@@ -2,19 +2,13 @@
 
 package slip
 
-import (
-	"strconv"
-)
+// IntegerSymbol is the symbol with a value of "integer".
+const IntegerSymbol = Symbol("integer")
 
-// Integer is a int64 Object.
-type Integer int64
+// Integer exists to allow assertions to determine if an Object is an integer.
+type Integer interface {
+	Rational
 
-// String representation of the Object.
-func (obj Integer) String() string {
-	return strconv.FormatInt(int64(obj), 10)
-}
-
-// Append a buffer with a representation of the Object.
-func (obj Integer) Append(b []byte) []byte {
-	return strconv.AppendInt(b, int64(obj), 10)
+	// IntegerType returns the integer type of the instance which can be one of: fixnum or bignum.
+	IntegerType() Symbol
 }

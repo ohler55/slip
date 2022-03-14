@@ -2,20 +2,20 @@
 
 package slip
 
-// ListSymbol is the symbol with a value of "list".
-const ListSymbol = Symbol("list")
+// VectorSymbol is the symbol with a value of "vector".
+const VectorSymbol = Symbol("vector")
 
-// List of Objects.
-type List []Object
+// Vector is a vector Object.
+type Vector []Object
 
 // String representation of the Object.
-func (obj List) String() string {
+func (obj Vector) String() string {
 	return string(obj.Append([]byte{}))
 }
 
 // Append a buffer with a representation of the Object.
-func (obj List) Append(b []byte) []byte {
-	b = append(b, '(')
+func (obj Vector) Append(b []byte) []byte {
+	b = append(b, "#("...)
 	for i := len(obj) - 1; 0 <= i; i-- {
 		v := obj[i]
 		if v == nil {
@@ -31,10 +31,9 @@ func (obj List) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a []interface{}.
-func (obj List) Simplify() interface{} {
+func (obj Vector) Simplify() interface{} {
 	out := make([]interface{}, 0, len(obj))
-	for i := len(obj) - 1; 0 <= i; i-- {
-		o := obj[i]
+	for _, o := range obj {
 		if o == nil {
 			out = append(out, nil)
 		} else {
@@ -45,19 +44,8 @@ func (obj List) Simplify() interface{} {
 }
 
 // Equal returns true if this Object and the other are equal in value.
-func (obj List) Equal(other Object) (eq bool) {
-	switch to := other.(type) {
-	case List:
-		if len(obj) == len(to) {
-			eq = true
-			for i, co := range obj {
-				if !ObjectEqual(co, to[i]) {
-					eq = false
-					break
-				}
-			}
-		}
-	case Cons:
+func (obj Vector) Equal(other Object) (eq bool) {
+	if to, ok := other.(Vector); ok {
 		if len(obj) == len(to) {
 			eq = true
 			for i, co := range obj {
@@ -72,11 +60,11 @@ func (obj List) Equal(other Object) (eq bool) {
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
-func (obj List) Hierarchy() []Symbol {
-	return []Symbol{ListSymbol, SequenceSymbol, TrueSymbol}
+func (obj Vector) Hierarchy() []Symbol {
+	return []Symbol{VectorSymbol, ArraySymbol, SequenceSymbol, TrueSymbol}
 }
 
-// SequenceType returns 'list.
-func (obj List) SequenceType() Symbol {
-	return ListSymbol
+// SequenceType returns 'cons.
+func (obj Vector) SequenceType() Symbol {
+	return VectorSymbol
 }

@@ -12,6 +12,16 @@ type Object interface {
 
 	// Append the object to a byte slice.
 	Append(b []byte) []byte
+
+	// Simplify the Object into simple go types of nil, bool, int64, float64,
+	// string, []interface{}, map[string]interface{}, or time.Time.
+	Simplify() interface{}
+
+	// Equal returns true if this Object and the other are equal in value.
+	Equal(other Object) bool
+
+	// Hierarchy returns the class hierarchy as symbols for the instance.
+	Hierarchy() []Symbol
 }
 
 // ObjectString returns the string for an Object or "nil" if nil.
@@ -25,73 +35,40 @@ func ObjectString(obj Object) string {
 // ObjectEqual compares two Object for equality returning true if they are
 // equal.
 func ObjectEqual(x, y Object) (eq bool) {
-	switch tx := x.(type) {
-	case Integer:
-		switch ty := y.(type) {
-		case Integer:
-			eq = tx == ty
-		case Float:
-			eq = Float(tx) == ty
-		}
-	case Float:
-		switch ty := y.(type) {
-		case Integer:
-			eq = tx == Float(ty)
-		case Float:
-			eq = tx == ty
-		}
-	case Time:
-		if ty, ok := y.(Time); ok {
-			eq = time.Time(tx).Equal(time.Time(ty))
-		}
-	case List:
-		if ty, ok := y.(List); ok && len(tx) == len(ty) {
-			eq = true
-			for i, xc := range tx {
-				if !ObjectEqual(xc, ty[i]) {
-					eq = false
-					break
-				}
-			}
-		}
-	case Cons:
-		if ty, ok := y.(Cons); ok && ObjectEqual(ty.Car(), tx.Car()) && ObjectEqual(ty.Cdr(), tx.Cdr()) {
-			eq = true
-		}
-	default:
-		eq = x == y
+	if x == nil {
+		return y == nil
 	}
-	return
+	return x.Equal(y)
 }
 
 // SimpleObject creates an Object from simple data.
-func SimpleToObject(val interface{}) (obj Object) {
+func SimpleObject(val interface{}) (obj Object) {
 	switch tv := val.(type) {
 	case bool:
 		if tv {
 			obj = True
 		}
 	case int:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 	case int8:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 	case int16:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 	case int32:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 	case int64:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 
 	case uint:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 	case uint8:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 	case uint16:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 	case uint32:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 	case uint64:
-		obj = Integer(tv)
+		obj = Fixnum(tv)
 
 	case float32:
 		obj = Float(tv)
@@ -103,16 +80,19 @@ func SimpleToObject(val interface{}) (obj Object) {
 	case []byte:
 		obj = String(tv)
 
+	case time.Time:
+		obj = Time(tv)
+
 	case []interface{}:
 		list := make(List, 0, len(tv))
-		for _, vc := range tv {
-			list = append(list, SimpleToObject(vc))
+		for i := len(tv) - 1; 0 <= i; i-- {
+			list = append(list, SimpleObject(tv[i]))
 		}
 		obj = list
 	case map[string]interface{}:
 		list := make(List, 0, len(tv))
 		for k, v2 := range tv {
-			list = append(list, Cons{String(k), SimpleToObject(v2)})
+			list = append(list, Cons{String(k), SimpleObject(v2)})
 		}
 		obj = list
 

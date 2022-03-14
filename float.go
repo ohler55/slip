@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+// FloatSymbol is the symbol with a value of "float".
+const FloatSymbol = Symbol("float")
+
 // Float is a int64 Object.
 type Float float64
 
@@ -17,4 +20,35 @@ func (obj Float) String() string {
 // Append a buffer with a representation of the Object.
 func (obj Float) Append(b []byte) []byte {
 	return strconv.AppendFloat(b, float64(obj), 'g', -1, 64)
+}
+
+// Simplify the Object into a float64.
+func (obj Float) Simplify() interface{} {
+	return float64(obj)
+}
+
+// Equal returns true if this Object and the other are equal in value.
+func (obj Float) Equal(other Object) (eq bool) {
+	switch to := other.(type) {
+	case Fixnum:
+		eq = obj == Float(to)
+	case Float:
+		eq = obj == to
+	}
+	return
+}
+
+// Hierarchy returns the class hierarchy as symbols for the instance.
+func (obj Float) Hierarchy() []Symbol {
+	return []Symbol{FloatSymbol, RealSymbol, NumberSymbol, TrueSymbol}
+}
+
+// RealType returns 'float.
+func (obj Float) RealType() Symbol {
+	return FloatSymbol
+}
+
+// NumberType returns 'float.
+func (obj Float) NumberType() Symbol {
+	return FloatSymbol
 }
