@@ -7,6 +7,14 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - tests for base types
+ - test tool for testing object types
+  - maybe helpful for others as well (what package?)
+   - sliptest
+    - TestObjec{obj Object, str string, simple interface{}, hierarchy []string, eq map[Object]bool}
+     - hierarchy could be a single string like foo.bar.t
+
+- need panic wrapper
+ - depends on stack
 - add remaining base type
  - hash-table map[Object]Object
  - ratio
