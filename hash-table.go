@@ -3,12 +3,16 @@
 package slip
 
 import (
-	"fmt"
 	"strconv"
 )
 
 // HashTableSymbol is the symbol with a value of "hashTable".
 const HashTableSymbol = Symbol("hash-table")
+
+func init() {
+	DefConstant(HashTableSymbol, HashTableSymbol,
+		`A _hash-table_ provides a mapping between a key and value. Keys can be a _string_, _symbol_, or _fixnum_.`)
+}
 
 // HashTable of Objects.
 type HashTable map[Object]Object
@@ -43,15 +47,7 @@ func (obj HashTable) Simplify() interface{} {
 				out[string(tk)] = v.Simplify()
 			}
 		default:
-			// TBD panic wrapper once stack is determined
-			var ts string
-			if k == nil {
-				ts = "nil"
-			} else {
-				ts = string(k.Hierarchy()[0])
-			}
-			panic(fmt.Sprintf("Hash-Table keys must be strings or symbols to be Simplified. Encountered key %s a %s.",
-				k, ts))
+			PanicType("Hash-Table keys", k, "string", "symbol")
 		}
 	}
 	return out

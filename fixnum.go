@@ -3,11 +3,21 @@
 package slip
 
 import (
+	"math"
 	"strconv"
 )
 
 // FixnumSymbol is the symbol with a value of "fixnum".
 const FixnumSymbol = Symbol("fixnum")
+
+func init() {
+	DefConstant(FixnumSymbol, FixnumSymbol,
+		`A _fixnum_ is an _integer_ in the range from _most-negative-fixnum_ and _most-positive-fixnum_ inclusive.`)
+	DefConstant(Symbol("most-positive-fixnum"), Fixnum(math.MaxInt64),
+		"The most positive value a _fixnum_ can have.")
+	DefConstant(Symbol("most-negative-fixnum"), Fixnum(math.MinInt64),
+		"The most negative value a _fixnum_ can have.")
+}
 
 // Fixnum is a int64 Object.
 type Fixnum int64

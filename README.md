@@ -6,17 +6,30 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- tests for base types
- - test tool for testing object types
-  - maybe helpful for others as well (what package?)
-   - sliptest
-    - TestObjec{obj Object, str string, simple interface{}, hierarchy []string, eq map[Object]bool}
-     - hierarchy could be a single string like foo.bar.t
+- scope
+ - eval
+  - should functions eval functions instead of having scope do the arg evals?
+  - do functions always need a scope for the args?
+   - yes for lambdas and as args
+    - could just create scope when calling lambdas
+   - no at first, only if lambda is there
+  - options
+   - scope evals args
+   - fun evals args
+  - trace
+   - set on scope or global?
+   - if depth is always given then if >= 0 trace
+    - maybe functions to display in and out
+     - call in func after eval of args
+     - call out func on exit or in defer?
+      - maybe scope eval can do this
+   - if trace is set in scope then the set is either trace func or no-op
 
-- need panic wrapper
- - depends on stack
+ - eval or trace for functions
+  - always eval unless a macro
+  - if a macro and trace then call macro trace
+
 - add remaining base type
- - hash-table map[Object]Object
  - ratio
  - bignum
  - complex
@@ -84,4 +97,3 @@ SLIce Processing is LISP for golang
  - handle args of &rest and :key
  - what to call sexpr/**object**
  - object & class support
- - should a stack be used for eval instead of nested function calls?

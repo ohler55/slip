@@ -9,6 +9,11 @@ import (
 // TimeSymbol is the symbol with a value of "time".
 const TimeSymbol = Symbol("time")
 
+func init() {
+	DefConstant(TimeSymbol, TimeSymbol,
+		`A _time_ identifies an instant in time backed by a golang time.Time.`)
+}
+
 // Time is a time.Time Object.
 type Time time.Time
 

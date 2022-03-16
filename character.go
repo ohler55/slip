@@ -7,6 +7,11 @@ import "unicode/utf8"
 // CharacterCharacter is the character with a value of "character".
 const CharacterSymbol = Symbol("character")
 
+func init() {
+	DefConstant(CharacterSymbol, CharacterSymbol,
+		`A _character_ is a Unicode character that can be represented by a golang Rune.`)
+}
+
 var (
 	specialCharacters = map[rune]string{
 		rune(' '):    `#\Space`,

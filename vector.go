@@ -5,6 +5,10 @@ package slip
 // VectorSymbol is the symbol with a value of "vector".
 const VectorSymbol = Symbol("vector")
 
+func init() {
+	DefConstant(VectorSymbol, VectorSymbol, `A _vector_ one dimensional array of _objects_.`)
+}
+
 // Vector is a vector Object.
 type Vector []Object
 

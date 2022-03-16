@@ -5,6 +5,10 @@ package slip
 // ListSymbol is the symbol with a value of "list".
 const ListSymbol = Symbol("list")
 
+func init() {
+	DefConstant(ListSymbol, ListSymbol, `A _cons_ is a sequence of _objects_.`)
+}
+
 // List of Objects.
 type List []Object
 
