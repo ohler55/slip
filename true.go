@@ -39,3 +39,8 @@ func (obj boolean) Equal(other Object) bool {
 func (obj boolean) Hierarchy() []Symbol {
 	return []Symbol{TrueSymbol}
 }
+
+// Eval returns self.
+func (obj boolean) Eval(s *Scope, depth int) Object {
+	return obj
+}

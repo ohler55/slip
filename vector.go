@@ -72,3 +72,8 @@ func (obj Vector) Hierarchy() []Symbol {
 func (obj Vector) SequenceType() Symbol {
 	return VectorSymbol
 }
+
+// Eval returns self.
+func (obj Vector) Eval(s *Scope, depth int) Object {
+	return obj
+}

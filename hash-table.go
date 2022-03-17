@@ -85,3 +85,8 @@ func (obj HashTable) Equal(other Object) (eq bool) {
 func (obj HashTable) Hierarchy() []Symbol {
 	return []Symbol{HashTableSymbol, TrueSymbol}
 }
+
+// Eval returns self.
+func (obj HashTable) Eval(s *Scope, depth int) Object {
+	return obj
+}

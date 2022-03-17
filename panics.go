@@ -4,7 +4,7 @@ package slip
 
 type Panic struct {
 	Message string
-	Stack   []string // TBD change to function
+	Stack   []Object
 }
 
 // Bytes returns the original error and stack in a format for display or
@@ -14,9 +14,9 @@ func (p *Panic) Bytes() []byte {
 
 	b = append(b, "* "...)
 	b = append(b, p.Message...)
-	for _, line := range p.Stack {
+	for _, obj := range p.Stack {
 		b = append(b, "  "...)
-		b = append(b, line...)
+		b = append(b, ObjectString(obj)...)
 		b = append(b, '\n')
 	}
 	return b

@@ -22,6 +22,9 @@ type Object interface {
 
 	// Hierarchy returns the class hierarchy as symbols for the instance.
 	Hierarchy() []Symbol
+
+	// Eval the object.
+	Eval(s *Scope, depth int) Object
 }
 
 // ObjectString returns the string for an Object or "nil" if nil.

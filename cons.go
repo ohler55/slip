@@ -118,3 +118,11 @@ func (obj Cons) Hierarchy() []Symbol {
 func (obj Cons) SequenceType() Symbol {
 	return ConsSymbol
 }
+
+// Eval panics.
+func (obj Cons) Eval(s *Scope, depth int) Object {
+	if 0 < len(obj) {
+		panic("Illegal function call")
+	}
+	return nil
+}

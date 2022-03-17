@@ -56,3 +56,8 @@ func (obj Float) RealType() Symbol {
 func (obj Float) NumberType() Symbol {
 	return FloatSymbol
 }
+
+// Eval returns self.
+func (obj Float) Eval(s *Scope, depth int) Object {
+	return obj
+}

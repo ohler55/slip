@@ -36,3 +36,11 @@ func (obj Symbol) Equal(other Object) bool {
 func (obj Symbol) Hierarchy() []Symbol {
 	return []Symbol{SymbolSymbol, TrueSymbol}
 }
+
+// Eval the symbol and return it's binding in the current scope.
+func (obj Symbol) Eval(s *Scope, depth int) Object {
+	if 0 < len(obj) && obj[0] == ':' {
+		return obj
+	}
+	return s.Get(obj)
+}

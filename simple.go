@@ -43,3 +43,8 @@ func (obj Simple) Equal(other Object) bool {
 func (obj Simple) Hierarchy() []Symbol {
 	return []Symbol{SimpleSymbol, TrueSymbol}
 }
+
+// Eval returns self.
+func (obj Simple) Eval(s *Scope, depth int) Object {
+	return obj
+}

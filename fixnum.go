@@ -72,3 +72,8 @@ func (obj Fixnum) RealType() Symbol {
 func (obj Fixnum) NumberType() Symbol {
 	return FixnumSymbol
 }
+
+// Eval returns self.
+func (obj Fixnum) Eval(s *Scope, depth int) Object {
+	return obj
+}

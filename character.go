@@ -64,3 +64,8 @@ func (obj Character) Equal(other Object) bool {
 func (obj Character) Hierarchy() []Symbol {
 	return []Symbol{CharacterSymbol, TrueSymbol}
 }
+
+// Eval returns self.
+func (obj Character) Eval(s *Scope, depth int) Object {
+	return obj
+}

@@ -4,7 +4,7 @@ package slip
 
 type undefined int
 
-const undef = int(0)
+const undef = undefined(0)
 
 // String representation of the Object.
 func (obj undefined) String() string {
@@ -29,4 +29,9 @@ func (obj undefined) Equal(other Object) bool {
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj undefined) Hierarchy() []Symbol {
 	return []Symbol{Symbol("undefined"), TrueSymbol}
+}
+
+// Eval returns self.
+func (obj undefined) Eval(s *Scope, depth int) Object {
+	return obj
 }

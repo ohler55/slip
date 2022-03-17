@@ -38,3 +38,8 @@ func (obj String) Equal(other Object) bool {
 func (obj String) Hierarchy() []Symbol {
 	return []Symbol{StringSymbol, VectorSymbol, ArraySymbol, SequenceSymbol, TrueSymbol}
 }
+
+// Eval returns self.
+func (obj String) Eval(s *Scope, depth int) Object {
+	return obj
+}

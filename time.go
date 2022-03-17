@@ -46,3 +46,8 @@ func (obj Time) Equal(other Object) (eq bool) {
 func (obj Time) Hierarchy() []Symbol {
 	return []Symbol{TimeSymbol, TrueSymbol}
 }
+
+// Eval returns self.
+func (obj Time) Eval(s *Scope, depth int) Object {
+	return obj
+}
