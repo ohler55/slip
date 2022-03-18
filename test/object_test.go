@@ -13,84 +13,132 @@ import (
 )
 
 func TestTrue(t *testing.T) {
-	sliptest.TestObject(t, slip.True, "t", true, "t",
-		[]*sliptest.EqTest{{Other: slip.True, Expect: true}, {Other: nil, Expect: false}})
+	(&sliptest.Object{
+		Target:    slip.True,
+		String:    "t",
+		Simple:    true,
+		Hierarchy: "t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.True, Expect: true},
+			{Other: slip.Fixnum(5), Expect: false},
+		},
+		Eval: slip.True,
+	}).Test(t)
 }
 
 func TestFixnum(t *testing.T) {
-	sliptest.TestObject(t,
-		slip.Fixnum(7),
-		"7",
-		int64(7),
-		"fixnum.integer.rational.real.number.t",
-		[]*sliptest.EqTest{
+	(&sliptest.Object{
+		Target:    slip.Fixnum(7),
+		String:    "7",
+		Simple:    int64(7),
+		Hierarchy: "fixnum.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
 			{Other: slip.Fixnum(7), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
 			{Other: slip.Float(7.0), Expect: true},
 			{Other: slip.Float(7.5), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		slip.Fixnum(0).IntegerType,
-		slip.Fixnum(0).RationalType,
-		slip.Fixnum(0).RealType,
-		slip.Fixnum(0).NumberType,
-	)
+		Selfies: []func() slip.Symbol{
+			slip.Fixnum(0).IntegerType,
+			slip.Fixnum(0).RationalType,
+			slip.Fixnum(0).RealType,
+			slip.Fixnum(0).NumberType,
+		},
+		Eval: slip.Fixnum(7),
+	}).Test(t)
 }
 
 func TestFloat(t *testing.T) {
-	sliptest.TestObject(t,
-		slip.Float(7.0),
-		"7",
-		float64(7.0),
-		"float.real.number.t",
-		[]*sliptest.EqTest{
+	(&sliptest.Object{
+		Target:    slip.Float(7.0),
+		String:    "7",
+		Simple:    float64(7.0),
+		Hierarchy: "float.real.number.t",
+		Equals: []*sliptest.EqTest{
 			{Other: slip.Fixnum(7), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
 			{Other: slip.Float(7.0), Expect: true},
 			{Other: slip.Float(7.5), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		slip.Float(0.0).RealType,
-		slip.Float(0.0).NumberType,
-	)
+		Selfies: []func() slip.Symbol{
+			slip.Float(0).RealType,
+			slip.Float(0).NumberType,
+		},
+		Eval: slip.Float(7.0),
+	}).Test(t)
 }
 
 func TestString(t *testing.T) {
-	sliptest.TestObject(t,
-		slip.String("abc"),
-		`"abc"`,
-		"abc",
-		"string.vector.array.sequence.t",
-		[]*sliptest.EqTest{
+	(&sliptest.Object{
+		Target:    slip.String("abc"),
+		String:    `"abc"`,
+		Simple:    "abc",
+		Hierarchy: "string.vector.array.sequence.t",
+		Equals: []*sliptest.EqTest{
 			{Other: slip.String("abc"), Expect: true},
 			{Other: slip.String("ABC"), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-	)
+		Eval: slip.String("abc"),
+	}).Test(t)
+}
+
+func TestSymbolKey(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Symbol(":abc"),
+		String:    ":abc",
+		Simple:    ":abc",
+		Hierarchy: "symbol.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Symbol(":abc"), Expect: true},
+			{Other: slip.Symbol(":ABC"), Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: slip.Symbol(":abc"),
+	}).Test(t)
+}
+
+func TestSymbol(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Symbol("abc"),
+		String:    "abc",
+		Simple:    "abc",
+		Hierarchy: "symbol.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Symbol("abc"), Expect: true},
+			{Other: slip.Symbol("ABC"), Expect: true},
+			{Other: slip.String("xyz"), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		PanicEval: true,
+	}).Test(t)
 }
 
 func TestTime(t *testing.T) {
 	tm := time.Date(2022, time.April, 1, 0, 0, 0, 0, time.UTC)
-	sliptest.TestObject(t,
-		slip.Time(tm),
-		"@2022-04-01T00:00:00Z",
-		tm,
-		"time.t",
-		[]*sliptest.EqTest{
+	(&sliptest.Object{
+		Target:    slip.Time(tm),
+		String:    "@2022-04-01T00:00:00Z",
+		Simple:    tm,
+		Hierarchy: "time.t",
+		Equals: []*sliptest.EqTest{
 			{Other: slip.Time(tm), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
 			{Other: slip.Time(time.Date(2022, time.April, 1, 0, 0, 0, 1, time.UTC)), Expect: false},
 		},
-	)
+		Eval: slip.Time(tm),
+	}).Test(t)
 }
 
 func TestList(t *testing.T) {
-	sliptest.TestObject(t,
-		slip.List{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
-		"(1 2 3 nil)",
-		[]interface{}{int64(1), int64(2), int64(3), nil},
-		"list.sequence.t",
-		[]*sliptest.EqTest{
+	(&sliptest.Object{
+		Target:    slip.List{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
+		String:    "(1 2 3 nil)",
+		Simple:    []interface{}{int64(1), int64(2), int64(3), nil},
+		Hierarchy: "list.sequence.t",
+		Equals: []*sliptest.EqTest{
 			{Other: slip.List{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}, Expect: true},
 			{Other: slip.List{nil, nil, slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
 			{Other: slip.List{slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
@@ -99,17 +147,20 @@ func TestList(t *testing.T) {
 			{Other: slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		slip.List{}.SequenceType,
-	)
+		PanicEval: true,
+		Selfies: []func() slip.Symbol{
+			slip.List{}.SequenceType,
+		},
+	}).Test(t)
 }
 
 func TestCons(t *testing.T) {
-	sliptest.TestObject(t,
-		slip.Cons{slip.Fixnum(2), slip.Fixnum(1)},
-		"(1 . 2)",
-		[]interface{}{int64(1), int64(2)},
-		"cons.list.sequence.t",
-		[]*sliptest.EqTest{
+	(&sliptest.Object{
+		Target:    slip.Cons{slip.Fixnum(2), slip.Fixnum(1)},
+		String:    "(1 . 2)",
+		Simple:    []interface{}{int64(1), int64(2)},
+		Hierarchy: "cons.list.sequence.t",
+		Equals: []*sliptest.EqTest{
 			{Other: slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}, Expect: true},
 			{Other: slip.Cons{nil, slip.Fixnum(1)}, Expect: false},
 			{Other: slip.Cons{slip.Fixnum(1)}, Expect: false},
@@ -117,8 +168,11 @@ func TestCons(t *testing.T) {
 			{Other: slip.Cons{nil, slip.Fixnum(1)}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		slip.Cons{}.SequenceType,
-	)
+		PanicEval: true,
+		Selfies: []func() slip.Symbol{
+			slip.Cons{}.SequenceType,
+		},
+	}).Test(t)
 }
 
 func TestConsString(t *testing.T) {
@@ -141,3 +195,11 @@ func TestConsCdr(t *testing.T) {
 	require.Equal(t, "nil", slip.ObjectString(slip.Cons{slip.Fixnum(1)}.Cdr()))
 	require.Equal(t, "(2 3)", slip.ObjectString(slip.Cons{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}.Cdr()))
 }
+
+// TBD symbol
+// TBD simple
+// TBD file-stream
+// TBD values
+
+// TBD vector (in different directory?)
+// TBD hash-table (in different directory)

@@ -2,6 +2,8 @@
 
 package slip
 
+import "strings"
+
 // SymbolSymbol is the symbol with a value of "symbol".
 const SymbolSymbol = Symbol("symbol")
 
@@ -29,7 +31,10 @@ func (obj Symbol) Simplify() interface{} {
 
 // Equal returns true if this Object and the other are equal in value.
 func (obj Symbol) Equal(other Object) bool {
-	return obj == other
+	if sym, ok := other.(Symbol); ok && strings.EqualFold(string(obj), string(sym)) {
+		return true
+	}
+	return false
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.

@@ -7,23 +7,6 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 
-- sliptest
- - add eval to tester
-  - object expected
-  - should it just be a struct and call Test like lithp?
- - need to be able to indicate a panic is expected for simplify
-  - maybe an errorf
-
-- Vars
- - for vars backed by go fields
-  - separate list in world to check
-  - pointers
-  - depending on type create different object or set different type
-  - don't allow remove
-
-- need fun alternative for dir
- - both functions and types like array and hash-table
-
 - scope
  - eval
   - should functions eval functions instead of having scope do the arg evals?
@@ -42,10 +25,6 @@ SLIce Processing is LISP for golang
      - call out func on exit or in defer?
       - maybe scope eval can do this
    - if trace is set in scope then the set is either trace func or no-op
-
- - eval or trace for functions
-  - always eval unless a macro
-  - if a macro and trace then call macro trace
 
 - add remaining base type
  - ratio

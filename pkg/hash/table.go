@@ -1,61 +1,63 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
-package slip
+package hash
 
 import (
 	"strconv"
+
+	"github.com/ohler55/slip"
 )
 
-// HashTableSymbol is the symbol with a value of "hashTable".
-const HashTableSymbol = Symbol("hash-table")
+// TableSymbol is the symbol with a value of "hashTable".
+const TableSymbol = slip.Symbol("hash-table")
 
 func init() {
-	DefConstant(HashTableSymbol, HashTableSymbol,
+	slip.DefConstant(TableSymbol, TableSymbol,
 		`A _hash-table_ provides a mapping between a key and value. Keys can be a _string_, _symbol_, or _fixnum_.`)
 }
 
-// HashTable of Objects.
-type HashTable map[Object]Object
+// Table of Objects.
+type Table map[slip.Object]slip.Object
 
 // String representation of the Object.
-func (obj HashTable) String() string {
+func (obj Table) String() string {
 	return string(obj.Append([]byte{}))
 }
 
 // Append a buffer with a representation of the Object.
-func (obj HashTable) Append(b []byte) []byte {
+func (obj Table) Append(b []byte) []byte {
 	b = append(b, "#<HASH-TABLE :COUNT "...)
 	b = strconv.AppendInt(b, int64(len(obj)), 10)
 	return append(b, '>')
 }
 
 // Simplify the Object into a []interface{}.
-func (obj HashTable) Simplify() interface{} {
+func (obj Table) Simplify() interface{} {
 	out := map[string]interface{}{}
 	for k, v := range obj {
 		switch tk := k.(type) {
-		case String:
+		case slip.String:
 			if v == nil {
 				out[string(tk)] = nil
 			} else {
 				out[string(tk)] = v.Simplify()
 			}
-		case Symbol:
+		case slip.Symbol:
 			if v == nil {
 				out[string(tk)] = nil
 			} else {
 				out[string(tk)] = v.Simplify()
 			}
 		default:
-			PanicType("Hash-Table keys", k, "string", "symbol")
+			slip.PanicType("Hash-Table keys", k, "string", "symbol")
 		}
 	}
 	return out
 }
 
 // Equal returns true if this Object and the other are equal in value.
-func (obj HashTable) Equal(other Object) (eq bool) {
-	if to, ok := other.(HashTable); ok {
+func (obj Table) Equal(other slip.Object) (eq bool) {
+	if to, ok := other.(Table); ok {
 		if len(obj) == len(to) {
 			eq = true
 			for k, v := range obj {
@@ -82,11 +84,11 @@ func (obj HashTable) Equal(other Object) (eq bool) {
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
-func (obj HashTable) Hierarchy() []Symbol {
-	return []Symbol{HashTableSymbol, TrueSymbol}
+func (obj Table) Hierarchy() []slip.Symbol {
+	return []slip.Symbol{TableSymbol, slip.TrueSymbol}
 }
 
 // Eval returns self.
-func (obj HashTable) Eval(s *Scope, depth int) Object {
+func (obj Table) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
 }

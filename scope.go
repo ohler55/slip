@@ -66,13 +66,7 @@ func (s *Scope) get(name string) Object {
 	if s.parent != nil {
 		return s.parent.get(name)
 	}
-
-	// TBD world get, constants and gets by function
-
-	if value, has := s.world.constants[name]; has {
-		return value
-	}
-	if value, has := constantValues[name]; has {
+	if value, has := s.world.get(name); has {
 		return value
 	}
 	panic(fmt.Sprintf("Variable %s is unbound.", name))
@@ -100,10 +94,7 @@ func (s *Scope) set(name string, value Object) {
 		s.parent.set(name, value)
 		return
 	}
-
-	// TBD world set by ptr by function
-
-	s.vars[name] = value
+	s.world.set(name, value)
 }
 
 // Has returns true if the variable is bound.
@@ -118,16 +109,7 @@ func (s *Scope) has(name string) bool {
 	if s.parent != nil {
 		return s.parent.has(name)
 	}
-
-	// TBD world has by ptr by function
-
-	if _, has := s.world.constants[name]; has {
-		return true
-	}
-	if _, has := constantValues[name]; has {
-		return true
-	}
-	return false
+	return s.world.has(name)
 }
 
 // Remove a variable binding.
