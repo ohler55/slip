@@ -4,9 +4,12 @@
 package pkg
 
 import (
-	// Pull in hash-table function and type.
+	// Pull in basic functions.
+	_ "github.com/ohler55/slip/pkg/basic"
+
+	// Pull in hash-table functions and type.
 	_ "github.com/ohler55/slip/pkg/hash"
 
-	// Pull in list function and type.
+	// Pull in list functions.
 	_ "github.com/ohler55/slip/pkg/list"
 )

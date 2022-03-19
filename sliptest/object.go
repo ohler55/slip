@@ -23,6 +23,10 @@ type EqTest struct {
 // Object test structure is used for testing slip.Objects.
 type Object struct {
 
+	// Scope is the Scope to use instead of creating a new Scope if it is
+	// non-nil.
+	Scope *slip.Scope
+
 	// Target of the test.
 	Target slip.Object
 
@@ -48,8 +52,8 @@ type Object struct {
 	// Eval is the expected result from a call to .Eval().
 	Eval slip.Object
 
-	// PanicEval if true indicated the call to .Eval() should panic.
-	PanicEval bool
+	// Panics if true indicated the call to .Eval() should panic.
+	Panics bool
 }
 
 // Test the object test specification.
@@ -61,16 +65,18 @@ func (to *Object) Test(t *testing.T) {
 	} else {
 		simp := to.Target.Simplify()
 		diff := alt.Compare(to.Simple, simp)
-		require.Nil(t, diff, "difference at %v for %s", diff, to.Target)
+		require.Nil(t, diff, "Simplify difference at %v for %s vs %s", diff, to.Simple, simp)
 	}
-	var hb []byte
-	for i, sym := range to.Target.Hierarchy() {
-		if 0 < i {
-			hb = append(hb, '.')
+	if 0 < len(to.Hierarchy) {
+		var hb []byte
+		for i, sym := range to.Target.Hierarchy() {
+			if 0 < i {
+				hb = append(hb, '.')
+			}
+			hb = append(hb, strings.ToLower(string(sym))...)
 		}
-		hb = append(hb, strings.ToLower(string(sym))...)
+		require.Equal(t, to.Hierarchy, string(hb))
 	}
-	require.Equal(t, to.Hierarchy, string(hb))
 	for _, et := range to.Equals {
 		if et.Expect {
 			require.True(t, to.Target.Equal(et.Other), "%s vs %s", to.Target, et.Other)
@@ -82,11 +88,14 @@ func (to *Object) Test(t *testing.T) {
 	for _, f := range to.Selfies {
 		require.Equal(t, self, f())
 	}
-	scope := slip.NewScope()
-	if to.PanicEval {
-		require.Panics(t, func() { to.Target.Eval(scope, 0) })
+	if to.Scope == nil {
+		to.Scope = slip.NewScope()
+	}
+	if to.Panics {
+		require.Panics(t, func() { to.Target.Eval(to.Scope, 0) })
 	} else {
-		result := to.Target.Eval(scope, 0)
-		require.True(t, slip.ObjectEqual(to.Eval, result))
+		result := to.Target.Eval(to.Scope, 0)
+		require.True(t, slip.ObjectEqual(to.Eval, result),
+			"Eval returned '%s' but expected '%s'", slip.ObjectString(result), slip.ObjectString(to.Eval))
 	}
 }

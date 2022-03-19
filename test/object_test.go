@@ -112,7 +112,7 @@ func TestSymbol(t *testing.T) {
 			{Other: slip.String("xyz"), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		PanicEval: true,
+		Panics: true,
 	}).Test(t)
 }
 
@@ -147,7 +147,7 @@ func TestList(t *testing.T) {
 			{Other: slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		PanicEval: true,
+		Panics: true,
 		Selfies: []func() slip.Symbol{
 			slip.List{}.SequenceType,
 		},
@@ -168,7 +168,7 @@ func TestCons(t *testing.T) {
 			{Other: slip.Cons{nil, slip.Fixnum(1)}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		PanicEval: true,
+		Panics: true,
 		Selfies: []func() slip.Symbol{
 			slip.Cons{}.SequenceType,
 		},

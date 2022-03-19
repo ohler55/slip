@@ -10,8 +10,33 @@ SLIce Processing is LISP for golang
 - functions
  - create a sample
  - pkg
+  - basic
+   + car
+   - cdr
+   + quote
+   - set
+   - setq
+   - setf
+   - describe
+   - apropos
+   - null
+   - atom
+   - eq
+   - equal
+   - defvar
+   - defun
+   - lambda
+   - defmacro
   - list
-   - car.go
+   - cons
+   - list
+   - cadr
+   - nth
+   -
+
+- Placer
+ - place value (car, cdr, nth, rest, first, card)
+  - others in hash-table, array, vector
 
  - or could follow hierarchy
   - t/sequence/list

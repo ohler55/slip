@@ -56,6 +56,15 @@ func (s *Scope) Trace(on bool) {
 	}
 }
 
+// Let a symbol be bound to the value in this Scope.
+func (s *Scope) Let(sym Symbol, value Object) {
+	name := strings.ToLower(string(sym))
+	if _, has := constantValues[name]; has {
+		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
+	}
+	s.vars[name] = value
+}
+
 // Get a named variable value.
 func (s *Scope) Get(sym Symbol) Object {
 	return s.get(strings.ToLower(string(sym)))
@@ -155,4 +164,12 @@ func traceAfter(s *Scope, obj Object, depth int) {
 	default:
 		panic(&Panic{Message: fmt.Sprint(tr), Stack: []Object{obj}})
 	}
+}
+
+// Eval evaluates an object and returns the result.
+func (s *Scope) Eval(obj Object, depth int) (result Object) {
+	if obj != nil {
+		result = obj.Eval(s, depth)
+	}
+	return
 }
