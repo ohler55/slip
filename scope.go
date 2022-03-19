@@ -10,7 +10,6 @@ import (
 // Scope encapsulates the scope for a function.
 type Scope struct {
 	parent      *Scope
-	world       *World
 	name        Object // can be nil so can't be Symbol
 	vars        map[string]Object
 	returnValue Object
@@ -18,12 +17,20 @@ type Scope struct {
 	after       func(s *Scope, obj Object, depth int)
 }
 
+func NewScope() *Scope {
+	return &Scope{
+		vars:   map[string]Object{},
+		before: noopBefore,
+		after:  normalAfter,
+	}
+}
+
 func (s *Scope) NewScope() *Scope {
 	return &Scope{
 		parent: s,
-		world:  s.world,
-		before: noopBefore,
-		after:  normalAfter,
+		vars:   map[string]Object{},
+		before: s.before,
+		after:  s.after,
 	}
 }
 
@@ -36,11 +43,6 @@ func (s *Scope) Before(obj Object, depth int) {
 // After should be called at the end of a Eval function call using a defer.
 func (s *Scope) After(obj Object, depth int) {
 	s.after(s, obj, depth)
-}
-
-// World returns the to level World.
-func (s *Scope) World() *World {
-	return s.world
 }
 
 // Trace turns tracing on or off for the scope and any future sub-scopes.
@@ -66,7 +68,7 @@ func (s *Scope) get(name string) Object {
 	if s.parent != nil {
 		return s.parent.get(name)
 	}
-	if value, has := s.world.get(name); has {
+	if value, has := getVar(name); has {
 		return value
 	}
 	panic(fmt.Sprintf("Variable %s is unbound.", name))
@@ -84,17 +86,15 @@ func (s *Scope) set(name string, value Object) {
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
-	if _, has := s.world.constants[name]; has {
-		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
-	}
 	if _, has := s.vars[name]; has {
+		s.vars[name] = value
 		return
 	}
 	if s.parent != nil {
 		s.parent.set(name, value)
 		return
 	}
-	s.world.set(name, value)
+	setVar(name, value)
 }
 
 // Has returns true if the variable is bound.
@@ -109,7 +109,7 @@ func (s *Scope) has(name string) bool {
 	if s.parent != nil {
 		return s.parent.has(name)
 	}
-	return s.world.has(name)
+	return hasVar(name)
 }
 
 // Remove a variable binding.

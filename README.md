@@ -7,6 +7,10 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 
+- functions
+ - create a sample
+ - implement append
+
 - scope
  - eval
   - should functions eval functions instead of having scope do the arg evals?

@@ -107,3 +107,11 @@ func SimpleObject(val interface{}) (obj Object) {
 	}
 	return
 }
+
+// Simplify an Object.
+func Simplify(obj Object) interface{} {
+	if obj == nil {
+		return nil
+	}
+	return obj.Simplify()
+}

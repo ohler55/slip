@@ -82,11 +82,11 @@ func (to *Object) Test(t *testing.T) {
 	for _, f := range to.Selfies {
 		require.Equal(t, self, f())
 	}
-	w := slip.NewWorld()
+	scope := slip.NewScope()
 	if to.PanicEval {
-		require.Panics(t, func() { to.Target.Eval(&w.Scope, 0) })
+		require.Panics(t, func() { to.Target.Eval(scope, 0) })
 	} else {
-		result := to.Target.Eval(&w.Scope, 0)
+		result := to.Target.Eval(scope, 0)
 		require.True(t, slip.ObjectEqual(to.Eval, result))
 	}
 }
