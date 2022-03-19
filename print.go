@@ -103,10 +103,13 @@ func (p *Printer) Write(obj Object) {
 
 // Append an Object to a byte array using the Printer variables.
 func (p *Printer) Append(b []byte, obj Object) []byte {
+	if obj == nil {
+		return append(b, caseName("nil")...)
+	}
 
-	// TBD
+	// TBD handle fancy stuff like level and lines
 
-	return b
+	return obj.Append(b)
 }
 
 // get *print-ansi*

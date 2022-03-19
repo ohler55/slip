@@ -6,4 +6,7 @@ package pkg
 import (
 	// Pull in hash-table function and type.
 	_ "github.com/ohler55/slip/pkg/hash"
+
+	// Pull in list function and type.
+	_ "github.com/ohler55/slip/pkg/list"
 )

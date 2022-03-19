@@ -9,7 +9,14 @@ SLIce Processing is LISP for golang
 
 - functions
  - create a sample
- - implement append
+ - pkg
+  - list
+   - car.go
+
+ - or could follow hierarchy
+  - t/sequence/list
+  - t/number/real/rational/integer
+  - will get heavy on the t with hash-table and array being just under t
 
 - scope
  - eval

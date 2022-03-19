@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 )
@@ -17,21 +18,21 @@ type Function struct {
 	Args List
 }
 
-func Define(name string, creator func(args List) Object, doc *FuncDoc) {
-	name = strings.ToLower(name)
+func Define(creator func(args List) Object, doc *FuncDoc) {
+	name := strings.ToLower(doc.Name)
 	if _, has := funcCreators[name]; has {
-		switch printer.Case {
-		case upcaseKey:
-			name = strings.ToUpper(name)
-		case capitalizeKey:
-			rn := []rune(name)
-			rn[0] = unicode.ToUpper(rn[0])
-			name = string(rn)
-		}
-		Warning("redefining %s", name)
+		Warning("redefining %s", caseName(name))
 	}
 	funcCreators[name] = creator
 	funcDocs[name] = doc
+}
+
+func NewFunc(name string, args List) Object {
+	name = strings.ToLower(name)
+	if create := funcCreators[name]; create != nil {
+		return create(args)
+	}
+	panic(fmt.Sprintf("Function %s is not defined.", caseName(name)))
 }
 
 // String representation of the Object.
@@ -41,10 +42,13 @@ func (obj *Function) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj *Function) Append(b []byte) []byte {
-
-	// TBD
-
-	return b
+	b = append(b, '(')
+	b = append(b, obj.Name...)
+	for _, arg := range obj.Args {
+		b = append(b, ' ')
+		b = Append(b, arg)
+	}
+	return append(b, ')')
 }
 
 // Simplify the function.
@@ -65,4 +69,26 @@ func (obj *Function) Equal(other Object) bool {
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *Function) Hierarchy() []Symbol {
 	return []Symbol{FunctionSymbol, TrueSymbol}
+}
+
+// GetArgs returns the function arguments.
+func (obj *Function) GetArgs() []Object {
+	return obj.Args
+}
+
+// GetName returns the function name.
+func (obj *Function) GetName() string {
+	return obj.Name
+}
+
+func caseName(name string) string {
+	switch printer.Case {
+	case upcaseKey:
+		name = strings.ToUpper(name)
+	case capitalizeKey:
+		rn := []rune(name)
+		rn[0] = unicode.ToUpper(rn[0])
+		name = string(rn)
+	}
+	return name
 }

@@ -2,6 +2,8 @@
 
 package slip
 
+import "fmt"
+
 type Panic struct {
 	Message string
 	Stack   []Object
@@ -51,4 +53,33 @@ func PanicType(use string, value Object, wants ...string) {
 	b = append(b, '.')
 
 	panic(&Panic{Message: string(b)})
+}
+
+func PanicArgCount(obj Object, min, max int) {
+	f := obj.(Funky)
+	args := f.GetArgs()
+	if min == max {
+		if len(args) < min {
+			panic(&Panic{
+				Message: fmt.Sprintf("Too few arguments to %s. %d expected but got %d.",
+					f.GetName(), min, len(args)),
+			})
+		} else {
+			panic(&Panic{
+				Message: fmt.Sprintf("Too many arguments to %s. %d expected but got %d.",
+					f.GetName(), min, len(args)),
+			})
+		}
+	}
+	if len(args) < min {
+		panic(&Panic{
+			Message: fmt.Sprintf("Too few arguments to %s. At least %d expected but got %d.",
+				f.GetName(), min, len(args)),
+		})
+	}
+	panic(&Panic{
+		Message: fmt.Sprintf("Too many arguments to %s. At most %d expected but got %d.",
+			f.GetName(), max, len(args)),
+	})
+
 }
