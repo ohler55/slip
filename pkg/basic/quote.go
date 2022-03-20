@@ -6,7 +6,11 @@ import "github.com/ohler55/slip"
 
 func init() {
 	slip.Define(
-		func(args slip.List) slip.Object { return &Quote{Function: slip.Function{Name: "quote", Args: args}} },
+		func(args slip.List) slip.Object {
+			f := Quote{Function: slip.Function{Name: "quote", Args: args, SkipEval: []bool{true}}}
+			f.Self = &f
+			return &f
+		},
 		&slip.FuncDoc{
 			Name: "quote",
 			Args: []*slip.DocArg{
@@ -34,15 +38,12 @@ type Quote struct {
 	slip.Function
 }
 
-// Eval the object.
-func (f *Quote) Eval(s *slip.Scope, depth int) slip.Object {
-	if len(f.Args) != 1 {
+// Call the the function with the arguments provided.
+func (f *Quote) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	s.Before(f, depth)
-	defer s.After(f, depth)
-
-	return f.Args[0]
+	return args[0]
 }
 
 // String representation of the Object.

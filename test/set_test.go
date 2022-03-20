@@ -15,7 +15,7 @@ func TestSetBasic(t *testing.T) {
 	scope := slip.NewScope()
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("set", slip.List{qx, slip.Fixnum(7)}),
+		Target: slip.NewFunc("set", slip.List{slip.Fixnum(7), qx}),
 		String: "(set 'x 7)",
 		Simple: []interface{}{"set", []interface{}{"quote", "x"}, 7},
 		Eval:   slip.Fixnum(7),

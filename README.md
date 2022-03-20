@@ -6,6 +6,9 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- make sure functions use reverse order
+ - for SkipEval too?
+
 
 - functions
  - pkg

@@ -6,7 +6,11 @@ import "github.com/ohler55/slip"
 
 func init() {
 	slip.Define(
-		func(args slip.List) slip.Object { return &Car{Function: slip.Function{Name: "car", Args: args}} },
+		func(args slip.List) slip.Object {
+			f := Car{Function: slip.Function{Name: "car", Args: args}}
+			f.Self = &f
+			return &f
+		},
 		&slip.FuncDoc{
 			Name: "car",
 			Args: []*slip.DocArg{
@@ -35,28 +39,24 @@ type Car struct {
 	slip.Function
 }
 
-// Eval the object.
-func (f *Car) Eval(s *slip.Scope, depth int) (result slip.Object) {
-	if len(f.Args) != 1 {
+// Call the the function with the arguments provided.
+func (f *Car) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	s.Before(f, depth)
-	defer s.After(f, depth)
-	if arg := f.Args[0]; arg != nil {
-		switch list := arg.Eval(s, depth+1).(type) {
-		case nil:
-			// leave result as nil
-		case slip.Cons:
-			if 0 < len(list) {
-				result = list[0]
-			}
-		case slip.List:
-			if 0 < len(list) {
-				result = list[0]
-			}
-		default:
-			slip.PanicType("argument to car", arg, "cons", "list")
+	switch list := args[0].(type) {
+	case nil:
+		// leave result as nil
+	case slip.Cons:
+		if 0 < len(list) {
+			result = list[0]
 		}
+	case slip.List:
+		if 0 < len(list) {
+			result = list[0]
+		}
+	default:
+		slip.PanicType("argument to car", list, "cons", "list")
 	}
 	return
 }

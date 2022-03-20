@@ -15,8 +15,20 @@ var funcCreators = map[string]func(args List) Object{}
 
 // Function is the base type for most if not all functions.
 type Function struct {
+
+	// Name of the function.
 	Name string
+
+	// Args are the un-evaluated and un-compiled arguments.
 	Args List
+
+	// Self points to the encapsulating object.
+	Self Caller
+
+	// SkipEval is a slice of flags indicating which arguments should be
+	// evaluated before calling Self.Call(). The last bool is the value used
+	// for &rest arguments if present.
+	SkipEval []bool
 }
 
 // Define a new golang function.
@@ -39,50 +51,112 @@ func NewFunc(name string, args List) Object {
 	panic(fmt.Sprintf("Function %s is not defined.", caseName(name)))
 }
 
+// Eval the object.
+func (f *Function) Eval(s *Scope, depth int) Object {
+	args := make(List, len(f.Args))
+	d2 := depth + 1
+	si := -1
+	for i := len(f.Args) - 1; 0 <= i; i-- {
+		si++
+		arg := f.Args[i]
+		if 0 < len(f.SkipEval) {
+			if len(f.SkipEval) <= si {
+				if f.SkipEval[len(f.SkipEval)-1] {
+					args[i] = arg
+					continue
+				}
+			} else if f.SkipEval[si] {
+				args[i] = arg
+				continue
+			}
+		}
+		if list, ok := arg.(List); ok {
+			arg = f.listToFunc(list)
+			f.Args[i] = arg
+		}
+		args[i] = s.Eval(arg, d2)
+	}
+	s.before(s, f.Name, args, depth)
+	defer s.after(s, f.Name, args, depth)
+
+	return f.Self.Call(s, args, depth)
+}
+
+// Apply evaluates with the need to evaluate the args.
+func (f *Function) Apply(s *Scope, args List, depth int) Object {
+	s.before(s, f.Name, args, depth)
+	defer s.after(s, f.Name, args, depth)
+
+	return f.Self.Call(s, args, depth)
+}
+
+// EvalArg converts lists arguments to functions and replaces the
+// argument. Then the argument is evaluated and returned. Non-list arguments
+// are just evaluated.
+func (f *Function) EvalArg(s *Scope, args List, index, depth int) Object {
+	if list, ok := args[index].(List); ok {
+		args[index] = f.listToFunc(list)
+	}
+	return s.Eval(args[index], depth)
+}
+
+func (f *Function) listToFunc(list List) Object {
+	if len(list) == 0 {
+		return nil
+	}
+	switch ta := list[len(list)-1].(type) {
+	case Symbol:
+		return NewFunc(string(ta), list[:len(list)-1])
+	case List:
+		// TBD maybe lambda
+	}
+	panic(fmt.Sprintf("%s is not a function", ObjectString(list[0])))
+}
+
 // String representation of the Object.
-func (obj *Function) String() string {
-	return string(obj.Append([]byte{}))
+func (f *Function) String() string {
+	return string(f.Append([]byte{}))
 }
 
 // Append a buffer with a representation of the Object.
-func (obj *Function) Append(b []byte) []byte {
+func (f *Function) Append(b []byte) []byte {
 	b = append(b, '(')
-	b = append(b, obj.Name...)
-	for _, arg := range obj.Args {
+	b = append(b, f.Name...)
+	for i := len(f.Args) - 1; 0 <= i; i-- {
 		b = append(b, ' ')
-		b = Append(b, arg)
+		b = Append(b, f.Args[i])
 	}
 	return append(b, ')')
 }
 
 // Simplify the function.
-func (obj *Function) Simplify() interface{} {
-	simple := make([]interface{}, 0, len(obj.Args)+1)
-	simple = append(simple, obj.Name)
-	for _, arg := range obj.Args {
-		simple = append(simple, Simplify(arg))
+func (f *Function) Simplify() interface{} {
+	simple := make([]interface{}, 0, len(f.Args)+1)
+	simple = append(simple, f.Name)
+	for i := len(f.Args) - 1; 0 <= i; i-- {
+		simple = append(simple, Simplify(f.Args[i]))
 	}
 	return simple
 }
 
 // Equal returns true if this Object and the other are equal in value.
-func (obj *Function) Equal(other Object) bool {
+func (f *Function) Equal(other Object) bool {
 	return false
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
-func (obj *Function) Hierarchy() []Symbol {
+func (f *Function) Hierarchy() []Symbol {
 	return []Symbol{FunctionSymbol, TrueSymbol}
 }
 
 // GetArgs returns the function arguments.
-func (obj *Function) GetArgs() []Object {
-	return obj.Args
+func (f *Function) GetArgs() List {
+	return f.Args
 }
 
 // GetName returns the function name.
-func (obj *Function) GetName() string {
-	return obj.Name
+func (f *Function) GetName() string {
+	return f.Name
 }
 
 func caseName(name string) string {

@@ -9,4 +9,7 @@ type Funky interface {
 
 	// GetName returns the function name.
 	GetName() string
+
+	// Apply evaluates with the need to evaluate the args.
+	Apply(args List, depth int) Object
 }

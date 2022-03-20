@@ -70,7 +70,7 @@ var (
 	}
 	varValues = map[string]Object{}
 	varDocs   = map[string]string{
-		"*default-pathname-defaults*": ``,
+		"*default-pathname-defaults*": `is the pathname for the current working directory.`,
 
 		"*error-output*": `is a stream used as the default for warnings and errors when not in interaction mode.`,
 

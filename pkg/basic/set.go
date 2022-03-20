@@ -6,7 +6,11 @@ import "github.com/ohler55/slip"
 
 func init() {
 	slip.Define(
-		func(args slip.List) slip.Object { return &Set{Function: slip.Function{Name: "set", Args: args}} },
+		func(args slip.List) slip.Object {
+			f := Set{Function: slip.Function{Name: "set", Args: args}}
+			f.Self = &f
+			return &f
+		},
 		&slip.FuncDoc{
 			Name: "set",
 			Args: []*slip.DocArg{
@@ -34,20 +38,16 @@ type Set struct {
 	slip.Function
 }
 
-// Eval the object.
-func (f *Set) Eval(s *slip.Scope, depth int) (result slip.Object) {
-	if len(f.Args) != 2 {
+// Call the the function with the arguments provided.
+func (f *Set) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	d2 := depth + 1
-	s.Before(f, depth)
-	arg := s.Eval(f.Args[0], d2)
-	sym, ok := arg.(slip.Symbol)
+	sym, ok := args[1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol argument to set", arg, "symbol")
+		slip.PanicType("symbol argument to set", args[0], "symbol")
 	}
-	value := s.Eval(f.Args[1], d2)
-	s.Set(sym, value)
+	s.Set(sym, args[0])
 
-	return value
+	return args[0]
 }

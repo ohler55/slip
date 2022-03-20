@@ -7,7 +7,7 @@ import "fmt"
 // Panic is used to gather a stack trace when panic occurs.
 type Panic struct {
 	Message string
-	Stack   []Object
+	Stack   []string
 }
 
 // Bytes returns the original error and stack in a format for display or
@@ -17,9 +17,9 @@ func (p *Panic) Bytes() []byte {
 
 	b = append(b, "* "...)
 	b = append(b, p.Message...)
-	for _, obj := range p.Stack {
+	for _, line := range p.Stack {
 		b = append(b, "  "...)
-		b = append(b, ObjectString(obj)...)
+		b = append(b, line...)
 		b = append(b, '\n')
 	}
 	return b

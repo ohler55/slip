@@ -13,8 +13,8 @@ type Scope struct {
 	// name        Object // can be nil so type can't be Symbol
 	vars        map[string]Object
 	returnValue Object
-	before      func(s *Scope, obj Object, depth int)
-	after       func(s *Scope, obj Object, depth int)
+	before      func(s *Scope, name string, args List, depth int)
+	after       func(s *Scope, name string, args List, depth int)
 }
 
 // NewScope create a new top level Scope.
@@ -38,6 +38,7 @@ func (s *Scope) NewScope() *Scope {
 	}
 }
 
+/*
 // Before should be called in a go defined Eval function before executing
 // other code.
 func (s *Scope) Before(obj Object, depth int) {
@@ -48,6 +49,7 @@ func (s *Scope) Before(obj Object, depth int) {
 func (s *Scope) After(obj Object, depth int) {
 	s.after(s, obj, depth)
 }
+*/
 
 // Trace turns tracing on or off for the scope and any future sub-scopes.
 func (s *Scope) Trace(on bool) {
@@ -140,34 +142,29 @@ func (s *Scope) remove(name string) {
 	}
 }
 
-func noopBefore(s *Scope, obj Object, depth int) {
+func noopBefore(s *Scope, name string, args List, depth int) {
 }
 
-func normalAfter(s *Scope, obj Object, depth int) {
+func normalAfter(s *Scope, name string, args List, depth int) {
 	switch tr := recover().(type) {
 	case nil:
 	case *Panic:
-		tr.Stack = append(tr.Stack, obj)
+		tr.Stack = append(tr.Stack, ObjectString(append(args, Symbol(name))))
 		panic(tr)
 	default:
-		panic(&Panic{Message: fmt.Sprint(tr), Stack: []Object{obj}})
+		panic(&Panic{
+			Message: fmt.Sprint(tr), Stack: []string{ObjectString(append(args, Symbol(name)))},
+		})
 	}
 }
 
-func traceBefore(s *Scope, obj Object, depth int) {
+func traceBefore(s *Scope, name string, args List, depth int) {
 	// TBD format trace
 }
 
-func traceAfter(s *Scope, obj Object, depth int) {
+func traceAfter(s *Scope, name string, args List, depth int) {
 	// TBD format trace
-	switch tr := recover().(type) {
-	case nil:
-	case *Panic:
-		tr.Stack = append(tr.Stack, obj)
-		panic(tr)
-	default:
-		panic(&Panic{Message: fmt.Sprint(tr), Stack: []Object{obj}})
-	}
+	normalAfter(s, name, args, depth)
 }
 
 // Eval evaluates an object and returns the result.

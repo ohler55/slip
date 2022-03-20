@@ -25,7 +25,7 @@ func (obj *FileStream) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj *FileStream) Append(b []byte) []byte {
-	b = append(b, "#<STREAM "...)
+	b = append(b, "#<FILE-STREAM "...)
 	b = append(b, (*os.File)(obj).Name()...)
 	b = append(b, " {"...)
 	b = strconv.AppendInt(b, int64((*os.File)(obj).Fd()), 10)
@@ -56,4 +56,14 @@ func (obj *FileStream) StreamType() Symbol {
 // Eval returns self.
 func (obj *FileStream) Eval(s *Scope, depth int) Object {
 	return obj
+}
+
+// Write made visible since os.File functions are not automatically visible.
+func (obj *FileStream) Write(b []byte) (int, error) {
+	return (*os.File)(obj).Write(b)
+}
+
+// Read made visible since os.File functions are not automatically visible.
+func (obj *FileStream) Read(b []byte) (int, error) {
+	return (*os.File)(obj).Read(b)
 }
