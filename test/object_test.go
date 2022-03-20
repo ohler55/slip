@@ -156,22 +156,31 @@ func TestList(t *testing.T) {
 
 func TestCons(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.Cons{slip.Fixnum(2), slip.Fixnum(1)},
-		String:    "(1 . 2)",
-		Simple:    []interface{}{int64(1), int64(2)},
+		Target:    slip.Cons{slip.Fixnum(1), nil},
+		String:    "(nil . 1)",
+		Simple:    []interface{}{nil, int64(1)},
 		Hierarchy: "cons.list.sequence.t",
 		Equals: []*sliptest.EqTest{
-			{Other: slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}, Expect: true},
+			{Other: slip.Cons{slip.Fixnum(1), nil}, Expect: true},
 			{Other: slip.Cons{nil, slip.Fixnum(1)}, Expect: false},
 			{Other: slip.Cons{slip.Fixnum(1)}, Expect: false},
-			{Other: slip.List{slip.Fixnum(2), slip.Fixnum(1)}, Expect: true},
-			{Other: slip.Cons{nil, slip.Fixnum(1)}, Expect: false},
+			{Other: slip.List{slip.Fixnum(1), nil}, Expect: true},
+			{Other: slip.List{nil, slip.Fixnum(1)}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
 		Panics: true,
 		Selfies: []func() slip.Symbol{
 			slip.Cons{}.SequenceType,
 		},
+	}).Test(t)
+}
+
+func TestConsEmpty(t *testing.T) {
+	(&sliptest.Object{
+		Target: slip.Cons{},
+		String: "nil",
+		Simple: []interface{}{},
+		Eval:   nil,
 	}).Test(t)
 }
 
@@ -196,10 +205,39 @@ func TestConsCdr(t *testing.T) {
 	require.Equal(t, "(2 3)", slip.ObjectString(slip.Cons{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}.Cdr()))
 }
 
-// TBD symbol
+func TestCharacterUnicode(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Character('ぴ'),
+		String:    `#\ぴ`,
+		Simple:    "ぴ",
+		Hierarchy: "character.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Character('ぴ'), Expect: true},
+			{Other: slip.Character('x'), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: slip.Character('ぴ'),
+	}).Test(t)
+}
+
+func TestCharacterSpecial(t *testing.T) {
+	(&sliptest.Object{
+		Target: slip.Character(' '),
+		String: `#\Space`,
+		Simple: " ",
+		Eval:   slip.Character(' '),
+	}).Test(t)
+}
+
+func TestCharacterControl(t *testing.T) {
+	(&sliptest.Object{
+		Target: slip.Character('\u001b'),
+		String: `#\u001b`,
+		Simple: "\u001b",
+		Eval:   slip.Character('\u001b'),
+	}).Test(t)
+}
+
 // TBD simple
 // TBD file-stream
 // TBD values
-
-// TBD vector (in different directory?)
-// TBD hash-table (in different directory)

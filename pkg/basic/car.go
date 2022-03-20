@@ -30,6 +30,7 @@ _nil_ if _arg_ is _nil_ or an empty _list_.`,
 		})
 }
 
+// Car represents the car function.
 type Car struct {
 	slip.Function
 }

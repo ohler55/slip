@@ -7,9 +7,11 @@ import (
 	"testing"
 
 	"github.com/ohler55/slip"
+	// Pull in all functions.
 	_ "github.com/ohler55/slip/pkg"
 
 	"github.com/ohler55/ojg/alt"
+	"github.com/ohler55/ojg/pretty"
 	"github.com/stretchr/testify/require"
 )
 
@@ -58,14 +60,14 @@ type Object struct {
 
 // Test the object test specification.
 func (to *Object) Test(t *testing.T) {
-	require.Equal(t, to.String, to.Target.String())
-	require.Equal(t, to.String, string(to.Target.Append([]byte{})))
+	require.Equal(t, to.String, to.Target.String(), "String() output")
+	require.Equal(t, to.String, string(to.Target.Append([]byte{})), "Append() output")
 	if _, ok := to.Simple.(error); ok {
 		require.Panics(t, func() { _ = to.Target.Simplify() })
 	} else {
 		simp := to.Target.Simplify()
 		diff := alt.Compare(to.Simple, simp)
-		require.Nil(t, diff, "Simplify difference at %v for %s vs %s", diff, to.Simple, simp)
+		require.Nil(t, diff, "Simplify difference at %v for %s vs %s", diff, pretty.SEN(to.Simple), pretty.SEN(simp))
 	}
 	if 0 < len(to.Hierarchy) {
 		var hb []byte
@@ -79,9 +81,9 @@ func (to *Object) Test(t *testing.T) {
 	}
 	for _, et := range to.Equals {
 		if et.Expect {
-			require.True(t, to.Target.Equal(et.Other), "%s vs %s", to.Target, et.Other)
+			require.True(t, to.Target.Equal(et.Other), "Equal %s vs %s", to.Target, et.Other)
 		} else {
-			require.False(t, to.Target.Equal(et.Other), "%s vs %s", to.Target, et.Other)
+			require.False(t, to.Target.Equal(et.Other), "Not Equal %s vs %s", to.Target, et.Other)
 		}
 	}
 	self := to.Target.Hierarchy()[0]

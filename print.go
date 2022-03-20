@@ -5,6 +5,7 @@ package slip
 import (
 	"fmt"
 	"io"
+	"math"
 	"strings"
 )
 
@@ -14,6 +15,8 @@ const (
 	capitalizeKey = Symbol(":capitalize")
 )
 
+// Printer of Objects. The values of it's members determine how Objects will
+// be encoded for printing.
 type Printer struct {
 
 	// ANSI backs *print-ansi*.
@@ -71,14 +74,14 @@ var (
 		Circle:      false,
 		Escape:      true,
 		Gensym:      true,
-		Length:      0,
-		Level:       0,
-		Lines:       0,
+		Length:      math.MaxInt,
+		Level:       math.MaxInt,
+		Lines:       math.MaxInt,
 		MiserWidth:  0,
 		Pretty:      true,
 		Radix:       false,
 		Readably:    false,
-		RightMargin: 0,
+		RightMargin: 120,
 	}
 )
 
@@ -210,12 +213,17 @@ func setPrintGensym(value Object) {
 
 // get *print-length*
 func getPrintLength() Object {
+	if printer.Level == math.MaxInt {
+		return nil
+	}
 	return Fixnum(printer.Length)
 }
 
 // set *print-length*
 func setPrintLength(value Object) {
-	if length, ok := value.(Fixnum); ok && 0 <= length {
+	if value == nil {
+		printer.Length = math.MaxInt
+	} else if length, ok := value.(Fixnum); ok && 0 <= length {
 		printer.Length = uint(length)
 	} else {
 		PanicType("*print-length*", value, "non-negative fixnum")
@@ -224,12 +232,17 @@ func setPrintLength(value Object) {
 
 // get *print-level*
 func getPrintLevel() Object {
+	if printer.Level == math.MaxInt {
+		return nil
+	}
 	return Fixnum(printer.Level)
 }
 
 // set *print-level*
 func setPrintLevel(value Object) {
-	if level, ok := value.(Fixnum); ok && 0 <= level {
+	if value == nil {
+		printer.Level = math.MaxInt
+	} else if level, ok := value.(Fixnum); ok && 0 <= level {
 		printer.Level = uint(level)
 	} else {
 		PanicType("*print-level*", value, "non-negative fixnum")
@@ -238,12 +251,17 @@ func setPrintLevel(value Object) {
 
 // get *print-lines*
 func getPrintLines() Object {
+	if printer.Lines == math.MaxInt {
+		return nil
+	}
 	return Fixnum(printer.Lines)
 }
 
 // set *print-lines*
 func setPrintLines(value Object) {
-	if lines, ok := value.(Fixnum); ok && 0 <= lines {
+	if value == nil {
+		printer.Lines = math.MaxInt
+	} else if lines, ok := value.(Fixnum); ok && 0 <= lines {
 		printer.Lines = uint(lines)
 	} else {
 		PanicType("*print-lines*", value, "non-negative fixnum")
@@ -325,15 +343,15 @@ func Warning(format string, args ...interface{}) {
 			b = append(b, "\x1b[31mWarning: "...) // red
 			b = append(b, fmt.Sprintf(format, args...)...)
 			b = append(b, "\x1b[m"...)
-			StandardOutput.(io.Writer).Write(b)
+			_, _ = StandardOutput.(io.Writer).Write(b)
 		} else {
 			b = append(b, "Warning: "...)
 			b = append(b, fmt.Sprintf(format, args...)...)
-			StandardOutput.(io.Writer).Write(b)
+			_, _ = StandardOutput.(io.Writer).Write(b)
 		}
 	} else {
 		b = append(b, "Warning: "...)
 		b = append(b, fmt.Sprintf(format, args...)...)
-		ErrorOutput.(io.Writer).Write(b)
+		_, _ = ErrorOutput.(io.Writer).Write(b)
 	}
 }

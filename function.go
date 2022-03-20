@@ -13,11 +13,13 @@ const FunctionSymbol = Symbol("function")
 
 var funcCreators = map[string]func(args List) Object{}
 
+// Function is the base type for most if not all functions.
 type Function struct {
 	Name string
 	Args List
 }
 
+// Define a new golang function.
 func Define(creator func(args List) Object, doc *FuncDoc) {
 	name := strings.ToLower(doc.Name)
 	if _, has := funcCreators[name]; has {
@@ -27,6 +29,8 @@ func Define(creator func(args List) Object, doc *FuncDoc) {
 	funcDocs[name] = doc
 }
 
+// NewFunc creates a new instance of the named function with the arguments
+// provided.
 func NewFunc(name string, args List) Object {
 	name = strings.ToLower(name)
 	if create := funcCreators[name]; create != nil {

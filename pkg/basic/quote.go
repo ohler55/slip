@@ -29,6 +29,7 @@ func init() {
 		})
 }
 
+// Quote represents the quote function.
 type Quote struct {
 	slip.Function
 }

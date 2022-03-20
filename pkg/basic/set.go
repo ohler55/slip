@@ -29,6 +29,7 @@ func init() {
 		})
 }
 
+// Set represents the set function.
 type Set struct {
 	slip.Function
 }

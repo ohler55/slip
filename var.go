@@ -74,37 +74,45 @@ var (
 
 		"*error-output*": `is a stream used as the default for warnings and errors when not in interaction mode.`,
 
-		"*print-ansi*": ``,
+		"*print-ansi*": `if true ANSI codes are used for interactive displays.`,
 
-		"*print-array*": ``,
+		"*print-array*": `controls the format of _arrays_ when printed. If false the content of arrays
+is not printed. If true _array_ content is included when displayed.`,
 
-		"*print-base*": ``,
+		"*print-base*": `is the base for integer values when printed. The initial value is ten.`,
 
-		"*print-case*": ``,
+		"*print-case*": `controls the display of symbols as either upper case, lower case, or capitalized.`,
 
-		"*print-circle*": ``,
+		"*print-circle*": `is not currently supported.`,
 
-		"*print-escape*": ``,
+		"*print-escape*": `if _true_ an attempt is made to print _objects_ so they can be read.
+For example the 'a' character will be displayed as _#\a_ when true and simply _a_ when false.`,
 
-		"*print-gensym*": ``,
+		"*print-gensym*": `has no effect. The "#:" is never a prefix for _symbols_`,
 
-		"*print-length*": ``,
+		"*print-length*": `controls how many elements at a level are printed. When exceeded "..." is
+printed instead of the remaining elements.`,
 
 		"*print-level*": `controls how many levels deep a nested _object_ will print.
-If nil no limit is imposed otherwise a positive fixnum specifies the level at which a _#_ is
+If nil no limit is imposed otherwise a positive fixnum specifies the level at which a "#" is
 output in place of the _object_ element.`,
 
-		"*print-lines*": ``,
+		"*print-lines*": `controls how many lines of an object will be printed. If the limit is exceeded
+a ".." is appended to the last line. Any closing delimiters are still printed.`,
 
-		"*print-miser-width*": ``,
+		"*print-miser-width*": `is not currently supported.`,
 
-		"*print-pretty*": ``,
+		"*print-pretty*": `if true will print _object_ in a "pretty" format that is more readable.
+If false (_nil_) then minimal whitespace is used for printing.`,
 
-		"*print-radix*": ``,
+		"*print-radix*": `is a flag indicating base 2, 8, and 16 rational should be prefixed with
+#b, #o, or #x respectively. Base 10 integers will include a trailing decimal point. Other values
+are base ar printer with the base following the # character such as #3rN when N is the integer
+being printed. Base 10 ratios are given a #10r prefix.`,
 
-		"*print-readably*": ``,
+		"*print-readably*": `if true while print such that output can be read by the parser when possible.`,
 
-		"*print-right-margin*": ``,
+		"*print-right-margin*": `establishes the right margin for pretty printing.`,
 
 		"*standard-output*": `is a stream used as the default output destination for writing.`,
 
@@ -160,6 +168,8 @@ func setStandardInput(value Object) {
 	}
 }
 
+// GetVar get the value bound to the sym argument. It panics if sym is
+// unbound.
 func GetVar(sym Symbol) (Object, bool) {
 	return getVar(strings.ToLower(string(sym)))
 }
@@ -175,11 +185,12 @@ func getVar(name string) (Object, bool) {
 		return f(), true
 	}
 
-	// TBD check functions as well when defined
+	// TBD check functions as well when defined, what gets returned in that case?
 
 	return nil, false
 }
 
+// SetVar binds the sym argument to a value.
 func SetVar(sym Symbol, value Object) {
 	setVar(strings.ToLower(string(sym)), value)
 }
@@ -194,6 +205,7 @@ func setVar(name string, value Object) {
 	varValues[name] = value
 }
 
+// HasVar returns true if the sym argument is bound to a value.
 func HasVar(sym Symbol) bool {
 	return hasVar(strings.ToLower(string(sym)))
 }
@@ -211,12 +223,15 @@ func hasVar(name string) bool {
 	return false
 }
 
+// RemoveVar removes the binding to the sym argument.
 func RemoveVar(sym Symbol) {
 	name := strings.ToLower(string(sym))
 	delete(varValues, name)
 	delete(varDocs, name)
 }
 
+// DescribeVar returns the documentation for the variable bound to the sym
+// argument.
 func DescribeVar(sym Symbol) string {
 	name := strings.ToLower(string(sym))
 	if doc, has := varDocs[name]; has {
@@ -228,6 +243,8 @@ func DescribeVar(sym Symbol) string {
 	return ""
 }
 
+// DescribeFunction returns the documentation for the function bound to the
+// sym argument.
 func DescribeFunction(sym Symbol) *FuncDoc {
 	name := strings.ToLower(string(sym))
 	if doc, has := funcDocs[name]; has {

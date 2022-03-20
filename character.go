@@ -4,7 +4,7 @@ package slip
 
 import "unicode/utf8"
 
-// CharacterCharacter is the character with a value of "character".
+// CharacterSymbol is the Symbol with a value of "character".
 const CharacterSymbol = Symbol("character")
 
 func init() {

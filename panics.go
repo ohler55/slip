@@ -4,6 +4,7 @@ package slip
 
 import "fmt"
 
+// Panic is used to gather a stack trace when panic occurs.
 type Panic struct {
 	Message string
 	Stack   []Object
@@ -29,6 +30,7 @@ func (p *Panic) Error() string {
 	return p.Message
 }
 
+// PanicType raises a panic describing an incorrect type being used.
 func PanicType(use string, value Object, wants ...string) {
 	var b []byte
 
@@ -55,6 +57,8 @@ func PanicType(use string, value Object, wants ...string) {
 	panic(&Panic{Message: string(b)})
 }
 
+// PanicArgCount raises a panic describing the wrong number of arguments to a
+// function.
 func PanicArgCount(obj Object, min, max int) {
 	f := obj.(Funky)
 	args := f.GetArgs()

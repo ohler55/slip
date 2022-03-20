@@ -48,7 +48,7 @@ func (obj *FileStream) Hierarchy() []Symbol {
 	return []Symbol{FileStreamSymbol, StreamSymbol, TrueSymbol}
 }
 
-// IntegerType returns 'fileStream.
+// StreamType returns 'fileStream.
 func (obj *FileStream) StreamType() Symbol {
 	return FileStreamSymbol
 }

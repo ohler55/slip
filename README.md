@@ -8,7 +8,6 @@ SLIce Processing is LISP for golang
 
 
 - functions
- - create a sample
  - pkg
   - basic
    + car
@@ -32,16 +31,14 @@ SLIce Processing is LISP for golang
    - list
    - cadr
    - nth
-   -
+
+- var_test.go
+ - include constant panic test as well
 
 - Placer
  - place value (car, cdr, nth, rest, first, card)
   - others in hash-table, array, vector
 
- - or could follow hierarchy
-  - t/sequence/list
-  - t/number/real/rational/integer
-  - will get heavy on the t with hash-table and array being just under t
 
 - scope
  - eval

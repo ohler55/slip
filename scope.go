@@ -9,28 +9,32 @@ import (
 
 // Scope encapsulates the scope for a function.
 type Scope struct {
-	parent      *Scope
-	name        Object // can be nil so can't be Symbol
+	parent *Scope
+	// name        Object // can be nil so type can't be Symbol
 	vars        map[string]Object
 	returnValue Object
 	before      func(s *Scope, obj Object, depth int)
 	after       func(s *Scope, obj Object, depth int)
 }
 
+// NewScope create a new top level Scope.
 func NewScope() *Scope {
 	return &Scope{
-		vars:   map[string]Object{},
-		before: noopBefore,
-		after:  normalAfter,
+		vars:        map[string]Object{},
+		returnValue: undef,
+		before:      noopBefore,
+		after:       normalAfter,
 	}
 }
 
+// NewScope create a new Scope with a parent of the current Scope.
 func (s *Scope) NewScope() *Scope {
 	return &Scope{
-		parent: s,
-		vars:   map[string]Object{},
-		before: s.before,
-		after:  s.after,
+		parent:      s,
+		vars:        map[string]Object{},
+		returnValue: undef,
+		before:      s.before,
+		after:       s.after,
 	}
 }
 
@@ -123,7 +127,7 @@ func (s *Scope) has(name string) bool {
 
 // Remove a variable binding.
 func (s *Scope) Remove(sym Symbol) {
-	delete(s.vars, strings.ToLower(string(sym)))
+	s.remove(strings.ToLower(string(sym)))
 }
 
 func (s *Scope) remove(name string) {

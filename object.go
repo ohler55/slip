@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Object is the interface for all LISP entities other than nil.
 type Object interface {
 	fmt.Stringer
 
