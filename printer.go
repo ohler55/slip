@@ -15,6 +15,15 @@ const (
 	capitalizeKey = Symbol(":capitalize")
 )
 
+type node struct {
+	value    Object
+	elements []*node
+	size     int
+	quote    bool
+
+	buf []byte
+}
+
 // Printer of Objects. The values of it's members determine how Objects will
 // be encoded for printing.
 type Printer struct {
