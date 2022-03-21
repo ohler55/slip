@@ -52,10 +52,11 @@ func NewFunc(name string, args List) Object {
 }
 
 // Eval the object.
-func (f *Function) Eval(s *Scope, depth int) Object {
+func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	args := make(List, len(f.Args))
 	d2 := depth + 1
 	si := -1
+	var update []int
 	for i := len(f.Args) - 1; 0 <= i; i-- {
 		si++
 		arg := f.Args[i]
@@ -63,10 +64,16 @@ func (f *Function) Eval(s *Scope, depth int) Object {
 			if len(f.SkipEval) <= si {
 				if f.SkipEval[len(f.SkipEval)-1] {
 					args[i] = arg
+					if _, ok := arg.(List); ok {
+						update = append(update, i)
+					}
 					continue
 				}
 			} else if f.SkipEval[si] {
 				args[i] = arg
+				if _, ok := arg.(List); ok {
+					update = append(update, i)
+				}
 				continue
 			}
 		}
@@ -79,7 +86,16 @@ func (f *Function) Eval(s *Scope, depth int) Object {
 	s.before(s, f.Name, args, depth)
 	defer s.after(s, f.Name, args, depth)
 
-	return f.Self.Call(s, args, depth)
+	result = f.Self.Call(s, args, depth)
+	// If there are any .Args that need updating to the function version do
+	// that by taking the compiled version from the args.
+	for _, u := range update {
+		a := args[u]
+		if _, ok := a.(Funky); ok {
+			f.Args[u] = a
+		}
+	}
+	return
 }
 
 // Apply evaluates with the need to evaluate the args.

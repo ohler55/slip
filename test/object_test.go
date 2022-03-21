@@ -3,6 +3,7 @@
 package test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -154,6 +155,14 @@ func TestList(t *testing.T) {
 	}).Test(t)
 }
 
+func TestListEmpty(t *testing.T) {
+	(&sliptest.Object{
+		Target: slip.List{},
+		String: "()",
+		Simple: []interface{}{},
+	}).Test(t)
+}
+
 func TestCons(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.Cons{slip.Fixnum(1), nil},
@@ -241,3 +250,18 @@ func TestCharacterControl(t *testing.T) {
 // TBD simple
 // TBD file-stream
 // TBD values
+
+func TestSimpleObject(t *testing.T) {
+	tm := time.Date(2022, time.April, 1, 0, 0, 0, 0, time.UTC)
+	simple := []interface{}{
+		true, -1, int8(-2), int16(-3), int32(-4), int64(-5),
+		uint(1), uint8(2), uint16(3), uint32(4), uint64(5),
+		float32(4.5), 5.4, tm, slip.True, "abc", []byte("def"),
+		fmt.Errorf("dummy error"),
+		map[string]interface{}{"x": 7},
+	}
+	obj := slip.SimpleObject(simple)
+	require.Equal(t,
+		`(t -1 -2 -3 -4 -5 1 2 3 4 5 4.5 5.4 @2022-04-01T00:00:00Z t "abc" "def" "dummy error" ((7 . "x")))`,
+		obj.String())
+}

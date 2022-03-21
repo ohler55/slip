@@ -7,7 +7,8 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - make sure functions use reverse order
- - for SkipEval too?
+ - need a way to provide form eval back to func like setq
+  - need to pass back func but eval in order
 
 
 - functions
@@ -16,7 +17,7 @@ SLIce Processing is LISP for golang
    + car
    - cdr
    + quote
-   - set
+   + set
    - setq
    - setf
    - describe

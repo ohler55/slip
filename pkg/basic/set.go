@@ -45,7 +45,7 @@ func (f *Set) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	}
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol argument to set", args[0], "symbol")
+		slip.PanicType("symbol argument to set", args[1], "symbol")
 	}
 	s.Set(sym, args[0])
 
