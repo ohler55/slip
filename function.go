@@ -5,7 +5,6 @@ package slip
 import (
 	"fmt"
 	"strings"
-	"unicode"
 )
 
 // FunctionSymbol is the symbol with a value of "function".
@@ -35,7 +34,7 @@ type Function struct {
 func Define(creator func(args List) Object, doc *FuncDoc) {
 	name := strings.ToLower(doc.Name)
 	if _, has := funcCreators[name]; has {
-		Warning("redefining %s", caseName(name))
+		Warning("redefining %s", printer.caseName(name))
 	}
 	funcCreators[name] = creator
 	funcDocs[name] = doc
@@ -48,7 +47,7 @@ func NewFunc(name string, args List) Object {
 	if create := funcCreators[name]; create != nil {
 		return create(args)
 	}
-	panic(fmt.Sprintf("Function %s is not defined.", caseName(name)))
+	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
 }
 
 // Eval the object.
@@ -173,16 +172,4 @@ func (f *Function) GetArgs() List {
 // GetName returns the function name.
 func (f *Function) GetName() string {
 	return f.Name
-}
-
-func caseName(name string) string {
-	switch printer.Case {
-	case upcaseKey:
-		name = strings.ToUpper(name)
-	case capitalizeKey:
-		rn := []rune(name)
-		rn[0] = unicode.ToUpper(rn[0])
-		name = string(rn)
-	}
-	return name
 }

@@ -4,7 +4,6 @@ package slip
 
 import (
 	"math"
-	"strconv"
 )
 
 // FixnumSymbol is the symbol with a value of "fixnum".
@@ -24,12 +23,12 @@ type Fixnum int64
 
 // String representation of the Object.
 func (obj Fixnum) String() string {
-	return strconv.FormatInt(int64(obj), 10)
+	return string(obj.Append([]byte{}))
 }
 
 // Append a buffer with a representation of the Object.
 func (obj Fixnum) Append(b []byte) []byte {
-	return strconv.AppendInt(b, int64(obj), 10)
+	return printer.Append(b, obj, 0)
 }
 
 // Simplify the Object into an int64.

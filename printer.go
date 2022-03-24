@@ -3,10 +3,13 @@
 package slip
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"math"
+	"strconv"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -20,6 +23,7 @@ type node struct {
 	elements []*node
 	size     int
 	quote    bool
+	funky    bool
 
 	buf []byte
 }
@@ -96,32 +100,224 @@ var (
 
 // Write an Object to *standard-output*.
 func Write(obj Object) {
-	if _, err := StandardOutput.(io.Writer).Write(printer.Append([]byte{}, obj)); err != nil {
+	if _, err := StandardOutput.(io.Writer).Write(printer.Append([]byte{}, obj, 0)); err != nil {
 		panic(err)
 	}
 }
 
 // Append an Object to a byte array using the global print variables.
 func Append(b []byte, obj Object) []byte {
-	return printer.Append(b, obj)
+	return printer.Append(b, obj, 0)
 }
 
 // Write an Object to *standard-output* using the Printer variables.
 func (p *Printer) Write(obj Object) {
-	if _, err := StandardOutput.(io.Writer).Write(p.Append([]byte{}, obj)); err != nil {
+	if _, err := StandardOutput.(io.Writer).Write(p.Append([]byte{}, obj, 0)); err != nil {
 		panic(err)
 	}
 }
 
 // Append an Object to a byte array using the Printer variables.
-func (p *Printer) Append(b []byte, obj Object) []byte {
-	if obj == nil {
-		return append(b, caseName("nil")...)
+func (p *Printer) Append(b []byte, obj Object, level int) []byte {
+Top:
+	switch to := obj.(type) {
+	case nil:
+		b = append(b, p.caseName("nil")...)
+	case Character:
+		if p.Escape {
+			b = to.Append(b)
+		} else {
+			b = append(b, string([]rune{rune(to)})...)
+		}
+	case Fixnum:
+		if p.Radix {
+			switch p.Base {
+			case 2:
+				b = append(b, "#b"...)
+				b = strconv.AppendInt(b, int64(to), int(p.Base))
+			case 8:
+				b = append(b, "#o"...)
+				b = strconv.AppendInt(b, int64(to), int(p.Base))
+			case 16:
+				b = append(b, "#x"...)
+				b = strconv.AppendInt(b, int64(to), int(p.Base))
+			case 10:
+				b = strconv.AppendInt(b, int64(to), 10)
+				b = append(b, '.')
+			default:
+				b = append(b, '#')
+				b = strconv.AppendInt(b, int64(p.Base), 10)
+				b = append(b, 'r')
+				b = strconv.AppendInt(b, int64(to), int(p.Base))
+			}
+		} else {
+			b = strconv.AppendInt(b, int64(to), int(p.Base))
+		}
+	// case Ratio: TBD
+	case Symbol:
+		b = append(b, p.caseName(string(to))...)
+	case List:
+		if int(p.Level) <= level {
+			return append(b, '#')
+		}
+		if p.Pretty {
+			b = p.appendTree(b, p.createTree(to, 0), 0, 0)
+		} else {
+			l2 := level + 1
+			b = append(b, '(')
+			for i := 0; i < len(to); i++ {
+				element := to[len(to)-i-1]
+				if 0 < i {
+					b = append(b, ' ')
+				}
+				if int(p.Length) <= i {
+					b = append(b, "..."...)
+					break
+				}
+				b = p.Append(b, element, l2)
+			}
+			b = append(b, ')')
+		}
+	case Funky:
+		name := to.GetName()
+		args := to.GetArgs()
+		if name == "quote" {
+			b = append(b, '\'')
+			obj = args[0]
+		} else {
+			// This double assignment is just stupid but it silences the linter.
+			args = append(args, Symbol(name))
+			obj = args
+		}
+		goto Top
+	default:
+		b = to.Append(b)
 	}
+	if bytes.ContainsRune(b, '\n') {
+		b = append(b, '\n')
+	}
+	return b
+}
 
-	// TBD handle fancy stuff like level and lines
+func (p *Printer) createTree(obj Object, level int) *node {
+	n := node{value: obj}
+Top:
+	switch to := obj.(type) {
+	case List:
+		if int(p.Level) <= level {
+			obj = Symbol("#")
+			goto Top
+		}
+		if 0 < len(to) {
+			l2 := level + 1
+			n.size = 1 + len(to)
+			n.elements = make([]*node, len(to))
+			for i := 0; i < len(to); i++ {
+				element := to[len(to)-i-1]
+				if int(p.Length) <= i {
+					n.elements[i] = &node{value: Symbol("..."), size: 3, buf: []byte("...")}
+					n.size += 3
+					break
+				}
+				n.elements[i] = p.createTree(element, l2)
+				n.size += n.elements[i].size
+			}
+		} else {
+			n.size = 2
+		}
+	case Symbol:
+		n.buf = []byte(p.caseName(string(to)))
+		n.size = len(n.buf)
+	case Cons:
+		obj = List{to.Car(), Symbol("."), to.Cdr()}
+		goto Top
 
-	return obj.Append(b)
+	case Funky:
+		name := to.GetName()
+		args := to.GetArgs()
+		if name == "quote" {
+			obj = args[0]
+			n.quote = true
+			n.funky = true
+		} else {
+			// This double assignment is just stupid but it silences the linter.
+			args = append(args, Symbol(name))
+			obj = args
+		}
+		goto Top
+	default:
+		n.buf = p.Append([]byte{}, obj, 0)
+		n.size = len(n.buf)
+	}
+	return &n
+}
+
+var spaces = []byte{'\n'}
+
+func (p *Printer) appendTree(b []byte, n *node, offset, closes int) []byte {
+	if n.quote {
+		b = append(b, '\'')
+	}
+	if 0 < len(n.buf) {
+		return append(b, n.buf...)
+	}
+	b = append(b, '(')
+	switch len(n.elements) {
+	case 0:
+		// nothing to do
+	case 1:
+		b = p.appendTree(b, n.elements[0], offset+1, closes+1)
+	default:
+		off := offset + 1
+		t := 0
+		if len(n.elements) == 2 {
+			t = closes + 1
+		}
+		if off+n.elements[0].size+n.elements[1].size+t+1 <= int(p.RightMargin) {
+			off += n.elements[0].size + 1
+		}
+		if len(spaces)-1 < off {
+			spaces = append(spaces, bytes.Repeat([]byte{' '}, off-len(spaces)+1)...)
+		}
+		pos := offset + 1
+		for i, e := range n.elements {
+			t := 0
+			if len(n.elements)-1 == i {
+				t = closes + 1
+			}
+			if i == 0 {
+				b = p.appendTree(b, e, off, t)
+				pos += e.size
+				continue
+			}
+			if pos+e.size+t+1 <= int(p.RightMargin) {
+				b = append(b, ' ')
+				b = p.appendTree(b, e, 0, t)
+				pos += e.size + t + 1
+			} else {
+				if p.Lines < math.MaxInt && int(p.Lines)-1 <= bytes.Count(b, []byte{'\n'}) {
+					b = append(b, " .."...)
+					break
+				}
+				b = append(b, spaces[:off+1]...)
+				b = p.appendTree(b, e, off, t)
+				pos = off + e.size + 1
+			}
+		}
+	}
+	return append(b, ')')
+}
+
+func (p *Printer) caseName(name string) string {
+	switch p.Case {
+	case upcaseKey:
+		name = strings.ToUpper(name)
+	case capitalizeKey:
+		rn := []rune(name)
+		rn[0] = unicode.ToUpper(rn[0])
+		name = string(rn)
+	}
+	return name
 }
 
 // get *print-ansi*
