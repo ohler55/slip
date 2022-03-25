@@ -201,6 +201,7 @@ func setVar(name string, value Object) {
 	}
 	if f, has := varSets[name]; has {
 		f(value)
+		return
 	}
 	varValues[name] = value
 }

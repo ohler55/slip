@@ -41,8 +41,8 @@ type Printer struct {
 	// Base backs *print-base*.
 	Base uint
 
-	// Case backs *print-case*.
-	Case Symbol
+	// Case backs *print-case*. A value of nil indicates no transformation.
+	Case Object
 
 	// Circle backs *print-circle*.
 	Circle bool
@@ -125,6 +125,8 @@ Top:
 		b = append(b, p.caseName("nil")...)
 	case Character:
 		if p.Escape {
+			// The Common Lisp docs are a big vague and leave options open for
+			// when the #\ escape sequences is used.
 			b = to.Append(b)
 		} else {
 			b = append(b, string([]rune{rune(to)})...)
@@ -312,7 +314,10 @@ func (p *Printer) caseName(name string) string {
 	switch p.Case {
 	case upcaseKey:
 		name = strings.ToUpper(name)
+	case downcaseKey:
+		name = strings.ToLower(name)
 	case capitalizeKey:
+		name = strings.ToLower(name)
 		rn := []rune(name)
 		rn[0] = unicode.ToUpper(rn[0])
 		name = string(rn)
@@ -367,13 +372,17 @@ func getPrintCase() Object {
 
 // set *print-case*
 func setPrintCase(value Object) {
-	key, _ := value.(Symbol)
-	key = Symbol(strings.ToLower(string(key)))
-	switch key {
-	case downcaseKey, upcaseKey, capitalizeKey:
-		printer.Case = key
-	default:
-		PanicType("*print-case*", value, ":downcase", ":upcase", ":capitalize")
+	if value == nil {
+		printer.Case = nil
+	} else {
+		key, _ := value.(Symbol)
+		key = Symbol(strings.ToLower(string(key)))
+		switch key {
+		case downcaseKey, upcaseKey, capitalizeKey:
+			printer.Case = key
+		default:
+			PanicType("*print-case*", value, ":downcase", ":upcase", ":capitalize")
+		}
 	}
 }
 

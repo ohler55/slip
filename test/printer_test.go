@@ -65,8 +65,59 @@ func TestPrintBase(t *testing.T) {
 	}
 }
 
-// TBD Case Symbol
-// TBD Circle bool
+func TestPrintCase(t *testing.T) {
+	key := slip.Symbol("*print-case*")
+	orig, has := slip.GetVar(key)
+	require.True(t, has)
+	defer slip.SetVar(key, orig)
+
+	slip.SetVar(key, slip.Symbol(":downcase"))
+	var val slip.Object
+	val, _ = slip.GetVar(key)
+	require.NotNil(t, val)
+	require.Equal(t, slip.Symbol(":downcase"), val)
+
+	doc := slip.DescribeVar(key)
+	require.NotEqual(t, "", doc)
+
+	require.Panics(t, func() { slip.SetVar(key, slip.True) })
+
+	obj := slip.Symbol("cYmBal")
+	for _, pair := range []*struct {
+		sym    slip.Object
+		expect string
+	}{
+		{sym: slip.Symbol(":downcase"), expect: "cymbal"},
+		{sym: slip.Symbol(":upcase"), expect: "CYMBAL"},
+		{sym: slip.Symbol(":capitalize"), expect: "Cymbal"},
+		{sym: nil, expect: "cYmBal"},
+	} {
+		slip.SetVar(key, pair.sym)
+		require.Equal(t, pair.expect, string(slip.Append([]byte{}, obj)), "%s: printer append", pair.sym)
+		require.Equal(t, pair.expect, obj.String(), "case %s obj.Append()", pair.sym)
+	}
+}
+
+func TestPrintCircle(t *testing.T) {
+	key := slip.Symbol("*print-circle*")
+	orig, has := slip.GetVar(key)
+	require.True(t, has)
+	defer slip.SetVar(key, orig)
+
+	slip.SetVar(key, slip.True)
+	var val slip.Object
+	val, _ = slip.GetVar(key)
+	require.NotNil(t, val)
+	require.Equal(t, slip.True, val)
+
+	slip.SetVar(key, nil)
+	val, _ = slip.GetVar(key)
+	require.Nil(t, val)
+
+	doc := slip.DescribeVar(key)
+	require.NotEqual(t, "", doc)
+}
+
 // TBD Escape bool
 // TBD Gensym bool
 // TBD Length uint

@@ -21,7 +21,7 @@ func (obj Symbol) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj Symbol) Append(b []byte) []byte {
-	return append(b, obj...)
+	return printer.Append(b, obj, 0)
 }
 
 // Simplify the Object into a string.
