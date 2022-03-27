@@ -6,6 +6,10 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- Array
+ - provide :initial-element (initVal)
+ - SetAll - set al content from lists
+
 - setf
  - Placer interface
 - lambda

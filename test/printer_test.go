@@ -37,13 +37,26 @@ func TestPrintArray(t *testing.T) {
 	val, _ = slip.GetVar(key)
 	require.Equal(t, slip.True, val)
 
-	// TBD print array
+	a0 := slip.NewArray(slip.Fixnum(0))
+	a1 := slip.NewArray(slip.Fixnum(1), 3)
+	a := testArray()
+	out := slip.Append([]byte{}, a0)
+	require.Equal(t, "#0A()", string(out))
+	out = slip.Append([]byte{}, a1)
+	require.Equal(t, "#(1 1 1)", string(out))
+	out = slip.Append([]byte{}, a)
+	require.Equal(t, "#3A(((0 1 2 3) (4 5 6 7) (8 9 10 11)) ((12 13 14 15) (16 17 18 19) (20 21 22 23)))", string(out))
 
 	slip.SetVar(key, nil)
 	val, _ = slip.GetVar(key)
 	require.Nil(t, val)
 
-	// TBD print array
+	out = slip.Append([]byte{}, a0)
+	require.Equal(t, "#<(ARRAY T NIL)>", string(out))
+	out = slip.Append([]byte{}, a1)
+	require.Equal(t, "#<(VECTOR 3)>", string(out))
+	out = slip.Append([]byte{}, a)
+	require.Equal(t, "#<(ARRAY T (2 3 4))>", string(out))
 
 	doc := slip.DescribeVar(key)
 	require.NotEqual(t, "", doc)

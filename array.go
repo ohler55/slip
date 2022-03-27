@@ -26,7 +26,9 @@ type Array struct {
 	elements []Object
 }
 
-func NewArray(dimensions ...int) *Array {
+// NewArray creates a new array with the specified dimensions and initial
+// value.
+func NewArray(initVal Object, dimensions ...int) *Array {
 	a := Array{
 		dims:  dimensions,
 		sizes: make([]int, len(dimensions)),
@@ -37,7 +39,11 @@ func NewArray(dimensions ...int) *Array {
 		size *= dimensions[i]
 	}
 	a.elements = make([]Object, size)
-
+	if initVal != nil {
+		for i := len(a.elements) - 1; 0 <= i; i-- {
+			a.elements[i] = initVal
+		}
+	}
 	return &a
 }
 
@@ -121,8 +127,8 @@ func (obj *Array) Size() int {
 	return len(obj.elements)
 }
 
-// Aref gets the value at the location identified by the indexes.
-func (obj *Array) Aref(indexes ...int) Object {
+// Get the value at the location identified by the indexes.
+func (obj *Array) Get(indexes ...int) Object {
 	if len(indexes) != len(obj.dims) {
 		panic(fmt.Sprintf("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims)))
 	}
@@ -137,7 +143,7 @@ func (obj *Array) Aref(indexes ...int) Object {
 			panic(fmt.Sprintf("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
 				index, i, dims, d))
 		}
-		pos += i * obj.sizes[i]
+		pos += index * obj.sizes[i]
 	}
 	return obj.elements[pos]
 }
@@ -164,9 +170,11 @@ func (obj *Array) Set(value Object, indexes ...int) {
 }
 
 // AsList the Object into set of nested lists.
-func (obj *Array) AsList() List {
-	list, _ := obj.listifyDim(0, 0)
-	return list
+func (obj *Array) AsList() (list List) {
+	if 0 < len(obj.dims) {
+		list, _ = obj.listifyDim(0, 0)
+	}
+	return
 }
 
 func (obj *Array) listifyDim(di, ei int) (List, int) {
@@ -187,5 +195,38 @@ func (obj *Array) listifyDim(di, ei int) (List, int) {
 	return list, ei
 }
 
-// AsLists() List
-// Resize
+// SetAll element from the nested list provided.
+func (obj *Array) SetAll(all List) {
+	if 0 < len(obj.dims) {
+		_ = obj.setDim(all, 0, 0)
+	}
+}
+
+func (obj *Array) setDim(list List, di, ei int) int {
+	d := obj.dims[di]
+	if d != len(list) {
+		panic(fmt.Sprintf("Malformed :initial-contents: Dimension of axis %d is %d but received %d long.",
+			di, d, len(list)))
+	}
+	if di == len(obj.dims)-1 {
+		for i := 0; i < d; i++ {
+			obj.elements[ei] = list[len(list)-i-1]
+			ei++
+		}
+	} else {
+		d2 := di + 1
+		for i := 0; i < d; i++ {
+			sub, ok := list[len(list)-i-1].(List)
+			if !ok {
+				PanicType("array initial-content", list[len(list)-i-1], "list")
+			}
+			ei = obj.setDim(sub, d2, ei)
+		}
+	}
+	return ei
+}
+
+// Resize the array using the initVal as the value for new elements.
+func (obj *Array) Resize(initVal Object, dimensions ...int) {
+	// TBD
+}

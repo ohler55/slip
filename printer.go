@@ -180,8 +180,18 @@ Top:
 		}
 	case *Array:
 		if p.Array {
-			// TBD
-
+			obj = to.AsList()
+			switch len(to.dims) {
+			case 0:
+				b = append(b, "#0A"...)
+			case 1:
+				b = append(b, '#')
+			default:
+				b = append(b, '#')
+				b = p.Append(b, Fixnum(len(to.dims)), 0)
+				b = append(b, 'A')
+			}
+			goto Top
 		} else {
 			switch len(to.dims) {
 			case 0:
@@ -201,7 +211,6 @@ Top:
 				b = append(b, "))>"...)
 			}
 		}
-		// TBD check print-array
 	case Funky:
 		name := to.GetName()
 		args := to.GetArgs()
