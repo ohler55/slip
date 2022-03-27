@@ -36,12 +36,12 @@ func (obj Vector) Append(b []byte) []byte {
 
 // Simplify the Object into a []interface{}.
 func (obj Vector) Simplify() interface{} {
-	out := make([]interface{}, 0, len(obj))
-	for _, o := range obj {
+	out := make([]interface{}, len(obj))
+	for i, o := range obj {
 		if o == nil {
-			out = append(out, nil)
+			out[len(out)-i-1] = nil
 		} else {
-			out = append(out, o.Simplify())
+			out[len(out)-i-1] = o.Simplify()
 		}
 	}
 	return out
@@ -68,8 +68,13 @@ func (obj Vector) Hierarchy() []Symbol {
 	return []Symbol{VectorSymbol, ArraySymbol, SequenceSymbol, TrueSymbol}
 }
 
-// SequenceType returns 'cons.
+// SequenceType returns 'vector.
 func (obj Vector) SequenceType() Symbol {
+	return VectorSymbol
+}
+
+// ArrayType returns 'vector.
+func (obj Vector) ArrayType() Symbol {
 	return VectorSymbol
 }
 

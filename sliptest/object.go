@@ -60,8 +60,13 @@ type Object struct {
 
 // Test the object test specification.
 func (to *Object) Test(t *testing.T) {
-	require.Equal(t, to.String, to.Target.String(), "String() output")
-	require.Equal(t, to.String, string(to.Target.Append([]byte{})), "Append() output")
+	if 0 < len(to.String) && to.String[0] == '/' && to.String[len(to.String)-1] == '/' {
+		require.Regexp(t, to.String[1:len(to.String)-1], to.Target.String(), "String() output")
+		require.Regexp(t, to.String[1:len(to.String)-1], string(to.Target.Append([]byte{})), "Append() output")
+	} else {
+		require.Equal(t, to.String, to.Target.String(), "String() output")
+		require.Equal(t, to.String, string(to.Target.Append([]byte{})), "Append() output")
+	}
 	if _, ok := to.Simple.(error); ok {
 		require.Panics(t, func() { _ = to.Target.Simplify() })
 	} else {

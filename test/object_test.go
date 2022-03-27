@@ -4,6 +4,7 @@ package test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -214,6 +215,25 @@ func TestConsCdr(t *testing.T) {
 	require.Equal(t, "(2 3)", slip.ObjectString(slip.Cons{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}.Cdr()))
 }
 
+func TestVector(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Vector{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
+		String:    "#(1 2 3 nil)",
+		Simple:    []interface{}{int64(1), int64(2), int64(3), nil},
+		Hierarchy: "vector.array.sequence.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Vector{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}, Expect: true},
+			{Other: slip.Vector{nil, nil, slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: slip.Vector{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
+		Selfies: []func() slip.Symbol{
+			slip.Vector{}.SequenceType,
+			slip.Vector{}.ArrayType,
+		},
+	}).Test(t)
+}
+
 func TestCharacterUnicode(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.Character('ぴ'),
@@ -247,9 +267,20 @@ func TestCharacterControl(t *testing.T) {
 	}).Test(t)
 }
 
-// TBD simple
-// TBD file-stream
-// TBD values
+func TestValues(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Values{slip.Fixnum(2), nil},
+		String:    "nil, 2",
+		Simple:    []interface{}{nil, int64(2)},
+		Hierarchy: "values.t",
+		Equals: []*sliptest.EqTest{
+			// always false
+			{Other: slip.Values{slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Panics: true,
+	}).Test(t)
+}
 
 func TestSimpleObject(t *testing.T) {
 	tm := time.Date(2022, time.April, 1, 0, 0, 0, 0, time.UTC)
@@ -262,6 +293,54 @@ func TestSimpleObject(t *testing.T) {
 	}
 	obj := slip.SimpleObject(simple)
 	require.Equal(t,
-		`(t -1 -2 -3 -4 -5 1 2 3 4 5 4.5 5.4 @2022-04-01T00:00:00Z t "abc" "def" "dummy error" ((7 . "x")))`,
+		`(t -1 -2 -3 -4 -5 1 2 3 4 5 4.5 5.4 @2022-04-01T00:00:00Z t "abc" "def" "dummy error" (("x" . 7)))`,
 		obj.String())
+}
+
+func TestSimple2(t *testing.T) {
+	(&sliptest.Object{
+		Target: &slip.Simple{Data: []interface{}{nil, true}},
+		String: "[null true]",
+		Simple: []interface{}{nil, true},
+		Eval:   &slip.Simple{Data: []interface{}{nil, true}},
+		Equals: []*sliptest.EqTest{
+			{Other: &slip.Simple{Data: []interface{}{nil, true}}, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+	}).Test(t)
+}
+
+func TestFileStream(t *testing.T) {
+	(&sliptest.Object{
+		Target:    (*slip.FileStream)(os.Stdout),
+		String:    "/^#<FILE-STREAM /dev/stdout \\{[0-9+]\\}>$/",
+		Simple:    fmt.Errorf("can not simplify"),
+		Hierarchy: "file-stream.stream.t",
+		Equals: []*sliptest.EqTest{
+			{Other: (*slip.FileStream)(os.Stdout), Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			(*slip.FileStream)(os.Stdout).StreamType,
+		},
+		Eval: (*slip.FileStream)(os.Stdout),
+	}).Test(t)
+}
+
+func TestFileStreamWriteRead(t *testing.T) {
+	pr, pw, err := os.Pipe()
+	require.NoError(t, err)
+	defer func() { _ = pw.Close(); _ = pr.Close() }()
+
+	lr := (*slip.FileStream)(pr)
+	lw := (*slip.FileStream)(pw)
+
+	_, _ = lw.Write([]byte("hello"))
+	lw.Close()
+
+	buf := make([]byte, 10)
+	n, err := lr.Read(buf)
+	require.NoError(t, err)
+
+	require.Equal(t, "hello", string(buf[:n]))
 }

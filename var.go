@@ -110,7 +110,8 @@ If false (_nil_) then minimal whitespace is used for printing.`,
 are base ar printer with the base following the # character such as #3rN when N is the integer
 being printed. Base 10 ratios are given a #10r prefix.`,
 
-		"*print-readably*": `if true while print such that output can be read by the parser when possible.`,
+		"*print-readably*": `if true while print such that output can be read by the parser when possible
+and raises an error if not possible to print readably.`,
 
 		"*print-right-margin*": `establishes the right margin for pretty printing.`,
 

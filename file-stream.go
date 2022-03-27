@@ -67,3 +67,8 @@ func (obj *FileStream) Write(b []byte) (int, error) {
 func (obj *FileStream) Read(b []byte) (int, error) {
 	return (*os.File)(obj).Read(b)
 }
+
+// Close made visible since os.File functions are not automatically visible.
+func (obj *FileStream) Close() error {
+	return (*os.File)(obj).Close()
+}

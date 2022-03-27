@@ -19,30 +19,17 @@ func (obj List) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj List) Append(b []byte) []byte {
-	b = append(b, '(')
-	for i := len(obj) - 1; 0 <= i; i-- {
-		v := obj[i]
-		if v == nil {
-			b = append(b, "nil"...)
-		} else {
-			b = v.Append(b)
-		}
-		if 0 < i {
-			b = append(b, ' ')
-		}
-	}
-	return append(b, ')')
+	return printer.Append(b, obj, 0)
 }
 
 // Simplify the Object into a []interface{}.
 func (obj List) Simplify() interface{} {
-	out := make([]interface{}, 0, len(obj))
-	for i := len(obj) - 1; 0 <= i; i-- {
-		o := obj[i]
+	out := make([]interface{}, len(obj))
+	for i, o := range obj {
 		if o == nil {
-			out = append(out, nil)
+			out[len(out)-i-1] = nil
 		} else {
-			out = append(out, o.Simplify())
+			out[len(out)-i-1] = o.Simplify()
 		}
 	}
 	return out

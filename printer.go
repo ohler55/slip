@@ -100,9 +100,7 @@ var (
 
 // Write an Object to *standard-output*.
 func Write(obj Object) {
-	if _, err := StandardOutput.(io.Writer).Write(printer.Append([]byte{}, obj, 0)); err != nil {
-		panic(err)
-	}
+	printer.Write(obj)
 }
 
 // Append an Object to a byte array using the global print variables.
@@ -180,6 +178,30 @@ Top:
 			}
 			b = append(b, ')')
 		}
+	case *Array:
+		if p.Array {
+			// TBD
+
+		} else {
+			switch len(to.dims) {
+			case 0:
+				b = append(b, "#<(ARRAY T NIL)>"...)
+			case 1:
+				b = append(b, "#<(VECTOR "...)
+				b = p.Append(b, Fixnum(to.dims[0]), 0)
+				b = append(b, ")>"...)
+			default:
+				b = append(b, "#<(ARRAY T ("...)
+				for i, d := range to.dims {
+					if 0 < i {
+						b = append(b, ' ')
+					}
+					b = p.Append(b, Fixnum(d), 0)
+				}
+				b = append(b, "))>"...)
+			}
+		}
+		// TBD check print-array
 	case Funky:
 		name := to.GetName()
 		args := to.GetArgs()
@@ -194,6 +216,9 @@ Top:
 		goto Top
 	default:
 		b = to.Append(b)
+		if p.Readably && bytes.HasPrefix(b, []byte("#<")) {
+			panic(fmt.Sprintf("%s can not be written readably", to))
+		}
 	}
 	if bytes.ContainsRune(b, '\n') {
 		b = append(b, '\n')
@@ -427,7 +452,7 @@ func setPrintGensym(value Object) {
 
 // get *print-length*
 func getPrintLength() Object {
-	if printer.Level == math.MaxInt {
+	if printer.Length == math.MaxInt {
 		return nil
 	}
 	return Fixnum(printer.Length)
@@ -537,12 +562,17 @@ func setPrintReadably(value Object) {
 
 // get *print-right-margin*
 func getPrintRightMargin() Object {
+	if printer.RightMargin == math.MaxInt {
+		return nil
+	}
 	return Fixnum(printer.RightMargin)
 }
 
 // set *print-right-margin*
 func setPrintRightMargin(value Object) {
-	if rightMargin, ok := value.(Fixnum); ok && 0 <= rightMargin {
+	if value == nil {
+		printer.RightMargin = math.MaxInt
+	} else if rightMargin, ok := value.(Fixnum); ok && 0 <= rightMargin {
 		printer.RightMargin = uint(rightMargin)
 	} else {
 		PanicType("*print-right-margin*", value, "non-negative fixnum")
@@ -556,16 +586,18 @@ func Warning(format string, args ...interface{}) {
 		if printer.ANSI {
 			b = append(b, "\x1b[31mWarning: "...) // red
 			b = append(b, fmt.Sprintf(format, args...)...)
-			b = append(b, "\x1b[m"...)
+			b = append(b, "\x1b[m\n"...)
 			_, _ = StandardOutput.(io.Writer).Write(b)
 		} else {
 			b = append(b, "Warning: "...)
 			b = append(b, fmt.Sprintf(format, args...)...)
+			b = append(b, '\n')
 			_, _ = StandardOutput.(io.Writer).Write(b)
 		}
 	} else {
 		b = append(b, "Warning: "...)
 		b = append(b, fmt.Sprintf(format, args...)...)
+		b = append(b, '\n')
 		_, _ = ErrorOutput.(io.Writer).Write(b)
 	}
 }

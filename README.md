@@ -6,13 +6,6 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- printer
- - Append()
-  - ansi
-   - used in describe and apropos
-   - how about print option for bold?
-
-- more unit test
 - setf
  - Placer interface
 - lambda
@@ -23,10 +16,10 @@ SLIce Processing is LISP for golang
  - pkg
   - basic
    + car
-   - cdr
+   + cdr
    + quote
    + set
-   - setq
+   + setq
    - setf
    - describe
    - apropos
@@ -44,13 +37,32 @@ SLIce Processing is LISP for golang
    - cadr
    - nth
 
-- var_test.go
- - include constant panic test as well
+- types
+ - array
+ - stream
+  - socket?
+ - ratio
+ - bignum
+ - complex
+ - class
+ - instance
+ - function
+ - macro
+ - macrog - golang macro
 
 - Placer
- - place value (car, cdr, nth, rest, first, card)
+ - place value (car, cdr, nth, rest, first, card, aref)
   - others in hash-table, array, vector
 
+- compile
+ - just compile
+  - don't eval defun
+  - keep as list of functions with args (maybe a progn?)
+   - maybe list of objects since last maybe be the return value
+ - eval the list of functions
+
+- load
+ - compile and then eval
 
 - scope
  - eval
@@ -71,27 +83,9 @@ SLIce Processing is LISP for golang
       - maybe scope eval can do this
    - if trace is set in scope then the set is either trace func or no-op
 
-- add remaining base type
- - ratio
- - bignum
- - complex
- - stream
- - array
- - stream
-  - socket?
- - class
- - instance
- - function
- - macro
- - macrog - golang macro
-
-- world
- - refVars
-  - set and get functions to set and get
-   - check after regular vars don't match
 
 - function
- - how to return multiple values
+ - how to return multiple values (slip.Values)
   - (values-list '(1 2))
    - special kind of list
    - unless wrapped in a function that handles multiple-values the first value is returned

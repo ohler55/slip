@@ -52,3 +52,8 @@ func (obj Values) Equal(other Object) (eq bool) {
 func (obj Values) Hierarchy() []Symbol {
 	return []Symbol{ValuesSymbol, TrueSymbol}
 }
+
+// Eval panics.
+func (obj Values) Eval(s *Scope, depth int) Object {
+	panic("Illegal function call")
+}

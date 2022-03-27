@@ -7,40 +7,40 @@ import "github.com/ohler55/slip"
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Car{Function: slip.Function{Name: "car", Args: args}}
+			f := Cdr{Function: slip.Function{Name: "cdr", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "car",
+			Name: "cdr",
 			Args: []*slip.DocArg{
 				{
 					Name:     "arg",
 					Type:     "list|cons",
-					Text:     "The value to take the first element of.",
+					Text:     "The value to take all but the first element of.",
 					Optional: false,
 				},
 			},
-			Return: "object",
-			Text: `returns the _car_ if _arg_ is a _cons_, the first element if _arg_ is a _list_, and
+			Return: "list|object",
+			Text: `returns the _cdr_ if _arg_ is a _cons_, all but the first element if _arg_ is a _list_, and
 _nil_ if _arg_ is _nil_ or an empty _list_.`,
 			Examples: []string{
-				"(car nil) => nil",
-				"(car '(a . b) => a",
-				"(car '(a b c)) => a",
+				"(cdr nil) => nil",
+				"(cdr '(a . b) => b",
+				"(cdr '(a b c)) => (b c)",
 			},
 			HasKeys: false,
 			HasRest: false,
 		})
 }
 
-// Car represents the car function.
-type Car struct {
+// Cdr represents the cdr function.
+type Cdr struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Car) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Cdr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
@@ -48,13 +48,13 @@ func (f *Car) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	case nil:
 		// leave result as nil
 	case slip.Cons:
-		result = list.Car()
+		result = list.Cdr()
 	case slip.List:
 		if 0 < len(list) {
-			result = list[len(list)-1]
+			result = list[:len(list)-1]
 		}
 	default:
-		slip.PanicType("argument to car", list, "cons", "list")
+		slip.PanicType("argument to cdr", list, "cons", "list")
 	}
 	return
 }

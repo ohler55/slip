@@ -24,7 +24,7 @@ func TestCarEmpty(t *testing.T) {
 
 func TestCarCons(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.Cons{slip.Symbol("a"), slip.Symbol("b")})
+	scope.Let(slip.Symbol("arg"), slip.Cons{slip.Symbol("b"), slip.Symbol("a")})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("car", slip.List{slip.Symbol("arg")}),
@@ -36,7 +36,7 @@ func TestCarCons(t *testing.T) {
 
 func TestCarList(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("a"), slip.Symbol("b"), slip.Symbol("c")})
+	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("c"), slip.Symbol("b"), slip.Symbol("a")})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("car", slip.List{slip.Symbol("arg")}),
@@ -63,6 +63,12 @@ func TestCarBadArgCount(t *testing.T) {
 		Target: slip.NewFunc("car", slip.List{}),
 		String: "(car)",
 		Simple: []interface{}{"car"},
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Object{
+		Target: slip.NewFunc("car", slip.List{nil, nil}),
+		String: "(car nil nil)",
+		Simple: []interface{}{"car", nil, nil},
 		Panics: true,
 	}).Test(t)
 }
