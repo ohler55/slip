@@ -2,14 +2,24 @@
 
 package slip
 
+const (
+	// AmpBody is &body.
+	AmpBody = "&body"
+	// AmpKey is &key.
+	AmpKey = "&key"
+	// AmpOptional is &optional.
+	AmpOptional = "&optional"
+	// AmpRest is &rest.
+	AmpRest = "&rest"
+)
+
 var funcDocs = map[string]*FuncDoc{}
 
 // DocArg describes a function argument.
 type DocArg struct {
-	Name     string
-	Type     string
-	Text     string
-	Optional bool
+	Name string
+	Type string
+	Text string
 }
 
 // FuncDoc describes a function.
@@ -19,6 +29,4 @@ type FuncDoc struct {
 	Return   string // return type
 	Text     string
 	Examples []string
-	HasKeys  bool
-	HasRest  bool
 }

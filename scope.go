@@ -7,34 +7,38 @@ import (
 	"strings"
 )
 
+type returnFrom struct {
+	tag    Object // Symbol or nil
+	result Object
+}
+
 // Scope encapsulates the scope for a function.
 type Scope struct {
-	parent *Scope
-	// name        Object // can be nil so type can't be Symbol
-	vars        map[string]Object
-	returnValue Object
-	before      func(s *Scope, name string, args List, depth int)
-	after       func(s *Scope, name string, args List, depth int)
+	parent     *Scope
+	name       Object // can be nil so type can't be Symbol
+	vars       map[string]Object
+	returnFrom *returnFrom
+	before     func(s *Scope, name string, args List, depth int)
+	after      func(s *Scope, name string, args List, depth int)
 }
 
 // NewScope create a new top level Scope.
 func NewScope() *Scope {
 	return &Scope{
-		vars:        map[string]Object{},
-		returnValue: undef,
-		before:      noopBefore,
-		after:       normalAfter,
+		vars:   map[string]Object{},
+		before: noopBefore,
+		after:  normalAfter,
 	}
 }
 
 // NewScope create a new Scope with a parent of the current Scope.
-func (s *Scope) NewScope() *Scope {
+func (s *Scope) NewScope(name Object) *Scope {
 	return &Scope{
-		parent:      s,
-		vars:        map[string]Object{},
-		returnValue: undef,
-		before:      s.before,
-		after:       s.after,
+		name:   name,
+		parent: s,
+		vars:   map[string]Object{},
+		before: s.before,
+		after:  s.after,
 	}
 }
 

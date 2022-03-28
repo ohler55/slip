@@ -15,10 +15,9 @@ func init() {
 			Name: "cdr",
 			Args: []*slip.DocArg{
 				{
-					Name:     "arg",
-					Type:     "list|cons",
-					Text:     "The value to take all but the first element of.",
-					Optional: false,
+					Name: "arg",
+					Type: "list|cons",
+					Text: "The value to take all but the first element of.",
 				},
 			},
 			Return: "list|object",
@@ -29,8 +28,6 @@ _nil_ if _arg_ is _nil_ or an empty _list_.`,
 				"(cdr '(a . b) => b",
 				"(cdr '(a b c)) => (b c)",
 			},
-			HasKeys: false,
-			HasRest: false,
 		})
 }
 

@@ -6,15 +6,22 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- Array
- - provide :initial-element (initVal)
- - SetAll - set al content from lists
+- test dynamic.go
 
 - setf
  - Placer interface
 - lambda
-- defun
+ - eval of lambda should return a function
+  - Lambda embeds Function
+   - adds list of forms/objects
+   - when eval called a new scope is created?
 
+   - lambda function and defun both create new functions
+    - Dynamic (function)
+    - in slip but defun and lambda in basic
+     -
+
+- defun
 
 - functions
  - pkg
@@ -25,6 +32,7 @@ SLIce Processing is LISP for golang
    + set
    + setq
    - setf
+   - incf
    - describe
    - apropos
    - null
@@ -42,7 +50,6 @@ SLIce Processing is LISP for golang
    - nth
 
 - types
- - array
  - stream
   - socket?
  - ratio
@@ -55,7 +62,7 @@ SLIce Processing is LISP for golang
  - macrog - golang macro
 
 - Placer
- - place value (car, cdr, nth, rest, first, card, aref)
+ - place value (car, cdr, nth, rest, first, card, aref, symbol)
   - others in hash-table, array, vector
 
 - compile

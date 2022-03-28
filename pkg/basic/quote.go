@@ -15,10 +15,9 @@ func init() {
 			Name: "quote",
 			Args: []*slip.DocArg{
 				{
-					Name:     "value",
-					Type:     "object",
-					Text:     "Any object.",
-					Optional: false,
+					Name: "value",
+					Type: "object",
+					Text: "Any object.",
 				},
 			},
 			Return: "object",
@@ -28,8 +27,6 @@ func init() {
 				"(quote (a . b)) => (a . b)",
 				"'(a b) => (a b)",
 			},
-			HasKeys: false,
-			HasRest: false,
 		})
 }
 
