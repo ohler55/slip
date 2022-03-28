@@ -14,18 +14,21 @@ const (
 // Dynamic represents the a function defined by a call to defun or lambda.
 type Dynamic struct {
 	Function
-	Doc   FuncDoc
-	Forms []Object // normal order
+	Doc   *FuncDoc
+	Forms List // reverse order
 }
 
 // Call the the function with the arguments provided.
 func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
 	ss := s.NewScope(Symbol(f.Name))
 	mode := reqMode
-	ai := 0
+
+	// TBD args should be reversed
+
+	ai := len(args) - 1
 	var rest List
 	for i, ad := range f.Doc.Args {
-		if len(args) <= ai {
+		if ai < 0 {
 			break
 		}
 		switch mode {
@@ -39,7 +42,7 @@ func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
 				mode = keyMode
 			default:
 				ss.Let(Symbol(ad.Name), args[ai])
-				ai++
+				ai--
 			}
 		case optMode:
 			switch ad.Name {
@@ -49,11 +52,11 @@ func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
 				mode = keyMode
 			default:
 				ss.Let(Symbol(ad.Name), args[ai])
-				ai++
+				ai--
 			}
 		case restMode:
 			a := args[ai]
-			ai++
+			ai--
 			if sym, ok := a.(Symbol); ok {
 				var key string
 				for j := i + 1; j < len(f.Doc.Args); j++ {
@@ -68,19 +71,17 @@ func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
 					}
 				}
 				mode = keyMode
-				if len(args) <= ai {
+				if ai < 0 {
 					panic(fmt.Sprintf("Missing value for key %s.", sym))
 				}
 				ss.Let(Symbol(key), args[ai])
-				ai++
+				ai--
 				break
 			}
-			ai++
 			rest = append(rest, a)
 		case keyMode:
 			a := args[ai]
-			ai++
-
+			ai--
 			if sym, ok := a.(Symbol); ok {
 				key := string(sym)
 				if 0 < len(key) {
@@ -92,7 +93,7 @@ func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
 					panic(fmt.Sprintf("Missing value for key %s.", sym))
 				}
 				ss.Let(Symbol(key), args[ai])
-				ai++
+				ai--
 				break
 			}
 			PanicType("keyword to function", a, "symbol")
@@ -102,8 +103,8 @@ func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
 		ss.Let(Symbol("rest"), rest)
 	}
 	d2 := depth + 1
-	for _, form := range f.Forms {
-		result = ss.Eval(form, d2)
+	for i := len(f.Forms) - 1; 0 <= i; i-- {
+		result = ss.Eval(f.Forms[i], d2)
 		if ss.returnFrom != nil {
 			switch {
 			case ss.returnFrom.tag == nil:
@@ -129,16 +130,50 @@ func (f *Dynamic) String() string {
 // Append a buffer with a representation of the Object.
 func (f *Dynamic) Append(b []byte) []byte {
 	b = append(b, '(')
-
 	if 0 < len(f.Name) {
 		b = append(b, f.Name...)
 	} else {
-		// TBD form list and print that
-		// (lambda (x) (+ 1 2)) 7)
+		list := make(List, len(f.Forms)+2)
+		copy(list, f.Forms)
+		args := make(List, len(f.Doc.Args))
+		for i, da := range f.Doc.Args {
+			args[len(args)-i-1] = Symbol(da.Name)
+		}
+		list[len(list)-1] = Symbol("lambda")
+		list[len(list)-2] = args
+		b = Append(b, list)
 	}
 	for i := len(f.Args) - 1; 0 <= i; i-- {
 		b = append(b, ' ')
 		b = Append(b, f.Args[i])
 	}
 	return append(b, ')')
+}
+
+// Simplify the function.
+func (f *Dynamic) Simplify() interface{} {
+	simple := make([]interface{}, 0, len(f.Args)+1)
+	if 0 < len(f.Name) {
+		simple = append(simple, f.Name)
+	} else {
+		args := make([]interface{}, len(f.Doc.Args))
+		for i, da := range f.Doc.Args {
+			args[i] = da.Name
+		}
+		lambda := make([]interface{}, 0, len(f.Forms)+2)
+		lambda = append(lambda, "lambda", args)
+		for i := len(f.Forms) - 1; 0 <= i; i-- {
+			form := f.Forms[i]
+			if form == nil {
+				lambda = append(lambda, nil)
+			} else {
+				lambda = append(lambda, form.Simplify())
+			}
+		}
+		simple = append(simple, lambda)
+	}
+	for i := len(f.Args) - 1; 0 <= i; i-- {
+		simple = append(simple, Simplify(f.Args[i]))
+	}
+	return simple
 }
