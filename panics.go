@@ -15,10 +15,11 @@ type Panic struct {
 func (p *Panic) Bytes() []byte {
 	var b []byte
 
-	b = append(b, "* "...)
-	b = append(b, p.Message...)
+	b = append(b, "** "...)
+	b = append(b, p.Error()...)
+	b = append(b, '\n')
 	for _, line := range p.Stack {
-		b = append(b, "  "...)
+		b = append(b, "   "...)
 		b = append(b, line...)
 		b = append(b, '\n')
 	}

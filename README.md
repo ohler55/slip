@@ -6,10 +6,6 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- setf
- - Placer interface
-
-- panics stack trace seems off
 
 - dynamic.go
  - return-from function
@@ -27,7 +23,7 @@ SLIce Processing is LISP for golang
    + quote
    + set
    + setq
-   - setf
+   + setf
    - incf
    - describe
    - apropos
