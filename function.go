@@ -77,7 +77,7 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 			}
 		}
 		if list, ok := arg.(List); ok {
-			arg = f.listToFunc(list)
+			arg = ListToFunc(list)
 			f.Args[i] = arg
 		}
 		args[i] = s.Eval(arg, d2)
@@ -110,22 +110,9 @@ func (f *Function) Apply(s *Scope, args List, depth int) Object {
 // are just evaluated.
 func (f *Function) EvalArg(s *Scope, args List, index, depth int) Object {
 	if list, ok := args[index].(List); ok {
-		args[index] = f.listToFunc(list)
+		args[index] = ListToFunc(list)
 	}
 	return s.Eval(args[index], depth)
-}
-
-func (f *Function) listToFunc(list List) Object {
-	if len(list) == 0 {
-		return nil
-	}
-	switch ta := list[len(list)-1].(type) {
-	case Symbol:
-		return NewFunc(string(ta), list[:len(list)-1])
-	case List:
-		// TBD maybe lambda
-	}
-	panic(fmt.Sprintf("%s is not a function", ObjectString(list[0])))
 }
 
 // String representation of the Object.
@@ -172,4 +159,18 @@ func (f *Function) GetArgs() List {
 // GetName returns the function name.
 func (f *Function) GetName() string {
 	return f.Name
+}
+
+// ListToFunc converts a list to a function.
+func ListToFunc(list List) Object {
+	if len(list) == 0 {
+		return nil
+	}
+	switch ta := list[len(list)-1].(type) {
+	case Symbol:
+		return NewFunc(string(ta), list[:len(list)-1])
+	case List:
+		// TBD maybe lambda
+	}
+	panic(fmt.Sprintf("%s is not a function", ObjectString(list[0])))
 }

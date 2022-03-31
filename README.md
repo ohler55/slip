@@ -6,20 +6,16 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- test dynamic.go
-
 - setf
  - Placer interface
+
+- panics stack trace seems off
+
+- dynamic.go
+ - return-from function
+
 - lambda
  - eval of lambda should return a function
-  - Lambda embeds Function
-   - adds list of forms/objects
-   - when eval called a new scope is created?
-
-   - lambda function and defun both create new functions
-    - Dynamic (function)
-    - in slip but defun and lambda in basic
-     -
 
 - defun
 
@@ -40,12 +36,12 @@ SLIce Processing is LISP for golang
    - eq
    - equal
    - defvar
-   - defun
-   - lambda
+   - defun - create a named Dynamic
+   - lambda - create a Dynamic
    - defmacro
   - list
    - cons
-   - list
+   + list
    - cadr
    - nth
 

@@ -134,7 +134,7 @@ func TestTime(t *testing.T) {
 	}).Test(t)
 }
 
-func TestList(t *testing.T) {
+func TestListObj(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.List{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
 		String:    "(1 2 3 nil)",
@@ -156,7 +156,7 @@ func TestList(t *testing.T) {
 	}).Test(t)
 }
 
-func TestListEmpty(t *testing.T) {
+func TestListObjEmpty(t *testing.T) {
 	(&sliptest.Object{
 		Target: slip.List{},
 		String: "()",

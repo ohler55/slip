@@ -22,15 +22,14 @@ type Dynamic struct {
 func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
 	ss := s.NewScope(Symbol(f.Name))
 	mode := reqMode
-
-	// TBD args should be reversed
-
 	ai := len(args) - 1
 	var rest List
+	var restSym Symbol
 	for i, ad := range f.Doc.Args {
 		if ai < 0 {
 			break
 		}
+	Mode:
 		switch mode {
 		case reqMode:
 			switch ad.Name {
@@ -55,52 +54,85 @@ func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
 				ai--
 			}
 		case restMode:
-			a := args[ai]
-			ai--
-			if sym, ok := a.(Symbol); ok {
-				var key string
-				for j := i + 1; j < len(f.Doc.Args); j++ {
-					if string(sym) == f.Doc.Args[j].Name {
-						key = string(sym)
-						break
+			for 0 <= ai {
+				a := args[ai]
+				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
+					sym = sym[1:]
+					for j := i + 1; j < len(f.Doc.Args); j++ {
+						if string(sym) == f.Doc.Args[j].Name {
+							mode = keyMode
+							break Mode
+						}
 					}
 				}
-				if 0 < len(key) {
-					if key[0] == ':' {
-						key = key[1:]
-					}
-				}
-				mode = keyMode
-				if ai < 0 {
-					panic(fmt.Sprintf("Missing value for key %s.", sym))
-				}
-				ss.Let(Symbol(key), args[ai])
 				ai--
-				break
+				if len(restSym) == 0 {
+					restSym = Symbol(ad.Name)
+				}
+				rest = append(rest, a)
 			}
-			rest = append(rest, a)
 		case keyMode:
-			a := args[ai]
-			ai--
-			if sym, ok := a.(Symbol); ok {
-				key := string(sym)
-				if 0 < len(key) {
-					if key[0] == ':' {
-						key = key[1:]
-					}
-				}
-				if len(args) <= ai {
-					panic(fmt.Sprintf("Missing value for key %s.", sym))
-				}
-				ss.Let(Symbol(key), args[ai])
+			for 0 <= ai {
+				a := args[ai]
 				ai--
-				break
+				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
+					sym = sym[1:]
+					if ai < 0 {
+						panic(fmt.Sprintf("Missing value for key :%s.", sym))
+					}
+					ss.Let(sym, args[ai])
+					ai--
+					continue
+				}
+				PanicType("keyword to function", a, "symbol")
 			}
-			PanicType("keyword to function", a, "symbol")
 		}
 	}
 	if 0 < len(rest) {
-		ss.Let(Symbol("rest"), rest)
+		// Reverse rest since it was build with append in the wrong order for
+		// a List.
+		for i := len(rest)/2 - 1; 0 <= i; i-- {
+			rest[i], rest[len(rest)-i-1] = rest[len(rest)-i-1], rest[i]
+		}
+		ss.Let(restSym, rest)
+	}
+	mode = reqMode
+	for _, ad := range f.Doc.Args {
+		switch mode {
+		case reqMode:
+			switch ad.Name {
+			case AmpOptional:
+				mode = optMode
+			case AmpRest:
+				mode = restMode
+			case AmpKey:
+				mode = keyMode
+			}
+		case optMode:
+			switch ad.Name {
+			case AmpRest:
+				mode = restMode
+			case AmpKey:
+				mode = keyMode
+			default:
+				if !ss.Has(Symbol(ad.Name)) {
+					ss.Let(Symbol(ad.Name), nil)
+				}
+			}
+		case restMode:
+			switch ad.Name {
+			case AmpKey:
+				mode = keyMode
+			default:
+				if !ss.Has(Symbol(ad.Name)) {
+					ss.Let(Symbol(ad.Name), nil)
+				}
+			}
+		case keyMode:
+			if !ss.Has(Symbol(ad.Name)) {
+				ss.Let(Symbol(ad.Name), nil)
+			}
+		}
 	}
 	d2 := depth + 1
 	for i := len(f.Forms) - 1; 0 <= i; i-- {

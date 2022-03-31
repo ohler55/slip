@@ -10,6 +10,6 @@ type Funky interface {
 	// GetName returns the function name.
 	GetName() string
 
-	// Apply evaluates with the need to evaluate the args.
+	// Apply evaluates without the need to evaluate the args..
 	Apply(s *Scope, args List, depth int) Object
 }

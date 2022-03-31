@@ -55,3 +55,20 @@ func (f *Car) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	}
 	return
 }
+
+// Place a value in the first position of a list or cons.
+func (f *Car) Place(args slip.List, value slip.Object) {
+	if len(args) != 1 {
+		slip.PanicArgCount(f, 1, 1)
+	}
+	switch list := args[0].(type) {
+	case slip.Cons:
+		list[len(list)-1] = value
+	case slip.List:
+		if 0 < len(list) {
+			list[len(list)-1] = value
+		}
+	default:
+		slip.PanicType("argument to car", list, "cons", "list")
+	}
+}
