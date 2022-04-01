@@ -1,6 +1,6 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
-package basic
+package list
 
 import "github.com/ohler55/slip"
 
