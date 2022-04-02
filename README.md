@@ -15,6 +15,8 @@ SLIce Processing is LISP for golang
    - (comma x)
    - (comma-at x)
    - (quote-comma x)
+ - or maybe expand to normal functions
+  - (foo ,bar) => (list 'foo bar)
 
 - dynamic.go
  - return-from function
@@ -31,7 +33,6 @@ SLIce Processing is LISP for golang
    + set
    + setq
    + setf
-   - incf
    - describe
    - apropos
    - null
@@ -49,13 +50,28 @@ SLIce Processing is LISP for golang
    - cons
    + list
    - nth
+  - number
+   - incf
+   - decf
+
 
 - types
- - stream
-  - socket?
  - ratio
  - bignum
  - complex
+ - stream
+  - socket?
+  - string
+   - with-input-from-string
+   - make-string-input-stream
+   - with-output-to-string
+   - make-string-output-stream
+   - get-output-stream-string
+   - write-line
+   - write-string
+   - write-char
+   - read-line
+   - read-char
  - class
  - instance
  - function

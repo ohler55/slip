@@ -43,6 +43,10 @@ func (obj Fixnum) Equal(other Object) (eq bool) {
 		eq = obj == to
 	case Float:
 		eq = Float(obj) == to
+	case *Ratio:
+		eq = to.Denominator == 1 && int64(obj) == to.Numerator
+		// TBD Complex
+		// TBD Bignum
 	}
 	return
 }

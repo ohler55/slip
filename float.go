@@ -38,6 +38,11 @@ func (obj Float) Equal(other Object) (eq bool) {
 		eq = obj == Float(to)
 	case Float:
 		eq = obj == to
+	case *Ratio:
+		eq = float64(to.Numerator)/float64(to.Denominator) == float64(obj)
+
+		// TBD Complex
+		// TBD Bignum
 	}
 	return
 }

@@ -36,6 +36,7 @@ func TestFixnum(t *testing.T) {
 		Hierarchy: "fixnum.integer.rational.real.number.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.Fixnum(7), Expect: true},
+			{Other: slip.NewRatio(7, 1), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
 			{Other: slip.Float(7.0), Expect: true},
 			{Other: slip.Float(7.5), Expect: false},
@@ -59,6 +60,7 @@ func TestFloat(t *testing.T) {
 		Hierarchy: "float.real.number.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.Fixnum(7), Expect: true},
+			{Other: slip.NewRatio(7, 1), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
 			{Other: slip.Float(7.0), Expect: true},
 			{Other: slip.Float(7.5), Expect: false},
@@ -70,6 +72,55 @@ func TestFloat(t *testing.T) {
 		},
 		Eval: slip.Float(7.0),
 	}).Test(t)
+}
+
+func TestRatio(t *testing.T) {
+	r := &slip.Ratio{}
+	(&sliptest.Object{
+		Target:    slip.NewRatio(12, 8),
+		String:    "3/2",
+		Simple:    1.5,
+		Hierarchy: "ratio.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.NewRatio(9, 6), Expect: true},
+			{Other: slip.NewRatio(5, 2), Expect: false},
+			{Other: slip.Float(1.5), Expect: true},
+			{Other: slip.Float(7.5), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			r.RationalType,
+			r.RealType,
+			r.NumberType,
+		},
+		Eval: slip.NewRatio(3, 2),
+	}).Test(t)
+	(&sliptest.Object{
+		Target:    slip.NewRatio(14, 2),
+		String:    "7",
+		Simple:    int64(7),
+		Hierarchy: "ratio.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Fixnum(7), Expect: true},
+		},
+		Eval: slip.Fixnum(7),
+	}).Test(t)
+	(&sliptest.Object{
+		Target:    slip.NewRatio(-21, 28),
+		String:    "-3/4",
+		Simple:    -0.75,
+		Hierarchy: "ratio.rational.real.number.t",
+		Eval:      slip.NewRatio(-3, 4),
+	}).Test(t)
+	(&sliptest.Object{
+		Target:    slip.NewRatio(0, 7),
+		String:    "0",
+		Simple:    0,
+		Hierarchy: "ratio.rational.real.number.t",
+		Eval:      slip.NewRatio(0, 1),
+	}).Test(t)
+
+	require.Panics(t, func() { _ = slip.NewRatio(7, 0) })
 }
 
 func TestString(t *testing.T) {
