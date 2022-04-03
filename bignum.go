@@ -44,7 +44,7 @@ func (obj *Bignum) Equal(other Object) (eq bool) {
 	case Fixnum:
 		num := (*big.Int)(obj)
 		eq = num.IsInt64() && num.Int64() == int64(to)
-	case Float:
+	case DoubleFloat:
 		f := big.NewFloat(float64(to))
 		if f.IsInt() {
 			i, _ := f.Int(nil)

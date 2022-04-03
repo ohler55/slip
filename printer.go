@@ -77,6 +77,9 @@ type Printer struct {
 
 	// RightMargin *print-right-margin*.
 	RightMargin uint
+
+	// Prec backs *print-prec*.
+	Prec uint
 }
 
 var (
@@ -91,6 +94,7 @@ var (
 		Length:      math.MaxInt,
 		Level:       math.MaxInt,
 		Lines:       math.MaxInt,
+		Prec:        16,
 		MiserWidth:  0,
 		Pretty:      true,
 		Radix:       false,
@@ -200,6 +204,24 @@ Top:
 		b = (*big.Rat)(to).Num().Append(b, int(p.Base))
 		b = append(b, '/')
 		b = (*big.Rat)(to).Denom().Append(b, int(p.Base))
+	case DoubleFloat:
+		switch {
+		case p.Readably:
+			// Use the LISP exponent nomenclature by forming the buffer and
+			// then replacing the 'e'.
+			var tmp []byte
+			// float64 precision is 16.
+			if p.Prec < 16 {
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', int(p.Prec), 64)
+			} else {
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', -1, 64)
+			}
+			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
+		case p.Prec < 16:
+			b = strconv.AppendFloat(b, float64(to), 'g', int(p.Prec), 64)
+		default:
+			b = strconv.AppendFloat(b, float64(to), 'g', -1, 64)
+		}
 	case Symbol:
 		b = append(b, p.caseName(string(to))...)
 	case List:
@@ -613,6 +635,20 @@ func getPrintReadably() (value Object) {
 // set *print-readably*
 func setPrintReadably(value Object) {
 	printer.Readably = value != nil
+}
+
+// get *print-prec*
+func getPrintPrec() Object {
+	return Fixnum(printer.Prec)
+}
+
+// set *print-prec*
+func setPrintPrec(value Object) {
+	if prec, ok := value.(Fixnum); ok && 0 < prec && prec < math.MaxInt32 {
+		printer.Prec = uint(prec)
+	} else {
+		PanicType("*print-prec*", value, "fixnum greater that 0")
+	}
 }
 
 // get *print-right-margin*

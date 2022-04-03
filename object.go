@@ -75,9 +75,10 @@ func SimpleObject(val interface{}) (obj Object) {
 		obj = Fixnum(tv)
 
 	case float32:
-		obj = Float(tv)
+		// TBD SingleFloat
+		obj = DoubleFloat(tv)
 	case float64:
-		obj = Float(tv)
+		obj = DoubleFloat(tv)
 
 	case string:
 		obj = String(tv)

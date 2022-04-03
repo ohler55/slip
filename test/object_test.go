@@ -41,8 +41,8 @@ func TestFixnum(t *testing.T) {
 			{Other: slip.NewRatio(7, 1), Expect: true},
 			{Other: slip.NewBignum(7), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
-			{Other: slip.Float(7.0), Expect: true},
-			{Other: slip.Float(7.5), Expect: false},
+			{Other: slip.DoubleFloat(7.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
 		Selfies: []func() slip.Symbol{
@@ -55,26 +55,27 @@ func TestFixnum(t *testing.T) {
 	}).Test(t)
 }
 
-func TestFloat(t *testing.T) {
+func TestDoubleFloat(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.Float(7.0),
+		Target:    slip.DoubleFloat(7.0),
 		String:    "7",
 		Simple:    float64(7.0),
-		Hierarchy: "float.real.number.t",
+		Hierarchy: "double-float.float.real.number.t",
 		Equals: []*sliptest.EqTest{
+			{Other: slip.DoubleFloat(7.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
 			{Other: slip.Fixnum(7), Expect: true},
 			{Other: slip.NewRatio(7, 1), Expect: true},
 			{Other: slip.NewBignum(7), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
-			{Other: slip.Float(7.0), Expect: true},
-			{Other: slip.Float(7.5), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
 		Selfies: []func() slip.Symbol{
-			slip.Float(0).RealType,
-			slip.Float(0).NumberType,
+			slip.DoubleFloat(0).FloatType,
+			slip.DoubleFloat(0).RealType,
+			slip.DoubleFloat(0).NumberType,
 		},
-		Eval: slip.Float(7.0),
+		Eval: slip.DoubleFloat(7.0),
 	}).Test(t)
 }
 
@@ -88,8 +89,8 @@ func TestRatio(t *testing.T) {
 		Equals: []*sliptest.EqTest{
 			{Other: slip.NewRatio(9, 6), Expect: true},
 			{Other: slip.NewRatio(5, 2), Expect: false},
-			{Other: slip.Float(1.5), Expect: true},
-			{Other: slip.Float(7.5), Expect: false},
+			{Other: slip.DoubleFloat(1.5), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
 		Selfies: []func() slip.Symbol{
@@ -145,8 +146,8 @@ func TestBignum(t *testing.T) {
 		Equals: []*sliptest.EqTest{
 			{Other: slip.NewBignum(123), Expect: true},
 			{Other: slip.NewBignum(5), Expect: false},
-			{Other: slip.Float(123.0), Expect: true},
-			{Other: slip.Float(7.5), Expect: false},
+			{Other: slip.DoubleFloat(123.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
 			{Other: slip.Fixnum(123), Expect: true},
 			{Other: slip.Fixnum(7), Expect: false},
 			{Other: slip.NewRatio(123, 1), Expect: true},

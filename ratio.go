@@ -45,7 +45,7 @@ func (obj *Ratio) Equal(other Object) (eq bool) {
 	case Fixnum:
 		rat := (*big.Rat)(obj)
 		eq = rat.IsInt() && rat.Num().IsInt64() && rat.Num().Int64() == int64(to)
-	case Float:
+	case DoubleFloat:
 		f, exact := (*big.Rat)(obj).Float64()
 		eq = exact && f == float64(to)
 	case *Ratio:

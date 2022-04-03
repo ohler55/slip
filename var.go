@@ -40,6 +40,7 @@ var (
 		"*print-level*":               getPrintLevel,
 		"*print-lines*":               getPrintLines,
 		"*print-miser-width*":         getPrintMiserWidth,
+		"*print-prec*":                getPrintPrec,
 		"*print-pretty*":              getPrintPretty,
 		"*print-radix*":               getPrintRadix,
 		"*print-readably*":            getPrintReadably,
@@ -61,6 +62,7 @@ var (
 		"*print-level*":               setPrintLevel,
 		"*print-lines*":               setPrintLines,
 		"*print-miser-width*":         setPrintMiserWidth,
+		"*print-prec*":                setPrintPrec,
 		"*print-pretty*":              setPrintPretty,
 		"*print-radix*":               setPrintRadix,
 		"*print-readably*":            setPrintReadably,
@@ -101,6 +103,9 @@ output in place of the _object_ element.`,
 a ".." is appended to the last line. Any closing delimiters are still printed.`,
 
 		"*print-miser-width*": `is not currently supported.`,
+
+		"*print-prec*": `controls the precision of float print representation. The precision of the output
+is limited to the specified value or the maximum precision of the _float_ type.`,
 
 		"*print-pretty*": `if true will print _object_ in a "pretty" format that is more readable.
 If false (_nil_) then minimal whitespace is used for printing.`,

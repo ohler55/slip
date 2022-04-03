@@ -42,8 +42,8 @@ func (obj Fixnum) Equal(other Object) (eq bool) {
 	switch to := other.(type) {
 	case Fixnum:
 		eq = obj == to
-	case Float:
-		eq = Float(obj) == to
+	case DoubleFloat:
+		eq = DoubleFloat(obj) == to
 	case *Ratio:
 		rat := (*big.Rat)(to)
 		eq = rat.IsInt() && rat.Num().IsInt64() && rat.Num().Int64() == int64(obj)
@@ -52,7 +52,6 @@ func (obj Fixnum) Equal(other Object) (eq bool) {
 		eq = num.IsInt64() && num.Int64() == int64(obj)
 
 		// TBD Complex
-		// TBD Bignum
 	}
 	return
 }

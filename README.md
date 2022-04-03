@@ -6,7 +6,30 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- change Ratio and Bignum simplify to emit strings if out of range or not exact
+- float
+ - should float be an interface? - yes
+  - long-float (big.Float)
+  - double-float (float64)
+   - short-float and single-float are just aliases for double-float
+ - rename Float to DoubleFloat
+  - add most-positive-double-float as well as short and single versions
+  - add most-negative-double-float as well as short and single versions
+  - add least-negative-xxx-float
+  - add least-positive-xxx-float
+  - add long-float-digits
+  - add xxx-float-epsilon and xxx-float-negative-epsilon (same values)
+  - need option for printing s, f, d, l instead of e
+   - honor *print-case* for case of exponent letter
+   - use *print-readably* to determine e vs other
+ - plan
+  - make a Float interface like integer
+  - create long-float
+   - along with globals
+  - add *print-prec* with ... if more digits past prec
+  - maybe short-float as float32 - might be useful for vectors to save space
+
+
+- use (type-of x) or (typep x 'long-float)
 
 - how to handle marco characters in compile
  - backquote ` of list allow use of , options
@@ -45,6 +68,7 @@ SLIce Processing is LISP for golang
    - defun - create a named Dynamic
    - lambda - create a Dynamic
    - defmacro
+   - coerce
   - list
    + car
    + cdr
@@ -58,9 +82,13 @@ SLIce Processing is LISP for golang
 
 
 - types
- - ratio
- - bignum
+ + ratio
+ + bignum
  - complex
+ - float
+  - long-float -> big.Float
+  - double-float
+  - single-float (alias short-float)
  - stream
   - socket?
   - string
