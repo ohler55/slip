@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"math/big"
 	"strconv"
 )
 
@@ -39,10 +40,16 @@ func (obj Float) Equal(other Object) (eq bool) {
 	case Float:
 		eq = obj == to
 	case *Ratio:
-		eq = float64(to.Numerator)/float64(to.Denominator) == float64(obj)
+		f, exact := (*big.Rat)(to).Float64()
+		eq = exact && f == float64(obj)
+	case *Bignum:
+		f := big.NewFloat(float64(obj))
+		if f.IsInt() {
+			i, _ := f.Int(nil)
+			eq = i.Cmp((*big.Int)(to)) == 0
+		}
 
 		// TBD Complex
-		// TBD Bignum
 	}
 	return
 }

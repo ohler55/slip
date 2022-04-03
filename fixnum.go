@@ -4,6 +4,7 @@ package slip
 
 import (
 	"math"
+	"math/big"
 )
 
 // FixnumSymbol is the symbol with a value of "fixnum".
@@ -44,7 +45,12 @@ func (obj Fixnum) Equal(other Object) (eq bool) {
 	case Float:
 		eq = Float(obj) == to
 	case *Ratio:
-		eq = to.Denominator == 1 && int64(obj) == to.Numerator
+		rat := (*big.Rat)(to)
+		eq = rat.IsInt() && rat.Num().IsInt64() && rat.Num().Int64() == int64(obj)
+	case *Bignum:
+		num := (*big.Int)(to)
+		eq = num.IsInt64() && num.Int64() == int64(obj)
+
 		// TBD Complex
 		// TBD Bignum
 	}

@@ -6,6 +6,8 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- change Ratio and Bignum simplify to emit strings if out of range or not exact
+
 - how to handle marco characters in compile
  - backquote ` of list allow use of , options
   - , eval

@@ -84,19 +84,29 @@ func TestPrintBase(t *testing.T) {
 	slip.SetVar(radixKey, slip.True)
 
 	obj := slip.Fixnum(37)
+	rat := slip.NewRatio(13, 37)
+	big := slip.NewBignum(37)
 	for _, pair := range []*struct {
-		base   int
-		expect string
+		base int
+		fixX string
+		ratX string
+		bigX string
 	}{
-		{base: 2, expect: "#b100101"},
-		{base: 3, expect: "#3r1101"},
-		{base: 8, expect: "#o45"},
-		{base: 10, expect: "37."},
-		{base: 16, expect: "#x25"},
+		{base: 2, fixX: "#b100101", ratX: "#b1101/100101", bigX: "#b100101"},
+		{base: 3, fixX: "#3r1101", ratX: "#3r111/1101", bigX: "#3r1101"},
+		{base: 8, fixX: "#o45", ratX: "#o15/45", bigX: "#o45"},
+		{base: 10, fixX: "37.", ratX: "#10r13/37", bigX: "37."},
+		{base: 16, fixX: "#x25", ratX: "#xd/25", bigX: "#x25"},
 	} {
 		slip.SetVar(key, slip.Fixnum(pair.base))
-		require.Equal(t, pair.expect, string(slip.Append([]byte{}, obj)), "%d: printer append", pair.base)
-		require.Equal(t, pair.expect, obj.String(), "base %d obj.Append()", pair.base)
+		require.Equal(t, pair.fixX, string(slip.Append([]byte{}, obj)), "%d: printer append", pair.base)
+		require.Equal(t, pair.fixX, obj.String(), "base %d obj.Append()", pair.base)
+
+		require.Equal(t, pair.ratX, string(slip.Append([]byte{}, rat)), "%d: printer append", pair.base)
+		require.Equal(t, pair.ratX, rat.String(), "base %d obj.Append()", pair.base)
+
+		require.Equal(t, pair.bigX, string(slip.Append([]byte{}, big)), "%d: printer append", pair.base)
+		require.Equal(t, pair.bigX, big.String(), "base %d obj.Append()", pair.base)
 	}
 }
 

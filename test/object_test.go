@@ -4,6 +4,8 @@ package test
 
 import (
 	"fmt"
+	"math"
+	"math/big"
 	"os"
 	"testing"
 	"time"
@@ -37,6 +39,7 @@ func TestFixnum(t *testing.T) {
 		Equals: []*sliptest.EqTest{
 			{Other: slip.Fixnum(7), Expect: true},
 			{Other: slip.NewRatio(7, 1), Expect: true},
+			{Other: slip.NewBignum(7), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
 			{Other: slip.Float(7.0), Expect: true},
 			{Other: slip.Float(7.5), Expect: false},
@@ -61,6 +64,7 @@ func TestFloat(t *testing.T) {
 		Equals: []*sliptest.EqTest{
 			{Other: slip.Fixnum(7), Expect: true},
 			{Other: slip.NewRatio(7, 1), Expect: true},
+			{Other: slip.NewBignum(7), Expect: true},
 			{Other: slip.Fixnum(5), Expect: false},
 			{Other: slip.Float(7.0), Expect: true},
 			{Other: slip.Float(7.5), Expect: false},
@@ -75,7 +79,7 @@ func TestFloat(t *testing.T) {
 }
 
 func TestRatio(t *testing.T) {
-	r := &slip.Ratio{}
+	r := slip.NewRatio(1, 1)
 	(&sliptest.Object{
 		Target:    slip.NewRatio(12, 8),
 		String:    "3/2",
@@ -102,6 +106,7 @@ func TestRatio(t *testing.T) {
 		Hierarchy: "ratio.rational.real.number.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.Fixnum(7), Expect: true},
+			{Other: slip.NewBignum(7), Expect: true},
 		},
 		Eval: slip.Fixnum(7),
 	}).Test(t)
@@ -119,8 +124,49 @@ func TestRatio(t *testing.T) {
 		Hierarchy: "ratio.rational.real.number.t",
 		Eval:      slip.NewRatio(0, 1),
 	}).Test(t)
+	(&sliptest.Object{
+		Target:    slip.NewRatio(7, 9),
+		String:    "7/9",
+		Simple:    "7/9",
+		Hierarchy: "ratio.rational.real.number.t",
+		Eval:      slip.NewRatio(7, 9),
+	}).Test(t)
 
 	require.Panics(t, func() { _ = slip.NewRatio(7, 0) })
+}
+
+func TestBignum(t *testing.T) {
+	b := (*slip.Bignum)(big.NewInt(0).Add(big.NewInt(math.MaxInt64), big.NewInt(math.MaxInt64)))
+	(&sliptest.Object{
+		Target:    slip.NewBignum(123),
+		String:    "123",
+		Simple:    123,
+		Hierarchy: "bignum.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.NewBignum(123), Expect: true},
+			{Other: slip.NewBignum(5), Expect: false},
+			{Other: slip.Float(123.0), Expect: true},
+			{Other: slip.Float(7.5), Expect: false},
+			{Other: slip.Fixnum(123), Expect: true},
+			{Other: slip.Fixnum(7), Expect: false},
+			{Other: slip.NewRatio(123, 1), Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			b.IntegerType,
+			b.RationalType,
+			b.RealType,
+			b.NumberType,
+		},
+		Eval: slip.NewBignum(123),
+	}).Test(t)
+	(&sliptest.Object{
+		Target:    b,
+		String:    "18446744073709551614",
+		Simple:    "18446744073709551614",
+		Hierarchy: "bignum.integer.rational.real.number.t",
+		Eval:      b,
+	}).Test(t)
 }
 
 func TestString(t *testing.T) {

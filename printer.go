@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/big"
 	"strconv"
 	"strings"
 	"unicode"
@@ -153,41 +154,52 @@ Top:
 		} else {
 			b = strconv.AppendInt(b, int64(to), int(p.Base))
 		}
+	case *Bignum:
+		if p.Radix {
+			switch p.Base {
+			case 2:
+				b = append(b, "#b"...)
+				b = (*big.Int)(to).Append(b, int(p.Base))
+			case 8:
+				b = append(b, "#o"...)
+				b = (*big.Int)(to).Append(b, int(p.Base))
+			case 16:
+				b = append(b, "#x"...)
+				b = (*big.Int)(to).Append(b, int(p.Base))
+			case 10:
+				b = (*big.Int)(to).Append(b, int(p.Base))
+				b = append(b, '.')
+			default:
+				b = append(b, '#')
+				b = strconv.AppendInt(b, int64(p.Base), 10)
+				b = append(b, 'r')
+				b = (*big.Int)(to).Append(b, int(p.Base))
+			}
+		} else {
+			b = (*big.Int)(to).Append(b, int(p.Base))
+		}
 	case *Ratio:
-		if to.Denominator == 1 {
-			obj = Fixnum(to.Numerator)
+		if (*big.Rat)(to).IsInt() {
+			obj = (*Bignum)((*big.Rat)(to).Num())
 			goto Top
 		}
 		if p.Radix {
 			switch p.Base {
 			case 2:
 				b = append(b, "#b"...)
-				b = strconv.AppendInt(b, to.Numerator, int(p.Base))
-				b = append(b, '/')
-				b = strconv.AppendUint(b, to.Denominator, int(p.Base))
 			case 8:
 				b = append(b, "#o"...)
-				b = strconv.AppendInt(b, to.Numerator, int(p.Base))
-				b = append(b, '/')
-				b = strconv.AppendUint(b, to.Denominator, int(p.Base))
 			case 16:
 				b = append(b, "#x"...)
-				b = strconv.AppendInt(b, to.Numerator, int(p.Base))
-				b = append(b, '/')
-				b = strconv.AppendUint(b, to.Denominator, int(p.Base))
 			default:
 				b = append(b, '#')
 				b = strconv.AppendInt(b, int64(p.Base), 10)
 				b = append(b, 'r')
-				b = strconv.AppendInt(b, to.Numerator, int(p.Base))
-				b = append(b, '/')
-				b = strconv.AppendUint(b, to.Denominator, int(p.Base))
 			}
-		} else {
-			b = strconv.AppendInt(b, to.Numerator, int(p.Base))
-			b = append(b, '/')
-			b = strconv.AppendUint(b, to.Denominator, int(p.Base))
 		}
+		b = (*big.Rat)(to).Num().Append(b, int(p.Base))
+		b = append(b, '/')
+		b = (*big.Rat)(to).Denom().Append(b, int(p.Base))
 	case Symbol:
 		b = append(b, p.caseName(string(to))...)
 	case List:
