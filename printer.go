@@ -204,6 +204,24 @@ Top:
 		b = (*big.Rat)(to).Num().Append(b, int(p.Base))
 		b = append(b, '/')
 		b = (*big.Rat)(to).Denom().Append(b, int(p.Base))
+	case SingleFloat:
+		switch {
+		case p.Readably:
+			// Use the LISP exponent nomenclature by forming the buffer and
+			// then replacing the 'e'.
+			var tmp []byte
+			// float64 precision is 16.
+			if p.Prec < 7 {
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', int(p.Prec), 32)
+			} else {
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', -1, 32)
+			}
+			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
+		case p.Prec < 7:
+			b = strconv.AppendFloat(b, float64(to), 'g', int(p.Prec), 32)
+		default:
+			b = strconv.AppendFloat(b, float64(to), 'g', -1, 32)
+		}
 	case DoubleFloat:
 		switch {
 		case p.Readably:

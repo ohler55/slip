@@ -54,6 +54,8 @@ func (obj DoubleFloat) Equal(other Object) (eq bool) {
 	switch to := other.(type) {
 	case Fixnum:
 		eq = obj == DoubleFloat(to)
+	case SingleFloat:
+		eq = float64(obj) == float64(to)
 	case DoubleFloat:
 		eq = obj == to
 	case *Ratio:

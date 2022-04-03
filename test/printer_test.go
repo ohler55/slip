@@ -359,25 +359,30 @@ func TestPrintPrec(t *testing.T) {
 	readablyOrig, _ := slip.GetVar(readablyKey)
 	defer slip.SetVar(readablyKey, readablyOrig)
 
-	slip.SetVar(key, slip.Fixnum(8))
+	slip.SetVar(key, slip.Fixnum(6))
 	var val slip.Object
 	val, _ = slip.GetVar(key)
-	require.Equal(t, slip.Fixnum(8), val)
+	require.Equal(t, slip.Fixnum(6), val)
 
 	doc := slip.DescribeVar(key)
 	require.NotEqual(t, "", doc)
 
 	require.Panics(t, func() { slip.SetVar(key, slip.True) })
 
-	obj := slip.DoubleFloat(1.234567890123456789e20)
-	require.Equal(t, "1.2345679e+20", string(slip.Append([]byte{}, obj)), "%s: printer append", obj)
+	df := slip.DoubleFloat(1.234567890123456789e20)
+	sf := slip.SingleFloat(1.234567890123456789e20)
+	require.Equal(t, "1.23457e+20", string(slip.Append([]byte{}, sf)), "%s: printer append", sf)
+	require.Equal(t, "1.23457e+20", string(slip.Append([]byte{}, df)), "%s: printer append", df)
 
 	slip.SetVar(readablyKey, slip.True)
-	require.Equal(t, "1.2345679d+20", string(slip.Append([]byte{}, obj)), "%s: printer append", obj)
+	require.Equal(t, "1.23457s+20", string(slip.Append([]byte{}, sf)), "%s: printer append", df)
+	require.Equal(t, "1.23457d+20", string(slip.Append([]byte{}, df)), "%s: printer append", df)
 
 	slip.SetVar(key, slip.Fixnum(20))
+	require.Equal(t, "1.2345679s+20",
+		string(slip.Append([]byte{}, sf)), "%s: printer append with prec 20", sf)
 	require.Equal(t, "1.2345678901234568d+20",
-		string(slip.Append([]byte{}, obj)), "%s: printer append with prec 20", obj)
+		string(slip.Append([]byte{}, df)), "%s: printer append with prec 20", df)
 }
 
 func TestPrintPretty(t *testing.T) {

@@ -87,8 +87,8 @@ SLIce Processing is LISP for golang
  - complex
  - float
   - long-float -> big.Float
-  - double-float
-  - single-float (alias short-float)
+  + double-float
+  + single-float (alias short-float)
  - stream
   - socket?
   - string

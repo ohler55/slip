@@ -43,6 +43,7 @@ func TestFixnum(t *testing.T) {
 			{Other: slip.Fixnum(5), Expect: false},
 			{Other: slip.DoubleFloat(7.0), Expect: true},
 			{Other: slip.DoubleFloat(7.5), Expect: false},
+			{Other: slip.SingleFloat(7.0), Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 		Selfies: []func() slip.Symbol{
@@ -52,30 +53,6 @@ func TestFixnum(t *testing.T) {
 			slip.Fixnum(0).NumberType,
 		},
 		Eval: slip.Fixnum(7),
-	}).Test(t)
-}
-
-func TestDoubleFloat(t *testing.T) {
-	(&sliptest.Object{
-		Target:    slip.DoubleFloat(7.0),
-		String:    "7",
-		Simple:    float64(7.0),
-		Hierarchy: "double-float.float.real.number.t",
-		Equals: []*sliptest.EqTest{
-			{Other: slip.DoubleFloat(7.0), Expect: true},
-			{Other: slip.DoubleFloat(7.5), Expect: false},
-			{Other: slip.Fixnum(7), Expect: true},
-			{Other: slip.NewRatio(7, 1), Expect: true},
-			{Other: slip.NewBignum(7), Expect: true},
-			{Other: slip.Fixnum(5), Expect: false},
-			{Other: slip.True, Expect: false},
-		},
-		Selfies: []func() slip.Symbol{
-			slip.DoubleFloat(0).FloatType,
-			slip.DoubleFloat(0).RealType,
-			slip.DoubleFloat(0).NumberType,
-		},
-		Eval: slip.DoubleFloat(7.0),
 	}).Test(t)
 }
 
@@ -91,6 +68,7 @@ func TestRatio(t *testing.T) {
 			{Other: slip.NewRatio(5, 2), Expect: false},
 			{Other: slip.DoubleFloat(1.5), Expect: true},
 			{Other: slip.DoubleFloat(7.5), Expect: false},
+			{Other: slip.SingleFloat(1.5), Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 		Selfies: []func() slip.Symbol{
@@ -148,6 +126,7 @@ func TestBignum(t *testing.T) {
 			{Other: slip.NewBignum(5), Expect: false},
 			{Other: slip.DoubleFloat(123.0), Expect: true},
 			{Other: slip.DoubleFloat(7.5), Expect: false},
+			{Other: slip.SingleFloat(123.0), Expect: true},
 			{Other: slip.Fixnum(123), Expect: true},
 			{Other: slip.Fixnum(7), Expect: false},
 			{Other: slip.NewRatio(123, 1), Expect: true},
@@ -167,6 +146,81 @@ func TestBignum(t *testing.T) {
 		Simple:    "18446744073709551614",
 		Hierarchy: "bignum.integer.rational.real.number.t",
 		Eval:      b,
+	}).Test(t)
+}
+
+func TestShortFloat(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.ShortFloat(7.0),
+		String:    "7",
+		Simple:    float64(7.0),
+		Hierarchy: "single-float.float.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.ShortFloat(7.0), Expect: true},
+			{Other: slip.ShortFloat(7.5), Expect: false},
+			{Other: slip.DoubleFloat(7.0), Expect: true},
+			{Other: slip.Fixnum(7), Expect: true},
+			{Other: slip.NewRatio(7, 1), Expect: true},
+			{Other: slip.NewBignum(7), Expect: true},
+			{Other: slip.Fixnum(5), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			slip.ShortFloat(0).FloatType,
+			slip.ShortFloat(0).RealType,
+			slip.ShortFloat(0).NumberType,
+		},
+		Eval: slip.ShortFloat(7.0),
+	}).Test(t)
+}
+
+func TestSingleFloat(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.SingleFloat(7.0),
+		String:    "7",
+		Simple:    float64(7.0),
+		Hierarchy: "single-float.float.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.SingleFloat(7.0), Expect: true},
+			{Other: slip.SingleFloat(7.5), Expect: false},
+			{Other: slip.DoubleFloat(7.0), Expect: true},
+			{Other: slip.Fixnum(7), Expect: true},
+			{Other: slip.NewRatio(7, 1), Expect: true},
+			{Other: slip.NewBignum(7), Expect: true},
+			{Other: slip.Fixnum(5), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			slip.SingleFloat(0).FloatType,
+			slip.SingleFloat(0).RealType,
+			slip.SingleFloat(0).NumberType,
+		},
+		Eval: slip.SingleFloat(7.0),
+	}).Test(t)
+}
+
+func TestDoubleFloat(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.DoubleFloat(7.0),
+		String:    "7",
+		Simple:    float64(7.0),
+		Hierarchy: "double-float.float.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.DoubleFloat(7.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
+			{Other: slip.SingleFloat(7.0), Expect: true},
+			{Other: slip.Fixnum(7), Expect: true},
+			{Other: slip.NewRatio(7, 1), Expect: true},
+			{Other: slip.NewBignum(7), Expect: true},
+			{Other: slip.Fixnum(5), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			slip.DoubleFloat(0).FloatType,
+			slip.DoubleFloat(0).RealType,
+			slip.DoubleFloat(0).NumberType,
+		},
+		Eval: slip.DoubleFloat(7.0),
 	}).Test(t)
 }
 
