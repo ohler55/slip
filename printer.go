@@ -240,6 +240,15 @@ Top:
 		default:
 			b = strconv.AppendFloat(b, float64(to), 'g', -1, 64)
 		}
+	case *LongFloat:
+		if p.Readably {
+			// Use the LISP exponent nomenclature by forming the buffer and
+			// then replacing the 'e'.
+			tmp := (*big.Float)(to).Append([]byte{}, 'g', int(p.Prec))
+			b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)
+		} else {
+			b = (*big.Float)(to).Append(b, 'g', int(p.Prec))
+		}
 	case Symbol:
 		b = append(b, p.caseName(string(to))...)
 	case List:

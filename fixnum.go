@@ -46,6 +46,8 @@ func (obj Fixnum) Equal(other Object) (eq bool) {
 		eq = SingleFloat(obj) == to
 	case DoubleFloat:
 		eq = DoubleFloat(obj) == to
+	case *LongFloat:
+		eq = big.NewFloat(float64(obj)).Cmp((*big.Float)(to)) == 0
 	case *Ratio:
 		rat := (*big.Rat)(to)
 		eq = rat.IsInt() && rat.Num().IsInt64() && rat.Num().Int64() == int64(obj)

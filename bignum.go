@@ -56,6 +56,11 @@ func (obj *Bignum) Equal(other Object) (eq bool) {
 			i, _ := f.Int(nil)
 			eq = i.Cmp((*big.Int)(obj)) == 0
 		}
+	case *LongFloat:
+		if (*big.Float)(to).IsInt() {
+			i, _ := (*big.Float)(to).Int(nil)
+			eq = (*big.Int)(obj).Cmp(i) == 0
+		}
 	case *Ratio:
 		rat := (*big.Rat)(to)
 		eq = rat.IsInt() && (*big.Int)(obj).Cmp(rat.Num()) == 0

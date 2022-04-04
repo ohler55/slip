@@ -86,9 +86,11 @@ func (to *Object) Test(t *testing.T) {
 	}
 	for _, et := range to.Equals {
 		if et.Expect {
-			require.True(t, to.Target.Equal(et.Other), "Equal %s vs %s", to.Target, et.Other)
+			require.True(t, to.Target.Equal(et.Other),
+				"Equal (%T)%s vs (%T)%s", to.Target, to.Target, et.Other, et.Other)
 		} else {
-			require.False(t, to.Target.Equal(et.Other), "Not Equal %s vs %s", to.Target, et.Other)
+			require.False(t, to.Target.Equal(et.Other),
+				"Not Equal (%T)%s vs (%T)%s", to.Target, to.Target, et.Other, et.Other)
 		}
 	}
 	self := to.Target.Hierarchy()[0]

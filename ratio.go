@@ -51,6 +51,10 @@ func (obj *Ratio) Equal(other Object) (eq bool) {
 	case DoubleFloat:
 		f, exact := (*big.Rat)(obj).Float64()
 		eq = exact && f == float64(to)
+	case *LongFloat:
+		f, exact := (*big.Rat)(obj).Float64()
+		f2, accuracy := (*big.Float)(to).Float64()
+		eq = exact && accuracy == big.Exact && f == f2
 	case *Ratio:
 		eq = (*big.Rat)(obj).Cmp((*big.Rat)(to)) == 0
 	case *Bignum:
