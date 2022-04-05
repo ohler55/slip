@@ -60,8 +60,6 @@ func (obj *Ratio) Equal(other Object) (eq bool) {
 	case *Bignum:
 		rat := (*big.Rat)(obj)
 		eq = rat.IsInt() && (*big.Int)(to).Cmp(rat.Num()) == 0
-
-		// TBD Complex
 	}
 	return
 }

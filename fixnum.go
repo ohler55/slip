@@ -54,8 +54,6 @@ func (obj Fixnum) Equal(other Object) (eq bool) {
 	case *Bignum:
 		num := (*big.Int)(to)
 		eq = num.IsInt64() && num.Int64() == int64(obj)
-
-		// TBD Complex
 	}
 	return
 }

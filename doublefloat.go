@@ -69,8 +69,6 @@ func (obj DoubleFloat) Equal(other Object) (eq bool) {
 			i, _ := f.Int(nil)
 			eq = i.Cmp((*big.Int)(to)) == 0
 		}
-
-		// TBD Complex
 	}
 	return
 }

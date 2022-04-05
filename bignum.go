@@ -66,8 +66,6 @@ func (obj *Bignum) Equal(other Object) (eq bool) {
 		eq = rat.IsInt() && (*big.Int)(obj).Cmp(rat.Num()) == 0
 	case *Bignum:
 		eq = (*big.Int)(obj).Cmp((*big.Int)(to)) == 0
-
-		// TBD Complex
 	}
 	return
 }

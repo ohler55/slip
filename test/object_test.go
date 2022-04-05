@@ -256,6 +256,24 @@ func TestLongFloat(t *testing.T) {
 	}).Test(t)
 }
 
+func TestComplex(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Complex(1 + 2i),
+		String:    "#C(1 2)",
+		Simple:    "1+2i",
+		Hierarchy: "complex.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Complex(1 + 2i), Expect: true},
+			{Other: slip.Complex(2 + 3i), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			slip.Complex(0).NumberType,
+		},
+		Eval: slip.Complex(1 + 2i),
+	}).Test(t)
+}
+
 func TestString(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.String("abc"),
