@@ -6,6 +6,77 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- Code
+ - read
+  - strings
+  - |symbols|
+  -
+
+- packages
+ - vars
+ - functions
+ - shadows
+ - uses (packages)
+ - package struct
+  - name
+  - aliases
+  - vars
+  - functions
+  - uses []*Package
+   - need to mask shared vs not
+    - how is that defined? Just by using package?
+   - use export on package define
+ - map of all packages (with nicknames or aliases)
+ - default package global or a package
+ - is a double lookup needed for all vars?
+  - export then package vars unless *package* is same package
+  - check current package first then uses
+
+ - var visibility
+  - from package
+   - same package vars pkg.var map
+   - imported vars from any package, redirect (same as uses)
+   - exported from uses packages unless shadowed
+    - PkgUse { pkg, vars (point to something or just a check for a second lookup?), }
+   - any package with pkg:var
+    - check pkg exports (external) first then get var if ok
+   - non-exported (internal) from any with pkg::var
+    - direct to pkg.var map
+   - intern and unintern
+    - adds symbol to package (same as defvar ?)
+  - get
+   - current pkg map
+   - current pkg imports map
+   - used pkg
+    - exports check then map (unless var is a wrapper, double map lookup might be best)
+ - all :zzz are in the keyword package ans implicitly used
+ - for exports from CL maybe a wildcard like a nil export list
+ - how to deal with function code
+  - when function runs it has all the vars in the package it was defined in and also *package*
+   - that means it need ref to it's package
+
+  type Import struct {
+    pkg *Package
+    name string
+  }
+  type Used struct {
+    pkg *Package
+    imports map[string]*Import (or maybe just map[string]bool
+  }
+  type Package struct {
+    vars map[string]Object
+    imports map[string]*Import
+    used []*Used
+  }
+
+
+ - eval
+  - turns lists into functions
+   - replace in code to allow second eval (if defuns then treat as if called a second time)
+  - call eval on each entry in Code
+
+
+
 - use (type-of x) or (typep x 'long-float)
 
 
@@ -47,6 +118,7 @@ SLIce Processing is LISP for golang
    - lambda - create a Dynamic
    - defmacro
    - coerce
+   - intern (string to symbol)
   - list
    + car
    + cdr
@@ -108,14 +180,6 @@ SLIce Processing is LISP for golang
 - compile
  - just parse into lists?
   - second pass to convert symbols to functions
-
- - read
-  - turns []byte into objects (lists, not functions)
-  - returns Code type (just list of objects)
- - eval
-  - turns lists into functions
-   - replace in code to allow second eval (if defuns then treat as if called a second time)
-  - call eval on each entry in Code
 
 
  - just compile
