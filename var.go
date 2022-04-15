@@ -4,28 +4,10 @@ package slip
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"strings"
 )
 
 var (
-	// ErrorOutput backs *error-output*.
-	ErrorOutput Object = (*FileStream)(os.Stderr)
-
-	// StandardOutput backs *standard-output*.
-	StandardOutput Object = (*FileStream)(os.Stdout)
-
-	// StandardInput backs *standard-input*.
-	StandardInput Object = (*FileStream)(os.Stdin)
-
-	// WorkingDir *default-pathname-defaults*
-	WorkingDir, _ = os.Getwd()
-
-	// Interactive flag. If true then warnings are output to *standard-output*
-	// otherwise they are output to *error-output*.
-	Interactive bool
-
 	varGets = map[string]func() Object{
 		"*default-pathname-defaults*": getWorkingDir,
 		"*error-output*":              getErrorOutput,
@@ -126,54 +108,6 @@ and raises an error if not possible to print readably.`,
 	}
 )
 
-func getWorkingDir() Object {
-	return String(WorkingDir)
-}
-
-func setWorkingDir(value Object) {
-	if dir, ok := value.(String); ok {
-		WorkingDir = string(dir)
-	} else {
-		PanicType("*default-pathname-defaults*", value, "string")
-	}
-}
-
-func getErrorOutput() Object {
-	return ErrorOutput
-}
-
-func setErrorOutput(value Object) {
-	if _, ok := value.(io.Writer); ok {
-		ErrorOutput = value
-	} else {
-		PanicType("*error-output*", value, "stream")
-	}
-}
-
-func getStandardOutput() Object {
-	return StandardOutput
-}
-
-func setStandardOutput(value Object) {
-	if _, ok := value.(io.Writer); ok {
-		StandardOutput = value
-	} else {
-		PanicType("*standard-output*", value, "stream")
-	}
-}
-
-func getStandardInput() Object {
-	return StandardInput
-}
-
-func setStandardInput(value Object) {
-	if _, ok := value.(io.Reader); ok {
-		StandardInput = value
-	} else {
-		PanicType("*standard-input*", value, "stream")
-	}
-}
-
 // GetVar get the value bound to the sym argument. It panics if sym is
 // unbound.
 func GetVar(sym Symbol) (Object, bool) {
@@ -181,6 +115,12 @@ func GetVar(sym Symbol) (Object, bool) {
 }
 
 func getVar(name string) (Object, bool) {
+
+	// TBD check current package Vars first then constants
+	// if vv found then check for non-nil val
+	//  if non-nil then return
+	//  if nil check ref then get and finally return nil
+
 	if value, has := varValues[name]; has {
 		return value, true
 	}

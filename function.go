@@ -30,12 +30,14 @@ type Function struct {
 	SkipEval []bool
 }
 
-// Define a new golang function.
-func Define(creator func(args List) Object, doc *FuncDoc) {
+// Define a new golang function. If the package is provided the function is
+// added to that package otherwise it is added to CurrentPackage (*package*).
+func Define(creator func(args List) Object, doc *FuncDoc, pkg ...*Package) {
 	name := strings.ToLower(doc.Name)
 	if _, has := funcCreators[name]; has {
 		Warning("redefining %s", printer.caseName(name))
 	}
+	// TBD use CurrentPackage unless pkg is provided
 	funcCreators[name] = creator
 	funcDocs[name] = doc
 }

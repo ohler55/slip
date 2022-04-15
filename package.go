@@ -3,61 +3,28 @@
 package slip
 
 import (
-	"fmt"
+	"sort"
 	"strings"
 )
 
 // PackageSymbol is the symbol with a value of "package".
 const PackageSymbol = Symbol("package")
 
+// TBD for vars
+//  Var with value, get, set, doc, *Var
+//   use for imports
+
 var (
-	clPkg = Package{
-		Name:      "COMMON-LISP",
-		Nicknames: []string{"CL"},
-		Doc:       "Home of symbols defined by the ANSI language spcification.",
-		Vars:      map[string]Object{ // TBD
-		},
-		varGets: map[string]func() Object{
-			"*package*": getCurrentPackage,
-		},
-		varSets: map[string]func(Object){
-			"*package*": setCurrentPackage,
-		},
-		varDocs: map[string]string{
-			"*package*": "the current package",
-		},
-	}
-	userPkg = Package{
-		Name:      "COMMON-LISP-USER",
-		Nicknames: []string{"CL-USER", "USER"},
-		Doc:       "The default package for user code and variables.",
-		Vars:      map[string]Object{},
-		Imports:   map[string]*Import{},
-		Uses:      []*Use{{Pkg: &clPkg}},
-	}
 	packages = map[string]*Package{
-		clPkg.Name:   &clPkg,
-		userPkg.Name: &userPkg,
+		CLPkg.Name:   &CLPkg,
+		UserPkg.Name: &UserPkg,
 	}
-	currentPackage *Package
 )
 
 func init() {
 	DefConstant(PackageSymbol, PackageSymbol, `A _package_ represents a namespace.`)
 
-	currentPackage = &userPkg
-}
-
-// Import is used to identify what package variables are imported.
-type Import struct {
-	Pkg  *Package
-	Name string
-}
-
-// Use is used with Package to list the used packages,
-type Use struct {
-	Pkg     *Package
-	Imports map[string]bool
+	CurrentPackage = &UserPkg
 }
 
 // Package represents a LISP package.
@@ -65,12 +32,25 @@ type Package struct {
 	Name      string
 	Nicknames []string
 	Doc       string
-	Vars      map[string]Object
+	Vars      map[string]*VarVal
 	Imports   map[string]*Import
-	Uses      []*Use
-	varGets   map[string]func() Object
-	varSets   map[string]func(Object)
-	varDocs   map[string]string
+	Uses      []*Package
+
+	funcCreators map[string]func(args List) Object
+	funcDocs     map[string]*FuncDoc
+}
+
+// Use another package
+func (obj *Package) Use(pkg *Package) {
+	for _, p := range obj.Uses {
+		if pkg.Name == p.Name {
+			return
+		}
+	}
+	obj.Uses = append(obj.Uses, pkg)
+	for name, vv := range pkg.Vars {
+		obj.Vars[name] = vv
+	}
 }
 
 // String representation of the Object.
@@ -85,7 +65,30 @@ func (obj *Package) Append(b []byte) []byte {
 
 // Simplify the Object into an int64.
 func (obj *Package) Simplify() interface{} {
-	panic(fmt.Sprintf("Can not simplify %s.", obj))
+	nicknames := make([]interface{}, len(obj.Nicknames))
+	for i, nn := range obj.Nicknames {
+		nicknames[i] = nn
+	}
+	vars := map[string]interface{}{}
+	for k, vv := range obj.Vars {
+		vars[k] = vv.Simplify()
+	}
+	imports := map[string]interface{}{}
+	for k, imp := range obj.Imports {
+		imports[k] = imp.Simplify()
+	}
+	uses := make([]interface{}, len(obj.Uses))
+	for i, p := range obj.Uses {
+		uses[i] = p.Name
+	}
+	return map[string]interface{}{
+		"name":      obj.Name,
+		"nicknames": nicknames,
+		"doc":       obj.Doc,
+		"vars":      vars,
+		"imports":   imports,
+		"uses":      uses,
+	}
 }
 
 // Equal returns true if this Object and the other are equal in value.
@@ -108,6 +111,12 @@ func PackageNames() (names List) {
 	for name := range packages {
 		names = append(names, String(name))
 	}
+	sort.Slice(names,
+		func(i, j int) bool {
+			si := string(names[i].(String))
+			sj := string(names[j].(String))
+			return 0 < strings.Compare(si, sj)
+		})
 	return
 }
 
@@ -129,16 +138,4 @@ func FindPackage(name string) *Package {
 		}
 	}
 	return nil
-}
-
-func getCurrentPackage() Object {
-	return currentPackage
-}
-
-func setCurrentPackage(value Object) {
-	if pkg, ok := value.(*Package); ok {
-		currentPackage = pkg
-	} else {
-		PanicType("*package*", value, "package")
-	}
 }

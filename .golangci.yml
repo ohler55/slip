@@ -123,7 +123,7 @@ linters-settings:
   lll:
     # max line length, lines longer will be reported. Default is 120.
     # '\t' is counted as 1 character by default, and can be changed with the tab-width option
-    line-length: 120
+    line-length: 140
     # tab width in spaces. Default to 1.
     tab-width: 4
   unused:
@@ -212,22 +212,16 @@ linters:
     - gofmt
     - goimports
     - revive
-    - gosimple
-    - govet
     - ineffassign
     - lll
     - megacheck
     - misspell
-    - staticcheck
-    - structcheck
-    - stylecheck
     - typecheck
     - unconvert
-    - unparam
-    - unused
     - varcheck
   enable-all: false
   disable:
+    - govet
     - goconst
     - depguard
     - gochecknoglobals
@@ -241,6 +235,17 @@ linters:
     - rowserrcheck # this is completely broken
     - scopelint
     - bodyclose # thinks all body closes have to happen in the same function as the request
+    - contextcheck # not ready for go1.18 yet
+    - gosimple # not ready for go1.18 yet
+    - nilerr # not ready for go1.18 yet
+    - noctx # not ready for go1.18 yet
+    - sqlclosecheck # not ready for go1.18 yet
+    - staticcheck # not ready for go1.18 yet
+    - structcheck # not ready for go1.18 yet
+    - stylecheck # not ready for go1.18 yet
+    - unparam # not ready for go1.18 yet
+    - unused # not ready for go1.18 yet
+
   disable-all: false
   presets:
     - bugs

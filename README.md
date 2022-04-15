@@ -14,6 +14,16 @@ SLIce Processing is LISP for golang
 
 - packages
  - vars
+  - no need for ref, just point to original
+   - on unintern look for new orig
+
+  - do we want to copy all vars from used packages?
+   - more efficient for access with only one map lookup
+   - more memory with duplicate maps (not that many packages, maybe ok since vars are small)
+   - should functions be the same but only for first compile/eval
+    - if uninterned then replace with used package func
+
+
  - functions
  - shadows
  - uses (packages)
