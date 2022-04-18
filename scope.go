@@ -68,7 +68,7 @@ func (s *Scope) Trace(on bool) {
 
 // Let a symbol be bound to the value in this Scope.
 func (s *Scope) Let(sym Symbol, value Object) {
-	name := strings.ToLower(string(sym))
+	name := strings.ToUpper(string(sym))
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
@@ -77,7 +77,7 @@ func (s *Scope) Let(sym Symbol, value Object) {
 
 // Get a named variable value.
 func (s *Scope) Get(sym Symbol) Object {
-	return s.get(strings.ToLower(string(sym)))
+	return s.get(strings.ToUpper(string(sym)))
 }
 
 func (s *Scope) get(name string) Object {
@@ -87,7 +87,7 @@ func (s *Scope) get(name string) Object {
 	if s.parent != nil {
 		return s.parent.get(name)
 	}
-	if value, has := getVar(name); has {
+	if value, has := CurrentPackage.Get(name); has {
 		return value
 	}
 	panic(fmt.Sprintf("Variable %s is unbound.", name))
@@ -98,7 +98,7 @@ func (s *Scope) get(name string) Object {
 // called. If no bindings are found before reaching the World then a new world
 // level binding is created.
 func (s *Scope) Set(sym Symbol, value Object) {
-	s.set(strings.ToLower(string(sym)), value)
+	s.set(strings.ToUpper(string(sym)), value)
 }
 
 func (s *Scope) set(name string, value Object) {
@@ -113,12 +113,12 @@ func (s *Scope) set(name string, value Object) {
 		s.parent.set(name, value)
 		return
 	}
-	setVar(name, value)
+	CurrentPackage.Set(name, value)
 }
 
 // Has returns true if the variable is bound.
 func (s *Scope) Has(sym Symbol) bool {
-	return s.has(strings.ToLower(string(sym)))
+	return s.has(strings.ToUpper(string(sym)))
 }
 
 func (s *Scope) has(name string) bool {
@@ -128,12 +128,12 @@ func (s *Scope) has(name string) bool {
 	if s.parent != nil {
 		return s.parent.has(name)
 	}
-	return hasVar(name)
+	return CurrentPackage.Has(name)
 }
 
 // Remove a variable binding.
 func (s *Scope) Remove(sym Symbol) {
-	s.remove(strings.ToLower(string(sym)))
+	s.remove(strings.ToUpper(string(sym)))
 }
 
 func (s *Scope) remove(name string) {

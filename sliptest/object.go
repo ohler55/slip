@@ -36,7 +36,9 @@ type Object struct {
 	String string
 
 	// Simple is the expected result from calling .Simplify(). If of type
-	// error a panic is expected.
+	// error a panic is expected. If the values is a function then that
+	// function is called with the result of Simplify() and should fail the
+	// test if the simplified value is not as expected.
 	Simple interface{}
 
 	// Hierarchy is the expected return from .Hierarchy() but joined with a
@@ -67,9 +69,12 @@ func (to *Object) Test(t *testing.T) {
 		require.Equal(t, to.String, to.Target.String(), "String() output")
 		require.Equal(t, to.String, string(to.Target.Append([]byte{})), "Append() output")
 	}
-	if _, ok := to.Simple.(error); ok {
+	switch ts := to.Simple.(type) {
+	case error:
 		require.Panics(t, func() { _ = to.Target.Simplify() })
-	} else {
+	case func(*testing.T, interface{}):
+		ts(t, to.Target.Simplify())
+	default:
 		simp := to.Target.Simplify()
 		diff := alt.Compare(to.Simple, simp)
 		require.Nil(t, diff, "Simplify difference at %v for %s vs %s", diff, pretty.SEN(to.Simple), pretty.SEN(simp))

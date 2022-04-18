@@ -33,7 +33,7 @@ type Function struct {
 // Define a new golang function. If the package is provided the function is
 // added to that package otherwise it is added to CurrentPackage (*package*).
 func Define(creator func(args List) Object, doc *FuncDoc, pkg ...*Package) {
-	name := strings.ToLower(doc.Name)
+	name := strings.ToUpper(doc.Name)
 	if _, has := funcCreators[name]; has {
 		Warning("redefining %s", printer.caseName(name))
 	}
@@ -45,7 +45,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkg ...*Package) {
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
 func NewFunc(name string, args List) Object {
-	name = strings.ToLower(name)
+	name = strings.ToUpper(name)
 	if create := funcCreators[name]; create != nil {
 		return create(args)
 	}

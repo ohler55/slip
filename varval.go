@@ -13,15 +13,31 @@ type VarVal struct {
 
 // Simplify the Object into an int64.
 func (vv *VarVal) Simplify() interface{} {
-	simple := map[string]interface{}{
-		// TBD get and or set
-		"doc": vv.Doc,
+	simple := map[string]interface{}{"doc": vv.Doc}
+
+	var val interface{}
+	if v := vv.Value(); v != nil {
+		if pkg, ok := v.(*Package); ok {
+			val = pkg.Name
+		} else {
+			val = v.Simplify()
+		}
 	}
-	if vv.Val != nil {
-		simple["val"] = vv.Val.Simplify()
-	}
+	simple["val"] = val
+
 	if vv.Pkg != nil {
 		simple["pkg"] = vv.Pkg.Name
 	}
 	return simple
+}
+
+// Value returns the value of the instance.
+func (vv *VarVal) Value() (val Object) {
+	switch {
+	case vv.Val != nil:
+		val = vv.Val
+	case vv.Get != nil:
+		val = vv.Get()
+	}
+	return
 }

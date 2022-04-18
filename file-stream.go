@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 )
@@ -35,7 +34,7 @@ func (obj *FileStream) Append(b []byte) []byte {
 
 // Simplify the Object into an int64.
 func (obj *FileStream) Simplify() interface{} {
-	panic(fmt.Sprintf("Can not simplify %s.", obj))
+	return obj.String()
 }
 
 // Equal returns true if this Object and the other are equal in value.

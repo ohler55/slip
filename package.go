@@ -3,16 +3,13 @@
 package slip
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 )
 
 // PackageSymbol is the symbol with a value of "package".
 const PackageSymbol = Symbol("package")
-
-// TBD for vars
-//  Var with value, get, set, doc, *Var
-//   use for imports
 
 var (
 	packages = map[string]*Package{
@@ -40,6 +37,21 @@ type Package struct {
 	funcDocs     map[string]*FuncDoc
 }
 
+// DefPackage creates a new package. Calling Import() and Use() after creation
+// is expected.
+func DefPackage(name string, nicknames []string, doc string) *Package {
+	pkg := Package{
+		Name:      strings.ToUpper(name),
+		Nicknames: nicknames,
+		Doc:       doc,
+		Vars:      map[string]*VarVal{},
+		Imports:   map[string]*Import{},
+	}
+	packages[pkg.Name] = &pkg
+
+	return &pkg
+}
+
 // Use another package
 func (obj *Package) Use(pkg *Package) {
 	for _, p := range obj.Uses {
@@ -51,6 +63,55 @@ func (obj *Package) Use(pkg *Package) {
 	for name, vv := range pkg.Vars {
 		obj.Vars[name] = vv
 	}
+}
+
+// Import another package variable
+func (obj *Package) Import(pkg *Package, varName string) {
+	name := strings.ToUpper(varName)
+	if vv := pkg.Vars[name]; vv != nil {
+		obj.Vars[name] = vv
+		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
+	} else {
+		panic(fmt.Sprintf("%s is not a variable in %s", name, pkg))
+	}
+}
+
+// Set a variable.
+func (obj *Package) Set(name string, value Object) {
+	name = strings.ToUpper(name)
+	if _, has := constantValues[name]; has {
+		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
+	}
+	if vv, has := obj.Vars[name]; has {
+		if vv.Set != nil {
+			vv.Set(value)
+		} else {
+			vv.Val = value
+		}
+		return
+	}
+	obj.Vars[name] = &VarVal{Val: value, Pkg: obj}
+}
+
+// Get a variable.
+func (obj *Package) Get(name string) (value Object, has bool) {
+	name = strings.ToUpper(name)
+	var vv *VarVal
+	if vv, has = obj.Vars[name]; has {
+		if vv.Get != nil {
+			value = vv.Get()
+		} else {
+			value = vv.Val
+		}
+		return
+	}
+	return nil, false
+}
+
+// Has a variable.
+func (obj *Package) Has(name string) (has bool) {
+	_, has = obj.Vars[strings.ToUpper(name)]
+	return
 }
 
 // String representation of the Object.
