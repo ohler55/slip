@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -29,19 +30,21 @@ const (
 
 	tokenStart = 't'
 	tokenDone  = 'T'
+
+	doubleQuote = 'Q'
+	stringByte  = 's'
+	stringDone  = 'S'
+	escByte     = 'e'
+	escOne      = 'o'
+	escUnicode4 = 'u'
+	escUnicode8 = 'U'
+	runeDigit   = '1'
+	runeHexA    = 'H'
+	runeHexa    = 'h'
+
 	/*
 		singleQuote = 'q'
 		doubleQuote = 'Q'
-		stringByte  = 's'
-		stringDone  = 'S'
-
-		escByte     = 'e'
-		escOk       = 'k'
-		escUnicode4 = 'u'
-		escUnicode8 = 'U'
-		runeDigit   = '1'
-		runeHexA    = 'H'
-		runeHexa    = 'h'
 
 		charByte  = '#'
 		charSlash = '/'
@@ -102,6 +105,51 @@ const (
 		"................................" + // 0xa0
 		"................................" + // 0xc0
 		"................................t" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	stringMode = "" +
+		".........ss..s.................." + // 0x00
+		"ssSsssssssssssssssssssssssssssss" + // 0x20
+		"ssssssssssssssssssssssssssssesss" + // 0x40
+		"ssssssssssssssssssssssssssssssss" + // 0x60
+		"ssssssssssssssssssssssssssssssss" + // 0x80
+		"ssssssssssssssssssssssssssssssss" + // 0xa0
+		"ssssssssssssssssssssssssssssssss" + // 0xc0
+		"sssssssssssssssssssssssssssssssss" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	escMode = "" +
+		"................................" + // 0x00
+		"..o............................." + // 0x20
+		".....................U......o..." + // 0x40
+		"..o...o.......o...o.ou.........." + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................e" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	escByteMap = "" +
+		"................................" + // 0x00
+		"..\"............................." + // 0x20
+		"............................\\..." + // 0x40
+		"..\b...\f.......\n...\r.\t.........." + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................E" //   0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	runeMode = "" +
+		"................................" + // 0x00
+		"................1111111111......" + // 0x20
+		".HHHHHH........................." + // 0x40
+		".hhhhhh........................." + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................r" //   0xe0
+
 )
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
@@ -133,9 +181,24 @@ func Read(src []byte) (code Code) {
 func (r *reader) read(src []byte) Code {
 	mode := valueMode
 	var (
-		b byte
-		// buf []byte
+		b    byte
+		buf  []byte
+		rb   []byte
+		rn   rune
+		rcnt int
 	)
+	runeAppendByte := func(r byte) {
+		rn = rn<<4 | rune(r)
+		rcnt--
+		if rcnt == 0 {
+			if len(rb) < 8 {
+				rb = make([]byte, 8)
+			}
+			n := utf8.EncodeRune(rb, rn)
+			buf = append(buf, rb[:n]...)
+			mode = stringMode
+		}
+	}
 	for r.pos, b = range src {
 	Retry:
 		switch mode[b] {
@@ -181,7 +244,51 @@ func (r *reader) read(src []byte) Code {
 		case revertToToken:
 			mode = tokenMode
 
-			// TBD string
+		case doubleQuote:
+			r.tokenStart = r.pos + 1
+			buf = buf[:0]
+			mode = stringMode
+		case stringByte:
+			if 0 < len(buf) {
+				buf = append(buf, b)
+			}
+		case stringDone:
+			var obj Object
+			if 0 < len(buf) {
+				obj = String(buf)
+			} else {
+				obj = String(src[r.tokenStart:r.pos])
+			}
+			if 0 < len(r.stack) {
+				r.stack = append(r.stack, obj)
+			} else {
+				r.code = append(r.code, obj)
+			}
+			mode = valueMode
+
+		case escByte:
+			if len(buf) == 0 && r.tokenStart < r.pos {
+				buf = append(buf, src[r.tokenStart:r.pos]...)
+			}
+			mode = escMode
+		case escOne:
+			buf = append(buf, escByteMap[b])
+			mode = stringMode
+		case escUnicode4:
+			rn = 0
+			rcnt = 4
+			mode = runeMode
+		case escUnicode8:
+			rn = 0
+			rcnt = 8
+			mode = runeMode
+		case runeDigit:
+			runeAppendByte(b - '0')
+		case runeHexA:
+			runeAppendByte(b - 'A' + 10)
+		case runeHexa:
+			runeAppendByte(b - 'a' + 10)
+			// TBD
 
 			// TBD |symbol|
 
@@ -196,11 +303,11 @@ func (r *reader) read(src []byte) Code {
 		r.pushToken(src)
 	case numberMode:
 		r.pushNumber(src)
+	case stringMode, runeMode, escMode:
+		r.raise("string not terminated")
 		/*
 			case charMode:
 				r.pushChar(src)
-			case stringMode, runeMode, escMode:
-				r.raise("string no terminated")
 				// TBD | deliminated symbol
 		*/
 	}
@@ -312,19 +419,24 @@ func (r *reader) pushNumber(src []byte) {
 			obj = Fixnum(i)
 			goto Push
 		}
+		bi = big.NewInt(0)
+		if err := bi.UnmarshalText(token); err == nil {
+			obj = (*Bignum)(bi)
+			goto Push
+		}
 	}
 	s = string(token)
 	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
 		obj = Fixnum(i)
 		goto Push
 	}
-	if f, err := strconv.ParseFloat(s, 64); err == nil {
-		obj = DoubleFloat(f)
+	bi = big.NewInt(0)
+	if err := bi.UnmarshalText(token); err == nil {
+		obj = (*Bignum)(bi)
 		goto Push
 	}
-	bi = big.NewInt(0)
-	if err := bi.UnmarshalText(src[r.tokenStart:r.pos]); err == nil {
-		obj = (*Bignum)(bi)
+	if f, err := strconv.ParseFloat(s, 64); err == nil {
+		obj = DoubleFloat(f)
 		goto Push
 	}
 	r.pushToken(src)
