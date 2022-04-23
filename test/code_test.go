@@ -87,3 +87,18 @@ b"]`, kind: "string"},
 		ct.test(t, i)
 	}
 }
+
+func TestCodeSymbolPipe(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: `|abc|`, expect: `[abc]`, kind: "symbol"},
+		{src: `||`, expect: `[||]`, kind: "symbol"},
+		{src: `|a\nb|`, expect: `[|a
+b|
+]`, kind: "symbol"},
+		{src: `|\u004a\U0001D122|`, expect: `[j𝄢]`, kind: "symbol"},
+		{src: `(|abc|)`, expect: `[(abc)]`, kind: "list"},
+		{src: `|abc`, raise: true},
+	} {
+		ct.test(t, i)
+	}
+}

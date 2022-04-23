@@ -42,9 +42,11 @@ const (
 	runeHexA    = 'H'
 	runeHexa    = 'h'
 
+	pipeByte = 'P'
+	pipeDone = 'p'
+
 	/*
 		singleQuote = 'q'
-		doubleQuote = 'Q'
 
 		charByte  = '#'
 		charSlash = '/'
@@ -56,7 +58,7 @@ const (
 		".........ab..a.................." + // 0x00
 		"a.Q#..tq()t+.+ttddddddddddt;ttt." + // 0x20
 		"ttttttttttttttttttttttttttt...tt" + // 0x40
-		".tttttttttttttttttttttttttt...t." + // 0x60
+		".tttttttttttttttttttttttttt.P.t." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -116,6 +118,17 @@ const (
 		"ssssssssssssssssssssssssssssssss" + // 0xa0
 		"ssssssssssssssssssssssssssssssss" + // 0xc0
 		"sssssssssssssssssssssssssssssssss" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	symbolMode = "" +
+		".........ss..s.................." + // 0x00
+		"ssssssssssssssssssssssssssssssss" + // 0x20
+		"ssssssssssssssssssssssssssssesss" + // 0x40
+		"sssssssssssssssssssssssssssspsss" + // 0x60
+		"ssssssssssssssssssssssssssssssss" + // 0x80
+		"ssssssssssssssssssssssssssssssss" + // 0xa0
+		"ssssssssssssssssssssssssssssssss" + // 0xc0
+		"ssssssssssssssssssssssssssssssssS" //  0xe0
 
 	//   0123456789abcdef0123456789abcdef
 	escMode = "" +
@@ -180,6 +193,7 @@ func Read(src []byte) (code Code) {
 
 func (r *reader) read(src []byte) Code {
 	mode := valueMode
+	nextMode := valueMode
 	var (
 		b    byte
 		buf  []byte
@@ -196,7 +210,7 @@ func (r *reader) read(src []byte) Code {
 			}
 			n := utf8.EncodeRune(rb, rn)
 			buf = append(buf, rb[:n]...)
-			mode = stringMode
+			mode = nextMode
 		}
 	}
 	for r.pos, b = range src {
@@ -248,6 +262,12 @@ func (r *reader) read(src []byte) Code {
 			r.tokenStart = r.pos + 1
 			buf = buf[:0]
 			mode = stringMode
+			nextMode = stringMode
+		case pipeByte:
+			r.tokenStart = r.pos + 1
+			buf = buf[:0]
+			mode = symbolMode
+			nextMode = symbolMode
 		case stringByte:
 			if 0 < len(buf) {
 				buf = append(buf, b)
@@ -265,6 +285,19 @@ func (r *reader) read(src []byte) Code {
 				r.code = append(r.code, obj)
 			}
 			mode = valueMode
+		case pipeDone:
+			var obj Object
+			if 0 < len(buf) {
+				obj = Symbol(buf)
+			} else {
+				obj = Symbol(src[r.tokenStart:r.pos])
+			}
+			if 0 < len(r.stack) {
+				r.stack = append(r.stack, obj)
+			} else {
+				r.code = append(r.code, obj)
+			}
+			mode = valueMode
 
 		case escByte:
 			if len(buf) == 0 && r.tokenStart < r.pos {
@@ -273,7 +306,7 @@ func (r *reader) read(src []byte) Code {
 			mode = escMode
 		case escOne:
 			buf = append(buf, escByteMap[b])
-			mode = stringMode
+			mode = nextMode
 		case escUnicode4:
 			rn = 0
 			rcnt = 4
@@ -288,13 +321,9 @@ func (r *reader) read(src []byte) Code {
 			runeAppendByte(b - 'A' + 10)
 		case runeHexa:
 			runeAppendByte(b - 'a' + 10)
-			// TBD
-
-			// TBD |symbol|
-
-			// TBD char
 
 			// TBD #, maybe same as char
+			// TBD char
 		}
 	}
 	r.pos++
@@ -303,8 +332,14 @@ func (r *reader) read(src []byte) Code {
 		r.pushToken(src)
 	case numberMode:
 		r.pushNumber(src)
-	case stringMode, runeMode, escMode:
+	case stringMode:
 		r.raise("string not terminated")
+	case runeMode:
+		r.raise("rune not terminated")
+	case escMode:
+		r.raise("escaped character not terminated")
+	case symbolMode:
+		r.raise("|symbol| not terminated")
 		/*
 			case charMode:
 				r.pushChar(src)
