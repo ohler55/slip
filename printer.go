@@ -252,13 +252,17 @@ Top:
 			b = strconv.AppendFloat(b, float64(to), 'g', -1, 64)
 		}
 	case *LongFloat:
+		prec := uint(float64((*big.Float)(to).Prec()) / prec10t2)
+		if p.Prec < prec {
+			prec = p.Prec
+		}
 		if p.Readably {
 			// Use the LISP exponent nomenclature by forming the buffer and
 			// then replacing the 'e'.
-			tmp := (*big.Float)(to).Append([]byte{}, 'g', int(p.Prec))
+			tmp := (*big.Float)(to).Append([]byte{}, 'g', int(prec))
 			b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)
 		} else {
-			b = (*big.Float)(to).Append(b, 'g', int(p.Prec))
+			b = (*big.Float)(to).Append(b, 'g', int(prec))
 		}
 	case Symbol:
 		if len(to) == 0 {

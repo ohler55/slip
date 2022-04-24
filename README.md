@@ -7,10 +7,25 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - Code
- - read
-  - strings
-  - |symbols|
-  -
+ - numbers
+  - int with trailing .
+
+ - #
+  - \ character
+  - ( vector
+  - <num>
+   - r - radix number
+   - A - array
+  - b - binary number (or ratio)
+  - o - octal (or ratio)
+  - x - hex (or ratio)
+  - <
+   - #<(ARRAY T NIL)>
+   - #<(VECTOR <fixnum>)>
+   - #<(ARRAY T (<dimes>))>
+   - package name
+
+
 
 - packages
  - vars

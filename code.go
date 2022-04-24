@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
+	"regexp"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -162,7 +163,6 @@ const (
 		"................................" + // 0xa0
 		"................................" + // 0xc0
 		"................................r" //   0xe0
-
 )
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
@@ -379,6 +379,13 @@ func (r *reader) closeList() {
 	}
 }
 
+var (
+	shortFloatRegex  = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(s[-+]?[0-9]+)?$`)
+	singleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(f[-+]?[0-9]+)?$`)
+	doubleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(d[-+]?[0-9]+)?$`)
+	longFloatRegex   = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(l[-+]?[0-9]+)?$`)
+)
+
 // Converts tokens to the correct type and then pushes that value onto the
 // stack.
 func (r *reader) pushToken(src []byte) {
@@ -412,8 +419,7 @@ func (r *reader) pushToken(src []byte) {
 				goto Push
 			}
 		}
-	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-':
-		// TBD consider 123. for base 10
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+':
 		s := string(token)
 		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
 			obj = Fixnum(i)
@@ -423,12 +429,37 @@ func (r *reader) pushToken(src []byte) {
 			obj = DoubleFloat(f)
 			goto Push
 		}
+		buf := bytes.ToLower(token)
+		if doubleFloatRegex.Match(buf) {
+			buf[bytes.IndexByte(buf, 'd')] = 'e'
+			if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
+				obj = DoubleFloat(f)
+				goto Push
+			}
+		}
+		if shortFloatRegex.Match(buf) {
+			buf[bytes.IndexByte(buf, 's')] = 'e'
+			if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
+				obj = SingleFloat(f)
+				goto Push
+			}
+		}
+		if singleFloatRegex.Match(buf) {
+			buf[bytes.IndexByte(buf, 'f')] = 'e'
+			if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
+				obj = SingleFloat(f)
+				goto Push
+			}
+		}
+		if longFloatRegex.Match(buf) {
+			buf[bytes.IndexByte(buf, 'l')] = 'e'
+			cnt := len(buf) - 2 - bytes.Count(buf, []byte{'-'}) - bytes.Count(buf, []byte{'+'})
+			if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.AwayFromZero); err == nil {
 
-		// TBD
-		// consider ratio n/m
-		// handle bignum
-		// for floats consider exponent characters for size
-
+				obj = (*LongFloat)(f)
+				goto Push
+			}
+		}
 	}
 	obj = Symbol(token)
 Push:
@@ -441,7 +472,6 @@ Push:
 
 func (r *reader) pushNumber(src []byte) {
 	// Numbers the easy way.
-	// TBD parse number directly from bytes for a small optimization
 	token := src[r.tokenStart:r.pos]
 	var (
 		obj Object
@@ -473,6 +503,17 @@ func (r *reader) pushNumber(src []byte) {
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
 		obj = DoubleFloat(f)
 		goto Push
+	}
+	if i := bytes.IndexByte(token, '/'); 0 < i {
+		if num, err := strconv.ParseInt(string(token[:i]), 10, 64); err == nil {
+			var den int64
+			if den, err = strconv.ParseInt(string(token[i+1:]), 10, 64); err == nil {
+				if 0 < den {
+					obj = NewRatio(num, den)
+					goto Push
+				}
+			}
+		}
 	}
 	r.pushToken(src)
 	return

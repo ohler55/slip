@@ -57,8 +57,22 @@ func TestCodeNumber(t *testing.T) {
 		{src: "123.", expect: "[123]", kind: "fixnum"},
 		{src: "-123.", expect: "[-123]", kind: "fixnum"},
 		{src: "1.23e-1", expect: "[0.123]", kind: "double-float"},
+		{src: "1.23s-1", expect: "[0.123]", kind: "single-float"},
+		{src: "1.23f-1", expect: "[0.123]", kind: "single-float"},
+		{src: "1.23d-1", expect: "[0.123]", kind: "double-float"},
+		{src: "1.23l-1", expect: "[0.123]", kind: "long-float"},
 		{src: "123456789012345678901234567890", expect: "[123456789012345678901234567890]", kind: "bignum"},
 		{src: "123456789012345678901234567890.", expect: "[123456789012345678901234567890]", kind: "bignum"},
+	} {
+		ct.test(t, i)
+	}
+}
+
+func TestCodeRatio(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: "1/2", expect: "[1/2]", kind: "ratio"},
+		{src: "-1/2", expect: "[-1/2]", kind: "ratio"},
+		{src: "1/-2", expect: "[|1/-2|]", kind: "symbol"},
 	} {
 		ct.test(t, i)
 	}
