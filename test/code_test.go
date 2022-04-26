@@ -116,3 +116,11 @@ b|
 		ct.test(t, i)
 	}
 }
+
+func TestCodeHash(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: `#\A`, expect: `[#\A]`, kind: "character"},
+	} {
+		ct.test(t, i)
+	}
+}

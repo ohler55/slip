@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -45,6 +46,10 @@ const (
 
 	pipeByte = 'P'
 	pipeDone = 'p'
+
+	sharpByte = '#'
+	charSlash = '/'
+	charDone  = 'C'
 
 	/*
 		singleQuote = 'q'
@@ -90,7 +95,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	numberMode = "" +
 		".........NN..N.................." + // 0x00
-		"N.......NNRa.aa.aaaaaaaaaaR...RR" + // 0x20
+		"N.......NNRa.aaRaaaaaaaaaaR...RR" + // 0x20
 		"RRRRRaRRRRRRRRRRRRRRRRRRRRR...RR" + // 0x40
 		"RRRRRaRRRRRRRRRRRRRRRRRRRRR...R." + // 0x60
 		"................................" + // 0x80
@@ -163,6 +168,28 @@ const (
 		"................................" + // 0xa0
 		"................................" + // 0xc0
 		"................................r" //   0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	sharpMode = "" +
+		"................................" + // 0x00
+		"................................" + // 0x20
+		"............................/..." + // 0x40
+		"................................" + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................#" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	charMode = "" +
+		".........CC..C.................." + // 0x00
+		"C.......CCaa.aaaaaaaaaaaaaa.aaa." + // 0x20
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaa...aa" + // 0x40
+		".aaaaaaaaaaaaaaaaaaaaaaaaaa...a." + // 0x60
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0x80
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0xa0
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0xc0
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaC" //  0xe0
 )
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
@@ -228,7 +255,7 @@ func (r *reader) read(src []byte) Code {
 
 		case openParen:
 			r.starts = append(r.starts, len(r.stack))
-			r.stack = append(r.stack, nil)
+			r.stack = append(r.stack, nil) // TBD should this be a market for list vs vector or array?
 		case closeParen:
 			r.closeList()
 
@@ -322,8 +349,24 @@ func (r *reader) read(src []byte) Code {
 		case runeHexa:
 			runeAppendByte(b - 'a' + 10)
 
-			// TBD #, maybe same as char
-			// TBD char
+		case sharpByte:
+			mode = sharpMode
+		case charSlash:
+			r.tokenStart = r.pos + 1
+			mode = charMode
+		case charDone:
+			r.pushChar(src)
+			mode = valueMode
+			goto Retry
+
+			// TBD other # modes
+
+		default:
+			if mode == sharpMode {
+				r.raise("illegal sharp marco character: #%c", b)
+			} else {
+				r.raise("enexpected character: '%c' (0x%02x)", b, b)
+			}
 		}
 	}
 	r.pos++
@@ -340,11 +383,8 @@ func (r *reader) read(src []byte) Code {
 		r.raise("escaped character not terminated")
 	case symbolMode:
 		r.raise("|symbol| not terminated")
-		/*
-			case charMode:
-				r.pushChar(src)
-				// TBD | deliminated symbol
-		*/
+	case charMode:
+		r.pushChar(src)
 	}
 	return r.code
 }
@@ -368,14 +408,21 @@ func (r *reader) closeList() {
 		list = append(list, r.stack[i])
 		r.stack[i] = nil // make sure reference to value is removed from stack
 	}
+	var obj Object
+
+	obj = list
+	// fmt.Printf("*** end of stack for list: %T %v\n", r.stack[start], r.stack[start])
+	// TBD if vector or array then ...
+	//  convert list later (mostly because arrays are build from sublists so easier to convert
+
 	if 0 < start {
 		r.stack = r.stack[:start+1]
-		r.stack[start] = list
+		r.stack[start] = obj
 		r.starts = r.starts[:len(r.starts)-1]
 	} else {
 		r.stack = r.stack[:0]
 		r.starts = r.starts[:0]
-		r.code = append(r.code, list)
+		r.code = append(r.code, obj)
 	}
 }
 
@@ -428,6 +475,17 @@ func (r *reader) pushToken(src []byte) {
 		if f, err := strconv.ParseFloat(s, 64); err == nil {
 			obj = DoubleFloat(f)
 			goto Push
+		}
+		if i := bytes.IndexByte(token, '/'); 0 < i {
+			if num, err := strconv.ParseInt(string(token[:i]), 10, 64); err == nil {
+				var den int64
+				if den, err = strconv.ParseInt(string(token[i+1:]), 10, 64); err == nil {
+					if 0 < den {
+						obj = NewRatio(num, den)
+						goto Push
+					}
+				}
+			}
 		}
 		buf := bytes.ToLower(token)
 		if doubleFloatRegex.Match(buf) {
@@ -504,17 +562,6 @@ func (r *reader) pushNumber(src []byte) {
 		obj = DoubleFloat(f)
 		goto Push
 	}
-	if i := bytes.IndexByte(token, '/'); 0 < i {
-		if num, err := strconv.ParseInt(string(token[:i]), 10, 64); err == nil {
-			var den int64
-			if den, err = strconv.ParseInt(string(token[i+1:]), 10, 64); err == nil {
-				if 0 < den {
-					obj = NewRatio(num, den)
-					goto Push
-				}
-			}
-		}
-	}
 	r.pushToken(src)
 	return
 
@@ -526,17 +573,65 @@ Push:
 	}
 }
 
-/*
-func (r *reader) pushHash(src []byte) {
+const hexByteValues = "" +
+	"................................" + // 0x00
+	"................\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09......" + // 0x20
+	".\x0a\x0b\x0c\x0d\x0e\x0f........................." + // 0x40
+	".\x0a\x0b\x0c\x0d\x0e\x0f........................." + // 0x60
+	"................................" + // 0x80
+	"................................" + // 0xa0
+	"................................" + // 0xc0
+	"................................" //   0xe0
 
-	fmt.Printf("*** # token: %s\n", src[r.tokenStart:r.pos])
+var runeMap = map[string]Character{
+	"backspace": Character('\b'),
+	"newline":   Character('\n'),
+	"page":      Character('\f'),
+	"return":    Character('\r'),
+	"rubout":    Character('\x7f'),
+	"space":     Character(' '),
+	"tab":       Character('\t'),
 }
 
 func (r *reader) pushChar(src []byte) {
-
-	fmt.Printf("*** string: %s\n", src[r.tokenStart:r.pos])
+	var c Character
+	cnt := r.pos - r.tokenStart
+	switch cnt {
+	case 0:
+		r.raise(`'#\' is not a valid character`)
+	case 1:
+		c = Character(src[r.tokenStart])
+	default:
+		var ok bool
+		if c, ok = runeMap[string(bytes.ToLower(src[r.tokenStart:r.pos]))]; ok {
+			break
+		}
+		if src[r.tokenStart] == 'u' || src[r.tokenStart] == 'U' {
+			if 7 < cnt {
+				break
+			}
+			var rn rune
+			for _, b := range src[r.tokenStart+1 : r.pos] {
+				rn = rn<<4 + rune(hexByteValues[b])
+			}
+			if rn <= unicode.MaxRune {
+				c = Character(rn)
+			}
+			break
+		}
+		if rn, n := utf8.DecodeRune(src[r.tokenStart:r.pos]); 0 < n {
+			c = Character(rn)
+		}
+	}
+	if c == 0 {
+		r.raise(`'#\%s' is not a valid character`, src[r.tokenStart:r.pos], r.line)
+	}
+	if 0 < len(r.stack) {
+		r.stack = append(r.stack, c)
+	} else {
+		r.code = append(r.code, c)
+	}
 }
-*/
 
 // String returns a string representation of the instance.
 func (c Code) String() string {
