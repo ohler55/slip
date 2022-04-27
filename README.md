@@ -9,16 +9,15 @@ SLIce Processing is LISP for golang
 - Code
  - #
   + \ character
-  - b - binary number (or ratio)
-  - o - octal (or ratio)
-  - x - hex (or ratio)
-  - ( vector (read as list then convert)
-   - maybe marker on stack to indicate vector and no list
+  + ( vector
+  + b - binary number (or ratio)
+  + o - octal (or ratio)
+  + x - hex (or ratio)
   - <num>
    - r - radix number
    - A - array
    - : ???
-   - #' seems to mean nothing - ignore?
+  - #' seems to mean nothing - ignore?
 
 
 - packages

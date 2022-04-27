@@ -117,9 +117,63 @@ b|
 	}
 }
 
-func TestCodeHash(t *testing.T) {
+func TestCodeCharacter(t *testing.T) {
 	for i, ct := range []*codeTest{
 		{src: `#\A`, expect: `[#\A]`, kind: "character"},
+		// TBD unicode and special
+	} {
+		ct.test(t, i)
+	}
+}
+
+func TestCodeVector(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: `#()`, expect: `[#()]`, kind: "vector"},
+		{src: `#(1)`, expect: `[#(1)]`, kind: "vector"},
+		{src: `#(1 2 3)`, expect: `[#(1 2 3)]`, kind: "vector"},
+	} {
+		ct.test(t, i)
+	}
+}
+
+func TestCodeBinary(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: `#b0`, expect: `[0]`, kind: "fixnum"},
+		{src: `#b1`, expect: `[1]`, kind: "fixnum"},
+		{src: `#b1010`, expect: `[10]`, kind: "fixnum"},
+		{src: `#b1010 `, expect: `[10]`, kind: "fixnum"},
+		{
+			src:    `#b1010101010101010101010101010101010101010101010101010101010101010`,
+			expect: `[12297829382473034410]`,
+			kind:   "bignum",
+		},
+		{src: `#b012`, raise: true},
+	} {
+		ct.test(t, i)
+	}
+}
+
+func TestCodeOct(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: `#o0`, expect: `[0]`, kind: "fixnum"},
+		{src: `#o1`, expect: `[1]`, kind: "fixnum"},
+		{src: `#o1234`, expect: `[668]`, kind: "fixnum"},
+		{src: `#o1234 `, expect: `[668]`, kind: "fixnum"},
+		{src: `#o123456701234567012345670`, expect: `[770996035962450594744]`, kind: "bignum"},
+		{src: `#o012345678`, raise: true},
+	} {
+		ct.test(t, i)
+	}
+}
+
+func TestCodeHex(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: `#x0`, expect: `[0]`, kind: "fixnum"},
+		{src: `#x1`, expect: `[1]`, kind: "fixnum"},
+		{src: `#x1a2B`, expect: `[6699]`, kind: "fixnum"},
+		{src: `#x1a2B `, expect: `[6699]`, kind: "fixnum"},
+		{src: `#x123456789abcdef123456789abcdef`, expect: `[94522879700260683142460330790866415]`, kind: "bignum"},
+		{src: `#x0123456789abcdefg`, raise: true},
 	} {
 		ct.test(t, i)
 	}

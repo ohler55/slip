@@ -15,7 +15,7 @@ import (
 
 const (
 	skipByte    = 'a'
-	skipNewline = 'b'
+	skipNewline = 'k'
 	commentByte = ';'
 	commentDone = 'c'
 
@@ -37,7 +37,7 @@ const (
 	stringByte  = 's'
 	stringDone  = 'S'
 	escByte     = 'e'
-	escOne      = 'o'
+	escOne      = 'E'
 	escUnicode4 = 'u'
 	escUnicode8 = 'U'
 	runeDigit   = '1'
@@ -47,21 +47,22 @@ const (
 	pipeByte = 'P'
 	pipeDone = 'p'
 
-	sharpByte = '#'
-	charSlash = '/'
-	charDone  = 'C'
+	sharpByte  = '#'
+	charSlash  = '/'
+	charDone   = 'C'
+	vectorByte = 'V'
+	binaryByte = 'b'
+	binaryDone = 'B'
+	octByte    = 'o'
+	octDone    = 'O'
+	hexByte    = 'x'
+	hexDone    = 'X'
 
-	/*
-		singleQuote = 'q'
-
-		charByte  = '#'
-		charSlash = '/'
-		charDone  = 'C'
-	*/
+	// singleQuote = 'q'
 
 	//   0123456789abcdef0123456789abcdef
 	valueMode = "" +
-		".........ab..a.................." + // 0x00
+		".........ak..a.................." + // 0x00
 		"a.Q#..tq()t+.+ttddddddddddt;ttt." + // 0x20
 		"ttttttttttttttttttttttttttt...tt" + // 0x40
 		".tttttttttttttttttttttttttt.P.t." + // 0x60
@@ -139,9 +140,9 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	escMode = "" +
 		"................................" + // 0x00
-		"..o............................." + // 0x20
-		".....................U......o..." + // 0x40
-		"..o...o.......o...o.ou.........." + // 0x60
+		"..E............................." + // 0x20
+		".....................U......E..." + // 0x40
+		"..E...E.......E...E.Eu.........." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -172,9 +173,9 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	sharpMode = "" +
 		"................................" + // 0x00
-		"................................" + // 0x20
-		"............................/..." + // 0x40
-		"................................" + // 0x60
+		"........V......................." + // 0x20
+		"..b............o........x.../..." + // 0x40
+		"..b............o........x......." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -190,7 +191,43 @@ const (
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0xa0
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0xc0
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaC" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	binaryMode = "" +
+		".........BB..B.................." + // 0x00
+		"B.......BB......aa.............." + // 0x20
+		"................................" + // 0x40
+		"................................" + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................b" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	octMode = "" +
+		".........OO..O.................." + // 0x00
+		"O.......OO......aaaaaaaa........" + // 0x20
+		"................................" + // 0x40
+		"................................" + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................o" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	hexMode = "" +
+		".........XX..X.................." + // 0x00
+		"X.......XX......aaaaaaaaaa......" + // 0x20
+		".aaaaaa........................." + // 0x40
+		".aaaaaa........................." + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................x" //  0xe0
 )
+
+// marker on stack indicating a vector and not a list.
+var vectorMarker = Vector{}
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
 // of keeping loaded code together so that it can be evaluated and optimized
@@ -255,7 +292,7 @@ func (r *reader) read(src []byte) Code {
 
 		case openParen:
 			r.starts = append(r.starts, len(r.stack))
-			r.stack = append(r.stack, nil) // TBD should this be a market for list vs vector or array?
+			r.stack = append(r.stack, nil)
 		case closeParen:
 			r.closeList()
 
@@ -359,12 +396,46 @@ func (r *reader) read(src []byte) Code {
 			mode = valueMode
 			goto Retry
 
+		case vectorByte:
+			r.starts = append(r.starts, len(r.stack))
+			r.stack = append(r.stack, vectorMarker)
+			mode = valueMode
+
+		case binaryByte:
+			r.tokenStart = r.pos + 1
+			mode = binaryMode
+		case binaryDone:
+			r.pushInteger(src, 2)
+			mode = valueMode
+			goto Retry
+
+		case octByte:
+			r.tokenStart = r.pos + 1
+			mode = octMode
+		case octDone:
+			r.pushInteger(src, 8)
+			mode = valueMode
+			goto Retry
+
+		case hexByte:
+			r.tokenStart = r.pos + 1
+			mode = hexMode
+		case hexDone:
+			r.pushInteger(src, 16)
+			mode = valueMode
+			goto Retry
+
 			// TBD other # modes
 
 		default:
-			if mode == sharpMode {
-				r.raise("illegal sharp marco character: #%c", b)
-			} else {
+			switch mode {
+			case sharpMode:
+				r.raise("illegal sharp macro character: #%c", b)
+			case binaryMode:
+				r.raise("illegal binary digit: #%c", b)
+			case octMode:
+				r.raise("illegal octal digit: #%c", b)
+			default:
 				r.raise("enexpected character: '%c' (0x%02x)", b, b)
 			}
 		}
@@ -385,6 +456,12 @@ func (r *reader) read(src []byte) Code {
 		r.raise("|symbol| not terminated")
 	case charMode:
 		r.pushChar(src)
+	case binaryMode:
+		r.pushInteger(src, 2)
+	case octMode:
+		r.pushInteger(src, 8)
+	case hexMode:
+		r.pushInteger(src, 16)
 	}
 	return r.code
 }
@@ -409,12 +486,15 @@ func (r *reader) closeList() {
 		r.stack[i] = nil // make sure reference to value is removed from stack
 	}
 	var obj Object
-
-	obj = list
-	// fmt.Printf("*** end of stack for list: %T %v\n", r.stack[start], r.stack[start])
-	// TBD if vector or array then ...
-	//  convert list later (mostly because arrays are build from sublists so easier to convert
-
+	switch to := r.stack[start].(type) {
+	case Vector:
+		obj = Vector(list)
+	case *Array:
+		fmt.Printf("*** Array: %v\n", to)
+		// TBD
+	default:
+		obj = list
+	}
 	if 0 < start {
 		r.stack = r.stack[:start+1]
 		r.stack[start] = obj
@@ -554,7 +634,7 @@ func (r *reader) pushNumber(src []byte) {
 		goto Push
 	}
 	bi = big.NewInt(0)
-	if err := bi.UnmarshalText(token); err == nil {
+	if _, ok := bi.SetString(s, 10); ok {
 		obj = (*Bignum)(bi)
 		goto Push
 	}
@@ -630,6 +710,24 @@ func (r *reader) pushChar(src []byte) {
 		r.stack = append(r.stack, c)
 	} else {
 		r.code = append(r.code, c)
+	}
+}
+
+func (r *reader) pushInteger(src []byte, base int) {
+	token := string(src[r.tokenStart:r.pos])
+	var obj Object
+	if i, err := strconv.ParseInt(token, base, 64); err == nil {
+		obj = Fixnum(i)
+	} else {
+		bi := big.NewInt(0)
+		if _, ok := bi.SetString(token, base); ok {
+			obj = (*Bignum)(bi)
+		}
+	}
+	if 0 < len(r.stack) {
+		r.stack = append(r.stack, obj)
+	} else {
+		r.code = append(r.code, obj)
 	}
 }
 
