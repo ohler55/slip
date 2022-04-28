@@ -283,6 +283,9 @@ Top:
 		}
 		b = append(b, p.caseName(string(to))...)
 	case List:
+		if len(to) == 0 {
+			return append(b, p.caseName("nil")...)
+		}
 		if int(p.Level) <= level {
 			return append(b, '#')
 		}

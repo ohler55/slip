@@ -361,7 +361,7 @@ func TestListObj(t *testing.T) {
 func TestListObjEmpty(t *testing.T) {
 	(&sliptest.Object{
 		Target: slip.List{},
-		String: "()",
+		String: "nil",
 		Simple: []interface{}{},
 	}).Test(t)
 }

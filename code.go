@@ -47,16 +47,19 @@ const (
 	pipeByte = 'P'
 	pipeDone = 'p'
 
-	sharpByte  = '#'
-	charSlash  = '/'
-	charDone   = 'C'
-	vectorByte = 'V'
-	binaryByte = 'b'
-	binaryDone = 'B'
-	octByte    = 'o'
-	octDone    = 'O'
-	hexByte    = 'x'
-	hexDone    = 'X'
+	sharpByte    = '#'
+	charSlash    = '/'
+	charDone     = 'C'
+	vectorByte   = 'V'
+	binaryByte   = 'b'
+	octByte      = 'o'
+	hexByte      = 'x'
+	intDone      = 'I'
+	sharpIntByte = '9'
+	sharpNumByte = '8'
+	radixByte    = 'r'
+	arrayByte    = 'A'
+	swallowOpen  = '{'
 
 	// singleQuote = 'q'
 
@@ -173,7 +176,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	sharpMode = "" +
 		"................................" + // 0x00
-		"........V......................." + // 0x20
+		"........V.......9999999999......" + // 0x20
 		"..b............o........x.../..." + // 0x40
 		"..b............o........x......." + // 0x60
 		"................................" + // 0x80
@@ -193,37 +196,38 @@ const (
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaC" //  0xe0
 
 	//   0123456789abcdef0123456789abcdef
-	binaryMode = "" +
-		".........BB..B.................." + // 0x00
-		"B.......BB......aa.............." + // 0x20
+	intMode = "" +
+		".........II..I.................." + // 0x00
+		"I.......II.a.a..aaaaaaaaaa......" + // 0x20
+		".aaaaaaaaaaaaaaaaaaaaaaaaaa....." + // 0x40
+		".aaaaaaaaaaaaaaaaaaaaaaaaaa......" + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................i" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	sharpNumMode = "" +
+		"................................" + // 0x00
+		"................8888888888......" + // 0x20
+		".A................r............." + // 0x40
+		".A................r............." + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................8" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	mustArrayMode = "" +
+		"................................" + // 0x00
+		"........{......................." + // 0x20
 		"................................" + // 0x40
 		"................................" + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
-		"................................b" //  0xe0
+		"................................(" //  0xe0
 
-	//   0123456789abcdef0123456789abcdef
-	octMode = "" +
-		".........OO..O.................." + // 0x00
-		"O.......OO......aaaaaaaa........" + // 0x20
-		"................................" + // 0x40
-		"................................" + // 0x60
-		"................................" + // 0x80
-		"................................" + // 0xa0
-		"................................" + // 0xc0
-		"................................o" //  0xe0
-
-	//   0123456789abcdef0123456789abcdef
-	hexMode = "" +
-		".........XX..X.................." + // 0x00
-		"X.......XX......aaaaaaaaaa......" + // 0x20
-		".aaaaaa........................." + // 0x40
-		".aaaaaa........................." + // 0x60
-		"................................" + // 0x80
-		"................................" + // 0xa0
-		"................................" + // 0xc0
-		"................................x" //  0xe0
 )
 
 // marker on stack indicating a vector and not a list.
@@ -259,11 +263,13 @@ func (r *reader) read(src []byte) Code {
 	mode := valueMode
 	nextMode := valueMode
 	var (
-		b    byte
-		buf  []byte
-		rb   []byte
-		rn   rune
-		rcnt int
+		b        byte
+		buf      []byte
+		rb       []byte
+		rn       rune
+		rcnt     int
+		base     int
+		sharpNum int
 	)
 	runeAppendByte := func(r byte) {
 		rn = rn<<4 | rune(r)
@@ -403,40 +409,56 @@ func (r *reader) read(src []byte) Code {
 
 		case binaryByte:
 			r.tokenStart = r.pos + 1
-			mode = binaryMode
-		case binaryDone:
-			r.pushInteger(src, 2)
-			mode = valueMode
-			goto Retry
-
+			mode = intMode
+			base = 2
 		case octByte:
 			r.tokenStart = r.pos + 1
-			mode = octMode
-		case octDone:
-			r.pushInteger(src, 8)
-			mode = valueMode
-			goto Retry
-
+			mode = intMode
+			base = 8
 		case hexByte:
 			r.tokenStart = r.pos + 1
-			mode = hexMode
-		case hexDone:
-			r.pushInteger(src, 16)
+			mode = intMode
+			base = 16
+		case intDone:
+			r.pushInteger(src, base)
 			mode = valueMode
 			goto Retry
 
-			// TBD other # modes
+		case sharpIntByte:
+			mode = sharpNumMode
+			sharpNum = int(b - '0')
+		case sharpNumByte:
+			sharpNum = sharpNum*10 + int(b-'0')
+		case radixByte:
+			r.tokenStart = r.pos + 1
+			mode = intMode
+			base = sharpNum
+
+		case arrayByte:
+			r.starts = append(r.starts, len(r.stack))
+			switch sharpNum {
+			case 0:
+				r.stack = append(r.stack, &Array{})
+			case 1:
+				r.stack = append(r.stack, vectorMarker)
+			default:
+				if ArrayMaxRank < sharpNum {
+					r.raise("%d exceeds the maximum Array rank of %d dimensions.", sharpNum, ArrayMaxRank)
+				}
+				r.stack = append(r.stack, &Array{dims: make([]int, sharpNum), sizes: make([]int, sharpNum)})
+			}
+			mode = mustArrayMode
+		case swallowOpen:
+			mode = valueMode
 
 		default:
 			switch mode {
 			case sharpMode:
 				r.raise("illegal sharp macro character: #%c", b)
-			case binaryMode:
-				r.raise("illegal binary digit: #%c", b)
-			case octMode:
-				r.raise("illegal octal digit: #%c", b)
+			case intMode:
+				r.raise("illegal base %d digit: #%c", base, b)
 			default:
-				r.raise("enexpected character: '%c' (0x%02x)", b, b)
+				r.raise("unexpected character: '%c' (0x%02x)", b, b)
 			}
 		}
 	}
@@ -447,7 +469,7 @@ func (r *reader) read(src []byte) Code {
 	case numberMode:
 		r.pushNumber(src)
 	case stringMode:
-		r.raise("string not terminated")
+		r.partial("string not terminated")
 	case runeMode:
 		r.raise("rune not terminated")
 	case escMode:
@@ -456,12 +478,11 @@ func (r *reader) read(src []byte) Code {
 		r.raise("|symbol| not terminated")
 	case charMode:
 		r.pushChar(src)
-	case binaryMode:
-		r.pushInteger(src, 2)
-	case octMode:
-		r.pushInteger(src, 8)
-	case hexMode:
-		r.pushInteger(src, 16)
+	case intMode:
+		r.pushInteger(src, base)
+	}
+	if 0 < len(r.stack) {
+		r.partial("list not terminated")
 	}
 	return r.code
 }
@@ -472,6 +493,14 @@ func (r *reader) raise(format string, args ...interface{}) {
 	f = append(f, " at %d:%d"...)
 	args = append(args, r.line, r.pos-r.lineStart)
 	panic(fmt.Sprintf(string(f), args...))
+}
+
+func (r *reader) partial(format string, args ...interface{}) {
+	f := make([]byte, 0, len(format)+9)
+	f = append(f, format...)
+	f = append(f, " at %d:%d"...)
+	args = append(args, r.line, r.pos-r.lineStart)
+	panic(&Partial{Reason: fmt.Sprintf(string(f), args...), Depth: len(r.starts)})
 }
 
 func (r *reader) closeList() {
@@ -490,8 +519,8 @@ func (r *reader) closeList() {
 	case Vector:
 		obj = Vector(list)
 	case *Array:
-		fmt.Printf("*** Array: %v\n", to)
-		// TBD
+		to.calcAndSet(list)
+		obj = to
 	default:
 		obj = list
 	}
@@ -722,6 +751,8 @@ func (r *reader) pushInteger(src []byte, base int) {
 		bi := big.NewInt(0)
 		if _, ok := bi.SetString(token, base); ok {
 			obj = (*Bignum)(bi)
+		} else {
+			r.raise("%s is not a valid base 2 integer", token)
 		}
 	}
 	if 0 < len(r.stack) {

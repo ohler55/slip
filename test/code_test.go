@@ -80,7 +80,7 @@ func TestCodeRatio(t *testing.T) {
 
 func TestCodeList(t *testing.T) {
 	for i, ct := range []*codeTest{
-		{src: "()", expect: "[()]", kind: "list"},
+		{src: "()", expect: "[nil]", kind: "list"},
 		{src: "(abc)", expect: "[(abc)]", kind: "list"},
 		{src: "(+ 1 2)", expect: "[(+ 1 2)]", kind: "list"},
 	} {
@@ -174,6 +174,34 @@ func TestCodeHex(t *testing.T) {
 		{src: `#x1a2B `, expect: `[6699]`, kind: "fixnum"},
 		{src: `#x123456789abcdef123456789abcdef`, expect: `[94522879700260683142460330790866415]`, kind: "bignum"},
 		{src: `#x0123456789abcdefg`, raise: true},
+	} {
+		ct.test(t, i)
+	}
+}
+
+func TestCodeRadix(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: `#3r0`, expect: `[0]`, kind: "fixnum"},
+		{src: `#7r1`, expect: `[1]`, kind: "fixnum"},
+		{src: `#5r100`, expect: `[25]`, kind: "fixnum"},
+		{src: `#33rabcdefghijklmnopqrstuvw`, expect: `[26425650874257907358648568190381955]`, kind: "bignum"},
+		{src: `#3r1234`, raise: true},
+	} {
+		ct.test(t, i)
+	}
+}
+
+func TestCodeArray(t *testing.T) {
+	key := slip.Symbol("*print-array*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
+	for i, ct := range []*codeTest{
+		{src: `#2A((1 2 3)(4 5 6))`, expect: `[#2A((1 2 3) (4 5 6))]`, kind: "array"},
+		{src: `#1A(1 2 3)`, expect: `[#(1 2 3)]`, kind: "vector"},
+		{src: `#0A()`, expect: `[#0Anil]`, kind: "array"},
+		{src: `#1025A()`, raise: true},
 	} {
 		ct.test(t, i)
 	}
