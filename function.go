@@ -174,5 +174,8 @@ func ListToFunc(list List) Object {
 	case List:
 		// TBD maybe lambda
 	}
-	panic(fmt.Sprintf("%s is not a function", ObjectString(list[0])))
+	panic(&Panic{
+		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[len(list)-1])),
+		Stack:   []string{list.String()},
+	})
 }

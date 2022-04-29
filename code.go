@@ -61,7 +61,7 @@ const (
 	arrayByte    = 'A'
 	swallowOpen  = '{'
 
-	// singleQuote = 'q'
+	singleQuote = 'q'
 
 	//   0123456789abcdef0123456789abcdef
 	valueMode = "" +
@@ -228,6 +228,7 @@ const (
 		"................................" + // 0xc0
 		"................................(" //  0xe0
 
+	quoteMarker = marker('q')
 )
 
 // marker on stack indicating a vector and not a list.
@@ -245,6 +246,7 @@ type reader struct {
 	line       int
 	lineStart  int
 	pos        int
+	newQuote   func(args List) Object
 
 	code Code
 }
@@ -451,6 +453,9 @@ func (r *reader) read(src []byte) Code {
 		case swallowOpen:
 			mode = valueMode
 
+		case singleQuote:
+			r.stack = append(r.stack, quoteMarker)
+
 		default:
 			switch mode {
 			case sharpMode:
@@ -514,6 +519,7 @@ func (r *reader) closeList() {
 		list = append(list, r.stack[i])
 		r.stack[i] = nil // make sure reference to value is removed from stack
 	}
+	r.stack = r.stack[:start+1]
 	var obj Object
 	switch to := r.stack[start].(type) {
 	case Vector:
@@ -522,10 +528,23 @@ func (r *reader) closeList() {
 		to.calcAndSet(list)
 		obj = to
 	default:
-		obj = list
+		if len(list) == 3 && list[1] == Symbol(".") {
+			list[1] = list[2]
+			obj = Cons(list[:2])
+		} else {
+			obj = list
+		}
+		if 0 < start && r.stack[start-1] == quoteMarker {
+			if r.newQuote == nil {
+				r.newQuote = funcCreators["QUOTE"]
+			}
+			obj = r.newQuote(List{obj})
+			start--
+			r.stack[start] = nil
+			r.stack = r.stack[:start+1]
+		}
 	}
 	if 0 < start {
-		r.stack = r.stack[:start+1]
 		r.stack[start] = obj
 		r.starts = r.starts[:len(r.starts)-1]
 	} else {
@@ -559,6 +578,19 @@ func (r *reader) pushToken(src []byte) {
 		obj = nil
 		goto Push
 	}
+	if 0 < len(r.stack) && r.stack[len(r.stack)-1] == quoteMarker {
+		if r.newQuote == nil {
+			r.newQuote = funcCreators["QUOTE"]
+		}
+		if len(r.stack) == 1 {
+			r.code = append(r.code, r.newQuote(List{Symbol(token)}))
+			r.stack[len(r.stack)-1] = nil
+			r.stack = r.stack[:0]
+		} else {
+			r.stack[len(r.stack)-1] = r.newQuote(List{Symbol(token)})
+		}
+		return
+	}
 	switch token[0] {
 	case '@':
 		// This is an extension to common lisp to make time easier to deal with.
@@ -576,15 +608,17 @@ func (r *reader) pushToken(src []byte) {
 			}
 		}
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+':
-		s := string(token)
-		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
-			obj = Fixnum(i)
-			goto Push
-		}
-		if f, err := strconv.ParseFloat(s, 64); err == nil {
-			obj = DoubleFloat(f)
-			goto Push
-		}
+		/*
+			s := string(token)
+				if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+					obj = Fixnum(i)
+					goto Push
+				}
+				if f, err := strconv.ParseFloat(s, 64); err == nil {
+					obj = DoubleFloat(f)
+					goto Push
+				}
+		*/
 		if i := bytes.IndexByte(token, '/'); 0 < i {
 			if num, err := strconv.ParseInt(string(token[:i]), 10, 64); err == nil {
 				var den int64
@@ -733,7 +767,7 @@ func (r *reader) pushChar(src []byte) {
 		}
 	}
 	if c == 0 {
-		r.raise(`'#\%s' is not a valid character`, src[r.tokenStart:r.pos], r.line)
+		r.raise(`'#\%s' is not a valid character`, src[r.tokenStart:r.pos])
 	}
 	if 0 < len(r.stack) {
 		r.stack = append(r.stack, c)

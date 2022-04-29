@@ -12,10 +12,13 @@ const (
 	p1Key       = "*REPL-PROMPT*"
 	p1ANSIKey   = "*REPL-PROMPT-ANSI*"
 	warnANSIKey = "*REPL-WARNING-ANSI*"
-	plusKey     = "+"
-	plus2Key    = "++"
-	plus3Key    = "+++"
-	// colorOff    = "\x1b[m"
+	form1Key    = "+"
+	form2Key    = "++"
+	form3Key    = "+++"
+	value1Key   = "/"
+	value2Key   = "//"
+	value3Key   = "///"
+	colorOff    = "\x1b[m"
 )
 
 type repl struct {
@@ -23,9 +26,14 @@ type repl struct {
 	buf   []byte
 	depth int
 	scope *Scope
-	prev  Object
-	prev2 Object
-	prev3 Object
+
+	form1 Object
+	form2 Object
+	form3 Object
+
+	value1 Object
+	value2 Object
+	value3 Object
 }
 
 // REPL is a Read Eval Print Loop.
@@ -39,9 +47,12 @@ func REPL() {
 		r.scope.Let(Symbol(p1ANSIKey), nil)
 		r.scope.Let(Symbol(warnANSIKey), nil)
 	}
-	r.scope.Let(Symbol(plusKey), nil)
-	r.scope.Let(Symbol(plus2Key), nil)
-	r.scope.Let(Symbol(plus3Key), nil)
+	r.scope.Let(Symbol(form1Key), nil)
+	r.scope.Let(Symbol(form2Key), nil)
+	r.scope.Let(Symbol(form3Key), nil)
+	r.scope.Let(Symbol(value1Key), nil)
+	r.scope.Let(Symbol(value2Key), nil)
+	r.scope.Let(Symbol(value3Key), nil)
 	defer func() {
 		_ = recover()
 		_, _ = (StandardOutput.(io.Writer)).Write([]byte("\nBye\n"))
@@ -64,8 +75,27 @@ func (r *repl) process() {
 		case *Partial:
 			r.depth = tr.Depth
 		case *Panic:
-			// TBD display and zero out the line and buffer
-			fmt.Printf("*** panic: %s\n", tr)
+			var buf []byte
+
+			if printer.ANSI {
+				var prefix String
+				if ansi := r.scope.get(warnANSIKey); ansi != nil {
+					prefix, _ = ansi.(String)
+					buf = append(buf, []byte(prefix)...)
+				}
+			}
+			buf = append(buf, "## "...)
+			buf = append(buf, tr.Message...)
+			buf = append(buf, '\n')
+			for _, line := range tr.Stack {
+				buf = append(buf, "##  "...)
+				buf = append(buf, line...)
+				buf = append(buf, '\n')
+			}
+			if printer.ANSI {
+				buf = append(buf, colorOff...)
+			}
+			_, _ = (StandardOutput.(io.Writer)).Write(buf)
 			r.reset()
 		case error:
 			if errors.Is(tr, io.EOF) {
@@ -81,13 +111,23 @@ func (r *repl) process() {
 	r.read()
 	code := Read(r.buf)
 	for _, obj := range code {
-		r.prev3 = r.prev2
-		r.prev2 = r.prev
-		r.prev = obj.Eval(r.scope, 0)
-		r.scope.set(plusKey, r.prev)
-		r.scope.set(plus2Key, r.prev2)
-		r.scope.set(plus3Key, r.prev3)
-		fmt.Fprintf(StandardOutput.(io.Writer), "%s\n", r.prev)
+		r.form3 = r.form2
+		r.form2 = r.form1
+		r.form1 = obj
+
+		r.value3 = r.value2
+		r.value2 = r.value1
+		r.value1 = obj.Eval(r.scope, 0)
+
+		r.scope.set(form1Key, r.form1)
+		r.scope.set(form2Key, r.form2)
+		r.scope.set(form3Key, r.form3)
+
+		r.scope.set(value1Key, r.value1)
+		r.scope.set(value2Key, r.value2)
+		r.scope.set(value3Key, r.value3)
+
+		fmt.Fprintf(StandardOutput.(io.Writer), "%s\n", r.value1)
 	}
 }
 

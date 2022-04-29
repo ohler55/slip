@@ -86,5 +86,4 @@ func PanicArgCount(obj Object, min, max int) {
 		Message: fmt.Sprintf("Too many arguments to %s. At most %d expected but got %d.",
 			f.GetName(), max, len(args)),
 	})
-
 }

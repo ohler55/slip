@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 
 	"github.com/ohler55/slip"
+	// Pull in all functions.
+	_ "github.com/ohler55/slip/pkg"
 )
 
 var (

@@ -6,13 +6,21 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- Code
- - ' - quote (lookup as needed and cache for life of function)
- - #' - function (like quote)
- - #. is value (lookup value)
 
-- repl
- - eval
+- Code
+ - #' - function (like quote)
+ - #. is read time eval of object if *read-eval* is true else panic
+
+- cmd/slip
+ - on load read then compile then eval
+
+- code.Compile
+ - turns lists into functions
+  - replace in code to allow second eval (if defuns then treat as if called a second time)
+ - defuns evaluated first if at top level
+  - when compiled check function is defun (or defmacro later) if so then eval
+   - maybe first pass to defun then second pass for all others
+    - misses defun inside another function but too bad
 
 
  - functions
@@ -69,12 +77,6 @@ SLIce Processing is LISP for golang
     imports map[string]*Import
     used []*Used
   }
-
-
- - eval
-  - turns lists into functions
-   - replace in code to allow second eval (if defuns then treat as if called a second time)
-  - call eval on each entry in Code
 
 
 
