@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -821,4 +822,54 @@ func (c Code) String() string {
 		b = append(b, ']')
 	}
 	return string(b)
+}
+
+// Compile all the code elements. This evaluates all the defun, defvar, and
+// defmacro calls and converts unquotes lists to functions.
+func (c Code) Compile() {
+	scope := NewScope()
+	for i, obj := range c {
+		list, ok := obj.(List)
+		if !ok || len(list) == 0 {
+			continue
+		}
+		var sym Symbol
+		if sym, ok = list[0].(Symbol); !ok {
+			continue
+		}
+		var f Object
+		switch strings.ToUpper(string(sym)) {
+		case "DEFUN":
+			// TBD need a ListToFunc that sets up an undefined list
+			f = ListToFunc(list)
+			c[i] = f
+		case "DEFVAR":
+			// TBD need a ListToFunc that sets up an undefined list
+			f = ListToFunc(list)
+			c[i] = f
+		case "DEFMACRO":
+			panic("Defmacro not implemented yet")
+		}
+		if f != nil {
+			f.Eval(scope, 0)
+			// TBD is this correct? No need to eval defxxx more than once
+			c[i] = nil
+		}
+	}
+	// Now convert lists to functions.
+	for i, obj := range c {
+		list, ok := obj.(List)
+		if !ok || len(list) == 0 {
+			continue
+		}
+		c[i] = ListToFunc(list)
+	}
+}
+
+// Eval all code elements and return the value of the last evaluation.
+func (c Code) Eval(scope *Scope) (result Object) {
+	for _, obj := range c {
+		result = obj.Eval(scope, 0)
+	}
+	return
 }

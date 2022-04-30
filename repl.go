@@ -37,8 +37,13 @@ type repl struct {
 }
 
 // REPL is a Read Eval Print Loop.
-func REPL() {
-	r := repl{line: make([]byte, 1024), scope: NewScope()}
+func REPL(scope ...*Scope) {
+	r := repl{line: make([]byte, 1024)}
+	if 0 < len(scope) {
+		r.scope = scope[0]
+	} else {
+		r.scope = NewScope()
+	}
 	r.scope.Let(Symbol(p1Key), String("* "))
 	if printer.ANSI {
 		r.scope.Let(Symbol(p1ANSIKey), String("\x1b[1m"))

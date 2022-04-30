@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"os"
@@ -19,7 +18,7 @@ var (
 	built   = "unknown"
 
 	verbose     bool
-	evalExpr    string
+	evalCode    string
 	ansiOff     bool
 	interactive bool
 )
@@ -27,7 +26,7 @@ var (
 func init() {
 	flag.BoolVar(&verbose, "v", verbose, "verbose")
 	flag.BoolVar(&ansiOff, "a", ansiOff, "no ANSI codes")
-	flag.StringVar(&evalExpr, "e", evalExpr, "Sexpression to evaluate")
+	flag.StringVar(&evalCode, "e", evalCode, "code to evaluate")
 	flag.BoolVar(&interactive, "i", interactive, "interactive mode")
 }
 
@@ -52,12 +51,19 @@ func run() {
 		case nil:
 			// normal exit
 		case *slip.Panic:
-			fmt.Println(string(bytes.Replace(tr.Bytes(), []byte("###"), []byte("\n### error:"), 1)))
+			if ansiOff {
+				_, _ = os.Stdout.Write(tr.Bytes())
+			} else {
+				buf := tr.Bytes()
+				buf = append([]byte("\x1b[31m"), buf...)
+				buf = append(buf, "\x1b[m"...)
+				_, _ = os.Stdout.Write(buf)
+			}
 		default:
 			if 0 < len(path) {
-				fmt.Printf("\n### error: %s in %s\n\n", tr, path)
+				fmt.Printf("\n## error: %s in %s\n\n", tr, path)
 			} else {
-				fmt.Printf("\n### error: %s\n\n", tr)
+				fmt.Printf("\n## error: %s\n\n", tr)
 			}
 		}
 	}()
@@ -65,20 +71,28 @@ func run() {
 		fmt.Printf("slip version %s built on %s\n", version, built)
 	}
 	if ansiOff {
-		// TBD
+		slip.SetVar(slip.Symbol("*print-ansi*"), nil)
 	}
+	scope := slip.NewScope()
+	var code slip.Code
 	for _, path = range flag.Args() {
 		if buf, err := os.ReadFile(path); err == nil {
-			// TBD read and eval
-			fmt.Printf("*** %s\n", buf)
+			code = append(code, slip.Read(buf)...)
 		} else {
 			panic(err)
 		}
 	}
-	path = ""
-	if 0 < len(evalExpr) {
-		// TBD
-		return
+	path = "" // not loading a file so zero out the path
+	code.Compile()
+	code.Eval(scope)
+	if 0 < len(evalCode) {
+		code = slip.ReadString(evalCode)
+		for _, obj := range code {
+			obj.Eval(scope, 0)
+		}
+		if !interactive {
+			return
+		}
 	}
-	slip.REPL()
+	slip.REPL(scope)
 }
