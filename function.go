@@ -10,8 +10,6 @@ import (
 // FunctionSymbol is the symbol with a value of "function".
 const FunctionSymbol = Symbol("function")
 
-var funcCreators = map[string]func(args List) Object{}
-
 // Function is the base type for most if not all functions.
 type Function struct {
 
@@ -32,21 +30,28 @@ type Function struct {
 
 // Define a new golang function. If the package is provided the function is
 // added to that package otherwise it is added to CurrentPackage (*package*).
-func Define(creator func(args List) Object, doc *FuncDoc, pkg ...*Package) {
+func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
+	pkg := CurrentPackage
+	if 0 < len(pkgs) {
+		pkg = pkgs[0]
+	}
 	name := strings.ToUpper(doc.Name)
-	if _, has := funcCreators[name]; has {
+	if _, has := pkg.funcCreators[name]; has {
 		Warning("redefining %s", printer.caseName(name))
 	}
-	// TBD use CurrentPackage unless pkg is provided
-	funcCreators[name] = creator
-	funcDocs[name] = doc
+	pkg.funcCreators[name] = creator
+	pkg.funcDocs[name] = doc
 }
 
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
-func NewFunc(name string, args List) Object {
+func NewFunc(name string, args List, pkgs ...*Package) Object {
 	name = strings.ToUpper(name)
-	if create := funcCreators[name]; create != nil {
+	pkg := CurrentPackage
+	if 0 < len(pkgs) {
+		pkg = pkgs[0]
+	}
+	if create := pkg.funcCreators[name]; create != nil {
 		return create(args)
 	}
 	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
@@ -178,4 +183,75 @@ func ListToFunc(list List) Object {
 		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[len(list)-1])),
 		Stack:   []string{list.String()},
 	})
+}
+
+// CompileArgs for the function.
+func (f *Function) CompileArgs() {
+	si := -1
+	for i := len(f.Args) - 1; 0 <= i; i-- {
+		si++
+		arg := f.Args[i]
+		if 0 < len(f.SkipEval) {
+			if len(f.SkipEval) <= si {
+				if f.SkipEval[len(f.SkipEval)-1] {
+					if alist, ok := arg.(List); ok {
+						f.Args[i] = CompileList(alist)
+					}
+				}
+			} else if f.SkipEval[si] {
+				if alist, ok := arg.(List); ok {
+					f.Args[i] = CompileList(alist)
+				}
+			}
+		}
+	}
+}
+
+// CompileList a list into a function or an undefined function.
+func CompileList(list List) (f Object) {
+	if 0 < len(list) {
+		switch ta := list[len(list)-1].(type) {
+		case Symbol:
+			name := strings.ToUpper(string(ta))
+			if create := CurrentPackage.funcCreators[name]; create != nil {
+				f = create(list[:len(list)-1])
+			} else {
+				lc := LispCaller{
+					Name: name,
+					Doc: &FuncDoc{
+						Name: name,
+						Args: []*DocArg{},
+					},
+					Forms: List{Undefined(name)},
+				}
+				CurrentPackage.LispCallers[name] = &lc
+				fc := func(args List) Object {
+					return &Dynamic{
+						Function: Function{
+							Name: name,
+							Self: &lc,
+						},
+					}
+				}
+				CurrentPackage.funcCreators[name] = fc
+				f = fc(list[:len(list)-1])
+			}
+			if funk, ok := f.(Funky); ok {
+				funk.CompileArgs()
+			}
+		case List:
+			// TBD maybe lambda
+		}
+	}
+	return
+}
+
+// DescribeFunction returns the documentation for the function bound to the
+// sym argument.
+func DescribeFunction(sym Symbol) *FuncDoc {
+	name := strings.ToUpper(string(sym))
+	if doc, has := CurrentPackage.funcDocs[name]; has {
+		return doc
+	}
+	return nil
 }

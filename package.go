@@ -33,6 +33,12 @@ type Package struct {
 	Imports   map[string]*Import
 	Uses      []*Package
 
+	// LispCallers is a map of all LispCallers defined with either a call to defun
+	// or implicitly by referencing a function not yet defined. In that case the
+	// caller in the map will have Forms list of length 1 and the single form will
+	// an Object that evaluates to an undefined function panic.
+	LispCallers map[string]*LispCaller
+
 	funcCreators map[string]func(args List) Object
 	funcDocs     map[string]*FuncDoc
 }
@@ -41,11 +47,12 @@ type Package struct {
 // is expected.
 func DefPackage(name string, nicknames []string, doc string) *Package {
 	pkg := Package{
-		Name:      strings.ToUpper(name),
-		Nicknames: nicknames,
-		Doc:       doc,
-		Vars:      map[string]*VarVal{},
-		Imports:   map[string]*Import{},
+		Name:        strings.ToUpper(name),
+		Nicknames:   nicknames,
+		Doc:         doc,
+		Vars:        map[string]*VarVal{},
+		Imports:     map[string]*Import{},
+		LispCallers: map[string]*LispCaller{},
 	}
 	packages[pkg.Name] = &pkg
 
@@ -63,6 +70,12 @@ func (obj *Package) Use(pkg *Package) {
 	for name, vv := range pkg.Vars {
 		obj.Vars[name] = vv
 	}
+	for name, fc := range pkg.funcCreators {
+		obj.funcCreators[name] = fc
+	}
+	for name, doc := range pkg.funcDocs {
+		obj.funcDocs[name] = doc
+	}
 }
 
 // Import another package variable
@@ -71,8 +84,12 @@ func (obj *Package) Import(pkg *Package, varName string) {
 	if vv := pkg.Vars[name]; vv != nil {
 		obj.Vars[name] = vv
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
+	} else if fc := pkg.funcCreators[name]; fc != nil {
+		obj.funcCreators[name] = fc
+		obj.funcDocs[name] = pkg.funcDocs[name]
+		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
 	} else {
-		panic(fmt.Sprintf("%s is not a variable in %s", name, pkg))
+		panic(fmt.Sprintf("%s is not a variable or function in %s", name, pkg))
 	}
 }
 

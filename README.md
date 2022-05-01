@@ -22,6 +22,19 @@ SLIce Processing is LISP for golang
    - maybe first pass to defun then second pass for all others
     - misses defun inside another function but too bad
 
+- LispCaller or FormCaller
+ - change Dynamic to point to a LispCaller
+  - put Doc and Forms in caller
+  - for defun put LispCallers in a map
+  - create create function when lisp caller is defined (either implicitely or with defun)
+
+ - createFunc
+  - create function with self pointer to lisp caller
+
+ - how different than dynamic?
+  - can they be the same with some changes?
+  -
+
 
  - functions
  - shadows

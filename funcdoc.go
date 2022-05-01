@@ -13,8 +13,6 @@ const (
 	AmpRest = "&rest"
 )
 
-var funcDocs = map[string]*FuncDoc{}
-
 // DocArg describes a function argument.
 type DocArg struct {
 	Name string

@@ -537,7 +537,7 @@ func (r *reader) closeList() {
 		}
 		if 0 < start && r.stack[start-1] == quoteMarker {
 			if r.newQuote == nil {
-				r.newQuote = funcCreators["QUOTE"]
+				r.newQuote = CLPkg.funcCreators["QUOTE"]
 			}
 			obj = r.newQuote(List{obj})
 			start--
@@ -581,7 +581,7 @@ func (r *reader) pushToken(src []byte) {
 	}
 	if 0 < len(r.stack) && r.stack[len(r.stack)-1] == quoteMarker {
 		if r.newQuote == nil {
-			r.newQuote = funcCreators["QUOTE"]
+			r.newQuote = CLPkg.funcCreators["QUOTE"]
 		}
 		if len(r.stack) == 1 {
 			r.code = append(r.code, r.newQuote(List{Symbol(token)}))
@@ -862,7 +862,7 @@ func (c Code) Compile() {
 		if !ok || len(list) == 0 {
 			continue
 		}
-		c[i] = ListToFunc(list)
+		c[i] = CompileList(list)
 	}
 }
 

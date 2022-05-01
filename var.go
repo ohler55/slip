@@ -51,13 +51,3 @@ func DescribeVar(sym Symbol) string {
 	}
 	return ""
 }
-
-// DescribeFunction returns the documentation for the function bound to the
-// sym argument.
-func DescribeFunction(sym Symbol) *FuncDoc {
-	name := strings.ToUpper(string(sym))
-	if doc, has := funcDocs[name]; has {
-		return doc
-	}
-	return nil
-}
