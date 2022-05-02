@@ -42,7 +42,7 @@ func TestPrintArray(t *testing.T) {
 	a1 := slip.NewArray(slip.Fixnum(1), 3)
 	a := testArray()
 	out := slip.Append([]byte{}, a0)
-	require.Equal(t, "#0A()", string(out))
+	require.Equal(t, "#0Anil", string(out))
 	out = slip.Append([]byte{}, a1)
 	require.Equal(t, "#(1 1 1)", string(out))
 	out = slip.Append([]byte{}, a)

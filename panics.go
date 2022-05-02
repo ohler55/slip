@@ -15,7 +15,7 @@ type Panic struct {
 func (p *Panic) Bytes() []byte {
 	var b []byte
 
-	b = append(b, "** "...)
+	b = append(b, "## "...)
 	b = append(b, p.Error()...)
 	b = append(b, '\n')
 	for _, line := range p.Stack {
@@ -86,5 +86,4 @@ func PanicArgCount(obj Object, min, max int) {
 		Message: fmt.Sprintf("Too many arguments to %s. At most %d expected but got %d.",
 			f.GetName(), max, len(args)),
 	})
-
 }

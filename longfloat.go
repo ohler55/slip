@@ -8,7 +8,12 @@ import (
 )
 
 // LongFloatSymbol is the symbol with a value of "longFloat".
-const LongFloatSymbol = Symbol("long-float")
+const (
+	LongFloatSymbol = Symbol("long-float")
+	// An approximation for converting base 10 to base 2 precision since
+	// big.Float uses base 10 precision for formatting and base 2 for parsing.
+	prec10t2 = 3.32
+)
 
 func init() {
 	DefConstant(LongFloatSymbol, LongFloatSymbol,

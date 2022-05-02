@@ -17,6 +17,17 @@ const (
 	upcaseKey     = Symbol(":upcase")
 	downcaseKey   = Symbol(":downcase")
 	capitalizeKey = Symbol(":capitalize")
+
+	//   0123456789abcdef0123456789abcdef
+	needPipeMap = "" +
+		"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" + // 0x00
+		"xxxxxxxxxx..x..x..........xx...." + // 0x20
+		"...........................xxx.." + // 0x40
+		"x..........................xxx.x" + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................" //   0xe0
 )
 
 type node struct {
@@ -241,17 +252,40 @@ Top:
 			b = strconv.AppendFloat(b, float64(to), 'g', -1, 64)
 		}
 	case *LongFloat:
+		prec := uint(float64((*big.Float)(to).Prec()) / prec10t2)
+		if p.Prec < prec {
+			prec = p.Prec
+		}
 		if p.Readably {
 			// Use the LISP exponent nomenclature by forming the buffer and
 			// then replacing the 'e'.
-			tmp := (*big.Float)(to).Append([]byte{}, 'g', int(p.Prec))
+			tmp := (*big.Float)(to).Append([]byte{}, 'g', int(prec))
 			b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)
 		} else {
-			b = (*big.Float)(to).Append(b, 'g', int(p.Prec))
+			b = (*big.Float)(to).Append(b, 'g', int(prec))
 		}
 	case Symbol:
+		if len(to) == 0 {
+			b = append(b, "||"...)
+			break
+		}
+		if to[0] == ':' {
+			b = append(b, p.caseName(string(to))...)
+			break
+		}
+		for _, c := range []byte(to) {
+			if needPipeMap[c] == 'x' {
+				b = append(b, '|')
+				b = append(b, p.caseName(string(to))...)
+				b = append(b, '|')
+				break Top
+			}
+		}
 		b = append(b, p.caseName(string(to))...)
 	case List:
+		if len(to) == 0 {
+			return append(b, p.caseName("nil")...)
+		}
 		if int(p.Level) <= level {
 			return append(b, '#')
 		}
@@ -318,6 +352,12 @@ Top:
 			obj = args
 		}
 		goto Top
+	case *Package:
+		b = append(b, "#<"...)
+		b = append(b, p.caseName("package")...)
+		b = append(b, ` "`...)
+		b = append(b, to.Name...)
+		b = append(b, `">`...)
 	default:
 		b = to.Append(b)
 		if p.Readably && bytes.HasPrefix(b, []byte("#<")) {

@@ -2,156 +2,10 @@
 
 package slip
 
-import "fmt"
-
-const (
-	reqMode  = 0
-	optMode  = 1
-	restMode = 2
-	keyMode  = 3
-)
-
 // Dynamic represents the a function defined by a call to defun or lambda.
 type Dynamic struct {
 	Function
-	Doc   *FuncDoc
-	Forms List // reverse order
-}
-
-// Call the the function with the arguments provided.
-func (f *Dynamic) Call(s *Scope, args List, depth int) (result Object) {
-	ss := s.NewScope(Symbol(f.Name))
-	mode := reqMode
-	ai := len(args) - 1
-	var rest List
-	var restSym Symbol
-	for i, ad := range f.Doc.Args {
-		if ai < 0 {
-			break
-		}
-	Mode:
-		switch mode {
-		case reqMode:
-			switch ad.Name {
-			case AmpOptional:
-				mode = optMode
-			case AmpRest:
-				mode = restMode
-			case AmpKey:
-				mode = keyMode
-			default:
-				ss.Let(Symbol(ad.Name), args[ai])
-				ai--
-			}
-		case optMode:
-			switch ad.Name {
-			case AmpRest:
-				mode = restMode
-			case AmpKey:
-				mode = keyMode
-			default:
-				ss.Let(Symbol(ad.Name), args[ai])
-				ai--
-			}
-		case restMode:
-			for 0 <= ai {
-				a := args[ai]
-				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
-					sym = sym[1:]
-					for j := i + 1; j < len(f.Doc.Args); j++ {
-						if string(sym) == f.Doc.Args[j].Name {
-							mode = keyMode
-							break Mode
-						}
-					}
-				}
-				ai--
-				if len(restSym) == 0 {
-					restSym = Symbol(ad.Name)
-				}
-				rest = append(rest, a)
-			}
-		case keyMode:
-			for 0 <= ai {
-				a := args[ai]
-				ai--
-				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
-					sym = sym[1:]
-					if ai < 0 {
-						panic(fmt.Sprintf("Missing value for key :%s.", sym))
-					}
-					ss.Let(sym, args[ai])
-					ai--
-					continue
-				}
-				PanicType("keyword to function", a, "symbol")
-			}
-		}
-	}
-	if 0 < len(rest) {
-		// Reverse rest since it was build with append in the wrong order for
-		// a List.
-		for i := len(rest)/2 - 1; 0 <= i; i-- {
-			rest[i], rest[len(rest)-i-1] = rest[len(rest)-i-1], rest[i]
-		}
-		ss.Let(restSym, rest)
-	}
-	mode = reqMode
-	for _, ad := range f.Doc.Args {
-		switch mode {
-		case reqMode:
-			switch ad.Name {
-			case AmpOptional:
-				mode = optMode
-			case AmpRest:
-				mode = restMode
-			case AmpKey:
-				mode = keyMode
-			}
-		case optMode:
-			switch ad.Name {
-			case AmpRest:
-				mode = restMode
-			case AmpKey:
-				mode = keyMode
-			default:
-				if !ss.Has(Symbol(ad.Name)) {
-					ss.Let(Symbol(ad.Name), nil)
-				}
-			}
-		case restMode:
-			switch ad.Name {
-			case AmpKey:
-				mode = keyMode
-			default:
-				if !ss.Has(Symbol(ad.Name)) {
-					ss.Let(Symbol(ad.Name), nil)
-				}
-			}
-		case keyMode:
-			if !ss.Has(Symbol(ad.Name)) {
-				ss.Let(Symbol(ad.Name), nil)
-			}
-		}
-	}
-	d2 := depth + 1
-	for i := len(f.Forms) - 1; 0 <= i; i-- {
-		result = ss.Eval(f.Forms[i], d2)
-		if ss.returnFrom != nil {
-			switch {
-			case ss.returnFrom.tag == nil:
-				if ss.name == nil {
-					return ss.returnFrom.result
-				}
-			case ss.returnFrom.tag.Equal(ss.name):
-				return ss.returnFrom.result
-			default:
-				s.returnFrom = ss.returnFrom
-			}
-			break
-		}
-	}
-	return
+	// Function.Self must point to a LispCaller.
 }
 
 // String representation of the Object.
@@ -165,10 +19,11 @@ func (f *Dynamic) Append(b []byte) []byte {
 	if 0 < len(f.Name) {
 		b = append(b, f.Name...)
 	} else {
-		list := make(List, len(f.Forms)+2)
-		copy(list, f.Forms)
-		args := make(List, len(f.Doc.Args))
-		for i, da := range f.Doc.Args {
+		lc := f.Self.(*LispCaller)
+		list := make(List, len(lc.Forms)+2)
+		copy(list, lc.Forms)
+		args := make(List, len(lc.Doc.Args))
+		for i, da := range lc.Doc.Args {
 			args[len(args)-i-1] = Symbol(da.Name)
 		}
 		list[len(list)-1] = Symbol("lambda")
@@ -188,14 +43,15 @@ func (f *Dynamic) Simplify() interface{} {
 	if 0 < len(f.Name) {
 		simple = append(simple, f.Name)
 	} else {
-		args := make([]interface{}, len(f.Doc.Args))
-		for i, da := range f.Doc.Args {
+		lc := f.Self.(*LispCaller)
+		args := make([]interface{}, len(lc.Doc.Args))
+		for i, da := range lc.Doc.Args {
 			args[i] = da.Name
 		}
-		lambda := make([]interface{}, 0, len(f.Forms)+2)
+		lambda := make([]interface{}, 0, len(lc.Forms)+2)
 		lambda = append(lambda, "lambda", args)
-		for i := len(f.Forms) - 1; 0 <= i; i-- {
-			form := f.Forms[i]
+		for i := len(lc.Forms) - 1; 0 <= i; i-- {
+			form := lc.Forms[i]
 			if form == nil {
 				lambda = append(lambda, nil)
 			} else {

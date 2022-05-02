@@ -6,28 +6,14 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- float
- - should float be an interface? - yes
-  - long-float (big.Float)
-  - double-float (float64)
-   - short-float and single-float are just aliases for double-float
- - rename Float to DoubleFloat
-  - add most-positive-double-float as well as short and single versions
-  - add most-negative-double-float as well as short and single versions
-  - add least-negative-xxx-float
-  - add least-positive-xxx-float
-  - add long-float-digits
-  - add xxx-float-epsilon and xxx-float-negative-epsilon (same values)
-  - need option for printing s, f, d, l instead of e
-   - honor *print-case* for case of exponent letter
-   - use *print-readably* to determine e vs other
- - plan
-  - make a Float interface like integer
-  - create long-float
-   - along with globals
-  - add *print-prec* with ... if more digits past prec
-  - maybe short-float as float32 - might be useful for vectors to save space
+- defun
 
+- deal with using let as a way of a making a closure
+ - allows for hidden variables with defuns in the let
+
+- Code
+ - #' - function (like quote)
+ - #. is read time eval of object if *read-eval* is true else panic
 
 - use (type-of x) or (typep x 'long-float)
 
@@ -49,8 +35,6 @@ SLIce Processing is LISP for golang
 - lambda
  - eval of lambda should return a function
 
-- defun
-
 - functions
  - pkg
   - basic
@@ -69,6 +53,7 @@ SLIce Processing is LISP for golang
    - lambda - create a Dynamic
    - defmacro
    - coerce
+   - intern (string to symbol)
   - list
    + car
    + cdr
@@ -106,16 +91,35 @@ SLIce Processing is LISP for golang
  - instance
  - function
  - macro
- - macrog - golang macro
 
 - Placer
  - place value (car, cdr, nth, rest, first, card, aref, symbol)
   - others in hash-table, array, vector
 
+- steps
+ - parse from bytes to lists/objects
+ - compile evaluates defun and macros
+  - is that the same as eval?
+   - maybe update lists to functions on the first pass
+ - eval
+ - maybe
+  - parse into Code
+  - Code.Eval()
+   - eval does list to function conversions
+   - deal with defuns as well as calling functions
+    - maybe a separate call for repeated calls like Run()
+  - maybe a compile that only runs defun, defmacro, defvar, etc
+  - then an eval, run, or exec for code that will be run multiple times
+
+
 - compile
+ - just parse into lists?
+  - second pass to convert symbols to functions
+
+
  - just compile
   - don't eval defun
-  - keep as list of functions with args (maybe a progn?)
+  - keep as list of Objects/functions with args (maybe a progn?)
    - maybe list of objects since last maybe be the return value
  - eval the list of functions
 

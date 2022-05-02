@@ -36,6 +36,14 @@ func ObjectString(obj Object) string {
 	return obj.String()
 }
 
+// ObjectAppend appends Object or "nil" if nil.
+func ObjectAppend(b []byte, obj Object) []byte {
+	if obj == nil {
+		return append(b, "nil"...)
+	}
+	return obj.Append(b)
+}
+
 // ObjectEqual compares two Object for equality returning true if they are
 // equal.
 func ObjectEqual(x, y Object) (eq bool) {

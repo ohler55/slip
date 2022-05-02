@@ -37,7 +37,7 @@ Repeated pairs of _symbol_ and _value_ are supported`,
 				"(setf x 7) => 7",
 				"(setf x 7 y 8) => 8",
 			},
-		})
+		}, &slip.CLPkg)
 }
 
 // Setf represents the setf function.

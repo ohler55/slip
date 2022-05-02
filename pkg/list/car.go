@@ -28,7 +28,7 @@ _nil_ if _arg_ is _nil_ or an empty _list_.`,
 				"(car '(a . b) => a",
 				"(car '(a b c)) => a",
 			},
-		})
+		}, &slip.CLPkg)
 }
 
 // Car represents the car function.

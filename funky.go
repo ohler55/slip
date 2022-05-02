@@ -12,4 +12,7 @@ type Funky interface {
 
 	// Apply evaluates without the need to evaluate the args..
 	Apply(s *Scope, args List, depth int) Object
+
+	// CompileArgs for the function.
+	CompileArgs()
 }

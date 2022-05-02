@@ -8,14 +8,17 @@ import (
 )
 
 // ArraySymbol is the symbol with a value of "array".
-const ArraySymbol = Symbol("array")
+const (
+	ArraySymbol  = Symbol("array")
+	ArrayMaxRank = 1024
+)
 
 func init() {
 	DefConstant(ArraySymbol, ArraySymbol,
 		`An _array_ is an _n_ dimensional collection of _objects_ identified by a _fixnum_ indices on each dimension.`)
 
 	// Somewhat arbitrary. Could be anything.
-	DefConstant(Symbol("array-rank-limit"), Fixnum(1024), `The upper bound on the rank of an _array_.`)
+	DefConstant(Symbol("array-rank-limit"), Fixnum(ArrayMaxRank), `The upper bound on the rank of an _array_.`)
 	DefConstant(Symbol("array-total-size-limit"), Fixnum(math.MaxInt), `The upper bound on the size of an _array_.`)
 }
 
@@ -45,6 +48,27 @@ func NewArray(initVal Object, dimensions ...int) *Array {
 		}
 	}
 	return &a
+}
+
+// Assumes dims and size arrays already allocated. Used by the reader.
+func (obj *Array) calcAndSet(list List) {
+	if 0 < len(obj.dims) {
+		orig := list
+		var ok bool
+		size := 1
+		for i := 0; i < len(obj.dims); i++ {
+			obj.dims[i] = len(list)
+			obj.sizes[i] = size
+			size *= len(list)
+			if i < len(obj.dims)-1 {
+				if list, ok = list[0].(List); !ok {
+					panic(fmt.Sprintf("Invalid data for a %d dimension array. %s", len(obj.dims), list))
+				}
+			}
+		}
+		obj.elements = make([]Object, size)
+		obj.setDim(orig, 0, 0)
+	}
 }
 
 // String representation of the Object.

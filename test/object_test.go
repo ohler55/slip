@@ -361,7 +361,7 @@ func TestListObj(t *testing.T) {
 func TestListObjEmpty(t *testing.T) {
 	(&sliptest.Object{
 		Target: slip.List{},
-		String: "()",
+		String: "nil",
 		Simple: []interface{}{},
 	}).Test(t)
 }
@@ -516,7 +516,7 @@ func TestFileStream(t *testing.T) {
 	(&sliptest.Object{
 		Target:    (*slip.FileStream)(os.Stdout),
 		String:    "/^#<FILE-STREAM /dev/stdout \\{[0-9+]\\}>$/",
-		Simple:    fmt.Errorf("can not simplify"),
+		Simple:    "#<FILE-STREAM /dev/stdout {1}>",
 		Hierarchy: "file-stream.stream.t",
 		Equals: []*sliptest.EqTest{
 			{Other: (*slip.FileStream)(os.Stdout), Expect: true},

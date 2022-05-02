@@ -27,7 +27,7 @@ func init() {
 				"(quote (a . b)) => (a . b)",
 				"'(a b) => (a b)",
 			},
-		})
+		}, &slip.CLPkg)
 }
 
 // Quote represents the quote function.
