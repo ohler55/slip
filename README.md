@@ -6,15 +6,6 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- Define should also propogate define to children unless already defined in child by different package
- - add parent to child ref list
-- Packages
- - func maps should use a func struct with creator, docs, and orignical package, like vars
-
-- add lock to package
- - applies to defuns and defmacro only
- - Package.Define still works
-
 - defun
 
 - deal with using let as a way of a making a closure

@@ -132,8 +132,8 @@ and raises an error if not possible to print readably.`,
 				Doc: "establishes the right margin for pretty printing.",
 			},
 		},
-		funcCreators: map[string]func(args List) Object{},
-		funcDocs:     map[string]*FuncDoc{},
+		Funcs:  map[string]*FuncInfo{},
+		Locked: true,
 	}
 
 	// ErrorOutput backs *error-output*.

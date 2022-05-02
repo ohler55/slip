@@ -46,8 +46,8 @@ func NewFunc(name string, args List, pkgs ...*Package) Object {
 	if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	if create := pkg.funcCreators[name]; create != nil {
-		return create(args)
+	if fi := pkg.Funcs[name]; fi != nil {
+		return fi.Create(args)
 	}
 	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
 }
@@ -208,8 +208,8 @@ func CompileList(list List) (f Object) {
 		switch ta := list[len(list)-1].(type) {
 		case Symbol:
 			name := strings.ToUpper(string(ta))
-			if create := CurrentPackage.funcCreators[name]; create != nil {
-				f = create(list[:len(list)-1])
+			if fi := CurrentPackage.Funcs[name]; fi != nil {
+				f = fi.Create(list[:len(list)-1])
 			} else {
 				lc := LispCaller{
 					Name: name,
@@ -228,7 +228,7 @@ func CompileList(list List) (f Object) {
 						},
 					}
 				}
-				CurrentPackage.funcCreators[name] = fc
+				CurrentPackage.Funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage}
 				f = fc(list[:len(list)-1])
 			}
 			if funk, ok := f.(Funky); ok {
@@ -245,8 +245,8 @@ func CompileList(list List) (f Object) {
 // sym argument.
 func DescribeFunction(sym Symbol) *FuncDoc {
 	name := strings.ToUpper(string(sym))
-	if doc, has := CurrentPackage.funcDocs[name]; has {
-		return doc
+	if fi, has := CurrentPackage.Funcs[name]; has {
+		return fi.Doc
 	}
 	return nil
 }

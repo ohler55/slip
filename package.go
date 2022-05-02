@@ -39,9 +39,8 @@ type Package struct {
 	// caller in the map will have Forms list of length 1 and the single form will
 	// an Object that evaluates to an undefined function panic.
 	LispCallers map[string]*LispCaller
-
-	funcCreators map[string]func(args List) Object
-	funcDocs     map[string]*FuncDoc
+	Funcs       map[string]*FuncInfo
+	Locked      bool
 }
 
 // DefPackage creates a new package. Calling Import() and Use() after creation
@@ -54,6 +53,7 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		Vars:        map[string]*VarVal{},
 		Imports:     map[string]*Import{},
 		LispCallers: map[string]*LispCaller{},
+		Funcs:       map[string]*FuncInfo{},
 	}
 	packages[pkg.Name] = &pkg
 
@@ -72,11 +72,8 @@ func (obj *Package) Use(pkg *Package) {
 	for name, vv := range pkg.Vars {
 		obj.Vars[name] = vv
 	}
-	for name, fc := range pkg.funcCreators {
-		obj.funcCreators[name] = fc
-	}
-	for name, doc := range pkg.funcDocs {
-		obj.funcDocs[name] = doc
+	for name, fi := range pkg.Funcs {
+		obj.Funcs[name] = fi
 	}
 }
 
@@ -86,9 +83,8 @@ func (obj *Package) Import(pkg *Package, varName string) {
 	if vv := pkg.Vars[name]; vv != nil {
 		obj.Vars[name] = vv
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
-	} else if fc := pkg.funcCreators[name]; fc != nil {
-		obj.funcCreators[name] = fc
-		obj.funcDocs[name] = pkg.funcDocs[name]
+	} else if fi := pkg.Funcs[name]; fi != nil {
+		obj.Funcs[name] = fi
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
 	} else {
 		panic(fmt.Sprintf("%s is not a variable or function in %s", name, pkg))
@@ -141,14 +137,18 @@ func (obj *Package) String() string {
 // Define a new golang function.
 func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	name := strings.ToUpper(doc.Name)
-	if _, has := obj.funcCreators[name]; has {
+	if _, has := obj.Funcs[name]; has {
 		Warning("redefining %s", printer.caseName(name))
 	}
-	obj.funcCreators[name] = creator
-	obj.funcDocs[name] = doc
+	fi := FuncInfo{
+		Name:   name,
+		Create: creator,
+		Doc:    doc,
+		Pkg:    obj,
+	}
+	obj.Funcs[name] = &fi
 	for _, pkg := range obj.Users {
-		pkg.funcCreators[name] = creator
-		pkg.funcDocs[name] = doc
+		pkg.Funcs[name] = &fi
 	}
 }
 
