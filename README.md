@@ -6,95 +6,25 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- Define should also propogate define to children unless already defined in child by different package
+ - add parent to child ref list
+- Packages
+ - func maps should use a func struct with creator, docs, and orignical package, like vars
+
+- add lock to package
+ - applies to defuns and defmacro only
+ - Package.Define still works
+
+- defun
+
+- deal with using let as a way of a making a closure
+ - allows for hidden variables with defuns in the let
 
 - Code
  - #' - function (like quote)
  - #. is read time eval of object if *read-eval* is true else panic
 
-- cmd/slip
- - on load read then compile then eval
-
-- code.Compile
- - turns lists into functions
-  - replace in code to allow second eval (if defuns then treat as if called a second time)
- - defuns evaluated first if at top level
-  - when compiled check function is defun (or defmacro later) if so then eval
-   - maybe first pass to defun then second pass for all others
-    - misses defun inside another function but too bad
-
-- LispCaller or FormCaller
- - change Dynamic to point to a LispCaller
-  - put Doc and Forms in caller
-  - for defun put LispCallers in a map
-  - create create function when lisp caller is defined (either implicitely or with defun)
-
- - createFunc
-  - create function with self pointer to lisp caller
-
- - how different than dynamic?
-  - can they be the same with some changes?
-  -
-
-
- - functions
- - shadows
- - uses (packages)
- - package struct
-  - name
-  - aliases
-  - vars
-  - functions
-  - uses []*Package
-   - need to mask shared vs not
-    - how is that defined? Just by using package?
-   - use export on package define
- - map of all packages (with nicknames or aliases)
- - default package global or a package
- - is a double lookup needed for all vars?
-  - export then package vars unless *package* is same package
-  - check current package first then uses
-
- - var visibility
-  - from package
-   - same package vars pkg.var map
-   - imported vars from any package, redirect (same as uses)
-   - exported from uses packages unless shadowed
-    - PkgUse { pkg, vars (point to something or just a check for a second lookup?), }
-   - any package with pkg:var
-    - check pkg exports (external) first then get var if ok
-   - non-exported (internal) from any with pkg::var
-    - direct to pkg.var map
-   - intern and unintern
-    - adds symbol to package (same as defvar ?)
-  - get
-   - current pkg map
-   - current pkg imports map
-   - used pkg
-    - exports check then map (unless var is a wrapper, double map lookup might be best)
- - all :zzz are in the keyword package ans implicitly used
- - for exports from CL maybe a wildcard like a nil export list
- - how to deal with function code
-  - when function runs it has all the vars in the package it was defined in and also *package*
-   - that means it need ref to it's package
-
-  type Import struct {
-    pkg *Package
-    name string
-  }
-  type Used struct {
-    pkg *Package
-    imports map[string]*Import (or maybe just map[string]bool
-  }
-  type Package struct {
-    vars map[string]Object
-    imports map[string]*Import
-    used []*Used
-  }
-
-
-
 - use (type-of x) or (typep x 'long-float)
-
 
 - how to handle marco characters in compile
  - backquote ` of list allow use of , options
@@ -113,8 +43,6 @@ SLIce Processing is LISP for golang
 
 - lambda
  - eval of lambda should return a function
-
-- defun
 
 - functions
  - pkg

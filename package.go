@@ -32,6 +32,7 @@ type Package struct {
 	Vars      map[string]*VarVal
 	Imports   map[string]*Import
 	Uses      []*Package
+	Users     []*Package
 
 	// LispCallers is a map of all LispCallers defined with either a call to defun
 	// or implicitly by referencing a function not yet defined. In that case the
@@ -67,6 +68,7 @@ func (obj *Package) Use(pkg *Package) {
 		}
 	}
 	obj.Uses = append(obj.Uses, pkg)
+	pkg.Users = append(pkg.Users, obj)
 	for name, vv := range pkg.Vars {
 		obj.Vars[name] = vv
 	}
@@ -134,6 +136,20 @@ func (obj *Package) Has(name string) (has bool) {
 // String representation of the Object.
 func (obj *Package) String() string {
 	return string(obj.Append([]byte{}))
+}
+
+// Define a new golang function.
+func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
+	name := strings.ToUpper(doc.Name)
+	if _, has := obj.funcCreators[name]; has {
+		Warning("redefining %s", printer.caseName(name))
+	}
+	obj.funcCreators[name] = creator
+	obj.funcDocs[name] = doc
+	for _, pkg := range obj.Users {
+		pkg.funcCreators[name] = creator
+		pkg.funcDocs[name] = doc
+	}
 }
 
 // Append a buffer with a representation of the Object.

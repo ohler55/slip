@@ -30,7 +30,7 @@ func init() {
 			Examples: []string{
 				"(set 'x 7) => 7",
 			},
-		})
+		}, &slip.CLPkg)
 }
 
 // Set represents the set function.

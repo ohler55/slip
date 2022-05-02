@@ -23,7 +23,7 @@ func init() {
 				"(list) => ()",
 				"(list a b) => (a b)",
 			},
-		})
+		}, &slip.CLPkg)
 }
 
 // List represents the list function.

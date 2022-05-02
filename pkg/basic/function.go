@@ -27,7 +27,7 @@ func init() {
 				"#'car => #<FUNCTION CAR>",
 				"#'(lambda (x) (car x)) => #<FUNCTION (LAMBDA (X))>",
 			},
-		})
+		}, &slip.CLPkg)
 }
 
 // Function represents the function function.

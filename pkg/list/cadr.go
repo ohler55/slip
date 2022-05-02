@@ -30,7 +30,7 @@ _nil_ if _arg_ is _nil_ or an empty _list_.`,
 				"(setf (cadr x) 'd) => d",
 				" x => (a d c)",
 			},
-		})
+		}, &slip.CLPkg)
 }
 
 // Cadr represents the cadr function.

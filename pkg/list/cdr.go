@@ -28,7 +28,7 @@ _nil_ if _arg_ is _nil_ or an empty _list_.`,
 				"(cdr '(a . b) => b",
 				"(cdr '(a b c)) => (b c)",
 			},
-		})
+		}, &slip.CLPkg)
 }
 
 // Cdr represents the cdr function.

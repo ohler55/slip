@@ -35,12 +35,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 	if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	name := strings.ToUpper(doc.Name)
-	if _, has := pkg.funcCreators[name]; has {
-		Warning("redefining %s", printer.caseName(name))
-	}
-	pkg.funcCreators[name] = creator
-	pkg.funcDocs[name] = doc
+	pkg.Define(creator, doc)
 }
 
 // NewFunc creates a new instance of the named function with the arguments
