@@ -7,9 +7,10 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - defun
+ - test defun with closure
+ -
 
-- deal with using let as a way of a making a closure
- - allows for hidden variables with defuns in the let
+
 
 - Code
  - #' - function (like quote)

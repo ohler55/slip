@@ -15,14 +15,19 @@ const (
 // indirection so that functions can be defined without regard to the order
 // defined.
 type LispCaller struct {
-	Name  string
-	Doc   *FuncDoc
-	Forms List // reverse order
+	Name    string
+	Doc     *FuncDoc
+	Forms   List // reverse order
+	Closure *Scope
 }
 
 // Call the the function with the arguments provided.
 func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
+	// Copy the before and after from the calling scope but replace the parent
+	// to the closure if there is one.
 	ss := s.NewScope(Symbol(lc.Name))
+	ss.parent = lc.Closure
+
 	mode := reqMode
 	ai := len(args) - 1
 	var rest List

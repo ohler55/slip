@@ -15,9 +15,10 @@ const (
 
 // DocArg describes a function argument.
 type DocArg struct {
-	Name string
-	Type string
-	Text string
+	Name    string
+	Type    string
+	Text    string
+	Default Object
 }
 
 // FuncDoc describes a function.
