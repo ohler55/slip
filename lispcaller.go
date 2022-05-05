@@ -123,7 +123,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 				mode = keyMode
 			default:
 				if !ss.Has(Symbol(ad.Name)) {
-					ss.Let(Symbol(ad.Name), nil)
+					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
 		case restMode:
@@ -132,12 +132,12 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 				mode = keyMode
 			default:
 				if !ss.Has(Symbol(ad.Name)) {
-					ss.Let(Symbol(ad.Name), nil)
+					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
 		case keyMode:
 			if !ss.Has(Symbol(ad.Name)) {
-				ss.Let(Symbol(ad.Name), nil)
+				ss.Let(Symbol(ad.Name), ad.Default)
 			}
 		}
 	}

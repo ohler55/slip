@@ -8,8 +8,10 @@ SLIce Processing is LISP for golang
 
 - defun
  - test defun with closure
- -
 
+- LispCaller
+ - validate args
+  - panic on extra
 
 
 - Code

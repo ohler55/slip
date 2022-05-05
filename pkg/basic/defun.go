@@ -3,7 +3,6 @@
 package basic
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -68,7 +67,12 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	upper := strings.ToUpper(string(name))
 	pos--
 	var ll slip.List
-	if ll, ok = args[pos].(slip.List); !ok {
+	switch tl := args[pos].(type) {
+	case slip.List:
+		ll = tl
+	case nil:
+		// leave as empty list
+	default:
 		slip.PanicType("lambda list of defun", args[pos], "list")
 	}
 	pos--
@@ -92,6 +96,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 				Function: slip.Function{
 					Name: upper,
 					Self: lc,
+					Args: args,
 				},
 			}
 		}
@@ -104,11 +109,26 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	if s.Parent() != nil {
 		lc.Closure = s
 	}
-
-	// TBD build doc args
-	// lc.Doc.Args     []*DocArg
-
-	fmt.Printf("*** defun %s %s docs: %q forms: %s\n", lc.Name, ll, lc.Doc.Text, lc.Forms)
-
+	for i := len(ll) - 1; 0 <= i; i-- {
+		switch ta := ll[i].(type) {
+		case slip.Symbol: // variable name
+			lc.Doc.Args = append(lc.Doc.Args, &slip.DocArg{Name: string(ta), Type: "object"})
+		case slip.List: // variable name and default value
+			if len(ta) != 2 {
+				slip.PanicType("lambda list element with default value", ta, "list of two elements")
+			}
+			if name, ok = ta[1].(slip.Symbol); !ok {
+				slip.PanicType("lambda list element with default value", ta, "list with a symbol as the first element")
+			}
+			if ta[0] == nil {
+				lc.Doc.Args = append(lc.Doc.Args, &slip.DocArg{Name: string(name), Type: "object"})
+			} else {
+				lc.Doc.Args = append(lc.Doc.Args,
+					&slip.DocArg{Name: string(name), Type: string(ta[0].Hierarchy()[0]), Default: ta[0]})
+			}
+		default:
+			slip.PanicType("lambda list element", ta, "symbol", "list")
+		}
+	}
 	return name
 }
