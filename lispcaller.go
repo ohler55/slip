@@ -95,6 +95,9 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 			}
 		}
 	}
+	if 0 <= ai {
+		panic(&Panic{Message: fmt.Sprintf("Too many arguments to %s. There is %d extra.", lc.Name, ai+1)})
+	}
 	if 0 < len(rest) {
 		// Reverse rest since it was build with append in the wrong order for
 		// a List.

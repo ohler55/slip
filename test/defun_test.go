@@ -3,6 +3,7 @@
 package test
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/ohler55/slip"
@@ -61,4 +62,40 @@ func TestDefunBadLambdaListArg(t *testing.T) {
 	require.Panics(t, func() { _ = slip.ReadString("(defun bad ((x)) nil)").Eval(slip.NewScope()) })
 	require.Panics(t, func() { _ = slip.ReadString("(defun bad ((t 0)) nil)").Eval(slip.NewScope()) })
 	require.Panics(t, func() { _ = slip.ReadString("(defun bad (t) nil)").Eval(slip.NewScope()) })
+}
+
+func TestDefunAgain(t *testing.T) {
+	var out bytes.Buffer
+	orig := slip.ErrorOutput
+	defer func() { slip.ErrorOutput = orig }()
+	slip.ErrorOutput = &slip.OutputStream{Writer: &out}
+	code := slip.ReadString(`
+(defun again () 3)
+(defun again () 7)
+(again)`)
+	scope := slip.NewScope()
+	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
+	require.Equal(t, "WARNING: redefining COMMON-LISP-USER::AGAIN in DEFUN\n", out.String())
+}
+
+func TestDefunTooManyArgs(t *testing.T) {
+	code := slip.ReadString(`
+(defun too-many () 3)
+(too-many 7)`)
+	scope := slip.NewScope()
+	require.Panics(t, func() { _ = code.Eval(scope) })
+}
+
+func TestDefunTooFewArgs(t *testing.T) {
+	code := slip.ReadString(`
+(defun too-few (x) x)
+(too-few)`)
+	scope := slip.NewScope()
+	require.Panics(t, func() { _ = code.Eval(scope) })
+}
+
+func TestDefunLocked(t *testing.T) {
+	code := slip.ReadString("(defun setq () nil)")
+	scope := slip.NewScope()
+	require.Panics(t, func() { _ = code.Eval(scope) })
 }

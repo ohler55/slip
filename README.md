@@ -6,13 +6,11 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- LispCaller
+ - test various configurations of args
+
 - defun
  - test defun with closure
-
-- LispCaller
- - validate args
-  - panic on extra
-
 
 - Code
  - #' - function (like quote)

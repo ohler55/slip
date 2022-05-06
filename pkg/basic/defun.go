@@ -3,6 +3,8 @@
 package basic
 
 import (
+	"fmt"
+	"io"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -80,34 +82,23 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	if docStr, ok = args[pos].(slip.String); !ok {
 		pos++
 	}
-	var lc *slip.LispCaller
-	if fi := slip.CurrentPackage.Funcs[upper]; fi == nil {
-		lc = &slip.LispCaller{
-			Name: upper,
-			Doc: &slip.FuncDoc{
-				Name:   upper,
-				Return: "object",
-				Text:   string(docStr),
-			},
-			Forms: args[:pos],
-		}
-		fc := func(args slip.List) slip.Object {
-			return &slip.Dynamic{
-				Function: slip.Function{
-					Name: upper,
-					Self: lc,
-					Args: args,
-				},
-			}
-		}
-		slip.CurrentPackage.LispCallers[upper] = lc
-		fi = &slip.FuncInfo{Create: fc, Pkg: slip.CurrentPackage}
-		slip.CurrentPackage.Funcs[upper] = fi
-	} else {
-		lc = slip.CurrentPackage.LispCallers[upper]
+	lc := &slip.LispCaller{
+		Name: upper,
+		Doc: &slip.FuncDoc{
+			Name:   upper,
+			Return: "object",
+			Text:   string(docStr),
+		},
+		Forms: args[:pos],
 	}
-	if s.Parent() != nil {
-		lc.Closure = s
+	fc := func(fargs slip.List) slip.Object {
+		return &slip.Dynamic{
+			Function: slip.Function{
+				Name: upper,
+				Self: lc,
+				Args: fargs,
+			},
+		}
 	}
 	for i := len(ll) - 1; 0 <= i; i-- {
 		switch ta := ll[i].(type) {
@@ -129,6 +120,21 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		default:
 			slip.PanicType("lambda list element", ta, "symbol", "list")
 		}
+	}
+	if fi := slip.CurrentPackage.Funcs[upper]; fi != nil {
+		if fi.Pkg.Locked {
+			panic(fmt.Sprintf("Redefining %s::%s in DEFUN. Package %s is locked.",
+				slip.CurrentPackage.Name, upper, slip.CurrentPackage.Name))
+		}
+		var w io.Writer
+		if w, ok = slip.ErrorOutput.(io.Writer); ok {
+			_, _ = fmt.Fprintf(w, "WARNING: redefining %s::%s in DEFUN\n", slip.CurrentPackage.Name, upper)
+		}
+	}
+	slip.CurrentPackage.LispCallers[upper] = lc
+	slip.CurrentPackage.Funcs[upper] = &slip.FuncInfo{Create: fc, Pkg: slip.CurrentPackage}
+	if s.Parent() != nil {
+		lc.Closure = s
 	}
 	return name
 }

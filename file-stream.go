@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// FileStreamSymbol is the symbol with a value of "fileStream".
+// FileStreamSymbol is the symbol with a value of "file-stream".
 const FileStreamSymbol = Symbol("file-stream")
 
 func init() {
