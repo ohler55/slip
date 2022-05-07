@@ -40,6 +40,22 @@ func TestDefunDefaultArgNilValue(t *testing.T) {
 	require.Equal(t, nil, slip.ReadString("(funny3)").Eval(scope))
 }
 
+func TestDefunRest(t *testing.T) {
+	code := slip.ReadString(`
+(defun the-rest (&rest args) args)
+(the-rest 1 2 3)`)
+	scope := slip.NewScope()
+	require.Equal(t, slip.List{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}, code.Eval(scope))
+}
+
+func TestDefunKey(t *testing.T) {
+	code := slip.ReadString(`
+(defun key-rest (&key kee) kee)
+(key-rest :kee 1)`)
+	scope := slip.NewScope()
+	require.Equal(t, slip.Fixnum(1), code.Eval(scope))
+}
+
 func TestDefunPre(t *testing.T) {
 	code := slip.ReadString(`
 (defun aaa () (bbb))

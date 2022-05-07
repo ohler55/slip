@@ -2,7 +2,10 @@
 
 package slip
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	reqMode  = 0
@@ -39,7 +42,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 	Mode:
 		switch mode {
 		case reqMode:
-			switch ad.Name {
+			switch strings.ToLower(ad.Name) {
 			case AmpOptional:
 				mode = optMode
 			case AmpRest:
@@ -51,7 +54,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 				ai--
 			}
 		case optMode:
-			switch ad.Name {
+			switch strings.ToLower(ad.Name) {
 			case AmpRest:
 				mode = restMode
 			case AmpKey:
@@ -96,7 +99,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 		}
 	}
 	if 0 <= ai {
-		panic(&Panic{Message: fmt.Sprintf("Too many arguments to %s. There is %d extra.", lc.Name, ai+1)})
+		panic(&Panic{Message: fmt.Sprintf("Too many arguments to %s. There are %d extra.", lc.Name, ai+1)})
 	}
 	if 0 < len(rest) {
 		// Reverse rest since it was build with append in the wrong order for
@@ -110,7 +113,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 	for _, ad := range lc.Doc.Args {
 		switch mode {
 		case reqMode:
-			switch ad.Name {
+			switch strings.ToLower(ad.Name) {
 			case AmpOptional:
 				mode = optMode
 			case AmpRest:
@@ -119,7 +122,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 				mode = keyMode
 			}
 		case optMode:
-			switch ad.Name {
+			switch strings.ToLower(ad.Name) {
 			case AmpRest:
 				mode = restMode
 			case AmpKey:
@@ -130,7 +133,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 				}
 			}
 		case restMode:
-			switch ad.Name {
+			switch strings.ToLower(ad.Name) {
 			case AmpKey:
 				mode = keyMode
 			default:
