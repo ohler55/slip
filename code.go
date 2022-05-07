@@ -834,13 +834,12 @@ func (c Code) Compile() {
 			continue
 		}
 		var sym Symbol
-		if sym, ok = list[0].(Symbol); !ok {
+		if sym, ok = list[len(list)-1].(Symbol); !ok {
 			continue
 		}
 		var f Object
 		switch strings.ToUpper(string(sym)) {
 		case "DEFUN":
-			// TBD need a ListToFunc that sets up an undefined list
 			f = ListToFunc(list)
 			c[i] = f
 		case "DEFVAR":
@@ -869,7 +868,9 @@ func (c Code) Compile() {
 // Eval all code elements and return the value of the last evaluation.
 func (c Code) Eval(scope *Scope) (result Object) {
 	for _, obj := range c {
-		result = obj.Eval(scope, 0)
+		if obj != nil {
+			result = obj.Eval(scope, 0)
+		}
 	}
 	return
 }

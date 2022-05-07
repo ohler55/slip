@@ -132,8 +132,9 @@ and raises an error if not possible to print readably.`,
 				Doc: "establishes the right margin for pretty printing.",
 			},
 		},
-		Funcs:  map[string]*FuncInfo{},
-		Locked: true,
+		LispCallers: map[string]*LispCaller{},
+		Funcs:       map[string]*FuncInfo{},
+		Locked:      true,
 	}
 
 	// ErrorOutput backs *error-output*.

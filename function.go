@@ -173,6 +173,7 @@ func ListToFunc(list List) Object {
 		return NewFunc(string(ta), list[:len(list)-1])
 	case List:
 		// TBD maybe lambda
+		fmt.Printf("*** lambda?\n")
 	}
 	panic(&Panic{
 		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[len(list)-1])),

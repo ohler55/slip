@@ -42,6 +42,11 @@ func (s *Scope) NewScope(name Object) *Scope {
 	}
 }
 
+// Parent returns the parent scope or nil.
+func (s *Scope) Parent() *Scope {
+	return s.parent
+}
+
 /*
 // Before should be called in a go defined Eval function before executing
 // other code.
