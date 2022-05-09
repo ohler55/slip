@@ -6,11 +6,33 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- LispCaller
- - test various configurations of args
+- values function in pkg/basic
+ - use with car
+
+- let
 
 - defun
  - test defun with closure
+
+- address multiple return values (Values type)
+ - maybe with defuns for testing
+ - is there a way for Values to always return first value
+  - alterative is every function must check type
+
+- flavors package (imported to user package)
+ - define flavor and instance and methid
+  - flavor
+   - holds methods as map
+  - instance
+   - pointer to flavor
+   - map of variables
+ - method
+  - core or primary method function
+  - list of before, after
+  - list of whoppers (wrappers)
+
+- simple or data or ???
+ - use flavors for the instance and methods
 
 - Code
  - #' - function (like quote)
@@ -43,6 +65,7 @@ SLIce Processing is LISP for golang
    + set
    + setq
    + setf
+   - let
    - describe
    - apropos
    - null
@@ -97,55 +120,8 @@ SLIce Processing is LISP for golang
  - place value (car, cdr, nth, rest, first, card, aref, symbol)
   - others in hash-table, array, vector
 
-- steps
- - parse from bytes to lists/objects
- - compile evaluates defun and macros
-  - is that the same as eval?
-   - maybe update lists to functions on the first pass
- - eval
- - maybe
-  - parse into Code
-  - Code.Eval()
-   - eval does list to function conversions
-   - deal with defuns as well as calling functions
-    - maybe a separate call for repeated calls like Run()
-  - maybe a compile that only runs defun, defmacro, defvar, etc
-  - then an eval, run, or exec for code that will be run multiple times
-
-
-- compile
- - just parse into lists?
-  - second pass to convert symbols to functions
-
-
- - just compile
-  - don't eval defun
-  - keep as list of Objects/functions with args (maybe a progn?)
-   - maybe list of objects since last maybe be the return value
- - eval the list of functions
-
 - load
  - compile and then eval
-
-- scope
- - eval
-  - should functions eval functions instead of having scope do the arg evals?
-  - do functions always need a scope for the args?
-   - yes for lambdas and as args
-    - could just create scope when calling lambdas
-   - no at first, only if lambda is there
-  - options
-   - scope evals args
-   - fun evals args
-  - trace
-   - set on scope or global?
-   - if depth is always given then if >= 0 trace
-    - maybe functions to display in and out
-     - call in func after eval of args
-     - call out func on exit or in defer?
-      - maybe scope eval can do this
-   - if trace is set in scope then the set is either trace func or no-op
-
 
 - function
  - how to return multiple values (slip.Values)
@@ -173,26 +149,12 @@ SLIce Processing is LISP for golang
 
  - fork
 
-- lisp - SLIce Processing (slip)
- - name
-  - gosp
-  - gisp
-  - glisp
-  - golisp - taken
-  - lispy
-  - slice processing (sp) (slip)
-  - list processing (lp)
- - list is reverse slice
- - support marcos
-  - represented as scoped fun
-  - support macro chars of , and ,@ in a backquoted (not single quote) list
-   - , eval
-   - ,@ is like: if foo is (a b) the ,@foo becomes a b
-   - ', as is, no eval, (as string?)
-   - https://lisp-journey.gitlab.io/blog/common-lisp-macros-by-example-tutorial/
-   - defmacro defined should expand at compile time
-   - golang macro should just not eval args
-
- - handle args of &rest and :key
- - what to call sexpr/**object**
- - object & class support
+- support marcos
+ - represented as scoped fun
+ - support macro chars of , and ,@ in a backquoted (not single quote) list
+  - , eval
+  - ,@ is like: if foo is (a b) the ,@foo becomes a b
+  - ', as is, no eval, (as string?)
+  - https://lisp-journey.gitlab.io/blog/common-lisp-macros-by-example-tutorial/
+  - defmacro defined should expand at compile time
+  - golang macro should just not eval args

@@ -55,5 +55,10 @@ func (obj Values) Hierarchy() []Symbol {
 
 // Eval panics.
 func (obj Values) Eval(s *Scope, depth int) Object {
-	panic("Illegal function call")
+	return obj[len(obj)-1]
+}
+
+// First value in the multiple values.
+func (obj Values) First() Object {
+	return obj[len(obj)-1]
 }

@@ -77,6 +77,9 @@ func (s *Scope) Let(sym Symbol, value Object) {
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
+	if vs, ok := value.(Values); ok {
+		value = vs.First()
+	}
 	s.vars[name] = value
 }
 
@@ -103,6 +106,9 @@ func (s *Scope) get(name string) Object {
 // called. If no bindings are found before reaching the World then a new world
 // level binding is created.
 func (s *Scope) Set(sym Symbol, value Object) {
+	if vs, ok := value.(Values); ok {
+		value = vs.First()
+	}
 	s.set(strings.ToUpper(string(sym)), value)
 }
 

@@ -480,7 +480,7 @@ func TestValues(t *testing.T) {
 			{Other: slip.Values{slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		Panics: true,
+		Eval: nil,
 	}).Test(t)
 }
 
