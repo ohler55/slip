@@ -36,12 +36,14 @@ type Cdr struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Cdr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	switch list := args[0].(type) {
+	a := args[0]
+Retry:
+	switch list := a.(type) {
 	case nil:
 		// leave result as nil
 	case slip.Cons:
@@ -50,6 +52,9 @@ func (f *Cdr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		if 0 < len(list) {
 			result = list[:len(list)-1]
 		}
+	case slip.Values:
+		a = list.First()
+		goto Retry
 	default:
 		slip.PanicType("argument to cdr", list, "cons", "list")
 	}

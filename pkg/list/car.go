@@ -36,7 +36,7 @@ type Car struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Car) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
@@ -66,18 +66,13 @@ func (f *Car) Place(args slip.List, value slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	a := args[0]
-Retry:
-	switch list := a.(type) {
+	switch list := args[0].(type) {
 	case slip.Cons:
 		list[len(list)-1] = value
 	case slip.List:
 		if 0 < len(list) {
 			list[len(list)-1] = value
 		}
-	case slip.Values:
-		a = list.First()
-		goto Retry
 	default:
 		slip.PanicType("argument to car", list, "cons", "list")
 	}

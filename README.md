@@ -6,9 +6,6 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- values function in pkg/basic
- - use with car
-
 - let
 
 - defun

@@ -38,18 +38,23 @@ type Cadr struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Cadr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	switch list := args[0].(type) {
+	a := args[0]
+Retry:
+	switch list := a.(type) {
 	case nil:
 		// leave result as nil
 	case slip.List:
 		if 1 < len(list) {
 			result = list[len(list)-2]
 		}
+	case slip.Values:
+		a = list.First()
+		goto Retry
 	default:
 		slip.PanicType("argument to cadr", list, "list")
 	}

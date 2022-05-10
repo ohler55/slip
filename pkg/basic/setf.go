@@ -55,6 +55,9 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		p := args[i]
 		i--
 		result = f.EvalArg(s, args, i, d2)
+		if vs, ok := result.(slip.Values); ok {
+			result = vs.First()
+		}
 	Retry:
 		switch ta := p.(type) {
 		case slip.Symbol:

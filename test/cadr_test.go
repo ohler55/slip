@@ -103,3 +103,9 @@ func TestCadrSetfNoArg(t *testing.T) {
 		Panics: true,
 	}).Test(t)
 }
+
+func TestCadrValues(t *testing.T) {
+	code := slip.ReadString(`(cadr (values '(a b) 'c))`)
+	scope := slip.NewScope()
+	require.Equal(t, slip.Symbol("b"), code.Eval(scope))
+}
