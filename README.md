@@ -6,27 +6,23 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- let
-
-- defun
- - test defun with closure
-
-- address multiple return values (Values type)
- - maybe with defuns for testing
- - is there a way for Values to always return first value
-  - alterative is every function must check type
 
 - flavors package (imported to user package)
- - define flavor and instance and methid
+ - define flavor and instance and method
   - flavor
    - holds methods as map
-  - instance
-   - pointer to flavor
-   - map of variables
  - method
   - core or primary method function
   - list of before, after
   - list of whoppers (wrappers)
+ - instance
+  - Instance struct
+   - Flavor *Flavor
+   - Data any
+    - Vars (use flavor for methods and access)
+   - Receive()
+    - calls flavor method from a map
+
 
 - simple or data or ???
  - use flavors for the instance and methods

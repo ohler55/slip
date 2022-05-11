@@ -66,6 +66,16 @@ func TestDefunPre(t *testing.T) {
 	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
 }
 
+func TestDefunClosure(t *testing.T) {
+	code := slip.ReadString(`
+(let ((x 7))
+ (defun clo () x))
+(clo)
+`)
+	scope := slip.NewScope()
+	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
+}
+
 func TestDefunBadName(t *testing.T) {
 	require.Panics(t, func() { _ = slip.ReadString("(defun t () nil)").Eval(slip.NewScope()) })
 }
