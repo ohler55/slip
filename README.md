@@ -6,15 +6,24 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- next
+ - flavors package
+  - add flavor name symbol for each flavor
+
+ - Flavor struct
+ - Method Struct
+ - Instance struct
+ - Vanilla Flavor
+  - print-self, describe, which-operations, and more
 
 - flavors package (imported to user package)
  - define flavor and instance and method
   - flavor
    - holds methods as map
- - method
-  - core or primary method function
-  - list of before, after
-  - list of whoppers (wrappers)
+   - list of component or inherited flavors (inherit list)
+ - method or combined-method
+  - daemon method function (primary)
+  - before, after, whoppers (wrappers) (one of each)
  - instance
   - Instance struct
    - Flavor *Flavor
@@ -24,7 +33,7 @@ SLIce Processing is LISP for golang
     - calls flavor method from a map
 
 
-- simple or data or ???
+- simple or data or opaque or ???
  - use flavors for the instance and methods
 
 - Code
