@@ -19,8 +19,8 @@ func init() {
 
 // Instance is an instance of a Flavor.
 type Instance struct {
+	scope  *slip.Scope
 	flavor *Flavor
-	vars   map[string]slip.Object
 }
 
 // String representation of the Object.

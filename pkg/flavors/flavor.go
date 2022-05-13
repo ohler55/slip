@@ -17,6 +17,8 @@ var allFlavors = map[string]*Flavor{vanilla.name: &vanilla}
 func init() {
 	slip.DefConstant(FlavorSymbol, FlavorSymbol,
 		`A _flavor_ encapsulates a class of objects.`)
+
+	defFlavor(slip.Symbol("Foo")) // TBD remove once the defflavor function is implemented
 }
 
 // Flavor of Objects.
@@ -33,8 +35,7 @@ type Flavor struct {
 	abstract        bool
 }
 
-// DefFlavor defines a Flavor.
-func DefFlavor(name slip.Symbol, inherit ...slip.Symbol) *Flavor {
+func defFlavor(name slip.Symbol, inherit ...slip.Symbol) *Flavor {
 	key := strings.ToLower(string(name))
 	if _, has := allFlavors[key]; has {
 		panic(fmt.Sprintf("Flavor %s already defined.", name))
@@ -99,15 +100,28 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 			obj.defaultVars[k] = v
 		}
 	}
-	// TBD add methods, if method does not exist create a blank first
-
+	for k, m := range cf.methods {
+		xm := obj.methods[k]
+		if xm != nil {
+			xm.inherit = append(xm.inherit, m)
+		} else {
+			xm = &method{
+				name:    k,
+				from:    obj,
+				inherit: []*method{m},
+			}
+			obj.methods[k] = xm
+		}
+	}
 }
 
-func (obj *Flavor) makeInstance(args slip.List) *Instance {
+func (obj *Flavor) makeInstance() *Instance {
 	inst := Instance{
 		flavor: obj,
-		vars:   map[string]slip.Object{},
+		scope:  slip.NewScope(),
 	}
-	// TBD add vars from args
+	for k, v := range obj.defaultVars {
+		inst.scope.Let(slip.Symbol(k), v)
+	}
 	return &inst
 }

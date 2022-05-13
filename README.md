@@ -1,4 +1,4 @@
-# slip
+# SLIP
 
 SLIce Processing is LISP for golang
 
@@ -9,28 +9,11 @@ SLIce Processing is LISP for golang
 - next
  - flavors package
   - add flavor name symbol for each flavor
+ - defflavor function
+ - make-instance function
+ - send function
 
- - Flavor struct
- - Method Struct
- - Instance struct
  - Vanilla Flavor
-  - print-self, describe, which-operations, and more
-
-- flavors package (imported to user package)
- - define flavor and instance and method
-  - flavor
-   - holds methods as map
-   - list of component or inherited flavors (inherit list)
- - method or combined-method
-  - daemon method function (primary)
-  - before, after, whoppers (wrappers) (one of each)
- - instance
-  - Instance struct
-   - Flavor *Flavor
-   - Data any
-    - Vars (use flavor for methods and access)
-   - Receive()
-    - calls flavor method from a map
 
 
 - simple or data or opaque or ???
