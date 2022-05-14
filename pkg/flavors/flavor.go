@@ -54,6 +54,7 @@ func defFlavor(name slip.Symbol, inherit ...slip.Symbol) *Flavor {
 	}
 	f.inheritFlavor(&vanilla)
 	allFlavors[key] = &f
+	FlavorsPkg.Set(string(name), &f)
 	return &f
 }
 

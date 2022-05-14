@@ -11,7 +11,7 @@ var (
 		Nicknames: []string{},
 		Doc:       "Home of symbols defined for the Flavors object model.",
 		Vars: map[string]*slip.VarVal{
-			"*ALL_FLAVOR-NAMES*": {
+			"*ALL-FLAVOR-NAMES*": {
 				Get: getAllFlavorNames,
 				Set: setPanic,
 				Doc: "the names of all the defined Flavors.",
@@ -21,6 +21,11 @@ var (
 		Funcs:       map[string]*slip.FuncInfo{},
 	}
 )
+
+func init() {
+	slip.AddPackage(&FlavorsPkg)
+	slip.UserPkg.Use(&FlavorsPkg)
+}
 
 func getAllFlavorNames() slip.Object {
 	names := make(slip.List, 0, len(allFlavors))

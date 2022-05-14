@@ -60,6 +60,11 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 	return &pkg
 }
 
+// AddPackage adds a package.
+func AddPackage(pkg *Package) {
+	packages[pkg.Name] = pkg
+}
+
 // Use another package
 func (obj *Package) Use(pkg *Package) {
 	for _, p := range obj.Uses {
@@ -105,7 +110,13 @@ func (obj *Package) Set(name string, value Object) {
 		}
 		return
 	}
-	obj.Vars[name] = &VarVal{Val: value, Pkg: obj}
+	vv := &VarVal{Val: value, Pkg: obj}
+	obj.Vars[name] = vv
+	for _, u := range obj.Users {
+		if _, has := u.Vars[name]; !has {
+			u.Vars[name] = vv
+		}
+	}
 }
 
 // Get a variable.
@@ -121,6 +132,22 @@ func (obj *Package) Get(name string) (value Object, has bool) {
 		return
 	}
 	return nil, false
+}
+
+// Remove a variable.
+func (obj *Package) Remove(name string) {
+	name = strings.ToUpper(name)
+	if vv, has := obj.Vars[name]; has {
+		if vv.Get != nil {
+			panic(fmt.Sprintf("%s can not be removed.", name))
+		}
+		delete(obj.Vars, name)
+		for _, u := range obj.Users {
+			if vv, has := u.Vars[name]; has && vv.Pkg == obj {
+				delete(u.Vars, name)
+			}
+		}
+	}
 }
 
 // Has a variable.

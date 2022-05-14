@@ -22,6 +22,7 @@ func init() {
 	for _, m := range vanilla.methods {
 		m.from = &vanilla
 	}
+	FlavorsPkg.Set(vanilla.name, &vanilla)
 }
 
 type describeCaller bool

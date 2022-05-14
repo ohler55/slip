@@ -7,9 +7,8 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - flavors package
-  - add flavor name symbol for each flavor
  - defflavor function
+  - check with *all-flaor-names*
  - make-instance function
  - send function
 
