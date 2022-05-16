@@ -7,10 +7,12 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+
  - defflavor function
   - check with *all-flaor-names*
  - make-instance function
  - send function
+  - send all args including op
 
  - Vanilla Flavor
 

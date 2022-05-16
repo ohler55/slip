@@ -7,11 +7,11 @@ import "github.com/ohler55/slip"
 var (
 	// FlavorsPkg is the Flavors package.
 	FlavorsPkg = slip.Package{
-		Name:      "FLAVORS",
+		Name:      "flavors",
 		Nicknames: []string{},
 		Doc:       "Home of symbols defined for the Flavors object model.",
 		Vars: map[string]*slip.VarVal{
-			"*ALL-FLAVOR-NAMES*": {
+			"*all-flavor-names*": {
 				Get: getAllFlavorNames,
 				Set: setPanic,
 				Doc: "the names of all the defined Flavors.",

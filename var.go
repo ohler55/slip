@@ -9,7 +9,7 @@ import (
 // GetVar get the value bound to the sym argument. It panics if sym is
 // unbound.
 func GetVar(sym Symbol) (Object, bool) {
-	name := strings.ToUpper(string(sym))
+	name := strings.ToLower(string(sym))
 	if value, has := constantValues[name]; has {
 		return value, true
 	}
@@ -23,7 +23,7 @@ func SetVar(sym Symbol, value Object) {
 
 // HasVar returns true if the sym argument is bound to a value.
 func HasVar(sym Symbol) bool {
-	name := strings.ToUpper(string(sym))
+	name := strings.ToLower(string(sym))
 	if _, has := CurrentPackage.Vars[name]; has {
 		return true
 	}
@@ -35,14 +35,14 @@ func HasVar(sym Symbol) bool {
 
 // RemoveVar removes the binding to the sym argument.
 func RemoveVar(sym Symbol) {
-	name := strings.ToUpper(string(sym))
+	name := strings.ToLower(string(sym))
 	delete(CurrentPackage.Vars, name)
 }
 
 // DescribeVar returns the documentation for the variable bound to the sym
 // argument.
 func DescribeVar(sym Symbol) string {
-	name := strings.ToUpper(string(sym))
+	name := strings.ToLower(string(sym))
 	if vv, has := CurrentPackage.Vars[name]; has {
 		return vv.Doc
 	}

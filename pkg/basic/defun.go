@@ -66,7 +66,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	if !ok {
 		slip.PanicType("name argument to defun", args[pos], "symbol")
 	}
-	upper := strings.ToUpper(string(name))
+	upper := strings.ToLower(string(name))
 	pos--
 	var ll slip.List
 	switch tl := args[pos].(type) {

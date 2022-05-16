@@ -73,7 +73,7 @@ func (s *Scope) Trace(on bool) {
 
 // Let a symbol be bound to the value in this Scope.
 func (s *Scope) Let(sym Symbol, value Object) {
-	name := strings.ToUpper(string(sym))
+	name := strings.ToLower(string(sym))
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
@@ -85,7 +85,7 @@ func (s *Scope) Let(sym Symbol, value Object) {
 
 // Get a named variable value.
 func (s *Scope) Get(sym Symbol) Object {
-	return s.get(strings.ToUpper(string(sym)))
+	return s.get(strings.ToLower(string(sym)))
 }
 
 func (s *Scope) get(name string) Object {
@@ -109,7 +109,7 @@ func (s *Scope) Set(sym Symbol, value Object) {
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
 	}
-	s.set(strings.ToUpper(string(sym)), value)
+	s.set(strings.ToLower(string(sym)), value)
 }
 
 func (s *Scope) set(name string, value Object) {
@@ -129,7 +129,7 @@ func (s *Scope) set(name string, value Object) {
 
 // Has returns true if the variable is bound.
 func (s *Scope) Has(sym Symbol) bool {
-	return s.has(strings.ToUpper(string(sym)))
+	return s.has(strings.ToLower(string(sym)))
 }
 
 func (s *Scope) has(name string) bool {
@@ -144,7 +144,7 @@ func (s *Scope) has(name string) bool {
 
 // Remove a variable binding.
 func (s *Scope) Remove(sym Symbol) {
-	s.remove(strings.ToUpper(string(sym)))
+	s.remove(strings.ToLower(string(sym)))
 }
 
 func (s *Scope) remove(name string) {

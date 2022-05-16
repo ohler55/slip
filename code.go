@@ -537,7 +537,7 @@ func (r *reader) closeList() {
 		}
 		if 0 < start && r.stack[start-1] == quoteMarker {
 			if r.newQuote == nil {
-				r.newQuote = CLPkg.Funcs["QUOTE"].Create
+				r.newQuote = CLPkg.Funcs["quote"].Create
 			}
 			obj = r.newQuote(List{obj})
 			start--
@@ -581,7 +581,7 @@ func (r *reader) pushToken(src []byte) {
 	}
 	if 0 < len(r.stack) && r.stack[len(r.stack)-1] == quoteMarker {
 		if r.newQuote == nil {
-			r.newQuote = CLPkg.Funcs["QUOTE"].Create
+			r.newQuote = CLPkg.Funcs["quote"].Create
 		}
 		if len(r.stack) == 1 {
 			r.code = append(r.code, r.newQuote(List{Symbol(token)}))
@@ -838,15 +838,15 @@ func (c Code) Compile() {
 			continue
 		}
 		var f Object
-		switch strings.ToUpper(string(sym)) {
-		case "DEFUN":
+		switch strings.ToLower(string(sym)) {
+		case "defun":
 			f = ListToFunc(list)
 			c[i] = f
-		case "DEFVAR":
+		case "defvar":
 			// TBD need a ListToFunc that sets up an undefined list
 			f = ListToFunc(list)
 			c[i] = f
-		case "DEFMACRO":
+		case "defmacro":
 			panic("Defmacro not implemented yet")
 		}
 		if f != nil {

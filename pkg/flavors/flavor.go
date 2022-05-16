@@ -4,6 +4,7 @@ package flavors
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -17,8 +18,6 @@ var allFlavors = map[string]*Flavor{vanilla.name: &vanilla}
 func init() {
 	slip.DefConstant(FlavorSymbol, FlavorSymbol,
 		`A _flavor_ encapsulates a class of objects.`)
-
-	defFlavor(slip.Symbol("Foo")) // TBD remove once the defflavor function is implemented
 }
 
 // Flavor of Objects.
@@ -28,9 +27,11 @@ type Flavor struct {
 	inherit         []*Flavor
 	defaultVars     map[string]slip.Object
 	methods         map[string]*method
+	included        []string
 	required        []string
 	requiredMethods []string
 	requiredVars    []string
+	initable        []string
 	defaultHandler  slip.Caller
 	abstract        bool
 }
@@ -62,6 +63,34 @@ func (obj *Flavor) addVar(name slip.Symbol, val slip.Object) {
 	obj.defaultVars[strings.ToLower(string(name))] = val
 }
 
+func (obj *Flavor) defMethod(name string, methodType string, caller slip.Caller) {
+	name = strings.ToLower(name)
+	m := obj.methods[name]
+	add := false
+	if m == nil {
+		add = true
+		m = &method{
+			name: name,
+			from: obj,
+		}
+	}
+	switch strings.ToLower(methodType) {
+	case ":primary", "":
+		m.primary = caller
+	case ":before":
+		m.before = caller
+	case ":after":
+		m.after = caller
+	case ":whopper", ":wrapper":
+		m.wrap = caller
+	default:
+		panic(fmt.Sprintf("%s is not a valid method type.", methodType))
+	}
+	if add {
+		obj.methods[name] = m
+	}
+}
+
 // String representation of the Object.
 func (obj *Flavor) String() string {
 	return string(obj.Append([]byte{}))
@@ -75,8 +104,50 @@ func (obj *Flavor) Append(b []byte) []byte {
 }
 
 // Simplify by returning the string representation of the flavor.
-func (obj *Flavor) Simplify() interface{} {
-	return obj.String()
+func (obj *Flavor) Simplify() any {
+	flist := make([]any, 0, len(obj.inherit))
+	for _, f := range obj.inherit {
+		flist = append(flist, f.name)
+	}
+	vars := map[string]any{}
+	for k, o := range obj.defaultVars {
+		if o == nil {
+			vars[k] = nil
+		} else {
+			vars[k] = o.Simplify()
+		}
+	}
+	methods := make([]any, 0, len(obj.methods))
+	names := make([]string, 0, len(obj.methods))
+
+	for name := range obj.methods {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		methods = append(methods, obj.methods[name].Simplify())
+	}
+	return map[string]any{
+		"name":            obj.name,
+		"docs":            obj.docs,
+		"inherit":         flist,
+		"defaultVars":     vars,
+		"methods":         methods,
+		"included":        obj.simplifyStringArray(obj.included),
+		"required":        obj.simplifyStringArray(obj.required),
+		"requiredMethods": obj.simplifyStringArray(obj.requiredMethods),
+		"requiredVars":    obj.simplifyStringArray(obj.requiredVars),
+		"initable":        obj.simplifyStringArray(obj.initable),
+		"defaultHandler":  (obj.defaultHandler != nil),
+		"abstract":        obj.abstract,
+	}
+}
+
+func (obj *Flavor) simplifyStringArray(sa []string) (simple []any) {
+	for _, s := range sa {
+		simple = append(simple, s)
+	}
+	return
 }
 
 // Equal returns true if this Object and the other are equal in value.

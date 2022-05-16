@@ -14,105 +14,105 @@ func init() {
 // CLPkg is the COMMON-LISP package.
 var (
 	CLPkg = Package{
-		Name:      "COMMON-LISP",
-		Nicknames: []string{"CL"},
+		Name:      "common-lisp",
+		Nicknames: []string{"cl"},
 		Doc:       "Home of symbols defined by the ANSI language spcification.",
 		Vars: map[string]*VarVal{
-			"*PACKAGE*": {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
-			"*DEFAULT-PATHNAME-DEFAULTS*": {
+			"*package*": {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
+			"*default-pathname-defaults*": {
 				Get: getWorkingDir,
 				Set: setWorkingDir,
 				Doc: "is the pathname for the current working directory.",
 			},
-			"*ERROR-OUTPUT*": {
+			"*error-output*": {
 				Get: getErrorOutput,
 				Set: setErrorOutput,
 				Doc: "is a stream used as the default for warnings and errors when not in interaction mode.",
 			},
-			"*STANDARD-INPUT*": {
+			"*standard-input*": {
 				Get: getStandardInput,
 				Set: setStandardInput,
 				Doc: "is a stream used as the default input source for reading.",
 			},
-			"*STANDARD-OUTPUT*": {
+			"*standard-output*": {
 				Get: getStandardOutput,
 				Set: setStandardOutput,
 				Doc: "is a stream used as the default output destination for writing.",
 			},
-			"*PRINT-ANSI*": {
+			"*print-ansi*": {
 				Get: getPrintANSI,
 				Set: setPrintANSI,
 				Doc: "if true ANSI codes are used for interactive displays.",
 			},
-			"*PRINT-ARRAY*": {
+			"*print-array*": {
 				Get: getPrintArray,
 				Set: setPrintArray,
 				Doc: `controls the format of _arrays_ when printed. If false the content of arrays
 is not printed. If true _array_ content is included when displayed.`,
 			},
-			"*PRINT-BASE*": {
+			"*print-base*": {
 				Get: getPrintBase,
 				Set: setPrintBase,
 				Doc: "is the base for integer values when printed. The initial value is ten.",
 			},
-			"*PRINT-CASE*": {
+			"*print-case*": {
 				Get: getPrintCase,
 				Set: setPrintCase,
 				Doc: "controls the display of symbols as either upper case, lower case, or capitalized.",
 			},
-			"*PRINT-CIRCLE*": {
+			"*print-circle*": {
 				Get: getPrintCircle,
 				Set: setPrintCircle,
 				Doc: "is not currently supported.",
 			},
-			"*PRINT-ESCAPE*": {
+			"*print-escape*": {
 				Get: getPrintEscape,
 				Set: setPrintEscape,
 				Doc: `if _true_ an attempt is made to print _objects_ so they can be read.
 For example the 'a' character will be displayed as _#\a_ when true and simply _a_ when false.`,
 			},
-			"*PRINT-GENSYM*": {
+			"*print-gensym*": {
 				Get: getPrintGensym,
 				Set: setPrintGensym,
 				Doc: `has no effect. The "#:" is never a prefix for _symbols_.`,
 			},
-			"*PRINT-LENGTH*": {
+			"*print-length*": {
 				Get: getPrintLength,
 				Set: setPrintLength,
 				Doc: `controls how many elements at a level are printed. When exceeded "..." is
 printed instead of the remaining elements.`,
 			},
-			"*PRINT-LEVEL*": {
+			"*print-level*": {
 				Get: getPrintLevel,
 				Set: setPrintLevel,
 				Doc: `controls how many levels deep a nested _object_ will print.
 If nil no limit is imposed otherwise a positive fixnum specifies the level at which a "#" is
 output in place of the _object_ element.`,
 			},
-			"*PRINT-LINES*": {
+			"*print-lines*": {
 				Get: getPrintLines,
 				Set: setPrintLines,
 				Doc: `controls how many lines of an object will be printed. If the limit is exceeded
 a ".." is appended to the last line. Any closing delimiters are still printed.`,
 			},
-			"*PRINT-MISER-WIDTH*": {
+			"*print-miser-width*": {
 				Get: getPrintMiserWidth,
 				Set: setPrintMiserWidth,
 				Doc: "is not currently supported.",
 			},
-			"*PRINT-PREC*": {
+			"*print-prec*": {
 				Get: getPrintPrec,
 				Set: setPrintPrec,
 				Doc: `controls the precision of float print representation. The precision of the output
 is limited to the specified value or the maximum precision of the _float_ type.`,
 			},
-			"*PRINT-PRETTY*": {
+			"*print-pretty*": {
 				Get: getPrintPretty,
 				Set: setPrintPretty,
 				Doc: `if true will print _object_ in a "pretty" format that is more readable.
 If false (_nil_) then minimal whitespace is used for printing.`,
 			},
-			"*PRINT-RADIX*": {
+			"*print-radix*": {
 				Get: getPrintRadix,
 				Set: setPrintRadix,
 				Doc: `is a flag indicating base 2, 8, and 16 rational should be prefixed with
@@ -120,13 +120,13 @@ If false (_nil_) then minimal whitespace is used for printing.`,
 are base ar printer with the base following the # character such as #3rN when N is the integer
 being printed. Base 10 ratios are given a #10r prefix.`,
 			},
-			"*PRINT-READABLY*": {
+			"*print-readably*": {
 				Get: getPrintReadably,
 				Set: setPrintReadably,
 				Doc: `if true while print such that output can be read by the parser when possible
 and raises an error if not possible to print readably.`,
 			},
-			"*PRINT-RIGHT-MARGIN*": {
+			"*print-right-margin*": {
 				Get: getPrintRightMargin,
 				Set: setPrintRightMargin,
 				Doc: "establishes the right margin for pretty printing.",

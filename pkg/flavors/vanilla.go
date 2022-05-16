@@ -9,12 +9,12 @@ var vanilla = Flavor{
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
 	methods: map[string]*method{
-		":describe":            {name: ":describe", daemon: describeCaller(true)},
-		":id":                  {name: ":id", daemon: idCaller(true)},
-		":operation-handler-p": {name: ":operation-handler-p", daemon: hasOpCaller(true)},
-		":print-self":          {name: ":print-self", daemon: printCaller(true)},
-		":send-if-handles":     {name: ":send-if-handles", daemon: sendIfCaller(true)},
-		":which-operations":    {name: ":print-self", daemon: whichOpsCaller(true)},
+		":describe":            {name: ":describe", primary: describeCaller(true)},
+		":id":                  {name: ":id", primary: idCaller(true)},
+		":operation-handler-p": {name: ":operation-handler-p", primary: hasOpCaller(true)},
+		":print-self":          {name: ":print-self", primary: printCaller(true)},
+		":send-if-handles":     {name: ":send-if-handles", primary: sendIfCaller(true)},
+		":which-operations":    {name: ":print-self", primary: whichOpsCaller(true)},
 	},
 }
 

@@ -41,7 +41,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
 func NewFunc(name string, args List, pkgs ...*Package) Object {
-	name = strings.ToUpper(name)
+	name = strings.ToLower(name)
 	pkg := CurrentPackage
 	if 0 < len(pkgs) {
 		pkg = pkgs[0]
@@ -125,7 +125,7 @@ func (f *Function) String() string {
 // Append a buffer with a representation of the Object.
 func (f *Function) Append(b []byte) []byte {
 	b = append(b, '(')
-	b = append(b, f.Name...)
+	b = printer.Append(b, Symbol(f.Name), 0)
 	for i := len(f.Args) - 1; 0 <= i; i-- {
 		b = append(b, ' ')
 		b = Append(b, f.Args[i])
@@ -208,7 +208,7 @@ func CompileList(list List) (f Object) {
 	if 0 < len(list) {
 		switch ta := list[len(list)-1].(type) {
 		case Symbol:
-			name := strings.ToUpper(string(ta))
+			name := strings.ToLower(string(ta))
 			if fi := CurrentPackage.Funcs[name]; fi != nil {
 				f = fi.Create(list[:len(list)-1])
 			} else {
@@ -245,7 +245,7 @@ func CompileList(list List) (f Object) {
 // DescribeFunction returns the documentation for the function bound to the
 // sym argument.
 func DescribeFunction(sym Symbol) *FuncDoc {
-	name := strings.ToUpper(string(sym))
+	name := strings.ToLower(string(sym))
 	if fi, has := CurrentPackage.Funcs[name]; has {
 		return fi.Doc
 	}
