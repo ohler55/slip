@@ -169,9 +169,14 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":abstract-flavor":
 			nf.abstract = true
 		case ":default-handler":
-
-			// TBD as lambda or function
-
+			if len(vals) == 1 {
+				if sym, ok := vals[0].(slip.Symbol); ok {
+					if fun, ok2 := slip.NewFunc(string(sym), slip.List{}).(slip.Funky); ok2 {
+						nf.defaultHandler = fun.Caller()
+					}
+				}
+			}
+			slip.PanicType(":default-handler of defflavor", nil, "symbol")
 		case ":documentation":
 			if ss, ok := vals[0].(slip.String); ok {
 				nf.docs = string(ss)
@@ -189,7 +194,7 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":initable-instance-variables", ":inittable-instance-variables":
 			nf.initable = f.valsStringList(vals)
 		case ":no-vanilla-flavor":
-
+			f.removeVanilla(nf)
 			// TBD remove vanilla and methods
 
 		case ":required-flavors":
@@ -206,6 +211,22 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 			}
 		default:
 			panic(fmt.Sprintf("%s is not an option to defflavor", key))
+		}
+	}
+}
+
+func (f *Defflavor) removeVanilla(nf *Flavor) {
+	// The vanilla-flavor should always be the last flavor on the inherit list
+	// so check and remove.
+	if 0 < len(nf.inherit) && nf.inherit[len(nf.inherit)-1] == &vanilla {
+		nf.inherit = nf.inherit[:len(nf.inherit)-1]
+		for k, m := range nf.methods {
+			if 0 < len(m.inherit) && m.inherit[len(m.inherit)-1].from == &vanilla {
+				m.inherit = m.inherit[:len(m.inherit)-1]
+			}
+			if len(m.inherit) == 0 && m.primary == nil && m.before == nil && m.after == nil && m.wrap == nil {
+				delete(nf.methods, k)
+			}
 		}
 	}
 }

@@ -9,7 +9,9 @@ SLIce Processing is LISP for golang
 - next
 
  - defflavor function
-  - check with *all-flaor-names*
+ - undefflavor
+  - remove from list and remove symbol only
+  - same with all flavors that use the undef one
  - make-instance function
  - send function
   - send all args including op

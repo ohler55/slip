@@ -166,6 +166,11 @@ func (obj *Flavor) Eval(s *slip.Scope, depth int) slip.Object {
 }
 
 func (obj *Flavor) inheritFlavor(cf *Flavor) {
+	for _, f2 := range obj.inherit {
+		if f2 == cf {
+			return
+		}
+	}
 	obj.inherit = append(obj.inherit, cf)
 	for k := range cf.defaultVars {
 		if v, has := obj.defaultVars[k]; !has {
@@ -183,6 +188,11 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 				inherit: []*method{m},
 			}
 			obj.methods[k] = xm
+		}
+	}
+	for _, f2 := range cf.inherit {
+		if &vanilla != f2 {
+			obj.inheritFlavor(f2)
 		}
 	}
 }

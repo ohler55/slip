@@ -203,6 +203,11 @@ func (f *Function) CompileArgs() {
 	}
 }
 
+// Caller returns the function's Caller (Self).
+func (f *Function) Caller() Caller {
+	return f.Self
+}
+
 // CompileList a list into a function or an undefined function.
 func CompileList(list List) (f Object) {
 	if 0 < len(list) {
