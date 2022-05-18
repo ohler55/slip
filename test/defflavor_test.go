@@ -3,11 +3,9 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
-	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/slip"
 	"github.com/stretchr/testify/require"
 )
@@ -25,14 +23,14 @@ func TestDefflavorBasic(t *testing.T) {
 
 	f := slip.ReadString("strawberry").Eval(scope)
 
-	fmt.Printf("*** flavor: %s\n", pretty.SEN(f))
+	// fmt.Printf("*** flavor: %s\n", pretty.SEN(f))
 	sf := f.Simplify()
 	require.Equal(t, "strawberry", jp.C("name").First(sf))
 	require.Equal(t, "Strawberry icecream", jp.C("docs").First(sf))
 
-	set := jp.MustParseString("methods[?(@.name == ':size')].daemons").First(sf)
+	daemons := jp.MustParseString("methods[?(@.name == ':size')].daemons[*]").Get(sf)
+	require.Equal(t, 1, len(daemons))
 
-	fmt.Printf("*** set: %s\n", pretty.SEN(set))
-	// verify methods for get and set
-	// TBD use simplify on flavor, implement first
+	daemons = jp.MustParseString("methods[?(@.name == ':set-size')].daemons[*]").Get(sf)
+	require.Equal(t, 1, len(daemons))
 }

@@ -34,6 +34,7 @@ type Flavor struct {
 	initable        []string
 	defaultHandler  slip.Caller
 	abstract        bool
+	noVanilla       bool
 }
 
 func defFlavor(name slip.Symbol, inherit ...slip.Symbol) *Flavor {
@@ -53,7 +54,6 @@ func defFlavor(name slip.Symbol, inherit ...slip.Symbol) *Flavor {
 			panic(fmt.Sprintf("Flavor %s not defined.", sym))
 		}
 	}
-	f.inheritFlavor(&vanilla)
 	allFlavors[key] = &f
 	FlavorsPkg.Set(string(name), &f)
 	return &f
@@ -163,6 +163,15 @@ func (obj *Flavor) Hierarchy() []slip.Symbol {
 // Eval returns self.
 func (obj *Flavor) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
+}
+
+func (obj *Flavor) inheritsFlavor(name string) bool {
+	for _, f2 := range obj.inherit {
+		if f2.name == name {
+			return true
+		}
+	}
+	return false
 }
 
 func (obj *Flavor) inheritFlavor(cf *Flavor) {

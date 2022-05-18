@@ -127,11 +127,62 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		}
 	}
 	f.processOptions(nf, args[:pos])
+	if !nf.abstract {
+		f.addIncludes(nf)
 
-	// TBD if not abstract then add included
-	// TBD validate
-
+		// TBD validate
+	}
+	if !nf.noVanilla {
+		nf.inheritFlavor(&vanilla)
+	}
 	return name
+}
+
+func (f *Defflavor) addIncludes(nf *Flavor) {
+	for _, fn := range nf.included {
+		if !nf.inheritsFlavor(fn) {
+			if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
+				nf.inheritFlavor(cf)
+			} else {
+				panic(fmt.Sprintf("Flavor %s not defined.", fn))
+			}
+		}
+	}
+	// Use an index since nf.inherit may grow during the iteration.
+	for i := 0; i < len(nf.inherit); i++ {
+		for _, fn := range nf.inherit[i].included {
+			if !nf.inheritsFlavor(fn) {
+				if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
+					nf.inheritFlavor(cf)
+				} else {
+					panic(fmt.Sprintf("Flavor %s not defined.", fn))
+				}
+			}
+		}
+	}
+}
+
+func (f *Defflavor) validateFlavor(nf *Flavor) {
+	full := make([]*Flavor, len(nf.inherit)+1)
+	full[0] = nf
+	copy(full[1:], nf.inherit)
+	for _, cf := range full {
+		for _, fn := range cf.required {
+			if !nf.inheritsFlavor(fn) {
+				panic(fmt.Sprintf("%s does not inherit from required flavor %s.", nf.name, fn))
+			}
+		}
+		for _, mn := range cf.requiredMethods {
+			if _, has := nf.methods[mn]; !has {
+				panic(fmt.Sprintf("%s does not include the required method %s.", nf.name, mn))
+			}
+		}
+		for _, vn := range cf.requiredVars {
+			if _, has := nf.defaultVars[vn]; !has {
+				panic(fmt.Sprintf("%s does not include the required variable %s.", nf.name, vn))
+			}
+		}
+	}
 }
 
 func (f *Defflavor) valsStringList(vals slip.List) (sa []string) {
@@ -194,9 +245,7 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":initable-instance-variables", ":inittable-instance-variables":
 			nf.initable = f.valsStringList(vals)
 		case ":no-vanilla-flavor":
-			f.removeVanilla(nf)
-			// TBD remove vanilla and methods
-
+			nf.noVanilla = true
 		case ":required-flavors":
 			nf.required = f.valsStringList(vals)
 		case ":required-instance-variables":
@@ -211,22 +260,6 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 			}
 		default:
 			panic(fmt.Sprintf("%s is not an option to defflavor", key))
-		}
-	}
-}
-
-func (f *Defflavor) removeVanilla(nf *Flavor) {
-	// The vanilla-flavor should always be the last flavor on the inherit list
-	// so check and remove.
-	if 0 < len(nf.inherit) && nf.inherit[len(nf.inherit)-1] == &vanilla {
-		nf.inherit = nf.inherit[:len(nf.inherit)-1]
-		for k, m := range nf.methods {
-			if 0 < len(m.inherit) && m.inherit[len(m.inherit)-1].from == &vanilla {
-				m.inherit = m.inherit[:len(m.inherit)-1]
-			}
-			if len(m.inherit) == 0 && m.primary == nil && m.before == nil && m.after == nil && m.wrap == nil {
-				delete(nf.methods, k)
-			}
 		}
 	}
 }
