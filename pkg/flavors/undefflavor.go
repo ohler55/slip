@@ -11,7 +11,7 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Undefflavor{Function: slip.Function{Name: "undefflavor", Args: args, SkipEval: []bool{true}}}
+			f := Undefflavor{Function: slip.Function{Name: "undefflavor", Args: args}}
 			f.Self = &f
 			return &f
 		},

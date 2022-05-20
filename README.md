@@ -7,6 +7,12 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - re-org
+  - test by package
+  - pkg dirs should match package name of alias
+   - cl - most everything
+   - flavors - as is
+   - json or data
 
  - defflavor function
  - undefflavor

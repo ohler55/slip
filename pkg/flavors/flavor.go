@@ -37,32 +37,6 @@ type Flavor struct {
 	noVanilla       bool
 }
 
-func defFlavor(name slip.Symbol, inherit ...slip.Symbol) *Flavor {
-	key := strings.ToLower(string(name))
-	if _, has := allFlavors[key]; has {
-		panic(fmt.Sprintf("Flavor %s already defined.", name))
-	}
-	f := Flavor{
-		name:        key,
-		defaultVars: map[string]slip.Object{},
-		methods:     map[string]*method{},
-	}
-	for _, sym := range inherit {
-		if cf := allFlavors[strings.ToLower(string(sym))]; cf != nil {
-			f.inheritFlavor(cf)
-		} else {
-			panic(fmt.Sprintf("Flavor %s not defined.", sym))
-		}
-	}
-	allFlavors[key] = &f
-	FlavorsPkg.Set(string(name), &f)
-	return &f
-}
-
-func (obj *Flavor) addVar(name slip.Symbol, val slip.Object) {
-	obj.defaultVars[strings.ToLower(string(name))] = val
-}
-
 func (obj *Flavor) defMethod(name string, methodType string, caller slip.Caller) {
 	name = strings.ToLower(name)
 	m := obj.methods[name]
@@ -181,8 +155,8 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 		}
 	}
 	obj.inherit = append(obj.inherit, cf)
-	for k := range cf.defaultVars {
-		if v, has := obj.defaultVars[k]; !has {
+	for k, v := range cf.defaultVars {
+		if _, has := obj.defaultVars[k]; !has {
 			obj.defaultVars[k] = v
 		}
 	}

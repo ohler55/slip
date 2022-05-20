@@ -21,6 +21,12 @@ func TestLetNoInitialForm(t *testing.T) {
 	require.Equal(t, "(nil nil)", slip.ObjectString(code.Eval(scope)))
 }
 
+func TestLetNested(t *testing.T) {
+	code := slip.ReadString("(let ((x 1)) (let ((y 2)) (list x y)))")
+	scope := slip.NewScope()
+	require.Equal(t, "(1 2)", slip.ObjectString(code.Eval(scope)))
+}
+
 func TestLetParallel(t *testing.T) {
 	code := slip.ReadString("(setq x 3) (let ((x 4) (y x)) (list x y))")
 	scope := slip.NewScope()

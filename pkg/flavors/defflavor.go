@@ -89,12 +89,24 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		slip.PanicType("vars of defflavor", args[pos], "list")
 	}
 	pos--
-	var inherit []slip.Symbol
+	key := strings.ToLower(string(name))
+	if _, has := allFlavors[key]; has {
+		panic(fmt.Sprintf("Flavor %s already defined.", name))
+	}
+	nf := &Flavor{
+		name:        key,
+		defaultVars: map[string]slip.Object{},
+		methods:     map[string]*method{},
+	}
 	switch tl := args[pos].(type) {
 	case slip.List:
 		for i := len(tl) - 1; 0 <= i; i-- {
 			if sym, ok2 := tl[i].(slip.Symbol); ok2 {
-				inherit = append(inherit, sym)
+				if cf := allFlavors[strings.ToLower(string(sym))]; cf != nil {
+					nf.inheritFlavor(cf)
+				} else {
+					panic(fmt.Sprintf("Flavor %s not defined.", sym))
+				}
 			} else {
 				slip.PanicType("flavors of defflavor", args[pos], "list of symbols")
 			}
@@ -104,11 +116,10 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	default:
 		slip.PanicType("flavors of defflavor", args[pos], "list")
 	}
-	nf := defFlavor(name, inherit...)
 	for i := len(vars) - 1; 0 <= i; i-- {
 		switch tv := vars[i].(type) {
 		case slip.Symbol:
-			nf.addVar(tv, nil)
+			nf.defaultVars[strings.ToLower(string(tv))] = nil
 		case slip.List:
 			if len(tv) != 2 {
 				slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
@@ -118,23 +129,25 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 				slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
 			}
 			if tv[0] == nil {
-				nf.addVar(sym, nil)
+				nf.defaultVars[strings.ToLower(string(sym))] = nil
 			} else {
-				nf.addVar(sym, tv[0].Eval(s, depth+1))
+				nf.defaultVars[strings.ToLower(string(sym))] = tv[0].Eval(s, depth+1)
 			}
 		default:
-			slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
+			slip.PanicType("xx vars element of defflavor", tv, "symbol", "list of symbol and value")
 		}
 	}
 	f.processOptions(nf, args[:pos])
 	if !nf.abstract {
 		f.addIncludes(nf)
-
-		// TBD validate
+		f.validateFlavor(nf)
 	}
 	if !nf.noVanilla {
 		nf.inheritFlavor(&vanilla)
 	}
+	allFlavors[nf.name] = nf
+	FlavorsPkg.Set(string(name), nf)
+
 	return name
 }
 
@@ -190,7 +203,7 @@ func (f *Defflavor) valsStringList(vals slip.List) (sa []string) {
 		if sym, ok := vals[i].(slip.Symbol); ok {
 			sa = append(sa, string(sym))
 		} else {
-			panic(fmt.Sprintf("%s is not a flavor.", vals[i]))
+			panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
 		}
 	}
 	return

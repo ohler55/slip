@@ -2,7 +2,12 @@
 
 package flavors
 
-import "github.com/ohler55/slip"
+import (
+	"sort"
+	"strings"
+
+	"github.com/ohler55/slip"
+)
 
 var (
 	// FlavorsPkg is the Flavors package.
@@ -28,8 +33,13 @@ func init() {
 }
 
 func getAllFlavorNames() slip.Object {
+	keys := make([]string, 0, len(allFlavors))
+	for key := range allFlavors {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool { return 0 < strings.Compare(keys[i], keys[j]) })
 	names := make(slip.List, 0, len(allFlavors))
-	for name := range allFlavors {
+	for _, name := range keys {
 		names = append(names, slip.Symbol(name))
 	}
 	return names
