@@ -9,6 +9,8 @@ SLIce Processing is LISP for golang
 - next
  - re-org
   - test by package
+   - test root just for objects in slip top level, is that enough?
+
   - pkg dirs should match package name of alias
    - cl - most everything
    - flavors - as is
