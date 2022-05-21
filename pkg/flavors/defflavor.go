@@ -97,6 +97,7 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		name:        key,
 		defaultVars: map[string]slip.Object{},
 		methods:     map[string]*method{},
+		initable:    map[string]bool{},
 	}
 	switch tl := args[pos].(type) {
 	case slip.List:
@@ -256,7 +257,13 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":included-flavors":
 			nf.included = f.valsStringList(vals)
 		case ":initable-instance-variables", ":inittable-instance-variables":
-			nf.initable = f.valsStringList(vals)
+			for i := len(vals) - 1; 0 <= i; i-- {
+				if sym, ok := vals[i].(slip.Symbol); ok {
+					nf.initable[string(sym)] = true
+				} else {
+					panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+				}
+			}
 		case ":no-vanilla-flavor":
 			nf.noVanilla = true
 		case ":required-flavors":
@@ -281,7 +288,7 @@ type getter string
 
 // Call returns the value of a variable in the instance.
 func (g getter) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
-	return args[len(args)-1].(*Instance).scope.Get(slip.Symbol(g))
+	return args[len(args)-1].(*Instance).Get(slip.Symbol(g))
 }
 
 type setter string
@@ -291,7 +298,7 @@ func (s setter) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
 	if len(args) < 3 {
 		panic(fmt.Sprintf("no value given for %s.", s))
 	}
-	args[len(args)-1].(*Instance).scope.Set(slip.Symbol(s), args[0])
+	args[len(args)-1].(*Instance).Set(slip.Symbol(s), args[0])
 
 	return args[0]
 }

@@ -7,28 +7,21 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - re-org
-  - test by package
-   - test root just for objects in slip top level, is that enough?
-
-  - pkg dirs should match package name of alias
-   - cl - most everything
-   - flavors - as is
-   - json or data
-
  - defflavor function
+  - support plists
+  - make intiable a map
  - undefflavor
-  - remove from list and remove symbol only
-  - same with all flavors that use the undef one
  - make-instance function
  - send function
   - send all args including op
+ - vanilla
+  - add init method that does nothing but takes plist
 
- - Vanilla Flavor
-
+- trace on instance to setup scope
 
 - simple or data or opaque or ???
  - use flavors for the instance and methods
+ - separate package
 
 - Code
  - #' - function (like quote)

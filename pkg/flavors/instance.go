@@ -19,7 +19,7 @@ func init() {
 
 // Instance is an instance of a Flavor.
 type Instance struct {
-	scope  *slip.Scope
+	slip.Scope
 	flavor *Flavor
 }
 
@@ -39,12 +39,12 @@ func (obj *Instance) Append(b []byte) []byte {
 
 // Simplify by returning the string representation of the flavor.
 func (obj *Instance) Simplify() interface{} {
+	// TBD make a map of vars and flavor
 	return obj.String()
 }
 
 // Equal returns true if this Object and the other are equal in value.
 func (obj *Instance) Equal(other slip.Object) (eq bool) {
-	// TBD as map instead? with flavor name?
 	return obj == other
 }
 
@@ -56,4 +56,11 @@ func (obj *Instance) Hierarchy() []slip.Symbol {
 // Eval returns self.
 func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
+}
+
+func (obj *Instance) send(message string, args slip.List, depth int) slip.Object {
+
+	// TBD
+
+	return nil
 }

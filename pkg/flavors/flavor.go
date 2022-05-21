@@ -31,7 +31,7 @@ type Flavor struct {
 	required        []string
 	requiredMethods []string
 	requiredVars    []string
-	initable        []string
+	initable        map[string]bool
 	defaultHandler  slip.Caller
 	abstract        bool
 	noVanilla       bool
@@ -101,6 +101,10 @@ func (obj *Flavor) Simplify() any {
 	for _, name := range names {
 		methods = append(methods, obj.methods[name].Simplify())
 	}
+	initable := map[string]any{}
+	for k := range obj.initable {
+		initable[k] = true
+	}
 	return map[string]any{
 		"name":            obj.name,
 		"docs":            obj.docs,
@@ -111,7 +115,7 @@ func (obj *Flavor) Simplify() any {
 		"required":        obj.simplifyStringArray(obj.required),
 		"requiredMethods": obj.simplifyStringArray(obj.requiredMethods),
 		"requiredVars":    obj.simplifyStringArray(obj.requiredVars),
-		"initable":        obj.simplifyStringArray(obj.initable),
+		"initable":        initable,
 		"defaultHandler":  (obj.defaultHandler != nil),
 		"abstract":        obj.abstract,
 	}
@@ -181,12 +185,11 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 }
 
 func (obj *Flavor) makeInstance() *Instance {
-	inst := Instance{
-		flavor: obj,
-		scope:  slip.NewScope(),
-	}
+	inst := Instance{flavor: obj}
+	inst.Scope.Init()
 	for k, v := range obj.defaultVars {
-		inst.scope.Let(slip.Symbol(k), v)
+		inst.Let(slip.Symbol(k), v)
 	}
+	inst.Let(slip.Symbol("self"), &inst)
 	return &inst
 }

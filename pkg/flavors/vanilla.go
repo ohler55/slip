@@ -10,6 +10,7 @@ var vanilla = Flavor{
 	defaultVars: map[string]slip.Object{"self": nil},
 	methods: map[string]*method{
 		":describe":            {name: ":describe", primary: describeCaller(true)},
+		":init":                {name: ":init", primary: initCaller(true)},
 		":id":                  {name: ":id", primary: idCaller(true)},
 		":operation-handler-p": {name: ":operation-handler-p", primary: hasOpCaller(true)},
 		":print-self":          {name: ":print-self", primary: printCaller(true)},
@@ -23,6 +24,13 @@ func init() {
 		m.from = &vanilla
 	}
 	FlavorsPkg.Set(vanilla.name, &vanilla)
+}
+
+type initCaller bool
+
+func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	// TBD first arg (len(args)-1) should be self
+	return nil
 }
 
 type describeCaller bool
