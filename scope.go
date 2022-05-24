@@ -16,7 +16,7 @@ type returnFrom struct {
 type Scope struct {
 	parent     *Scope
 	name       Object // can be nil so type can't be Symbol
-	vars       map[string]Object
+	Vars       map[string]Object
 	returnFrom *returnFrom
 	before     func(s *Scope, name string, args List, depth int)
 	after      func(s *Scope, name string, args List, depth int)
@@ -25,7 +25,7 @@ type Scope struct {
 // NewScope create a new top level Scope.
 func NewScope() *Scope {
 	return &Scope{
-		vars:   map[string]Object{},
+		Vars:   map[string]Object{},
 		before: noopBefore,
 		after:  normalAfter,
 	}
@@ -36,7 +36,7 @@ func (s *Scope) NewScope(name Object) *Scope {
 	return &Scope{
 		name:   name,
 		parent: s,
-		vars:   map[string]Object{},
+		Vars:   map[string]Object{},
 		before: s.before,
 		after:  s.after,
 	}
@@ -44,7 +44,7 @@ func (s *Scope) NewScope(name Object) *Scope {
 
 // Init a scope.
 func (s *Scope) Init() {
-	s.vars = map[string]Object{}
+	s.Vars = map[string]Object{}
 }
 
 // Parent returns the parent scope or nil.
@@ -85,7 +85,7 @@ func (s *Scope) Let(sym Symbol, value Object) {
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
 	}
-	s.vars[name] = value
+	s.Vars[name] = value
 }
 
 // Get a named variable value.
@@ -94,7 +94,7 @@ func (s *Scope) Get(sym Symbol) Object {
 }
 
 func (s *Scope) get(name string) Object {
-	if value, has := s.vars[name]; has {
+	if value, has := s.Vars[name]; has {
 		return value
 	}
 	if s.parent != nil {
@@ -121,8 +121,8 @@ func (s *Scope) set(name string, value Object) {
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
-	if _, has := s.vars[name]; has {
-		s.vars[name] = value
+	if _, has := s.Vars[name]; has {
+		s.Vars[name] = value
 		return
 	}
 	if s.parent != nil {
@@ -138,7 +138,7 @@ func (s *Scope) Has(sym Symbol) bool {
 }
 
 func (s *Scope) has(name string) bool {
-	if _, has := s.vars[name]; has {
+	if _, has := s.Vars[name]; has {
 		return true
 	}
 	if s.parent != nil {
@@ -153,8 +153,8 @@ func (s *Scope) Remove(sym Symbol) {
 }
 
 func (s *Scope) remove(name string) {
-	if _, has := s.vars[name]; has {
-		delete(s.vars, name)
+	if _, has := s.Vars[name]; has {
+		delete(s.Vars, name)
 		return
 	}
 	if s.parent != nil {

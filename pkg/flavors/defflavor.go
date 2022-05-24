@@ -94,10 +94,12 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		panic(fmt.Sprintf("Flavor %s already defined.", name))
 	}
 	nf := &Flavor{
-		name:        key,
-		defaultVars: map[string]slip.Object{},
-		methods:     map[string]*method{},
-		initable:    map[string]bool{},
+		name:           key,
+		defaultVars:    map[string]slip.Object{},
+		keywords:       map[string]slip.Object{},
+		methods:        map[string][]*method{},
+		initable:       map[string]bool{},
+		defaultHandler: defHand(true),
 	}
 	switch tl := args[pos].(type) {
 	case slip.List:
@@ -242,6 +244,22 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 				}
 			}
 			slip.PanicType(":default-handler of defflavor", nil, "symbol")
+		case ":default-init-plist":
+			for i := len(vals) - 1; 0 <= i; i-- {
+				if plist, ok := vals[i].(slip.List); ok && len(plist) == 2 {
+					if sym, ok := plist[1].(slip.Symbol); ok {
+						if sym == slip.Symbol("allow-other-keys") {
+							nf.allowOtherKeys = plist[0] == slip.True
+						} else {
+							nf.keywords[string(sym)] = plist[0]
+						}
+					} else {
+						panic(fmt.Sprintf("In :default-init-plist list car, %s is not a symbol.", plist[1]))
+					}
+				} else {
+					panic(fmt.Sprintf("In :default-init-plist, %s is not a list.", vals[i]))
+				}
+			}
 		case ":documentation":
 			if ss, ok := vals[0].(slip.String); ok {
 				nf.docs = string(ss)
@@ -264,10 +282,20 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 					panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
 				}
 			}
+		case ":init-keywords":
+			for i := len(vals) - 1; 0 <= i; i-- {
+				if sym, ok := vals[i].(slip.Symbol); ok {
+					nf.keywords[string(sym)] = nil
+				} else {
+					panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+				}
+			}
 		case ":no-vanilla-flavor":
 			nf.noVanilla = true
 		case ":required-flavors":
 			nf.required = f.valsStringList(vals)
+		case ":required-init-keywords":
+			nf.requiredKeywords = f.valsStringList(vals)
 		case ":required-instance-variables":
 			nf.requiredVars = f.valsStringList(vals)
 		case ":required-method":
@@ -301,4 +329,12 @@ func (s setter) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
 	args[len(args)-1].(*Instance).Set(slip.Symbol(s), args[0])
 
 	return args[0]
+}
+
+type defHand bool
+
+// Call returns the value of a variable in the instance.
+func (dh defHand) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	inst := args[len(args)-1].(*Instance)
+	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.flavor.name, args[len(args)-2]))
 }

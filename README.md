@@ -8,14 +8,12 @@ SLIce Processing is LISP for golang
 
 - next
  - defflavor function
-  - support plists
-  - make intiable a map
  - undefflavor
  - make-instance function
+ - defmethod
+  - is there a (defmethod flavor :after :method (args) forms*)?
  - send function
   - send all args including op
- - vanilla
-  - add init method that does nothing but takes plist
 
 - trace on instance to setup scope
 

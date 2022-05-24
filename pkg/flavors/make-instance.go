@@ -81,9 +81,17 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 				continue
 			}
 		}
-		// TBD if a plist keyword then add to init-plist
+		if cf.allowOtherKeys {
+			// TBD should val be evaluated first?
+			plist = append(plist, val, sym)
+		} else if _, has := cf.keywords[key]; has {
+			// TBD should val be evaluated first?
+			plist = append(plist, val, sym)
+		} else {
+			panic(fmt.Sprintf("%s is not an init keyword for Flavor %s.", sym, cf.name))
+		}
 	}
-	_ = inst.send("init", plist, depth+1)
+	_ = inst.send("init", slip.List{plist}, depth+1)
 
 	return inst
 }

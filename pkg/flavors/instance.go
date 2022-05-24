@@ -39,8 +39,14 @@ func (obj *Instance) Append(b []byte) []byte {
 
 // Simplify by returning the string representation of the flavor.
 func (obj *Instance) Simplify() interface{} {
-	// TBD make a map of vars and flavor
-	return obj.String()
+	vars := map[string]any{}
+	for name, val := range obj.Vars {
+		vars[name] = slip.Simplify(val)
+	}
+	return map[string]any{
+		"flavor": obj.flavor.name,
+		"vars":   vars,
+	}
 }
 
 // Equal returns true if this Object and the other are equal in value.
@@ -59,8 +65,45 @@ func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 }
 
 func (obj *Instance) send(message string, args slip.List, depth int) slip.Object {
+	ma := obj.flavor.methods[message]
+	if len(ma) == 0 {
+		xargs := append(args, slip.Symbol(":"+message), obj)
+		obj.flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
+	}
+	for _, m := range ma {
+		if m.wrap != nil {
+			return obj.sendWrap(ma, args, depth)
+		}
+	}
+	return obj.sendInner(ma, args, depth)
+}
 
+func (obj *Instance) sendWrap(ma []*method, args slip.List, depth int) slip.Object {
 	// TBD
-
+	// walk wrappers
+	//  need to register a reference to the method progress
+	//    maybe just and index to the next starting at 0
+	//    when greater than len of inherited move to others
 	return nil
+}
+
+func (obj *Instance) sendInner(ma []*method, args slip.List, depth int) slip.Object {
+	for _, m := range ma {
+		if m.before != nil {
+			m.before.Call(&obj.Scope, args, depth)
+		}
+	}
+	var result slip.Object
+	for _, m := range ma {
+		if m.primary != nil {
+			result = m.primary.Call(&obj.Scope, args, depth)
+			break
+		}
+	}
+	for _, m := range ma {
+		if m.after != nil {
+			m.after.Call(&obj.Scope, args, depth)
+		}
+	}
+	return result
 }

@@ -9,43 +9,33 @@ import "github.com/ohler55/slip"
 type method struct {
 	name    string
 	from    *Flavor
-	inherit []*method // in order
 	primary slip.Caller
 	before  slip.Caller
 	after   slip.Caller
 	wrap    slip.Caller
 }
 
+func (m *method) empty() bool {
+	return m.primary == nil && m.wrap == nil && m.before == nil && m.after == nil
+}
+
 // Simplify by returning a representation of the method.
 func (m *method) Simplify() any {
-	var daemons []any
-	full := make([]*method, len(m.inherit)+1)
-	full[0] = m
-	copy(full[1:], m.inherit)
-	for _, m2 := range full {
-		if m2.wrap != nil {
-			daemons = append(daemons, map[string]any{"flavor": m2.from.name, "type": "whopper"})
-		}
+	simple := map[string]any{
+		"name": m.name,
+		"from": m.from.name,
 	}
-	for _, m2 := range full {
-		if m2.before != nil {
-			daemons = append(daemons, map[string]any{"flavor": m2.from.name, "type": "before"})
-		}
+	if m.wrap != nil {
+		simple["whopper"] = true
 	}
-	for _, m2 := range full {
-		if m2.primary != nil {
-			daemons = append(daemons, map[string]any{"flavor": m2.from.name, "type": "primary"})
-			break
-		}
+	if m.before != nil {
+		simple["before"] = true
 	}
-	for i := len(full) - 1; 0 <= i; i-- {
-		m2 := full[i]
-		if m2.before != nil {
-			daemons = append(daemons, map[string]any{"flavor": m2.from.name, "type": "after"})
-		}
+	if m.primary != nil {
+		simple["primary"] = true
 	}
-	return map[string]any{
-		"name":    m.name,
-		"daemons": daemons,
+	if m.after != nil {
+		simple["after"] = true
 	}
+	return simple
 }

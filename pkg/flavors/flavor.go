@@ -22,31 +22,35 @@ func init() {
 
 // Flavor of Objects.
 type Flavor struct {
-	name            string
-	docs            string
-	inherit         []*Flavor
-	defaultVars     map[string]slip.Object
-	methods         map[string]*method
-	included        []string
-	required        []string
-	requiredMethods []string
-	requiredVars    []string
-	initable        map[string]bool
-	defaultHandler  slip.Caller
-	abstract        bool
-	noVanilla       bool
+	name             string
+	docs             string
+	inherit          []*Flavor
+	defaultVars      map[string]slip.Object
+	keywords         map[string]slip.Object
+	methods          map[string][]*method
+	included         []string
+	required         []string
+	requiredMethods  []string
+	requiredVars     []string
+	requiredKeywords []string
+	initable         map[string]bool
+	defaultHandler   slip.Caller
+	abstract         bool
+	noVanilla        bool
+	allowOtherKeys   bool
 }
 
 func (obj *Flavor) defMethod(name string, methodType string, caller slip.Caller) {
 	name = strings.ToLower(name)
-	m := obj.methods[name]
+	var m *method
 	add := false
-	if m == nil {
+	ma := obj.methods[name]
+	if 0 < len(ma) {
+		m = ma[0]
+	} else {
 		add = true
-		m = &method{
-			name: name,
-			from: obj,
-		}
+		m = &method{name: name, from: obj}
+		ma = []*method{m}
 	}
 	switch strings.ToLower(methodType) {
 	case ":primary", "":
@@ -61,7 +65,7 @@ func (obj *Flavor) defMethod(name string, methodType string, caller slip.Caller)
 		panic(fmt.Sprintf("%s is not a valid method type.", methodType))
 	}
 	if add {
-		obj.methods[name] = m
+		obj.methods[name] = ma
 	}
 }
 
@@ -85,11 +89,11 @@ func (obj *Flavor) Simplify() any {
 	}
 	vars := map[string]any{}
 	for k, o := range obj.defaultVars {
-		if o == nil {
-			vars[k] = nil
-		} else {
-			vars[k] = o.Simplify()
-		}
+		vars[k] = slip.Simplify(o)
+	}
+	keywords := map[string]any{}
+	for k, o := range obj.keywords {
+		keywords[k] = slip.Simplify(o)
 	}
 	methods := make([]any, 0, len(obj.methods))
 	names := make([]string, 0, len(obj.methods))
@@ -99,25 +103,35 @@ func (obj *Flavor) Simplify() any {
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		methods = append(methods, obj.methods[name].Simplify())
+		var daemons []any
+		for _, m := range obj.methods[name] {
+			if !m.empty() {
+				daemons = append(daemons, m.Simplify())
+			}
+		}
+		methods = append(methods, daemons)
 	}
 	initable := map[string]any{}
 	for k := range obj.initable {
 		initable[k] = true
 	}
+	_, isDefHand := obj.defaultHandler.(defHand)
 	return map[string]any{
-		"name":            obj.name,
-		"docs":            obj.docs,
-		"inherit":         flist,
-		"defaultVars":     vars,
-		"methods":         methods,
-		"included":        obj.simplifyStringArray(obj.included),
-		"required":        obj.simplifyStringArray(obj.required),
-		"requiredMethods": obj.simplifyStringArray(obj.requiredMethods),
-		"requiredVars":    obj.simplifyStringArray(obj.requiredVars),
-		"initable":        initable,
-		"defaultHandler":  (obj.defaultHandler != nil),
-		"abstract":        obj.abstract,
+		"name":             obj.name,
+		"docs":             obj.docs,
+		"inherit":          flist,
+		"defaultVars":      vars,
+		"methods":          methods,
+		"keywords":         keywords,
+		"included":         obj.simplifyStringArray(obj.included),
+		"required":         obj.simplifyStringArray(obj.required),
+		"requiredMethods":  obj.simplifyStringArray(obj.requiredMethods),
+		"requiredVars":     obj.simplifyStringArray(obj.requiredVars),
+		"requiredKeywords": obj.simplifyStringArray(obj.requiredKeywords),
+		"initable":         initable,
+		"defaultHandler":   !isDefHand,
+		"abstract":         obj.abstract,
+		"allowOtherKeys":   obj.allowOtherKeys,
 	}
 }
 
@@ -159,22 +173,25 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 		}
 	}
 	obj.inherit = append(obj.inherit, cf)
+	if cf.allowOtherKeys {
+		obj.allowOtherKeys = true
+	}
 	for k, v := range cf.defaultVars {
 		if _, has := obj.defaultVars[k]; !has {
 			obj.defaultVars[k] = v
 		}
 	}
-	for k, m := range cf.methods {
-		xm := obj.methods[k]
-		if xm != nil {
-			xm.inherit = append(xm.inherit, m)
+	for k, v := range cf.keywords {
+		if _, has := obj.keywords[k]; !has {
+			obj.keywords[k] = v
+		}
+	}
+	for k, ma := range cf.methods {
+		xma := obj.methods[k]
+		if 0 < len(xma) {
+			obj.methods[k] = append(obj.methods[k], ma[0])
 		} else {
-			xm = &method{
-				name:    k,
-				from:    obj,
-				inherit: []*method{m},
-			}
-			obj.methods[k] = xm
+			obj.methods[k] = []*method{{name: k, from: obj}, ma[0]}
 		}
 	}
 	for _, f2 := range cf.inherit {
@@ -188,8 +205,9 @@ func (obj *Flavor) makeInstance() *Instance {
 	inst := Instance{flavor: obj}
 	inst.Scope.Init()
 	for k, v := range obj.defaultVars {
-		inst.Let(slip.Symbol(k), v)
+		inst.Vars[k] = v
 	}
-	inst.Let(slip.Symbol("self"), &inst)
+	inst.Vars["self"] = &inst
+
 	return &inst
 }

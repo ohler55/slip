@@ -8,20 +8,20 @@ var vanilla = Flavor{
 	name:        "vanilla-flavor",
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
-	methods: map[string]*method{
-		":describe":            {name: ":describe", primary: describeCaller(true)},
-		":init":                {name: ":init", primary: initCaller(true)},
-		":id":                  {name: ":id", primary: idCaller(true)},
-		":operation-handler-p": {name: ":operation-handler-p", primary: hasOpCaller(true)},
-		":print-self":          {name: ":print-self", primary: printCaller(true)},
-		":send-if-handles":     {name: ":send-if-handles", primary: sendIfCaller(true)},
-		":which-operations":    {name: ":print-self", primary: whichOpsCaller(true)},
+	methods: map[string][]*method{
+		":describe":            []*method{{name: ":describe", primary: describeCaller(true)}},
+		":init":                []*method{{name: ":init", primary: initCaller(true)}},
+		":id":                  []*method{{name: ":id", primary: idCaller(true)}},
+		":operation-handler-p": []*method{{name: ":operation-handler-p", primary: hasOpCaller(true)}},
+		":print-self":          []*method{{name: ":print-self", primary: printCaller(true)}},
+		":send-if-handles":     []*method{{name: ":send-if-handles", primary: sendIfCaller(true)}},
+		":which-operations":    []*method{{name: ":print-self", primary: whichOpsCaller(true)}},
 	},
 }
 
 func init() {
-	for _, m := range vanilla.methods {
-		m.from = &vanilla
+	for _, ma := range vanilla.methods {
+		ma[0].from = &vanilla
 	}
 	FlavorsPkg.Set(vanilla.name, &vanilla)
 }
@@ -29,7 +29,7 @@ func init() {
 type initCaller bool
 
 func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	// TBD first arg (len(args)-1) should be self
+	// Does nothing.
 	return nil
 }
 

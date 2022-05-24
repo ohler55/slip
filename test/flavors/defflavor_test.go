@@ -3,6 +3,7 @@
 package flavors_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
@@ -25,15 +26,15 @@ func TestDefflavorBasic(t *testing.T) {
 
 	f := slip.ReadString("strawberry").Eval(scope)
 
-	// fmt.Printf("*** flavor: %s\n", pretty.SEN(f))
+	fmt.Printf("*** flavor: %s\n", pretty.SEN(f))
 	sf := f.Simplify()
 	require.Equal(t, "strawberry", jp.C("name").First(sf))
 	require.Equal(t, "Strawberry icecream", jp.C("docs").First(sf))
 
-	daemons := jp.MustParseString("methods[?(@.name == ':size')].daemons[*]").Get(sf)
+	daemons := jp.MustParseString("methods[*][?(@.name == ':size')]").Get(sf)
 	require.Equal(t, 1, len(daemons))
 
-	daemons = jp.MustParseString("methods[?(@.name == ':set-size')].daemons[*]").Get(sf)
+	daemons = jp.MustParseString("methods[*][?(@.name == ':set-size')]").Get(sf)
 	require.Equal(t, 1, len(daemons))
 }
 
