@@ -91,7 +91,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			panic(fmt.Sprintf("%s is not an init keyword for Flavor %s.", sym, cf.name))
 		}
 	}
-	_ = inst.send("init", slip.List{plist}, depth+1)
+	_ = inst.send(":init", slip.List{plist}, depth+1)
 
 	return inst
 }

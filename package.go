@@ -202,6 +202,13 @@ func (obj *Package) Simplify() interface{} {
 	for i, p := range obj.Uses {
 		uses[i] = p.Name
 	}
+	funcs := make([]string, 0, len(obj.Funcs))
+	for name := range obj.Funcs {
+		funcs = append(funcs, name)
+		// TBD maybe show package defined in?
+	}
+	sort.Strings(funcs)
+
 	return map[string]interface{}{
 		"name":      obj.Name,
 		"nicknames": nicknames,
@@ -209,6 +216,7 @@ func (obj *Package) Simplify() interface{} {
 		"vars":      vars,
 		"imports":   imports,
 		"uses":      uses,
+		"functions": funcs,
 	}
 }
 

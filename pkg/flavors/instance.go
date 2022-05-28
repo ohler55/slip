@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"unsafe"
 
+	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/slip"
 )
 
@@ -21,6 +22,7 @@ func init() {
 type Instance struct {
 	slip.Scope
 	flavor *Flavor
+	Pocket any // user data when implementing special instances
 }
 
 // String representation of the Object.
@@ -41,12 +43,18 @@ func (obj *Instance) Append(b []byte) []byte {
 func (obj *Instance) Simplify() interface{} {
 	vars := map[string]any{}
 	for name, val := range obj.Vars {
-		vars[name] = slip.Simplify(val)
+		if name != "self" {
+			vars[name] = slip.Simplify(val)
+		}
 	}
-	return map[string]any{
+	simple := map[string]any{
 		"flavor": obj.flavor.name,
 		"vars":   vars,
 	}
+	if obj.Pocket != nil {
+		simple["pocket"] = alt.Decompose(obj.Pocket)
+	}
+	return simple
 }
 
 // Equal returns true if this Object and the other are equal in value.
@@ -67,8 +75,8 @@ func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 func (obj *Instance) send(message string, args slip.List, depth int) slip.Object {
 	ma := obj.flavor.methods[message]
 	if len(ma) == 0 {
-		xargs := append(args, slip.Symbol(":"+message), obj)
-		obj.flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
+		xargs := append(args, slip.Symbol(message))
+		return obj.flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
 	}
 	for _, m := range ma {
 		if m.wrap != nil {

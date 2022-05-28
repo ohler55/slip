@@ -189,12 +189,12 @@ func (f *Function) CompileArgs() {
 		arg := f.Args[i]
 		if 0 < len(f.SkipEval) {
 			if len(f.SkipEval) <= si {
-				if f.SkipEval[len(f.SkipEval)-1] {
+				if !f.SkipEval[len(f.SkipEval)-1] {
 					if alist, ok := arg.(List); ok {
 						f.Args[i] = CompileList(alist)
 					}
 				}
-			} else if f.SkipEval[si] {
+			} else if !f.SkipEval[si] {
 				if alist, ok := arg.(List); ok {
 					f.Args[i] = CompileList(alist)
 				}

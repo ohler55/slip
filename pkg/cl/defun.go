@@ -3,10 +3,6 @@
 package cl
 
 import (
-	"fmt"
-	"io"
-	"strings"
-
 	"github.com/ohler55/slip"
 )
 
@@ -61,78 +57,22 @@ type Defun struct {
 
 // Call the the function with the arguments provided.
 func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	pos := len(args) - 1
-	name, ok := args[pos].(slip.Symbol)
+	name, ok := args[len(args)-1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defun", args[pos], "symbol")
+		slip.PanicType("name argument to defun", args[len(args)-1], "symbol")
 	}
-	upper := strings.ToLower(string(name))
-	pos--
-	var ll slip.List
-	switch tl := args[pos].(type) {
-	case slip.List:
-		ll = tl
-	case nil:
-		// leave as empty list
-	default:
-		slip.PanicType("lambda list of defun", args[pos], "list")
-	}
-	pos--
-	var docStr slip.String
-	if docStr, ok = args[pos].(slip.String); !ok {
-		pos++
-	}
-	lc := &slip.LispCaller{
-		Name: upper,
-		Doc: &slip.FuncDoc{
-			Name:   upper,
-			Return: "object",
-			Text:   string(docStr),
-		},
-		Forms: args[:pos],
-	}
+	lc := slip.DefLispCaller("defun", string(name), s, args[:len(args)-1])
 	fc := func(fargs slip.List) slip.Object {
 		return &slip.Dynamic{
 			Function: slip.Function{
-				Name: upper,
+				Name: lc.Name,
 				Self: lc,
 				Args: fargs,
 			},
 		}
 	}
-	for i := len(ll) - 1; 0 <= i; i-- {
-		switch ta := ll[i].(type) {
-		case slip.Symbol: // variable name
-			lc.Doc.Args = append(lc.Doc.Args, &slip.DocArg{Name: string(ta), Type: "object"})
-		case slip.List: // variable name and default value
-			if len(ta) != 2 {
-				slip.PanicType("lambda list element with default value", ta, "list of two elements")
-			}
-			if name, ok = ta[1].(slip.Symbol); !ok {
-				slip.PanicType("lambda list element with default value", ta, "list with a symbol as the first element")
-			}
-			if ta[0] == nil {
-				lc.Doc.Args = append(lc.Doc.Args, &slip.DocArg{Name: string(name), Type: "object"})
-			} else {
-				lc.Doc.Args = append(lc.Doc.Args,
-					&slip.DocArg{Name: string(name), Type: string(ta[0].Hierarchy()[0]), Default: ta[0]})
-			}
-		default:
-			slip.PanicType("lambda list element", ta, "symbol", "list")
-		}
-	}
-	if fi := slip.CurrentPackage.Funcs[upper]; fi != nil {
-		if fi.Pkg.Locked {
-			panic(fmt.Sprintf("Redefining %s::%s in DEFUN. Package %s is locked.",
-				slip.CurrentPackage.Name, upper, slip.CurrentPackage.Name))
-		}
-		var w io.Writer
-		if w, ok = slip.ErrorOutput.(io.Writer); ok {
-			_, _ = fmt.Fprintf(w, "WARNING: redefining %s::%s in DEFUN\n", slip.CurrentPackage.Name, upper)
-		}
-	}
-	slip.CurrentPackage.LispCallers[upper] = lc
-	slip.CurrentPackage.Funcs[upper] = &slip.FuncInfo{Create: fc, Pkg: slip.CurrentPackage}
+	slip.CurrentPackage.LispCallers[lc.Name] = lc
+	slip.CurrentPackage.Funcs[lc.Name] = &slip.FuncInfo{Create: fc, Pkg: slip.CurrentPackage}
 	if s.Parent() != nil {
 		lc.Closure = s
 	}

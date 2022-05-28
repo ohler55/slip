@@ -3,6 +3,8 @@
 package flavors
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
 )
 
@@ -19,7 +21,6 @@ func init() {
 				{
 					Name: "method",
 					Type: "list",
-					// TBD is the order wrong? how about handling both?
 					Text: "A list of the flavor name, optional method type, and operation (method name) .",
 				},
 				{
@@ -37,8 +38,8 @@ func init() {
 			Return: "nil",
 			Text:   `defines a method for a flavor.`,
 			Examples: []string{
-				"(setq fruit (make-instance 'strawberry :color 'red)) => #<strawberry 123456>",
-				"(defmethod (strawberry :size) => nil",
+				"(defflavor strawberry (size) ()) => #<flavor strawberry>",
+				`(defmethod (strawberry :before :size) () (format t "getting size"))  => nil`,
 			},
 		}, &FlavorsPkg)
 }
@@ -50,12 +51,46 @@ type Defmethod struct {
 
 // Call the the function with the arguments provided.
 func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-
-	// TBD same as defun to get a LispCaller
-	// TBD should there be a lambda-list defun helper? shared by defun and defmethod and lambda
-	//   maybe lambda plus forms to make LispCaller
-	//  lispcaller.go - MakeLispCaller, new, build, def
-	//    test with current defun
+	pos := len(args) - 1
+	if pos < 1 {
+		slip.PanicArgCount(f, 2, -1)
+	}
+	ml, ok := args[pos].(slip.List)
+	if !ok {
+		slip.PanicType("method designator for defmethod", args[pos], "list")
+	}
+	var (
+		flavor *Flavor
+		daemon string
+		method string
+	)
+	switch len(ml) {
+	case 0, 1:
+		panic(fmt.Sprintf("Too few elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml)))
+	case 2:
+		if sym, ok2 := ml[1].(slip.Symbol); ok2 {
+			flavor = allFlavors[string(sym)]
+		}
+	case 3:
+		if sym, ok2 := ml[2].(slip.Symbol); ok2 {
+			flavor = allFlavors[string(sym)]
+		}
+		if sym, ok2 := ml[1].(slip.Symbol); ok2 {
+			daemon = string(sym)
+		}
+	default:
+		panic(fmt.Sprintf("Too many elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml)))
+	}
+	if sym, ok2 := ml[0].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
+		method = string(sym)
+	} else {
+		slip.PanicType("method for defmethod", ml[0], "keyword")
+	}
+	if flavor == nil {
+		slip.PanicType("flavor for defmethod", ml[len(ml)-1], "name of flavor")
+	}
+	lc := slip.DefLispCaller("defmethod", "", s, args[:pos])
+	flavor.defMethod(method, daemon, lc)
 
 	return nil
 }

@@ -7,19 +7,26 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - unit test
+  - test send with build in first
+   - inspect instance with simplify
+
+
  - defflavor function
  - undefflavor
  - make-instance function
  - defmethod
-  - is there a (defmethod flavor :after :method (args) forms*)?
  - send function
-  - send all args including op
 
 - trace on instance to setup scope
 
 - simple or data or opaque or ???
  - use flavors for the instance and methods
  - separate package
+
+- would building our own stack be a better approach?
+ - trace would be easier
+ -
 
 - Code
  - #' - function (like quote)

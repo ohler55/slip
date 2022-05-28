@@ -212,6 +212,22 @@ func (f *Defflavor) valsStringList(vals slip.List) (sa []string) {
 	return
 }
 
+func (f *Defflavor) setDefaultHandler(nf *Flavor, val slip.Object) {
+	switch tv := val.(type) {
+	case slip.Symbol:
+		if fun, ok := slip.NewFunc(string(tv), slip.List{}).(slip.Funky); ok {
+			nf.defaultHandler = fun.Caller()
+		}
+	case slip.List:
+		// TBD convert to function and eval (likely a quote)
+	case slip.Funky:
+		nf.defaultHandler = tv.Caller()
+	default:
+		// TBD lambda
+		slip.PanicType("defflavor default-handler", val, "symbol", "lambda")
+	}
+}
+
 func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 	// Order of options doesn't matter so process the easy way.
 	for _, opt := range options {
@@ -236,14 +252,10 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":abstract-flavor":
 			nf.abstract = true
 		case ":default-handler":
-			if len(vals) == 1 {
-				if sym, ok := vals[0].(slip.Symbol); ok {
-					if fun, ok2 := slip.NewFunc(string(sym), slip.List{}).(slip.Funky); ok2 {
-						nf.defaultHandler = fun.Caller()
-					}
-				}
+			if len(vals) != 1 {
+				slip.PanicType(":default-handler of defflavor", nil, "symbol")
 			}
-			slip.PanicType(":default-handler of defflavor", nil, "symbol")
+			f.setDefaultHandler(nf, vals[0])
 		case ":default-init-plist":
 			for i := len(vals) - 1; 0 <= i; i-- {
 				if plist, ok := vals[i].(slip.List); ok && len(plist) == 2 {
@@ -315,18 +327,18 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 type getter string
 
 // Call returns the value of a variable in the instance.
-func (g getter) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
-	return args[len(args)-1].(*Instance).Get(slip.Symbol(g))
+func (g getter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+	return scope.Get(slip.Symbol(g))
 }
 
 type setter string
 
 // Call sets the value of a variable in the instance.
-func (s setter) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
-	if len(args) < 3 {
-		panic(fmt.Sprintf("no value given for %s.", s))
+func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+	if len(args) < 1 {
+		panic(fmt.Sprintf("no value given for set-%s.", s))
 	}
-	args[len(args)-1].(*Instance).Set(slip.Symbol(s), args[0])
+	scope.Set(slip.Symbol(s), args[0])
 
 	return args[0]
 }
@@ -334,7 +346,7 @@ func (s setter) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
 type defHand bool
 
 // Call returns the value of a variable in the instance.
-func (dh defHand) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	inst := args[len(args)-1].(*Instance)
-	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.flavor.name, args[len(args)-2]))
+func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+	inst := scope.Get(slip.Symbol("self")).(*Instance)
+	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.flavor.name, args[len(args)-1]))
 }

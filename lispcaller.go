@@ -4,6 +4,7 @@ package slip
 
 import (
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -162,6 +163,70 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 				s.returnFrom = ss.returnFrom
 			}
 			break
+		}
+	}
+	return
+}
+
+// DefLispCaller parses arguments into a LispCaller. Arguments should be a
+// lambda-list followed by an optional documentaiton strings and then the
+// forms to evaluate when the LispCaller is called.
+func DefLispCaller(defName, funcName string, s *Scope, args List) (lc *LispCaller) {
+	funcName = strings.ToLower(funcName)
+	pos := len(args) - 1
+	var ll List
+	switch tl := args[pos].(type) {
+	case List:
+		ll = tl
+	case nil:
+		// leave as empty list
+	default:
+		PanicType(fmt.Sprintf("lambda list of %s", defName), args[pos], "list")
+	}
+	pos--
+	docStr, ok := args[pos].(String)
+	if !ok {
+		pos++
+	}
+	lc = &LispCaller{
+		Name: funcName,
+		Doc: &FuncDoc{
+			Name:   funcName,
+			Return: "object",
+			Text:   string(docStr),
+		},
+		Forms: args[:pos],
+	}
+	for i := len(ll) - 1; 0 <= i; i-- {
+		switch ta := ll[i].(type) {
+		case Symbol: // variable name
+			lc.Doc.Args = append(lc.Doc.Args, &DocArg{Name: string(ta), Type: "object"})
+		case List: // variable name and default value
+			if len(ta) != 2 {
+				PanicType("lambda list element with default value", ta, "list of two elements")
+			}
+			var name Symbol
+			if name, ok = ta[1].(Symbol); !ok {
+				PanicType("lambda list element with default value", ta, "list with a symbol as the first element")
+			}
+			if ta[0] == nil {
+				lc.Doc.Args = append(lc.Doc.Args, &DocArg{Name: string(name), Type: "object"})
+			} else {
+				lc.Doc.Args = append(lc.Doc.Args,
+					&DocArg{Name: string(name), Type: string(ta[0].Hierarchy()[0]), Default: ta[0]})
+			}
+		default:
+			PanicType("lambda list element", ta, "symbol", "list")
+		}
+	}
+	if fi := CurrentPackage.Funcs[funcName]; fi != nil {
+		if fi.Pkg.Locked {
+			panic(fmt.Sprintf("Redefining %s::%s in %s. Package %s is locked.",
+				CurrentPackage.Name, funcName, defName, CurrentPackage.Name))
+		}
+		var w io.Writer
+		if w, ok = ErrorOutput.(io.Writer); ok {
+			_, _ = fmt.Fprintf(w, "WARNING: redefining %s::%s in %s\n", CurrentPackage.Name, funcName, defName)
 		}
 	}
 	return
