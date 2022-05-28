@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 )
 
 func init() {
@@ -213,13 +214,15 @@ func (f *Defflavor) valsStringList(vals slip.List) (sa []string) {
 }
 
 func (f *Defflavor) setDefaultHandler(nf *Flavor, val slip.Object) {
+Top:
 	switch tv := val.(type) {
 	case slip.Symbol:
 		if fun, ok := slip.NewFunc(string(tv), slip.List{}).(slip.Funky); ok {
 			nf.defaultHandler = fun.Caller()
 		}
-	case slip.List:
-		// TBD convert to function and eval (likely a quote)
+	case *cl.Quote:
+		val = tv.Args[0]
+		goto Top
 	case slip.Funky:
 		nf.defaultHandler = tv.Caller()
 	default:
@@ -345,7 +348,7 @@ func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 
 type defHand bool
 
-// Call returns the value of a variable in the instance.
+// Call the default handler.
 func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
 	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.flavor.name, args[len(args)-1]))
