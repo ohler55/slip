@@ -3,7 +3,6 @@
 package flavors_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
@@ -25,8 +24,6 @@ func TestDefflavorBasic(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope)
 
 	f := slip.ReadString("strawberry").Eval(scope)
-
-	fmt.Printf("*** flavor: %s\n", pretty.SEN(f))
 	sf := f.Simplify()
 	require.Equal(t, "strawberry", jp.C("name").First(sf))
 	require.Equal(t, "Strawberry icecream", jp.C("docs").First(sf))

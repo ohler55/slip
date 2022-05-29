@@ -10,7 +10,8 @@ SLIce Processing is LISP for golang
  - unit test
   - test send with build in first
    - inspect instance with simplify
-
+- vanilla
+ - add :eval-inside-yourself?
 
  - defflavor function
  - undefflavor
