@@ -223,8 +223,6 @@ Top:
 	case *cl.Quote:
 		val = tv.Args[0]
 		goto Top
-	case slip.Funky:
-		nf.defaultHandler = tv.Caller()
 	default:
 		// TBD lambda
 		slip.PanicType("defflavor default-handler", val, "symbol", "lambda")
@@ -240,7 +238,7 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case slip.Symbol:
 			key = to
 		case slip.List:
-			if len(to) < 1 {
+			if len(to) < 2 {
 				slip.PanicType("options element of defflavor", opt, "symbol", "list of symbol and values")
 			}
 			var ok bool
@@ -276,11 +274,13 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 				}
 			}
 		case ":documentation":
-			if ss, ok := vals[0].(slip.String); ok {
-				nf.docs = string(ss)
-			} else {
-				slip.PanicType("defflavor :documentation", vals[0], "string")
+			if 0 < len(vals) {
+				if ss, ok := vals[0].(slip.String); ok {
+					nf.docs = string(ss)
+					break
+				}
 			}
+			slip.PanicType("defflavor :documentation", vals[0], "string")
 		case ":gettable-instance-variables":
 			for k := range nf.defaultVars {
 				if k != "self" {
@@ -313,7 +313,7 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 			nf.requiredKeywords = f.valsStringList(vals)
 		case ":required-instance-variables":
 			nf.requiredVars = f.valsStringList(vals)
-		case ":required-method":
+		case ":required-methods":
 			nf.requiredMethods = f.valsStringList(vals)
 		case ":settable-instance-variables":
 			for k := range nf.defaultVars {
