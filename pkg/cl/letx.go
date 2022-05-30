@@ -21,6 +21,7 @@ func init() {
 					Type: "list",
 					Text: "A list of variables with optional initial value form.",
 				},
+				{Name: "&rest"},
 				{
 					Name: "forms",
 					Type: "object",

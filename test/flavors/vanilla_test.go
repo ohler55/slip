@@ -34,7 +34,8 @@ func TestVanilla(t *testing.T) {
 
 	methods := slip.ReadString("(send berry :which-operations)").Eval(scope)
 	require.Equal(t,
-		"(:describe :id :init :operation-handler-p :print-self :send-if-handles :set-size :size :which-operations)",
+		"(:describe :eval-inside-yourself :id :init :operation-handler-p :print-self "+
+			":send-if-handles :set-size :size\n           :which-operations)\n",
 		methods.String())
 
 	pr, pw, err := os.Pipe()
@@ -54,5 +55,29 @@ func TestVanilla(t *testing.T) {
     size: "medium"
 `, string(out))
 
-	// fmt.Printf("*** methods %s\n", methods)
+	pr2, pw2, err2 := os.Pipe()
+	require.NoError(t, err2)
+	defer func() { _ = pw2.Close(); _ = pr2.Close() }()
+
+	scope.Let(slip.Symbol("out"), (*slip.FileStream)(pw2))
+	_ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope)
+	pw2.Close()
+	out, err = ioutil.ReadAll(pr2)
+	require.NoError(t, err)
+	require.Regexp(t, "#<strawberry [0-9a-f]+>", string(out))
+
+	require.Panics(t, func() { _ = slip.ReadString("(send berry :print-self out 0)").Eval(scope) })
+	require.Panics(t, func() { _ = slip.ReadString("(send berry :print-self t 0 t)").Eval(scope) })
+	// try to write to a closed stream
+	require.Panics(t, func() { _ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope) })
+
+	size := slip.ReadString("(send berry :send-if-handles :size)").Eval(scope)
+	require.Equal(t, slip.String("medium"), size)
+	result := slip.ReadString("(send berry :send-if-handles :nothing)").Eval(scope)
+	require.Nil(t, result)
+	require.Panics(t, func() { _ = slip.ReadString("(send berry :send-if-handles)").Eval(scope) })
+
+	size = slip.ReadString("(send berry :eval-inside-yourself 'size)").Eval(scope)
+	require.Equal(t, slip.String("medium"), size)
+	require.Panics(t, func() { _ = slip.ReadString("(send berry :eval-inside-yourself)").Eval(scope) })
 }

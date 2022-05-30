@@ -17,13 +17,14 @@ var vanilla = Flavor{
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
 	methods: map[string][]*method{
-		":describe":            []*method{{name: ":describe", primary: describeCaller(true)}},
-		":init":                []*method{{name: ":init", primary: initCaller(true)}},
-		":id":                  []*method{{name: ":id", primary: idCaller(true)}},
-		":operation-handler-p": []*method{{name: ":operation-handler-p", primary: hasOpCaller(true)}},
-		":print-self":          []*method{{name: ":print-self", primary: printCaller(true)}},
-		":send-if-handles":     []*method{{name: ":send-if-handles", primary: sendIfCaller(true)}},
-		":which-operations":    []*method{{name: ":which-operations", primary: whichOpsCaller(true)}},
+		":describe":             []*method{{name: ":describe", primary: describeCaller(true)}},
+		":eval-inside-yourself": []*method{{name: ":eval-inside-yourself", primary: insideCaller(true)}},
+		":init":                 []*method{{name: ":init", primary: initCaller(true)}},
+		":id":                   []*method{{name: ":id", primary: idCaller(true)}},
+		":operation-handler-p":  []*method{{name: ":operation-handler-p", primary: hasOpCaller(true)}},
+		":print-self":           []*method{{name: ":print-self", primary: printCaller(true)}},
+		":send-if-handles":      []*method{{name: ":send-if-handles", primary: sendIfCaller(true)}},
+		":which-operations":     []*method{{name: ":which-operations", primary: whichOpsCaller(true)}},
 	},
 }
 
@@ -93,16 +94,36 @@ func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 type printCaller bool
 
 func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	// TBD first arg (len(args)-1) should be self
-	// has 3 args
-	// maybe don't implement?
+	// Args should be stream printdepth escape-p. The second two arguments are
+	// ignored.
+	obj := s.Get("self").(*Instance)
+	if len(args) != 3 {
+		panic(fmt.Sprintf("Method print-self expects 3 argument but received %d.", len(args)))
+	}
+	w, ok := args[len(args)-1].(io.Writer)
+	if !ok {
+		panic(fmt.Sprintf("Method print-self expects the first argument to be an output-stream not a %T.",
+			args[len(args)-1]))
+	}
+	if _, err := w.Write(obj.Append([]byte{})); err != nil {
+		panic(err)
+	}
 	return nil
 }
 
 type sendIfCaller bool
 
-func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	// TBD first arg (len(args)-1) should be self
+func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*Instance)
+	if len(args) == 0 {
+		panic("Method send-if-handles expects at least 1 argument but received 0.")
+	}
+	pos := len(args) - 1
+	if sym, ok := args[pos].(slip.Symbol); ok {
+		if _, has := obj.flavor.methods[string(sym)]; has {
+			return obj.send(string(sym), args[:pos], depth+1)
+		}
+	}
 	return nil
 }
 
@@ -120,4 +141,13 @@ func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 		methods = append(methods, slip.Symbol(name))
 	}
 	return methods
+}
+
+type insideCaller bool
+
+func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	if len(args) != 1 {
+		panic(fmt.Sprintf("Method eval-inside-yourself expects 1 argument but received %d.", len(args)))
+	}
+	return s.Eval(args[0], depth+1)
 }
