@@ -61,6 +61,63 @@ func TestDefflavorInherit(t *testing.T) {
 	require.Equal(t, "(vanilla-flavor)", names.String())
 }
 
+func TestDefflavorNoVanilla(t *testing.T) {
+	defer undefFlavors("chocolate")
+	scope := slip.NewScope()
+	slip.ReadString(`
+(defflavor chocolate ((a 1)) () :no-vanilla-flavor)
+`).Eval(scope)
+
+	sf := slip.ReadString("chocolate").Eval(scope).Simplify()
+	require.Equal(t, "[]", pretty.SEN(jp.C("inherit").First(sf)))
+}
+
+func TestDefflavorKeywords(t *testing.T) {
+	defer undefFlavors("f1")
+	scope := slip.NewScope()
+	slip.ReadString(`
+(defflavor f1 ((b 2)) () (:init-keywords :x :y) (:required-init-keywords :x))
+`).Eval(scope)
+
+	sf := slip.ReadString("f1").Eval(scope).Simplify()
+	require.Equal(t, `[":x"]`, pretty.SEN(jp.C("requiredKeywords").First(sf)))
+	require.Equal(t, `{":x": null ":y": null}`, pretty.SEN(jp.C("keywords").First(sf)))
+}
+
+func TestDefflavorInitPlist(t *testing.T) {
+	defer undefFlavors("f1")
+	scope := slip.NewScope()
+	slip.ReadString(`
+(defflavor f1 ((b 2)) () (:default-init-plist (:allow-other-keys t) (:x 1) (:y 2)))
+`).Eval(scope)
+
+	sf := slip.ReadString("f1").Eval(scope).Simplify()
+	require.Equal(t, `{":x": 1 ":y": 2}`, pretty.SEN(jp.C("keywords").First(sf)))
+}
+
+func TestDefflavorInitBadPlist(t *testing.T) {
+	defer undefFlavors("f1")
+	require.Panics(t, func() {
+		slip.ReadString(`
+(defflavor f1 ((b 2)) () (:default-init-plist (t 2)))
+`).Eval(slip.NewScope())
+	})
+	require.Panics(t, func() {
+		slip.ReadString(`
+(defflavor f1 ((b 2)) () (:default-init-plist :x))
+`).Eval(slip.NewScope())
+	})
+}
+
+func TestDefflavorBadKeywords(t *testing.T) {
+	defer undefFlavors("f1")
+	require.Panics(t, func() {
+		slip.ReadString(`
+(defflavor f1 ((b 2)) () (:init-keywords t))
+`).Eval(slip.NewScope())
+	})
+}
+
 func TestDefflavorInclude(t *testing.T) {
 	defer undefFlavors("f1", "f2", "f3")
 	scope := slip.NewScope()
@@ -129,6 +186,7 @@ func TestDefflavorTooManyOption(t *testing.T) {
 
 func TestDefflavorBadOptionKey(t *testing.T) {
 	require.Panics(t, func() { slip.ReadString("(defflavor f1 () () (t t))").Eval(slip.NewScope()) })
+	require.Panics(t, func() { slip.ReadString("(defflavor f1 () () :not-an-option)").Eval(slip.NewScope()) })
 }
 
 func TestDefflavorBadOption(t *testing.T) {
@@ -167,6 +225,11 @@ func TestDefflavorRequiredNotSymbol(t *testing.T) {
 
 func TestDefflavorBadDocs(t *testing.T) {
 	require.Panics(t, func() { slip.ReadString("(defflavor f1 () () (:documentation t))").Eval(slip.NewScope()) })
+}
+
+func TestDefflavorBadInitable(t *testing.T) {
+	require.Panics(t,
+		func() { slip.ReadString("(defflavor f1 () () (:initable-instance-variables t))").Eval(slip.NewScope()) })
 }
 
 func TestDefflavorRequired(t *testing.T) {

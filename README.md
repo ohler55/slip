@@ -7,13 +7,15 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - add princ to make before and after testing easier
-  - follow by a terpri
- - defflavor function
- - undefflavor
- - make-instance function
+ - defflavor
+  - test all combinations
+   - simplify
+ - make-instance
+  - check required keywords
+
  - defmethod
- - send function
+  - simplify flavor to see daemons
+  - test with send with princ to see trace of before and after
 
 - trace on instance to setup scope
 

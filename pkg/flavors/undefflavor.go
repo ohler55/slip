@@ -62,7 +62,7 @@ func (f *Undefflavor) Call(s *slip.Scope, args slip.List, depth int) (result sli
 
 func (f *Undefflavor) removeFlavor(cf *Flavor) {
 	delete(allFlavors, cf.name)
-	delete(FlavorsPkg.Vars, cf.name)
+	FlavorsPkg.Remove(cf.name)
 	for _, f2 := range allFlavors {
 		if f2.inheritsFlavor(cf.name) {
 			f.removeFlavor(f2)

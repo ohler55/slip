@@ -261,7 +261,7 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 			for i := len(vals) - 1; 0 <= i; i-- {
 				if plist, ok := vals[i].(slip.List); ok && len(plist) == 2 {
 					if sym, ok := plist[1].(slip.Symbol); ok {
-						if sym == slip.Symbol("allow-other-keys") {
+						if sym == slip.Symbol(":allow-other-keys") {
 							nf.allowOtherKeys = plist[0] == slip.True
 						} else {
 							nf.keywords[string(sym)] = plist[0]
