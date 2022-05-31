@@ -3,7 +3,6 @@
 package flavors_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
@@ -266,15 +265,4 @@ func TestDefflavorMissing(t *testing.T) {
 (defflavor f3 () () (:required-instance-variables b))
 `).Eval(scope)
 	})
-}
-
-func undefFlavors(fns ...string) {
-	for _, fn := range fns {
-		undefFlavor(fn)
-	}
-}
-
-func undefFlavor(fn string) {
-	defer func() { recover() }()
-	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn)).Eval(slip.NewScope())
 }

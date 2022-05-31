@@ -1,0 +1,106 @@
+// Copyright (c) 2022, Peter Ohler, All rights reserved.
+
+package flavors_test
+
+import (
+	"testing"
+
+	"github.com/ohler55/ojg/pretty"
+	"github.com/ohler55/slip"
+
+	"github.com/stretchr/testify/require"
+)
+
+func TestMakeInstanceSimple(t *testing.T) {
+	defer undefFlavors("blueberry")
+	code := slip.ReadString(`
+(defflavor blueberry ((size "medium")) () :initable-instance-variables)
+(setq berry (make-instance 'blueberry :size 'small))
+`)
+	scope := slip.NewScope()
+	berry := code.Eval(scope)
+
+	require.Equal(t, "{flavor: blueberry vars: {size: small}}", pretty.SEN(berry))
+	require.Regexp(t, "#<blueberry [0-9a-f]+>", berry.String())
+}
+
+func TestMakeInstanceKeywords(t *testing.T) {
+	defer undefFlavors("blueberry")
+	code := slip.ReadString(`
+(defflavor blueberry () () (:default-init-plist (:x 3)))
+(setq berry (make-instance 'blueberry :x 4))
+`)
+	scope := slip.NewScope()
+	berry := code.Eval(scope)
+
+	require.Equal(t, "{flavor: blueberry vars: {}}", pretty.SEN(berry))
+	require.Regexp(t, "#<blueberry [0-9a-f]+>", berry.String())
+}
+
+func TestMakeInstanceOtherKeywords(t *testing.T) {
+	defer undefFlavors("blueberry")
+	code := slip.ReadString(`
+(defflavor blueberry () () (:default-init-plist (:allow-other-keys t)))
+(setq berry (make-instance 'blueberry :x 4))
+`)
+	scope := slip.NewScope()
+	berry := code.Eval(scope)
+	require.Regexp(t, "#<blueberry [0-9a-f]+>", berry.String())
+}
+
+func TestMakeInstanceBadArgCount(t *testing.T) {
+	require.Panics(t, func() { _ = slip.ReadString(`(make-instance)`).Eval(slip.NewScope()) })
+}
+
+func TestMakeInstanceNotFlavor(t *testing.T) {
+	require.Panics(t, func() { _ = slip.ReadString(`(make-instance t)`).Eval(slip.NewScope()) })
+	require.Panics(t, func() { _ = slip.ReadString(`(make-instance 'not-a-flavor)`).Eval(slip.NewScope()) })
+}
+
+func TestMakeInstanceAbstract(t *testing.T) {
+	defer undefFlavors("blueberry")
+	require.Panics(t, func() {
+		_ = slip.ReadString(`
+(defflavor blueberry ((size "medium")) () :abstract-flavor)
+(make-instance blueberry)
+`).Eval(slip.NewScope())
+	})
+}
+
+func TestMakeInstanceBadKeyword(t *testing.T) {
+	defer undefFlavors("blueberry", "raspberry", "blackberry", "cherry")
+	require.Panics(t, func() {
+		_ = slip.ReadString(`
+(defflavor blueberry () ())
+(make-instance 'blueberry t nil)
+`).Eval(slip.NewScope())
+	})
+	require.Panics(t, func() {
+		_ = slip.ReadString(`
+(defflavor raspberry () ())
+(make-instance raspberry bad nil)
+`).Eval(slip.NewScope())
+	})
+	require.Panics(t, func() {
+		_ = slip.ReadString(`
+(defflavor blackberry () ())
+(make-instance blackberry :self nil)
+`).Eval(slip.NewScope())
+	})
+	require.Panics(t, func() {
+		_ = slip.ReadString(`
+(defflavor cherry () ())
+(make-instance cherry :x nil)
+`).Eval(slip.NewScope())
+	})
+}
+
+func TestMakeInstanceMissingKeyword(t *testing.T) {
+	defer undefFlavors("blueberry")
+	require.Panics(t, func() {
+		_ = slip.ReadString(`
+(defflavor blueberry () () (:required-init-keywords :x))
+(make-instance 'blueberry)
+`).Eval(slip.NewScope())
+	})
+}

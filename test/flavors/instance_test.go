@@ -1,6 +1,6 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
-package flavors
+package flavors_test
 
 import (
 	"testing"
@@ -14,13 +14,13 @@ import (
 )
 
 func TestInstance(t *testing.T) {
+	defer undefFlavors("blueberry")
 	code := slip.ReadString(`
 (defflavor blueberry ((size "medium")) ())
 (setq berry (make-instance 'blueberry))
 `)
 	scope := slip.NewScope()
 	berry := code.Eval(scope)
-	defer slip.ReadString("(undefflavor 'blueberry)").Eval(scope)
 
 	bi := berry.(*flavors.Instance)
 	bi.Pocket = 7

@@ -292,7 +292,7 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":initable-instance-variables", ":inittable-instance-variables":
 			for i := len(vals) - 1; 0 <= i; i-- {
 				if sym, ok := vals[i].(slip.Symbol); ok {
-					nf.initable[string(sym)] = true
+					nf.initable[":"+string(sym)] = true
 				} else {
 					panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
 				}
