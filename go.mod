@@ -3,7 +3,7 @@ module github.com/ohler55/slip
 go 1.18
 
 require (
-	github.com/ohler55/ojg v1.14.0
+	github.com/ohler55/ojg v1.14.1
 	github.com/stretchr/testify v1.7.0
 )
 

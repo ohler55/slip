@@ -7,15 +7,18 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - defflavor
-  - test all combinations
-   - simplify
- - make-instance
-  - check required keywords
 
- - defmethod
-  - simplify flavor to see daemons
-  - test with send with princ to see trace of before and after
+ - send with daemons
+
+ - remove dependency on testify to remove dependency alert
+  - add regex to tt
+  - allow compare of types to tt
+   - easy way is for simplify
+   - more robust is to use reflection
+
+ - whopper
+  - (continue-whopper arg1 arg2)
+  - (defwhaooper (flavor method) (arg1 arg2) forms)
 
 - trace on instance to setup scope
 

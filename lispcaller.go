@@ -184,9 +184,17 @@ func DefLispCaller(defName, funcName string, s *Scope, args List) (lc *LispCalle
 		PanicType(fmt.Sprintf("lambda list of %s", defName), args[pos], "list")
 	}
 	pos--
-	docStr, ok := args[pos].(String)
-	if !ok {
-		pos++
+	var (
+		docStr String
+		ok     bool
+	)
+	if pos < 0 {
+		pos = 0
+	} else {
+		docStr, ok = args[pos].(String)
+		if !ok {
+			pos++
+		}
 	}
 	lc = &LispCaller{
 		Name: funcName,

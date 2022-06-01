@@ -11,7 +11,7 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Defmethod{Function: slip.Function{Name: "defmethod", Args: args}}
+			f := Defmethod{Function: slip.Function{Name: "defmethod", Args: args, SkipEval: []bool{true}}}
 			f.Self = &f
 			return &f
 		},

@@ -80,6 +80,7 @@ func TestPackageDef(t *testing.T) {
 
 	require.Equal(t, `{
   doc: Sailing.
+  functions: []
   imports: {bb: {name: bb pkg: "#<package \"b\">"}}
   name: c
   nicknames: [sea see]
