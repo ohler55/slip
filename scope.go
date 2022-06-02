@@ -45,6 +45,8 @@ func (s *Scope) NewScope(name Object) *Scope {
 // Init a scope.
 func (s *Scope) Init() {
 	s.Vars = map[string]Object{}
+	s.before = noopBefore
+	s.after = normalAfter
 }
 
 // Parent returns the parent scope or nil.

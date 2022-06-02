@@ -3,6 +3,7 @@
 package flavors_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/ohler55/slip"
@@ -76,4 +77,33 @@ func TestSendNotKeyword(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'nokey)").Eval(scope)
 
 	require.Panics(t, func() { _ = slip.ReadString("(send nock t)").Eval(scope) })
+}
+
+func TestSendDaemons(t *testing.T) {
+	defer undefFlavors("berry", "blueberry")
+	var b strings.Builder
+	scope := slip.NewScope()
+	scope.Set(slip.Symbol("out"), &slip.OutputStream{Writer: &b})
+	_ = slip.ReadString(`
+(defflavor berry (color) ()
+ :gettable-instance-variables
+ :settable-instance-variables
+ :initable-instance-variables)
+(defmethod (berry :rot) () (princ "berry rot" out) (terpri out))
+(defmethod (berry :after :rot) () (princ "berry after rot" out) (terpri out))
+`).Eval(scope)
+	_ = slip.ReadString(`
+(defflavor blueberry () (berry))
+(defmethod (blueberry :before :rot) () (princ "blueberry before rot" out) (terpri out))
+(defmethod (blueberry :after :rot) () (princ "blueberry after rot" out) (terpri out))
+`).Eval(scope)
+
+	_ = slip.ReadString("(setq blue (make-instance blueberry))").Eval(scope)
+
+	_ = slip.ReadString("(send blue :rot)").Eval(scope)
+	require.Equal(t, `blueberry before rot
+berry rot
+blueberry after rot
+berry after rot
+`, b.String())
 }

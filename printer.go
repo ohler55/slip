@@ -264,6 +264,8 @@ Top:
 		} else {
 			b = (*big.Float)(to).Append(b, 'g', int(prec))
 		}
+	case String:
+		b = append(b, to...)
 	case Symbol:
 		if len(to) == 0 {
 			b = append(b, "||"...)
