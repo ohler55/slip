@@ -5,9 +5,9 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCarEmpty(t *testing.T) {
@@ -85,7 +85,7 @@ func TestCarSetfCons(t *testing.T) {
 		Simple: []interface{}{"setf", []interface{}{"car", "target"}, 9},
 		Eval:   slip.Fixnum(9),
 	}).Test(t)
-	require.Equal(t, slip.Cons{slip.Fixnum(8), slip.Fixnum(9)}, scope.Get(slip.Symbol("target")))
+	tt.Equal(t, slip.Cons{slip.Fixnum(8), slip.Fixnum(9)}, scope.Get(slip.Symbol("target")))
 }
 
 func TestCarSetfNoArg(t *testing.T) {
@@ -116,11 +116,11 @@ func TestCarSetfNotList(t *testing.T) {
 func TestCarValues(t *testing.T) {
 	code := slip.ReadString(`(car (values '(a b) 'c))`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Symbol("a"), code.Eval(scope))
+	tt.Equal(t, slip.Symbol("a"), code.Eval(scope))
 }
 
 func TestCarPlaceValues(t *testing.T) {
 	code := slip.ReadString(`(setq target '(a b)) (setf (car target) (values 'c 'd))`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Symbol("c"), code.Eval(scope))
+	tt.Equal(t, slip.Symbol("c"), code.Eval(scope))
 }

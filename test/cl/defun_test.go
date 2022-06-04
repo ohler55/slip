@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/stretchr/testify/require"
 )
 
 func TestDefunBasic(t *testing.T) {
@@ -17,7 +17,7 @@ func TestDefunBasic(t *testing.T) {
   x)
 (funny 7)`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
+	tt.Equal(t, slip.Fixnum(7), code.Eval(scope))
 }
 
 func TestDefunDefaultArgValue(t *testing.T) {
@@ -25,9 +25,8 @@ func TestDefunDefaultArgValue(t *testing.T) {
 (defun funny2 (&optional (x 3)) x)
 (funny2 7)`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
-
-	require.Equal(t, slip.Fixnum(3), slip.ReadString("(funny2)").Eval(scope))
+	tt.Equal(t, slip.Fixnum(7), code.Eval(scope))
+	tt.Equal(t, slip.Fixnum(3), slip.ReadString("(funny2)").Eval(scope))
 }
 
 func TestDefunDefaultArgNilValue(t *testing.T) {
@@ -35,9 +34,8 @@ func TestDefunDefaultArgNilValue(t *testing.T) {
 (defun funny3 (&optional (x nil)) x)
 (funny3 7)`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
-
-	require.Equal(t, nil, slip.ReadString("(funny3)").Eval(scope))
+	tt.Equal(t, slip.Fixnum(7), code.Eval(scope))
+	tt.Equal(t, nil, slip.ReadString("(funny3)").Eval(scope))
 }
 
 func TestDefunRest(t *testing.T) {
@@ -45,7 +43,7 @@ func TestDefunRest(t *testing.T) {
 (defun the-rest (&rest args) args)
 (the-rest 1 2 3)`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.List{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}, code.Eval(scope))
+	tt.Equal(t, slip.List{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}, code.Eval(scope))
 }
 
 func TestDefunKey(t *testing.T) {
@@ -53,7 +51,7 @@ func TestDefunKey(t *testing.T) {
 (defun key-rest (&key kee) kee)
 (key-rest :kee 1)`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Fixnum(1), code.Eval(scope))
+	tt.Equal(t, slip.Fixnum(1), code.Eval(scope))
 }
 
 func TestDefunPre(t *testing.T) {
@@ -63,7 +61,7 @@ func TestDefunPre(t *testing.T) {
 (aaa)`)
 	scope := slip.NewScope()
 	code.Compile()
-	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
+	tt.Equal(t, slip.Fixnum(7), code.Eval(scope))
 }
 
 func TestDefunClosure(t *testing.T) {
@@ -73,21 +71,21 @@ func TestDefunClosure(t *testing.T) {
 (clo)
 `)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
+	tt.Equal(t, slip.Fixnum(7), code.Eval(scope))
 }
 
 func TestDefunBadName(t *testing.T) {
-	require.Panics(t, func() { _ = slip.ReadString("(defun t () nil)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defun t () nil)").Eval(slip.NewScope()) })
 }
 
 func TestDefunBadLambdaList(t *testing.T) {
-	require.Panics(t, func() { _ = slip.ReadString("(defun bad t nil)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defun bad t nil)").Eval(slip.NewScope()) })
 }
 
 func TestDefunBadLambdaListArg(t *testing.T) {
-	require.Panics(t, func() { _ = slip.ReadString("(defun bad ((x)) nil)").Eval(slip.NewScope()) })
-	require.Panics(t, func() { _ = slip.ReadString("(defun bad ((t 0)) nil)").Eval(slip.NewScope()) })
-	require.Panics(t, func() { _ = slip.ReadString("(defun bad (t) nil)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defun bad ((x)) nil)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defun bad ((t 0)) nil)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defun bad (t) nil)").Eval(slip.NewScope()) })
 }
 
 func TestDefunAgain(t *testing.T) {
@@ -100,8 +98,8 @@ func TestDefunAgain(t *testing.T) {
 (defun again () 7)
 (again)`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Fixnum(7), code.Eval(scope))
-	require.Equal(t, "WARNING: redefining common-lisp-user::again in defun\n", out.String())
+	tt.Equal(t, slip.Fixnum(7), code.Eval(scope))
+	tt.Equal(t, "WARNING: redefining common-lisp-user::again in defun\n", out.String())
 }
 
 func TestDefunTooManyArgs(t *testing.T) {
@@ -109,7 +107,7 @@ func TestDefunTooManyArgs(t *testing.T) {
 (defun too-many () 3)
 (too-many 7)`)
 	scope := slip.NewScope()
-	require.Panics(t, func() { _ = code.Eval(scope) })
+	tt.Panic(t, func() { _ = code.Eval(scope) })
 }
 
 func TestDefunTooFewArgs(t *testing.T) {
@@ -117,11 +115,11 @@ func TestDefunTooFewArgs(t *testing.T) {
 (defun too-few (x) x)
 (too-few)`)
 	scope := slip.NewScope()
-	require.Panics(t, func() { _ = code.Eval(scope) })
+	tt.Panic(t, func() { _ = code.Eval(scope) })
 }
 
 func TestDefunLocked(t *testing.T) {
 	code := slip.ReadString("(defun setq () nil)")
 	scope := slip.NewScope()
-	require.Panics(t, func() { _ = code.Eval(scope) })
+	tt.Panic(t, func() { _ = code.Eval(scope) })
 }

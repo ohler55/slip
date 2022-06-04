@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPrincStream(t *testing.T) {
@@ -18,8 +18,8 @@ func TestPrincStream(t *testing.T) {
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	result := slip.ReadString("(princ 123 out)").Eval(scope)
 
-	require.Equal(t, slip.Fixnum(123), result)
-	require.Equal(t, "123", out.String())
+	tt.Equal(t, slip.Fixnum(123), result)
+	tt.Equal(t, "123", out.String())
 }
 
 func TestPrincStdout(t *testing.T) {
@@ -31,16 +31,16 @@ func TestPrincStdout(t *testing.T) {
 	slip.StandardOutput = &slip.OutputStream{Writer: &out}
 	result := slip.ReadString("(princ 123)").Eval(scope)
 
-	require.Equal(t, slip.Fixnum(123), result)
-	require.Equal(t, "123", out.String())
+	tt.Equal(t, slip.Fixnum(123), result)
+	tt.Equal(t, "123", out.String())
 }
 
 func TestPrincArgCount(t *testing.T) {
-	require.Panics(t, func() { _ = slip.ReadString("(princ)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(princ)").Eval(slip.NewScope()) })
 }
 
 func TestPrincBadStream(t *testing.T) {
-	require.Panics(t, func() { _ = slip.ReadString("(princ 123 t)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(princ 123 t)").Eval(slip.NewScope()) })
 }
 
 type badWriter int
@@ -52,5 +52,5 @@ func (w badWriter) Write([]byte) (int, error) {
 func TestPrincWriteFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
-	require.Panics(t, func() { _ = slip.ReadString("(princ 123 out)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(princ 123 out)").Eval(scope) })
 }

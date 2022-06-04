@@ -5,9 +5,9 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSetqBasic(t *testing.T) {
@@ -19,7 +19,7 @@ func TestSetqBasic(t *testing.T) {
 		Simple: []interface{}{"setq", "x", 7},
 		Eval:   slip.Fixnum(7),
 	}).Test(t)
-	require.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
+	tt.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
 }
 
 func TestSetqEmpty(t *testing.T) {
@@ -40,8 +40,8 @@ func TestSetqMultiple(t *testing.T) {
 		Simple: []interface{}{"setq", "x", 7, "y", 8},
 		Eval:   slip.Fixnum(8),
 	}).Test(t)
-	require.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
-	require.Equal(t, slip.Fixnum(8), scope.Get(slip.Symbol("y")))
+	tt.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
+	tt.Equal(t, slip.Fixnum(8), scope.Get(slip.Symbol("y")))
 }
 
 func TestSetqUpdateFunc(t *testing.T) {
@@ -54,7 +54,7 @@ func TestSetqUpdateFunc(t *testing.T) {
 		Simple: []interface{}{"setq", "x", []interface{}{"car", []interface{}{"quote", []interface{}{7}}}},
 		Eval:   slip.Fixnum(7),
 	}).Test(t)
-	require.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
+	tt.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
 }
 
 func TestSetqBadArgCount(t *testing.T) {

@@ -6,11 +6,10 @@ import (
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestInstance(t *testing.T) {
@@ -24,8 +23,8 @@ func TestInstance(t *testing.T) {
 
 	bi := berry.(*flavors.Instance)
 	bi.Pocket = 7
-	require.Equal(t, "{flavor: blueberry pocket: 7 vars: {size: medium}}", pretty.SEN(berry))
-	require.Regexp(t, "#<blueberry [0-9a-f]+>", berry.String())
+	tt.Equal(t, "{flavor: blueberry pocket: 7 vars: {size: medium}}", pretty.SEN(berry))
+	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 
 	(&sliptest.Object{
 		Target: berry,

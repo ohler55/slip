@@ -57,7 +57,13 @@ func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			slip.PanicType("princ output-stream", args[0], "output-stream")
 		}
 	}
-	if _, err := w.Write(slip.Append([]byte{}, obj)); err != nil {
+	var err error
+	if s, _ := obj.(slip.String); 0 < len(s) {
+		_, err = w.Write([]byte(s))
+	} else {
+		_, err = w.Write(slip.Append([]byte{}, obj))
+	}
+	if err != nil {
 		panic(err)
 	}
 	return obj

@@ -5,9 +5,9 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSetfSymbol(t *testing.T) {
@@ -19,7 +19,7 @@ func TestSetfSymbol(t *testing.T) {
 		Simple: []interface{}{"setf", "x", 7},
 		Eval:   slip.Fixnum(7),
 	}).Test(t)
-	require.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
+	tt.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
 }
 
 func TestSetfPlacer(t *testing.T) {
@@ -33,7 +33,7 @@ func TestSetfPlacer(t *testing.T) {
 		Simple: []interface{}{"setf", []interface{}{"car", "target"}, 9},
 		Eval:   slip.Fixnum(9),
 	}).Test(t)
-	require.Equal(t, slip.List{slip.Fixnum(8), slip.Fixnum(9)}, scope.Get(slip.Symbol("target")))
+	tt.Equal(t, slip.List{slip.Fixnum(8), slip.Fixnum(9)}, scope.Get(slip.Symbol("target")))
 }
 
 func TestSetfPlacerList(t *testing.T) {
@@ -47,7 +47,7 @@ func TestSetfPlacerList(t *testing.T) {
 		Simple: []interface{}{"setf", []interface{}{"car", []interface{}{"cdr", "target"}}, 9},
 		Eval:   slip.Fixnum(9),
 	}).Test(t)
-	require.Equal(t, slip.List{slip.Fixnum(8), slip.Fixnum(9), slip.Fixnum(6)}, scope.Get(slip.Symbol("target")))
+	tt.Equal(t, slip.List{slip.Fixnum(8), slip.Fixnum(9), slip.Fixnum(6)}, scope.Get(slip.Symbol("target")))
 }
 
 func TestSetfNotPairs(t *testing.T) {
@@ -83,5 +83,5 @@ func TestSetfList(t *testing.T) {
 		Simple: []interface{}{"setf", []interface{}{"car", "target"}, 9},
 		Eval:   slip.Fixnum(9),
 	}).Test(t)
-	require.Equal(t, slip.List{slip.Fixnum(8), slip.Fixnum(9)}, scope.Get(slip.Symbol("target")))
+	tt.Equal(t, slip.List{slip.Fixnum(8), slip.Fixnum(9)}, scope.Get(slip.Symbol("target")))
 }

@@ -6,9 +6,8 @@ import (
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestMakeInstanceSimple(t *testing.T) {
@@ -20,8 +19,8 @@ func TestMakeInstanceSimple(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope)
 
-	require.Equal(t, "{flavor: blueberry vars: {size: small}}", pretty.SEN(berry))
-	require.Regexp(t, "#<blueberry [0-9a-f]+>", berry.String())
+	tt.Equal(t, "{flavor: blueberry vars: {size: small}}", pretty.SEN(berry))
+	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
 func TestMakeInstanceKeywords(t *testing.T) {
@@ -33,8 +32,8 @@ func TestMakeInstanceKeywords(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope)
 
-	require.Equal(t, "{flavor: blueberry vars: {}}", pretty.SEN(berry))
-	require.Regexp(t, "#<blueberry [0-9a-f]+>", berry.String())
+	tt.Equal(t, "{flavor: blueberry vars: {}}", pretty.SEN(berry))
+	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
 func TestMakeInstanceOtherKeywords(t *testing.T) {
@@ -45,21 +44,21 @@ func TestMakeInstanceOtherKeywords(t *testing.T) {
 `)
 	scope := slip.NewScope()
 	berry := code.Eval(scope)
-	require.Regexp(t, "#<blueberry [0-9a-f]+>", berry.String())
+	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
 func TestMakeInstanceBadArgCount(t *testing.T) {
-	require.Panics(t, func() { _ = slip.ReadString(`(make-instance)`).Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance)`).Eval(slip.NewScope()) })
 }
 
 func TestMakeInstanceNotFlavor(t *testing.T) {
-	require.Panics(t, func() { _ = slip.ReadString(`(make-instance t)`).Eval(slip.NewScope()) })
-	require.Panics(t, func() { _ = slip.ReadString(`(make-instance 'not-a-flavor)`).Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance t)`).Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'not-a-flavor)`).Eval(slip.NewScope()) })
 }
 
 func TestMakeInstanceAbstract(t *testing.T) {
 	defer undefFlavors("blueberry")
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor blueberry ((size "medium")) () :abstract-flavor)
 (make-instance blueberry)
@@ -69,25 +68,25 @@ func TestMakeInstanceAbstract(t *testing.T) {
 
 func TestMakeInstanceBadKeyword(t *testing.T) {
 	defer undefFlavors("blueberry", "raspberry", "blackberry", "cherry")
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor blueberry () ())
 (make-instance 'blueberry t nil)
 `).Eval(slip.NewScope())
 	})
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor raspberry () ())
 (make-instance raspberry bad nil)
 `).Eval(slip.NewScope())
 	})
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor blackberry () ())
 (make-instance blackberry :self nil)
 `).Eval(slip.NewScope())
 	})
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor cherry () ())
 (make-instance cherry :x nil)
@@ -97,7 +96,7 @@ func TestMakeInstanceBadKeyword(t *testing.T) {
 
 func TestMakeInstanceMissingKeyword(t *testing.T) {
 	defer undefFlavors("blueberry")
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor blueberry () () (:required-init-keywords :x))
 (make-instance 'blueberry)

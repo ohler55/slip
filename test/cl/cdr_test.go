@@ -5,9 +5,9 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCdrEmpty(t *testing.T) {
@@ -77,5 +77,5 @@ func TestCdrBadArgCount(t *testing.T) {
 func TestCdrValues(t *testing.T) {
 	code := slip.ReadString(`(cdr (values '(a b) 'c))`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.List{slip.Symbol("b")}, code.Eval(scope))
+	tt.Equal(t, slip.List{slip.Symbol("b")}, code.Eval(scope))
 }

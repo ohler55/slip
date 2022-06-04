@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/stretchr/testify/require"
 )
 
 func defineBerry(t *testing.T) {
@@ -36,9 +36,9 @@ func TestDefMethodBasic(t *testing.T) {
 
 	f := slip.ReadString("berry").Eval(slip.NewScope())
 	sf := f.Simplify()
-	require.True(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].primary").First(sf))
-	require.True(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].after").First(sf))
-	require.True(t, true, jp.MustParseString("methods[*][?(@.name == ':color')].before").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].primary").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].after").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':color')].before").First(sf))
 }
 
 func TestDefMethodInherit(t *testing.T) {
@@ -49,16 +49,16 @@ func TestDefMethodInherit(t *testing.T) {
 	f := slip.ReadString("blueberry").Eval(slip.NewScope())
 	sf := f.Simplify()
 	rot := jp.MustParseString("methods[*][?(@.name == ':rot')]").Get(sf)
-	require.Equal(t, 2, len(rot))
-	require.Equal(t, "blueberry", jp.C("from").First(rot[0]))
-	require.Equal(t, true, jp.C("before").First(rot[0]))
-	require.Equal(t, true, jp.C("after").First(rot[0]))
-	require.Equal(t, "berry", jp.C("from").First(rot[1]))
+	tt.Equal(t, 2, len(rot))
+	tt.Equal(t, "blueberry", jp.C("from").First(rot[0]))
+	tt.Equal(t, true, jp.C("before").First(rot[0]))
+	tt.Equal(t, true, jp.C("after").First(rot[0]))
+	tt.Equal(t, "berry", jp.C("from").First(rot[1]))
 }
 
 func TestDefMethodArgCount(t *testing.T) {
 	defer undefFlavor("berry")
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor berry (color) ())
 (defmethod (berry :rot))
@@ -68,7 +68,7 @@ func TestDefMethodArgCount(t *testing.T) {
 
 func TestDefMethodNotList(t *testing.T) {
 	defer undefFlavor("berry")
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor berry (color) ())
 (defmethod t ())
@@ -78,7 +78,7 @@ func TestDefMethodNotList(t *testing.T) {
 
 func TestDefMethodLowDesignatorCount(t *testing.T) {
 	defer undefFlavor("berry")
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor berry (color) ())
 (defmethod (berry) ())
@@ -88,7 +88,7 @@ func TestDefMethodLowDesignatorCount(t *testing.T) {
 
 func TestDefMethodHighDesignatorCount(t *testing.T) {
 	defer undefFlavor("berry")
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor berry (color) ())
 (defmethod (berry :before :rot nil) ())
@@ -98,7 +98,7 @@ func TestDefMethodHighDesignatorCount(t *testing.T) {
 
 func TestDefMethodBadDesignator(t *testing.T) {
 	defer undefFlavor("berry")
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor berry (color) ())
 (defmethod (berry rot) ())
@@ -107,7 +107,7 @@ func TestDefMethodBadDesignator(t *testing.T) {
 }
 
 func TestDefMethodNotFlavor(t *testing.T) {
-	require.Panics(t, func() {
+	tt.Panic(t, func() {
 		_ = slip.ReadString(`(defmethod (nothing :rot) ())`).Eval(slip.NewScope())
 	})
 }

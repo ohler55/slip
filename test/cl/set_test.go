@@ -5,9 +5,9 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSetBasic(t *testing.T) {
@@ -20,7 +20,7 @@ func TestSetBasic(t *testing.T) {
 		Simple: []interface{}{"set", []interface{}{"quote", "x"}, 7},
 		Eval:   slip.Fixnum(7),
 	}).Test(t)
-	require.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
+	tt.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
 }
 
 func TestSetBadArgCount(t *testing.T) {

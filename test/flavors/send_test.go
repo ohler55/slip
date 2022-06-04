@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSendGetSet(t *testing.T) {
@@ -23,14 +23,14 @@ func TestSendGetSet(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope)
 
 	size := slip.ReadString("(send berry :size)").Eval(scope)
-	require.Equal(t, slip.String("medium"), size)
+	tt.Equal(t, slip.String("medium"), size)
 
 	_ = slip.ReadString(`(send berry :set-size "large")`).Eval(scope)
 	size = slip.ReadString("(send berry :size)").Eval(scope)
-	require.Equal(t, slip.String("large"), size)
+	tt.Equal(t, slip.String("large"), size)
 
-	require.Panics(t, func() { _ = slip.ReadString("(send berry :bad)").Eval(scope) })
-	require.Panics(t, func() { _ = slip.ReadString("(send berry :set-size)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :bad)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :set-size)").Eval(scope) })
 }
 
 func TestSendDefHand(t *testing.T) {
@@ -46,7 +46,7 @@ func TestSendDefHand(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'handy)").Eval(scope)
 
 	result := slip.ReadString("(send hand :nothing 7)").Eval(scope)
-	require.Equal(t, slip.List{slip.Fixnum(7), slip.Symbol(":nothing")}, result)
+	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Symbol(":nothing")}, result)
 }
 
 func TestSendMissingArg(t *testing.T) {
@@ -59,11 +59,11 @@ func TestSendMissingArg(t *testing.T) {
 	_ = code.Eval(scope)
 	defer slip.ReadString("(undefflavor 'missy)").Eval(scope)
 
-	require.Panics(t, func() { _ = slip.ReadString("(send miss)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send miss)").Eval(scope) })
 }
 
 func TestSendNotInstance(t *testing.T) {
-	require.Panics(t, func() { _ = slip.ReadString("(send 7 :x)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send 7 :x)").Eval(slip.NewScope()) })
 }
 
 func TestSendNotKeyword(t *testing.T) {
@@ -76,7 +76,7 @@ func TestSendNotKeyword(t *testing.T) {
 	_ = code.Eval(scope)
 	defer slip.ReadString("(undefflavor 'nokey)").Eval(scope)
 
-	require.Panics(t, func() { _ = slip.ReadString("(send nock t)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send nock t)").Eval(scope) })
 }
 
 func TestSendDaemons(t *testing.T) {
@@ -101,7 +101,7 @@ func TestSendDaemons(t *testing.T) {
 	_ = slip.ReadString("(setq blue (make-instance blueberry))").Eval(scope)
 
 	_ = slip.ReadString("(send blue :rot)").Eval(scope)
-	require.Equal(t, `blueberry before rot
+	tt.Equal(t, `blueberry before rot
 berry rot
 blueberry after rot
 berry after rot

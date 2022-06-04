@@ -7,15 +7,14 @@ import (
 
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/ojg/pretty"
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestPackage(t *testing.T) {
 	pkgs := slip.PackageNames()
-	require.Equal(t, `("common-lisp" "common-lisp-user" "flavors")`, pkgs.String())
+	tt.Equal(t, `("common-lisp" "common-lisp-user" "flavors")`, pkgs.String())
 }
 
 func TestPackageUser(t *testing.T) {
@@ -34,8 +33,8 @@ func TestPackageUser(t *testing.T) {
 }
 
 func checkUserPkgSimplify(t *testing.T, simple interface{}) {
-	require.Equal(t, []interface{}{"common-lisp", "flavors"}, jp.C("uses").First(simple))
-	require.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
+	tt.Equal(t, []interface{}{"common-lisp", "flavors"}, jp.C("uses").First(simple))
+	tt.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
 }
 
 func TestPackageCL(t *testing.T) {
@@ -54,15 +53,15 @@ func TestPackageCL(t *testing.T) {
 }
 
 func checkCLPkgSimplify(t *testing.T, simple interface{}) {
-	require.Equal(t, []interface{}{}, jp.C("uses").First(simple))
-	require.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
+	tt.Equal(t, []interface{}{}, jp.C("uses").First(simple))
+	tt.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
 }
 
 func TestPackageFind(t *testing.T) {
-	require.Equal(t, &slip.UserPkg, slip.FindPackage("COMMON-LISP-USER"))
-	require.Equal(t, &slip.UserPkg, slip.FindPackage("common-lisp-user"))
-	require.Equal(t, &slip.UserPkg, slip.FindPackage("user"))
-	require.Equal(t, (*slip.Package)(nil), slip.FindPackage("nothing"))
+	tt.Equal(t, &slip.UserPkg, slip.FindPackage("COMMON-LISP-USER"))
+	tt.Equal(t, &slip.UserPkg, slip.FindPackage("common-lisp-user"))
+	tt.Equal(t, &slip.UserPkg, slip.FindPackage("user"))
+	tt.Equal(t, (*slip.Package)(nil), slip.FindPackage("nothing"))
 }
 
 func TestPackageDef(t *testing.T) {
@@ -76,9 +75,9 @@ func TestPackageDef(t *testing.T) {
 	pc.Use(pa)
 	pc.Import(pb, "bb")
 
-	require.Panics(t, func() { pc.Import(pb, "x") })
+	tt.Panic(t, func() { pc.Import(pb, "x") })
 
-	require.Equal(t, `{
+	tt.Equal(t, `{
   doc: Sailing.
   functions: []
   imports: {bb: {name: bb pkg: "#<package \"b\">"}}
@@ -90,10 +89,10 @@ func TestPackageDef(t *testing.T) {
 }
 
 func TestPackageCurrent(t *testing.T) {
-	require.Equal(t, "common-lisp-user", slip.CurrentPackage.Name)
+	tt.Equal(t, "common-lisp-user", slip.CurrentPackage.Name)
 	defer func() { slip.CurrentPackage = &slip.UserPkg }()
 
 	pa := slip.DefPackage("a", []string{"aye"}, "Lots of ayes.")
 	slip.CLPkg.Set("*package*", pa)
-	require.Equal(t, "a", slip.CurrentPackage.Name)
+	tt.Equal(t, "a", slip.CurrentPackage.Name)
 }

@@ -17,14 +17,14 @@ var vanilla = Flavor{
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
 	methods: map[string][]*method{
-		":describe":             []*method{{name: ":describe", primary: describeCaller(true)}},
-		":eval-inside-yourself": []*method{{name: ":eval-inside-yourself", primary: insideCaller(true)}},
-		":init":                 []*method{{name: ":init", primary: initCaller(true)}},
-		":id":                   []*method{{name: ":id", primary: idCaller(true)}},
-		":operation-handler-p":  []*method{{name: ":operation-handler-p", primary: hasOpCaller(true)}},
-		":print-self":           []*method{{name: ":print-self", primary: printCaller(true)}},
-		":send-if-handles":      []*method{{name: ":send-if-handles", primary: sendIfCaller(true)}},
-		":which-operations":     []*method{{name: ":which-operations", primary: whichOpsCaller(true)}},
+		":describe":             {{name: ":describe", primary: describeCaller(true)}},
+		":eval-inside-yourself": {{name: ":eval-inside-yourself", primary: insideCaller(true)}},
+		":init":                 {{name: ":init", primary: initCaller(true)}},
+		":id":                   {{name: ":id", primary: idCaller(true)}},
+		":operation-handler-p":  {{name: ":operation-handler-p", primary: hasOpCaller(true)}},
+		":print-self":           {{name: ":print-self", primary: printCaller(true)}},
+		":send-if-handles":      {{name: ":send-if-handles", primary: sendIfCaller(true)}},
+		":which-operations":     {{name: ":which-operations", primary: whichOpsCaller(true)}},
 	},
 }
 

@@ -5,9 +5,9 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestListEmpty(t *testing.T) {
@@ -39,5 +39,5 @@ func TestListBasic(t *testing.T) {
 func TestListValues(t *testing.T) {
 	code := slip.ReadString(`(list 'a (values 'b 'c) 'd)`)
 	scope := slip.NewScope()
-	require.Equal(t, "(a b d)", slip.ObjectString(code.Eval(scope)))
+	tt.Equal(t, "(a b d)", slip.ObjectString(code.Eval(scope)))
 }

@@ -5,9 +5,9 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCadrEmpty(t *testing.T) {
@@ -75,7 +75,7 @@ func TestCadrSetf(t *testing.T) {
 		Simple: []interface{}{"setf", []interface{}{"cadr", "target"}, 9},
 		Eval:   slip.Fixnum(9),
 	}).Test(t)
-	require.Equal(t, slip.List{slip.Fixnum(9), slip.Fixnum(7)}, scope.Get(slip.Symbol("target")))
+	tt.Equal(t, slip.List{slip.Fixnum(9), slip.Fixnum(7)}, scope.Get(slip.Symbol("target")))
 }
 
 func TestCadrSetfFail(t *testing.T) {
@@ -107,5 +107,5 @@ func TestCadrSetfNoArg(t *testing.T) {
 func TestCadrValues(t *testing.T) {
 	code := slip.ReadString(`(cadr (values '(a b) 'c))`)
 	scope := slip.NewScope()
-	require.Equal(t, slip.Symbol("b"), code.Eval(scope))
+	tt.Equal(t, slip.Symbol("b"), code.Eval(scope))
 }

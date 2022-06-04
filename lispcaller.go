@@ -169,7 +169,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 }
 
 // DefLispCaller parses arguments into a LispCaller. Arguments should be a
-// lambda-list followed by an optional documentaiton strings and then the
+// lambda-list followed by an optional documentation strings and then the
 // forms to evaluate when the LispCaller is called.
 func DefLispCaller(defName, funcName string, s *Scope, args List) (lc *LispCaller) {
 	funcName = strings.ToLower(funcName)
