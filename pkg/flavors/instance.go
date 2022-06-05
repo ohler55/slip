@@ -79,21 +79,16 @@ func (obj *Instance) send(message string, args slip.List, depth int) slip.Object
 		xargs = append(xargs, slip.Symbol(message))
 		return obj.flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
 	}
-	for _, m := range ma {
+	for i, m := range ma {
 		if m.wrap != nil {
-			return obj.sendWrap(ma, args, depth)
+			loc := &whopLoc{methods: ma, current: i}
+			ws := obj.Scope.NewScope(nil)
+			ws.Let("~whopper-location~", loc)
+
+			return m.wrap.Call(ws, args, depth)
 		}
 	}
 	return obj.sendInner(ma, args, depth)
-}
-
-func (obj *Instance) sendWrap(ma []*method, args slip.List, depth int) slip.Object {
-	// TBD
-	// walk wrappers
-	//  need to register a reference to the method progress
-	//    maybe just and index to the next starting at 0
-	//    when greater than len of inherited move to others
-	return nil
 }
 
 func (obj *Instance) sendInner(ma []*method, args slip.List, depth int) slip.Object {

@@ -10,7 +10,18 @@ SLIce Processing is LISP for golang
 
  - whopper
   - (continue-whopper arg1 arg2)
-  - (defwhopper (flavor method) (arg1 arg2) forms)
+     - type for whopper entry whapperEntry
+    - []*method
+    - index
+ - defwhopper (flavor :method) (args) forms)
+
+ - other method combinations?
+  - progn
+  - or
+  - and
+  - list
+
+- (defwhopper (flavor method) (arg1 arg2) forms)
   - instance pock doesn't work since could be sends to self
    - must be in scope of send
     - maybe special let value that can't easily be reached like ;whop-loc
