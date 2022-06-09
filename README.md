@@ -10,12 +10,11 @@ SLIce Processing is LISP for golang
 
  - whopper
   - (continue-whopper arg1 arg2)
-     - type for whopper entry whapperEntry
-    - []*method
-    - index
  - defwhopper (flavor :method) (args) forms)
 
  - other method combinations?
+  - :method-combination option for defflavor
+  - daemon (default)
   - progn
   - or
   - and
