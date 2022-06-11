@@ -3,11 +3,9 @@
 package flavors
 
 import (
-	"fmt"
 	"strconv"
 	"unsafe"
 
-	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/slip"
 )
 
@@ -78,11 +76,10 @@ func (obj *Instance) send(message string, args slip.List, depth int) slip.Object
 	}
 	for i, m := range ma {
 		if m.wrap != nil {
-			fmt.Printf("*** send %s\n", pretty.SEN(m))
 			loc := &whopLoc{methods: ma, current: i}
 			ws := obj.Scope.NewScope(nil)
 			ws.Let("~whopper-location~", loc)
-			fmt.Printf("*** send ws %s - %v\n", pretty.SEN(ws), ws.Parent())
+			(m.wrap.(*slip.LispCaller)).Closure = ws
 
 			return m.wrap.Call(ws, args, depth)
 		}

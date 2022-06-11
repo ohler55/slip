@@ -87,8 +87,7 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 		}
 		args[i] = s.Eval(arg, d2)
 	}
-	result = f.Self.Call(s, args, depth) // TBD pass nil in for scope?
-	// result = f.Self.Call(nil, args, depth) // TBD pass nil in for scope?
+	result = f.Self.Call(s, args, depth)
 
 	// If there are any .Args that need updating to the function version do
 	// that by taking the compiled version from the args.

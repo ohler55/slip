@@ -7,15 +7,11 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - NewScope
- - Call() - normally call with nil scope
-  - instance send is different, includes scope
 
- - whopper
-  - (continue-whopper arg1 arg2)
-   - need some way to pass scope to continue-whopper
-   - maybe use a new LispCaller variant
- - defwhopper (flavor :method) (args) forms)
+- next look at tracing and errors/panics
+ - panics don't seem to print out the stack correctly
+ - should tracing be global instead of by scope?
+  - not used that often so reduce footprint of scope
 
  - other method combinations?
   - :method-combination option for defflavor
@@ -24,23 +20,6 @@ SLIce Processing is LISP for golang
   - or
   - and
   - list
-
-- (defwhopper (flavor method) (arg1 arg2) forms)
-  - instance pock doesn't work since could be sends to self
-   - must be in scope of send
-    - maybe special let value that can't easily be reached like ;whop-loc
-    - create and then call first wrap with it
-     - calls to continue-whopper look up and determine next one to call
-    - unlike before and afters wraps are full func calls
-     - do they need to be functions (lambdas) instead of just callers
-      - probably not
-
-- next look at tracing and errors/panics
- - panics don't seem to print out the stack correctly
- - should tracing be global instead of by scope?
-  - not used that often so reduce footprint of scope
-
-- trace on instance to setup scope
 
 - simple or data or opaque or ???
  - use flavors for the instance and methods

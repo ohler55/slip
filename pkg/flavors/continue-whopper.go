@@ -3,9 +3,6 @@
 package flavors
 
 import (
-	"fmt"
-
-	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/slip"
 )
 
@@ -42,19 +39,19 @@ type ContinueWhopper struct {
 
 // Call the the function with the arguments provided.
 func (f *ContinueWhopper) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	fmt.Printf("*** continue-whopper %s --- %v\n", pretty.SEN(s), s.Parent())
 	self, _ := s.Get("self").(*Instance)
 	loc, _ := s.Get("~whopper-location~").(*whopLoc)
 	if self == nil || loc == nil {
 		panic("continue-whopper can only be called from a whopper.")
 	}
-	for ; loc.current < len(loc.methods); loc.current++ {
+	for loc.current++; loc.current < len(loc.methods); loc.current++ {
 		wrap := loc.methods[loc.current].wrap
 		if wrap == nil {
 			continue
 		}
 		ws := self.Scope.NewScope(nil)
 		ws.Let("~whopper-location~", &whopLoc{methods: loc.methods, current: loc.current + 1})
+		(wrap.(*slip.LispCaller)).Closure = ws
 
 		return wrap.Call(ws, args, depth)
 	}
