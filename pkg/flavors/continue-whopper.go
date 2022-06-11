@@ -3,6 +3,9 @@
 package flavors
 
 import (
+	"fmt"
+
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/slip"
 )
 
@@ -14,7 +17,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "continueWhopper",
+			Name: "continue-whopper",
 			Args: []*slip.DocArg{
 				{Name: slip.AmpRest},
 				{
@@ -39,6 +42,7 @@ type ContinueWhopper struct {
 
 // Call the the function with the arguments provided.
 func (f *ContinueWhopper) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	fmt.Printf("*** continue-whopper %s --- %v\n", pretty.SEN(s), s.Parent())
 	self, _ := s.Get("self").(*Instance)
 	loc, _ := s.Get("~whopper-location~").(*whopLoc)
 	if self == nil || loc == nil {

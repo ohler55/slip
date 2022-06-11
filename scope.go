@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+var beforeEval func(s *Scope, name string, args List, depth int) = noopBefore
+var afterEval func(s *Scope, name string, args List, depth int) = normalAfter
+
 type returnFrom struct {
 	tag    Object // Symbol or nil
 	result Object
@@ -18,16 +21,12 @@ type Scope struct {
 	name       Object // can be nil so type can't be Symbol
 	Vars       map[string]Object
 	returnFrom *returnFrom
-	before     func(s *Scope, name string, args List, depth int)
-	after      func(s *Scope, name string, args List, depth int)
 }
 
 // NewScope create a new top level Scope.
 func NewScope() *Scope {
 	return &Scope{
-		Vars:   map[string]Object{},
-		before: noopBefore,
-		after:  normalAfter,
+		Vars: map[string]Object{},
 	}
 }
 
@@ -37,45 +36,17 @@ func (s *Scope) NewScope(name Object) *Scope {
 		name:   name,
 		parent: s,
 		Vars:   map[string]Object{},
-		before: s.before,
-		after:  s.after,
 	}
 }
 
 // Init a scope.
 func (s *Scope) Init() {
 	s.Vars = map[string]Object{}
-	s.before = noopBefore
-	s.after = normalAfter
 }
 
 // Parent returns the parent scope or nil.
 func (s *Scope) Parent() *Scope {
 	return s.parent
-}
-
-/*
-// Before should be called in a go defined Eval function before executing
-// other code.
-func (s *Scope) Before(obj Object, depth int) {
-	s.before(s, obj, depth)
-}
-
-// After should be called at the end of a Eval function call using a defer.
-func (s *Scope) After(obj Object, depth int) {
-	s.after(s, obj, depth)
-}
-*/
-
-// Trace turns tracing on or off for the scope and any future sub-scopes.
-func (s *Scope) Trace(on bool) {
-	if on {
-		s.before = traceBefore
-		s.after = traceAfter
-	} else {
-		s.before = noopBefore
-		s.after = normalAfter
-	}
 }
 
 // Let a symbol be bound to the value in this Scope.
@@ -162,31 +133,6 @@ func (s *Scope) remove(name string) {
 	if s.parent != nil {
 		s.parent.remove(name)
 	}
-}
-
-func noopBefore(s *Scope, name string, args List, depth int) {
-}
-
-func normalAfter(s *Scope, name string, args List, depth int) {
-	switch tr := recover().(type) {
-	case nil:
-	case *Panic:
-		tr.Stack = append(tr.Stack, ObjectString(append(args, Symbol(name))))
-		panic(tr)
-	default:
-		panic(&Panic{
-			Message: fmt.Sprint(tr), Stack: []string{ObjectString(append(args, Symbol(name)))},
-		})
-	}
-}
-
-func traceBefore(s *Scope, name string, args List, depth int) {
-	// TBD format trace
-}
-
-func traceAfter(s *Scope, name string, args List, depth int) {
-	// TBD format trace
-	normalAfter(s, name, args, depth)
 }
 
 // Eval evaluates an object and returns the result.

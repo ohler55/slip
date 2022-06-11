@@ -7,9 +7,14 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - NewScope
+ - Call() - normally call with nil scope
+  - instance send is different, includes scope
 
  - whopper
   - (continue-whopper arg1 arg2)
+   - need some way to pass scope to continue-whopper
+   - maybe use a new LispCaller variant
  - defwhopper (flavor :method) (args) forms)
 
  - other method combinations?

@@ -3,10 +3,11 @@
 package flavors
 
 import (
+	"fmt"
 	"strconv"
 	"unsafe"
 
-	"github.com/ohler55/ojg/alt"
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/slip"
 )
 
@@ -15,14 +16,13 @@ const InstanceSymbol = slip.Symbol("instance")
 
 func init() {
 	slip.DefConstant(InstanceSymbol, InstanceSymbol,
-		`An _instance_ of a _flavor_ .`)
+		`An _instance_ of a _flavor_.`)
 }
 
 // Instance is an instance of a Flavor.
 type Instance struct {
 	slip.Scope
 	flavor *Flavor
-	Pocket any // user data when implementing special instances
 }
 
 // String representation of the Object.
@@ -51,9 +51,6 @@ func (obj *Instance) Simplify() interface{} {
 		"flavor": obj.flavor.name,
 		"vars":   vars,
 	}
-	if obj.Pocket != nil {
-		simple["pocket"] = alt.Decompose(obj.Pocket)
-	}
 	return simple
 }
 
@@ -81,9 +78,11 @@ func (obj *Instance) send(message string, args slip.List, depth int) slip.Object
 	}
 	for i, m := range ma {
 		if m.wrap != nil {
+			fmt.Printf("*** send %s\n", pretty.SEN(m))
 			loc := &whopLoc{methods: ma, current: i}
 			ws := obj.Scope.NewScope(nil)
 			ws.Let("~whopper-location~", loc)
+			fmt.Printf("*** send ws %s - %v\n", pretty.SEN(ws), ws.Parent())
 
 			return m.wrap.Call(ws, args, depth)
 		}

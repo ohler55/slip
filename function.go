@@ -54,8 +54,8 @@ func NewFunc(name string, args List, pkgs ...*Package) Object {
 
 // Eval the object.
 func (f *Function) Eval(s *Scope, depth int) (result Object) {
-	s.before(s, f.Name, f.Args, depth)
-	defer s.after(s, f.Name, f.Args, depth)
+	beforeEval(s, f.Name, f.Args, depth)
+	defer afterEval(s, f.Name, f.Args, depth)
 
 	args := make(List, len(f.Args))
 	d2 := depth + 1
@@ -87,7 +87,9 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 		}
 		args[i] = s.Eval(arg, d2)
 	}
-	result = f.Self.Call(s, args, depth)
+	result = f.Self.Call(s, args, depth) // TBD pass nil in for scope?
+	// result = f.Self.Call(nil, args, depth) // TBD pass nil in for scope?
+
 	// If there are any .Args that need updating to the function version do
 	// that by taking the compiled version from the args.
 	for _, u := range update {
@@ -101,8 +103,8 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 
 // Apply evaluates with the need to evaluate the args.
 func (f *Function) Apply(s *Scope, args List, depth int) Object {
-	s.before(s, f.Name, args, depth)
-	defer s.after(s, f.Name, args, depth)
+	beforeEval(s, f.Name, args, depth)
+	defer afterEval(s, f.Name, args, depth)
 
 	return f.Self.Call(s, args, depth)
 }

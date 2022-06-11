@@ -29,8 +29,15 @@ type LispCaller struct {
 func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 	// Copy the before and after from the calling scope but replace the parent
 	// to the closure if there is one.
-	ss := s.NewScope(Symbol(lc.Name))
-	ss.parent = lc.Closure
+	/*
+		ss := NewScope()
+		ss.name = Symbol(lc.Name)
+		if lc.Closure != nil {
+			ss.parent = lc.Closure
+		}
+	*/
+	ss := s.NewScope(Symbol(lc.Name)) // TBD maybe just NewScope and set name and scope after
+	ss.parent = lc.Closure            // TBD only set if not nil?
 
 	mode := reqMode
 	ai := len(args) - 1

@@ -8,7 +8,6 @@ import (
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -21,9 +20,7 @@ func TestInstance(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope)
 
-	bi := berry.(*flavors.Instance)
-	bi.Pocket = 7
-	tt.Equal(t, "{flavor: blueberry pocket: 7 vars: {size: medium}}", pretty.SEN(berry))
+	tt.Equal(t, "{flavor: blueberry vars: {size: medium}}", pretty.SEN(berry))
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 
 	(&sliptest.Object{
@@ -31,7 +28,6 @@ func TestInstance(t *testing.T) {
 		String: "/#<blueberry [0-9a-f]+>/",
 		Simple: map[string]any{
 			"flavor": "blueberry",
-			"pocket": int64(7),
 			"vars":   map[string]any{"size": "medium"},
 		},
 		Hierarchy: "instance.t",
