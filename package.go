@@ -47,7 +47,7 @@ type Package struct {
 // is expected.
 func DefPackage(name string, nicknames []string, doc string) *Package {
 	pkg := Package{
-		Name:        strings.ToUpper(name),
+		Name:        strings.ToLower(name),
 		Nicknames:   nicknames,
 		Doc:         doc,
 		Vars:        map[string]*VarVal{},
@@ -58,6 +58,11 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 	packages[pkg.Name] = &pkg
 
 	return &pkg
+}
+
+// AddPackage adds a package.
+func AddPackage(pkg *Package) {
+	packages[pkg.Name] = pkg
 }
 
 // Use another package
@@ -79,7 +84,7 @@ func (obj *Package) Use(pkg *Package) {
 
 // Import another package variable
 func (obj *Package) Import(pkg *Package, varName string) {
-	name := strings.ToUpper(varName)
+	name := strings.ToLower(varName)
 	if vv := pkg.Vars[name]; vv != nil {
 		obj.Vars[name] = vv
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
@@ -93,7 +98,7 @@ func (obj *Package) Import(pkg *Package, varName string) {
 
 // Set a variable.
 func (obj *Package) Set(name string, value Object) {
-	name = strings.ToUpper(name)
+	name = strings.ToLower(name)
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
@@ -105,12 +110,18 @@ func (obj *Package) Set(name string, value Object) {
 		}
 		return
 	}
-	obj.Vars[name] = &VarVal{Val: value, Pkg: obj}
+	vv := &VarVal{Val: value, Pkg: obj}
+	obj.Vars[name] = vv
+	for _, u := range obj.Users {
+		if _, has := u.Vars[name]; !has {
+			u.Vars[name] = vv
+		}
+	}
 }
 
 // Get a variable.
 func (obj *Package) Get(name string) (value Object, has bool) {
-	name = strings.ToUpper(name)
+	name = strings.ToLower(name)
 	var vv *VarVal
 	if vv, has = obj.Vars[name]; has {
 		if vv.Get != nil {
@@ -123,9 +134,25 @@ func (obj *Package) Get(name string) (value Object, has bool) {
 	return nil, false
 }
 
+// Remove a variable.
+func (obj *Package) Remove(name string) {
+	name = strings.ToLower(name)
+	if vv, has := obj.Vars[name]; has {
+		if vv.Get != nil {
+			panic(fmt.Sprintf("%s can not be removed.", name))
+		}
+		delete(obj.Vars, name)
+		for _, u := range obj.Users {
+			if vv, has := u.Vars[name]; has && vv.Pkg == obj {
+				delete(u.Vars, name)
+			}
+		}
+	}
+}
+
 // Has a variable.
 func (obj *Package) Has(name string) (has bool) {
-	_, has = obj.Vars[strings.ToUpper(name)]
+	_, has = obj.Vars[strings.ToLower(name)]
 	return
 }
 
@@ -136,7 +163,7 @@ func (obj *Package) String() string {
 
 // Define a new golang function.
 func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
-	name := strings.ToUpper(doc.Name)
+	name := strings.ToLower(doc.Name)
 	if _, has := obj.Funcs[name]; has {
 		Warning("redefining %s", printer.caseName(name))
 	}
@@ -175,6 +202,13 @@ func (obj *Package) Simplify() interface{} {
 	for i, p := range obj.Uses {
 		uses[i] = p.Name
 	}
+	funcs := make([]string, 0, len(obj.Funcs))
+	for name := range obj.Funcs {
+		funcs = append(funcs, name)
+		// TBD maybe show package defined in?
+	}
+	sort.Strings(funcs)
+
 	return map[string]interface{}{
 		"name":      obj.Name,
 		"nicknames": nicknames,
@@ -182,6 +216,7 @@ func (obj *Package) Simplify() interface{} {
 		"vars":      vars,
 		"imports":   imports,
 		"uses":      uses,
+		"functions": funcs,
 	}
 }
 
@@ -220,7 +255,7 @@ func FindPackage(name string) *Package {
 	if pkg := packages[name]; pkg != nil {
 		return pkg
 	}
-	name = strings.ToUpper(name)
+	name = strings.ToLower(name)
 	if pkg := packages[name]; pkg != nil {
 		return pkg
 	}

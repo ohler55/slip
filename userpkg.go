@@ -3,10 +3,10 @@
 package slip
 
 var (
-	// UserPkg is the COMMON-LISP-USER package.
+	// UserPkg is the common-lisp-user package.
 	UserPkg = Package{
-		Name:        "COMMON-LISP-USER",
-		Nicknames:   []string{"CL-USER", "USER"},
+		Name:        "common-lisp-user",
+		Nicknames:   []string{"cl-user", "user"},
 		Doc:         "The default package for user code and variables.",
 		Vars:        map[string]*VarVal{},
 		Imports:     map[string]*Import{},

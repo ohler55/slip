@@ -15,4 +15,7 @@ type Funky interface {
 
 	// CompileArgs for the function.
 	CompileArgs()
+
+	// Caller returns the function's Caller (Self).
+	Caller() Caller
 }

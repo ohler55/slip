@@ -10,10 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestTrue(t *testing.T) {
@@ -113,7 +112,7 @@ func TestRatio(t *testing.T) {
 		Eval:      slip.NewRatio(7, 9),
 	}).Test(t)
 
-	require.Panics(t, func() { _ = slip.NewRatio(7, 0) })
+	tt.Panic(t, func() { _ = slip.NewRatio(7, 0) })
 }
 
 func TestBignum(t *testing.T) {
@@ -397,24 +396,24 @@ func TestConsEmpty(t *testing.T) {
 }
 
 func TestConsString(t *testing.T) {
-	require.Equal(t, "nil", slip.Cons{}.String())
-	require.Equal(t, "(1)", slip.Cons{slip.Fixnum(1)}.String())
-	require.Equal(t, "(1)", slip.Cons{nil, slip.Fixnum(1)}.String())
-	require.Equal(t, "(1 . 2)", slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}.String())
-	require.Equal(t, "(nil)", slip.Cons{nil}.String())
-	require.Equal(t, "(nil . 1)", slip.Cons{slip.Fixnum(1), nil}.String())
-	require.Equal(t, "(1 2 3 nil)", slip.Cons{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}.String())
+	tt.Equal(t, "nil", slip.Cons{}.String())
+	tt.Equal(t, "(1)", slip.Cons{slip.Fixnum(1)}.String())
+	tt.Equal(t, "(1)", slip.Cons{nil, slip.Fixnum(1)}.String())
+	tt.Equal(t, "(1 . 2)", slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}.String())
+	tt.Equal(t, "(nil)", slip.Cons{nil}.String())
+	tt.Equal(t, "(nil . 1)", slip.Cons{slip.Fixnum(1), nil}.String())
+	tt.Equal(t, "(1 2 3 nil)", slip.Cons{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}.String())
 }
 
 func TestConsCar(t *testing.T) {
-	require.Equal(t, "1", slip.ObjectString(slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}.Car()))
-	require.Equal(t, "nil", slip.ObjectString(slip.Cons{}.Car()))
+	tt.Equal(t, "1", slip.ObjectString(slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}.Car()))
+	tt.Equal(t, "nil", slip.ObjectString(slip.Cons{}.Car()))
 }
 
 func TestConsCdr(t *testing.T) {
-	require.Equal(t, "2", slip.ObjectString(slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}.Cdr()))
-	require.Equal(t, "nil", slip.ObjectString(slip.Cons{slip.Fixnum(1)}.Cdr()))
-	require.Equal(t, "(2 3)", slip.ObjectString(slip.Cons{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}.Cdr()))
+	tt.Equal(t, "2", slip.ObjectString(slip.Cons{slip.Fixnum(2), slip.Fixnum(1)}.Cdr()))
+	tt.Equal(t, "nil", slip.ObjectString(slip.Cons{slip.Fixnum(1)}.Cdr()))
+	tt.Equal(t, "(2 3)", slip.ObjectString(slip.Cons{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}.Cdr()))
 }
 
 func TestVector(t *testing.T) {
@@ -494,7 +493,7 @@ func TestSimpleObject(t *testing.T) {
 		map[string]interface{}{"x": 7},
 	}
 	obj := slip.SimpleObject(simple)
-	require.Equal(t,
+	tt.Equal(t,
 		`(t -1 -2 -3 -4 -5 1 2 3 4 5 4.5 5.4 @2022-04-01T00:00:00Z t "abc" "def" "dummy error" (("x" . 7)))`,
 		obj.String())
 }
@@ -531,7 +530,7 @@ func TestFileStream(t *testing.T) {
 
 func TestFileStreamWriteRead(t *testing.T) {
 	pr, pw, err := os.Pipe()
-	require.NoError(t, err)
+	tt.Nil(t, err)
 	defer func() { _ = pw.Close(); _ = pr.Close() }()
 
 	lr := (*slip.FileStream)(pr)
@@ -542,7 +541,7 @@ func TestFileStreamWriteRead(t *testing.T) {
 
 	buf := make([]byte, 10)
 	n, err := lr.Read(buf)
-	require.NoError(t, err)
+	tt.Nil(t, err)
 
-	require.Equal(t, "hello", string(buf[:n]))
+	tt.Equal(t, "hello", string(buf[:n]))
 }

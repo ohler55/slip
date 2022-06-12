@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/ohler55/ojg/sen"
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestArray(t *testing.T) {
@@ -35,37 +35,37 @@ func TestArray(t *testing.T) {
 func TestArrayGet(t *testing.T) {
 	a := testArray()
 	val := a.Get(1, 1, 1)
-	require.Equal(t, slip.Fixnum(17), val)
-	require.Panics(t, func() { _ = a.Get(1, 1) })
-	require.Panics(t, func() { _ = a.Get(1, -1, 1) })
+	tt.Equal(t, slip.Fixnum(17), val)
+	tt.Panic(t, func() { _ = a.Get(1, 1) })
+	tt.Panic(t, func() { _ = a.Get(1, -1, 1) })
 }
 
 func TestArraySet(t *testing.T) {
 	a := testArray()
 	a.Set(slip.Fixnum(42), 1, 1, 1)
 	val := a.Get(1, 1, 1)
-	require.Equal(t, slip.Fixnum(42), val)
-	require.Panics(t, func() { a.Set(nil, 1, 1) })
-	require.Panics(t, func() { a.Set(nil, 1, -1, 1) })
+	tt.Equal(t, slip.Fixnum(42), val)
+	tt.Panic(t, func() { a.Set(nil, 1, 1) })
+	tt.Panic(t, func() { a.Set(nil, 1, -1, 1) })
 }
 
 func TestArraySetAll(t *testing.T) {
 	content := testArray().AsList()
 	a := slip.NewArray(nil, 2, 3, 4)
 	a.SetAll(content)
-	require.Equal(t, "(((0 1 2 3) (4 5 6 7) (8 9 10 11)) ((12 13 14 15) (16 17 18 19) (20 21 22 23)))",
+	tt.Equal(t, "(((0 1 2 3) (4 5 6 7) (8 9 10 11)) ((12 13 14 15) (16 17 18 19) (20 21 22 23)))",
 		a.AsList().String())
 
 	a = slip.NewArray(nil, 2, 2)
-	require.Panics(t, func() { a.SetAll(slip.List{slip.List{nil}, slip.List{nil}}) })
-	require.Panics(t, func() { a.SetAll(slip.List{nil, nil}) })
+	tt.Panic(t, func() { a.SetAll(slip.List{slip.List{nil}, slip.List{nil}}) })
+	tt.Panic(t, func() { a.SetAll(slip.List{nil, nil}) })
 }
 
 func TestArrayMisc(t *testing.T) {
 	a := testArray()
-	require.Equal(t, 24, a.Size())
-	require.Equal(t, []int{2, 3, 4}, a.Dimensions())
-	require.Equal(t, []interface{}{nil}, slip.NewArray(nil, 1).Simplify())
+	tt.Equal(t, 24, a.Size())
+	tt.Equal(t, []int{2, 3, 4}, a.Dimensions())
+	tt.Equal(t, []interface{}{nil}, slip.NewArray(nil, 1).Simplify())
 }
 
 func testArray() *slip.Array {

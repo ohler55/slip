@@ -5,8 +5,8 @@ package test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
-	"github.com/stretchr/testify/require"
 )
 
 type codeTest struct {
@@ -18,7 +18,7 @@ type codeTest struct {
 
 func (ct *codeTest) test(t *testing.T, i int) {
 	if ct.raise {
-		require.Panics(t, func() { _ = slip.ReadString(ct.src) })
+		tt.Panic(t, func() { _ = slip.ReadString(ct.src) })
 		return
 	}
 	var code slip.Code
@@ -27,9 +27,9 @@ func (ct *codeTest) test(t *testing.T, i int) {
 	} else {
 		code = slip.Read([]byte(ct.src))
 	}
-	require.Equal(t, ct.expect, code.String(), "%d: %s", i, ct.src)
+	tt.Equal(t, ct.expect, code.String(), i, ct.src)
 	if 0 < len(ct.kind) {
-		require.Equal(t, ct.kind, string(code[0].Hierarchy()[0]))
+		tt.Equal(t, ct.kind, string(code[0].Hierarchy()[0]))
 	}
 }
 
@@ -243,7 +243,7 @@ func TestCodeArray(t *testing.T) {
 func TestCodeStringer(t *testing.T) {
 	code := slip.Code{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil}
-	require.Equal(t, `[nil
+	tt.Equal(t, `[nil
  nil
  nil
  nil

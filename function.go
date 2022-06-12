@@ -41,7 +41,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
 func NewFunc(name string, args List, pkgs ...*Package) Object {
-	name = strings.ToUpper(name)
+	name = strings.ToLower(name)
 	pkg := CurrentPackage
 	if 0 < len(pkgs) {
 		pkg = pkgs[0]
@@ -54,8 +54,8 @@ func NewFunc(name string, args List, pkgs ...*Package) Object {
 
 // Eval the object.
 func (f *Function) Eval(s *Scope, depth int) (result Object) {
-	s.before(s, f.Name, f.Args, depth)
-	defer s.after(s, f.Name, f.Args, depth)
+	beforeEval(s, f.Name, f.Args, depth)
+	defer afterEval(s, f.Name, f.Args, depth)
 
 	args := make(List, len(f.Args))
 	d2 := depth + 1
@@ -88,6 +88,7 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 		args[i] = s.Eval(arg, d2)
 	}
 	result = f.Self.Call(s, args, depth)
+
 	// If there are any .Args that need updating to the function version do
 	// that by taking the compiled version from the args.
 	for _, u := range update {
@@ -101,8 +102,8 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 
 // Apply evaluates with the need to evaluate the args.
 func (f *Function) Apply(s *Scope, args List, depth int) Object {
-	s.before(s, f.Name, args, depth)
-	defer s.after(s, f.Name, args, depth)
+	beforeEval(s, f.Name, args, depth)
+	defer afterEval(s, f.Name, args, depth)
 
 	return f.Self.Call(s, args, depth)
 }
@@ -125,7 +126,7 @@ func (f *Function) String() string {
 // Append a buffer with a representation of the Object.
 func (f *Function) Append(b []byte) []byte {
 	b = append(b, '(')
-	b = append(b, f.Name...)
+	b = printer.Append(b, Symbol(f.Name), 0)
 	for i := len(f.Args) - 1; 0 <= i; i-- {
 		b = append(b, ' ')
 		b = Append(b, f.Args[i])
@@ -189,12 +190,12 @@ func (f *Function) CompileArgs() {
 		arg := f.Args[i]
 		if 0 < len(f.SkipEval) {
 			if len(f.SkipEval) <= si {
-				if f.SkipEval[len(f.SkipEval)-1] {
+				if !f.SkipEval[len(f.SkipEval)-1] {
 					if alist, ok := arg.(List); ok {
 						f.Args[i] = CompileList(alist)
 					}
 				}
-			} else if f.SkipEval[si] {
+			} else if !f.SkipEval[si] {
 				if alist, ok := arg.(List); ok {
 					f.Args[i] = CompileList(alist)
 				}
@@ -203,12 +204,17 @@ func (f *Function) CompileArgs() {
 	}
 }
 
+// Caller returns the function's Caller (Self).
+func (f *Function) Caller() Caller {
+	return f.Self
+}
+
 // CompileList a list into a function or an undefined function.
 func CompileList(list List) (f Object) {
 	if 0 < len(list) {
 		switch ta := list[len(list)-1].(type) {
 		case Symbol:
-			name := strings.ToUpper(string(ta))
+			name := strings.ToLower(string(ta))
 			if fi := CurrentPackage.Funcs[name]; fi != nil {
 				f = fi.Create(list[:len(list)-1])
 			} else {
@@ -245,7 +251,7 @@ func CompileList(list List) (f Object) {
 // DescribeFunction returns the documentation for the function bound to the
 // sym argument.
 func DescribeFunction(sym Symbol) *FuncDoc {
-	name := strings.ToUpper(string(sym))
+	name := strings.ToLower(string(sym))
 	if fi, has := CurrentPackage.Funcs[name]; has {
 		return fi.Doc
 	}

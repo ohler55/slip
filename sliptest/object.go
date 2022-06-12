@@ -12,7 +12,7 @@ import (
 
 	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/pretty"
-	"github.com/stretchr/testify/require"
+	"github.com/ohler55/ojg/tt"
 )
 
 // EqTest is used for specifying what the result of comparing Other to a
@@ -62,22 +62,18 @@ type Object struct {
 
 // Test the object test specification.
 func (to *Object) Test(t *testing.T) {
-	if 0 < len(to.String) && to.String[0] == '/' && to.String[len(to.String)-1] == '/' {
-		require.Regexp(t, to.String[1:len(to.String)-1], to.Target.String(), "String() output")
-		require.Regexp(t, to.String[1:len(to.String)-1], string(to.Target.Append([]byte{})), "Append() output")
-	} else {
-		require.Equal(t, to.String, to.Target.String(), "String() output")
-		require.Equal(t, to.String, string(to.Target.Append([]byte{})), "Append() output")
-	}
+	tt.Equal(t, to.String, to.Target.String(), "String() output")
+	tt.Equal(t, to.String, string(to.Target.Append([]byte{})), "Append() output")
 	switch ts := to.Simple.(type) {
 	case error:
-		require.Panics(t, func() { _ = to.Target.Simplify() })
+		tt.Panic(t, func() { _ = to.Target.Simplify() })
 	case func(*testing.T, interface{}):
 		ts(t, to.Target.Simplify())
 	default:
 		simp := to.Target.Simplify()
 		diff := alt.Compare(to.Simple, simp)
-		require.Nil(t, diff, "Simplify difference at %v for %s vs %s", diff, pretty.SEN(to.Simple), pretty.SEN(simp))
+		tt.Equal(t, 0, len(diff),
+			"Simplify difference at %v for %s vs %s", diff, pretty.SEN(to.Simple), pretty.SEN(simp))
 	}
 	if 0 < len(to.Hierarchy) {
 		var hb []byte
@@ -87,29 +83,29 @@ func (to *Object) Test(t *testing.T) {
 			}
 			hb = append(hb, strings.ToLower(string(sym))...)
 		}
-		require.Equal(t, to.Hierarchy, string(hb))
+		tt.Equal(t, to.Hierarchy, string(hb))
 	}
 	for _, et := range to.Equals {
 		if et.Expect {
-			require.True(t, to.Target.Equal(et.Other),
+			tt.Equal(t, true, to.Target.Equal(et.Other),
 				"Equal (%T)%s vs (%T)%s", to.Target, to.Target, et.Other, et.Other)
 		} else {
-			require.False(t, to.Target.Equal(et.Other),
+			tt.Equal(t, false, to.Target.Equal(et.Other),
 				"Not Equal (%T)%s vs (%T)%s", to.Target, to.Target, et.Other, et.Other)
 		}
 	}
 	self := to.Target.Hierarchy()[0]
 	for _, f := range to.Selfies {
-		require.Equal(t, self, f())
+		tt.Equal(t, self, f())
 	}
 	if to.Scope == nil {
 		to.Scope = slip.NewScope()
 	}
 	if to.Panics {
-		require.Panics(t, func() { to.Target.Eval(to.Scope, 0) })
+		tt.Panic(t, func() { to.Target.Eval(to.Scope, 0) })
 	} else {
 		result := to.Target.Eval(to.Scope, 0)
-		require.True(t, slip.ObjectEqual(to.Eval, result),
+		tt.Equal(t, true, slip.ObjectEqual(to.Eval, result),
 			"Eval returned '%s' but expected '%s'", slip.ObjectString(result), slip.ObjectString(to.Eval))
 	}
 }

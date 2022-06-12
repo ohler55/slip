@@ -1,4 +1,4 @@
-# slip
+# SLIP
 
 SLIce Processing is LISP for golang
 
@@ -6,26 +6,28 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- next
 
-- flavors package (imported to user package)
- - define flavor and instance and method
-  - flavor
-   - holds methods as map
- - method
-  - core or primary method function
-  - list of before, after
-  - list of whoppers (wrappers)
- - instance
-  - Instance struct
-   - Flavor *Flavor
-   - Data any
-    - Vars (use flavor for methods and access)
-   - Receive()
-    - calls flavor method from a map
+ - look at tracing and errors/panics
+  - panics don't seem to print out the stack correctly
+  - should tracing be global instead of by scope?
+   - not used that often so reduce footprint of scope
 
+ - other method combinations?
+  - :method-combination option for defflavor
+  - daemon (default)
+  - progn
+  - or
+  - and
+  - list
 
-- simple or data or ???
+- simple or data or opaque or ???
  - use flavors for the instance and methods
+ - separate package
+
+- would building our own stack be a better approach?
+ - could reuse scope but would need to clear vars
+ - could replace args key lookups for lispcaller with an index to arg to avoid using maps
 
 - Code
  - #' - function (like quote)
