@@ -9,15 +9,16 @@ import (
 )
 
 const (
-	p1Key       = "*REPL-PROMPT*"
-	p1ANSIKey   = "*REPL-PROMPT-ANSI*"
-	warnANSIKey = "*REPL-WARNING-ANSI*"
+	p1Key       = "*repl-prompt*"
+	p1ANSIKey   = "*repl-prompt-ansi*"
+	warnANSIKey = "*repl-warning-ansi*"
 	form1Key    = "+"
 	form2Key    = "++"
 	form3Key    = "+++"
 	value1Key   = "/"
 	value2Key   = "//"
 	value3Key   = "///"
+	bold        = "\x1b[1m"
 	colorOff    = "\x1b[m"
 )
 
@@ -46,7 +47,7 @@ func REPL(scope ...*Scope) {
 	}
 	r.scope.Let(Symbol(p1Key), String("* "))
 	if printer.ANSI {
-		r.scope.Let(Symbol(p1ANSIKey), String("\x1b[1m"))
+		r.scope.Let(Symbol(p1ANSIKey), String(bold))
 		r.scope.Let(Symbol(warnANSIKey), String("\x1b[31m"))
 	} else {
 		r.scope.Let(Symbol(p1ANSIKey), nil)

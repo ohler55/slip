@@ -8,10 +8,20 @@ SLIce Processing is LISP for golang
 
 - next
 
- - look at tracing and errors/panics
-  - panics don't seem to print out the stack correctly
-  - should tracing be global instead of by scope?
-   - not used that often so reduce footprint of scope
+- simple or data or opaque or ???
+ - use flavors for the instance and methods or just functions
+  - is there a need for daemons? if not then maybe not worth making an object unless for name spacing
+ - functions or methods
+  - format as json or sen
+  - get
+  - first
+  - set
+  - has
+  - etc...
+  - parse
+  - to-lisp or as-lisp
+ - separate package
+
 
  - other method combinations?
   - :method-combination option for defflavor
@@ -20,10 +30,6 @@ SLIce Processing is LISP for golang
   - or
   - and
   - list
-
-- simple or data or opaque or ???
- - use flavors for the instance and methods
- - separate package
 
 - would building our own stack be a better approach?
  - could reuse scope but would need to clear vars

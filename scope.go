@@ -7,9 +7,6 @@ import (
 	"strings"
 )
 
-var beforeEval = noopBefore
-var afterEval = normalAfter
-
 type returnFrom struct {
 	tag    Object // Symbol or nil
 	result Object

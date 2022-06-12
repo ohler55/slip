@@ -16,7 +16,7 @@ func (p *Panic) Bytes() []byte {
 	var b []byte
 
 	b = append(b, "## "...)
-	b = append(b, p.Error()...)
+	b = append(b, p.Message...)
 	b = append(b, '\n')
 	for _, line := range p.Stack {
 		b = append(b, "   "...)
@@ -28,7 +28,7 @@ func (p *Panic) Bytes() []byte {
 
 // Error returns the panic message.
 func (p *Panic) Error() string {
-	return p.Message
+	return string(p.Bytes())
 }
 
 // PanicType raises a panic describing an incorrect type being used.

@@ -55,7 +55,7 @@ func NewFunc(name string, args List, pkgs ...*Package) Object {
 // Eval the object.
 func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	beforeEval(s, f.Name, f.Args, depth)
-	defer afterEval(s, f.Name, f.Args, depth)
+	defer afterEval(s, f.Name, f.Args, depth, &result)
 
 	args := make(List, len(f.Args))
 	d2 := depth + 1
@@ -101,9 +101,9 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 }
 
 // Apply evaluates with the need to evaluate the args.
-func (f *Function) Apply(s *Scope, args List, depth int) Object {
+func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
 	beforeEval(s, f.Name, args, depth)
-	defer afterEval(s, f.Name, args, depth)
+	defer afterEval(s, f.Name, args, depth, &result)
 
 	return f.Self.Call(s, args, depth)
 }
