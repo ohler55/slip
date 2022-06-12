@@ -67,7 +67,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	}
 	inst := cf.makeInstance()
 	var plist slip.List
-	keys := map[string]bool{} // TBD only if required is not empty, maybe map of req and delete when encountered
+	keys := map[string]bool{}
 	for i := len(args) - 2; 0 < i; i-- {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok || len(sym) < 2 || sym[0] != ':' {

@@ -26,8 +26,7 @@ func init() {
 			Return: "object",
 			Text:   `continues with the rest of the daemon methods.`,
 			Examples: []string{
-				// TBD defmethod with continue-whopper called in body
-				"(continue-whopper fruit :color) => red",
+				"(defwhopper (blueberry :rot) () (continue-whopper))",
 			},
 		}, &FlavorsPkg)
 }
@@ -41,9 +40,6 @@ type ContinueWhopper struct {
 func (f *ContinueWhopper) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self, _ := s.Get("self").(*Instance)
 	loc, _ := s.Get("~whopper-location~").(*whopLoc)
-	if self == nil || loc == nil {
-		panic("continue-whopper can only be called from a whopper.")
-	}
 	for loc.current++; loc.current < len(loc.methods); loc.current++ {
 		wrap := loc.methods[loc.current].wrap
 		if wrap == nil {

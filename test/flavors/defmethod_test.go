@@ -106,6 +106,16 @@ func TestDefMethodBadDesignator(t *testing.T) {
 	})
 }
 
+func TestDefMethodBadDaemon(t *testing.T) {
+	defer undefFlavor("berry")
+	tt.Panic(t, func() {
+		_ = slip.ReadString(`
+(defflavor berry (color) ())
+(defmethod (berry :nothing :rot) ())
+`).Eval(slip.NewScope())
+	})
+}
+
 func TestDefMethodNotFlavor(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`(defmethod (nothing :rot) ())`).Eval(slip.NewScope())
