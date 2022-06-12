@@ -12,6 +12,6 @@ github.com/ohler55/slip/sliptest\
 	make -C flavors
 	$Q grep github cl/cov.out >> cov.out
 	$Q grep github flavors/cov.out >> cov.out
-	$Q go tool cover -func=cov.out | grep "total:\t"
+	$Q go tool cover -func=cov.out | grep "total:"
 
 .PHONY: all cover

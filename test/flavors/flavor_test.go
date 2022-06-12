@@ -3,10 +3,8 @@
 package flavors_test
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/sen"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
@@ -21,7 +19,6 @@ func TestFlavor(t *testing.T) {
 	_ = code.Eval(scope)
 	f := slip.ReadString("blueberry").Eval(scope)
 
-	fmt.Printf("*** %s\n", pretty.SEN(f.Simplify()))
 	simple := sen.MustParse([]byte(`{
   abstract: false
   allowOtherKeys: false

@@ -60,6 +60,19 @@ func TestDefflavorInherit(t *testing.T) {
 	tt.Equal(t, "(vanilla-flavor)", names.String())
 }
 
+func TestDefflavorInheritSame(t *testing.T) {
+	defer undefFlavors("f1", "f2", "f3")
+	scope := slip.NewScope()
+	slip.ReadString(`
+(defflavor f1 ((a 1)) ())
+(defflavor f2 ((b 2)) (f1))
+(defflavor f3 () (f1 f2))
+`).Eval(scope)
+
+	sf := slip.ReadString("f3").Eval(scope).Simplify()
+	tt.Equal(t, "[f1 f2 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
+}
+
 func TestDefflavorNoVanilla(t *testing.T) {
 	defer undefFlavors("chocolate")
 	scope := slip.NewScope()
@@ -91,6 +104,18 @@ func TestDefflavorInitPlist(t *testing.T) {
 `).Eval(scope)
 
 	sf := slip.ReadString("f1").Eval(scope).Simplify()
+	tt.Equal(t, `{":x": 1 ":y": 2}`, pretty.SEN(jp.C("keywords").First(sf)))
+}
+
+func TestDefflavorInitPlistInherit(t *testing.T) {
+	defer undefFlavors("f1")
+	scope := slip.NewScope()
+	slip.ReadString(`
+(defflavor f1 ((a 1)) () (:default-init-plist (:allow-other-keys t) (:x 1) (:y 2)))
+(defflavor f2 ((b 2)) (f1))
+`).Eval(scope)
+
+	sf := slip.ReadString("f2").Eval(scope).Simplify()
 	tt.Equal(t, `{":x": 1 ":y": 2}`, pretty.SEN(jp.C("keywords").First(sf)))
 }
 

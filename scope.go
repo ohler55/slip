@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-var beforeEval func(s *Scope, name string, args List, depth int) = noopBefore
-var afterEval func(s *Scope, name string, args List, depth int) = normalAfter
+var beforeEval = noopBefore
+var afterEval = normalAfter
 
 type returnFrom struct {
 	tag    Object // Symbol or nil

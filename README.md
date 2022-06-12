@@ -8,10 +8,10 @@ SLIce Processing is LISP for golang
 
 - next
 
-- next look at tracing and errors/panics
- - panics don't seem to print out the stack correctly
- - should tracing be global instead of by scope?
-  - not used that often so reduce footprint of scope
+ - look at tracing and errors/panics
+  - panics don't seem to print out the stack correctly
+  - should tracing be global instead of by scope?
+   - not used that often so reduce footprint of scope
 
  - other method combinations?
   - :method-combination option for defflavor
@@ -26,8 +26,8 @@ SLIce Processing is LISP for golang
  - separate package
 
 - would building our own stack be a better approach?
- - trace would be easier
- -
+ - could reuse scope but would need to clear vars
+ - could replace args key lookups for lispcaller with an index to arg to avoid using maps
 
 - Code
  - #' - function (like quote)
