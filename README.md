@@ -7,21 +7,28 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - lambda
+  - like defun but don't add to current package
 
-- simple or data or opaque or ???
+- simple
+ - separate package
+  - simple
  - use flavors for the instance and methods or just functions
   - is there a need for daemons? if not then maybe not worth making an object unless for name spacing
  - functions or methods
   - format as json or sen
-  - get
-  - first
-  - set
-  - has
-  - etc...
-  - parse
-  - to-lisp or as-lisp
- - separate package
-
+  - get with mapc like interface, maybe get and collect (getc?)
+  - simple-first
+  - simple-set
+  - simple-has
+  - simple-parse-json
+  - simple-parse-sen
+  - make-json-path
+  - make-simple
+  - json-path-p
+  - simple-p
+  - simple-walk
+  - simple-to-lisp
 
  - other method combinations?
   - :method-combination option for defflavor
