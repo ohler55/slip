@@ -5,7 +5,9 @@ package slip
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
+	"unsafe"
 )
 
 const (
@@ -19,7 +21,7 @@ const (
 // indirection so that functions can be defined without regard to the order
 // defined.
 type LispCaller struct {
-	Name    string
+	Name    string // TBD is this needed?
 	Doc     *FuncDoc
 	Forms   List // reverse order
 	Closure *Scope
@@ -102,6 +104,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 		}
 	}
 	if 0 <= ai {
+		// TBD change lc.Name to lc.String()
 		panic(&Panic{Message: fmt.Sprintf("Too many arguments to %s. There are %d extra.", lc.Name, ai+1)})
 	}
 	if 0 < len(rest) {
@@ -240,4 +243,63 @@ func DefLispCaller(defName, funcName string, s *Scope, args List) (lc *LispCalle
 		}
 	}
 	return
+}
+
+// String representation of the Object.
+func (lc *LispCaller) String() string {
+	return string(lc.Append([]byte{}))
+}
+
+// Append a buffer with a representation of the Object.
+func (lc *LispCaller) Append(b []byte) []byte {
+	b = append(b, "#<"...)
+	b = printer.Append(b, Symbol("function"), 0)
+	b = append(b, " ("...)
+	b = printer.Append(b, Symbol("lambda"), 0)
+	b = append(b, " ("...)
+	for i, ad := range lc.Doc.Args {
+		if 0 < i {
+			b = append(b, ' ')
+		}
+		b = append(b, ad.Name...)
+	}
+	b = append(b, ')')
+
+	// TBD if *print-full* or *print-forms* then print forms else number
+
+	b = append(b, ") {"...)
+	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(lc))), 16)
+	b = append(b, '}')
+
+	return append(b, '>')
+}
+
+// Equal returns true if this Object and the other are equal in value.
+func (lc *LispCaller) Equal(other Object) bool {
+	return lc == other
+}
+
+// Hierarchy returns the class hierarchy as symbols for the instance.
+func (lc *LispCaller) Hierarchy() []Symbol {
+	return []Symbol{FunctionSymbol, TrueSymbol}
+}
+
+// Simplify the function.
+func (lc *LispCaller) Simplify() interface{} {
+	simple := make([]any, 0, len(lc.Forms)+2)
+	simple = append(simple, "lambda")
+	args := make([]any, 0, len(lc.Doc.Args))
+	for _, ad := range lc.Doc.Args {
+		args = append(args, ad.Name)
+	}
+	simple = append(simple, args)
+	for i := len(lc.Forms) - 1; 0 <= i; i-- {
+		simple = append(simple, Simplify(lc.Forms[i]))
+	}
+	return simple
+}
+
+// Eval the object.
+func (lc *LispCaller) Eval(s *Scope, depth int) (result Object) {
+	return lc
 }

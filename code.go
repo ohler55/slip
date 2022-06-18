@@ -840,11 +840,11 @@ func (c Code) Compile() {
 		var f Object
 		switch strings.ToLower(string(sym)) {
 		case "defun":
-			f = ListToFunc(list)
+			f = ListToFunc(scope, list, 0)
 			c[i] = f
 		case "defvar":
 			// TBD need a ListToFunc that sets up an undefined list
-			f = ListToFunc(list)
+			f = ListToFunc(scope, list, 0)
 			c[i] = f
 		case "defmacro":
 			panic("Defmacro not implemented yet")

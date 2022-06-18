@@ -19,6 +19,8 @@ func (f *Dynamic) Append(b []byte) []byte {
 	if 0 < len(f.Name) {
 		b = append(b, f.Name...)
 	} else {
+		// TBD or have lispcaller (self) append themselves if an object
+		//  make lispcaller and object or create a lambda type to wrap it
 		lc := f.Self.(*LispCaller)
 		list := make(List, len(lc.Forms)+2)
 		copy(list, lc.Forms)

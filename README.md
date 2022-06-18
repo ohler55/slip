@@ -10,6 +10,11 @@ SLIce Processing is LISP for golang
  - lambda
   - like defun but don't add to current package
 
+ - should LispCaller become Lambda?
+  - then make object (add functions for interface)
+  - look at printer vars to determine if forms whould be printed or not
+   - add *print-full* or *print-expand*
+
 - simple
  - separate package
   - simple

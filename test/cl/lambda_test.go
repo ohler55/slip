@@ -1,0 +1,45 @@
+// Copyright (c) 2022, Peter Ohler, All rights reserved.
+
+package cl_test
+
+import (
+	"testing"
+
+	"github.com/ohler55/ojg/sen"
+	"github.com/ohler55/ojg/tt"
+	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/sliptest"
+)
+
+func TestLambdaSelf(t *testing.T) {
+	lambda := slip.ReadString("(lambda (x) (car x))").Eval(slip.NewScope())
+	(&sliptest.Object{
+		Target:    lambda,
+		String:    `/^#<function \(lambda \(x\)\) \{[a-h0-9]+\}>$/`,
+		Simple:    sen.MustParse([]byte("[lambda [x] [car x]]")),
+		Hierarchy: "function.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.True, Expect: false},
+		},
+		Eval: lambda,
+	}).Test(t)
+}
+
+func TestLambdaNoArgs(t *testing.T) {
+	lambda := slip.ReadString("(lambda () (terpri))").Eval(slip.NewScope())
+	(&sliptest.Object{
+		Target:    lambda,
+		String:    `/^#<function \(lambda \(\)\) \{[a-h0-9]+\}>$/`,
+		Simple:    sen.MustParse([]byte("[lambda [] [terpri]]")),
+		Hierarchy: "function.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.True, Expect: false},
+		},
+		Eval: lambda,
+	}).Test(t)
+}
+
+func TestLambdaFuncEval(t *testing.T) {
+	result := slip.ReadString("((lambda (x) (car x)) '(1 2 3))").Eval(slip.NewScope())
+	tt.Equal(t, slip.Fixnum(1), result)
+}
