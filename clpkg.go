@@ -76,6 +76,12 @@ For example the 'a' character will be displayed as _#\a_ when true and simply _a
 				Set: setPrintGensym,
 				Doc: `has no effect. The "#:" is never a prefix for _symbols_.`,
 			},
+			"*print-lambda*": {
+				Get: getPrintLambda,
+				Set: setPrintLambda,
+				Doc: `if true lambda expressions are printed as defined otherwise they are printed
+similar to other functions.`,
+			},
 			"*print-length*": {
 				Get: getPrintLength,
 				Set: setPrintLength,
@@ -132,9 +138,9 @@ and raises an error if not possible to print readably.`,
 				Doc: "establishes the right margin for pretty printing.",
 			},
 		},
-		LispCallers: map[string]*LispCaller{},
-		Funcs:       map[string]*FuncInfo{},
-		Locked:      true,
+		Lambdas: map[string]*Lambda{},
+		Funcs:   map[string]*FuncInfo{},
+		Locked:  true,
 	}
 
 	// ErrorOutput backs *error-output*.

@@ -3,6 +3,10 @@
 package cl
 
 import (
+	"fmt"
+	"io"
+	"strings"
+
 	"github.com/ohler55/slip"
 )
 
@@ -61,18 +65,29 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	if !ok {
 		slip.PanicType("name argument to defun", args[len(args)-1], "symbol")
 	}
-	lc := slip.DefLispCaller("defun", string(name), s, args[:len(args)-1])
+	low := strings.ToLower(string(name))
+	lc := slip.DefLambda("defun", s, args[:len(args)-1])
 	fc := func(fargs slip.List) slip.Object {
 		return &slip.Dynamic{
 			Function: slip.Function{
-				Name: lc.Name,
+				Name: low,
 				Self: lc,
 				Args: fargs,
 			},
 		}
 	}
-	slip.CurrentPackage.LispCallers[lc.Name] = lc
-	slip.CurrentPackage.Funcs[lc.Name] = &slip.FuncInfo{Create: fc, Pkg: slip.CurrentPackage}
+	if fi := slip.CurrentPackage.Funcs[low]; fi != nil {
+		if fi.Pkg.Locked {
+			panic(fmt.Sprintf("Redefining %s::%s in defun. Package %s is locked.",
+				slip.CurrentPackage.Name, low, slip.CurrentPackage.Name))
+		}
+		var w io.Writer
+		if w, ok = slip.ErrorOutput.(io.Writer); ok {
+			_, _ = fmt.Fprintf(w, "WARNING: redefining %s::%s in defun\n", slip.CurrentPackage.Name, low)
+		}
+	}
+	slip.CurrentPackage.Lambdas[low] = lc
+	slip.CurrentPackage.Funcs[low] = &slip.FuncInfo{Create: fc, Pkg: slip.CurrentPackage}
 	if s.Parent() != nil {
 		lc.Closure = s
 	}

@@ -177,7 +177,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 			if sym, ok := ta[len(ta)-1].(Symbol); ok {
 				if strings.EqualFold("lambda", string(sym)) {
 					lambdaDef := ListToFunc(s, ta, depth+1)
-					lc := s.Eval(lambdaDef, depth).(*LispCaller)
+					lc := s.Eval(lambdaDef, depth).(*Lambda)
 					return &Dynamic{
 						Function: Function{
 							Self: lc,
@@ -230,15 +230,14 @@ func CompileList(list List) (f Object) {
 			if fi := CurrentPackage.Funcs[name]; fi != nil {
 				f = fi.Create(list[:len(list)-1])
 			} else {
-				lc := LispCaller{
-					Name: name,
+				lc := Lambda{
 					Doc: &FuncDoc{
 						Name: name,
 						Args: []*DocArg{},
 					},
 					Forms: List{Undefined(name)},
 				}
-				CurrentPackage.LispCallers[name] = &lc
+				CurrentPackage.Lambdas[name] = &lc
 				fc := func(args List) Object {
 					return &Dynamic{
 						Function: Function{
@@ -254,7 +253,21 @@ func CompileList(list List) (f Object) {
 				funk.CompileArgs()
 			}
 		case List:
-			// TBD maybe lambda
+			if 1 < len(ta) {
+				if sym, ok := ta[len(ta)-1].(Symbol); ok {
+					if strings.EqualFold("lambda", string(sym)) {
+						s := NewScope()
+						lambdaDef := ListToFunc(s, ta, 0)
+						lc := s.Eval(lambdaDef, 0).(*Lambda)
+						return &Dynamic{
+							Function: Function{
+								Self: lc,
+								Args: list[:len(list)-1],
+							},
+						}
+					}
+				}
+			}
 		}
 	}
 	return

@@ -11,12 +11,17 @@ import (
 )
 
 func TestDynamicLambda(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
 			Args: slip.List{slip.Fixnum(2), slip.NewFunc("quote", slip.List{slip.List{nil, slip.Fixnum(1)}})},
 		},
 	}
-	lambda.Self = &slip.LispCaller{
+	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{{Name: "x"}, {Name: "y"}},
 		},
@@ -39,14 +44,17 @@ func TestDynamicLambda(t *testing.T) {
 }
 
 func TestDynamicDefun(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
 	dummy := &slip.Dynamic{
 		Function: slip.Function{
 			Name: "dummy",
 			Args: slip.List{slip.Fixnum(2), slip.NewFunc("quote", slip.List{slip.List{nil, slip.Fixnum(1)}})},
 		},
 	}
-	dummy.Self = &slip.LispCaller{
-		Name: "dummy",
+	dummy.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{{Name: "x"}, {Name: "y"}},
 		},
@@ -62,12 +70,17 @@ func TestDynamicDefun(t *testing.T) {
 }
 
 func TestDynamicAmps(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
 			Args: slip.List{slip.Fixnum(5), slip.Symbol(":k1"), slip.Fixnum(4), slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
 		},
 	}
-	lambda.Self = &slip.LispCaller{
+	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{
 				{Name: "x"},
@@ -91,12 +104,17 @@ func TestDynamicAmps(t *testing.T) {
 }
 
 func TestDynamicAmpRest(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
 			Args: slip.List{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
 		},
 	}
-	lambda.Self = &slip.LispCaller{
+	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{
 				{Name: "x"},
@@ -115,12 +133,17 @@ func TestDynamicAmpRest(t *testing.T) {
 }
 
 func TestDynamicAmpKey(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
 			Args: slip.List{slip.Fixnum(2), slip.Symbol(":k1"), slip.Fixnum(1)},
 		},
 	}
-	lambda.Self = &slip.LispCaller{
+	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{
 				{Name: "x"},
@@ -139,12 +162,17 @@ func TestDynamicAmpKey(t *testing.T) {
 }
 
 func TestDynamicAmpOptKey(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
 			Args: slip.List{slip.Fixnum(2), slip.Symbol(":k1"), slip.Fixnum(1)},
 		},
 	}
-	lambda.Self = &slip.LispCaller{
+	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{
 				{Name: "&optional"}, {Name: "x"},
@@ -163,12 +191,17 @@ func TestDynamicAmpOptKey(t *testing.T) {
 }
 
 func TestDynamicAmpDefaults(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
 			Args: slip.List{},
 		},
 	}
-	lambda.Self = &slip.LispCaller{
+	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{
 				{Name: "&optional"}, {Name: "x"},
@@ -187,12 +220,17 @@ func TestDynamicAmpDefaults(t *testing.T) {
 }
 
 func TestDynamicAmpNoKeyValue(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
 			Args: slip.List{slip.Symbol(":k1"), slip.Fixnum(1)},
 		},
 	}
-	lambda.Self = &slip.LispCaller{
+	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{
 				{Name: "&optional"}, {Name: "x"},
@@ -211,12 +249,17 @@ func TestDynamicAmpNoKeyValue(t *testing.T) {
 }
 
 func TestDynamicAmpKeyExtraSymbol(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.True)
+
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
 			Args: slip.List{slip.Fixnum(3), slip.Fixnum(2), slip.Symbol(":k1"), slip.Fixnum(1)},
 		},
 	}
-	lambda.Self = &slip.LispCaller{
+	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{
 				{Name: "&optional"}, {Name: "x"},

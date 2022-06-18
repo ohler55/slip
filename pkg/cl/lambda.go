@@ -55,15 +55,9 @@ func (f *Lambda) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
 	}
-	lc := slip.DefLispCaller("lambda", "", s, args)
+	lc := slip.DefLambda("lambda", s, args)
 	if s.Parent() != nil {
 		lc.Closure = s
 	}
 	return lc
-	return &slip.Dynamic{
-		Function: slip.Function{
-			Self: lc,
-			Args: nil, // TBD what goes here?
-		},
-	}
 }

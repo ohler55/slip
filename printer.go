@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unsafe"
 )
 
 const (
@@ -65,6 +66,9 @@ type Printer struct {
 	// Gensym backs *print-gensym*.
 	Gensym bool
 
+	// Readably *print-lambda* .
+	Lambda bool
+
 	// Length backs *print-length*.
 	Length uint
 
@@ -102,6 +106,7 @@ var (
 		Circle:      false,
 		Escape:      true,
 		Gensym:      true,
+		Lambda:      false,
 		Length:      math.MaxInt,
 		Level:       math.MaxInt,
 		Lines:       math.MaxInt,
@@ -339,6 +344,36 @@ Top:
 				}
 				b = append(b, "))>"...)
 			}
+		}
+	case *Lambda:
+		if p.Lambda {
+			list := make(List, 0, len(to.Forms)+2)
+			for _, form := range to.Forms {
+				list = append(list, form)
+			}
+			args := make(List, 0, len(to.Doc.Args))
+			for i := len(to.Doc.Args) - 1; 0 <= i; i-- {
+				args = append(args, Symbol(to.Doc.Args[i].Name))
+			}
+			list = append(list, args, Symbol("lambda"))
+			obj = list
+			goto Top
+		} else {
+			b = append(b, "#<"...)
+			b = p.Append(b, Symbol("function"), 0)
+			b = append(b, " ("...)
+			b = p.Append(b, Symbol("lambda"), 0)
+			b = append(b, " ("...)
+			for i, ad := range to.Doc.Args {
+				if 0 < i {
+					b = append(b, ' ')
+				}
+				b = append(b, ad.Name...)
+			}
+			b = append(b, ')')
+			b = append(b, ") {"...)
+			b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(to))), 16)
+			b = append(b, "}>"...)
 		}
 	case Funky:
 		name := to.GetName()
@@ -592,6 +627,19 @@ func getPrintGensym() (value Object) {
 // set *print-gensym*
 func setPrintGensym(value Object) {
 	printer.Gensym = value != nil
+}
+
+// get *print-lambda*
+func getPrintLambda() (value Object) {
+	if printer.Lambda {
+		value = True
+	}
+	return
+}
+
+// set *print-lambda*
+func setPrintLambda(value Object) {
+	printer.Lambda = value != nil
 }
 
 // get *print-length*

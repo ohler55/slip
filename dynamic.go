@@ -19,18 +19,7 @@ func (f *Dynamic) Append(b []byte) []byte {
 	if 0 < len(f.Name) {
 		b = append(b, f.Name...)
 	} else {
-		// TBD or have lispcaller (self) append themselves if an object
-		//  make lispcaller and object or create a lambda type to wrap it
-		lc := f.Self.(*LispCaller)
-		list := make(List, len(lc.Forms)+2)
-		copy(list, lc.Forms)
-		args := make(List, len(lc.Doc.Args))
-		for i, da := range lc.Doc.Args {
-			args[len(args)-i-1] = Symbol(da.Name)
-		}
-		list[len(list)-1] = Symbol("lambda")
-		list[len(list)-2] = args
-		b = Append(b, list)
+		b = f.Self.(Object).Append(b)
 	}
 	for i := len(f.Args) - 1; 0 <= i; i-- {
 		b = append(b, ' ')
@@ -45,7 +34,7 @@ func (f *Dynamic) Simplify() interface{} {
 	if 0 < len(f.Name) {
 		simple = append(simple, f.Name)
 	} else {
-		lc := f.Self.(*LispCaller)
+		lc := f.Self.(*Lambda)
 		args := make([]interface{}, len(lc.Doc.Args))
 		for i, da := range lc.Doc.Args {
 			args[i] = da.Name

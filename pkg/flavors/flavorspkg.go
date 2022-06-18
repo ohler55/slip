@@ -22,8 +22,8 @@ var (
 				Doc: "the names of all the defined Flavors.",
 			},
 		},
-		LispCallers: map[string]*slip.LispCaller{},
-		Funcs:       map[string]*slip.FuncInfo{},
+		Lambdas: map[string]*slip.Lambda{},
+		Funcs:   map[string]*slip.FuncInfo{},
 	}
 )
 

@@ -42,4 +42,10 @@ func TestLambdaNoArgs(t *testing.T) {
 func TestLambdaFuncEval(t *testing.T) {
 	result := slip.ReadString("((lambda (x) (car x)) '(1 2 3))").Eval(slip.NewScope())
 	tt.Equal(t, slip.Fixnum(1), result)
+
+	code := slip.ReadString("((lambda (x) (car x)) '(1 2 3))")
+	code.Compile()
+	tt.Equal(t, 1, len(code))
+	tt.Equal(t, `/^\(#<function \(lambda \(x\)\) \{[0-9a-h]+\}> '\(1 2 3\)\)$/`, slip.ObjectString(code[0]))
+	tt.SameType(t, &slip.Dynamic{}, code[0])
 }
