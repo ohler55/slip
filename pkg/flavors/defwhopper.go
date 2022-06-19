@@ -82,7 +82,7 @@ func (f *Defwhopper) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	} else {
 		slip.PanicType("method for defwhopper", ml[0], "keyword")
 	}
-	lc := slip.DefLispCaller("defwhopper", "", s, args[:pos])
+	lc := slip.DefLambda("defwhopper", s, args[:pos])
 	flavor.defMethod(method, ":whopper", lc)
 
 	return nil

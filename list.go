@@ -75,7 +75,7 @@ func (obj List) SequenceType() Symbol {
 // Eval panics unless the list is empty.
 func (obj List) Eval(s *Scope, depth int) Object {
 	if 0 < len(obj) {
-		return ListToFunc(obj).Eval(s, depth)
+		return ListToFunc(s, obj, depth).Eval(s, depth)
 	}
 	return nil
 }

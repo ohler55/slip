@@ -79,7 +79,7 @@ func (obj *Instance) send(message string, args slip.List, depth int) slip.Object
 			loc := &whopLoc{methods: ma, current: i}
 			ws := obj.Scope.NewScope(nil)
 			ws.Let("~whopper-location~", loc)
-			(m.wrap.(*slip.LispCaller)).Closure = ws
+			(m.wrap.(*slip.Lambda)).Closure = ws
 
 			return m.wrap.Call(ws, args, depth)
 		}

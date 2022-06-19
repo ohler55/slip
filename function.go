@@ -82,7 +82,7 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 			}
 		}
 		if list, ok := arg.(List); ok {
-			arg = ListToFunc(list)
+			arg = ListToFunc(s, list, depth+1)
 			f.Args[i] = arg
 		}
 		args[i] = s.Eval(arg, d2)
@@ -113,7 +113,7 @@ func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
 // are just evaluated.
 func (f *Function) EvalArg(s *Scope, args List, index, depth int) Object {
 	if list, ok := args[index].(List); ok {
-		args[index] = ListToFunc(list)
+		args[index] = ListToFunc(s, list, depth+1)
 	}
 	return s.Eval(args[index], depth)
 }
@@ -165,7 +165,7 @@ func (f *Function) GetName() string {
 }
 
 // ListToFunc converts a list to a function.
-func ListToFunc(list List) Object {
+func ListToFunc(s *Scope, list List, depth int) Object {
 	if len(list) == 0 {
 		return nil
 	}
@@ -173,8 +173,20 @@ func ListToFunc(list List) Object {
 	case Symbol:
 		return NewFunc(string(ta), list[:len(list)-1])
 	case List:
-		// TBD maybe lambda
-		fmt.Printf("*** lambda?\n")
+		if 1 < len(ta) {
+			if sym, ok := ta[len(ta)-1].(Symbol); ok {
+				if strings.EqualFold("lambda", string(sym)) {
+					lambdaDef := ListToFunc(s, ta, depth+1)
+					lc := s.Eval(lambdaDef, depth).(*Lambda)
+					return &Dynamic{
+						Function: Function{
+							Self: lc,
+							Args: list[:len(list)-1],
+						},
+					}
+				}
+			}
+		}
 	}
 	panic(&Panic{
 		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[len(list)-1])),
@@ -218,15 +230,14 @@ func CompileList(list List) (f Object) {
 			if fi := CurrentPackage.Funcs[name]; fi != nil {
 				f = fi.Create(list[:len(list)-1])
 			} else {
-				lc := LispCaller{
-					Name: name,
+				lc := Lambda{
 					Doc: &FuncDoc{
 						Name: name,
 						Args: []*DocArg{},
 					},
 					Forms: List{Undefined(name)},
 				}
-				CurrentPackage.LispCallers[name] = &lc
+				CurrentPackage.Lambdas[name] = &lc
 				fc := func(args List) Object {
 					return &Dynamic{
 						Function: Function{
@@ -242,7 +253,21 @@ func CompileList(list List) (f Object) {
 				funk.CompileArgs()
 			}
 		case List:
-			// TBD maybe lambda
+			if 1 < len(ta) {
+				if sym, ok := ta[len(ta)-1].(Symbol); ok {
+					if strings.EqualFold("lambda", string(sym)) {
+						s := NewScope()
+						lambdaDef := ListToFunc(s, ta, 0)
+						lc := s.Eval(lambdaDef, 0).(*Lambda)
+						return &Dynamic{
+							Function: Function{
+								Self: lc,
+								Args: list[:len(list)-1],
+							},
+						}
+					}
+				}
+			}
 		}
 	}
 	return

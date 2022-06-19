@@ -5,13 +5,13 @@ package slip
 var (
 	// UserPkg is the common-lisp-user package.
 	UserPkg = Package{
-		Name:        "common-lisp-user",
-		Nicknames:   []string{"cl-user", "user"},
-		Doc:         "The default package for user code and variables.",
-		Vars:        map[string]*VarVal{},
-		Imports:     map[string]*Import{},
-		LispCallers: map[string]*LispCaller{},
-		Funcs:       map[string]*FuncInfo{},
+		Name:      "common-lisp-user",
+		Nicknames: []string{"cl-user", "user"},
+		Doc:       "The default package for user code and variables.",
+		Vars:      map[string]*VarVal{},
+		Imports:   map[string]*Import{},
+		Lambdas:   map[string]*Lambda{},
+		Funcs:     map[string]*FuncInfo{},
 	}
 )
 

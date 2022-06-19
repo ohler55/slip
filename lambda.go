@@ -4,7 +4,6 @@ package slip
 
 import (
 	"fmt"
-	"io"
 	"strings"
 )
 
@@ -15,30 +14,26 @@ const (
 	keyMode  = 3
 )
 
-// LispCaller is a Caller for forms/objects. It provides a level of
+// Lambda is a Caller for forms/objects. It provides a level of
 // indirection so that functions can be defined without regard to the order
 // defined.
-type LispCaller struct {
-	Name    string
+type Lambda struct {
 	Doc     *FuncDoc
 	Forms   List // reverse order
 	Closure *Scope
 }
 
 // Call the the function with the arguments provided.
-func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
+func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	ss := NewScope()
-	if 0 < len(lc.Name) {
-		ss.name = Symbol(lc.Name)
-	}
-	if lc.Closure != nil {
-		ss.parent = lc.Closure
+	if lam.Closure != nil {
+		ss.parent = lam.Closure
 	}
 	mode := reqMode
 	ai := len(args) - 1
 	var rest List
 	var restSym Symbol
-	for i, ad := range lc.Doc.Args {
+	for i, ad := range lam.Doc.Args {
 		if ai < 0 {
 			break
 		}
@@ -71,8 +66,8 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 				a := args[ai]
 				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
 					sym = sym[1:]
-					for j := i + 1; j < len(lc.Doc.Args); j++ {
-						if string(sym) == lc.Doc.Args[j].Name {
+					for j := i + 1; j < len(lam.Doc.Args); j++ {
+						if string(sym) == lam.Doc.Args[j].Name {
 							mode = keyMode
 							break Mode
 						}
@@ -102,7 +97,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 		}
 	}
 	if 0 <= ai {
-		panic(&Panic{Message: fmt.Sprintf("Too many arguments to %s. There are %d extra.", lc.Name, ai+1)})
+		panic(&Panic{Message: fmt.Sprintf("Too many arguments to %s. There are %d extra.", lam, ai+1)})
 	}
 	if 0 < len(rest) {
 		// Reverse rest since it was build with append in the wrong order for
@@ -113,7 +108,7 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 		ss.Let(restSym, rest)
 	}
 	mode = reqMode
-	for _, ad := range lc.Doc.Args {
+	for _, ad := range lam.Doc.Args {
 		switch mode {
 		case reqMode:
 			switch strings.ToLower(ad.Name) {
@@ -151,8 +146,8 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 		}
 	}
 	d2 := depth + 1
-	for i := len(lc.Forms) - 1; 0 <= i; i-- {
-		result = ss.Eval(lc.Forms[i], d2)
+	for i := len(lam.Forms) - 1; 0 <= i; i-- {
+		result = ss.Eval(lam.Forms[i], d2)
 		if ss.returnFrom != nil {
 			switch {
 			case ss.returnFrom.tag == nil:
@@ -170,11 +165,10 @@ func (lc *LispCaller) Call(s *Scope, args List, depth int) (result Object) {
 	return
 }
 
-// DefLispCaller parses arguments into a LispCaller. Arguments should be a
+// DefLambda parses arguments into a Lambda. Arguments should be a
 // lambda-list followed by an optional documentation strings and then the
-// forms to evaluate when the LispCaller is called.
-func DefLispCaller(defName, funcName string, s *Scope, args List) (lc *LispCaller) {
-	funcName = strings.ToLower(funcName)
+// forms to evaluate when the Lambda is called.
+func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 	pos := len(args) - 1
 	var ll List
 	switch tl := args[pos].(type) {
@@ -198,10 +192,8 @@ func DefLispCaller(defName, funcName string, s *Scope, args List) (lc *LispCalle
 			pos++
 		}
 	}
-	lc = &LispCaller{
-		Name: funcName,
+	lam = &Lambda{
 		Doc: &FuncDoc{
-			Name:   funcName,
 			Return: "object",
 			Text:   string(docStr),
 		},
@@ -210,7 +202,7 @@ func DefLispCaller(defName, funcName string, s *Scope, args List) (lc *LispCalle
 	for i := len(ll) - 1; 0 <= i; i-- {
 		switch ta := ll[i].(type) {
 		case Symbol: // variable name
-			lc.Doc.Args = append(lc.Doc.Args, &DocArg{Name: string(ta), Type: "object"})
+			lam.Doc.Args = append(lam.Doc.Args, &DocArg{Name: string(ta), Type: "object"})
 		case List: // variable name and default value
 			if len(ta) != 2 {
 				PanicType("lambda list element with default value", ta, "list of two elements")
@@ -220,24 +212,54 @@ func DefLispCaller(defName, funcName string, s *Scope, args List) (lc *LispCalle
 				PanicType("lambda list element with default value", ta, "list with a symbol as the first element")
 			}
 			if ta[0] == nil {
-				lc.Doc.Args = append(lc.Doc.Args, &DocArg{Name: string(name), Type: "object"})
+				lam.Doc.Args = append(lam.Doc.Args, &DocArg{Name: string(name), Type: "object"})
 			} else {
-				lc.Doc.Args = append(lc.Doc.Args,
+				lam.Doc.Args = append(lam.Doc.Args,
 					&DocArg{Name: string(name), Type: string(ta[0].Hierarchy()[0]), Default: ta[0]})
 			}
 		default:
 			PanicType("lambda list element", ta, "symbol", "list")
 		}
 	}
-	if fi := CurrentPackage.Funcs[funcName]; fi != nil {
-		if fi.Pkg.Locked {
-			panic(fmt.Sprintf("Redefining %s::%s in %s. Package %s is locked.",
-				CurrentPackage.Name, funcName, defName, CurrentPackage.Name))
-		}
-		var w io.Writer
-		if w, ok = ErrorOutput.(io.Writer); ok {
-			_, _ = fmt.Fprintf(w, "WARNING: redefining %s::%s in %s\n", CurrentPackage.Name, funcName, defName)
-		}
-	}
 	return
+}
+
+// String representation of the Object.
+func (lam *Lambda) String() string {
+	return string(lam.Append([]byte{}))
+}
+
+// Append a buffer with a representation of the Object.
+func (lam *Lambda) Append(b []byte) []byte {
+	return printer.Append(b, lam, 0)
+}
+
+// Equal returns true if this Object and the other are equal in value.
+func (lam *Lambda) Equal(other Object) bool {
+	return lam == other
+}
+
+// Hierarchy returns the class hierarchy as symbols for the instance.
+func (lam *Lambda) Hierarchy() []Symbol {
+	return []Symbol{FunctionSymbol, TrueSymbol}
+}
+
+// Simplify the function.
+func (lam *Lambda) Simplify() interface{} {
+	simple := make([]any, 0, len(lam.Forms)+2)
+	simple = append(simple, "lambda")
+	args := make([]any, 0, len(lam.Doc.Args))
+	for _, ad := range lam.Doc.Args {
+		args = append(args, ad.Name)
+	}
+	simple = append(simple, args)
+	for i := len(lam.Forms) - 1; 0 <= i; i-- {
+		simple = append(simple, Simplify(lam.Forms[i]))
+	}
+	return simple
+}
+
+// Eval the object.
+func (lam *Lambda) Eval(s *Scope, depth int) (result Object) {
+	return lam
 }

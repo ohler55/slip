@@ -95,4 +95,6 @@ func TestPackageCurrent(t *testing.T) {
 	pa := slip.DefPackage("a", []string{"aye"}, "Lots of ayes.")
 	slip.CLPkg.Set("*package*", pa)
 	tt.Equal(t, "a", slip.CurrentPackage.Name)
+
+	tt.Panic(t, func() { slip.CLPkg.Set("*package*", slip.True) })
 }

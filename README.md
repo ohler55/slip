@@ -7,8 +7,9 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - lambda
-  - like defun but don't add to current package
+ - test coverage
+ - #'
+  - test with %s
 
 - simple
  - separate package

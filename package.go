@@ -34,26 +34,26 @@ type Package struct {
 	Uses      []*Package
 	Users     []*Package
 
-	// LispCallers is a map of all LispCallers defined with either a call to defun
+	// Lambdas is a map of all Lambdas defined with either a call to defun
 	// or implicitly by referencing a function not yet defined. In that case the
 	// caller in the map will have Forms list of length 1 and the single form will
 	// an Object that evaluates to an undefined function panic.
-	LispCallers map[string]*LispCaller
-	Funcs       map[string]*FuncInfo
-	Locked      bool
+	Lambdas map[string]*Lambda
+	Funcs   map[string]*FuncInfo
+	Locked  bool
 }
 
 // DefPackage creates a new package. Calling Import() and Use() after creation
 // is expected.
 func DefPackage(name string, nicknames []string, doc string) *Package {
 	pkg := Package{
-		Name:        strings.ToLower(name),
-		Nicknames:   nicknames,
-		Doc:         doc,
-		Vars:        map[string]*VarVal{},
-		Imports:     map[string]*Import{},
-		LispCallers: map[string]*LispCaller{},
-		Funcs:       map[string]*FuncInfo{},
+		Name:      strings.ToLower(name),
+		Nicknames: nicknames,
+		Doc:       doc,
+		Vars:      map[string]*VarVal{},
+		Imports:   map[string]*Import{},
+		Lambdas:   map[string]*Lambda{},
+		Funcs:     map[string]*FuncInfo{},
 	}
 	packages[pkg.Name] = &pkg
 
