@@ -276,5 +276,3 @@ func TestDynamicAmpKeyExtraSymbol(t *testing.T) {
 		Panics:    true,
 	}).Test(t)
 }
-
-// TBD panics and skipped mode changes

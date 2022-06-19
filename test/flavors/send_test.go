@@ -49,6 +49,21 @@ func TestSendDefHand(t *testing.T) {
 	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Symbol(":nothing")}, result)
 }
 
+func TestSendDefHandLambda(t *testing.T) {
+	code := slip.ReadString(`
+(defflavor handy () ()
+ (:default-handler (lambda (&rest args) args)))
+(setq hand (make-instance 'handy))
+`)
+	scope := slip.NewScope()
+	code.Compile()
+	_ = code.Eval(scope)
+	defer slip.ReadString("(undefflavor 'handy)").Eval(scope)
+
+	result := slip.ReadString("(send hand :nothing 7)").Eval(scope)
+	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Symbol(":nothing")}, result)
+}
+
 func TestSendMissingArg(t *testing.T) {
 	code := slip.ReadString(`
 (defflavor missy (x) () :gettable-instance-variables)

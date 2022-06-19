@@ -223,8 +223,17 @@ Top:
 	case *cl.Quote:
 		val = tv.Args[0]
 		goto Top
+	case slip.List:
+		if 1 < len(tv) {
+			if sym, ok := tv[len(tv)-1].(slip.Symbol); ok {
+				if strings.EqualFold("lambda", string(sym)) {
+					s := slip.NewScope()
+					lambdaDef := slip.ListToFunc(s, tv, 0)
+					nf.defaultHandler = s.Eval(lambdaDef, 0).(*slip.Lambda)
+				}
+			}
+		}
 	default:
-		// TBD lambda
 		slip.PanicType("defflavor default-handler", val, "symbol", "lambda")
 	}
 }

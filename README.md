@@ -7,8 +7,9 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - defflavor support lambda
- - dynamic tests TBD
+ - test coverage
+ - #'
+  - test with %s
 
 - simple
  - separate package
