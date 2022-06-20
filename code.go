@@ -58,6 +58,7 @@ const (
 	intDone      = 'I'
 	sharpIntByte = '9'
 	sharpNumByte = '8'
+	sharpQuote   = 'G'
 	radixByte    = 'r'
 	arrayByte    = 'A'
 	swallowOpen  = '{'
@@ -177,7 +178,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	sharpMode = "" +
 		"................................" + // 0x00
-		"........V.......9999999999......" + // 0x20
+		".......GV.......9999999999......" + // 0x20
 		"..b............o........x.../..." + // 0x40
 		"..b............o........x......." + // 0x60
 		"................................" + // 0x80
@@ -229,7 +230,8 @@ const (
 		"................................" + // 0xc0
 		"................................(" //  0xe0
 
-	quoteMarker = marker('q')
+	quoteMarker      = marker('q')
+	sharpQuoteMarker = marker('#')
 )
 
 // marker on stack indicating a vector and not a list.
@@ -241,13 +243,14 @@ var vectorMarker = Vector{}
 type Code []Object
 
 type reader struct {
-	tokenStart int
-	stack      []Object
-	starts     []int
-	line       int
-	lineStart  int
-	pos        int
-	newQuote   func(args List) Object
+	tokenStart    int
+	stack         []Object
+	starts        []int
+	line          int
+	lineStart     int
+	pos           int
+	newQuote      func(args List) Object
+	newSharpQuote func(args List) Object
 
 	code Code
 }
@@ -456,6 +459,9 @@ func (r *reader) read(src []byte) Code {
 
 		case singleQuote:
 			r.stack = append(r.stack, quoteMarker)
+		case sharpQuote:
+			r.stack = append(r.stack, sharpQuoteMarker)
+			mode = valueMode
 
 		default:
 			switch mode {
@@ -535,14 +541,25 @@ func (r *reader) closeList() {
 		} else {
 			obj = list
 		}
-		if 0 < start && r.stack[start-1] == quoteMarker {
-			if r.newQuote == nil {
-				r.newQuote = CLPkg.Funcs["quote"].Create
+		if 0 < start {
+			switch {
+			case r.stack[start-1] == quoteMarker:
+				if r.newQuote == nil {
+					r.newQuote = CLPkg.Funcs["quote"].Create
+				}
+				obj = r.newQuote(List{obj})
+				start--
+				r.stack[start] = nil
+				r.stack = r.stack[:start+1]
+			case r.stack[start-1] == sharpQuoteMarker:
+				if r.newSharpQuote == nil {
+					r.newSharpQuote = CLPkg.Funcs["function"].Create
+				}
+				obj = r.newSharpQuote(List{obj})
+				start--
+				r.stack[start] = nil
+				r.stack = r.stack[:start+1]
 			}
-			obj = r.newQuote(List{obj})
-			start--
-			r.stack[start] = nil
-			r.stack = r.stack[:start+1]
 		}
 	}
 	if 0 < start {
@@ -579,18 +596,33 @@ func (r *reader) pushToken(src []byte) {
 		obj = nil
 		goto Push
 	}
-	if 0 < len(r.stack) && r.stack[len(r.stack)-1] == quoteMarker {
-		if r.newQuote == nil {
-			r.newQuote = CLPkg.Funcs["quote"].Create
+	if 0 < len(r.stack) {
+		switch {
+		case r.stack[len(r.stack)-1] == quoteMarker:
+			if r.newQuote == nil {
+				r.newQuote = CLPkg.Funcs["quote"].Create
+			}
+			if len(r.stack) == 1 {
+				r.code = append(r.code, r.newQuote(List{Symbol(token)}))
+				r.stack[len(r.stack)-1] = nil
+				r.stack = r.stack[:0]
+			} else {
+				r.stack[len(r.stack)-1] = r.newQuote(List{Symbol(token)})
+			}
+			return
+		case r.stack[len(r.stack)-1] == sharpQuoteMarker:
+			if r.newSharpQuote == nil {
+				r.newSharpQuote = CLPkg.Funcs["function"].Create
+			}
+			if len(r.stack) == 1 {
+				r.code = append(r.code, r.newSharpQuote(List{Symbol(token)}))
+				r.stack[len(r.stack)-1] = nil
+				r.stack = r.stack[:0]
+			} else {
+				r.stack[len(r.stack)-1] = r.newSharpQuote(List{Symbol(token)})
+			}
+			return
 		}
-		if len(r.stack) == 1 {
-			r.code = append(r.code, r.newQuote(List{Symbol(token)}))
-			r.stack[len(r.stack)-1] = nil
-			r.stack = r.stack[:0]
-		} else {
-			r.stack[len(r.stack)-1] = r.newQuote(List{Symbol(token)})
-		}
-		return
 	}
 	switch token[0] {
 	case '@':

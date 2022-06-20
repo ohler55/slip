@@ -22,6 +22,17 @@ func TestPrincStream(t *testing.T) {
 	tt.Equal(t, "123", out.String())
 }
 
+func TestPrincStreamString(t *testing.T) {
+	var out strings.Builder
+	scope := slip.NewScope()
+
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+	result := slip.ReadString(`(princ "abc" out)`).Eval(scope)
+
+	tt.Equal(t, slip.String("abc"), result)
+	tt.Equal(t, "abc", out.String())
+}
+
 func TestPrincStdout(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()

@@ -7,9 +7,6 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - test coverage
- - #'
-  - test with %s
 
 - simple
  - separate package

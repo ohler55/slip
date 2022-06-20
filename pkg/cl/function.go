@@ -2,7 +2,12 @@
 
 package cl
 
-import "github.com/ohler55/slip"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/ohler55/slip"
+)
 
 func init() {
 	slip.Define(
@@ -40,9 +45,20 @@ func (f *Function) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	// TBD if symbol resolve to function
-	// if list starting with lambda then create function
-	return args[0]
+	switch ta := args[0].(type) {
+	case slip.Symbol:
+		return slip.FindFunc(string(ta))
+	case slip.List:
+		if 1 < len(ta) {
+			if sym, ok := ta[len(ta)-1].(slip.Symbol); ok {
+				if strings.EqualFold("lambda", string(sym)) {
+					lambdaDef := slip.ListToFunc(s, ta, depth+1)
+					return s.Eval(lambdaDef, depth).(*slip.Lambda)
+				}
+			}
+		}
+	}
+	panic(fmt.Sprintf("|%s| is not a function name or lambda", slip.ObjectString(args[0])))
 }
 
 // String representation of the Object.

@@ -49,3 +49,12 @@ func TestLambdaFuncEval(t *testing.T) {
 	tt.Equal(t, `/^\(#<function \(lambda \(x\)\) \{[0-9a-h]+\}> '\(1 2 3\)\)$/`, slip.ObjectString(code[0]))
 	tt.SameType(t, &slip.Dynamic{}, code[0])
 }
+
+func TestLambdaClosure(t *testing.T) {
+	result := slip.ReadString("(let ((x 3)) ((lambda () x)))").Eval(slip.NewScope())
+	tt.Equal(t, slip.Fixnum(3), result)
+}
+
+func TestLambdaBadArgCount(t *testing.T) {
+	tt.Panic(t, func() { _ = slip.ReadString("(lambda)").Eval(slip.NewScope()) })
+}

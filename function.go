@@ -52,6 +52,19 @@ func NewFunc(name string, args List, pkgs ...*Package) Object {
 	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
 }
 
+// FindFunc finds the FuncInfo for a provided name or panics if none exists.
+func FindFunc(name string, pkgs ...*Package) *FuncInfo {
+	name = strings.ToLower(name)
+	pkg := CurrentPackage
+	if 0 < len(pkgs) {
+		pkg = pkgs[0]
+	}
+	if fi := pkg.Funcs[name]; fi != nil {
+		return fi
+	}
+	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
+}
+
 // Eval the object.
 func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	beforeEval(s, f.Name, f.Args, depth)
@@ -102,6 +115,9 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 
 // Apply evaluates with the need to evaluate the args.
 func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
+
+	// TBD maybe not needed, use FuncInfo instead
+
 	beforeEval(s, f.Name, args, depth)
 	defer afterEval(s, f.Name, args, depth, &result)
 
