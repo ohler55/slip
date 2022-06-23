@@ -133,7 +133,7 @@ func (r *repl) process() {
 		r.scope.set(value2Key, r.value2)
 		r.scope.set(value3Key, r.value3)
 
-		fmt.Fprintf(StandardOutput.(io.Writer), "%s\n", r.value1)
+		fmt.Fprintf(StandardOutput.(io.Writer), "%s\n", ObjectString(r.value1))
 	}
 }
 

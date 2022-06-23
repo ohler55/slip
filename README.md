@@ -7,6 +7,13 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - add more functions
+ - (apropos string & optional package) => nil
+ - (apropos-list string & optional package) => symbols
+ - (describe object &optionsl stream) => nil
+
+ - macro
+  - expand on read
 
 - simple
  - separate package
@@ -41,7 +48,6 @@ SLIce Processing is LISP for golang
  - could replace args key lookups for lispcaller with an index to arg to avoid using maps
 
 - Code
- - #' - function (like quote)
  - #. is read time eval of object if *read-eval* is true else panic
 
 - use (type-of x) or (typep x 'long-float)
@@ -71,7 +77,7 @@ SLIce Processing is LISP for golang
    + set
    + setq
    + setf
-   - let
+   + let
    - describe
    - apropos
    - null

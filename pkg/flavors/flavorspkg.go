@@ -30,6 +30,9 @@ var (
 func init() {
 	slip.AddPackage(&FlavorsPkg)
 	slip.UserPkg.Use(&FlavorsPkg)
+	for _, vv := range FlavorsPkg.Vars {
+		vv.Pkg = &FlavorsPkg
+	}
 }
 
 func getAllFlavorNames() slip.Object {
