@@ -4,7 +4,6 @@ package cl
 
 import (
 	"fmt"
-	"io"
 	"sort"
 	"strings"
 
@@ -14,12 +13,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Apropos{Function: slip.Function{Name: "apropos", Args: args}}
+			f := AproposList{Function: slip.Function{Name: "apropos-list", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "apropos",
+			Name: "apropos-list",
 			Args: []*slip.DocArg{
 				{
 					Name: "string",
@@ -33,23 +32,23 @@ func init() {
 					Text: "A package to limit the search to.",
 				},
 			},
-			Return: "nil",
+			Return: "list",
 			Text: `Search all symbols for a symbols that contains the provided string or symbol.
 The matches are printed to *standard-output* along with the package they are from and what the
 symbol is associated with.`,
 			Examples: []string{
-				`(apropos "terpri") => nil ;; terpri (builtin) is written`,
+				`(aproposList "terpri") => (terpri)`,
 			},
 		}, &slip.CLPkg)
 }
 
-// Apropos represents the apropos function.
-type Apropos struct {
+// AproposList represents the aproposList function.
+type AproposList struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *AproposList) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
@@ -77,19 +76,19 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			panic(fmt.Sprintf("Package %s not found.", name))
 		}
 	}
-	var lines []string
+	var list slip.List
 	if pkg != nil {
-		for k, vv := range pkg.Vars {
+		for k := range pkg.Vars {
 			if !strings.Contains(k, pat) {
 				continue
 			}
-			lines = append(lines, f.formVarLine(k, vv))
+			list = append(list, slip.Symbol(k))
 		}
-		for k, fi := range pkg.Funcs {
+		for k := range pkg.Funcs {
 			if !strings.Contains(k, pat) {
 				continue
 			}
-			lines = append(lines, f.formFuncLine(k, fi))
+			list = append(list, slip.Symbol(k))
 		}
 	} else {
 		for _, pn := range slip.PackageNames() {
@@ -98,55 +97,17 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				if vv.Pkg != pkg || !strings.Contains(k, pat) {
 					continue
 				}
-				lines = append(lines, f.formVarLine(k, vv))
+				list = append(list, slip.Symbol(k))
 			}
 			for k, fi := range pkg.Funcs {
 				if fi.Pkg != pkg || !strings.Contains(k, pat) {
 					continue
 				}
-				lines = append(lines, f.formFuncLine(k, fi))
+				list = append(list, slip.Symbol(k))
 			}
 		}
 	}
-	sort.Strings(lines)
-	var w io.Writer = slip.StandardOutput.(io.Writer)
-	for _, line := range lines {
-		if _, err := w.Write(append([]byte(line), '\n')); err != nil {
-			panic(err)
-		}
-	}
-	return nil
-}
+	sort.Slice(list, func(i, j int) bool { return string(list[j].(slip.Symbol)) < string(list[i].(slip.Symbol)) })
 
-func (f *Apropos) formVarLine(k string, vv *slip.VarVal) string {
-	var line []byte
-	p := vv.Pkg
-	if p != &slip.CLPkg {
-		line = slip.Append(line, slip.Symbol(p.Name))
-		line = append(line, "::"...)
-	}
-	line = slip.Append(line, slip.Symbol(k))
-	line = append(line, " = "...)
-	line = slip.ObjectAppend(line, vv.Value())
-
-	return string(line)
-}
-
-func (f *Apropos) formFuncLine(k string, fi *slip.FuncInfo) string {
-	var line []byte
-	p := fi.Pkg
-	if p != &slip.CLPkg {
-		line = slip.Append(line, slip.Symbol(p.Name))
-		line = append(line, "::"...)
-	}
-	line = slip.Append(line, slip.Symbol(k))
-	line = append(line, " ("...)
-	if fi.BuiltIn {
-		line = append(line, " (built-in)"...)
-	} else {
-		line = append(line, " (lambda)"...)
-	}
-	line = append(line, ')')
-
-	return string(line)
+	return list
 }

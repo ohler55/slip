@@ -34,10 +34,10 @@ type Package struct {
 	Uses      []*Package
 	Users     []*Package
 
-	// Lambdas is a map of all Lambdas defined with either a call to defun
-	// or implicitly by referencing a function not yet defined. In that case the
-	// caller in the map will have Forms list of length 1 and the single form will
-	// an Object that evaluates to an undefined function panic.
+	// Lambdas is a map of all Lambdas defined with either a call to defun or
+	// implicitly by referencing a function not yet defined. In that case the
+	// caller in the map will have Forms list of length 1 and the single form
+	// will have an Object that evaluates to an undefined function panic.
 	Lambdas map[string]*Lambda
 	Funcs   map[string]*FuncInfo
 	Locked  bool
@@ -168,10 +168,11 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 		Warning("redefining %s", printer.caseName(name))
 	}
 	fi := FuncInfo{
-		Name:   name,
-		Create: creator,
-		Doc:    doc,
-		Pkg:    obj,
+		Name:    name,
+		Create:  creator,
+		Doc:     doc,
+		Pkg:     obj,
+		BuiltIn: true,
 	}
 	obj.Funcs[name] = &fi
 	for _, pkg := range obj.Users {

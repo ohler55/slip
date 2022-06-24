@@ -6,10 +6,11 @@ import "github.com/ohler55/ojg/alt"
 
 // FuncInfo stores information about a function.
 type FuncInfo struct {
-	Name   string
-	Create func(args List) Object
-	Doc    *FuncDoc
-	Pkg    *Package // package interned in
+	Name    string
+	Create  func(args List) Object
+	Doc     *FuncDoc
+	Pkg     *Package // package interned in
+	BuiltIn bool
 }
 
 // String representation of the Object.
