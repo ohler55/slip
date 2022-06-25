@@ -35,7 +35,7 @@ func TestVanilla(t *testing.T) {
 	methods := slip.ReadString("(send berry :which-operations)").Eval(scope)
 	tt.Equal(t,
 		"(:describe :eval-inside-yourself :id :init :operation-handler-p :print-self "+
-			":send-if-handles :set-size :size\n           :which-operations)\n",
+			":send-if-handles :set-size :size\n           :which-operations)",
 		methods.String())
 
 	pr, pw, err := os.Pipe()

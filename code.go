@@ -845,11 +845,12 @@ func (c Code) String() string {
 		// is only expected to be used for debugging.
 		b = b[:0]
 		b = append(b, '[')
-		for i, obj := range c {
-			if 0 < i {
-				b = append(b, "\n "...)
-			}
+		for _, obj := range c {
+			b = append(b, "\n "...)
 			b = ObjectAppend(b, obj)
+		}
+		if 0 < len(c) {
+			b = append(b, '\n')
 		}
 		b = append(b, ']')
 	}

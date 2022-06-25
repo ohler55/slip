@@ -312,8 +312,7 @@ func TestPrintLines(t *testing.T) {
      (5
       (6
        (7
-        ()))))))))
-`, string(out))
+        ()))))))))`, string(out))
 
 	slip.SetVar(key, slip.Fixnum(6))
 	val, _ = slip.GetVar(key)
@@ -325,8 +324,7 @@ func TestPrintLines(t *testing.T) {
   (2
    (3
     (4
-     (5 ..))))))
-`, string(out))
+     (5 ..))))))`, string(out))
 
 	doc := slip.DescribeVar(key)
 	tt.NotEqual(t, "", doc)
@@ -417,8 +415,7 @@ func TestPrintPretty(t *testing.T) {
 	expect := `(0 1 (0) 2 (0 1 (0))
    3
    (0 1 (0) 2
-      (0 1 (0))))
-`
+      (0 1 (0))))`
 	tt.Equal(t, expect, string(out))
 	// flat
 	slip.SetVar(key, nil)

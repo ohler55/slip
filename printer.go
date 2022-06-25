@@ -399,9 +399,11 @@ Top:
 			panic(fmt.Sprintf("%s can not be written readably", to))
 		}
 	}
+	/* TBD
 	if bytes.ContainsRune(b, '\n') {
 		b = append(b, '\n')
 	}
+	*/
 	return b
 }
 

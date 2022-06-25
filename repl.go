@@ -117,6 +117,8 @@ func (r *repl) process() {
 	r.read()
 	code := Read(r.buf)
 	for _, obj := range code {
+		var skipWrite bool
+
 		r.form3 = r.form2
 		r.form2 = r.form1
 		r.form1 = obj
@@ -124,6 +126,10 @@ func (r *repl) process() {
 		r.value3 = r.value2
 		r.value2 = r.value1
 		r.value1 = obj.Eval(r.scope, 0)
+		if r.value1 == Novalue {
+			r.value1 = nil
+			skipWrite = true
+		}
 
 		r.scope.set(form1Key, r.form1)
 		r.scope.set(form2Key, r.form2)
@@ -133,7 +139,9 @@ func (r *repl) process() {
 		r.scope.set(value2Key, r.value2)
 		r.scope.set(value3Key, r.value3)
 
-		fmt.Fprintf(StandardOutput.(io.Writer), "%s\n", ObjectString(r.value1))
+		if !skipWrite {
+			fmt.Fprintf(StandardOutput.(io.Writer), "%s\n", ObjectString(r.value1))
+		}
 	}
 }
 

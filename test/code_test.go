@@ -128,8 +128,7 @@ func TestCodeSymbolPipe(t *testing.T) {
 		{src: `|abc|`, expect: `[abc]`, kind: "symbol"},
 		{src: `||`, expect: `[||]`, kind: "symbol"},
 		{src: `|a\nb|`, expect: `[|a
-b|
-]`, kind: "symbol"},
+b|]`, kind: "symbol"},
 		{src: `|\u004a\U0001D122|`, expect: `[j𝄢]`, kind: "symbol"},
 		{src: `(|abc|)`, expect: `[(abc)]`, kind: "list"},
 		{src: `|abc`, raise: true},
@@ -243,7 +242,7 @@ func TestCodeArray(t *testing.T) {
 func TestCodeStringer(t *testing.T) {
 	code := slip.Code{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil}
-	tt.Equal(t, `[nil
+	tt.Equal(t, `[
  nil
  nil
  nil
@@ -274,5 +273,7 @@ func TestCodeStringer(t *testing.T) {
  nil
  nil
  nil
- nil]`, code.String())
+ nil
+ nil
+]`, code.String())
 }
