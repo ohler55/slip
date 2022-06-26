@@ -145,10 +145,12 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	f.processOptions(nf, args[:pos])
 	if !nf.abstract {
 		f.addIncludes(nf)
-		f.validateFlavor(nf)
 	}
 	if !nf.noVanilla {
 		nf.inheritFlavor(&vanilla)
+	}
+	if !nf.abstract {
+		f.validateFlavor(nf)
 	}
 	allFlavors[nf.name] = nf
 	FlavorsPkg.Set(string(name), nf)
@@ -300,11 +302,19 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":included-flavors":
 			nf.included = f.valsStringList(vals)
 		case ":initable-instance-variables", ":inittable-instance-variables":
-			for i := len(vals) - 1; 0 <= i; i-- {
-				if sym, ok := vals[i].(slip.Symbol); ok {
-					nf.initable[":"+string(sym)] = true
-				} else {
-					panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+			if 0 < len(vals) {
+				for i := len(vals) - 1; 0 <= i; i-- {
+					if sym, ok := vals[i].(slip.Symbol); ok {
+						nf.initable[":"+string(sym)] = true
+					} else {
+						panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+					}
+				}
+			} else {
+				for k := range nf.defaultVars {
+					if k != "self" {
+						nf.initable[":"+k] = true
+					}
 				}
 			}
 		case ":init-keywords":

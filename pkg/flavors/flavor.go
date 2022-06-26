@@ -211,3 +211,114 @@ func (obj *Flavor) makeInstance() *Instance {
 
 	return &inst
 }
+
+// Describe the instance in detail.
+func (obj *Flavor) Describe(b []byte, indent, right int, ansi bool) []byte {
+	b = append(b, indentSpaces[:indent]...)
+	if ansi {
+		b = append(b, bold...)
+		b = append(b, obj.name...)
+		b = append(b, colorOff...)
+	} else {
+		b = append(b, obj.name...)
+	}
+	if obj.abstract {
+		b = append(b, " is an abstract flavor:\n"...)
+	} else {
+		b = append(b, " is a flavor:\n"...)
+	}
+	i2 := indent + 2
+	i3 := indent + 4
+	if 0 < len(obj.docs) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Description:\n"...)
+		b = slip.AppendDoc(b, obj.docs, i3, right, ansi)
+		b = append(b, '\n')
+	}
+	if 0 < len(obj.inherit) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Inherits:"...)
+		for _, f := range obj.inherit {
+			b = append(b, ' ')
+			b = append(b, f.name...)
+		}
+		b = append(b, '\n')
+	}
+	if 1 < len(obj.defaultVars) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Variables:\n"...)
+		var keys []string
+		for k := range obj.defaultVars {
+			if k == "self" {
+				continue
+			}
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			b = append(b, indentSpaces[:i3]...)
+			b = append(b, k...)
+			b = append(b, " = "...)
+			b = slip.Append(b, obj.defaultVars[k])
+			if obj.initable[":"+k] {
+				b = append(b, " (initable)"...)
+			}
+			b = append(b, '\n')
+		}
+	}
+	if 0 < len(obj.keywords) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Keywords with default values:\n"...)
+		var keys []string
+		for k := range obj.keywords {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			b = append(b, indentSpaces[:i3]...)
+			b = append(b, k...)
+			b = append(b, " = "...)
+			b = slip.Append(b, obj.keywords[k])
+			b = append(b, '\n')
+		}
+	}
+	if obj.allowOtherKeys {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Allow Other Keywords: true\n"...)
+	}
+	if 0 < len(obj.methods) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Methods:\n"...)
+		var keys []string
+		for k := range obj.methods {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			b = append(b, indentSpaces[:i3]...)
+			b = append(b, k...)
+			b = append(b, '\n')
+		}
+	}
+	b = obj.describeStrings(b, "Included Flavors", obj.included, indent, right)
+	b = obj.describeStrings(b, "Required Flavors", obj.required, indent, right)
+	b = obj.describeStrings(b, "Required Variable", obj.requiredVars, indent, right)
+	b = obj.describeStrings(b, "Required Methods", obj.requiredMethods, indent, right)
+	b = obj.describeStrings(b, "Required Keywords", obj.requiredKeywords, indent, right)
+
+	return b
+}
+
+func (obj *Flavor) describeStrings(b []byte, label string, list []string, indent, right int) []byte {
+	if 0 < len(list) {
+		b = append(b, indentSpaces[:indent+2]...)
+		b = append(b, label...)
+		b = append(b, ":\n"...)
+		for _, s := range list {
+			b = append(b, indentSpaces[:indent+4]...)
+			b = append(b, s...)
+			b = append(b, '\n')
+		}
+	}
+	return b
+}
