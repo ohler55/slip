@@ -57,9 +57,10 @@ variables can be provided an initial value. (also spelled :inittable-instance-va
 				},
 			},
 			Return: "object",
-			Text:   `defines a flavor with the given _name_ in the current package.`,
+			Text:   `__defflavor__ defines a flavor with the given _name_ in the current package.`,
 			Examples: []string{
 				"(defflavor strawberry (temperature) ()) => #<flavor strawberry>",
+				"(defflavor blueberry ((temperature -7)) ()) => #<flavor blueberry>",
 			},
 		}, &FlavorsPkg)
 }

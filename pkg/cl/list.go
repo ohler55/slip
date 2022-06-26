@@ -18,7 +18,7 @@ func init() {
 				{Name: "objects", Type: "object"},
 			},
 			Return: "list",
-			Text:   `returns a _list_ of all the _objects_.`,
+			Text:   `__list__ returns a _list_ of all the _objects_.`,
 			Examples: []string{
 				"(list) => ()",
 				"(list a b) => (a b)",

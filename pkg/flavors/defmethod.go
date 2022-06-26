@@ -36,7 +36,7 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text:   `defines a method for a flavor.`,
+			Text:   `__defmethod__ defines a method for a flavor.`,
 			Examples: []string{
 				"(defflavor strawberry (size) ()) => #<flavor strawberry>",
 				`(defmethod (strawberry :before :size) () (format t "getting size"))  => nil`,

@@ -34,11 +34,11 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text: `Search all symbols for a symbols that contains the provided string or symbol.
-The matches are printed to *standard-output* along with the package they are from and what the
+			Text: `Return all symbols that contain the provided _string_.
+The matches are printed to _*standard-output*_ along with the package they are from and what the
 symbol is associated with.`,
 			Examples: []string{
-				`(apropos "terpri") => nil ;; terpri (builtin) is written`,
+				`(apropos "terpri") => nil ;; terpri (built-in) is written`,
 			},
 		}, &slip.CLPkg)
 }
@@ -115,7 +115,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			panic(err)
 		}
 	}
-	return nil
+	return slip.Novalue
 }
 
 func (f *Apropos) formVarLine(k string, vv *slip.VarVal) string {
@@ -140,13 +140,10 @@ func (f *Apropos) formFuncLine(k string, fi *slip.FuncInfo) string {
 		line = append(line, "::"...)
 	}
 	line = slip.Append(line, slip.Symbol(k))
-	line = append(line, " ("...)
 	if fi.BuiltIn {
 		line = append(line, " (built-in)"...)
 	} else {
 		line = append(line, " (lambda)"...)
 	}
-	line = append(line, ')')
-
 	return string(line)
 }

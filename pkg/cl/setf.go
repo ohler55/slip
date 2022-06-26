@@ -30,7 +30,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `the value of the _symbol_ to _value_. Note that _symbol_ is not evaluated.
+			Text: `__setf__ the value of the _symbol_ to _value_. Note that _symbol_ is not evaluated.
 Repeated pairs of _symbol_ and _value_ are supported`,
 			Examples: []string{
 				"(setf) => nil",

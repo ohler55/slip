@@ -36,7 +36,7 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text:   `defines a whopper for a flavor method.`,
+			Text:   `__defwhopper__ defines a whopper for a flavor method.`,
 			Examples: []string{
 				"(defflavor strawberry (size) ()) => #<flavor strawberry>",
 				`(defwhopper (strawberry :size) () (format t "getting size") (continue-whopper))  => nil`,

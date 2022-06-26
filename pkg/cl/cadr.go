@@ -21,7 +21,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `returns the _cadr_ if _arg_ is a _cons_, the second element if _arg_ is a _list_, and
+			Text: `__cadr__ returns (car (cdr arg)) if _arg_ is a _cons_, the second element if _arg_ is a _list_, and
 _nil_ if _arg_ is _nil_ or an empty _list_.`,
 			Examples: []string{
 				"(cadr nil) => nil",

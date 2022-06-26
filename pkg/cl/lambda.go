@@ -38,7 +38,7 @@ one or more values follow.`,
 				},
 			},
 			Return: "object",
-			Text:   `defines a function with the given _name_ in the current package.`,
+			Text:   `__lambda__ defines a function in the current package.`,
 			Examples: []string{
 				"(lambda () nil) => (lambda () nil)",
 			},

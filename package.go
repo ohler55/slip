@@ -269,3 +269,107 @@ func FindPackage(name string) *Package {
 	}
 	return nil
 }
+
+// Describe the instance in detail.
+func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
+	b = append(b, indentSpaces[:indent]...)
+	b = append(b, "Name: "...)
+	b = append(b, obj.Name...)
+	b = append(b, '\n')
+
+	b = append(b, indentSpaces[:indent]...)
+	b = append(b, "Nicknames: ("...)
+	for _, name := range obj.Nicknames {
+		b = Append(b, Symbol(name))
+		b = append(b, ' ')
+	}
+	b[len(b)-1] = ')'
+	b = append(b, '\n')
+
+	b = append(b, indentSpaces[:indent]...)
+	b = append(b, "Description:\n"...)
+	b = AppendDoc(b, obj.Doc, indent+2, right, ansi)
+	b = append(b, '\n')
+
+	if 0 < len(obj.Imports) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Imports:\n"...)
+		for _, imp := range obj.Imports {
+			b = append(b, indentSpaces[:indent+2]...)
+			b = append(b, imp.Name...)
+			b = append(b, " from "...)
+			b = append(b, imp.Pkg.Name...)
+			b = append(b, '\n')
+		}
+	}
+	if 0 < len(obj.Uses) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Uses:\n"...)
+		for _, p := range obj.Uses {
+			b = append(b, indentSpaces[:indent+2]...)
+			b = append(b, p.Name...)
+			b = append(b, '\n')
+		}
+	}
+	if 0 < len(obj.Users) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Used By:\n"...)
+		for _, p := range obj.Users {
+			b = append(b, indentSpaces[:indent+2]...)
+			b = append(b, p.Name...)
+			b = append(b, '\n')
+		}
+	}
+	var keys []string
+	for k, vv := range obj.Vars {
+		if obj != vv.Pkg {
+			continue
+		}
+		keys = append(keys, k)
+	}
+	if 0 < len(keys) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Variables:\n"...)
+		sort.Strings(keys)
+		for _, k := range keys {
+			vv := obj.Vars[k]
+			b = append(b, indentSpaces[:indent+2]...)
+			b = append(b, k...)
+			b = append(b, " = "...)
+			b = Append(b, vv.Value())
+			b = append(b, '\n')
+		}
+	}
+	var names []string
+	max := 0
+	for k, fi := range obj.Funcs {
+		if obj != fi.Pkg {
+			continue
+		}
+		names = append(names, k)
+		if max < len(k) {
+			max = len(k)
+		}
+	}
+	if 0 < len(names) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Functions:\n"...)
+		sort.Strings(names)
+		cols := (right - indent - 2) / (max + 1)
+		col := 0
+		for _, k := range names {
+			if col == 0 {
+				b = append(b, indentSpaces[:indent+2]...)
+			}
+			col++
+			b = append(b, k...)
+			if cols < col {
+				b = append(b, '\n')
+				col = 0
+			} else {
+				b = append(b, indentSpaces[:max-len(k)+1]...)
+			}
+		}
+	}
+	return append(b, '\n')
+}

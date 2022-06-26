@@ -25,8 +25,8 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `removes the _flavor_ and all flavors that inherit the _flavor_. Instances of the removed
-flavors are still valid but no new instance can be created.`,
+			Text: `__undeffalvor__ removes the _flavor_ and all flavors that inherit the _flavor_.
+Instances of the removed flavors are still valid but no new instance can be created.`,
 			Examples: []string{
 				"(undefflavor 'strawberry) => nil",
 			},

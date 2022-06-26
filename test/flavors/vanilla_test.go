@@ -40,9 +40,12 @@ func TestVanilla(t *testing.T) {
 
 	pr, pw, err := os.Pipe()
 	tt.Nil(t, err)
+	ansi := scope.Get("*print-ansi*")
 	orig := slip.StandardOutput
 	slip.StandardOutput = (*slip.FileStream)(pw)
-	defer func() { _ = pw.Close(); _ = pr.Close(); slip.StandardOutput = orig }()
+	defer func() { _ = pw.Close(); _ = pr.Close(); slip.StandardOutput = orig; scope.Set("*print-ansi*", ansi) }()
+
+	scope.Set("*print-ansi*", nil)
 
 	_ = slip.ReadString("(send berry :describe)").Eval(scope)
 
@@ -50,7 +53,7 @@ func TestVanilla(t *testing.T) {
 	var out []byte
 	out, err = ioutil.ReadAll(pr)
 	tt.Nil(t, err)
-	tt.Equal(t, `/#<strawberry [0-9a-f]+>, an object of flavor strawberry,
+	tt.Equal(t, `/#<strawberry [0-9a-f]+>, an instance of flavor strawberry,
   has instance variable values:
     size: "medium"
 /`, string(out))

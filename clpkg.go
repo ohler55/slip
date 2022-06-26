@@ -167,6 +167,7 @@ func init() {
 	for _, vv := range CLPkg.Vars {
 		vv.Pkg = &CLPkg
 	}
+	CLPkg.Set("*common-lisp*", &CLPkg)
 }
 
 func getCurrentPackage() Object {

@@ -33,9 +33,7 @@ func init() {
 				},
 			},
 			Return: "list",
-			Text: `Search all symbols for a symbols that contains the provided string or symbol.
-The matches are printed to *standard-output* along with the package they are from and what the
-symbol is associated with.`,
+			Text:   `Return all symbols that contain the provided _string_ and returns the matchs in a list.`,
 			Examples: []string{
 				`(aproposList "terpri") => (terpri)`,
 			},

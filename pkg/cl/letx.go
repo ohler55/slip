@@ -29,8 +29,8 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `binds the binding variables and then evaluates the forms in order with a closure that includes
-the bindings. All bindings are performed in sequence unlike _let_.`,
+			Text: `__let*__ binds the binding variables and then evaluates the forms in order with
+a closure that includes the bindings. All bindings are performed in sequence unlike __let__.`,
 			Examples: []string{
 				"(let* ()) => nil",
 				"(let* ((x 1) (y x)) (list x y)) => (1 1)",

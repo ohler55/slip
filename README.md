@@ -7,16 +7,13 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - is an no-value object needed
-  - return from describe and some others indicates don't print in repl
- - when ansi use triangle prompt
-
+ - tests for apropos and describe
  - add more functions
- - (describe object &optional stream) => nil
-  - synbol
-  - basic type like string, fixnum, etc
-  - flavors.Instance
-  - function
+  - type-of
+  - typep
+  - null
+  - atom
+  - ...
 
  - macro
   - expand on read
@@ -84,8 +81,8 @@ SLIce Processing is LISP for golang
    + setq
    + setf
    + let
-   - describe
-   - apropos
+   + describe
+   + apropos
    - null
    - atom
    - eq

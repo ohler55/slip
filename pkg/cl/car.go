@@ -21,7 +21,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `returns the _car_ if _arg_ is a _cons_, the first element if _arg_ is a _list_, and
+			Text: `__car__ returns the _car_ if _arg_ is a _cons_, the first element if _arg_ is a _list_, and
 _nil_ if _arg_ is _nil_ or an empty _list_.`,
 			Examples: []string{
 				"(car nil) => nil",

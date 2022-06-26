@@ -18,8 +18,8 @@ func init() {
 				{Name: "objects", Type: "object"},
 			},
 			Return: "values",
-			Text: `returns a multi-value object of all the _objects_. Use only as a return value for functions that
-return multiple values.`,
+			Text: `__values__ returns a multi-value object of all the _objects_.
+Use only as a return value for functions that return multiple values.`,
 			Examples: []string{
 				"(values a b) => a, b",
 			},

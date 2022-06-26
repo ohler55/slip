@@ -26,7 +26,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `writes a string representation of the _object_ to the provided _output-stream_.
+			Text: `__terpri__ writes a string representation of the _object_ to the provided _output-stream_.
 If the _output-stream_ is not provided then the _*standard-output*_ is used. The _object_ is returned.`,
 			Examples: []string{
 				"(terpri) => nil ;; a newline is written",

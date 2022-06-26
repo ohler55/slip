@@ -3,6 +3,7 @@
 package flavors
 
 import (
+	"sort"
 	"strconv"
 	"unsafe"
 
@@ -106,4 +107,49 @@ func (obj *Instance) sendInner(ma []*method, args slip.List, depth int) slip.Obj
 		}
 	}
 	return result
+}
+
+const (
+	bold         = "\x1b[1m"
+	colorOff     = "\x1b[m"
+	indentSpaces = "                                                                                "
+)
+
+// Describe the instance in detail.
+func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
+	b = append(b, indentSpaces[:indent]...)
+	if ansi {
+		b = append(b, bold...)
+		b = obj.Append(b)
+		b = append(b, colorOff...)
+	} else {
+		b = obj.Append(b)
+	}
+	b = append(b, ", an instance of flavor "...)
+	if ansi {
+		b = append(b, bold...)
+		b = append(b, obj.flavor.name...)
+		b = append(b, colorOff...)
+	} else {
+		b = append(b, obj.flavor.name...)
+	}
+	b = append(b, ",\n"...)
+
+	b = append(b, indentSpaces[:indent]...)
+	b = append(b, "  has instance variable values:\n"...)
+	keys := make([]string, 0, len(obj.Vars))
+	for k := range obj.Vars {
+		if k != "self" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		b = append(b, indentSpaces[:indent+4]...)
+		b = append(b, k...)
+		b = append(b, ": "...)
+		b = slip.ObjectAppend(b, obj.Vars[k])
+		b = append(b, '\n')
+	}
+	return b
 }

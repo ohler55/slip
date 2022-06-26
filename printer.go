@@ -15,6 +15,11 @@ import (
 )
 
 const (
+	bold         = "\x1b[1m"
+	underline    = "\x1b[4m"
+	colorOff     = "\x1b[m"
+	indentSpaces = "                                                                                "
+
 	upcaseKey     = Symbol(":upcase")
 	downcaseKey   = Symbol(":downcase")
 	capitalizeKey = Symbol(":capitalize")
@@ -808,4 +813,88 @@ func Warning(format string, args ...interface{}) {
 		b = append(b, '\n')
 		_, _ = ErrorOutput.(io.Writer).Write(b)
 	}
+}
+
+// AppendDoc appends text after formatting and converting _ and __ either to
+// ANSI underline and bold or is not ANSI removing them.
+func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
+	var (
+		lastSpace int
+		spaceCol  int
+		col       = indent
+		emp       int
+		fs        bool // font style active
+		ret       bool
+	)
+	b = append(b, indentSpaces[:indent]...)
+	for _, c := range []byte(text) {
+		if c == '_' {
+			if ansi {
+				emp++
+			}
+			continue
+		}
+		if 0 < emp {
+			if fs {
+				b = append(b, colorOff...)
+				fs = false
+			} else {
+				if emp == 1 {
+					b = append(b, underline...)
+				} else {
+					b = append(b, bold...)
+				}
+				fs = true
+			}
+			emp = 0
+		}
+		switch c {
+		case ' ':
+			if ret {
+				b = append(b, '\n')
+				b = append(b, indentSpaces[:indent]...)
+				lastSpace = 0
+				spaceCol = indent
+				col = indent
+				ret = false
+			} else {
+				lastSpace = len(b)
+				spaceCol = col
+				col++
+				b = append(b, ' ')
+			}
+		case '\n':
+			if ret {
+				b = append(b, '\n')
+				b = append(b, indentSpaces[:indent]...)
+				lastSpace = 0
+				spaceCol = indent
+				col = indent
+			} else {
+				lastSpace = len(b)
+				spaceCol = col
+				b = append(b, ' ')
+				col++
+				ret = true
+			}
+		default:
+			ret = false
+			b = append(b, c)
+			col++
+		}
+		if right < col && 0 < lastSpace {
+			// Append indent to the end just as a way to expand b.
+			b = append(b, indentSpaces[:indent]...)
+			copy(b[lastSpace+1+indent:], b[lastSpace+1:])
+			copy(b[lastSpace+1:], indentSpaces[:indent])
+			b[lastSpace] = '\n'
+			col = indent + col - spaceCol
+			lastSpace = 0
+			spaceCol = 0
+		}
+	}
+	if 0 < emp {
+		b = append(b, colorOff...)
+	}
+	return b
 }

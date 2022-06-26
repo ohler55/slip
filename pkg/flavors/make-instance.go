@@ -28,12 +28,13 @@ func init() {
 				{
 					Name: "options",
 					Type: "object",
-					Text: `The remaining arguments must be pairs of an init-option and value. An init-value can be
-the variable name prefixed with a colon or a plist option.`,
+					Text: `The remaining arguments must be pairs of an init-option and value.
+An init-value can be the variable name prefixed with a colon or a plist option.`,
 				},
 			},
 			Return: "instance",
-			Text:   `of _flavor_ with the provided variable values and plist options.`,
+			Text: `__make-instance__ makes an instance of _flavor_ with the provided
+variable values and plist options.`,
 			Examples: []string{
 				"(make-instance 'strawberry :color 'red) => #<strawberry 123456>",
 			},

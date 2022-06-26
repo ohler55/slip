@@ -29,8 +29,8 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `binds the binding variables and then evaluates the forms in order with a closure that includes
-the bindings. All bindings are performed in parallel unlike _let*_.`,
+			Text: `__let__ binds the binding variables and then evaluates the forms in order with
+a closure that includes the bindings. All bindings are performed in parallel unlike __let*__.`,
 			Examples: []string{
 				"(let ()) => nil",
 				"(let ((x 1) y) (list x y)) => (1 nil)",

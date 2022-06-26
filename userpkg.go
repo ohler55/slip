@@ -17,4 +17,5 @@ var (
 
 func init() {
 	UserPkg.Use(&CLPkg)
+	UserPkg.Set("*common-lisp-user*", &UserPkg)
 }

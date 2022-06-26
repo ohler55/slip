@@ -46,24 +46,9 @@ type describeCaller bool
 
 func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
-	b := obj.Append([]byte{})
-	b = append(b, ", an object of flavor "...)
-	b = append(b, obj.flavor.name...)
-	b = append(b, ",\n  has instance variable values:\n"...)
-	keys := make([]string, 0, len(obj.Vars))
-	for k := range obj.Vars {
-		if k != "self" {
-			keys = append(keys, k)
-		}
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		b = append(b, "    "...)
-		b = append(b, k...)
-		b = append(b, ": "...)
-		b = slip.ObjectAppend(b, obj.Vars[k])
-		b = append(b, '\n')
-	}
+	ansi := s.Get("*print-ansi*") != nil
+	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
+	b := obj.Describe([]byte{}, 0, right, ansi)
 	_, _ = slip.StandardOutput.(io.Writer).Write(b)
 
 	return nil

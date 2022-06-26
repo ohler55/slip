@@ -8,8 +8,6 @@ import (
 	"strconv"
 )
 
-const indentSpaces = "                                                                                "
-
 var beforeEval = noopBefore
 var afterEval = normalAfter
 

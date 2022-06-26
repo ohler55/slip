@@ -34,7 +34,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text:   `a message to an object.`,
+			Text:   `__send__ a _message_ to an _object_.`,
 			Examples: []string{
 				"(setq fruit (make-instance 'strawberry :color 'red)) => #<strawberry 123456>",
 				"(send fruit :color) => red",

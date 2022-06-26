@@ -33,6 +33,7 @@ func init() {
 	for _, vv := range FlavorsPkg.Vars {
 		vv.Pkg = &FlavorsPkg
 	}
+	FlavorsPkg.Set("*flavors*", &FlavorsPkg)
 }
 
 func getAllFlavorNames() slip.Object {

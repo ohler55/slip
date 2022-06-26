@@ -26,7 +26,7 @@ func init() {
 				},
 			},
 			Return: "function",
-			Text:   `returns the function bound to _name_ or the evaluated lambda expression.`,
+			Text:   `__function__ returns the function bound to _name_ or the evaluated lambda expression.`,
 			Examples: []string{
 				"(function car) => #<FUNCTION CAR>",
 				"#'car => #<FUNCTION CAR>",

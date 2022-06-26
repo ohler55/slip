@@ -24,7 +24,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text:   `continues with the rest of the daemon methods.`,
+			Text:   `__continue-whopper__ continues with the rest of the daemon methods using the arguments provided.`,
 			Examples: []string{
 				"(defwhopper (blueberry :rot) () (continue-whopper))",
 			},

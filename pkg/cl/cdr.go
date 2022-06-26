@@ -21,7 +21,7 @@ func init() {
 				},
 			},
 			Return: "list|object",
-			Text: `returns the _cdr_ if _arg_ is a _cons_, all but the first element if _arg_ is a _list_, and
+			Text: `__cdr__ returns the _cdr_ if _arg_ is a _cons_, all but the first element if _arg_ is a _list_, and
 _nil_ if _arg_ is _nil_ or an empty _list_.`,
 			Examples: []string{
 				"(cdr nil) => nil",

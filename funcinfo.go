@@ -55,3 +55,72 @@ func (obj *FuncInfo) Eval(s *Scope, depth int) Object {
 func (obj *FuncInfo) Apply(s *Scope, args List, depth int) (result Object) {
 	return obj.Create(args).Eval(s, depth)
 }
+
+// Describe the instance in detail.
+func (obj *FuncInfo) Describe(b []byte, indent, right int, ansi bool) []byte {
+	b = append(b, indentSpaces[:indent]...)
+	b = append(b, "Lambda-List: ("...)
+	for i, da := range obj.Doc.Args {
+		if 0 < i {
+			b = append(b, ' ')
+		}
+		if da.Default == nil {
+			b = append(b, da.Name...)
+		} else {
+			b = append(b, '(')
+			b = append(b, da.Name...)
+			b = append(b, ' ')
+			b = Append(b, da.Default)
+			b = append(b, ')')
+		}
+	}
+	b = append(b, ")\n"...)
+
+	if 0 < len(obj.Doc.Return) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Return: "...)
+		b = append(b, obj.Doc.Return...)
+		b = append(b, '\n')
+	}
+	if 0 < len(obj.Doc.Text) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Description:\n"...)
+		b = AppendDoc(b, obj.Doc.Text, indent+2, right, ansi)
+		b = append(b, '\n')
+		if 0 < len(obj.Doc.Args) {
+			b = append(b, indentSpaces[:indent]...)
+			b = append(b, "Arguments:\n"...)
+		}
+		for _, da := range obj.Doc.Args {
+			if da.Name[0] == '&' {
+				continue
+			}
+			b = append(b, indentSpaces[:indent+2]...)
+			if ansi {
+				b = append(b, underline...)
+				b = append(b, da.Name...)
+				b = append(b, colorOff...)
+			} else {
+				b = append(b, da.Name...)
+			}
+			b = append(b, ": "...)
+			b = append(b, da.Type...)
+			if 0 < len(da.Text) {
+				b = append(b, '\n')
+				b = AppendDoc(b, da.Text, indent+4, right, ansi)
+			}
+			b = append(b, '\n')
+		}
+	}
+	if 0 < len(obj.Doc.Examples) {
+		b = append(b, '\n')
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Examples:\n"...)
+		for _, ex := range obj.Doc.Examples {
+			b = append(b, indentSpaces[:indent+2]...)
+			b = append(b, ex...)
+			b = append(b, '\n')
+		}
+	}
+	return append(b, '\n')
+}

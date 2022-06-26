@@ -18,8 +18,6 @@ const (
 	value1Key   = "/"
 	value2Key   = "//"
 	value3Key   = "///"
-	bold        = "\x1b[1m"
-	colorOff    = "\x1b[m"
 )
 
 type repl struct {
@@ -45,13 +43,14 @@ func REPL(scope ...*Scope) {
 	} else {
 		r.scope = NewScope()
 	}
-	r.scope.Let(Symbol(p1Key), String("* "))
 	if printer.ANSI {
 		r.scope.Let(Symbol(p1ANSIKey), String(bold))
 		r.scope.Let(Symbol(warnANSIKey), String("\x1b[31m"))
+		r.scope.Let(Symbol(p1Key), String("\x1b[1;94m▶ \x1b[m"))
 	} else {
 		r.scope.Let(Symbol(p1ANSIKey), nil)
 		r.scope.Let(Symbol(warnANSIKey), nil)
+		r.scope.Let(Symbol(p1Key), String("* "))
 	}
 	r.scope.Let(Symbol(form1Key), nil)
 	r.scope.Let(Symbol(form2Key), nil)

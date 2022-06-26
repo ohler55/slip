@@ -26,7 +26,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text:   `the value of the _symbol_ to _value_.`,
+			Text:   `__set__ the value of the _symbol_ to _value_.`,
 			Examples: []string{
 				"(set 'x 7) => 7",
 			},

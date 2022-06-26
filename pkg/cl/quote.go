@@ -21,7 +21,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text:   `returns _value_ without evaluating it.`,
+			Text:   `__quote__ returns _value_ without evaluating it.`,
 			Examples: []string{
 				"(quote nil) => nil",
 				"(quote (a . b)) => (a . b)",
