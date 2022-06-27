@@ -244,7 +244,7 @@ func (obj *Flavor) Describe(b []byte, indent, right int, ansi bool) []byte {
 		}
 		b = append(b, '\n')
 	}
-	if 1 < len(obj.defaultVars) {
+	if 0 < len(obj.defaultVars) {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "Variables:\n"...)
 		var keys []string

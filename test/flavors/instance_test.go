@@ -8,6 +8,7 @@ import (
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -37,4 +38,14 @@ func TestInstance(t *testing.T) {
 		},
 		Eval: berry,
 	}).Test(t)
+
+	out := berry.(*flavors.Instance).Describe([]byte{}, 0, 80, false)
+	tt.Equal(t, `/#<blueberry [0-9a-h]+>, an instance of flavor blueberry,
+  has instance variable values:
+    size: "medium"
+/`, string(out))
+
+	out = berry.(*flavors.Instance).Describe([]byte{}, 0, 80, true)
+	tt.Equal(t, "/\x1b\\[1m#<blueberry [0-9a-h]+>\x1b\\[m, an instance of flavor \x1b\\[1mblueberry\x1b\\[m,\n"+
+		"  has instance variable values:\n    size: \"medium\".*/", string(out))
 }
