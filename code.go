@@ -265,6 +265,21 @@ func Read(src []byte) (code Code) {
 	return (&reader{}).read(src)
 }
 
+// CompileString LISP string source code and return an Object.
+func CompileString(src string) Object {
+	return Compile([]byte(src))
+}
+
+// Compile LISP source code and return an Object.
+func Compile(src []byte) (result Object) {
+	code := (&reader{}).read(src)
+	code.Compile()
+	if 0 < len(code) {
+		result = code[len(code)-1]
+	}
+	return
+}
+
 func (r *reader) read(src []byte) Code {
 	mode := valueMode
 	nextMode := valueMode

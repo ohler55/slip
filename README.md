@@ -7,7 +7,6 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - tests for apropos and describe
  - add more functions
   - type-of
   - typep

@@ -55,7 +55,7 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		slip.PanicArgCount(f, 1, 2)
 	}
 	obj := args[len(args)-1]
-	var w io.Writer = slip.StandardOutput.(io.Writer)
+	w := s.Get("*standard-output*").(io.Writer)
 	if 1 < len(args) {
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
