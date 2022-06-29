@@ -14,4 +14,10 @@ github.com/ohler55/slip/sliptest\
 	$Q grep github flavors/cov.out >> cov.out
 	$Q go tool cover -func=cov.out | grep "total:"
 
+local:
+	go test -coverpkg \
+github.com/ohler55/slip,\
+github.com/ohler55/slip/sliptest\
+ -coverprofile=cov.out
+
 .PHONY: all cover

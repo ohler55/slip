@@ -45,7 +45,7 @@ func (f *ContinueWhopper) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 		if wrap == nil {
 			continue
 		}
-		ws := self.Scope.NewScope(nil)
+		ws := self.Scope.NewScope()
 		ws.Let("~whopper-location~", &whopLoc{methods: loc.methods, current: loc.current + 1})
 		(wrap.(*slip.Lambda)).Closure = ws
 

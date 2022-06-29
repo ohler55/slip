@@ -78,7 +78,7 @@ func (obj *Instance) send(message string, args slip.List, depth int) slip.Object
 	for i, m := range ma {
 		if m.wrap != nil {
 			loc := &whopLoc{methods: ma, current: i}
-			ws := obj.Scope.NewScope(nil)
+			ws := obj.Scope.NewScope()
 			ws.Let("~whopper-location~", loc)
 			(m.wrap.(*slip.Lambda)).Closure = ws
 

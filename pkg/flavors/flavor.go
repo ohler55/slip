@@ -203,7 +203,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 
 func (obj *Flavor) makeInstance() *Instance {
 	inst := Instance{flavor: obj}
-	inst.Scope.Init()
+	inst.Scope.Vars = map[string]slip.Object{}
 	for k, v := range obj.defaultVars {
 		inst.Vars[k] = v
 	}

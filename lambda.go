@@ -151,10 +151,10 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 		if ss.returnFrom != nil {
 			switch {
 			case ss.returnFrom.tag == nil:
-				if ss.name == nil {
+				if ss.Name == nil {
 					return ss.returnFrom.result
 				}
-			case ss.returnFrom.tag.Equal(ss.name):
+			case ss.returnFrom.tag.Equal(ss.Name):
 				return ss.returnFrom.result
 			default:
 				s.returnFrom = ss.returnFrom

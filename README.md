@@ -7,6 +7,20 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - trace
+ - test
+  - scope
+  - repl
+  - printer
+   - lambda
+   - AppendDoc
+  - lambda
+  - package
+  - panic
+  - partial
+  - code
+  - function
+
  - add more functions
   - type-of
   - typep

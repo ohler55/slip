@@ -87,30 +87,35 @@ func (obj *FuncInfo) Describe(b []byte, indent, right int, ansi bool) []byte {
 		b = append(b, "Description:\n"...)
 		b = AppendDoc(b, obj.Doc.Text, indent+2, right, ansi)
 		b = append(b, '\n')
-		if 0 < len(obj.Doc.Args) {
-			b = append(b, indentSpaces[:indent]...)
-			b = append(b, "Arguments:\n"...)
+	}
+	if 0 < len(obj.Doc.Args) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Arguments:\n"...)
+	}
+	for _, da := range obj.Doc.Args {
+		if da.Name[0] == '&' {
+			continue
 		}
-		for _, da := range obj.Doc.Args {
-			if da.Name[0] == '&' {
-				continue
-			}
-			b = append(b, indentSpaces[:indent+2]...)
-			if ansi {
-				b = append(b, underline...)
-				b = append(b, da.Name...)
-				b = append(b, colorOff...)
-			} else {
-				b = append(b, da.Name...)
-			}
-			b = append(b, ": "...)
-			b = append(b, da.Type...)
-			if 0 < len(da.Text) {
-				b = append(b, '\n')
-				b = AppendDoc(b, da.Text, indent+4, right, ansi)
-			}
+		b = append(b, indentSpaces[:indent+2]...)
+		if ansi {
+			b = append(b, underline...)
+			b = append(b, da.Name...)
+			b = append(b, colorOff...)
+		} else {
+			b = append(b, da.Name...)
+		}
+		b = append(b, ": ["...)
+		b = append(b, da.Type...)
+		b = append(b, ']')
+		if da.Default != nil {
+			b = append(b, " = "...)
+			b = da.Default.Append(b)
+		}
+		if 0 < len(da.Text) {
 			b = append(b, '\n')
+			b = AppendDoc(b, da.Text, indent+4, right, ansi)
 		}
+		b = append(b, '\n')
 	}
 	if 0 < len(obj.Doc.Examples) {
 		b = append(b, '\n')

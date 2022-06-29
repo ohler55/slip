@@ -87,7 +87,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		}
 	}
 	slip.CurrentPackage.Lambdas[low] = lc
-	slip.CurrentPackage.Funcs[low] = &slip.FuncInfo{Create: fc, Pkg: slip.CurrentPackage}
+	slip.CurrentPackage.Funcs[low] = &slip.FuncInfo{Name: low, Doc: lc.Doc, Create: fc, Pkg: slip.CurrentPackage}
 	if s.Parent() != nil {
 		lc.Closure = s
 	}

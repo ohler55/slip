@@ -4,12 +4,15 @@ package test
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math"
 	"math/big"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
@@ -481,6 +484,7 @@ func TestValues(t *testing.T) {
 		},
 		Eval: nil,
 	}).Test(t)
+	tt.Nil(t, slip.Values{slip.Fixnum(2), nil}.First())
 }
 
 func TestSimpleObject(t *testing.T) {
@@ -544,4 +548,132 @@ func TestFileStreamWriteRead(t *testing.T) {
 	tt.Nil(t, err)
 
 	tt.Equal(t, "hello", string(buf[:n]))
+}
+
+func TestInputStream(t *testing.T) {
+	stream := slip.InputStream{Reader: strings.NewReader("abc")}
+	(&sliptest.Object{
+		Target:    &stream,
+		String:    "#<INPUT-STREAM>",
+		Simple:    "#<INPUT-STREAM>",
+		Hierarchy: "input-stream.stream.t",
+		Equals: []*sliptest.EqTest{
+			{Other: &stream, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			(&slip.InputStream{}).StreamType,
+		},
+		Eval: &stream,
+	}).Test(t)
+	data, err := ioutil.ReadAll(&stream)
+	tt.Nil(t, err)
+	tt.Equal(t, "abc", string(data))
+}
+
+func TestOutputStream(t *testing.T) {
+	var out strings.Builder
+	stream := slip.OutputStream{Writer: &out}
+	(&sliptest.Object{
+		Target:    &stream,
+		String:    "#<OUTPUT-STREAM>",
+		Simple:    "#<OUTPUT-STREAM>",
+		Hierarchy: "output-stream.stream.t",
+		Equals: []*sliptest.EqTest{
+			{Other: &stream, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			(&slip.OutputStream{}).StreamType,
+		},
+		Eval: &stream,
+	}).Test(t)
+}
+
+func TestFuncInfo(t *testing.T) {
+	fi := slip.FindFunc("car")
+	(&sliptest.Object{
+		Target: fi,
+		String: "#<function car>",
+		Simple: func(t *testing.T, simple any) {
+			tt.Equal(t, "car", jp.C("name").First(simple))
+		},
+		Hierarchy: "function.t",
+		Equals: []*sliptest.EqTest{
+			{Other: fi, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: fi,
+	}).Test(t)
+	result := fi.Apply(slip.NewScope(), slip.Read([]byte("('(1 2))"))[0].(slip.List), 0)
+	tt.Equal(t, slip.Fixnum(1), result)
+}
+
+func TestFuncInfoDescribeBasic(t *testing.T) {
+	fi := slip.FindFunc("car")
+	out := fi.Describe([]byte{}, 0, 80, false)
+	tt.Equal(t, `Lambda-List: (arg)
+Return: object
+Description:
+  car returns the car if arg is a cons, the first element if arg is a list, and
+  nil if arg is nil or an empty list.
+Arguments:
+  arg: [list|cons]
+    The value to take the first element of.
+
+Examples:
+  (car nil) => nil
+  (car '(a . b) => a
+  (car '(a b c)) => a
+
+`, string(out))
+}
+
+func TestFuncInfoDescribeOptions(t *testing.T) {
+	_ = slip.CompileString(`(defun func-info-test ((x 3) &options y) (list x y))`)
+	fi := slip.FindFunc("func-info-test")
+	out := fi.Describe([]byte{}, 0, 80, false)
+	tt.Equal(t, `Lambda-List: ((x 3) &options y)
+Return: object
+Arguments:
+  x: [fixnum] = 3
+  y: [object]
+
+`, string(out))
+
+	out = fi.Describe([]byte{}, 0, 80, true)
+	tt.Equal(t, "Lambda-List: ((x 3) &options y)\n"+
+		"Return: object\n"+
+		"Arguments:\n"+
+		"  \x1b[4mx\x1b[m: [fixnum] = 3\n"+
+		"  \x1b[4my\x1b[m: [object]\n\n", string(out))
+}
+
+func TestNovalue(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Novalue,
+		String:    "",
+		Simple:    nil,
+		Hierarchy: "t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Novalue, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: nil,
+	}).Test(t)
+}
+
+func TestUndefined(t *testing.T) {
+	obj := slip.Undefined("test")
+	(&sliptest.Object{
+		Target:    obj,
+		String:    "test",
+		Simple:    nil,
+		Hierarchy: "t",
+		Equals: []*sliptest.EqTest{
+			{Other: obj, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Panics: true,
+	}).Test(t)
 }

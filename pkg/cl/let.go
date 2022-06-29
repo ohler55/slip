@@ -52,7 +52,7 @@ func (f *Let) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if !ok {
 		slip.PanicType("let bindings", args[len(args)-1], "list")
 	}
-	ns := s.NewScope(nil)
+	ns := s.NewScope()
 	d2 := depth + 1
 	for _, binding := range bindings {
 		switch tb := binding.(type) {
