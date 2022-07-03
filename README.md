@@ -7,9 +7,10 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - panic and recover functions
+  - use to test repl
  - trace
  - test
-  - scope
   - repl
   - printer
    - lambda

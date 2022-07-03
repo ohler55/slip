@@ -9,6 +9,9 @@ import (
 )
 
 const (
+	printANSI   = "*print-ansi*"
+	stdInput    = "*standard-input*"
+	stdOutput   = "*standard-output*"
 	p1Key       = "*repl-prompt*"
 	p1ANSIKey   = "*repl-prompt-ansi*"
 	warnANSIKey = "*repl-warning-ansi*"
@@ -43,7 +46,7 @@ func REPL(scope ...*Scope) {
 	} else {
 		r.scope = NewScope()
 	}
-	if printer.ANSI {
+	if r.scope.get(printANSI) != nil {
 		r.scope.Let(Symbol(p1ANSIKey), String(bold))
 		r.scope.Let(Symbol(warnANSIKey), String("\x1b[31m"))
 		r.scope.Let(Symbol(p1Key), String("\x1b[1;94m▶ \x1b[m"))
@@ -60,7 +63,7 @@ func REPL(scope ...*Scope) {
 	r.scope.Let(Symbol(value3Key), nil)
 	defer func() {
 		_ = recover()
-		_, _ = (StandardOutput.(io.Writer)).Write([]byte("\nBye\n"))
+		_, _ = r.scope.get(stdOutput).(io.Writer).Write([]byte("\nBye\n"))
 	}()
 	for {
 		r.process()
@@ -74,21 +77,28 @@ func (r *repl) reset() {
 
 func (r *repl) process() {
 	defer func() {
-		switch tr := recover().(type) {
-		case nil:
+		rec := recover()
+		if rec == nil {
 			r.reset()
+			return
+		}
+		var (
+			prefix string
+			suffix string
+		)
+		if r.scope.get(printANSI) != nil {
+			if ansi := r.scope.get(warnANSIKey); ansi != nil {
+				s, _ := ansi.(String)
+				prefix = string(s)
+				suffix = "\x1b[m"
+			}
+		}
+		switch tr := rec.(type) {
 		case *Partial:
 			r.depth = tr.Depth
 		case *Panic:
 			var buf []byte
-
-			if printer.ANSI {
-				var prefix String
-				if ansi := r.scope.get(warnANSIKey); ansi != nil {
-					prefix, _ = ansi.(String)
-					buf = append(buf, []byte(prefix)...)
-				}
-			}
+			buf = append(buf, prefix...)
 			buf = append(buf, "## "...)
 			buf = append(buf, tr.Message...)
 			buf = append(buf, '\n')
@@ -97,19 +107,17 @@ func (r *repl) process() {
 				buf = append(buf, line...)
 				buf = append(buf, '\n')
 			}
-			if printer.ANSI {
-				buf = append(buf, colorOff...)
-			}
-			_, _ = (StandardOutput.(io.Writer)).Write(buf)
+			buf = append(buf, suffix...)
+			_, _ = r.scope.get(stdOutput).(io.Writer).Write(buf)
 			r.reset()
 		case error:
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
 			}
-			r.printWarning(tr)
+			fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s## %v%s\n", prefix, tr, suffix)
 			r.reset()
 		default:
-			r.printWarning(tr)
+			fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s## %v%s\n", prefix, tr, suffix)
 			r.reset()
 		}
 	}()
@@ -139,45 +147,26 @@ func (r *repl) process() {
 		r.scope.set(value3Key, r.value3)
 
 		if !skipWrite {
-			fmt.Fprintf(StandardOutput.(io.Writer), "%s\n", ObjectString(r.value1))
+			fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s\n", ObjectString(r.value1))
 		}
-	}
-}
-
-func (r *repl) printWarning(val interface{}) {
-	if printer.ANSI {
-		var prefix String
-		if ansi := r.scope.get(warnANSIKey); ansi != nil {
-			prefix, _ = ansi.(String)
-		}
-		fmt.Fprintf(StandardOutput.(io.Writer), "%s## %v\x1b[m\n", string(prefix), val)
-	} else {
-		fmt.Fprintf(StandardOutput.(io.Writer), "## %v\n", val)
 	}
 }
 
 func (r *repl) read() {
-	if printer.ANSI {
-		var prefix String
-		if ansi := r.scope.get(p1ANSIKey); ansi != nil {
-			prefix, _ = ansi.(String)
-		}
-		if 0 < len(r.buf) {
-			fmt.Fprintf(StandardOutput.(io.Writer), "%s%d] \x1b[m", string(prefix), r.depth)
-		} else {
-			p1 := r.scope.get(p1Key).(String)
-			fmt.Fprintf(StandardOutput.(io.Writer), "%s%s\x1b[m", string(prefix), string(p1))
-		}
+	var prefix String
+	var suffix string
+	if ansi := r.scope.get(p1ANSIKey); ansi != nil {
+		prefix, _ = ansi.(String)
+		suffix = "\x1b[m"
+	}
+	if 0 < len(r.buf) {
+		fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s%d] %s", string(prefix), r.depth, suffix)
 	} else {
-		if 0 < len(r.buf) {
-			fmt.Fprintf(StandardOutput.(io.Writer), "%d] ", r.depth)
-		} else {
-			p1 := r.scope.get(p1Key).(String)
-			_, _ = (StandardOutput.(io.Writer)).Write([]byte(p1))
-		}
+		p1 := r.scope.get(p1Key).(String)
+		fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s%s%s", string(prefix), string(p1), suffix)
 	}
 	for {
-		n, err := (StandardInput.(io.Reader)).Read(r.line)
+		n, err := r.scope.get(stdInput).(io.Reader).Read(r.line)
 		if err != nil {
 			panic(err)
 		}
