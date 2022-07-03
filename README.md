@@ -29,6 +29,14 @@ SLIce Processing is LISP for golang
   - atom
   - ...
 
+- how about a slip or go packages? (go, golang)
+ - trace
+ - panic
+ - recover
+ - base64 (encode and decode)
+ - channel (push, pop, close, make)
+ - time
+
  - macro
   - expand on read
 

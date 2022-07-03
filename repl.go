@@ -114,11 +114,12 @@ func (r *repl) process() {
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
 			}
+			// Must be an internal error. Most likely an error on read or write.
 			fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s## %v%s\n", prefix, tr, suffix)
-			r.reset()
+			panic(tr)
 		default:
 			fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s## %v%s\n", prefix, tr, suffix)
-			r.reset()
+			panic(tr)
 		}
 	}()
 	r.read()
