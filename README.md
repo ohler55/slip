@@ -7,8 +7,11 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - panic and recover functions
-  - use to test repl
+ - recover
+  - args
+   - symbol to assign recovery object to
+   - recovery form
+   - &rest forms to evaluate
  - trace
  - test
   - repl

@@ -8,6 +8,7 @@ import "fmt"
 type Panic struct {
 	Message string
 	Stack   []string
+	Value   Object // used when the panic function is called
 }
 
 // Bytes returns the original error and stack in a format for display or
@@ -19,7 +20,7 @@ func (p *Panic) Bytes() []byte {
 	b = append(b, p.Message...)
 	b = append(b, '\n')
 	for _, line := range p.Stack {
-		b = append(b, "   "...)
+		b = append(b, "##  "...)
 		b = append(b, line...)
 		b = append(b, '\n')
 	}
@@ -28,7 +29,7 @@ func (p *Panic) Bytes() []byte {
 
 // Error returns the panic message.
 func (p *Panic) Error() string {
-	return string(p.Bytes())
+	return p.Message
 }
 
 // PanicType raises a panic describing an incorrect type being used.

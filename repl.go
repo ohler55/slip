@@ -99,14 +99,7 @@ func (r *repl) process() {
 		case *Panic:
 			var buf []byte
 			buf = append(buf, prefix...)
-			buf = append(buf, "## "...)
-			buf = append(buf, tr.Message...)
-			buf = append(buf, '\n')
-			for _, line := range tr.Stack {
-				buf = append(buf, "##  "...)
-				buf = append(buf, line...)
-				buf = append(buf, '\n')
-			}
+			buf = append(buf, tr.Bytes()...)
 			buf = append(buf, suffix...)
 			_, _ = r.scope.get(stdOutput).(io.Writer).Write(buf)
 			r.reset()

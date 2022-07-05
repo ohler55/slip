@@ -13,8 +13,8 @@ func TestPanics(t *testing.T) {
 	f := slip.NewFunc("car", slip.List{slip.NewFunc("cdr", slip.List{slip.True})})
 	msg := recoverPanic(f)
 	tt.Equal(t, `## argument to cdr must be a cons or list not t, a t.
-   (cdr t)
-   (car (cdr t))
+##  (cdr t)
+##  (car (cdr t))
 `, msg)
 }
 
