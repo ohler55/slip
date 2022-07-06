@@ -7,14 +7,7 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - recover
-  - args
-   - symbol to assign recovery object to
-   - recovery form
-   - &rest forms to evaluate
- - trace
  - test
-  - repl
   - printer
    - lambda
    - AppendDoc
@@ -32,13 +25,10 @@ SLIce Processing is LISP for golang
   - atom
   - ...
 
-- how about a slip or go packages? (go, golang)
- - trace
- - panic
- - recover
- - base64 (encode and decode)
+- gi package
  - channel (push, pop, close, make)
  - time
+ - base64 (encode and decode)
 
  - macro
   - expand on read
