@@ -87,3 +87,8 @@ func (obj Fixnum) NumberType() Symbol {
 func (obj Fixnum) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// RealValue of the number as a float64.
+func (obj Fixnum) RealValue() float64 {
+	return float64(obj)
+}

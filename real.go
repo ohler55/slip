@@ -16,4 +16,7 @@ type Real interface {
 	// RealType returns the real type of the instance which can be one of:
 	// fixnum, bignum, float, or ratio.
 	RealType() Symbol
+
+	// RealValue of the number as a float64.
+	RealValue() float64
 }

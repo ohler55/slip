@@ -97,3 +97,8 @@ func (obj SingleFloat) NumberType() Symbol {
 func (obj SingleFloat) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// RealValue of the number as a float64.
+func (obj SingleFloat) RealValue() float64 {
+	return float64(obj)
+}
