@@ -1,6 +1,6 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
-package gi
+package gi_test
 
 import (
 	"testing"

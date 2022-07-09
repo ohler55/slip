@@ -34,7 +34,6 @@ SLIce Processing is LISP for golang
   - time-utc
   - time-in
   - timep
-
  - base64 (encode and decode)
 
  - macro
