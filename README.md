@@ -26,9 +26,8 @@ SLIce Processing is LISP for golang
   - ...
 
 - gi package
- - run
- - channel (push, pop, close, make)
- - time
+ - move time to gi
+ - time functions
   - now
   - time-format
   - time-utc

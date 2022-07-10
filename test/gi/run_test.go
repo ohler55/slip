@@ -25,6 +25,7 @@ func TestRunOk(t *testing.T) {
 		if slip.Fixnum(3).Equal(scope.Get(x)) {
 			break
 		}
+		time.Sleep(time.Millisecond * 10)
 	}
 	tt.Equal(t, slip.Fixnum(3), scope.Get(x))
 }
