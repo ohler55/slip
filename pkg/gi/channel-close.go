@@ -44,5 +44,7 @@ func (f *ChannelClose) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	if !ok {
 		slip.PanicType("channel", args[0], "channel")
 	}
-	return <-ch
+	close(ch)
+
+	return slip.Novalue
 }
