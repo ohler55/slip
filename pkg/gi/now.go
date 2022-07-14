@@ -1,0 +1,71 @@
+// Copyright (c) 2022, Peter Ohler, All rights reserved.
+
+package gi
+
+import (
+	"strings"
+	"time"
+
+	"github.com/ohler55/slip"
+)
+
+func init() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := Now{Function: slip.Function{Name: "now", Args: args, SkipEval: []bool{true}}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "now",
+			Args: []*slip.DocArg{
+				{Name: slip.AmpOptional},
+				{
+					Name: "location",
+					Type: "string",
+					Text: "Location for the time. (e.g. America/Toronto)",
+				},
+			},
+			Text: `__now__ returns the current time in the UTC timezone.`,
+			Examples: []string{
+				`(now) => 2022-07-10T17:29:21.123456789Z`,
+			},
+		}, &GiPkg)
+}
+
+// Now represents the now function.
+type Now struct {
+	slip.Function
+}
+
+// Call the function with the arguments provided.
+func (f *Now) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	var t time.Time
+	switch len(args) {
+	case 0:
+		t = time.Now().UTC()
+	case 1:
+		switch ta := args[0].(type) {
+		case slip.Symbol:
+			switch strings.ToLower(string(ta)) {
+			case "utc":
+				t = time.Now().UTC()
+			case "local":
+				t = time.Now()
+			default:
+				slip.PanicType("location", ta, "string", "symbol UTC", "symbol local")
+			}
+		case slip.String:
+			loc, err := time.LoadLocation(string(ta))
+			if err != nil {
+				panic(err)
+			}
+			t = time.Now().In(loc)
+		default:
+			slip.PanicType("location", args[0], "string", "symbol")
+		}
+	default:
+		slip.PanicArgCount(f, 0, 1)
+	}
+	return slip.Time(t)
+}

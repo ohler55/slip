@@ -26,13 +26,14 @@ SLIce Processing is LISP for golang
   - ...
 
 - gi package
- - move time to gi
  - time functions
-  - now
+  - now - should it have an option location, if so use time.LoadLocation
   - time-format
   - time-utc
   - time-in
   - timep
+  - make-time
+   - year, month, day, ...
  - base64 (encode and decode)
 
  - macro
