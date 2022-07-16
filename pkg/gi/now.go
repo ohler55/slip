@@ -12,7 +12,7 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Now{Function: slip.Function{Name: "now", Args: args, SkipEval: []bool{true}}}
+			f := Now{Function: slip.Function{Name: "now", Args: args}}
 			f.Self = &f
 			return &f
 		},
