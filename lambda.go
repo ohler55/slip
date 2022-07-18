@@ -184,13 +184,16 @@ func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 		docStr String
 		ok     bool
 	)
-	if pos < 0 {
+	switch {
+	case pos < 0:
 		pos = 0
-	} else {
+	case 0 < pos:
 		docStr, ok = args[pos].(String)
 		if !ok {
 			pos++
 		}
+	default:
+		pos++
 	}
 	lam = &Lambda{
 		Doc: &FuncDoc{

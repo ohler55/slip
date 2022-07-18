@@ -17,14 +17,16 @@ var (
 	version = "unknown"
 	built   = "unknown"
 
-	verbose     bool
+	showVersion bool
 	evalCode    string
 	ansiOff     bool
 	interactive bool
+	trace       bool
 )
 
 func init() {
-	flag.BoolVar(&verbose, "v", verbose, "verbose")
+	flag.BoolVar(&showVersion, "v", showVersion, "version")
+	flag.BoolVar(&trace, "t", trace, "trace")
 	flag.BoolVar(&ansiOff, "a", ansiOff, "no ANSI codes")
 	flag.StringVar(&evalCode, "e", evalCode, "code to evaluate")
 	flag.BoolVar(&interactive, "i", interactive, "interactive mode")
@@ -67,11 +69,14 @@ func run() {
 			}
 		}
 	}()
-	if verbose {
+	if showVersion {
 		fmt.Printf("slip version %s built on %s\n", version, built)
 	}
 	if ansiOff {
 		slip.SetVar(slip.Symbol("*print-ansi*"), nil)
+	}
+	if trace {
+		slip.Trace(true)
 	}
 	scope := slip.NewScope()
 	var code slip.Code

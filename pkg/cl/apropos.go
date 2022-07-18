@@ -33,7 +33,7 @@ func init() {
 					Text: "A package to limit the search to.",
 				},
 			},
-			Return: "nil",
+			Return: "",
 			Text: `Return all symbols that contain the provided _string_.
 The matches are printed to _*standard-output*_ along with the package they are from and what the
 symbol is associated with.`,

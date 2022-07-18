@@ -99,14 +99,7 @@ func (r *repl) process() {
 		case *Panic:
 			var buf []byte
 			buf = append(buf, prefix...)
-			buf = append(buf, "## "...)
-			buf = append(buf, tr.Message...)
-			buf = append(buf, '\n')
-			for _, line := range tr.Stack {
-				buf = append(buf, "##  "...)
-				buf = append(buf, line...)
-				buf = append(buf, '\n')
-			}
+			buf = append(buf, tr.Bytes()...)
 			buf = append(buf, suffix...)
 			_, _ = r.scope.get(stdOutput).(io.Writer).Write(buf)
 			r.reset()
@@ -114,11 +107,12 @@ func (r *repl) process() {
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
 			}
+			// Must be an internal error. Most likely an error on read or write.
 			fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s## %v%s\n", prefix, tr, suffix)
-			r.reset()
+			panic(tr)
 		default:
 			fmt.Fprintf(r.scope.get(stdOutput).(io.Writer), "%s## %v%s\n", prefix, tr, suffix)
-			r.reset()
+			panic(tr)
 		}
 	}()
 	r.read()

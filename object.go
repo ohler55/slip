@@ -108,6 +108,11 @@ func SimpleObject(val interface{}) (obj Object) {
 		}
 		obj = list
 
+	case *Panic:
+		obj = tv.Value
+		if obj == nil {
+			obj = String(tv.Message)
+		}
 	case Object:
 		obj = tv
 

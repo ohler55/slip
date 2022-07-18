@@ -14,7 +14,10 @@ func init() {
 		`A _time_ identifies an instant in time backed by a golang time.Time.`)
 }
 
-// Time is a time.Time Object.
+// Time is a time.Time Object. It might be better in the pkg/gi package but
+// then it could not be used in the SimpleObject conversion function so
+// instead it is a core (slip) type and the time related functions are in the
+// pkg/gi package.
 type Time time.Time
 
 // String representation of the Object.

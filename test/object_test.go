@@ -57,6 +57,7 @@ func TestFixnum(t *testing.T) {
 		},
 		Eval: slip.Fixnum(7),
 	}).Test(t)
+	tt.Equal(t, 7.0, slip.Fixnum(7).RealValue())
 }
 
 func TestRatio(t *testing.T) {
@@ -114,6 +115,7 @@ func TestRatio(t *testing.T) {
 		Hierarchy: "ratio.rational.real.number.t",
 		Eval:      slip.NewRatio(7, 9),
 	}).Test(t)
+	tt.Equal(t, 1.5, slip.NewRatio(12, 8).RealValue())
 
 	tt.Panic(t, func() { _ = slip.NewRatio(7, 0) })
 }
@@ -152,6 +154,7 @@ func TestBignum(t *testing.T) {
 		Hierarchy: "bignum.integer.rational.real.number.t",
 		Eval:      b,
 	}).Test(t)
+	tt.Equal(t, 123.0, slip.NewBignum(123).RealValue())
 }
 
 func TestShortFloat(t *testing.T) {
@@ -178,6 +181,7 @@ func TestShortFloat(t *testing.T) {
 		},
 		Eval: slip.ShortFloat(7.0),
 	}).Test(t)
+	tt.Equal(t, 7.0, slip.ShortFloat(7.0).RealValue())
 }
 
 func TestSingleFloat(t *testing.T) {
@@ -204,6 +208,7 @@ func TestSingleFloat(t *testing.T) {
 		},
 		Eval: slip.SingleFloat(7.0),
 	}).Test(t)
+	tt.Equal(t, 7.0, slip.SingleFloat(7.0).RealValue())
 }
 
 func TestDoubleFloat(t *testing.T) {
@@ -230,6 +235,7 @@ func TestDoubleFloat(t *testing.T) {
 		},
 		Eval: slip.DoubleFloat(7.0),
 	}).Test(t)
+	tt.Equal(t, 7.0, slip.DoubleFloat(7.0).RealValue())
 }
 
 func TestLongFloat(t *testing.T) {
@@ -256,6 +262,7 @@ func TestLongFloat(t *testing.T) {
 		},
 		Eval: slip.NewLongFloat(7.0),
 	}).Test(t)
+	tt.Equal(t, 7.0, slip.NewLongFloat(7.0).RealValue())
 }
 
 func TestComplex(t *testing.T) {

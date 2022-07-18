@@ -3,6 +3,7 @@
 package test
 
 import (
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -10,6 +11,19 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 )
+
+type errReader int
+
+func (r errReader) Read(_ []byte) (int, error) {
+	if 0 < r {
+		panic("fail")
+	}
+	return 0, fmt.Errorf("fail")
+}
+
+func (r errReader) Close() error {
+	return nil
+}
 
 type lineReader struct {
 	lines []string
@@ -41,8 +55,25 @@ func TestREPLWarn(t *testing.T) {
 }
 
 func TestREPLError(t *testing.T) {
-	// TBD function called should panic
-	// TBD function called should panic with and error (maybe read a file that's not there)
+	var out strings.Builder
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("*print-ansi*"), nil)
+	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
+	scope.Let(slip.Symbol("*standard-input*"), &slip.InputStream{Reader: errReader(0)})
+
+	slip.REPL(scope)
+	tt.Equal(t, "* ## fail\n\nBye\n", out.String())
+}
+
+func TestREPLPanic(t *testing.T) {
+	var out strings.Builder
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("*print-ansi*"), nil)
+	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
+	scope.Let(slip.Symbol("*standard-input*"), &slip.InputStream{Reader: errReader(1)})
+
+	slip.REPL(scope)
+	tt.Equal(t, "* ## fail\n\nBye\n", out.String())
 }
 
 func TestREPLNovalue(t *testing.T) {

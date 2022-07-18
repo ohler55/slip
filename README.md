@@ -7,11 +7,7 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - panic and recover functions
-  - use to test repl
- - trace
  - test
-  - repl
   - printer
    - lambda
    - AppendDoc
@@ -28,6 +24,17 @@ SLIce Processing is LISP for golang
   - null
   - atom
   - ...
+
+- gi package
+ - time functions
+  + now
+  - timep
+  - time-format
+  - time-utc
+  - time-in
+  - make-time
+   - year, month, day, ...
+ - base64 (encode and decode)
 
  - macro
   - expand on read

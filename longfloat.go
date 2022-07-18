@@ -114,3 +114,9 @@ func (obj *LongFloat) NumberType() Symbol {
 func (obj *LongFloat) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// RealValue of the number as a float64.
+func (obj *LongFloat) RealValue() float64 {
+	f, _ := (*big.Float)(obj).Float64()
+	return f
+}

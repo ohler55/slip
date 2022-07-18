@@ -88,3 +88,9 @@ func (obj *Ratio) NumberType() Symbol {
 func (obj *Ratio) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// RealValue of the number as a float64.
+func (obj *Ratio) RealValue() float64 {
+	f, _ := (*big.Rat)(obj).Float64()
+	return f
+}

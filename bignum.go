@@ -99,3 +99,9 @@ func (obj *Bignum) NumberType() Symbol {
 func (obj *Bignum) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// RealValue of the number as a float64.
+func (obj *Bignum) RealValue() float64 {
+	f, _ := big.NewFloat(0.0).SetInt((*big.Int)(obj)).Float64()
+	return f
+}

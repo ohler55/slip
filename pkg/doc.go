@@ -9,4 +9,7 @@ import (
 
 	// Pull in flavors functions and type.
 	_ "github.com/ohler55/slip/pkg/flavors"
+
+	// Pull in gi functions and type.
+	_ "github.com/ohler55/slip/pkg/gi"
 )

@@ -34,6 +34,7 @@ func normalAfter(s *Scope, name string, args List, depth int, result *Object) {
 	default:
 		panic(&Panic{
 			Message: fmt.Sprint(tr), Stack: []string{ObjectString(append(args, Symbol(name)))},
+			Value: SimpleObject(tr),
 		})
 	}
 }

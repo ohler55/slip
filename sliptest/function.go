@@ -27,6 +27,9 @@ type Function struct {
 
 	// Panics if true indicated the call to .Eval() should panic.
 	Panics bool
+
+	// Result of the function call.
+	Result slip.Object
 }
 
 // Test the object test specification.
@@ -39,7 +42,7 @@ func (tf *Function) Test(t *testing.T) {
 	if tf.Panics {
 		tt.Panic(t, func() { obj.Eval(scope, 0) })
 	} else {
-		result := obj.Eval(scope, 0)
-		tt.Equal(t, tf.Expect, slip.ObjectString(result))
+		tf.Result = obj.Eval(scope, 0)
+		tt.Equal(t, tf.Expect, slip.ObjectString(tf.Result))
 	}
 }
