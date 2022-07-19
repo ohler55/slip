@@ -27,7 +27,6 @@ SLIce Processing is LISP for golang
 
 - gi package
 
-
  - macro
   - expand on read
 
