@@ -3,7 +3,6 @@
 package gi
 
 import (
-	"strings"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -26,7 +25,8 @@ func init() {
 					Text: "Location for the time. (e.g. America/Toronto)",
 				},
 			},
-			Text: `__now__ returns the current time in the UTC timezone.`,
+			Return: "time",
+			Text:   `__now__ returns the current time in the UTC timezone.`,
 			Examples: []string{
 				`(now) => 2022-07-10T17:29:21.123456789Z`,
 			},
@@ -45,25 +45,7 @@ func (f *Now) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	case 0:
 		t = time.Now().UTC()
 	case 1:
-		switch ta := args[0].(type) {
-		case slip.Symbol:
-			switch strings.ToLower(string(ta)) {
-			case "utc":
-				t = time.Now().UTC()
-			case "local":
-				t = time.Now()
-			default:
-				slip.PanicType("location", ta, "string", "symbol UTC", "symbol local")
-			}
-		case slip.String:
-			loc, err := time.LoadLocation(string(ta))
-			if err != nil {
-				panic(err)
-			}
-			t = time.Now().In(loc)
-		default:
-			slip.PanicType("location", args[0], "string", "symbol")
-		}
+		t = time.Now().In(getLocArg(args[0]))
 	default:
 		slip.PanicArgCount(f, 0, 1)
 	}

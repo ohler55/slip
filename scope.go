@@ -66,6 +66,9 @@ func (s *Scope) Get(sym Symbol) Object {
 }
 
 func (s *Scope) get(name string) Object {
+	if v, has := constantValues[name]; has {
+		return v
+	}
 	s.moo.Lock()
 	if s.Vars != nil {
 		if value, has := s.Vars[name]; has {
@@ -120,6 +123,9 @@ func (s *Scope) Has(sym Symbol) bool {
 }
 
 func (s *Scope) has(name string) bool {
+	if _, has := constantValues[name]; has {
+		return true
+	}
 	s.moo.Lock()
 	if s.Vars != nil {
 		if _, has := s.Vars[name]; has {

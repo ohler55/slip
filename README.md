@@ -26,18 +26,11 @@ SLIce Processing is LISP for golang
   - ...
 
 - gi package
- - time functions
-  + now
-  - timep
-  - time-format
-  - time-utc
-  - time-in
-  - make-time
-   - year, month, day, ...
- - base64 (encode and decode)
 
  - macro
   - expand on read
+
+- base64 (encode and decode in gi package)
 
 - simple
  - separate package
