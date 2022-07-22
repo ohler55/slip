@@ -10,14 +10,14 @@ import (
 
 func TestAproposListString(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(apropos-list "terp")`,
+		Source: `(apropos-list "terpr")`,
 		Expect: "(terpri)",
 	}).Test(t)
 }
 
 func TestAproposListSymbol(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(apropos-list 'terp)`,
+		Source: `(apropos-list 'terpr)`,
 		Expect: "(terpri)",
 	}).Test(t)
 }

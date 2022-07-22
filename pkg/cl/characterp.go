@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Atom{Function: slip.Function{Name: "atom", Args: args}}
+			f := Characterp{Function: slip.Function{Name: "characterp", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "atom",
+			Name: "characterp",
 			Args: []*slip.DocArg{
 				{
 					Name: "object",
@@ -23,31 +23,26 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text:   `__atom__ returns _true_ if _object_ is an atom otherwise nil is returned.`,
+			Text:   `__characterp__ returns _true_ if _object_ is a character otherwise nil is returned.`,
 			Examples: []string{
-				"(atom 1.2) => t",
-				"(atom '(1 2)) => nil",
+				`(characterp #\A) => t`,
+				"(characterp 2) => nil",
 			},
 		}, &slip.CLPkg)
 }
 
-// Atom represents the atom function.
-type Atom struct {
+// Characterp represents the characterp function.
+type Characterp struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Atom) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Characterp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	switch ta := args[0].(type) {
-	case slip.List:
-		if 0 < len(ta) {
-			return nil
-		}
-	case slip.Cons:
-		return nil
+	if _, ok := args[0].(slip.Character); ok {
+		return slip.True
 	}
-	return slip.True
+	return nil
 }

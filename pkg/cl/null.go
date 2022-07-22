@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Atom{Function: slip.Function{Name: "atom", Args: args}}
+			f := Null{Function: slip.Function{Name: "null", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "atom",
+			Name: "null",
 			Args: []*slip.DocArg{
 				{
 					Name: "object",
@@ -23,31 +23,31 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text:   `__atom__ returns _true_ if _object_ is an atom otherwise nil is returned.`,
+			Text:   `__null__ returns _true_ if _object_ is an empty list otherwise nil is returned.`,
 			Examples: []string{
-				"(atom 1.2) => t",
-				"(atom '(1 2)) => nil",
+				"(null 1.2) => nil",
+				"(null '()) => t",
 			},
 		}, &slip.CLPkg)
 }
 
-// Atom represents the atom function.
-type Atom struct {
+// Null represents the null function.
+type Null struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Atom) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Null) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
 	switch ta := args[0].(type) {
 	case slip.List:
-		if 0 < len(ta) {
-			return nil
+		if len(ta) == 0 {
+			return slip.True
 		}
-	case slip.Cons:
-		return nil
+	case nil:
+		return slip.True
 	}
-	return slip.True
+	return nil
 }
