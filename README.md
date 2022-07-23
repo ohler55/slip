@@ -23,21 +23,20 @@ SLIce Processing is LISP for golang
   + boundp
   + characterp
   + consp
-  - evenp
-  - floatp
+  + evenp
+  + floatp
   - input-stream-p
-  - intergetp
+  + intergerp
   - listp
   - minusp
   + null
-  - numberp
-  - oddp
+  + numberp
+  + oddp
   - output-stream-p
   - plusp
   - streamp
-  - stringp
-  - symbolp
-  - timep
+  + stringp
+  + symbolp
   - type-of
   - typep
   - zerop
