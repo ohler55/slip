@@ -32,8 +32,7 @@ func (obj *Ratio) Append(b []byte) []byte {
 
 // Simplify the Object into an int64.
 func (obj *Ratio) Simplify() interface{} {
-	f, exact := (*big.Rat)(obj).Float64()
-	if exact {
+	if f, exact := (*big.Rat)(obj).Float64(); exact {
 		return f
 	}
 	return string(printer.Append([]byte{}, obj, 0))

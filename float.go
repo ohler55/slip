@@ -11,7 +11,7 @@ func init() {
 
 // Float exists to allow assertions to determine if an Object is an float.
 type Float interface {
-	Rational
+	Real
 
 	// FloatType returns the float type of the instance which can be one of: fixnum or bignum.
 	FloatType() Symbol

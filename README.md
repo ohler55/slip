@@ -18,15 +18,6 @@ SLIce Processing is LISP for golang
   - code
   - function
 
- - add more functions
-  - type-of
-  - typep
-  - null
-  - atom
-  - ...
-
-- gi package
-
  - macro
   - expand on read
 

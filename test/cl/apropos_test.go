@@ -18,7 +18,7 @@ func TestAproposString(t *testing.T) {
 	slip.StandardOutput = &slip.OutputStream{Writer: &out}
 
 	(&sliptest.Function{
-		Source: `(apropos "terp")`,
+		Source: `(apropos "terpr")`,
 		Expect: "",
 	}).Test(t)
 	tt.Equal(t, "terpri (built-in)\n", out.String())
