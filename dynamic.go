@@ -30,16 +30,16 @@ func (f *Dynamic) Append(b []byte) []byte {
 
 // Simplify the function.
 func (f *Dynamic) Simplify() interface{} {
-	simple := make([]interface{}, 0, len(f.Args)+1)
+	simple := make([]any, 0, len(f.Args)+1)
 	if 0 < len(f.Name) {
 		simple = append(simple, f.Name)
 	} else {
 		lc := f.Self.(*Lambda)
-		args := make([]interface{}, len(lc.Doc.Args))
+		args := make([]any, len(lc.Doc.Args))
 		for i, da := range lc.Doc.Args {
 			args[i] = da.Name
 		}
-		lambda := make([]interface{}, 0, len(lc.Forms)+2)
+		lambda := make([]any, 0, len(lc.Forms)+2)
 		lambda = append(lambda, "lambda", args)
 		for i := len(lc.Forms) - 1; 0 <= i; i-- {
 			form := lc.Forms[i]

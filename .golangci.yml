@@ -245,6 +245,7 @@ linters:
     - stylecheck # not ready for go1.18 yet
     - unparam # not ready for go1.18 yet
     - unused # not ready for go1.18 yet
+    - asasalint # a nonsense rule
 
   disable-all: false
   presets:

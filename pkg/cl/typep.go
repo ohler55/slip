@@ -1,0 +1,73 @@
+// Copyright (c) 2022, Peter Ohler, All rights reserved.
+
+package cl
+
+import (
+	"strings"
+
+	"github.com/ohler55/slip"
+)
+
+func init() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := Typep{Function: slip.Function{Name: "typep", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "typep",
+			Args: []*slip.DocArg{
+				{
+					Name: "object",
+					Type: "object",
+					Text: "The object to check.",
+				},
+				{
+					Name: "type",
+					Type: "symbol",
+					Text: "The expected type of _object_.",
+				},
+			},
+			Return: "nil",
+			Text:   `__typep__ returns _true_ if _object_ is of type _type_.`,
+			Examples: []string{
+				"(typep 1 'fixnum) => t",
+				"(typep 3.2 'fixnum) => nil",
+			},
+		}, &slip.CLPkg)
+}
+
+// Typep represents the typep function.
+type Typep struct {
+	slip.Function
+}
+
+// Call the the function with the arguments provided.
+func (f *Typep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	if len(args) != 2 {
+		slip.PanicArgCount(f, 2, 2)
+	}
+	sym, ok := args[0].(slip.Symbol)
+	if !ok {
+		slip.PanicType("type", args[0], "symbol")
+	}
+	switch ta := args[1].(type) {
+	case nil:
+		if strings.EqualFold("null", string(sym)) {
+			return slip.True
+		}
+	case slip.List:
+		if len(ta) == 0 && strings.EqualFold("null", string(sym)) {
+			return slip.True
+		}
+		if strings.EqualFold(string(ta.Hierarchy()[0]), string(sym)) {
+			return slip.True
+		}
+	default:
+		if strings.EqualFold(string(ta.Hierarchy()[0]), string(sym)) {
+			return slip.True
+		}
+	}
+	return nil
+}
