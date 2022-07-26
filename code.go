@@ -59,6 +59,7 @@ const (
 	sharpIntByte = '9'
 	sharpNumByte = '8'
 	sharpQuote   = 'G'
+	sharpComplex = 'i'
 	radixByte    = 'r'
 	arrayByte    = 'A'
 	swallowOpen  = '{'
@@ -179,8 +180,8 @@ const (
 	sharpMode = "" +
 		"................................" + // 0x00
 		".......GV.......9999999999......" + // 0x20
-		"..b............o........x.../..." + // 0x40
-		"..b............o........x......." + // 0x60
+		"..bi...........o........x.../..." + // 0x40
+		"..bi...........o........x......." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -236,6 +237,9 @@ const (
 
 // marker on stack indicating a vector and not a list.
 var vectorMarker = Vector{}
+
+// marker on stack indicating a vector and not a list.
+var complexMarker = Complex(complex(0, 0))
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
 // of keeping loaded code together so that it can be evaluated and optimized
@@ -455,6 +459,11 @@ func (r *reader) read(src []byte) Code {
 			mode = intMode
 			base = sharpNum
 
+		case sharpComplex:
+			r.starts = append(r.starts, len(r.stack))
+			r.stack = append(r.stack, complexMarker)
+			mode = mustArrayMode
+
 		case arrayByte:
 			r.starts = append(r.starts, len(r.stack))
 			switch sharpNum {
@@ -549,6 +558,8 @@ func (r *reader) closeList() {
 	case *Array:
 		to.calcAndSet(list)
 		obj = to
+	case Complex:
+		obj = newComplex(list)
 	default:
 		if len(list) == 3 && list[1] == Symbol(".") {
 			list[1] = list[2]

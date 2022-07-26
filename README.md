@@ -7,6 +7,44 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - code.go
+  - read complex #c(number number)
+ - math
+  - abs
+  - acos
+  - add
+  - asin
+  - atan
+  - ceiling
+  - constants
+  - cos
+  - divide
+  - exp
+  - float
+  - floor
+  - gt
+  - gte
+  - integer
+  - log
+  - lt
+  - lte
+  - max
+  - min
+  - mod
+  - multiply
+  - oneminus
+  - oneplus
+  - random
+  - rem
+  - round
+  - signum
+  - sin
+  - sqrt
+  - subtract
+  - tan
+  - truncate
+  - uniq
+
  - test
   - printer
    - lambda

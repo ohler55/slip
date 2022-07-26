@@ -2,7 +2,10 @@
 
 package slip
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 // ComplexSymbol is the symbol with a value of "complex".
 const ComplexSymbol = Symbol("complex")
@@ -65,4 +68,25 @@ func (obj Complex) NumberType() Symbol {
 // Eval returns self.
 func (obj Complex) Eval(s *Scope, depth int) Object {
 	return obj
+}
+
+func newComplex(list List) Complex {
+	if len(list) != 2 {
+		panic(fmt.Sprintf("Can not forms a complex object from %s.", list))
+	}
+	var (
+		r float64
+		i float64
+	)
+	if rv, ok := list[1].(Real); ok {
+		r = rv.RealValue()
+	} else {
+		panic(fmt.Sprintf("Can not convert %s, a %T into a float.", list[1], list[1]))
+	}
+	if rv, ok := list[0].(Real); ok {
+		i = rv.RealValue()
+	} else {
+		panic(fmt.Sprintf("Can not convert %s, a %T into a float.", list[0], list[0]))
+	}
+	return Complex(complex(r, i))
 }

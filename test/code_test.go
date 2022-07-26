@@ -85,6 +85,18 @@ func TestCodeRatio(t *testing.T) {
 	}
 }
 
+func TestCodeComplex(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: "#c(1 2)", expect: "[#C(1 2)]", kind: "complex"},
+		{src: "#c(-3 2)", expect: "[#C(-3 2)]", kind: "complex"},
+		{src: "#c(-3 -2)", expect: "[#C(-3 -2)]", kind: "complex"},
+		{src: "#c(-3)", raise: true},
+		{src: "#c(1 2 3)", raise: true},
+	} {
+		ct.test(t, i)
+	}
+}
+
 func TestCodeList(t *testing.T) {
 	for i, ct := range []*codeTest{
 		{src: "()", expect: "[nil]", kind: "list"},
