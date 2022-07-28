@@ -6,6 +6,7 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- signum test
 - next
  - math
   + abs
@@ -17,11 +18,11 @@ SLIce Processing is LISP for golang
   + cos
   - divide
   - exp
-  - float
+  - float ooo
   - floor
   - gt
   - gte
-  - integer
+  - integer ooo
   - log
   - lt
   - lte
@@ -29,14 +30,14 @@ SLIce Processing is LISP for golang
   - min
   - mod
   - multiply
-  - oneminus
-  - oneplus
+  - oneminus ----
+  - oneplus ----
   - random
   - rem
   - round
   - signum
   + sin
-  - sqrt
+  + sqrt
   - subtract
   + tan
   - truncate

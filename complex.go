@@ -26,9 +26,9 @@ func (obj Complex) String() string {
 // Append a buffer with a representation of the Object.
 func (obj Complex) Append(b []byte) []byte {
 	b = append(b, "#C("...)
-	b = printer.Append(b, Fixnum(real(obj)), 0)
+	b = printer.Append(b, DoubleFloat(real(obj)), 0)
 	b = append(b, ' ')
-	b = printer.Append(b, Fixnum(imag(obj)), 0)
+	b = printer.Append(b, DoubleFloat(imag(obj)), 0)
 
 	return append(b, ')')
 }
