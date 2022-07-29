@@ -52,7 +52,7 @@ func TestSqrtLongFloat(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSqrtRatioFloat(t *testing.T) {
+func TestSqrtFloat(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(sqrt 9/4)`,
 		Expect: "1.5",
@@ -63,7 +63,7 @@ func TestSqrtRatioFloat(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSqrtRatioBignum(t *testing.T) {
+func TestSqrtBignum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(sqrt 100000000000000000000)`,
 		Expect: "1e+10",
