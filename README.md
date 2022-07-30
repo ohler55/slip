@@ -11,17 +11,20 @@ SLIce Processing is LISP for golang
   + abs
   + acos
   - add
+   - support time
+   - loop over values adn change sum type as needed
   + asin
   + atan
   - ceiling
+  - coerce
+   - also support integers unlike CL
   + cos
   - divide
   - exp
-  - float ooo
+  + float
   - floor
   - gt
   - gte
-  - integer ooo
   - log
   - lt
   - lte

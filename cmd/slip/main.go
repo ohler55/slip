@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/ohler55/slip"
+	"golang.org/x/term"
+
 	// Pull in all functions.
 	_ "github.com/ohler55/slip/pkg"
 )
@@ -43,6 +45,9 @@ usage: %s [<options>] [<filepath>]...
 		fmt.Fprintln(os.Stderr)
 	}
 	flag.Parse()
+	if w, _, err := term.GetSize(0); err == nil {
+		slip.CurrentPackage.Set("*print-right-margin*", slip.Fixnum(w-2))
+	}
 	run()
 }
 

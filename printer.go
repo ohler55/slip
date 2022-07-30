@@ -233,9 +233,9 @@ Top:
 			var tmp []byte
 			// float64 precision is 16.
 			if p.Prec < 7 {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', int(p.Prec), 32)
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', int(p.Prec), 32)
 			} else {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', -1, 32)
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 32)
 			}
 			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
 		case p.Prec < 7:
@@ -251,9 +251,9 @@ Top:
 			var tmp []byte
 			// float64 precision is 16.
 			if p.Prec < 16 {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', int(p.Prec), 64)
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', int(p.Prec), 64)
 			} else {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', -1, 64)
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 64)
 			}
 			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
 		case p.Prec < 16:
@@ -269,7 +269,7 @@ Top:
 		if p.Readably {
 			// Use the LISP exponent nomenclature by forming the buffer and
 			// then replacing the 'e'.
-			tmp := (*big.Float)(to).Append([]byte{}, 'g', int(prec))
+			tmp := (*big.Float)(to).Append([]byte{}, 'e', int(prec))
 			b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)
 		} else {
 			b = (*big.Float)(to).Append(b, 'g', int(prec))

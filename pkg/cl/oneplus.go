@@ -11,7 +11,7 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Oneplus{Function: slip.Function{Name: "oneplus", Args: args}}
+			f := Oneplus{Function: slip.Function{Name: "1+", Args: args}}
 			f.Self = &f
 			return &f
 		},
@@ -24,7 +24,7 @@ func init() {
 					Text: "The number to increment.",
 				},
 			},
-			Return: "nil",
+			Return: "number",
 			Text:   `__1+__ returns the _number_ plus 1.`,
 			Examples: []string{
 				"(1+ 5) => 6",
