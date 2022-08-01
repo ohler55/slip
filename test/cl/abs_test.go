@@ -31,7 +31,7 @@ func TestAbsDoubleFloat(t *testing.T) {
 
 func TestAbsLongFloat(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(abs -3.1l0)`,
+		Source: `(abs -3.1L0)`,
 		Expect: "3.1",
 	}).Test(t)
 }

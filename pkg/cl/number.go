@@ -39,12 +39,13 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 			n1 = slip.SingleFloat(t1)
 		case slip.SingleFloat:
 			n0 = t0
-			n1 = v1
+			n1 = t1
 		case slip.DoubleFloat:
 			n0 = slip.DoubleFloat(t0)
-			n1 = v1
+			n1 = t1
 		case *slip.LongFloat:
 			n0 = (*slip.LongFloat)(big.NewFloat(float64(t0)))
+			n1 = t1
 		case *slip.Bignum:
 			n0 = t0
 			var z big.Float
@@ -67,10 +68,10 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 			n1 = slip.DoubleFloat(t1)
 		case slip.DoubleFloat:
 			n0 = t0
-			n1 = v1
+			n1 = t1
 		case *slip.LongFloat:
 			n0 = (*slip.LongFloat)(big.NewFloat(float64(t0)))
-			n1 = v1
+			n1 = t1
 		case *slip.Bignum:
 			n0 = t0
 			var z big.Float
@@ -87,7 +88,9 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 		switch t1 := v1.(type) {
 		case slip.Fixnum:
 			n0 = t0
-			n1 = (*slip.LongFloat)(big.NewFloat(float64(t1)))
+			var z big.Float
+			z.SetInt64(int64(t1))
+			n1 = (*slip.LongFloat)(&z)
 		case slip.SingleFloat:
 			n0 = t0
 			n1 = (*slip.LongFloat)(big.NewFloat(float64(t1)))
@@ -209,4 +212,20 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 		slip.PanicType("numbers", t0, "number")
 	}
 	return
+}
+
+func syncFloatPrec(v0, v1 *slip.LongFloat) {
+	p0 := (*big.Float)(v0).Prec()
+	p1 := (*big.Float)(v1).Prec()
+	// The big.Float adds random digits when increasing precision so
+	// increase the hard way by converting to a string and re-parsing.
+	if p0 < p1 {
+		s := (*big.Float)(v0).Text('e', -1)
+		(*big.Float)(v0).SetPrec(p1)
+		(*big.Float)(v0).Parse(s, 10)
+	} else if p1 < p0 {
+		s := (*big.Float)(v1).Text('e', -1)
+		(*big.Float)(v1).SetPrec(p0)
+		(*big.Float)(v1).Parse(s, 10)
+	}
 }

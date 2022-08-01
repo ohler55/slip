@@ -52,6 +52,7 @@ func (f *Add) Call(s *slip.Scope, args slip.List, depth int) (sum slip.Object) {
 		case slip.DoubleFloat:
 			sum = ta + sum.(slip.DoubleFloat)
 		case *slip.LongFloat:
+			syncFloatPrec(ta, sum.(*slip.LongFloat))
 			sum = (*slip.LongFloat)(((*big.Float)(sum.(*slip.LongFloat))).Add(
 				(*big.Float)(sum.(*slip.LongFloat)),
 				(*big.Float)(ta)),

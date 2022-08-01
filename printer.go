@@ -98,8 +98,8 @@ type Printer struct {
 	// RightMargin *print-right-margin*.
 	RightMargin uint
 
-	// Prec backs *print-prec*.
-	Prec uint
+	// Prec backs *print-precision*.
+	Prec int
 }
 
 var (
@@ -115,7 +115,7 @@ var (
 		Length:      math.MaxInt,
 		Level:       math.MaxInt,
 		Lines:       math.MaxInt,
-		Prec:        16,
+		Prec:        -1,
 		MiserWidth:  0,
 		Pretty:      true,
 		Radix:       false,
@@ -262,17 +262,20 @@ Top:
 			b = strconv.AppendFloat(b, float64(to), 'g', -1, 64)
 		}
 	case *LongFloat:
-		prec := uint(float64((*big.Float)(to).Prec()) / prec10t2)
-		if p.Prec < prec {
-			prec = p.Prec
+		prec := -1
+		if 0 < p.Prec {
+			prec = int(float64((*big.Float)(to).Prec()) / prec10t2)
+			if p.Prec < prec {
+				prec = p.Prec
+			}
 		}
 		if p.Readably {
 			// Use the LISP exponent nomenclature by forming the buffer and
 			// then replacing the 'e'.
-			tmp := (*big.Float)(to).Append([]byte{}, 'e', int(prec))
+			tmp := (*big.Float)(to).Append([]byte{}, 'e', prec)
 			b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)
 		} else {
-			b = (*big.Float)(to).Append(b, 'g', int(prec))
+			b = (*big.Float)(to).Append(b, 'g', prec)
 		}
 	case Symbol:
 		if len(to) == 0 {
@@ -766,8 +769,8 @@ func getPrintPrec() Object {
 
 // set *print-prec*
 func setPrintPrec(value Object) {
-	if prec, ok := value.(Fixnum); ok && 0 < prec && prec < math.MaxInt32 {
-		printer.Prec = uint(prec)
+	if prec, ok := value.(Fixnum); ok {
+		printer.Prec = int(prec)
 	} else {
 		PanicType("*print-prec*", value, "fixnum greater that 0")
 	}

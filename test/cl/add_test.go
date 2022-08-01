@@ -38,40 +38,95 @@ func TestAddSingleFloat(t *testing.T) {
 		Expect: "3s+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(+ 3.5s+0 4.5s+0 5.5s+0)`,
-		Expect: "1.35s+01",
+		Source: `(+ 2 3.0s+0 1.5s+0 1)`,
+		Expect: "7.5s+00",
 	}).Test(t)
 }
 
-/*
 func TestAddDoubleFloat(t *testing.T) {
+	key := slip.Symbol("*print-readably*")
+	orig, _ := slip.GetVar(key)
+	slip.SetVar(key, slip.True)
+	defer slip.SetVar(key, orig)
+
 	(&sliptest.Function{
-		Source: `(+ 3.1d0)`,
-		Expect: "4.1",
+		Source: `(+ 3.0d+0)`,
+		Expect: "3d+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 2 3.5d+0 4.5s+0 1)`,
+		Expect: "1.1d+01",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 3.5s+0 4.5d+0 1.0d+0)`,
+		Expect: "9d+00",
 	}).Test(t)
 }
 
 func TestAddLongFloat(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(+ 3.5l0)`,
-		Expect: "4.5",
-	}).Test(t)
-}
+	key := slip.Symbol("*print-readably*")
+	orig, _ := slip.GetVar(key)
+	slip.SetVar(key, slip.True)
+	defer slip.SetVar(key, orig)
 
-func TestAddRatio(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(+ 3/4)`,
-		Expect: "7/4",
+		Source: `(+ 3.0L+0)`,
+		Expect: "3L+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 2 3.5L+0 4.5s+0 1)`,
+		Expect: "1.1L+01",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 3.5s+0 4.5L+0 1.0L+0)`,
+		Expect: "9L+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 3.5d+0 4.5L+0 1.0d+0)`,
+		Expect: "9L+00",
 	}).Test(t)
 }
 
 func TestAddBignum(t *testing.T) {
+	key := slip.Symbol("*print-readably*")
+	orig, _ := slip.GetVar(key)
+	slip.SetVar(key, slip.True)
+	defer slip.SetVar(key, orig)
+
 	(&sliptest.Function{
-		Source: `(+ 100000000000000000000)`,
-		Expect: "100000000000000000001",
+		Source: `(+ 30000000000000000000)`,
+		Expect: "30000000000000000000",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 1 30000000000000000000 2)`,
+		Expect: "30000000000000000003",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 30000000000000000000 20000000000000000000)`,
+		Expect: "50000000000000000000",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 30000000000000000000 2.0s+19 10000000000000000000)`,
+		Expect: "6s+19",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 30000000000000000000 2.0d+19 10000000000000000000)`,
+		Expect: "6d+19",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 30000000000000000000 2.0L+19 10000000000000000000)`,
+		Expect: "6L+19",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ 2.0L+0 1.0000000000000000001L+0)`,
+		Expect: "3.0000000000000000001L+00",
 	}).Test(t)
 }
 
+// TBD ratio
+// TBD complex
+
+/*
 func TestAddComplex(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(+ #C(1 2))`,

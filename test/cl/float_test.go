@@ -49,11 +49,11 @@ func TestFloatPrototype(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(float 2.5 0.0L0)`,
-		Expect: "2.500000000000000L+00",
+		Expect: "2.5L+00",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(float 2.5L0 0.0l0)`,
-		Expect: "2.50L+00",
+		Expect: "2.5L+00",
 	}).Test(t)
 }
 
