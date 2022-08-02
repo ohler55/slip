@@ -10,14 +10,10 @@ SLIce Processing is LISP for golang
  - math
   + abs
   + acos
-  - add
-   - support time
-   - loop over values adn change sum type as needed
+  + add
   + asin
   + atan
   - ceiling
-  - coerce
-   - also support integers unlike CL
   + cos
   - divide
   - exp
@@ -43,7 +39,9 @@ SLIce Processing is LISP for golang
   - subtract
   + tan
   - truncate
-  - uniq
+
+  - coerce
+   - also support integers unlike CL
 
  - test
   - printer

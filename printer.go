@@ -233,13 +233,13 @@ Top:
 			var tmp []byte
 			// float64 precision is 16.
 			if p.Prec < 7 {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', int(p.Prec), 32)
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', p.Prec, 32)
 			} else {
 				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 32)
 			}
 			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
 		case p.Prec < 7:
-			b = strconv.AppendFloat(b, float64(to), 'g', int(p.Prec), 32)
+			b = strconv.AppendFloat(b, float64(to), 'g', p.Prec, 32)
 		default:
 			b = strconv.AppendFloat(b, float64(to), 'g', -1, 32)
 		}
@@ -251,13 +251,13 @@ Top:
 			var tmp []byte
 			// float64 precision is 16.
 			if p.Prec < 16 {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', int(p.Prec), 64)
+				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', p.Prec, 64)
 			} else {
 				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 64)
 			}
 			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
 		case p.Prec < 16:
-			b = strconv.AppendFloat(b, float64(to), 'g', int(p.Prec), 64)
+			b = strconv.AppendFloat(b, float64(to), 'g', p.Prec, 64)
 		default:
 			b = strconv.AppendFloat(b, float64(to), 'g', -1, 64)
 		}

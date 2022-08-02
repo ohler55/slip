@@ -107,7 +107,7 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 			n1 = (*slip.LongFloat)(&z)
 		case *slip.Ratio:
 			n0 = t0
-			n1 = slip.DoubleFloat(t1.RealValue())
+			n1 = (*slip.LongFloat)(big.NewFloat(t1.RealValue()))
 		case slip.Complex:
 			f, _ := (*big.Float)(t0).Float64()
 			n0 = slip.Complex(complex(f, 0.0))
@@ -173,10 +173,13 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 				n0 = t0
 				n1 = (*slip.Ratio)(big.NewRat((*big.Int)(t1).Int64(), 1))
 			} else {
-				f, _ := (*big.Rat)(t0).Float64()
-				n0 = (*slip.LongFloat)(big.NewFloat(f))
 				var z big.Float
 				n1 = (*slip.LongFloat)(z.SetInt((*big.Int)(t1)))
+				prec := z.Prec()
+				var z0 big.Float
+				z0.SetPrec(prec)
+				z0.SetRat((*big.Rat)(t0))
+				n0 = (*slip.LongFloat)(&z0)
 			}
 		case *slip.Ratio:
 			n0 = t0
@@ -222,10 +225,10 @@ func syncFloatPrec(v0, v1 *slip.LongFloat) {
 	if p0 < p1 {
 		s := (*big.Float)(v0).Text('e', -1)
 		(*big.Float)(v0).SetPrec(p1)
-		(*big.Float)(v0).Parse(s, 10)
+		_, _, _ = (*big.Float)(v0).Parse(s, 10)
 	} else if p1 < p0 {
 		s := (*big.Float)(v1).Text('e', -1)
 		(*big.Float)(v1).SetPrec(p0)
-		(*big.Float)(v1).Parse(s, 10)
+		_, _, _ = (*big.Float)(v1).Parse(s, 10)
 	}
 }
