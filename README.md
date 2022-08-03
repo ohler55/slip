@@ -15,7 +15,7 @@ SLIce Processing is LISP for golang
   + atan
   - ceiling
   + cos
-  - divide
+  - divide ---
   - exp
   + float
   - floor
@@ -27,7 +27,7 @@ SLIce Processing is LISP for golang
   - max
   - min
   - mod
-  - multiply
+  - multiply ---
   + oneminus
   + oneplus
   - random
@@ -36,7 +36,7 @@ SLIce Processing is LISP for golang
   + signum
   + sin
   + sqrt
-  - subtract
+  + subtract
   + tan
   - truncate
 

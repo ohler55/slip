@@ -25,10 +25,10 @@ func init() {
 				},
 			},
 			Return: "number",
-			Text:   `__+__ returns the um of the _numbers_.`,
+			Text:   `__+__ returns the sum of the _numbers_.`,
 			Examples: []string{
-				"(1+ 5) => 5",
-				"(1+ 2/3 + 3) => 11/3",
+				"(+ 5) => 5",
+				"(+ 2/3 + 3) => 11/3",
 			},
 		}, &slip.CLPkg)
 }
