@@ -28,7 +28,7 @@ func init() {
 			Text:   `__+__ returns the sum of the _numbers_.`,
 			Examples: []string{
 				"(+ 5) => 5",
-				"(+ 2/3 + 3) => 11/3",
+				"(+ 2/3 3) => 11/3",
 			},
 		}, &slip.CLPkg)
 }
