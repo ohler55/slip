@@ -25,7 +25,7 @@ func init() {
 				},
 			},
 			Return: "number",
-			Text:   `__+__ returns the product of the _numbers_.`,
+			Text:   `__*__ returns the product of the _numbers_.`,
 			Examples: []string{
 				"(* 5) => 5",
 				"(* 2/3 3) => 2",
