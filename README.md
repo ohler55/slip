@@ -14,6 +14,7 @@ SLIce Processing is LISP for golang
   + asin
   + atan
   - ceiling
+   - also fceiling to force result to a float if not already a float
   + cos
   + divide
   + = (same)
@@ -35,6 +36,7 @@ SLIce Processing is LISP for golang
   - random
   - rem
   - round
+   - round as expected but if exactly half way head toward the closest even
   + signum
   + sin
   + sqrt
@@ -46,7 +48,22 @@ SLIce Processing is LISP for golang
    - also support integers unlike CL
 
 - hash-table
- - functions
+ - make-hash-table
+ - hash-table-p
+ - hash-table-count
+ - hash-table-p
+ - hash-table-rehash-size
+ - hash-table-rehash-threshold
+ - hash-table-size
+ - hash-table-test
+ - gethash
+  - use setf to set
+ - rehash
+ - remhash
+ - maphash
+ - clrhash
+ - sxhash
+ - with-hash-table-iterator
 
 
  - test
