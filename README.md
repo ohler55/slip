@@ -26,8 +26,8 @@ SLIce Processing is LISP for golang
   - log
   + lt
   + lte
-  - max
-  - min
+  + max
+  + min
   - mod
   + multiply
   + oneminus
@@ -44,6 +44,10 @@ SLIce Processing is LISP for golang
 
   - coerce
    - also support integers unlike CL
+
+- hash-table
+ - functions
+
 
  - test
   - printer
