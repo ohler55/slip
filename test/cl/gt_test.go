@@ -84,11 +84,15 @@ func TestGtRatio(t *testing.T) {
 		Source: `(> 3/4 1/2)`,
 		Expect: "t",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(> 3/4 7/8)`,
+		Expect: "nil",
+	}).Test(t)
 }
 
 func TestGtComplex(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(> #C(1 2))`,
+		Source: `(> 1 #C(1 2))`,
 		Panics: true,
 	}).Test(t)
 }

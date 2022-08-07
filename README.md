@@ -21,11 +21,11 @@ SLIce Processing is LISP for golang
   - exp
   + float
   - floor
-  - gt
-  - gte
+  + gt
+  + gte
   - log
-  - lt
-  - lte
+  + lt
+  + lte
   - max
   - min
   - mod
