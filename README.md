@@ -16,8 +16,8 @@ SLIce Processing is LISP for golang
   - ceiling
   + cos
   + divide
-  - = (same)
-  - /= (notsame)
+  + = (same)
+  + /= (uniq)
   - exp
   + float
   - floor
