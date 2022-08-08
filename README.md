@@ -15,6 +15,8 @@ SLIce Processing is LISP for golang
   + atan
   - ceiling
    - also fceiling to force result to a float if not already a float
+   - number / divisor
+   - remainder = quotient - original
   + cos
   + divide
   + = (same)
