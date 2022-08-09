@@ -6,6 +6,9 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
+- update all num functions to support Values{}
+ - in numbers.go as well as functions themselves
+
 - next
  - math
   + abs
@@ -13,10 +16,8 @@ SLIce Processing is LISP for golang
   + add
   + asin
   + atan
-  - ceiling
-   - also fceiling to force result to a float if not already a float
-   - number / divisor
-   - remainder = quotient - original
+  + ceiling
+  - fceiling - same as ceiling but convert q to float
   + cos
   + divide
   + = (same)

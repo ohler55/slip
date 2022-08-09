@@ -63,40 +63,93 @@ func (f *Ceiling) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 
 	switch tn := num.(type) {
 	case slip.Fixnum:
-		q = slip.Fixnum(tn / div.(slip.Fixnum))
-		prod := q.(slip.Fixnum) * div.(slip.Fixnum)
-		r = slip.Fixnum(tn - prod)
+		q = tn / div.(slip.Fixnum)
+		r = tn - q.(slip.Fixnum)*div.(slip.Fixnum)
 		if 0 < r.(slip.Fixnum) {
 			q = q.(slip.Fixnum) + slip.Fixnum(1)
 			r = r.(slip.Fixnum) - div.(slip.Fixnum)
 		}
 	case slip.SingleFloat:
-		q = slip.SingleFloat(tn / div.(slip.SingleFloat))
+		q = tn / div.(slip.SingleFloat)
 		q = slip.SingleFloat(math.Ceil(float64(q.(slip.SingleFloat))))
-		r = slip.SingleFloat(tn - q.(slip.SingleFloat)*div.(slip.SingleFloat))
+		r = tn - q.(slip.SingleFloat)*div.(slip.SingleFloat)
 	case slip.DoubleFloat:
-		q = slip.DoubleFloat(tn / div.(slip.DoubleFloat))
+		q = tn / div.(slip.DoubleFloat)
 		q = slip.DoubleFloat(math.Ceil(float64(q.(slip.DoubleFloat))))
-		r = slip.DoubleFloat(tn - q.(slip.DoubleFloat)*div.(slip.DoubleFloat))
+		r = tn - q.(slip.DoubleFloat)*div.(slip.DoubleFloat)
 	case *slip.LongFloat:
 		syncFloatPrec(tn, div.(*slip.LongFloat))
-		q = (*slip.LongFloat)((*big.Float)(tn).Quo((*big.Float)(tn), (*big.Float)(div.(*slip.LongFloat))))
-		// TBD r
-
+		var quo big.Float
+		_ = quo.Quo((*big.Float)(tn), (*big.Float)(div.(*slip.LongFloat)))
+		bi, acc := quo.Int(nil)
+		switch acc {
+		case big.Exact:
+			q = (*slip.LongFloat)(&quo)
+			r = (*slip.LongFloat)(big.NewFloat(0.0))
+		case big.Below:
+			bi = bi.Add(bi, big.NewInt(1))
+			var (
+				zq big.Float
+				zp big.Float
+				zr big.Float
+			)
+			q = (*slip.LongFloat)(zq.SetInt(bi))
+			_ = zp.Mul((*big.Float)(q.(*slip.LongFloat)), (*big.Float)(div.(*slip.LongFloat)))
+			r = (*slip.LongFloat)(zr.Sub((*big.Float)(tn), &zp))
+		case big.Above:
+			var (
+				zp big.Float
+				zr big.Float
+			)
+			q = (*slip.LongFloat)(quo.SetInt(bi))
+			_ = zp.Mul((*big.Float)(q.(*slip.LongFloat)), (*big.Float)(div.(*slip.LongFloat)))
+			r = (*slip.LongFloat)(zr.Sub((*big.Float)(tn), &zp))
+		}
 	case *slip.Bignum:
-		/*
-			var z big.Int
-			var zz big.Int
-			q, r := zz.QuoRem((*big.Int)(quot.(*slip.Bignum)), (*big.Int)(ta), &z)
-			if r.Sign() == 0 {
-				quot = (*slip.Bignum)(q)
-			} else {
-				var zr big.Rat
-				quot = (*slip.Ratio)(zr.SetFrac((*big.Int)(quot.(*slip.Bignum)), (*big.Int)(ta)))
-			}
-		*/
+		var (
+			zr big.Int
+			zq big.Int
+		)
+		_, _ = zq.QuoRem((*big.Int)(tn), (*big.Int)(div.(*slip.Bignum)), &zr)
+		switch zr.Sign() {
+		case 0:
+			q = (*slip.Bignum)(&zq)
+			r = (*slip.Bignum)(&zr)
+		case -1:
+			q = (*slip.Bignum)(&zq)
+			r = (*slip.Bignum)(&zr)
+		case 1:
+			q = (*slip.Bignum)(zq.Add(&zq, big.NewInt(1)))
+			var zp big.Int
+			_ = zp.Mul(&zq, (*big.Int)(div.(*slip.Bignum)))
+			r = (*slip.Bignum)(zr.Sub((*big.Int)(tn), &zp))
+		}
 	case *slip.Ratio:
-		// quot = (*slip.Ratio)(((*big.Rat)(quot.(*slip.Ratio))).Quo((*big.Rat)(quot.(*slip.Ratio)), (*big.Rat)(ta)))
+		var (
+			zr big.Rat
+			zq big.Rat
+			bi big.Int
+			zb big.Rat
+			zp big.Rat
+		)
+		_ = zq.Quo((*big.Rat)(tn), (*big.Rat)(div.(*slip.Ratio)))
+		_ = bi.Quo(zq.Num(), zq.Denom())
+		_ = zb.SetInt(&bi)
+		_ = zp.Mul(&zb, (*big.Rat)(div.(*slip.Ratio)))
+		_ = zr.Sub((*big.Rat)(tn), &zp)
+		switch zr.Sign() {
+		case 0:
+			q = (*slip.Bignum)(&bi)
+			r = slip.Fixnum(0)
+		case -1:
+			q = (*slip.Bignum)(&bi)
+			r = (*slip.Ratio)(&zr)
+		case 1:
+			q = (*slip.Bignum)(bi.Add(&bi, big.NewInt(1)))
+			_ = zb.SetInt(&bi)
+			_ = zp.Mul(&zb, (*big.Rat)(div.(*slip.Ratio)))
+			r = (*slip.Ratio)(zr.Sub((*big.Rat)(tn), &zp))
+		}
 	case slip.Complex:
 		slip.PanicType("number", tn, "real")
 	}
