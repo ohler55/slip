@@ -36,19 +36,19 @@ func TestCeilingSingleFloat(t *testing.T) {
 
 	(&sliptest.Function{
 		Source: `(ceiling 3.5s+0)`,
-		Expect: "4s+00, -5s-01",
+		Expect: "4, -5s-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling 5.5s+0 2)`,
-		Expect: "3s+00, -5s-01",
+		Expect: "3, -5s-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling 1.5s+0 2)`,
-		Expect: "1s+00, -5s-01",
+		Expect: "1, -5s-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling -5.5s+0 2)`,
-		Expect: "-2s+00, -1.5s+00",
+		Expect: "-2, -1.5s+00",
 	}).Test(t)
 }
 
@@ -60,19 +60,19 @@ func TestCeilingDoubleFloat(t *testing.T) {
 
 	(&sliptest.Function{
 		Source: `(ceiling 3.5d+0)`,
-		Expect: "4d+00, -5d-01",
+		Expect: "4, -5d-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling 5.5d+0 2)`,
-		Expect: "3d+00, -5d-01",
+		Expect: "3, -5d-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling 1.5d+0 2)`,
-		Expect: "1d+00, -5d-01",
+		Expect: "1, -5d-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling -5.5d+0 2)`,
-		Expect: "-2d+00, -1.5d+00",
+		Expect: "-2, -1.5d+00",
 	}).Test(t)
 }
 
@@ -84,23 +84,23 @@ func TestCeilingLongFloat(t *testing.T) {
 
 	(&sliptest.Function{
 		Source: `(ceiling 3.5L+0)`,
-		Expect: "4L+00, -5L-01",
+		Expect: "4, -5L-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling 5.5L+0 2)`,
-		Expect: "3L+00, -5L-01",
+		Expect: "3, -5L-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling 1.5L+0 2)`,
-		Expect: "1L+00, -5L-01",
+		Expect: "1, -5L-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling -5.5L+0 2)`,
-		Expect: "-2L+00, -1.5L+00",
+		Expect: "-2, -1.5L+00",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling 6.0L+0 2)`,
-		Expect: "3L+00, 0L+00",
+		Expect: "3, 0d+00",
 	}).Test(t)
 }
 

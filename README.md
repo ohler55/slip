@@ -2,7 +2,9 @@
 
 SLIce Processing is LISP for golang
 
+T222 16019 26418
 
+1 800 959 5525 -
 
 -------------------------------------------------------------------------------
 
@@ -16,7 +18,8 @@ SLIce Processing is LISP for golang
   + add
   + asin
   + atan
-  + ceiling
+  - ceiling
+   - always return int (fixnum or bignum)
   - fceiling - same as ceiling but convert q to float
   + cos
   + divide

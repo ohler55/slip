@@ -26,7 +26,7 @@ func init() {
 to the next integer towards positive infinity.`,
 				},
 			},
-			Return: "real,real",
+			Return: "integer,real",
 			Text: `__ceiling__ returns the quotient of the _numbers_ rounded
 toward positive infinity as well as the remainder.`,
 			Examples: []string{
@@ -71,12 +71,12 @@ func (f *Ceiling) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	case slip.SingleFloat:
 		q = tn / div.(slip.SingleFloat)
-		q = slip.SingleFloat(math.Ceil(float64(q.(slip.SingleFloat))))
-		r = tn - q.(slip.SingleFloat)*div.(slip.SingleFloat)
+		q = slip.Fixnum(math.Ceil(float64(q.(slip.SingleFloat))))
+		r = tn - slip.SingleFloat(q.(slip.Fixnum))*div.(slip.SingleFloat)
 	case slip.DoubleFloat:
 		q = tn / div.(slip.DoubleFloat)
-		q = slip.DoubleFloat(math.Ceil(float64(q.(slip.DoubleFloat))))
-		r = tn - q.(slip.DoubleFloat)*div.(slip.DoubleFloat)
+		q = slip.Fixnum(math.Ceil(float64(q.(slip.DoubleFloat))))
+		r = tn - slip.DoubleFloat(q.(slip.Fixnum))*div.(slip.DoubleFloat)
 	case *slip.LongFloat:
 		syncFloatPrec(tn, div.(*slip.LongFloat))
 		var quo big.Float
@@ -84,25 +84,26 @@ func (f *Ceiling) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		bi, acc := quo.Int(nil)
 		switch acc {
 		case big.Exact:
-			q = (*slip.LongFloat)(&quo)
-			r = (*slip.LongFloat)(big.NewFloat(0.0))
+			q = (*slip.Bignum)(bi)
+			r = slip.DoubleFloat(0.0)
 		case big.Below:
-			bi = bi.Add(bi, big.NewInt(1))
+			q = (*slip.Bignum)(bi.Add(bi, big.NewInt(1)))
 			var (
 				zq big.Float
 				zp big.Float
 				zr big.Float
 			)
-			q = (*slip.LongFloat)(zq.SetInt(bi))
-			_ = zp.Mul((*big.Float)(q.(*slip.LongFloat)), (*big.Float)(div.(*slip.LongFloat)))
+			_ = zq.SetInt(bi)
+			_ = zp.Mul(&zq, (*big.Float)(div.(*slip.LongFloat)))
 			r = (*slip.LongFloat)(zr.Sub((*big.Float)(tn), &zp))
 		case big.Above:
+			q = (*slip.Bignum)(bi)
 			var (
 				zp big.Float
 				zr big.Float
 			)
-			q = (*slip.LongFloat)(quo.SetInt(bi))
-			_ = zp.Mul((*big.Float)(q.(*slip.LongFloat)), (*big.Float)(div.(*slip.LongFloat)))
+			_ = quo.SetInt(bi)
+			_ = zp.Mul(&quo, (*big.Float)(div.(*slip.LongFloat)))
 			r = (*slip.LongFloat)(zr.Sub((*big.Float)(tn), &zp))
 		}
 	case *slip.Bignum:
