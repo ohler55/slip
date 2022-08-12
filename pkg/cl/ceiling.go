@@ -31,7 +31,7 @@ to the next integer towards positive infinity.`,
 toward positive infinity as well as the remainder.`,
 			Examples: []string{
 				"(ceiling 5.4) => 5, 0.4",
-				"(ceiling 3/2) => 2.0, -1/2",
+				"(ceiling 3/2) => 2, -1/2",
 				"(ceiling 5 2) => 2, 1",
 			},
 		}, &slip.CLPkg)
@@ -44,6 +44,10 @@ type Ceiling struct {
 
 // Call the the function with the arguments provided.
 func (f *Ceiling) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	return ceiling(f, args)
+}
+
+func ceiling(f slip.Object, args slip.List) slip.Values {
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
