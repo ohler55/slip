@@ -2,10 +2,6 @@
 
 SLIce Processing is LISP for golang
 
-T222 16019 26418
-
-1 800 959 5525 -
-
 -------------------------------------------------------------------------------
 
 - update all num functions to support Values{}
@@ -18,16 +14,16 @@ T222 16019 26418
   + add
   + asin
   + atan
-  - ceiling
-   - always return int (fixnum or bignum)
-  - fceiling - same as ceiling but convert q to float
+  + ceiling
+  + fceiling
   + cos
   + divide
   + = (same)
   + /= (uniq)
   - exp
   + float
-  - floor
+  + floor
+  + ffloor
   + gt
   + gte
   - log
@@ -43,12 +39,14 @@ T222 16019 26418
   - rem
   - round
    - round as expected but if exactly half way head toward the closest even
+  - fround
   + signum
   + sin
   + sqrt
   + subtract
   + tan
   - truncate
+  - ftruncate
 
   - coerce
    - also support integers unlike CL

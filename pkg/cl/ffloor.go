@@ -11,39 +11,39 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Fceiling{Function: slip.Function{Name: "fceiling", Args: args}}
+			f := Ffloor{Function: slip.Function{Name: "ffloor", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "fceiling",
+			Name: "ffloor",
 			Args: []*slip.DocArg{
 				{
 					Name: "number",
 					Type: "real",
 					Text: `The number to take the quotient of and then rounded
-to the next integer towards positive infinity.`,
+to the next integer towards negative infinity.`,
 				},
 			},
-			Return: "float,real",
-			Text: `__fceiling__ returns the quotient of the _numbers_ rounded
-toward positive infinity as well as the remainder.`,
+			Return: "integer,real",
+			Text: `__ffloor__ returns the quotient of the _numbers_ rounded
+toward negative infinity as well as the remainder.`,
 			Examples: []string{
-				"(fceiling 5.4) => 6.0, -0.6",
-				"(fceiling 3/2) => 2.0, -1/2",
-				"(fceiling 5 2) => 3.0, -1",
+				"(ffloor 5.4) => 5.0, 0.4",
+				"(ffloor 3/2) => 1.0, 1/2",
+				"(ffloor 5 2) => 2.0, 1",
 			},
 		}, &slip.CLPkg)
 }
 
-// Fceiling represents the fceiling function.
-type Fceiling struct {
+// Ffloor represents the ffloor function.
+type Ffloor struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Fceiling) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	values := ceiling(f, args)
+func (f *Ffloor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	values := floor(f, args)
 	switch tv := values[1].(type) {
 	case slip.Fixnum:
 		switch values[0].(type) {

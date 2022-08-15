@@ -12,42 +12,42 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Ceiling{Function: slip.Function{Name: "ceiling", Args: args}}
+			f := Floor{Function: slip.Function{Name: "floor", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "ceiling",
+			Name: "floor",
 			Args: []*slip.DocArg{
 				{
 					Name: "number",
 					Type: "real",
 					Text: `The number to take the quotient of and then rounded
-to the next integer towards positive infinity.`,
+to the next integer towards negative infinity.`,
 				},
 			},
 			Return: "integer,real",
-			Text: `__ceiling__ returns the quotient of the _numbers_ rounded
-toward positive infinity as well as the remainder.`,
+			Text: `__floor__ returns the quotient of the _numbers_ rounded
+toward negative infinity as well as the remainder.`,
 			Examples: []string{
-				"(ceiling 5.4) => 6, -0.6",
-				"(ceiling 3/2) => 2, -1/2",
-				"(ceiling 5 2) => 3, -1",
+				"(floor 5.4) => 5, 0.4",
+				"(floor 3/2) => 1, 1/2",
+				"(floor 5 2) => 2, 1",
 			},
 		}, &slip.CLPkg)
 }
 
-// Ceiling represents the ceiling function.
-type Ceiling struct {
+// Floor represents the floor function.
+type Floor struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Ceiling) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	return ceiling(f, args)
+func (f *Floor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	return floor(f, args)
 }
 
-func ceiling(f slip.Object, args slip.List) slip.Values {
+func floor(f slip.Object, args slip.List) slip.Values {
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
@@ -70,9 +70,9 @@ func ceiling(f slip.Object, args slip.List) slip.Values {
 		q = tn / div.(slip.Fixnum)
 		r = tn - q.(slip.Fixnum)*div.(slip.Fixnum)
 		if 0 < div.(slip.Fixnum) {
-			if 0 < r.(slip.Fixnum) {
-				q = q.(slip.Fixnum) + slip.Fixnum(1)
-				r = r.(slip.Fixnum) - div.(slip.Fixnum)
+			if r.(slip.Fixnum) < 0 {
+				q = q.(slip.Fixnum) - slip.Fixnum(1)
+				r = r.(slip.Fixnum) + div.(slip.Fixnum)
 			}
 		} else if r.(slip.Fixnum) < 0 {
 			q = q.(slip.Fixnum) + slip.Fixnum(1)
@@ -80,11 +80,11 @@ func ceiling(f slip.Object, args slip.List) slip.Values {
 		}
 	case slip.SingleFloat:
 		q = tn / div.(slip.SingleFloat)
-		q = slip.Fixnum(math.Ceil(float64(q.(slip.SingleFloat))))
+		q = slip.Fixnum(math.Floor(float64(q.(slip.SingleFloat))))
 		r = tn - slip.SingleFloat(q.(slip.Fixnum))*div.(slip.SingleFloat)
 	case slip.DoubleFloat:
 		q = tn / div.(slip.DoubleFloat)
-		q = slip.Fixnum(math.Ceil(float64(q.(slip.DoubleFloat))))
+		q = slip.Fixnum(math.Floor(float64(q.(slip.DoubleFloat))))
 		r = tn - slip.DoubleFloat(q.(slip.Fixnum))*div.(slip.DoubleFloat)
 	case *slip.LongFloat:
 		syncFloatPrec(tn, div.(*slip.LongFloat))
@@ -96,23 +96,28 @@ func ceiling(f slip.Object, args slip.List) slip.Values {
 			q = (*slip.Bignum)(bi)
 			r = (*slip.LongFloat)(big.NewFloat(0.0))
 		case big.Below:
-			q = (*slip.Bignum)(bi.Add(bi, big.NewInt(1)))
 			var (
 				zq big.Float
 				zp big.Float
 				zr big.Float
 			)
 			_ = zq.SetInt(bi)
-			_ = zp.Mul(&zq, (*big.Float)(div.(*slip.LongFloat)))
+			d := (*big.Float)(div.(*slip.LongFloat))
+			q = (*slip.Bignum)(bi)
+			_ = zp.Mul(&zq, d)
 			r = (*slip.LongFloat)(zr.Sub((*big.Float)(tn), &zp))
 		case big.Above:
-			q = (*slip.Bignum)(bi)
 			var (
+				zq big.Float
 				zp big.Float
 				zr big.Float
 			)
+			d := (*big.Float)(div.(*slip.LongFloat))
+			bi = bi.Sub(bi, big.NewInt(1))
 			_ = quo.SetInt(bi)
-			_ = zp.Mul(&quo, (*big.Float)(div.(*slip.LongFloat)))
+			q = (*slip.Bignum)(bi)
+			_ = zq.SetInt(bi)
+			_ = zp.Mul(&quo, d)
 			r = (*slip.LongFloat)(zr.Sub((*big.Float)(tn), &zp))
 		}
 	case *slip.Bignum:
@@ -126,26 +131,29 @@ func ceiling(f slip.Object, args slip.List) slip.Values {
 		case 0:
 			q = (*slip.Bignum)(&zq)
 			r = (*slip.Bignum)(&zr)
-		case -1:
+		case 1:
 			if d.Sign() == 1 {
 				q = (*slip.Bignum)(&zq)
 				r = (*slip.Bignum)(&zr)
 			} else {
-				_ = zq.Add(&zq, big.NewInt(1))
+				_ = zq.Sub(&zq, big.NewInt(1))
 				q = (*slip.Bignum)(&zq)
 				var zp big.Int
 				_ = zp.Mul(&zq, d)
 				r = (*slip.Bignum)(zr.Sub((*big.Int)(tn), &zp))
 			}
-		case 1:
+		case -1:
 			if d.Sign() == 1 {
-				q = (*slip.Bignum)(zq.Add(&zq, big.NewInt(1)))
+				_ = zq.Sub(&zq, big.NewInt(1))
+				q = (*slip.Bignum)(&zq)
 				var zp big.Int
 				_ = zp.Mul(&zq, d)
 				r = (*slip.Bignum)(zr.Sub((*big.Int)(tn), &zp))
 			} else {
 				q = (*slip.Bignum)(&zq)
-				r = (*slip.Bignum)(&zr)
+				var zp big.Int
+				_ = zp.Mul(&zq, d)
+				r = (*slip.Bignum)(zr.Sub((*big.Int)(tn), &zp))
 			}
 		}
 	case *slip.Ratio:
@@ -156,31 +164,33 @@ func ceiling(f slip.Object, args slip.List) slip.Values {
 			zb big.Rat
 			zp big.Rat
 		)
-		_ = zq.Quo((*big.Rat)(tn), (*big.Rat)(div.(*slip.Ratio)))
+		d := (*big.Rat)(div.(*slip.Ratio))
+		_ = zq.Quo((*big.Rat)(tn), d)
 		_ = bi.Quo(zq.Num(), zq.Denom())
 		_ = zb.SetInt(&bi)
-		_ = zp.Mul(&zb, (*big.Rat)(div.(*slip.Ratio)))
+		_ = zp.Mul(&zb, d)
 		_ = zr.Sub((*big.Rat)(tn), &zp)
-		d := (*big.Rat)(div.(*slip.Ratio))
 		switch zr.Sign() {
 		case 0:
 			q = (*slip.Bignum)(&bi)
 			r = slip.Fixnum(0)
-		case -1:
+		case 1:
 			if d.Sign() == 1 {
 				q = (*slip.Bignum)(&bi)
 				r = (*slip.Ratio)(&zr)
 			} else {
-				q = (*slip.Bignum)(bi.Add(&bi, big.NewInt(1)))
+				_ = bi.Sub(&bi, big.NewInt(1))
+				q = (*slip.Bignum)(&bi)
 				_ = zb.SetInt(&bi)
-				_ = zp.Mul(&zb, (*big.Rat)(div.(*slip.Ratio)))
-				r = (*slip.Ratio)(zr.Sub((*big.Rat)(tn), &zp))
+				_ = zp.Mul(&zb, d)
+				_ = zr.Sub((*big.Rat)(tn), &zp)
+				r = (*slip.Ratio)(&zr)
 			}
-		case 1:
+		case -1:
 			if d.Sign() == 1 {
-				q = (*slip.Bignum)(bi.Add(&bi, big.NewInt(1)))
+				q = (*slip.Bignum)(bi.Sub(&bi, big.NewInt(1)))
 				_ = zb.SetInt(&bi)
-				_ = zp.Mul(&zb, (*big.Rat)(div.(*slip.Ratio)))
+				_ = zp.Mul(&zb, d)
 				r = (*slip.Ratio)(zr.Sub((*big.Rat)(tn), &zp))
 			} else {
 				q = (*slip.Bignum)(&bi)

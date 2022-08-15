@@ -26,6 +26,10 @@ func TestCeilingFixnum(t *testing.T) {
 		Source: `(ceiling -5 2)`,
 		Expect: "-2, -1",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling -5 -2)`,
+		Expect: "3, 1",
+	}).Test(t)
 }
 
 func TestCeilingSingleFloat(t *testing.T) {
@@ -39,16 +43,24 @@ func TestCeilingSingleFloat(t *testing.T) {
 		Expect: "4, -5s-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(ceiling 5.5s+0 2)`,
-		Expect: "3, -5s-01",
-	}).Test(t)
-	(&sliptest.Function{
 		Source: `(ceiling 1.5s+0 2)`,
 		Expect: "1, -5s-01",
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(ceiling 5.5s+0 2)`,
+		Expect: "3, -5s-01",
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(ceiling -5.5s+0 2)`,
 		Expect: "-2, -1.5s+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling 5.5s+0 -2)`,
+		Expect: "-2, 1.5s+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling -5.5s+0 -2)`,
+		Expect: "3, 5s-01",
 	}).Test(t)
 }
 
@@ -63,16 +75,24 @@ func TestCeilingDoubleFloat(t *testing.T) {
 		Expect: "4, -5d-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(ceiling 5.5d+0 2)`,
-		Expect: "3, -5d-01",
-	}).Test(t)
-	(&sliptest.Function{
 		Source: `(ceiling 1.5d+0 2)`,
 		Expect: "1, -5d-01",
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(ceiling 5.5d+0 2)`,
+		Expect: "3, -5d-01",
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(ceiling -5.5d+0 2)`,
 		Expect: "-2, -1.5d+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling 5.5d+0 -2)`,
+		Expect: "-2, 1.5d+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling -5.5d+0 -2)`,
+		Expect: "3, 5d-01",
 	}).Test(t)
 }
 
@@ -87,24 +107,36 @@ func TestCeilingLongFloat(t *testing.T) {
 		Expect: "4, -5L-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(ceiling 5.5L+0 2)`,
-		Expect: "3, -5L-01",
-	}).Test(t)
-	(&sliptest.Function{
 		Source: `(ceiling 1.5L+0 2)`,
 		Expect: "1, -5L-01",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling 6.0L+0 2)`,
+		Expect: "3, 0L+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling 5.5L+0 2)`,
+		Expect: "3, -5L-01",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling -5.5L+0 2)`,
 		Expect: "-2, -1.5L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(ceiling 6.0L+0 2)`,
-		Expect: "3, 0d+00",
+		Source: `(ceiling 5.5L+0 -2)`,
+		Expect: "-2, 1.5L+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling -5.5L+0 -2)`,
+		Expect: "3, 5L-01",
 	}).Test(t)
 }
 
 func TestCeilingBignum(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(ceiling 60000000000000000000 20000000000000000000)`,
+		Expect: "3, 0",
+	}).Test(t)
 	(&sliptest.Function{
 		Source: `(ceiling 50000000000000000000 20000000000000000000)`,
 		Expect: "3, -10000000000000000000",
@@ -114,8 +146,12 @@ func TestCeilingBignum(t *testing.T) {
 		Expect: "-2, -10000000000000000000",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(ceiling 60000000000000000000 20000000000000000000)`,
-		Expect: "3, 0",
+		Source: `(ceiling 50000000000000000000 -20000000000000000000)`,
+		Expect: "-2, 10000000000000000000",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling -50000000000000000000 -20000000000000000000)`,
+		Expect: "3, 10000000000000000000",
 	}).Test(t)
 }
 
@@ -135,6 +171,18 @@ func TestCeilingRatio(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(ceiling 3/4 1/2)`,
 		Expect: "2, -1/4",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling 3/4 -1/2)`,
+		Expect: "-1, 1/4",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling -3/4 1/2)`,
+		Expect: "-1, -1/4",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ceiling -3/4 -1/2)`,
+		Expect: "2, 1/4",
 	}).Test(t)
 }
 
