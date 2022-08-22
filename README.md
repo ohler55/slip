@@ -7,6 +7,8 @@ SLIce Processing is LISP for golang
 - update all num functions to support Values{}
  - in numbers.go as well as functions themselves
 
+- make const/vars for 0 and 1 and 2 for various big type
+
 - next
  - math
   + abs
@@ -38,14 +40,13 @@ SLIce Processing is LISP for golang
   - random
   - rem
   - round
-   - round as expected but if exactly half way head toward the closest even
   - fround
   + signum
   + sin
   + sqrt
   + subtract
   + tan
-  - truncate
+  + truncate
   - ftruncate
 
   - coerce
