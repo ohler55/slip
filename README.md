@@ -23,6 +23,7 @@ SLIce Processing is LISP for golang
   + = (same)
   + /= (uniq)
   - exp
+  - expt
   + float
   + floor
   + ffloor
@@ -39,15 +40,15 @@ SLIce Processing is LISP for golang
   + oneplus
   - random
   - rem
-  - round
-  - fround
+  + round
+  + fround
   + signum
   + sin
   + sqrt
   + subtract
   + tan
   + truncate
-  - ftruncate
+  + ftruncate
 
   - coerce
    - also support integers unlike CL
