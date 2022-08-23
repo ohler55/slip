@@ -22,7 +22,7 @@ SLIce Processing is LISP for golang
   + divide
   + = (same)
   + /= (uniq)
-  - exp
+  + exp
   - expt
   + float
   + floor
