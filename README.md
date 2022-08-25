@@ -29,7 +29,7 @@ SLIce Processing is LISP for golang
   + ffloor
   + gt
   + gte
-  - log
+  + log
   + lt
   + lte
   + max
