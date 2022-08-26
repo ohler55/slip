@@ -34,7 +34,7 @@ SLIce Processing is LISP for golang
   + lte
   + max
   + min
-  - mod
+  + mod
   + multiply
   + oneminus
   + oneplus
