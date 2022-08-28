@@ -3,6 +3,9 @@
 package cl
 
 import (
+	"math/big"
+	"math/rand"
+
 	"github.com/ohler55/slip"
 )
 
@@ -28,8 +31,8 @@ func init() {
 					Text: "A random state.",
 				},
 			},
-			Return: "nil",
-			Text:   `__random__ returns a random numner less than _limit_.`,
+			Return: "real",
+			Text:   `__random__ returns a random number less than _limit_.`,
 			Examples: []string{
 				"(random 5) => 3",
 				"(random 7.5) => 3.9",
@@ -69,13 +72,16 @@ func (f *Random) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case slip.Fixnum:
 		result = slip.Fixnum(rs.Uint64() % uint64(limit))
 	case *slip.Bignum:
-		// TBD
+		var z big.Int
+		result = (*slip.Bignum)(z.Rand(rand.New(rs), (*big.Int)(limit)))
 	case slip.SingleFloat:
 		result = slip.SingleFloat(float64(rs.Uint64()%(1<<53))/float64(1<<53)) * limit
 	case slip.DoubleFloat:
 		result = slip.DoubleFloat(float64(rs.Uint64()%(1<<53))/float64(1<<53)) * limit
 	case *slip.LongFloat:
-		// TBD
+		var z big.Float
+		_ = z.Mul(big.NewFloat(float64(rs.Uint64()%(1<<53))/float64(1<<53)), (*big.Float)(limit))
+		result = (*slip.LongFloat)(&z)
 	default:
 		slip.PanicType("limit", limit, "real")
 	}
