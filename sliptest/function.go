@@ -40,9 +40,9 @@ func (tf *Function) Test(t *testing.T) {
 		scope = slip.NewScope()
 	}
 	if tf.Panics {
-		tt.Panic(t, func() { obj.Eval(scope, 0) })
+		tt.Panic(t, func() { obj.Eval(scope, 0) }, tf.Source)
 	} else {
 		tf.Result = obj.Eval(scope, 0)
-		tt.Equal(t, tf.Expect, slip.ObjectString(tf.Result))
+		tt.Equal(t, tf.Expect, slip.ObjectString(tf.Result), tf.Source)
 	}
 }

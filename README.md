@@ -2,11 +2,37 @@
 
 SLIce Processing is LISP for golang
 
-
-
 -------------------------------------------------------------------------------
 
+- update all num functions to support Values{}
+ - in numbers.go as well as functions themselves
+
+- make const/vars for 0 and 1 and 2 for various big type
+
 - next
+
+  - coerce
+   - also support integers unlike CL
+
+- hash-table
+ - make-hash-table
+ - hash-table-p
+ - hash-table-count
+ - hash-table-p
+ - hash-table-rehash-size
+ - hash-table-rehash-threshold
+ - hash-table-size
+ - hash-table-test
+ - gethash
+  - use setf to set
+ - rehash
+ - remhash
+ - maphash
+ - clrhash
+ - sxhash
+ - with-hash-table-iterator
+
+
  - test
   - printer
    - lambda

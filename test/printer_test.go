@@ -378,16 +378,16 @@ func TestPrintPrec(t *testing.T) {
 	tt.Equal(t, "1.23457e+20", string(slip.Append([]byte{}, lf)), "%s: printer append", df)
 
 	slip.SetVar(readablyKey, slip.True)
-	tt.Equal(t, "1.23457s+20", string(slip.Append([]byte{}, sf)), "%s: printer append", df)
-	tt.Equal(t, "1.23457d+20", string(slip.Append([]byte{}, df)), "%s: printer append", df)
-	tt.Equal(t, "1.23457L+20", string(slip.Append([]byte{}, lf)), "%s: printer append", df)
+	tt.Equal(t, "1.234568s+20", string(slip.Append([]byte{}, sf)), "%s: printer append", df)
+	tt.Equal(t, "1.234568d+20", string(slip.Append([]byte{}, df)), "%s: printer append", df)
+	tt.Equal(t, "1.234568L+20", string(slip.Append([]byte{}, lf)), "%s: printer append", df)
 
 	slip.SetVar(key, slip.Fixnum(20))
 	tt.Equal(t, "1.2345679s+20",
 		string(slip.Append([]byte{}, sf)), "%s: printer append with prec 20", sf)
 	tt.Equal(t, "1.2345678901234568d+20",
 		string(slip.Append([]byte{}, df)), "%s: printer append with prec 20", df)
-	tt.Equal(t, "1.234567890123456789L+20",
+	tt.Equal(t, "1.23456789012345678900L+20",
 		string(slip.Append([]byte{}, lf)), "%s: printer append with prec 20", df)
 }
 

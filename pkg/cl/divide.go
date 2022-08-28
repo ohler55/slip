@@ -1,0 +1,122 @@
+// Copyright (c) 2022, Peter Ohler, All rights reserved.
+
+package cl
+
+import (
+	"math/big"
+
+	"github.com/ohler55/slip"
+)
+
+func init() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := Divide{Function: slip.Function{Name: "/", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "/",
+			Args: []*slip.DocArg{
+				{
+					Name: "numbers",
+					Type: "number",
+					Text: "The number to take the quotient of.",
+				},
+			},
+			Return: "number",
+			Text:   `__/__ returns the quotient of the _numbers_.`,
+			Examples: []string{
+				"(/ 5) => 1/5",
+				"(/ 3 2/3) => 9/2",
+			},
+		}, &slip.CLPkg)
+}
+
+// Divide represents the divide function.
+type Divide struct {
+	slip.Function
+}
+
+// Call the the function with the arguments provided.
+func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Object) {
+	if len(args) < 1 {
+		slip.PanicArgCount(f, 1, -1)
+	}
+	var arg slip.Object
+	for pos := len(args) - 1; 0 <= pos; pos-- {
+		if quot == nil {
+			quot = args[pos]
+			if _, ok := quot.(slip.Number); !ok {
+				slip.PanicType("numbers", quot, "number")
+			}
+			if pos == 0 {
+				switch td := quot.(type) {
+				case slip.Fixnum:
+					if td == 1 {
+						quot = td
+					} else {
+						quot = (*slip.Ratio)(big.NewRat(1, int64(td)))
+					}
+
+				case slip.SingleFloat:
+					quot = 1.0 / td
+				case slip.DoubleFloat:
+					quot = 1.0 / td
+				case *slip.LongFloat:
+					one := big.NewFloat(1.0)
+					one.SetPrec((*big.Float)(td).Prec())
+					quot = (*slip.LongFloat)(one.Quo(one, (*big.Float)(td)))
+				case *slip.Bignum:
+					bi := (*big.Int)(td)
+					if bi.IsInt64() && bi.Int64() == 1 {
+						quot = td
+					} else {
+						var z big.Rat
+						quot = (*slip.Ratio)(z.SetFrac(big.NewInt(1), (*big.Int)(td)))
+					}
+				case *slip.Ratio:
+					quot = (*slip.Ratio)((*big.Rat)(td).Inv((*big.Rat)(td)))
+				case slip.Complex:
+					quot = slip.Complex(complex(1, 0) / complex128(td))
+				}
+				return
+			}
+			continue
+		}
+		arg, quot = normalizeNumber(args[pos], quot)
+		switch ta := arg.(type) {
+		case slip.Fixnum:
+			if quot.(slip.Fixnum)%ta == 0 {
+				quot = quot.(slip.Fixnum) / ta
+			} else {
+				quot = (*slip.Ratio)(big.NewRat(int64(quot.(slip.Fixnum)), int64(ta)))
+			}
+		case slip.SingleFloat:
+			quot = quot.(slip.SingleFloat) / ta
+		case slip.DoubleFloat:
+			quot = quot.(slip.DoubleFloat) / ta
+		case *slip.LongFloat:
+			syncFloatPrec(ta, quot.(*slip.LongFloat))
+			quot = (*slip.LongFloat)(((*big.Float)(quot.(*slip.LongFloat))).Quo(
+				(*big.Float)(quot.(*slip.LongFloat)),
+				(*big.Float)(ta)),
+			)
+		case *slip.Bignum:
+			var z big.Int
+			var zz big.Int
+			q, r := zz.QuoRem((*big.Int)(quot.(*slip.Bignum)), (*big.Int)(ta), &z)
+			if r.Sign() == 0 {
+				quot = (*slip.Bignum)(q)
+			} else {
+				var zr big.Rat
+				quot = (*slip.Ratio)(zr.SetFrac((*big.Int)(quot.(*slip.Bignum)), (*big.Int)(ta)))
+			}
+		case *slip.Ratio:
+			quot = (*slip.Ratio)(((*big.Rat)(quot.(*slip.Ratio))).Quo((*big.Rat)(quot.(*slip.Ratio)), (*big.Rat)(ta)))
+		case slip.Complex:
+			quot = slip.Complex(complex128(quot.(slip.Complex)) / complex128(ta))
+		}
+	}
+	return
+}
