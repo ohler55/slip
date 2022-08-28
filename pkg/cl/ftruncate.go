@@ -24,6 +24,12 @@ func init() {
 					Text: `The number to take the quotient of and then truncateed
 to the next integer towards positive infinity.`,
 				},
+				{Name: "&optional"},
+				{
+					Name: "divisor",
+					Type: "real",
+					Text: `The number to divide the _number_ by. The default is 1.`,
+				},
 			},
 			Return: "float,real",
 			Text: `__ftruncate__ returns the quotient of the _numbers_ truncateed

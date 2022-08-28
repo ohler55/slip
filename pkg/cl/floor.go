@@ -25,6 +25,12 @@ func init() {
 					Text: `The number to take the quotient of and then rounded
 to the next integer towards negative infinity.`,
 				},
+				{Name: "&optional"},
+				{
+					Name: "divisor",
+					Type: "real",
+					Text: `The number to divide the _number_ by. The default is 1.`,
+				},
 			},
 			Return: "integer,real",
 			Text: `__floor__ returns the quotient of the _numbers_ rounded

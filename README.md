@@ -39,7 +39,7 @@ SLIce Processing is LISP for golang
   + oneminus
   + oneplus
   - random
-  - rem
+  + rem
   + round
   + fround
   + signum

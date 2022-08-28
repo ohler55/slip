@@ -50,17 +50,6 @@ func TestModBignum(t *testing.T) {
 	}).Test(t)
 }
 
-func TestModNotReal(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(mod #C(1 1) 2)`,
-		Panics: true,
-	}).Test(t)
-	(&sliptest.Function{
-		Source: `(mod 2 #C(1 1))`,
-		Panics: true,
-	}).Test(t)
-}
-
 func TestModReal(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(mod 7.5 3)`,
@@ -77,6 +66,24 @@ func TestModReal(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(mod -1.5 -5.0)`,
 		Expect: "-1.5",
+	}).Test(t)
+}
+
+func TestModArgCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(mod 2)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestModNotReal(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(mod #C(1 1) 2)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(mod 2 #C(1 1))`,
+		Panics: true,
 	}).Test(t)
 }
 
