@@ -108,16 +108,14 @@ func (obj *RandomState) Seed(seed int64) {
 
 // Int63 returns a random int64.
 func (obj *RandomState) Int63() (r int64) {
-	obj.mu.Lock()
-	r = int64(obj.Uint64() >> 1)
-	obj.mu.Unlock()
-	return
+	return int64(obj.Uint64() >> 1)
 }
 
 // Uint64 returns a random uint64. It does this by incrementing the indices by
 // the steps, then looking up the associated values in the randTable which are
 // then XORed to come up with the random value.
 func (obj *RandomState) Uint64() (r uint64) {
+	obj.mu.Lock()
 	for i := len(obj.steps) - 1; 0 <= i; i-- {
 		obj.indices[i] += obj.steps[i]
 		if len(randTable) <= obj.indices[i] {
@@ -127,6 +125,7 @@ func (obj *RandomState) Uint64() (r uint64) {
 	for _, i := range obj.indices {
 		r += randTable[i]
 	}
+	obj.mu.Unlock()
 	return
 }
 
