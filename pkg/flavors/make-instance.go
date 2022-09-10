@@ -38,7 +38,7 @@ variable values and plist options.`,
 			Examples: []string{
 				"(make-instance 'strawberry :color 'red) => #<strawberry 123456>",
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // MakeInstance represents the makeInstance function.

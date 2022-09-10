@@ -62,7 +62,7 @@ variables can be provided an initial value. (also spelled :inittable-instance-va
 				"(defflavor strawberry (temperature) ()) => #<flavor strawberry>",
 				"(defflavor blueberry ((temperature -7)) ()) => #<flavor blueberry>",
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // Defflavor represents the defflavor function.
@@ -91,27 +91,13 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		slip.PanicType("vars of defflavor", args[pos], "list")
 	}
 	pos--
-	key := strings.ToLower(string(name))
-	if _, has := allFlavors[key]; has {
-		panic(fmt.Sprintf("Flavor %s already defined.", name))
-	}
-	nf := &Flavor{
-		name:           key,
-		defaultVars:    map[string]slip.Object{},
-		keywords:       map[string]slip.Object{},
-		methods:        map[string][]*method{},
-		initable:       map[string]bool{},
-		defaultHandler: defHand(true),
-	}
+
+	var inherit []string
 	switch tl := args[pos].(type) {
 	case slip.List:
 		for i := len(tl) - 1; 0 <= i; i-- {
 			if sym, ok2 := tl[i].(slip.Symbol); ok2 {
-				if cf := allFlavors[strings.ToLower(string(sym))]; cf != nil {
-					nf.inheritFlavor(cf)
-				} else {
-					panic(fmt.Sprintf("Flavor %s not defined.", sym))
-				}
+				inherit = append(inherit, string(sym))
 			} else {
 				slip.PanicType("flavors of defflavor", args[pos], "list of symbols")
 			}
@@ -121,10 +107,12 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	default:
 		slip.PanicType("flavors of defflavor", args[pos], "list")
 	}
+
+	defVars := map[string]slip.Object{}
 	for i := len(vars) - 1; 0 <= i; i-- {
 		switch tv := vars[i].(type) {
 		case slip.Symbol:
-			nf.defaultVars[strings.ToLower(string(tv))] = nil
+			defVars[strings.ToLower(string(tv))] = nil
 		case slip.List:
 			if len(tv) != 2 {
 				slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
@@ -134,31 +122,58 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 				slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
 			}
 			if tv[0] == nil {
-				nf.defaultVars[strings.ToLower(string(sym))] = nil
+				defVars[strings.ToLower(string(sym))] = nil
 			} else {
-				nf.defaultVars[strings.ToLower(string(sym))] = tv[0].Eval(s, depth+1)
+				defVars[strings.ToLower(string(sym))] = tv[0].Eval(s, depth+1)
 			}
 		default:
 			slip.PanicType("xx vars element of defflavor", tv, "symbol", "list of symbol and value")
 		}
 	}
-	f.processOptions(nf, args[:pos])
+	_ = DefFlavor(string(name), defVars, inherit, args[:pos])
+
+	return name
+}
+
+// DefFlavor defines a new flavor.
+func DefFlavor(name string, vars map[string]slip.Object, inherit []string, options slip.List) *Flavor {
+	name = strings.ToLower(name)
+	if _, has := allFlavors[name]; has {
+		panic(fmt.Sprintf("Flavor %s already defined.", name))
+	}
+	nf := &Flavor{
+		name:           name,
+		defaultVars:    vars,
+		keywords:       map[string]slip.Object{},
+		methods:        map[string][]*method{},
+		initable:       map[string]bool{},
+		defaultHandler: defHand(true),
+	}
+	for _, fname := range inherit {
+		if cf := allFlavors[strings.ToLower(fname)]; cf != nil {
+			nf.inheritFlavor(cf)
+		} else {
+			panic(fmt.Sprintf("Flavor %s not defined.", fname))
+		}
+	}
+
+	processFlavorOptions(nf, options)
 	if !nf.abstract {
-		f.addIncludes(nf)
+		addIncludes(nf)
 	}
 	if !nf.noVanilla {
 		nf.inheritFlavor(&vanilla)
 	}
 	if !nf.abstract {
-		f.validateFlavor(nf)
+		validateFlavor(nf)
 	}
 	allFlavors[nf.name] = nf
-	FlavorsPkg.Set(string(name), nf)
+	Pkg.Set(nf.name, nf)
 
-	return name
+	return nf
 }
 
-func (f *Defflavor) addIncludes(nf *Flavor) {
+func addIncludes(nf *Flavor) {
 	for _, fn := range nf.included {
 		if !nf.inheritsFlavor(fn) {
 			if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
@@ -182,7 +197,7 @@ func (f *Defflavor) addIncludes(nf *Flavor) {
 	}
 }
 
-func (f *Defflavor) validateFlavor(nf *Flavor) {
+func validateFlavor(nf *Flavor) {
 	full := make([]*Flavor, len(nf.inherit)+1)
 	full[0] = nf
 	copy(full[1:], nf.inherit)
@@ -205,7 +220,7 @@ func (f *Defflavor) validateFlavor(nf *Flavor) {
 	}
 }
 
-func (f *Defflavor) valsStringList(vals slip.List) (sa []string) {
+func valsStringList(vals slip.List) (sa []string) {
 	for i := len(vals) - 1; 0 <= i; i-- {
 		if sym, ok := vals[i].(slip.Symbol); ok {
 			sa = append(sa, string(sym))
@@ -216,7 +231,7 @@ func (f *Defflavor) valsStringList(vals slip.List) (sa []string) {
 	return
 }
 
-func (f *Defflavor) setDefaultHandler(nf *Flavor, val slip.Object) {
+func setDefaultHandler(nf *Flavor, val slip.Object) {
 Top:
 	switch tv := val.(type) {
 	case slip.Symbol:
@@ -241,7 +256,7 @@ Top:
 	}
 }
 
-func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
+func processFlavorOptions(nf *Flavor, options slip.List) {
 	// Order of options doesn't matter so process the easy way.
 	for _, opt := range options {
 		var key slip.Symbol
@@ -268,7 +283,7 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 			if len(vals) != 1 {
 				slip.PanicType(":default-handler of defflavor", nil, "symbol")
 			}
-			f.setDefaultHandler(nf, vals[0])
+			setDefaultHandler(nf, vals[0])
 		case ":default-init-plist":
 			for i := len(vals) - 1; 0 <= i; i-- {
 				if plist, ok := vals[i].(slip.List); ok && len(plist) == 2 {
@@ -296,11 +311,11 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":gettable-instance-variables":
 			for k := range nf.defaultVars {
 				if k != "self" {
-					nf.defMethod(":"+k, "", getter(k))
+					nf.DefMethod(":"+k, "", getter(k))
 				}
 			}
 		case ":included-flavors":
-			nf.included = f.valsStringList(vals)
+			nf.included = valsStringList(vals)
 		case ":initable-instance-variables", ":inittable-instance-variables":
 			if 0 < len(vals) {
 				for i := len(vals) - 1; 0 <= i; i-- {
@@ -328,17 +343,17 @@ func (f *Defflavor) processOptions(nf *Flavor, options slip.List) {
 		case ":no-vanilla-flavor":
 			nf.noVanilla = true
 		case ":required-flavors":
-			nf.required = f.valsStringList(vals)
+			nf.required = valsStringList(vals)
 		case ":required-init-keywords":
-			nf.requiredKeywords = f.valsStringList(vals)
+			nf.requiredKeywords = valsStringList(vals)
 		case ":required-instance-variables":
-			nf.requiredVars = f.valsStringList(vals)
+			nf.requiredVars = valsStringList(vals)
 		case ":required-methods":
-			nf.requiredMethods = f.valsStringList(vals)
+			nf.requiredMethods = valsStringList(vals)
 		case ":settable-instance-variables":
 			for k := range nf.defaultVars {
 				if k != "self" {
-					nf.defMethod(":set-"+k, "", setter(k))
+					nf.DefMethod(":set-"+k, "", setter(k))
 				}
 			}
 		default:
@@ -371,5 +386,5 @@ type defHand bool
 // Call the default handler.
 func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
-	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.flavor.name, args[len(args)-1]))
+	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.Flavor.name, args[len(args)-1]))
 }

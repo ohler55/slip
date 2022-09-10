@@ -29,7 +29,7 @@ func init() {
 			Examples: []string{
 				`(time-utc @2022-07-10T12:29:21-05:00) => @2022-07-10T17:29:21Z`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // TimeUtc represents the timeUtc function.

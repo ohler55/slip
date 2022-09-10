@@ -27,7 +27,7 @@ func init() {
 				`(setq queue (make-channel 10)) => #<channel 12345>`,
 				`(channel-close queue)`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // ChannelClose represents the channelClose function.

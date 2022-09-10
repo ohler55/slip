@@ -28,7 +28,7 @@ func init() {
 			Examples: []string{
 				"(defwhopper (blueberry :rot) () (continue-whopper))",
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // ContinueWhopper represents the continueWhopper function.

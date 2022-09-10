@@ -34,7 +34,7 @@ func init() {
 			Examples: []string{
 				`(time-in @2022-07-10T17:29:21Z "EST") => @2022-07-10T12:29:21-05:00`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // TimeIn represents the timeIn function.

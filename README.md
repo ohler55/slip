@@ -5,6 +5,10 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - rename pkg file to pkg.go in each package dir
+
+ - list-all-packages function
+  - use to verify bag package exists
 
  - print
 

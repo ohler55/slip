@@ -40,7 +40,7 @@ otherwise the rest of the forms are evaluated in order.`,
 			Examples: []string{
 				`(recover rec (7) (/ 1 0)) => 7`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // Recover represents the recover function.

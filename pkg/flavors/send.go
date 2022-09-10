@@ -39,7 +39,7 @@ func init() {
 				"(setq fruit (make-instance 'strawberry :color 'red)) => #<strawberry 123456>",
 				"(send fruit :color) => red",
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // Send represents the send function.

@@ -40,7 +40,8 @@ type Flavor struct {
 	allowOtherKeys   bool
 }
 
-func (obj *Flavor) defMethod(name string, methodType string, caller slip.Caller) {
+// DefMethod adds a method to the Flavor.
+func (obj *Flavor) DefMethod(name string, methodType string, caller slip.Caller) {
 	name = strings.ToLower(name)
 	var m *method
 	add := false
@@ -202,7 +203,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 }
 
 func (obj *Flavor) makeInstance() *Instance {
-	inst := Instance{flavor: obj}
+	inst := Instance{Flavor: obj}
 	inst.Scope.Vars = map[string]slip.Object{}
 	for k, v := range obj.defaultVars {
 		inst.Vars[k] = v

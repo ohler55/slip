@@ -33,7 +33,7 @@ func init() {
 				`(channel-push  queue 10)`,
 				`(channel-pop  queue) => 10`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // ChannelPush represents the channelPush function.
