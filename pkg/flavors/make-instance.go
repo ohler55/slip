@@ -101,7 +101,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			panic(fmt.Sprintf("Keyword %s missing from make-instance for flavor %s.", k, cf.name))
 		}
 	}
-	_ = inst.send(":init", slip.List{plist}, depth+1)
+	_ = inst.Receive(":init", slip.List{plist}, depth+1)
 
 	return inst
 }

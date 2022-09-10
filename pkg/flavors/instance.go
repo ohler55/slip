@@ -68,7 +68,10 @@ func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
 }
 
-func (obj *Instance) send(message string, args slip.List, depth int) slip.Object {
+// Receive a method invocation from the send function. Not intended to be
+// call by any code other than the send function but is public to allow it
+// to be over-ridden.
+func (obj *Instance) Receive(message string, args slip.List, depth int) slip.Object {
 	ma := obj.flavor.methods[message]
 	if len(ma) == 0 {
 		xargs := args
@@ -85,10 +88,10 @@ func (obj *Instance) send(message string, args slip.List, depth int) slip.Object
 			return m.wrap.Call(ws, args, depth)
 		}
 	}
-	return obj.sendInner(ma, args, depth)
+	return obj.innerReceive(ma, args, depth)
 }
 
-func (obj *Instance) sendInner(ma []*method, args slip.List, depth int) slip.Object {
+func (obj *Instance) innerReceive(ma []*method, args slip.List, depth int) slip.Object {
 	for _, m := range ma {
 		if m.before != nil {
 			m.before.Call(&obj.Scope, args, depth)

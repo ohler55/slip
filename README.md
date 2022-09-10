@@ -4,15 +4,18 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- update all num functions to support Values{}
- - in numbers.go as well as functions themselves
-
-- make const/vars for 0 and 1 and 2 for various big type
-
 - next
 
-  - coerce
-   - also support integers unlike CL
+ - print
+
+ - format
+  - includes the lithp inline option
+  - walk and read format-directives and apply to output string
+
+
+ - coerce
+  - also support integers unlike CL
+  - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
 
 - hash-table
  - make-hash-table
@@ -48,26 +51,36 @@ SLIce Processing is LISP for golang
   - expand on read
 
 - base64 (encode and decode in gi package)
-
-- simple
+- flavors
+ - add User or Custom or Any (any) field to instance for custom flavors
+ - or make the send function send to Receiver then embed instance in Bag
+  - make Instance.send public
+- bag
  - separate package
-  - simple
+  - bag
+   - integer, float, string, t, nil, bag::false, time, list, bag::map
+ - as flavor
+  - like vanilla
+  - add user data field to instance
+   - or is an interface without daemons better?
+   - without daemons might as well be pure functions
  - use flavors for the instance and methods or just functions
   - is there a need for daemons? if not then maybe not worth making an object unless for name spacing
  - functions or methods
   - format as json or sen
-  - get with mapc like interface, maybe get and collect (getc?)
-  - simple-first
-  - simple-set
-  - simple-has
-  - simple-parse-json
-  - simple-parse-sen
-  - make-json-path
-  - make-simple
-  - json-path-p
-  - simple-p
-  - simple-walk
-  - simple-to-lisp
+  - bag-get (gets first one)
+  - bag-set
+  - bag-has
+  - bag-parse
+   - handle both json and sen
+    - simple-parse-json ?
+    - simple-parse-sen ?
+  - make-bag-path (json path)
+  - make-bag
+  - bag-path-p
+  - bag-p
+  - bag-walk (with path then like jp.Get else walk all)
+  - bag-to-lisp
 
  - other method combinations?
   - :method-combination option for defflavor

@@ -106,7 +106,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	pos := len(args) - 1
 	if sym, ok := args[pos].(slip.Symbol); ok {
 		if _, has := obj.flavor.methods[string(sym)]; has {
-			return obj.send(string(sym), args[:pos], depth+1)
+			return obj.Receive(string(sym), args[:pos], depth+1)
 		}
 	}
 	return nil

@@ -53,7 +53,7 @@ func (f *Send) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicArgCount(f, 2, -1)
 	}
 	pos := len(args) - 1
-	inst, ok := args[pos].(*Instance)
+	inst, ok := args[pos].(Receiver)
 	if !ok {
 		slip.PanicType("object of send", args[pos], "instance")
 	}
@@ -62,5 +62,5 @@ func (f *Send) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if method, ok = args[pos].(slip.Symbol); !ok {
 		slip.PanicType("method of send", args[pos], "keyword")
 	}
-	return inst.send(string(method), args[:pos], depth)
+	return inst.Receive(string(method), args[:pos], depth)
 }
