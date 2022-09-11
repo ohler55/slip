@@ -16,7 +16,7 @@ type Object interface {
 
 	// Simplify the Object into simple go types of nil, bool, int64, float64,
 	// string, []interface{}, map[string]interface{}, or time.Time.
-	Simplify() interface{}
+	Simplify() any
 
 	// Equal returns true if this Object and the other are equal in value.
 	Equal(other Object) bool

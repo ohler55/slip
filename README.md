@@ -12,11 +12,13 @@ SLIce Processing is LISP for golang
 - bag
  - as flavor
   - format as json or sen
+   - also time format to use
   - bag-get (gets first one)
    - with nil or no arg return Instance.Any
   - bag-set
   - bag-has
   - bag-parse
+   - detect time? (which ojg versions to use?)
    - handle both json and sen
     - simple-parse-json ?
     - simple-parse-sen ?

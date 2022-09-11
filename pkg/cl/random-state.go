@@ -90,7 +90,7 @@ func (obj *RandomState) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
 }
 
-var seedPrimes [47]int = [...]int{
+var seedPrimes = []int{
 	1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67,
 	71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149,
 	151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199,
@@ -129,7 +129,7 @@ func (obj *RandomState) Uint64() (r uint64) {
 	return
 }
 
-var randTable [997]uint64 = [...]uint64{
+var randTable = []uint64{
 	0xfd6f07d63ec10a24, 0x11a515a02c8264ed, 0x697e8473a7259e2e, 0xfa0c083569096dcf, 0x79d4b34caec2ced3,
 	0xe3cbb1da0f8f290c, 0x7cc9b9a57c8fcdde, 0x489cbd020c8b2218, 0x92de88328f0e2289, 0x17c700e0f2daa1eb,
 	0x9e7825e4c5205cfa, 0x0a2e5e0177a8012a, 0xc87eb0367fd40549, 0x3e056c852dad63ab, 0x816d679255dc2858,

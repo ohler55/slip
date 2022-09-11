@@ -6,5 +6,5 @@
 // package) and be encoded in the same way. It can also be converted to and
 // from native LISP with bag::map becoming an assoc list. The bag::false value
 // is the only non-native value that is retained since LSIP does not
-// differenciate between nil and boolean false.
+// differentiate between nil and boolean false.
 package bag
