@@ -5,10 +5,25 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - rename pkg file to pkg.go in each package dir
 
  - list-all-packages function
   - use to verify bag package exists
+
+- bag
+ - as flavor
+  - format as json or sen
+  - bag-get (gets first one)
+   - with nil or no arg return Instance.Any
+  - bag-set
+  - bag-has
+  - bag-parse
+   - handle both json and sen
+    - simple-parse-json ?
+    - simple-parse-sen ?
+  - make-bag-path (json path)
+  - bag-path-p
+  - bag-walk (with path then like jp.Get else walk all)
+  - bag-to-lisp
 
  - print
 
@@ -55,36 +70,6 @@ SLIce Processing is LISP for golang
   - expand on read
 
 - base64 (encode and decode in gi package)
-- flavors
- - add User or Custom or Any (any) field to instance for custom flavors
- - or make the send function send to Receiver then embed instance in Bag
-  - make Instance.send public
-- bag
- - separate package
-  - bag
-   - integer, float, string, t, nil, bag::false, time, list, bag::map
- - as flavor
-  - like vanilla
-  - add user data field to instance
-   - or is an interface without daemons better?
-   - without daemons might as well be pure functions
- - use flavors for the instance and methods or just functions
-  - is there a need for daemons? if not then maybe not worth making an object unless for name spacing
- - functions or methods
-  - format as json or sen
-  - bag-get (gets first one)
-  - bag-set
-  - bag-has
-  - bag-parse
-   - handle both json and sen
-    - simple-parse-json ?
-    - simple-parse-sen ?
-  - make-bag-path (json path)
-  - make-bag
-  - bag-path-p
-  - bag-p
-  - bag-walk (with path then like jp.Get else walk all)
-  - bag-to-lisp
 
  - other method combinations?
   - :method-combination option for defflavor
@@ -93,6 +78,7 @@ SLIce Processing is LISP for golang
   - or
   - and
   - list
+
 
 - would building our own stack be a better approach?
  - could reuse scope but would need to clear vars
