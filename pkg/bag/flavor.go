@@ -4,7 +4,9 @@ package bag
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/ohler55/ojg/sen"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -14,6 +16,11 @@ var flavor *flavors.Flavor
 func init() {
 	flavor = flavors.DefFlavor("bag-flavor", map[string]slip.Object{}, nil,
 		slip.List{
+			slip.List{
+				slip.Symbol(":set"),
+				slip.Symbol(":parse"),
+				slip.Symbol(":init-keywords"),
+			},
 			slip.List{
 				slip.String(`A bag is flexible a container for data composed of t, nil, integer,
 float, string, time, list, as well as the special bag::map and
@@ -25,6 +32,7 @@ nil and boolean false.`),
 				slip.Symbol(":documentation")},
 		},
 	)
+	flavor.DefMethod(":init", "", initCaller(true))
 	flavor.DefMethod(":set", "", setCaller(true))
 
 	// TBD add methods
@@ -39,6 +47,35 @@ nil and boolean false.`),
 // Flavor returns the bag-flavor.
 func Flavor() *flavors.Flavor {
 	return flavor
+}
+
+type initCaller bool
+
+func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		args = args[0].(slip.List)
+	}
+
+	switch len(args) {
+	case 0:
+		// ok
+	case 2:
+		key, _ := args[1].(slip.Symbol)
+		switch {
+		case strings.EqualFold(":set", string(key)):
+			obj.Any = objectToBag(args[0])
+		case strings.EqualFold(":parse", string(key)):
+			so, ok := args[0].(slip.String)
+			if !ok {
+				slip.PanicType("bag :init :parse", args[0], "string")
+			}
+			obj.Any = sen.MustParse([]byte(so))
+		}
+	default:
+		panic(fmt.Sprintf("Method bag-flavor init method expects zero or two arguments but received %d.", len(args)))
+	}
+	return nil
 }
 
 type setCaller bool

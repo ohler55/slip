@@ -10,6 +10,7 @@ SLIce Processing is LISP for golang
   - use to verify bag package exists
 
 - bag
+ - make-instance with arguments for parsing
  - as flavor
   - format as json or sen
    - also time format to use
