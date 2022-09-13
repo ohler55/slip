@@ -41,10 +41,11 @@ func TestBagFlavorSet(t *testing.T) {
 	scope := slip.NewScope()
 	obj := slip.ReadString("(setq bag (make-instance 'bag-flavor))").Eval(scope).(*flavors.Instance)
 
-	_ = slip.ReadString("(send bag :set nil 7)").Eval(scope)
+	_ = slip.ReadString("(send bag :set 7)").Eval(scope)
 	tt.Equal(t, "7", pretty.SEN(obj.Any))
 
-	tt.Panic(t, func() { slip.ReadString("(send bag :set nil)").Eval(scope) })
+	tt.Panic(t, func() { slip.ReadString("(send bag :set 7 t)").Eval(scope) })
+	tt.Panic(t, func() { slip.ReadString("(send bag :set 7 nil t)").Eval(scope) })
 }
 
 // TBD test each method

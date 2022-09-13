@@ -6,11 +6,11 @@ SLIce Processing is LISP for golang
 
 - next
 
- - list-all-packages function
-  - use to verify bag package exists
-
 - bag
- - make-instance with arguments for parsing
+ - bag-path
+ - make-bag-path
+
+  - bag-set bag value &optional path
  - as flavor
   - format as json or sen
    - also time format to use

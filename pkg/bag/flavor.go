@@ -82,10 +82,13 @@ type setCaller bool
 
 func (caller setCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	if len(args) != 2 {
-		panic(fmt.Sprintf("Method bag-flavor set method expects two arguments but received %d.", len(args)))
+	switch len(args) {
+	case 1:
+		setBag(obj, args[0], nil)
+	case 2:
+		setBag(obj, args[1], args[0])
+	default:
+		panic(fmt.Sprintf("Method bag-flavor set method expects one or two arguments but received %d.", len(args)))
 	}
-	set(obj, args)
-
 	return obj
 }
