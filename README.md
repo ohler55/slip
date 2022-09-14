@@ -7,11 +7,9 @@ SLIce Processing is LISP for golang
 - next
 
 - bag
- - bag-path
- - make-bag-path
+ - option for time format
+  - use for format and for parse
 
-  - bag-set bag value &optional path
- - as flavor
   - format as json or sen
    - also time format to use
   - bag-get (gets first one)

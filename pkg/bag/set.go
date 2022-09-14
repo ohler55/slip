@@ -81,8 +81,9 @@ func setBag(obj *flavors.Instance, value, path slip.Object) {
 	case nil:
 	case slip.String:
 		x = jp.MustParseString(string(p))
+	case Path:
+		x = jp.Expr(p)
 	default:
-		// TBD Also handle bag-path
 		slip.PanicType("path", p, "string")
 	}
 	v := objectToBag(value)
@@ -98,7 +99,7 @@ func objectToBag(obj slip.Object) (v any) {
 	case nil:
 		// leave v as nil
 	case slip.Symbol:
-		if strings.EqualFold("false", string(val)) {
+		if strings.EqualFold(":false", string(val)) {
 			v = false
 		} else {
 			v = string(val)
