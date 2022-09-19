@@ -5,6 +5,16 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - add global ojg.Options
+  - bag-time-format - string (time.RFC3339Nano, second, nano, nil)
+  - bag-time-wrap - string (key in {key:time-formatted}_
+  - set option.Converter according to the bag-time-xxx
+ - update and test bag-flavor init :parse with options for parse
+ - converters
+  - string converted if no wrap
+  - if wrap then use a wrap converter
+ - constants for rfc3339nano, second, and namo?
+  - if rfc3339 then be flexible on length for parse
 
 - bag
  - option for time format
