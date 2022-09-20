@@ -124,6 +124,19 @@ func updateConverter() {
 			options.Converter = &ojg.TimeNanoConverter
 		case time.RFC3339Nano, "rfc3339":
 			options.Converter = &ojg.TimeRFC3339Converter
+		case "second":
+			options.Converter = &ojg.Converter{
+				Float: []func(val float64) (interface{}, bool){
+					func(val float64) (interface{}, bool) {
+						if 946684800.0 <= val && val <= 2524608000.0 { // 2000-01-01 <= val <= 2050-01-01
+							sec := int64(val)
+							nano := int64((val - float64(sec)) * 1_000_000_000.0)
+							return time.Unix(sec, nano), true
+						}
+						return val, false
+					},
+				},
+			}
 		default:
 			options.Converter = &ojg.Converter{
 				String: []func(val string) (interface{}, bool){

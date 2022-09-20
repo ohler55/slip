@@ -5,6 +5,7 @@ package bag_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg"
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
@@ -36,6 +37,16 @@ func TestBagFlavorInit(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'bag-flavor :bad 7)`).Eval(scope) })
 }
 
+func TestBagFlavorInitParseTime(t *testing.T) {
+	scope := slip.NewScope()
+
+	_ = slip.ReadString(`(setq *bag-time-format* *rfc3339nano*)`).Eval(scope)
+	obj := slip.ReadString(`
+(setq bag (make-instance 'bag-flavor :parse "[\"2022-09-19T01:02:03Z\"]"))`).Eval(scope).(*flavors.Instance)
+	tt.Equal(t, "[1663549323.000000000]", pretty.SEN(obj.Any, &ojg.Options{TimeFormat: "second"}))
+
+}
+
 // Tested more heavily in the bag-set tests.
 func TestBagFlavorSet(t *testing.T) {
 	scope := slip.NewScope()
@@ -46,6 +57,59 @@ func TestBagFlavorSet(t *testing.T) {
 
 	tt.Panic(t, func() { slip.ReadString("(send bag :set 7 t)").Eval(scope) })
 	tt.Panic(t, func() { slip.ReadString("(send bag :set 7 nil t)").Eval(scope) })
+}
+
+// Tested more heavily in the bag-parse tests.
+func TestBagFlavorParse(t *testing.T) {
+	scope := slip.NewScope()
+	obj := slip.ReadString("(setq bag (make-instance 'bag-flavor))").Eval(scope).(*flavors.Instance)
+
+	_ = slip.ReadString(`(send bag :parse "{a:3}")`).Eval(scope)
+	tt.Equal(t, "{a: 3}", pretty.SEN(obj.Any))
+
+	tt.Panic(t, func() { slip.ReadString(`(send bag :parse "7" t)`).Eval(scope) })
+	tt.Panic(t, func() { slip.ReadString(`(send bag :parse "7" nil t)`).Eval(scope) })
+}
+
+// Tested more heavily in the bag-get tests.
+func TestBagFlavorGet(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope).(*flavors.Instance)
+
+	result := slip.ReadString(`(send bag :get "a" t)`).Eval(scope)
+	tt.Equal(t, "7", pretty.SEN(result))
+
+	result = slip.ReadString(`(send bag :get "a")`).Eval(scope)
+	tt.Equal(t, "7", pretty.SEN(result.(*flavors.Instance).Any))
+
+	result = slip.ReadString(`(send bag :get)`).Eval(scope)
+	tt.Equal(t, "{a: 7}", pretty.SEN(result.(*flavors.Instance).Any))
+
+	tt.Panic(t, func() { slip.ReadString(`(send bag :get t t)`).Eval(scope) })
+	tt.Panic(t, func() { slip.ReadString(`(send bag :get "a" nil 7)`).Eval(scope) })
+}
+
+// Tested more heavily in the bag-has tests.
+func TestBagFlavorHas(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope).(*flavors.Instance)
+
+	result := slip.ReadString(`(send bag :has "a")`).Eval(scope)
+	tt.Equal(t, "t", slip.ObjectString(result))
+
+	tt.Panic(t, func() { slip.ReadString(`(send bag :has t)`).Eval(scope) })
+	tt.Panic(t, func() { slip.ReadString(`(send bag :has "a" t)`).Eval(scope) })
+}
+
+// Tested more heavily in the bag-native tests.
+func TestBagFlavorNative(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope).(*flavors.Instance)
+
+	result := slip.ReadString(`(send bag :native)`).Eval(scope)
+	tt.Equal(t, `(("a" . 7))`, slip.ObjectString(result))
+
+	tt.Panic(t, func() { slip.ReadString(`(send bag :native t)`).Eval(scope) })
 }
 
 // TBD test each method

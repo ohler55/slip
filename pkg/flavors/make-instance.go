@@ -66,7 +66,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	if cf.abstract {
 		panic(fmt.Sprintf("Can not create an instance of abstract flavor %s.", cf.name))
 	}
-	inst := cf.makeInstance()
+	inst := cf.MakeInstance()
 	var plist slip.List
 	keys := map[string]bool{}
 	for i := len(args) - 2; 0 < i; i-- {

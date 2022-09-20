@@ -5,38 +5,22 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - add global ojg.Options
-  - bag-time-format - string (time.RFC3339Nano, second, nano, nil)
-  - bag-time-wrap - string (key in {key:time-formatted}_
-  - set option.Converter according to the bag-time-xxx
  - update and test bag-flavor init :parse with options for parse
- - converters
-  - string converted if no wrap
-  - if wrap then use a wrap converter
- - constants for rfc3339nano, second, and namo?
-  - if rfc3339 then be flexible on length for parse
 
 - bag
- - option for time format
-  - use for format and for parse
-
-  - format as json or sen
-   - also time format to use
-  - bag-get (gets first one)
-   - with nil or no arg return Instance.Any
-  - bag-set
-  - bag-has
-  - bag-parse
-   - detect time? (which ojg versions to use?)
-   - handle both json and sen
-    - simple-parse-json ?
-    - simple-parse-sen ?
-  - make-bag-path (json path)
-  - bag-path-p
-  - bag-walk (with path then like jp.Get else walk all)
-  - bag-to-lisp
+ - bag-path-p
+ - bag-format as json or sen
+ - bag-walk (with path then like jp.Get else walk all)
+ + bag-set
+ + bag-parse
+ + make-bag-path (json path)
+ + bag-get (gets first one)
+ + bag-has
+ + bag-native
 
  - print
+
+ - method or function to get flavor of instance and one to check the flavor
 
  - format
   - includes the lithp inline option

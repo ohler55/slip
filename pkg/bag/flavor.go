@@ -34,13 +34,13 @@ nil and boolean false.`),
 	)
 	flavor.DefMethod(":init", "", initCaller(true))
 	flavor.DefMethod(":set", "", setCaller(true))
+	flavor.DefMethod(":parse", "", parseCaller(true))
+	flavor.DefMethod(":get", "", getCaller(true))
+	flavor.DefMethod(":has", "", hasCaller(true))
+	flavor.DefMethod(":native", "", nativeCaller(true))
 
 	// TBD add methods
-	// get
-	// has
-	// parse
 	// walk
-	// to-lisp
 	// format
 }
 
@@ -56,7 +56,6 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-
 	switch len(args) {
 	case 0:
 		// ok
@@ -71,6 +70,9 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 				slip.PanicType("bag :init :parse", args[0], "string")
 			}
 			obj.Any = sen.MustParse([]byte(so))
+			if options.Converter != nil {
+				obj.Any = options.Converter.Convert(obj.Any)
+			}
 		}
 	default:
 		panic(fmt.Sprintf("Method bag-flavor init method expects zero or two arguments but received %d.", len(args)))
@@ -91,4 +93,58 @@ func (caller setCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 		panic(fmt.Sprintf("Method bag-flavor set method expects one or two arguments but received %d.", len(args)))
 	}
 	return obj
+}
+
+type parseCaller bool
+
+func (caller parseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	switch len(args) {
+	case 1:
+		parseBag(obj, args[0], nil)
+	case 2:
+		parseBag(obj, args[1], args[0])
+	default:
+		panic(fmt.Sprintf("Method bag-flavor parse method expects one or two arguments but received %d.", len(args)))
+	}
+	return obj
+}
+
+type getCaller bool
+
+func (caller getCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	switch len(args) {
+	case 0:
+		value = getBag(obj, nil, false)
+	case 1:
+		value = getBag(obj, args[0], false)
+	case 2:
+		value = getBag(obj, args[1], args[0] != nil)
+	default:
+		panic(fmt.Sprintf("Method bag-flavor get method expects one or two arguments but received %d.", len(args)))
+	}
+	return
+}
+
+type hasCaller bool
+
+func (caller hasCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if len(args) == 1 {
+		value = hasBag(obj, args[0])
+	} else {
+		panic(fmt.Sprintf("Method bag-flavor has method expects one arguments but received %d.", len(args)))
+	}
+	return
+}
+
+type nativeCaller bool
+
+func (caller nativeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		panic(fmt.Sprintf("Method bag-flavor native method expects no arguments but received %d.", len(args)))
+	}
+	return slip.SimpleObject(obj.Any)
 }

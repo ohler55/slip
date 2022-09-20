@@ -202,7 +202,8 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 	}
 }
 
-func (obj *Flavor) makeInstance() *Instance {
+// MakeInstance creates a new instance but does not call the :init method.
+func (obj *Flavor) MakeInstance() *Instance {
 	inst := Instance{Flavor: obj}
 	inst.Scope.Vars = map[string]slip.Object{}
 	for k, v := range obj.defaultVars {
