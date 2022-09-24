@@ -33,7 +33,7 @@ the _*bag-time_wrap*_ value and the time encoded according to the _*bag-time-for
 		},
 	}
 
-	options ojg.Options
+	options = ojg.DefaultOptions
 )
 
 func init() {

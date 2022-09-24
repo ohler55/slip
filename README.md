@@ -8,12 +8,6 @@ SLIce Processing is LISP for golang
  - update and test bag-flavor init :parse with options for parse
 
 - bag
- - bag-write bag [t - stdout, nil - default string, stream] @key
-  - :pretty - nil or depth on a line, t is 4
-  - :right-margin
-  - :time-format
-  - :time-wrap
-  - :json (boolean with default to false/sen)
  - bag-walk (with path then like jp.Get else walk all)
  + bag-set
  + bag-parse
@@ -22,6 +16,7 @@ SLIce Processing is LISP for golang
  + bag-has
  + bag-native
  + bag-path-p
+ + bag-write bag [t - stdout, nil - default string, stream] @key
 
  - print
 
