@@ -112,4 +112,13 @@ func TestBagFlavorNative(t *testing.T) {
 	tt.Panic(t, func() { slip.ReadString(`(send bag :native t)`).Eval(scope) })
 }
 
+// Tested more heavily in the bag-write tests.
+func TestBagFlavorWrite(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope).(*flavors.Instance)
+
+	result := slip.ReadString(`(send bag :write)`).Eval(scope)
+	tt.Equal(t, `"{a: 7}"`, slip.ObjectString(result))
+}
+
 // TBD test each method

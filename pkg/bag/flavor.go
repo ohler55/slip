@@ -38,10 +38,10 @@ nil and boolean false.`),
 	flavor.DefMethod(":get", "", getCaller(true))
 	flavor.DefMethod(":has", "", hasCaller(true))
 	flavor.DefMethod(":native", "", nativeCaller(true))
+	flavor.DefMethod(":write", "", writeCaller(true))
 
 	// TBD add methods
 	// walk
-	// format
 }
 
 // Flavor returns the bag-flavor.
@@ -147,4 +147,11 @@ func (caller nativeCaller) Call(s *slip.Scope, args slip.List, _ int) (value sli
 		panic(fmt.Sprintf("Method bag-flavor native method expects no arguments but received %d.", len(args)))
 	}
 	return slip.SimpleObject(obj.Any)
+}
+
+type writeCaller bool
+
+func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	return writeBag(obj, args, 0)
 }

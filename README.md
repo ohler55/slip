@@ -8,7 +8,8 @@ SLIce Processing is LISP for golang
  - update and test bag-flavor init :parse with options for parse
 
 - bag
- - bag-walk (with path then like jp.Get else walk all)
+ - flavor :write
+ - bag-walk (with path then like jp.Get else walk all (path of ..))
  + bag-set
  + bag-parse
  + make-bag-path (json path)

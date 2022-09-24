@@ -102,6 +102,10 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	if !ok || obj.Flavor != flavor {
 		slip.PanicType("bag", args[1], "bag")
 	}
+	return writeBag(obj, args, pos)
+}
+
+func writeBag(obj *flavors.Instance, args slip.List, pos int) (result slip.Object) {
 	var out io.Writer
 	if 0 < pos {
 		pos--
@@ -138,8 +142,8 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		case ":pretty":
 			prty = args[pos-1] != nil
 		case ":depth":
-			var num slip.Fixnum
-			if num, ok = args[pos-1].(slip.Fixnum); !ok {
+			num, ok := args[pos-1].(slip.Fixnum)
+			if !ok {
 				slip.PanicType(":depth", args[pos-1], "fixnum")
 			}
 			pw.MaxDepth = int(num)
@@ -147,8 +151,8 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 				pw.Indent = 0
 			}
 		case ":right-margin":
-			var num slip.Fixnum
-			if num, ok = args[pos-1].(slip.Fixnum); !ok {
+			num, ok := args[pos-1].(slip.Fixnum)
+			if !ok {
 				slip.PanicType(":right-margin", args[pos-1], "fixnum")
 			}
 			pw.Width = int(num)
