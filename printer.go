@@ -124,6 +124,11 @@ var (
 	}
 )
 
+// DefaultPrinter returns the default Printer.
+func DefaultPrinter() *Printer {
+	return &printer
+}
+
 // Write an Object to *standard-output*.
 func Write(obj Object) {
 	printer.Write(obj)

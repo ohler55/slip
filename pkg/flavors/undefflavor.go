@@ -30,7 +30,7 @@ Instances of the removed flavors are still valid but no new instance can be crea
 			Examples: []string{
 				"(undefflavor 'strawberry) => nil",
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // Undefflavor represents the undefflavor function.
@@ -62,7 +62,7 @@ func (f *Undefflavor) Call(s *slip.Scope, args slip.List, depth int) (result sli
 
 func (f *Undefflavor) removeFlavor(cf *Flavor) {
 	delete(allFlavors, cf.name)
-	FlavorsPkg.Remove(cf.name)
+	Pkg.Remove(cf.name)
 	for _, f2 := range allFlavors {
 		if f2.inheritsFlavor(cf.name) {
 			f.removeFlavor(f2)

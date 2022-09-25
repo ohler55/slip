@@ -26,7 +26,7 @@ func init() {
 			Examples: []string{
 				`(timep @2022-07-10T17:29:21.123456789Z) => t`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // Timep represents the timep function.

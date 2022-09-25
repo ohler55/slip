@@ -41,7 +41,7 @@ func init() {
 				"(defflavor strawberry (size) ()) => #<flavor strawberry>",
 				`(defmethod (strawberry :before :size) () (format t "getting size"))  => nil`,
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // Defmethod represents the defmethod function.
@@ -90,7 +90,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		slip.PanicType("flavor for defmethod", ml[len(ml)-1], "name of flavor")
 	}
 	lc := slip.DefLambda("defmethod", s, args[:pos])
-	flavor.defMethod(method, daemon, lc)
+	flavor.DefMethod(method, daemon, lc)
 
 	return nil
 }

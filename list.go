@@ -24,7 +24,7 @@ func (obj List) Append(b []byte) []byte {
 
 // Simplify the Object into a []interface{}.
 func (obj List) Simplify() interface{} {
-	out := make([]interface{}, len(obj))
+	out := make([]any, len(obj))
 	for i, o := range obj {
 		if o == nil {
 			out[len(out)-i-1] = nil

@@ -4,15 +4,20 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- update all num functions to support Values{}
- - in numbers.go as well as functions themselves
-
-- make const/vars for 0 and 1 and 2 for various big type
-
 - next
 
-  - coerce
-   - also support integers unlike CL
+ - print
+
+ - method or function to get flavor of instance and one to check the flavor
+
+ - format
+  - includes the lithp inline option
+  - walk and read format-directives and apply to output string
+
+
+ - coerce
+  - also support integers unlike CL
+  - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
 
 - hash-table
  - make-hash-table
@@ -49,26 +54,6 @@ SLIce Processing is LISP for golang
 
 - base64 (encode and decode in gi package)
 
-- simple
- - separate package
-  - simple
- - use flavors for the instance and methods or just functions
-  - is there a need for daemons? if not then maybe not worth making an object unless for name spacing
- - functions or methods
-  - format as json or sen
-  - get with mapc like interface, maybe get and collect (getc?)
-  - simple-first
-  - simple-set
-  - simple-has
-  - simple-parse-json
-  - simple-parse-sen
-  - make-json-path
-  - make-simple
-  - json-path-p
-  - simple-p
-  - simple-walk
-  - simple-to-lisp
-
  - other method combinations?
   - :method-combination option for defflavor
   - daemon (default)
@@ -76,6 +61,7 @@ SLIce Processing is LISP for golang
   - or
   - and
   - list
+
 
 - would building our own stack be a better approach?
  - could reuse scope but would need to clear vars

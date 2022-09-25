@@ -27,7 +27,7 @@ func init() {
 				`(trace t) ;; tracing on`,
 				`(trace nil) ;; tracing off`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // Trace represents the trace function.

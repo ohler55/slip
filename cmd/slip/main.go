@@ -1,5 +1,6 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
+// Package main is the main package.
 package main
 
 import (

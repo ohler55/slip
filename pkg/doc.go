@@ -12,4 +12,7 @@ import (
 
 	// Pull in gi functions and type.
 	_ "github.com/ohler55/slip/pkg/gi"
+
+	// Pull in bag functions.
+	_ "github.com/ohler55/slip/pkg/bag"
 )

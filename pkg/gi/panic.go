@@ -25,7 +25,7 @@ func init() {
 				`(panic "Something is broken") => ;; throws "Something is broken"`,
 				"(panic 'a => ;; throws a",
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // Panic represents the panic function.

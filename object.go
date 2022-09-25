@@ -15,8 +15,8 @@ type Object interface {
 	Append(b []byte) []byte
 
 	// Simplify the Object into simple go types of nil, bool, int64, float64,
-	// string, []interface{}, map[string]interface{}, or time.Time.
-	Simplify() interface{}
+	// string, []any, map[string]any, or time.Time.
+	Simplify() any
 
 	// Equal returns true if this Object and the other are equal in value.
 	Equal(other Object) bool
@@ -54,7 +54,7 @@ func ObjectEqual(x, y Object) (eq bool) {
 }
 
 // SimpleObject creates an Object from simple data.
-func SimpleObject(val interface{}) (obj Object) {
+func SimpleObject(val any) (obj Object) {
 	switch tv := val.(type) {
 	case bool:
 		if tv {
@@ -95,13 +95,13 @@ func SimpleObject(val interface{}) (obj Object) {
 	case time.Time:
 		obj = Time(tv)
 
-	case []interface{}:
+	case []any:
 		list := make(List, 0, len(tv))
 		for i := len(tv) - 1; 0 <= i; i-- {
 			list = append(list, SimpleObject(tv[i]))
 		}
 		obj = list
-	case map[string]interface{}:
+	case map[string]any:
 		list := make(List, 0, len(tv))
 		for k, v2 := range tv {
 			list = append(list, Cons{String(k), SimpleObject(v2)})
@@ -123,7 +123,7 @@ func SimpleObject(val interface{}) (obj Object) {
 }
 
 // Simplify an Object.
-func Simplify(obj Object) interface{} {
+func Simplify(obj Object) any {
 	if obj == nil {
 		return nil
 	}

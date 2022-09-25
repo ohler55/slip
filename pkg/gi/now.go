@@ -30,7 +30,7 @@ func init() {
 			Examples: []string{
 				`(now) => 2022-07-10T17:29:21.123456789Z`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // Now represents the now function.
