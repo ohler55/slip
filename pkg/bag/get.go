@@ -84,7 +84,7 @@ func getBag(obj *flavors.Instance, path slip.Object, lisp bool) slip.Object {
 	case Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string")
+		slip.PanicType("path", p, "string", "bag-path")
 	}
 	var value any
 	if x == nil {

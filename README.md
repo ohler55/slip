@@ -5,19 +5,6 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - update and test bag-flavor init :parse with options for parse
-
-- bag
- - flavor :write
- - bag-walk (with path then like jp.Get else walk all (path of ..))
- + bag-set
- + bag-parse
- + make-bag-path (json path)
- + bag-get (gets first one)
- + bag-has
- + bag-native
- + bag-path-p
- + bag-write bag [t - stdout, nil - default string, stream] @key
 
  - print
 

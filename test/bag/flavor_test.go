@@ -74,7 +74,7 @@ func TestBagFlavorParse(t *testing.T) {
 // Tested more heavily in the bag-get tests.
 func TestBagFlavorGet(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope).(*flavors.Instance)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope)
 
 	result := slip.ReadString(`(send bag :get "a" t)`).Eval(scope)
 	tt.Equal(t, "7", pretty.SEN(result))
@@ -92,7 +92,7 @@ func TestBagFlavorGet(t *testing.T) {
 // Tested more heavily in the bag-has tests.
 func TestBagFlavorHas(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope).(*flavors.Instance)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope)
 
 	result := slip.ReadString(`(send bag :has "a")`).Eval(scope)
 	tt.Equal(t, "t", slip.ObjectString(result))
@@ -104,7 +104,7 @@ func TestBagFlavorHas(t *testing.T) {
 // Tested more heavily in the bag-native tests.
 func TestBagFlavorNative(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope).(*flavors.Instance)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope)
 
 	result := slip.ReadString(`(send bag :native)`).Eval(scope)
 	tt.Equal(t, `(("a" . 7))`, slip.ObjectString(result))
@@ -115,10 +115,18 @@ func TestBagFlavorNative(t *testing.T) {
 // Tested more heavily in the bag-write tests.
 func TestBagFlavorWrite(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope).(*flavors.Instance)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope)
 
 	result := slip.ReadString(`(send bag :write)`).Eval(scope)
 	tt.Equal(t, `"{a: 7}"`, slip.ObjectString(result))
 }
 
-// TBD test each method
+// Tested more heavily in the bag-walk tests.
+func TestBagFlavorWalk(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`(setq result '())`).Eval(scope)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2]"))`).Eval(scope)
+
+	_ = slip.ReadString(`(send bag :walk (lambda (x) (setq result (cons x result))) "*" t)`).Eval(scope)
+	tt.Equal(t, "(2 1)", scope.Get(slip.Symbol("result")).String())
+}

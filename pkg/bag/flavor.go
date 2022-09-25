@@ -39,9 +39,7 @@ nil and boolean false.`),
 	flavor.DefMethod(":has", "", hasCaller(true))
 	flavor.DefMethod(":native", "", nativeCaller(true))
 	flavor.DefMethod(":write", "", writeCaller(true))
-
-	// TBD add methods
-	// walk
+	flavor.DefMethod(":walk", "", walkCaller(true))
 }
 
 // Flavor returns the bag-flavor.
@@ -153,5 +151,13 @@ type writeCaller bool
 
 func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	return writeBag(obj, args, 0)
+	return writeBag(obj, args, len(args)-1)
+}
+
+type walkCaller bool
+
+func (caller walkCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	walkBag(s, obj, args, len(args)-1, depth)
+	return nil
 }
