@@ -14,6 +14,7 @@ github.com/ohler55/slip/sliptest\
 	$Q grep github cl/cov.out >> cov.out
 	$Q grep github flavors/cov.out >> cov.out
 	$Q grep github gi/cov.out >> cov.out
+	$Q grep github bag/cov.out >> cov.out
 	$Q go tool cover -func=cov.out | grep "total:"
 
 local:

@@ -41,7 +41,7 @@ func init() {
 				"(defflavor strawberry (size) ()) => #<flavor strawberry>",
 				`(defwhopper (strawberry :size) () (format t "getting size") (continue-whopper))  => nil`,
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // Defwhopper represents the defwhopper function.
@@ -83,7 +83,7 @@ func (f *Defwhopper) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		slip.PanicType("method for defwhopper", ml[0], "keyword")
 	}
 	lc := slip.DefLambda("defwhopper", s, args[:pos])
-	flavor.defMethod(method, ":whopper", lc)
+	flavor.DefMethod(method, ":whopper", lc)
 
 	return nil
 }

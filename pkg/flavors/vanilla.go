@@ -32,7 +32,7 @@ func init() {
 	for _, ma := range vanilla.methods {
 		ma[0].from = &vanilla
 	}
-	FlavorsPkg.Set(vanilla.name, &vanilla)
+	Pkg.Set(vanilla.name, &vanilla)
 }
 
 type initCaller bool
@@ -69,7 +69,7 @@ func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 		panic(fmt.Sprintf("Method operation-handler-p expects 1 argument but received %d.", len(args)))
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
-		if _, has := obj.flavor.methods[string(sym)]; has {
+		if _, has := obj.Flavor.methods[string(sym)]; has {
 			return slip.True
 		}
 	}
@@ -105,8 +105,8 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	}
 	pos := len(args) - 1
 	if sym, ok := args[pos].(slip.Symbol); ok {
-		if _, has := obj.flavor.methods[string(sym)]; has {
-			return obj.send(string(sym), args[:pos], depth+1)
+		if _, has := obj.Flavor.methods[string(sym)]; has {
+			return obj.Receive(string(sym), args[:pos], depth+1)
 		}
 	}
 	return nil
@@ -116,8 +116,8 @@ type whichOpsCaller bool
 
 func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
-	names := make([]string, 0, len(obj.flavor.methods))
-	for k := range obj.flavor.methods {
+	names := make([]string, 0, len(obj.Flavor.methods))
+	for k := range obj.Flavor.methods {
 		names = append(names, k)
 	}
 	sort.Slice(names, func(i, j int) bool { return 0 < strings.Compare(names[i], names[j]) })

@@ -38,7 +38,7 @@ variable values and plist options.`,
 			Examples: []string{
 				"(make-instance 'strawberry :color 'red) => #<strawberry 123456>",
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // MakeInstance represents the makeInstance function.
@@ -66,7 +66,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	if cf.abstract {
 		panic(fmt.Sprintf("Can not create an instance of abstract flavor %s.", cf.name))
 	}
-	inst := cf.makeInstance()
+	inst := cf.MakeInstance()
 	var plist slip.List
 	keys := map[string]bool{}
 	for i := len(args) - 2; 0 < i; i-- {
@@ -101,7 +101,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			panic(fmt.Sprintf("Keyword %s missing from make-instance for flavor %s.", k, cf.name))
 		}
 	}
-	_ = inst.send(":init", slip.List{plist}, depth+1)
+	_ = inst.Receive(":init", slip.List{plist}, depth+1)
 
 	return inst
 }

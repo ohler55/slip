@@ -29,7 +29,7 @@ func init() {
 				`(channel-push  queue 10)`,
 				`(channel-pop  queue) => 10`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // ChannelPop represents the channelPop function.

@@ -21,7 +21,9 @@ func init() {
 // Instance is an instance of a Flavor.
 type Instance struct {
 	slip.Scope
-	flavor *Flavor
+	Flavor *Flavor
+	// Any is available to go methods.
+	Any any
 }
 
 // String representation of the Object.
@@ -32,7 +34,7 @@ func (obj *Instance) String() string {
 // Append a buffer with a representation of the Object.
 func (obj *Instance) Append(b []byte) []byte {
 	b = append(b, "#<"...)
-	b = append(b, obj.flavor.name...)
+	b = append(b, obj.Flavor.name...)
 	b = append(b, ' ')
 	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(obj))), 16)
 	return append(b, '>')
@@ -47,7 +49,7 @@ func (obj *Instance) Simplify() interface{} {
 		}
 	}
 	simple := map[string]any{
-		"flavor": obj.flavor.name,
+		"flavor": obj.Flavor.name,
 		"vars":   vars,
 	}
 	return simple
@@ -68,12 +70,15 @@ func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
 }
 
-func (obj *Instance) send(message string, args slip.List, depth int) slip.Object {
-	ma := obj.flavor.methods[message]
+// Receive a method invocation from the send function. Not intended to be
+// call by any code other than the send function but is public to allow it
+// to be over-ridden.
+func (obj *Instance) Receive(message string, args slip.List, depth int) slip.Object {
+	ma := obj.Flavor.methods[message]
 	if len(ma) == 0 {
 		xargs := args
 		xargs = append(xargs, slip.Symbol(message))
-		return obj.flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
+		return obj.Flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
 	}
 	for i, m := range ma {
 		if m.wrap != nil {
@@ -85,10 +90,10 @@ func (obj *Instance) send(message string, args slip.List, depth int) slip.Object
 			return m.wrap.Call(ws, args, depth)
 		}
 	}
-	return obj.sendInner(ma, args, depth)
+	return obj.innerReceive(ma, args, depth)
 }
 
-func (obj *Instance) sendInner(ma []*method, args slip.List, depth int) slip.Object {
+func (obj *Instance) innerReceive(ma []*method, args slip.List, depth int) slip.Object {
 	for _, m := range ma {
 		if m.before != nil {
 			m.before.Call(&obj.Scope, args, depth)
@@ -128,28 +133,30 @@ func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
 	b = append(b, ", an instance of flavor "...)
 	if ansi {
 		b = append(b, bold...)
-		b = append(b, obj.flavor.name...)
+		b = append(b, obj.Flavor.name...)
 		b = append(b, colorOff...)
 	} else {
-		b = append(b, obj.flavor.name...)
+		b = append(b, obj.Flavor.name...)
 	}
 	b = append(b, ",\n"...)
 
-	b = append(b, indentSpaces[:indent]...)
-	b = append(b, "  has instance variable values:\n"...)
 	keys := make([]string, 0, len(obj.Vars))
 	for k := range obj.Vars {
 		if k != "self" {
 			keys = append(keys, k)
 		}
 	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		b = append(b, indentSpaces[:indent+4]...)
-		b = append(b, k...)
-		b = append(b, ": "...)
-		b = slip.ObjectAppend(b, obj.Vars[k])
-		b = append(b, '\n')
+	if 0 < len(keys) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "  has instance variable values:\n"...)
+		sort.Strings(keys)
+		for _, k := range keys {
+			b = append(b, indentSpaces[:indent+4]...)
+			b = append(b, k...)
+			b = append(b, ": "...)
+			b = slip.ObjectAppend(b, obj.Vars[k])
+			b = append(b, '\n')
+		}
 	}
 	return b
 }

@@ -28,7 +28,7 @@ func init() {
 			Examples: []string{
 				`(run (setq x 7))`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // Run represents the run function.

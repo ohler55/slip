@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	// FlavorsPkg is the Flavors package.
-	FlavorsPkg = slip.Package{
+	// Pkg is the Flavors package.
+	Pkg = slip.Package{
 		Name:      "flavors",
 		Nicknames: []string{},
 		Doc:       "Home of symbols defined for the Flavors object model.",
@@ -28,12 +28,12 @@ var (
 )
 
 func init() {
-	slip.AddPackage(&FlavorsPkg)
-	slip.UserPkg.Use(&FlavorsPkg)
-	for _, vv := range FlavorsPkg.Vars {
-		vv.Pkg = &FlavorsPkg
+	slip.AddPackage(&Pkg)
+	slip.UserPkg.Use(&Pkg)
+	for _, vv := range Pkg.Vars {
+		vv.Pkg = &Pkg
 	}
-	FlavorsPkg.Set("*flavors*", &FlavorsPkg)
+	Pkg.Set("*flavors*", &Pkg)
 }
 
 func getAllFlavorNames() slip.Object {

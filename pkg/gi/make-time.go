@@ -66,7 +66,7 @@ func init() {
 			Examples: []string{
 				`(make-time 2022 july 17 20 53 24 123456789 "EST") => @2022-07-17T20:53:24.123456789-05:00`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 
 	slip.DefConstant(slip.Symbol("january"), slip.Fixnum(1), "The month of January as a fixnum.")
 	slip.DefConstant(slip.Symbol("february"), slip.Fixnum(2), "The month of February as a fixnum.")

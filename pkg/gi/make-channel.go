@@ -27,7 +27,7 @@ func init() {
 			Examples: []string{
 				`(make-channel 10) => #<channel 12345>`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // MakeChannel represents the makeChannel function.

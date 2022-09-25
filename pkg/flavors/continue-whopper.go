@@ -28,7 +28,7 @@ func init() {
 			Examples: []string{
 				"(defwhopper (blueberry :rot) () (continue-whopper))",
 			},
-		}, &FlavorsPkg)
+		}, &Pkg)
 }
 
 // ContinueWhopper represents the continueWhopper function.
@@ -51,5 +51,5 @@ func (f *ContinueWhopper) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 
 		return wrap.Call(ws, args, depth)
 	}
-	return self.sendInner(loc.methods, args, depth)
+	return self.innerReceive(loc.methods, args, depth)
 }

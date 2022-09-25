@@ -34,7 +34,7 @@ func init() {
 			Examples: []string{
 				`(time-format @2022-07-10T17:29:21Z "2006-01-02") => "2022-07-17"`,
 			},
-		}, &GiPkg)
+		}, &Pkg)
 }
 
 // TimeFormat represents the timeFormat function.
