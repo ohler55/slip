@@ -11,12 +11,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Princ{Function: slip.Function{Name: "princ", Args: args}}
+			f := Prin1{Function: slip.Function{Name: "prin1", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "princ",
+			Name: "prin1",
 			Args: []*slip.DocArg{
 				{
 					Name: "object",
@@ -31,43 +31,37 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `__princ__ writes a string representation of the _object_ to the provided _output-stream_.
-Output is produced as if _*print-escape*_ is _false_ and _*print-readably*_ is _false_.
+			Text: `__prin1__ writes a string representation of the _object_ to the provided _output-stream_.
+Output is produced as if _*print-escape*_ is _true_ and _*print-readably*_ is _true_.
 If the _output-stream_ is not provided then the _*standard-output*_ is used. The _object_ is returned.`,
 			Examples: []string{
-				"(princ 123) => 123 ;; 123 is written",
+				"(prin1 123) => 123 ;; 123 is written",
 			},
 		}, &slip.CLPkg)
 }
 
-// Princ represents the princ function.
-type Princ struct {
+// Prin1 represents the prin1 function.
+type Prin1 struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Prin1) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	p := *slip.DefaultPrinter()
-	p.Escape = false
-	p.Readably = false
+	p.Escape = true
+	p.Readably = true
 	obj := args[len(args)-1]
 	var w io.Writer = slip.StandardOutput.(io.Writer)
 	if 1 < len(args) {
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType("princ output-stream", args[0], "output-stream")
+			slip.PanicType("prin1 output-stream", args[0], "output-stream")
 		}
 	}
-	var err error
-	if s, _ := obj.(slip.String); 0 < len(s) {
-		_, err = w.Write([]byte(s))
-	} else {
-		_, err = w.Write(p.Append([]byte{}, obj, 0))
-	}
-	if err != nil {
+	if _, err := w.Write(p.Append([]byte{}, obj, 0)); err != nil {
 		panic(err)
 	}
 	return obj

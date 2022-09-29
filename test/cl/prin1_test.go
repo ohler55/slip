@@ -1,0 +1,60 @@
+// Copyright (c) 2022, Peter Ohler, All rights reserved.
+
+package cl_test
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/ohler55/ojg/tt"
+	"github.com/ohler55/slip"
+)
+
+func TestPrin1Stream(t *testing.T) {
+	var out strings.Builder
+	scope := slip.NewScope()
+
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+	result := slip.ReadString("(prin1 123 out)").Eval(scope)
+
+	tt.Equal(t, slip.Fixnum(123), result)
+	tt.Equal(t, "123", out.String())
+}
+
+func TestPrin1StreamString(t *testing.T) {
+	var out strings.Builder
+	scope := slip.NewScope()
+
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+	result := slip.ReadString(`(prin1 "abc" out)`).Eval(scope)
+
+	tt.Equal(t, slip.String("abc"), result)
+	tt.Equal(t, `"abc"`, out.String())
+}
+
+func TestPrin1Stdout(t *testing.T) {
+	var out strings.Builder
+	scope := slip.NewScope()
+
+	orig := slip.StandardOutput
+	defer func() { slip.StandardOutput = orig }()
+	slip.StandardOutput = &slip.OutputStream{Writer: &out}
+	result := slip.ReadString("(prin1 123)").Eval(scope)
+
+	tt.Equal(t, slip.Fixnum(123), result)
+	tt.Equal(t, "123", out.String())
+}
+
+func TestPrin1ArgCount(t *testing.T) {
+	tt.Panic(t, func() { _ = slip.ReadString("(prin1)").Eval(slip.NewScope()) })
+}
+
+func TestPrin1BadStream(t *testing.T) {
+	tt.Panic(t, func() { _ = slip.ReadString("(prin1 123 t)").Eval(slip.NewScope()) })
+}
+
+func TestPrin1WriteFail(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
+	tt.Panic(t, func() { _ = slip.ReadString("(prin1 123 out)").Eval(scope) })
+}
