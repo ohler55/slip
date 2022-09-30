@@ -8,7 +8,7 @@ SLIce Processing is LISP for golang
 
  + print
  + prin1
- - pprint
+ + pprint
  - write
 
 
