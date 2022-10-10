@@ -238,6 +238,10 @@ func TestPrintLength(t *testing.T) {
 	out = slip.Append([]byte{}, list)
 	tt.Equal(t, "(0 1 2 3 4 5 6 7 8 9 ...)", string(out))
 
+	slip.SetVar(key, slip.Fixnum(5))
+	out = slip.Append([]byte{}, list)
+	tt.Equal(t, "(0 1 2 3 4 ...)", string(out))
+
 	doc := slip.DescribeVar(key)
 	tt.NotEqual(t, "", doc)
 

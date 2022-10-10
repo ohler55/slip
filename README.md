@@ -9,8 +9,10 @@ SLIce Processing is LISP for golang
  + print
  + prin1
  + pprint
- - write
+ + write
 
+- printer
+ - test length with pretty
 
  - method or function to get flavor of instance and one to check the flavor
 

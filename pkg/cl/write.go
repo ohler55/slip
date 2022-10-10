@@ -88,7 +88,8 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 
 	obj := args[len(args)-1]
 	var w io.Writer = slip.StandardOutput.(io.Writer)
-	for i := len(args) - 2; 1 < i; i -= 2 {
+
+	for i := len(args) - 2; 0 < i; i -= 2 {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok {
 			slip.PanicType("keyword", args[i], "keyword")
