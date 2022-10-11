@@ -50,6 +50,8 @@ func TestScopeSet(t *testing.T) {
 	tt.Equal(t, slip.Fixnum(3), parent.Get(z))
 	tt.Equal(t, true, slip.CurrentPackage.Has(string(z)))
 
+	tt.Equal(t, slip.Fixnum(9223372036854775807), child.Get(slip.Symbol("most-positive-fixnum")))
+
 	tt.Panic(t, func() { child.Set(slip.Symbol("Fixnum"), slip.Fixnum(3)) })
 }
 
@@ -73,4 +75,6 @@ func TestScopeRemove(t *testing.T) {
 
 	tt.Equal(t, false, child.Has(y))
 	tt.Equal(t, false, parent.Has(y))
+
+	tt.Equal(t, true, child.Has(slip.Symbol("most-positive-fixnum")))
 }
