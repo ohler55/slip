@@ -92,6 +92,8 @@ func TestCodeComplex(t *testing.T) {
 		{src: "#c(-3 -2)", expect: "[#C(-3 -2)]", kind: "complex"},
 		{src: "#c(-3)", raise: true},
 		{src: "#c(1 2 3)", raise: true},
+		{src: "#c(t 2)", raise: true},
+		{src: "#c(1 t)", raise: true},
 	} {
 		ct.test(t, i)
 	}

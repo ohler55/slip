@@ -5,12 +5,10 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
-
- + print
- + prin1
- + pprint
- + write
-
+ - unit tests
+  - function.go
+  - code.go
+  - lambda.go
 
  - method or function to get flavor of instance and one to check the flavor
 
