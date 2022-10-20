@@ -210,7 +210,6 @@ linters:
     - gocritic
     - gofmt
     - goimports
-    - revive
     - ineffassign
     - lll
     - megacheck
@@ -247,6 +246,7 @@ linters:
     - varcheck # not ready for go1.19
     - deadcode # not ready for go1.19
     - reassign # stupid rule blocking a valid API use
+    - revive # complains about unexported return, calling it annoying
 
   disable-all: false
   presets:

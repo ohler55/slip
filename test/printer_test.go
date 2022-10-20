@@ -10,7 +10,12 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/sliptest"
 )
+
+func TestDefaultPrinter(t *testing.T) {
+	tt.NotNil(t, slip.DefaultPrinter())
+}
 
 func TestPrintANSI(t *testing.T) {
 	key := slip.Symbol("*print-ansi*")
@@ -25,6 +30,15 @@ func TestPrintANSI(t *testing.T) {
 
 	doc := slip.DescribeVar(key)
 	tt.NotEqual(t, "", doc)
+
+	(&sliptest.Function{
+		Source: `*print-ansi*`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `nothing`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestPrintArray(t *testing.T) {
@@ -205,6 +219,33 @@ func TestPrintGensym(t *testing.T) {
 	tt.NotEqual(t, "", doc)
 }
 
+func TestPrintLambda(t *testing.T) {
+	key := slip.Symbol("*print-lambda*")
+	orig, has := slip.GetVar(key)
+	tt.Equal(t, true, has)
+	defer slip.SetVar(key, orig)
+
+	slip.SetVar(key, slip.True)
+	var val slip.Object
+	val, _ = slip.GetVar(key)
+	tt.Equal(t, slip.True, val)
+
+	scope := slip.NewScope()
+	lam := slip.ReadString("(lambda (x y) (+ x y))").Eval(scope)
+	out := slip.Append([]byte{}, lam)
+	tt.Equal(t, "(lambda (x y) (+ x y))", string(out))
+
+	slip.SetVar(key, nil)
+	val, _ = slip.GetVar(key)
+	tt.Nil(t, val)
+
+	out = slip.Append([]byte{}, lam)
+	tt.Equal(t, `/^#<function \(lambda \(x y\)\) \{[0-9a-f]+\}>/`, string(out))
+
+	doc := slip.DescribeVar(key)
+	tt.NotEqual(t, "", doc)
+}
+
 func TestPrintLength(t *testing.T) {
 	key := slip.Symbol("*print-length*")
 	orig, has := slip.GetVar(key)
@@ -242,6 +283,25 @@ func TestPrintLength(t *testing.T) {
 	tt.NotEqual(t, "", doc)
 
 	tt.Panic(t, func() { slip.SetVar(key, slip.Fixnum(-10)) })
+}
+
+func TestPrintPrettyLength(t *testing.T) {
+	key := slip.Symbol("*print-length*")
+	orig, _ := slip.GetVar(key)
+	defer slip.SetVar(key, orig)
+	slip.SetVar(key, slip.Fixnum(5))
+
+	pkey := slip.Symbol("*print-pretty*")
+	porig, _ := slip.GetVar(pkey)
+	defer slip.SetVar(pkey, porig)
+	slip.SetVar(pkey, slip.True)
+
+	var list slip.List
+	for i := 10; 0 <= i; i-- {
+		list = append(list, slip.Fixnum(i))
+	}
+	out := slip.Append([]byte{}, list)
+	tt.Equal(t, "(0 1 2 3 4 ...)", string(out))
 }
 
 func TestPrintLevel(t *testing.T) {
@@ -358,6 +418,7 @@ func TestPrintPrec(t *testing.T) {
 	readablyOrig, _ := slip.GetVar(readablyKey)
 	defer slip.SetVar(readablyKey, readablyOrig)
 
+	slip.SetVar(readablyKey, nil)
 	slip.SetVar(key, slip.Fixnum(6))
 	var val slip.Object
 	val, _ = slip.GetVar(key)
@@ -384,11 +445,16 @@ func TestPrintPrec(t *testing.T) {
 
 	slip.SetVar(key, slip.Fixnum(20))
 	tt.Equal(t, "1.2345679s+20",
-		string(slip.Append([]byte{}, sf)), "%s: printer append with prec 20", sf)
+		string(slip.Append([]byte{}, sf)), "%s: printer append readably with prec 20", sf)
 	tt.Equal(t, "1.2345678901234568d+20",
-		string(slip.Append([]byte{}, df)), "%s: printer append with prec 20", df)
+		string(slip.Append([]byte{}, df)), "%s: printer append readably with prec 20", df)
 	tt.Equal(t, "1.23456789012345678900L+20",
-		string(slip.Append([]byte{}, lf)), "%s: printer append with prec 20", df)
+		string(slip.Append([]byte{}, lf)), "%s: printer append readably with prec 20", df)
+
+	slip.SetVar(readablyKey, nil)
+	tt.Equal(t, "1.2345679s+20", string(slip.Append([]byte{}, sf)), "%s: printer append with prec 20", sf)
+	tt.Equal(t, "1.2345678901234568d+20", string(slip.Append([]byte{}, df)), "%s: printer append with prec 20", df)
+
 }
 
 func TestPrintPretty(t *testing.T) {
@@ -585,4 +651,18 @@ func TestPrinterFunky(t *testing.T) {
 
 	slip.SetVar(prettyKey, nil)
 	tt.Equal(t, "(car (car nil))", string(out))
+}
+
+func TestAppendDocANSI(t *testing.T) {
+	out := slip.AppendDoc(nil, `__bold__ has _italic_.`, 2, 20, true)
+	tt.Equal(t, "  \x1b[1mbold\x1b[m has \x1b[4mitalic\x1b[m.", string(out))
+
+	out = slip.AppendDoc(nil, `A longer string that should wrap around.`, 2, 20, false)
+	tt.Equal(t, "  A longer string\n  that should wrap\n  around.", string(out))
+
+	out = slip.AppendDoc(nil, "Multiline\nwith new lines\n one\n\ntwo", 2, 20, false)
+	tt.Equal(t, "  Multiline with new\n  lines\n  one\n  two", string(out))
+
+	out = slip.AppendDoc(nil, "_missing underscore", 2, 40, true)
+	tt.Equal(t, "  \x1b[4mmissing underscore\x1b[m", string(out))
 }

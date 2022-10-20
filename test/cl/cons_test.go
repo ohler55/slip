@@ -41,3 +41,10 @@ func TestConsList(t *testing.T) {
 		Expect: "(1 2)",
 	}).Test(t)
 }
+
+func TestConsArgCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(cons 1)`,
+		Panics: true,
+	}).Test(t)
+}

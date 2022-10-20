@@ -4,6 +4,11 @@ package slip
 
 type marker byte
 
+// NewMarker only exists for coverage testing.
+func NewMarker(b byte) marker {
+	return marker(b)
+}
+
 // String representation of the Object.
 func (obj marker) String() string {
 	return string([]byte{byte(obj)})

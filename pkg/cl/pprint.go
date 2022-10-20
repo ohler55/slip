@@ -11,12 +11,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Princ{Function: slip.Function{Name: "princ", Args: args}}
+			f := Pprint{Function: slip.Function{Name: "pprint", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "princ",
+			Name: "pprint",
 			Args: []*slip.DocArg{
 				{
 					Name: "object",
@@ -30,45 +30,41 @@ func init() {
 					Text: "The stream to write to.",
 				},
 			},
-			Return: "object",
-			Text: `__princ__ writes a string representation of the _object_ to the provided _output-stream_.
-Output is produced as if _*print-escape*_ is _false_ and _*print-readably*_ is _false_.
+			Return: "",
+			Text: `__pprint__ writes a string representation of the _object_ to the provided _output-stream_.
+Output is produced as if _*pprint-escape*_ is _false_ and _*print-pretty*_ is non-nil. A newline is
+prepended to the output.
 If the _output-stream_ is not provided then the _*standard-output*_ is used. The _object_ is returned.`,
 			Examples: []string{
-				"(princ 123) => 123 ;; 123 is written",
+				"(pprint 123) => 123 ;; \n123 is written",
 			},
 		}, &slip.CLPkg)
 }
 
-// Princ represents the princ function.
-type Princ struct {
+// Pprint represents the pprint function.
+type Pprint struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Pprint) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	p := *slip.DefaultPrinter()
-	p.Escape = false
-	p.Readably = false
+	p.Escape = true
+	p.Pretty = true
 	obj := args[len(args)-1]
 	var w io.Writer = slip.StandardOutput.(io.Writer)
 	if 1 < len(args) {
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType("princ output-stream", args[0], "output-stream")
+			slip.PanicType("pprint output-stream", args[0], "output-stream")
 		}
 	}
-	var err error
-	if s, _ := obj.(slip.String); 0 < len(s) {
-		_, err = w.Write([]byte(s))
-	} else {
-		_, err = w.Write(p.Append([]byte{}, obj, 0))
-	}
-	if err != nil {
+	b := p.Append([]byte{'\n'}, obj, 0)
+	if _, err := w.Write(b); err != nil {
 		panic(err)
 	}
-	return obj
+	return slip.Novalue
 }

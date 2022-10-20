@@ -231,12 +231,12 @@ Top:
 		b = append(b, '/')
 		b = (*big.Rat)(to).Denom().Append(b, int(p.Base))
 	case SingleFloat:
+		// Use the LISP exponent nomenclature by forming the buffer and
+		// then replacing the 'e'.
+		var tmp []byte
 		switch {
 		case p.Readably:
-			// Use the LISP exponent nomenclature by forming the buffer and
-			// then replacing the 'e'.
-			var tmp []byte
-			// float64 precision is 16.
+			// float32 precision is 7.
 			if p.Prec < 7 {
 				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', p.Prec, 32)
 			} else {
@@ -246,14 +246,15 @@ Top:
 		case p.Prec < 7:
 			b = strconv.AppendFloat(b, float64(to), 'g', p.Prec, 32)
 		default:
-			b = strconv.AppendFloat(b, float64(to), 'g', -1, 32)
+			tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', -1, 32)
+			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
 		}
 	case DoubleFloat:
+		// Use the LISP exponent nomenclature by forming the buffer and
+		// then replacing the 'e'.
+		var tmp []byte
 		switch {
 		case p.Readably:
-			// Use the LISP exponent nomenclature by forming the buffer and
-			// then replacing the 'e'.
-			var tmp []byte
 			// float64 precision is 16.
 			if p.Prec < 16 {
 				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', p.Prec, 64)
@@ -264,7 +265,8 @@ Top:
 		case p.Prec < 16:
 			b = strconv.AppendFloat(b, float64(to), 'g', p.Prec, 64)
 		default:
-			b = strconv.AppendFloat(b, float64(to), 'g', -1, 64)
+			tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', -1, 64)
+			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
 		}
 	case *LongFloat:
 		prec := -1
@@ -432,16 +434,16 @@ Top:
 		if 0 < len(to) {
 			l2 := level + 1
 			n.size = 1 + len(to)
-			n.elements = make([]*node, len(to))
 			for i := 0; i < len(to); i++ {
 				element := to[len(to)-i-1]
 				if int(p.Length) <= i {
-					n.elements[i] = &node{value: Symbol("..."), size: 3, buf: []byte("...")}
+					n.elements = append(n.elements, &node{value: Symbol("..."), size: 3, buf: []byte("...")})
 					n.size += 3
 					break
 				}
-				n.elements[i] = p.createTree(element, l2)
-				n.size += n.elements[i].size
+				t := p.createTree(element, l2)
+				n.elements = append(n.elements, t)
+				n.size += t.size
 			}
 		} else {
 			n.size = 2
@@ -859,7 +861,7 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 		switch c {
 		case ' ':
 			if ret {
-				b = append(b, '\n')
+				b[len(b)-1] = '\n'
 				b = append(b, indentSpaces[:indent]...)
 				lastSpace = 0
 				spaceCol = indent
@@ -873,7 +875,7 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 			}
 		case '\n':
 			if ret {
-				b = append(b, '\n')
+				b[len(b)-1] = '\n'
 				b = append(b, indentSpaces[:indent]...)
 				lastSpace = 0
 				spaceCol = indent
@@ -901,7 +903,7 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 			spaceCol = 0
 		}
 	}
-	if 0 < emp {
+	if fs {
 		b = append(b, colorOff...)
 	}
 	return b

@@ -115,9 +115,6 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 
 // Apply evaluates with the need to evaluate the args.
 func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
-
-	// TBD maybe not needed, use FuncInfo instead
-
 	beforeEval(s, f.Name, args, depth)
 	defer afterEval(s, f.Name, args, depth, &result)
 

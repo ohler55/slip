@@ -3,6 +3,8 @@
 package test
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
@@ -97,4 +99,83 @@ func TestPackageCurrent(t *testing.T) {
 	tt.Equal(t, "a", slip.CurrentPackage.Name)
 
 	tt.Panic(t, func() { slip.CLPkg.Set("*package*", slip.True) })
+}
+
+func TestPackageVars(t *testing.T) {
+	key := "package-var-test"
+	slip.CurrentPackage.Set(key, slip.Fixnum(7))
+	val, has := slip.CurrentPackage.Get(key)
+	tt.Equal(t, true, has)
+	tt.Equal(t, "7", slip.ObjectString(val))
+
+	slip.CurrentPackage.Set(key, nil)
+	val, has = slip.CurrentPackage.Get(key)
+	tt.Equal(t, true, has)
+	tt.Nil(t, val)
+
+	slip.CurrentPackage.Remove(key)
+	val, has = slip.CurrentPackage.Get(key)
+	tt.Equal(t, false, has)
+	tt.Nil(t, val)
+
+	tt.Panic(t, func() { slip.CurrentPackage.Remove("*print-pretty*") })
+
+	cl := slip.FindPackage("common-lisp")
+	cl.Set(key, slip.Fixnum(7))
+	cl.Remove(key)
+	val, has = cl.Get(key)
+	tt.Equal(t, false, has)
+	tt.Nil(t, val)
+}
+
+func TestPackageDescribe(t *testing.T) {
+	out := slip.CurrentPackage.Describe(nil, 0, 40, false)
+	tt.Equal(t, true, bytes.Contains(out, []byte("Name: common-lisp-user")))
+
+	cl := slip.FindPackage("common-lisp")
+	out = cl.Describe(nil, 0, 40, false)
+	tt.Equal(t, true, bytes.Contains(out, []byte("Name: common-lisp")))
+	tt.Equal(t, true, bytes.Contains(out, []byte("*print-case* = ")))
+
+	p := slip.Package{
+		Name:    "fake",
+		Vars:    map[string]*slip.VarVal{},
+		Imports: map[string]*slip.Import{},
+		Lambdas: map[string]*slip.Lambda{},
+		Funcs:   map[string]*slip.FuncInfo{},
+	}
+	p.Import(cl, "car")
+	out = p.Describe(nil, 0, 40, false)
+	tt.Equal(t, true, bytes.Contains(out, []byte("Name: fake")))
+}
+
+// Dummy is the struct for a test function.
+type Dummy struct {
+	slip.Function
+}
+
+// Call the function with the arguments provided.
+func (f *Dummy) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	return nil
+}
+
+func TestPackageDefine(t *testing.T) {
+	cf := func(args slip.List) slip.Object {
+		f := Dummy{Function: slip.Function{Name: "dummy", Args: args}}
+		f.Self = &f
+		return &f
+	}
+	doc := slip.FuncDoc{
+		Name:   "dummy",
+		Args:   []*slip.DocArg{},
+		Return: "object",
+	}
+	var out strings.Builder
+	orig := slip.ErrorOutput
+	defer func() { slip.ErrorOutput = orig }()
+	slip.ErrorOutput = &slip.OutputStream{Writer: &out}
+
+	slip.CurrentPackage.Define(cf, &doc)
+	slip.CurrentPackage.Define(cf, &doc)
+	tt.Equal(t, "Warning: redefining dummy\n", out.String())
 }
