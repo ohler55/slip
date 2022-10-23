@@ -39,18 +39,6 @@ SLIce Processing is LISP for golang
  - sxhash
  - with-hash-table-iterator
 
-
- - test
-  - printer
-   - lambda
-   - AppendDoc
-  - lambda
-  - package
-  - panic
-  - partial
-  - code
-  - function
-
  - macro
   - expand on read
 
