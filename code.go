@@ -785,16 +785,6 @@ const hexByteValues = "" +
 	"................................" + // 0xc0
 	"................................" //   0xe0
 
-var runeMap = map[string]Character{
-	"backspace": Character('\b'),
-	"newline":   Character('\n'),
-	"page":      Character('\f'),
-	"return":    Character('\r'),
-	"rubout":    Character('\x7f'),
-	"space":     Character(' '),
-	"tab":       Character('\t'),
-}
-
 func (r *reader) pushChar(src []byte) {
 	var c Character
 	cnt := r.pos - r.tokenStart

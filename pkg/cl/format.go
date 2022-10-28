@@ -3,10 +3,8 @@
 package cl
 
 import (
-	"fmt"
 	"io"
 
-	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/slip"
 )
 
@@ -45,7 +43,7 @@ If _destination_ is _nil_ then a string is returned otherwise _nil_ is returned.
 
 A control directive begins a _~_ character followed by control characters. A directive has the form of:
 
-   ~[_modifier_],[_parameter_,]...<directive>
+   ~[_parameter_,]...[_modifier_]<directive>
 
 
 Common LISP defines a language for handling a variety of control directive operations. A subset of
@@ -284,7 +282,7 @@ Control directives and operations are:
              form is ~_n_|.
 
  __~~__          Outputs a tilde character. An integer prefix parameter is
-             supported. A positive _n_ parameter specifies the number tilde
+             supported. A positive _n_ parameter specifies the number of tilde
              characters to output. The general form is ~_n_~.
 
 
@@ -327,135 +325,16 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	if !ok {
 		slip.PanicType("control", args[len(args)-2], "string")
 	}
-	ctrl := control{str: []byte(cs), args: args}
+	ctrl := control{str: []byte(cs), args: args, argPos: len(args) - 3}
 	ctrl.end = len(ctrl.str)
 
 	ctrl.process()
 
-	fmt.Printf("*** ctrl: %s - %v\n", pretty.SEN(&ctrl), w)
-
 	if w == nil {
 		return slip.String(ctrl.out)
 	}
-	w.Write(ctrl.out)
-
+	if _, err := w.Write(ctrl.out); err != nil {
+		panic(err)
+	}
 	return nil
-}
-
-type control struct {
-	str    []byte
-	end    int
-	pos    int
-	out    []byte
-	args   slip.List
-	argPos int
-}
-
-func (c *control) process() {
-	for c.pos < c.end {
-		b := c.str[c.pos]
-		if b == '~' {
-			c.readDir()
-			continue
-		}
-		c.out = append(c.out, b)
-		c.pos++
-	}
-	// TBD scan until ~ then read modifiers and parameters
-	//  once the directive is identifier hand parsing to it along with arguments and current arg position
-	//  return buf, pos in control string or next char along with current arg position
-	//    maybe use control (buf, control, control pos, args, arg pos)
-	//    functions on control for each directive?
-
-}
-
-func (c *control) readDir() {
-	var (
-		colon     bool
-		at        bool
-		params    []any
-		paramMode bool
-	)
-	// TBD set colon, at, others
-	// mods
-	// params (a slice)
-	c.pos++ // move past ~
-	for c.pos < c.end {
-		b := c.str[c.pos]
-		c.pos++
-		switch b {
-		case ':':
-			if colon {
-				panic(fmt.Sprintf("invalid directive at %d of %q", c.pos, c.str))
-			}
-			colon = true
-		case '@':
-			if at {
-				panic(fmt.Sprintf("invalid directive at %d of %q", c.pos, c.str))
-			}
-			at = true
-		case ',':
-			prev := c.str[c.pos-2]
-			if paramMode {
-				if prev == ',' {
-					params = append(params, nil)
-				}
-			} else if prev == ':' || prev == '@' {
-				params = append(params, nil)
-			}
-			paramMode = true
-		case '#':
-			// TBD either bare or #\ for character
-			// parse character or not
-			//  read up to , or dirChar
-			paramMode = true
-		case 'v':
-			params = append(params, "v")
-			paramMode = true
-		case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			paramMode = true
-			// TBD read as number or just strings?
-		case '\n':
-		case '$':
-		case '%':
-		case '&':
-		case '(':
-		case '*':
-		case '/':
-		case '<':
-		case '=':
-		case '?':
-		case 'A', 'a':
-			c.dirA(colon, at, params)
-		case 'B', 'b':
-		case 'C', 'c':
-		case 'D', 'd':
-		case 'E', 'e':
-		case 'F', 'f':
-		case 'G', 'g':
-		case 'I', 'i':
-		case 'O', 'o':
-		case 'P', 'p':
-		case 'R', 'r':
-		case 'S', 's':
-		case 'T', 't':
-		case 'W', 'w':
-		case 'X', 'x':
-		case '[':
-		case '{':
-		case '|':
-		case '~':
-			// TBD dirTilde
-			c.out = append(c.out, '~')
-			return
-		default:
-			panic(fmt.Sprintf("invalid directive at %d of %q", c.pos, c.str))
-		}
-	}
-	// TBD read modifier, parameters, dirChar
-	// switch on char read (: @ , number, v, # (bare or for a char), dirChar
-}
-
-func (c *control) dirA(colon, at bool, params []any) {
-	// TBD
 }
