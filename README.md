@@ -1,2 +1,180 @@
-# slip
+# SLIP
+
 SLIce Processing is LISP for golang
+
+-------------------------------------------------------------------------------
+
+- next
+ - format
+
+ - unit tests
+  - function.go
+  - code.go
+  - lambda.go
+
+ - method or function to get flavor of instance and one to check the flavor
+
+
+ - coerce
+  - also support integers unlike CL
+  - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
+
+- hash-table
+ - make-hash-table
+ - hash-table-p
+ - hash-table-count
+ - hash-table-p
+ - hash-table-rehash-size
+ - hash-table-rehash-threshold
+ - hash-table-size
+ - hash-table-test
+ - gethash
+  - use setf to set
+ - rehash
+ - remhash
+ - maphash
+ - clrhash
+ - sxhash
+ - with-hash-table-iterator
+
+ - macro
+  - expand on read
+
+- base64 (encode and decode in gi package)
+
+ - other method combinations?
+  - :method-combination option for defflavor
+  - daemon (default)
+  - progn
+  - or
+  - and
+  - list
+
+
+- would building our own stack be a better approach?
+ - could reuse scope but would need to clear vars
+ - could replace args key lookups for lispcaller with an index to arg to avoid using maps
+
+- Code
+ - #. is read time eval of object if *read-eval* is true else panic
+
+- use (type-of x) or (typep x 'long-float)
+
+- how to handle marco characters in compile
+ - backquote ` of list allow use of , options
+  - , eval
+  - ,@ is like: if foo is (a b) the ,@foo becomes a b
+  - ', as is, no eval, (as string?)
+  - maybe treat like (quote foo) but (backquote (foo bar))
+   - (comma x)
+   - (comma-at x)
+   - (quote-comma x)
+ - or maybe expand to normal functions
+  - (foo ,bar) => (list 'foo bar)
+
+- dynamic.go
+ - return-from function
+
+- lambda
+ - eval of lambda should return a function
+
+- functions
+ - pkg
+  - basic
+   + quote
+   + set
+   + setq
+   + setf
+   + let
+   + describe
+   + apropos
+   - null
+   - atom
+   - eq
+   - equal
+   - defvar
+   - defun - create a named Dynamic
+   - lambda - create a Dynamic
+   - defmacro
+   - coerce
+   - intern (string to symbol)
+  - list
+   + car
+   + cdr
+   + cadr
+   - cons
+   + list
+   - nth
+  - number
+   - incf
+   - decf
+
+
+- types
+ + ratio
+ + bignum
+ + float
+  + long-float -> big.Float
+  + double-float
+  + single-float (alias short-float)
+ + complex
+ - stream
+  - socket?
+  - string
+   - with-input-from-string
+   - make-string-input-stream
+   - with-output-to-string
+   - make-string-output-stream
+   - get-output-stream-string
+   - write-line
+   - write-string
+   - write-char
+   - read-line
+   - read-char
+ - class
+ - instance
+ - function
+ - macro
+
+- Placer
+ - place value (car, cdr, nth, rest, first, card, aref, symbol)
+  - others in hash-table, array, vector
+
+- load
+ - compile and then eval
+
+- function
+ - how to return multiple values (slip.Values)
+  - (values-list '(1 2))
+   - special kind of list
+   - unless wrapped in a function that handles multiple-values the first value is returned
+    - how to do that, need knowledge of outer function
+    - or maybe all have to check, have to check types anyway so...
+
+- types
+ - function
+ - array (multi demensional) #<ARRAY 4x3 simple 32546632> of #2A((1 2 3)(2 3 4)) of #3A or ...
+  - if (make-array '(1) then it is a vector #(1 2 3)
+  - (aref foo 1 2)
+ - struct (defstruct)
+ - class
+  - instances
+ - ratio (struct{ num Object, denom Object}
+ - stream
+  - file
+  - socket
+   - pipe
+ - simple (json-ish, from ojg)
+  - format as json or sen
+
+ - fork
+
+- support marcos
+ - represented as scoped fun
+ - support macro chars of , and ,@ in a backquoted (not single quote) list
+  - , eval
+  - ,@ is like: if foo is (a b) the ,@foo becomes a b
+  - ', as is, no eval, (as string?)
+  - https://lisp-journey.gitlab.io/blog/common-lisp-macros-by-example-tutorial/
+  - defmacro defined should expand at compile time
+  - golang macro should just not eval args
