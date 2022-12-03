@@ -34,15 +34,18 @@ type Function struct {
 
 // Test the object test specification.
 func (tf *Function) Test(t *testing.T) {
-	obj := slip.CompileString(tf.Source)
 	scope := tf.Scope
 	if scope == nil {
 		scope = slip.NewScope()
 	}
 	if tf.Panics {
-		tt.Panic(t, func() { obj.Eval(scope, 0) }, tf.Source)
+		tt.Panic(t, func() {
+			obj := slip.CompileString(tf.Source)
+			obj.Eval(scope, 0)
+		}, tf.Source)
 	} else {
-		tf.Result = obj.Eval(scope, 0)
+		obj := slip.CompileString(tf.Source)
+		tf.Result = scope.Eval(obj, 0)
 		tt.Equal(t, tf.Expect, slip.ObjectString(tf.Result), tf.Source)
 	}
 }

@@ -97,7 +97,7 @@ func (obj *Package) Import(pkg *Package, varName string) {
 }
 
 // Set a variable.
-func (obj *Package) Set(name string, value Object) {
+func (obj *Package) Set(name string, value Object) *VarVal {
 	name = strings.ToLower(name)
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
@@ -108,7 +108,7 @@ func (obj *Package) Set(name string, value Object) {
 		} else {
 			vv.Val = value
 		}
-		return
+		return vv
 	}
 	vv := &VarVal{Val: value, Pkg: obj}
 	obj.Vars[name] = vv
@@ -117,6 +117,7 @@ func (obj *Package) Set(name string, value Object) {
 			u.Vars[name] = vv
 		}
 	}
+	return vv
 }
 
 // Get a variable.
@@ -287,7 +288,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 	b = append(b, '\n')
 
 	b = append(b, indentSpaces[:indent]...)
-	b = append(b, "Description:\n"...)
+	b = append(b, "Documentation:\n"...)
 	b = AppendDoc(b, obj.Doc, indent+2, right, ansi)
 	b = append(b, '\n')
 

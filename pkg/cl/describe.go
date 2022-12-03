@@ -4,6 +4,7 @@ package cl
 
 import (
 	"io"
+	"strings"
 
 	"github.com/ohler55/slip"
 )
@@ -104,6 +105,12 @@ Details:
 				b = append(b, string(obj.Hierarchy()[0])...)
 			}
 			b = append(b, ":\n"...)
+			var vv *slip.VarVal
+			if vv, _ = slip.CurrentPackage.Vars[strings.ToLower(string(to))]; vv != nil && 0 < len(vv.Doc) {
+				b = append(b, "  Documentation:\n"...)
+				b = slip.AppendDoc(b, vv.Doc, indent+4, right, ansi)
+				b = append(b, '\n')
+			}
 			indent += 2
 			goto Details
 		}

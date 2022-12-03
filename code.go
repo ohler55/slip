@@ -235,11 +235,18 @@ const (
 	sharpQuoteMarker = marker('#')
 )
 
-// marker on stack indicating a vector and not a list.
-var vectorMarker = Vector{}
+var (
+	// marker on stack indicating a vector and not a list.
+	vectorMarker = Vector{}
 
-// marker on stack indicating a vector and not a list.
-var complexMarker = Complex(complex(0, 0))
+	// marker on stack indicating a vector and not a list.
+	complexMarker = Complex(complex(0, 0))
+
+	// Set as needed. Global since they are build in but from a different go
+	// package.
+	newQuote      func(args List) Object
+	newSharpQuote func(args List) Object
+)
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
 // of keeping loaded code together so that it can be evaluated and optimized
@@ -247,14 +254,12 @@ var complexMarker = Complex(complex(0, 0))
 type Code []Object
 
 type reader struct {
-	tokenStart    int
-	stack         []Object
-	starts        []int
-	line          int
-	lineStart     int
-	pos           int
-	newQuote      func(args List) Object
-	newSharpQuote func(args List) Object
+	tokenStart int
+	stack      []Object
+	starts     []int
+	line       int
+	lineStart  int
+	pos        int
 
 	code Code
 }
@@ -570,18 +575,18 @@ func (r *reader) closeList() {
 		if 0 < start {
 			switch {
 			case r.stack[start-1] == quoteMarker:
-				if r.newQuote == nil {
-					r.newQuote = CLPkg.Funcs["quote"].Create
+				if newQuote == nil {
+					newQuote = CLPkg.Funcs["quote"].Create
 				}
-				obj = r.newQuote(List{obj})
+				obj = newQuote(List{obj})
 				start--
 				r.stack[start] = nil
 				r.stack = r.stack[:start+1]
 			case r.stack[start-1] == sharpQuoteMarker:
-				if r.newSharpQuote == nil {
-					r.newSharpQuote = CLPkg.Funcs["function"].Create
+				if newSharpQuote == nil {
+					newSharpQuote = CLPkg.Funcs["function"].Create
 				}
-				obj = r.newSharpQuote(List{obj})
+				obj = newSharpQuote(List{obj})
 				start--
 				r.stack[start] = nil
 				r.stack = r.stack[:start+1]
@@ -625,27 +630,27 @@ func (r *reader) pushToken(src []byte) {
 	if 0 < len(r.stack) {
 		switch {
 		case r.stack[len(r.stack)-1] == quoteMarker:
-			if r.newQuote == nil {
-				r.newQuote = CLPkg.Funcs["quote"].Create
+			if newQuote == nil {
+				newQuote = CLPkg.Funcs["quote"].Create
 			}
 			if len(r.stack) == 1 {
-				r.code = append(r.code, r.newQuote(List{Symbol(token)}))
+				r.code = append(r.code, newQuote(List{Symbol(token)}))
 				r.stack[len(r.stack)-1] = nil
 				r.stack = r.stack[:0]
 			} else {
-				r.stack[len(r.stack)-1] = r.newQuote(List{Symbol(token)})
+				r.stack[len(r.stack)-1] = newQuote(List{Symbol(token)})
 			}
 			return
 		case r.stack[len(r.stack)-1] == sharpQuoteMarker:
-			if r.newSharpQuote == nil {
-				r.newSharpQuote = CLPkg.Funcs["function"].Create
+			if newSharpQuote == nil {
+				newSharpQuote = CLPkg.Funcs["function"].Create
 			}
 			if len(r.stack) == 1 {
-				r.code = append(r.code, r.newSharpQuote(List{Symbol(token)}))
+				r.code = append(r.code, newSharpQuote(List{Symbol(token)}))
 				r.stack[len(r.stack)-1] = nil
 				r.stack = r.stack[:0]
 			} else {
-				r.stack[len(r.stack)-1] = r.newSharpQuote(List{Symbol(token)})
+				r.stack[len(r.stack)-1] = newSharpQuote(List{Symbol(token)})
 			}
 			return
 		}
@@ -874,7 +879,7 @@ func (c Code) String() string {
 }
 
 // Compile all the code elements. This evaluates all the defun, defvar, and
-// defmacro calls and converts unquotes lists to functions.
+// defmacro calls and converts unquoted lists to functions.
 func (c Code) Compile() {
 	scope := NewScope()
 	for i, obj := range c {
@@ -883,25 +888,35 @@ func (c Code) Compile() {
 			continue
 		}
 		var sym Symbol
-		if sym, ok = list[len(list)-1].(Symbol); !ok {
-			continue
+		switch tv := list[len(list)-1].(type) {
+		case Symbol:
+			sym = tv
+		case List:
+			if 0 < len(tv) {
+				if s2, ok2 := tv[len(tv)-1].(Symbol); ok2 {
+					if strings.EqualFold("lambda", string(s2)) {
+						break
+					}
+				}
+			}
+			panic(fmt.Sprintf("%s is not a function", tv))
+		default:
+			panic(fmt.Sprintf("%s is not a function", tv))
 		}
 		var f Object
 		switch strings.ToLower(string(sym)) {
-		case "defun":
-			f = ListToFunc(scope, list, 0)
-			c[i] = f
-		case "defvar":
-			// TBD need a ListToFunc that sets up an undefined list
+		case "defun", "defvar", "defparameter":
 			f = ListToFunc(scope, list, 0)
 			c[i] = f
 		case "defmacro":
 			panic("Defmacro not implemented yet")
 		}
 		if f != nil {
-			f.Eval(scope, 0)
-			// TBD is this correct? No need to eval defxxx more than once
-			c[i] = nil
+			name := f.Eval(scope, 0)
+			if newQuote == nil {
+				newQuote = CLPkg.Funcs["quote"].Create
+			}
+			c[i] = newQuote(List{name})
 		}
 	}
 	// Now convert lists to functions.

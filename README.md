@@ -6,10 +6,6 @@ SLIce Processing is LISP for golang
 
 - next
  - format
-  - walk and read format-directives and apply to output string
-   - create directive and apply
-
-
 
  - unit tests
   - function.go

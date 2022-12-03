@@ -95,3 +95,41 @@ func TestTracePanicDeep(t *testing.T) {
 	// Indent is capped at 80 spaces.
 	tt.Equal(t, false, strings.Contains(out.String(), strings.Repeat(" ", 81)))
 }
+
+func TestTracePanicString(t *testing.T) {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := panicTest{Function: slip.Function{Name: "panic-test", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name:   "panic-test",
+			Args:   []*slip.DocArg{},
+			Return: "nil",
+		}, &slip.CLPkg)
+
+	var out strings.Builder
+	orig := slip.StandardOutput
+	defer func() { slip.StandardOutput = orig }()
+
+	slip.StandardOutput = &slip.OutputStream{Writer: &out}
+	slip.CurrentPackage.Set("*print-ansi*", nil)
+	slip.Trace(true)
+	tt.Panic(t, func() { _ = slip.ReadString("(panic-test)").Eval(slip.NewScope()) })
+	slip.Trace(false)
+
+	tt.Equal(t, `0: (panic-test)
+0: (panic-test) => string panic
+`,
+		out.String())
+}
+
+type panicTest struct {
+	slip.Function
+}
+
+// Call the the function with the arguments provided.
+func (f *panicTest) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	panic("string panic")
+}

@@ -52,7 +52,7 @@ those operations are implemented. An addition operator for inline evaluation of 
 
 Control directives and operations are:
 
- ___Directive___   ___Description___
+ ___Directive___   ___Documentation___
  _          _  _                                                               _
  __~<newline>__  The _newline_ character and any following whitespace are ignored.
              The : modifier indicates only the _newline_ is ignored. The @
@@ -100,8 +100,8 @@ Control directives and operations are:
              The function bound to the _name_ must take 4 arguments. The first
              argument is an _output-stream_. The second is the format argument
              corresponding to the directive. The third is true if the _:_
-             modifier was specified while the forth is true if the _@_ modifier
-             was specified.
+             modifier was specified while the fourth is true if the _@_
+             modifier was specified.
 
  __~;__          Separator for the __~[__ and __~<__ directives.
 
@@ -165,7 +165,7 @@ Control directives and operations are:
              Parameters are:
              __mincol__         - minimum width
              __padchar__        - padding character (e.g., #\Tab)
-             __commachar__      - padding character (e.g., #\Space)
+             __commachar__      - comma character (e.g., #\_)
              __comma-interval__ - interval between commas
 
  __~E__          Output a number as a floating point. The full form is:
@@ -186,7 +186,7 @@ Control directives and operations are:
 
  __~F__          Output a number as a fixed format floating point decimal
              notation without an exponent. The full form is:
-               ~w,d,e,k,overflowchar,padchar,exponentchar__F__
+               ~w,d,k,overflowchar,padchar__F__
              Modifiers and parameters and the same as the Exponential (__~E__)
              directive.
 
@@ -244,8 +244,8 @@ Control directives and operations are:
              forms are:
                ~__[__str0__~;__str1__~;__...__~;__strn__~]__
                ~__[__str0__~;__str1__~;__...__~;__strn__~:;__default__~]__
-               ~__[__alternative__~;__consequent__~]__
-               ~__[__consequent__~]__
+               ~__:[__alternative__~;__consequent__~]__
+               ~__@[__consequent__~]__
              The first form expects an integer argument that identifies the
              position of the string to be output. If the argument is below
              zero or greater than the number of strings then nothing is
@@ -316,8 +316,9 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		w = ta
 	default:
 		if ta == slip.True {
-			w = slip.StandardOutput.(io.Writer)
-			break
+			if w, _ = s.Get("*standard-output*").(io.Writer); w != nil {
+				break
+			}
 		}
 		slip.PanicType("destination", ta, "output-stream")
 	}
@@ -325,7 +326,7 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	if !ok {
 		slip.PanicType("control", args[len(args)-2], "string")
 	}
-	ctrl := control{str: []byte(cs), args: args, argPos: len(args) - 3}
+	ctrl := control{scope: s, str: []byte(cs), args: args[:len(args)-2], argPos: len(args) - 3}
 	ctrl.end = len(ctrl.str)
 
 	ctrl.process()

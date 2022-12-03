@@ -233,7 +233,7 @@ func (obj *Flavor) Describe(b []byte, indent, right int, ansi bool) []byte {
 	i3 := indent + 4
 	if 0 < len(obj.docs) {
 		b = append(b, indentSpaces[:i2]...)
-		b = append(b, "Description:\n"...)
+		b = append(b, "Documentation:\n"...)
 		b = slip.AppendDoc(b, obj.docs, i3, right, ansi)
 		b = append(b, '\n')
 	}
