@@ -134,6 +134,12 @@ func (obj *Package) Get(name string) (value Object, has bool) {
 	return nil, false
 }
 
+// JustGet a variable.
+func (obj *Package) JustGet(name string) (value Object) {
+	value, _ = obj.Get(name)
+	return
+}
+
 // Remove a variable.
 func (obj *Package) Remove(name string) {
 	name = strings.ToLower(name)

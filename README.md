@@ -7,14 +7,34 @@ SLIce Processing is LISP for golang
 - next
  - unit tests
   - function.go
-  - code.go
   - lambda.go
 
  - method or function to get flavor of instance and one to check the flavor
 
- - format
-  - includes the lithp inline option
-  - walk and read format-directives and apply to output string
+ - repl
+  - add change hooks
+  - use ~/.slip as a config file for setting in the repl
+   - print setting
+   - repl setting
+   - update on set using hooks
+  - add -c option for config file (- means none)
+  - make repl an instance? (flavor?)
+   - with struct members and a Reciever at least
+   - bound to *repl*
+   - in .slip config just use (send *repl* set-foo 3)
+   - can struct and instance be mixed?
+  - move to separate dir (to assure it can be a separate repo if desired)
+  - add hooks to package and others to capture changes in the global dictionary
+  - better handling of interactions
+   - tab complete
+    - keep sorted list (extra info for type? used for color coding
+   - paren matching
+    - bold, underline, or flashing? maybe option
+    - on move or typing ( or )
+  - handle raw terminal input
+  - use interface for terminal to handle different move and clear
+  - get term dimensions
+  - support multiline editing
 
 
  - coerce
