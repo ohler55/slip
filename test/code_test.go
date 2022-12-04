@@ -253,6 +253,41 @@ func TestCodeArray(t *testing.T) {
 	}
 }
 
+func TestCodeQuote(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: `#'car`, expect: `[#'car]`, kind: "function"},
+		{src: `(list #'car)`, expect: `[(list (name car))]`, kind: "list"},
+		{src: `'abc`, expect: `['abc]`, kind: "function"},
+		{src: `('abc)`, expect: `[('abc)]`, kind: "list"},
+		{src: `#'(lambda () nil)`, expect: `[#'(lambda () nil)]`, kind: "function"},
+	} {
+		ct.test(t, i)
+	}
+}
+
+func TestCodeCompile(t *testing.T) {
+	code := slip.ReadString("(defmacro foo (&rest args) nil)")
+	tt.Panic(t, func() { code.Compile() })
+
+	code = slip.ReadString("(5)")
+	tt.Panic(t, func() { code.Compile() })
+
+	code = slip.ReadString("((x))")
+	tt.Panic(t, func() { code.Compile() })
+
+	code = slip.ReadString("((lambda () nil))")
+	code.Compile()
+	tt.SameType(t, &slip.Dynamic{}, code[0])
+
+	code = slip.ReadString("(defvar code-compile-test 5)")
+	code.Compile()
+	val, has := slip.CurrentPackage.Get("code-compile-test")
+	tt.Equal(t, slip.Fixnum(5), val)
+	tt.Equal(t, true, has)
+
+	// TBD defparameter
+}
+
 func TestCodeStringer(t *testing.T) {
 	code := slip.Code{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil}

@@ -22,7 +22,7 @@ func init() {
 					Text: "The object to check.",
 				},
 			},
-			Return: "nil",
+			Return: "symbol",
 			Text:   `__type-of__ returns the type of the object as a symbol.`,
 			Examples: []string{
 				"(type-of 1) => fixnum",

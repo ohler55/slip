@@ -478,6 +478,15 @@ func TestCharacterControl(t *testing.T) {
 	}).Test(t)
 }
 
+func TestReadCharacter(t *testing.T) {
+	tt.Equal(t, slip.Character('A'), slip.ReadCharacter([]byte{'A'}))
+	tt.Equal(t, slip.Character(' '), slip.ReadCharacter([]byte("space")))
+	tt.Equal(t, slip.Character('\u001b'), slip.ReadCharacter([]byte("u001b")))
+	tt.Equal(t, slip.Character('ぴ'), slip.ReadCharacter([]byte("ぴ")))
+	tt.Panic(t, func() { slip.ReadCharacter([]byte{}) })
+	tt.Panic(t, func() { slip.ReadCharacter([]byte("u00112233")) })
+}
+
 func TestValues(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.Values{slip.Fixnum(2), nil},
@@ -629,7 +638,7 @@ func TestFuncInfoDescribeBasic(t *testing.T) {
 	out := fi.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `Lambda-List: (arg)
 Return: object
-Description:
+Documentation:
   car returns the car if arg is a cons, the first element if arg is a list, and
   nil if arg is nil or an empty list.
 Arguments:

@@ -5,6 +5,8 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - format
+
  - unit tests
   - function.go
   - lambda.go
@@ -36,7 +38,6 @@ SLIce Processing is LISP for golang
   - get term dimensions
   - support multiline editing
 
-
  - coerce
   - also support integers unlike CL
   - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
@@ -58,18 +59,6 @@ SLIce Processing is LISP for golang
  - clrhash
  - sxhash
  - with-hash-table-iterator
-
-
- - test
-  - printer
-   - lambda
-   - AppendDoc
-  - lambda
-  - package
-  - panic
-  - partial
-  - code
-  - function
 
  - macro
   - expand on read

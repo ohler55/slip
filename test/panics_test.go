@@ -49,3 +49,9 @@ func recoverPanic(obj slip.Object) (msg, stack string) {
 	_ = obj.Eval(slip.NewScope(), 0)
 	return
 }
+
+func TestPanicParcial(t *testing.T) {
+	p := slip.Partial{Reason: "test", Depth: 3}
+	tt.Equal(t, "test", p.String())
+	tt.Equal(t, "test", p.Error())
+}

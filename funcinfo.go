@@ -84,7 +84,7 @@ func (obj *FuncInfo) Describe(b []byte, indent, right int, ansi bool) []byte {
 	}
 	if 0 < len(obj.Doc.Text) {
 		b = append(b, indentSpaces[:indent]...)
-		b = append(b, "Description:\n"...)
+		b = append(b, "Documentation:\n"...)
 		b = AppendDoc(b, obj.Doc.Text, indent+2, right, ansi)
 		b = append(b, '\n')
 	}

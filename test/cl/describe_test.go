@@ -30,7 +30,7 @@ func TestDescribeBasic(t *testing.T) {
 car names a function:
   Lambda-List: (arg)
   Return: object
-  Description:
+  Documentation:
     car returns the car if arg is a cons, the first element if arg is a list,
     and nil if arg is nil or an empty list.
   Arguments:
