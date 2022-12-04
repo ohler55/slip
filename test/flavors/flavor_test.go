@@ -121,7 +121,7 @@ func TestFlavorDescribeOptions(t *testing.T) {
 
 	out := f.(*flavors.Flavor).Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `abbey is an abstract flavor:
-  Description:
+  Documentation:
     an abstract
   Variables:
     x = 3 (initable)

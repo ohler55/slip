@@ -5,16 +5,14 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
+ - format
+
  - unit tests
   - function.go
   - code.go
   - lambda.go
 
  - method or function to get flavor of instance and one to check the flavor
-
- - format
-  - includes the lithp inline option
-  - walk and read format-directives and apply to output string
 
 
  - coerce
@@ -38,18 +36,6 @@ SLIce Processing is LISP for golang
  - clrhash
  - sxhash
  - with-hash-table-iterator
-
-
- - test
-  - printer
-   - lambda
-   - AppendDoc
-  - lambda
-  - package
-  - panic
-  - partial
-  - code
-  - function
 
  - macro
   - expand on read
