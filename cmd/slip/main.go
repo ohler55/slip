@@ -82,15 +82,11 @@ func run() {
 	if trace {
 		slip.Trace(true)
 	}
-	var (
-		r     *repl.REPL
-		scope *slip.Scope
-	)
+	var scope *slip.Scope
 	if 0 < len(evalCode) && !interactive {
 		scope = slip.NewScope()
 	} else {
-		r = repl.NewREPL()
-		scope = &r.Instance.Scope
+		scope = repl.Scope()
 	}
 	var code slip.Code
 	for _, path = range flag.Args() {
@@ -114,8 +110,8 @@ func run() {
 	}
 	if 0 < len(cfgDir) && cfgDir != "-" {
 		path = cfgDir
-		r.SetCfgDir(cfgDir)
+		repl.SetConfigDir(cfgDir)
 		path = ""
 	}
-	r.Run()
+	repl.Run()
 }

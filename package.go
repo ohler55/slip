@@ -12,6 +12,16 @@ import (
 const PackageSymbol = Symbol("package")
 
 var (
+	// SetHook is called after setting a variable or after a defvar or
+	// defparmeter is called.
+	SetHook = func(p *Package, key string) {}
+
+	// UnsetHook is called when a variable is unset or removed.
+	UnsetHook = func(p *Package, key string) {}
+
+	// DefunHook is called after a function is added.
+	DefunHook = func(p *Package, key string) {}
+
 	packages = map[string]*Package{
 		CLPkg.Name:   &CLPkg,
 		UserPkg.Name: &UserPkg,
@@ -108,6 +118,7 @@ func (obj *Package) Set(name string, value Object) {
 		} else {
 			vv.Val = value
 		}
+		SetHook(obj, name)
 		return
 	}
 	vv := &VarVal{Val: value, Pkg: obj}
@@ -117,6 +128,7 @@ func (obj *Package) Set(name string, value Object) {
 			u.Vars[name] = vv
 		}
 	}
+	SetHook(obj, name)
 }
 
 // Get a variable.
@@ -154,6 +166,7 @@ func (obj *Package) Remove(name string) {
 			}
 		}
 	}
+	UnsetHook(obj, name)
 }
 
 // Has a variable.
@@ -184,6 +197,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	for _, pkg := range obj.Users {
 		pkg.Funcs[name] = &fi
 	}
+	DefunHook(obj, name)
 }
 
 // Append a buffer with a representation of the Object.

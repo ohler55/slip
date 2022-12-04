@@ -8,6 +8,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime/debug"
+	"sort"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -17,28 +19,67 @@ import (
 const (
 	bold = "\x1b[1m"
 
-	printANSI   = "*print-ansi*"
-	stdInput    = "*standard-input*"
-	stdOutput   = "*standard-output*"
-	p1Key       = "*repl-prompt*"
-	p1ANSIKey   = "*repl-prompt-ansi*"
+	printANSI = "*print-ansi*"
+	stdInput  = "*standard-input*"
+	stdOutput = "*standard-output*"
+
+	// TBD make these vars on repl instance
+	// TBD set warning color (list colors or none)
 	warnANSIKey = "*repl-warning-ansi*"
-	form1Key    = "+"
-	form2Key    = "++"
-	form3Key    = "+++"
-	value1Key   = "/"
-	value2Key   = "//"
-	value3Key   = "///"
+
+	form1Key  = "+"
+	form2Key  = "++"
+	form3Key  = "+++"
+	value1Key = "/"
+	value2Key = "//"
+	value3Key = "///"
+
+	configHeader = ";;;; slip REPL configuration file\n\n"
 )
 
-type REPL struct {
-	flavors.Instance
-
+var (
+	// A value of true is setq while false is for (send *repl* set-var value)
+	modifiedVars = map[string]bool{}
 	// TBD is a lock file needed to avoid collisions when running multiple
 	// instances?
-	configFilename  string
-	historyFilename string
+	configFilename  = ""
+	historyFilename = ""
 
+	theOne loop
+)
+
+func init() {
+	theOne.line = make([]byte, 1024)
+
+	rf := flavors.DefFlavor("REPL", map[string]slip.Object{}, []string{}, slip.List{})
+	theOne.Flavor = rf
+	theOne.Vars = map[string]slip.Object{"self": &theOne}
+
+	// TBD setup like flavors.MakeInstance
+
+	if theOne.Get(slip.Symbol(printANSI)) != nil {
+		theOne.Let(slip.Symbol(warnANSIKey), slip.String("\x1b[31m"))
+		theOne.prompt = "\x1b[1;94m▶ \x1b[m"
+	} else {
+		theOne.Let(slip.Symbol(warnANSIKey), nil)
+		theOne.prompt = "* "
+	}
+	theOne.Let(slip.Symbol(form1Key), nil)
+	theOne.Let(slip.Symbol(form2Key), nil)
+	theOne.Let(slip.Symbol(form3Key), nil)
+	theOne.Let(slip.Symbol(value1Key), nil)
+	theOne.Let(slip.Symbol(value2Key), nil)
+	theOne.Let(slip.Symbol(value3Key), nil)
+
+	slip.SetHook = setHook
+	slip.UnsetHook = unsetHook
+	slip.DefunHook = defunHook
+
+	slip.DefConstant(slip.Symbol("*repl*"), &theOne, "The REPL.")
+}
+
+type loop struct {
+	flavors.Instance
 	line  []byte
 	buf   []byte
 	depth int
@@ -50,33 +91,13 @@ type REPL struct {
 	value1 slip.Object
 	value2 slip.Object
 	value3 slip.Object
+
+	prompt string
 }
 
-// NewREPL returns a new instance or a REPL.
-func NewREPL() *REPL {
-	r := REPL{line: make([]byte, 1024)}
-	if r.Get(slip.Symbol(printANSI)) != nil {
-		r.Let(slip.Symbol(p1ANSIKey), slip.String(bold))
-		r.Let(slip.Symbol(warnANSIKey), slip.String("\x1b[31m"))
-		r.Let(slip.Symbol(p1Key), slip.String("\x1b[1;94m▶ \x1b[m"))
-	} else {
-		r.Let(slip.Symbol(p1ANSIKey), nil)
-		r.Let(slip.Symbol(warnANSIKey), nil)
-		r.Let(slip.Symbol(p1Key), slip.String("* "))
-	}
-	r.Let(slip.Symbol(form1Key), nil)
-	r.Let(slip.Symbol(form2Key), nil)
-	r.Let(slip.Symbol(form3Key), nil)
-	r.Let(slip.Symbol(value1Key), nil)
-	r.Let(slip.Symbol(value2Key), nil)
-	r.Let(slip.Symbol(value3Key), nil)
-
-	return &r
-}
-
-// SetCfgDir sets the configuration directory for the configuration and
+// SetConfigDir sets the configuration directory for the configuration and
 // history files.
-func (r *REPL) SetCfgDir(dir string) {
+func SetConfigDir(dir string) {
 	if strings.Contains(dir, "~") {
 		home, err := os.UserHomeDir()
 		if err != nil {
@@ -88,17 +109,18 @@ func (r *REPL) SetCfgDir(dir string) {
 	if dir, err = filepath.Abs(filepath.Clean(dir)); err != nil {
 		panic(err)
 	}
-	r.configFilename = filepath.Join(dir, "config.lisp")
-	r.historyFilename = filepath.Join(dir, "history")
+	configFilename = filepath.Join(dir, "config.lisp")
+	historyFilename = filepath.Join(dir, "history")
 
 	os.MkdirAll(dir, 0755)
 	var buf []byte
-	if buf, err = os.ReadFile(r.configFilename); err == nil {
+	if buf, err = os.ReadFile(configFilename); err == nil {
+		scope := slip.NewScope()
 		code := slip.Read(buf)
 		code.Compile()
-		code.Eval(&r.Instance.Scope)
+		code.Eval(scope)
 	} else if os.IsNotExist(err) {
-		if err = os.WriteFile(r.configFilename, []byte(";;;; slip REPL configuration file\n"), 0666); err != nil {
+		if err = os.WriteFile(configFilename, []byte(configHeader), 0666); err != nil {
 			panic(err)
 		}
 	} else {
@@ -106,22 +128,51 @@ func (r *REPL) SetCfgDir(dir string) {
 	}
 }
 
-func (r *REPL) Run() {
+// Scope returns the REPL scope.
+func Scope() *slip.Scope {
+	return &theOne.Instance.Scope
+}
+
+func Run() {
 	defer func() {
 		_ = recover()
-		_, _ = r.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte("\nBye\n"))
+		_, _ = theOne.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte("\nBye\n"))
 	}()
 	for {
-		r.process()
+		theOne.process()
 	}
 }
 
-func (r *REPL) reset() {
+func (r *loop) Let(sym slip.Symbol, value slip.Object) {
+	r.Instance.Scope.Let(sym, value)
+	modifiedVars[string(sym)] = false
+	updateConfigFile()
+}
+
+// Receive a method invocation from the send function.
+func (r *loop) Receive(message string, args slip.List, depth int) slip.Object {
+	message = strings.ToLower(message)
+	switch message {
+	case ":set-prompt":
+		if str, ok := args[0].(slip.String); ok {
+			r.prompt = string(str)
+			modifiedVars["prompt"] = false
+		} else {
+			panic("send set-prompt to *repl* expects a string argument")
+		}
+	default:
+		return r.Instance.Receive(message, args, depth)
+	}
+	updateConfigFile()
+	return args[0]
+}
+
+func (r *loop) reset() {
 	r.buf = r.buf[:0]
 	r.depth = 0
 }
 
-func (r *REPL) process() {
+func (r *loop) process() {
 	defer func() {
 		rec := recover()
 		if rec == nil {
@@ -149,13 +200,16 @@ func (r *REPL) process() {
 			buf = append(buf, suffix...)
 			_, _ = r.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			r.reset()
+			debug.PrintStack()
 		case error:
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
 			}
+			debug.PrintStack()
 			fmt.Fprintf(r.Get(slip.Symbol(stdOutput)).(io.Writer), "%s## %v%s\n", prefix, tr, suffix)
 			r.reset()
 		default:
+			debug.PrintStack()
 			fmt.Fprintf(r.Get(slip.Symbol(stdOutput)).(io.Writer), "%s## %v%s\n", prefix, tr, suffix)
 			r.reset()
 		}
@@ -177,7 +231,7 @@ func (r *REPL) process() {
 			skipWrite = true
 		}
 		// Eval was successful.
-		r.writeToHistory()
+		writeToHistory()
 
 		r.Set(slip.Symbol(form1Key), r.form1)
 		r.Set(slip.Symbol(form2Key), r.form2)
@@ -193,18 +247,18 @@ func (r *REPL) process() {
 	}
 }
 
-func (r *REPL) read() {
+func (r *loop) read() {
 	var prefix slip.String
 	var suffix string
-	if ansi := r.Get(slip.Symbol(p1ANSIKey)); ansi != nil {
-		prefix, _ = ansi.(slip.String)
-		suffix = "\x1b[m"
-	}
+
+	// TBD how to set the prompt for other levels with bold or color
+	//   maybe just ansi code for before and also prompt character
+	//   or secondary prompt with %d or a list of pre and post with number in the middle
+	//     %d option allows for %02d or maybe format function
 	if 0 < len(r.buf) {
 		fmt.Fprintf(r.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%d] %s", string(prefix), r.depth, suffix)
 	} else {
-		p1 := r.Get(slip.Symbol(p1Key)).(slip.String)
-		fmt.Fprintf(r.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%s%s", string(prefix), string(p1), suffix)
+		fmt.Fprintf(r.Get(slip.Symbol(stdOutput)).(io.Writer), "%s", theOne.prompt)
 	}
 	for {
 		n, err := r.Get(slip.Symbol(stdInput)).(io.Reader).Read(r.line)
@@ -218,11 +272,51 @@ func (r *REPL) read() {
 	}
 }
 
-func (r *REPL) updateConfigFile() {
-	// TBD write all repl vars as well as all *print-xxx* vars
-	//   other global vars?
+func updateConfigFile() {
+	if len(configFilename) == 0 || len(modifiedVars) == 0 {
+		return
+	}
+	var b []byte
+	b = append(b, configHeader...)
+	keys := make([]string, 0, len(modifiedVars))
+	for key := range modifiedVars {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		if modifiedVars[key] {
+			value := slip.UserPkg.JustGet(key)
+			b = fmt.Appendf(b, "(setq %s %s)\n", key, value)
+		} else {
+			switch key {
+			case "prompt":
+				b = fmt.Appendf(b, "(send *repl* :set-prompt %q)\n", theOne.prompt)
+			case "tbd":
+				// TBD others
+			}
+		}
+	}
+	if err := os.WriteFile(configFilename, b, 0666); err != nil {
+		panic(err)
+	}
 }
 
-func (r *REPL) writeToHistory() {
+func writeToHistory() {
 	// TBD write r.buf to history
+}
+
+func setHook(p *slip.Package, key string) {
+	if strings.HasPrefix(key, "*print-") || key == "*bag-time-format*" || key == "*bag-time-wrap*" {
+		modifiedVars[key] = true
+		updateConfigFile()
+	}
+	// TBD add to completions
+}
+
+func unsetHook(p *slip.Package, key string) {
+	// TBD remove from completions
+}
+
+func defunHook(p *slip.Package, key string) {
+	// TBD
 }
