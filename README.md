@@ -13,21 +13,26 @@ SLIce Processing is LISP for golang
 
  - method or function to get flavor of instance and one to check the flavor
 
- - repl
-  - add change hooks
-  - use ~/.slip as a config file for setting in the repl
-   - print setting
-   - repl setting
-   - update on set using hooks
-  - add -c option for config file (- means none)
-  - make repl an instance? (flavor?)
-   - with struct members and a Reciever at least
-   - bound to *repl*
-   - in .slip config just use (send *repl* set-foo 3)
-   - can struct and instance be mixed?
-  - move to separate dir (to assure it can be a separate repo if desired)
-  - add hooks to package and others to capture changes in the global dictionary
-  - better handling of interactions
+ - repl package
+  - (ansi-string :red :bold)
+  - *repl-input-stream*
+  - *repl-output-stream*
+  - (help &optional topic) ;; topic can be index
+   - configuration
+    - set variables which are updated
+   - custom.lisp
+   - history
+   - index
+    - configuration
+    - history
+    - ansi for color and character attributes
+    - run
+    - exit
+  - (repl-history &optional nth)
+  - (repl-run)
+  - (repl-exit)
+
+  - better handling of interactions (raw terminal?)
    - tab complete
     - keep sorted list (extra info for type? used for color coding
    - paren matching

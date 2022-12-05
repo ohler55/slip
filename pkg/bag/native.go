@@ -32,7 +32,7 @@ daemons are invoked hence it native a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-native bag) => (("a" . 7))`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Native represents the native function.

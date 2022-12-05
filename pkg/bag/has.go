@@ -39,7 +39,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-has bag "a") => t`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Has represents the has function.

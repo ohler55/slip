@@ -118,7 +118,7 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		} else {
 			vv.Val = value
 		}
-		SetHook(obj, name)
+		SetHook(vv.Pkg, name)
 		return vv
 	}
 	vv := &VarVal{Val: value, Pkg: obj}

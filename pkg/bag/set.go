@@ -48,7 +48,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-set bag 3 "a") => #<bag-flavor 12345> ;; content is now {a:3}`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Set represents the set function.

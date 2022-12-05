@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/repl"
+	"github.com/ohler55/slip/pkg/repl"
 	"golang.org/x/term"
 
 	// Pull in all functions.
@@ -87,6 +87,7 @@ func run() {
 		scope = slip.NewScope()
 	} else {
 		scope = repl.Scope()
+		repl.ZeroMods()
 	}
 	var code slip.Code
 	for _, path = range flag.Args() {

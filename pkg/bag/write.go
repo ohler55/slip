@@ -84,7 +84,7 @@ daemons are invoked hence it write a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-write bag) => "{a: 7}")`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Write represents the write function.

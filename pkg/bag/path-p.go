@@ -27,7 +27,7 @@ func init() {
 			Examples: []string{
 				`(bag-path-p (make-bag-path "a.b")) => t`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Pathp represents the pathp function.
