@@ -14,6 +14,11 @@ var (
 		Vars: map[string]*slip.VarVal{
 			"*repl-prompt*":         {Get: getPrompt, Set: setPrompt, Doc: "the REPL prompt"},
 			"*repl-warning-prefix*": {Get: getWarnPrefix, Set: setWarnPrefix, Doc: "prefix to print before a warning"},
+			"*repl-editor*": {
+				Get: getEditor,
+				Set: setEditor,
+				Doc: "if true use the SLIP REPL editor as the reader else use a simple line reader.",
+			},
 		},
 		Lambdas: map[string]*slip.Lambda{},
 		Funcs:   map[string]*slip.FuncInfo{},

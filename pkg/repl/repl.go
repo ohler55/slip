@@ -48,9 +48,7 @@ var (
 	value2 slip.Object
 	value3 slip.Object
 
-	lineBuf   = make([]byte, 1024)
-	formBuf   []byte
-	formDepth int
+	replReader reader = &termReader{}
 
 	// TBD flag to not let Run() be called more than once before (repl-exit) is called
 )
@@ -119,9 +117,11 @@ func Scope() *slip.Scope {
 // Run starts the REPL.
 func Run() {
 	defer func() {
+		replReader.stop()
 		_ = recover()
 		_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte("\nBye\n"))
 	}()
+	replReader.initialize()
 	for {
 		process()
 	}
@@ -133,8 +133,7 @@ func ZeroMods() {
 }
 
 func reset() {
-	formBuf = formBuf[:0]
-	formDepth = 0
+	replReader.reset()
 }
 
 func process() {
@@ -151,7 +150,7 @@ func process() {
 		}
 		switch tr := rec.(type) {
 		case *slip.Partial:
-			formDepth = tr.Depth
+			replReader.setDepth(tr.Depth)
 		case *slip.Panic:
 			var buf []byte
 			buf = append(buf, warnPrefix...)
@@ -160,6 +159,9 @@ func process() {
 			_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			reset()
 			// debug.PrintStack()
+		case die:
+			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			os.Exit(1)
 		case error:
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
@@ -173,8 +175,8 @@ func process() {
 			reset()
 		}
 	}()
-	read()
-	code := slip.Read(formBuf)
+	buf := replReader.read()
+	code := slip.Read(buf)
 	for _, obj := range code {
 		var skipWrite bool
 
@@ -206,24 +208,6 @@ func process() {
 	}
 }
 
-func read() {
-	if 0 < len(formBuf) {
-		_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte("  "))
-	} else {
-		_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte(prompt))
-	}
-	for {
-		n, err := scope.Get(slip.Symbol(stdInput)).(io.Reader).Read(lineBuf)
-		if err != nil {
-			panic(err)
-		}
-		formBuf = append(formBuf, lineBuf[:n]...)
-		if 0 < len(formBuf) && formBuf[len(formBuf)-1] == '\n' {
-			break
-		}
-	}
-}
-
 func updateConfigFile() {
 	if len(configFilename) == 0 || len(modifiedVars) == 0 {
 		return
@@ -246,6 +230,12 @@ func updateConfigFile() {
 
 func writeToHistory() {
 	// TBD write formBuf to history
+	// separate go routine for writing
+	//  open, write, close
+	//  keep in memory as well as []byte
+	// load on startup
+	// when 10% over write memory in new file then delete old
+
 }
 
 func setHook(p *slip.Package, key string) {
@@ -287,5 +277,24 @@ func setWarnPrefix(value slip.Object) {
 		warnPrefix = string(str)
 	} else {
 		panic("*repl-warning-prefix* must be a string")
+	}
+}
+
+func getEditor() slip.Object {
+	if _, ok := replReader.(*editor); ok {
+		return slip.True
+	}
+	return nil
+}
+
+func setEditor(value slip.Object) {
+	if value == nil {
+		if _, ok := replReader.(*termReader); !ok {
+			replReader = &termReader{}
+			replReader.initialize()
+		}
+	} else if _, ok := replReader.(*editor); !ok {
+		replReader = &editor{}
+		replReader.initialize()
 	}
 }
