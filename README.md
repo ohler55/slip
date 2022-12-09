@@ -14,6 +14,10 @@ SLIce Processing is LISP for golang
  - method or function to get flavor of instance and one to check the flavor
 
  - repl package
+  - editor
+   - handle entry of utf8
+   - rune not byte for lines
+
   - (ansi-string :red :bold)
   - *repl-input-stream*
   - *repl-output-stream*

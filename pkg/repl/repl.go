@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"sort"
 	"strings"
 
@@ -158,7 +159,7 @@ func process() {
 			buf = append(buf, suffix...)
 			_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			reset()
-			// debug.PrintStack()
+			debug.PrintStack()
 		case die:
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
 			os.Exit(1)
@@ -166,11 +167,11 @@ func process() {
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
 			}
-			// debug.PrintStack()
+			debug.PrintStack()
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
 			reset()
 		default:
-			// debug.PrintStack()
+			debug.PrintStack()
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
 			reset()
 		}

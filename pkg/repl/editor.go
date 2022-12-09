@@ -18,6 +18,8 @@ type editor struct {
 	lines     [][]byte
 	v0        int // first terminal line of display
 	buf       []byte
+	uni       []byte
+	mode      []bindFunc
 	line      int
 	pos       int
 	foff      int // form offset (right after prompt)
@@ -44,6 +46,7 @@ func (ed *editor) initialize() {
 		panic(err)
 	}
 	ed.buf = make([]byte, 16)
+	ed.mode = topMode
 }
 
 func (ed *editor) stop() {
@@ -88,6 +91,10 @@ func (ed *editor) display() {
 	ed.setCursor(ed.v0+ed.line, ed.foff)
 }
 
+func (ed *editor) displayChar(line, pos int) {
+	// TBD
+}
+
 func (ed *editor) read() []byte {
 	if len(ed.lines) == 0 {
 		ed.v0, _ = ed.getCursor()
@@ -109,143 +116,14 @@ top:
 		}
 		for i := 0; i < cnt; i++ {
 			b := rbuf[i]
-			switch b {
-			case 0x01: // ^a
-				ed.lineBegin()
-			case 0x02: // ^b
-				ed.back()
-			case 0x03: // ^c
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x04: // ^d
-				panic(io.EOF) // change to delete forward
-			case 0x05: // ^e
-				ed.lineEnd()
-			case 0x06: // ^f
-				ed.forward()
-			case 0x07: // ^g
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x08: // ^
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x09:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x0a: // return
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x0b:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x0c:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x0d: // newline
-				ed.addByte(b)
+			ed.mode[b](ed, b)
+			if b == 0x0d {
 				break top
-			case 0x0e:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x0f:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x10:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x11:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x12:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x13:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x14:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x15:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x16:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x17:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x18:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x19:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x1a:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x1b: // escape
-				// TBD go into escape mode and determine what to read
-				// [ indicates some key code
-				// other char is user sequence
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x1c:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x1d:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x1e:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x1f:
-				fmt.Printf("*** %02x\n\r", b)
-			case 0x7f: // backspace
-				fmt.Printf("*** %02x\n\r", b)
-			default:
-				if _, err := ed.out.Write([]byte{b}); err != nil {
-					panic(err)
-				}
-				ed.addByte(b)
 			}
 		}
 	}
 	_, _ = ed.out.Write([]byte{'\n', '\r'})
 	return bytes.Join(ed.lines, []byte{'\n'})
-}
-
-func (ed *editor) addByte(b byte) {
-	// TBD handle new char not at end
-	// update line that changes
-	// handle wraps
-	// handle end of window
-	if b == 0x0d {
-		ed.line++
-		ed.pos = 0
-	}
-	for len(ed.lines) <= ed.line {
-		ed.lines = append(ed.lines, nil)
-	}
-	if b != 0x0d {
-		ed.lines[ed.line] = append(ed.lines[ed.line], b)
-		ed.pos++
-	}
-	// TBD update display, go to start, blank, and print
-	// TBD should buf be slice of lines?
-	//  easier to blank rest of line when display
-	//  have to join for return from read
-}
-
-func (ed *editor) back() {
-	ed.pos--
-	if ed.pos < 0 {
-		if 0 < ed.line {
-			ed.line--
-			ed.pos = len(ed.lines[ed.line])
-		} else {
-			ed.pos = 0
-		}
-	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
-}
-
-func (ed *editor) forward() {
-	ed.pos++
-	if len(ed.lines[ed.line]) < ed.pos {
-		if ed.line+1 < len(ed.lines) {
-			ed.line++
-			ed.pos = 0
-		} else {
-			ed.pos = len(ed.lines[ed.line])
-		}
-	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
-}
-
-func (ed *editor) lineBegin() {
-	ed.pos = 0
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
-}
-
-func (ed *editor) lineEnd() {
-	ed.pos = len(ed.lines[ed.line])
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 }
 
 // ANSI sequences
