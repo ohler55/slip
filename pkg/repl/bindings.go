@@ -3,9 +3,14 @@
 package repl
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"unicode/utf8"
+
+	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
+	"golang.org/x/term"
 )
 
 type bindFunc func(ed *editor, b byte)
@@ -61,7 +66,7 @@ var (
 		bad, bad, matchClose, bad, bad, bad, matchOpen, bad, // 0x00
 		bad, bad, bad, bad, bad, nl, bad, bad, // 0x08
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x10
-		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x20
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x20
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x30
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x40
 		bad, bad, bad, bad, bad, enterU8, bad, bad, // 0x50
@@ -130,6 +135,7 @@ func init() {
 }
 
 func bad(ed *editor, b byte) {
+	fmt.Printf("*** %02x\n", b)
 	// TBD if a status line then indicate and error there
 	_, _ = ed.out.Write([]byte{0x07})
 	ed.mode = topMode
@@ -140,25 +146,21 @@ func done(ed *editor, b byte) {
 }
 
 func topUni(ed *editor, b byte) {
-	// TBD switch modes to unicodeMode
-	//  add to ed.uni
-	//  unicode mode adds to ed.uni then checks for unicode
-	//  any non-hibit is an error
 	ed.uni = ed.uni[:0]
 	ed.uni = append(ed.uni, b)
 	ed.mode = unicodeMode
 }
 
 func addUni(ed *editor, b byte) {
-	// TBD switch modes to unicodeMode
-	//  add to ed.uni
-	//  unicode mode adds to ed.uni then checks for unicode
-	//  any non-hibit is an error
 	ed.uni = append(ed.uni, b)
 	if utf8.Valid(ed.uni) {
 		ed.mode = topMode
-		// TBD append to rune line
-		fmt.Printf("*** %s\n", ed.uni)
+		if _, err := ed.out.Write(ed.uni); err != nil {
+			panic(err)
+		}
+		r, _ := utf8.DecodeRune(ed.uni)
+		ed.lines[ed.line] = append(ed.lines[ed.line], r)
+		ed.pos++
 	}
 }
 
@@ -178,10 +180,7 @@ func addByte(ed *editor, b byte) {
 	if _, err := ed.out.Write([]byte{b}); err != nil {
 		panic(err)
 	}
-	for len(ed.lines) <= ed.line {
-		ed.lines = append(ed.lines, nil)
-	}
-	ed.lines[ed.line] = append(ed.lines[ed.line], b)
+	ed.lines[ed.line] = append(ed.lines[ed.line], rune(b))
 	ed.pos++
 }
 
@@ -344,26 +343,60 @@ func historyForward(ed *editor, _ byte) {
 }
 
 func searchBack(ed *editor, _ byte) {
-	// TBD
+	// TBD search history
 	_, _ = ed.out.Write([]byte{0x07})
 	ed.mode = topMode
 }
 
 func searchForward(ed *editor, _ byte) {
-	// TBD
+	// TBD search history
 	_, _ = ed.out.Write([]byte{0x07})
 	ed.mode = topMode
 }
 
 func delForward(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	line := ed.lines[ed.line]
+	if ed.pos < len(line) {
+		line = append(line[:ed.pos], line[ed.pos+1:]...)
+		ed.lines[ed.line] = line
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.clearToEnd()
+		if _, err := ed.out.Write([]byte(string(line[ed.pos:]))); err != nil {
+			panic(err)
+		}
+	} else if ed.line < len(ed.lines)-1 {
+		line = ed.lines[ed.line+1]
+		ed.lines = append(ed.lines[:ed.line+1], ed.lines[ed.line+2:]...)
+		ed.lines[ed.line] = append(ed.lines[ed.line], line...)
+		ed.setCursor(ed.v0+len(ed.lines), 0)
+		ed.clearLine()
+		ed.display()
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
 func delBack(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	line := ed.lines[ed.line]
+	if 0 < ed.pos {
+		ed.pos--
+		line = append(line[:ed.pos], line[ed.pos+1:]...)
+		ed.lines[ed.line] = line
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.clearToEnd()
+		if _, err := ed.out.Write([]byte(string(line[ed.pos:]))); err != nil {
+			panic(err)
+		}
+	} else if 0 < ed.line {
+		ed.line--
+		ed.pos = len(ed.lines[ed.line])
+		ed.lines = append(ed.lines[:ed.line+1], ed.lines[ed.line+2:]...)
+		ed.lines[ed.line] = append(ed.lines[ed.line], line...)
+		ed.setCursor(ed.v0+len(ed.lines), 0)
+		ed.clearLine()
+		ed.display()
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
@@ -380,14 +413,34 @@ func delBackWord(ed *editor, _ byte) {
 }
 
 func delLineEnd(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	line := ed.lines[ed.line]
+	if ed.pos < len(line) {
+		line = line[:ed.pos]
+		ed.lines[ed.line] = line
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.clearToEnd()
+	} else if ed.line < len(ed.lines)-1 {
+		line = ed.lines[ed.line+1]
+		ed.lines = append(ed.lines[:ed.line+1], ed.lines[ed.line+2:]...)
+		ed.lines[ed.line] = append(ed.lines[ed.line], line...)
+		ed.setCursor(ed.v0+len(ed.lines), 0)
+		ed.clearLine()
+		ed.display()
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
 func swapChar(ed *editor, _ byte) {
-	// TBD swap then update each char
-	_, _ = ed.out.Write([]byte{0x07})
+	if 0 < ed.pos && ed.pos < len(ed.lines[ed.line]) {
+		r0 := ed.lines[ed.line][ed.pos-1]
+		r := ed.lines[ed.line][ed.pos]
+		ed.lines[ed.line][ed.pos] = r0
+		ed.lines[ed.line][ed.pos-1] = r
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos-1)
+		ed.out.Write([]byte(string([]rune{r, r0})))
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	}
 	ed.mode = topMode
 }
 
@@ -436,5 +489,44 @@ func tab(ed *editor, _ byte) {
 func help(ed *editor, _ byte) {
 	// TBD
 	_, _ = ed.out.Write([]byte{0x07})
+	ed.mode = topMode
+}
+
+func describe(ed *editor, _ byte) {
+	var (
+		start int
+		end   int
+	)
+	line := ed.lines[ed.line]
+	for start = ed.pos - 1; 0 <= start; start-- {
+		if sepMap[line[start]] == 'x' {
+			start++
+			break
+		}
+	}
+	for end = ed.pos; end < len(line); end++ {
+		if sepMap[line[end]] == 'x' {
+			break
+		}
+	}
+	if start < 0 {
+		return
+	}
+	word := string(line[start:end])
+	w, h, _ := term.GetSize(0)
+	bottom := ed.v0 + len(ed.lines)
+
+	buf := cl.AppendDescribe(nil, slip.Symbol(word), scope, w, true)
+	buf = bytes.ReplaceAll(buf, []byte{'\n'}, []byte{'\n', '\r'})
+	cnt := bytes.Count(buf, []byte{'\n'})
+	ed.dirty = cnt + 1
+	if h <= bottom+cnt {
+		diff := bottom + cnt - h
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+	ed.setCursor(ed.v0+len(ed.lines), ed.foff)
+	ed.out.Write(buf)
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }

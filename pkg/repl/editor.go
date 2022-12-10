@@ -3,7 +3,6 @@
 package repl
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -15,14 +14,14 @@ import (
 type die string
 
 type editor struct {
-	lines     [][]byte
+	lines     [][]rune
 	v0        int // first terminal line of display
-	buf       []byte
 	uni       []byte
 	mode      []bindFunc
 	line      int
 	pos       int
 	foff      int // form offset (right after prompt)
+	dirty     int // number of lines below form to delete on next key stroke unless a tab
 	in        *os.File
 	fd        int // in fd
 	out       io.Writer
@@ -42,11 +41,14 @@ func (ed *editor) initialize() {
 	ed.in = (*os.File)(fs)
 	ed.fd = int(((*os.File)(fs)).Fd())
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
+	// TBD wrap out with writer that replaces \n with \n\r
+	//  write section at a time and then \n\r
+	//  have to change terminal so other printing works correctly
 	if ed.origState, err = term.MakeRaw(ed.fd); err != nil {
 		panic(err)
 	}
-	ed.buf = make([]byte, 16)
 	ed.mode = topMode
+	ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
 }
 
 func (ed *editor) stop() {
@@ -69,9 +71,6 @@ func (ed *editor) reset() {
 	ed.pos = 0
 }
 
-// TBD functions to get cursor position and also compare to screen size from term.GetSize()
-// setCursor(), getCursor(), (save and restore also possible)
-
 // TBD on read check .buf len. if 0 then get cursor, else move to start location
 //  print prompt then each line followed by a clear to end of line
 //    record location after printing prompt as poff (prompt offset or maybe foff for form offset)
@@ -86,22 +85,24 @@ func (ed *editor) display() {
 		if 0 < i {
 			ed.clearLine()
 		}
-		_, _ = ed.out.Write(line)
+		_, _ = ed.out.Write([]byte(string(line)))
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff)
 }
 
-func (ed *editor) displayChar(line, pos int) {
-	// TBD
+func (ed *editor) displayRune(v, h int, r rune) {
+	ed.setCursor(v, h)
+	ed.out.Write([]byte(string([]rune{r})))
 }
 
-func (ed *editor) read() []byte {
+func (ed *editor) read() (out []byte) {
 	if len(ed.lines) == 0 {
 		ed.v0, _ = ed.getCursor()
 		ed.setCursor(ed.v0, 0)
 		ed.clearLine()
 		_, _ = ed.out.Write([]byte(prompt))
 		_, ed.foff = ed.getCursor()
+		ed.lines = [][]rune{{}}
 	} else {
 		ed.setCursor(ed.v0+ed.line, ed.foff)
 	}
@@ -114,6 +115,14 @@ top:
 		} else if cnt == 0 {
 			continue
 		}
+		if 0 < ed.dirty && rbuf[0] != 0x09 {
+			start := ed.v0 + len(ed.lines) - 1
+			for ; 0 < ed.dirty; ed.dirty-- {
+				ed.setCursor(start+ed.dirty, 0)
+				ed.clearLine()
+			}
+			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		}
 		for i := 0; i < cnt; i++ {
 			b := rbuf[i]
 			ed.mode[b](ed, b)
@@ -123,7 +132,11 @@ top:
 		}
 	}
 	_, _ = ed.out.Write([]byte{'\n', '\r'})
-	return bytes.Join(ed.lines, []byte{'\n'})
+	for _, line := range ed.lines {
+		out = append(out, string(line)...)
+		out = append(out, '\n')
+	}
+	return
 }
 
 // ANSI sequences
@@ -175,4 +188,14 @@ func (ed *editor) iRight(n int) {
 
 func (ed *editor) iLeft(n int) {
 	_, _ = fmt.Fprintf(ed.out, "\x1b[%dD", n)
+}
+
+func (ed *editor) scroll(n int) {
+	if 0 < n {
+		_, _ = fmt.Fprintf(ed.out, "\x1b[%dS", n)
+	} else if n < 0 {
+		_, _ = fmt.Fprintf(ed.out, "\x1b[%dT", n)
+	}
+	//_, _ = fmt.Fprintf(ed.out, "\x1b[%dD", n)
+	// D and M
 }

@@ -15,8 +15,8 @@ SLIce Processing is LISP for golang
 
  - repl package
   - editor
-   - handle entry of utf8
-   - rune not byte for lines
+   - delete
+   - insert
 
   - (ansi-string :red :bold)
   - *repl-input-stream*
