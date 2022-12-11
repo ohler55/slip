@@ -3,9 +3,11 @@
 package repl
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
+	"unicode/utf8"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/repl/term"
@@ -187,4 +189,32 @@ func (ed *editor) scroll(n int) {
 	} else if n < 0 {
 		_, _ = fmt.Fprintf(ed.out, "\x1b[%dT", n)
 	}
+}
+
+func (ed *editor) box(top, left, h, w int) {
+	// Save cursor position and then turn the cursor invisible.
+	ed.out.Write([]byte{'\x1b', '[', '7', '\x1b', '[', '?', '2', '5', 'l'})
+
+	ed.setCursor(top, left)
+	line := utf8.AppendRune(nil, '┌')
+	line = append(line, bytes.Repeat(utf8.AppendRune(nil, '─'), w-2)...)
+	line = utf8.AppendRune(line, '┒')
+	ed.out.Write(line)
+
+	leftEdge := utf8.AppendRune(nil, '│')
+	rightEdge := utf8.AppendRune(nil, '┃')
+	for i := top + 1; i < top+h; i++ {
+		ed.setCursor(i, left)
+		ed.out.Write(leftEdge)
+		ed.setCursor(i, left+w-1)
+		ed.out.Write(rightEdge)
+	}
+	ed.setCursor(top+h, left)
+	line = utf8.AppendRune(nil, '┕')
+	line = append(line, bytes.Repeat(utf8.AppendRune(nil, '━'), w-2)...)
+	line = utf8.AppendRune(line, '┛')
+	ed.out.Write(line)
+
+	// Restore the cursor position then Make the cursor visible.
+	ed.out.Write([]byte{'\x1b', '[', '8', '\x1b', '[', '?', '2', '5', 'h'})
 }

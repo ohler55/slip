@@ -19,6 +19,7 @@ var (
 				Set: setEditor,
 				Doc: "if true use the SLIP REPL editor as the reader else use a simple line reader.",
 			},
+			"*repl-help-box*": {Val: slip.True, Doc: "if true display help in a box."},
 		},
 		Lambdas: map[string]*slip.Lambda{},
 		Funcs:   map[string]*slip.FuncInfo{},

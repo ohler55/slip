@@ -30,8 +30,8 @@ var (
 	topMode  []bindFunc
 	rootMode = []bindFunc{
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
-		help, tab, bad, delLineEnd, bad, addReturn, down, bad, // 0x08
-		up, bad, searchBack, searchForward, swapChar, bad, historyForward, nlAfter, // 0x10
+		help, tab, bad, delLineEnd, bad, addReturn, down, nlAfter, // 0x08
+		up, bad, searchBack, searchForward, swapChar, bad, historyForward, bad, // 0x10
 		bad, bad, bad, esc, bad, bad, bad, bad, // 0x18
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x20
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x28
@@ -542,8 +542,90 @@ func tab(ed *editor, _ byte) {
 }
 
 func help(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	header := `__SLIP REPL Editor__
+
+
+This editor includes history, tab completions, and word (symbol)
+descriptions. In the key binding table __M__ indicates pressing the meta or
+option key or pressing the escape key before the rest of the sequence. A __^__
+indicates the control key is held while pressing the key. Key bindings are:
+
+`
+	keys := []string{
+		"\x1b[1m^a\x1b[m    move to line start",
+		"\x1b[1m^b\x1b[m    move left one",
+		"\x1b[1m^c\x1b[m    exit",
+		"\x1b[1m^d\x1b[m    delete one forward",
+		"\x1b[1m^e\x1b[m    move to line end",
+		"\x1b[1m^f\x1b[m    move right one",
+		"\x1b[1m^h\x1b[m    show this help page",
+		"\x1b[1mTAB\x1b[m   word completion",
+		"\x1b[1m^k\x1b[m    delete to line end",
+		"\x1b[1m^n\x1b[m    move down one",
+		"\x1b[1m^o\x1b[m    insert newline after",
+		"\x1b[1m^p\x1b[m    move up one",
+		"\x1b[1m^r\x1b[m    search history back",
+		"\x1b[1m^s\x1b[m    search history forward",
+		"\x1b[1m^t\x1b[m    swap characters",
+		"\x1b[1m^v\x1b[m    next in history",
+		"\x1b[1mDEL\x1b[m   delete one back",
+		"\x1b[1mM-^b\x1b[m  move back to matching paren",
+		"\x1b[1mM-^f\x1b[m  move forward to matching paren",
+		"\x1b[1mM-\\\x1b[m   collapse space",
+		"\x1b[1mM-b\x1b[m   move back one word",
+		"\x1b[1mM-d\x1b[m   delete one word",
+		"\x1b[1mM-f\x1b[m   move forward one word",
+		"\x1b[1mM-t\x1b[m   swap words",
+		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
+		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
+		"\x1b[1mM-v\x1b[m   previous in history",
+		"\x1b[1mM-DEL\x1b[m delete previous word",
+		"\x1b[1mENTER\x1b[m evaluate form",
+	}
+	w, h, _ := term.GetSize(0)
+	bottom := ed.v0 + len(ed.lines)
+	box := scope.Get("*repl-help-box*") != nil
+	indent := 0
+	pad := 0
+	if box {
+		w -= 6
+		indent = 3
+		pad = 2
+	}
+	leftPad := bytes.Repeat([]byte{' '}, indent)
+	buf := slip.AppendDoc(nil, header, indent, w, true)
+	buf = bytes.TrimSpace(buf)
+	buf = append(buf, '\n', '\n')
+
+	colCnt := w / 38 // enough for the longest key binding plus 2 for spacing
+	klines := len(keys)/colCnt + 1
+	for i := 0; i < klines; i++ {
+		buf = append(buf, leftPad...)
+		for j := 0; j < colCnt; j++ {
+			if len(keys) <= i+j*klines {
+				continue
+			}
+			k := keys[i+j*klines]
+			buf = append(buf, k...)
+			// 45 is the map length plus the 7 bytes used for making the key
+			// sequence bold.
+			buf = append(buf, bytes.Repeat([]byte{' '}, 45-len(k))...)
+		}
+		buf = append(buf, '\n')
+	}
+	cnt := bytes.Count(buf, []byte{'\n'})
+	ed.dirty = cnt + 1 + pad
+	if h <= bottom+cnt+pad {
+		diff := bottom + cnt - h + pad
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+	ed.setCursor(ed.v0+len(ed.lines)+pad/2, 1+indent)
+	_, _ = ed.out.Write(buf)
+	if box {
+		ed.box(ed.v0+len(ed.lines), 2, cnt+2/pad, w+pad)
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
@@ -570,17 +652,33 @@ func describe(ed *editor, _ byte) {
 	word := string(line[start:end])
 	w, h, _ := term.GetSize(0)
 	bottom := ed.v0 + len(ed.lines)
-
-	buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, w-1, true)
-	cnt := bytes.Count(buf, []byte{'\n'})
-	ed.dirty = cnt + 1
-	if h <= bottom+cnt {
-		diff := bottom + cnt - h
-		ed.scroll(diff)
-		ed.v0 -= diff
+	box := scope.Get("*repl-help-box*") != nil
+	if box {
+		buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, 3, w-7, true)
+		buf = bytes.TrimSpace(buf)
+		cnt := bytes.Count(buf, []byte{'\n'})
+		ed.dirty = cnt + 3
+		if h <= bottom+cnt+2 {
+			diff := bottom + cnt - h + 2
+			ed.scroll(diff)
+			ed.v0 -= diff
+		}
+		ed.setCursor(ed.v0+len(ed.lines)+1, ed.foff)
+		_, _ = ed.out.Write(buf)
+		ed.box(ed.v0+len(ed.lines), 2, cnt+2, w-3)
+	} else {
+		buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, 0, w-1, true)
+		buf = bytes.TrimSpace(buf)
+		cnt := bytes.Count(buf, []byte{'\n'})
+		ed.dirty = cnt + 1
+		if h <= bottom+cnt {
+			diff := bottom + cnt - h
+			ed.scroll(diff)
+			ed.v0 -= diff
+		}
+		ed.setCursor(ed.v0+len(ed.lines), ed.foff)
+		_, _ = ed.out.Write(buf)
 	}
-	ed.setCursor(ed.v0+len(ed.lines), ed.foff)
-	_, _ = ed.out.Write(buf)
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
