@@ -61,6 +61,7 @@ var (
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xe8
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf0
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf8
+		topName,
 	}
 	escMode = []bindFunc{
 		bad, bad, matchClose, bad, bad, bad, matchOpen, bad, // 0x00
@@ -83,6 +84,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
+		escName,
 	}
 	esc5bMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -101,6 +103,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
+		esc5bName,
 	}
 	unicodeMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -127,6 +130,7 @@ var (
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xe8
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf0
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf8
+		unicodeName,
 	}
 )
 
@@ -134,10 +138,61 @@ func init() {
 	topMode = rootMode
 }
 
+func topName(ed *editor, b byte) {
+	ed.msg = ""
+}
+
+func escName(ed *editor, b byte) {
+	ed.msg = "M-"
+}
+
+func esc5bName(ed *editor, b byte) {
+	ed.msg = "esc [ "
+}
+
+func unicodeName(ed *editor, b byte) {
+	ed.msg = "unicode "
+}
+
+func (ed *editor) modeName() string {
+	e := editor{}
+	ed.mode[256](&e, 0)
+	return e.msg
+}
+
+const hexMap = "0123456789abcdef"
+
 func bad(ed *editor, b byte) {
-	fmt.Printf("*** %02x\n", b)
-	// TBD if a status line then indicate and error there
 	_, _ = ed.out.Write([]byte{0x07})
+	w, h, _ := term.GetSize(0)
+	bottom := ed.v0 + len(ed.lines)
+	cnt := 1
+	ed.dirty = cnt + 1
+	if h <= bottom+cnt {
+		diff := bottom + cnt - h
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+	var charName []byte
+	switch {
+	case b < 0x20:
+		charName = []byte{'^', 'a' + b - 1}
+	case b == 0x7f:
+		charName = []byte{'D', 'E', 'L'}
+	case 0x80 <= b:
+		charName = []byte{'\\', 'u', '0', '0', hexMap[b>>4], hexMap[b&0x0f]}
+	default:
+		charName = []byte{b}
+	}
+	msg := fmt.Appendf(nil, "\x1b[7m%s key %s%s is undefined",
+		bytes.Repeat([]byte{' '}, ed.foff),
+		ed.modeName(), charName)
+	msg = append(msg, bytes.Repeat([]byte{' '}, w-len(msg)+4)...)
+	msg = append(msg, "\x1b[m"...)
+
+	ed.setCursor(ed.v0+len(ed.lines), 0)
+	_, _ = ed.out.Write(msg)
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
@@ -438,7 +493,7 @@ func swapChar(ed *editor, _ byte) {
 		ed.lines[ed.line][ed.pos] = r0
 		ed.lines[ed.line][ed.pos-1] = r
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos-1)
-		ed.out.Write([]byte(string([]rune{r, r0})))
+		_, _ = ed.out.Write([]byte(string([]rune{r, r0})))
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
 	ed.mode = topMode
@@ -516,8 +571,7 @@ func describe(ed *editor, _ byte) {
 	w, h, _ := term.GetSize(0)
 	bottom := ed.v0 + len(ed.lines)
 
-	buf := cl.AppendDescribe(nil, slip.Symbol(word), scope, w, true)
-	buf = bytes.ReplaceAll(buf, []byte{'\n'}, []byte{'\n', '\r'})
+	buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, w-1, true)
 	cnt := bytes.Count(buf, []byte{'\n'})
 	ed.dirty = cnt + 1
 	if h <= bottom+cnt {
@@ -526,7 +580,7 @@ func describe(ed *editor, _ byte) {
 		ed.v0 -= diff
 	}
 	ed.setCursor(ed.v0+len(ed.lines), ed.foff)
-	ed.out.Write(buf)
+	_, _ = ed.out.Write(buf)
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }

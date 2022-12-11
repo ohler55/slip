@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/ohler55/slip"
-	"golang.org/x/term"
+	"github.com/ohler55/slip/pkg/repl/term"
 )
 
 type die string
@@ -17,6 +17,7 @@ type editor struct {
 	lines     [][]rune
 	v0        int // first terminal line of display
 	uni       []byte
+	msg       string
 	mode      []bindFunc
 	line      int
 	pos       int
@@ -33,7 +34,6 @@ func (ed *editor) initialize() {
 	if ed.origState != nil {
 		return
 	}
-	var err error
 	fs, ok := scope.Get(slip.Symbol(stdInput)).(*slip.FileStream)
 	if !ok {
 		panic("*repl-editor* can only be set to true when the *standard-input* is a file-stream")
@@ -41,19 +41,14 @@ func (ed *editor) initialize() {
 	ed.in = (*os.File)(fs)
 	ed.fd = int(((*os.File)(fs)).Fd())
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
-	// TBD wrap out with writer that replaces \n with \n\r
-	//  write section at a time and then \n\r
-	//  have to change terminal so other printing works correctly
-	if ed.origState, err = term.MakeRaw(ed.fd); err != nil {
-		panic(err)
-	}
+	ed.origState = term.MakeRaw(ed.fd)
 	ed.mode = topMode
-	ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
+	_, _ = ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
 }
 
 func (ed *editor) stop() {
 	if ed.origState != nil {
-		_ = term.Restore(ed.fd, ed.origState)
+		term.Restore(ed.fd, ed.origState)
 		ed.origState = nil
 	}
 }
@@ -70,10 +65,6 @@ func (ed *editor) reset() {
 	ed.line = 0
 	ed.pos = 0
 }
-
-// TBD on read check .buf len. if 0 then get cursor, else move to start location
-//  print prompt then each line followed by a clear to end of line
-//    record location after printing prompt as poff (prompt offset or maybe foff for form offset)
 
 func (ed *editor) display() {
 	ed.setCursor(ed.v0, 0)
@@ -92,7 +83,7 @@ func (ed *editor) display() {
 
 func (ed *editor) displayRune(v, h int, r rune) {
 	ed.setCursor(v, h)
-	ed.out.Write([]byte(string([]rune{r})))
+	_, _ = ed.out.Write([]byte(string([]rune{r})))
 }
 
 func (ed *editor) read() (out []byte) {
@@ -131,7 +122,7 @@ top:
 			}
 		}
 	}
-	_, _ = ed.out.Write([]byte{'\n', '\r'})
+	_, _ = ed.out.Write([]byte{'\n'})
 	for _, line := range ed.lines {
 		out = append(out, string(line)...)
 		out = append(out, '\n')
@@ -196,6 +187,4 @@ func (ed *editor) scroll(n int) {
 	} else if n < 0 {
 		_, _ = fmt.Fprintf(ed.out, "\x1b[%dT", n)
 	}
-	//_, _ = fmt.Fprintf(ed.out, "\x1b[%dD", n)
-	// D and M
 }
