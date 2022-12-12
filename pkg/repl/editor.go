@@ -218,3 +218,23 @@ func (ed *editor) box(top, left, h, w int) {
 	// Restore the cursor position then Make the cursor visible.
 	ed.out.Write([]byte{'\x1b', '[', '8', '\x1b', '[', '?', '2', '5', 'h'})
 }
+
+func (ed *editor) displayMessage(msg []byte) {
+	w, h := term.GetSize(0)
+	bottom := ed.v0 + len(ed.lines)
+	cnt := 1
+	ed.dirty = cnt + 1
+	if h <= bottom+cnt {
+		diff := bottom + cnt - h
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+
+	ed.setCursor(ed.v0+len(ed.lines), 1)
+	_, _ = ed.out.Write([]byte{'\x1b', '[', '7', 'm'})
+	_, _ = ed.out.Write(bytes.Repeat([]byte{' '}, ed.foff-1))
+	msg = append(msg, bytes.Repeat([]byte{' '}, w-len(msg)-ed.foff)...)
+	msg = append(msg, "\x1b[m"...)
+	_, _ = ed.out.Write(msg)
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+}

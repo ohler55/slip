@@ -10,7 +10,7 @@ import (
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
-	"golang.org/x/term"
+	"github.com/ohler55/slip/pkg/repl/term"
 )
 
 type bindFunc func(ed *editor, b byte)
@@ -30,7 +30,7 @@ var (
 	topMode  []bindFunc
 	rootMode = []bindFunc{
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
-		help, tab, bad, delLineEnd, bad, addReturn, down, nlAfter, // 0x08
+		help, tab, nl, delLineEnd, bad, addReturn, down, nlAfter, // 0x08
 		up, bad, searchBack, searchForward, swapChar, bad, historyForward, bad, // 0x10
 		bad, bad, bad, esc, bad, bad, bad, bad, // 0x18
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x20
@@ -65,7 +65,7 @@ var (
 	}
 	escMode = []bindFunc{
 		bad, bad, matchClose, bad, bad, bad, matchOpen, bad, // 0x00
-		bad, bad, bad, bad, bad, nl, bad, bad, // 0x08
+		bad, bad, bad, bad, bad, bad, bad, bad, // 0x08
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x10
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x20
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x30
@@ -74,7 +74,7 @@ var (
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
 		bad, bad, backWord, bad, delForwardWord, bad, forwardWord, bad, // 0x60
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x68
-		bad, bad, bad, bad, swapWord, enterU4, historyBack, bad, // 0x70
+		bad, bad, bad, bad, bad, enterU4, historyBack, bad, // 0x70
 		bad, bad, bad, bad, bad, bad, bad, delBackWord, // 0x78
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x80
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x90
@@ -164,15 +164,6 @@ const hexMap = "0123456789abcdef"
 
 func bad(ed *editor, b byte) {
 	_, _ = ed.out.Write([]byte{0x07})
-	w, h, _ := term.GetSize(0)
-	bottom := ed.v0 + len(ed.lines)
-	cnt := 1
-	ed.dirty = cnt + 1
-	if h <= bottom+cnt {
-		diff := bottom + cnt - h
-		ed.scroll(diff)
-		ed.v0 -= diff
-	}
 	var charName []byte
 	switch {
 	case b < 0x20:
@@ -184,15 +175,8 @@ func bad(ed *editor, b byte) {
 	default:
 		charName = []byte{b}
 	}
-	msg := fmt.Appendf(nil, "\x1b[7m%s key %s%s is undefined",
-		bytes.Repeat([]byte{' '}, ed.foff),
-		ed.modeName(), charName)
-	msg = append(msg, bytes.Repeat([]byte{' '}, w-len(msg)+4)...)
-	msg = append(msg, "\x1b[m"...)
-
-	ed.setCursor(ed.v0+len(ed.lines), 0)
-	_, _ = ed.out.Write(msg)
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	msg := fmt.Appendf(nil, "key %s%s is undefined", ed.modeName(), charName)
+	ed.displayMessage(msg)
 	ed.mode = topMode
 }
 
@@ -219,24 +203,54 @@ func addUni(ed *editor, b byte) {
 	}
 }
 
+// TBD when at bottom of terminal things go wrong
 func addReturn(ed *editor, _ byte) {
-	ed.line++
-	ed.pos = 0
-	for len(ed.lines) <= ed.line {
-		ed.lines = append(ed.lines, nil)
+	_, h := term.GetSize(0)
+	bottom := ed.v0 + len(ed.lines) + 1
+	if h <= bottom {
+		ed.scroll(1)
+		ed.v0--
 	}
+	line := ed.lines[ed.line]
+	ed.lines = append(ed.lines, nil)
+	ed.line++
+	if ed.line < len(ed.lines)-1 {
+		copy(ed.lines[ed.line+1:], ed.lines[ed.line:])
+	}
+	if ed.pos < len(line) {
+		ed.lines[ed.line-1] = line[:ed.pos]
+		ed.lines[ed.line] = line[ed.pos:]
+	}
+	ed.setCursor(ed.v0+ed.line-1, ed.foff+ed.pos)
+	ed.clearToEnd()
+	for i := ed.line; i < len(ed.lines); i++ {
+		ed.setCursor(ed.v0+i, ed.foff)
+		_, _ = ed.out.Write([]byte(string(ed.lines[i])))
+	}
+	ed.pos = 0
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 }
 
 func addByte(ed *editor, b byte) {
-	// TBD handle new char not at end
-	// update line that changes
-	// handle wraps
-	// handle end of window
-	if _, err := ed.out.Write([]byte{b}); err != nil {
-		panic(err)
+	if ed.pos == len(ed.lines[ed.line]) {
+		if _, err := ed.out.Write([]byte{b}); err != nil {
+			panic(err)
+		}
+		ed.lines[ed.line] = append(ed.lines[ed.line], rune(b))
+		ed.pos++
+	} else {
+		line := ed.lines[ed.line]
+		line = append(line, ' ') // make sure there is space for a new rune
+		copy(line[ed.pos+1:], line[ed.pos:])
+		line[ed.pos] = rune(b)
+		ed.lines[ed.line] = line
+		if _, err := ed.out.Write([]byte(string(line[ed.pos:]))); err != nil {
+			panic(err)
+		}
+		ed.pos++
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
-	ed.lines[ed.line] = append(ed.lines[ed.line], rune(b))
-	ed.pos++
+	// TBD handle wraps
 }
 
 func esc(ed *editor, _ byte) {
@@ -416,9 +430,7 @@ func delForward(ed *editor, _ byte) {
 		ed.lines[ed.line] = line
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 		ed.clearToEnd()
-		if _, err := ed.out.Write([]byte(string(line[ed.pos:]))); err != nil {
-			panic(err)
-		}
+		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
 	} else if ed.line < len(ed.lines)-1 {
 		line = ed.lines[ed.line+1]
 		ed.lines = append(ed.lines[:ed.line+1], ed.lines[ed.line+2:]...)
@@ -439,9 +451,7 @@ func delBack(ed *editor, _ byte) {
 		ed.lines[ed.line] = line
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 		ed.clearToEnd()
-		if _, err := ed.out.Write([]byte(string(line[ed.pos:]))); err != nil {
-			panic(err)
-		}
+		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
 	} else if 0 < ed.line {
 		ed.line--
 		ed.pos = len(ed.lines[ed.line])
@@ -499,12 +509,6 @@ func swapChar(ed *editor, _ byte) {
 	ed.mode = topMode
 }
 
-func swapWord(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
-	ed.mode = topMode
-}
-
 func collapse(ed *editor, _ byte) {
 	// TBD collapse space
 	_, _ = ed.out.Write([]byte{0x07})
@@ -517,10 +521,9 @@ func nlAfter(ed *editor, _ byte) {
 	ed.mode = topMode
 }
 
-func nl(ed *editor, _ byte) {
-	// TBD split line
-	_, _ = ed.out.Write([]byte{0x07})
-	ed.mode = topMode
+func nl(ed *editor, b byte) {
+	addReturn(ed, b)
+	ed.display()
 }
 
 func enterU4(ed *editor, _ byte) {
@@ -561,6 +564,7 @@ indicates the control key is held while pressing the key. Key bindings are:
 		"\x1b[1m^h\x1b[m    show this help page",
 		"\x1b[1mTAB\x1b[m   word completion",
 		"\x1b[1m^k\x1b[m    delete to line end",
+		"\x1b[1m^j\x1b[m    insert newline",
 		"\x1b[1m^n\x1b[m    move down one",
 		"\x1b[1m^o\x1b[m    insert newline after",
 		"\x1b[1m^p\x1b[m    move up one",
@@ -575,14 +579,13 @@ indicates the control key is held while pressing the key. Key bindings are:
 		"\x1b[1mM-b\x1b[m   move back one word",
 		"\x1b[1mM-d\x1b[m   delete one word",
 		"\x1b[1mM-f\x1b[m   move forward one word",
-		"\x1b[1mM-t\x1b[m   swap words",
 		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
 		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
 		"\x1b[1mM-v\x1b[m   previous in history",
 		"\x1b[1mM-DEL\x1b[m delete previous word",
 		"\x1b[1mENTER\x1b[m evaluate form",
 	}
-	w, h, _ := term.GetSize(0)
+	w, h := term.GetSize(0)
 	bottom := ed.v0 + len(ed.lines)
 	box := scope.Get("*repl-help-box*") != nil
 	indent := 0
@@ -646,38 +649,36 @@ func describe(ed *editor, _ byte) {
 			break
 		}
 	}
-	if start < 0 {
+	if start < 0 || end-start == 0 {
+		_, _ = ed.out.Write([]byte{0x07})
+		ed.displayMessage([]byte("could not determine what to describe"))
+		ed.mode = topMode
 		return
 	}
 	word := string(line[start:end])
-	w, h, _ := term.GetSize(0)
+	w, h := term.GetSize(0)
 	bottom := ed.v0 + len(ed.lines)
 	box := scope.Get("*repl-help-box*") != nil
+	indent := 0
+	pad := 0
 	if box {
-		buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, 3, w-7, true)
-		buf = bytes.TrimSpace(buf)
-		cnt := bytes.Count(buf, []byte{'\n'})
-		ed.dirty = cnt + 3
-		if h <= bottom+cnt+2 {
-			diff := bottom + cnt - h + 2
-			ed.scroll(diff)
-			ed.v0 -= diff
-		}
-		ed.setCursor(ed.v0+len(ed.lines)+1, ed.foff)
-		_, _ = ed.out.Write(buf)
-		ed.box(ed.v0+len(ed.lines), 2, cnt+2, w-3)
-	} else {
-		buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, 0, w-1, true)
-		buf = bytes.TrimSpace(buf)
-		cnt := bytes.Count(buf, []byte{'\n'})
-		ed.dirty = cnt + 1
-		if h <= bottom+cnt {
-			diff := bottom + cnt - h
-			ed.scroll(diff)
-			ed.v0 -= diff
-		}
-		ed.setCursor(ed.v0+len(ed.lines), ed.foff)
-		_, _ = ed.out.Write(buf)
+		w -= 6
+		indent = 3
+		pad = 2
+	}
+	buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, indent, w-1, true)
+	buf = bytes.TrimSpace(buf)
+	cnt := bytes.Count(buf, []byte{'\n'})
+	ed.dirty = cnt + 1 + pad
+	if h <= bottom+cnt+pad {
+		diff := bottom + cnt - h + pad
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+	ed.setCursor(ed.v0+len(ed.lines)+pad/2, indent+1)
+	_, _ = ed.out.Write(buf)
+	if box {
+		ed.box(ed.v0+len(ed.lines), 2, cnt+2/pad, w+pad)
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode

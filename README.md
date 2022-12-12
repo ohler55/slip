@@ -15,8 +15,10 @@ SLIce Processing is LISP for golang
 
  - repl package
   - editor
-   - delete
-   - insert
+    - insert
+  - history
+  - completion
+  - select, copy, yank, ring (stack)
 
   - (ansi-string :red :bold)
   - *repl-input-stream*
