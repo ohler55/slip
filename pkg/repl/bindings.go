@@ -30,7 +30,7 @@ var (
 	topMode  []bindFunc
 	rootMode = []bindFunc{
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
-		help, tab, nl, delLineEnd, bad, addReturn, down, nlAfter, // 0x08
+		help, tab, nl, delLineEnd, bad, enter, down, nlAfter, // 0x08
 		up, bad, searchBack, searchForward, swapChar, bad, historyForward, bad, // 0x10
 		bad, bad, bad, esc, bad, bad, bad, bad, // 0x18
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x20
@@ -164,18 +164,28 @@ const hexMap = "0123456789abcdef"
 
 func bad(ed *editor, b byte) {
 	_, _ = ed.out.Write([]byte{0x07})
+	mod := ed.modeName()
 	var charName []byte
-	switch {
-	case b < 0x20:
-		charName = []byte{'^', 'a' + b - 1}
-	case b == 0x7f:
-		charName = []byte{'D', 'E', 'L'}
-	case 0x80 <= b:
-		charName = []byte{'\\', 'u', '0', '0', hexMap[b>>4], hexMap[b&0x0f]}
-	default:
-		charName = []byte{b}
+	for i := 0; i < ed.kcnt; i++ {
+		c := ed.key[i]
+		switch {
+		case c == 0x1b:
+			if mod != "M-" {
+				charName = append(charName, 'M', '-')
+			}
+		case c < 0x20:
+			charName = append(charName, '^', 'a'+c-1)
+		case c == 0x7f:
+			charName = append(charName, 'D', 'E', 'L')
+		case 0x80 <= c:
+			charName = append(charName, '\\', 'u', '0', '0', hexMap[c>>4], hexMap[c&0x0f])
+		default:
+			charName = append(charName, c)
+		}
 	}
-	msg := fmt.Appendf(nil, "key %s%s is undefined", ed.modeName(), charName)
+	seq := ed.key[:ed.kcnt]
+	msg := fmt.Appendf(nil, "key %s%s is undefined. sequence: %#v", mod, charName, seq)
+	ed.kcnt = 0
 	ed.displayMessage(msg)
 	ed.mode = topMode
 }
@@ -203,13 +213,24 @@ func addUni(ed *editor, b byte) {
 	}
 }
 
-// TBD when at bottom of terminal things go wrong
-func addReturn(ed *editor, _ byte) {
+func enter(ed *editor, b byte) {
 	_, h := term.GetSize(0)
-	bottom := ed.v0 + len(ed.lines) + 1
+	bottom := ed.v0 + len(ed.lines)
 	if h <= bottom {
-		ed.scroll(1)
-		ed.v0--
+		diff := bottom + 1 - h
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+	// Let the editor handle the eval.
+}
+
+func nl(ed *editor, b byte) {
+	_, h := term.GetSize(0)
+	bottom := ed.v0 + len(ed.lines)
+	if h <= bottom {
+		diff := bottom + 1 - h
+		ed.scroll(diff)
+		ed.v0 -= diff
 	}
 	line := ed.lines[ed.line]
 	ed.lines = append(ed.lines, nil)
@@ -225,6 +246,7 @@ func addReturn(ed *editor, _ byte) {
 	ed.clearToEnd()
 	for i := ed.line; i < len(ed.lines); i++ {
 		ed.setCursor(ed.v0+i, ed.foff)
+		ed.clearToEnd()
 		_, _ = ed.out.Write([]byte(string(ed.lines[i])))
 	}
 	ed.pos = 0
@@ -521,11 +543,6 @@ func nlAfter(ed *editor, _ byte) {
 	ed.mode = topMode
 }
 
-func nl(ed *editor, b byte) {
-	addReturn(ed, b)
-	ed.display()
-}
-
 func enterU4(ed *editor, _ byte) {
 	// TBD
 	_, _ = ed.out.Write([]byte{0x07})
@@ -548,10 +565,11 @@ func help(ed *editor, _ byte) {
 	header := `__SLIP REPL Editor__
 
 
-This editor includes history, tab completions, and word (symbol)
-descriptions. In the key binding table __M__ indicates pressing the meta or
-option key or pressing the escape key before the rest of the sequence. A __^__
-indicates the control key is held while pressing the key. Key bindings are:
+This editor includes history, tab completions, word (symbol) descriptions, and
+parenthesis matching. In the key binding table __M__ indicates pressing the
+meta or option key or pressing the escape key before the rest of the
+sequence. A __^__ indicates the control key is held while pressing the
+key. Key bindings are:
 
 `
 	keys := []string{
@@ -585,16 +603,9 @@ indicates the control key is held while pressing the key. Key bindings are:
 		"\x1b[1mM-DEL\x1b[m delete previous word",
 		"\x1b[1mENTER\x1b[m evaluate form",
 	}
-	w, h := term.GetSize(0)
-	bottom := ed.v0 + len(ed.lines)
-	box := scope.Get("*repl-help-box*") != nil
-	indent := 0
-	pad := 0
-	if box {
-		w -= 6
-		indent = 3
-		pad = 2
-	}
+	w, _ := term.GetSize(0)
+	w -= 6
+	indent := 3
 	leftPad := bytes.Repeat([]byte{' '}, indent)
 	buf := slip.AppendDoc(nil, header, indent, w, true)
 	buf = bytes.TrimSpace(buf)
@@ -616,20 +627,7 @@ indicates the control key is held while pressing the key. Key bindings are:
 		}
 		buf = append(buf, '\n')
 	}
-	cnt := bytes.Count(buf, []byte{'\n'})
-	ed.dirty = cnt + 1 + pad
-	if h <= bottom+cnt+pad {
-		diff := bottom + cnt - h + pad
-		ed.scroll(diff)
-		ed.v0 -= diff
-	}
-	ed.setCursor(ed.v0+len(ed.lines)+pad/2, 1+indent)
-	_, _ = ed.out.Write(buf)
-	if box {
-		ed.box(ed.v0+len(ed.lines), 2, cnt+2/pad, w+pad)
-	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
-	ed.mode = topMode
+	ed.displayHelp(buf)
 }
 
 func describe(ed *editor, _ byte) {
@@ -656,30 +654,9 @@ func describe(ed *editor, _ byte) {
 		return
 	}
 	word := string(line[start:end])
-	w, h := term.GetSize(0)
-	bottom := ed.v0 + len(ed.lines)
-	box := scope.Get("*repl-help-box*") != nil
-	indent := 0
-	pad := 0
-	if box {
-		w -= 6
-		indent = 3
-		pad = 2
-	}
-	buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, indent, w-1, true)
+	w, _ := term.GetSize(0)
+	buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, 3, w-7, true)
 	buf = bytes.TrimSpace(buf)
-	cnt := bytes.Count(buf, []byte{'\n'})
-	ed.dirty = cnt + 1 + pad
-	if h <= bottom+cnt+pad {
-		diff := bottom + cnt - h + pad
-		ed.scroll(diff)
-		ed.v0 -= diff
-	}
-	ed.setCursor(ed.v0+len(ed.lines)+pad/2, indent+1)
-	_, _ = ed.out.Write(buf)
-	if box {
-		ed.box(ed.v0+len(ed.lines), 2, cnt+2/pad, w+pad)
-	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
-	ed.mode = topMode
+
+	ed.displayHelp(buf)
 }

@@ -16,20 +16,24 @@ import (
 type die string
 
 type editor struct {
-	lines     [][]rune
-	v0        int // first terminal line of display
-	uni       []byte
-	msg       string
-	mode      []bindFunc
-	line      int
-	pos       int
-	foff      int // form offset (right after prompt)
-	dirty     int // number of lines below form to delete on next key stroke unless a tab
-	in        *os.File
-	fd        int // in fd
-	out       io.Writer
-	depth     int
-	origState *term.State
+	lines      [][]rune
+	v0         int // first terminal line of display
+	key        []byte
+	uni        []byte
+	msg        string
+	mode       []bindFunc
+	kcnt       int
+	line       int
+	pos        int
+	foff       int // form offset (right after prompt)
+	dirty      int // number of lines below form to delete on next key stroke unless a tab
+	dirtyLines [][]byte
+	dirtyTop   int
+	in         *os.File
+	fd         int // in fd
+	out        io.Writer
+	depth      int
+	origState  *term.State
 }
 
 func (ed *editor) initialize() {
@@ -45,6 +49,7 @@ func (ed *editor) initialize() {
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
 	ed.origState = term.MakeRaw(ed.fd)
 	ed.mode = topMode
+	ed.key = make([]byte, 8)
 	_, _ = ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
 }
 
@@ -99,16 +104,15 @@ func (ed *editor) read() (out []byte) {
 	} else {
 		ed.setCursor(ed.v0+ed.line, ed.foff)
 	}
-	rbuf := make([]byte, 8) // large enough for a character
+	var err error
 top:
 	for {
-		cnt, err := ed.in.Read(rbuf)
-		if err != nil {
+		if ed.kcnt, err = ed.in.Read(ed.key); err != nil {
 			panic(err)
-		} else if cnt == 0 {
+		} else if ed.kcnt == 0 {
 			continue
 		}
-		if 0 < ed.dirty && rbuf[0] != 0x09 {
+		if 0 < ed.dirty && ed.key[0] != 0x09 {
 			start := ed.v0 + len(ed.lines) - 1
 			for ; 0 < ed.dirty; ed.dirty-- {
 				ed.setCursor(start+ed.dirty, 0)
@@ -116,15 +120,15 @@ top:
 			}
 			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 		}
-		for i := 0; i < cnt; i++ {
-			b := rbuf[i]
+		for i := 0; i < ed.kcnt; i++ {
+			b := ed.key[i]
 			ed.mode[b](ed, b)
 			if b == 0x0d {
 				break top
 			}
 		}
 	}
-	_, _ = ed.out.Write([]byte{'\n'})
+	ed.setCursor(ed.v0+len(ed.lines), 0)
 	for _, line := range ed.lines {
 		out = append(out, string(line)...)
 		out = append(out, '\n')
@@ -237,4 +241,69 @@ func (ed *editor) displayMessage(msg []byte) {
 	msg = append(msg, "\x1b[m"...)
 	_, _ = ed.out.Write(msg)
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+}
+
+func (ed *editor) displayHelp(doc []byte) {
+	w, h := term.GetSize(0)
+	bottom := ed.v0 + len(ed.lines)
+	box := scope.Get("*repl-help-box*") != nil
+	indent := 0
+	pad := 0
+	if box {
+		w -= 6
+		indent = 3
+		pad = 2
+	}
+	cnt := bytes.Count(doc, []byte{'\n'})
+	if h <= bottom+cnt+pad {
+		diff := bottom + cnt - h + pad
+		if h <= len(ed.lines)+pad+cnt { // not all will fit in window
+			ed.dirtyLines = bytes.Split(doc, []byte{'\n'})
+			ed.dirtyTop = 0
+			cnt = h - len(ed.lines) - pad - 2
+			diff = bottom + cnt - h + pad
+			pos := 0
+			for i := cnt; 0 < i; i-- {
+				p := bytes.IndexByte(doc[pos+1:], '\n')
+				pos += p + 1
+			}
+			doc = doc[:pos]
+		}
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+	ed.dirty = cnt + 1 + pad
+	ed.setCursor(ed.v0+len(ed.lines)+pad/2, indent+1)
+	_, _ = ed.out.Write(doc)
+	if box {
+		ed.box(ed.v0+len(ed.lines), 2, cnt+2/pad, w+pad)
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.mode = topMode
+}
+
+// dir can be -1, 0, or 1
+func (ed *editor) updateDirty(dir int) {
+	switch {
+	case 0 < dir:
+		ed.dirtyTop += ed.dirty - 3
+		if len(ed.dirtyLines) <= ed.dirtyTop-ed.dirty+3 {
+			ed.dirtyTop = len(ed.dirtyLines) - ed.dirty + 3
+		}
+	case dir < 0:
+		ed.dirtyTop -= ed.dirty - 3
+		if ed.dirtyTop < 0 {
+			ed.dirtyTop = 0
+		}
+	}
+
+	// TBD join to form buf
+	//
+	// ed.setCursor(ed.v0+len(ed.lines)+pad/2, indent+1)
+	// _, _ = ed.out.Write(doc)
+	// if box {
+	// 	ed.box(ed.v0+len(ed.lines), 2, cnt+2/pad, w+pad)
+	// }
+	// ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	// ed.mode = topMode
 }
