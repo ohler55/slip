@@ -40,6 +40,7 @@ var (
 	scope      slip.Scope
 	prompt     string
 	warnPrefix string
+	matchColor string
 
 	form1 slip.Object
 	form2 slip.Object
@@ -58,9 +59,11 @@ func init() {
 	if scope.Get(slip.Symbol(printANSI)) != nil {
 		warnPrefix = "\x1b[31m"
 		prompt = "\x1b[1;94m▶ \x1b[m"
+		matchColor = "\x1b[1m"
 	} else {
 		warnPrefix = ""
 		prompt = "* "
+		matchColor = ""
 	}
 	scope.Let(slip.Symbol(form1Key), nil)
 	scope.Let(slip.Symbol(form2Key), nil)
@@ -222,7 +225,11 @@ func updateConfigFile() {
 	sort.Strings(keys)
 	for _, key := range keys {
 		value := slip.UserPkg.JustGet(key)
-		b = fmt.Appendf(b, "(setq %s %s)\n", key, slip.ObjectString(value))
+		p := *slip.DefaultPrinter()
+		p.Readably = true
+		b = fmt.Appendf(b, "(setq %s ", key)
+		b = p.Append(b, value, 0)
+		b = append(b, ")\n"...)
 	}
 	if err := os.WriteFile(configFilename, b, 0666); err != nil {
 		panic(err)
@@ -266,6 +273,18 @@ func setPrompt(value slip.Object) {
 		prompt = string(str)
 	} else {
 		panic("*repl-prompt* must be a string")
+	}
+}
+
+func getMatchColor() slip.Object {
+	return slip.String(matchColor)
+}
+
+func setMatchColor(value slip.Object) {
+	if str, ok := value.(slip.String); ok {
+		matchColor = string(str)
+	} else {
+		panic("*repl-match-color* must be a string")
 	}
 }
 

@@ -14,17 +14,8 @@ SLIce Processing is LISP for golang
  - method or function to get flavor of instance and one to check the flavor
 
  - repl package
-  - help that is larger than the window
-   - displayHelp
-   - split buf into line array
-   - take initial n lines join and ready for display
-   - save dirtyLines, dirtyTop
-   - tab scrolls one page (box height - 3 or 4)
-   - shift-tab back
-   - maybe tab to scroll?
-   - or allow scrolling in box somehow
-    - might need a separate read loop
-     - exit on any key other than up and down keys (^p ^n up down pageup and page down)
+  - test (ansi &rest code)
+  - implement rest of bindings for moves
   - history
   - completion
   - select, copy, yank, ring (stack)

@@ -92,7 +92,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x20
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x30
 		bad, up, down, forward, back, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x40
-		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x50
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, shiftTab, bad, bad, bad, bad, bad, // 0x50
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x60
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x70
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x80
@@ -270,9 +270,21 @@ func addByte(ed *editor, b byte) {
 			panic(err)
 		}
 		ed.pos++
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	}
+	switch b {
+	case '(':
+		if p := ed.findCloseParen(); p != nil {
+			ed.match = *p
+			ed.displayRune(p.line, p.pos)
+		}
+	case ')':
+		if p := ed.findOpenParen(); p != nil {
+			ed.match = *p
+			ed.displayRune(p.line, p.pos)
+		}
 	}
 	// TBD handle wraps
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 }
 
 func esc(ed *editor, _ byte) {
@@ -410,14 +422,20 @@ func lineEnd(ed *editor, _ byte) {
 }
 
 func matchClose(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	if p := ed.findOpenParen(); p != nil {
+		ed.line = p.line
+		ed.pos = p.pos
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	}
 	ed.mode = topMode
 }
 
 func matchOpen(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	if p := ed.findCloseParen(); p != nil {
+		ed.line = p.line
+		ed.pos = p.pos
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	}
 	ed.mode = topMode
 }
 
@@ -556,8 +574,19 @@ func enterU8(ed *editor, _ byte) {
 }
 
 func tab(ed *editor, _ byte) {
+	if ed.dirty.lines != nil {
+		ed.updateDirty(1)
+	}
 	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	ed.mode = topMode
+}
+
+func shiftTab(ed *editor, _ byte) {
+	if ed.dirty.lines != nil {
+		ed.updateDirty(-1)
+	} else {
+		_, _ = ed.out.Write([]byte{0x07})
+	}
 	ed.mode = topMode
 }
 
@@ -566,33 +595,34 @@ func help(ed *editor, _ byte) {
 
 
 This editor includes history, tab completions, word (symbol) descriptions, and
-parenthesis matching. In the key binding table __M__ indicates pressing the
+parenthesis matching. In the key binding table __M-__ indicates pressing the
 meta or option key or pressing the escape key before the rest of the
-sequence. A __^__ indicates the control key is held while pressing the
-key. Key bindings are:
+sequence. A __C-__ indicates the control key is held while pressing the key. A
+shift key is denoted with a __^__ character. Key bindings are:
 
 `
 	keys := []string{
-		"\x1b[1m^a\x1b[m    move to line start",
-		"\x1b[1m^b\x1b[m    move left one",
-		"\x1b[1m^c\x1b[m    exit",
-		"\x1b[1m^d\x1b[m    delete one forward",
-		"\x1b[1m^e\x1b[m    move to line end",
-		"\x1b[1m^f\x1b[m    move right one",
-		"\x1b[1m^h\x1b[m    show this help page",
-		"\x1b[1mTAB\x1b[m   word completion",
-		"\x1b[1m^k\x1b[m    delete to line end",
-		"\x1b[1m^j\x1b[m    insert newline",
-		"\x1b[1m^n\x1b[m    move down one",
-		"\x1b[1m^o\x1b[m    insert newline after",
-		"\x1b[1m^p\x1b[m    move up one",
-		"\x1b[1m^r\x1b[m    search history back",
-		"\x1b[1m^s\x1b[m    search history forward",
-		"\x1b[1m^t\x1b[m    swap characters",
-		"\x1b[1m^v\x1b[m    next in history",
+		"\x1b[1mC-a\x1b[m   move to line start",
+		"\x1b[1mC-b\x1b[m   move left one",
+		"\x1b[1mC-c\x1b[m   exit",
+		"\x1b[1mC-d\x1b[m   delete one forward",
+		"\x1b[1mC-e\x1b[m   move to line end",
+		"\x1b[1mC-f\x1b[m   move right one",
+		"\x1b[1mC-h\x1b[m   show this help page",
+		"\x1b[1mTAB\x1b[m   word completion or help scroll",
+		"\x1b[1mS-TAB\x1b[m help scroll back",
+		"\x1b[1mC-k\x1b[m   delete to line end",
+		"\x1b[1mC-j\x1b[m   insert newline",
+		"\x1b[1mC-n\x1b[m   move down one",
+		"\x1b[1mC-o\x1b[m   insert newline after",
+		"\x1b[1mC-p\x1b[m   move up one",
+		"\x1b[1mC-r\x1b[m   search history back",
+		"\x1b[1mC-s\x1b[m   search history forward",
+		"\x1b[1mC-t\x1b[m   swap characters",
+		"\x1b[1mC-v\x1b[m   next in history",
 		"\x1b[1mDEL\x1b[m   delete one back",
-		"\x1b[1mM-^b\x1b[m  move back to matching paren",
-		"\x1b[1mM-^f\x1b[m  move forward to matching paren",
+		"\x1b[1mM-C-b\x1b[m move back to matching paren",
+		"\x1b[1mM-C-f\x1b[m move forward to matching paren",
 		"\x1b[1mM-\\\x1b[m   collapse space",
 		"\x1b[1mM-b\x1b[m   move back one word",
 		"\x1b[1mM-d\x1b[m   delete one word",
