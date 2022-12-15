@@ -28,6 +28,7 @@ type editor struct {
 	foff      int // form offset (right after prompt)
 	dirty     dirty
 	match     point // matching parens that needs to be redrawn on move
+	lastSpot  point
 	in        *os.File
 	fd        int // in fd
 	out       io.Writer
@@ -85,7 +86,7 @@ func (ed *editor) display() {
 		}
 		_, _ = ed.out.Write([]byte(string(line)))
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff)
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 }
 
 func (ed *editor) displayRune(line, pos int) {
@@ -112,7 +113,7 @@ func (ed *editor) read() (out []byte) {
 		_, ed.foff = ed.getCursor()
 		ed.lines = [][]rune{{}}
 	} else {
-		ed.setCursor(ed.v0+ed.line, ed.foff)
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
 	var err error
 top:
@@ -133,18 +134,47 @@ top:
 			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 			ed.dirty.lines = nil
 		}
-		if 0 <= ed.match.line {
-			n := ed.match.line
-			ed.match.line = -1
-			ed.displayRune(n, ed.match.pos)
-			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
-		}
 		for i := 0; i < ed.kcnt; i++ {
 			b := ed.key[i]
 			ed.mode[b](ed, b)
 			if b == 0x0d {
+				if 0 <= ed.match.line {
+					n := ed.match.line
+					ed.match.line = -1
+					ed.displayRune(n, ed.match.pos)
+				}
 				break top
 			}
+		}
+		if ed.lastSpot.line != ed.line || ed.lastSpot.pos != ed.pos {
+			// clear last match
+			if 0 <= ed.match.line {
+				n := ed.match.line
+				ed.match.line = -1
+				ed.displayRune(n, ed.match.pos)
+				ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+			}
+			var p *point
+			pos := ed.pos
+			if pos < len(ed.lines[ed.line]) && ed.lines[ed.line][pos] == '(' {
+				if p = ed.findCloseParen(); p != nil && 0 < p.pos {
+					p.pos--
+				} else {
+					p = nil
+				}
+			} else {
+				pos--
+				if 0 <= pos && ed.lines[ed.line][pos] == ')' {
+					p = ed.findOpenParen()
+				}
+			}
+			if p != nil {
+				ed.match = *p
+				ed.displayRune(p.line, p.pos)
+				ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+			}
+			ed.lastSpot.line = ed.line
+			ed.lastSpot.pos = ed.pos
 		}
 	}
 	ed.setCursor(ed.v0+len(ed.lines), 0)
@@ -397,4 +427,84 @@ func (ed *editor) findCloseParen() *point {
 		pos = 0
 	}
 	return nil
+}
+
+func (ed *editor) findWordEnd() (ln int, pos int) {
+	pos = ed.pos + 1
+	ln = ed.line
+	first := true
+lineLoop:
+	for ; ln < len(ed.lines); ln++ {
+		line := ed.lines[ln]
+		if first {
+			first = false
+		} else {
+			pos = 0
+		}
+		for ; pos < len(line); pos++ {
+			if sepMap[line[pos]] != 'x' {
+				break lineLoop
+			}
+		}
+	}
+	if len(ed.lines) <= ln {
+		ln = len(ed.lines) - 1
+		pos = len(ed.lines[ln])
+	} else {
+		line := ed.lines[ln]
+		for ; pos < len(line); pos++ {
+			if sepMap[line[pos]] == 'x' {
+				break
+			}
+		}
+	}
+	return
+}
+
+func (ed *editor) findWordStart() (ln int, pos int) {
+	pos = ed.pos - 1
+	ln = ed.line
+	// Skip until a word character (non-separator) is encountered.
+	first := true
+lineLoop:
+	for ; 0 <= ln; ln-- {
+		line := ed.lines[ln]
+		if first {
+			first = false
+		} else {
+			pos = len(line) - 1
+		}
+		for ; 0 <= pos; pos-- {
+			if sepMap[line[pos]] != 'x' {
+				break lineLoop
+			}
+		}
+	}
+	if ln < 0 {
+		ln = 0
+		pos = -1
+	} else {
+		line := ed.lines[ln]
+		for ; 0 <= pos; pos-- {
+			if sepMap[line[pos]] == 'x' {
+				break
+			}
+		}
+	}
+	pos++
+	return
+}
+
+func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
+	if fromLine == toLine {
+		line := ed.lines[toLine]
+		ed.lines[toLine] = append(line[:fromPos], line[toPos:]...)
+		return
+	}
+	ed.lines[fromLine] = append(ed.lines[fromLine][:fromPos], ed.lines[toLine][toPos:]...)
+	if toLine < len(ed.lines) {
+		ed.lines = append(ed.lines[:fromLine+1], ed.lines[toLine+1:]...)
+	} else {
+		ed.lines = ed.lines[:fromLine+1]
+	}
 }

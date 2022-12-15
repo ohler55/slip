@@ -93,6 +93,7 @@ func SetConfigDir(dir string) {
 	}
 	cfgPath := filepath.Join(dir, "config.lisp")
 	historyFilename = filepath.Join(dir, "history")
+	customPath := filepath.Join(dir, "custom.lisp")
 
 	_ = os.MkdirAll(dir, 0755)
 	var buf []byte
@@ -109,6 +110,11 @@ func SetConfigDir(dir string) {
 		} else {
 			panic(err)
 		}
+	}
+	if buf, err = os.ReadFile(customPath); err == nil {
+		code := slip.Read(buf)
+		code.Compile()
+		code.Eval(&scope)
 	}
 	configFilename = cfgPath
 }

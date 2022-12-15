@@ -25,6 +25,9 @@ type Function struct {
 	// Expect is the expected result from a call to .Eval().
 	Expect string
 
+	// Readaby if true print readably.
+	Readably bool
+
 	// Panics if true indicated the call to .Eval() should panic.
 	Panics bool
 
@@ -46,6 +49,12 @@ func (tf *Function) Test(t *testing.T) {
 	} else {
 		obj := slip.CompileString(tf.Source)
 		tf.Result = scope.Eval(obj, 0)
-		tt.Equal(t, tf.Expect, slip.ObjectString(tf.Result), tf.Source)
+		if tf.Readably {
+			p := *slip.DefaultPrinter()
+			p.Readably = true
+			tt.Equal(t, tf.Expect, string(p.Append(nil, tf.Result, 0)), tf.Source)
+		} else {
+			tt.Equal(t, tf.Expect, slip.ObjectString(tf.Result), tf.Source)
+		}
 	}
 }

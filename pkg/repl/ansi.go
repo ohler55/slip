@@ -81,7 +81,7 @@ func (f *Ansi) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case ":white":
 			color = 37
 		default:
-			panic(fmt.Sprintf("%s is not a valid keyword for the anso function", sym))
+			panic(fmt.Sprintf("%s is not a valid keyword for the ansi function", sym))
 		}
 	}
 	if reset {
@@ -92,7 +92,11 @@ func (f *Ansi) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	var seq []byte
 	seq = append(seq, '\x1b', '[')
-	seq = fmt.Appendf(seq, "%d;%d", mod, color)
+	if color == 0 {
+		seq = fmt.Appendf(seq, "%d", mod)
+	} else {
+		seq = fmt.Appendf(seq, "%d;%d", mod, color)
+	}
 	seq = append(seq, 'm')
 
 	return slip.String(seq)

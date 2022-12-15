@@ -15,13 +15,20 @@ SLIce Processing is LISP for golang
 
  - repl package
   - test (ansi &rest code)
-  - implement rest of bindings for moves
   - history
   - completion
+   - build completion map
+    - sorted slice
+   - complete if only one match
+   - popup if multiple on second tab
+    - subsequent tabs cycles through matches
+  - color for words
+   - functions
+   - variables
+   - strings
   - select, copy, yank, ring (stack)
-  - color
 
-  - (ansi-string :red :bold)
+
   - *repl-input-stream*
   - *repl-output-stream*
   - (help &optional topic) ;; topic can be index

@@ -68,7 +68,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x08
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x10
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x20
-		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x30
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x30
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x40
 		bad, bad, bad, bad, bad, enterU8, bad, bad, // 0x50
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
@@ -174,7 +174,7 @@ func bad(ed *editor, b byte) {
 				charName = append(charName, 'M', '-')
 			}
 		case c < 0x20:
-			charName = append(charName, '^', 'a'+c-1)
+			charName = append(charName, 'C', '-', 'a'+c-1)
 		case c == 0x7f:
 			charName = append(charName, 'D', 'E', 'L')
 		case 0x80 <= c:
@@ -191,6 +191,7 @@ func bad(ed *editor, b byte) {
 }
 
 func done(ed *editor, b byte) {
+	ed.setCursor(ed.v0+len(ed.lines), 1)
 	panic(io.EOF)
 }
 
@@ -213,7 +214,7 @@ func addUni(ed *editor, b byte) {
 	}
 }
 
-func enter(ed *editor, b byte) {
+func enter(ed *editor, _ byte) {
 	_, h := term.GetSize(0)
 	bottom := ed.v0 + len(ed.lines)
 	if h <= bottom {
@@ -221,6 +222,8 @@ func enter(ed *editor, b byte) {
 		ed.scroll(diff)
 		ed.v0 -= diff
 	}
+	ed.line = len(ed.lines) - 1
+	ed.pos = len(ed.lines[ed.line])
 	// Let the editor handle the eval.
 }
 
@@ -270,18 +273,6 @@ func addByte(ed *editor, b byte) {
 			panic(err)
 		}
 		ed.pos++
-	}
-	switch b {
-	case '(':
-		if p := ed.findCloseParen(); p != nil {
-			ed.match = *p
-			ed.displayRune(p.line, p.pos)
-		}
-	case ')':
-		if p := ed.findOpenParen(); p != nil {
-			ed.match = *p
-			ed.displayRune(p.line, p.pos)
-		}
 	}
 	// TBD handle wraps
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
@@ -346,67 +337,13 @@ func down(ed *editor, _ byte) {
 }
 
 func backWord(ed *editor, _ byte) {
-	ed.pos--
-	// Skip until a work character (non-separator) is encountered.
-	first := true
-lineLoop:
-	for ; 0 <= ed.line; ed.line-- {
-		line := ed.lines[ed.line]
-		if first {
-			first = false
-		} else {
-			ed.pos = len(line) - 1
-		}
-		for ; 0 <= ed.pos; ed.pos-- {
-			if sepMap[line[ed.pos]] != 'x' {
-				break lineLoop
-			}
-		}
-	}
-	if ed.line < 0 {
-		ed.line = 0
-		ed.pos = -1
-	} else {
-		line := ed.lines[ed.line]
-		for ; 0 <= ed.pos; ed.pos-- {
-			if sepMap[line[ed.pos]] == 'x' {
-				break
-			}
-		}
-	}
-	ed.pos++
+	ed.line, ed.pos = ed.findWordStart()
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
 func forwardWord(ed *editor, _ byte) {
-	ed.pos++
-	first := true
-lineLoop:
-	for ; ed.line < len(ed.lines); ed.line++ {
-		line := ed.lines[ed.line]
-		if first {
-			first = false
-		} else {
-			ed.pos = 0
-		}
-		for ; ed.pos < len(line); ed.pos++ {
-			if sepMap[line[ed.pos]] != 'x' {
-				break lineLoop
-			}
-		}
-	}
-	if len(ed.lines) <= ed.line {
-		ed.line = len(ed.lines) - 1
-		ed.pos = len(ed.lines[ed.line])
-	} else {
-		line := ed.lines[ed.line]
-		for ; ed.pos < len(line); ed.pos++ {
-			if sepMap[line[ed.pos]] == 'x' {
-				break
-			}
-		}
-	}
+	ed.line, ed.pos = ed.findWordEnd()
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
@@ -436,30 +373,6 @@ func matchOpen(ed *editor, _ byte) {
 		ed.pos = p.pos
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
-	ed.mode = topMode
-}
-
-func historyBack(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
-	ed.mode = topMode
-}
-
-func historyForward(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
-	ed.mode = topMode
-}
-
-func searchBack(ed *editor, _ byte) {
-	// TBD search history
-	_, _ = ed.out.Write([]byte{0x07})
-	ed.mode = topMode
-}
-
-func searchForward(ed *editor, _ byte) {
-	// TBD search history
-	_, _ = ed.out.Write([]byte{0x07})
 	ed.mode = topMode
 }
 
@@ -506,14 +419,34 @@ func delBack(ed *editor, _ byte) {
 }
 
 func delForwardWord(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	toLine, toPos := ed.findWordEnd()
+	for i := ed.line; i < len(ed.lines); i++ {
+		ed.setCursor(ed.v0+i, ed.foff)
+		ed.clearToEnd()
+	}
+	ed.deleteRange(ed.line, ed.pos, toLine, toPos)
+	for i := ed.line; i < len(ed.lines); i++ {
+		ed.setCursor(ed.v0+i, ed.foff)
+		_, _ = ed.out.Write([]byte(string(ed.lines[i])))
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
 func delBackWord(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	toLine, toPos := ed.findWordStart()
+	for i := toLine; i < len(ed.lines); i++ {
+		ed.setCursor(ed.v0+i, ed.foff)
+		ed.clearToEnd()
+	}
+	ed.deleteRange(toLine, toPos, ed.line, ed.pos)
+	ed.line = toLine
+	ed.pos = toPos
+	for i := toLine; i < len(ed.lines); i++ {
+		ed.setCursor(ed.v0+i, ed.foff)
+		_, _ = ed.out.Write([]byte(string(ed.lines[i])))
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
@@ -550,35 +483,45 @@ func swapChar(ed *editor, _ byte) {
 }
 
 func collapse(ed *editor, _ byte) {
-	// TBD collapse space
-	_, _ = ed.out.Write([]byte{0x07})
+	start := ed.pos - 1
+	end := ed.pos
+	line := ed.lines[ed.line]
+	for ; 0 <= start; start-- {
+		if line[start] != ' ' {
+			break
+		}
+	}
+	start++
+	for ; end < len(line); end++ {
+		if line[end] != ' ' {
+			break
+		}
+	}
+	ed.lines[ed.line] = append(line[:start], line[end:]...)
+	ed.pos = start
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.clearToEnd()
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	_, _ = ed.out.Write([]byte(string(ed.lines[ed.line][ed.pos:])))
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
 func nlAfter(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
-	ed.mode = topMode
-}
-
-func enterU4(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
-	ed.mode = topMode
-}
-
-func enterU8(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	nl(ed, ' ')
+	ed.line--
+	ed.pos = len(ed.lines[ed.line])
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
 func tab(ed *editor, _ byte) {
+	ed.mode = topMode
 	if ed.dirty.lines != nil {
 		ed.updateDirty(1)
+		return
 	}
-	// TBD
-	ed.mode = topMode
+	// TBD completion
 }
 
 func shiftTab(ed *editor, _ byte) {
@@ -623,6 +566,9 @@ shift key is denoted with a __^__ character. Key bindings are:
 		"\x1b[1mDEL\x1b[m   delete one back",
 		"\x1b[1mM-C-b\x1b[m move back to matching paren",
 		"\x1b[1mM-C-f\x1b[m move forward to matching paren",
+		"\x1b[1mC-/\x1b[m   describe word",
+		"\x1b[1mM-/\x1b[m   describe word",
+		"\x1b[1mM-?\x1b[m   describe word",
 		"\x1b[1mM-\\\x1b[m   collapse space",
 		"\x1b[1mM-b\x1b[m   move back one word",
 		"\x1b[1mM-d\x1b[m   delete one word",
@@ -689,4 +635,40 @@ func describe(ed *editor, _ byte) {
 	buf = bytes.TrimSpace(buf)
 
 	ed.displayHelp(buf)
+}
+
+func historyBack(ed *editor, _ byte) {
+	// TBD
+	_, _ = ed.out.Write([]byte{0x07})
+	ed.mode = topMode
+}
+
+func historyForward(ed *editor, _ byte) {
+	// TBD
+	_, _ = ed.out.Write([]byte{0x07})
+	ed.mode = topMode
+}
+
+func searchBack(ed *editor, _ byte) {
+	// TBD search history
+	_, _ = ed.out.Write([]byte{0x07})
+	ed.mode = topMode
+}
+
+func searchForward(ed *editor, _ byte) {
+	// TBD search history
+	_, _ = ed.out.Write([]byte{0x07})
+	ed.mode = topMode
+}
+
+func enterU4(ed *editor, _ byte) {
+	// TBD use status line and separate read loop
+	_, _ = ed.out.Write([]byte{0x07})
+	ed.mode = topMode
+}
+
+func enterU8(ed *editor, _ byte) {
+	// TBD
+	_, _ = ed.out.Write([]byte{0x07})
+	ed.mode = topMode
 }
