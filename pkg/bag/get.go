@@ -46,7 +46,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-get bag "a") => 3`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Get represents the get function.

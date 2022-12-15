@@ -47,7 +47,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(parseq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-parse bag "{b:5}" "a") => #<bag-flavor 12345> ;; content is now {a:{b:5}}`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Parse represents the parse function.

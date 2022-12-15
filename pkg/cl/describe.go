@@ -3,6 +3,7 @@
 package cl
 
 import (
+	"bytes"
 	"io"
 	"strings"
 
@@ -65,7 +66,21 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	}
 	ansi := s.Get("*print-ansi*") != nil
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
-	var b []byte
+
+	b := AppendDescribe(nil, obj, s, 0, right, ansi)
+	if _, err := w.Write(b); err != nil {
+		panic(err)
+	}
+	return slip.Novalue
+}
+
+// AppendDescribe appends a symbol description to a buffer.
+func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int, ansi bool) []byte {
+	var pad []byte
+	if 0 < indent {
+		pad = bytes.Repeat([]byte{' '}, indent)
+	}
+	b = append(b, pad...)
 	if ansi {
 		b = append(b, bold...)
 		b = slip.Append(b, obj)
@@ -73,18 +88,21 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	} else {
 		b = slip.Append(b, obj)
 	}
-	b = append(b, "\n  ["...)
+	b = append(b, "\n  "...)
+	b = append(b, pad...)
+	b = append(b, '[')
 	if obj == nil {
 		b = append(b, "null"...)
 	} else {
 		b = append(b, string(obj.Hierarchy()[0])...)
 	}
 	b = append(b, "]\n"...)
-	indent := 0
+	b = append(b, pad...)
 Details:
 	switch to := obj.(type) {
 	case slip.Symbol:
 		b = append(b, '\n')
+		b = append(b, pad...)
 		if s.Has(to) {
 			obj = s.Get(to)
 		} else if fi := slip.CurrentPackage.Funcs[string(to)]; fi != nil {
@@ -105,11 +123,14 @@ Details:
 				b = append(b, string(obj.Hierarchy()[0])...)
 			}
 			b = append(b, ":\n"...)
+			b = append(b, pad...)
 			var vv *slip.VarVal
 			if vv, _ = slip.CurrentPackage.Vars[strings.ToLower(string(to))]; vv != nil && 0 < len(vv.Doc) {
 				b = append(b, "  Documentation:\n"...)
+				b = append(b, pad...)
 				b = slip.AppendDoc(b, vv.Doc, indent+4, right, ansi)
 				b = append(b, '\n')
+				b = append(b, pad...)
 			}
 			indent += 2
 			goto Details
@@ -122,8 +143,5 @@ Details:
 		b = slip.Append(b, to)
 		b = append(b, '\n')
 	}
-	if _, err := w.Write(b); err != nil {
-		panic(err)
-	}
-	return slip.Novalue
+	return b
 }

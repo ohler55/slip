@@ -51,7 +51,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(bag-walk bag (lambda (x) (setq result cons x result)) "*") => nil`,
 				`result => (7 8)`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Walk represents the walk function.

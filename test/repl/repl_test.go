@@ -1,17 +1,8 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
-package test
+package repl
 
-import (
-	"fmt"
-	"io"
-	"strings"
-	"testing"
-
-	"github.com/ohler55/ojg/tt"
-	"github.com/ohler55/slip"
-)
-
+/*
 type errReader int
 
 func (r errReader) Read(_ []byte) (int, error) {
@@ -143,3 +134,4 @@ func testREPL(t *testing.T, input, expect string, scopes ...*slip.Scope) {
 	result = strings.TrimPrefix(result, "* ")
 	tt.Equal(t, expect, result)
 }
+*/

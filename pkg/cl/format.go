@@ -165,7 +165,7 @@ Control directives and operations are:
              Parameters are:
              __mincol__         - minimum width
              __padchar__        - padding character (e.g., #\Tab)
-             __commachar__      - comma character (e.g., #\_)
+             __commachar__      - comma character (e.g., #\space)
              __comma-interval__ - interval between commas
 
  __~E__          Output a number as a floating point. The full form is:

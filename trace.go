@@ -8,8 +8,12 @@ import (
 	"strconv"
 )
 
-var beforeEval = noopBefore
-var afterEval = normalAfter
+const warnANSIKey = "*repl-warning-ansi*"
+
+var (
+	beforeEval = noopBefore
+	afterEval  = normalAfter
+)
 
 // Trace turns tracing on or off for the scope and any future sub-scopes.
 func Trace(on bool) {
