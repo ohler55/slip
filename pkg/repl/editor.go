@@ -18,11 +18,11 @@ type die string
 type editor struct {
 	lines     [][]rune
 	v0        int // first terminal line of display
-	key       []byte
+	key       seq
+	prev      seq
 	uni       []byte
 	msg       string
 	mode      []bindFunc
-	kcnt      int
 	line      int
 	pos       int
 	foff      int // form offset (right after prompt)
@@ -34,6 +34,7 @@ type editor struct {
 	out       io.Writer
 	depth     int
 	origState *term.State
+	hist      history
 }
 
 func (ed *editor) initialize() {
@@ -47,10 +48,14 @@ func (ed *editor) initialize() {
 	ed.in = (*os.File)(fs)
 	ed.fd = int(((*os.File)(fs)).Fd())
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
-	ed.origState = term.MakeRaw(ed.fd)
 	ed.mode = topMode
-	ed.key = make([]byte, 8)
+	ed.key.buf = make([]byte, 8)
+	ed.prev.buf = make([]byte, 8)
 	ed.match.line = -1
+	ed.hist.filename = historyFilename
+	ed.hist.setLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
+	ed.hist.load()
+	ed.origState = term.MakeRaw(ed.fd)
 	_, _ = ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
 }
 
@@ -78,7 +83,6 @@ func (ed *editor) display() {
 	ed.setCursor(ed.v0, 0)
 	ed.clearLine()
 	_, _ = ed.out.Write([]byte(prompt))
-	_, ed.foff = ed.getCursor()
 	for i, line := range ed.lines {
 		ed.setCursor(ed.v0+i, ed.foff)
 		if 0 < i {
@@ -104,13 +108,32 @@ func (ed *editor) displayRune(line, pos int) {
 	}
 }
 
+func printSize(s string) (cnt int) {
+	var esc bool
+	for _, r := range []rune(s) {
+		switch r {
+		case '\x1b':
+			esc = true
+		case 'm':
+			if esc {
+				esc = false
+			}
+		default:
+			if !esc {
+				cnt++
+			}
+		}
+	}
+	return
+}
+
 func (ed *editor) read() (out []byte) {
 	if len(ed.lines) == 0 {
 		ed.v0, _ = ed.getCursor()
 		ed.setCursor(ed.v0, 0)
 		ed.clearLine()
 		_, _ = ed.out.Write([]byte(prompt))
-		_, ed.foff = ed.getCursor()
+		ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 		ed.lines = [][]rune{{}}
 	} else {
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
@@ -118,14 +141,15 @@ func (ed *editor) read() (out []byte) {
 	var err error
 top:
 	for {
-		if ed.kcnt, err = ed.in.Read(ed.key); err != nil {
+		ed.prev.set(&ed.key)
+		if ed.key.cnt, err = ed.in.Read(ed.key.buf); err != nil {
 			panic(err)
-		} else if ed.kcnt == 0 {
+		} else if ed.key.cnt == 0 {
 			continue
 		}
 		// dirty and not tab and not shift-tab
 		if 0 < ed.dirty.cnt &&
-			ed.key[0] != 0x09 && !(ed.key[0] == 0x1b && ed.key[1] == 0x5b && ed.key[2] == 0x5a) {
+			ed.key.buf[0] != 0x09 && !(ed.key.buf[0] == 0x1b && ed.key.buf[1] == 0x5b && ed.key.buf[2] == 0x5a) {
 			start := ed.v0 + len(ed.lines) - 1
 			for ; 0 < ed.dirty.cnt; ed.dirty.cnt-- {
 				ed.setCursor(start+ed.dirty.cnt, 0)
@@ -134,8 +158,8 @@ top:
 			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 			ed.dirty.lines = nil
 		}
-		for i := 0; i < ed.kcnt; i++ {
-			b := ed.key[i]
+		for i := 0; i < ed.key.cnt; i++ {
+			b := ed.key.buf[i]
 			ed.mode[b](ed, b)
 			if b == 0x0d {
 				if 0 <= ed.match.line {
@@ -188,10 +212,46 @@ top:
 // ANSI sequences
 func (ed *editor) getCursor() (v, h int) {
 	if _, err := ed.out.Write([]byte("\x1b[6n")); err != nil {
-		panic(die(err.Error()))
+		return ed.v0, ed.foff
 	}
-	if _, err := fmt.Fscanf(ed.in, "\x1b[%d;%dR", &v, &h); err != nil {
-		panic(die(err.Error()))
+	// On error return current position. This can occur if someone is typing
+	// while an attempt is made to get the cursor scan. Hold down the
+	// enter/return key to force this. Generally only happens on a remote
+	// terminal where input is buffered so user key presses can be mixed with
+	// the terminal response.
+	buf := make([]byte, 16)
+	cnt, _ := ed.in.Read(buf)
+
+	var mode int
+done:
+	for i, b := range buf {
+		if cnt <= i {
+			break
+		}
+		switch b {
+		case '\n', '\r':
+			// ignore
+		case '\x1b':
+			mode++
+		case '[':
+			if mode == 1 {
+				mode++
+			}
+		case ';':
+			if mode == 2 {
+				mode++
+			}
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			if mode == 2 {
+				v = v*10 + int(b-'0')
+			} else {
+				h = h*10 + int(b-'0')
+			}
+		case 'R':
+			break done
+		default:
+			return ed.v0, ed.foff
+		}
 	}
 	return
 }
@@ -294,7 +354,9 @@ func (ed *editor) displayMessage(msg []byte) {
 
 	ed.setCursor(ed.v0+len(ed.lines), 1)
 	_, _ = ed.out.Write([]byte{'\x1b', '[', '7', 'm'})
-	_, _ = ed.out.Write(bytes.Repeat([]byte{' '}, ed.foff-1))
+	if 1 < ed.foff {
+		_, _ = ed.out.Write(bytes.Repeat([]byte{' '}, ed.foff-1))
+	}
 	msg = append(msg, bytes.Repeat([]byte{' '}, w-len(msg)-ed.foff)...)
 	msg = append(msg, "\x1b[m"...)
 	_, _ = ed.out.Write(msg)
@@ -506,5 +568,49 @@ func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
 		ed.lines = append(ed.lines[:fromLine+1], ed.lines[toLine+1:]...)
 	} else {
 		ed.lines = ed.lines[:fromLine+1]
+	}
+}
+
+func (ed *editor) addToHistory() {
+	ed.hist.addForm(ed.lines, ed)
+}
+
+func (ed *editor) setForm(form [][]rune) {
+	for i := ed.line; 0 < i; i-- { // zero is cleared when ed.display is called
+		ed.setCursor(ed.v0+i, ed.foff)
+		ed.clearToEnd()
+	}
+	ed.lines = formDup(form)
+	ed.line = len(ed.lines) - 1
+	ed.pos = len(ed.lines[ed.line])
+
+	_, h := term.GetSize(0)
+	bottom := ed.v0 + len(ed.lines)
+	if h <= bottom {
+		diff := bottom + 1 - h
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+	ed.display()
+}
+
+func getHistoryLimit() slip.Object {
+	if ed, ok := replReader.(*editor); ok {
+		return slip.Fixnum(ed.hist.limit)
+	}
+	return nil
+}
+
+func setHistoryLimit(value slip.Object) {
+	ed, ok := replReader.(*editor)
+	if ok {
+		var num slip.Fixnum
+		if num, ok = value.(slip.Fixnum); !ok {
+			slip.PanicType("*repl-history-limit*", value, "fixnum")
+		}
+		if num < 0 {
+			num = 0
+		}
+		ed.hist.setLimit(int(num))
 	}
 }

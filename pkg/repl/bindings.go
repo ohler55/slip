@@ -166,8 +166,8 @@ func bad(ed *editor, b byte) {
 	_, _ = ed.out.Write([]byte{0x07})
 	mod := ed.modeName()
 	var charName []byte
-	for i := 0; i < ed.kcnt; i++ {
-		c := ed.key[i]
+	for i := 0; i < ed.key.cnt; i++ {
+		c := ed.key.buf[i]
 		switch {
 		case c == 0x1b:
 			if mod != "M-" {
@@ -183,9 +183,9 @@ func bad(ed *editor, b byte) {
 			charName = append(charName, c)
 		}
 	}
-	seq := ed.key[:ed.kcnt]
+	seq := ed.key.buf[:ed.key.cnt]
 	msg := fmt.Appendf(nil, "key %s%s is undefined. sequence: %#v", mod, charName, seq)
-	ed.kcnt = 0
+	ed.key.cnt = 0
 	ed.displayMessage(msg)
 	ed.mode = topMode
 }
@@ -637,20 +637,54 @@ func describe(ed *editor, _ byte) {
 	ed.displayHelp(buf)
 }
 
+func formDup(form [][]rune) [][]rune {
+	d := make([][]rune, len(form))
+	for i, line := range form {
+		l2 := make([]rune, len(line))
+		copy(l2, line)
+		d[i] = l2
+	}
+	return d
+}
+
 func historyBack(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	ed.hist.addKey(&ed.key)
+	switch {
+	case !ed.hist.hasKey(&ed.prev):
+		ed.hist.cur = len(ed.hist.forms) - 1
+	case ed.hist.cur < 0:
+		ed.mode = topMode
+		return
+	default:
+		ed.hist.cur--
+	}
+	if form := ed.hist.get(); form != nil {
+		ed.setForm(form)
+	}
 	ed.mode = topMode
 }
 
 func historyForward(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	ed.hist.addKey(&ed.key)
+	switch {
+	case !ed.hist.hasKey(&ed.prev):
+		ed.hist.cur = 0
+	case len(ed.hist.forms) <= ed.hist.cur:
+		ed.mode = topMode
+		return
+	default:
+		ed.hist.cur++
+	}
+	if form := ed.hist.get(); form != nil {
+		ed.setForm(form)
+	}
 	ed.mode = topMode
 }
 
 func searchBack(ed *editor, _ byte) {
 	// TBD search history
+	//  use status bar to show whats typed so far
+	//  need to handle
 	_, _ = ed.out.Write([]byte{0x07})
 	ed.mode = topMode
 }
