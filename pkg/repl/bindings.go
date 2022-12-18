@@ -132,10 +132,19 @@ var (
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf8
 		unicodeName,
 	}
+	// Update this if the key bindings for history are changed.
+	historyBindings map[string]bindFunc
 )
 
 func init() {
 	topMode = rootMode
+	// Update this if the key bindings for history are changed.
+	historyBindings = map[string]bindFunc{
+		"\x16":  historyForward,
+		"\x1bv": historyBack,
+		"\x12":  searchBack,
+		"\x13":  searchForward,
+	}
 }
 
 func topName(ed *editor, b byte) {
@@ -637,32 +646,155 @@ func describe(ed *editor, _ byte) {
 	ed.displayHelp(buf)
 }
 
+func formDup(form [][]rune) [][]rune {
+	d := make([][]rune, len(form))
+	for i, line := range form {
+		l2 := make([]rune, len(line))
+		copy(l2, line)
+		d[i] = l2
+	}
+	return d
+}
+
+func historyOverride(ed *editor) bool {
+	k := string(ed.key[:ed.kcnt])
+	f := historyBindings[k]
+	if f == nil {
+		ed.keepForm()
+		ed.override = nil
+		return false
+	}
+	f(ed, ' ')
+	return true
+}
+
 func historyBack(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	switch {
+	case ed.override == nil:
+		ed.hist.cur = len(ed.hist.forms) - 1
+	case ed.hist.cur <= 0:
+		ed.override = historyOverride
+		ed.mode = topMode
+		return
+	default:
+		ed.hist.cur--
+	}
+	if form := ed.hist.get(); form != nil {
+		ed.setForm(form)
+	}
+	ed.override = historyOverride
 	ed.mode = topMode
 }
 
 func historyForward(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
+	switch {
+	case ed.override == nil:
+		ed.hist.cur = 0
+	case len(ed.hist.forms)-1 <= ed.hist.cur:
+		ed.override = historyOverride
+		ed.setForm([][]rune{{}})
+		ed.mode = topMode
+		return
+	default:
+		ed.hist.cur++
+	}
+	if form := ed.hist.get(); form != nil {
+		ed.setForm(form)
+	}
+	ed.override = historyOverride
 	ed.mode = topMode
 }
 
-func searchBack(ed *editor, _ byte) {
-	// TBD search history
-	_, _ = ed.out.Write([]byte{0x07})
+func historySearchOverride(ed *editor) bool {
+	k := string(ed.key[:ed.kcnt])
+	f := historyBindings[k]
+	var b byte = 'x'
+	if f == nil {
+		if ed.key[0] < 0x20 {
+			ed.keepForm()
+			ed.override = nil
+			ed.hist.pattern = ed.hist.pattern[:0]
+			ed.hist.searchDir = 0
+			return false
+		}
+		if ed.hist.searchDir == forwardDir {
+			f = searchForward
+		} else {
+			f = searchBack
+		}
+		b = 'r'
+	}
+	f(ed, b)
+	return true
+}
+
+func searchBack(ed *editor, b byte) {
+	switch {
+	case ed.override == nil:
+		ed.hist.pattern = ed.hist.pattern[:0]
+		ed.hist.cur = len(ed.hist.forms) - 1
+	default:
+		start := ed.hist.cur
+		if 0 < len(ed.hist.pattern) {
+			start--
+		}
+		if b == 'r' {
+			r, _ := utf8.DecodeRune(ed.key)
+			if r == '\x7f' {
+				if 0 < len(ed.hist.pattern) {
+					ed.hist.pattern = ed.hist.pattern[:len(ed.hist.pattern)-1]
+				}
+			} else {
+				ed.hist.pattern = append(ed.hist.pattern, r)
+			}
+		}
+		if form := ed.hist.searchBack(start, string(ed.hist.pattern)); form != nil {
+			ed.setForm(form)
+			ed.hist.cur = start
+		}
+	}
+	buf := fmt.Appendf(nil, "search backwards: %s", string(ed.hist.pattern))
+	ed.displayMessage(buf)
+	ed.override = historySearchOverride
+	ed.hist.searchDir = backwardDir
 	ed.mode = topMode
 }
 
-func searchForward(ed *editor, _ byte) {
-	// TBD search history
-	_, _ = ed.out.Write([]byte{0x07})
+func searchForward(ed *editor, b byte) {
+	switch {
+	case ed.override == nil:
+		ed.hist.pattern = ed.hist.pattern[:0]
+		ed.hist.cur = 0
+	default:
+		start := ed.hist.cur
+		if 0 < len(ed.hist.pattern) {
+			start++
+		}
+		if b == 'r' {
+			r, _ := utf8.DecodeRune(ed.key)
+			if r == '\x7f' {
+				if 0 < len(ed.hist.pattern) {
+					ed.hist.pattern = ed.hist.pattern[:len(ed.hist.pattern)-1]
+				}
+			} else {
+				ed.hist.pattern = append(ed.hist.pattern, r)
+			}
+		}
+		if form := ed.hist.searchForward(start, string(ed.hist.pattern)); form != nil {
+			ed.setForm(form)
+			ed.hist.cur = start
+		}
+	}
+	buf := fmt.Appendf(nil, "search forwards: %s", string(ed.hist.pattern))
+	ed.displayMessage(buf)
+	ed.override = historySearchOverride
+	ed.hist.searchDir = backwardDir
 	ed.mode = topMode
 }
 
 func enterU4(ed *editor, _ byte) {
-	// TBD use status line and separate read loop
+	// TBD use status line
+	//  setup an override
 	_, _ = ed.out.Write([]byte{0x07})
 	ed.mode = topMode
 }

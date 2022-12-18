@@ -13,9 +13,14 @@ SLIce Processing is LISP for golang
 
  - method or function to get flavor of instance and one to check the flavor
 
+ - require module-name &optional path-list
+  - *package-load-path* slip package (and lisp?) locations
+  - use env var for location (can also set with setq)
+   - single path - if multiple desired then write some lisp code
+  - use plugin.Open()
+   - try each path module-name.so
+
  - repl package
-  - test (ansi &rest code)
-  - history
   - completion
    - build completion map
     - sorted slice
@@ -27,7 +32,6 @@ SLIce Processing is LISP for golang
    - variables
    - strings
   - select, copy, yank, ring (stack)
-
 
   - *repl-input-stream*
   - *repl-output-stream*

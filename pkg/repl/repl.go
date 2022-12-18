@@ -202,7 +202,9 @@ func process() {
 			skipWrite = true
 		}
 		// Eval was successful.
-		writeToHistory()
+		if ed, ok := replReader.(*editor); ok {
+			ed.addToHistory()
+		}
 
 		scope.Set(slip.Symbol(form1Key), form1)
 		scope.Set(slip.Symbol(form2Key), form2)
@@ -240,16 +242,6 @@ func updateConfigFile() {
 	if err := os.WriteFile(configFilename, b, 0666); err != nil {
 		panic(err)
 	}
-}
-
-func writeToHistory() {
-	// TBD write formBuf to history
-	// separate go routine for writing
-	//  open, write, close
-	//  keep in memory as well as []byte
-	// load on startup
-	// when 10% over write memory in new file then delete old
-
 }
 
 func setHook(p *slip.Package, key string) {
