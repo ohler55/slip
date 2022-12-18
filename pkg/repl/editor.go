@@ -18,8 +18,8 @@ type die string
 type editor struct {
 	lines     [][]rune
 	v0        int // first terminal line of display
-	key       seq
-	prev      seq
+	key       []byte
+	kcnt      int
 	uni       []byte
 	msg       string
 	mode      []bindFunc
@@ -35,6 +35,7 @@ type editor struct {
 	depth     int
 	origState *term.State
 	hist      history
+	override  func(ed *editor) bool // return true if handled
 }
 
 func (ed *editor) initialize() {
@@ -49,8 +50,7 @@ func (ed *editor) initialize() {
 	ed.fd = int(((*os.File)(fs)).Fd())
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
 	ed.mode = topMode
-	ed.key.buf = make([]byte, 8)
-	ed.prev.buf = make([]byte, 8)
+	ed.key = make([]byte, 8)
 	ed.match.line = -1
 	ed.hist.filename = historyFilename
 	ed.hist.setLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
@@ -141,15 +141,14 @@ func (ed *editor) read() (out []byte) {
 	var err error
 top:
 	for {
-		ed.prev.set(&ed.key)
-		if ed.key.cnt, err = ed.in.Read(ed.key.buf); err != nil {
+		if ed.kcnt, err = ed.in.Read(ed.key); err != nil {
 			panic(err)
-		} else if ed.key.cnt == 0 {
+		} else if ed.kcnt == 0 {
 			continue
 		}
 		// dirty and not tab and not shift-tab
 		if 0 < ed.dirty.cnt &&
-			ed.key.buf[0] != 0x09 && !(ed.key.buf[0] == 0x1b && ed.key.buf[1] == 0x5b && ed.key.buf[2] == 0x5a) {
+			ed.key[0] != 0x09 && !(ed.key[0] == 0x1b && ed.key[1] == 0x5b && ed.key[2] == 0x5a) {
 			start := ed.v0 + len(ed.lines) - 1
 			for ; 0 < ed.dirty.cnt; ed.dirty.cnt-- {
 				ed.setCursor(start+ed.dirty.cnt, 0)
@@ -158,8 +157,11 @@ top:
 			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 			ed.dirty.lines = nil
 		}
-		for i := 0; i < ed.key.cnt; i++ {
-			b := ed.key.buf[i]
+		if ed.override != nil && ed.override(ed) {
+			continue
+		}
+		for i := 0; i < ed.kcnt; i++ {
+			b := ed.key[i]
 			ed.mode[b](ed, b)
 			if b == 0x0d {
 				if 0 <= ed.match.line {
@@ -357,7 +359,10 @@ func (ed *editor) displayMessage(msg []byte) {
 	if 1 < ed.foff {
 		_, _ = ed.out.Write(bytes.Repeat([]byte{' '}, ed.foff-1))
 	}
-	msg = append(msg, bytes.Repeat([]byte{' '}, w-len(msg)-ed.foff)...)
+	pad := w - len(msg) - ed.foff
+	if 0 < pad {
+		msg = append(msg, bytes.Repeat([]byte{' '}, pad)...)
+	}
 	msg = append(msg, "\x1b[m"...)
 	_, _ = ed.out.Write(msg)
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
@@ -580,7 +585,7 @@ func (ed *editor) setForm(form [][]rune) {
 		ed.setCursor(ed.v0+i, ed.foff)
 		ed.clearToEnd()
 	}
-	ed.lines = formDup(form)
+	ed.lines = form
 	ed.line = len(ed.lines) - 1
 	ed.pos = len(ed.lines[ed.line])
 
@@ -592,6 +597,11 @@ func (ed *editor) setForm(form [][]rune) {
 		ed.v0 -= diff
 	}
 	ed.display()
+}
+
+func (ed *editor) keepForm() {
+	ed.lines = formDup(ed.lines)
+	ed.line = len(ed.lines) - 1
 }
 
 func getHistoryLimit() slip.Object {

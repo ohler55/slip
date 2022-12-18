@@ -12,15 +12,20 @@ import (
 	"strings"
 )
 
-const maxFormSize = 16384
+const (
+	maxFormSize = 16384
+	forwardDir  = 1
+	backwardDir = -1
+)
 
 type history struct {
-	forms    [][][]rune // first on form is oldest
-	filename string
-	limit    int
-	max      int // limit * 1.1
-	cur      int // current position
-	keys     []*seq
+	forms     [][][]rune // first on form is oldest
+	filename  string
+	limit     int
+	max       int    // limit * 1.1
+	cur       int    // current position
+	pattern   []rune // search pattern
+	searchDir int    // forward, backward or 0 for not searching
 }
 
 func (h *history) load() {
@@ -142,22 +147,4 @@ func (h *history) searchForward(start int, s string) (form [][]rune) {
 		}
 	}
 	return nil
-}
-
-func (h *history) addKey(k *seq) {
-	for _, s := range h.keys {
-		if s.same(k) {
-			return
-		}
-	}
-	h.keys = append(h.keys, k.dup())
-}
-
-func (h *history) hasKey(k *seq) bool {
-	for _, s := range h.keys {
-		if s.same(k) {
-			return true
-		}
-	}
-	return false
 }
