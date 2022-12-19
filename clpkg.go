@@ -24,6 +24,7 @@ var (
 				Set: setWorkingDir,
 				Doc: "is the pathname for the current working directory.",
 			},
+			"*package-load-path*": {Val: List{}, Doc: "package load paths"},
 			"*error-output*": {
 				Get: getErrorOutput,
 				Set: setErrorOutput,

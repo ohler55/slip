@@ -13,12 +13,8 @@ SLIce Processing is LISP for golang
 
  - method or function to get flavor of instance and one to check the flavor
 
- - require module-name &optional path-list
-  - *package-load-path* slip package (and lisp?) locations
-  - use env var for location (can also set with setq)
-   - single path - if multiple desired then write some lisp code
-  - use plugin.Open()
-   - try each path module-name.so
+ - don't use bufio
+  - write a LineReader
 
  - repl package
   - completion
