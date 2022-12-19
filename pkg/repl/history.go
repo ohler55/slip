@@ -3,7 +3,6 @@
 package repl
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -13,7 +12,6 @@ import (
 )
 
 const (
-	maxFormSize = 16384
 	forwardDir  = 1
 	backwardDir = -1
 )
@@ -33,10 +31,10 @@ func (h *history) load() {
 	if err != nil {
 		return
 	}
-	r := bufio.NewReaderSize(f, maxFormSize)
+	r := NewLineReader(f, 4096)
 	var line []byte
 	for {
-		if line, _, err = r.ReadLine(); err != nil {
+		if line, err = r.ReadLine(); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}

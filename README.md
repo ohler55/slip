@@ -13,9 +13,6 @@ SLIce Processing is LISP for golang
 
  - method or function to get flavor of instance and one to check the flavor
 
- - don't use bufio
-  - write a LineReader
-
  - repl package
   - completion
    - build completion map
