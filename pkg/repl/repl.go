@@ -202,9 +202,7 @@ func process() {
 			skipWrite = true
 		}
 		// Eval was successful.
-		if ed, ok := replReader.(*editor); ok {
-			ed.addToHistory()
-		}
+		replReader.addToHistory()
 
 		scope.Set(slip.Symbol(form1Key), form1)
 		scope.Set(slip.Symbol(form2Key), form2)
@@ -251,15 +249,15 @@ func setHook(p *slip.Package, key string) {
 		modifiedVars[key] = true
 		updateConfigFile()
 	}
-	// TBD add to completions
+	replReader.addWord(key)
 }
 
 func unsetHook(p *slip.Package, key string) {
-	// TBD remove from completions
+	replReader.removeWord(key)
 }
 
 func defunHook(p *slip.Package, key string) {
-	// TBD
+	replReader.addWord(key)
 }
 
 func getPrompt() slip.Object {

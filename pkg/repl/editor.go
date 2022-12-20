@@ -15,6 +15,11 @@ import (
 
 type die string
 
+type seq struct {
+	cnt int
+	buf []byte
+}
+
 type editor struct {
 	lines     [][]rune
 	v0        int // first terminal line of display
@@ -36,6 +41,7 @@ type editor struct {
 	origState *term.State
 	hist      history
 	override  func(ed *editor) bool // return true if handled
+	completer completer
 }
 
 func (ed *editor) initialize() {
@@ -56,6 +62,15 @@ func (ed *editor) initialize() {
 	ed.hist.setLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
 	ed.hist.load()
 	ed.origState = term.MakeRaw(ed.fd)
+
+	for name := range slip.CurrentPackage.Funcs {
+		ed.completer.insert(name)
+	}
+	for name := range slip.CurrentPackage.Vars {
+		ed.completer.insert(name)
+	}
+	ed.completer.sort()
+
 	_, _ = ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
 }
 
@@ -77,6 +92,14 @@ func (ed *editor) reset() {
 	ed.lines = ed.lines[:0]
 	ed.line = 0
 	ed.pos = 0
+}
+
+func (ed *editor) addWord(word string) {
+	ed.completer.add(word)
+}
+
+func (ed *editor) removeWord(word string) {
+	ed.completer.remove(word)
 }
 
 func (ed *editor) display() {

@@ -32,7 +32,7 @@ var (
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
 		help, tab, nl, delLineEnd, bad, enter, down, nlAfter, // 0x08
 		up, bad, searchBack, searchForward, swapChar, bad, historyForward, bad, // 0x10
-		bad, bad, bad, esc, bad, bad, bad, bad, // 0x18
+		bad, bad, bad, esc, bad, bad, bad, describe, // 0x18
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x20
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x28
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x30
@@ -217,6 +217,7 @@ func addUni(ed *editor, b byte) {
 		if _, err := ed.out.Write(ed.uni); err != nil {
 			panic(err)
 		}
+		// TBD handle inserts
 		r, _ := utf8.DecodeRune(ed.uni)
 		ed.lines[ed.line] = append(ed.lines[ed.line], r)
 		ed.pos++
@@ -530,7 +531,71 @@ func tab(ed *editor, _ byte) {
 		ed.updateDirty(1)
 		return
 	}
-	// TBD completion
+	line := ed.lines[ed.line]
+	pos := ed.pos - 1
+	for ; 0 <= pos; pos-- {
+		r := line[pos]
+		if r <= ' ' || r == '(' || r == ')' {
+			break
+		}
+	}
+	pos++
+	if pos < ed.pos-1 {
+		word := string(line[pos:ed.pos])
+		wa, lo, hi := ed.completer.match(word)
+		if 0 < len(wa) {
+			// TBD only deal with tab the first time, next is override
+			//  if tab again then display if not already displayed (different override)
+			//  display on first if not expanded and jump
+			if added := expandWord(word, wa, lo, hi); 0 < len(added) {
+				if ed.pos == len(ed.lines[ed.line]) {
+					if _, err := ed.out.Write([]byte(string(added))); err != nil {
+						panic(err)
+					}
+					ed.lines[ed.line] = append(ed.lines[ed.line], added...)
+					ed.pos += len(added)
+				} else {
+					line := ed.lines[ed.line]
+					end := line[ed.pos:]
+					line = append(line[:ed.pos], append(added, end...)...)
+					ed.lines[ed.line] = line
+					if _, err := ed.out.Write([]byte(string(line[ed.pos:]))); err != nil {
+						panic(err)
+					}
+					ed.pos += len(added)
+				}
+			} else {
+				// TBD display choices
+				// box or not? box would be more consistent
+				// keep track of index into words
+				//   -1 when not yet selected
+
+				// TBD set override
+
+				// TBD
+				// if displaying tab to next
+				//   also allow arrow keys and ^f ^b ^n ^p after tabbing in
+
+			}
+		}
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.mode = topMode
+}
+
+func expandWord(word string, wa []string, lo, hi int) (added []rune) {
+	w0 := []rune(wa[lo])
+	for i := len(word); i < len(w0); i++ {
+		r := w0[i]
+		for j := lo + 1; j <= hi; j++ {
+			w := []rune(wa[j])
+			if len(w) <= i || w[i] != r {
+				return
+			}
+		}
+		added = append(added, r)
+	}
+	return
 }
 
 func shiftTab(ed *editor, _ byte) {

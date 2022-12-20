@@ -51,3 +51,12 @@ func (r *termReader) read() []byte {
 	}
 	return r.buf
 }
+
+func (r *termReader) addWord(word string) {
+}
+
+func (r *termReader) removeWord(word string) {
+}
+
+func (r *termReader) addToHistory() {
+}
