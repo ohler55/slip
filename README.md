@@ -13,35 +13,29 @@ SLIce Processing is LISP for golang
 
  - method or function to get flavor of instance and one to check the flavor
 
- - repl package
-  - completion
-   - build completion map
-    - sorted slice
-   - complete if only one match
-   - popup if multiple on second tab
-    - subsequent tabs cycles through matches
-  - color for words
-   - functions
-   - variables
-   - strings
-  - select, copy, yank, ring (stack)
+ - figure out how to determine the print length of runes when some are double wide (e.g., 0x01f44d)
 
+ - repl package
   - *repl-input-stream*
   - *repl-output-stream*
-  - (help &optional topic) ;; topic can be index
-   - configuration
-    - set variables which are updated
-   - custom.lisp
-   - history
-   - index
-    - configuration
-    - history
-    - ansi for color and character attributes
-    - run
-    - exit
-  - (repl-history &optional nth)
+  - (repl-history &optional start end)
   - (repl-run)
   - (repl-exit)
+
+  - color for words
+   - functions - word after (
+   - variables - match word
+   - strings - quotes
+   - comments - ;;
+  - select, copy, yank, ring (stack) (is this really needed?)
+   - need select
+    - mark
+    - highlight from mark to current
+    - ^w to delete
+    - M-w to copy
+   - ^y for yank
+   - M-y for next
+   - need hookup with system copy and paste
 
   - better handling of interactions (raw terminal?)
    - tab complete

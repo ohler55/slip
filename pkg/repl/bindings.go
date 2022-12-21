@@ -32,7 +32,7 @@ var (
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
 		help, tab, nl, delLineEnd, bad, enter, down, nlAfter, // 0x08
 		up, bad, searchBack, searchForward, swapChar, bad, historyForward, bad, // 0x10
-		bad, bad, bad, esc, bad, bad, bad, bad, // 0x18
+		bad, bad, bad, esc, bad, bad, bad, describe, // 0x18
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x20
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x28
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x30
@@ -70,11 +70,11 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x20
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x30
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x40
-		bad, bad, bad, bad, bad, enterU8, bad, bad, // 0x50
+		bad, bad, bad, bad, bad, enterUnicode, bad, bad, // 0x50
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
 		bad, bad, backWord, bad, delForwardWord, bad, forwardWord, bad, // 0x60
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x68
-		bad, bad, bad, bad, bad, enterU4, historyBack, bad, // 0x70
+		bad, bad, bad, bad, bad, enterUnicode, historyBack, bad, // 0x70
 		bad, bad, bad, bad, bad, bad, bad, delBackWord, // 0x78
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x80
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x90
@@ -213,14 +213,10 @@ func topUni(ed *editor, b byte) {
 func addUni(ed *editor, b byte) {
 	ed.uni = append(ed.uni, b)
 	if utf8.Valid(ed.uni) {
-		ed.mode = topMode
-		if _, err := ed.out.Write(ed.uni); err != nil {
-			panic(err)
-		}
 		r, _ := utf8.DecodeRune(ed.uni)
-		ed.lines[ed.line] = append(ed.lines[ed.line], r)
-		ed.pos++
+		ed.addRune(r)
 	}
+	ed.mode = topMode
 }
 
 func enter(ed *editor, _ byte) {
@@ -266,25 +262,10 @@ func nl(ed *editor, b byte) {
 }
 
 func addByte(ed *editor, b byte) {
-	if ed.pos == len(ed.lines[ed.line]) {
-		if _, err := ed.out.Write([]byte{b}); err != nil {
-			panic(err)
-		}
-		ed.lines[ed.line] = append(ed.lines[ed.line], rune(b))
-		ed.pos++
-	} else {
-		line := ed.lines[ed.line]
-		line = append(line, ' ') // make sure there is space for a new rune
-		copy(line[ed.pos+1:], line[ed.pos:])
-		line[ed.pos] = rune(b)
-		ed.lines[ed.line] = line
-		if _, err := ed.out.Write([]byte(string(line[ed.pos:]))); err != nil {
-			panic(err)
-		}
-		ed.pos++
-	}
-	// TBD handle wraps
+	ed.addRune(rune(b))
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.mode = topMode
+	// TBD handle wraps
 }
 
 func esc(ed *editor, _ byte) {
@@ -530,14 +511,134 @@ func tab(ed *editor, _ byte) {
 		ed.updateDirty(1)
 		return
 	}
-	// TBD completion
+	line := ed.lines[ed.line]
+	pos := ed.pos - 1
+	for ; 0 <= pos; pos-- {
+		r := line[pos]
+		if r <= ' ' || r == '(' || r == ')' {
+			break
+		}
+	}
+	pos++
+	if pos < ed.pos {
+		word := string(line[pos:ed.pos])
+		wa, lo, hi := ed.completer.match(word)
+		if 0 < len(wa) {
+			if added := expandWord(word, wa, lo, hi); 0 < len(added) {
+				if ed.pos == len(ed.lines[ed.line]) {
+					if _, err := ed.out.Write([]byte(string(added))); err != nil {
+						panic(err)
+					}
+					ed.lines[ed.line] = append(ed.lines[ed.line], added...)
+					ed.pos += len(added)
+				} else {
+					line := ed.lines[ed.line]
+					end := line[ed.pos:]
+					line = append(line[:ed.pos], append(added, end...)...)
+					ed.lines[ed.line] = line
+					_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
+					ed.pos += len(added)
+				}
+			} else {
+				ed.completer.lo = lo
+				ed.completer.hi = hi
+				ed.completer.index = -1
+				ed.completer.target = word
+				ed.override = completeOverride
+				ed.displayCompletions()
+			}
+		}
+	}
+	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.mode = topMode
 }
 
-func shiftTab(ed *editor, _ byte) {
+func completeOverride(ed *editor) bool {
+	k := string(ed.key[:ed.kcnt])
+	switch k {
+	case "\t", "\x06", "\x1b[C": // next
+		ed.completer.index++
+		if ed.completer.hi-ed.completer.lo < ed.completer.index {
+			ed.completer.index = 0
+		}
+	case "\x02", "\x1b[D": // back
+		ed.completer.index--
+		if ed.completer.index < 0 {
+			ed.completer.index = ed.completer.hi - ed.completer.lo
+		}
+	case "\x0e", "\x1b[B": // down
+		if ed.completer.index < 0 {
+			ed.completer.index = 0
+		} else {
+			ed.completer.index += ed.completer.colCnt
+		}
+		if ed.completer.hi-ed.completer.lo < ed.completer.index {
+			ed.completer.index %= ed.completer.colCnt
+		}
+	case "\x10", "\x1b[A": // up
+		if ed.completer.index < 0 {
+			ed.completer.index = 0
+		}
+		ed.completer.index -= ed.completer.colCnt
+		if ed.completer.index < 0 {
+			lastRow := (ed.completer.hi - ed.completer.lo + 1) / ed.completer.colCnt * ed.completer.colCnt
+			ed.completer.index = lastRow + ed.completer.index%ed.completer.colCnt
+			if ed.completer.hi-ed.completer.lo < ed.completer.index {
+				ed.completer.index = ed.completer.hi
+			}
+		}
+	case "\n", "\r":
+		if 0 <= ed.completer.index {
+			word := ed.completer.words[ed.completer.lo+ed.completer.index]
+			added := []rune(word)[len(ed.completer.target):]
+			if ed.pos == len(ed.lines[ed.line]) {
+				_, _ = ed.out.Write([]byte(string(added)))
+				ed.lines[ed.line] = append(ed.lines[ed.line], added...)
+				ed.pos += len(added)
+			} else {
+				line := ed.lines[ed.line]
+				end := line[ed.pos:]
+				line = append(line[:ed.pos], append(added, end...)...)
+				ed.lines[ed.line] = line
+				_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
+				ed.pos += len(added)
+			}
+		}
+		ed.kcnt = 0
+		ed.override = nil
+		return false
+	case "\x1b": // esc
+		ed.kcnt = 0
+		ed.override = nil
+		return false
+	default:
+		ed.override = nil
+		return false
+	}
+	ed.displayCompletions()
+	return true
+}
+
+func expandWord(word string, wa []string, lo, hi int) (added []rune) {
+	w0 := []rune(wa[lo])
+	for i := len(word); i < len(w0); i++ {
+		r := w0[i]
+		for j := lo + 1; j <= hi; j++ {
+			w := []rune(wa[j])
+			if len(w) <= i || w[i] != r {
+				return
+			}
+		}
+		added = append(added, r)
+	}
+	return
+}
+
+func shiftTab(ed *editor, b byte) {
 	if ed.dirty.lines != nil {
 		ed.updateDirty(-1)
 	} else {
-		_, _ = ed.out.Write([]byte{0x07})
+		bad(ed, b)
 	}
 	ed.mode = topMode
 }
@@ -792,15 +893,96 @@ func searchForward(ed *editor, b byte) {
 	ed.mode = topMode
 }
 
-func enterU4(ed *editor, _ byte) {
-	// TBD use status line
-	//  setup an override
-	_, _ = ed.out.Write([]byte{0x07})
+func enterUnicode(ed *editor, _ byte) {
+	ed.ri = 0
+	ed.displayMessage([]byte("unicode: \\u0000"))
+	ed.override = unicodeOverride
 	ed.mode = topMode
 }
 
-func enterU8(ed *editor, _ byte) {
-	// TBD
-	_, _ = ed.out.Write([]byte{0x07})
-	ed.mode = topMode
+// key length in bytes
+func (ed *editor) keyLen() (cnt int) {
+	if 0 < ed.kcnt {
+		switch {
+		case ed.key[0] == 0x1b: // esc
+			cnt = 1
+			if 1 < ed.kcnt {
+				switch ed.key[1] {
+				case 0x1b: // second esc
+					cnt = 4
+				case 0x5b:
+					cnt = 3
+					if 2 < ed.kcnt && (ed.key[2] == 0x31 || ed.key[2] == 0x32) {
+						cnt = ed.kcnt
+					}
+				case 0x4f:
+					cnt = 3
+				default:
+					cnt = 2
+				}
+			}
+		case ed.key[0] <= 0x7f:
+			cnt = 1
+		default:
+			_, cnt = utf8.DecodeRune(ed.key)
+		}
+	}
+	return
+}
+
+func (ed *editor) getKey() string {
+	return string(ed.key[:ed.keyLen()])
+}
+
+func (ed *editor) clearKey() {
+	cnt := ed.keyLen()
+	copy(ed.key, ed.key[:cnt])
+	ed.kcnt -= cnt
+}
+
+func unicodeOverride(ed *editor) bool {
+	k := ed.getKey()
+	switch k {
+	case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
+		ed.ri = (ed.ri << 4) + uint32(k[0]-'0')
+	case "a", "b", "c", "d", "e", "f":
+		ed.ri = (ed.ri << 4) + uint32(k[0]-'a') + 10
+	case "A", "B", "C", "D", "E", "F":
+		ed.ri = (ed.ri << 4) + uint32(k[0]-'A') + 10
+	case "\n", "\r":
+		ed.override = nil
+		ed.clearKey()
+		if !utf8.ValidRune(rune(ed.ri)) {
+			ed.clearKey()
+			ed.displayMessage(fmt.Appendf(nil, "\\u%x is not a valid code point", ed.ri))
+		} else {
+			ed.addRune(rune(ed.ri))
+		}
+		return false
+	case "\x1b": // esc
+		ed.clearKey()
+		ed.override = nil
+		return false
+	case "\x7f":
+		ed.clearKey()
+		ed.ri >>= ed.ri
+	default:
+		if k[0] < 0x20 {
+			ed.override = nil
+			return false
+		}
+		ed.displayMessage(fmt.Appendf(nil, "%s is not a valid hexadecimal character", k))
+		return true
+	}
+	var buf []byte
+	switch {
+	case utf8.MaxRune < rune(ed.ri):
+		buf = fmt.Appendf(nil, "\\u%x is not a valid code point", ed.ri)
+	case 0xFFFF < ed.ri:
+		buf = fmt.Appendf(nil, "unicode: \\u%08x", ed.ri)
+	default:
+		buf = fmt.Appendf(nil, "unicode: \\u%04x", ed.ri)
+	}
+	ed.displayMessage(buf)
+	return true
 }

@@ -55,7 +55,7 @@ files:
 
   • __config.lisp__ contains _setq_ function calls that set variables on
     startup of the REPL. This file over-written by the REPL as _setq_
-    functions are invoked on REPL and _*print-xxx*_ variables.
+    functions are invoked on _*repl-xxx*_ and _*print-xxx*_ variables.
 
   • __custom.lisp__ is loaded on startup. It is where customiations can be
     made.
@@ -65,7 +65,16 @@ files:
 	helpEdit = `__SLIP REPL Editing__
 
 
-TBD keys bindings, completions, colorization
+The key bindings can be viewed by hitting control-h. The key bindings
+generally follow the Emacs key bindings.
+
+
+Unlike read-line or shell C-p and C-n move up and down a multi-line form while
+Emacs page up (M-v) and page down (C-v) move forward and back in
+history. History is not by line but by form.
+
+
+Tab completion is supported for function names and package level variables.
 `
 	helpHistory = `__SLIP REPL History__
 

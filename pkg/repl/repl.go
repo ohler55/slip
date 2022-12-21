@@ -77,6 +77,9 @@ func init() {
 	slip.DefunHook = defunHook
 }
 
+// die is used with panic to print an error and then exit.
+type die string
+
 // SetConfigDir sets the configuration directory for the configuration and
 // history files.
 func SetConfigDir(dir string) {
@@ -168,20 +171,26 @@ func process() {
 			buf = append(buf, suffix...)
 			_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			reset()
-			debug.PrintStack()
+			if scope.Get("*repl-debug*") != nil {
+				debug.PrintStack()
+			}
 		case die:
-			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%s%s\n", warnPrefix, tr, suffix)
 			os.Exit(1)
 		case error:
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
 			}
-			debug.PrintStack()
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			if scope.Get("*repl-debug*") != nil {
+				debug.PrintStack()
+			}
 			reset()
 		default:
-			debug.PrintStack()
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			if scope.Get("*repl-debug*") != nil {
+				debug.PrintStack()
+			}
 			reset()
 		}
 	}()
@@ -202,9 +211,7 @@ func process() {
 			skipWrite = true
 		}
 		// Eval was successful.
-		if ed, ok := replReader.(*editor); ok {
-			ed.addToHistory()
-		}
+		replReader.addToHistory()
 
 		scope.Set(slip.Symbol(form1Key), form1)
 		scope.Set(slip.Symbol(form2Key), form2)
@@ -251,15 +258,15 @@ func setHook(p *slip.Package, key string) {
 		modifiedVars[key] = true
 		updateConfigFile()
 	}
-	// TBD add to completions
+	replReader.addWord(key)
 }
 
 func unsetHook(p *slip.Package, key string) {
-	// TBD remove from completions
+	replReader.removeWord(key)
 }
 
 func defunHook(p *slip.Package, key string) {
-	// TBD
+	replReader.addWord(key)
 }
 
 func getPrompt() slip.Object {

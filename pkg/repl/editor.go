@@ -13,7 +13,10 @@ import (
 	"github.com/ohler55/slip/pkg/repl/term"
 )
 
-type die string
+type seq struct {
+	cnt int
+	buf []byte
+}
 
 type editor struct {
 	lines     [][]rune
@@ -21,6 +24,7 @@ type editor struct {
 	key       []byte
 	kcnt      int
 	uni       []byte
+	ri        uint32
 	msg       string
 	mode      []bindFunc
 	line      int
@@ -36,6 +40,7 @@ type editor struct {
 	origState *term.State
 	hist      history
 	override  func(ed *editor) bool // return true if handled
+	completer completer
 }
 
 func (ed *editor) initialize() {
@@ -56,6 +61,15 @@ func (ed *editor) initialize() {
 	ed.hist.setLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
 	ed.hist.load()
 	ed.origState = term.MakeRaw(ed.fd)
+
+	for name := range slip.CurrentPackage.Funcs {
+		ed.completer.insert(name)
+	}
+	for name := range slip.CurrentPackage.Vars {
+		ed.completer.insert(name)
+	}
+	ed.completer.sort()
+
 	_, _ = ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
 }
 
@@ -77,6 +91,14 @@ func (ed *editor) reset() {
 	ed.lines = ed.lines[:0]
 	ed.line = 0
 	ed.pos = 0
+}
+
+func (ed *editor) addWord(word string) {
+	ed.completer.add(word)
+}
+
+func (ed *editor) removeWord(word string) {
+	ed.completer.remove(word)
 }
 
 func (ed *editor) display() {
@@ -209,6 +231,20 @@ top:
 		out = append(out, '\n')
 	}
 	return
+}
+
+func (ed *editor) addRune(r rune) {
+	if ed.pos == len(ed.lines[ed.line]) {
+		_, _ = ed.out.Write([]byte(string([]rune{r})))
+		ed.lines[ed.line] = append(ed.lines[ed.line], r)
+	} else {
+		line := ed.lines[ed.line]
+		end := line[ed.pos:]
+		line = append(line[:ed.pos], append([]rune{r}, end...)...)
+		ed.lines[ed.line] = line
+		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
+	}
+	ed.pos++
 }
 
 // ANSI sequences
@@ -410,6 +446,46 @@ func (ed *editor) displayHelp(doc []byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+}
+
+func (ed *editor) displayCompletions() {
+	words := ed.completer.words[ed.completer.lo : ed.completer.hi+1]
+	w, _ := term.GetSize(0)
+	w -= 6
+	leftPad := []byte{' ', ' ', ' '}
+	colWidth := 0
+	for _, word := range words {
+		if colWidth < len(word) {
+			colWidth = len(word)
+		}
+	}
+	var buf []byte
+	colWidth += 2
+	colCnt := w / colWidth
+	ed.completer.colCnt = colCnt
+	klines := len(words)/colCnt + 1
+	for i := 0; i < klines; i++ {
+		if 0 < i {
+			buf = append(buf, leftPad...)
+		}
+		for j := 0; j < colCnt; j++ {
+			index := i*colCnt + j
+			if len(words) <= index {
+				continue
+			}
+			word := words[index]
+			if ed.completer.index == index {
+				buf = append(buf, '\x1b', '[', '7', 'm')
+				buf = append(buf, word...)
+				buf = append(buf, '\x1b', '[', 'm')
+			} else {
+				buf = append(buf, word...)
+			}
+			buf = append(buf, bytes.Repeat([]byte{' '}, colWidth-len(word))...)
+		}
+		buf = append(buf, '\n')
+	}
+	ed.displayHelp(buf)
 }
 
 // dir can be -1, 0, or 1
