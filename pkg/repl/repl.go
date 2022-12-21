@@ -77,6 +77,9 @@ func init() {
 	slip.DefunHook = defunHook
 }
 
+// die is used with panic to print an error and then exit.
+type die string
+
 // SetConfigDir sets the configuration directory for the configuration and
 // history files.
 func SetConfigDir(dir string) {
@@ -168,20 +171,26 @@ func process() {
 			buf = append(buf, suffix...)
 			_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			reset()
-			debug.PrintStack()
+			if scope.Get("*repl-debug*") != nil {
+				debug.PrintStack()
+			}
 		case die:
-			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%s%s\n", warnPrefix, tr, suffix)
 			os.Exit(1)
 		case error:
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
 			}
-			debug.PrintStack()
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			if scope.Get("*repl-debug*") != nil {
+				debug.PrintStack()
+			}
 			reset()
 		default:
-			debug.PrintStack()
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			if scope.Get("*repl-debug*") != nil {
+				debug.PrintStack()
+			}
 			reset()
 		}
 	}()

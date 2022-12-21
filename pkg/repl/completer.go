@@ -9,9 +9,12 @@ import (
 
 type completer struct {
 	words []string
-	lo    int
-	hi    int
-	index int
+	// the rest are for interactions
+	lo     int
+	hi     int
+	index  int
+	colCnt int
+	target string
 }
 
 // Don't check to see if the word already exists. Used oon startup.
@@ -36,6 +39,7 @@ func (c *completer) remove(word string) {
 }
 
 func (c *completer) match(word string) (words []string, lo, hi int) {
+	word = strings.ToLower(word)
 	// Since words are not evenly distributed across all characters (heavy on
 	// *) a binary search is used to find the match.
 	lo = 0

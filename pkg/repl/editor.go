@@ -13,8 +13,6 @@ import (
 	"github.com/ohler55/slip/pkg/repl/term"
 )
 
-type die string
-
 type seq struct {
 	cnt int
 	buf []byte
@@ -26,6 +24,7 @@ type editor struct {
 	key       []byte
 	kcnt      int
 	uni       []byte
+	ri        uint32
 	msg       string
 	mode      []bindFunc
 	line      int
@@ -234,6 +233,20 @@ top:
 	return
 }
 
+func (ed *editor) addRune(r rune) {
+	if ed.pos == len(ed.lines[ed.line]) {
+		_, _ = ed.out.Write([]byte(string([]rune{r})))
+		ed.lines[ed.line] = append(ed.lines[ed.line], r)
+	} else {
+		line := ed.lines[ed.line]
+		end := line[ed.pos:]
+		line = append(line[:ed.pos], append([]rune{r}, end...)...)
+		ed.lines[ed.line] = line
+		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
+	}
+	ed.pos++
+}
+
 // ANSI sequences
 func (ed *editor) getCursor() (v, h int) {
 	if _, err := ed.out.Write([]byte("\x1b[6n")); err != nil {
@@ -433,6 +446,46 @@ func (ed *editor) displayHelp(doc []byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+}
+
+func (ed *editor) displayCompletions() {
+	words := ed.completer.words[ed.completer.lo : ed.completer.hi+1]
+	w, _ := term.GetSize(0)
+	w -= 6
+	leftPad := []byte{' ', ' ', ' '}
+	colWidth := 0
+	for _, word := range words {
+		if colWidth < len(word) {
+			colWidth = len(word)
+		}
+	}
+	var buf []byte
+	colWidth += 2
+	colCnt := w / colWidth
+	ed.completer.colCnt = colCnt
+	klines := len(words)/colCnt + 1
+	for i := 0; i < klines; i++ {
+		if 0 < i {
+			buf = append(buf, leftPad...)
+		}
+		for j := 0; j < colCnt; j++ {
+			index := i*colCnt + j
+			if len(words) <= index {
+				continue
+			}
+			word := words[index]
+			if ed.completer.index == index {
+				buf = append(buf, '\x1b', '[', '7', 'm')
+				buf = append(buf, word...)
+				buf = append(buf, '\x1b', '[', 'm')
+			} else {
+				buf = append(buf, word...)
+			}
+			buf = append(buf, bytes.Repeat([]byte{' '}, colWidth-len(word))...)
+		}
+		buf = append(buf, '\n')
+	}
+	ed.displayHelp(buf)
 }
 
 // dir can be -1, 0, or 1
