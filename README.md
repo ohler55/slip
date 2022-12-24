@@ -16,12 +16,19 @@ SLIce Processing is LISP for golang
  - figure out how to determine the print length of runes when some are double wide (e.g., 0x01f44d)
 
  - repl package
-  - *repl-input-stream*
-  - *repl-output-stream*
-  - (repl-history &optional start end)
-  - (repl-run)
-  - (repl-exit)
+  - fake/mock/test terminal - termock
+   - set stdIn and out for slip with fake/mock terminal
+   - give it input
+   - get output (handle ansi somehow)
+    - handle auto response for ansi get cursor
+    - show ansi mods with <bold> or something <off>
+   - create or change height and width
 
+  - (repl-history &optional start end)
+  - (repl-exit)
+  - line wrap
+
+ - future repl options
   - color for words
    - functions - word after (
    - variables - match word
@@ -36,17 +43,6 @@ SLIce Processing is LISP for golang
    - ^y for yank
    - M-y for next
    - need hookup with system copy and paste
-
-  - better handling of interactions (raw terminal?)
-   - tab complete
-    - keep sorted list (extra info for type? used for color coding
-   - paren matching
-    - bold, underline, or flashing? maybe option
-    - on move or typing ( or )
-  - handle raw terminal input
-  - use interface for terminal to handle different move and clear
-  - get term dimensions
-  - support multiline editing
 
  - coerce
   - also support integers unlike CL
