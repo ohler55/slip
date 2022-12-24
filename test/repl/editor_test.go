@@ -5,7 +5,6 @@ package repl
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -102,10 +101,12 @@ func edTest(t *testing.T, script []any) {
 	go runScript(t, tm, script)
 
 	repl.Run()
-	out := tm.Output()
-	tt.Equal(t, true, strings.HasPrefix(out, "<set-cursor "))
-	out = tm.Output()
-	tt.Equal(t, "\nBye\n", out)
+	for {
+		out := tm.Output()
+		if match("/Bye/", out) {
+			break
+		}
+	}
 }
 
 func TestEditorEmpty(t *testing.T) {
@@ -147,11 +148,9 @@ func TestEditorHelp(t *testing.T) {
 		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
 		expect("<set-cursor 2:3>"),
 		provide("\x01"),
-		expect("<set-cursor 40:1>"),
-		expect("<clear-line 40>"),
-		// skip the rest of the clear-lines
+		expect("<set-cursor 3:1>"),
+		expect("<clear-down 3>"),
 		until("<set-cursor 2:3>"),
 		provide("\x03"),
-		expect("<set-cursor 2:3>"),
 	})
 }

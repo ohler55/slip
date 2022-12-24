@@ -133,6 +133,13 @@ func (tm *Termock) Write(p []byte) (n int, err error) {
 				if tm.width < tm.ch {
 					tm.ch = tm.width
 				}
+			case 'J': // clear down or whole screen
+				switch n0 {
+				case 0: // clean down
+					tm.output <- fmt.Sprintf("<clear-down %d>", tm.cv)
+				case 2: // clear screen
+					tm.output <- "<clear-screen>"
+				}
 			case 'K': // clear
 				switch n0 {
 				case 0: // clear to start

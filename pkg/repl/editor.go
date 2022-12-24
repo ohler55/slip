@@ -174,11 +174,8 @@ top:
 		// dirty and not tab and not shift-tab
 		if 0 < ed.dirty.cnt &&
 			ed.key[0] != 0x09 && !(ed.key[0] == 0x1b && ed.key[1] == 0x5b && ed.key[2] == 0x5a) {
-			start := ed.v0 + len(ed.lines) - 1
-			for ; 0 < ed.dirty.cnt; ed.dirty.cnt-- {
-				ed.setCursor(start+ed.dirty.cnt, 1)
-				ed.clearLine()
-			}
+			ed.setCursor(ed.v0+len(ed.lines), 1)
+			ed.clearDown()
 			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 			ed.dirty.lines = nil
 		}
@@ -323,6 +320,10 @@ func (ed *editor) clearToEnd() {
 
 func (ed *editor) clearToStart() {
 	_, _ = ed.out.Write([]byte(("\x1b[1K")))
+}
+
+func (ed *editor) clearDown() {
+	_, _ = ed.out.Write([]byte(("\x1b[J")))
 }
 
 func (ed *editor) home() {
