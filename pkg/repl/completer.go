@@ -7,7 +7,10 @@ import (
 	"strings"
 )
 
-type completer struct {
+// Completer provides completion choices given a partial word. Words are
+// stored in a slice in sorted order to optimize not only the search for a
+// match but for returing a slice of matches.
+type Completer struct {
 	words []string
 	// the rest are for interactions
 	lo     int
@@ -17,7 +20,8 @@ type completer struct {
 	target string
 }
 
-func (c *completer) init() {
+// Init the instance.
+func (c *Completer) Init() {
 	c.words = nil
 	c.lo = 0
 	c.hi = 0
@@ -26,28 +30,37 @@ func (c *completer) init() {
 	c.target = ""
 }
 
-// Don't check to see if the word already exists. Used oon startup.
-func (c *completer) insert(word string) {
+// Insert a word. No check is made to see if the word already exists. Used on
+// startup.
+func (c *Completer) Insert(word string) {
 	c.words = append(c.words, word)
 }
 
-func (c *completer) sort() {
+// Sort previously inserted words. Only need to be called after
+// inserting. When a word is added with the Add() function it is inserted in
+// the correct order.
+func (c *Completer) Sort() {
 	sort.Strings(c.words)
 }
 
-func (c *completer) add(word string) {
-	words, _, _ := c.match(word)
+// Add a word to the completer words.
+func (c *Completer) Add(word string) {
+	words, _, _ := c.Match(word)
 	if words == nil {
 		c.words = append(c.words, word)
 		sort.Strings(c.words)
 	}
 }
 
-func (c *completer) remove(word string) {
-	// TBD find first then modify
+// Remove a word.
+func (c *Completer) Remove(word string) {
+	// TBD find first then modify with a copy and shorten
 }
 
-func (c *completer) match(word string) (words []string, lo, hi int) {
+// Match looks for a match of the word provided. The internal slice of sorted
+// words is returned along with the low and high indices into the word slice
+// for matches that begin with the provided word.
+func (c *Completer) Match(word string) (words []string, lo, hi int) {
 	word = strings.ToLower(word)
 	// Since words are not evenly distributed across all characters (heavy on
 	// *) a binary search is used to find the match.

@@ -42,7 +42,7 @@ type editor struct {
 	origState *term.State
 	hist      History
 	override  func(ed *editor) bool // return true if handled
-	completer completer
+	completer Completer
 }
 
 func (ed *editor) initialize() {
@@ -61,14 +61,14 @@ func (ed *editor) initialize() {
 		ed.fd = int(((*os.File)(fs)).Fd())
 		ed.origState = term.MakeRaw(ed.fd)
 	}
-	ed.completer.init()
+	ed.completer.Init()
 	for name := range slip.CurrentPackage.Funcs {
-		ed.completer.insert(name)
+		ed.completer.Insert(name)
 	}
 	for name := range slip.CurrentPackage.Vars {
-		ed.completer.insert(name)
+		ed.completer.Insert(name)
 	}
-	ed.completer.sort()
+	ed.completer.Sort()
 
 	_, _ = ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
 }
@@ -96,11 +96,11 @@ func (ed *editor) reset() {
 }
 
 func (ed *editor) addWord(word string) {
-	ed.completer.add(word)
+	ed.completer.Add(word)
 }
 
 func (ed *editor) removeWord(word string) {
-	ed.completer.remove(word)
+	ed.completer.Remove(word)
 }
 
 func (ed *editor) display() {

@@ -520,7 +520,7 @@ func tab(ed *editor, _ byte) {
 	pos++
 	if pos < ed.pos {
 		word := string(line[pos:ed.pos])
-		wa, lo, hi := ed.completer.match(word)
+		wa, lo, hi := ed.completer.Match(word)
 		if 0 < len(wa) {
 			if added := expandWord(word, wa, lo, hi); 0 < len(added) {
 				if ed.pos == len(ed.lines[ed.line]) {
