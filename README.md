@@ -17,12 +17,9 @@ SLIce Processing is LISP for golang
 
  - repl package
   - fake/mock/test terminal - termock
-   - set stdIn and out for slip with fake/mock terminal
-   - give it input
-   - get output (handle ansi somehow)
-    - handle auto response for ansi get cursor
-    - show ansi mods with <bold> or something <off>
-   - create or change height and width
+   - more tests
+  - should history and completer be public for testing?
+   - encapsulated and might be generally useful, clean APIs anyway
 
   - (repl-history &optional start end)
   - (repl-exit)

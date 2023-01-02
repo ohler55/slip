@@ -5,6 +5,7 @@ package repl
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -151,6 +152,106 @@ func TestEditorHelp(t *testing.T) {
 		expect("<set-cursor 3:1>"),
 		expect("<clear-down 3>"),
 		until("<set-cursor 2:3>"),
+		provide("\x03"),
+	})
+}
+
+func TestEditorDescribeScroll(t *testing.T) {
+	edTest(t, []any{
+		startSteps,
+		provide(strings.Repeat("\n", 20)),
+		until("<clear-to-start 22:3>"),
+		expect("<set-cursor 22:3>"),
+		provide("(car"),
+		until("("),
+		expect("c"),
+		expect("a"),
+		expect("r"),
+		provide("\x1b/"),
+		until("<scroll-up 1>"),
+		expect("<set-cursor 23:4>"),
+		expect("<bold>"),
+		expect("car"),
+		expect("<normal>"),
+		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		expect("<set-cursor 21:7>"),
+		provide("\x03"),
+	})
+}
+
+func TestEditorUnknownKey(t *testing.T) {
+	edTest(t, []any{
+		startSteps,
+		provide("\x0c"),
+		until("<inverse>"),
+		expect("  "),
+		expect("key C-l is undefined. sequence: []byte{0xc}                                  "),
+		expect("<normal>"),
+		provide("\x03"),
+	})
+}
+
+func TestEditorComplete(t *testing.T) {
+	edTest(t, []any{
+		startSteps,
+		provide("*pri"),
+		until("*"),
+		expect("p"),
+		expect("r"),
+		expect("i"),
+		comment("press <tab>"),
+		provide("\t"),
+		until("nt-"), // complete as much as common
+
+		comment("press <tab> again"),
+		provide("\t"), // show choices
+		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		expect("<set-cursor 2:10>"),
+
+		comment("press <tab> to pick first entry"),
+		provide("\t"), // highlight first choice
+		until("<inverse>"),
+		expect("*print-ansi*"),
+		expect("<normal>"),
+		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		expect("<set-cursor 2:10>"),
+
+		comment("press C-f"),
+		provide("\x06"), // highlight next choice
+		until("<inverse>"),
+		expect("*print-array*"),
+		expect("<normal>"),
+		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		expect("<set-cursor 2:10>"),
+
+		comment("press C-n"),
+		provide("\x0e"),
+		until("<inverse>"),
+		expect("*print-circle*"),
+		expect("<normal>"),
+		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		expect("<set-cursor 2:10>"),
+
+		comment("press C-b"),
+		provide("\x02"),
+		until("<inverse>"),
+		expect("*print-case*"),
+		expect("<normal>"),
+		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		expect("<set-cursor 2:10>"),
+
+		comment("press C-p"),
+		provide("\x10"),
+		until("<inverse>"),
+		expect("*print-ansi*"),
+		expect("<normal>"),
+		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		expect("<set-cursor 2:10>"),
+
+		provide("\r"), // make a choice
+		until("<clear-down 3>"),
+		until("ansi*"),
+
 		provide("\x03"),
 	})
 }

@@ -546,8 +546,9 @@ func tab(ed *editor, _ byte) {
 				ed.displayCompletions()
 			}
 		}
+	} else {
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 

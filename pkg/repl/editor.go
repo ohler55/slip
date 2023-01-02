@@ -51,7 +51,7 @@ func (ed *editor) initialize() {
 	}
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
 	ed.mode = topMode
-	ed.key = make([]byte, 8)
+	ed.key = make([]byte, 32)
 	ed.match.line = -1
 	ed.hist.filename = historyFilename
 	ed.hist.setLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
@@ -62,6 +62,7 @@ func (ed *editor) initialize() {
 		ed.fd = int(((*os.File)(fs)).Fd())
 		ed.origState = term.MakeRaw(ed.fd)
 	}
+	ed.completer.init()
 	for name := range slip.CurrentPackage.Funcs {
 		ed.completer.insert(name)
 	}
@@ -303,6 +304,12 @@ done:
 }
 
 func (ed *editor) setCursor(v, h int) {
+	if v < 0 {
+		v = 0
+	}
+	if h < 0 {
+		h = 0
+	}
 	_, _ = fmt.Fprintf(ed.out, "\x1b[%d;%dH", v, h)
 }
 
