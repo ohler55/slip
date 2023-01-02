@@ -21,7 +21,7 @@ type seq struct {
 }
 
 type editor struct {
-	lines     [][]rune
+	lines     Form
 	v0        int // first terminal line of display
 	key       []byte
 	kcnt      int
@@ -40,7 +40,7 @@ type editor struct {
 	out       io.Writer
 	depth     int
 	origState *term.State
-	hist      history
+	hist      History
 	override  func(ed *editor) bool // return true if handled
 	completer completer
 }
@@ -53,9 +53,8 @@ func (ed *editor) initialize() {
 	ed.mode = topMode
 	ed.key = make([]byte, 32)
 	ed.match.line = -1
-	ed.hist.filename = historyFilename
-	ed.hist.setLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
-	ed.hist.load()
+	ed.hist.SetLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
+	ed.hist.Load(historyFilename)
 	ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 	ed.in = scope.Get(slip.Symbol(stdInput)).(io.Reader)
 	if fs, ok := ed.in.(*slip.FileStream); ok {
@@ -160,7 +159,7 @@ func (ed *editor) read() (out []byte) {
 		ed.clearLine()
 		_, _ = ed.out.Write([]byte(prompt))
 		ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
-		ed.lines = [][]rune{{}}
+		ed.lines = Form{{}}
 	} else {
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
@@ -655,10 +654,10 @@ func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
 }
 
 func (ed *editor) addToHistory() {
-	ed.hist.addForm(ed.lines, ed)
+	ed.hist.AddForm(ed.lines, ed)
 }
 
-func (ed *editor) setForm(form [][]rune) {
+func (ed *editor) setForm(form Form) {
 	for i := ed.line; 0 < i; i-- { // zero is cleared when ed.display is called
 		ed.setCursor(ed.v0+i, ed.foff)
 		ed.clearToEnd()
@@ -699,6 +698,6 @@ func setHistoryLimit(value slip.Object) {
 		if num < 0 {
 			num = 0
 		}
-		ed.hist.setLimit(int(num))
+		ed.hist.SetLimit(int(num))
 	}
 }

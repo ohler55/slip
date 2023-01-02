@@ -746,8 +746,8 @@ func describe(ed *editor, _ byte) {
 	ed.displayHelp(buf, w, h)
 }
 
-func formDup(form [][]rune) [][]rune {
-	d := make([][]rune, len(form))
+func formDup(form Form) Form {
+	d := make(Form, len(form))
 	for i, line := range form {
 		l2 := make([]rune, len(line))
 		copy(l2, line)
@@ -779,7 +779,7 @@ func historyBack(ed *editor, _ byte) {
 	default:
 		ed.hist.cur--
 	}
-	if form := ed.hist.get(); form != nil {
+	if form := ed.hist.Get(); form != nil {
 		ed.setForm(form)
 	}
 	ed.override = historyOverride
@@ -792,13 +792,13 @@ func historyForward(ed *editor, _ byte) {
 		ed.hist.cur = 0
 	case len(ed.hist.forms)-1 <= ed.hist.cur:
 		ed.override = historyOverride
-		ed.setForm([][]rune{{}})
+		ed.setForm(Form{{}})
 		ed.mode = topMode
 		return
 	default:
 		ed.hist.cur++
 	}
-	if form := ed.hist.get(); form != nil {
+	if form := ed.hist.Get(); form != nil {
 		ed.setForm(form)
 	}
 	ed.override = historyOverride
@@ -848,7 +848,7 @@ func searchBack(ed *editor, b byte) {
 				ed.hist.pattern = append(ed.hist.pattern, r)
 			}
 		}
-		if form := ed.hist.searchBack(start, string(ed.hist.pattern)); form != nil {
+		if form := ed.hist.SearchBack(start, string(ed.hist.pattern)); form != nil {
 			ed.setForm(form)
 			ed.hist.cur = start
 		}
@@ -880,7 +880,7 @@ func searchForward(ed *editor, b byte) {
 				ed.hist.pattern = append(ed.hist.pattern, r)
 			}
 		}
-		if form := ed.hist.searchForward(start, string(ed.hist.pattern)); form != nil {
+		if form := ed.hist.SearchForward(start, string(ed.hist.pattern)); form != nil {
 			ed.setForm(form)
 			ed.hist.cur = start
 		}

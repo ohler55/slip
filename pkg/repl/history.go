@@ -16,8 +16,10 @@ const (
 	backwardDir = -1
 )
 
-type history struct {
-	forms     [][][]rune // first on form is oldest
+// History keeps a history of forms. Previously added Forms are stored in
+// memory and also to a file.
+type History struct {
+	forms     []Form // first on form is oldest
 	filename  string
 	limit     int
 	max       int    // limit * 1.1
@@ -26,11 +28,13 @@ type history struct {
 	searchDir int    // forward, backward or 0 for not searching
 }
 
-func (h *history) load() {
-	f, err := os.Open(h.filename)
+// Load forms from a file and use that file for updates to history.
+func (h *History) Load(filename string) {
+	f, err := os.Open(filename)
 	if err != nil {
 		return
 	}
+	h.filename = filename
 	r := NewLineReader(f, 4096)
 	var line []byte
 	for {
@@ -40,7 +44,7 @@ func (h *history) load() {
 			}
 			panic(err)
 		}
-		var form [][]rune
+		var form Form
 		for _, sub := range bytes.Split(line, []byte{'\t'}) {
 			form = append(form, []rune(string(sub)))
 		}
@@ -48,12 +52,15 @@ func (h *history) load() {
 	}
 }
 
-func (h *history) setLimit(limit int) {
+// SetLimit of the history. The limit is the target maximum number of forms
+// saved.
+func (h *History) SetLimit(limit int) {
 	h.limit = limit
 	h.max = h.limit + h.limit/10
 }
 
-func (h *history) addForm(form [][]rune, ed *editor) {
+// AddForm adds a form to history.
+func (h *History) AddForm(form Form, ed *editor) {
 	if h.limit <= 0 {
 		return
 	}
@@ -103,8 +110,8 @@ func (h *history) addForm(form [][]rune, ed *editor) {
 	}
 }
 
-// reverse order
-func (h *history) getNth(n int) (form [][]rune) {
+// Nth form in history numbered from the most recent added form.
+func (h *History) Nth(n int) (form Form) {
 	n = len(h.forms) - n - 1
 	if 0 <= n && n < len(h.forms) {
 		form = h.forms[n]
@@ -112,22 +119,26 @@ func (h *history) getNth(n int) (form [][]rune) {
 	return
 }
 
-func (h *history) get() (form [][]rune) {
+// Get the form at the cursor in history.
+func (h *History) Get() (form Form) {
 	if 0 <= h.cur && h.cur < len(h.forms) {
 		form = h.forms[h.cur]
 	}
 	return
 }
 
-func (h *history) size() int {
+// Size of the current history.
+func (h *History) Size() int {
 	return len(h.forms)
 }
 
-func (h *history) searchBack(start int, s string) [][]rune {
+// SearchBack for a match to the provided target string starting with the
+// cursor at the start position.
+func (h *History) SearchBack(start int, target string) Form {
 	for ; 0 <= start; start-- {
 		form := h.forms[start]
 		for _, line := range form {
-			if strings.Contains(string(line), s) {
+			if strings.Contains(string(line), target) {
 				return form
 			}
 		}
@@ -135,11 +146,13 @@ func (h *history) searchBack(start int, s string) [][]rune {
 	return nil
 }
 
-func (h *history) searchForward(start int, s string) (form [][]rune) {
+// SearchForward for a match to the provided target string starting with the
+// cursor at the start position.
+func (h *History) SearchForward(start int, target string) (form Form) {
 	for ; start < len(h.forms); start++ {
 		form := h.forms[start]
 		for _, line := range form {
-			if strings.Contains(string(line), s) {
+			if strings.Contains(string(line), target) {
 				return form
 			}
 		}
