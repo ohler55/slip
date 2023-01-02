@@ -58,11 +58,11 @@ var (
 func init() {
 	if scope.Get(slip.Symbol(printANSI)) != nil {
 		warnPrefix = "\x1b[31m"
-		prompt = "\x1b[1;94m▶ \x1b[m"
+		setPrompt(slip.String("\x1b[1;94m▶ \x1b[m"))
 		matchColor = "\x1b[1m"
 	} else {
 		warnPrefix = ""
-		prompt = "* "
+		setPrompt(slip.String("* "))
 		matchColor = ""
 	}
 	scope.Let(slip.Symbol(form1Key), nil)
@@ -77,8 +77,13 @@ func init() {
 	slip.DefunHook = defunHook
 }
 
-// die is used with panic to print an error and then exit.
+// Die is used with panic to print an error and then exit.
 type die string
+
+// GetScope returns the REPL scope.
+func GetScope() *slip.Scope {
+	return &scope
+}
 
 // SetConfigDir sets the configuration directory for the configuration and
 // history files.
@@ -130,9 +135,9 @@ func Scope() *slip.Scope {
 // Run starts the REPL.
 func Run() {
 	defer func() {
-		replReader.stop()
 		_ = recover()
 		_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte("\nBye\n"))
+		replReader.stop()
 	}()
 	replReader.initialize()
 	for {
@@ -276,6 +281,9 @@ func getPrompt() slip.Object {
 func setPrompt(value slip.Object) {
 	if str, ok := value.(slip.String); ok {
 		prompt = string(str)
+		if ed, ok := replReader.(*editor); ok {
+			ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
+		}
 	} else {
 		panic("*repl-prompt* must be a string")
 	}

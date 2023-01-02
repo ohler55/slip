@@ -17,6 +17,15 @@ type completer struct {
 	target string
 }
 
+func (c *completer) init() {
+	c.words = nil
+	c.lo = 0
+	c.hi = 0
+	c.index = 0
+	c.colCnt = 0
+	c.target = ""
+}
+
 // Don't check to see if the word already exists. Used oon startup.
 func (c *completer) insert(word string) {
 	c.words = append(c.words, word)

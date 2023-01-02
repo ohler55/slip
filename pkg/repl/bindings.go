@@ -10,7 +10,6 @@ import (
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
-	"github.com/ohler55/slip/pkg/repl/term"
 )
 
 type bindFunc func(ed *editor, b byte)
@@ -220,7 +219,7 @@ func addUni(ed *editor, b byte) {
 }
 
 func enter(ed *editor, _ byte) {
-	_, h := term.GetSize(0)
+	_, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
 	if h <= bottom {
 		diff := bottom + 1 - h
@@ -233,7 +232,7 @@ func enter(ed *editor, _ byte) {
 }
 
 func nl(ed *editor, b byte) {
-	_, h := term.GetSize(0)
+	_, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
 	if h <= bottom {
 		diff := bottom + 1 - h
@@ -263,9 +262,8 @@ func nl(ed *editor, b byte) {
 
 func addByte(ed *editor, b byte) {
 	ed.addRune(rune(b))
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
-	// TBD handle wraps
+	// TBD handle wraps or past line end, might need to set terminal to not wrap with ansi code
 }
 
 func esc(ed *editor, _ byte) {
@@ -548,8 +546,9 @@ func tab(ed *editor, _ byte) {
 				ed.displayCompletions()
 			}
 		}
+	} else {
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
 }
 
@@ -651,7 +650,7 @@ This editor includes history, tab completions, word (symbol) descriptions, and
 parenthesis matching. In the key binding table __M-__ indicates pressing the
 meta or option key or pressing the escape key before the rest of the
 sequence. A __C-__ indicates the control key is held while pressing the key. A
-shift key is denoted with a __^__ character. Key bindings are:
+shift key is denoted with a __S-__. Key bindings are:
 
 `
 	keys := []string{
@@ -689,7 +688,7 @@ shift key is denoted with a __^__ character. Key bindings are:
 		"\x1b[1mM-DEL\x1b[m delete previous word",
 		"\x1b[1mENTER\x1b[m evaluate form",
 	}
-	w, _ := term.GetSize(0)
+	w, h := ed.getSize()
 	w -= 6
 	indent := 3
 	leftPad := bytes.Repeat([]byte{' '}, indent)
@@ -713,7 +712,7 @@ shift key is denoted with a __^__ character. Key bindings are:
 		}
 		buf = append(buf, '\n')
 	}
-	ed.displayHelp(buf)
+	ed.displayHelp(buf, w, h)
 }
 
 func describe(ed *editor, _ byte) {
@@ -740,11 +739,11 @@ func describe(ed *editor, _ byte) {
 		return
 	}
 	word := string(line[start:end])
-	w, _ := term.GetSize(0)
+	w, h := ed.getSize()
 	buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, 3, w-7, true)
 	buf = bytes.TrimSpace(buf)
 
-	ed.displayHelp(buf)
+	ed.displayHelp(buf, w, h)
 }
 
 func formDup(form [][]rune) [][]rune {

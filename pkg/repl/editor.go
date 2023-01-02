@@ -13,6 +13,8 @@ import (
 	"github.com/ohler55/slip/pkg/repl/term"
 )
 
+const MAX_DIM = 9999
+
 type seq struct {
 	cnt int
 	buf []byte
@@ -33,7 +35,7 @@ type editor struct {
 	dirty     dirty
 	match     point // matching parens that needs to be redrawn on move
 	lastSpot  point
-	in        *os.File
+	in        io.Reader
 	fd        int // in fd
 	out       io.Writer
 	depth     int
@@ -44,24 +46,23 @@ type editor struct {
 }
 
 func (ed *editor) initialize() {
-	if ed.origState != nil {
+	if ed.out != nil {
 		return
 	}
-	fs, ok := scope.Get(slip.Symbol(stdInput)).(*slip.FileStream)
-	if !ok {
-		panic("*repl-editor* can only be set to true when the *standard-input* is a file-stream")
-	}
-	ed.in = (*os.File)(fs)
-	ed.fd = int(((*os.File)(fs)).Fd())
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
 	ed.mode = topMode
-	ed.key = make([]byte, 8)
+	ed.key = make([]byte, 32)
 	ed.match.line = -1
 	ed.hist.filename = historyFilename
 	ed.hist.setLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
 	ed.hist.load()
-	ed.origState = term.MakeRaw(ed.fd)
-
+	ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
+	ed.in = scope.Get(slip.Symbol(stdInput)).(io.Reader)
+	if fs, ok := ed.in.(*slip.FileStream); ok {
+		ed.fd = int(((*os.File)(fs)).Fd())
+		ed.origState = term.MakeRaw(ed.fd)
+	}
+	ed.completer.init()
 	for name := range slip.CurrentPackage.Funcs {
 		ed.completer.insert(name)
 	}
@@ -78,6 +79,8 @@ func (ed *editor) stop() {
 		term.Restore(ed.fd, ed.origState)
 		ed.origState = nil
 	}
+	ed.reset()
+	ed.out = nil
 }
 
 func (ed *editor) setDepth(d int) {
@@ -102,9 +105,10 @@ func (ed *editor) removeWord(word string) {
 }
 
 func (ed *editor) display() {
-	ed.setCursor(ed.v0, 0)
+	ed.setCursor(ed.v0, 1)
 	ed.clearLine()
 	_, _ = ed.out.Write([]byte(prompt))
+	ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 	for i, line := range ed.lines {
 		ed.setCursor(ed.v0+i, ed.foff)
 		if 0 < i {
@@ -152,7 +156,7 @@ func printSize(s string) (cnt int) {
 func (ed *editor) read() (out []byte) {
 	if len(ed.lines) == 0 {
 		ed.v0, _ = ed.getCursor()
-		ed.setCursor(ed.v0, 0)
+		ed.setCursor(ed.v0, 1)
 		ed.clearLine()
 		_, _ = ed.out.Write([]byte(prompt))
 		ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
@@ -171,11 +175,8 @@ top:
 		// dirty and not tab and not shift-tab
 		if 0 < ed.dirty.cnt &&
 			ed.key[0] != 0x09 && !(ed.key[0] == 0x1b && ed.key[1] == 0x5b && ed.key[2] == 0x5a) {
-			start := ed.v0 + len(ed.lines) - 1
-			for ; 0 < ed.dirty.cnt; ed.dirty.cnt-- {
-				ed.setCursor(start+ed.dirty.cnt, 0)
-				ed.clearLine()
-			}
+			ed.setCursor(ed.v0+len(ed.lines), 1)
+			ed.clearDown()
 			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 			ed.dirty.lines = nil
 		}
@@ -225,7 +226,7 @@ top:
 			ed.lastSpot.pos = ed.pos
 		}
 	}
-	ed.setCursor(ed.v0+len(ed.lines), 0)
+	ed.setCursor(ed.v0+len(ed.lines), 1)
 	for _, line := range ed.lines {
 		out = append(out, string(line)...)
 		out = append(out, '\n')
@@ -245,6 +246,14 @@ func (ed *editor) addRune(r rune) {
 		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
 	}
 	ed.pos++
+}
+
+func (ed *editor) getSize() (w, h int) {
+	_, _ = ed.out.Write([]byte(("\x1b[s")))
+	ed.setCursor(MAX_DIM, MAX_DIM)
+	h, w = ed.getCursor()
+	_, _ = ed.out.Write([]byte(("\x1b[u")))
+	return
 }
 
 // ANSI sequences
@@ -295,6 +304,12 @@ done:
 }
 
 func (ed *editor) setCursor(v, h int) {
+	if v < 0 {
+		v = 0
+	}
+	if h < 0 {
+		h = 0
+	}
 	_, _ = fmt.Fprintf(ed.out, "\x1b[%d;%dH", v, h)
 }
 
@@ -314,24 +329,12 @@ func (ed *editor) clearToStart() {
 	_, _ = ed.out.Write([]byte(("\x1b[1K")))
 }
 
+func (ed *editor) clearDown() {
+	_, _ = ed.out.Write([]byte(("\x1b[J")))
+}
+
 func (ed *editor) home() {
 	_, _ = ed.out.Write([]byte(("\x1b[H")))
-}
-
-func (ed *editor) iUp(n int) {
-	_, _ = fmt.Fprintf(ed.out, "\x1b[%dA", n)
-}
-
-func (ed *editor) iDown(n int) {
-	_, _ = fmt.Fprintf(ed.out, "\x1b[%dB", n)
-}
-
-func (ed *editor) iRight(n int) {
-	_, _ = fmt.Fprintf(ed.out, "\x1b[%dC", n)
-}
-
-func (ed *editor) iLeft(n int) {
-	_, _ = fmt.Fprintf(ed.out, "\x1b[%dD", n)
 }
 
 func (ed *editor) scroll(n int) {
@@ -343,8 +346,8 @@ func (ed *editor) scroll(n int) {
 }
 
 func (ed *editor) box(top, left, h, w, barTop, barBottom int) {
-	// Save cursor position and then turn the cursor invisible.
-	_, _ = ed.out.Write([]byte{'\x1b', '[', '7', '\x1b', '[', '?', '2', '5', 'l'})
+	// Save cursor position and then turn the cursor invisible if supported.
+	_, _ = ed.out.Write([]byte{'\x1b', '7', '\x1b', '[', '?', '2', '5', 'l'})
 
 	ed.setCursor(top, left)
 	line := utf8.AppendRune(nil, '┌')
@@ -376,11 +379,11 @@ func (ed *editor) box(top, left, h, w, barTop, barBottom int) {
 	_, _ = ed.out.Write(line)
 
 	// Restore the cursor position then Make the cursor visible.
-	_, _ = ed.out.Write([]byte{'\x1b', '[', '8', '\x1b', '[', '?', '2', '5', 'h'})
+	_, _ = ed.out.Write([]byte{'\x1b', '8', '\x1b', '[', '?', '2', '5', 'h'})
 }
 
 func (ed *editor) displayMessage(msg []byte) {
-	w, h := term.GetSize(0)
+	w, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
 	cnt := 1
 	ed.dirty.cnt = cnt + 1
@@ -404,8 +407,7 @@ func (ed *editor) displayMessage(msg []byte) {
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 }
 
-func (ed *editor) displayHelp(doc []byte) {
-	w, h := term.GetSize(0)
+func (ed *editor) displayHelp(doc []byte, w, h int) {
 	bottom := ed.v0 + len(ed.lines)
 	box := scope.Get("*repl-help-box*") != nil
 	indent := 0
@@ -450,7 +452,7 @@ func (ed *editor) displayHelp(doc []byte) {
 
 func (ed *editor) displayCompletions() {
 	words := ed.completer.words[ed.completer.lo : ed.completer.hi+1]
-	w, _ := term.GetSize(0)
+	w, h := ed.getSize()
 	w -= 6
 	leftPad := []byte{' ', ' ', ' '}
 	colWidth := 0
@@ -485,7 +487,7 @@ func (ed *editor) displayCompletions() {
 		}
 		buf = append(buf, '\n')
 	}
-	ed.displayHelp(buf)
+	ed.displayHelp(buf, w, h)
 }
 
 // dir can be -1, 0, or 1
@@ -516,7 +518,7 @@ func (ed *editor) updateDirty(dir int) {
 	ed.setCursor(ed.v0+len(ed.lines)+1, 4)
 	_, _ = ed.out.Write(doc)
 	if ed.dirty.box {
-		w, _ := term.GetSize(0)
+		w, _ := ed.getSize()
 		cnt := ed.dirty.cnt - 3
 		barTop := cnt * ed.dirty.top / len(ed.dirty.lines)
 		bar := cnt * cnt / len(ed.dirty.lines)
@@ -665,7 +667,7 @@ func (ed *editor) setForm(form [][]rune) {
 	ed.line = len(ed.lines) - 1
 	ed.pos = len(ed.lines[ed.line])
 
-	_, h := term.GetSize(0)
+	_, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
 	if h <= bottom {
 		diff := bottom + 1 - h
