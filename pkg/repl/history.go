@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 )
 
 const (
@@ -30,11 +29,12 @@ type History struct {
 
 // Load forms from a file and use that file for updates to history.
 func (h *History) Load(filename string) {
+	h.filename = filename
+	h.forms = nil
 	f, err := os.Open(filename)
 	if err != nil {
 		return
 	}
-	h.filename = filename
 	r := NewLineReader(f, 4096)
 	var line []byte
 	for {
@@ -44,11 +44,14 @@ func (h *History) Load(filename string) {
 			}
 			panic(err)
 		}
-		var form Form
-		for _, sub := range bytes.Split(line, []byte{'\t'}) {
-			form = append(form, []rune(string(sub)))
+		line = bytes.TrimSpace(line)
+		if 0 < len(line) {
+			var form Form
+			for _, sub := range bytes.Split(line, []byte{'\t'}) {
+				form = append(form, []rune(string(sub)))
+			}
+			h.forms = append(h.forms, form)
 		}
-		h.forms = append(h.forms, form)
 	}
 }
 
@@ -59,12 +62,12 @@ func (h *History) SetLimit(limit int) {
 	h.max = h.limit + h.limit/10
 }
 
-// AddForm adds a form to history.
-func (h *History) AddForm(form Form, ed *editor) {
+// Add adds a form to history.
+func (h *History) Add(form Form) {
 	if h.limit <= 0 {
 		return
 	}
-	h.forms = append(h.forms, formDup(form))
+	h.forms = append(h.forms, form.Dup())
 	if h.max <= len(h.forms) {
 		h.forms = h.forms[len(h.forms)-h.limit:]
 		tmp := fmt.Sprintf("%s.tmp", h.filename)
@@ -73,17 +76,10 @@ func (h *History) AddForm(form Form, ed *editor) {
 			panic(err)
 		}
 		defer func() { _ = f.Close() }()
-		var entry []byte
-		// Write each line separately to avoid excessive memory use if the
-		// history is long.
-		for _, frm := range ed.lines {
-			for _, line := range frm {
-				entry = append(entry, string(line)...)
-				entry = append(entry, '\t')
-			}
-			entry[len(entry)-1] = '\n'
-			// TBD if too long don't write
-			if _, err = f.Write(entry); err != nil {
+		for _, frm := range h.forms {
+			// Write each line separately to avoid excessive memory use if the
+			// history is long.
+			if _, err = f.Write(frm.Append(nil)); err != nil {
 				panic(err)
 			}
 		}
@@ -93,18 +89,11 @@ func (h *History) AddForm(form Form, ed *editor) {
 		}
 	} else {
 		f, err := os.OpenFile(h.filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
 		defer func() { _ = f.Close() }()
-		var entry []byte
-		for _, line := range form {
-			entry = append(entry, string(line)...)
-			entry = append(entry, '\t')
+		if err == nil {
+			_, err = f.Write(form.Append(nil))
 		}
-		entry[len(entry)-1] = '\n'
-		// TBD if too long don't write
-		if _, err = f.Write(entry); err != nil {
+		if err != nil {
 			panic(err)
 		}
 	}
@@ -117,6 +106,22 @@ func (h *History) Nth(n int) (form Form) {
 		form = h.forms[n]
 	}
 	return
+}
+
+// Cursor returns the current cursor position.
+func (h *History) Cursor() int {
+	return len(h.forms) - h.cur - 1
+}
+
+// SetCursor sets the current cursor position adjusted to from zero to one
+// less than the length of the history.
+func (h *History) SetCursor(pos int) {
+	if pos < 0 {
+		pos = 0
+	} else if len(h.forms) <= pos {
+		pos = len(h.forms) - 1
+	}
+	h.cur = len(h.forms) - pos - 1
 }
 
 // Get the form at the cursor in history.
@@ -133,14 +138,12 @@ func (h *History) Size() int {
 }
 
 // SearchBack for a match to the provided target string starting with the
-// cursor at the start position.
-func (h *History) SearchBack(start int, target string) Form {
+// cursor position.
+func (h *History) SearchBack(target string) Form {
+	start := h.cur
 	for ; 0 <= start; start-- {
-		form := h.forms[start]
-		for _, line := range form {
-			if strings.Contains(string(line), target) {
-				return form
-			}
+		if form := h.forms[start]; form.Contains(target) {
+			return form
 		}
 	}
 	return nil
@@ -148,13 +151,11 @@ func (h *History) SearchBack(start int, target string) Form {
 
 // SearchForward for a match to the provided target string starting with the
 // cursor at the start position.
-func (h *History) SearchForward(start int, target string) (form Form) {
+func (h *History) SearchForward(target string) (form Form) {
+	start := h.cur
 	for ; start < len(h.forms); start++ {
-		form := h.forms[start]
-		for _, line := range form {
-			if strings.Contains(string(line), target) {
-				return form
-			}
+		if form := h.forms[start]; form.Contains(target) {
+			return form
 		}
 	}
 	return nil

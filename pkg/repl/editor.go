@@ -654,7 +654,7 @@ func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
 }
 
 func (ed *editor) addToHistory() {
-	ed.hist.AddForm(ed.lines, ed)
+	ed.hist.Add(ed.lines)
 }
 
 func (ed *editor) setForm(form Form) {
@@ -677,7 +677,7 @@ func (ed *editor) setForm(form Form) {
 }
 
 func (ed *editor) keepForm() {
-	ed.lines = formDup(ed.lines)
+	ed.lines = ed.lines.Dup()
 	ed.line = len(ed.lines) - 1
 }
 

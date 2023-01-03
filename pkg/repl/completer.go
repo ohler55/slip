@@ -33,6 +33,7 @@ func (c *Completer) Init() {
 // Insert a word. No check is made to see if the word already exists. Used on
 // startup.
 func (c *Completer) Insert(word string) {
+	word = strings.ToLower(word)
 	c.words = append(c.words, word)
 }
 
@@ -45,6 +46,7 @@ func (c *Completer) Sort() {
 
 // Add a word to the completer words.
 func (c *Completer) Add(word string) {
+	word = strings.ToLower(word)
 	words, _, _ := c.Match(word)
 	if words == nil {
 		c.words = append(c.words, word)
@@ -54,7 +56,22 @@ func (c *Completer) Add(word string) {
 
 // Remove a word.
 func (c *Completer) Remove(word string) {
-	// TBD find first then modify with a copy and shorten
+	word = strings.ToLower(word)
+	if words, lo, hi := c.Match(word); words != nil {
+		for ; lo <= hi; lo++ {
+			if words[lo] == word {
+				break
+			}
+		}
+		if hi < lo {
+			// Not in words.
+			return
+		}
+		if lo < len(c.words)-1 {
+			copy(c.words[lo:], c.words[lo+1:])
+		}
+		c.words = c.words[:len(c.words)-1]
+	}
 }
 
 // Match looks for a match of the word provided. The internal slice of sorted
@@ -68,16 +85,14 @@ func (c *Completer) Match(word string) (words []string, lo, hi int) {
 	hi = len(c.words) - 1
 	lw := c.words[lo]
 	hw := c.words[hi]
-	if word < lw || hw < word {
+	if (word < lw && !strings.HasPrefix(lw, word)) || hw < word {
 		return nil, 0, 0
 	}
 	var (
 		mid int
 		mw  string
 	)
-	cnt := 0
 	// Bracket the match then expand based on the runes in the word.
-top:
 	for 1 < hi-lo {
 		mid = (hi + lo) / 2
 		mw = c.words[mid]
@@ -88,16 +103,6 @@ top:
 		case lw < mw:
 			lw = mw
 			lo = mid
-		default: // ==
-			lo = mid
-			lw = mw
-			hi = mid
-			hw = mw
-			break top
-		}
-		cnt++
-		if 20 < cnt {
-			break
 		}
 	}
 	switch {
@@ -111,9 +116,7 @@ top:
 		return nil, 0, 0
 	}
 	words = c.words
-	for 0 < lo && strings.HasPrefix(c.words[lo-1], word) {
-		lo--
-	}
+	// A partial match or full match will always be the lowest lo.
 	for hi < len(c.words)-1 && strings.HasPrefix(c.words[hi+1], word) {
 		hi++
 	}

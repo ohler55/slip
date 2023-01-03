@@ -746,16 +746,6 @@ func describe(ed *editor, _ byte) {
 	ed.displayHelp(buf, w, h)
 }
 
-func formDup(form Form) Form {
-	d := make(Form, len(form))
-	for i, line := range form {
-		l2 := make([]rune, len(line))
-		copy(l2, line)
-		d[i] = l2
-	}
-	return d
-}
-
 func historyOverride(ed *editor) bool {
 	k := string(ed.key[:ed.kcnt])
 	f := historyBindings[k]
@@ -834,9 +824,9 @@ func searchBack(ed *editor, b byte) {
 		ed.hist.pattern = ed.hist.pattern[:0]
 		ed.hist.cur = len(ed.hist.forms) - 1
 	default:
-		start := ed.hist.cur
+		orig := ed.hist.cur
 		if 0 < len(ed.hist.pattern) {
-			start--
+			ed.hist.cur--
 		}
 		if b == 'r' {
 			r, _ := utf8.DecodeRune(ed.key)
@@ -848,9 +838,10 @@ func searchBack(ed *editor, b byte) {
 				ed.hist.pattern = append(ed.hist.pattern, r)
 			}
 		}
-		if form := ed.hist.SearchBack(start, string(ed.hist.pattern)); form != nil {
+		if form := ed.hist.SearchBack(string(ed.hist.pattern)); form != nil {
 			ed.setForm(form)
-			ed.hist.cur = start
+		} else {
+			ed.hist.cur = orig
 		}
 	}
 	buf := fmt.Appendf(nil, "search backwards: %s", string(ed.hist.pattern))
@@ -866,9 +857,9 @@ func searchForward(ed *editor, b byte) {
 		ed.hist.pattern = ed.hist.pattern[:0]
 		ed.hist.cur = 0
 	default:
-		start := ed.hist.cur
-		if 0 < len(ed.hist.pattern) {
-			start++
+		orig := ed.hist.cur
+		if 0 < len(ed.hist.pattern)-1 {
+			ed.hist.cur++
 		}
 		if b == 'r' {
 			r, _ := utf8.DecodeRune(ed.key)
@@ -880,9 +871,10 @@ func searchForward(ed *editor, b byte) {
 				ed.hist.pattern = append(ed.hist.pattern, r)
 			}
 		}
-		if form := ed.hist.SearchForward(start, string(ed.hist.pattern)); form != nil {
+		if form := ed.hist.SearchForward(string(ed.hist.pattern)); form != nil {
 			ed.setForm(form)
-			ed.hist.cur = start
+		} else {
+			ed.hist.cur = orig
 		}
 	}
 	buf := fmt.Appendf(nil, "search forwards: %s", string(ed.hist.pattern))
