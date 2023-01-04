@@ -179,13 +179,45 @@ func TestEditorDescribeScroll(t *testing.T) {
 	})
 }
 
-func TestEditorUnknownKey(t *testing.T) {
+func TestEditorUnknownControlKey(t *testing.T) {
+	testEditorUnknownKey(t, "\x0c")
+}
+
+func TestEditorUnknownMetaKey(t *testing.T) {
+	testEditorUnknownKey(t, "\x1b\x10")
+}
+
+func TestEditorUnknownMetaBracketKey(t *testing.T) {
+	testEditorUnknownKey(t, "\x1b\x5bZ")
+}
+
+func TestEditorUnknownUnicodeKey(t *testing.T) {
+	testEditorUnknownKey(t, "\xeeA")
+}
+
+func TestEditorUnknownMetaMetaDelKey(t *testing.T) {
+	testEditorUnknownKey(t, "\x1b\x1b\x7f")
+}
+
+func TestEditorBadUnicode(t *testing.T) {
 	edTest(t, []any{
 		startSteps,
-		provide("\x0c"),
+		provide("\xee\xee\xee\xee\xee\xee"),
 		until("<inverse>"),
 		expect("  "),
-		expect("key C-l is undefined. sequence: []byte{0xc}                                  "),
+		expect("/invalid UTF-8 sequence: \\[\\]byte{0xee, 0xee, 0xee, 0xee, 0xee, 0xee}.*/"),
+		expect("<normal>"),
+		provide("\x03"),
+	})
+}
+
+func testEditorUnknownKey(t *testing.T, key string) {
+	edTest(t, []any{
+		startSteps,
+		provide(key),
+		until("<inverse>"),
+		expect("  "),
+		expect("/key .+ is undefined. sequence: \\[\\]byte{.+} +/"),
 		expect("<normal>"),
 		provide("\x03"),
 	})
@@ -254,4 +286,21 @@ func TestEditorComplete(t *testing.T) {
 
 		provide("\x03"),
 	})
+}
+
+func TestEditorString(t *testing.T) {
+	testEditorString(t, `"abc"`, `"abc"`)
+}
+
+func TestEditorUnicodeString(t *testing.T) {
+	testEditorString(t, `ピーター`, `ピーター`)
+}
+
+func testEditorString(t *testing.T, seq string, expect string) {
+	want := []any{startSteps, provide(seq)}
+	for _, r := range []rune(expect) {
+		want = append(want, until(string([]rune{r})))
+	}
+	want = append(want, provide("\x03"))
+	edTest(t, want)
 }

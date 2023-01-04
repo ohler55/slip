@@ -60,7 +60,7 @@ var (
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xe8
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf0
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf8
-		topName,
+		func(ed *editor, b byte) { ed.msg = "" },
 	}
 	escMode = []bindFunc{
 		bad, bad, matchClose, bad, bad, bad, matchOpen, bad, // 0x00
@@ -83,7 +83,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
-		escName,
+		func(ed *editor, b byte) { ed.msg = "M-" },
 	}
 	esc5bMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -102,7 +102,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
-		esc5bName,
+		func(ed *editor, b byte) { ed.msg = "esc [ " },
 	}
 	unicodeMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -129,7 +129,7 @@ var (
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xe8
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf0
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf8
-		unicodeName,
+		func(ed *editor, b byte) { ed.msg = "unicode " },
 	}
 	// Update this if the key bindings for history are changed.
 	historyBindings map[string]bindFunc
@@ -144,22 +144,6 @@ func init() {
 		"\x12":  searchBack,
 		"\x13":  searchForward,
 	}
-}
-
-func topName(ed *editor, b byte) {
-	ed.msg = ""
-}
-
-func escName(ed *editor, b byte) {
-	ed.msg = "M-"
-}
-
-func esc5bName(ed *editor, b byte) {
-	ed.msg = "esc [ "
-}
-
-func unicodeName(ed *editor, b byte) {
-	ed.msg = "unicode "
 }
 
 func (ed *editor) modeName() string {
@@ -214,8 +198,14 @@ func addUni(ed *editor, b byte) {
 	if utf8.Valid(ed.uni) {
 		r, _ := utf8.DecodeRune(ed.uni)
 		ed.addRune(r)
+		ed.mode = topMode
 	}
-	ed.mode = topMode
+	if 6 <= len(ed.uni) {
+		_, _ = ed.out.Write([]byte{0x07})
+		msg := fmt.Appendf(nil, "invalid UTF-8 sequence: %#v", ed.uni)
+		ed.displayMessage(msg)
+		ed.mode = topMode
+	}
 }
 
 func enter(ed *editor, _ byte) {
