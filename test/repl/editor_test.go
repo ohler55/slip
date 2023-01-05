@@ -4,6 +4,7 @@ package repl
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -12,6 +13,8 @@ import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/repl"
 )
+
+const debugScript = true
 
 type expect string
 type provide string
@@ -66,12 +69,18 @@ func runScript(t *testing.T, tm *repl.Termock, script []any) {
 			}
 			tt.Equal(t, string(tx), out)
 		case until:
+			if testing.Verbose() && debugScript {
+				fmt.Printf("??? waiting for %q\n", tx)
+			}
 			for {
 				out := tm.Output()
 				if testing.Verbose() {
 					fmt.Printf(">>> %q\n", out)
 				}
 				if match(string(tx), out) {
+					if testing.Verbose() && debugScript {
+						fmt.Printf("--- matched %q\n", out)
+					}
 					break
 				}
 			}
@@ -91,6 +100,8 @@ func runScript(t *testing.T, tm *repl.Termock, script []any) {
 }
 
 func edTest(t *testing.T, script []any) {
+	err := os.RemoveAll("config/history")
+	tt.Nil(t, err)
 	tm := repl.NewTermock(40, 80)
 	scope := repl.GetScope()
 	scope.Set(slip.Symbol("x"), slip.Fixnum(3))
@@ -160,7 +171,7 @@ func TestEditorDescribeScroll(t *testing.T) {
 	edTest(t, []any{
 		startSteps,
 		provide(strings.Repeat("\n", 20)),
-		until("<clear-to-start 22:3>"),
+		until("<clear-to-end 22:3>"),
 		expect("<set-cursor 22:3>"),
 		provide("(car"),
 		until("("),
@@ -175,6 +186,21 @@ func TestEditorDescribeScroll(t *testing.T) {
 		expect("<normal>"),
 		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
 		expect("<set-cursor 21:7>"),
+		provide("\x03"),
+	})
+}
+
+func TestEditorDescribeUnknown(t *testing.T) {
+	edTest(t, []any{
+		startSteps,
+		provide("( "),
+		until("("),
+		expect(" "),
+		provide("\x02"),
+		provide("\x1b/"),
+		until("<inverse>"),
+		until("/could not determine what to describe/"),
+		until("<set-cursor 2:4>"),
 		provide("\x03"),
 	})
 }
@@ -223,7 +249,7 @@ func testEditorUnknownKey(t *testing.T, key string) {
 	})
 }
 
-func TestEditorComplete(t *testing.T) {
+func TestEditorTabComplete(t *testing.T) {
 	edTest(t, []any{
 		startSteps,
 		provide("*pri"),
@@ -280,9 +306,103 @@ func TestEditorComplete(t *testing.T) {
 		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
 		expect("<set-cursor 2:10>"),
 
+		comment("press C-b at first choice"),
+		provide("\x02"), // highlight next choice
+		until("<inverse>"),
+		expect("*print-right-margin*"),
+		until("<set-cursor 2:10>"),
+
+		comment("press C-f at last choice"),
+		provide("\x06"), // highlight next choice
+		until("<inverse>"),
+		expect("*print-ansi*"),
+		until("<set-cursor 2:10>"),
+
+		comment("press C-p at top line"),
+		provide("\x10"), // highlight next choice
+		until("<inverse>"),
+		expect("*print-readably*"),
+		until("<set-cursor 2:10>"),
+
+		comment("press C-n at last line"),
+		provide("\x0e"), // highlight next choice
+		until("<inverse>"),
+		expect("*print-ansi*"),
+		until("<set-cursor 2:10>"),
+
 		provide("\r"), // make a choice
 		until("<clear-down 3>"),
 		until("ansi*"),
+
+		provide("\x03"),
+	})
+}
+
+func TestEditorHistory(t *testing.T) {
+	edTest(t, []any{
+		startSteps,
+		// Create some history.
+		provide("\"a\"\r"),
+		until("▶ "),
+		expect("<normal>"),
+
+		provide("\"b\"\r"),
+		until("▶ "),
+		expect("<normal>"),
+
+		provide("\"c\"\r"),
+		until("▶ "),
+		expect("<normal>"),
+
+		provide("\x1bv"),
+		until("\"c\""),
+		until("/<set-cursor .*>/"),
+
+		provide("\x1bv"),
+		until("\"b\""),
+		until("/<set-cursor .*>/"),
+
+		provide("\x1bv"),
+		until("\"a\""),
+		until("/<set-cursor .*>/"),
+
+		provide("\x1bv"), // nothing should happen
+
+		provide("\x16"),
+		until("\"b\""),
+		until("/<set-cursor .*>/"),
+
+		provide("\x16"),
+		until("\"c\""),
+		until("/<set-cursor .*>/"),
+
+		provide("\x16"),
+		until("▶ "), // back to a blank line
+		expect("<normal>"),
+
+		provide(" \x16"),
+		until("\"a\""),
+		until("/<set-cursor .*>/"),
+
+		provide("\x13"),
+		until("/search forwards:   /"),
+		provide("b"),
+
+		until("\"b\""),
+		until("/search forwards: b/"),
+		until("/<set-cursor .*>/"),
+
+		provide("\x7f"),
+		until("/search forwards:   /"),
+		until("/<set-cursor .*>/"),
+
+		provide("\x12"),
+		until("/search backwards:   /"),
+		until("/<set-cursor .*>/"),
+
+		provide("b"),
+		until("/search backwards: b/"),
+		until("/<set-cursor .*>/"),
 
 		provide("\x03"),
 	})
@@ -296,11 +416,180 @@ func TestEditorUnicodeString(t *testing.T) {
 	testEditorString(t, `ピーター`, `ピーター`)
 }
 
-func testEditorString(t *testing.T, seq string, expect string) {
+func TestEditorParenMatch(t *testing.T) {
+	testEditorString(t, "(+ 1\n 2)",
+		"(+ 1<set-cursor 3:3> 2)<set-cursor 2:3><bold>(<normal><set-cursor 3:6>")
+}
+
+func TestEditorLeftRight(t *testing.T) {
+	testEditorSeq(t, "a\nb\x02\x02\x02\x02\x06\x06\x06\x06",
+		"a", "<set-cursor 2:4>", "<set-cursor 3:3>", "b",
+		"<set-cursor 3:3>", "<set-cursor 2:4>", "<set-cursor 2:3>", "<set-cursor 2:3>",
+		"<set-cursor 2:4>", "<set-cursor 3:3>", "<set-cursor 3:4>", "<set-cursor 3:4>",
+	)
+}
+
+func TestEditorUp(t *testing.T) {
+	testEditorSeq(t, "a\nbc\x10\x10",
+		"a", "<set-cursor 3:3>", "b", "c",
+		"<set-cursor 2:4>", "<set-cursor 2:4>",
+	)
+}
+
+func TestEditorDown(t *testing.T) {
+	testEditorSeq(t, "ab\nc\x10\x06\x0e\x0e",
+		"a", "b", "<set-cursor 3:3>", "c",
+		"<set-cursor 2:4>", "<set-cursor 2:5>",
+		"<set-cursor 3:4>", "<set-cursor 3:4>",
+	)
+}
+
+func TestEditorNL(t *testing.T) {
+	testEditorSeq(t, "ab\x02\n",
+		"a", "b", "<set-cursor 2:4>",
+		"<set-cursor 3:3>",
+		"<clear-to-end 3:3>", "b", "<set-cursor 3:3>",
+	)
+}
+
+func TestEditorForwardBackWord(t *testing.T) {
+	testEditorSeq(t, "abc def\x1bb\x1bb\x1bf\x1bf",
+		"a", "b", "c", " ", "d", "e", "f",
+		"<set-cursor 2:7>", "<set-cursor 2:3>",
+		"<set-cursor 2:6>", "<set-cursor 2:10>",
+	)
+}
+
+func TestEditorLineStartEnd(t *testing.T) {
+	testEditorSeq(t, "abc\x01\x05",
+		"a", "b", "c",
+		"<set-cursor 2:3>", "<set-cursor 2:6>",
+	)
+}
+
+func TestEditorMatchOpenClose(t *testing.T) {
+	testEditorSeq(t, "(())\x1b\x02\x1b\x06",
+		"(", "(", ")", ")",
+		"<set-cursor 2:3>",
+		"<set-cursor 2:7>",
+	)
+}
+
+func TestEditorDelWord(t *testing.T) {
+	testEditorSeq(t, "abc def\x1b\x7f\x01\x1b\x64",
+		"a", "b", "c", " ", "d", "e", "f",
+		"<set-cursor 2:3>", "abc ",
+		"<set-cursor 2:3>",
+		"<clear-to-end 2:3>", " ",
+		"<set-cursor 2:3>",
+	)
+}
+
+func TestEditorDelChar(t *testing.T) {
+	testEditorSeq(t, "abc\x7f\x01\x04",
+		"a", "b", "c",
+		"<set-cursor 2:5>", "<clear-to-end 2:5>", "<set-cursor 2:5>",
+		"<set-cursor 2:3>",
+		"<set-cursor 2:3>", "<clear-to-end 2:3>", "b",
+		"<set-cursor 2:3>",
+	)
+}
+
+func TestEditorDelBackwardLine(t *testing.T) {
+	testEditorSeq(t, "ab\ncd\x02\x02\x7f\x05",
+		"a", "b", "<set-cursor 3:3>", "c", "d",
+		"<set-cursor 3:4>",
+		"<set-cursor 3:3>",
+		"<clear-line 3>", "<set-cursor 2:3>", "abcd", "<set-cursor 2:7>",
+	)
+}
+
+func TestEditorDelForwardLine(t *testing.T) {
+	testEditorSeq(t, "ab\ncd\x10\x04\x05",
+		"a", "b", "<set-cursor 3:3>", "c", "d",
+		"<set-cursor 2:5>",
+		"<clear-line 3>", "<set-cursor 2:3>", "abcd", "<set-cursor 2:7>",
+	)
+}
+
+func TestEditorDelToEnd(t *testing.T) {
+	testEditorSeq(t, "abc\ndef\x10\x01\x06\x0b\x0b",
+		"a", "b", "c", "<set-cursor 3:3>", "d", "e", "f",
+		"<set-cursor 2:6>", "<set-cursor 2:4>",
+		"<clear-to-end 2:4>", "<set-cursor 2:4>",
+		"<clear-line 3>", "<clear-line 2>", "adef",
+		"<set-cursor 2:4>",
+	)
+}
+
+func TestEditorSwapChar(t *testing.T) {
+	testEditorSeq(t, "abcd\x02\x02\x14",
+		"a", "b", "c", "d",
+		"<set-cursor 2:5>",
+		"<set-cursor 2:4>", "cb", "<set-cursor 2:5>",
+	)
+}
+
+func TestEditorCollapse(t *testing.T) {
+	testEditorSeq(t, "ab  \x1b\x5c",
+		"a", "b", " ", " ",
+		"<set-cursor 2:5>", "<clear-to-end 2:5>",
+		"<set-cursor 2:5>",
+	)
+	testEditorSeq(t, "  ab\x01\x1b\x5c",
+		" ", " ", "a", "b",
+		"<set-cursor 2:3>", "<clear-to-end 2:3>", "ab",
+		"<set-cursor 2:3>",
+	)
+}
+
+func TestEditorNlAfter(t *testing.T) {
+	testEditorSeq(t, "abcd\x02\x02\x0f",
+		"a", "b", "c", "d",
+		"<set-cursor 2:5>",
+		"<clear-to-end 2:5>",
+		"<set-cursor 3:3>", "cd", "<set-cursor 2:5>",
+	)
+}
+
+// TBD
+func xTestEditorEnterUnicode(t *testing.T) {
+	testEditorSeq(t, "\x1b\x5530d4\rx",
+		"z",
+		"<inverse>", "/unicode: /", "3", "0", "d", "4",
+		"<clear-to-end 4>",
+		// TBD
+		"<set-cursor 2:4>",
+	)
+}
+
+func testEditorSeq(t *testing.T, seq string, expect ...string) {
 	want := []any{startSteps, provide(seq)}
-	for _, r := range []rune(expect) {
-		want = append(want, until(string([]rune{r})))
+	for _, x := range expect {
+		want = append(want, until(x))
 	}
 	want = append(want, provide("\x03"))
+
+	edTest(t, want)
+}
+
+func testEditorString(t *testing.T, seq string, expect string) {
+	want := []any{startSteps, provide(seq)}
+	ra := []rune(expect)
+	for i := 0; i < len(ra); i++ {
+		r := ra[i]
+		if r == '<' {
+			if end := strings.IndexByte(expect[i:], '>'); 0 < end {
+				want = append(want, until(string(ra[i:i+end+1])))
+				i += end
+			} else {
+				want = append(want, until(string([]rune{r})))
+			}
+		} else {
+			want = append(want, until(string([]rune{r})))
+		}
+	}
+	want = append(want, provide("\x03"))
+
 	edTest(t, want)
 }

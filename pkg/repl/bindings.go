@@ -874,7 +874,7 @@ func searchForward(ed *editor, b byte) {
 	buf := fmt.Appendf(nil, "search forwards: %s", string(ed.hist.pattern))
 	ed.displayMessage(buf)
 	ed.override = historySearchOverride
-	ed.hist.searchDir = backwardDir
+	ed.hist.searchDir = forwardDir
 	ed.mode = topMode
 }
 

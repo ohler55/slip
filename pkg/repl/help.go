@@ -135,7 +135,7 @@ func (f *Help) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if 1 < len(args) {
 		slip.PanicArgCount(f, 0, 1)
 	}
-	w := slip.CLPkg.JustGet(stdOutput).(io.Writer)
+	w := s.Get(stdOutput).(io.Writer)
 	text := helpTop
 	if 0 < len(args) {
 		var topic string

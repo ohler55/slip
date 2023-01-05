@@ -16,10 +16,10 @@ SLIce Processing is LISP for golang
  - figure out how to determine the print length of runes when some are double wide (e.g., 0x01f44d)
 
  - repl package
+  - unicode is broke
+   - enter and extra return with faint [ is displayed
   - fake/mock/test terminal - termock
    - more tests
-  - should history and completer be public for testing?
-   - encapsulated and might be generally useful, clean APIs anyway
 
   - (repl-history &optional start end)
   - (repl-exit)
