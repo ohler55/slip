@@ -83,7 +83,7 @@ func (s *Scope) get(name string) Object {
 	if value, has := CurrentPackage.Get(name); has {
 		return value
 	}
-	panic(fmt.Sprintf("Variable %s is unbound.", name))
+	panic(NewPanic("Variable %s is unbound.", name))
 }
 
 // Set a variable to the provided value. If sym is bound in this scope the

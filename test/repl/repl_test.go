@@ -45,7 +45,7 @@ func TestREPLPrompt(t *testing.T) {
 
 func TestREPLHooks(t *testing.T) {
 	slip.UserPkg.Set("foo", slip.Fixnum(7))
-	// TBD how can th ecompleter be checked?
+	// TBD how can the completer be checked?
 	slip.UserPkg.Remove("foo")
-	// TBD how can th ecompleter be checked?
+	// TBD how can the completer be checked?
 }
