@@ -143,9 +143,9 @@ func (tm *Termock) Write(p []byte) (n int, err error) {
 			case 'K': // clear
 				switch n0 {
 				case 0: // clear to start
-					tm.output <- fmt.Sprintf("<clear-to-start %d:%d>", tm.cv, tm.ch)
-				case 1: // cleat to end
 					tm.output <- fmt.Sprintf("<clear-to-end %d:%d>", tm.cv, tm.ch)
+				case 1: // cleat to end
+					tm.output <- fmt.Sprintf("<clear-to-start %d:%d>", tm.cv, tm.ch)
 				case 2: // clear line
 					tm.output <- fmt.Sprintf("<clear-line %d>", tm.cv)
 				}

@@ -32,6 +32,11 @@ func (p *Panic) Error() string {
 	return p.Message
 }
 
+// NewPanic returns a Panic object that can then be used with a call to panic.
+func NewPanic(format string, args ...any) *Panic {
+	return &Panic{Message: fmt.Sprintf(format, args...)}
+}
+
 // PanicType raises a panic describing an incorrect type being used.
 func PanicType(use string, value Object, wants ...string) {
 	var b []byte

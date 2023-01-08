@@ -192,6 +192,7 @@ func process() {
 			}
 			reset()
 		default:
+			debug.PrintStack()
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
 			if scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()

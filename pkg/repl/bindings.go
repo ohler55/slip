@@ -60,7 +60,7 @@ var (
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xe8
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf0
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf8
-		topName,
+		func(ed *editor, b byte) { ed.msg = "" },
 	}
 	escMode = []bindFunc{
 		bad, bad, matchClose, bad, bad, bad, matchOpen, bad, // 0x00
@@ -83,7 +83,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
-		escName,
+		func(ed *editor, b byte) { ed.msg = "M-" },
 	}
 	esc5bMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -102,7 +102,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
-		esc5bName,
+		func(ed *editor, b byte) { ed.msg = "esc [ " },
 	}
 	unicodeMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -129,7 +129,7 @@ var (
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xe8
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf0
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf8
-		unicodeName,
+		func(ed *editor, b byte) { ed.msg = "unicode " },
 	}
 	// Update this if the key bindings for history are changed.
 	historyBindings map[string]bindFunc
@@ -144,22 +144,6 @@ func init() {
 		"\x12":  searchBack,
 		"\x13":  searchForward,
 	}
-}
-
-func topName(ed *editor, b byte) {
-	ed.msg = ""
-}
-
-func escName(ed *editor, b byte) {
-	ed.msg = "M-"
-}
-
-func esc5bName(ed *editor, b byte) {
-	ed.msg = "esc [ "
-}
-
-func unicodeName(ed *editor, b byte) {
-	ed.msg = "unicode "
 }
 
 func (ed *editor) modeName() string {
@@ -214,8 +198,14 @@ func addUni(ed *editor, b byte) {
 	if utf8.Valid(ed.uni) {
 		r, _ := utf8.DecodeRune(ed.uni)
 		ed.addRune(r)
+		ed.mode = topMode
 	}
-	ed.mode = topMode
+	if 6 <= len(ed.uni) {
+		_, _ = ed.out.Write([]byte{0x07})
+		msg := fmt.Appendf(nil, "invalid UTF-8 sequence: %#v", ed.uni)
+		ed.displayMessage(msg)
+		ed.mode = topMode
+	}
 }
 
 func enter(ed *editor, _ byte) {
@@ -520,7 +510,7 @@ func tab(ed *editor, _ byte) {
 	pos++
 	if pos < ed.pos {
 		word := string(line[pos:ed.pos])
-		wa, lo, hi := ed.completer.match(word)
+		wa, lo, hi := ed.completer.Match(word)
 		if 0 < len(wa) {
 			if added := expandWord(word, wa, lo, hi); 0 < len(added) {
 				if ed.pos == len(ed.lines[ed.line]) {
@@ -685,6 +675,10 @@ shift key is denoted with a __S-__. Key bindings are:
 		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
 		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
 		"\x1b[1mM-v\x1b[m   previous in history",
+		"\x1b[1m🔼\x1b[m    move up one",
+		"\x1b[1m🔽\x1b[m    move down one",
+		"\x1b[1m▶️\x1b[m     move right one",
+		"\x1b[1m◀️\x1b[m     move left one",
 		"\x1b[1mM-DEL\x1b[m delete previous word",
 		"\x1b[1mENTER\x1b[m evaluate form",
 	}
@@ -746,16 +740,6 @@ func describe(ed *editor, _ byte) {
 	ed.displayHelp(buf, w, h)
 }
 
-func formDup(form [][]rune) [][]rune {
-	d := make([][]rune, len(form))
-	for i, line := range form {
-		l2 := make([]rune, len(line))
-		copy(l2, line)
-		d[i] = l2
-	}
-	return d
-}
-
 func historyOverride(ed *editor) bool {
 	k := string(ed.key[:ed.kcnt])
 	f := historyBindings[k]
@@ -779,7 +763,7 @@ func historyBack(ed *editor, _ byte) {
 	default:
 		ed.hist.cur--
 	}
-	if form := ed.hist.get(); form != nil {
+	if form := ed.hist.Get(); form != nil {
 		ed.setForm(form)
 	}
 	ed.override = historyOverride
@@ -792,13 +776,13 @@ func historyForward(ed *editor, _ byte) {
 		ed.hist.cur = 0
 	case len(ed.hist.forms)-1 <= ed.hist.cur:
 		ed.override = historyOverride
-		ed.setForm([][]rune{{}})
+		ed.setForm(Form{{}})
 		ed.mode = topMode
 		return
 	default:
 		ed.hist.cur++
 	}
-	if form := ed.hist.get(); form != nil {
+	if form := ed.hist.Get(); form != nil {
 		ed.setForm(form)
 	}
 	ed.override = historyOverride
@@ -834,9 +818,9 @@ func searchBack(ed *editor, b byte) {
 		ed.hist.pattern = ed.hist.pattern[:0]
 		ed.hist.cur = len(ed.hist.forms) - 1
 	default:
-		start := ed.hist.cur
+		orig := ed.hist.cur
 		if 0 < len(ed.hist.pattern) {
-			start--
+			ed.hist.cur--
 		}
 		if b == 'r' {
 			r, _ := utf8.DecodeRune(ed.key)
@@ -848,9 +832,10 @@ func searchBack(ed *editor, b byte) {
 				ed.hist.pattern = append(ed.hist.pattern, r)
 			}
 		}
-		if form := ed.hist.searchBack(start, string(ed.hist.pattern)); form != nil {
+		if form := ed.hist.SearchBack(string(ed.hist.pattern)); form != nil {
 			ed.setForm(form)
-			ed.hist.cur = start
+		} else {
+			ed.hist.cur = orig
 		}
 	}
 	buf := fmt.Appendf(nil, "search backwards: %s", string(ed.hist.pattern))
@@ -866,9 +851,9 @@ func searchForward(ed *editor, b byte) {
 		ed.hist.pattern = ed.hist.pattern[:0]
 		ed.hist.cur = 0
 	default:
-		start := ed.hist.cur
-		if 0 < len(ed.hist.pattern) {
-			start++
+		orig := ed.hist.cur
+		if 0 < len(ed.hist.pattern)-1 {
+			ed.hist.cur++
 		}
 		if b == 'r' {
 			r, _ := utf8.DecodeRune(ed.key)
@@ -880,15 +865,16 @@ func searchForward(ed *editor, b byte) {
 				ed.hist.pattern = append(ed.hist.pattern, r)
 			}
 		}
-		if form := ed.hist.searchForward(start, string(ed.hist.pattern)); form != nil {
+		if form := ed.hist.SearchForward(string(ed.hist.pattern)); form != nil {
 			ed.setForm(form)
-			ed.hist.cur = start
+		} else {
+			ed.hist.cur = orig
 		}
 	}
 	buf := fmt.Appendf(nil, "search forwards: %s", string(ed.hist.pattern))
 	ed.displayMessage(buf)
 	ed.override = historySearchOverride
-	ed.hist.searchDir = backwardDir
+	ed.hist.searchDir = forwardDir
 	ed.mode = topMode
 }
 
