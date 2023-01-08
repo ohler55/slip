@@ -102,6 +102,8 @@ func runScript(t *testing.T, tm *repl.Termock, script []any) {
 func edTest(t *testing.T, script []any) {
 	err := os.RemoveAll("config/history")
 	tt.Nil(t, err)
+	err = os.RemoveAll("config/config.lisp")
+	tt.Nil(t, err)
 	tm := repl.NewTermock(40, 80)
 	scope := repl.GetScope()
 	scope.Set(slip.Symbol("x"), slip.Fixnum(3))
