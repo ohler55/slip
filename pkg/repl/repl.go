@@ -170,18 +170,23 @@ func process() {
 		case *slip.Partial:
 			replReader.setDepth(tr.Depth)
 		case *slip.Panic:
-			var buf []byte
-			buf = append(buf, warnPrefix...)
-			buf = append(buf, tr.Bytes()...)
-			buf = append(buf, suffix...)
-			_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
+			if 0 < len(tr.Message) {
+				var buf []byte
+				buf = append(buf, warnPrefix...)
+				buf = append(buf, tr.Bytes()...)
+				buf = append(buf, suffix...)
+				_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
+			}
 			reset()
 			if scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
 			}
+			if tr.Fatal {
+				panic("")
+			}
 		case die:
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%s%s\n", warnPrefix, tr, suffix)
-			os.Exit(1)
+			panic("")
 		case error:
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
@@ -192,7 +197,6 @@ func process() {
 			}
 			reset()
 		default:
-			debug.PrintStack()
 			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
 			if scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
@@ -201,6 +205,9 @@ func process() {
 		}
 	}()
 	buf := replReader.read()
+	// Enter was pressed so save to history.
+	replReader.addToHistory()
+
 	code := slip.Read(buf)
 	for _, obj := range code {
 		var skipWrite bool
@@ -216,9 +223,6 @@ func process() {
 			value1 = nil
 			skipWrite = true
 		}
-		// Eval was successful.
-		replReader.addToHistory()
-
 		scope.Set(slip.Symbol(form1Key), form1)
 		scope.Set(slip.Symbol(form2Key), form2)
 		scope.Set(slip.Symbol(form3Key), form3)
