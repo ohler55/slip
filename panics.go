@@ -9,6 +9,7 @@ type Panic struct {
 	Message string
 	Stack   []string
 	Value   Object // used when the panic function is called
+	Fatal   bool
 }
 
 // Bytes returns the original error and stack in a format for display or
