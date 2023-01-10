@@ -243,6 +243,7 @@ func (ed *editor) addRune(r rune) {
 		line = append(line[:ed.pos], append([]rune{r}, end...)...)
 		ed.lines[ed.line] = line
 		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos+1)
 	}
 	ed.pos++
 }

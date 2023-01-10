@@ -16,10 +16,11 @@ SLIce Processing is LISP for golang
  - figure out how to determine the print length of runes when some are double wide (e.g., 0x01f44d)
 
  - repl package
-  - C-d seems to confuse display - some others as well
   - line wrap or rather goes past the end of the line
   - unicode is broke
    - enter and extra return with faint [ is displayed
+
+ - option for eval on closing paren
 
  - future repl options
   - color for words
