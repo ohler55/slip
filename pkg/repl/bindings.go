@@ -199,6 +199,7 @@ func addUni(ed *editor, b byte) {
 		r, _ := utf8.DecodeRune(ed.uni)
 		ed.addRune(r)
 		ed.mode = topMode
+		return
 	}
 	if 6 <= len(ed.uni) {
 		_, _ = ed.out.Write([]byte{0x07})

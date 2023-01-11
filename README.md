@@ -17,10 +17,10 @@ SLIce Processing is LISP for golang
 
  - repl package
   - line wrap or rather goes past the end of the line
-  - unicode is broke
-   - enter and extra return with faint [ is displayed
+  - unicode width
+   - check for rune width when moving and when positioning cursor
 
- - option for eval on closing paren
+ - option for eval on closing paren *repl-eval-on-close*
 
  - future repl options
   - color for words
