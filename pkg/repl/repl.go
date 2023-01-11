@@ -37,10 +37,11 @@ var (
 	configFilename  = ""
 	historyFilename = ""
 
-	scope      slip.Scope
-	prompt     string
-	warnPrefix string
-	matchColor string
+	scope       slip.Scope
+	prompt      string
+	warnPrefix  string
+	matchColor  string
+	evalOnClose bool
 
 	form1 slip.Object
 	form2 slip.Object
@@ -335,4 +336,15 @@ func setEditor(value slip.Object) {
 		replReader = &editor{}
 		replReader.initialize()
 	}
+}
+
+func getEvalOnClose() slip.Object {
+	if evalOnClose {
+		return slip.True
+	}
+	return nil
+}
+
+func setEvalOnClose(value slip.Object) {
+	evalOnClose = value != nil
 }

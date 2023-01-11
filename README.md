@@ -20,8 +20,6 @@ SLIce Processing is LISP for golang
   - unicode width
    - check for rune width when moving and when positioning cursor
 
- - option for eval on closing paren *repl-eval-on-close*
-
  - future repl options
   - color for words
    - functions - word after (

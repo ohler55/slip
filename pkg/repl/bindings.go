@@ -12,7 +12,8 @@ import (
 	"github.com/ohler55/slip/pkg/cl"
 )
 
-type bindFunc func(ed *editor, b byte)
+// return true to eval form
+type bindFunc func(ed *editor, b byte) bool
 
 var (
 	//   0123456789abcdef0123456789abcdef
@@ -60,7 +61,7 @@ var (
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xe8
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf0
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf8
-		func(ed *editor, b byte) { ed.msg = "" },
+		func(ed *editor, b byte) bool { ed.msg = ""; return false },
 	}
 	escMode = []bindFunc{
 		bad, bad, matchClose, bad, bad, bad, matchOpen, bad, // 0x00
@@ -83,7 +84,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
-		func(ed *editor, b byte) { ed.msg = "M-" },
+		func(ed *editor, b byte) bool { ed.msg = "M-"; return false },
 	}
 	esc5bMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -102,7 +103,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
-		func(ed *editor, b byte) { ed.msg = "esc [ " },
+		func(ed *editor, b byte) bool { ed.msg = "esc [ "; return false },
 	}
 	unicodeMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -129,7 +130,7 @@ var (
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xe8
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf0
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf8
-		func(ed *editor, b byte) { ed.msg = "unicode " },
+		func(ed *editor, b byte) bool { ed.msg = "unicode "; return false },
 	}
 	// Update this if the key bindings for history are changed.
 	historyBindings map[string]bindFunc
@@ -154,7 +155,7 @@ func (ed *editor) modeName() string {
 
 const hexMap = "0123456789abcdef"
 
-func bad(ed *editor, b byte) {
+func bad(ed *editor, b byte) bool {
 	_, _ = ed.out.Write([]byte{0x07})
 	mod := ed.modeName()
 	var charName []byte
@@ -180,26 +181,28 @@ func bad(ed *editor, b byte) {
 	ed.kcnt = 0
 	ed.displayMessage(msg)
 	ed.mode = topMode
+	return false
 }
 
-func done(ed *editor, b byte) {
+func done(ed *editor, b byte) bool {
 	ed.setCursor(ed.v0+len(ed.lines), 1)
 	panic(io.EOF)
 }
 
-func topUni(ed *editor, b byte) {
+func topUni(ed *editor, b byte) bool {
 	ed.uni = ed.uni[:0]
 	ed.uni = append(ed.uni, b)
 	ed.mode = unicodeMode
+	return false
 }
 
-func addUni(ed *editor, b byte) {
+func addUni(ed *editor, b byte) bool {
 	ed.uni = append(ed.uni, b)
 	if utf8.Valid(ed.uni) {
 		r, _ := utf8.DecodeRune(ed.uni)
 		ed.addRune(r)
 		ed.mode = topMode
-		return
+		return false
 	}
 	if 6 <= len(ed.uni) {
 		_, _ = ed.out.Write([]byte{0x07})
@@ -207,22 +210,19 @@ func addUni(ed *editor, b byte) {
 		ed.displayMessage(msg)
 		ed.mode = topMode
 	}
+	return false
 }
 
-func enter(ed *editor, _ byte) {
-	_, h := ed.getSize()
-	bottom := ed.v0 + len(ed.lines)
-	if h <= bottom {
-		diff := bottom + 1 - h
-		ed.scroll(diff)
-		ed.v0 -= diff
+func enter(ed *editor, b byte) bool {
+	if evalOnClose {
+		nl(ed, b)
+	} else {
+		ed.evalForm()
 	}
-	ed.line = len(ed.lines) - 1
-	ed.pos = len(ed.lines[ed.line])
-	// Let the editor handle the eval.
+	return true
 }
 
-func nl(ed *editor, b byte) {
+func nl(ed *editor, b byte) bool {
 	_, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
 	if h <= bottom {
@@ -249,23 +249,27 @@ func nl(ed *editor, b byte) {
 	}
 	ed.pos = 0
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	return false
 }
 
-func addByte(ed *editor, b byte) {
+func addByte(ed *editor, b byte) bool {
 	ed.addRune(rune(b))
 	ed.mode = topMode
 	// TBD handle wraps or past line end, might need to set terminal to not wrap with ansi code
+	return false
 }
 
-func esc(ed *editor, _ byte) {
+func esc(ed *editor, _ byte) bool {
 	ed.mode = escMode
+	return false
 }
 
-func esc5b(ed *editor, _ byte) {
+func esc5b(ed *editor, _ byte) bool {
 	ed.mode = esc5bMode
+	return false
 }
 
-func back(ed *editor, _ byte) {
+func back(ed *editor, _ byte) bool {
 	ed.pos--
 	if ed.pos < 0 {
 		if 0 < ed.line {
@@ -277,9 +281,10 @@ func back(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func forward(ed *editor, _ byte) {
+func forward(ed *editor, _ byte) bool {
 	ed.pos++
 	if len(ed.lines[ed.line]) < ed.pos {
 		if ed.line+1 < len(ed.lines) {
@@ -291,9 +296,10 @@ func forward(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func up(ed *editor, _ byte) {
+func up(ed *editor, _ byte) bool {
 	if 0 < ed.line {
 		ed.line--
 		if len(ed.lines[ed.line]) < ed.pos {
@@ -302,9 +308,10 @@ func up(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func down(ed *editor, _ byte) {
+func down(ed *editor, _ byte) bool {
 	if ed.line+1 < len(ed.lines) {
 		ed.line++
 		if len(ed.lines[ed.line]) < ed.pos {
@@ -313,49 +320,56 @@ func down(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func backWord(ed *editor, _ byte) {
+func backWord(ed *editor, _ byte) bool {
 	ed.line, ed.pos = ed.findWordStart()
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func forwardWord(ed *editor, _ byte) {
+func forwardWord(ed *editor, _ byte) bool {
 	ed.line, ed.pos = ed.findWordEnd()
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func lineBegin(ed *editor, _ byte) {
+func lineBegin(ed *editor, _ byte) bool {
 	ed.pos = 0
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	return false
 }
 
-func lineEnd(ed *editor, _ byte) {
+func lineEnd(ed *editor, _ byte) bool {
 	ed.pos = len(ed.lines[ed.line])
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	return false
 }
 
-func matchClose(ed *editor, _ byte) {
+func matchClose(ed *editor, _ byte) bool {
 	if p := ed.findOpenParen(); p != nil {
 		ed.line = p.line
 		ed.pos = p.pos
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
 	ed.mode = topMode
+	return false
 }
 
-func matchOpen(ed *editor, _ byte) {
+func matchOpen(ed *editor, _ byte) bool {
 	if p := ed.findCloseParen(); p != nil {
 		ed.line = p.line
 		ed.pos = p.pos
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
 	ed.mode = topMode
+	return false
 }
 
-func delForward(ed *editor, _ byte) {
+func delForward(ed *editor, _ byte) bool {
 	line := ed.lines[ed.line]
 	if ed.pos < len(line) {
 		line = append(line[:ed.pos], line[ed.pos+1:]...)
@@ -373,9 +387,10 @@ func delForward(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func delBack(ed *editor, _ byte) {
+func delBack(ed *editor, _ byte) bool {
 	line := ed.lines[ed.line]
 	if 0 < ed.pos {
 		ed.pos--
@@ -395,9 +410,10 @@ func delBack(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func delForwardWord(ed *editor, _ byte) {
+func delForwardWord(ed *editor, _ byte) bool {
 	toLine, toPos := ed.findWordEnd()
 	for i := ed.line; i < len(ed.lines); i++ {
 		ed.setCursor(ed.v0+i, ed.foff)
@@ -410,9 +426,10 @@ func delForwardWord(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func delBackWord(ed *editor, _ byte) {
+func delBackWord(ed *editor, _ byte) bool {
 	toLine, toPos := ed.findWordStart()
 	for i := toLine; i < len(ed.lines); i++ {
 		ed.setCursor(ed.v0+i, ed.foff)
@@ -427,9 +444,10 @@ func delBackWord(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func delLineEnd(ed *editor, _ byte) {
+func delLineEnd(ed *editor, _ byte) bool {
 	line := ed.lines[ed.line]
 	if ed.pos < len(line) {
 		line = line[:ed.pos]
@@ -446,9 +464,10 @@ func delLineEnd(ed *editor, _ byte) {
 	}
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func swapChar(ed *editor, _ byte) {
+func swapChar(ed *editor, _ byte) bool {
 	if 0 < ed.pos && ed.pos < len(ed.lines[ed.line]) {
 		r0 := ed.lines[ed.line][ed.pos-1]
 		r := ed.lines[ed.line][ed.pos]
@@ -459,9 +478,10 @@ func swapChar(ed *editor, _ byte) {
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
 	ed.mode = topMode
+	return false
 }
 
-func collapse(ed *editor, _ byte) {
+func collapse(ed *editor, _ byte) bool {
 	start := ed.pos - 1
 	end := ed.pos
 	line := ed.lines[ed.line]
@@ -484,21 +504,23 @@ func collapse(ed *editor, _ byte) {
 	_, _ = ed.out.Write([]byte(string(ed.lines[ed.line][ed.pos:])))
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func nlAfter(ed *editor, _ byte) {
+func nlAfter(ed *editor, _ byte) bool {
 	nl(ed, ' ')
 	ed.line--
 	ed.pos = len(ed.lines[ed.line])
 	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	ed.mode = topMode
+	return false
 }
 
-func tab(ed *editor, _ byte) {
+func tab(ed *editor, _ byte) bool {
 	ed.mode = topMode
 	if ed.dirty.lines != nil {
 		ed.updateDirty(1)
-		return
+		return false
 	}
 	line := ed.lines[ed.line]
 	pos := ed.pos - 1
@@ -541,6 +563,7 @@ func tab(ed *editor, _ byte) {
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
 	}
 	ed.mode = topMode
+	return false
 }
 
 func completeOverride(ed *editor) bool {
@@ -624,16 +647,17 @@ func expandWord(word string, wa []string, lo, hi int) (added []rune) {
 	return
 }
 
-func shiftTab(ed *editor, b byte) {
+func shiftTab(ed *editor, b byte) bool {
 	if ed.dirty.lines != nil {
 		ed.updateDirty(-1)
 	} else {
 		bad(ed, b)
 	}
 	ed.mode = topMode
+	return false
 }
 
-func help(ed *editor, _ byte) {
+func help(ed *editor, _ byte) bool {
 	header := `__SLIP REPL Editor__
 
 
@@ -708,9 +732,10 @@ shift key is denoted with a __S-__. Key bindings are:
 		buf = append(buf, '\n')
 	}
 	ed.displayHelp(buf, w, h)
+	return false
 }
 
-func describe(ed *editor, _ byte) {
+func describe(ed *editor, _ byte) bool {
 	var (
 		start int
 		end   int
@@ -731,7 +756,7 @@ func describe(ed *editor, _ byte) {
 		_, _ = ed.out.Write([]byte{0x07})
 		ed.displayMessage([]byte("could not determine what to describe"))
 		ed.mode = topMode
-		return
+		return false
 	}
 	word := string(line[start:end])
 	w, h := ed.getSize()
@@ -739,6 +764,7 @@ func describe(ed *editor, _ byte) {
 	buf = bytes.TrimSpace(buf)
 
 	ed.displayHelp(buf, w, h)
+	return false
 }
 
 func historyOverride(ed *editor) bool {
@@ -753,14 +779,14 @@ func historyOverride(ed *editor) bool {
 	return true
 }
 
-func historyBack(ed *editor, _ byte) {
+func historyBack(ed *editor, _ byte) bool {
 	switch {
 	case ed.override == nil:
 		ed.hist.cur = len(ed.hist.forms) - 1
 	case ed.hist.cur <= 0:
 		ed.override = historyOverride
 		ed.mode = topMode
-		return
+		return false
 	default:
 		ed.hist.cur--
 	}
@@ -769,9 +795,10 @@ func historyBack(ed *editor, _ byte) {
 	}
 	ed.override = historyOverride
 	ed.mode = topMode
+	return false
 }
 
-func historyForward(ed *editor, _ byte) {
+func historyForward(ed *editor, _ byte) bool {
 	switch {
 	case ed.override == nil:
 		ed.hist.cur = 0
@@ -779,7 +806,7 @@ func historyForward(ed *editor, _ byte) {
 		ed.override = historyOverride
 		ed.setForm(Form{{}})
 		ed.mode = topMode
-		return
+		return false
 	default:
 		ed.hist.cur++
 	}
@@ -788,6 +815,7 @@ func historyForward(ed *editor, _ byte) {
 	}
 	ed.override = historyOverride
 	ed.mode = topMode
+	return false
 }
 
 func historySearchOverride(ed *editor) bool {
@@ -813,7 +841,7 @@ func historySearchOverride(ed *editor) bool {
 	return true
 }
 
-func searchBack(ed *editor, b byte) {
+func searchBack(ed *editor, b byte) bool {
 	switch {
 	case ed.override == nil:
 		ed.hist.pattern = ed.hist.pattern[:0]
@@ -844,9 +872,10 @@ func searchBack(ed *editor, b byte) {
 	ed.override = historySearchOverride
 	ed.hist.searchDir = backwardDir
 	ed.mode = topMode
+	return false
 }
 
-func searchForward(ed *editor, b byte) {
+func searchForward(ed *editor, b byte) bool {
 	switch {
 	case ed.override == nil:
 		ed.hist.pattern = ed.hist.pattern[:0]
@@ -877,13 +906,15 @@ func searchForward(ed *editor, b byte) {
 	ed.override = historySearchOverride
 	ed.hist.searchDir = forwardDir
 	ed.mode = topMode
+	return false
 }
 
-func enterUnicode(ed *editor, _ byte) {
+func enterUnicode(ed *editor, _ byte) bool {
 	ed.ri = 0
 	ed.displayMessage([]byte("unicode: \\u0000"))
 	ed.override = unicodeOverride
 	ed.mode = topMode
+	return false
 }
 
 // key length in bytes

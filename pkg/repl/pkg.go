@@ -27,6 +27,11 @@ var (
 			"*repl-history-limit*": {Get: getHistoryLimit, Set: setHistoryLimit, Doc: "the form history limit."},
 			"*repl-help-box*":      {Val: slip.True, Doc: "if true display help in a box."},
 			"*repl-debug*":         {Val: nil, Doc: "if true the go stack is printed on error."},
+			"*repl-eval-on-close*": {
+				Get: getEvalOnClose,
+				Set: setEvalOnClose,
+				Doc: "if true evaluate a form when the close parenthensis typed",
+			},
 		},
 		Lambdas: map[string]*slip.Lambda{},
 		Funcs:   map[string]*slip.FuncInfo{},

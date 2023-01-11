@@ -184,8 +184,7 @@ top:
 		}
 		for i := 0; i < ed.kcnt; i++ {
 			b := ed.key[i]
-			ed.mode[b](ed, b)
-			if b == 0x0d {
+			if ed.mode[b](ed, b) {
 				if 0 <= ed.match.line {
 					n := ed.match.line
 					ed.match.line = -1
@@ -214,6 +213,15 @@ top:
 				pos--
 				if 0 <= pos && ed.lines[ed.line][pos] == ')' {
 					p = ed.findOpenParen()
+					if evalOnClose && ed.isFirstChar(p) {
+						ed.evalForm()
+						if 0 <= ed.match.line {
+							n := ed.match.line
+							ed.match.line = -1
+							ed.displayRune(n, ed.match.pos)
+						}
+						break top
+					}
 				}
 			}
 			if p != nil {
@@ -231,6 +239,18 @@ top:
 		out = append(out, '\n')
 	}
 	return
+}
+
+func (ed *editor) evalForm() {
+	_, h := ed.getSize()
+	bottom := ed.v0 + len(ed.lines)
+	if h <= bottom {
+		diff := bottom + 1 - h
+		ed.scroll(diff)
+		ed.v0 -= diff
+	}
+	ed.line = len(ed.lines) - 1
+	ed.pos = len(ed.lines[ed.line])
 }
 
 func (ed *editor) addRune(r rune) {
@@ -572,6 +592,22 @@ func (ed *editor) findCloseParen() *point {
 		pos = 0
 	}
 	return nil
+}
+
+func (ed *editor) isFirstChar(p *point) bool {
+	pos := p.pos - 1
+	for i := p.line; 0 <= i; i-- {
+		line := ed.lines[i]
+		for ; 0 <= pos; pos-- {
+			if line[pos] != ' ' {
+				return false
+			}
+		}
+		if 0 < i {
+			pos = len(ed.lines[i-1]) - 1
+		}
+	}
+	return true
 }
 
 func (ed *editor) findWordEnd() (ln int, pos int) {
