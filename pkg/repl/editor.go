@@ -115,12 +115,12 @@ func (ed *editor) display() {
 		}
 		_, _ = ed.out.Write([]byte(string(line)))
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 }
 
 func (ed *editor) displayRune(line, pos int) {
 	if 0 <= line && line < len(ed.lines) && 0 <= pos && pos < len(ed.lines[line]) {
-		ed.setCursor(ed.v0+line, ed.foff+pos)
+		ed.setCursorPos(line, pos)
 		if ed.match.line == line && ed.match.pos == pos {
 			_, _ = ed.out.Write([]byte(matchColor))
 			_, _ = ed.out.Write([]byte(string(ed.lines[line][pos : pos+1])))
@@ -161,7 +161,7 @@ func (ed *editor) read() (out []byte) {
 		ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 		ed.lines = Form{{}}
 	} else {
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.setCursorCurrent()
 	}
 	var err error
 top:
@@ -176,7 +176,7 @@ top:
 			ed.key[0] != 0x09 && !(ed.key[0] == 0x1b && ed.key[1] == 0x5b && ed.key[2] == 0x5a) {
 			ed.setCursor(ed.v0+len(ed.lines), 1)
 			ed.clearDown()
-			ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+			ed.setCursorCurrent()
 			ed.dirty.lines = nil
 		}
 		if ed.override != nil && ed.override(ed) {
@@ -199,7 +199,7 @@ top:
 				n := ed.match.line
 				ed.match.line = -1
 				ed.displayRune(n, ed.match.pos)
-				ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+				ed.setCursorCurrent()
 			}
 			var p *point
 			pos := ed.pos
@@ -227,7 +227,7 @@ top:
 			if p != nil {
 				ed.match = *p
 				ed.displayRune(p.line, p.pos)
-				ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+				ed.setCursorCurrent()
 			}
 			ed.lastSpot.line = ed.line
 			ed.lastSpot.pos = ed.pos
@@ -263,6 +263,7 @@ func (ed *editor) addRune(r rune) {
 		line = append(line[:ed.pos], append([]rune{r}, end...)...)
 		ed.lines[ed.line] = line
 		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
+		// TBD
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos+1)
 	}
 	ed.pos++
@@ -331,6 +332,19 @@ func (ed *editor) setCursor(v, h int) {
 		h = 0
 	}
 	_, _ = fmt.Fprintf(ed.out, "\x1b[%d;%dH", v, h)
+}
+
+func (ed *editor) setCursorPos(line, pos int) {
+	cpos := ed.foff
+	rline := ed.lines[line]
+	for i := 0; i < pos; i++ {
+		cpos += RuneWidth(rline[i])
+	}
+	ed.setCursor(ed.v0+line, cpos)
+}
+
+func (ed *editor) setCursorCurrent() {
+	ed.setCursorPos(ed.line, ed.pos)
 }
 
 func (ed *editor) clearScreen() {
@@ -424,7 +438,7 @@ func (ed *editor) displayMessage(msg []byte) {
 	}
 	msg = append(msg, "\x1b[m"...)
 	_, _ = ed.out.Write(msg)
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 }
 
 func (ed *editor) displayHelp(doc []byte, w, h int) {
@@ -466,7 +480,7 @@ func (ed *editor) displayHelp(doc []byte, w, h int) {
 			ed.box(ed.v0+len(ed.lines), 2, cnt+2/pad, w+pad, -1, -1)
 		}
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 }
 
@@ -544,7 +558,7 @@ func (ed *editor) updateDirty(dir int) {
 		bar := cnt * cnt / len(ed.dirty.lines)
 		ed.box(ed.v0+len(ed.lines), 2, ed.dirty.cnt-2, w-4, barTop, barTop+bar)
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 }
 
@@ -623,7 +637,8 @@ lineLoop:
 			pos = 0
 		}
 		for ; pos < len(line); pos++ {
-			if sepMap[line[pos]] != 'x' {
+			r := line[pos]
+			if sepMapLen <= r || sepMap[r] != 'x' {
 				break lineLoop
 			}
 		}
@@ -634,7 +649,8 @@ lineLoop:
 	} else {
 		line := ed.lines[ln]
 		for ; pos < len(line); pos++ {
-			if sepMap[line[pos]] == 'x' {
+			r := line[pos]
+			if r < sepMapLen && sepMap[r] == 'x' {
 				break
 			}
 		}
@@ -656,7 +672,8 @@ lineLoop:
 			pos = len(line) - 1
 		}
 		for ; 0 <= pos; pos-- {
-			if sepMap[line[pos]] != 'x' {
+			r := line[pos]
+			if sepMapLen <= r || sepMap[r] != 'x' {
 				break lineLoop
 			}
 		}
@@ -667,7 +684,8 @@ lineLoop:
 	} else {
 		line := ed.lines[ln]
 		for ; 0 <= pos; pos-- {
-			if sepMap[line[pos]] == 'x' {
+			r := line[pos]
+			if r < sepMapLen && sepMap[r] == 'x' {
 				break
 			}
 		}

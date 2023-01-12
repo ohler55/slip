@@ -15,18 +15,15 @@ import (
 // return true to eval form
 type bindFunc func(ed *editor, b byte) bool
 
-var (
+const (
 	//   0123456789abcdef0123456789abcdef
 	sepMap = "" +
 		".........xx..x.................." + // 0x00
-		"x.......xx......................" + // 0x20
-		"................................." + // 0x40
-		"................................" + // 0x60
-		"................................" + // 0x80
-		"................................" + // 0xa0
-		"................................" + // 0xc0
-		"................................" //  0xe0
+		"x.......xx......................" //   0x20
+	sepMapLen = rune(len(sepMap))
+)
 
+var (
 	topMode  []bindFunc
 	rootMode = []bindFunc{
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
@@ -240,7 +237,7 @@ func nl(ed *editor, b byte) bool {
 		ed.lines[ed.line-1] = line[:ed.pos]
 		ed.lines[ed.line] = line[ed.pos:]
 	}
-	ed.setCursor(ed.v0+ed.line-1, ed.foff+ed.pos)
+	ed.setCursorPos(ed.line-1, ed.pos)
 	ed.clearToEnd()
 	for i := ed.line; i < len(ed.lines); i++ {
 		ed.setCursor(ed.v0+i, ed.foff)
@@ -248,7 +245,7 @@ func nl(ed *editor, b byte) bool {
 		_, _ = ed.out.Write([]byte(string(ed.lines[i])))
 	}
 	ed.pos = 0
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	return false
 }
 
@@ -279,7 +276,7 @@ func back(ed *editor, _ byte) bool {
 			ed.pos = 0
 		}
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -294,7 +291,7 @@ func forward(ed *editor, _ byte) bool {
 			ed.pos = len(ed.lines[ed.line])
 		}
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -306,7 +303,7 @@ func up(ed *editor, _ byte) bool {
 			ed.pos = len(ed.lines[ed.line])
 		}
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -318,34 +315,34 @@ func down(ed *editor, _ byte) bool {
 			ed.pos = len(ed.lines[ed.line])
 		}
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
 
 func backWord(ed *editor, _ byte) bool {
 	ed.line, ed.pos = ed.findWordStart()
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
 
 func forwardWord(ed *editor, _ byte) bool {
 	ed.line, ed.pos = ed.findWordEnd()
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
 
 func lineBegin(ed *editor, _ byte) bool {
 	ed.pos = 0
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	return false
 }
 
 func lineEnd(ed *editor, _ byte) bool {
 	ed.pos = len(ed.lines[ed.line])
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	return false
 }
 
@@ -353,7 +350,7 @@ func matchClose(ed *editor, _ byte) bool {
 	if p := ed.findOpenParen(); p != nil {
 		ed.line = p.line
 		ed.pos = p.pos
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.setCursorCurrent()
 	}
 	ed.mode = topMode
 	return false
@@ -363,7 +360,7 @@ func matchOpen(ed *editor, _ byte) bool {
 	if p := ed.findCloseParen(); p != nil {
 		ed.line = p.line
 		ed.pos = p.pos
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.setCursorCurrent()
 	}
 	ed.mode = topMode
 	return false
@@ -374,7 +371,7 @@ func delForward(ed *editor, _ byte) bool {
 	if ed.pos < len(line) {
 		line = append(line[:ed.pos], line[ed.pos+1:]...)
 		ed.lines[ed.line] = line
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.setCursorCurrent()
 		ed.clearToEnd()
 		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
 	} else if ed.line < len(ed.lines)-1 {
@@ -385,7 +382,7 @@ func delForward(ed *editor, _ byte) bool {
 		ed.clearLine()
 		ed.display()
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -396,7 +393,7 @@ func delBack(ed *editor, _ byte) bool {
 		ed.pos--
 		line = append(line[:ed.pos], line[ed.pos+1:]...)
 		ed.lines[ed.line] = line
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.setCursorCurrent()
 		ed.clearToEnd()
 		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
 	} else if 0 < ed.line {
@@ -408,7 +405,7 @@ func delBack(ed *editor, _ byte) bool {
 		ed.clearLine()
 		ed.display()
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -424,7 +421,7 @@ func delForwardWord(ed *editor, _ byte) bool {
 		ed.setCursor(ed.v0+i, ed.foff)
 		_, _ = ed.out.Write([]byte(string(ed.lines[i])))
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -442,7 +439,7 @@ func delBackWord(ed *editor, _ byte) bool {
 		ed.setCursor(ed.v0+i, ed.foff)
 		_, _ = ed.out.Write([]byte(string(ed.lines[i])))
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -452,7 +449,7 @@ func delLineEnd(ed *editor, _ byte) bool {
 	if ed.pos < len(line) {
 		line = line[:ed.pos]
 		ed.lines[ed.line] = line
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.setCursorCurrent()
 		ed.clearToEnd()
 	} else if ed.line < len(ed.lines)-1 {
 		line = ed.lines[ed.line+1]
@@ -462,7 +459,7 @@ func delLineEnd(ed *editor, _ byte) bool {
 		ed.clearLine()
 		ed.display()
 	}
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -473,9 +470,9 @@ func swapChar(ed *editor, _ byte) bool {
 		r := ed.lines[ed.line][ed.pos]
 		ed.lines[ed.line][ed.pos] = r0
 		ed.lines[ed.line][ed.pos-1] = r
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos-1)
+		ed.setCursorPos(ed.line, ed.pos-1)
 		_, _ = ed.out.Write([]byte(string([]rune{r, r0})))
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.setCursorCurrent()
 	}
 	ed.mode = topMode
 	return false
@@ -498,11 +495,11 @@ func collapse(ed *editor, _ byte) bool {
 	}
 	ed.lines[ed.line] = append(line[:start], line[end:]...)
 	ed.pos = start
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.clearToEnd()
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	_, _ = ed.out.Write([]byte(string(ed.lines[ed.line][ed.pos:])))
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -511,7 +508,7 @@ func nlAfter(ed *editor, _ byte) bool {
 	nl(ed, ' ')
 	ed.line--
 	ed.pos = len(ed.lines[ed.line])
-	ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
@@ -560,7 +557,7 @@ func tab(ed *editor, _ byte) bool {
 			}
 		}
 	} else {
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos)
+		ed.setCursorCurrent()
 	}
 	ed.mode = topMode
 	return false
@@ -742,13 +739,15 @@ func describe(ed *editor, _ byte) bool {
 	)
 	line := ed.lines[ed.line]
 	for start = ed.pos - 1; 0 <= start; start-- {
-		if sepMap[line[start]] == 'x' {
+		r := line[start]
+		if r < sepMapLen && sepMap[r] == 'x' {
 			start++
 			break
 		}
 	}
 	for end = ed.pos; end < len(line); end++ {
-		if sepMap[line[end]] == 'x' {
+		r := line[end]
+		if r < sepMapLen && sepMap[r] == 'x' {
 			break
 		}
 	}

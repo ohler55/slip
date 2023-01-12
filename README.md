@@ -13,12 +13,8 @@ SLIce Processing is LISP for golang
 
  - method or function to get flavor of instance and one to check the flavor
 
- - figure out how to determine the print length of runes when some are double wide (e.g., 0x01f44d)
-
  - repl package
   - line wrap or rather goes past the end of the line
-  - unicode width
-   - check for rune width when moving and when positioning cursor
 
  - future repl options
   - color for words
