@@ -23,7 +23,7 @@ type comment string
 
 var promptSeq = []any{
 	expect("/<set-cursor [0-9]+:1>/"),
-	expect("/<clear-line [0-9]+>/"),
+	until("/<clear-line [0-9]+>/"),
 	expect("<bold>"),
 	expect("<bright-blue>"),
 	expect("▶ "),
@@ -105,6 +105,8 @@ func edTest(t *testing.T, script []any) {
 	err = os.RemoveAll("config/config.lisp")
 	tt.Nil(t, err)
 	tm := repl.NewTermock(40, 80)
+	defer repl.SetSizer(nil)
+	repl.SetSizer(tm)
 	scope := repl.GetScope()
 	scope.Set(slip.Symbol("x"), slip.Fixnum(3))
 	scope.Set(slip.Symbol("*standard-output*"), tm)
@@ -133,7 +135,6 @@ func TestEditorEval(t *testing.T) {
 		provide("x"),
 		expect("x"),
 		provide("\r"),
-		expect("<set-cursor 9999:9999>"),
 		expect("<set-cursor 3:1>"),
 		expect("3\n"),
 		promptSeq,
@@ -145,7 +146,6 @@ func TestEditorHelp(t *testing.T) {
 	edTest(t, []any{
 		startSteps,
 		provide("\x08"),
-		expect("<set-cursor 9999:9999>"),
 		expect("<set-cursor 4:4>"),
 		expect("<bold>"),
 		expect("SLIP REPL Editor"),
@@ -157,9 +157,9 @@ func TestEditorHelp(t *testing.T) {
 		expect("<bold>"),
 		expect("C-a"),
 		expect("<normal>"),
-		expect("   move to line start              \n   "),
-		until("┌────────────────────────────────────────────────────────────────────┒"),
-		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		expect("/move to line start/"),
+		until("/┌──────────────*────────────┒/"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 2:3>"),
 		provide("\x01"),
 		expect("<set-cursor 3:1>"),
@@ -186,7 +186,7 @@ func TestEditorDescribeScroll(t *testing.T) {
 		expect("<bold>"),
 		expect("car"),
 		expect("<normal>"),
-		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 21:7>"),
 		provide("\x03"),
 	})
@@ -265,7 +265,7 @@ func TestEditorTabComplete(t *testing.T) {
 
 		comment("press <tab> again"),
 		provide("\t"), // show choices
-		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 2:10>"),
 
 		comment("press <tab> to pick first entry"),
@@ -273,7 +273,7 @@ func TestEditorTabComplete(t *testing.T) {
 		until("<inverse>"),
 		expect("*print-ansi*"),
 		expect("<normal>"),
-		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 2:10>"),
 
 		comment("press C-f"),
@@ -281,7 +281,7 @@ func TestEditorTabComplete(t *testing.T) {
 		until("<inverse>"),
 		expect("*print-array*"),
 		expect("<normal>"),
-		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 2:10>"),
 
 		comment("press C-n"),
@@ -289,7 +289,7 @@ func TestEditorTabComplete(t *testing.T) {
 		until("<inverse>"),
 		expect("*print-circle*"),
 		expect("<normal>"),
-		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 2:10>"),
 
 		comment("press C-b"),
@@ -297,7 +297,7 @@ func TestEditorTabComplete(t *testing.T) {
 		until("<inverse>"),
 		expect("*print-case*"),
 		expect("<normal>"),
-		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 2:10>"),
 
 		comment("press C-p"),
@@ -305,7 +305,7 @@ func TestEditorTabComplete(t *testing.T) {
 		until("<inverse>"),
 		expect("*print-ansi*"),
 		expect("<normal>"),
-		until("┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 2:10>"),
 
 		comment("press C-b at first choice"),

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"sync/atomic"
 	"unicode/utf8"
 
 	"github.com/ohler55/slip"
@@ -156,8 +157,8 @@ func bad(ed *editor, b byte) bool {
 	_, _ = ed.out.Write([]byte{0x07})
 	mod := ed.modeName()
 	var charName []byte
-	for i := 0; i < ed.kcnt; i++ {
-		c := ed.key[i]
+	for i := 0; i < ed.key.cnt; i++ {
+		c := ed.key.buf[i]
 		switch {
 		case c == 0x1b:
 			if mod != "M-" {
@@ -173,9 +174,9 @@ func bad(ed *editor, b byte) bool {
 			charName = append(charName, c)
 		}
 	}
-	seq := ed.key[:ed.kcnt]
-	msg := fmt.Appendf(nil, "key %s%s is undefined. sequence: %#v", mod, charName, seq)
-	ed.kcnt = 0
+	sq := ed.key.buf[:ed.key.cnt]
+	msg := fmt.Appendf(nil, "key %s%s is undefined. sequence: %#v", mod, charName, sq)
+	ed.key.cnt = 0
 	ed.displayMessage(msg)
 	ed.mode = topMode
 	return false
@@ -220,8 +221,8 @@ func enter(ed *editor, b byte) bool {
 }
 
 func nl(ed *editor, b byte) bool {
-	_, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
+	h := int(atomic.LoadInt32(&ed.height))
 	if h <= bottom {
 		diff := bottom + 1 - h
 		ed.scroll(diff)
@@ -564,7 +565,7 @@ func tab(ed *editor, _ byte) bool {
 }
 
 func completeOverride(ed *editor) bool {
-	k := string(ed.key[:ed.kcnt])
+	k := string(ed.key.buf[:ed.key.cnt])
 	switch k {
 	case "\t", "\x06", "\x1b[C": // next
 		ed.completer.index++
@@ -614,11 +615,11 @@ func completeOverride(ed *editor) bool {
 				ed.pos += len(added)
 			}
 		}
-		ed.kcnt = 0
+		ed.key.cnt = 0
 		ed.override = nil
 		return false
 	case "\x1b": // esc
-		ed.kcnt = 0
+		ed.key.cnt = 0
 		ed.override = nil
 		return false
 	default:
@@ -704,11 +705,10 @@ shift key is denoted with a __S-__. Key bindings are:
 		"\x1b[1mM-DEL\x1b[m delete previous word",
 		"\x1b[1mENTER\x1b[m evaluate form",
 	}
-	w, h := ed.getSize()
-	w -= 6
+	w := int(atomic.LoadInt32(&ed.width))
 	indent := 3
 	leftPad := bytes.Repeat([]byte{' '}, indent)
-	buf := slip.AppendDoc(nil, header, indent, w, true)
+	buf := slip.AppendDoc(nil, header, indent, w-6, true)
 	buf = bytes.TrimSpace(buf)
 	buf = append(buf, '\n', '\n')
 
@@ -728,7 +728,7 @@ shift key is denoted with a __S-__. Key bindings are:
 		}
 		buf = append(buf, '\n')
 	}
-	ed.displayHelp(buf, w, h)
+	ed.displayHelp(buf, w, int(atomic.LoadInt32(&ed.height)))
 	return false
 }
 
@@ -758,8 +758,9 @@ func describe(ed *editor, _ byte) bool {
 		return false
 	}
 	word := string(line[start:end])
-	w, h := ed.getSize()
-	buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, 3, w-7, true)
+	h := int(atomic.LoadInt32(&ed.height))
+	w := int(atomic.LoadInt32(&ed.width))
+	buf := cl.AppendDescribe(nil, slip.Symbol(word), &scope, 3, w-6, true)
 	buf = bytes.TrimSpace(buf)
 
 	ed.displayHelp(buf, w, h)
@@ -767,7 +768,7 @@ func describe(ed *editor, _ byte) bool {
 }
 
 func historyOverride(ed *editor) bool {
-	k := string(ed.key[:ed.kcnt])
+	k := string(ed.key.buf[:ed.key.cnt])
 	f := historyBindings[k]
 	if f == nil {
 		ed.keepForm()
@@ -818,11 +819,11 @@ func historyForward(ed *editor, _ byte) bool {
 }
 
 func historySearchOverride(ed *editor) bool {
-	k := string(ed.key[:ed.kcnt])
+	k := string(ed.key.buf[:ed.key.cnt])
 	f := historyBindings[k]
 	var b byte = 'x'
 	if f == nil {
-		if ed.key[0] < 0x20 {
+		if ed.key.buf[0] < 0x20 {
 			ed.keepForm()
 			ed.override = nil
 			ed.hist.pattern = ed.hist.pattern[:0]
@@ -851,7 +852,7 @@ func searchBack(ed *editor, b byte) bool {
 			ed.hist.cur--
 		}
 		if b == 'r' {
-			r, _ := utf8.DecodeRune(ed.key)
+			r, _ := utf8.DecodeRune(ed.key.buf)
 			if r == '\x7f' {
 				if 0 < len(ed.hist.pattern) {
 					ed.hist.pattern = ed.hist.pattern[:len(ed.hist.pattern)-1]
@@ -885,7 +886,7 @@ func searchForward(ed *editor, b byte) bool {
 			ed.hist.cur++
 		}
 		if b == 'r' {
-			r, _ := utf8.DecodeRune(ed.key)
+			r, _ := utf8.DecodeRune(ed.key.buf)
 			if r == '\x7f' {
 				if 0 < len(ed.hist.pattern) {
 					ed.hist.pattern = ed.hist.pattern[:len(ed.hist.pattern)-1]
@@ -918,18 +919,18 @@ func enterUnicode(ed *editor, _ byte) bool {
 
 // key length in bytes
 func (ed *editor) keyLen() (cnt int) {
-	if 0 < ed.kcnt {
+	if 0 < ed.key.cnt {
 		switch {
-		case ed.key[0] == 0x1b: // esc
+		case ed.key.buf[0] == 0x1b: // esc
 			cnt = 1
-			if 1 < ed.kcnt {
-				switch ed.key[1] {
+			if 1 < ed.key.cnt {
+				switch ed.key.buf[1] {
 				case 0x1b: // second esc
 					cnt = 4
 				case 0x5b:
 					cnt = 3
-					if 2 < ed.kcnt && (ed.key[2] == 0x31 || ed.key[2] == 0x32) {
-						cnt = ed.kcnt
+					if 2 < ed.key.cnt && (ed.key.buf[2] == 0x31 || ed.key.buf[2] == 0x32) {
+						cnt = ed.key.cnt
 					}
 				case 0x4f:
 					cnt = 3
@@ -937,23 +938,23 @@ func (ed *editor) keyLen() (cnt int) {
 					cnt = 2
 				}
 			}
-		case ed.key[0] <= 0x7f:
+		case ed.key.buf[0] <= 0x7f:
 			cnt = 1
 		default:
-			_, cnt = utf8.DecodeRune(ed.key)
+			_, cnt = utf8.DecodeRune(ed.key.buf)
 		}
 	}
 	return
 }
 
 func (ed *editor) getKey() string {
-	return string(ed.key[:ed.keyLen()])
+	return string(ed.key.buf[:ed.keyLen()])
 }
 
 func (ed *editor) clearKey() {
 	cnt := ed.keyLen()
-	copy(ed.key, ed.key[:cnt])
-	ed.kcnt -= cnt
+	copy(ed.key.buf, ed.key.buf[:cnt])
+	ed.key.cnt -= cnt
 }
 
 func unicodeOverride(ed *editor) bool {

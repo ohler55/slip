@@ -24,7 +24,6 @@ func TestTermReader(t *testing.T) {
 		scope.Set(slip.Symbol("*standard-output*"), origOut)
 		scope.Set(slip.Symbol("*standard-input*"), origIn)
 		scope.Set(slip.Symbol("*repl-prompt*"), origPrompt)
-		scope.Set(slip.Symbol("*repl-editor*"), slip.True)
 	}()
 
 	var out strings.Builder
@@ -51,7 +50,6 @@ func TestTermReaderPanic(t *testing.T) {
 		scope.Set(slip.Symbol("*standard-output*"), origOut)
 		scope.Set(slip.Symbol("*standard-input*"), origIn)
 		scope.Set(slip.Symbol("*repl-prompt*"), origPrompt)
-		scope.Set(slip.Symbol("*repl-editor*"), slip.True)
 	}()
 
 	var out strings.Builder

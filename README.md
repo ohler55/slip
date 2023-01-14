@@ -15,6 +15,7 @@ SLIce Processing is LISP for golang
 
  - repl package
   - line wrap or rather goes past the end of the line
+   - use one of ᐅ ᐊ  ❯ ❮  ᗒ ᗕ
 
  - future repl options
   - color for words

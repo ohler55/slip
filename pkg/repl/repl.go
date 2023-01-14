@@ -53,6 +53,7 @@ var (
 
 	replReader reader = &termReader{}
 
+	sizer hasSize
 	// TBD flag to not let Run() be called more than once before (repl-exit) is called
 )
 
@@ -347,4 +348,8 @@ func getEvalOnClose() slip.Object {
 
 func setEvalOnClose(value slip.Object) {
 	evalOnClose = value != nil
+}
+
+func SetSizer(hs hasSize) {
+	sizer = hs
 }

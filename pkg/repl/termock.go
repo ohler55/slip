@@ -265,3 +265,7 @@ func (tm *Termock) Hierarchy() []slip.Symbol {
 func (tm *Termock) Eval(s *slip.Scope, depth int) slip.Object {
 	return nil
 }
+
+func (tm *Termock) getSize() (w, h int) {
+	return tm.width, tm.height
+}

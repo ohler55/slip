@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
+	"sync/atomic"
+	"syscall"
 	"unicode/utf8"
 
 	"github.com/ohler55/slip"
@@ -21,28 +24,31 @@ type seq struct {
 }
 
 type editor struct {
-	lines     Form
-	v0        int // first terminal line of display
-	key       []byte
-	kcnt      int
-	uni       []byte
-	ri        uint32
-	msg       string
-	mode      []bindFunc
-	line      int
-	pos       int
-	foff      int // form offset (right after prompt)
-	dirty     dirty
-	match     point // matching parens that needs to be redrawn on move
-	lastSpot  point
-	in        io.Reader
-	fd        int // in fd
-	out       io.Writer
-	depth     int
-	origState *term.State
-	hist      History
-	override  func(ed *editor) bool // return true if handled
-	completer Completer
+	lines      Form
+	v0         int // first terminal line of display
+	key        seq
+	uni        []byte
+	ri         uint32
+	msg        string
+	mode       []bindFunc
+	line       int
+	pos        int
+	foff       int // form offset (right after prompt)
+	dirty      dirty
+	match      point // matching parens that needs to be redrawn on move
+	lastSpot   point
+	in         io.Reader
+	fd         int // in fd
+	out        io.Writer
+	width      int32
+	height     int32
+	depth      int
+	origState  *term.State
+	hist       History
+	override   func(ed *editor) bool // return true if handled
+	completer  Completer
+	resizeChan chan os.Signal
+	seqChan    chan *seq
 }
 
 func (ed *editor) initialize() {
@@ -51,11 +57,12 @@ func (ed *editor) initialize() {
 	}
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
 	ed.mode = topMode
-	ed.key = make([]byte, 32)
+	ed.key.buf = make([]byte, 32)
 	ed.match.line = -1
 	ed.hist.SetLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
 	ed.hist.Load(historyFilename)
 	ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
+	ed.seqChan = make(chan *seq, 100)
 	ed.in = scope.Get(slip.Symbol(stdInput)).(io.Reader)
 	if fs, ok := ed.in.(*slip.FileStream); ok {
 		ed.fd = int(((*os.File)(fs)).Fd())
@@ -70,7 +77,15 @@ func (ed *editor) initialize() {
 	}
 	ed.completer.Sort()
 
+	go ed.chanRead()
+
 	_, _ = ed.out.Write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
+	ed.v0, _ = ed.getCursor()
+	_, _ = ed.getSize()
+	ed.setCursor(ed.v0, 1)
+
+	ed.resizeChan = make(chan os.Signal, 10)
+	signal.Notify(ed.resizeChan, syscall.SIGWINCH)
 }
 
 func (ed *editor) stop() {
@@ -78,6 +93,11 @@ func (ed *editor) stop() {
 		term.Restore(ed.fd, ed.origState)
 		ed.origState = nil
 	}
+	if ed.resizeChan != nil {
+		ed.resizeChan <- nil
+		ed.resizeChan = nil
+	}
+	ed.seqChan <- nil
 	ed.reset()
 	ed.out = nil
 }
@@ -152,6 +172,20 @@ func printSize(s string) (cnt int) {
 	return
 }
 
+func (ed *editor) chanRead() {
+	var err error
+	for {
+		s := seq{cnt: 0, buf: make([]byte, 32)}
+		if s.cnt, err = ed.in.Read(s.buf); err != nil {
+			// shutting down
+			return
+		}
+		if 0 < s.cnt {
+			ed.seqChan <- &s
+		}
+	}
+}
+
 func (ed *editor) read() (out []byte) {
 	if len(ed.lines) == 0 {
 		ed.v0, _ = ed.getCursor()
@@ -163,17 +197,31 @@ func (ed *editor) read() (out []byte) {
 	} else {
 		ed.setCursorCurrent()
 	}
-	var err error
 top:
 	for {
-		if ed.kcnt, err = ed.in.Read(ed.key); err != nil {
-			panic(err)
-		} else if ed.kcnt == 0 {
-			continue
+		select {
+		case key := <-ed.seqChan:
+			ed.key.cnt = key.cnt
+			copy(ed.key.buf, key.buf)
+		case sig := <-ed.resizeChan:
+			if sig == nil {
+				return nil
+			}
+			if len(ed.resizeChan) == 0 {
+				_, _ = ed.getSize()
+				ed.v0, _ = ed.getCursor()
+				ed.setCursor(ed.v0, 1)
+				ed.clearDown()
+				ed.dirty.lines = nil
+				ed.override = nil
+				ed.dirty.cnt = 0
+				ed.display()
+				continue top
+			}
 		}
 		// dirty and not tab and not shift-tab
 		if 0 < ed.dirty.cnt &&
-			ed.key[0] != 0x09 && !(ed.key[0] == 0x1b && ed.key[1] == 0x5b && ed.key[2] == 0x5a) {
+			ed.key.buf[0] != 0x09 && !(ed.key.buf[0] == 0x1b && ed.key.buf[1] == 0x5b && ed.key.buf[2] == 0x5a) {
 			ed.setCursor(ed.v0+len(ed.lines), 1)
 			ed.clearDown()
 			ed.setCursorCurrent()
@@ -182,8 +230,8 @@ top:
 		if ed.override != nil && ed.override(ed) {
 			continue
 		}
-		for i := 0; i < ed.kcnt; i++ {
-			b := ed.key[i]
+		for i := 0; i < ed.key.cnt; i++ {
+			b := ed.key.buf[i]
 			if ed.mode[b](ed, b) {
 				if 0 <= ed.match.line {
 					n := ed.match.line
@@ -242,8 +290,8 @@ top:
 }
 
 func (ed *editor) evalForm() {
-	_, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
+	h := int(atomic.LoadInt32(&ed.height))
 	if h <= bottom {
 		diff := bottom + 1 - h
 		ed.scroll(diff)
@@ -263,17 +311,19 @@ func (ed *editor) addRune(r rune) {
 		line = append(line[:ed.pos], append([]rune{r}, end...)...)
 		ed.lines[ed.line] = line
 		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
-		// TBD
 		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos+1)
 	}
 	ed.pos++
 }
 
 func (ed *editor) getSize() (w, h int) {
-	_, _ = ed.out.Write([]byte(("\x1b[s")))
-	ed.setCursor(MAX_DIM, MAX_DIM)
-	h, w = ed.getCursor()
-	_, _ = ed.out.Write([]byte(("\x1b[u")))
+	if hs, _ := sizer.(hasSize); hs != nil {
+		w, h = hs.getSize()
+	} else {
+		w, h = term.GetSize(ed.fd)
+	}
+	atomic.StoreInt32(&ed.height, int32(h))
+	atomic.StoreInt32(&ed.width, int32(w))
 	return
 }
 
@@ -282,18 +332,11 @@ func (ed *editor) getCursor() (v, h int) {
 	if _, err := ed.out.Write([]byte("\x1b[6n")); err != nil {
 		return ed.v0, ed.foff
 	}
-	// On error return current position. This can occur if someone is typing
-	// while an attempt is made to get the cursor scan. Hold down the
-	// enter/return key to force this. Generally only happens on a remote
-	// terminal where input is buffered so user key presses can be mixed with
-	// the terminal response.
-	buf := make([]byte, 16)
-	cnt, _ := ed.in.Read(buf)
-
+	key := <-ed.seqChan
 	var mode int
 done:
-	for i, b := range buf {
-		if cnt <= i {
+	for i, b := range key.buf {
+		if key.cnt <= i {
 			break
 		}
 		switch b {
@@ -318,7 +361,8 @@ done:
 		case 'R':
 			break done
 		default:
-			return ed.v0, ed.foff
+			v, h = ed.v0, ed.foff
+			break done
 		}
 	}
 	return
@@ -336,9 +380,14 @@ func (ed *editor) setCursor(v, h int) {
 
 func (ed *editor) setCursorPos(line, pos int) {
 	cpos := ed.foff
-	rline := ed.lines[line]
-	for i := 0; i < pos; i++ {
-		cpos += RuneWidth(rline[i])
+	if line < len(ed.lines) {
+		rline := ed.lines[line]
+		if len(rline) < pos {
+			pos = len(rline)
+		}
+		for i := 0; i < pos; i++ {
+			cpos += RuneWidth(rline[i])
+		}
 	}
 	ed.setCursor(ed.v0+line, cpos)
 }
@@ -391,8 +440,8 @@ func (ed *editor) box(top, left, h, w, barTop, barBottom int) {
 
 	leftEdge := utf8.AppendRune(nil, '│')
 	rightEdge := utf8.AppendRune(nil, '┃')
-	barEdge := utf8.AppendRune(nil, '▊')
-	// barEdge := utf8.AppendRune(nil, '█')
+	// barEdge := utf8.AppendRune(nil, '▊')
+	barEdge := utf8.AppendRune(nil, '█')
 
 	barTop += top
 	barBottom += top
@@ -417,22 +466,21 @@ func (ed *editor) box(top, left, h, w, barTop, barBottom int) {
 }
 
 func (ed *editor) displayMessage(msg []byte) {
-	w, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
 	cnt := 1
 	ed.dirty.cnt = cnt + 1
+	h := int(atomic.LoadInt32(&ed.height))
 	if h <= bottom+cnt {
 		diff := bottom + cnt - h
 		ed.scroll(diff)
 		ed.v0 -= diff
 	}
-
 	ed.setCursor(ed.v0+len(ed.lines), 1)
 	_, _ = ed.out.Write([]byte{'\x1b', '[', '7', 'm'})
 	if 1 < ed.foff {
 		_, _ = ed.out.Write(bytes.Repeat([]byte{' '}, ed.foff-1))
 	}
-	pad := w - len(msg) - ed.foff
+	pad := int(atomic.LoadInt32(&ed.width)) - len(msg) - ed.foff
 	if 0 < pad {
 		msg = append(msg, bytes.Repeat([]byte{' '}, pad)...)
 	}
@@ -447,7 +495,7 @@ func (ed *editor) displayHelp(doc []byte, w, h int) {
 	indent := 0
 	pad := 0
 	if box {
-		w -= 6
+		w -= 4
 		indent = 3
 		pad = 2
 	}
@@ -486,8 +534,7 @@ func (ed *editor) displayHelp(doc []byte, w, h int) {
 
 func (ed *editor) displayCompletions() {
 	words := ed.completer.words[ed.completer.lo : ed.completer.hi+1]
-	w, h := ed.getSize()
-	w -= 6
+	w := int(atomic.LoadInt32(&ed.width))
 	leftPad := []byte{' ', ' ', ' '}
 	colWidth := 0
 	for _, word := range words {
@@ -497,7 +544,7 @@ func (ed *editor) displayCompletions() {
 	}
 	var buf []byte
 	colWidth += 2
-	colCnt := w / colWidth
+	colCnt := (w - 6) / colWidth
 	ed.completer.colCnt = colCnt
 	klines := len(words)/colCnt + 1
 	for i := 0; i < klines; i++ {
@@ -521,7 +568,7 @@ func (ed *editor) displayCompletions() {
 		}
 		buf = append(buf, '\n')
 	}
-	ed.displayHelp(buf, w, h)
+	ed.displayHelp(buf, w, int(atomic.LoadInt32(&ed.height)))
 }
 
 // dir can be -1, 0, or 1
@@ -552,11 +599,10 @@ func (ed *editor) updateDirty(dir int) {
 	ed.setCursor(ed.v0+len(ed.lines)+1, 4)
 	_, _ = ed.out.Write(doc)
 	if ed.dirty.box {
-		w, _ := ed.getSize()
 		cnt := ed.dirty.cnt - 3
 		barTop := cnt * ed.dirty.top / len(ed.dirty.lines)
 		bar := cnt * cnt / len(ed.dirty.lines)
-		ed.box(ed.v0+len(ed.lines), 2, ed.dirty.cnt-2, w-4, barTop, barTop+bar)
+		ed.box(ed.v0+len(ed.lines), 2, ed.dirty.cnt-2, int(atomic.LoadInt32(&ed.width))-2, barTop, barTop+bar)
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
@@ -721,8 +767,8 @@ func (ed *editor) setForm(form Form) {
 	ed.line = len(ed.lines) - 1
 	ed.pos = len(ed.lines[ed.line])
 
-	_, h := ed.getSize()
 	bottom := ed.v0 + len(ed.lines)
+	h := int(atomic.LoadInt32(&ed.height))
 	if h <= bottom {
 		diff := bottom + 1 - h
 		ed.scroll(diff)
