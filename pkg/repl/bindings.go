@@ -228,6 +228,7 @@ func nl(ed *editor, b byte) bool {
 		ed.scroll(diff)
 		ed.v0 -= diff
 	}
+	// TBD set shift, calc line len
 	line := ed.lines[ed.line]
 	ed.lines = append(ed.lines, nil)
 	ed.line++
@@ -253,7 +254,6 @@ func nl(ed *editor, b byte) bool {
 func addByte(ed *editor, b byte) bool {
 	ed.addRune(rune(b))
 	ed.mode = topMode
-	// TBD handle wraps or past line end, might need to set terminal to not wrap with ansi code
 	return false
 }
 
@@ -268,6 +268,7 @@ func esc5b(ed *editor, _ byte) bool {
 }
 
 func back(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	ed.pos--
 	if ed.pos < 0 {
 		if 0 < ed.line {
@@ -283,6 +284,7 @@ func back(ed *editor, _ byte) bool {
 }
 
 func forward(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	ed.pos++
 	if len(ed.lines[ed.line]) < ed.pos {
 		if ed.line+1 < len(ed.lines) {
@@ -298,6 +300,7 @@ func forward(ed *editor, _ byte) bool {
 }
 
 func up(ed *editor, _ byte) bool {
+	// TBD reset shift
 	if 0 < ed.line {
 		ed.line--
 		if len(ed.lines[ed.line]) < ed.pos {
@@ -310,6 +313,7 @@ func up(ed *editor, _ byte) bool {
 }
 
 func down(ed *editor, _ byte) bool {
+	// TBD reset shift
 	if ed.line+1 < len(ed.lines) {
 		ed.line++
 		if len(ed.lines[ed.line]) < ed.pos {
@@ -322,6 +326,7 @@ func down(ed *editor, _ byte) bool {
 }
 
 func backWord(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	ed.line, ed.pos = ed.findWordStart()
 	ed.setCursorCurrent()
 	ed.mode = topMode
@@ -329,6 +334,7 @@ func backWord(ed *editor, _ byte) bool {
 }
 
 func forwardWord(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	ed.line, ed.pos = ed.findWordEnd()
 	ed.setCursorCurrent()
 	ed.mode = topMode
@@ -336,18 +342,21 @@ func forwardWord(ed *editor, _ byte) bool {
 }
 
 func lineBegin(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	ed.pos = 0
 	ed.setCursorCurrent()
 	return false
 }
 
 func lineEnd(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	ed.pos = len(ed.lines[ed.line])
 	ed.setCursorCurrent()
 	return false
 }
 
 func matchClose(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	if p := ed.findOpenParen(); p != nil {
 		ed.line = p.line
 		ed.pos = p.pos
@@ -358,6 +367,7 @@ func matchClose(ed *editor, _ byte) bool {
 }
 
 func matchOpen(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	if p := ed.findCloseParen(); p != nil {
 		ed.line = p.line
 		ed.pos = p.pos
@@ -368,6 +378,7 @@ func matchOpen(ed *editor, _ byte) bool {
 }
 
 func delForward(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	line := ed.lines[ed.line]
 	if ed.pos < len(line) {
 		line = append(line[:ed.pos], line[ed.pos+1:]...)
@@ -389,6 +400,7 @@ func delForward(ed *editor, _ byte) bool {
 }
 
 func delBack(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	line := ed.lines[ed.line]
 	if 0 < ed.pos {
 		ed.pos--
@@ -412,6 +424,7 @@ func delBack(ed *editor, _ byte) bool {
 }
 
 func delForwardWord(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	toLine, toPos := ed.findWordEnd()
 	for i := ed.line; i < len(ed.lines); i++ {
 		ed.setCursor(ed.v0+i, ed.foff)
@@ -428,6 +441,7 @@ func delForwardWord(ed *editor, _ byte) bool {
 }
 
 func delBackWord(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	toLine, toPos := ed.findWordStart()
 	for i := toLine; i < len(ed.lines); i++ {
 		ed.setCursor(ed.v0+i, ed.foff)
@@ -446,6 +460,7 @@ func delBackWord(ed *editor, _ byte) bool {
 }
 
 func delLineEnd(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	line := ed.lines[ed.line]
 	if ed.pos < len(line) {
 		line = line[:ed.pos]
@@ -480,6 +495,7 @@ func swapChar(ed *editor, _ byte) bool {
 }
 
 func collapse(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	start := ed.pos - 1
 	end := ed.pos
 	line := ed.lines[ed.line]
@@ -506,6 +522,7 @@ func collapse(ed *editor, _ byte) bool {
 }
 
 func nlAfter(ed *editor, _ byte) bool {
+	// TBD does shift need to change?
 	nl(ed, ' ')
 	ed.line--
 	ed.pos = len(ed.lines[ed.line])
@@ -599,6 +616,7 @@ func completeOverride(ed *editor) bool {
 			}
 		}
 	case "\n", "\r":
+		// TBD does shift need to change?
 		if 0 <= ed.completer.index {
 			word := ed.completer.words[ed.completer.lo+ed.completer.index]
 			added := []rune(word)[len(ed.completer.target):]

@@ -11,11 +11,25 @@ SLIce Processing is LISP for golang
   - function.go
   - lambda.go
 
- - method or function to get flavor of instance and one to check the flavor
+ - flavors
+  - method or function to get flavor of instance and one to check the flavor
+  - make gettable and settable support lising the vars
+   - readable-instance-variables as alias for gettable-instance-variables
+   - writable-instance-variables as alias for settable-instance-variables
 
  - repl package
   - line wrap or rather goes past the end of the line
+   - first detect line too long, truncate
+    - start with fresh calc each time
    - use one of ᐅ ᐊ  ❯ ❮  ᗒ ᗕ
+  - add shift to editor
+   - condition is width < pos(rune adjusted)
+   - only current line is applied
+   -
+  - keep parallel line length slice
+  - just shift current line
+   - revert to 0 after leaving line
+ - set eval key (M-e)
 
  - future repl options
   - color for words
