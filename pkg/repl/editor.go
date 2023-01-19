@@ -43,7 +43,7 @@ type editor struct {
 	width      int32
 	height     int32
 	depth      int
-	shift      int // shift on current line
+	shift      int // rune shift on current line
 	origState  *term.State
 	hist       History
 	override   func(ed *editor) bool // return true if handled
@@ -302,82 +302,88 @@ func (ed *editor) evalForm() {
 	ed.pos = len(ed.lines[ed.line])
 }
 
-func (ed *editor) lineWidth() (w int) {
-
-	for _, r := range ed.lines[ed.line] {
-		w += RuneWidth(r)
-	}
-	return
-}
-
 func (ed *editor) drawLine() {
 	var rline []rune
+	back := ed.foff
 	if 0 < ed.shift {
-		rline = append(rline, 'ᐊ', ' ') // TBD spaces for ed.foff
+		//rline = append(rline, 'ᐊ', ' ')
+		rline = append(rline, 'ᗕ', ' ')
+		back = 2
 	} else {
 		if 0 < ed.line {
-			rline = append(rline, ' ', ' ') // TBD spaces for ed.foff
+			rline = append(rline, ' ', ' ')
+			back = 2
 		} else {
 			rline = append(rline, []rune(prompt)...)
 		}
 	}
-	max := int(ed.width) - ed.foff - 1 + ed.shift
+	max := int(atomic.LoadInt32(&ed.width)) - ed.foff - 1
 	wp := 0
-	for _, r := range ed.lines[ed.line] {
-		if ed.shift < wp {
-			rline = append(rline, r)
-		}
+	for _, r := range ed.lines[ed.line][ed.shift:] {
+		rline = append(rline, r)
 		w := RuneWidth(r)
 		wp += w
 		if max <= wp {
-			rline = append(rline, ' ', 'ᐅ') // TBD spaces for ed.foff
+			//rline = append(rline, ' ', 'ᐅ')
+			rline = append(rline, ' ', 'ᗒ')
 			break
 		}
 	}
-	ed.setCursor(ed.v0+ed.line, 1)
+	ed.setCursor(ed.v0+ed.line, ed.foff-back)
 	_, _ = ed.out.Write([]byte(string(rline)))
-	ed.setCursor(ed.v0+ed.line, int(ed.width)-2) // TBD really set pos
+}
 
-	// ed.setCursor(ed.v0+i, ed.foff-2)
-	// _, _ = ed.out.Write([]byte("ᐊ "))
-	// _, _ = ed.out.Write([]byte("❮"))
-	// _, _ = ed.out.Write([]byte("ᗕ "))
-
+func (ed *editor) lineWidth() (pw, lw int) {
+	if 0 < len(ed.lines) {
+		for i, r := range ed.lines[ed.line] {
+			rw := RuneWidth(r)
+			lw += rw
+			if i < ed.pos {
+				pw += rw
+			}
+		}
+	}
+	return
+}
+func (ed *editor) runesTo(w int) (cnt int) {
+	if 0 < len(ed.lines) {
+		var r rune
+		for cnt, r = range ed.lines[ed.line] {
+			rw := RuneWidth(r)
+			w -= rw
+			if w <= 0 {
+				cnt++
+				break
+			}
+		}
+	}
+	return
 }
 
 func (ed *editor) addRune(r rune) {
-	if ed.pos == len(ed.lines[ed.line]) {
-		_, _ = ed.out.Write([]byte(string([]rune{r})))
-		ed.lines[ed.line] = append(ed.lines[ed.line], r)
+	if len(ed.lines) == 0 {
+		ed.lines = [][]rune{}
+	}
+	line := ed.lines[ed.line]
+	if ed.pos == len(line) {
+		line = append(line, r)
 	} else {
-		line := ed.lines[ed.line]
 		end := line[ed.pos:]
 		line = append(line[:ed.pos], append([]rune{r}, end...)...)
-		ed.lines[ed.line] = line
-		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos+1)
 	}
+	ed.lines[ed.line] = line
 	ed.pos++
-	max := int(ed.width) - ed.foff - 1
-	if max < printSize(string(ed.lines[ed.line])) {
-		if ed.pos-ed.shift >= max {
-			ed.shift = ed.pos - max
+	max := int(atomic.LoadInt32(&ed.width)) - ed.foff - 1
+	if pw, lw := ed.lineWidth(); max < lw {
+		if max <= pw {
+			ed.shift = ed.runesTo(pw - max)
 		}
 		ed.drawLine()
-
-		// fmt.Printf("*** wide shift %d\n", ed.shift)
-		// TBD draw line
-		//  how many runes for shift
-		//  from there how many until max
-
-		// TBD
-		// if pos - shift > max then recalc shift
-		// if longer than width
-		//   is shift currently set?
-		//   if 0 < shift then display <
-		//   if end - shift then >
-		//   draw line
+	} else {
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos-1)
+		_, _ = ed.out.Write([]byte(string(line[ed.pos-1:])))
 	}
+	ed.setCursorCurrent()
 }
 
 func (ed *editor) getSize() (w, h int) {
@@ -453,7 +459,7 @@ func (ed *editor) setCursorPos(line, pos int) {
 			cpos += RuneWidth(rline[i])
 		}
 	}
-	// TBD add shift
+	cpos -= ed.shift // TBD should consider rune width
 	ed.setCursor(ed.v0+line, cpos)
 }
 

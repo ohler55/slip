@@ -70,7 +70,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x40
 		bad, bad, bad, bad, bad, enterUnicode, bad, bad, // 0x50
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
-		bad, bad, backWord, bad, delForwardWord, bad, forwardWord, bad, // 0x60
+		bad, bad, backWord, bad, delForwardWord, eval, forwardWord, bad, // 0x60
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x68
 		bad, bad, bad, bad, bad, enterUnicode, historyBack, bad, // 0x70
 		bad, bad, bad, bad, bad, bad, bad, delBackWord, // 0x78
@@ -217,6 +217,13 @@ func enter(ed *editor, b byte) bool {
 	} else {
 		ed.evalForm()
 	}
+	ed.mode = topMode
+	return true
+}
+
+func eval(ed *editor, b byte) bool {
+	ed.evalForm()
+	ed.mode = topMode
 	return true
 }
 

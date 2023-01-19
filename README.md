@@ -19,17 +19,11 @@ SLIce Processing is LISP for golang
 
  - repl package
   - line wrap or rather goes past the end of the line
-   - first detect line too long, truncate
-    - start with fresh calc each time
-   - use one of ᐅ ᐊ  ❯ ❮  ᗒ ᗕ
-  - add shift to editor
-   - condition is width < pos(rune adjusted)
-   - only current line is applied
-   -
-  - keep parallel line length slice
-  - just shift current line
-   - revert to 0 after leaving line
- - set eval key (M-e)
+   - handle other bindings
+    - just shift current line
+     - revert to 0 after leaving line
+ - set eval key (M-e) - maybe use on history
+  -
 
  - future repl options
   - color for words
