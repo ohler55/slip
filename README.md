@@ -22,7 +22,6 @@ SLIce Processing is LISP for golang
    - handle other bindings
     - just shift current line
      - revert to 0 after leaving line
- - set eval key (M-e) - maybe use on history
   -
 
  - future repl options

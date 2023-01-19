@@ -719,6 +719,7 @@ shift key is denoted with a __S-__. Key bindings are:
 		"\x1b[1mM-\\\x1b[m   collapse space",
 		"\x1b[1mM-b\x1b[m   move back one word",
 		"\x1b[1mM-d\x1b[m   delete one word",
+		"\x1b[1mM-e\x1b[m   evaluate current form",
 		"\x1b[1mM-f\x1b[m   move forward one word",
 		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
 		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
