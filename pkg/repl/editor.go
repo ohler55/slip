@@ -302,6 +302,27 @@ func (ed *editor) evalForm() {
 	ed.pos = len(ed.lines[ed.line])
 }
 
+func (ed *editor) redrawLine(n int) {
+	max := int(atomic.LoadInt32(&ed.width)) - ed.foff
+	line := ed.lines[n]
+	w := 0
+	for i, r := range line {
+		w += RuneWidth(r)
+		if max <= w {
+			if n == 0 {
+				ed.setCursor(ed.v0, 1)
+				ed.clearLine()
+				_, _ = ed.out.Write([]byte(prompt))
+			} else {
+				ed.setCursor(ed.v0+n, ed.foff)
+				ed.clearLine()
+			}
+			_, _ = ed.out.Write([]byte(string(line[:i])))
+			return
+		}
+	}
+}
+
 func (ed *editor) drawLine() {
 	var rline []rune
 	back := ed.foff
@@ -345,6 +366,28 @@ func (ed *editor) lineWidth() (pw, lw int) {
 	}
 	return
 }
+
+func (ed *editor) adjustShift() {
+	max := int(atomic.LoadInt32(&ed.width)) - ed.foff - 1
+	from := 0 // from end
+	line := ed.lines[ed.line]
+	if ed.pos < ed.shift {
+		if 0 <= ed.pos {
+			ed.shift = ed.pos
+			ed.drawLine()
+		}
+	} else {
+		cnt := ed.pos
+		for ; 0 < cnt && from < max; cnt-- {
+			from += RuneWidth(line[cnt-1])
+		}
+		if ed.shift < cnt {
+			ed.shift = cnt
+			ed.drawLine()
+		}
+	}
+}
+
 func (ed *editor) runesTo(w int) (cnt int) {
 	if 0 < len(ed.lines) {
 		var r rune

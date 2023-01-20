@@ -275,43 +275,49 @@ func esc5b(ed *editor, _ byte) bool {
 }
 
 func back(ed *editor, _ byte) bool {
-	// TBD does shift need to change?
 	ed.pos--
 	if ed.pos < 0 {
 		if 0 < ed.line {
 			ed.line--
+			ed.shift = 0
 			ed.pos = len(ed.lines[ed.line])
+			ed.redrawLine(ed.line + 1)
 		} else {
 			ed.pos = 0
 		}
 	}
+	ed.adjustShift()
 	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
 
 func forward(ed *editor, _ byte) bool {
-	// TBD does shift need to change?
 	ed.pos++
 	if len(ed.lines[ed.line]) < ed.pos {
 		if ed.line+1 < len(ed.lines) {
 			ed.line++
+			ed.shift = 0
 			ed.pos = 0
+			ed.redrawLine(ed.line - 1)
 		} else {
 			ed.pos = len(ed.lines[ed.line])
 		}
 	}
+	ed.adjustShift()
 	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
 
 func up(ed *editor, _ byte) bool {
-	// TBD reset shift
 	if 0 < ed.line {
 		ed.line--
+		ed.shift = 0
+		ed.redrawLine(ed.line + 1)
 		if len(ed.lines[ed.line]) < ed.pos {
 			ed.pos = len(ed.lines[ed.line])
+			ed.adjustShift()
 		}
 	}
 	ed.setCursorCurrent()
@@ -320,11 +326,13 @@ func up(ed *editor, _ byte) bool {
 }
 
 func down(ed *editor, _ byte) bool {
-	// TBD reset shift
 	if ed.line+1 < len(ed.lines) {
 		ed.line++
+		ed.shift = 0
+		ed.redrawLine(ed.line - 1)
 		if len(ed.lines[ed.line]) < ed.pos {
 			ed.pos = len(ed.lines[ed.line])
+			ed.adjustShift()
 		}
 	}
 	ed.setCursorCurrent()
@@ -349,15 +357,18 @@ func forwardWord(ed *editor, _ byte) bool {
 }
 
 func lineBegin(ed *editor, _ byte) bool {
-	// TBD does shift need to change?
 	ed.pos = 0
+	if 0 < ed.shift {
+		ed.shift = 0
+		ed.drawLine()
+	}
 	ed.setCursorCurrent()
 	return false
 }
 
 func lineEnd(ed *editor, _ byte) bool {
-	// TBD does shift need to change?
 	ed.pos = len(ed.lines[ed.line])
+	ed.adjustShift()
 	ed.setCursorCurrent()
 	return false
 }
