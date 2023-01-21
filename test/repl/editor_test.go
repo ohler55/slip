@@ -133,10 +133,9 @@ func TestEditorEval(t *testing.T) {
 	edTest(t, []any{
 		startSteps,
 		provide("x"),
-		expect("x"),
+		until("x"),
 		provide("\r"),
-		expect("<set-cursor 3:1>"),
-		expect("3\n"),
+		until("3\n"),
 		promptSeq,
 		provide("\x03"),
 	})
@@ -173,13 +172,12 @@ func TestEditorDescribeScroll(t *testing.T) {
 	edTest(t, []any{
 		startSteps,
 		provide(strings.Repeat("\n", 20)),
-		until("<clear-to-end 22:3>"),
-		expect("<set-cursor 22:3>"),
+		until("<set-cursor 22:3>"),
 		provide("(car"),
 		until("("),
-		expect("c"),
-		expect("a"),
-		expect("r"),
+		until("c"),
+		until("a"),
+		until("r"),
 		provide("\x1b/"),
 		until("<scroll-up 1>"),
 		expect("<set-cursor 23:4>"),
@@ -197,7 +195,7 @@ func TestEditorDescribeUnknown(t *testing.T) {
 		startSteps,
 		provide("( "),
 		until("("),
-		expect(" "),
+		until(" "),
 		provide("\x02"),
 		provide("\x1b/"),
 		until("<inverse>"),
@@ -256,9 +254,9 @@ func TestEditorTabComplete(t *testing.T) {
 		startSteps,
 		provide("*pri"),
 		until("*"),
-		expect("p"),
-		expect("r"),
-		expect("i"),
+		until("p"),
+		until("r"),
+		until("i"),
 		comment("press <tab>"),
 		provide("\t"),
 		until("nt-"), // complete as much as common
@@ -334,7 +332,7 @@ func TestEditorTabComplete(t *testing.T) {
 
 		provide("\r"), // make a choice
 		until("<clear-down 3>"),
-		until("ansi*"),
+		until("/ansi*/"),
 
 		provide("\x03"),
 	})
@@ -449,8 +447,7 @@ func TestEditorDown(t *testing.T) {
 func TestEditorNL(t *testing.T) {
 	testEditorSeq(t, "ab\x02\n",
 		"a", "b", "<set-cursor 2:4>",
-		"<set-cursor 3:3>",
-		"<clear-to-end 3:3>", "b", "<set-cursor 3:3>",
+		"  b",
 	)
 }
 
@@ -480,9 +477,8 @@ func TestEditorMatchOpenClose(t *testing.T) {
 func TestEditorDelWord(t *testing.T) {
 	testEditorSeq(t, "abc def\x1b\x7f\x01\x1b\x64",
 		"a", "b", "c", " ", "d", "e", "f",
-		"<set-cursor 2:3>", "abc ",
-		"<set-cursor 2:3>",
-		"<clear-to-end 2:3>", " ",
+		"abc ",
+		" ",
 		"<set-cursor 2:3>",
 	)
 }
@@ -490,36 +486,32 @@ func TestEditorDelWord(t *testing.T) {
 func TestEditorDelChar(t *testing.T) {
 	testEditorSeq(t, "abc\x7f\x01\x04",
 		"a", "b", "c",
-		"<set-cursor 2:5>", "<clear-to-end 2:5>", "<set-cursor 2:5>",
-		"<set-cursor 2:3>",
-		"<set-cursor 2:3>", "<clear-to-end 2:3>", "b",
+		"ab",
+		"b",
 		"<set-cursor 2:3>",
 	)
 }
 
 func TestEditorDelBackwardLine(t *testing.T) {
 	testEditorSeq(t, "ab\ncd\x02\x02\x7f\x05",
-		"a", "b", "<set-cursor 3:3>", "c", "d",
-		"<set-cursor 3:4>",
-		"<set-cursor 3:3>",
-		"<clear-line 3>", "<set-cursor 2:3>", "abcd", "<set-cursor 2:7>",
+		"a", "b", "c", "d",
+		"  cd",
+		"abcd", "<set-cursor 2:7>",
 	)
 }
 
 func TestEditorDelForwardLine(t *testing.T) {
 	testEditorSeq(t, "ab\ncd\x10\x04\x05",
-		"a", "b", "<set-cursor 3:3>", "c", "d",
-		"<set-cursor 2:5>",
-		"<clear-line 3>", "<set-cursor 2:3>", "abcd", "<set-cursor 2:7>",
+		"a", "b", "c", "d",
+		"  cd",
+		"abcd", "<set-cursor 2:7>",
 	)
 }
 
 func TestEditorDelToEnd(t *testing.T) {
 	testEditorSeq(t, "abc\ndef\x10\x01\x06\x0b\x0b",
-		"a", "b", "c", "<set-cursor 3:3>", "d", "e", "f",
-		"<set-cursor 2:6>", "<set-cursor 2:4>",
-		"<clear-to-end 2:4>", "<set-cursor 2:4>",
-		"<clear-line 3>", "<clear-line 2>", "adef",
+		"a", "b", "c", "d", "e", "f",
+		"adef",
 		"<set-cursor 2:4>",
 	)
 }
@@ -527,20 +519,18 @@ func TestEditorDelToEnd(t *testing.T) {
 func TestEditorSwapChar(t *testing.T) {
 	testEditorSeq(t, "abcd\x02\x02\x14",
 		"a", "b", "c", "d",
-		"<set-cursor 2:5>",
-		"<set-cursor 2:4>", "cb", "<set-cursor 2:5>",
+		"cb", "<set-cursor 2:5>",
 	)
 }
 
 func TestEditorCollapse(t *testing.T) {
 	testEditorSeq(t, "ab  \x1b\x5c",
 		"a", "b", " ", " ",
-		"<set-cursor 2:5>", "<clear-to-end 2:5>",
 		"<set-cursor 2:5>",
 	)
 	testEditorSeq(t, "  ab\x01\x1b\x5c",
 		" ", " ", "a", "b",
-		"<set-cursor 2:3>", "<clear-to-end 2:3>", "ab",
+		"ab",
 		"<set-cursor 2:3>",
 	)
 }
@@ -548,9 +538,7 @@ func TestEditorCollapse(t *testing.T) {
 func TestEditorNlAfter(t *testing.T) {
 	testEditorSeq(t, "abcd\x02\x02\x0f",
 		"a", "b", "c", "d",
-		"<set-cursor 2:5>",
-		"<clear-to-end 2:5>",
-		"<set-cursor 3:3>", "cd", "<set-cursor 2:5>",
+		"ab", "  cd", "<set-cursor 2:5>",
 	)
 }
 
