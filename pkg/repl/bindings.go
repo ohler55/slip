@@ -227,7 +227,7 @@ func eval(ed *editor, b byte) bool {
 	return true
 }
 
-func nl(ed *editor, b byte) bool {
+func nl(ed *editor, _ byte) bool {
 	bottom := ed.v0 + len(ed.lines)
 	h := int(atomic.LoadInt32(&ed.height))
 	if h <= bottom {
@@ -235,7 +235,6 @@ func nl(ed *editor, b byte) bool {
 		ed.scroll(diff)
 		ed.v0 -= diff
 	}
-	// TBD set shift, calc line len
 	line := ed.lines[ed.line]
 	ed.lines = append(ed.lines, nil)
 	ed.line++
@@ -246,12 +245,15 @@ func nl(ed *editor, b byte) bool {
 		ed.lines[ed.line-1] = line[:ed.pos]
 		ed.lines[ed.line] = line[ed.pos:]
 	}
-	ed.setCursorPos(ed.line-1, ed.pos)
-	ed.clearToEnd()
-	for i := ed.line; i < len(ed.lines); i++ {
-		ed.setCursor(ed.v0+i, ed.foff)
-		ed.clearToEnd()
-		_, _ = ed.out.Write([]byte(string(ed.lines[i])))
+	ed.shift = 0
+	ed.setCursorPos(ed.line-1, 1)
+	ed.clearLine()
+	ed.redrawLine(ed.line-1, true)
+	ed.clearLine()
+	ed.adjustShift()
+	ed.drawLine()
+	for i := ed.line + 1; i < len(ed.lines); i++ {
+		ed.redrawLine(i, false)
 	}
 	ed.pos = 0
 	ed.setCursorCurrent()
@@ -281,7 +283,7 @@ func back(ed *editor, _ byte) bool {
 			ed.line--
 			ed.shift = 0
 			ed.pos = len(ed.lines[ed.line])
-			ed.redrawLine(ed.line + 1)
+			ed.redrawLine(ed.line+1, false)
 		} else {
 			ed.pos = 0
 		}
@@ -299,7 +301,7 @@ func forward(ed *editor, _ byte) bool {
 			ed.line++
 			ed.shift = 0
 			ed.pos = 0
-			ed.redrawLine(ed.line - 1)
+			ed.redrawLine(ed.line-1, false)
 		} else {
 			ed.pos = len(ed.lines[ed.line])
 		}
@@ -314,7 +316,7 @@ func up(ed *editor, _ byte) bool {
 	if 0 < ed.line {
 		ed.line--
 		ed.shift = 0
-		ed.redrawLine(ed.line + 1)
+		ed.redrawLine(ed.line+1, false)
 		if len(ed.lines[ed.line]) < ed.pos {
 			ed.pos = len(ed.lines[ed.line])
 			ed.adjustShift()
@@ -329,7 +331,7 @@ func down(ed *editor, _ byte) bool {
 	if ed.line+1 < len(ed.lines) {
 		ed.line++
 		ed.shift = 0
-		ed.redrawLine(ed.line - 1)
+		ed.redrawLine(ed.line-1, false)
 		if len(ed.lines[ed.line]) < ed.pos {
 			ed.pos = len(ed.lines[ed.line])
 			ed.adjustShift()
@@ -540,10 +542,12 @@ func collapse(ed *editor, _ byte) bool {
 }
 
 func nlAfter(ed *editor, _ byte) bool {
-	// TBD does shift need to change?
 	nl(ed, ' ')
 	ed.line--
+	ed.redrawLine(ed.line+1, true)
 	ed.pos = len(ed.lines[ed.line])
+	ed.adjustShift()
+	ed.drawLine()
 	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false

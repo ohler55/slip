@@ -19,6 +19,12 @@ SLIce Processing is LISP for golang
 
  - repl package
   - line wrap or rather goes past the end of the line
+   - simplify drawing
+    - drawLine(n int)
+     - if current ...
+     - else ...
+    - remove redrawLine
+
    - handle other bindings
     - just shift current line
      - revert to 0 after leaving line

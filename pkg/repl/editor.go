@@ -196,6 +196,7 @@ func (ed *editor) read() (out []byte) {
 		ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 		ed.lines = Form{{}}
 	} else {
+		ed.adjustShift()
 		ed.setCursorCurrent()
 	}
 top:
@@ -302,7 +303,7 @@ func (ed *editor) evalForm() {
 	ed.pos = len(ed.lines[ed.line])
 }
 
-func (ed *editor) redrawLine(n int) {
+func (ed *editor) redrawLine(n int, always bool) {
 	max := int(atomic.LoadInt32(&ed.width)) - ed.foff
 	line := ed.lines[n]
 	w := 0
@@ -320,6 +321,16 @@ func (ed *editor) redrawLine(n int) {
 			_, _ = ed.out.Write([]byte(string(line[:i])))
 			return
 		}
+	}
+	if always {
+		ed.setCursor(ed.v0+n, 1)
+		ed.clearLine()
+		if n == 0 {
+			_, _ = ed.out.Write([]byte(prompt))
+		} else {
+			ed.setCursor(ed.v0+n, ed.foff)
+		}
+		_, _ = ed.out.Write([]byte(string(line)))
 	}
 }
 
