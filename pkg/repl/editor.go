@@ -43,6 +43,7 @@ type editor struct {
 	width      int32
 	height     int32
 	depth      int
+	shift      int // rune shift on current line
 	origState  *term.State
 	hist       History
 	override   func(ed *editor) bool // return true if handled
@@ -124,16 +125,8 @@ func (ed *editor) removeWord(word string) {
 }
 
 func (ed *editor) display() {
-	ed.setCursor(ed.v0, 1)
-	ed.clearLine()
-	_, _ = ed.out.Write([]byte(prompt))
-	ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
-	for i, line := range ed.lines {
-		ed.setCursor(ed.v0+i, ed.foff)
-		if 0 < i {
-			ed.clearLine()
-		}
-		_, _ = ed.out.Write([]byte(string(line)))
+	for i := 0; i < len(ed.lines); i++ {
+		ed.drawLine(i)
 	}
 	ed.setCursorCurrent()
 }
@@ -195,6 +188,7 @@ func (ed *editor) read() (out []byte) {
 		ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 		ed.lines = Form{{}}
 	} else {
+		ed.adjustShift(true)
 		ed.setCursorCurrent()
 	}
 top:
@@ -301,19 +295,118 @@ func (ed *editor) evalForm() {
 	ed.pos = len(ed.lines[ed.line])
 }
 
-func (ed *editor) addRune(r rune) {
-	if ed.pos == len(ed.lines[ed.line]) {
-		_, _ = ed.out.Write([]byte(string([]rune{r})))
-		ed.lines[ed.line] = append(ed.lines[ed.line], r)
+func (ed *editor) drawLine(n int) {
+	if len(ed.lines) <= n {
+		ed.setCursor(ed.v0+n, 1)
+		ed.clearLine()
+		return
+	}
+	max := int(atomic.LoadInt32(&ed.width)) - ed.foff
+	var rline []rune
+	back := ed.foff
+	line := ed.lines[n]
+
+	switch {
+	case ed.line == n && 0 < ed.shift:
+		// rline = append(rline, 'ᐊ', ' ')
+		rline = append(rline, 'ᗕ', ' ')
+		back = 2
+		line = line[ed.shift:]
+	case 0 < n:
+		rline = append(rline, ' ', ' ')
+		back = 2
+	default:
+		rline = append(rline, []rune(prompt)...)
+	}
+	wp := 0
+	for _, r := range line {
+		wp += RuneWidth(r)
+		if wp <= max {
+			rline = append(rline, r)
+			continue
+		}
+		rline[len(rline)-1] = ' '
+		rline = append(rline, 'ᗒ')
+		break
+	}
+	ed.setCursor(ed.v0+n, ed.foff-back)
+	ed.clearLine()
+	_, _ = ed.out.Write([]byte(string(rline)))
+}
+
+func (ed *editor) lineWidth() (pw, lw int) {
+	if 0 < len(ed.lines) {
+		for i, r := range ed.lines[ed.line] {
+			rw := RuneWidth(r)
+			lw += rw
+			if i < ed.pos {
+				pw += rw
+			}
+		}
+	}
+	return
+}
+
+func (ed *editor) adjustShift(draw bool) {
+	max := int(atomic.LoadInt32(&ed.width)) - ed.foff - 1
+	from := 0 // from end
+	line := ed.lines[ed.line]
+	if ed.pos < ed.shift {
+		if 0 <= ed.pos {
+			ed.shift = ed.pos
+		}
 	} else {
-		line := ed.lines[ed.line]
+		cnt := ed.pos
+		for ; 0 < cnt && from < max; cnt-- {
+			from += RuneWidth(line[cnt-1])
+		}
+		if ed.shift < cnt {
+			ed.shift = cnt
+		}
+	}
+	if draw {
+		ed.drawLine(ed.line)
+	}
+}
+
+func (ed *editor) runesTo(w int) (cnt int) {
+	if 0 < len(ed.lines) {
+		var r rune
+		for cnt, r = range ed.lines[ed.line] {
+			w -= RuneWidth(r)
+			if w <= 0 {
+				cnt++
+				break
+			}
+		}
+	}
+	return
+}
+
+func (ed *editor) addRune(r rune) {
+	if len(ed.lines) == 0 {
+		ed.lines = [][]rune{}
+	}
+	line := ed.lines[ed.line]
+	if ed.pos == len(line) {
+		line = append(line, r)
+	} else {
 		end := line[ed.pos:]
 		line = append(line[:ed.pos], append([]rune{r}, end...)...)
-		ed.lines[ed.line] = line
-		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
-		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos+1)
 	}
+	ed.lines[ed.line] = line
 	ed.pos++
+	max := int(atomic.LoadInt32(&ed.width)) - ed.foff
+	if pw, lw := ed.lineWidth(); max < lw {
+		if max <= pw {
+			ed.shift = ed.runesTo(pw - max)
+		}
+		ed.drawLine(ed.line)
+	} else {
+		ed.setCursor(ed.v0+ed.line, ed.foff+ed.pos-1)
+		_, _ = ed.out.Write([]byte(string(line[ed.pos-1:])))
+	}
+	ed.setCursorCurrent()
 }
 
 func (ed *editor) getSize() (w, h int) {
@@ -389,6 +482,7 @@ func (ed *editor) setCursorPos(line, pos int) {
 			cpos += RuneWidth(rline[i])
 		}
 	}
+	cpos -= ed.shift
 	ed.setCursor(ed.v0+line, cpos)
 }
 
@@ -766,7 +860,8 @@ func (ed *editor) setForm(form Form) {
 	ed.lines = form
 	ed.line = len(ed.lines) - 1
 	ed.pos = len(ed.lines[ed.line])
-
+	ed.shift = 0
+	ed.adjustShift(false)
 	bottom := ed.v0 + len(ed.lines)
 	h := int(atomic.LoadInt32(&ed.height))
 	if h <= bottom {

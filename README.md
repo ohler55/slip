@@ -11,11 +11,14 @@ SLIce Processing is LISP for golang
   - function.go
   - lambda.go
 
- - method or function to get flavor of instance and one to check the flavor
+ - flavors
+  - method or function to get flavor of instance and one to check the flavor
+   :flavor
+   (flavor name) => flavor or nil
+  - make gettable and settable support listing the vars
+   - readable-instance-variables as alias for gettable-instance-variables
+   - writable-instance-variables as alias for settable-instance-variables
 
- - repl package
-  - line wrap or rather goes past the end of the line
-   - use one of ᐅ ᐊ  ❯ ❮  ᗒ ᗕ
 
  - future repl options
   - color for words
