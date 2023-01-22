@@ -23,7 +23,6 @@ func TestDefflavorBasic(t *testing.T) {
 `)
 	scope := slip.NewScope()
 	tt.Equal(t, slip.Symbol("strawberry"), code.Eval(scope))
-	defer undefFlavor("strawberry")
 
 	f := slip.ReadString("strawberry").Eval(scope)
 	sf := f.Simplify()
@@ -35,6 +34,33 @@ func TestDefflavorBasic(t *testing.T) {
 
 	daemons = jp.MustParseString("methods[*][?(@.name == ':set-size')]").Get(sf)
 	tt.Equal(t, 1, len(daemons))
+}
+
+func TestDefflavorGettableSettable(t *testing.T) {
+	defer undefFlavor("strawberry")
+
+	code := slip.ReadString(`
+(defflavor strawberry ((size "medium") color) ()
+ (:gettable-instance-variables size)
+ (:settable-instance-variables size))
+`)
+	scope := slip.NewScope()
+	tt.Equal(t, slip.Symbol("strawberry"), code.Eval(scope))
+
+	f := slip.ReadString("strawberry").Eval(scope)
+	sf := f.Simplify()
+
+	daemons := jp.MustParseString("methods[*][?(@.name == ':size')]").Get(sf)
+	tt.Equal(t, 1, len(daemons))
+
+	daemons = jp.MustParseString("methods[*][?(@.name == ':color')]").Get(sf)
+	tt.Equal(t, 0, len(daemons))
+
+	daemons = jp.MustParseString("methods[*][?(@.name == ':set-size')]").Get(sf)
+	tt.Equal(t, 1, len(daemons))
+
+	daemons = jp.MustParseString("methods[*][?(@.name == ':set-color')]").Get(sf)
+	tt.Equal(t, 0, len(daemons))
 }
 
 func TestDefflavorInherit(t *testing.T) {
@@ -138,6 +164,24 @@ func TestDefflavorBadKeywords(t *testing.T) {
 	tt.Panic(t, func() {
 		slip.ReadString(`
 (defflavor f1 ((b 2)) () (:init-keywords t))
+`).Eval(slip.NewScope())
+	})
+}
+
+func TestDefflavorBadGettable(t *testing.T) {
+	defer undefFlavors("f1")
+	tt.Panic(t, func() {
+		slip.ReadString(`
+(defflavor f1 ((b 2)) () (:gettable-instance-variables t))
+`).Eval(slip.NewScope())
+	})
+}
+
+func TestDefflavorBadSettable(t *testing.T) {
+	defer undefFlavors("f1")
+	tt.Panic(t, func() {
+		slip.ReadString(`
+(defflavor f1 ((b 2)) () (:settable-instance-variables t))
 `).Eval(slip.NewScope())
 	})
 }

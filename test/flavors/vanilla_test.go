@@ -7,8 +7,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func TestVanilla(t *testing.T) {
@@ -26,6 +28,9 @@ func TestVanilla(t *testing.T) {
 	id := slip.ReadString("(send berry :id)").Eval(scope)
 	tt.SameType(t, slip.Fixnum(0), id)
 
+	f := slip.ReadString("(send berry :flavor)").Eval(scope)
+	tt.Equal(t, "#<flavor strawberry>", f.String())
+
 	has := slip.ReadString("(send berry :operation-handler-p :size)").Eval(scope)
 	tt.Equal(t, slip.True, has)
 	has = slip.ReadString("(send berry :operation-handler-p :x)").Eval(scope)
@@ -34,8 +39,8 @@ func TestVanilla(t *testing.T) {
 
 	methods := slip.ReadString("(send berry :which-operations)").Eval(scope)
 	tt.Equal(t,
-		"(:describe :eval-inside-yourself :id :init :operation-handler-p :print-self "+
-			":send-if-handles :set-size :size\n           :which-operations)",
+		"(:describe :eval-inside-yourself :flavor :id :init :inspect :operation-handler-p :print-self "+
+			":send-if-handles :set-size\n           :size :which-operations)",
 		methods.String())
 
 	pr, pw, err := os.Pipe()
@@ -83,4 +88,9 @@ func TestVanilla(t *testing.T) {
 	size = slip.ReadString("(send berry :eval-inside-yourself 'size)").Eval(scope)
 	tt.Equal(t, slip.String("medium"), size)
 	tt.Panic(t, func() { _ = slip.ReadString("(send berry :eval-inside-yourself)").Eval(scope) })
+
+	bag := slip.ReadString("(send berry :inspect)").Eval(scope)
+	tt.SameType(t, &flavors.Instance{}, bag)
+	inst := bag.(*flavors.Instance)
+	tt.Equal(t, "{flavor: strawberry vars: {size: medium}}", pretty.SEN(inst.Any))
 }

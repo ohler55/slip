@@ -61,12 +61,16 @@ func (f *Typep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if len(ta) == 0 && strings.EqualFold("null", string(sym)) {
 			return slip.True
 		}
-		if strings.EqualFold(string(ta.Hierarchy()[0]), string(sym)) {
-			return slip.True
+		for _, h := range ta.Hierarchy() {
+			if strings.EqualFold(string(h), string(sym)) {
+				return slip.True
+			}
 		}
 	default:
-		if strings.EqualFold(string(ta.Hierarchy()[0]), string(sym)) {
-			return slip.True
+		for _, h := range ta.Hierarchy() {
+			if strings.EqualFold(string(h), string(sym)) {
+				return slip.True
+			}
 		}
 	}
 	return nil

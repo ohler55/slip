@@ -19,8 +19,10 @@ var vanilla = Flavor{
 	methods: map[string][]*method{
 		":describe":             {{name: ":describe", primary: describeCaller(true)}},
 		":eval-inside-yourself": {{name: ":eval-inside-yourself", primary: insideCaller(true)}},
+		":flavor":               {{name: ":flavor", primary: flavorCaller(true)}},
 		":init":                 {{name: ":init", primary: initCaller(true)}},
 		":id":                   {{name: ":id", primary: idCaller(true)}},
+		":inspect":              {{name: ":inspect", primary: inspectCaller(true)}},
 		":operation-handler-p":  {{name: ":operation-handler-p", primary: hasOpCaller(true)}},
 		":print-self":           {{name: ":print-self", primary: printCaller(true)}},
 		":send-if-handles":      {{name: ":send-if-handles", primary: sendIfCaller(true)}},
@@ -59,6 +61,13 @@ type idCaller bool
 func (caller idCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
 	return slip.Fixnum(uintptr(unsafe.Pointer(obj)))
+}
+
+type flavorCaller bool
+
+func (caller flavorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*Instance)
+	return obj.Flavor
 }
 
 type hasOpCaller bool
@@ -135,4 +144,15 @@ func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 		panic(fmt.Sprintf("Method eval-inside-yourself expects 1 argument but received %d.", len(args)))
 	}
 	return s.Eval(args[0], depth+1)
+}
+
+type inspectCaller bool
+
+func (caller inspectCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*Instance)
+	cf := allFlavors["bag-flavor"]
+	inst := cf.MakeInstance()
+	inst.Any = obj.Simplify()
+
+	return inst
 }

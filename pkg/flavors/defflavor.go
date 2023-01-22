@@ -308,10 +308,20 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 				}
 			}
 			slip.PanicType("defflavor :documentation", vals[0], "string")
-		case ":gettable-instance-variables":
-			for k := range nf.defaultVars {
-				if k != "self" {
-					nf.DefMethod(":"+k, "", getter(k))
+		case ":gettable-instance-variables", ":readable-instance-variables":
+			if 0 < len(vals) {
+				for i := len(vals) - 1; 0 <= i; i-- {
+					if sym, ok := vals[i].(slip.Symbol); ok {
+						nf.DefMethod(":"+string(sym), "", getter(sym))
+					} else {
+						panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+					}
+				}
+			} else {
+				for k := range nf.defaultVars {
+					if k != "self" {
+						nf.DefMethod(":"+k, "", getter(k))
+					}
 				}
 			}
 		case ":included-flavors":
@@ -350,10 +360,20 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 			nf.requiredVars = valsStringList(vals)
 		case ":required-methods":
 			nf.requiredMethods = valsStringList(vals)
-		case ":settable-instance-variables":
-			for k := range nf.defaultVars {
-				if k != "self" {
-					nf.DefMethod(":set-"+k, "", setter(k))
+		case ":settable-instance-variables", ":writable-instance-variables":
+			if 0 < len(vals) {
+				for i := len(vals) - 1; 0 <= i; i-- {
+					if sym, ok := vals[i].(slip.Symbol); ok {
+						nf.DefMethod(":set-"+string(sym), "", setter(sym))
+					} else {
+						panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+					}
+				}
+			} else {
+				for k := range nf.defaultVars {
+					if k != "self" {
+						nf.DefMethod(":set-"+k, "", setter(k))
+					}
 				}
 			}
 		default:

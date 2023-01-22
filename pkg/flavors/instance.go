@@ -62,7 +62,7 @@ func (obj *Instance) Equal(other slip.Object) (eq bool) {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *Instance) Hierarchy() []slip.Symbol {
-	return []slip.Symbol{InstanceSymbol, slip.TrueSymbol}
+	return []slip.Symbol{slip.Symbol(obj.Flavor.name), InstanceSymbol, slip.TrueSymbol}
 }
 
 // Eval returns self.

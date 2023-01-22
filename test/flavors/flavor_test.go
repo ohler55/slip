@@ -34,8 +34,10 @@ func TestFlavorSimple(t *testing.T) {
   methods: [
     [{from: vanilla-flavor name: ":describe" primary: true}]
     [{from: vanilla-flavor name: ":eval-inside-yourself" primary: true}]
+    [{from: vanilla-flavor name: ":flavor" primary: true}]
     [{from: vanilla-flavor name: ":id" primary: true}]
     [{from: vanilla-flavor name: ":init" primary: true}]
+    [{from: vanilla-flavor name: ":inspect" primary: true}]
     [{from: vanilla-flavor name: ":operation-handler-p" primary: true}]
     [{from: vanilla-flavor name: ":print-self" primary: true}]
     [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
@@ -78,8 +80,10 @@ func TestFlavorDescribeBasic(t *testing.T) {
   Methods:
     :describe
     :eval-inside-yourself
+    :flavor
     :id
     :init
+    :inspect
     :operation-handler-p
     :print-self
     :send-if-handles
@@ -94,8 +98,10 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"  Methods:\n"+
 		"    :describe\n"+
 		"    :eval-inside-yourself\n"+
+		"    :flavor\n"+
 		"    :id\n"+
 		"    :init\n"+
+		"    :inspect\n"+
 		"    :operation-handler-p\n"+
 		"    :print-self\n"+
 		"    :send-if-handles\n"+

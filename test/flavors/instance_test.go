@@ -31,7 +31,7 @@ func TestInstance(t *testing.T) {
 			"flavor": "blueberry",
 			"vars":   map[string]any{"size": "medium"},
 		},
-		Hierarchy: "instance.t",
+		Hierarchy: "blueberry.instance.t",
 		Equals: []*sliptest.EqTest{
 			{Other: berry, Expect: true},
 			{Other: slip.True, Expect: false},

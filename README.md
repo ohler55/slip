@@ -5,19 +5,55 @@ SLIce Processing is LISP for golang
 -------------------------------------------------------------------------------
 
 - next
- - format
+
+- repl is broken after history
+
+ - flavors
+   (describe-flavor name|flavor)
+   - flavor as a receiver
+    :name
+    :describe
+    :which-operations
+    :inspect => bag
+     - add to vanilla as well
+     - (make-instance bag-flavor)
+      - then instance.Any = simplify
+
+ - support pkg:func syntax
+
+ - cl
+   - assoc
+   - eq
+   - equal
+   - coerce
+   - intern (string to symbol)
+   - apply
+   - eval
+  - list
+   - nth
+   - map
+   - mapc
+   - mapcar
+   - mapcon
+   - mapcan
+   - map-into
+   - mapl
+   - maplist
+
+  - number
+   - incf
+   - decf
+
+ - bag
+  - remove
+  - modify
 
  - unit tests
   - function.go
   - lambda.go
 
- - flavors
-  - method or function to get flavor of instance and one to check the flavor
-   :flavor
-   (flavor name) => flavor or nil
-  - make gettable and settable support listing the vars
-   - readable-instance-variables as alias for gettable-instance-variables
-   - writable-instance-variables as alias for settable-instance-variables
+
+ - defmacro
 
 
  - future repl options
@@ -57,6 +93,7 @@ SLIce Processing is LISP for golang
  - clrhash
  - sxhash
  - with-hash-table-iterator
+ - maphash
 
  - macro
   - expand on read
@@ -80,6 +117,7 @@ SLIce Processing is LISP for golang
  - #. is read time eval of object if *read-eval* is true else panic
 
 - use (type-of x) or (typep x 'long-float)
+ - should work with flavors also (use heirachy)
 
 - how to handle marco characters in compile
  - backquote ` of list allow use of , options
@@ -113,7 +151,7 @@ SLIce Processing is LISP for golang
    - atom
    - eq
    - equal
-   - defvar
+   + defvar
    - defun - create a named Dynamic
    - lambda - create a Dynamic
    - defmacro
