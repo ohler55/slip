@@ -7,17 +7,14 @@ SLIce Processing is LISP for golang
 - next
 
 - repl is broken after history
+ - how to reproduce...
+ - on resize change right margin unless already set
+  - is it possible to know?
 
  - flavors
-   (describe-flavor name|flavor)
-   - flavor as a receiver
-    :name
-    :describe
-    :which-operations
-    :inspect => bag
-     - add to vanilla as well
-     - (make-instance bag-flavor)
-      - then instance.Any = simplify
+   (describe-flavor flavor)
+  - test (describe-method flavor method)
+  - test flavor as a receiver
 
  - support pkg:func syntax
 

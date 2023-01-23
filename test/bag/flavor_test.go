@@ -19,7 +19,7 @@ func TestBagFlavorBasic(t *testing.T) {
 	_ = slip.ReadString("(setq bag (make-instance 'bag-flavor))").Eval(scope)
 
 	// Verify bag-flavor inherits from vanilla-flavor
-	result := slip.ReadString("(send bag :operation-handler-p :describe)").Eval(scope)
+	result := slip.ReadString("(send bag :operation-handled-p :describe)").Eval(scope)
 	tt.Equal(t, slip.True, result)
 }
 

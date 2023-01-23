@@ -4,6 +4,7 @@ package flavors
 
 import (
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 
@@ -17,7 +18,8 @@ var allFlavors = map[string]*Flavor{vanilla.name: &vanilla}
 
 func init() {
 	slip.DefConstant(FlavorSymbol, FlavorSymbol,
-		`A _flavor_ encapsulates a class of objects.`)
+		`A _flavor_ encapsulates a class of objects or instances.
+The _flavor_ itself is an instance and can be sent a limited set of methods.`)
 }
 
 // Flavor of Objects.
@@ -323,4 +325,42 @@ func (obj *Flavor) describeStrings(b []byte, label string, list []string, indent
 		}
 	}
 	return b
+}
+
+// Receive a method invocation from the send function. Not intended to be
+// call by any code other than the send function but is public to allow it
+// to be over-ridden.
+func (obj *Flavor) Receive(message string, args slip.List, depth int) (result slip.Object) {
+	var lo bool
+top:
+	switch message {
+	case ":name":
+		result = slip.String(obj.name)
+	case ":describe":
+		w := slip.CurrentPackage.JustGet("*standard-output*").(io.Writer)
+		ansi := slip.CurrentPackage.JustGet("*print-ansi*") != nil
+		right := int(slip.CurrentPackage.JustGet("*print-right-margin*").(slip.Fixnum))
+		_, _ = w.Write(obj.Describe(nil, 0, right, ansi))
+		result = slip.Novalue
+	case ":which-operations":
+		result = slip.List{
+			slip.Symbol(":which-operations"),
+			slip.Symbol(":name"),
+			slip.Symbol(":inspect"),
+			slip.Symbol(":describe"),
+		}
+	case ":inspect":
+		cf := allFlavors["bag-flavor"]
+		inst := cf.MakeInstance()
+		inst.Any = obj.Simplify()
+		result = inst
+	default:
+		if lo {
+			panic(fmt.Sprintf("%s is not a valid method for a Flavor.", message))
+		}
+		message = strings.ToLower(message)
+		lo = true
+		goto top
+	}
+	return
 }

@@ -38,7 +38,7 @@ The path must follow the JSONPath format. Default: ".."`,
 				{
 					Name: "as-lisp",
 					Type: "boolean",
-					Text: `If not nil then the value to the function is a LISP value otherwise a new _bag_.`,
+					Text: `If not nil then the value to the _function_ is a LISP value otherwise a new _bag_.`,
 				},
 			},
 			Return: "bag",

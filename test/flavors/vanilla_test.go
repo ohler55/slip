@@ -31,15 +31,15 @@ func TestVanilla(t *testing.T) {
 	f := slip.ReadString("(send berry :flavor)").Eval(scope)
 	tt.Equal(t, "#<flavor strawberry>", f.String())
 
-	has := slip.ReadString("(send berry :operation-handler-p :size)").Eval(scope)
+	has := slip.ReadString("(send berry :operation-handled-p :size)").Eval(scope)
 	tt.Equal(t, slip.True, has)
-	has = slip.ReadString("(send berry :operation-handler-p :x)").Eval(scope)
+	has = slip.ReadString("(send berry :operation-handled-p :x)").Eval(scope)
 	tt.Nil(t, has)
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :operation-handler-p)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :operation-handled-p)").Eval(scope) })
 
 	methods := slip.ReadString("(send berry :which-operations)").Eval(scope)
 	tt.Equal(t,
-		"(:describe :eval-inside-yourself :flavor :id :init :inspect :operation-handler-p :print-self "+
+		"(:describe :eval-inside-yourself :flavor :id :init :inspect :operation-handled-p :print-self "+
 			":send-if-handles :set-size\n           :size :which-operations)",
 		methods.String())
 

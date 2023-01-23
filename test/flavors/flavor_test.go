@@ -38,7 +38,7 @@ func TestFlavorSimple(t *testing.T) {
     [{from: vanilla-flavor name: ":id" primary: true}]
     [{from: vanilla-flavor name: ":init" primary: true}]
     [{from: vanilla-flavor name: ":inspect" primary: true}]
-    [{from: vanilla-flavor name: ":operation-handler-p" primary: true}]
+    [{from: vanilla-flavor name: ":operation-handled-p" primary: true}]
     [{from: vanilla-flavor name: ":print-self" primary: true}]
     [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
     [{from: vanilla-flavor name: ":which-operations" primary: true}]
@@ -84,7 +84,7 @@ func TestFlavorDescribeBasic(t *testing.T) {
     :id
     :init
     :inspect
-    :operation-handler-p
+    :operation-handled-p
     :print-self
     :send-if-handles
     :which-operations
@@ -102,7 +102,7 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"    :id\n"+
 		"    :init\n"+
 		"    :inspect\n"+
-		"    :operation-handler-p\n"+
+		"    :operation-handled-p\n"+
 		"    :print-self\n"+
 		"    :send-if-handles\n"+
 		"    :which-operations\n", string(out))

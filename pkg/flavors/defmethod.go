@@ -28,6 +28,12 @@ func init() {
 					Type: "lambda-list",
 					Text: `The arguments to the method. A standard lambda-list`,
 				},
+				{Name: slip.AmpOptional},
+				{
+					Name: "documentation",
+					Type: "string",
+					Text: `Documentation for the method.`,
+				},
 				{Name: slip.AmpRest},
 				{
 					Name: "forms",
@@ -89,8 +95,21 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	if flavor == nil {
 		slip.PanicType("flavor for defmethod", ml[len(ml)-1], "name of flavor")
 	}
-	lc := slip.DefLambda("defmethod", s, args[:pos])
-	flavor.DefMethod(method, daemon, lc)
+	if 0 < pos {
+		var str slip.String
+		if str, ok = args[pos-1].(slip.String); ok {
+			pos--
+			flavor.DefMethod(
+				method,
+				daemon,
+				&Daemon{
+					caller: slip.DefLambda("defmethod", s, args[:pos]), // TBD use method instead of "defmethod"
+					docs:   string(str),
+				})
+			return
+		}
+	}
+	flavor.DefMethod(method, daemon, slip.DefLambda("defmethod", s, args[:pos])) // TBD use method instead of "defmethod"
 
 	return nil
 }
