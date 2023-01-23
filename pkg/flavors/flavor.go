@@ -338,6 +338,12 @@ top:
 		result = slip.String(obj.name)
 	case ":describe":
 		w := slip.CurrentPackage.JustGet("*standard-output*").(io.Writer)
+		if 0 < len(args) {
+			var ok bool
+			if w, ok = args[0].(io.Writer); !ok {
+				slip.PanicType("describe output-stream", args[0], "output-stream")
+			}
+		}
 		ansi := slip.CurrentPackage.JustGet("*print-ansi*") != nil
 		right := int(slip.CurrentPackage.JustGet("*print-right-margin*").(slip.Fixnum))
 		_, _ = w.Write(obj.Describe(nil, 0, right, ansi))
