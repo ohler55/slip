@@ -21,6 +21,7 @@ func TestDefwhopperBasic(t *testing.T) {
 (defmethod (berry :rot) () (princ "berry rot" out) (terpri out))
 (defmethod (berry :after :rot) () (princ "berry after rot" out) (terpri out))
 (defwhopper (berry :rot) ()
+ "What a whopper!"
  (princ "berry whopper rot start" out) (terpri out)
  (continue-whopper)
  (princ "berry whopper rot done" out) (terpri out))

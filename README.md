@@ -10,6 +10,8 @@ SLIce Processing is LISP for golang
  - how to reproduce...
  - on resize change right margin unless already set
   - is it possible to know?
+   - use setHook with flag indicating it was called
+   - if flag not set then change DefaultPrinter.RightMargin
 
  - flavors
    (describe-flavor flavor)

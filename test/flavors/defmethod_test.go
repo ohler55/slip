@@ -16,7 +16,7 @@ func defineBerry(t *testing.T) {
  :gettable-instance-variables
  :settable-instance-variables
  :initable-instance-variables)
-(defmethod (berry :rot) () (setq color 'brown))
+(defmethod (berry :rot) () "When berries rot they turn brown." (setq color 'brown))
 (defmethod (berry :before :color) () (princ "berry before color") (terpri))
 (defmethod (berry :after :rot) () (princ "berry after rot") (terpri))
 `).Eval(slip.NewScope())
@@ -25,12 +25,12 @@ func defineBerry(t *testing.T) {
 func defineBlueberry(t *testing.T) {
 	_ = slip.ReadString(`
 (defflavor blueberry () (berry))
-(defmethod (blueberry :before :rot) () (princ "blueberry before rot") (terpri))
+(defmethod (blueberry :before :rot) () "Berries that are blue." (princ "blueberry before rot") (terpri))
 (defmethod (blueberry :after :rot) () (princ "blueberry after rot") (terpri))
 `).Eval(slip.NewScope())
 }
 
-func TestDefMethodBasic(t *testing.T) {
+func TestDefmethodBasic(t *testing.T) {
 	defer undefFlavor("berry")
 	defineBerry(t)
 
@@ -41,7 +41,7 @@ func TestDefMethodBasic(t *testing.T) {
 	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':color')].before").First(sf))
 }
 
-func TestDefMethodInherit(t *testing.T) {
+func TestDefmethodInherit(t *testing.T) {
 	defer undefFlavors("berry", "blueberry")
 	defineBerry(t)
 	defineBlueberry(t)
@@ -56,7 +56,7 @@ func TestDefMethodInherit(t *testing.T) {
 	tt.Equal(t, "berry", jp.C("from").First(rot[1]))
 }
 
-func TestDefMethodArgCount(t *testing.T) {
+func TestDefmethodArgCount(t *testing.T) {
 	defer undefFlavor("berry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
@@ -66,7 +66,7 @@ func TestDefMethodArgCount(t *testing.T) {
 	})
 }
 
-func TestDefMethodNotList(t *testing.T) {
+func TestDefmethodNotList(t *testing.T) {
 	defer undefFlavor("berry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
@@ -76,7 +76,7 @@ func TestDefMethodNotList(t *testing.T) {
 	})
 }
 
-func TestDefMethodLowDesignatorCount(t *testing.T) {
+func TestDefmethodLowDesignatorCount(t *testing.T) {
 	defer undefFlavor("berry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
@@ -86,7 +86,7 @@ func TestDefMethodLowDesignatorCount(t *testing.T) {
 	})
 }
 
-func TestDefMethodHighDesignatorCount(t *testing.T) {
+func TestDefmethodHighDesignatorCount(t *testing.T) {
 	defer undefFlavor("berry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
@@ -96,7 +96,7 @@ func TestDefMethodHighDesignatorCount(t *testing.T) {
 	})
 }
 
-func TestDefMethodBadDesignator(t *testing.T) {
+func TestDefmethodBadDesignator(t *testing.T) {
 	defer undefFlavor("berry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
@@ -106,7 +106,7 @@ func TestDefMethodBadDesignator(t *testing.T) {
 	})
 }
 
-func TestDefMethodBadDaemon(t *testing.T) {
+func TestDefmethodBadDaemon(t *testing.T) {
 	defer undefFlavor("berry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
@@ -116,7 +116,7 @@ func TestDefMethodBadDaemon(t *testing.T) {
 	})
 }
 
-func TestDefMethodNotFlavor(t *testing.T) {
+func TestDefmethodNotFlavor(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`(defmethod (nothing :rot) ())`).Eval(slip.NewScope())
 	})

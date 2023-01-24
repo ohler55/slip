@@ -847,7 +847,9 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 		ret       bool
 	)
 	b = append(b, indentSpaces[:indent]...)
-	for _, c := range []byte(text) {
+	ba := []byte(text)
+	last := len(ba) - 1
+	for i, c := range ba {
 		if c == '_' {
 			if ansi {
 				emp++
@@ -897,7 +899,9 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 			} else {
 				lastSpace = len(b)
 				spaceCol = col
-				b = append(b, ' ')
+				if i < last {
+					b = append(b, 'z')
+				}
 				col++
 				ret = true
 			}

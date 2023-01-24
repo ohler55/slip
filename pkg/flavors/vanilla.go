@@ -119,6 +119,7 @@ func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 func (caller hasOpCaller) Docs() string {
 	return `__:operation-handled-p__ _method_ => _boolean_
 
+
 Returns _t_ if the instance handles the method and _nil_ otherwise.
 `
 }
