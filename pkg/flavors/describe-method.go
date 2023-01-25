@@ -5,12 +5,9 @@ package flavors
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/ohler55/slip"
 )
-
-var spaces = "                                                                                "
 
 func init() {
 	slip.Define(
@@ -103,11 +100,8 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	b = append(b, cf.name...)
 	b = append(b, off...)
 	b = append(b, '\n')
-	if len(spaces) < 2*len(ma) {
-		spaces = strings.Repeat("  ", len(ma))
-	}
-	appendDaemon := func(m *method, caller slip.Caller, indent int, daemon string) {
-		b = append(b, spaces[:indent]...)
+	appendDaemon := func(m *method, caller slip.Caller, daemon string) {
+		b = append(b, "  "...)
 		b = append(b, emp...)
 		b = append(b, m.from.name...)
 		b = append(b, off...)
@@ -115,30 +109,30 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 		b = append(b, daemon...)
 		b = append(b, '\n')
 		if hd, ok := caller.(HasDocs); ok {
-			b = slip.AppendDoc(b, hd.Docs(), 2+indent, right, ansi)
+			b = slip.AppendDoc(b, hd.Docs(), 4, right, ansi)
 			b = append(b, '\n')
 		}
 	}
-	for i, m := range ma {
+	for _, m := range ma {
 		if m.wrap != nil {
-			appendDaemon(m, m.wrap, (i+1)*2, ":whopper")
+			appendDaemon(m, m.wrap, ":whopper")
 		}
 	}
-	for i, m := range ma {
+	for _, m := range ma {
 		if m.before != nil {
-			appendDaemon(m, m.before, (i+1)*2, ":before")
+			appendDaemon(m, m.before, ":before")
 		}
 	}
-	for i, m := range ma {
+	for _, m := range ma {
 		if m.primary != nil {
-			appendDaemon(m, m.primary, (i+1)*2, ":primary")
+			appendDaemon(m, m.primary, ":primary")
 			break
 		}
 	}
 	for i := len(ma) - 1; 0 <= i; i-- {
 		m := ma[i]
 		if m.after != nil {
-			appendDaemon(m, m.after, (i+1)*2, ":after")
+			appendDaemon(m, m.after, ":after")
 		}
 	}
 	_, _ = w.Write(b)
