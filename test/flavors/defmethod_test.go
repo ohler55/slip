@@ -3,6 +3,7 @@
 package flavors_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
@@ -54,6 +55,15 @@ func TestDefmethodInherit(t *testing.T) {
 	tt.Equal(t, true, jp.C("before").First(rot[0]))
 	tt.Equal(t, true, jp.C("after").First(rot[0]))
 	tt.Equal(t, "berry", jp.C("from").First(rot[1]))
+
+	var out strings.Builder
+	scope := slip.NewScope()
+	orig := scope.Get(slip.Symbol("*standard-output*"))
+	scope.Set(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
+	defer scope.Set(slip.Symbol("*standard-output*"), orig)
+	_ = slip.ReadString("(setq obj (make-instance 'blueberry))").Eval(scope)
+	result := slip.ReadString("(send obj :rot)").Eval(scope)
+	tt.Equal(t, "brown", slip.ObjectString(result))
 }
 
 func TestDefmethodArgCount(t *testing.T) {

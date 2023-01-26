@@ -33,6 +33,20 @@ func TestFunctionApply(t *testing.T) {
 	tt.Equal(t, "7", slip.ObjectString(result))
 }
 
+func TestFunctionPkgApply(t *testing.T) {
+	scope := slip.NewScope()
+	f := slip.NewFunc("cl:car", slip.List{}).(slip.Funky)
+	result := f.Apply(scope, slip.List{slip.List{slip.Fixnum(7)}}, 0)
+	tt.Equal(t, "7", slip.ObjectString(result))
+}
+
+func TestFunctionPkg2Apply(t *testing.T) {
+	scope := slip.NewScope()
+	f := slip.NewFunc("cl::car", slip.List{}).(slip.Funky)
+	result := f.Apply(scope, slip.List{slip.List{slip.Fixnum(7)}}, 0)
+	tt.Equal(t, "7", slip.ObjectString(result))
+}
+
 func TestFunctionEvalArg(t *testing.T) {
 	scope := slip.NewScope()
 	defer func() { slip.CurrentPackage.Remove("x") }()

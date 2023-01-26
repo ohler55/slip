@@ -41,6 +41,8 @@ func TestCodeToken(t *testing.T) {
 		{src: "1a", expect: "[1a]", kind: "symbol"},
 		{src: "1e2e3", expect: "[1e2e3]", kind: "symbol"},
 		{src: "-a", expect: "[-a]", kind: "symbol"},
+		{src: ":abc", expect: "[:abc]", kind: "symbol"},
+		{src: "cl:abc", expect: "[cl:abc]", kind: "symbol"},
 		{src: "\nt\n", expect: "[t]", kind: "t"},
 		{src: "@2022-04-10T18:52:17Z", expect: "[@2022-04-10T18:52:17Z]", kind: "time"},
 	} {

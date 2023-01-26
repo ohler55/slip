@@ -333,8 +333,10 @@ func (r *reader) read(src []byte) Code {
 			r.closeList()
 
 		case tokenStart:
-			r.tokenStart = r.pos
-			mode = tokenMode
+			if mode != tokenMode {
+				r.tokenStart = r.pos
+				mode = tokenMode
+			}
 		case tokenDone:
 			r.pushToken(src)
 			mode = valueMode

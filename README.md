@@ -13,13 +13,6 @@ SLIce Processing is LISP for golang
    - use setHook with flag indicating it was called
    - if flag not set then change DefaultPrinter.RightMargin
 
- - flavors
-   (describe-flavor flavor)
-  - test (describe-method flavor method)
-  - test flavor as a receiver
-
- - support pkg:func syntax
-
  - cl
    - assoc
    - eq

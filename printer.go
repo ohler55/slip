@@ -29,7 +29,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	needPipeMap = "" +
 		"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" + // 0x00
-		"xxxxxxxxxx..x..x..........xx...." + // 0x20
+		"xxxxxxxxxx..x..x...........x...." + // 0x20
 		"...........................xxx.." + // 0x40
 		"x..........................xxx.x" + // 0x60
 		"................................" + // 0x80
@@ -900,7 +900,7 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 				lastSpace = len(b)
 				spaceCol = col
 				if i < last {
-					b = append(b, 'z')
+					b = append(b, ' ')
 				}
 				col++
 				ret = true

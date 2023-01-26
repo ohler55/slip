@@ -3,8 +3,10 @@
 package flavors_test
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/sen"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
@@ -139,4 +141,79 @@ func TestFlavorDescribeOptions(t *testing.T) {
   Required Methods:
     :x
 `, string(out))
+}
+
+func TestFlavorReceive(t *testing.T) {
+	defer undefFlavors("blueberry")
+	code := slip.ReadString(`
+(defflavor blueberry ((size "medium")) ())
+`)
+	scope := slip.NewScope()
+	_ = code.Eval(scope)
+
+	result := slip.ReadString("(send blueberry :name)").Eval(scope)
+	tt.Equal(t, slip.String("blueberry"), result)
+
+	result = slip.ReadString("(send blueberry :inspect)").Eval(scope)
+	tt.SameType(t, &flavors.Instance{}, result)
+	tt.Equal(t, `{
+  abstract: false
+  allowOtherKeys: false
+  defaultHandler: false
+  defaultVars: {self: null size: medium}
+  docs: ""
+  included: []
+  inherit: [vanilla-flavor]
+  initable: {}
+  keywords: {}
+  methods: [
+    [{from: vanilla-flavor name: ":describe" primary: true}]
+    [{from: vanilla-flavor name: ":eval-inside-yourself" primary: true}]
+    [{from: vanilla-flavor name: ":flavor" primary: true}]
+    [{from: vanilla-flavor name: ":id" primary: true}]
+    [{from: vanilla-flavor name: ":init" primary: true}]
+    [{from: vanilla-flavor name: ":inspect" primary: true}]
+    [{from: vanilla-flavor name: ":operation-handled-p" primary: true}]
+    [{from: vanilla-flavor name: ":print-self" primary: true}]
+    [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
+    [{from: vanilla-flavor name: ":which-operations" primary: true}]
+  ]
+  name: blueberry
+  required: []
+  requiredKeywords: []
+  requiredMethods: []
+  requiredVars: []
+}`, pretty.SEN((result.(*flavors.Instance)).Any))
+
+	result = slip.ReadString("(send blueberry :WHICH-OPERATIONS)").Eval(scope)
+	tt.Equal(t, "(:describe :inspect :name :which-operations)", slip.ObjectString(result))
+
+	var out strings.Builder
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+
+	ansi := slip.CurrentPackage.JustGet("*print-ansi*")
+	defer slip.CurrentPackage.Set("*print-ansi*", ansi)
+	slip.CurrentPackage.Set("*print-ansi*", nil)
+
+	scope.Let(slip.Symbol("*print-ansi*"), nil)
+	_ = slip.ReadString("(send blueberry :describe out)").Eval(scope)
+	tt.Equal(t, `blueberry is a flavor:
+  Inherits: vanilla-flavor
+  Variables:
+    size = "medium"
+  Methods:
+    :describe
+    :eval-inside-yourself
+    :flavor
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :which-operations
+`, out.String())
+
+	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :describe t)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :not-a-method)").Eval(scope) })
 }

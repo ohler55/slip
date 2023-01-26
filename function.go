@@ -41,12 +41,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
 func NewFunc(name string, args List, pkgs ...*Package) Object {
-	name = strings.ToLower(name)
-	pkg := CurrentPackage
-	if 0 < len(pkgs) {
-		pkg = pkgs[0]
-	}
-	if fi := pkg.Funcs[name]; fi != nil {
+	if fi := FindFunc(name, pkgs...); fi != nil {
 		return fi.Create(args)
 	}
 	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
@@ -54,12 +49,25 @@ func NewFunc(name string, args List, pkgs ...*Package) Object {
 
 // FindFunc finds the FuncInfo for a provided name or panics if none exists.
 func FindFunc(name string, pkgs ...*Package) *FuncInfo {
-	name = strings.ToLower(name)
 	pkg := CurrentPackage
-	if 0 < len(pkgs) {
+	if i := strings.IndexByte(name, ':'); 0 < i {
+		if pkg = FindPackage(name[:i]); pkg == nil {
+			panic(fmt.Sprintf("package %s is not defined.", printer.caseName(name[:i])))
+		}
+		i++
+		if i < len(name) && name[i] == ':' {
+			i++
+		}
+		name = name[i:]
+	} else if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	if fi := pkg.Funcs[name]; fi != nil {
+	fi := pkg.Funcs[name]
+	if fi == nil {
+		name = strings.ToLower(name)
+		fi = pkg.Funcs[name]
+	}
+	if fi != nil {
 		return fi
 	}
 	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
