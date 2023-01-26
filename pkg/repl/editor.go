@@ -202,7 +202,7 @@ top:
 				return nil
 			}
 			if len(ed.resizeChan) == 0 {
-				_, _ = ed.getSize()
+				w, _ := ed.getSize()
 				ed.v0, _ = ed.getCursor()
 				ed.setCursor(ed.v0, 1)
 				ed.clearDown()
@@ -210,6 +210,9 @@ top:
 				ed.override = nil
 				ed.dirty.cnt = 0
 				ed.display()
+				if !modifiedVars["*print-right-margin*"] {
+					slip.DefaultPrinter().RightMargin = uint(w)
+				}
 				continue top
 			}
 		}
