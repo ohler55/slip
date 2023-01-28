@@ -10,9 +10,12 @@ SLIce Processing is LISP for golang
  - how to reproduce...
 
  - cl
+   + = (same.go)
+   - eq - same object (same pointer)
+   - eql - numbers of same type and same value, or character and same
+   - equal - eq, eql, symbols the same, cons are recursively the same, array, pathnames (case sensitive if so on os), strings, others only eq
+   - equalp - equal, others descend
    - assoc
-   - eq
-   - equal
    - coerce
    - intern (string to symbol)
    - apply
