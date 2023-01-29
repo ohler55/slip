@@ -38,6 +38,17 @@ func TestEqlCharacter(t *testing.T) {
 	}).Test(t)
 }
 
+func TestEqlString(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(eql "abc" "abc")`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(eql "abc" "ABC")`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestEqlArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(eql 3)`,

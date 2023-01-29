@@ -21,10 +21,18 @@ func init() {
 			},
 			Return: "boolean",
 			Text: `__eql__ returns _t_ if _x_ and _y_ are either _eq_ or numbers and have the
-same value or characters both are the same character. Otherwise _nil_ is returned.`,
+same value or characters both are the same character. Otherwise _nil_ is returned.
+
+
+The common-lisp documentation indicates any _string_ will fail the _eql_ test
+as _string_ is excluded from the definition yet the examples provided show a
+case sensitive string comparison. This implementation follows the examples and
+not the documentation.`,
 			Examples: []string{
 				"(eql 5 5) => t",
 				"(eql 5 5.0) => t",
+				`(eql "abc" "abc") => t`,
+				`(eql "abc" "ABC") => nil`,
 			},
 		}, &slip.CLPkg)
 }
@@ -47,6 +55,10 @@ func (f *Eql) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	switch tx := x.(type) {
 	case slip.Character:
 		if y.(slip.Character) == tx {
+			return slip.True
+		}
+	case slip.String:
+		if x == y {
 			return slip.True
 		}
 	default:

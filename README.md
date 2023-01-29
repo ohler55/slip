@@ -9,12 +9,9 @@ SLIce Processing is LISP for golang
 - repl is broken after history
  - how to reproduce...
 
+- check with CRA on refund
+
  - cl
-   + = (same.go)
-   + eq
-   + eql
-   + equal
-   + equalp
    - assoc
    - coerce
    - intern (string to symbol)
