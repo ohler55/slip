@@ -48,4 +48,10 @@ func TestInstance(t *testing.T) {
 	out = berry.(*flavors.Instance).Describe([]byte{}, 0, 80, true)
 	tt.Equal(t, "/\x1b\\[1m#<blueberry [0-9a-h]+>\x1b\\[m, an instance of flavor \x1b\\[1mblueberry\x1b\\[m,\n"+
 		"  has instance variable values:\n    size: \"medium\".*/", string(out))
+
+	b2 := slip.ReadString("(make-instance blueberry)").Eval(slip.NewScope()).(*flavors.Instance)
+	tt.Equal(t, true, b2.Equal(berry))
+
+	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
+	tt.Equal(t, false, b2.Equal(berry))
 }

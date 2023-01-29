@@ -10,9 +10,12 @@ SLIce Processing is LISP for golang
  - how to reproduce...
 
  - cl
+   + = (same.go)
+   + eq
+   + eql
+   + equal
+   + equalp
    - assoc
-   - eq
-   - equal
    - coerce
    - intern (string to symbol)
    - apply
