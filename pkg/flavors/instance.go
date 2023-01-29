@@ -56,8 +56,22 @@ func (obj *Instance) Simplify() interface{} {
 }
 
 // Equal returns true if this Object and the other are equal in value.
-func (obj *Instance) Equal(other slip.Object) (eq bool) {
-	return obj == other
+func (obj *Instance) Equal(other slip.Object) bool {
+	if obj == other {
+		return true
+	}
+	if o, ok := other.(*Instance); ok && obj.Flavor == o.Flavor {
+		for k, val := range obj.Vars {
+			if k == "self" {
+				continue
+			}
+			if !slip.ObjectEqual(val, o.Vars[k]) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.

@@ -63,3 +63,10 @@ func TestEqPackage(t *testing.T) {
 		Expect: "nil",
 	}).Test(t)
 }
+
+func TestEqArgCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(eq 'abc)`,
+		Panics: true,
+	}).Test(t)
+}

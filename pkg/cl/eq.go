@@ -40,20 +40,27 @@ func (f *Eq) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	// Verify the types are the same.
-	if (*[2]uintptr)(unsafe.Pointer(&args[0]))[0] != (*[2]uintptr)(unsafe.Pointer(&args[1]))[0] {
-		return nil
-	}
-	switch x := args[1].(type) {
-	case slip.Symbol:
-		// Symbols with the same string are the same
-		if args[0].(slip.Symbol) == x {
-			return slip.True
-		}
-	default:
-		if (*[2]uintptr)(unsafe.Pointer(&args[0]))[1] == (*[2]uintptr)(unsafe.Pointer(&args[1]))[1] {
-			return slip.True
-		}
+	if eq(args[0], args[1]) {
+		return slip.True
 	}
 	return nil
+}
+
+func eq(x, y slip.Object) bool {
+	// Verify the types are the same.
+	if (*[2]uintptr)(unsafe.Pointer(&x))[0] != (*[2]uintptr)(unsafe.Pointer(&y))[0] {
+		return false
+	}
+	switch tx := x.(type) {
+	case slip.Symbol:
+		// Symbols with the same string are the same
+		if y.(slip.Symbol) == tx {
+			return true
+		}
+	default:
+		if (*[2]uintptr)(unsafe.Pointer(&x))[1] == (*[2]uintptr)(unsafe.Pointer(&y))[1] {
+			return true
+		}
+	}
+	return false
 }
