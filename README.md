@@ -9,7 +9,21 @@ SLIce Processing is LISP for golang
 - repl is broken after history
  - how to reproduce...
 
-- check with CRA on refund
+- hash-table
+ + make-hash-table
+ + hash-table-p
+ + hash-table-count
+ + hash-table-size
+ + hash-table-test
+ + hash-table-rehash-size
+ + hash-table-rehash-threshold
+ + gethash
+ - remhash
+ - maphash
+ - clrhash
+ - sxhash - return hash key for object, using equal (so case insensitive)
+  - maybe simplify sum each byte after mask of case (0x020 so uint64(0xdf & b)) then drop sign
+
 
  - cl
    - assoc
@@ -64,24 +78,6 @@ SLIce Processing is LISP for golang
   - also support integers unlike CL
   - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
 
-- hash-table
- - make-hash-table
- - hash-table-p
- - hash-table-count
- - hash-table-p
- - hash-table-rehash-size
- - hash-table-rehash-threshold
- - hash-table-size
- - hash-table-test
- - gethash
-  - use setf to set
- - rehash
- - remhash
- - maphash
- - clrhash
- - sxhash
- - with-hash-table-iterator
- - maphash
 
  - macro
   - expand on read
