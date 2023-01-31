@@ -18,11 +18,10 @@ SLIce Processing is LISP for golang
  + hash-table-rehash-size
  + hash-table-rehash-threshold
  + gethash
- - remhash
+ + remhash
+ + clrhash
+ + sxhash
  - maphash
- - clrhash
- - sxhash - return hash key for object, using equal (so case insensitive)
-  - maybe simplify sum each byte after mask of case (0x020 so uint64(0xdf & b)) then drop sign
 
 
  - cl
