@@ -25,7 +25,22 @@ func TestMaphashLambda(t *testing.T) {
 	tt.Equal(t, slip.List{slip.List{slip.Fixnum(1), slip.Symbol("a")}}, scope.Get(slip.Symbol("entries")))
 }
 
-func xTestMaphashSymbol(t *testing.T) {
+func TestMaphashLambdaList(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`
+(setq table (make-hash-table))
+(setf (gethash 'a table) 1)
+(setq entries '())
+`).Eval(scope)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(maphash '(lambda (k v) (setq entries (cons (list k v) entries))) table)`,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t, slip.List{slip.List{slip.Fixnum(1), slip.Symbol("a")}}, scope.Get(slip.Symbol("entries")))
+}
+
+func TestMaphashSymbol(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`
 (setq table (make-hash-table))
@@ -39,4 +54,25 @@ func xTestMaphashSymbol(t *testing.T) {
 		Expect: "nil",
 	}).Test(t)
 	tt.Equal(t, slip.List{slip.List{slip.Fixnum(1), slip.Symbol("a")}}, scope.Get(slip.Symbol("entries")))
+}
+
+func TestMaphashArgCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(maphash 'entry-push)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestMaphashNotHashTable(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(maphash 'entry-push t)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestMaphashNotFunction(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(maphash t (make-hash-table))`,
+		Panics: true,
+	}).Test(t)
 }

@@ -2,7 +2,9 @@
 
 package cl
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 func init() {
 	slip.Define(
@@ -59,17 +61,14 @@ CallFunc:
 			_ = tf.Call(s, slip.List{v, k}, d2)
 		}
 	case *slip.FuncInfo:
-		/*
-			for k, v := range ht {
-				// TBD need func to apply without eval of args
-				tf.Apply(s, slip.List{v, k}, d2)
-			}
-		*/
+		ff := tf.Create(nil).(slip.Funky)
+		for k, v := range ht {
+			_ = ff.Apply(s, slip.List{v, k}, d2)
+		}
 	case slip.Symbol:
 		fn = slip.FindFunc(string(tf))
 		goto CallFunc
 	case slip.List:
-		// TBD how to get here
 		fn = s.Eval(tf, d2)
 		goto CallFunc
 	default:
