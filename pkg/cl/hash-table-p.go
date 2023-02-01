@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
 
 package cl
 
@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Numberp{Function: slip.Function{Name: "numberp", Args: args}}
+			f := HashTablep{Function: slip.Function{Name: "hash-table-p", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "numberp",
+			Name: "hash-table-p",
 			Args: []*slip.DocArg{
 				{
 					Name: "object",
@@ -23,25 +23,25 @@ func init() {
 				},
 			},
 			Return: "boolean",
-			Text:   `__numberp__ returns _true_ if _object_ is a number.`,
+			Text:   `__hash-table-p__ returns _true_ if _object_ is a hash-table.`,
 			Examples: []string{
-				"(numberp 4) => t",
-				"(numberp 5.1) => nil",
+				"(hash-table-p (make-hash-table)) => t",
+				"(hash-table-p 5.1) => nil",
 			},
 		}, &slip.CLPkg)
 }
 
-// Numberp represents the numberp function.
-type Numberp struct {
+// HashTablep represents the hash-table-p function.
+type HashTablep struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Numberp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *HashTablep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	if _, ok := args[0].(slip.Number); ok {
+	if _, ok := args[0].(slip.HashTable); ok {
 		return slip.True
 	}
 	return nil

@@ -3,7 +3,6 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ohler55/slip"
@@ -13,7 +12,7 @@ import (
 func TestHashTableSymbol(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.HashTable{slip.Symbol("a"): slip.True},
-		String:    "#<HASH-TABLE :COUNT 1>",
+		String:    "#<hash-table eql 1/-->",
 		Simple:    map[string]interface{}{"a": true},
 		Hierarchy: "hash-table.t",
 		Equals: []*sliptest.EqTest{
@@ -26,7 +25,7 @@ func TestHashTableSymbol(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Object{
 		Target:    slip.HashTable{slip.Symbol("a"): nil},
-		String:    "#<HASH-TABLE :COUNT 1>",
+		String:    "#<hash-table eql 1/-->",
 		Simple:    map[string]interface{}{"a": nil},
 		Hierarchy: "hash-table.t",
 		Equals: []*sliptest.EqTest{
@@ -41,7 +40,7 @@ func TestHashTableSymbol(t *testing.T) {
 func TestHashTableString(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.HashTable{slip.String("a"): slip.True},
-		String:    "#<HASH-TABLE :COUNT 1>",
+		String:    "#<hash-table eql 1/-->",
 		Simple:    map[string]interface{}{"a": true},
 		Hierarchy: "hash-table.t",
 		Equals: []*sliptest.EqTest{
@@ -52,7 +51,7 @@ func TestHashTableString(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Object{
 		Target:    slip.HashTable{slip.String("a"): nil},
-		String:    "#<HASH-TABLE :COUNT 1>",
+		String:    "#<hash-table eql 1/-->",
 		Simple:    map[string]interface{}{"a": nil},
 		Hierarchy: "hash-table.t",
 		Equals: []*sliptest.EqTest{
@@ -63,11 +62,11 @@ func TestHashTableString(t *testing.T) {
 	}).Test(t)
 }
 
-func TestHashTableNonKey(t *testing.T) {
+func TestHashTableMixedKey(t *testing.T) {
 	(&sliptest.Object{
-		Target: slip.HashTable{slip.Fixnum(1): slip.True},
-		String: "#<HASH-TABLE :COUNT 1>",
-		Simple: fmt.Errorf("can not simplify"),
-		Eval:   slip.HashTable{slip.Fixnum(1): slip.True},
+		Target: slip.HashTable{slip.Fixnum(1): slip.True, slip.Symbol("a"): slip.Fixnum(3), nil: nil},
+		String: "#<hash-table eql 3/-->",
+		Simple: map[string]any{"1": true, "a": 3, "nil": nil},
+		Eval:   slip.HashTable{slip.Fixnum(1): slip.True, slip.Symbol("a"): slip.Fixnum(3), nil: nil},
 	}).Test(t)
 }

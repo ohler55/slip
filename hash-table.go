@@ -11,7 +11,9 @@ const HashTableSymbol = Symbol("hash-table")
 
 func init() {
 	DefConstant(HashTableSymbol, HashTableSymbol,
-		`A _hash-table_ provides a mapping between a key and value. Keys can be a _string_, _symbol_, or _fixnum_.`)
+		`A _hash-table_ provides a mapping between a key and value. Keys can be a _string_, _symbol_, or _fixnum_.
+Only the __eql__ _:test_ is supported.
+`)
 }
 
 // HashTable of Objects.
@@ -24,9 +26,9 @@ func (obj HashTable) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj HashTable) Append(b []byte) []byte {
-	b = append(b, "#<HASH-TABLE :COUNT "...)
+	b = append(b, "#<hash-table eql "...)
 	b = strconv.AppendInt(b, int64(len(obj)), 10)
-	return append(b, '>')
+	return append(b, "/-->"...)
 }
 
 // Simplify the Object into a []interface{}.
@@ -47,7 +49,12 @@ func (obj HashTable) Simplify() interface{} {
 				out[string(tk)] = v.Simplify()
 			}
 		default:
-			PanicType("hash-table keys", k, "string", "symbol")
+			key := ObjectString(k)
+			if v == nil {
+				out[key] = nil
+			} else {
+				out[key] = v.Simplify()
+			}
 		}
 	}
 	return out

@@ -74,13 +74,13 @@ func TestAproposDefun(t *testing.T) {
 	var out strings.Builder
 	slip.StandardOutput = &slip.OutputStream{Writer: &out}
 
-	_ = slip.CompileString("(defun apropos-test () nil)")
+	_ = slip.CompileString("(defun apropos-testy () nil)")
 
 	(&sliptest.Function{
-		Source: `(apropos 'test 'user)`,
+		Source: `(apropos 'testy 'user)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `common-lisp-user::apropos-test (lambda)
+	tt.Equal(t, `common-lisp-user::apropos-testy (lambda)
 `, out.String())
 }
 
