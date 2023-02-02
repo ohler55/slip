@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
 
 package flavors_test
 
@@ -10,11 +10,11 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func TestMakeInstanceSimple(t *testing.T) {
+func TestAllocateInstanceSimple(t *testing.T) {
 	defer undefFlavors("blueberry")
 	code := slip.ReadString(`
 (defflavor blueberry ((size "medium")) () :initable-instance-variables)
-(setq bb (make-instance 'blueberry :size 'small))
+(setq bb (allocate-instance 'blueberry :size 'small))
 `)
 	scope := slip.NewScope()
 	berry := code.Eval(scope)
@@ -23,11 +23,11 @@ func TestMakeInstanceSimple(t *testing.T) {
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
-func TestMakeInstanceKeywords(t *testing.T) {
+func TestAllocateInstanceKeywords(t *testing.T) {
 	defer undefFlavors("blueberry")
 	code := slip.ReadString(`
 (defflavor blueberry () () (:default-init-plist (:x 3)))
-(setq bb (make-instance 'blueberry :x 4))
+(setq bb (allocate-instance 'blueberry :x 4))
 `)
 	scope := slip.NewScope()
 	berry := code.Eval(scope)
@@ -36,70 +36,70 @@ func TestMakeInstanceKeywords(t *testing.T) {
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
-func TestMakeInstanceOtherKeywords(t *testing.T) {
+func TestAllocateInstanceOtherKeywords(t *testing.T) {
 	defer undefFlavors("blueberry")
 	code := slip.ReadString(`
 (defflavor blueberry () () (:default-init-plist (:allow-other-keys t)))
-(setq bb (make-instance 'blueberry :x 4))
+(setq bb (allocate-instance 'blueberry :x 4))
 `)
 	scope := slip.NewScope()
 	berry := code.Eval(scope)
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
-func TestMakeInstanceBadArgCount(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance)`).Eval(slip.NewScope()) })
+func TestAllocateInstanceBadArgCount(t *testing.T) {
+	tt.Panic(t, func() { _ = slip.ReadString(`(allocate-instance)`).Eval(slip.NewScope()) })
 }
 
-func TestMakeInstanceNotFlavor(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance t)`).Eval(slip.NewScope()) })
-	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'not-a-flavor)`).Eval(slip.NewScope()) })
+func TestAllocateInstanceNotFlavor(t *testing.T) {
+	tt.Panic(t, func() { _ = slip.ReadString(`(allocate-instance t)`).Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(allocate-instance 'not-a-flavor)`).Eval(slip.NewScope()) })
 }
 
-func TestMakeInstanceAbstract(t *testing.T) {
+func TestAllocateInstanceAbstract(t *testing.T) {
 	defer undefFlavors("blueberry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor blueberry ((size "medium")) () :abstract-flavor)
-(make-instance blueberry)
+(allocate-instance blueberry)
 `).Eval(slip.NewScope())
 	})
 }
 
-func TestMakeInstanceBadKeyword(t *testing.T) {
+func TestAllocateInstanceBadKeyword(t *testing.T) {
 	defer undefFlavors("blueberry", "raspberry", "blackberry", "cherry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor blueberry () ())
-(make-instance 'blueberry t nil)
+(allocate-instance 'blueberry t nil)
 `).Eval(slip.NewScope())
 	})
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor raspberry () ())
-(make-instance raspberry bad nil)
+(allocate-instance raspberry bad nil)
 `).Eval(slip.NewScope())
 	})
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor blackberry () ())
-(make-instance blackberry :self nil)
+(allocate-instance blackberry :self nil)
 `).Eval(slip.NewScope())
 	})
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor cherry () ())
-(make-instance cherry :x nil)
+(allocate-instance cherry :x nil)
 `).Eval(slip.NewScope())
 	})
 }
 
-func TestMakeInstanceMissingKeyword(t *testing.T) {
+func TestAllocateInstanceMissingKeyword(t *testing.T) {
 	defer undefFlavors("blueberry")
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`
 (defflavor blueberry () () (:required-init-keywords :x))
-(make-instance 'blueberry)
+(allocate-instance 'blueberry)
 `).Eval(slip.NewScope())
 	})
 }

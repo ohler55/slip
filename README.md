@@ -27,7 +27,6 @@ SLIce Processing is LISP for golang
   - class-name class/flavor (also flavor-name)
   - find-class symbol &optional errorp (also find-flavor)
   - class-of instance (also flavor-of)
-  - allocate-instance (same as make-instance but don't call :init)
 
  - cl
    - assoc
