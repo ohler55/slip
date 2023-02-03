@@ -23,10 +23,6 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
- - flavors aliases
-  - class-name class/flavor (also flavor-name)
-  - find-class symbol &optional errorp (also find-flavor)
-  - class-of instance (also flavor-of)
 
  - cl
    - assoc
