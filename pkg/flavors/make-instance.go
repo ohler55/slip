@@ -48,6 +48,14 @@ type MakeInstance struct {
 
 // Call the the function with the arguments provided.
 func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	inst, plist := allocateInstance(f, s, args, "make-instance")
+
+	_ = inst.Receive(":init", slip.List{plist}, depth+1)
+
+	return inst
+}
+
+func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string) (*Instance, slip.List) {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
 	}
@@ -58,7 +66,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	case *Flavor:
 		cf = ta
 	default:
-		slip.PanicType("flavor argument to make-instance", ta, "symbol", "flavor")
+		slip.PanicType(fmt.Sprintf("flavor argument to %s", label), ta, "symbol", "flavor")
 	}
 	if cf == nil {
 		panic(fmt.Sprintf("%s is not a defined flavor.", args[len(args)-1]))
@@ -72,11 +80,11 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	for i := len(args) - 2; 0 < i; i-- {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok || len(sym) < 2 || sym[0] != ':' {
-			slip.PanicType("make-instance option keyword", args[i], "keyword")
+			slip.PanicType(fmt.Sprintf("%s option keyword", label), args[i], "keyword")
 		}
 		key := strings.ToLower(string(sym))
 		if key == ":self" {
-			panic("make-instance option keyword 'self' is not initable.")
+			panic(fmt.Sprintf("%s option keyword 'self' is not initable.", label))
 		}
 		i--
 		val := args[i]
@@ -98,10 +106,8 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	}
 	for _, k := range cf.requiredKeywords {
 		if !keys[k] {
-			panic(fmt.Sprintf("Keyword %s missing from make-instance for flavor %s.", k, cf.name))
+			panic(fmt.Sprintf("Keyword %s missing from %s for flavor %s.", k, label, cf.name))
 		}
 	}
-	_ = inst.Receive(":init", slip.List{plist}, depth+1)
-
-	return inst
+	return inst, plist
 }

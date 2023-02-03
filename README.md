@@ -9,6 +9,21 @@ SLIce Processing is LISP for golang
 - repl is broken after history
  - how to reproduce...
 
+- data access packages
+ - graphql
+  - client
+   - get back a bag
+  - server
+   - start up ggql server
+    - resolve calls lisp
+    - need to be thread safe
+   - accept query using a lisp syntax
+   - call lisp to fetch and populate bag for response
+    - could be database query
+    - or pull from multiple sources
+
+- next
+
  - cl
    - assoc
    - coerce
