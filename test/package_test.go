@@ -16,7 +16,7 @@ import (
 
 func TestPackage(t *testing.T) {
 	pkgs := slip.PackageNames()
-	tt.Equal(t, `("bag" "common-lisp" "common-lisp-user" "flavors" "gi")`, pkgs.String())
+	tt.Equal(t, `("bag" "common-lisp" "common-lisp-user" "flavors" "gi" "keyword")`, pkgs.String())
 }
 
 func TestPackageUser(t *testing.T) {
@@ -35,7 +35,7 @@ func TestPackageUser(t *testing.T) {
 }
 
 func checkUserPkgSimplify(t *testing.T, simple interface{}) {
-	tt.Equal(t, []interface{}{"common-lisp", "flavors", "gi", "bag"}, jp.C("uses").First(simple))
+	tt.Equal(t, []interface{}{"keyword", "common-lisp", "flavors", "gi", "bag"}, jp.C("uses").First(simple))
 	tt.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
 }
 

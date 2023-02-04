@@ -15,6 +15,7 @@ var (
 		Vars:      map[string]*slip.VarVal{},
 		Lambdas:   map[string]*slip.Lambda{},
 		Funcs:     map[string]*slip.FuncInfo{},
+		PreSet:    slip.DefaultPreSet,
 	}
 )
 

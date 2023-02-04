@@ -80,7 +80,7 @@ func (s *Scope) get(name string) Object {
 	if s.parent != nil {
 		return s.parent.get(name)
 	}
-	if value, has := CurrentPackage.Get(name); has {
+	if value, has := CurrentPackage.Get(name); has && Unbound != value {
 		return value
 	}
 	panic(NewPanic("Variable %s is unbound.", name))
@@ -117,7 +117,7 @@ func (s *Scope) set(name string, value Object) {
 	CurrentPackage.Set(name, value)
 }
 
-// Has returns true if the variable is bound.
+// Has returns true if the variable is exists.
 func (s *Scope) Has(sym Symbol) bool {
 	return s.has(strings.ToLower(string(sym)))
 }
@@ -138,6 +138,32 @@ func (s *Scope) has(name string) bool {
 		return s.parent.has(name)
 	}
 	return CurrentPackage.Has(name)
+}
+
+// Bound returns true if the variable is bound.
+func (s *Scope) Bound(sym Symbol) bool {
+	return s.bound(strings.ToLower(string(sym)))
+}
+
+func (s *Scope) bound(name string) bool {
+	if _, has := constantValues[name]; has {
+		return true
+	}
+	s.moo.Lock()
+	if s.Vars != nil {
+		if _, has := s.Vars[name]; has {
+			s.moo.Unlock()
+			return true
+		}
+	}
+	s.moo.Unlock()
+	if s.parent != nil {
+		return s.parent.bound(name)
+	}
+	if v, has := CurrentPackage.Get(name); has && Unbound != v {
+		return true
+	}
+	return false
 }
 
 // Remove a variable binding.

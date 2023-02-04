@@ -93,7 +93,7 @@ func traceWriterPanic(s *Scope, b []byte, p *Panic) {
 	if printer.ANSI {
 		color := "\x1b[31m"
 		sym := Symbol(warnANSIKey)
-		if s.Has(sym) {
+		if s.Bound(sym) {
 			if o, ok := s.Get(sym).(String); ok {
 				color = string(o)
 			}

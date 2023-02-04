@@ -12,6 +12,7 @@ var (
 		Imports:   map[string]*Import{},
 		Lambdas:   map[string]*Lambda{},
 		Funcs:     map[string]*FuncInfo{},
+		PreSet:    DefaultPreSet,
 	}
 )
 

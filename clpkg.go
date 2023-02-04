@@ -141,6 +141,7 @@ and raises an error if not possible to print readably.`,
 		},
 		Lambdas: map[string]*Lambda{},
 		Funcs:   map[string]*FuncInfo{},
+		PreSet:  DefaultPreSet,
 		Locked:  true,
 	}
 

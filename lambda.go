@@ -126,7 +126,7 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 			case AmpKey:
 				mode = keyMode
 			default:
-				if !ss.Has(Symbol(ad.Name)) {
+				if !ss.Bound(Symbol(ad.Name)) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
@@ -135,12 +135,12 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 			case AmpKey:
 				mode = keyMode
 			default:
-				if !ss.Has(Symbol(ad.Name)) {
+				if !ss.Bound(Symbol(ad.Name)) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
 		case keyMode:
-			if !ss.Has(Symbol(ad.Name)) {
+			if !ss.Bound(Symbol(ad.Name)) {
 				ss.Let(Symbol(ad.Name), ad.Default)
 			}
 		}

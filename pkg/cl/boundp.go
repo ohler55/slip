@@ -45,7 +45,7 @@ func (f *Boundp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if !ok {
 		slip.PanicType("symbol", args[0], "symbol")
 	}
-	if s.Has(sym) {
+	if s.Bound(sym) {
 		return slip.True
 	}
 	if _, has := slip.CurrentPackage.Funcs[string(sym)]; has {

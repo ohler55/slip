@@ -50,6 +50,7 @@ type Package struct {
 	// will have an Object that evaluates to an undefined function panic.
 	Lambdas map[string]*Lambda
 	Funcs   map[string]*FuncInfo
+	PreSet  func(p *Package, name string, value Object) (string, Object)
 	Locked  bool
 }
 
@@ -64,10 +65,16 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		Imports:   map[string]*Import{},
 		Lambdas:   map[string]*Lambda{},
 		Funcs:     map[string]*FuncInfo{},
+		PreSet:    DefaultPreSet,
 	}
 	packages[pkg.Name] = &pkg
 
 	return &pkg
+}
+
+// DefaultPreSet is the default function for package PreSet.
+func DefaultPreSet(p *Package, name string, value Object) (string, Object) {
+	return strings.ToLower(name), value
 }
 
 // AddPackage adds a package.
@@ -108,7 +115,7 @@ func (obj *Package) Import(pkg *Package, varName string) {
 
 // Set a variable.
 func (obj *Package) Set(name string, value Object) *VarVal {
-	name = strings.ToLower(name)
+	name, value = obj.PreSet(obj, name, value)
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
@@ -134,17 +141,27 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 
 // Get a variable.
 func (obj *Package) Get(name string) (value Object, has bool) {
-	name = strings.ToLower(name)
-	var vv *VarVal
-	if vv, has = obj.Vars[name]; has {
+	if vv := obj.GetVarVal(name); vv != nil {
 		if vv.Get != nil {
 			value = vv.Get()
 		} else {
 			value = vv.Val
 		}
-		return
+		has = true
 	}
-	return nil, false
+	return
+}
+
+// GetVarVal a variable.
+func (obj *Package) GetVarVal(name string) (vv *VarVal) {
+	if vv, _ = obj.Vars[name]; vv != nil {
+		return vv
+	}
+	name = strings.ToLower(name)
+	if vv, _ = obj.Vars[name]; vv != nil {
+		return vv
+	}
+	return nil
 }
 
 // JustGet a variable.

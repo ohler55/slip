@@ -59,11 +59,11 @@ func (f *Defvar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		slip.PanicType("name argument to defvar", args[len(args)-1], "symbol")
 	}
 	name = slip.Symbol(strings.ToLower(string(name)))
-	if slip.CurrentPackage.Has(string(name)) {
+	if v, has := slip.CurrentPackage.Get(string(name)); has && v != slip.Unbound {
 		return name
 	}
 	var (
-		iv  slip.Object
+		iv  slip.Object = slip.Unbound
 		doc slip.String
 	)
 	if 1 < len(args) {

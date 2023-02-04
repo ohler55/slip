@@ -44,11 +44,13 @@ func TestScopeSet(t *testing.T) {
 
 	tt.Equal(t, slip.Fixnum(2), child.Get(y))
 	tt.Equal(t, false, parent.Has(y))
+	tt.Equal(t, false, parent.Bound(y))
 	tt.Equal(t, false, slip.CurrentPackage.Has(string(y)))
 
 	tt.Equal(t, slip.Fixnum(3), child.Get(z))
 	tt.Equal(t, slip.Fixnum(3), parent.Get(z))
 	tt.Equal(t, true, slip.CurrentPackage.Has(string(z)))
+	tt.Equal(t, true, parent.Bound(z))
 
 	tt.Equal(t, slip.Fixnum(9223372036854775807), child.Get(slip.Symbol("most-positive-fixnum")))
 

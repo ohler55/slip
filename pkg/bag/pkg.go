@@ -18,6 +18,7 @@ var (
 		Doc:       "Home of symbols defined for the bag package.",
 		Lambdas:   map[string]*slip.Lambda{},
 		Funcs:     map[string]*slip.FuncInfo{},
+		PreSet:    slip.DefaultPreSet,
 		Vars: map[string]*slip.VarVal{
 			"*bag-time-format*": {
 				Get: getTimeFormat,
