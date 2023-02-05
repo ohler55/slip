@@ -32,12 +32,12 @@ func TestInternInherited(t *testing.T) {
 
 func TestInternExternal(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(intern "xyz" 'keyword)`,
-		Expect: ":xyz, nil",
+		Source: `(intern "intern-test-external" 'keyword)`,
+		Expect: ":intern-test-external, nil",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(intern "xyz" "keyword")`,
-		Expect: ":xyz, :external",
+		Source: `(intern "intern-test-external" "keyword")`,
+		Expect: ":intern-test-external, :external",
 	}).Test(t)
 }
 

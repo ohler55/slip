@@ -284,7 +284,7 @@
  * [ ] FIND-METHOD
  * [ ] FIND-PACKAGE
  * [ ] FIND-RESTART
- * [ ] FIND-SYMBOL
+ * [x] FIND-SYMBOL
  * [ ] FINISH-OUTPUT
  * [ ] FIRST
  * [ ] FIXNUM
@@ -767,7 +767,7 @@
  * [ ] UNBOUND-VARIABLE
  * [ ] UNDEFINED-FUNCTION
  * [ ] UNEXPORT
- * [ ] UNINTERN
+ * [x] UNINTERN
  * [ ] UNION
  * [ ] UNLESS
  * [ ] UNREAD-CHAR

@@ -99,7 +99,7 @@ func TestDefunAgain(t *testing.T) {
 (again)`)
 	scope := slip.NewScope()
 	tt.Equal(t, slip.Fixnum(7), code.Eval(scope))
-	tt.Equal(t, "WARNING: redefining common-lisp-user::again in defun\n", out.String())
+	tt.Equal(t, "WARNING: redefining common-lisp-user:again in defun\n", out.String())
 }
 
 func TestDefunTooManyArgs(t *testing.T) {

@@ -26,7 +26,6 @@ SLIce Processing is LISP for golang
 
  - cl
    - find-package
-   - find-symbol
 
    - assoc
    - coerce

@@ -7,11 +7,13 @@ import (
 )
 
 var (
-	Pkg = slip.Package{
+	pkgVarVal = slip.VarVal{Set: setREPL, Doc: "the REPL package"}
+	Pkg       = slip.Package{
 		Name:      "repl",
 		Nicknames: []string{},
 		Doc:       "A package for REPL related functions.",
 		Vars: map[string]*slip.VarVal{
+			"*repl*":                &pkgVarVal,
 			"*repl-prompt*":         {Get: getPrompt, Set: setPrompt, Doc: "the REPL prompt"},
 			"*repl-warning-prefix*": {Get: getWarnPrefix, Set: setWarnPrefix, Doc: "prefix to print before a warning"},
 			"*repl-match-color*": {
@@ -43,7 +45,7 @@ var (
 func init() {
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*repl*", &Pkg)
+	pkgVarVal.Get = getREPL
 	for _, vv := range Pkg.Vars {
 		vv.Pkg = &Pkg
 	}

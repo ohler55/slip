@@ -118,11 +118,11 @@ func TestPackageVars(t *testing.T) {
 	tt.Equal(t, false, has)
 	tt.Nil(t, val)
 
-	tt.Panic(t, func() { slip.CurrentPackage.Remove("*print-pretty*") })
+	tt.Panic(t, func() { slip.CLPkg.Remove("*print-pretty*") })
 
 	cl := slip.FindPackage("common-lisp")
-	cl.Set(key, slip.Fixnum(7))
-	cl.Remove(key)
+	tt.Panic(t, func() { cl.Set(key, slip.Fixnum(7)) })
+	tt.Panic(t, func() { cl.Remove(key) })
 	val, has = cl.Get(key)
 	tt.Equal(t, false, has)
 	tt.Nil(t, val)

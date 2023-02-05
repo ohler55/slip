@@ -128,6 +128,9 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		SetHook(vv.Pkg, name)
 		return vv
 	}
+	if obj.Locked {
+		panic(fmt.Sprintf("Package %s is locked thus no new variables can be set.", obj.Name))
+	}
 	vv := &VarVal{Val: value, Pkg: obj}
 	obj.Vars[name] = vv
 	for _, u := range obj.Users {
@@ -171,20 +174,22 @@ func (obj *Package) JustGet(name string) (value Object) {
 }
 
 // Remove a variable.
-func (obj *Package) Remove(name string) {
+func (obj *Package) Remove(name string) (removed bool) {
+	if obj.Locked {
+		panic(fmt.Sprintf("Package %s is locked.", obj.Name))
+	}
 	name = strings.ToLower(name)
-	if vv, has := obj.Vars[name]; has {
-		if vv.Get != nil {
-			panic(fmt.Sprintf("%s can not be removed.", name))
-		}
+	if _, has := obj.Vars[name]; has {
 		delete(obj.Vars, name)
 		for _, u := range obj.Users {
-			if vv, has := u.Vars[name]; has && vv.Pkg == obj {
+			if vv, _ := u.Vars[name]; vv != nil && vv.Pkg == obj {
 				delete(u.Vars, name)
+				removed = true
 			}
 		}
 	}
 	UnsetHook(obj, name)
+	return
 }
 
 // Has a variable.

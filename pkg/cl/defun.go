@@ -78,12 +78,12 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	}
 	if fi := slip.CurrentPackage.Funcs[low]; fi != nil {
 		if fi.Pkg.Locked {
-			panic(fmt.Sprintf("Redefining %s::%s in defun. Package %s is locked.",
+			panic(fmt.Sprintf("Redefining %s:%s in defun. Package %s is locked.",
 				slip.CurrentPackage.Name, low, slip.CurrentPackage.Name))
 		}
 		var w io.Writer
 		if w, ok = slip.ErrorOutput.(io.Writer); ok {
-			_, _ = fmt.Fprintf(w, "WARNING: redefining %s::%s in defun\n", slip.CurrentPackage.Name, low)
+			_, _ = fmt.Fprintf(w, "WARNING: redefining %s:%s in defun\n", slip.CurrentPackage.Name, low)
 		}
 	}
 	slip.CurrentPackage.Lambdas[low] = lc

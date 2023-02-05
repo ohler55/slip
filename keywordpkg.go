@@ -21,7 +21,6 @@ var (
 		Lambdas: map[string]*Lambda{},
 		Funcs:   map[string]*FuncInfo{},
 		PreSet:  keywordPreSet,
-		Locked:  true,
 	}
 )
 

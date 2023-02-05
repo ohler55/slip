@@ -353,3 +353,11 @@ func setEvalOnClose(value slip.Object) {
 func SetSizer(hs hasSize) {
 	sizer = hs
 }
+
+func getREPL() slip.Object {
+	return &Pkg
+}
+
+func setREPL(_ slip.Object) {
+	panic("*repl* is a read only variable")
+}
