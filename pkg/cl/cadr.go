@@ -44,7 +44,6 @@ func (f *Cadr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		slip.PanicArgCount(f, 1, 1)
 	}
 	a := args[0]
-Retry:
 	switch list := a.(type) {
 	case nil:
 		// leave result as nil
@@ -52,9 +51,6 @@ Retry:
 		if 1 < len(list) {
 			result = list[len(list)-2]
 		}
-	case slip.Values:
-		a = list.First()
-		goto Retry
 	default:
 		slip.PanicType("argument to cadr", list, "list")
 	}

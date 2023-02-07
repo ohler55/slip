@@ -84,10 +84,12 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	var update []int
 	for i := len(f.Args) - 1; 0 <= i; i-- {
 		si++
+		skip := false
 		arg := f.Args[i]
 		if 0 < len(f.SkipEval) {
 			if len(f.SkipEval) <= si {
 				if f.SkipEval[len(f.SkipEval)-1] {
+					skip = true
 					args[i] = arg
 					if _, ok := arg.(List); ok {
 						update = append(update, i)
@@ -95,6 +97,7 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 					continue
 				}
 			} else if f.SkipEval[si] {
+				skip = true
 				args[i] = arg
 				if _, ok := arg.(List); ok {
 					update = append(update, i)
@@ -106,7 +109,11 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 			arg = ListToFunc(s, list, depth+1)
 			f.Args[i] = arg
 		}
-		args[i] = s.Eval(arg, d2)
+		v := s.Eval(arg, d2)
+		if vs, ok := v.(Values); ok && !skip {
+			v = vs[len(vs)-1]
+		}
+		args[i] = v
 	}
 	result = f.Self.Call(s, args, depth)
 
