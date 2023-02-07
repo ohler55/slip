@@ -282,9 +282,7 @@
  * [ ] FIND-IF
  * [ ] FIND-IF-NOT
  * [ ] FIND-METHOD
- * [ ] FIND-PACKAGE
  * [ ] FIND-RESTART
- * [x] FIND-SYMBOL
  * [ ] FINISH-OUTPUT
  * [ ] FIRST
  * [ ] FIXNUM
@@ -344,7 +342,6 @@
  * [ ] INTEGER-DECODE-FLOAT
  * [ ] INTEGER-LENGTH
  * [ ] INTERACTIVE-STREAM-P
- * [x] INTERN
  * [ ] INTERNAL-TIME-UNITS-PER-SECOND
  * [ ] INTERSECTION
  * [ ] INVALID-METHOD-ERROR
@@ -767,7 +764,6 @@
  * [ ] UNBOUND-VARIABLE
  * [ ] UNDEFINED-FUNCTION
  * [ ] UNEXPORT
- * [x] UNINTERN
  * [ ] UNION
  * [ ] UNLESS
  * [ ] UNREAD-CHAR
@@ -885,6 +881,8 @@
  * [x] EXPT
  * [x] FCEILING
  * [x] FIND-CLASS
+ * [x] FIND-PACKAGE
+ * [x] FIND-SYMBOL
  * [x] FLOAT
  * [x] FLOATP
  * [x] FLOOR
@@ -901,6 +899,7 @@
  * [x] HASH-TABLE-TEST
  * [x] INPUT-STREAM-P
  * [x] INTEGERP
+ * [x] INTERN
  * [x] LAMBDA
  * [x] LET
  * [x] LET*
@@ -948,6 +947,7 @@
  * [x] TRUNCATE
  * [x] TYPE-OF
  * [x] TYPEP
+ * [x] UNINTERN
  * [x] VALUES
  * [x] WRITE
  * [x] ZEROP

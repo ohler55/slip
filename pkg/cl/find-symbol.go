@@ -31,7 +31,7 @@ func init() {
 				},
 			},
 			Return: "symbol, status",
-			Text: `__findSymbol__ Finds a _symbol_ matching _string_ in the _package_. The _symbol_ is
+			Text: `__find-symbol__ Finds a _symbol_ matching _string_ in the _package_. The _symbol_ is
 returned along with the _status_ where the _status_ can be one of:
 
   _:interal_ indicates the _symbol_ was found in the _package_.
@@ -41,7 +41,7 @@ returned along with the _status_ where the _status_ can be one of:
 
 `,
 			Examples: []string{
-				`(findSymbol "abc") => abc, nil`,
+				`(find-symbol "abc") => abc, nil`,
 			},
 		}, &slip.CLPkg)
 }
