@@ -24,13 +24,42 @@ SLIce Processing is LISP for golang
 
 - next
 
+ - car cdr blends
+ * [ ] CAAAAR
+ * [ ] CAAADR
+ * [ ] CAAAR
+ * [ ] CAADAR
+ * [ ] CAADDR
+ * [ ] CAADR
+ * [ ] CAAR
+ * [ ] CADAAR
+ * [ ] CADADR
+ * [ ] CADAR
+ * [ ] CADDAR
+ * [ ] CADDDR
+ * [ ] CADDR
+ * [ ] CDAAAR
+ * [ ] CDAADR
+ * [ ] CDAAR
+ * [ ] CDADAR
+ * [ ] CDADDR
+ * [ ] CDADR
+ * [ ] CDAR
+ * [ ] CDDAAR
+ * [ ] CDDADR
+ * [ ] CDDAR
+ * [ ] CDDDAR
+ * [ ] CDDDDR
+ * [ ] CDDDR
+ * [ ] CDDR
+
+
  - cl
    - assoc
    - coerce
    - apply
    - eval
   - list
-   - nth
    - map
    - mapc
    - mapcar

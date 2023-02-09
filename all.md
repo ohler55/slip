@@ -499,7 +499,7 @@
  * [ ] NSUBSTITUTE
  * [ ] NSUBSTITUTE-IF
  * [ ] NSUBSTITUTE-IF-NOT
- * [ ] NTH
+ * [x] NTH
  * [ ] NTH-VALUE
  * [ ] NTHCDR
  * [ ] NUMBER
