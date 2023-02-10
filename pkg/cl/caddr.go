@@ -16,7 +16,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "arg",
-					Type: "list|cons",
+					Type: "list",
 					Text: "The value to take the third element of.",
 				},
 			},

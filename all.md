@@ -103,13 +103,13 @@
  * [ ] CAADAR
  * [ ] CAADDR
  * [ ] CAADR
- * [ ] CAAR
+ * [x] CAAR
  * [ ] CADAAR
  * [ ] CADADR
  * [ ] CADAR
  * [ ] CADDAR
- * [ ] CADDDR
- * [ ] CADDR
+ * [x] CADDDR
+ * [x] CADDR
  * [ ] CALL-ARGUMENTS-LIMIT
  * [ ] CALL-METHOD
  * [ ] CALL-NEXT-METHOD

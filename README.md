@@ -31,13 +31,13 @@ SLIce Processing is LISP for golang
  * [ ] CAADAR
  * [ ] CAADDR
  * [ ] CAADR
- * [ ] CAAR
+ * [x] CAAR
  * [ ] CADAAR
  * [ ] CADADR
  * [ ] CADAR
  * [ ] CADDAR
- * [ ] CADDDR
- * [ ] CADDR
+ * [x] CADDDR
+ * [x] CADDR
  * [ ] CDAAAR
  * [ ] CDAADR
  * [ ] CDAAR
