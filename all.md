@@ -97,9 +97,9 @@
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
- * [ ] CAAAAR
+ * [x] CAAAAR
  * [ ] CAAADR
- * [ ] CAAAR
+ * [x] CAAAR
  * [ ] CAADAR
  * [ ] CAADDR
  * [ ] CAADR

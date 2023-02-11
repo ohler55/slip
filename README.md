@@ -25,9 +25,9 @@ SLIce Processing is LISP for golang
 - next
 
  - car cdr blends
- * [ ] CAAAAR
+ * [x] CAAAAR
  * [ ] CAAADR
- * [ ] CAAAR
+ * [x] CAAAR
  * [ ] CAADAR
  * [ ] CAADDR
  * [ ] CAADR
