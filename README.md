@@ -23,9 +23,16 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
+ - editor
+  - after caars and cddrs create debug file/writer on editor
+  - no zero length commands
+
  - setf with cdr only is last one is a cons
 
-
+ - general car/cdr pattern
+  - maybe []bool{} with true for car and false for cdr
+  - cadGet and cadPlace
+  - (f, args, ops []bool)
 
  - car cdr blends
  * [x] CAAAAR

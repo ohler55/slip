@@ -5,6 +5,8 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -26,6 +28,27 @@ func TestCddrFound(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(cddr '(a b c d))",
 		Expect: "(c d)",
+	}).Test(t)
+}
+
+func TestCddrSetfCons(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '(a . (b . c)))").Eval(slip.NewScope())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (cddr target) 'x)",
+		Expect: "x",
+	}).Test(t)
+	tt.Equal(t, "(a . (b . x))", slip.ObjectString(scope.Get(slip.Symbol("target"))))
+}
+
+func TestCddrSetfList(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '(a  b  c))").Eval(slip.NewScope())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (cddr target) 'x)",
+		Panics: true,
 	}).Test(t)
 }
 

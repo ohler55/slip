@@ -41,10 +41,10 @@ type Caaar struct {
 
 // Call the function with the arguments provided.
 func (f *Caaar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	return caaGet(f, 3, args)
+	return cadGet(f, args, []bool{true, true, true})
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Caaar) Place(args slip.List, value slip.Object) {
-	caaPlace(f, 3, args, value)
+	cadPlace(f, args, []bool{true, true, true}, value)
 }

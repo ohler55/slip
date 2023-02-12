@@ -5,6 +5,8 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -41,4 +43,15 @@ func TestCddddrWrongNotList(t *testing.T) {
 		Source: "(cddddr t)",
 		Panics: true,
 	}).Test(t)
+}
+
+func TestCddddrSetfCons(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '(a . (b . (c . (d . e)))))").Eval(slip.NewScope())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (cddddr target) 'x)",
+		Expect: "x",
+	}).Test(t)
+	tt.Equal(t, "(a . (b . (c . (d . x))))", slip.ObjectString(scope.Get(slip.Symbol("target"))))
 }
