@@ -3,6 +3,8 @@
 package cl
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
 )
 
@@ -41,40 +43,58 @@ type Caar struct {
 
 // Call the function with the arguments provided.
 func (f *Caar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	return caaGet(f, 2, args)
+}
+
+// Place a value in the first position of a list or cons.
+func (f *Caar) Place(args slip.List, value slip.Object) {
+	caaPlace(f, 2, args, value)
+}
+
+func caaGet(f slip.Object, n int, args slip.List) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
 	a := args[0]
-	for i := 2; 0 < i; i-- {
+	for i := n; 0 < i; i-- {
 		switch list := a.(type) {
 		case nil:
 			a = nil
+		case slip.Cons:
+			a = list.Car()
 		case slip.List:
 			if 0 < len(list) {
 				a = list[len(list)-1]
 			}
 		default:
-			slip.PanicType("argument to caar", list, "list")
+			slip.PanicType(fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), args[0], "cons", "list")
 		}
 	}
 	return a
 }
 
-// Place a value in the first position of a list or cons.
-func (f *Caar) Place(args slip.List, value slip.Object) {
+// Used by caar, caaar, and caaaar.
+func caaPlace(f slip.Object, n int, args slip.List, value slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
 	a := args[0]
-	for i := 2; 0 < i; i-- {
-		if list, _ := a.(slip.List); 0 < len(list) {
+	for i := n; 0 < i; i-- {
+		switch list := a.(type) {
+		case slip.Cons:
+			if i == 1 {
+				list[len(list)-1] = value
+				return
+			}
+			a = list.Car()
+		case slip.List:
 			if i == 1 {
 				list[len(list)-1] = value
 				return
 			}
 			a = list[len(list)-1]
-		} else {
-			slip.PanicType("argument to caar", a, "list")
+		default:
+			slip.PanicType(fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), args[0], "cons", "list")
 		}
 	}
 }

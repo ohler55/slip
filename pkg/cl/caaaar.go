@@ -41,40 +41,10 @@ type Caaaar struct {
 
 // Call the function with the arguments provided.
 func (f *Caaaar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	a := args[0]
-	for i := 4; 0 < i; i-- {
-		switch list := a.(type) {
-		case nil:
-			a = nil
-		case slip.List:
-			if 0 < len(list) {
-				a = list[len(list)-1]
-			}
-		default:
-			slip.PanicType("argument to caaaar", list, "list")
-		}
-	}
-	return a
+	return caaGet(f, 4, args)
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Caaaar) Place(args slip.List, value slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	a := args[0]
-	for i := 4; 0 < i; i-- {
-		if list, _ := a.(slip.List); 0 < len(list) {
-			if i == 1 {
-				list[len(list)-1] = value
-				return
-			}
-			a = list[len(list)-1]
-		} else {
-			slip.PanicType("argument to caaaar", a, "list")
-		}
-	}
+	caaPlace(f, 4, args, value)
 }

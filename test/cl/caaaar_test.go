@@ -31,6 +31,13 @@ func TestCaaaarFound(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCaaaarCons(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(caaaar '((((a . b) . c) . d) . e))",
+		Expect: "a",
+	}).Test(t)
+}
+
 func TestCaaaarWrongArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(caaaar)",

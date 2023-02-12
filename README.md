@@ -23,14 +23,17 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
+ - setf with cdr only is last one is a cons
+
+
 
  - car cdr blends
  * [x] CAAAAR
- * [ ] CAAADR
+ * [x] CAAADR
  * [x] CAAAR
  * [ ] CAADAR
  * [ ] CAADDR
- * [ ] CAADR
+ * [x] CAADR
  * [x] CAAR
  * [ ] CADAAR
  * [ ] CADADR
@@ -49,9 +52,9 @@ SLIce Processing is LISP for golang
  * [ ] CDDADR
  * [ ] CDDAR
  * [ ] CDDDAR
- * [ ] CDDDDR
- * [ ] CDDDR
- * [ ] CDDR
+ * [x] CDDDDR
+ * [x] CDDDR
+ * [x] CDDR
 
 
  - cl

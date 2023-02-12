@@ -24,9 +24,16 @@ func TestCaaarFoundNil(t *testing.T) {
 	}).Test(t)
 }
 
-func TestCaaarFound(t *testing.T) {
+func TestCaaarList(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(caaar '(((a b) c) d))",
+		Expect: "a",
+	}).Test(t)
+}
+
+func TestCaaarCons(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(caaar '(((a . b) . c) . d))",
 		Expect: "a",
 	}).Test(t)
 }
@@ -45,7 +52,7 @@ func TestCaaarWrongNotList(t *testing.T) {
 	}).Test(t)
 }
 
-func TestCaaarSetfOk(t *testing.T) {
+func TestCaaarSetfList(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString("(setq target '(((a b) c) d))").Eval(slip.NewScope())
 	(&sliptest.Function{
@@ -54,6 +61,17 @@ func TestCaaarSetfOk(t *testing.T) {
 		Expect: "x",
 	}).Test(t)
 	tt.Equal(t, "(((x b) c) d)", slip.ObjectString(scope.Get(slip.Symbol("target"))))
+}
+
+func TestCaaarSetfCons(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '(((a . b) . c) . d))").Eval(slip.NewScope())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (caaar target) 'x)",
+		Expect: "x",
+	}).Test(t)
+	tt.Equal(t, "(((x . b) . c) . d)", slip.ObjectString(scope.Get(slip.Symbol("target"))))
 }
 
 func TestCaaarSetfFail(t *testing.T) {

@@ -24,9 +24,16 @@ func TestCaarFoundNil(t *testing.T) {
 	}).Test(t)
 }
 
-func TestCaarFound(t *testing.T) {
+func TestCaarList(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(caar '((a b) c))",
+		Expect: "a",
+	}).Test(t)
+}
+
+func TestCaarCons(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(caar '((a . b) . c))",
 		Expect: "a",
 	}).Test(t)
 }
@@ -45,7 +52,7 @@ func TestCaarWrongNotList(t *testing.T) {
 	}).Test(t)
 }
 
-func TestCaarSetfOk(t *testing.T) {
+func TestCaarSetfList(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString("(setq target '((a b) c))").Eval(slip.NewScope())
 	(&sliptest.Function{
@@ -54,6 +61,17 @@ func TestCaarSetfOk(t *testing.T) {
 		Expect: "x",
 	}).Test(t)
 	tt.Equal(t, "((x b) c)", slip.ObjectString(scope.Get(slip.Symbol("target"))))
+}
+
+func TestCaarSetfCons(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '((a . b) . c))").Eval(slip.NewScope())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (caar target) 'x)",
+		Expect: "x",
+	}).Test(t)
+	tt.Equal(t, "((x . b) . c)", slip.ObjectString(scope.Get(slip.Symbol("target"))))
 }
 
 func TestCaarSetfFail(t *testing.T) {

@@ -98,11 +98,11 @@
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
  * [x] CAAAAR
- * [ ] CAAADR
+ * [x] CAAADR
  * [x] CAAAR
  * [ ] CAADAR
  * [ ] CAADDR
- * [ ] CAADR
+ * [x] CAADR
  * [x] CAAR
  * [ ] CADAAR
  * [ ] CADADR
@@ -127,9 +127,9 @@
  * [ ] CDDADR
  * [ ] CDDAR
  * [ ] CDDDAR
- * [ ] CDDDDR
- * [ ] CDDDR
- * [ ] CDDR
+ * [x] CDDDDR
+ * [x] CDDDR
+ * [x] CDDR
  * [ ] CELL-ERROR
  * [ ] CELL-ERROR-NAME
  * [ ] CERROR
