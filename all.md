@@ -100,14 +100,14 @@
  * [x] CAAAAR
  * [x] CAAADR
  * [x] CAAAR
- * [ ] CAADAR
- * [ ] CAADDR
+ * [x] CAADAR
+ * [x] CAADDR
  * [x] CAADR
  * [x] CAAR
- * [ ] CADAAR
- * [ ] CADADR
- * [ ] CADAR
- * [ ] CADDAR
+ * [x] CADAAR
+ * [x] CADADR
+ * [x] CADAR
+ * [x] CADDAR
  * [x] CADDDR
  * [x] CADDR
  * [ ] CALL-ARGUMENTS-LIMIT

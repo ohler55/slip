@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
 
 package cl
 
@@ -21,14 +21,13 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `__cadr__ returns (car (cdr arg)) if _arg_ is a _cons_, the second element if _arg_ is a _list_, and
-_nil_ if _arg_ is _nil_ or an empty _list_.`,
+			Text:   `__cadr__ returns (car (cdr arg)).`,
 			Examples: []string{
 				"(cadr nil) => nil",
 				"(cadr '(a b c)) => b",
 				"(setq x '(a b c))",
-				"(setf (cadr x) 'd) => d",
-				" x => (a d c)",
+				"(setf (cadr x) 'z) => z",
+				" x => (a z c)",
 			},
 		}, &slip.CLPkg)
 }
@@ -45,12 +44,5 @@ func (f *Cadr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 
 // Place a value in the first position of a list or cons.
 func (f *Cadr) Place(args slip.List, value slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	if list, ok := args[0].(slip.List); ok && 1 < len(list) {
-		list[len(list)-2] = value
-	} else {
-		slip.PanicType("argument to cadr", list, "list")
-	}
+	cadPlace(f, args, []bool{false, true}, value)
 }
