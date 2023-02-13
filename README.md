@@ -41,8 +41,8 @@ SLIce Processing is LISP for golang
  * [x] CADDAR
  * [x] CADDDR
  * [x] CADDR
- * [ ] CDAAAR
- * [ ] CDAADR
+ * [x] CDAAAR
+ * [x] CDAADR
  * [ ] CDAAR
  * [ ] CDADAR
  * [ ] CDADDR

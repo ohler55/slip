@@ -116,8 +116,8 @@
  * [ ] CASE
  * [ ] CATCH
  * [ ] CCASE
- * [ ] CDAAAR
- * [ ] CDAADR
+ * [x] CDAAAR
+ * [x] CDAADR
  * [ ] CDAAR
  * [ ] CDADAR
  * [ ] CDADDR
