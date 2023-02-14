@@ -92,3 +92,8 @@ func (obj Fixnum) Eval(s *Scope, depth int) Object {
 func (obj Fixnum) RealValue() float64 {
 	return float64(obj)
 }
+
+// Int64 of the number.
+func (obj Fixnum) Int64() int64 {
+	return int64(obj)
+}

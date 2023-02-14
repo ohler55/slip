@@ -2,7 +2,9 @@
 
 package cl
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 func init() {
 	slip.Define(
@@ -42,7 +44,6 @@ func (f *Cdr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		slip.PanicArgCount(f, 1, 1)
 	}
 	a := args[0]
-Retry:
 	switch list := a.(type) {
 	case nil:
 		// leave result as nil
@@ -52,11 +53,23 @@ Retry:
 		if 0 < len(list) {
 			result = list[:len(list)-1]
 		}
-	case slip.Values:
-		a = list.First()
-		goto Retry
 	default:
 		slip.PanicType("argument to cdr", list, "cons", "list")
 	}
 	return
+}
+
+// Place a value in the first position of a list or cons.
+func (f *Cdr) Place(args slip.List, value slip.Object) {
+	if len(args) != 1 {
+		slip.PanicArgCount(f, 1, 1)
+	}
+	switch list := args[0].(type) {
+	case slip.Cons:
+		list[0] = value
+	case slip.List:
+		panic("setf on cdr of a list is not implemented")
+	default:
+		slip.PanicType("argument to cdr", list, "cons", "list")
+	}
 }

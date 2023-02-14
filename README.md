@@ -23,6 +23,9 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
+ - editor
+  - create debug file/writer on editor
+  - no zero length commands
 
  - cl
    - assoc
@@ -30,7 +33,6 @@ SLIce Processing is LISP for golang
    - apply
    - eval
   - list
-   - nth
    - map
    - mapc
    - mapcar

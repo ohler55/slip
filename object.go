@@ -104,7 +104,7 @@ func SimpleObject(val any) (obj Object) {
 	case map[string]any:
 		list := make(List, 0, len(tv))
 		for k, v2 := range tv {
-			list = append(list, Cons{String(k), SimpleObject(v2)})
+			list = append(list, Cons{SimpleObject(v2), String(k)})
 		}
 		obj = list
 

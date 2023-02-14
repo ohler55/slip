@@ -13,6 +13,10 @@ func init() {
 type Integer interface {
 	Rational
 
-	// IntegerType returns the integer type of the instance which can be one of: fixnum or bignum.
+	// IntegerType returns the integer type of the instance which can be one
+	// of: fixnum or bignum.
 	IntegerType() Symbol
+
+	// Int64 returns the closes int64 of the integer.
+	Int64() int64
 }

@@ -2,7 +2,9 @@
 
 package cl
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 func init() {
 	slip.Define(
@@ -42,7 +44,6 @@ func (f *Car) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		slip.PanicArgCount(f, 1, 1)
 	}
 	a := args[0]
-Retry:
 	switch list := a.(type) {
 	case nil:
 		// leave result as nil
@@ -52,9 +53,6 @@ Retry:
 		if 0 < len(list) {
 			result = list[len(list)-1]
 		}
-	case slip.Values:
-		a = list.First()
-		goto Retry
 	default:
 		slip.PanicType("argument to car", list, "cons", "list")
 	}

@@ -462,7 +462,7 @@ Top:
 		n.buf = []byte(p.caseName(string(to)))
 		n.size = len(n.buf)
 	case Cons:
-		obj = List{to.Car(), Symbol("."), to.Cdr()}
+		obj = List{to.Cdr(), Symbol("."), to.Car()}
 		goto Top
 
 	case Funky:

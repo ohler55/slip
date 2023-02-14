@@ -105,3 +105,8 @@ func (obj *Bignum) RealValue() float64 {
 	f, _ := big.NewFloat(0.0).SetInt((*big.Int)(obj)).Float64()
 	return f
 }
+
+// Int64 of the number.
+func (obj *Bignum) Int64() int64 {
+	return (*big.Int)(obj).Int64()
+}

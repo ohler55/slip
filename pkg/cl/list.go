@@ -33,10 +33,5 @@ type List struct {
 
 // Call the function with the arguments provided.
 func (f *List) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	for i, obj := range args {
-		if vs, ok := obj.(slip.Values); ok {
-			args[i] = vs.First()
-		}
-	}
 	return args
 }

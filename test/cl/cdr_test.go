@@ -47,6 +47,27 @@ func TestCdrList(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCdrSetfCons(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '(a . b))").Eval(slip.NewScope())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (cdr target) 'x)",
+		Expect: "x",
+	}).Test(t)
+	tt.Equal(t, "(a . x)", slip.ObjectString(scope.Get(slip.Symbol("target"))))
+}
+
+func TestCdrSetfList(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '(a b))").Eval(slip.NewScope())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (cdr target) 'x)",
+		Panics: true,
+	}).Test(t)
+}
+
 func TestCdrBadArg(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("arg"), slip.True)
@@ -78,4 +99,18 @@ func TestCdrValues(t *testing.T) {
 	code := slip.ReadString(`(cdr (values '(a b) 'c))`)
 	scope := slip.NewScope()
 	tt.Equal(t, slip.List{slip.Symbol("b")}, code.Eval(scope))
+}
+
+func TestCdrSetfArgCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(setf (cdr) 'x)",
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCdrSetfNotConsOunt(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(setf (cdr t) 'x)",
+		Panics: true,
+	}).Test(t)
 }

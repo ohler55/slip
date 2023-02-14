@@ -97,39 +97,12 @@
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
- * [ ] CAAAAR
- * [ ] CAAADR
- * [ ] CAAAR
- * [ ] CAADAR
- * [ ] CAADDR
- * [ ] CAADR
- * [ ] CAAR
- * [ ] CADAAR
- * [ ] CADADR
- * [ ] CADAR
- * [ ] CADDAR
- * [ ] CADDDR
- * [ ] CADDR
  * [ ] CALL-ARGUMENTS-LIMIT
  * [ ] CALL-METHOD
  * [ ] CALL-NEXT-METHOD
  * [ ] CASE
  * [ ] CATCH
  * [ ] CCASE
- * [ ] CDAAAR
- * [ ] CDAADR
- * [ ] CDAAR
- * [ ] CDADAR
- * [ ] CDADDR
- * [ ] CDADR
- * [ ] CDAR
- * [ ] CDDAAR
- * [ ] CDDADR
- * [ ] CDDAR
- * [ ] CDDDAR
- * [ ] CDDDDR
- * [ ] CDDDR
- * [ ] CDDR
  * [ ] CELL-ERROR
  * [ ] CELL-ERROR-NAME
  * [ ] CERROR
@@ -499,7 +472,6 @@
  * [ ] NSUBSTITUTE
  * [ ] NSUBSTITUTE-IF
  * [ ] NSUBSTITUTE-IF-NOT
- * [ ] NTH
  * [ ] NTH-VALUE
  * [ ] NTHCDR
  * [ ] NUMBER
@@ -858,8 +830,35 @@
  * [x] APROPOS-LIST
  * [x] ASIN
  * [x] ATAN
+ * [x] CAAAAR
+ * [x] CAAADR
+ * [x] CAAAR
+ * [x] CAADAR
+ * [x] CAADDR
+ * [x] CAADR
+ * [x] CAAR
+ * [x] CADAAR
+ * [x] CADADR
+ * [x] CADAR
+ * [x] CADDAR
+ * [x] CADDDR
+ * [x] CADDR
  * [x] CADR
  * [x] CAR
+ * [x] CDAAAR
+ * [x] CDAADR
+ * [x] CDAAR
+ * [x] CDADAR
+ * [x] CDADDR
+ * [x] CDADR
+ * [x] CDAR
+ * [x] CDDAAR
+ * [x] CDDADR
+ * [x] CDDAR
+ * [x] CDDDAR
+ * [x] CDDDDR
+ * [x] CDDDR
+ * [x] CDDR
  * [x] CDR
  * [x] CEILING
  * [x] CHARACTERP
@@ -915,6 +914,7 @@
  * [x] MIN
  * [x] MINUSP
  * [x] MOD
+ * [x] NTH
  * [x] NULL
  * [x] NUMBERP
  * [x] ODDP
