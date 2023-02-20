@@ -3,9 +3,9 @@ module github.com/ohler55/slip
 go 1.19
 
 require (
-	github.com/ohler55/ojg v1.14.2
+	github.com/ohler55/ojg v1.17.5
 	golang.org/x/term v0.3.0
 	golang.org/x/text v0.4.0
 )
 
-require golang.org/x/sys v0.3.0 // indirect
+require golang.org/x/sys v0.3.0

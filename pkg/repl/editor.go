@@ -50,12 +50,16 @@ type editor struct {
 	completer  Completer
 	resizeChan chan os.Signal
 	seqChan    chan *seq
+	log        *os.File
 }
 
 func (ed *editor) initialize() {
 	if ed.out != nil {
 		return
 	}
+	// Uncomment for debugging.
+	ed.log, _ = os.Create("editor.log")
+
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
 	ed.mode = topMode
 	ed.key.buf = make([]byte, 32)
@@ -101,6 +105,9 @@ func (ed *editor) stop() {
 	ed.seqChan <- nil
 	ed.reset()
 	ed.out = nil
+	if ed.log != nil {
+		_ = ed.log.Close()
+	}
 }
 
 func (ed *editor) setDepth(d int) {
@@ -852,7 +859,20 @@ func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
 }
 
 func (ed *editor) addToHistory() {
-	ed.hist.Add(ed.lines)
+	if !ed.emptyForm() {
+		ed.hist.Add(ed.lines)
+	}
+}
+
+func (ed *editor) emptyForm() bool {
+	for _, line := range ed.lines {
+		for _, r := range line {
+			if r != ' ' {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func (ed *editor) setForm(form Form) {

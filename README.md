@@ -25,7 +25,7 @@ SLIce Processing is LISP for golang
 - next
  - editor
   - create debug file/writer on editor
-  - no zero length commands
+   - log key and func called?
 
  - cl
    - assoc
