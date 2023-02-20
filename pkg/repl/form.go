@@ -50,3 +50,29 @@ func (f Form) Append(b []byte) []byte {
 	}
 	return b
 }
+
+// Empty return true if there are not non-space characters in the form.
+func (f Form) Empty() bool {
+	for _, line := range f {
+		for _, r := range line {
+			if r != ' ' {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// Equal returns true if the two forms are equal.
+func (f Form) Equal(f2 Form) bool {
+	if len(f) != len(f2) {
+		return false
+	}
+	for i, line := range f {
+		line2 := f2[i]
+		if len(line) != len(line2) || string(line) != string(line2) {
+			return false
+		}
+	}
+	return true
+}

@@ -4,10 +4,6 @@ SLIce Processing is LISP for golang
 
 -------------------------------------------------------------------------------
 
-- next
-
-- repl is broken after history
- - how to reproduce...
 
 - data access packages
  - graphql
@@ -23,9 +19,6 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
- - editor
-  - create debug file/writer on editor
-   - log key and func called?
 
  - cl
    - assoc

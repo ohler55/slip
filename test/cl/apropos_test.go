@@ -49,8 +49,8 @@ func TestAproposPkg(t *testing.T) {
 		Source: `(apropos 'deff 'flavors)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `flavors::defflavor (built-in)
-flavors::undefflavor (built-in)
+	tt.Equal(t, `flavors:defflavor (built-in)
+flavors:undefflavor (built-in)
 `, out.String())
 }
 
@@ -64,7 +64,7 @@ func TestAproposPkgVars(t *testing.T) {
 		Source: `(apropos 'vanilla 'flavors)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `flavors::vanilla-flavor = #<flavor vanilla-flavor>
+	tt.Equal(t, `flavors:vanilla-flavor = #<flavor vanilla-flavor>
 `, out.String())
 }
 
@@ -80,7 +80,7 @@ func TestAproposDefun(t *testing.T) {
 		Source: `(apropos 'testy 'user)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `common-lisp-user::apropos-testy (lambda)
+	tt.Equal(t, `common-lisp-user:apropos-testy (lambda)
 `, out.String())
 }
 

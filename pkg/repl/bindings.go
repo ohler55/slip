@@ -138,10 +138,14 @@ func init() {
 	topMode = rootMode
 	// Update this if the key bindings for history are changed.
 	historyBindings = map[string]bindFunc{
-		"\x16":  historyForward,
-		"\x1bv": historyBack,
-		"\x12":  searchBack,
-		"\x13":  searchForward,
+		"\x16":      historyForward,
+		"\x0e":      historyForward,
+		"\x1b\x5bB": historyForward,
+		"\x1bv":     historyBack,
+		"\x10":      historyBack,
+		"\x1b\x5bA": historyBack,
+		"\x12":      searchBack,
+		"\x13":      searchForward,
 	}
 }
 
@@ -154,7 +158,8 @@ func (ed *editor) modeName() string {
 const hexMap = "0123456789abcdef"
 
 func bad(ed *editor, b byte) bool {
-	_, _ = ed.out.Write([]byte{0x07})
+	ed.logf("=> %02x bad\n", b)
+	ed.write([]byte{0x07})
 	mod := ed.modeName()
 	var charName []byte
 	for i := 0; i < ed.key.cnt; i++ {
@@ -183,11 +188,13 @@ func bad(ed *editor, b byte) bool {
 }
 
 func done(ed *editor, b byte) bool {
+	ed.logf("=> %02x done\n", b)
 	ed.setCursor(ed.v0+len(ed.lines), 1)
 	panic(io.EOF)
 }
 
 func topUni(ed *editor, b byte) bool {
+	ed.logf("=> %02x topUni\n", b)
 	ed.uni = ed.uni[:0]
 	ed.uni = append(ed.uni, b)
 	ed.mode = unicodeMode
@@ -195,6 +202,7 @@ func topUni(ed *editor, b byte) bool {
 }
 
 func addUni(ed *editor, b byte) bool {
+	ed.logf("=> %02x addUni\n", b)
 	ed.uni = append(ed.uni, b)
 	if utf8.Valid(ed.uni) {
 		r, _ := utf8.DecodeRune(ed.uni)
@@ -203,7 +211,7 @@ func addUni(ed *editor, b byte) bool {
 		return false
 	}
 	if 6 <= len(ed.uni) {
-		_, _ = ed.out.Write([]byte{0x07})
+		ed.write([]byte{0x07})
 		msg := fmt.Appendf(nil, "invalid UTF-8 sequence: %#v", ed.uni)
 		ed.displayMessage(msg)
 		ed.mode = topMode
@@ -212,6 +220,7 @@ func addUni(ed *editor, b byte) bool {
 }
 
 func enter(ed *editor, b byte) bool {
+	ed.logf("=> %02x enter\n", b)
 	if evalOnClose {
 		nl(ed, b)
 	} else {
@@ -222,12 +231,14 @@ func enter(ed *editor, b byte) bool {
 }
 
 func eval(ed *editor, b byte) bool {
+	ed.logf("=> %02x eval\n", b)
 	ed.evalForm()
 	ed.mode = topMode
 	return true
 }
 
-func nl(ed *editor, _ byte) bool {
+func nl(ed *editor, b byte) bool {
+	ed.logf("=> %02x nl\n", b)
 	bottom := ed.v0 + len(ed.lines)
 	h := int(atomic.LoadInt32(&ed.height))
 	if h <= bottom {
@@ -256,22 +267,26 @@ func nl(ed *editor, _ byte) bool {
 }
 
 func addByte(ed *editor, b byte) bool {
+	ed.logf("=> %02x addByte\n", b)
 	ed.addRune(rune(b))
 	ed.mode = topMode
 	return false
 }
 
-func esc(ed *editor, _ byte) bool {
+func esc(ed *editor, b byte) bool {
+	ed.logf("=> %02x esc\n", b)
 	ed.mode = escMode
 	return false
 }
 
-func esc5b(ed *editor, _ byte) bool {
+func esc5b(ed *editor, b byte) bool {
+	ed.logf("=> %02x esc5b\n", b)
 	ed.mode = esc5bMode
 	return false
 }
 
-func back(ed *editor, _ byte) bool {
+func back(ed *editor, b byte) bool {
+	ed.logf("=> %02x back\n", b)
 	ed.pos--
 	if ed.pos < 0 {
 		if 0 < ed.line {
@@ -289,7 +304,8 @@ func back(ed *editor, _ byte) bool {
 	return false
 }
 
-func forward(ed *editor, _ byte) bool {
+func forward(ed *editor, b byte) bool {
+	ed.logf("=> %02x forward\n", b)
 	ed.pos++
 	if len(ed.lines[ed.line]) < ed.pos {
 		if ed.line+1 < len(ed.lines) {
@@ -307,7 +323,8 @@ func forward(ed *editor, _ byte) bool {
 	return false
 }
 
-func up(ed *editor, _ byte) bool {
+func up(ed *editor, b byte) bool {
+	ed.logf("=> %02x up\n", b)
 	if 0 < ed.line {
 		ed.line--
 		ed.shift = 0
@@ -316,13 +333,16 @@ func up(ed *editor, _ byte) bool {
 			ed.pos = len(ed.lines[ed.line])
 			ed.adjustShift(true)
 		}
+	} else if ed.lines.Empty() {
+		return historyBack(ed, b)
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
 
-func down(ed *editor, _ byte) bool {
+func down(ed *editor, b byte) bool {
+	ed.logf("=> %02x down\n", b)
 	if ed.line+1 < len(ed.lines) {
 		ed.line++
 		ed.shift = 0
@@ -331,13 +351,16 @@ func down(ed *editor, _ byte) bool {
 			ed.pos = len(ed.lines[ed.line])
 			ed.adjustShift(true)
 		}
+	} else if ed.lines.Empty() {
+		return historyForward(ed, b)
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
 
-func backWord(ed *editor, _ byte) bool {
+func backWord(ed *editor, b byte) bool {
+	ed.logf("=> %02x backWord\n", b)
 	n := ed.line
 	ed.line, ed.pos = ed.findWordStart()
 	if ed.line != n {
@@ -349,7 +372,8 @@ func backWord(ed *editor, _ byte) bool {
 	return false
 }
 
-func forwardWord(ed *editor, _ byte) bool {
+func forwardWord(ed *editor, b byte) bool {
+	ed.logf("=> %02x forwardWord\n", b)
 	n := ed.line
 	ed.line, ed.pos = ed.findWordEnd()
 	if ed.line != n {
@@ -361,7 +385,8 @@ func forwardWord(ed *editor, _ byte) bool {
 	return false
 }
 
-func lineBegin(ed *editor, _ byte) bool {
+func lineBegin(ed *editor, b byte) bool {
+	ed.logf("=> %02x lineBegin\n", b)
 	ed.pos = 0
 	if 0 < ed.shift {
 		ed.shift = 0
@@ -371,14 +396,16 @@ func lineBegin(ed *editor, _ byte) bool {
 	return false
 }
 
-func lineEnd(ed *editor, _ byte) bool {
+func lineEnd(ed *editor, b byte) bool {
+	ed.logf("=> %02x lineEnd\n", b)
 	ed.pos = len(ed.lines[ed.line])
 	ed.adjustShift(true)
 	ed.setCursorCurrent()
 	return false
 }
 
-func matchClose(ed *editor, _ byte) bool {
+func matchClose(ed *editor, b byte) bool {
+	ed.logf("=> %02x matchClose\n", b)
 	if p := ed.findOpenParen(); p != nil {
 		ed.line = p.line
 		ed.pos = p.pos
@@ -389,7 +416,8 @@ func matchClose(ed *editor, _ byte) bool {
 	return false
 }
 
-func matchOpen(ed *editor, _ byte) bool {
+func matchOpen(ed *editor, b byte) bool {
+	ed.logf("=> %02x matchOpen\n", b)
 	if p := ed.findCloseParen(); p != nil {
 		ed.line = p.line
 		ed.pos = p.pos
@@ -400,14 +428,15 @@ func matchOpen(ed *editor, _ byte) bool {
 	return false
 }
 
-func delForward(ed *editor, _ byte) bool {
+func delForward(ed *editor, b byte) bool {
+	ed.logf("=> %02x delForward\n", b)
 	line := ed.lines[ed.line]
-	if ed.pos < len(line) {
+	switch {
+	case ed.pos < len(line):
 		line = append(line[:ed.pos], line[ed.pos+1:]...)
 		ed.lines[ed.line] = line
 		ed.adjustShift(true)
-		_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
-	} else if ed.line < len(ed.lines)-1 {
+	case ed.line < len(ed.lines)-1:
 		line = ed.lines[ed.line+1]
 		ed.lines = append(ed.lines[:ed.line+1], ed.lines[ed.line+2:]...)
 		ed.lines[ed.line] = append(ed.lines[ed.line], line...)
@@ -415,13 +444,16 @@ func delForward(ed *editor, _ byte) bool {
 		ed.setCursor(ed.v0+len(ed.lines), 0)
 		ed.clearLine()
 		ed.display()
+	case ed.lines.Empty():
+		return done(ed, b)
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
 	return false
 }
 
-func delBack(ed *editor, _ byte) bool {
+func delBack(ed *editor, b byte) bool {
+	ed.logf("=> %02x delBack\n", b)
 	line := ed.lines[ed.line]
 	if 0 < ed.pos {
 		ed.pos--
@@ -443,7 +475,8 @@ func delBack(ed *editor, _ byte) bool {
 	return false
 }
 
-func delForwardWord(ed *editor, _ byte) bool {
+func delForwardWord(ed *editor, b byte) bool {
+	ed.logf("=> %02x delForwardWord\n", b)
 	cnt := len(ed.lines)
 	toLine, toPos := ed.findWordEnd()
 	ed.deleteRange(ed.line, ed.pos, toLine, toPos)
@@ -455,7 +488,8 @@ func delForwardWord(ed *editor, _ byte) bool {
 	return false
 }
 
-func delBackWord(ed *editor, _ byte) bool {
+func delBackWord(ed *editor, b byte) bool {
+	ed.logf("=> %02x delBackWord\n", b)
 	cnt := len(ed.lines)
 	toLine, toPos := ed.findWordStart()
 	ed.deleteRange(toLine, toPos, ed.line, ed.pos)
@@ -469,7 +503,8 @@ func delBackWord(ed *editor, _ byte) bool {
 	return false
 }
 
-func delLineEnd(ed *editor, _ byte) bool {
+func delLineEnd(ed *editor, b byte) bool {
+	ed.logf("=> %02x delLineEnd\n", b)
 	line := ed.lines[ed.line]
 	if ed.pos < len(line) {
 		line = line[:ed.pos]
@@ -488,21 +523,23 @@ func delLineEnd(ed *editor, _ byte) bool {
 	return false
 }
 
-func swapChar(ed *editor, _ byte) bool {
+func swapChar(ed *editor, b byte) bool {
+	ed.logf("=> %02x swapChar\n", b)
 	if 0 < ed.pos && ed.pos < len(ed.lines[ed.line]) {
 		r0 := ed.lines[ed.line][ed.pos-1]
 		r := ed.lines[ed.line][ed.pos]
 		ed.lines[ed.line][ed.pos] = r0
 		ed.lines[ed.line][ed.pos-1] = r
 		ed.setCursorPos(ed.line, ed.pos-1)
-		_, _ = ed.out.Write([]byte(string([]rune{r, r0})))
+		ed.write([]byte(string([]rune{r, r0})))
 		ed.setCursorCurrent()
 	}
 	ed.mode = topMode
 	return false
 }
 
-func collapse(ed *editor, _ byte) bool {
+func collapse(ed *editor, b byte) bool {
+	ed.logf("=> %02x collapse\n", b)
 	start := ed.pos - 1
 	end := ed.pos
 	line := ed.lines[ed.line]
@@ -525,7 +562,8 @@ func collapse(ed *editor, _ byte) bool {
 	return false
 }
 
-func nlAfter(ed *editor, _ byte) bool {
+func nlAfter(ed *editor, b byte) bool {
+	ed.logf("=> %02x nlAfter\n", b)
 	nl(ed, ' ')
 	ed.line--
 	ed.drawLine(ed.line + 1)
@@ -536,7 +574,8 @@ func nlAfter(ed *editor, _ byte) bool {
 	return false
 }
 
-func tab(ed *editor, _ byte) bool {
+func tab(ed *editor, b byte) bool {
+	ed.logf("=> %02x tab\n", b)
 	ed.mode = topMode
 	if ed.dirty.lines != nil {
 		ed.updateDirty(1)
@@ -557,9 +596,7 @@ func tab(ed *editor, _ byte) bool {
 		if 0 < len(wa) {
 			if added := expandWord(word, wa, lo, hi); 0 < len(added) {
 				if ed.pos == len(ed.lines[ed.line]) {
-					if _, err := ed.out.Write([]byte(string(added))); err != nil {
-						panic(err)
-					}
+					ed.write([]byte(string(added)))
 					ed.lines[ed.line] = append(ed.lines[ed.line], added...)
 					ed.pos += len(added)
 				} else {
@@ -567,7 +604,7 @@ func tab(ed *editor, _ byte) bool {
 					end := line[ed.pos:]
 					line = append(line[:ed.pos], append(added, end...)...)
 					ed.lines[ed.line] = line
-					_, _ = ed.out.Write([]byte(string(line[ed.pos:])))
+					ed.write([]byte(string(line[ed.pos:])))
 					ed.pos += len(added)
 				}
 			} else {
@@ -667,6 +704,7 @@ func expandWord(word string, wa []string, lo, hi int) (added []rune) {
 }
 
 func shiftTab(ed *editor, b byte) bool {
+	ed.logf("=> %02x shiftTab\n", b)
 	if ed.dirty.lines != nil {
 		ed.updateDirty(-1)
 	} else {
@@ -676,7 +714,8 @@ func shiftTab(ed *editor, b byte) bool {
 	return false
 }
 
-func help(ed *editor, _ byte) bool {
+func help(ed *editor, b byte) bool {
+	ed.logf("=> %02x help\n", b)
 	header := `__SLIP REPL Editor__
 
 
@@ -754,7 +793,8 @@ shift key is denoted with a __S-__. Key bindings are:
 	return false
 }
 
-func describe(ed *editor, _ byte) bool {
+func describe(ed *editor, b byte) bool {
+	ed.logf("=> %02x describe\n", b)
 	var (
 		start int
 		end   int
@@ -774,7 +814,7 @@ func describe(ed *editor, _ byte) bool {
 		}
 	}
 	if start < 0 || end-start == 0 {
-		_, _ = ed.out.Write([]byte{0x07})
+		ed.write([]byte{0x07})
 		ed.displayMessage([]byte("could not determine what to describe"))
 		ed.mode = topMode
 		return false
@@ -793,6 +833,7 @@ func historyOverride(ed *editor) bool {
 	k := string(ed.key.buf[:ed.key.cnt])
 	f := historyBindings[k]
 	if f == nil {
+		ed.logf("*** %v\n", ed.key.buf[:ed.key.cnt])
 		ed.keepForm()
 		ed.override = nil
 		return false
@@ -801,7 +842,8 @@ func historyOverride(ed *editor) bool {
 	return true
 }
 
-func historyBack(ed *editor, _ byte) bool {
+func historyBack(ed *editor, b byte) bool {
+	ed.logf("=> %02x historyBack\n", b)
 	switch {
 	case ed.override == nil:
 		ed.hist.cur = len(ed.hist.forms) - 1
@@ -820,7 +862,8 @@ func historyBack(ed *editor, _ byte) bool {
 	return false
 }
 
-func historyForward(ed *editor, _ byte) bool {
+func historyForward(ed *editor, b byte) bool {
+	ed.logf("=> %02x historyForward\n", b)
 	switch {
 	case ed.override == nil:
 		ed.hist.cur = 0
@@ -864,6 +907,7 @@ func historySearchOverride(ed *editor) bool {
 }
 
 func searchBack(ed *editor, b byte) bool {
+	ed.logf("=> %02x searchBack\n", b)
 	switch {
 	case ed.override == nil:
 		ed.hist.pattern = ed.hist.pattern[:0]
@@ -898,6 +942,7 @@ func searchBack(ed *editor, b byte) bool {
 }
 
 func searchForward(ed *editor, b byte) bool {
+	ed.logf("=> %02x searchForward\n", b)
 	switch {
 	case ed.override == nil:
 		ed.hist.pattern = ed.hist.pattern[:0]
@@ -931,7 +976,8 @@ func searchForward(ed *editor, b byte) bool {
 	return false
 }
 
-func enterUnicode(ed *editor, _ byte) bool {
+func enterUnicode(ed *editor, b byte) bool {
+	ed.logf("=> %02x enterUnicode\n", b)
 	ed.ri = 0
 	ed.displayMessage([]byte("unicode: \\u0000"))
 	ed.override = unicodeOverride

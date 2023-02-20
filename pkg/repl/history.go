@@ -64,7 +64,10 @@ func (h *History) SetLimit(limit int) {
 
 // Add adds a form to history.
 func (h *History) Add(form Form) {
-	if h.limit <= 0 {
+	if h.limit <= 0 || form.Empty() {
+		return
+	}
+	if 0 < len(h.forms) && form.Equal(h.forms[len(h.forms)-1]) {
 		return
 	}
 	h.forms = append(h.forms, form.Dup())
