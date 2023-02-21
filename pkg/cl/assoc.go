@@ -56,7 +56,7 @@ type Assoc struct {
 }
 
 // Call the the function with the arguments provided.
-func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 4)
 	pos := len(args) - 1
 	item := args[pos]
@@ -85,63 +85,31 @@ func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			slip.PanicType("keyword", sym, ":key", ":test")
 		}
 	}
-	switch {
-	case testFunc != nil:
-		d2 := depth + 1
-		var k slip.Object
-		for i := len(alist) - 1; 0 <= i; i-- {
-			switch tv := alist[i].(type) {
-			case nil:
-				continue
-			case slip.Cons:
-				k = tv.Car()
-			case slip.List:
-				k = tv[len(tv)-1]
-			default:
-				slip.PanicType("assoc list element", tv, "cons", "list")
-			}
-			if keyFunc != nil {
-				k = keyFunc.Call(s, slip.List{k}, d2)
-			}
-			if testFunc.Call(s, slip.List{item, k}, d2) != nil {
-				return alist[i]
-			}
+	d2 := depth + 1
+	var k slip.Object
+	for i := len(alist) - 1; 0 <= i; i-- {
+		switch tv := alist[i].(type) {
+		case nil:
+			continue
+		case slip.Cons:
+			k = tv.Car()
+		case slip.List:
+			k = tv[len(tv)-1]
+		default:
+			slip.PanicType("assoc list element", tv, "cons", "list")
 		}
-	case keyFunc != nil:
-		d2 := depth + 1
-		var k slip.Object
-		for i := len(alist) - 1; 0 <= i; i-- {
-			switch tv := alist[i].(type) {
-			case nil:
-				continue
-			case slip.Cons:
-				k = tv.Car()
-			case slip.List:
-				k = tv[len(tv)-1]
-			default:
-				slip.PanicType("assoc list element", tv, "cons", "list")
-			}
-			if slip.ObjectEqual(item, keyFunc.Call(s, slip.List{k}, d2)) {
-				return alist[i]
-			}
+		if keyFunc != nil {
+			k = keyFunc.Call(s, slip.List{k}, d2)
 		}
-	default:
-		var k slip.Object
-		for i := len(alist) - 1; 0 <= i; i-- {
-			switch tv := alist[i].(type) {
-			case nil:
-				continue
-			case slip.Cons:
-				k = tv.Car()
-			case slip.List:
-				k = tv[len(tv)-1]
-			default:
-				slip.PanicType("assoc list element", tv, "cons", "list")
-			}
+		if testFunc == nil {
 			if slip.ObjectEqual(item, k) {
-				return alist[i]
+				found = alist[i]
+				break
 			}
+		} else if testFunc.Call(s, slip.List{item, k}, d2) != nil {
+			found = alist[i]
+			break
 		}
 	}
-	return nil
+	return
 }
