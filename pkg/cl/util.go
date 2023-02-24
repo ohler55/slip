@@ -4,14 +4,14 @@ package cl
 
 import "github.com/ohler55/slip"
 
-func resolveToCaller(s *slip.Scope, fn slip.Object, depth int) slip.Caller {
+func resolveToCaller(s *slip.Scope, fn slip.Object, depth int) (caller slip.Caller) {
 	d2 := depth + 1
 CallFunc:
 	switch tf := fn.(type) {
 	case *slip.Lambda:
-		return tf
+		caller = tf
 	case *slip.FuncInfo:
-		return tf.Create(nil).(slip.Funky).Caller()
+		caller = tf.Create(nil).(slip.Funky).Caller()
 	case slip.Symbol:
 		fn = slip.FindFunc(string(tf))
 		goto CallFunc
@@ -21,5 +21,5 @@ CallFunc:
 	default:
 		slip.PanicType("function", tf, "function")
 	}
-	return nil
+	return
 }
