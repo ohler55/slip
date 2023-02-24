@@ -19,12 +19,17 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
-
  - cl
-   - assoc
-   - coerce
-   - apply
-   - eval
+  - conditionals
+   - and
+   - or
+   - not
+   - when
+   - unless
+   - if
+
+  - apply
+  - eval
   - list
    - map
    - mapc
@@ -34,6 +39,8 @@ SLIce Processing is LISP for golang
    - map-into
    - mapl
    - maplist
+
+  - coerce
 
   - number
    - incf

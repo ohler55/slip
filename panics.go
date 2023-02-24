@@ -66,6 +66,14 @@ func PanicType(use string, value Object, wants ...string) Object {
 	return nil
 }
 
+// ArgCountCheck panics if the number of arguments is outside the range
+// specified.
+func ArgCountCheck(obj Object, args List, min, max int) {
+	if len(args) < min || (0 <= max && max < len(args)) {
+		PanicArgCount(obj, min, max)
+	}
+}
+
 // PanicArgCount raises a panic describing the wrong number of arguments to a
 // function.
 func PanicArgCount(obj Object, min, max int) {

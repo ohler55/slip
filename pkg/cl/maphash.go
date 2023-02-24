@@ -54,25 +54,9 @@ func (f *Maphash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	}
 	fn := args[1]
 	d2 := depth + 1
-CallFunc:
-	switch tf := fn.(type) {
-	case *slip.Lambda:
-		for k, v := range ht {
-			_ = tf.Call(s, slip.List{v, k}, d2)
-		}
-	case *slip.FuncInfo:
-		ff := tf.Create(nil).(slip.Funky)
-		for k, v := range ht {
-			_ = ff.Apply(s, slip.List{v, k}, d2)
-		}
-	case slip.Symbol:
-		fn = slip.FindFunc(string(tf))
-		goto CallFunc
-	case slip.List:
-		fn = s.Eval(tf, d2)
-		goto CallFunc
-	default:
-		slip.PanicType("function", tf, "function")
+	caller := resolveToCaller(s, fn, d2)
+	for k, v := range ht {
+		_ = caller.Call(s, slip.List{v, k}, d2)
 	}
 	return nil
 }

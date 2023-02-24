@@ -46,9 +46,9 @@
  * [ ] ASH
  * [ ] ASINH
  * [ ] ASSERT
- * [ ] ASSOC
- * [ ] ASSOC-IF
- * [ ] ASSOC-IF-NOT
+ * [x] ASSOC
+ * [x] ASSOC-IF
+ * [x] ASSOC-IF-NOT
  * [ ] ATANH
  * [ ] ATOM
  * [ ] BASE-CHAR
