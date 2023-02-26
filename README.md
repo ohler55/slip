@@ -20,12 +20,6 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-  - conditionals
-   - cond macro
-   - when macro
-   - unless macro
-   - if macro
-
   - apply
   - eval
   - list

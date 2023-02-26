@@ -22,7 +22,6 @@
  * [ ] ADJUSTABLE-ARRAY-P
  * [ ] ALPHA-CHAR-P
  * [ ] ALPHANUMERICP
- * [x] AND
  * [ ] APPEND
  * [ ] APPLY
  * [ ] AREF
@@ -46,9 +45,6 @@
  * [ ] ASH
  * [ ] ASINH
  * [ ] ASSERT
- * [x] ASSOC
- * [x] ASSOC-IF
- * [x] ASSOC-IF-NOT
  * [ ] ATANH
  * [ ] ATOM
  * [ ] BASE-CHAR
@@ -143,7 +139,6 @@
  * [ ] CONCATENATE
  * [ ] CONCATENATED-STREAM
  * [ ] CONCATENATED-STREAM-STREAMS
- * [ ] COND
  * [ ] CONDITION
  * [ ] CONJUGATE
  * [ ] CONSTANTLY
@@ -300,7 +295,6 @@
  * [ ] HANDLER-CASE
  * [ ] HOST-NAMESTRING
  * [ ] IDENTITY
- * [ ] IF
  * [ ] IGNORABLE
  * [ ] IGNORE
  * [ ] IGNORE-ERRORS
@@ -454,7 +448,6 @@
  * [ ] NINTH
  * [ ] NO-APPLICABLE-METHOD
  * [ ] NO-NEXT-METHOD
- * [x] NOT
  * [ ] NOTANY
  * [ ] NOTEVERY
  * [ ] NOTINLINE
@@ -480,7 +473,6 @@
  * [ ] OPEN
  * [ ] OPEN-STREAM-P
  * [ ] OPTIMIZE
- * [x] OR
  * [ ] OTHERWISE
  * [ ] PACKAGE
  * [ ] PACKAGE-ERROR
@@ -737,7 +729,6 @@
  * [ ] UNDEFINED-FUNCTION
  * [ ] UNEXPORT
  * [ ] UNION
- * [ ] UNLESS
  * [ ] UNREAD-CHAR
  * [ ] UNSIGNED-BYTE
  * [ ] UNTRACE
@@ -758,7 +749,6 @@
  * [ ] VECTORP
  * [ ] WARN
  * [ ] WARNING
- * [ ] WHEN
  * [ ] WILD-PATHNAME-P
  * [ ] WITH-ACCESSORS
  * [ ] WITH-COMPILATION-UNIT
@@ -826,9 +816,13 @@
  * [x] ABS
  * [x] ACOS
  * [x] ALLOCATE-INSTANCE
+ * [x] AND
  * [x] APROPOS
  * [x] APROPOS-LIST
  * [x] ASIN
+ * [x] ASSOC
+ * [x] ASSOC-IF
+ * [x] ASSOC-IF-NOT
  * [x] ATAN
  * [x] CAAAAR
  * [x] CAAADR
@@ -865,6 +859,7 @@
  * [x] CLASS-NAME
  * [x] CLASS-OF
  * [x] CLRHASH
+ * [x] COND
  * [x] CONS
  * [x] CONSP
  * [x] COS
@@ -896,6 +891,7 @@
  * [x] HASH-TABLE-REHASH-THRESHOLD
  * [x] HASH-TABLE-SIZE
  * [x] HASH-TABLE-TEST
+ * [x] IF
  * [x] INPUT-STREAM-P
  * [x] INTEGERP
  * [x] INTERN
@@ -914,10 +910,12 @@
  * [x] MIN
  * [x] MINUSP
  * [x] MOD
+ * [x] NOT
  * [x] NTH
  * [x] NULL
  * [x] NUMBERP
  * [x] ODDP
+ * [x] OR
  * [x] OUTPUT-STREAM-P
  * [x] PLUSP
  * [x] PPRINT
@@ -948,7 +946,9 @@
  * [x] TYPE-OF
  * [x] TYPEP
  * [x] UNINTERN
+ * [x] UNLESS
  * [x] VALUES
+ * [x] WHEN
  * [x] WRITE
  * [x] ZEROP
  - [-] &AUX
