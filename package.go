@@ -210,11 +210,14 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 		Warning("redefining %s", printer.caseName(name))
 	}
 	fi := FuncInfo{
-		Name:    name,
-		Create:  creator,
-		Doc:     doc,
-		Pkg:     obj,
-		BuiltIn: true,
+		Name:   name,
+		Create: creator,
+		Doc:    doc,
+		Pkg:    obj,
+		Kind:   doc.Kind,
+	}
+	if len(fi.Kind) == 0 {
+		fi.Kind = BuiltInSymbol
 	}
 	obj.Funcs[name] = &fi
 	for _, pkg := range obj.Users {

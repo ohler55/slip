@@ -143,10 +143,9 @@ func (f *Apropos) formFuncLine(k string, fi *slip.FuncInfo) string {
 		line = append(line, ':')
 	}
 	line = slip.Append(line, slip.Symbol(k))
-	if fi.BuiltIn {
-		line = append(line, " (built-in)"...)
-	} else {
-		line = append(line, " (lambda)"...)
-	}
+	line = append(line, " ("...)
+	line = append(line, fi.Hierarchy()[0]...)
+	line = append(line, ')')
+
 	return string(line)
 }

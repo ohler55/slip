@@ -15,6 +15,7 @@ func init() {
 		},
 		&slip.FuncDoc{
 			// TBD or is it better to be (run (setq x 7)), different than apply but same as eval
+			Kind: slip.MacroSymbol,
 			Name: "run",
 			Args: []*slip.DocArg{
 				{

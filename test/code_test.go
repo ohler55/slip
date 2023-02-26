@@ -257,11 +257,11 @@ func TestCodeArray(t *testing.T) {
 
 func TestCodeQuote(t *testing.T) {
 	for i, ct := range []*codeTest{
-		{src: `#'car`, expect: `[#'car]`, kind: "function"},
+		{src: `#'car`, expect: `[#'car]`, kind: "macro"},
 		{src: `(list #'car)`, expect: `[(list (name car))]`, kind: "list"},
-		{src: `'abc`, expect: `['abc]`, kind: "function"},
+		{src: `'abc`, expect: `['abc]`, kind: "macro"},
 		{src: `('abc)`, expect: `[('abc)]`, kind: "list"},
-		{src: `#'(lambda () nil)`, expect: `[#'(lambda () nil)]`, kind: "function"},
+		{src: `#'(lambda () nil)`, expect: `[#'(lambda () nil)]`, kind: "macro"},
 	} {
 		ct.test(t, i)
 	}

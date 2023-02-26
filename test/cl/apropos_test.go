@@ -35,7 +35,7 @@ func TestAproposSymbol(t *testing.T) {
 		Expect: "",
 	}).Test(t)
 	tt.Equal(t, `/.*print-lambda. = nil
-.*lambda \(built-in\)
+.*lambda \(macro\)
 .*/`, out.String())
 }
 
@@ -49,7 +49,7 @@ func TestAproposPkg(t *testing.T) {
 		Source: `(apropos 'deff 'flavors)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `flavors:defflavor (built-in)
+	tt.Equal(t, `flavors:defflavor (macro)
 flavors:undefflavor (built-in)
 `, out.String())
 }
@@ -80,7 +80,7 @@ func TestAproposDefun(t *testing.T) {
 		Source: `(apropos 'testy 'user)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `common-lisp-user:apropos-testy (lambda)
+	tt.Equal(t, `common-lisp-user:apropos-testy (function)
 `, out.String())
 }
 

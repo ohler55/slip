@@ -14,6 +14,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "lambda",
 			Args: []*slip.DocArg{
 				{

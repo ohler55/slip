@@ -28,4 +28,5 @@ type FuncDoc struct {
 	Return   string // return type
 	Text     string
 	Examples []string
+	Kind     Symbol
 }
