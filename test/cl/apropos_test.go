@@ -49,7 +49,7 @@ func TestAproposPkg(t *testing.T) {
 		Source: `(apropos 'deff 'flavors)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `flavors:defflavor (built-in)
+	tt.Equal(t, `flavors:defflavor (macro)
 flavors:undefflavor (built-in)
 `, out.String())
 }

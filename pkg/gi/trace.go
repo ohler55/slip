@@ -9,7 +9,7 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Trace{Function: slip.Function{Name: "trace", Args: args, SkipEval: []bool{true}}}
+			f := Trace{Function: slip.Function{Name: "trace", Args: args}}
 			f.Self = &f
 			return &f
 		},
@@ -19,7 +19,7 @@ func init() {
 				{
 					Name: "on",
 					Type: "boolean",
-					Text: "If not nil then trun tracing on else turn tracing off.",
+					Text: "If not _nil_ then turn tracing on else turn tracing off.",
 				},
 			},
 			Text: `__trace__ turns tracing on or off.`,
