@@ -917,6 +917,20 @@ func (ed *editor) setForm(form Form) {
 	ed.display()
 }
 
+func (ed *editor) clearForm() {
+	for i := ed.line; 0 <= i; i-- { // zero is cleared when ed.display is called
+		ed.setCursor(ed.v0+i, ed.foff)
+		ed.clearToEnd()
+	}
+	ed.lines = Form{{}}
+	ed.line = 0
+	ed.pos = 0
+	ed.shift = 0
+	ed.lastSpot.line = 0
+	ed.lastSpot.pos = 0
+	ed.display()
+}
+
 func (ed *editor) keepForm() {
 	ed.lines = ed.lines.Dup()
 	ed.line = len(ed.lines) - 1

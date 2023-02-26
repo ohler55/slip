@@ -29,7 +29,7 @@ var (
 	rootMode = []bindFunc{
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
 		help, tab, nl, delLineEnd, bad, enter, down, nlAfter, // 0x08
-		up, bad, searchBack, searchForward, swapChar, bad, historyForward, bad, // 0x10
+		up, bad, searchBack, searchForward, swapChar, clearForm, historyForward, bad, // 0x10
 		bad, bad, bad, esc, bad, bad, bad, describe, // 0x18
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x20
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x28
@@ -723,14 +723,16 @@ This editor includes history, tab completions, word (symbol) descriptions, and
 parenthesis matching. In the key binding table __M-__ indicates pressing the
 meta or option key or pressing the escape key before the rest of the
 sequence. A __C-__ indicates the control key is held while pressing the key. A
-shift key is denoted with a __S-__. Key bindings are:
+shift key is denoted with a __S-__. Some keys have different behavior if the
+current form is blank. The alternate behavior is included in parenthesis. Key
+bindings are:
 
 `
 	keys := []string{
 		"\x1b[1mC-a\x1b[m   move to line start",
 		"\x1b[1mC-b\x1b[m   move left one",
 		"\x1b[1mC-c\x1b[m   exit",
-		"\x1b[1mC-d\x1b[m   delete one forward",
+		"\x1b[1mC-d\x1b[m   delete one forward (exit)",
 		"\x1b[1mC-e\x1b[m   move to line end",
 		"\x1b[1mC-f\x1b[m   move right one",
 		"\x1b[1mC-h\x1b[m   show this help page",
@@ -738,12 +740,13 @@ shift key is denoted with a __S-__. Key bindings are:
 		"\x1b[1mS-TAB\x1b[m help scroll back",
 		"\x1b[1mC-k\x1b[m   delete to line end",
 		"\x1b[1mC-j\x1b[m   insert newline",
-		"\x1b[1mC-n\x1b[m   move down one",
+		"\x1b[1mC-n\x1b[m   move down one (next in history)",
 		"\x1b[1mC-o\x1b[m   insert newline after",
-		"\x1b[1mC-p\x1b[m   move up one",
+		"\x1b[1mC-p\x1b[m   move up one (previous in history)",
 		"\x1b[1mC-r\x1b[m   search history back",
 		"\x1b[1mC-s\x1b[m   search history forward",
 		"\x1b[1mC-t\x1b[m   swap characters",
+		"\x1b[1mC-u\x1b[m   clear current form",
 		"\x1b[1mC-v\x1b[m   next in history",
 		"\x1b[1mDEL\x1b[m   delete one back",
 		"\x1b[1mM-C-b\x1b[m move back to matching paren",
@@ -773,7 +776,7 @@ shift key is denoted with a __S-__. Key bindings are:
 	buf = bytes.TrimSpace(buf)
 	buf = append(buf, '\n', '\n')
 
-	colCnt := w / 38 // enough for the longest key binding plus 2 for spacing
+	colCnt := w / 41 // enough for the longest key binding description plus 2 for spacing
 	klines := len(keys)/colCnt + 1
 	for i := 0; i < klines; i++ {
 		buf = append(buf, leftPad...)
@@ -783,9 +786,9 @@ shift key is denoted with a __S-__. Key bindings are:
 			}
 			k := keys[i+j*klines]
 			buf = append(buf, k...)
-			// 45 is the map length plus the 7 bytes used for making the key
-			// sequence bold.
-			buf = append(buf, bytes.Repeat([]byte{' '}, 45-len(k))...)
+			// 48 is the max map description length plus the 7 bytes used for
+			// making the key sequence bold.
+			buf = append(buf, bytes.Repeat([]byte{' '}, 48-len(k))...)
 		}
 		buf = append(buf, '\n')
 	}
@@ -829,11 +832,16 @@ func describe(ed *editor, b byte) bool {
 	return false
 }
 
+func clearForm(ed *editor, b byte) bool {
+	ed.logf("=> %02x clearForm\n", b)
+	ed.clearForm()
+	return false
+}
+
 func historyOverride(ed *editor) bool {
 	k := string(ed.key.buf[:ed.key.cnt])
 	f := historyBindings[k]
 	if f == nil {
-		ed.logf("*** %v\n", ed.key.buf[:ed.key.cnt])
 		ed.keepForm()
 		ed.override = nil
 		return false

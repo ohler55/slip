@@ -9,35 +9,35 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Null{Function: slip.Function{Name: "null", Args: args}}
+			f := Not{Function: slip.Function{Name: "not", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "null",
+			Name: "not",
 			Args: []*slip.DocArg{
 				{
-					Name: "object",
+					Name: "value",
 					Type: "object",
-					Text: "The object to check.",
+					Text: "The value to check for _nil_ or not.",
 				},
 			},
 			Return: "nil",
-			Text:   `__null__ returns _t_ if _object_ is an empty list or _nil_ otherwise _nil_ is returned.`,
+			Text:   `__not__ returns _t_ if _object_ is an empty list or _nil_ otherwise _nil_ is returned.`,
 			Examples: []string{
-				"(null 1.2) => nil",
-				"(null '()) => t",
+				"(not 1.2) => nil",
+				"(not '()) => t",
 			},
 		}, &slip.CLPkg)
 }
 
-// Null represents the null function.
-type Null struct {
+// Not represents the not function.
+type Not struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Null) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Not) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}

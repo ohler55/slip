@@ -622,7 +622,7 @@ func TestFuncInfo(t *testing.T) {
 		Simple: func(t *testing.T, simple any) {
 			tt.Equal(t, "car", jp.C("name").First(simple))
 		},
-		Hierarchy: "function.t",
+		Hierarchy: "built-in.t",
 		Equals: []*sliptest.EqTest{
 			{Other: fi, Expect: true},
 			{Other: slip.True, Expect: false},

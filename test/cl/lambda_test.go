@@ -17,7 +17,7 @@ func TestLambdaSelf(t *testing.T) {
 		Target:    lambda,
 		String:    `/^#<function \(lambda \(x\)\) \{[a-h0-9]+\}>$/`,
 		Simple:    sen.MustParse([]byte("[lambda [x] [car x]]")),
-		Hierarchy: "function.t",
+		Hierarchy: "lambda.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},
@@ -31,7 +31,7 @@ func TestLambdaNoArgs(t *testing.T) {
 		Target:    lambda,
 		String:    `/^#<function \(lambda \(\)\) \{[a-h0-9]+\}>$/`,
 		Simple:    sen.MustParse([]byte("[lambda [] [terpri]]")),
-		Hierarchy: "function.t",
+		Hierarchy: "lambda.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},

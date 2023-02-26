@@ -28,7 +28,7 @@ func TestDescribeBasic(t *testing.T) {
 	tt.Equal(t, `car
   [symbol]
 
-car names a function:
+car names a built-in:
   Lambda-List: (arg)
   Return: object
   Documentation:

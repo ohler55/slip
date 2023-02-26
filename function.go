@@ -7,8 +7,16 @@ import (
 	"strings"
 )
 
-// FunctionSymbol is the symbol with a value of "function".
-const FunctionSymbol = Symbol("function")
+const (
+	// BuiltInSymbol is the symbol with a value of "built-in".
+	BuiltInSymbol = Symbol("built-in")
+	// FunctionSymbol is the symbol with a value of "function".
+	FunctionSymbol = Symbol("function")
+	// MacroSymbol is the symbol with a value of "macro".
+	MacroSymbol = Symbol("macro")
+	// LambdaSymbol is the symbol with a value of "lambda".
+	LambdaSymbol = Symbol("lambda")
+)
 
 // Function is the base type for most if not all functions.
 type Function struct {
@@ -139,11 +147,15 @@ func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
 // EvalArg converts lists arguments to functions and replaces the
 // argument. Then the argument is evaluated and returned. Non-list arguments
 // are just evaluated.
-func (f *Function) EvalArg(s *Scope, args List, index, depth int) Object {
+func (f *Function) EvalArg(s *Scope, args List, index, depth int) (v Object) {
 	if list, ok := args[index].(List); ok {
 		args[index] = ListToFunc(s, list, depth+1)
 	}
-	return s.Eval(args[index], depth)
+	v = s.Eval(args[index], depth)
+	if list, ok := v.(List); ok && len(list) == 0 {
+		v = nil
+	}
+	return
 }
 
 // String representation of the Object.
@@ -179,6 +191,11 @@ func (f *Function) Equal(other Object) bool {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (f *Function) Hierarchy() []Symbol {
+	for _, skip := range f.SkipEval {
+		if skip {
+			return []Symbol{MacroSymbol, TrueSymbol}
+		}
+	}
 	return []Symbol{FunctionSymbol, TrueSymbol}
 }
 

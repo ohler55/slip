@@ -22,7 +22,7 @@
  * [ ] ADJUSTABLE-ARRAY-P
  * [ ] ALPHA-CHAR-P
  * [ ] ALPHANUMERICP
- * [ ] AND
+ * [x] AND
  * [ ] APPEND
  * [ ] APPLY
  * [ ] AREF
@@ -454,7 +454,7 @@
  * [ ] NINTH
  * [ ] NO-APPLICABLE-METHOD
  * [ ] NO-NEXT-METHOD
- * [ ] NOT
+ * [x] NOT
  * [ ] NOTANY
  * [ ] NOTEVERY
  * [ ] NOTINLINE
@@ -480,7 +480,7 @@
  * [ ] OPEN
  * [ ] OPEN-STREAM-P
  * [ ] OPTIMIZE
- * [ ] OR
+ * [x] OR
  * [ ] OTHERWISE
  * [ ] PACKAGE
  * [ ] PACKAGE-ERROR

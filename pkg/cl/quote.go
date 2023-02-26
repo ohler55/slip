@@ -12,6 +12,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "quote",
 			Args: []*slip.DocArg{
 				{

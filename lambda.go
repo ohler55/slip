@@ -199,6 +199,7 @@ func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 		Doc: &FuncDoc{
 			Return: "object",
 			Text:   string(docStr),
+			Kind:   LambdaSymbol,
 		},
 		Forms: args[:pos],
 	}
@@ -244,7 +245,7 @@ func (lam *Lambda) Equal(other Object) bool {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (lam *Lambda) Hierarchy() []Symbol {
-	return []Symbol{FunctionSymbol, TrueSymbol}
+	return []Symbol{LambdaSymbol, TrueSymbol}
 }
 
 // Simplify the function.
