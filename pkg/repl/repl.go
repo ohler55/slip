@@ -27,7 +27,7 @@ const (
 	value2Key = "//"
 	value3Key = "///"
 
-	configHeader = ";;;; slip REPL configuration file. For help type: (help configuration)\n\n"
+	configHeader = ";;;; slip REPL configuration file. For help type: (help 'configuration)\n\n"
 )
 
 var (
