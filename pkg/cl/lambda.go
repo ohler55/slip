@@ -57,7 +57,7 @@ func (f *Lambda) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		slip.PanicArgCount(f, 1, -1)
 	}
 	lc := slip.DefLambda("lambda", s, args)
-	if s.Parent != nil {
+	if s.Parent() != nil {
 		lc.Closure = s
 	}
 	return lc
