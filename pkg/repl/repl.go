@@ -31,9 +31,7 @@ const (
 )
 
 var (
-	modifiedVars = map[string]bool{}
-	// TBD is a lock file needed to avoid collisions when running multiple
-	// instances?
+	modifiedVars    = map[string]bool{}
 	configFilename  = ""
 	historyFilename = ""
 
