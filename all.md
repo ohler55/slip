@@ -23,7 +23,7 @@
  * [ ] ALPHA-CHAR-P
  * [ ] ALPHANUMERICP
  * [ ] APPEND
- * [ ] APPLY
+ * [x] APPLY
  * [ ] AREF
  * [ ] ARITHMETIC-ERROR
  * [ ] ARITHMETIC-ERROR-OPERANDS
@@ -224,7 +224,7 @@
  * [ ] ENSURE-GENERIC-FUNCTION
  * [ ] ERROR
  * [ ] ETYPECASE
- * [ ] EVAL
+ * [x] EVAL
  * [ ] EVAL-WHEN
  * [ ] EVENP
  * [ ] EVERY

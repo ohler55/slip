@@ -20,8 +20,6 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-  - apply
-  - eval
   - list
    - map
    - mapc
