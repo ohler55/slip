@@ -22,7 +22,7 @@ SLIce Processing is LISP for golang
  - cl
   - list
    - map
-   - mapc
+   + mapc
    - mapcar
    - mapcon
    - mapcan

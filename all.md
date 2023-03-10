@@ -404,7 +404,7 @@
  * [ ] MAKUNBOUND
  * [ ] MAP
  * [ ] MAP-INTO
- * [ ] MAPC
+ * [x] MAPC
  * [ ] MAPCAN
  * [ ] MAPCAR
  * [ ] MAPCON
