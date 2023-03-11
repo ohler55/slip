@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Mapc{Function: slip.Function{Name: "mapc", Args: args}}
+			f := Mapcar{Function: slip.Function{Name: "mapcar", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "mapc",
+			Name: "mapcar",
 			Args: []*slip.DocArg{
 				{
 					Name: "function",
@@ -29,23 +29,21 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text: `__mapc__ calls _function_ for each entry in the _lists_
-an argument from each list.`,
+			Text: `__mapcar__ calls _function_ for each entry in the _lists_
+an argument from each list and returns a _list_ of the results of each call.`,
 			Examples: []string{
-				"(setq list '())",
-				"(mapc (lambda (x) (setq list (cons x list))) '(1 2 3)) => (1 2 3)",
-				"list => (3 2 1)",
+				"(mapcar (lambda (x) (1+ x)) '(1 2 3)) => (2 3 4)",
 			},
 		}, &slip.CLPkg)
 }
 
-// Mapc represents the mapc function.
-type Mapc struct {
+// Mapcar represents the mapcar function.
+type Mapcar struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Mapc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Mapcar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
 	pos := len(args) - 1
 	fn := args[pos]
@@ -57,6 +55,7 @@ func (f *Mapc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	if !ok {
 		slip.PanicType("lists", args[pos], "list")
 	}
+	var rlist slip.List
 	if 0 < pos {
 		min := len(list)
 		var l2 slip.List
@@ -68,19 +67,21 @@ func (f *Mapc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 				min = len(l2)
 			}
 		}
+		rlist = make(slip.List, min)
 		ca := make(slip.List, pos+1)
 		for n := 1; n <= min; n++ {
 			for i := 0; i <= pos; i++ {
 				l2 := args[i].(slip.List)
 				ca[i] = l2[len(l2)-n]
 			}
-			_ = caller.Call(s, ca, d2)
+			rlist[min-n] = caller.Call(s, ca, d2)
 		}
 	} else {
 		// The most common case.
+		rlist = make(slip.List, len(list))
 		for i := len(list) - 1; 0 <= i; i-- {
-			_ = caller.Call(s, slip.List{list[i]}, d2)
+			rlist[i] = caller.Call(s, slip.List{list[i]}, d2)
 		}
 	}
-	return list
+	return rlist
 }

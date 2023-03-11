@@ -406,7 +406,7 @@
  * [ ] MAP-INTO
  * [x] MAPC
  * [ ] MAPCAN
- * [ ] MAPCAR
+ * [x] MAPCAR
  * [ ] MAPCON
  * [ ] MAPL
  * [ ] MAPLIST
