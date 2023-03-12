@@ -29,7 +29,7 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text: `__mapc__ calls _function_ for each entry in the _lists_
+			Text: `__mapc__ calls _function_ for each entry in the _lists_ with
 an argument from each list.`,
 			Examples: []string{
 				"(setq list '())",

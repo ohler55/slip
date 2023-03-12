@@ -29,7 +29,7 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text: `__mapcar__ calls _function_ for each entry in the _lists_
+			Text: `__mapcar__ calls _function_ for each entry in the _lists_ with
 an argument from each list and returns a _list_ of the results of each call.`,
 			Examples: []string{
 				"(mapcar (lambda (x) (1+ x)) '(1 2 3)) => (2 3 4)",
