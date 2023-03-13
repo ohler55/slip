@@ -25,7 +25,7 @@ func TestCdrEmpty(t *testing.T) {
 
 func TestCdrCons(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.Cons{slip.Symbol("b"), slip.Symbol("a")})
+	scope.Let(slip.Symbol("arg"), slip.List{slip.Tail{Value: slip.Symbol("b")}, slip.Symbol("a")})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("cdr", slip.List{slip.Symbol("arg")}),

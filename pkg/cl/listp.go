@@ -44,7 +44,7 @@ func (f *Listp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicArgCount(f, 1, 1)
 	}
 	switch args[0].(type) {
-	case nil, slip.List, slip.Cons:
+	case nil, slip.List:
 		return slip.True
 	}
 	return nil

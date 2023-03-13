@@ -568,9 +568,13 @@ func (r *reader) closeList() {
 	case Complex:
 		obj = newComplex(list)
 	default:
-		if len(list) == 3 && list[1] == Symbol(".") {
-			list[1] = list[2]
-			obj = Cons(list[:2])
+		if 3 <= len(list) && list[1] == Symbol(".") {
+			copy(list[1:], list[2:])
+			list = list[:len(list)-1]
+			if list[0] != nil { // if nil then normal list despite the dot
+				list[0] = Tail{Value: list[0]}
+			}
+			obj = list
 		} else {
 			obj = list
 		}

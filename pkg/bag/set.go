@@ -110,26 +110,32 @@ func objectToBag(obj slip.Object) (v any) {
 			break
 		}
 		// If an assoc list then assume a map and if it fails then panic.
-		if _, ok := val[0].(slip.Cons); ok {
-			m := map[string]any{}
-			for _, e := range val {
-				var c slip.Cons
-				if c, ok = e.(slip.Cons); !ok {
-					slip.PanicType("assoc list item", e, "cons")
+		if pair, ok := val[0].(slip.List); ok && len(pair) == 2 {
+			if _, ok = pair[0].(slip.Tail); ok {
+				m := map[string]any{}
+				for _, e := range val {
+					if pair, ok = e.(slip.List); !ok || len(pair) != 2 {
+						slip.PanicType("assoc list item", e, "cons")
+					}
+					var key string
+					switch tk := pair[1].(type) {
+					case slip.Symbol:
+						key = string(tk)
+					case slip.String:
+						key = string(tk)
+					default:
+						slip.PanicType("assoc list item car", tk, "symbol", "string")
+					}
+					cdr := pair[0]
+					var tail slip.Tail
+					if tail, ok = cdr.(slip.Tail); ok {
+						cdr = tail.Value
+					}
+					m[key] = objectToBag(cdr)
 				}
-				var key string
-				switch tk := c.Car().(type) {
-				case slip.Symbol:
-					key = string(tk)
-				case slip.String:
-					key = string(tk)
-				default:
-					slip.PanicType("assoc list item car", tk, "symbol", "string")
-				}
-				m[key] = objectToBag(c.Cdr())
+				v = m
+				break
 			}
-			v = m
-			break
 		}
 		list := make([]any, len(val))
 		for i, o := range val {

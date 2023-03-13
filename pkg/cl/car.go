@@ -47,12 +47,8 @@ func (f *Car) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	switch list := a.(type) {
 	case nil:
 		// leave result as nil
-	case slip.Cons:
-		result = list.Car()
 	case slip.List:
-		if 0 < len(list) {
-			result = list[len(list)-1]
-		}
+		result = list.Car()
 	default:
 		slip.PanicType("argument to car", list, "cons", "list")
 	}
@@ -64,14 +60,9 @@ func (f *Car) Place(args slip.List, value slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	switch list := args[0].(type) {
-	case slip.Cons:
+	if list, ok := args[0].(slip.List); ok && 0 < len(list) {
 		list[len(list)-1] = value
-	case slip.List:
-		if 0 < len(list) {
-			list[len(list)-1] = value
-		}
-	default:
-		slip.PanicType("argument to car", list, "cons", "list")
+		return
 	}
+	slip.PanicType("argument to car", args[0], "cons", "list")
 }

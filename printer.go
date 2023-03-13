@@ -451,6 +451,10 @@ Top:
 					n.size += 3
 					break
 				}
+				if tail, ok := element.(Tail); ok { // cons
+					n.elements = append(n.elements, &node{value: Symbol("."), size: 1, buf: []byte{'.'}})
+					element = tail.Value
+				}
 				t := p.createTree(element, l2)
 				n.elements = append(n.elements, t)
 				n.size += t.size
@@ -461,10 +465,6 @@ Top:
 	case Symbol:
 		n.buf = []byte(p.caseName(string(to)))
 		n.size = len(n.buf)
-	case Cons:
-		obj = List{to.Cdr(), Symbol("."), to.Car()}
-		goto Top
-
 	case Funky:
 		name := to.GetName()
 		args := to.GetArgs()

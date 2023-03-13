@@ -43,6 +43,6 @@ func (f *Cons) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	case slip.List:
 		return append(o2, args[1])
 	default:
-		return slip.Cons{o2, args[1]}
+		return slip.List{slip.Tail{Value: o2}, args[1]}
 	}
 }
