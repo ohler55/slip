@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Mapcan{Function: slip.Function{Name: "mapcan", Args: args}}
+			f := Maplist{Function: slip.Function{Name: "maplist", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "mapcan",
+			Name: "maplist",
 			Args: []*slip.DocArg{
 				{
 					Name: "function",
@@ -29,21 +29,21 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text: `__mapcan__ calls _function_ for each entry in the _lists_ with
-an argument from each list and returns a _list_ of the results of each _nconc_ed together.`,
+			Text: `__maplist__ calls _function_ for each _cdr_ in the _lists_ with
+an argument from each list and returns a _list_ of the results of each call.`,
 			Examples: []string{
-				"(mapcan (lambda (x y) (list x y)) '(a b c) '(1 2 3)) => (a 1 b 2 c 3)",
+				"(maplist (lambda (x) (1+ (car x))) '(1 2 3)) => (2 3 4)",
 			},
 		}, &slip.CLPkg)
 }
 
-// Mapcan represents the mapcan function.
-type Mapcan struct {
+// Maplist represents the maplist function.
+type Maplist struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Mapcan) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Maplist) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
 	pos := len(args) - 1
 	fn := args[pos]
@@ -66,27 +66,14 @@ func (f *Mapcan) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			min = len(l2)
 		}
 	}
+	rlist = make(slip.List, min)
 	ca := make(slip.List, pos+1)
 	for n := 1; n <= min; n++ {
 		for i := 0; i <= pos; i++ {
 			l2 := args[i].(slip.List)
-			ca[i] = l2[len(l2)-n]
+			ca[i] = l2[:len(l2)-n+1]
 		}
-		r := caller.Call(s, ca, d2)
-		switch tr := r.(type) {
-		case nil:
-			// ok but nothing to append
-		case slip.List:
-			if 0 < len(rlist) {
-				if _, ok := rlist[0].(slip.Tail); ok {
-					rlist = append(tr, rlist[1:]...)
-					break
-				}
-			}
-			rlist = append(tr, rlist...)
-		default:
-			slip.PanicType("list item", tr, "list", "nil", "cons")
-		}
+		rlist[min-n] = caller.Call(s, ca, d2)
 	}
 	return rlist
 }

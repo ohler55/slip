@@ -18,26 +18,20 @@ SLIce Processing is LISP for golang
     - could be database query
     - or pull from multiple sources
 
-- Cons change
- - create Tail type (*Object, slice of 1, struct?)
- - update all functions
- - update parser
-  - '(a b . c) parses incorrectly
- - check to see what length returns for a cons or (a b . c)
-  - length should fail as not a list
-
 - next
  - cl
   - list
    - map
    + mapc
    + mapcar
-   - mapcon
-   - mapcan
-   - map-into
+   + mapcan
+   + maplist
    - mapl
-   - maplist
+   - mapcon
+   - map-into
 
+  - rplaca
+  - rplacd
   - coerce
 
   - number

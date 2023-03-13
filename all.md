@@ -23,7 +23,6 @@
  * [ ] ALPHA-CHAR-P
  * [ ] ALPHANUMERICP
  * [ ] APPEND
- * [x] APPLY
  * [ ] AREF
  * [ ] ARITHMETIC-ERROR
  * [ ] ARITHMETIC-ERROR-OPERANDS
@@ -224,7 +223,6 @@
  * [ ] ENSURE-GENERIC-FUNCTION
  * [ ] ERROR
  * [ ] ETYPECASE
- * [x] EVAL
  * [ ] EVAL-WHEN
  * [ ] EVENP
  * [ ] EVERY
@@ -404,12 +402,9 @@
  * [ ] MAKUNBOUND
  * [ ] MAP
  * [ ] MAP-INTO
- * [x] MAPC
- * [ ] MAPCAN
- * [x] MAPCAR
  * [ ] MAPCON
  * [ ] MAPL
- * [ ] MAPLIST
+ * [x] MAPLIST
  * [ ] MASK-FIELD
  * [ ] MEMBER
  * [ ] MEMBER-IF
@@ -817,6 +812,7 @@
  * [x] ACOS
  * [x] ALLOCATE-INSTANCE
  * [x] AND
+ * [x] APPLY
  * [x] APROPOS
  * [x] APROPOS-LIST
  * [x] ASIN
@@ -871,6 +867,7 @@
  * [x] EQL
  * [x] EQUAL
  * [x] EQUALP
+ * [x] EVAL
  * [x] EXP
  * [x] EXPT
  * [x] FCEILING
@@ -905,6 +902,9 @@
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
  * [x] MAKE-RANDOM-STATE
+ * [x] MAPC
+ * [x] MAPCAN
+ * [x] MAPCAR
  * [x] MAPHASH
  * [x] MAX
  * [x] MIN

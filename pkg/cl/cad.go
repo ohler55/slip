@@ -51,11 +51,7 @@ func cadPlace(f slip.Object, args slip.List, ops []bool, value slip.Object) {
 	if list, ok := a.(slip.List); ok {
 		if ops[len(ops)-1] {
 			if 0 < len(list) {
-				if _, ok = list[len(list)-1].(slip.Tail); ok {
-					list[len(list)-1] = slip.Tail{Value: value}
-				} else {
-					list[len(list)-1] = value
-				}
+				list[len(list)-1] = value
 				return
 			}
 		} else {

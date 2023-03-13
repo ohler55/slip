@@ -18,7 +18,7 @@ func TestConsCons(t *testing.T) {
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},
-		Eval: slip.Cons{slip.Fixnum(2), slip.Fixnum(1)},
+		Eval: slip.List{slip.Tail{Value: slip.Fixnum(2)}, slip.Fixnum(1)},
 	}).Test(t)
 }
 

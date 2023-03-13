@@ -104,10 +104,10 @@ func (obj List) Cdr() (cdr Object) {
 		if tail, ok := obj[0].(Tail); ok {
 			cdr = tail.Value
 		} else {
-			cdr = List(obj[:1])
+			cdr = obj[:1]
 		}
 	default:
-		cdr = List(obj[:len(obj)-1])
+		cdr = obj[:len(obj)-1]
 	}
 	return
 }

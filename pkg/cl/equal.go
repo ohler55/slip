@@ -81,10 +81,6 @@ func equal(x, y slip.Object) bool {
 		if ty, ok := y.(slip.String); ok && strings.EqualFold(string(tx), string(ty)) {
 			return true
 		}
-	case slip.Cons:
-		if ty, ok := y.(slip.Cons); ok && equal(tx.Car(), ty.Car()) && equal(tx.Cdr(), ty.Cdr()) {
-			return true
-		}
 	case slip.List:
 		if ty, ok := y.(slip.List); ok && len(tx) == len(ty) {
 			for i, xv := range tx {
@@ -102,6 +98,10 @@ func equal(x, y slip.Object) bool {
 				}
 			}
 			return true
+		}
+	case slip.Tail:
+		if ty, ok := y.(slip.Tail); ok {
+			return equal(tx.Value, ty.Value)
 		}
 	}
 	return false

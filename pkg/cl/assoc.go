@@ -91,10 +91,8 @@ func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (found slip.Objec
 		switch tv := alist[i].(type) {
 		case nil:
 			continue
-		case slip.Cons:
-			k = tv.Car()
 		case slip.List:
-			k = tv[len(tv)-1]
+			k = tv.Car()
 		default:
 			slip.PanicType("assoc list element", tv, "cons", "list")
 		}

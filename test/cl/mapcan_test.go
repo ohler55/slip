@@ -15,6 +15,13 @@ func TestMapcanLambda(t *testing.T) {
 	}).Test(t)
 }
 
+func TestMapcanCons(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(mapcan (lambda (x y) (cons x y)) '(a b c d) '(1 2 3))`,
+		Expect: "(a b c . 3)",
+	}).Test(t)
+}
+
 func TestMapcanNotList(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(mapcan 'print t)`,
@@ -25,6 +32,13 @@ func TestMapcanNotList(t *testing.T) {
 func TestMapcanNotList2(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(mapcan 'print '(1 2) t)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestMapcanReturnNotList(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(mapcan (lambda (x) t) '(a b c))`,
 		Panics: true,
 	}).Test(t)
 }
