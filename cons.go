@@ -2,14 +2,6 @@
 
 package slip
 
-// ConsSymbol is the symbol with a value of "cons".
-const ConsSymbol = Symbol("cons")
-
-func init() {
-	DefConstant(ConsSymbol, ConsSymbol,
-		`A _cons_ is a dotted pair of _objects_ with a _car_ and a _cdr_.`)
-}
-
 // Cons of Objects. Basically a List of two Objects but displayed differently.
 type Cons []Object
 

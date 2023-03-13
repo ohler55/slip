@@ -47,11 +47,13 @@ func (f *Cdr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	switch list := a.(type) {
 	case nil:
 		// leave result as nil
-	case slip.Cons:
-		result = list.Cdr()
 	case slip.List:
 		if 0 < len(list) {
-			result = list[:len(list)-1]
+			if tail, ok := list[0].(slip.Tail); ok {
+				result = tail.Value
+			} else {
+				result = list[:len(list)-1]
+			}
 		}
 	default:
 		slip.PanicType("argument to cdr", list, "cons", "list")
@@ -65,9 +67,13 @@ func (f *Cdr) Place(args slip.List, value slip.Object) {
 		slip.PanicArgCount(f, 1, 1)
 	}
 	switch list := args[0].(type) {
-	case slip.Cons:
-		list[0] = value
 	case slip.List:
+		if 0 < len(list) {
+			if _, ok := list[0].(slip.Tail); ok {
+				list[0] = slip.Tail{Value: value}
+				return
+			}
+		}
 		panic("setf on cdr of a list is not implemented")
 	default:
 		slip.PanicType("argument to cdr", list, "cons", "list")

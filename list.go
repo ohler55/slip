@@ -2,11 +2,18 @@
 
 package slip
 
-// ListSymbol is the symbol with a value of "list".
-const ListSymbol = Symbol("list")
+const (
+	// ListSymbol is the symbol with a value of "list".
+	ListSymbol = Symbol("list")
+
+	// ConsSymbol is the symbol with a value of "cons".
+	ConsSymbol = Symbol("cons")
+)
 
 func init() {
 	DefConstant(ListSymbol, ListSymbol, `A _cons_ is a sequence of _objects_.`)
+	DefConstant(ConsSymbol, ConsSymbol,
+		`A _cons_ is a dotted pair of _objects_ with a _car_ and a _cdr_.`)
 }
 
 // List of Objects.
@@ -37,25 +44,12 @@ func (obj List) Simplify() interface{} {
 
 // Equal returns true if this Object and the other are equal in value.
 func (obj List) Equal(other Object) (eq bool) {
-	switch to := other.(type) {
-	case List:
-		if len(obj) == len(to) {
-			eq = true
-			for i, co := range obj {
-				if !ObjectEqual(co, to[i]) {
-					eq = false
-					break
-				}
-			}
-		}
-	case Cons:
-		if len(obj) == len(to) {
-			eq = true
-			for i, co := range obj {
-				if !ObjectEqual(co, to[i]) {
-					eq = false
-					break
-				}
+	if ol, ok := other.(List); ok && len(obj) == len(ol) {
+		eq = true
+		for i, co := range obj {
+			if !ObjectEqual(co, ol[i]) {
+				eq = false
+				break
 			}
 		}
 	}
@@ -64,11 +58,21 @@ func (obj List) Equal(other Object) (eq bool) {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj List) Hierarchy() []Symbol {
+	if 0 < len(obj) {
+		if _, ok := obj[0].(Tail); ok {
+			return []Symbol{ConsSymbol, ListSymbol, SequenceSymbol, TrueSymbol}
+		}
+	}
 	return []Symbol{ListSymbol, SequenceSymbol, TrueSymbol}
 }
 
-// SequenceType returns 'list.
+// SequenceType returns 'list or 'cons if a cons.
 func (obj List) SequenceType() Symbol {
+	if 0 < len(obj) {
+		if _, ok := obj[0].(Tail); ok {
+			return ConsSymbol
+		}
+	}
 	return ListSymbol
 }
 
@@ -78,4 +82,32 @@ func (obj List) Eval(s *Scope, depth int) Object {
 		return ListToFunc(s, obj, depth).Eval(s, depth)
 	}
 	return nil
+}
+
+// Car of the list
+func (obj List) Car() (car Object) {
+	if 0 < len(obj) {
+		car = obj[len(obj)-1]
+		if tail, ok := car.(Tail); ok {
+			car = tail.Value
+		}
+	}
+	return
+}
+
+// Cdr of the list.
+func (obj List) Cdr() (cdr Object) {
+	switch len(obj) {
+	case 0, 1:
+		// leave cdr as nil
+	case 2:
+		if tail, ok := obj[0].(Tail); ok {
+			cdr = tail.Value
+		} else {
+			cdr = List(obj[:1])
+		}
+	default:
+		cdr = List(obj[:len(obj)-1])
+	}
+	return
 }
