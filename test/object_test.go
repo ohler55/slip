@@ -347,15 +347,15 @@ func TestTime(t *testing.T) {
 
 func TestListObj(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.List{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
+		Target:    slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), nil},
 		String:    "(1 2 3 nil)",
 		Simple:    []any{int64(1), int64(2), int64(3), nil},
 		Hierarchy: "list.sequence.t",
 		Equals: []*sliptest.EqTest{
-			{Other: slip.List{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}, Expect: true},
-			{Other: slip.List{nil, nil, slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
-			{Other: slip.List{slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
-			{Other: slip.List{slip.Tail{Value: slip.Fixnum(2)}, slip.Fixnum(1)}, Expect: false}, // cons
+			{Other: slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), nil}, Expect: true},
+			{Other: slip.List{slip.Fixnum(1), slip.Fixnum(2), nil, nil}, Expect: false},
+			{Other: slip.List{slip.Fixnum(1), slip.Fixnum(2)}, Expect: false},
+			{Other: slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}, Expect: false}, // cons
 			{Other: slip.True, Expect: false},
 		},
 		Panics: true,
@@ -375,16 +375,14 @@ func TestListObjEmpty(t *testing.T) {
 
 func TestCons(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.List{slip.Tail{Value: slip.Fixnum(1)}, nil},
+		Target:    slip.List{nil, slip.Tail{Value: slip.Fixnum(1)}},
 		String:    "(nil . 1)",
 		Simple:    []any{nil, int64(1)},
 		Hierarchy: "cons.list.sequence.t",
 		Equals: []*sliptest.EqTest{
-			{Other: slip.List{slip.Tail{Value: slip.Fixnum(1)}, nil}, Expect: true},
+			{Other: slip.List{nil, slip.Tail{Value: slip.Fixnum(1)}}, Expect: true},
 			{Other: slip.List{nil, slip.Fixnum(1)}, Expect: false},
-			{Other: slip.List{slip.Tail{Value: slip.Fixnum(1)}}, Expect: false},
 			{Other: slip.List{slip.Fixnum(1), nil}, Expect: false},
-			{Other: slip.List{nil, slip.Fixnum(1)}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
 		Panics: true,
@@ -395,31 +393,31 @@ func TestCons(t *testing.T) {
 }
 
 func TestConsString(t *testing.T) {
-	tt.Equal(t, "(1 . 2)", slip.List{slip.Tail{Value: slip.Fixnum(2)}, slip.Fixnum(1)}.String())
-	tt.Equal(t, "(nil . 1)", slip.List{slip.Tail{Value: slip.Fixnum(1)}, nil}.String())
-	tt.Equal(t, "(1 2 . 3)", slip.List{slip.Tail{Value: slip.Fixnum(3)}, slip.Fixnum(2), slip.Fixnum(1)}.String())
+	tt.Equal(t, "(1 . 2)", slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}.String())
+	tt.Equal(t, "(nil . 1)", slip.List{nil, slip.Tail{Value: slip.Fixnum(1)}}.String())
+	tt.Equal(t, "(1 2 . 3)", slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Tail{Value: slip.Fixnum(3)}}.String())
 }
 
 func TestConsCar(t *testing.T) {
-	tt.Equal(t, "1", slip.ObjectString(slip.List{slip.Tail{Value: slip.Fixnum(2)}, slip.Fixnum(1)}.Car()))
+	tt.Equal(t, "1", slip.ObjectString(slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}.Car()))
 }
 
 func TestConsCdr(t *testing.T) {
-	tt.Equal(t, "2", slip.ObjectString(slip.List{slip.Tail{Value: slip.Fixnum(2)}, slip.Fixnum(1)}.Cdr()))
+	tt.Equal(t, "2", slip.ObjectString(slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}.Cdr()))
 }
 
 func TestVector(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.Vector{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
+		Target:    slip.Vector{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), nil},
 		String:    "#(1 2 3 nil)",
 		Simple:    []any{int64(1), int64(2), int64(3), nil},
 		Hierarchy: "vector.array.sequence.t",
 		Equals: []*sliptest.EqTest{
-			{Other: slip.Vector{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}, Expect: true},
-			{Other: slip.Vector{nil, nil, slip.Fixnum(2), slip.Fixnum(1)}, Expect: false},
+			{Other: slip.Vector{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), nil}, Expect: true},
+			{Other: slip.Vector{slip.Fixnum(1), slip.Fixnum(2), nil, nil}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		Eval: slip.Vector{nil, slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
+		Eval: slip.Vector{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), nil},
 		Selfies: []func() slip.Symbol{
 			slip.Vector{}.SequenceType,
 			slip.Vector{}.ArrayType,

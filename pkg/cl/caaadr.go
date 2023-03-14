@@ -47,7 +47,7 @@ func (f *Caaadr) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	a := args[0]
 	switch list := a.(type) {
 	case nil:
-		return nil
+		break
 	case slip.List:
 		if 1 < len(list) {
 			a = list[len(list)-2]
@@ -65,8 +65,10 @@ func (f *Caaadr) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 			return a
 		}
+	default:
+		slip.PanicType("argument to caaadr", a, "list")
 	}
-	return slip.PanicType("argument to caaadr", a, "list")
+	return nil
 }
 
 // Place a value in the first position of a list or cons.

@@ -324,8 +324,8 @@ Top:
 		} else {
 			l2 := level + 1
 			b = append(b, '(')
-			for i := 0; i < len(to); i++ {
-				element := to[len(to)-i-1]
+			for i, element := range to {
+				// TBD handle Tail
 				if 0 < i {
 					b = append(b, ' ')
 				}
@@ -377,6 +377,7 @@ Top:
 				list = append(list, form)
 			}
 			args := make(List, 0, len(to.Doc.Args))
+			// TBD reverse
 			for i := len(to.Doc.Args) - 1; 0 <= i; i-- {
 				args = append(args, Symbol(to.Doc.Args[i].Name))
 			}
@@ -444,8 +445,7 @@ Top:
 		if 0 < len(to) {
 			l2 := level + 1
 			n.size = 1 + len(to)
-			for i := 0; i < len(to); i++ {
-				element := to[len(to)-i-1]
+			for i, element := range to {
 				if int(p.Length) <= i {
 					n.elements = append(n.elements, &node{value: Symbol("..."), size: 3, buf: []byte("...")})
 					n.size += 3
