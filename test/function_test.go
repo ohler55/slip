@@ -53,7 +53,7 @@ func TestFunctionEvalArg(t *testing.T) {
 
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("setq", slip.List{slip.Fixnum(7), slip.Symbol("x")}),
+		Target: slip.NewFunc("setq", slip.List{slip.Symbol("x"), slip.Fixnum(7)}),
 		String: "(setq x 7)",
 		Simple: []interface{}{"setq", "x", 7},
 		Eval:   slip.Fixnum(7),

@@ -291,7 +291,7 @@ func PackageNames() (names List) {
 		func(i, j int) bool {
 			si := string(names[i].(String))
 			sj := string(names[j].(String))
-			return 0 < strings.Compare(si, sj)
+			return 0 > strings.Compare(si, sj)
 		})
 	return
 }

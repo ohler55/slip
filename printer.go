@@ -373,15 +373,13 @@ Top:
 	case *Lambda:
 		if p.Lambda {
 			list := make(List, 0, len(to.Forms)+2)
-			for _, form := range to.Forms {
-				list = append(list, form)
-			}
+			list = append(list, Symbol("lambda"))
 			args := make(List, 0, len(to.Doc.Args))
-			// TBD reverse
-			for i := len(to.Doc.Args) - 1; 0 <= i; i-- {
-				args = append(args, Symbol(to.Doc.Args[i].Name))
+			for _, ad := range to.Doc.Args {
+				args = append(args, Symbol(ad.Name))
 			}
-			list = append(list, args, Symbol("lambda"))
+			list = append(list, args)
+			list = append(list, to.Forms...)
 			obj = list
 			goto Top
 		} else {
@@ -408,9 +406,7 @@ Top:
 			b = append(b, '\'')
 			obj = args[0]
 		} else {
-			// This double assignment is just stupid but it silences the linter.
-			args = append(args, Symbol(name))
-			obj = args
+			obj = append(List{Symbol(name)}, args...)
 		}
 		goto Top
 	case *Package:
@@ -473,9 +469,7 @@ Top:
 			n.quote = true
 			n.funky = true
 		} else {
-			// This double assignment is just stupid but it silences the linter.
-			args = append(args, Symbol(name))
-			obj = args
+			obj = append(List{Symbol(name)}, args...)
 		}
 		goto Top
 	default:

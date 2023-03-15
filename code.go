@@ -315,6 +315,7 @@ func (r *reader) read(src []byte) Code {
 	}
 	for r.pos, b = range src {
 	Retry:
+		//fmt.Printf("*** top stack %c %s - %s\n", b, r.stack, r.code)
 		switch mode[b] {
 		case skipNewline:
 			r.line++
@@ -527,6 +528,7 @@ func (r *reader) read(src []byte) Code {
 	if 0 < len(r.stack) {
 		r.partial("list not terminated")
 	}
+	//fmt.Printf("*** read code: %s %T\n", r.code, r.code[0])
 	return r.code
 }
 
@@ -552,11 +554,9 @@ func (r *reader) closeList() {
 	}
 	start := r.starts[len(r.starts)-1]
 	size := len(r.stack) - start - 1
-	list := make(List, 0, size)
-	for i := start + size; start < i; i-- {
-		list = append(list, r.stack[i])
-		r.stack[i] = nil // make sure reference to value is removed from stack
-	}
+	list := make(List, size)
+	copy(list, r.stack[start+1:])
+	// TBD does the stack need to be cleared (set to nil) before shrinking?
 	r.stack = r.stack[:start+1]
 	var obj Object
 	switch to := r.stack[start].(type) {
@@ -568,12 +568,13 @@ func (r *reader) closeList() {
 	case Complex:
 		obj = newComplex(list)
 	default:
-		if 3 <= len(list) && list[1] == Symbol(".") {
-			copy(list[1:], list[2:])
-			list = list[:len(list)-1]
-			if list[0] != nil { // if nil then normal list despite the dot
-				list[0] = Tail{Value: list[0]}
+		if 3 <= len(list) && list[len(list)-2] == Symbol(".") {
+			if list[len(list)-1] == nil {
+				list[len(list)-2] = nil
+			} else {
+				list[len(list)-2] = Tail{Value: list[len(list)-1]}
 			}
+			list = list[:len(list)-1]
 			obj = list
 		} else {
 			obj = list
@@ -894,12 +895,12 @@ func (c Code) Compile() {
 			continue
 		}
 		var sym Symbol
-		switch tv := list[len(list)-1].(type) {
+		switch tv := list[0].(type) {
 		case Symbol:
 			sym = tv
 		case List:
 			if 0 < len(tv) {
-				if s2, ok2 := tv[len(tv)-1].(Symbol); ok2 {
+				if s2, ok2 := tv[0].(Symbol); ok2 {
 					if strings.EqualFold("lambda", string(s2)) {
 						break
 					}

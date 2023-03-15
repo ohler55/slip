@@ -62,12 +62,12 @@ type Defun struct {
 
 // Call the the function with the arguments provided.
 func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	name, ok := args[len(args)-1].(slip.Symbol)
+	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defun", args[len(args)-1], "symbol")
+		slip.PanicType("name argument to defun", args[0], "symbol")
 	}
 	low := strings.ToLower(string(name))
-	lc := slip.DefLambda("defun", s, args[:len(args)-1])
+	lc := slip.DefLambda("defun", s, args[1:])
 	fc := func(fargs slip.List) slip.Object {
 		return &slip.Dynamic{
 			Function: slip.Function{

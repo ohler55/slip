@@ -88,9 +88,6 @@ func (obj List) Eval(s *Scope, depth int) Object {
 func (obj List) Car() (car Object) {
 	if 0 < len(obj) {
 		car = obj[0]
-		if tail, ok := car.(Tail); ok {
-			car = tail.Value
-		}
 	}
 	return
 }

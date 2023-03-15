@@ -33,11 +33,11 @@ func normalAfter(s *Scope, name string, args List, depth int, result *Object) {
 	switch tr := recover().(type) {
 	case nil:
 	case *Panic:
-		tr.Stack = append(tr.Stack, ObjectString(append(args, Symbol(name))))
+		tr.Stack = append(tr.Stack, ObjectString(append(List{Symbol(name)}, args...)))
 		panic(tr)
 	default:
 		panic(&Panic{
-			Message: fmt.Sprint(tr), Stack: []string{ObjectString(append(args, Symbol(name)))},
+			Message: fmt.Sprint(tr), Stack: []string{ObjectString(append(List{Symbol(name)}, args...))},
 			Value: SimpleObject(tr),
 		})
 	}
@@ -53,7 +53,7 @@ func traceBefore(s *Scope, name string, args List, depth int) {
 	}
 	b = strconv.AppendInt(b, int64(depth), 10)
 	b = append(b, ": "...)
-	b = ObjectAppend(b, append(args, Symbol(name)))
+	b = ObjectAppend(b, append(List{Symbol(name)}, args...))
 	b = append(b, '\n')
 	_, _ = StandardOutput.(io.Writer).Write(b)
 }
@@ -68,7 +68,7 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 	}
 	b = strconv.AppendInt(b, int64(depth), 10)
 	b = append(b, ": "...)
-	b = ObjectAppend(b, append(args, Symbol(name)))
+	b = ObjectAppend(b, append(List{Symbol(name)}, args...))
 	b = append(b, " => "...)
 
 	switch tr := recover().(type) {
@@ -77,12 +77,12 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 		b = append(b, '\n')
 		_, _ = StandardOutput.(io.Writer).Write(b)
 	case *Panic:
-		tr.Stack = append(tr.Stack, ObjectString(append(args, Symbol(name))))
+		tr.Stack = append(tr.Stack, ObjectString(append(List{Symbol(name)}, args...)))
 		traceWriterPanic(s, b, tr)
 		panic(tr)
 	default:
 		p := Panic{
-			Message: fmt.Sprint(tr), Stack: []string{ObjectString(append(args, Symbol(name)))},
+			Message: fmt.Sprint(tr), Stack: []string{ObjectString(append(List{Symbol(name)}, args...))},
 		}
 		traceWriterPanic(s, b, &p)
 		panic(&p)

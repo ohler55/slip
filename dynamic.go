@@ -21,9 +21,9 @@ func (f *Dynamic) Append(b []byte) []byte {
 	} else {
 		b = f.Self.(Object).Append(b)
 	}
-	for i := len(f.Args) - 1; 0 <= i; i-- {
+	for _, a := range f.Args {
 		b = append(b, ' ')
-		b = Append(b, f.Args[i])
+		b = Append(b, a)
 	}
 	return append(b, ')')
 }
@@ -41,8 +41,7 @@ func (f *Dynamic) Simplify() interface{} {
 		}
 		lambda := make([]any, 0, len(lc.Forms)+2)
 		lambda = append(lambda, "lambda", args)
-		for i := len(lc.Forms) - 1; 0 <= i; i-- {
-			form := lc.Forms[i]
+		for _, form := range lc.Forms {
 			if form == nil {
 				lambda = append(lambda, nil)
 			} else {
@@ -51,8 +50,8 @@ func (f *Dynamic) Simplify() interface{} {
 		}
 		simple = append(simple, lambda)
 	}
-	for i := len(f.Args) - 1; 0 <= i; i-- {
-		simple = append(simple, Simplify(f.Args[i]))
+	for _, a := range f.Args {
+		simple = append(simple, Simplify(a))
 	}
 	return simple
 }

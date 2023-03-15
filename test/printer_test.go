@@ -258,7 +258,7 @@ func TestPrintLength(t *testing.T) {
 	tt.Nil(t, val)
 
 	var list slip.List
-	for i := 10; 0 <= i; i-- {
+	for i := 0; i <= 10; i++ {
 		list = append(list, slip.Fixnum(i))
 	}
 	out := slip.Append([]byte{}, list)
@@ -297,7 +297,7 @@ func TestPrintPrettyLength(t *testing.T) {
 	slip.SetVar(pkey, slip.True)
 
 	var list slip.List
-	for i := 10; 0 <= i; i-- {
+	for i := 0; i <= 10; i++ {
 		list = append(list, slip.Fixnum(i))
 	}
 	out := slip.Append([]byte{}, list)
@@ -317,7 +317,7 @@ func TestPrintLevel(t *testing.T) {
 
 	var list slip.List
 	for i := 7; 0 <= i; i-- {
-		list = slip.List{list, slip.Fixnum(i)}
+		list = slip.List{slip.Fixnum(i), list}
 	}
 	out := slip.Append([]byte{}, list)
 	tt.Equal(t, "(0 (1 (2 (3 (4 (5 (6 (7 ()))))))))", string(out))
@@ -361,7 +361,7 @@ func TestPrintLines(t *testing.T) {
 
 	var list slip.List
 	for i := 7; 0 <= i; i-- {
-		list = slip.List{list, slip.Fixnum(i)}
+		list = slip.List{slip.Fixnum(i), list}
 	}
 	out := slip.Append([]byte{}, list)
 	tt.Equal(t, `(0
@@ -558,9 +558,9 @@ func makeTestTree(n int) slip.Object {
 	var list slip.List
 	for ; 0 <= n; n-- {
 		if 0 < n {
-			list = append(list, makeTestTree(n-1))
+			list = append(slip.List{makeTestTree(n - 1)}, list...)
 		}
-		list = append(list, slip.Fixnum(n))
+		list = append(slip.List{slip.Fixnum(n)}, list...)
 	}
 	return list
 }
@@ -575,7 +575,7 @@ func TestPrinterWrite(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	slip.SetVar(key, (*slip.FileStream)(pw))
-	slip.Write(slip.List{slip.True, nil})
+	slip.Write(slip.List{nil, slip.True})
 
 	pw.Close()
 	var out []byte

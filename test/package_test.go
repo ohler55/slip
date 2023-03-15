@@ -52,6 +52,7 @@ func TestPackageCL(t *testing.T) {
 		},
 		Eval: &slip.CLPkg,
 	}).Test(t)
+	tt.Panic(t, func() { slip.CLPkg.Set("*common-lisp*", slip.True) })
 }
 
 func checkCLPkgSimplify(t *testing.T, simple interface{}) {

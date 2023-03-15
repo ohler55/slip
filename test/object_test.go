@@ -58,6 +58,7 @@ func TestFixnum(t *testing.T) {
 		Eval: slip.Fixnum(7),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.Fixnum(7).RealValue())
+	tt.Equal(t, 7, slip.Fixnum(7).Int64())
 }
 
 func TestRatio(t *testing.T) {
@@ -155,6 +156,7 @@ func TestBignum(t *testing.T) {
 		Eval:      b,
 	}).Test(t)
 	tt.Equal(t, 123.0, slip.NewBignum(123).RealValue())
+	tt.Equal(t, 123, slip.NewBignum(123).Int64())
 }
 
 func TestShortFloat(t *testing.T) {
@@ -363,6 +365,9 @@ func TestListObj(t *testing.T) {
 			slip.List{}.SequenceType,
 		},
 	}).Test(t)
+	tt.Equal(t, slip.List{slip.Fixnum(2)}, slip.List{slip.Fixnum(1), slip.Fixnum(2)}.Cdr())
+	tt.Equal(t, slip.List{slip.Fixnum(2), slip.Fixnum(3)},
+		slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}.Cdr())
 }
 
 func TestListObjEmpty(t *testing.T) {
@@ -390,6 +395,7 @@ func TestCons(t *testing.T) {
 			slip.List{slip.Tail{}}.SequenceType,
 		},
 	}).Test(t)
+	tt.Equal(t, slip.Fixnum(2), slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}.Cdr())
 }
 
 func TestConsString(t *testing.T) {
@@ -486,9 +492,23 @@ func TestValues(t *testing.T) {
 func TestSimpleObject(t *testing.T) {
 	tm := time.Date(2022, time.April, 1, 0, 0, 0, 0, time.UTC)
 	simple := []any{
-		true, -1, int8(-2), int16(-3), int32(-4), int64(-5),
-		uint(1), uint8(2), uint16(3), uint32(4), uint64(5),
-		float32(4.5), 5.4, tm, slip.True, "abc", []byte("def"),
+		true,
+		-1,
+		int8(-2),
+		int16(-3),
+		int32(-4),
+		int64(-5),
+		uint(1),
+		uint8(2),
+		uint16(3),
+		uint32(4),
+		uint64(5),
+		float32(4.5),
+		5.4,
+		tm,
+		slip.True,
+		"abc",
+		[]byte("def"),
 		fmt.Errorf("dummy error"),
 		map[string]any{"x": 7},
 	}
@@ -679,5 +699,76 @@ func TestUndefined(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 		Panics: true,
+	}).Test(t)
+}
+
+func TestUnbound(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Unbound,
+		String:    "<unbound> 0x00",
+		Simple:    nil,
+		Hierarchy: "unbound",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Unbound, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: slip.Unbound,
+	}).Test(t)
+}
+
+func TestTail(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Tail{Value: slip.True},
+		String:    "t",
+		Simple:    true,
+		Hierarchy: "t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Tail{Value: slip.True}, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: slip.True,
+	}).Test(t)
+}
+
+type simplyBad int
+
+// String representation.
+func (sb simplyBad) String() string {
+	return "x"
+}
+
+// Append the object to a byte slice.
+func (sb simplyBad) Append(b []byte) []byte {
+	return []byte{'x'}
+}
+
+// Simplify the Object into simple go types of nil, bool, int64, float64,
+// string, []any, map[string]any, or time.Time.
+func (sb simplyBad) Simplify() any {
+	panic("bad")
+}
+
+// Equal returns true if this Object and the other are equal in value.
+func (sb simplyBad) Equal(other slip.Object) bool {
+	return false
+}
+
+// Hierarchy returns the class hierarchy as symbols for the instance.
+func (sb simplyBad) Hierarchy() []slip.Symbol {
+	return []slip.Symbol{slip.Symbol("x")}
+}
+
+// Eval the object.
+func (sb simplyBad) Eval(s *slip.Scope, depth int) slip.Object {
+	return nil
+}
+
+func TestSlipTest(t *testing.T) {
+	(&sliptest.Object{
+		Target:    simplyBad(0),
+		String:    "x",
+		Simple:    fmt.Errorf("bad"),
+		Hierarchy: "x",
+		Eval:      nil,
 	}).Test(t)
 }
