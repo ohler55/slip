@@ -45,11 +45,11 @@ type Apply struct {
 // Call the function with the arguments provided.
 func (f *Apply) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
-	fn := args[len(args)-1]
+	fn := args[0]
 	d2 := depth + 1
 	caller := resolveToCaller(s, fn, d2)
 	var larg slip.List
-	switch ta := args[0].(type) {
+	switch ta := args[len(args)-1].(type) {
 	case nil:
 		// ok, empty list
 	case slip.List:
@@ -58,8 +58,8 @@ func (f *Apply) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		slip.PanicType("last argument", ta, "list")
 	}
 	cargs := make(slip.List, len(args)-2+len(larg))
-	copy(cargs, larg)
-	copy(cargs[len(larg):], args[1:len(args)-1])
+	copy(cargs, args[1:])
+	copy(cargs[:len(args)-1], larg)
 
 	return caller.Call(s, cargs, d2)
 }

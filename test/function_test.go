@@ -16,6 +16,7 @@ func TestFunctionNew(t *testing.T) {
 	tt.Equal(t, "(car nil)", slip.ObjectString(f))
 
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing", slip.List{}) })
+	tt.Panic(t, func() { _ = slip.NewFunc("nothing:at-all", slip.List{}) })
 }
 
 func TestFunctionFind(t *testing.T) {

@@ -49,10 +49,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
 func NewFunc(name string, args List, pkgs ...*Package) Object {
-	if fi := FindFunc(name, pkgs...); fi != nil {
-		return fi.Create(args)
-	}
-	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
+	return FindFunc(name, pkgs...).Create(args)
 }
 
 // FindFunc finds the FuncInfo for a provided name or panics if none exists.

@@ -522,11 +522,14 @@ func TestPrintReadably(t *testing.T) {
 
 	tt.Panic(t, func() { _ = slip.Append([]byte{}, (*slip.FileStream)(os.Stdout)) })
 
+	out := slip.Append([]byte{}, (slip.String)("special &"))
+	tt.Equal(t, `"special &"`, string(out))
+
 	slip.SetVar(key, nil)
 	val, _ = slip.GetVar(key)
 	tt.Nil(t, val)
 
-	out := slip.Append([]byte{}, (*slip.FileStream)(os.Stdout))
+	out = slip.Append([]byte{}, (*slip.FileStream)(os.Stdout))
 	tt.Equal(t, "/^#<FILE.*/", string(out))
 
 	doc := slip.DescribeVar(key)
@@ -665,4 +668,7 @@ func TestAppendDocANSI(t *testing.T) {
 
 	out = slip.AppendDoc(nil, "_missing underscore", 2, 40, true)
 	tt.Equal(t, "  \x1b[4mmissing underscore\x1b[m", string(out))
+
+	out = slip.AppendDoc(nil, "one\n\ntwo\n\n", 2, 40, true)
+	tt.Equal(t, "  one\n  two\n", string(out))
 }

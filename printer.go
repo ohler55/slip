@@ -883,10 +883,10 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 			if ret {
 				if 0 < len(b) && b[len(b)-1] != '\n' {
 					b[len(b)-1] = '\n'
-				} else {
-					b = append(b, '\n')
 				}
-				b = append(b, indentSpaces[:indent]...)
+				if i < last {
+					b = append(b, indentSpaces[:indent]...)
+				}
 				lastSpace = 0
 				spaceCol = indent
 				col = indent

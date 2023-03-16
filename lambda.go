@@ -85,7 +85,7 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 				ai++
 				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
 					sym = sym[1:]
-					if ai < 0 {
+					if len(args) <= ai {
 						panic(fmt.Sprintf("Missing value for key :%s.", sym))
 					}
 					ss.Let(sym, args[ai])
