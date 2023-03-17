@@ -115,7 +115,7 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 		}
 		v := s.Eval(arg, d2)
 		if vs, ok := v.(Values); ok && !skip {
-			v = vs[len(vs)-1]
+			v = vs[0]
 		}
 		args[i] = v
 	}

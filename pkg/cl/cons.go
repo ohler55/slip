@@ -37,12 +37,12 @@ func (f *Cons) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	switch o2 := args[0].(type) {
+	switch o2 := args[1].(type) {
 	case nil:
-		return slip.List{args[1]}
+		return slip.List{args[0]}
 	case slip.List:
-		return append(o2, args[1])
+		return append(slip.List{args[0]}, o2...)
 	default:
-		return slip.List{slip.Tail{Value: o2}, args[1]}
+		return slip.List{args[0], slip.Tail{Value: o2}}
 	}
 }

@@ -48,12 +48,17 @@ func (f *Cdr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	case nil:
 		// leave result as nil
 	case slip.List:
-		if 0 < len(list) {
-			if tail, ok := list[0].(slip.Tail); ok {
+		switch len(list) {
+		case 0:
+			// leave result as nil
+		case 2:
+			if tail, ok := list[1].(slip.Tail); ok {
 				result = tail.Value
 			} else {
-				result = list[:len(list)-1]
+				result = list[1:]
 			}
+		default:
+			result = list[1:]
 		}
 	default:
 		slip.PanicType("argument to cdr", list, "cons", "list")
@@ -68,9 +73,9 @@ func (f *Cdr) Place(args slip.List, value slip.Object) {
 	}
 	switch list := args[0].(type) {
 	case slip.List:
-		if 0 < len(list) {
-			if _, ok := list[0].(slip.Tail); ok {
-				list[0] = slip.Tail{Value: value}
+		if 1 < len(list) {
+			if _, ok := list[1].(slip.Tail); ok {
+				list[1] = slip.Tail{Value: value}
 				return
 			}
 		}

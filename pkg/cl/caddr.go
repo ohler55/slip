@@ -39,31 +39,10 @@ type Caddr struct {
 
 // Call the function with the arguments provided.
 func (f *Caddr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	a := args[0]
-	switch list := a.(type) {
-	case nil:
-		// leave result as nil
-	case slip.List:
-		if 2 < len(list) {
-			result = list[len(list)-3]
-		}
-	default:
-		slip.PanicType("argument to caddr", list, "list")
-	}
-	return
+	return cadGet(f, args, []bool{false, false, true})
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Caddr) Place(args slip.List, value slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	if list, ok := args[0].(slip.List); ok && 2 < len(list) {
-		list[len(list)-3] = value
-	} else {
-		slip.PanicType("argument to caddr", list, "list")
-	}
+	cadPlace(f, args, []bool{false, false, true}, value)
 }

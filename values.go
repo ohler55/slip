@@ -15,15 +15,14 @@ func (obj Values) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj Values) Append(b []byte) []byte {
-	for i := len(obj) - 1; 0 <= i; i-- {
-		v := obj[i]
+	for i, v := range obj {
+		if 0 < i {
+			b = append(b, ", "...)
+		}
 		if v == nil {
 			b = append(b, "nil"...)
 		} else {
 			b = v.Append(b)
-		}
-		if 0 < i {
-			b = append(b, ", "...)
 		}
 	}
 	return b
@@ -32,8 +31,7 @@ func (obj Values) Append(b []byte) []byte {
 // Simplify the Object into a []interface{}.
 func (obj Values) Simplify() interface{} {
 	out := make([]interface{}, 0, len(obj))
-	for i := len(obj) - 1; 0 <= i; i-- {
-		o := obj[i]
+	for _, o := range obj {
 		if o == nil {
 			out = append(out, nil)
 		} else {
@@ -55,10 +53,10 @@ func (obj Values) Hierarchy() []Symbol {
 
 // Eval panics.
 func (obj Values) Eval(s *Scope, depth int) Object {
-	return obj[len(obj)-1]
+	return obj[0]
 }
 
 // First value in the multiple values.
 func (obj Values) First() Object {
-	return obj[len(obj)-1]
+	return obj[0]
 }

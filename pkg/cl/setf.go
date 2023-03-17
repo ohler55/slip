@@ -52,9 +52,9 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		panic(fmt.Sprintf("setf expected placer/value pairs. Not %d arguments.", len(f.Args)))
 	}
 	d2 := depth + 1
-	for i := len(args) - 1; 0 <= i; i-- {
+	for i := 0; i < len(args)-1; i++ {
 		p := args[i]
-		i--
+		i++
 		result = f.EvalArg(s, args, i, d2)
 		if vs, ok := result.(slip.Values); ok {
 			result = vs.First()
@@ -69,7 +69,7 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		case slip.Placer:
 			targs := ta.GetArgs()
 			pargs := make(slip.List, len(targs))
-			for j := len(targs) - 1; 0 <= j; j-- {
+			for j := 0; j < len(targs); j++ {
 				v := targs[j]
 				if list, ok := v.(slip.List); ok {
 					v = slip.ListToFunc(s, list, depth+1)
