@@ -51,7 +51,7 @@ func (f *Float) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	var f64 float64
-	switch ta := args[len(args)-1].(type) {
+	switch ta := args[0].(type) {
 	case *slip.LongFloat:
 		if 1 < len(args) {
 			if _, ok := args[0].(*slip.LongFloat); ok {
@@ -65,7 +65,7 @@ func (f *Float) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicType("number", ta, "number")
 	}
 	if 1 < len(args) {
-		switch ta := args[0].(type) {
+		switch ta := args[1].(type) {
 		case slip.SingleFloat:
 			return slip.SingleFloat(f64)
 		case slip.DoubleFloat:

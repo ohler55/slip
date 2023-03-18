@@ -50,13 +50,13 @@ func (f *Unintern) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
-	so, ok := args[len(args)-1].(slip.Symbol)
+	so, ok := args[0].(slip.Symbol)
 	if !ok || len(so) < 1 {
-		slip.PanicType("symbol", args[len(args)-1], "symbol")
+		slip.PanicType("symbol", args[0], "symbol")
 	}
 	p := slip.CurrentPackage
 	if 1 < len(args) {
-		switch ta := args[0].(type) {
+		switch ta := args[1].(type) {
 		case slip.Symbol:
 			if p = slip.FindPackage(string(ta)); p == nil {
 				panic(fmt.Sprintf("package %s not found", ta))
@@ -68,7 +68,7 @@ func (f *Unintern) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		case *slip.Package:
 			p = ta
 		default:
-			slip.PanicType("package", args[0], "package", "string", "symbol")
+			slip.PanicType("package", args[1], "package", "string", "symbol")
 		}
 	}
 	if p == &slip.KeywordPkg && so[0] != ':' {

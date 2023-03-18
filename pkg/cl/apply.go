@@ -58,8 +58,8 @@ func (f *Apply) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		slip.PanicType("last argument", ta, "list")
 	}
 	cargs := make(slip.List, len(args)-2+len(larg))
-	copy(cargs, args[1:])
-	copy(cargs[:len(args)-1], larg)
+	copy(cargs, args[1:len(args)-1])
+	copy(cargs[len(args)-2:], larg)
 
 	return caller.Call(s, cargs, d2)
 }

@@ -54,12 +54,12 @@ func (f *Pprint) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	p := *slip.DefaultPrinter()
 	p.Escape = true
 	p.Pretty = true
-	obj := args[len(args)-1]
+	obj := args[0]
 	var w io.Writer = slip.StandardOutput.(io.Writer)
 	if 1 < len(args) {
 		var ok bool
-		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType("pprint output-stream", args[0], "output-stream")
+		if w, ok = args[1].(io.Writer); !ok {
+			slip.PanicType("pprint output-stream", args[1], "output-stream")
 		}
 	}
 	b := p.Append([]byte{'\n'}, obj, 0)

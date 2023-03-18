@@ -51,7 +51,7 @@ func (f *Function) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		return slip.FindFunc(string(ta))
 	case slip.List:
 		if 1 < len(ta) {
-			if sym, ok := ta[len(ta)-1].(slip.Symbol); ok {
+			if sym, ok := ta[0].(slip.Symbol); ok {
 				if strings.EqualFold("lambda", string(sym)) {
 					lambdaDef := slip.ListToFunc(s, ta, depth+1)
 					return s.Eval(lambdaDef, depth).(*slip.Lambda)

@@ -56,13 +56,13 @@ func (f *FindSymbol) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
-	so, ok := args[len(args)-1].(slip.String)
+	so, ok := args[0].(slip.String)
 	if !ok || len(so) < 1 {
-		slip.PanicType("string", args[len(args)-1], "string")
+		slip.PanicType("string", args[0], "string")
 	}
 	p := slip.CurrentPackage
 	if 1 < len(args) {
-		switch ta := args[0].(type) {
+		switch ta := args[1].(type) {
 		case slip.Symbol:
 			if p = slip.FindPackage(string(ta)); p == nil {
 				panic(fmt.Sprintf("package %s not found", ta))
@@ -74,7 +74,7 @@ func (f *FindSymbol) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		case *slip.Package:
 			p = ta
 		default:
-			slip.PanicType("package", args[0], "package", "string", "symbol")
+			slip.PanicType("package", ta, "package", "string", "symbol")
 		}
 	}
 	if p == &slip.KeywordPkg && so[0] != ':' {
@@ -92,5 +92,5 @@ func (f *FindSymbol) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	default:
 		status = slip.Symbol(":inherited")
 	}
-	return slip.Values{status, slip.Symbol(so)}
+	return slip.Values{slip.Symbol(so), status}
 }

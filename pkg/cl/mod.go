@@ -49,10 +49,10 @@ func (f *Mod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	if _, ok := args[0].(slip.Real); !ok {
-		slip.PanicType("divisor", args[0], "real")
+	if _, ok := args[1].(slip.Real); !ok {
+		slip.PanicType("divisor", args[1], "real")
 	}
-	n, d := normalizeNumber(args[1], args[0])
+	n, d := normalizeNumber(args[0], args[1])
 	switch num := n.(type) {
 	case slip.Fixnum:
 		div := int64(d.(slip.Fixnum))

@@ -181,10 +181,10 @@ func (obj *Package) Remove(name string) (removed bool) {
 	name = strings.ToLower(name)
 	if _, has := obj.Vars[name]; has {
 		delete(obj.Vars, name)
+		removed = true
 		for _, u := range obj.Users {
 			if vv, _ := u.Vars[name]; vv != nil && vv.Pkg == obj {
 				delete(u.Vars, name)
-				removed = true
 			}
 		}
 	}

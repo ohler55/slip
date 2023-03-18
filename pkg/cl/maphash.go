@@ -48,11 +48,11 @@ func (f *Maphash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	ht, ok := args[0].(slip.HashTable)
+	ht, ok := args[1].(slip.HashTable)
 	if !ok {
 		slip.PanicType("hash-table", args[0], "hash-table")
 	}
-	fn := args[1]
+	fn := args[0]
 	d2 := depth + 1
 	caller := resolveToCaller(s, fn, d2)
 	for k, v := range ht {

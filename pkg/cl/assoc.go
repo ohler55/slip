@@ -58,19 +58,19 @@ type Assoc struct {
 // Call the the function with the arguments provided.
 func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 4)
-	pos := len(args) - 1
+	pos := 0
 	item := args[pos]
-	pos--
+	pos++
 	alist, ok := args[pos].(slip.List)
 	if !ok {
 		slip.PanicType("alist", args[pos], "list")
 	}
-	pos--
+	pos++
 	var (
 		keyFunc  slip.Caller
 		testFunc slip.Caller
 	)
-	for ; 0 < pos; pos -= 2 {
+	for ; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
 			slip.PanicType("keyword", args[pos], "keyword")
@@ -78,17 +78,17 @@ func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (found slip.Objec
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
 		case ":key":
-			keyFunc = resolveToCaller(s, args[pos-1], depth)
+			keyFunc = resolveToCaller(s, args[pos+1], depth)
 		case ":test":
-			testFunc = resolveToCaller(s, args[pos-1], depth)
+			testFunc = resolveToCaller(s, args[pos+1], depth)
 		default:
 			slip.PanicType("keyword", sym, ":key", ":test")
 		}
 	}
 	d2 := depth + 1
 	var k slip.Object
-	for i := len(alist) - 1; 0 <= i; i-- {
-		switch tv := alist[i].(type) {
+	for _, a := range alist {
+		switch tv := a.(type) {
 		case nil:
 			continue
 		case slip.List:
@@ -101,11 +101,11 @@ func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (found slip.Objec
 		}
 		if testFunc == nil {
 			if slip.ObjectEqual(item, k) {
-				found = alist[i]
+				found = a
 				break
 			}
-		} else if testFunc.Call(s, slip.List{item, k}, d2) != nil {
-			found = alist[i]
+		} else if testFunc.Call(s, slip.List{k, item}, d2) != nil {
+			found = a
 			break
 		}
 	}

@@ -57,13 +57,13 @@ func (f *If) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object)
 	}
 	result = nil
 	d2 := depth + 1
-	pos := len(args) - 1
+	pos := 0
 	test := f.EvalArg(s, args, pos, d2) != nil
-	pos--
+	pos++
 	if test {
 		result = f.EvalArg(s, args, pos, d2)
-	} else if 0 < pos {
-		pos--
+	} else if pos < len(args)-1 {
+		pos++
 		result = f.EvalArg(s, args, pos, d2)
 	}
 	return

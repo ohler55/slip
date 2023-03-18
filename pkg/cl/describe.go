@@ -56,12 +56,12 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
-	obj := args[len(args)-1]
+	obj := args[0]
 	w := s.Get("*standard-output*").(io.Writer)
 	if 1 < len(args) {
 		var ok bool
-		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType("describe output-stream", args[0], "output-stream")
+		if w, ok = args[1].(io.Writer); !ok {
+			slip.PanicType("describe output-stream", args[1], "output-stream")
 		}
 	}
 	ansi := s.Get("*print-ansi*") != nil

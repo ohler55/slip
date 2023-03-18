@@ -44,13 +44,13 @@ func (f *Subtract) Call(s *slip.Scope, args slip.List, depth int) (dif slip.Obje
 		slip.PanicArgCount(f, 1, -1)
 	}
 	var arg slip.Object
-	for pos := len(args) - 1; 0 <= pos; pos-- {
+	for pos, a := range args {
 		if dif == nil {
-			dif = args[pos]
+			dif = a
 			if _, ok := dif.(slip.Number); !ok {
 				slip.PanicType("numbers", dif, "number")
 			}
-			if pos == 0 {
+			if pos == len(args)-1 {
 				switch td := dif.(type) {
 				case slip.Fixnum:
 					dif = -td
@@ -71,7 +71,7 @@ func (f *Subtract) Call(s *slip.Scope, args slip.List, depth int) (dif slip.Obje
 			}
 			continue
 		}
-		arg, dif = normalizeNumber(args[pos], dif)
+		arg, dif = normalizeNumber(a, dif)
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			dif = dif.(slip.Fixnum) - ta

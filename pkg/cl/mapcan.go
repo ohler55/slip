@@ -45,12 +45,12 @@ type Mapcan struct {
 // Call the function with the arguments provided.
 func (f *Mapcan) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, -1)
-	pos := len(args) - 1
+	pos := 0
 	fn := args[pos]
 	d2 := depth + 1
 	caller := resolveToCaller(s, fn, d2)
 
-	pos--
+	pos++
 	list, ok := args[pos].(slip.List)
 	if !ok {
 		slip.PanicType("lists", args[pos], "list")
@@ -58,7 +58,7 @@ func (f *Mapcan) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var rlist slip.List
 	min := len(list)
 	var l2 slip.List
-	for i := 0; i < pos; i++ {
+	for i := 1; i < len(args); i++ {
 		if l2, ok = args[i].(slip.List); !ok {
 			slip.PanicType("lists", args[i], "list")
 		}
@@ -66,11 +66,11 @@ func (f *Mapcan) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			min = len(l2)
 		}
 	}
-	ca := make(slip.List, pos+1)
-	for n := 1; n <= min; n++ {
-		for i := 0; i <= pos; i++ {
+	ca := make(slip.List, len(args)-1)
+	for n := 0; n < min; n++ {
+		for i := 1; i < len(args); i++ {
 			l2 := args[i].(slip.List)
-			ca[i] = l2[len(l2)-n]
+			ca[i-1] = l2[n]
 		}
 		r := caller.Call(s, ca, d2)
 		switch tr := r.(type) {
@@ -78,12 +78,12 @@ func (f *Mapcan) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			// ok but nothing to append
 		case slip.List:
 			if 0 < len(rlist) {
-				if _, ok := rlist[0].(slip.Tail); ok {
-					rlist = append(tr, rlist[1:]...)
+				if _, ok := rlist[len(rlist)-1].(slip.Tail); ok {
+					rlist = append(rlist[:len(rlist)-1], tr...)
 					break
 				}
 			}
-			rlist = append(tr, rlist...)
+			rlist = append(rlist, tr...)
 		default:
 			slip.PanicType("list item", tr, "list", "nil", "cons")
 		}

@@ -45,12 +45,12 @@ type Maplist struct {
 // Call the function with the arguments provided.
 func (f *Maplist) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
-	pos := len(args) - 1
+	pos := 0
 	fn := args[pos]
 	d2 := depth + 1
 	caller := resolveToCaller(s, fn, d2)
 
-	pos--
+	pos++
 	list, ok := args[pos].(slip.List)
 	if !ok {
 		slip.PanicType("lists", args[pos], "list")
@@ -58,7 +58,7 @@ func (f *Maplist) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	var rlist slip.List
 	min := len(list)
 	var l2 slip.List
-	for i := 0; i < pos; i++ {
+	for i := 1; i < len(args); i++ {
 		if l2, ok = args[i].(slip.List); !ok {
 			slip.PanicType("lists", args[i], "list")
 		}
@@ -67,13 +67,13 @@ func (f *Maplist) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		}
 	}
 	rlist = make(slip.List, min)
-	ca := make(slip.List, pos+1)
-	for n := 1; n <= min; n++ {
-		for i := 0; i <= pos; i++ {
+	ca := make(slip.List, len(args)-1)
+	for n := 0; n < min; n++ {
+		for i := 1; i < len(args); i++ {
 			l2 := args[i].(slip.List)
-			ca[i] = l2[:len(l2)-n+1]
+			ca[i-1] = l2[n:]
 		}
-		rlist[min-n] = caller.Call(s, ca, d2)
+		rlist[n] = caller.Call(s, ca, d2)
 	}
 	return rlist
 }

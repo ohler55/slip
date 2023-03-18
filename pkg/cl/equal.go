@@ -58,7 +58,7 @@ func (f *Equal) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	if equal(args[1], args[0]) {
+	if equal(args[0], args[1]) {
 		return slip.True
 	}
 	return nil
