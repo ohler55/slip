@@ -211,7 +211,7 @@ type writeCaller bool
 
 func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	return writeBag(obj, args, len(args)-1)
+	return writeBag(obj, args)
 }
 
 func (caller writeCaller) Docs() string {
@@ -239,7 +239,7 @@ type walkCaller bool
 
 func (caller walkCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	walkBag(s, obj, args, len(args)-1, depth)
+	walkBag(s, obj, args, depth)
 	return nil
 }
 

@@ -38,9 +38,7 @@ type MakeBagPath struct {
 
 // Call the function with the arguments provided.
 func (f *MakeBagPath) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.ArgCountCheck(f, args, 1, 1)
 	str, ok := args[0].(slip.String)
 	if !ok {
 		slip.PanicType("path", args[0], "string")

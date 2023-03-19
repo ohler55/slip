@@ -59,18 +59,17 @@ func (f *Get) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if len(args) < 1 || 3 < len(args) {
 		slip.PanicArgCount(f, 1, 3)
 	}
-	pos := len(args) - 1
-	obj, ok := args[pos].(*flavors.Instance)
+	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[pos], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
-	pos--
-	var lisp bool
-	if 0 <= pos {
-		lisp = 0 < pos && args[0] != nil
-		result = getBag(obj, args[pos], lisp)
-	} else {
+	switch len(args) {
+	case 1:
 		result = getBag(obj, nil, false)
+	case 2:
+		result = getBag(obj, args[1], false)
+	case 3:
+		result = getBag(obj, args[1], args[2] != nil)
 	}
 	return
 }

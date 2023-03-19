@@ -95,9 +95,9 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 		}
 		keys[key] = true
 		if cf.allowOtherKeys {
-			plist = append(plist, val, sym)
+			plist = append(plist, sym, val)
 		} else if _, has := cf.keywords[key]; has {
-			plist = append(plist, val, sym)
+			plist = append(plist, sym, val)
 		} else {
 			panic(fmt.Sprintf("%s is not an init keyword for flavor %s.", sym, cf.name))
 		}
