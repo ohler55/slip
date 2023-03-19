@@ -49,10 +49,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
 func NewFunc(name string, args List, pkgs ...*Package) Object {
-	if fi := FindFunc(name, pkgs...); fi != nil {
-		return fi.Create(args)
-	}
-	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
+	return FindFunc(name, pkgs...).Create(args)
 }
 
 // FindFunc finds the FuncInfo for a provided name or panics if none exists.
@@ -90,10 +87,9 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	d2 := depth + 1
 	si := -1
 	var update []int
-	for i := len(f.Args) - 1; 0 <= i; i-- {
+	for i, arg := range f.Args {
 		si++
 		skip := false
-		arg := f.Args[i]
 		if 0 < len(f.SkipEval) {
 			if len(f.SkipEval) <= si {
 				if f.SkipEval[len(f.SkipEval)-1] {
@@ -119,7 +115,7 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 		}
 		v := s.Eval(arg, d2)
 		if vs, ok := v.(Values); ok && !skip {
-			v = vs[len(vs)-1]
+			v = vs[0]
 		}
 		args[i] = v
 	}
@@ -167,9 +163,9 @@ func (f *Function) String() string {
 func (f *Function) Append(b []byte) []byte {
 	b = append(b, '(')
 	b = printer.Append(b, Symbol(f.Name), 0)
-	for i := len(f.Args) - 1; 0 <= i; i-- {
+	for _, a := range f.Args {
 		b = append(b, ' ')
-		b = Append(b, f.Args[i])
+		b = Append(b, a)
 	}
 	return append(b, ')')
 }
@@ -178,8 +174,8 @@ func (f *Function) Append(b []byte) []byte {
 func (f *Function) Simplify() interface{} {
 	simple := make([]interface{}, 0, len(f.Args)+1)
 	simple = append(simple, f.Name)
-	for i := len(f.Args) - 1; 0 <= i; i-- {
-		simple = append(simple, Simplify(f.Args[i]))
+	for _, a := range f.Args {
+		simple = append(simple, Simplify(a))
 	}
 	return simple
 }
@@ -214,19 +210,19 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 	if len(list) == 0 {
 		return nil
 	}
-	switch ta := list[len(list)-1].(type) {
+	switch ta := list[0].(type) {
 	case Symbol:
-		return NewFunc(string(ta), list[:len(list)-1])
+		return NewFunc(string(ta), list[1:])
 	case List:
 		if 1 < len(ta) {
-			if sym, ok := ta[len(ta)-1].(Symbol); ok {
+			if sym, ok := ta[0].(Symbol); ok {
 				if strings.EqualFold("lambda", string(sym)) {
 					lambdaDef := ListToFunc(s, ta, depth+1)
 					lc := s.Eval(lambdaDef, depth).(*Lambda)
 					return &Dynamic{
 						Function: Function{
 							Self: lc,
-							Args: list[:len(list)-1],
+							Args: list[1:],
 						},
 					}
 				}
@@ -234,7 +230,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 		}
 	}
 	panic(&Panic{
-		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[len(list)-1])),
+		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[0])),
 		Stack:   []string{list.String()},
 	})
 }
@@ -269,11 +265,11 @@ func (f *Function) Caller() Caller {
 // CompileList a list into a function or an undefined function.
 func CompileList(list List) (f Object) {
 	if 0 < len(list) {
-		switch ta := list[len(list)-1].(type) {
+		switch ta := list[0].(type) {
 		case Symbol:
 			name := strings.ToLower(string(ta))
 			if fi := CurrentPackage.Funcs[name]; fi != nil {
-				f = fi.Create(list[:len(list)-1])
+				f = fi.Create(list[1:])
 			} else {
 				lc := Lambda{
 					Doc: &FuncDoc{
@@ -292,14 +288,14 @@ func CompileList(list List) (f Object) {
 					}
 				}
 				CurrentPackage.Funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage}
-				f = fc(list[:len(list)-1])
+				f = fc(list[1:])
 			}
 			if funk, ok := f.(Funky); ok {
 				funk.CompileArgs()
 			}
 		case List:
 			if 1 < len(ta) {
-				if sym, ok := ta[len(ta)-1].(Symbol); ok {
+				if sym, ok := ta[0].(Symbol); ok {
 					if strings.EqualFold("lambda", string(sym)) {
 						s := NewScope()
 						lambdaDef := ListToFunc(s, ta, 0)
@@ -307,7 +303,7 @@ func CompileList(list List) (f Object) {
 						return &Dynamic{
 							Function: Function{
 								Self: lc,
-								Args: list[:len(list)-1],
+								Args: list[1:],
 							},
 						}
 					}

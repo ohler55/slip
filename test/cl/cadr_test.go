@@ -11,101 +11,68 @@ import (
 )
 
 func TestCadrEmpty(t *testing.T) {
-	(&sliptest.Object{
-		Target:    slip.NewFunc("cadr", slip.List{nil}),
-		String:    "(cadr nil)",
-		Simple:    []interface{}{"cadr", nil},
-		Hierarchy: "function.t",
-		Equals: []*sliptest.EqTest{
-			{Other: slip.True, Expect: false},
-		},
-		Eval: nil,
+	(&sliptest.Function{
+		Source: "(cadr nil)",
+		Expect: "nil",
 	}).Test(t)
 }
 
-func TestCadrOne(t *testing.T) {
-	(&sliptest.Object{
-		Target:    slip.NewFunc("cadr", slip.List{slip.NewFunc("quote", slip.List{slip.List{slip.Symbol("a")}})}),
-		String:    "(cadr '(a))",
-		Simple:    []interface{}{"cadr", []interface{}{"quote", []interface{}{"a"}}},
-		Hierarchy: "function.t",
-		Eval:      nil,
+func TestCadrFoundNil(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(cadr '(nil))",
+		Expect: "nil",
 	}).Test(t)
 }
 
-func TestCadrTwo(t *testing.T) {
-	(&sliptest.Object{
-		Target: slip.NewFunc("cadr",
-			slip.List{slip.NewFunc("quote", slip.List{slip.List{slip.Symbol("b"), slip.Symbol("a")}})}),
-		String:    "(cadr '(a b))",
-		Simple:    []interface{}{"cadr", []interface{}{"quote", []interface{}{"a", "b"}}},
-		Hierarchy: "function.t",
-		Eval:      slip.Symbol("b"),
+func TestCadrFound(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(cadr '(a b c))",
+		Expect: "b",
 	}).Test(t)
 }
 
 func TestCadrWrongArgCount(t *testing.T) {
-	(&sliptest.Object{
-		Target:    slip.NewFunc("cadr", slip.List{}),
-		String:    "(cadr)",
-		Simple:    []interface{}{"cadr"},
-		Hierarchy: "function.t",
-		Panics:    true,
+	(&sliptest.Function{
+		Source: "(cadr)",
+		Panics: true,
 	}).Test(t)
 }
 
 func TestCadrWrongNotList(t *testing.T) {
-	(&sliptest.Object{
-		Target:    slip.NewFunc("cadr", slip.List{slip.True}),
-		String:    "(cadr t)",
-		Simple:    []interface{}{"cadr", true},
-		Hierarchy: "function.t",
-		Panics:    true,
+	(&sliptest.Function{
+		Source: "(cadr t)",
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: "(cadr '(a . b))",
+		Panics: true,
 	}).Test(t)
 }
 
-func TestCadrSetf(t *testing.T) {
+func TestCadrSetfOk(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("target"), slip.List{slip.Fixnum(8), slip.Fixnum(7)})
-	cadr := slip.List{slip.Symbol("target"), slip.Symbol("cadr")}
-	(&sliptest.Object{
+	_ = slip.ReadString("(setq target '(a b c))").Eval(slip.NewScope())
+	(&sliptest.Function{
 		Scope:  scope,
-		Target: slip.NewFunc("setf", slip.List{slip.Fixnum(9), cadr}),
-		String: "(setf (cadr target) 9)",
-		Simple: []interface{}{"setf", []interface{}{"cadr", "target"}, 9},
-		Eval:   slip.Fixnum(9),
+		Source: "(setf (cadr target) 'x)",
+		Expect: "x",
 	}).Test(t)
-	tt.Equal(t, slip.List{slip.Fixnum(9), slip.Fixnum(7)}, scope.Get(slip.Symbol("target")))
+	tt.Equal(t, "(a x c)", slip.ObjectString(scope.Get(slip.Symbol("target"))))
 }
 
 func TestCadrSetfFail(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("target"), slip.List{slip.Fixnum(7)})
-	cadr := slip.List{slip.Symbol("target"), slip.Symbol("cadr")}
-	(&sliptest.Object{
+	_ = slip.ReadString("(setq target '(a . b))").Eval(slip.NewScope())
+	(&sliptest.Function{
 		Scope:  scope,
-		Target: slip.NewFunc("setf", slip.List{slip.Fixnum(9), cadr}),
-		String: "(setf (cadr target) 9)",
-		Simple: []interface{}{"setf", []interface{}{"cadr", "target"}, 9},
+		Source: "(setf (cadr target) 'x)",
 		Panics: true,
 	}).Test(t)
 }
 
-func TestCadrSetfNoArg(t *testing.T) {
-	scope := slip.NewScope()
-	scope.Let(slip.Symbol("target"), slip.List{})
-	cadr := slip.List{slip.Symbol("cadr")}
-	(&sliptest.Object{
-		Scope:  scope,
-		Target: slip.NewFunc("setf", slip.List{slip.Fixnum(9), cadr}),
-		String: "(setf (cadr) 9)",
-		Simple: []interface{}{"setf", []interface{}{"cadr"}, 9},
+func TestCadrSetfArgCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(setf (cadr) 'x)",
 		Panics: true,
 	}).Test(t)
-}
-
-func TestCadrValues(t *testing.T) {
-	code := slip.ReadString(`(cadr (values '(a b) 'c))`)
-	scope := slip.NewScope()
-	tt.Equal(t, slip.Symbol("b"), code.Eval(scope))
 }

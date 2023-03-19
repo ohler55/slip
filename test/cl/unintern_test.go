@@ -25,7 +25,7 @@ func TestUninternNew(t *testing.T) {
 func TestUninternInherited(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(unintern '*package*)`,
-		Expect: "nil",
+		Expect: "t",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(unintern '*package* *common-lisp*)`,

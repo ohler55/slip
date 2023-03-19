@@ -41,55 +41,10 @@ type Caaadr struct {
 
 // Call the function with the arguments provided.
 func (f *Caaadr) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	a := args[0]
-	switch list := a.(type) {
-	case nil:
-		return nil
-	case slip.List:
-		if 1 < len(list) {
-			a = list[len(list)-2]
-			for i := 2; 0 < i; i-- {
-				switch list := a.(type) {
-				case nil:
-					return nil
-				case slip.List:
-					if 0 < len(list) {
-						a = list[len(list)-1]
-					}
-				default:
-					slip.PanicType("argument to caaadr", list, "list")
-				}
-			}
-			return a
-		}
-	}
-	return slip.PanicType("argument to caaadr", a, "list")
+	return cadGet(f, args, []bool{false, true, true, true})
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Caaadr) Place(args slip.List, value slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	a := args[0]
-	if list, ok := a.(slip.List); ok {
-		if 1 < len(list) {
-			a = list[len(list)-2]
-			for i := 2; 0 < i; i-- {
-				if list, _ := a.(slip.List); 0 < len(list) {
-					if i == 1 {
-						list[len(list)-1] = value
-						return
-					}
-					a = list[len(list)-1]
-				} else {
-					break
-				}
-			}
-		}
-	}
-	slip.PanicType("argument to caaadr", a, "list")
+	cadPlace(f, args, []bool{false, true, true, true}, value)
 }

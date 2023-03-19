@@ -78,15 +78,15 @@ func newComplex(list List) Complex {
 		r float64
 		i float64
 	)
-	if rv, ok := list[1].(Real); ok {
+	if rv, ok := list[0].(Real); ok {
 		r = rv.RealValue()
 	} else {
-		panic(fmt.Sprintf("Can not convert %s, a %T into a float.", list[1], list[1]))
+		panic(fmt.Sprintf("Can not convert %s, a %T into a float.", list[0], list[0]))
 	}
-	if rv, ok := list[0].(Real); ok {
+	if rv, ok := list[1].(Real); ok {
 		i = rv.RealValue()
 	} else {
-		panic(fmt.Sprintf("Can not convert %s, a %T into a float.", list[0], list[0]))
+		panic(fmt.Sprintf("Can not convert %s, a %T into a float.", list[1], list[1]))
 	}
 	return Complex(complex(r, i))
 }

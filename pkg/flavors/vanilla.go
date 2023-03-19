@@ -59,8 +59,8 @@ func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	w := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
 		var ok bool
-		if w, ok = args[len(args)-1].(io.Writer); !ok {
-			slip.PanicType(":describe output-stream", args[len(args)-1], "output-stream")
+		if w, ok = args[0].(io.Writer); !ok {
+			slip.PanicType(":describe output-stream", args[0], "output-stream")
 		}
 	}
 	_, _ = w.Write(b)
@@ -133,8 +133,8 @@ func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	w := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
 		var ok bool
-		if w, ok = args[len(args)-1].(io.Writer); !ok {
-			slip.PanicType(":describe output-stream", args[len(args)-1], "output-stream")
+		if w, ok = args[0].(io.Writer); !ok {
+			slip.PanicType(":describe output-stream", args[0], "output-stream")
 		}
 	}
 	if _, err := w.Write(obj.Append(nil)); err != nil {
@@ -159,10 +159,9 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	if len(args) == 0 {
 		panic("Method send-if-handles expects at least 1 argument but received 0.")
 	}
-	pos := len(args) - 1
-	if sym, ok := args[pos].(slip.Symbol); ok {
+	if sym, ok := args[0].(slip.Symbol); ok {
 		if _, has := obj.Flavor.methods[string(sym)]; has {
-			return obj.Receive(string(sym), args[:pos], depth+1)
+			return obj.Receive(string(sym), args[1:], depth+1)
 		}
 	}
 	return nil
@@ -186,7 +185,7 @@ func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	for k := range obj.Flavor.methods {
 		names = append(names, k)
 	}
-	sort.Slice(names, func(i, j int) bool { return 0 < strings.Compare(names[i], names[j]) })
+	sort.Slice(names, func(i, j int) bool { return 0 > strings.Compare(names[i], names[j]) })
 	methods := make(slip.List, 0, len(names))
 	for _, name := range names {
 		methods = append(methods, slip.Symbol(name))

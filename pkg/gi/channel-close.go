@@ -37,9 +37,7 @@ type ChannelClose struct {
 
 // Call the function with the arguments provided.
 func (f *ChannelClose) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.ArgCountCheck(f, args, 1, 1)
 	ch, ok := args[0].(Channel)
 	if !ok {
 		slip.PanicType("channel", args[0], "channel")

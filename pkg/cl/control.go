@@ -146,12 +146,12 @@ func (c *control) readDir() {
 				params = append(params, nil)
 			}
 		case '#':
-			params = append(params, c.argPos+1)
+			params = append(params, len(c.args)-c.argPos)
 		case 'v':
 			var p any
 			if 0 <= c.argPos {
 				p = c.args[c.argPos]
-				c.argPos--
+				c.argPos++
 			}
 			params = append(params, p)
 		case '\'':
@@ -308,7 +308,7 @@ func (c *control) dirMoney(colon, at bool, params []any) {
 	var val float64
 	if 0 <= c.argPos {
 		arg := c.args[c.argPos]
-		c.argPos--
+		c.argPos++
 		if r, ok := arg.(slip.Real); ok {
 			val = r.RealValue()
 		} else {
@@ -493,14 +493,14 @@ func (c *control) dirMove(colon, at bool, params []any) {
 	case colon && at:
 		panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
 	case colon:
-		c.argPos += n
+		c.argPos -= n
 	case at:
 		if !changed {
 			n = 0
 		}
-		c.argPos = len(c.args) - n - 1
+		c.argPos = n
 	default:
-		c.argPos -= n
+		c.argPos += n
 	}
 }
 
@@ -528,16 +528,16 @@ func (c *control) dirCall(colon, at bool, params []any) {
 	}
 	fi := slip.FindFunc(string(name), p) // panics if not found
 	args := make(slip.List, 4)
-	args[3] = &slip.OutputStream{Writer: c}
+	args[0] = &slip.OutputStream{Writer: c}
 	if 0 <= c.argPos {
-		args[2] = c.args[c.argPos]
-		c.argPos--
+		args[1] = c.args[c.argPos]
+		c.argPos++
 	}
 	if colon {
-		args[1] = slip.True
+		args[2] = slip.True
 	}
 	if at {
-		args[0] = slip.True
+		args[3] = slip.True
 	}
 	fi.Apply(c.scope, args, 0)
 }
@@ -722,13 +722,13 @@ func (c *control) dirEval(colon, at bool, params []any) {
 
 func (c *control) dirProc(colon, at bool, params []any) {
 	var ctrl []byte
-	if 0 <= c.argPos {
+	if c.argPos < len(c.args) {
 		ss, ok := c.args[c.argPos].(slip.String)
 		if !ok {
 			panic(fmt.Sprintf("recursive processing directive expected a control string at %d of %q", c.pos, c.str))
 		}
 		ctrl = []byte(ss)
-		c.argPos--
+		c.argPos++
 	}
 	c2 := control{
 		scope: c.scope,
@@ -740,17 +740,21 @@ func (c *control) dirProc(colon, at bool, params []any) {
 		c2.argPos = c.argPos
 	} else {
 		var args slip.List
-		if 0 <= c.argPos {
+		if c.argPos < len(c.args) {
 			var ok bool
 			if args, ok = c.args[c.argPos].(slip.List); !ok {
 				panic(fmt.Sprintf("recursive processing directive expected an argument list at %d of %q", c.pos, c.str))
 			}
 		}
 		c2.args = args
-		c2.argPos = len(c2.args) - 1
+		c2.argPos = 0
 	}
 	c2.process()
-	c.argPos = c2.argPos
+	if at {
+		c.argPos = c2.argPos
+	} else {
+		c.argPos++
+	}
 	c.out = append(c.out, c2.out...)
 }
 
@@ -759,7 +763,7 @@ func (c *control) dirA(colon, at bool, params []any) {
 		var arg slip.Object
 		if 0 <= c.argPos {
 			arg = c.args[c.argPos]
-			c.argPos--
+			c.argPos++
 		}
 		if s, ok := arg.(slip.String); ok {
 			c.out = append(c.out, s...)
@@ -788,7 +792,7 @@ func (c *control) dirC(colon, at bool, params []any) {
 	)
 	if 0 <= c.argPos {
 		arg, ok = c.args[c.argPos].(slip.Character)
-		c.argPos--
+		c.argPos++
 	}
 	if !ok {
 		panic(fmt.Sprintf("character directive expected a character argument at %d of %q", c.pos, c.str))
@@ -820,7 +824,7 @@ func (c *control) dirInt(colon, at bool, params []any, base int) {
 	)
 	if 0 <= c.argPos {
 		arg = c.args[c.argPos]
-		c.argPos--
+		c.argPos++
 	}
 	mincol := 0
 	padchar := []byte{' '}
@@ -881,7 +885,7 @@ func (c *control) getEFGarg(ff *floatFormatter) {
 	var arg slip.Object
 	if 0 <= c.argPos {
 		arg = c.args[c.argPos]
-		c.argPos--
+		c.argPos++
 	}
 	// golang big.Float fails to preserve digits when printing. The last few
 	// become noise even with a very high precision so no attempt is made to
@@ -1132,13 +1136,13 @@ func (c *control) dirO(colon, at bool, params []any) {
 
 func (c *control) dirP(colon, at bool, params []any) {
 	if colon {
-		c.argPos++
+		c.argPos--
 	}
 	if c.argPos < 0 || len(c.args) <= c.argPos {
 		panic(fmt.Sprintf("missing argument for Plural directive at %d of %q", c.pos, c.str))
 	}
 	arg := c.args[c.argPos]
-	c.argPos--
+	c.argPos++
 	n, ok := arg.(slip.Fixnum)
 	switch {
 	case ok && n == 1:
@@ -1153,7 +1157,7 @@ func (c *control) dirP(colon, at bool, params []any) {
 }
 
 func (c *control) dirR(colon, at bool, params []any) {
-	if c.argPos < 0 {
+	if len(c.args) <= c.argPos {
 		panic(fmt.Sprintf("missing argument for Radix directive at %d of %q", c.pos, c.str))
 	}
 	var (
@@ -1162,7 +1166,7 @@ func (c *control) dirR(colon, at bool, params []any) {
 		sep    string
 	)
 	arg := c.args[c.argPos]
-	c.argPos--
+	c.argPos++
 	switch ta := arg.(type) {
 	case slip.Fixnum:
 		digits = strconv.AppendInt(nil, int64(ta), 10)
@@ -1285,7 +1289,7 @@ func (c *control) dirAS(colon, at bool, params []any, p *slip.Printer) {
 	)
 	if 0 <= c.argPos {
 		arg = c.args[c.argPos]
-		c.argPos--
+		c.argPos++
 	}
 	switch ta := arg.(type) {
 	case nil:
@@ -1383,7 +1387,7 @@ func (c *control) dirW(colon, at bool, params []any) {
 	var arg slip.Object
 	if 0 <= c.argPos {
 		arg = c.args[c.argPos]
-		c.argPos--
+		c.argPos++
 	}
 	p := *slip.DefaultPrinter()
 	if colon {
@@ -1431,9 +1435,9 @@ func (c *control) dirCond(colon, at bool, params []any) {
 	}
 	var arg slip.Object
 	if colon || at || n < 0 {
-		if 0 <= c.argPos {
+		if c.argPos < len(c.args) {
 			arg = c.args[c.argPos]
-			c.argPos--
+			c.argPos++
 		}
 	}
 	strs, def, pos := scanCond(c.str, c.pos)
@@ -1442,7 +1446,7 @@ func (c *control) dirCond(colon, at bool, params []any) {
 		panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
 	case colon:
 		if len(strs) != 2 || 0 < len(def) {
-			panic(fmt.Sprintf("invalid form for conditional directive with : modifier must at %d of %q",
+			panic(fmt.Sprintf("invalid form for conditional directive with : modifier at %d of %q",
 				c.pos, c.str))
 		}
 		if arg == nil {
@@ -1452,12 +1456,12 @@ func (c *control) dirCond(colon, at bool, params []any) {
 		}
 	case at:
 		if len(strs) != 1 || 0 < len(def) {
-			panic(fmt.Sprintf("invalid form for conditional directive with @ modifier must at %d of %q",
+			panic(fmt.Sprintf("invalid form for conditional directive with @ modifier at %d of %q",
 				c.pos, c.str))
 		}
 		if arg != nil {
+			c.argPos--
 			c.subProcess(strs[0])
-			c.argPos++
 		}
 	default:
 		if n < 0 {
@@ -1564,15 +1568,15 @@ func (c *control) dirIter(colon, at bool, params []any) {
 	case colon && at:
 		// The iteration consumes format arguments that must be lists.
 		for ; 0 < n; n-- {
-			if (c.argPos < 0 && !atLeastOnce) || c2.stop {
+			if (len(c.args) <= c.argPos && !atLeastOnce) || c2.stop {
 				break
 			}
 			c2.args = slip.List{}
-			if 0 <= c.argPos {
+			if c.argPos < len(c.args) {
 				c2.args = objAsList(c.args[c.argPos], "iteration directive argument")
-				c.argPos--
+				c.argPos++
 			}
-			c2.argPos = len(c2.args) - 1
+			c2.argPos = 0
 			c2.pos = start
 			c2.process()
 			c.out = append(c.out, c2.out...)
@@ -1583,20 +1587,20 @@ func (c *control) dirIter(colon, at bool, params []any) {
 		// The iterator argument must be a list of lists with the each list
 		// element being consumed by one iteration.
 		var argList slip.List
-		if 0 <= c.argPos {
+		if c.argPos < len(c.args) {
 			argList = objAsList(c.args[c.argPos], "iteration directive argument")
-			c.argPos--
+			c.argPos++
 		}
 		if atLeastOnce && len(argList) == 0 {
 			argList = slip.List{slip.List{}}
 		}
-		for i := len(argList) - 1; 0 <= i; i-- {
+		for _, al := range argList {
 			if n <= 0 || c2.stop {
 				break
 			}
 			n--
-			c2.args = objAsList(argList[i], "iteration directive sub-argument")
-			c2.argPos = len(c2.args) - 1
+			c2.args = objAsList(al, "iteration directive sub-argument")
+			c2.argPos = 0
 			c2.pos = start
 			c2.process()
 			c.out = append(c.out, c2.out...)
@@ -1605,7 +1609,7 @@ func (c *control) dirIter(colon, at bool, params []any) {
 	case at:
 		// The iteration arguments are consumed from the format arguments.
 		for ; 0 < n; n-- {
-			if (c2.argPos < 0 && !atLeastOnce) || c2.stop {
+			if (len(c2.args) <= c2.argPos && !atLeastOnce) || c2.stop {
 				break
 			}
 			c2.pos = start
@@ -1619,12 +1623,13 @@ func (c *control) dirIter(colon, at bool, params []any) {
 		// The iterator argument must be a list that is consumed progressively
 		// for each iteration.
 		c2.args = nil
-		if 0 <= c.argPos {
+		if c.argPos < len(c.args) {
 			c2.args = objAsList(c.args[c.argPos], "iteration directive argument")
+			c.argPos++
 		}
-		c2.argPos = len(c2.args) - 1
+		c2.argPos = 0
 		for ; 0 < n; n-- {
-			if (c2.argPos < 0 && !atLeastOnce) || c2.stop {
+			if (len(c2.args) <= c2.argPos && !atLeastOnce) || c2.stop {
 				break
 			}
 			c2.pos = start
@@ -1633,7 +1638,6 @@ func (c *control) dirIter(colon, at bool, params []any) {
 			c2.out = c2.out[:0]
 			atLeastOnce = false
 		}
-		c.argPos = c2.argPos
 	}
 }
 

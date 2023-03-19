@@ -25,14 +25,14 @@ func TestListEmpty(t *testing.T) {
 
 func TestListBasic(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.NewFunc("list", slip.List{slip.Fixnum(2), slip.Fixnum(1)}),
+		Target:    slip.NewFunc("list", slip.List{slip.Fixnum(1), slip.Fixnum(2)}),
 		String:    "(list 1 2)",
 		Simple:    []interface{}{"list", 1, 2},
 		Hierarchy: "function.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},
-		Eval: slip.List{slip.Fixnum(2), slip.Fixnum(1)},
+		Eval: slip.List{slip.Fixnum(1), slip.Fixnum(2)},
 	}).Test(t)
 }
 

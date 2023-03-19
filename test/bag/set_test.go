@@ -117,7 +117,7 @@ func TestBagSetMap(t *testing.T) {
 
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(bag-set bag '(t (a . 1)))`,
+		Source: `(bag-set bag '((a . 1) t))`,
 		Panics: true,
 	}).Test(t)
 }

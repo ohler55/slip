@@ -43,11 +43,11 @@ func (f *Set) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	sym, ok := args[1].(slip.Symbol)
+	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol argument to set", args[1], "symbol")
+		slip.PanicType("symbol argument to set", args[0], "symbol")
 	}
-	s.Set(sym, args[0])
+	s.Set(sym, args[1])
 
-	return args[0]
+	return args[1]
 }

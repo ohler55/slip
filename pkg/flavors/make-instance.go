@@ -56,11 +56,9 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 }
 
 func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string) (*Instance, slip.List) {
-	if len(args) < 1 {
-		slip.PanicArgCount(f, 1, -1)
-	}
+	slip.ArgCountCheck(f, args, 1, -1)
 	var cf *Flavor
-	switch ta := args[len(args)-1].(type) {
+	switch ta := args[0].(type) {
 	case slip.Symbol:
 		cf = allFlavors[string(ta)]
 	case *Flavor:
@@ -69,7 +67,7 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 		slip.PanicType(fmt.Sprintf("flavor argument to %s", label), ta, "symbol", "flavor")
 	}
 	if cf == nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[len(args)-1]))
+		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
 	}
 	if cf.abstract {
 		panic(fmt.Sprintf("Can not create an instance of abstract flavor %s.", cf.name))
@@ -77,7 +75,7 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 	inst := cf.MakeInstance()
 	var plist slip.List
 	keys := map[string]bool{}
-	for i := len(args) - 2; 0 < i; i-- {
+	for i := 1; i < len(args); i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok || len(sym) < 2 || sym[0] != ':' {
 			slip.PanicType(fmt.Sprintf("%s option keyword", label), args[i], "keyword")
@@ -86,7 +84,7 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 		if key == ":self" {
 			panic(fmt.Sprintf("%s option keyword 'self' is not initable.", label))
 		}
-		i--
+		i++
 		val := args[i]
 		if len(cf.initable) == 0 || cf.initable[key] {
 			vkey := key[1:]
@@ -97,9 +95,9 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 		}
 		keys[key] = true
 		if cf.allowOtherKeys {
-			plist = append(plist, val, sym)
+			plist = append(plist, sym, val)
 		} else if _, has := cf.keywords[key]; has {
-			plist = append(plist, val, sym)
+			plist = append(plist, sym, val)
 		} else {
 			panic(fmt.Sprintf("%s is not an init keyword for flavor %s.", sym, cf.name))
 		}

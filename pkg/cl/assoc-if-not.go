@@ -54,30 +54,30 @@ type AssocIfNot struct {
 // Call the the function with the arguments provided.
 func (f *AssocIfNot) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 4)
-	pos := len(args) - 1
+	pos := 0
 	predicate := resolveToCaller(s, args[pos], depth)
-	pos--
+	pos++
 	alist, ok := args[pos].(slip.List)
 	if !ok {
 		slip.PanicType("alist", args[pos], "list")
 	}
-	pos--
+	pos++
 	var keyFunc slip.Caller
-	for ; 0 < pos; pos -= 2 {
+	for ; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
 			slip.PanicType("keyword", args[pos], "keyword")
 		}
 		if keyword := strings.ToLower(string(sym)); keyword == ":key" {
-			keyFunc = resolveToCaller(s, args[pos-1], depth)
+			keyFunc = resolveToCaller(s, args[pos+1], depth)
 		} else {
 			slip.PanicType("keyword", sym, ":key")
 		}
 	}
 	d2 := depth + 1
 	var k slip.Object
-	for i := len(alist) - 1; 0 <= i; i-- {
-		switch tv := alist[i].(type) {
+	for _, a := range alist {
+		switch tv := a.(type) {
 		case nil:
 			continue
 		case slip.List:
@@ -89,7 +89,7 @@ func (f *AssocIfNot) Call(s *slip.Scope, args slip.List, depth int) (found slip.
 			k = keyFunc.Call(s, slip.List{k}, d2)
 		}
 		if predicate.Call(s, slip.List{k}, d2) == nil {
-			found = alist[i]
+			found = a
 			break
 		}
 	}

@@ -11,20 +11,20 @@ import (
 
 func TestConsCons(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.NewFunc("cons", slip.List{slip.Fixnum(2), slip.Fixnum(1)}),
+		Target:    slip.NewFunc("cons", slip.List{slip.Fixnum(1), slip.Fixnum(2)}),
 		String:    "(cons 1 2)",
 		Simple:    []interface{}{"cons", 1, 2},
 		Hierarchy: "function.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},
-		Eval: slip.List{slip.Tail{Value: slip.Fixnum(2)}, slip.Fixnum(1)},
+		Eval: slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}},
 	}).Test(t)
 }
 
 func TestConsNil(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.NewFunc("cons", slip.List{nil, slip.Fixnum(1)}),
+		Target:    slip.NewFunc("cons", slip.List{slip.Fixnum(1), nil}),
 		String:    "(cons 1 nil)",
 		Simple:    []interface{}{"cons", 1, nil},
 		Hierarchy: "function.t",

@@ -51,9 +51,9 @@ func (f *When) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	}
 	result = nil
 	d2 := depth + 1
-	pos := len(args) - 1
+	pos := 0
 	if f.EvalArg(s, args, pos, d2) != nil {
-		for pos--; 0 <= pos; pos-- {
+		for pos++; pos < len(args); pos++ {
 			result = f.EvalArg(s, args, pos, d2)
 		}
 	}

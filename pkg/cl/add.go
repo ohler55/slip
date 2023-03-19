@@ -41,9 +41,8 @@ type Add struct {
 // Call the the function with the arguments provided.
 func (f *Add) Call(s *slip.Scope, args slip.List, depth int) (sum slip.Object) {
 	sum = slip.Fixnum(0)
-	var arg slip.Object
-	for pos := len(args) - 1; 0 <= pos; pos-- {
-		arg, sum = normalizeNumber(args[pos], sum)
+	for _, arg := range args {
+		arg, sum = normalizeNumber(arg, sum)
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			sum = ta + sum.(slip.Fixnum)

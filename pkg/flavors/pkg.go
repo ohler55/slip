@@ -42,7 +42,7 @@ func getAllFlavorNames() slip.Object {
 	for key := range allFlavors {
 		keys = append(keys, key)
 	}
-	sort.Slice(keys, func(i, j int) bool { return 0 < strings.Compare(keys[i], keys[j]) })
+	sort.Slice(keys, func(i, j int) bool { return 0 > strings.Compare(keys[i], keys[j]) })
 	names := make(slip.List, 0, len(allFlavors))
 	for _, name := range keys {
 		names = append(names, slip.Symbol(name))

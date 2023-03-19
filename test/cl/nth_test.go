@@ -26,7 +26,7 @@ func TestNthBasic(t *testing.T) {
 
 func TestNthSetf(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let("abc", slip.List{slip.Symbol("c"), slip.Symbol("b"), slip.Symbol("a")})
+	scope.Let("abc", slip.List{slip.Symbol("a"), slip.Symbol("b"), slip.Symbol("c")})
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(setf (nth 1 abc) 7)`,

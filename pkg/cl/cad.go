@@ -51,17 +51,17 @@ func cadPlace(f slip.Object, args slip.List, ops []bool, value slip.Object) {
 	if list, ok := a.(slip.List); ok {
 		if ops[len(ops)-1] {
 			if 0 < len(list) {
-				list[len(list)-1] = value
+				list[0] = value
 				return
 			}
 		} else {
 			if len(list) == 2 {
-				if _, ok = list[0].(slip.Tail); ok {
-					list[0] = slip.Tail{Value: value}
+				if _, ok = list[1].(slip.Tail); ok {
+					list[1] = slip.Tail{Value: value}
 					return
 				}
 			}
-			panic("setf on cdr of a list is not support")
+			panic("setf on cdr of a list is not supported")
 		}
 	}
 	slip.PanicType(fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), a, "cons", "list")

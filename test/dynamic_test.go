@@ -18,14 +18,14 @@ func TestDynamicLambda(t *testing.T) {
 
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
-			Args: slip.List{slip.Fixnum(2), slip.NewFunc("quote", slip.List{slip.List{nil, slip.Fixnum(1)}})},
+			Args: slip.List{slip.NewFunc("quote", slip.List{slip.List{slip.Fixnum(1), nil}}), slip.Fixnum(2)},
 		},
 	}
 	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{{Name: "x"}, {Name: "y"}},
 		},
-		Forms: slip.List{slip.NewFunc("car", slip.List{slip.Symbol("x")}), nil},
+		Forms: slip.List{nil, slip.NewFunc("car", slip.List{slip.Symbol("x")})},
 	}
 	(&sliptest.Object{
 		Target: lambda,
@@ -51,14 +51,14 @@ func TestDynamicDefun(t *testing.T) {
 	dummy := &slip.Dynamic{
 		Function: slip.Function{
 			Name: "dummy",
-			Args: slip.List{slip.Fixnum(2), slip.NewFunc("quote", slip.List{slip.List{nil, slip.Fixnum(1)}})},
+			Args: slip.List{slip.NewFunc("quote", slip.List{slip.List{slip.Fixnum(1), nil}}), slip.Fixnum(2)},
 		},
 	}
 	dummy.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{{Name: "x"}, {Name: "y"}},
 		},
-		Forms: slip.List{slip.NewFunc("car", slip.List{slip.Symbol("x")}), nil},
+		Forms: slip.List{nil, slip.NewFunc("car", slip.List{slip.Symbol("x")})},
 	}
 	(&sliptest.Object{
 		Target:    dummy,
@@ -77,7 +77,7 @@ func TestDynamicAmps(t *testing.T) {
 
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
-			Args: slip.List{slip.Fixnum(5), slip.Symbol(":k1"), slip.Fixnum(4), slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
+			Args: slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), slip.Fixnum(4), slip.Symbol(":k1"), slip.Fixnum(5)},
 		},
 	}
 	lambda.Self = &slip.Lambda{
@@ -90,7 +90,7 @@ func TestDynamicAmps(t *testing.T) {
 			},
 		},
 		Forms: slip.List{slip.NewFunc("list",
-			slip.List{slip.Symbol("k2"), slip.Symbol("k1"), slip.Symbol("z"), slip.Symbol("y"), slip.Symbol("x")})},
+			slip.List{slip.Symbol("x"), slip.Symbol("y"), slip.Symbol("z"), slip.Symbol("k1"), slip.Symbol("k2")})},
 	}
 	(&sliptest.Object{
 		Target: lambda,
@@ -99,7 +99,7 @@ func TestDynamicAmps(t *testing.T) {
 			[]byte(`[[lambda [x "&optional" y "&rest" z "&key" k1 k2] [list x y z k1 k2]] 1 2 3 4 ":k1" 5]`)),
 		Hierarchy: "function.t",
 		Eval: slip.List{
-			nil, slip.Fixnum(5), slip.List{slip.Fixnum(4), slip.Fixnum(3)}, slip.Fixnum(2), slip.Fixnum(1)},
+			slip.Fixnum(1), slip.Fixnum(2), slip.List{slip.Fixnum(3), slip.Fixnum(4)}, slip.Fixnum(5), nil},
 	}).Test(t)
 }
 
@@ -111,7 +111,7 @@ func TestDynamicAmpRest(t *testing.T) {
 
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
-			Args: slip.List{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)},
+			Args: slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)},
 		},
 	}
 	lambda.Self = &slip.Lambda{
@@ -121,14 +121,14 @@ func TestDynamicAmpRest(t *testing.T) {
 				{Name: "&rest"}, {Name: "z"},
 			},
 		},
-		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("z"), slip.Symbol("x")})},
+		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("x"), slip.Symbol("z")})},
 	}
 	(&sliptest.Object{
 		Target:    lambda,
 		String:    "((lambda (x &rest z) (list x z)) 1 2 3)",
 		Simple:    sen.MustParse([]byte(`[[lambda [x "&rest" z] [list x z]] 1 2 3]`)),
 		Hierarchy: "function.t",
-		Eval:      slip.List{slip.List{slip.Fixnum(3), slip.Fixnum(2)}, slip.Fixnum(1)},
+		Eval:      slip.List{slip.Fixnum(1), slip.List{slip.Fixnum(2), slip.Fixnum(3)}},
 	}).Test(t)
 }
 
@@ -140,7 +140,7 @@ func TestDynamicAmpKey(t *testing.T) {
 
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
-			Args: slip.List{slip.Fixnum(2), slip.Symbol(":k1"), slip.Fixnum(1)},
+			Args: slip.List{slip.Fixnum(1), slip.Symbol(":k1"), slip.Fixnum(2)},
 		},
 	}
 	lambda.Self = &slip.Lambda{
@@ -150,14 +150,14 @@ func TestDynamicAmpKey(t *testing.T) {
 				{Name: "&key"}, {Name: "k1"},
 			},
 		},
-		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("k1"), slip.Symbol("x")})},
+		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("x"), slip.Symbol("k1")})},
 	}
 	(&sliptest.Object{
 		Target:    lambda,
 		String:    "((lambda (x &key k1) (list x k1)) 1 :k1 2)",
 		Simple:    sen.MustParse([]byte(`[[lambda [x "&key" k1] [list x k1]] 1 ":k1" 2]`)),
 		Hierarchy: "function.t",
-		Eval:      slip.List{slip.Fixnum(2), slip.Fixnum(1)},
+		Eval:      slip.List{slip.Fixnum(1), slip.Fixnum(2)},
 	}).Test(t)
 }
 
@@ -169,7 +169,7 @@ func TestDynamicAmpOptKey(t *testing.T) {
 
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
-			Args: slip.List{slip.Fixnum(2), slip.Symbol(":k1"), slip.Fixnum(1)},
+			Args: slip.List{slip.Fixnum(1), slip.Symbol(":k1"), slip.Fixnum(2)},
 		},
 	}
 	lambda.Self = &slip.Lambda{
@@ -179,14 +179,14 @@ func TestDynamicAmpOptKey(t *testing.T) {
 				{Name: "&key"}, {Name: "k1"},
 			},
 		},
-		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("k1"), slip.Symbol("x")})},
+		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("x"), slip.Symbol("k1")})},
 	}
 	(&sliptest.Object{
 		Target:    lambda,
 		String:    "((lambda (&optional x &key k1) (list x k1)) 1 :k1 2)",
 		Simple:    sen.MustParse([]byte(`[[lambda ["&optional" x "&key" k1] [list x k1]] 1 ":k1" 2]`)),
 		Hierarchy: "function.t",
-		Eval:      slip.List{slip.Fixnum(2), slip.Fixnum(1)},
+		Eval:      slip.List{slip.Fixnum(1), slip.Fixnum(2)},
 	}).Test(t)
 }
 
@@ -208,7 +208,7 @@ func TestDynamicAmpDefaults(t *testing.T) {
 				{Name: "&rest"}, {Name: "z"},
 			},
 		},
-		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("z"), slip.Symbol("x")})},
+		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("x"), slip.Symbol("z")})},
 	}
 	(&sliptest.Object{
 		Target:    lambda,
@@ -227,7 +227,7 @@ func TestDynamicAmpNoKeyValue(t *testing.T) {
 
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
-			Args: slip.List{slip.Symbol(":k1"), slip.Fixnum(1)},
+			Args: slip.List{slip.Fixnum(1), slip.Symbol(":k1")},
 		},
 	}
 	lambda.Self = &slip.Lambda{
@@ -237,7 +237,7 @@ func TestDynamicAmpNoKeyValue(t *testing.T) {
 				{Name: "&key"}, {Name: "k1"},
 			},
 		},
-		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("k1"), slip.Symbol("x")})},
+		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("x"), slip.Symbol("k1")})},
 	}
 	(&sliptest.Object{
 		Target:    lambda,
@@ -256,7 +256,7 @@ func TestDynamicAmpKeyExtraSymbol(t *testing.T) {
 
 	lambda := &slip.Dynamic{
 		Function: slip.Function{
-			Args: slip.List{slip.Fixnum(3), slip.Fixnum(2), slip.Symbol(":k1"), slip.Fixnum(1)},
+			Args: slip.List{slip.Fixnum(1), slip.Symbol(":k1"), slip.Fixnum(2), slip.Fixnum(3)},
 		},
 	}
 	lambda.Self = &slip.Lambda{
@@ -266,7 +266,7 @@ func TestDynamicAmpKeyExtraSymbol(t *testing.T) {
 				{Name: "&key"}, {Name: "k1"},
 			},
 		},
-		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("k1"), slip.Symbol("x")})},
+		Forms: slip.List{slip.NewFunc("list", slip.List{slip.Symbol("x"), slip.Symbol("k1")})},
 	}
 	(&sliptest.Object{
 		Target:    lambda,

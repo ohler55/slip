@@ -51,20 +51,20 @@ func (f *Nth) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	switch list := args[0].(type) {
+	switch list := args[1].(type) {
 	case nil:
 	case slip.List:
-		num, ok := args[1].(slip.Integer)
+		num, ok := args[0].(slip.Integer)
 		if !ok {
-			slip.PanicType("n", args[1], "integer")
+			slip.PanicType("n", args[0], "integer")
 		}
 		n := int(num.Int64())
 		if len(list) <= n || n < 0 {
 			return nil
 		}
-		return list[len(list)-n-1]
+		return list[n]
 	default:
-		slip.PanicType("list", args[0], "list")
+		slip.PanicType("list", args[1], "list")
 	}
 	return nil
 }
@@ -74,17 +74,17 @@ func (f *Nth) Place(args slip.List, value slip.Object) {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	list, ok := args[0].(slip.List)
+	list, ok := args[1].(slip.List)
 	if !ok {
-		slip.PanicType("list", args[0], "list")
+		slip.PanicType("list", args[1], "list")
 	}
 	var num slip.Integer
-	if num, ok = args[1].(slip.Integer); !ok {
+	if num, ok = args[0].(slip.Integer); !ok {
 		slip.PanicType("n", args[1], "integer")
 	}
 	n := int(num.Int64())
 	if len(list) <= n || n < 0 {
 		panic(fmt.Sprintf("%d is outside the bounds a list of length %d", n, len(list)))
 	}
-	list[len(list)-n-1] = value
+	list[n] = value
 }

@@ -45,17 +45,16 @@ type Cond struct {
 func (f *Cond) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	result = nil
 	d2 := depth + 1
-	for i := len(args) - 1; 0 <= i; i-- {
-		clause, ok := args[i].(slip.List)
+	for _, a := range args {
+		clause, ok := a.(slip.List)
 		if !ok || len(clause) == 0 {
-			slip.PanicType("clause", args[i], "list")
+			slip.PanicType("clause", a, "list")
 		}
-		pos := len(clause) - 1
-		if f.EvalArg(s, clause, pos, d2) == nil {
+		if f.EvalArg(s, clause, 0, d2) == nil {
 			continue
 		}
-		for pos--; 0 <= pos; pos-- {
-			result = f.EvalArg(s, clause, pos, d2)
+		for i := 1; i < len(clause); i++ {
+			result = f.EvalArg(s, clause, i, d2)
 		}
 		break
 	}

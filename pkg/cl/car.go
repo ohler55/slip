@@ -61,7 +61,7 @@ func (f *Car) Place(args slip.List, value slip.Object) {
 		slip.PanicArgCount(f, 1, 1)
 	}
 	if list, ok := args[0].(slip.List); ok && 0 < len(list) {
-		list[len(list)-1] = value
+		list[0] = value
 		return
 	}
 	slip.PanicType("argument to car", args[0], "cons", "list")

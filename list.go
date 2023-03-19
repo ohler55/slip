@@ -34,9 +34,9 @@ func (obj List) Simplify() interface{} {
 	out := make([]any, len(obj))
 	for i, o := range obj {
 		if o == nil {
-			out[len(out)-i-1] = nil
+			out[i] = nil
 		} else {
-			out[len(out)-i-1] = o.Simplify()
+			out[i] = o.Simplify()
 		}
 	}
 	return out
@@ -59,7 +59,7 @@ func (obj List) Equal(other Object) (eq bool) {
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj List) Hierarchy() []Symbol {
 	if 0 < len(obj) {
-		if _, ok := obj[0].(Tail); ok {
+		if _, ok := obj[len(obj)-1].(Tail); ok {
 			return []Symbol{ConsSymbol, ListSymbol, SequenceSymbol, TrueSymbol}
 		}
 	}
@@ -69,7 +69,7 @@ func (obj List) Hierarchy() []Symbol {
 // SequenceType returns 'list or 'cons if a cons.
 func (obj List) SequenceType() Symbol {
 	if 0 < len(obj) {
-		if _, ok := obj[0].(Tail); ok {
+		if _, ok := obj[len(obj)-1].(Tail); ok {
 			return ConsSymbol
 		}
 	}
@@ -87,10 +87,7 @@ func (obj List) Eval(s *Scope, depth int) Object {
 // Car of the list
 func (obj List) Car() (car Object) {
 	if 0 < len(obj) {
-		car = obj[len(obj)-1]
-		if tail, ok := car.(Tail); ok {
-			car = tail.Value
-		}
+		car = obj[0]
 	}
 	return
 }
@@ -101,13 +98,13 @@ func (obj List) Cdr() (cdr Object) {
 	case 0, 1:
 		// leave cdr as nil
 	case 2:
-		if tail, ok := obj[0].(Tail); ok {
+		if tail, ok := obj[len(obj)-1].(Tail); ok {
 			cdr = tail.Value
 		} else {
-			cdr = obj[:1]
+			cdr = obj[1:]
 		}
 	default:
-		cdr = obj[:len(obj)-1]
+		cdr = obj[1:]
 	}
 	return
 }

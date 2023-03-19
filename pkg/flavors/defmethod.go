@@ -58,13 +58,10 @@ type Defmethod struct {
 
 // Call the the function with the arguments provided.
 func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	pos := len(args) - 1
-	if pos < 1 {
-		slip.PanicArgCount(f, 2, -1)
-	}
-	ml, ok := args[pos].(slip.List)
+	slip.ArgCountCheck(f, args, 2, -1)
+	ml, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("method designator for defmethod", args[pos], "list")
+		slip.PanicType("method designator for defmethod", args[0], "list")
 	}
 	var (
 		flavor *Flavor
@@ -75,11 +72,11 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	case 0, 1:
 		panic(fmt.Sprintf("Too few elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml)))
 	case 2:
-		if sym, ok2 := ml[1].(slip.Symbol); ok2 {
+		if sym, ok2 := ml[0].(slip.Symbol); ok2 {
 			flavor = allFlavors[string(sym)]
 		}
 	case 3:
-		if sym, ok2 := ml[2].(slip.Symbol); ok2 {
+		if sym, ok2 := ml[0].(slip.Symbol); ok2 {
 			flavor = allFlavors[string(sym)]
 		}
 		if sym, ok2 := ml[1].(slip.Symbol); ok2 {
@@ -88,20 +85,20 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	default:
 		panic(fmt.Sprintf("Too many elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml)))
 	}
-	if sym, ok2 := ml[0].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
+	if sym, ok2 := ml[len(ml)-1].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
 		method = string(sym)
 	} else {
-		slip.PanicType("method for defmethod", ml[0], "keyword")
+		slip.PanicType("method for defmethod", ml[len(ml)-1], "keyword")
 	}
 	if flavor == nil {
-		slip.PanicType("flavor for defmethod", ml[len(ml)-1], "name of flavor")
+		slip.PanicType("flavor for defmethod", ml[0], "name of flavor")
 	}
-	if 2 < pos { // method, method-args, docs, forms
+	if 3 < len(args) { // method, method-args, docs, forms
 		var str slip.String
-		if str, ok = args[pos-2].(slip.String); ok {
+		if str, ok = args[2].(slip.String); ok {
 			list := make(slip.List, len(args)-2)
-			list[len(list)-1] = args[pos-1]
-			copy(list[:len(list)-1], args[:pos-1])
+			list[0] = args[1]
+			copy(list[1:], args[3:])
 			flavor.DefMethod(
 				method,
 				daemon,
@@ -112,7 +109,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			return
 		}
 	}
-	flavor.DefMethod(method, daemon, slip.DefLambda(method, s, args[:pos]))
+	flavor.DefMethod(method, daemon, slip.DefLambda(method, s, args[1:]))
 
 	return nil
 }

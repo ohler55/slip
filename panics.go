@@ -39,7 +39,7 @@ func NewPanic(format string, args ...any) *Panic {
 }
 
 // PanicType raises a panic describing an incorrect type being used.
-func PanicType(use string, value Object, wants ...string) Object {
+func PanicType(use string, value Object, wants ...string) {
 	var b []byte
 
 	b = append(b, use...)
@@ -63,7 +63,6 @@ func PanicType(use string, value Object, wants ...string) Object {
 	b = append(b, '.')
 
 	panic(&Panic{Message: string(b)})
-	return nil
 }
 
 // ArgCountCheck panics if the number of arguments is outside the range

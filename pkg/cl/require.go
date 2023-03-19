@@ -52,7 +52,7 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	var name string
-	switch ta := args[len(args)-1].(type) {
+	switch ta := args[0].(type) {
 	case slip.String:
 		name = string(ta)
 	case slip.Symbol:
@@ -63,15 +63,15 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var paths []string
 
 	if 1 < len(args) {
-		switch ta := args[0].(type) {
+		switch ta := args[1].(type) {
 		case slip.String:
 			paths = append(paths, string(ta))
 		case slip.List:
-			for i := len(ta) - 1; 0 <= i; i-- {
-				if s, ok := ta[i].(slip.String); ok {
-					paths = append(paths, string(s))
+			for _, a2 := range ta {
+				if str, ok := a2.(slip.String); ok {
+					paths = append(paths, string(str))
 				} else {
-					slip.PanicType("path members", ta[i], "string")
+					slip.PanicType("path members", a2, "string")
 				}
 			}
 		default:
@@ -85,11 +85,11 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case slip.String:
 			paths = append(paths, string(tp))
 		case slip.List:
-			for i := len(tp) - 1; 0 <= i; i-- {
-				if s, ok := tp[i].(slip.String); ok {
-					paths = append(paths, string(s))
+			for _, a2 := range tp {
+				if str, ok := a2.(slip.String); ok {
+					paths = append(paths, string(str))
 				} else {
-					slip.PanicType("*package-load-path* members", tp[i], "string")
+					slip.PanicType("*package-load-path* members", a2, "string")
 				}
 			}
 		default:

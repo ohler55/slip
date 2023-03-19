@@ -25,7 +25,7 @@ func TestCdrEmpty(t *testing.T) {
 
 func TestCdrCons(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.List{slip.Tail{Value: slip.Symbol("b")}, slip.Symbol("a")})
+	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("a"), slip.Tail{Value: slip.Symbol("b")}})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("cdr", slip.List{slip.Symbol("arg")}),
@@ -37,13 +37,13 @@ func TestCdrCons(t *testing.T) {
 
 func TestCdrList(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("c"), slip.Symbol("b"), slip.Symbol("a")})
+	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("a"), slip.Symbol("b"), slip.Symbol("c")})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("cdr", slip.List{slip.Symbol("arg")}),
 		String: "(cdr arg)",
 		Simple: []interface{}{"cdr", "arg"},
-		Eval:   slip.List{slip.Symbol('c'), slip.Symbol('b')},
+		Eval:   slip.List{slip.Symbol('b'), slip.Symbol('c')},
 	}).Test(t)
 }
 

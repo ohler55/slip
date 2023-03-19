@@ -41,9 +41,8 @@ type Multiply struct {
 // Call the the function with the arguments provided.
 func (f *Multiply) Call(s *slip.Scope, args slip.List, depth int) (product slip.Object) {
 	product = slip.Fixnum(1)
-	var arg slip.Object
-	for pos := len(args) - 1; 0 <= pos; pos-- {
-		arg, product = normalizeNumber(args[pos], product)
+	for _, arg := range args {
+		arg, product = normalizeNumber(arg, product)
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			product = ta * product.(slip.Fixnum)
@@ -58,9 +57,11 @@ func (f *Multiply) Call(s *slip.Scope, args slip.List, depth int) (product slip.
 				(*big.Float)(ta)),
 			)
 		case *slip.Bignum:
-			product = (*slip.Bignum)(((*big.Int)(product.(*slip.Bignum))).Mul((*big.Int)(product.(*slip.Bignum)), (*big.Int)(ta)))
+			product = (*slip.Bignum)(((*big.Int)(product.(*slip.Bignum))).Mul((*big.Int)(product.(*slip.Bignum)),
+				(*big.Int)(ta)))
 		case *slip.Ratio:
-			product = (*slip.Ratio)(((*big.Rat)(product.(*slip.Ratio))).Mul((*big.Rat)(product.(*slip.Ratio)), (*big.Rat)(ta)))
+			product = (*slip.Ratio)(((*big.Rat)(product.(*slip.Ratio))).Mul((*big.Rat)(product.(*slip.Ratio)),
+				(*big.Rat)(ta)))
 		case slip.Complex:
 			product = slip.Complex(complex128(product.(slip.Complex)) * complex128(ta))
 		}

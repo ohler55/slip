@@ -2,7 +2,9 @@
 
 package cl
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 func init() {
 	slip.Define(

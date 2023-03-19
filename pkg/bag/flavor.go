@@ -17,11 +17,7 @@ func init() {
 	flavor = flavors.DefFlavor("bag-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
-				slip.Symbol(":set"),
-				slip.Symbol(":parse"),
-				slip.Symbol(":init-keywords"),
-			},
-			slip.List{
+				slip.Symbol(":documentation"),
 				slip.String(`A bag is flexible a container for data composed of t, nil, integer,
 float, string, time, list, as well as the special bag::map and
 :false. It can be parsed from JSON or SEN (ojg package) and be encoded
@@ -29,7 +25,12 @@ in the same way. It can also be converted to and from native LISP with
 bag::map becoming an assoc list. The bag::false value is the only
 non-native value that is retained since LISP does not differentiate between
 nil and boolean false.`),
-				slip.Symbol(":documentation")},
+			},
+			slip.List{
+				slip.Symbol(":init-keywords"),
+				slip.Symbol(":parse"),
+				slip.Symbol(":set"),
+			},
 		},
 	)
 	flavor.DefMethod(":init", "", initCaller(true))
@@ -58,14 +59,14 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 	case 0:
 		// ok
 	case 2:
-		key, _ := args[1].(slip.Symbol)
+		key, _ := args[0].(slip.Symbol)
 		switch {
 		case strings.EqualFold(":set", string(key)):
-			obj.Any = objectToBag(args[0])
+			obj.Any = objectToBag(args[1])
 		case strings.EqualFold(":parse", string(key)):
-			so, ok := args[0].(slip.String)
+			so, ok := args[1].(slip.String)
 			if !ok {
-				slip.PanicType("bag :init :parse", args[0], "string")
+				slip.PanicType("bag :init :parse", args[1], "string")
 			}
 			obj.Any = sen.MustParse([]byte(so))
 			if options.Converter != nil {
@@ -95,7 +96,7 @@ func (caller setCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	case 1:
 		setBag(obj, args[0], nil)
 	case 2:
-		setBag(obj, args[1], args[0])
+		setBag(obj, args[0], args[1])
 	default:
 		panic(fmt.Sprintf("Method bag-flavor set method expects one or two arguments but received %d.", len(args)))
 	}
@@ -121,7 +122,7 @@ func (caller parseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	case 1:
 		parseBag(obj, args[0], nil)
 	case 2:
-		parseBag(obj, args[1], args[0])
+		parseBag(obj, args[0], args[1])
 	default:
 		panic(fmt.Sprintf("Method bag-flavor parse method expects one or two arguments but received %d.", len(args)))
 	}
@@ -150,7 +151,7 @@ func (caller getCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.O
 	case 1:
 		value = getBag(obj, args[0], false)
 	case 2:
-		value = getBag(obj, args[1], args[0] != nil)
+		value = getBag(obj, args[0], args[1] != nil)
 	default:
 		panic(fmt.Sprintf("Method bag-flavor get method expects one or two arguments but received %d.", len(args)))
 	}
@@ -210,7 +211,7 @@ type writeCaller bool
 
 func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	return writeBag(obj, args, len(args)-1)
+	return writeBag(obj, args)
 }
 
 func (caller writeCaller) Docs() string {
@@ -238,7 +239,7 @@ type walkCaller bool
 
 func (caller walkCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	walkBag(s, obj, args, len(args)-1, depth)
+	walkBag(s, obj, args, depth)
 	return nil
 }
 

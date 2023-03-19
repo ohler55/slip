@@ -58,9 +58,9 @@ func (f *Defparameter) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	if len(args) < 1 || 3 < len(args) {
 		slip.PanicArgCount(f, 1, 3)
 	}
-	name, ok := args[len(args)-1].(slip.Symbol)
+	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defparameter", args[len(args)-1], "symbol")
+		slip.PanicType("name argument to defparameter", args[0], "symbol")
 	}
 	name = slip.Symbol(strings.ToLower(string(name)))
 	var (
@@ -68,11 +68,11 @@ func (f *Defparameter) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		doc slip.String
 	)
 	if 1 < len(args) {
-		iv = args[len(args)-2]
+		iv = args[1]
 		if 2 < len(args) {
 			var ok bool
-			if doc, ok = args[0].(slip.String); !ok {
-				slip.PanicType("documentation argument to defparameter", args[0], "string")
+			if doc, ok = args[2].(slip.String); !ok {
+				slip.PanicType("documentation argument to defparameter", args[2], "string")
 			}
 		}
 	}

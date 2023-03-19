@@ -25,7 +25,7 @@ func TestCarEmpty(t *testing.T) {
 
 func TestCarCons(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.List{slip.Tail{Value: slip.Symbol("b")}, slip.Symbol("a")})
+	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("a"), slip.Tail{Value: slip.Symbol("b")}})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("car", slip.List{slip.Symbol("arg")}),
@@ -37,7 +37,7 @@ func TestCarCons(t *testing.T) {
 
 func TestCarList(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("c"), slip.Symbol("b"), slip.Symbol("a")})
+	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("a"), slip.Symbol("b"), slip.Symbol("c")})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("car", slip.List{slip.Symbol("arg")}),
@@ -76,16 +76,16 @@ func TestCarBadArgCount(t *testing.T) {
 
 func TestCarSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("target"), slip.List{slip.Tail{Value: slip.Fixnum(8)}, slip.Fixnum(7)})
-	car := slip.List{slip.Symbol("target"), slip.Symbol("car")}
+	scope.Let(slip.Symbol("target"), slip.List{slip.Fixnum(7), slip.Tail{Value: slip.Fixnum(8)}})
+	car := slip.List{slip.Symbol("car"), slip.Symbol("target")}
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("setf", slip.List{slip.Fixnum(9), car}),
+		Target: slip.NewFunc("setf", slip.List{car, slip.Fixnum(9)}),
 		String: "(setf (car target) 9)",
 		Simple: []interface{}{"setf", []interface{}{"car", "target"}, 9},
 		Eval:   slip.Fixnum(9),
 	}).Test(t)
-	tt.Equal(t, slip.List{slip.Tail{Value: slip.Fixnum(8)}, slip.Fixnum(9)}, scope.Get(slip.Symbol("target")))
+	tt.Equal(t, slip.List{slip.Fixnum(9), slip.Tail{Value: slip.Fixnum(8)}}, scope.Get(slip.Symbol("target")))
 }
 
 func TestCarSetfNoArg(t *testing.T) {
@@ -94,7 +94,7 @@ func TestCarSetfNoArg(t *testing.T) {
 	car := slip.List{slip.Symbol("car")}
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("setf", slip.List{slip.Fixnum(9), car}),
+		Target: slip.NewFunc("setf", slip.List{car, slip.Fixnum(9)}),
 		String: "(setf (car) 9)",
 		Simple: []interface{}{"setf", []interface{}{"car"}, 9},
 		Panics: true,
@@ -103,10 +103,10 @@ func TestCarSetfNoArg(t *testing.T) {
 
 func TestCarSetfNotList(t *testing.T) {
 	scope := slip.NewScope()
-	car := slip.List{slip.True, slip.Symbol("car")}
+	car := slip.List{slip.Symbol("car"), slip.True}
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("setf", slip.List{slip.Fixnum(9), car}),
+		Target: slip.NewFunc("setf", slip.List{car, slip.Fixnum(9)}),
 		String: "(setf (car t) 9)",
 		Simple: []interface{}{"setf", []interface{}{"car", true}, 9},
 		Panics: true,

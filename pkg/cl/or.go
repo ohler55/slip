@@ -43,8 +43,10 @@ type Or struct {
 func (f *Or) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	result = nil
 	d2 := depth + 1
-	for i := len(args) - 1; 0 <= i && result == nil; i-- {
-		result = f.EvalArg(s, args, i, d2)
+	for i := range args {
+		if result = f.EvalArg(s, args, i, d2); result != nil {
+			break
+		}
 	}
 	return
 }

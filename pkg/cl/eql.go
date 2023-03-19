@@ -47,8 +47,8 @@ func (f *Eql) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	x := args[1]
-	y := args[0]
+	x := args[0]
+	y := args[1]
 	if eq(x, y) {
 		return slip.True
 	}

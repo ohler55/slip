@@ -50,25 +50,25 @@ type Fround struct {
 // Call the the function with the arguments provided.
 func (f *Fround) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	values := round(f, args)
-	switch tv := values[1].(type) {
+	switch tv := values[0].(type) {
 	case slip.Fixnum:
-		switch values[0].(type) {
+		switch values[1].(type) {
 		case slip.SingleFloat:
-			values[1] = slip.SingleFloat(tv)
+			values[0] = slip.SingleFloat(tv)
 		default:
-			values[1] = slip.DoubleFloat(tv)
+			values[0] = slip.DoubleFloat(tv)
 		}
 	case *slip.Bignum:
 		if (*big.Int)(tv).IsInt64() {
-			if _, ok := values[0].(*slip.LongFloat); ok {
+			if _, ok := values[1].(*slip.LongFloat); ok {
 				var z big.Float
-				values[1] = (*slip.LongFloat)(z.SetInt((*big.Int)(tv)))
+				values[0] = (*slip.LongFloat)(z.SetInt((*big.Int)(tv)))
 			} else {
-				values[1] = slip.DoubleFloat((*big.Int)(tv).Int64())
+				values[0] = slip.DoubleFloat((*big.Int)(tv).Int64())
 			}
 		} else {
 			var z big.Float
-			values[1] = (*slip.LongFloat)(z.SetInt((*big.Int)(tv)))
+			values[0] = (*slip.LongFloat)(z.SetInt((*big.Int)(tv)))
 		}
 	}
 	return values

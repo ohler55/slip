@@ -43,7 +43,7 @@ func TestDefunRest(t *testing.T) {
 (defun the-rest (&rest args) args)
 (the-rest 1 2 3)`)
 	scope := slip.NewScope()
-	tt.Equal(t, slip.List{slip.Fixnum(3), slip.Fixnum(2), slip.Fixnum(1)}, code.Eval(scope))
+	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}, code.Eval(scope))
 }
 
 func TestDefunKey(t *testing.T) {

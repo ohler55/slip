@@ -37,9 +37,7 @@ type Pathp struct {
 
 // Call the the function with the arguments provided.
 func (f *Pathp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.ArgCountCheck(f, args, 1, 1)
 	if _, ok := args[0].(Path); ok {
 		return slip.True
 	}

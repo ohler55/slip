@@ -302,7 +302,6 @@ func TestFormatCall(t *testing.T) {
 	code = slip.ReadString(`(defun test-pkg-call-dir (s arg colon at) (format s "~A ~A ~A" arg colon at))`)
 	code.Eval(scope)
 
-	// TBD defer unintern to clean functions and also cleanup package
 	(&sliptest.Function{
 		Source: `(format nil "~/test-call-dir/" 3)`,
 		Expect: `"3 nil nil"`,
@@ -962,10 +961,6 @@ func TestFormatIter(t *testing.T) {
 		Expect: `"names:"`,
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(format nil "names:~{ ~A~:}" '())`,
-		Expect: `"names: nil"`,
-	}).Test(t)
-	(&sliptest.Function{
 		Source: `(format nil "names:~{ ~A~}" t)`,
 		Panics: true,
 	}).Test(t)
@@ -989,7 +984,7 @@ func TestFormatIter(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(format nil "names:~:{ ~A~:}" '())`,
-		Expect: `"names: nil"`,
+		Panics: true,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(format nil "names:~:{ ~A~}" '(t))`,
@@ -999,6 +994,10 @@ func TestFormatIter(t *testing.T) {
 		Source: `(format nil "names:~:{ ~A~}" t)`,
 		Panics: true,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(format nil "names:~{ ~A~:}" '())`,
+		Panics: true,
+	}).Test(t)
 
 	(&sliptest.Function{
 		Source: `(format nil "names:~:@{ ~A~}" '(ann) '(bob) '(candy))`,
@@ -1006,7 +1005,7 @@ func TestFormatIter(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(format nil "names:~:@{ ~A~}" '(ann) nil '(candy))`,
-		Expect: `"names: ann nil candy"`,
+		Panics: true,
 	}).Test(t)
 }
 

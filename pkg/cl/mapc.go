@@ -47,20 +47,20 @@ type Mapc struct {
 // Call the function with the arguments provided.
 func (f *Mapc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
-	pos := len(args) - 1
+	pos := 0
 	fn := args[pos]
 	d2 := depth + 1
 	caller := resolveToCaller(s, fn, d2)
 
-	pos--
+	pos++
 	list, ok := args[pos].(slip.List)
 	if !ok {
 		slip.PanicType("lists", args[pos], "list")
 	}
-	if 0 < pos {
+	if pos < len(args)-1 {
 		min := len(list)
 		var l2 slip.List
-		for i := 0; i < pos; i++ {
+		for i := 1; i < len(args); i++ {
 			if l2, ok = args[i].(slip.List); !ok {
 				slip.PanicType("lists", args[i], "list")
 			}
@@ -68,18 +68,18 @@ func (f *Mapc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 				min = len(l2)
 			}
 		}
-		ca := make(slip.List, pos+1)
-		for n := 1; n <= min; n++ {
-			for i := 0; i <= pos; i++ {
+		ca := make(slip.List, len(args)-1)
+		for n := 0; n < min; n++ {
+			for i := 1; i < len(args); i++ {
 				l2 := args[i].(slip.List)
-				ca[i] = l2[len(l2)-n]
+				ca[i-1] = l2[n]
 			}
 			_ = caller.Call(s, ca, d2)
 		}
 	} else {
 		// The most common case.
-		for i := len(list) - 1; 0 <= i; i-- {
-			_ = caller.Call(s, slip.List{list[i]}, d2)
+		for _, v := range list {
+			_ = caller.Call(s, slip.List{v}, d2)
 		}
 	}
 	return list

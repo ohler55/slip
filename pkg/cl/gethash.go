@@ -46,16 +46,16 @@ func (f *Gethash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	ht, ok := args[0].(slip.HashTable)
+	ht, ok := args[1].(slip.HashTable)
 	if !ok {
-		slip.PanicType("hash-table", args[0], "hash-table")
+		slip.PanicType("hash-table", args[1], "hash-table")
 	}
-	v, has := ht[args[1]]
+	v, has := ht[args[0]]
 	var ho slip.Object
 	if has {
 		ho = slip.True
 	}
-	return slip.Values{ho, v}
+	return slip.Values{v, ho}
 }
 
 // Place a value in the first position of a list or cons.
@@ -63,9 +63,9 @@ func (f *Gethash) Place(args slip.List, value slip.Object) {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	ht, ok := args[0].(slip.HashTable)
+	ht, ok := args[1].(slip.HashTable)
 	if !ok {
-		slip.PanicType("hash-table", args[0], "hash-table")
+		slip.PanicType("hash-table", args[1], "hash-table")
 	}
-	ht[args[1]] = value
+	ht[args[0]] = value
 }

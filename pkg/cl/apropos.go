@@ -54,7 +54,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	var pat string
-	switch ta := args[len(args)-1].(type) {
+	switch ta := args[0].(type) {
 	case slip.Symbol:
 		pat = strings.ToLower(string(ta))
 	case slip.String:
@@ -65,7 +65,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var pkg *slip.Package
 	if 1 < len(args) {
 		var name string
-		switch ta := args[0].(type) {
+		switch ta := args[1].(type) {
 		case slip.Symbol:
 			name = string(ta)
 		case slip.String:

@@ -52,10 +52,10 @@ func (f *Random) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	}
 	var rs *RandomState
 	if 1 < len(args) {
-		if args[0] == slip.True {
+		if args[1] == slip.True {
 			rs = NewRandomState(nil)
 		} else {
-			switch state := args[0].(type) {
+			switch state := args[1].(type) {
 			case nil:
 				obj, _ := slip.CLPkg.Get(randomStateStr)
 				rs, _ = obj.(*RandomState)
@@ -68,7 +68,7 @@ func (f *Random) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		obj, _ := slip.CLPkg.Get(randomStateStr)
 		rs, _ = obj.(*RandomState)
 	}
-	switch limit := args[len(args)-1].(type) {
+	switch limit := args[0].(type) {
 	case slip.Fixnum:
 		result = slip.Fixnum(rs.Uint64() % uint64(limit))
 	case *slip.Bignum:

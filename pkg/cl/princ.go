@@ -53,12 +53,12 @@ func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	p := *slip.DefaultPrinter()
 	p.Escape = false
 	p.Readably = false
-	obj := args[len(args)-1]
+	obj := args[0]
 	var w io.Writer = slip.StandardOutput.(io.Writer)
 	if 1 < len(args) {
 		var ok bool
-		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType("princ output-stream", args[0], "output-stream")
+		if w, ok = args[1].(io.Writer); !ok {
+			slip.PanicType("princ output-stream", args[1], "output-stream")
 		}
 	}
 	var err error

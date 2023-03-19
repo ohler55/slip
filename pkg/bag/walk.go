@@ -61,27 +61,22 @@ type Walk struct {
 
 // Call the the function with the arguments provided.
 func (f *Walk) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) < 2 || 4 < len(args) {
-		slip.PanicArgCount(f, 2, 4)
-	}
-	pos := len(args) - 1
-	obj, ok := args[pos].(*flavors.Instance)
+	slip.ArgCountCheck(f, args, 2, 4)
+	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[pos], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
-	pos--
-	walkBag(s, obj, args, pos, depth)
+	walkBag(s, obj, args[1:], depth)
 
 	return nil
 }
 
-func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, pos, depth int) {
-	fn := args[pos]
-	pos--
+func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {
+	fn := args[0]
 	path := jp.D()
 	var lisp bool
-	if 0 <= pos {
-		switch p := args[pos].(type) {
+	if 1 < len(args) {
+		switch p := args[1].(type) {
 		case nil:
 		case slip.String:
 			path = jp.MustParseString(string(p))
@@ -90,10 +85,7 @@ func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, pos, depth in
 		default:
 			slip.PanicType("path", p, "string", "bag-path")
 		}
-		pos--
-		if 0 <= pos {
-			lisp = args[pos] != nil
-		}
+		lisp = 2 < len(args) && args[2] != nil
 	}
 	d2 := depth + 1
 CallFunc:
