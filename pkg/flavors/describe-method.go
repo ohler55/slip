@@ -51,12 +51,9 @@ type DescribeMethod struct {
 
 // Call the the function with the arguments provided.
 func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 2 || 3 < len(args) {
-		slip.PanicArgCount(f, 2, 3)
-	}
-	pos := len(args) - 1
+	slip.ArgCountCheck(f, args, 2, 3)
 	var cf *Flavor
-	switch ta := args[pos].(type) {
+	switch ta := args[0].(type) {
 	case slip.Symbol:
 		cf = allFlavors[string(ta)]
 	case *Flavor:
@@ -65,20 +62,18 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 		slip.PanicType("flavor argument to describe-method", ta, "symbol", "flavor")
 	}
 	if cf == nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[pos]))
+		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
 	}
-	pos--
-	meth, _ := args[pos].(slip.Symbol)
+	meth, _ := args[1].(slip.Symbol)
 	ma := cf.methods[string(meth)]
 	if len(ma) == 0 {
-		panic(fmt.Sprintf("%s is not a method on %s.", args[pos], cf.name))
+		panic(fmt.Sprintf("%s is not a method on %s.", args[1], cf.name))
 	}
 	w := s.Get("*standard-output*").(io.Writer)
-	pos--
-	if pos == 0 {
+	if 2 < len(args) {
 		var ok bool
-		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType("describe-method output-stream", args[0], "output-stream")
+		if w, ok = args[2].(io.Writer); !ok {
+			slip.PanicType("describe-method output-stream", args[2], "output-stream")
 		}
 	}
 	ansi := s.Get("*print-ansi*") != nil

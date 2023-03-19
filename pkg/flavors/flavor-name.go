@@ -38,12 +38,9 @@ type FlavorName struct {
 
 // Call the the function with the arguments provided.
 func (f *FlavorName) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	pos := len(args) - 1
+	slip.ArgCountCheck(f, args, 1, 1)
 	var cf *Flavor
-	switch ta := args[pos].(type) {
+	switch ta := args[0].(type) {
 	case slip.Symbol:
 		cf = allFlavors[string(ta)]
 	case *Flavor:
@@ -52,7 +49,7 @@ func (f *FlavorName) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		slip.PanicType("flavor argument to flavor-name", ta, "flavor")
 	}
 	if cf == nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[pos]))
+		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
 	}
 	return slip.Symbol(cf.name)
 }

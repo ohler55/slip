@@ -45,21 +45,18 @@ type FindFlavor struct {
 
 // Call the the function with the arguments provided.
 func (f *FindFlavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
-	pos := len(args) - 1
+	slip.ArgCountCheck(f, args, 1, 2)
 	var cf *Flavor
-	sym, ok := args[pos].(slip.Symbol)
+	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name", args[pos], "symbol")
+		slip.PanicType("name", args[0], "symbol")
 	}
 	cf = allFlavors[string(sym)]
 	if cf != nil {
 		return cf
 	}
-	if 1 < len(args) && args[0] != nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[pos]))
+	if 1 < len(args) && args[1] != nil {
+		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
 	}
 	return nil
 }

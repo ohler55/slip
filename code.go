@@ -315,7 +315,6 @@ func (r *reader) read(src []byte) Code {
 	}
 	for r.pos, b = range src {
 	Retry:
-		//fmt.Printf("*** top stack %c %s - %s\n", b, r.stack, r.code)
 		switch mode[b] {
 		case skipNewline:
 			r.line++
@@ -528,7 +527,6 @@ func (r *reader) read(src []byte) Code {
 	if 0 < len(r.stack) {
 		r.partial("list not terminated")
 	}
-	//fmt.Printf("*** read code: %s %T\n", r.code, r.code[0])
 	return r.code
 }
 

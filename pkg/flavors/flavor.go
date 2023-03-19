@@ -350,10 +350,10 @@ top:
 		result = slip.Novalue
 	case ":which-operations":
 		result = slip.List{
-			slip.Symbol(":which-operations"),
-			slip.Symbol(":name"),
-			slip.Symbol(":inspect"),
 			slip.Symbol(":describe"),
+			slip.Symbol(":inspect"),
+			slip.Symbol(":name"),
+			slip.Symbol(":which-operations"),
 		}
 	case ":inspect":
 		cf := allFlavors["bag-flavor"]
