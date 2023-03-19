@@ -92,5 +92,5 @@ func (f *Intern) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	default:
 		status = slip.Symbol(":inherited")
 	}
-	return slip.Values{status, slip.Symbol(so)}
+	return slip.Values{slip.Symbol(so), status}
 }

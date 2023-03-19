@@ -309,7 +309,7 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		slip.PanicArgCount(f, 2, -1)
 	}
 	var w io.Writer
-	switch ta := args[len(args)-1].(type) {
+	switch ta := args[0].(type) {
 	case nil:
 		// leave w as nil
 	case io.Writer:
@@ -322,11 +322,11 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		}
 		slip.PanicType("destination", ta, "output-stream")
 	}
-	cs, ok := args[len(args)-2].(slip.String)
+	cs, ok := args[1].(slip.String)
 	if !ok {
-		slip.PanicType("control", args[len(args)-2], "string")
+		slip.PanicType("control", args[1], "string")
 	}
-	ctrl := control{scope: s, str: []byte(cs), args: args[:len(args)-2], argPos: len(args) - 3}
+	ctrl := control{scope: s, str: []byte(cs), args: args[2:], argPos: 0}
 	ctrl.end = len(ctrl.str)
 
 	ctrl.process()
