@@ -46,11 +46,11 @@ func (f *ChannelPush) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	ch, ok := args[1].(Channel)
+	ch, ok := args[0].(Channel)
 	if !ok {
-		slip.PanicType("channel", args[1], "channel")
+		slip.PanicType("channel", args[0], "channel")
 	}
-	ch <- args[0]
+	ch <- args[1]
 
 	return slip.Novalue
 }

@@ -35,8 +35,6 @@ type Panic struct {
 
 // Call the function with the arguments provided.
 func (f *Panic) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.ArgCountCheck(f, args, 1, 1)
 	panic(args[0])
 }

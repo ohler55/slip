@@ -8,21 +8,21 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestMakeTimepDay(t *testing.T) {
+func TestMakeTimeDay(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(make-time 2022 07 17)`,
 		Expect: "@2022-07-17T00:00:00Z",
 	}).Test(t)
 }
 
-func TestMakeTimepFull(t *testing.T) {
+func TestMakeTimeFull(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(make-time 2022 july 17 20 53 24 123456789 "EST")`,
 		Expect: "@2022-07-17T20:53:24.123456789-05:00",
 	}).Test(t)
 }
 
-func TestMakeTimepBadArgs(t *testing.T) {
+func TestMakeTimeBadArgs(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(make-time 2022 july 17 20 53 24 123456789 "EST" 1)`,
 		Panics: true,

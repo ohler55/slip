@@ -39,13 +39,10 @@ type TimeUtc struct {
 
 // Call the function with the arguments provided.
 func (f *TimeUtc) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.ArgCountCheck(f, args, 1, 1)
 	t, ok := args[0].(slip.Time)
 	if !ok {
 		slip.PanicType("time", args[0], "time")
 	}
-
 	return slip.Time(time.Time(t).UTC())
 }

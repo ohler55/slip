@@ -88,10 +88,8 @@ type MakeTime struct {
 }
 
 // Call the function with the arguments provided.
-func (f *MakeTime) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 3 || 8 < len(args) {
-		slip.PanicArgCount(f, 3, 8)
-	}
+func (f *MakeTime) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.ArgCountCheck(f, args, 3, 8)
 	var (
 		year   slip.Fixnum
 		month  slip.Fixnum
@@ -103,44 +101,44 @@ func (f *MakeTime) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		loc    = time.UTC
 		ok     bool
 	)
-	pos := len(args) - 1
+	pos := 0
 	if year, ok = args[pos].(slip.Fixnum); !ok {
 		slip.PanicType("year", args[pos], "fixnum")
 	}
-	pos--
+	pos++
 	if month, ok = args[pos].(slip.Fixnum); !ok {
 		slip.PanicType("month", args[pos], "fixnum")
 	}
-	pos--
+	pos++
 	if day, ok = args[pos].(slip.Fixnum); !ok {
 		slip.PanicType("day", args[pos], "fixnum")
 	}
-	pos--
-	if 0 <= pos {
+	pos++
+	if pos < len(args) {
 		if hour, ok = args[pos].(slip.Fixnum); !ok {
 			slip.PanicType("hour", args[pos], "fixnum")
 		}
-		pos--
+		pos++
 	}
-	if 0 <= pos {
+	if pos < len(args) {
 		if minute, ok = args[pos].(slip.Fixnum); !ok {
 			slip.PanicType("minute", args[pos], "fixnum")
 		}
-		pos--
+		pos++
 	}
-	if 0 <= pos {
+	if pos < len(args) {
 		if second, ok = args[pos].(slip.Fixnum); !ok {
 			slip.PanicType("second", args[pos], "fixnum")
 		}
-		pos--
+		pos++
 	}
-	if 0 <= pos {
+	if pos < len(args) {
 		if nsec, ok = args[pos].(slip.Fixnum); !ok {
 			slip.PanicType("nanosecond", args[pos], "fixnum")
 		}
-		pos--
+		pos++
 	}
-	if 0 <= pos {
+	if pos < len(args) {
 		loc = getLocArg(args[pos])
 	}
 	return slip.Time(time.Date(int(year), time.Month(month), int(day),
