@@ -34,7 +34,7 @@ func TestScopeSet(t *testing.T) {
 	child := parent.NewScope()
 	child.Let(y, slip.Fixnum(0))
 
-	child.Set(x, slip.Values{nil, slip.Fixnum(1)})
+	child.Set(x, slip.Values{slip.Fixnum(1), nil})
 	child.Set(y, slip.Fixnum(2))
 	child.Set(z, slip.Fixnum(3))
 
@@ -66,7 +66,7 @@ func TestScopeRemove(t *testing.T) {
 	child := parent.NewScope()
 	child.Let(y, slip.Fixnum(0))
 
-	child.Set(x, slip.Values{nil, slip.Fixnum(1)})
+	child.Set(x, slip.Values{slip.Fixnum(1), nil})
 	child.Set(y, slip.Fixnum(2))
 
 	child.Remove(x)

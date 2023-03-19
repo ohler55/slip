@@ -107,7 +107,7 @@ func TestUniqNotNumber(t *testing.T) {
 		Panics: true,
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/= t 1)`,
+		Source: `(/= 1 t)`,
 		Panics: true,
 	}).Test(t)
 }

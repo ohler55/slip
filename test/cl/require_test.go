@@ -55,7 +55,7 @@ func TestRequireBadPath(t *testing.T) {
 }
 
 func TestRequireBadLoadPath(t *testing.T) {
-	slip.CurrentPackage.Set("*package-load-path*", slip.List{slip.True, slip.String("testplugin")})
+	slip.CurrentPackage.Set("*package-load-path*", slip.List{slip.String("testplugin"), slip.True})
 	(&sliptest.Function{
 		Source: `(require "testplugin")`,
 		Panics: true,

@@ -1157,7 +1157,7 @@ func (c *control) dirP(colon, at bool, params []any) {
 }
 
 func (c *control) dirR(colon, at bool, params []any) {
-	if c.argPos < 0 {
+	if len(c.args) <= c.argPos {
 		panic(fmt.Sprintf("missing argument for Radix directive at %d of %q", c.pos, c.str))
 	}
 	var (

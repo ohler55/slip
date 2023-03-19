@@ -475,7 +475,7 @@ func TestReadCharacter(t *testing.T) {
 
 func TestValues(t *testing.T) {
 	(&sliptest.Object{
-		Target:    slip.Values{slip.Fixnum(2), nil},
+		Target:    slip.Values{nil, slip.Fixnum(2)},
 		String:    "nil, 2",
 		Simple:    []any{nil, int64(2)},
 		Hierarchy: "values.t",
@@ -486,7 +486,7 @@ func TestValues(t *testing.T) {
 		},
 		Eval: nil,
 	}).Test(t)
-	tt.Nil(t, slip.Values{slip.Fixnum(2), nil}.First())
+	tt.Nil(t, slip.Values{nil, slip.Fixnum(2)}.First())
 }
 
 func TestSimpleObject(t *testing.T) {
