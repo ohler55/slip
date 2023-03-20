@@ -174,3 +174,23 @@ func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
 	}
 	return b
 }
+
+// Length returns the length of the object.
+func (obj Instance) Length() (size int) {
+	if 0 < len(obj.Flavor.methods[":length"]) {
+		v := obj.Receive(":length", slip.List{}, 0)
+		if num, ok := v.(slip.Fixnum); ok {
+			size = int(num)
+		}
+	} else {
+		switch tv := obj.Any.(type) {
+		case string:
+			size = len(tv)
+		case []any:
+			size = len(tv)
+		case map[string]any:
+			size = len(tv)
+		}
+	}
+	return
+}

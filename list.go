@@ -76,6 +76,11 @@ func (obj List) SequenceType() Symbol {
 	return ListSymbol
 }
 
+// Length returns the length of the object.
+func (obj List) Length() int {
+	return len(obj)
+}
+
 // Eval panics unless the list is empty.
 func (obj List) Eval(s *Scope, depth int) Object {
 	if 0 < len(obj) {

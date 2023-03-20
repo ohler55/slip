@@ -93,6 +93,11 @@ func (obj HashTable) Hierarchy() []Symbol {
 	return []Symbol{HashTableSymbol, TrueSymbol}
 }
 
+// Length returns the length of the object.
+func (obj HashTable) Length() int {
+	return len(obj)
+}
+
 // Eval returns self.
 func (obj HashTable) Eval(s *Scope, depth int) Object {
 	return obj

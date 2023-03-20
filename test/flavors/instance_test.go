@@ -54,4 +54,20 @@ func TestInstance(t *testing.T) {
 
 	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
 	tt.Equal(t, false, b2.Equal(berry))
+
+	bi := berry.(*flavors.Instance)
+	tt.Equal(t, 0, bi.Length())
+
+	bi.Any = []any{1}
+	tt.Equal(t, 1, bi.Length())
+
+	bi.Any = map[string]any{"a": 1}
+	tt.Equal(t, 1, bi.Length())
+
+	bi.Any = "abc"
+	tt.Equal(t, 3, bi.Length())
+
+	_ = slip.ReadString(`(defmethod (blueberry :length) () 5)`).Eval(scope)
+	tt.Equal(t, 5, bi.Length())
+
 }

@@ -340,7 +340,6 @@
  * [ ] LEAST-POSITIVE-NORMALIZED-SINGLE-FLOAT
  * [ ] LEAST-POSITIVE-SHORT-FLOAT
  * [ ] LEAST-POSITIVE-SINGLE-FLOAT
- * [ ] LENGTH
  * [ ] LISP-IMPLEMENTATION-TYPE
  * [ ] LISP-IMPLEMENTATION-VERSION
  * [ ] LIST*
@@ -402,9 +401,6 @@
  * [ ] MAKUNBOUND
  * [ ] MAP
  * [ ] MAP-INTO
- * [ ] MAPCON
- * [ ] MAPL
- * [x] MAPLIST
  * [ ] MASK-FIELD
  * [ ] MEMBER
  * [ ] MEMBER-IF
@@ -893,6 +889,7 @@
  * [x] INTEGERP
  * [x] INTERN
  * [x] LAMBDA
+ * [x] LENGTH
  * [x] LET
  * [x] LET*
  * [x] LIST
@@ -905,7 +902,10 @@
  * [x] MAPC
  * [x] MAPCAN
  * [x] MAPCAR
+ * [x] MAPCON
  * [x] MAPHASH
+ * [x] MAPL
+ * [x] MAPLIST
  * [x] MAX
  * [x] MIN
  * [x] MINUSP
