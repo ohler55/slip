@@ -37,6 +37,16 @@ func (obj String) Hierarchy() []Symbol {
 	return []Symbol{StringSymbol, VectorSymbol, ArraySymbol, SequenceSymbol, TrueSymbol}
 }
 
+// SequenceType returns 'vector.
+func (obj String) SequenceType() Symbol {
+	return StringSymbol
+}
+
+// Length returns the length of the object.
+func (obj String) Length() int {
+	return len(obj)
+}
+
 // Eval returns self.
 func (obj String) Eval(s *Scope, depth int) Object {
 	return obj

@@ -9,11 +9,10 @@ func init() {
 	DefConstant(SequenceSymbol, SequenceSymbol, `A _sequence_ is an ordered collection of _objects_.`)
 }
 
-// Sequence exists to allow assertions to determine if an Object is an sequence.
+// Sequence exists to allow assertions to determine if an Object is a sequence.
 type Sequence interface {
-	Number
-
 	// SequenceType returns the sequence type of the instance which can be one
-	// of: list, cons, or vector.
+	// of: string, list, or vector. Breaking with the LISP standard, some
+	// other types also support the interface.
 	SequenceType() Symbol
 }

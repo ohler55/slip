@@ -72,6 +72,11 @@ func (obj Vector) SequenceType() Symbol {
 	return VectorSymbol
 }
 
+// Length returns the length of the object.
+func (obj Vector) Length() int {
+	return len(obj)
+}
+
 // ArrayType returns 'vector.
 func (obj Vector) ArrayType() Symbol {
 	return VectorSymbol
