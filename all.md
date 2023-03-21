@@ -432,7 +432,6 @@
  * [ ] NAME-CHAR
  * [ ] NAMESTRING
  * [ ] NBUTLAST
- * [ ] NCONC
  * [ ] NEXT-METHOD-P
  * [ ] NIL
  * [ ] NINTERSECTION
@@ -489,7 +488,6 @@
  * [ ] PATHNAMEP
  * [ ] PEEK-CHAR
  * [ ] PHASE
- * [ ] PI
  * [ ] POP
  * [ ] POSITION
  * [ ] POSITION-IF
@@ -519,12 +517,10 @@
  * [ ] PROGN
  * [ ] PROGRAM-ERROR
  * [ ] PROGV
- * [ ] PROVIDE
  * [ ] PSETF
  * [ ] PSETQ
  * [ ] PUSH
  * [ ] PUSHNEW
- * [ ] RANDOM-STATE
  * [ ] RANDOM-STATE-P
  * [ ] RASSOC
  * [ ] RASSOC-IF
@@ -572,8 +568,6 @@
  * [ ] ROOM
  * [ ] ROTATEF
  * [ ] ROW-MAJOR-AREF
- * [ ] RPLACA
- * [ ] RPLACD
  * [ ] SAFETY
  * [ ] SATISFIES
  * [ ] SBIT
@@ -910,6 +904,7 @@
  * [x] MIN
  * [x] MINUSP
  * [x] MOD
+ * [x] NCONC
  * [x] NOT
  * [x] NTH
  * [x] NULL
@@ -917,6 +912,7 @@
  * [x] ODDP
  * [x] OR
  * [x] OUTPUT-STREAM-P
+ * [x] PI
  * [x] PLUSP
  * [x] PPRINT
  * [x] PRIN1
@@ -924,10 +920,13 @@
  * [x] PRINT
  * [x] QUOTE
  * [x] RANDOM
+ * [x] RANDOM-STATE
  * [x] REM
  * [x] REMHASH
  * [x] REQUIRE
  * [x] ROUND
+ * [x] RPLACA
+ * [x] RPLACD
  * [x] SET
  * [x] SETF
  * [x] SETQ
@@ -973,6 +972,7 @@
  - [-] COMPILER-MACRO-FUNCTION
  - [-] DEFCLASS (defflavor instead)
  - [-] MAKE-INSTANCES-OBSOLETE
+ - [-] PROVIDE
  - [-] REINITIALIZE-INSTANCE
  - [-] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
  - [-] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
