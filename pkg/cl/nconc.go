@@ -25,7 +25,8 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text:   `__nconc__ concatenates the _lists_ modifying the first list to includes the rest.`,
+			Text: `__nconc__ concatenates the _lists_ modifying the left most list to include the rest.
+Unlike common LISP the original lists are not always modified.`,
 			Examples: []string{
 				"(nconc '(a b) '(c d)) => (a b c d)",
 				"(nconc) => nil",
@@ -40,33 +41,42 @@ type Nconc struct {
 
 // Call the the function with the arguments provided.
 func (f *Nconc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	for _, a := range args {
-		switch tr := result.(type) {
+	for i := len(args) - 1; 0 <= i; i-- {
+		switch ta := args[i].(type) {
 		case nil:
-			result = a
+			// no change
+			break
 		case slip.List:
-			if len(tr) == 0 {
-				result = a
+			if len(ta) == 0 {
+				// no change
 				break
 			}
-			if _, ok := tr[len(tr)-1].(slip.Tail); ok {
-				if list, ok := a.(slip.List); ok {
-					if len(list) == 0 {
-						break
-					}
-					result = append(tr[:len(tr)-1], list...)
-					break
+			if result == nil {
+				result = ta
+				break
+			}
+			if _, ok := ta[len(ta)-1].(slip.Tail); ok {
+				if list, ok := result.(slip.List); ok {
+					ta = append(ta[:len(ta)-1], list...)
+				} else {
+					ta[len(ta)-1] = slip.Tail{Value: result}
 				}
-				tr[len(tr)-1] = slip.Tail{Value: a}
+				result = ta
 				break
 			}
-			if list, ok := a.(slip.List); ok {
-				result = append(tr, list...)
+			if list, ok := result.(slip.List); ok {
+				ta = append(ta, list...)
+				result = ta
 				break
 			}
-			slip.PanicType("list", a, "list")
+			ta = append(ta, slip.Tail{Value: result})
+			result = ta
 		default:
-			slip.PanicType("list", a, "list")
+			if result == nil {
+				result = ta
+				break
+			}
+			slip.PanicType("list", ta, "list")
 		}
 	}
 	return

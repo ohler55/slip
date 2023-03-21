@@ -20,10 +20,54 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-  - nconc
-  - rplaca
-  - rplacd
-  - coerce
+
+  - append
+  - concatenate
+  - adjoin
+  - add
+  - boundp
+  - butlast
+  - do
+  - dolist
+  - dotimes
+  - return
+  - last
+  - loop (simple only)
+  - merge
+  - union
+  - nunion
+  - intersection
+  - nintersection
+  - sort
+  - reverse
+  - prog
+  - progn
+  - room
+  - load - maybe handled in the compile phase
+  - gi:log - can this be made to work correctly?
+
+  - defpackage
+  - in-package
+  - package-name
+  - package-nicknames
+  - rename-package
+  - shadow
+  - package-shadowing-symbols
+  - shadowing-import
+  - intern
+  - unintern
+  - find-symbol
+  - export
+  - unexport
+  - package-used-by-list
+  - unuse-package
+  - use-package
+  - package-use-list
+  - require
+  - find-all-symbols
+  - do-symbols
+  - do-all-symbols
+  - do-external-symbols
 
   - number
    - incf
@@ -32,11 +76,6 @@ SLIce Processing is LISP for golang
  - bag
   - remove
   - modify
-
- - unit tests
-  - function.go
-  - lambda.go
-
 
  - defmacro
 
