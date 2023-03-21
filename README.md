@@ -20,6 +20,7 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
+  - nconc
   - rplaca
   - rplacd
   - coerce
