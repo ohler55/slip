@@ -20,11 +20,12 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-
-  - append
+  + append
   - concatenate
   - adjoin
   - add
+  - psetq
+  - list*
   - boundp
   - butlast
   - do
@@ -41,6 +42,11 @@ SLIce Processing is LISP for golang
   - sort
   - reverse
   - prog
+   - like let but with tags
+   - maybe just treat the tags as symbols and (go tag) goes back or forward to tag
+   - support return
+   - starts like let
+  - prog*
   - progn
   - room
   - load - maybe handled in the compile phase

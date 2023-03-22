@@ -45,7 +45,6 @@ func (f *Nconc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		switch ta := args[i].(type) {
 		case nil:
 			// no change
-			break
 		case slip.List:
 			if len(ta) == 0 {
 				// no change
