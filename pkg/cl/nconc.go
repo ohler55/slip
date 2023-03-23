@@ -24,7 +24,7 @@ func init() {
 					Text: "The lists to concatenate.",
 				},
 			},
-			Return: "object",
+			Return: "list",
 			Text: `__nconc__ concatenates the _lists_ modifying the left most list to include the rest.
 Unlike common LISP the original lists are not always modified.`,
 			Examples: []string{

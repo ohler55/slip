@@ -24,7 +24,7 @@ func init() {
 					Text: "The lists to concatenate.",
 				},
 			},
-			Return: "object",
+			Return: "list",
 			Text:   `__append__ concatenates copies of the _lists_.`,
 			Examples: []string{
 				"(append '(a b) '(c d)) => (a b c d)",

@@ -21,9 +21,8 @@ SLIce Processing is LISP for golang
 - next
  - cl
   + append
-  - concatenate
+  + gi:add
   - adjoin
-  - add
   - psetq
   - list*
   - boundp
