@@ -17,12 +17,10 @@
  * [ ] ACONS
  * [ ] ACOSH
  * [ ] ADD-METHOD
- * [ ] ADJOIN
  * [ ] ADJUST-ARRAY
  * [ ] ADJUSTABLE-ARRAY-P
  * [ ] ALPHA-CHAR-P
  * [ ] ALPHANUMERICP
- * [x] APPEND
  * [ ] AREF
  * [ ] ARITHMETIC-ERROR
  * [ ] ARITHMETIC-ERROR-OPERANDS
@@ -800,8 +798,10 @@
  * [x] >=
  * [x] ABS
  * [x] ACOS
+ * [x] ADJOIN
  * [x] ALLOCATE-INSTANCE
  * [x] AND
+ * [x] APPEND
  * [x] APPLY
  * [x] APROPOS
  * [x] APROPOS-LIST

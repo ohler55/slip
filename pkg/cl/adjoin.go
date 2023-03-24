@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
 
 package cl
 
@@ -11,29 +11,29 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Assoc{Function: slip.Function{Name: "assoc", Args: args}}
+			f := Adjoin{Function: slip.Function{Name: "adjoin", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "assoc",
+			Name: "adjoin",
 			Args: []*slip.DocArg{
 				{
 					Name: "item",
 					Type: "object",
-					Text: "The value to match against the _car_ of each element of _alist_.",
+					Text: "The value to conditionally add to _list_.",
 				},
 				{
-					Name: "alist",
+					Name: "list",
 					Type: "list",
-					Text: "The association list to search for _item_ in.",
+					Text: "The list to search for _item_ in and concatenate to.",
 				},
 				{Name: "&key"},
 				{
 					Name: "key",
 					Type: "symbol|lambda",
 					Text: `A function that expects one argument to apply to each element
-in the _alist_ to return a key for comparison.`,
+in the _list_ to return a key for comparison.`,
 				},
 				{
 					Name: "test",
@@ -42,35 +42,34 @@ in the _alist_ to return a key for comparison.`,
 indicate a match. The default is _equal_`,
 				},
 			},
-			Return: "cons|list",
-			Text:   `__assoc__ returns the first _cons_ whose _car_ satisfies _test_ or _nil_ if there is no match.`,
+			Return: "list",
+			Text:   `__adjoin__ adds _item_ if it is not already on _list_.`,
 			Examples: []string{
-				"(assoc 'x '((x . 1) (y. 2) (z . 3))) => (x . 1)",
+				"(adjoin 'a '(b c)) => (a b c)",
 			},
 		}, &slip.CLPkg)
 }
 
-// Assoc represents the assoc function.
-type Assoc struct {
+// Adjoin represents the adjoin function.
+type Adjoin struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
+func (f *Adjoin) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 6)
-	pos := 0
-	item := args[pos]
-	pos++
-	alist, ok := args[pos].(slip.List)
+	item := args[0]
+	list, ok := args[1].(slip.List)
 	if !ok {
-		slip.PanicType("alist", args[pos], "list")
+		if args[1] != nil {
+			slip.PanicType("list", args[1], "list")
+		}
 	}
-	pos++
 	var (
 		keyFunc  slip.Caller
 		testFunc slip.Caller
 	)
-	for ; pos < len(args)-1; pos += 2 {
+	for pos := 2; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
 			slip.PanicType("keyword", args[pos], "keyword")
@@ -86,28 +85,22 @@ func (f *Assoc) Call(s *slip.Scope, args slip.List, depth int) (found slip.Objec
 		}
 	}
 	d2 := depth + 1
-	var k slip.Object
-	for _, a := range alist {
-		switch tv := a.(type) {
-		case nil:
-			continue
-		case slip.List:
-			k = tv.Car()
-		default:
-			slip.PanicType("assoc list element", tv, "cons", "list")
-		}
+	if keyFunc != nil {
+		item = keyFunc.Call(s, slip.List{item}, d2)
+	}
+	for _, v := range list {
 		if keyFunc != nil {
-			k = keyFunc.Call(s, slip.List{k}, d2)
+			v = keyFunc.Call(s, slip.List{v}, d2)
 		}
 		if testFunc == nil {
-			if slip.ObjectEqual(item, k) {
-				found = a
-				break
+			if slip.ObjectEqual(item, v) {
+				// Already on list so return the original list.
+				return list
 			}
-		} else if testFunc.Call(s, slip.List{k, item}, d2) != nil {
-			found = a
-			break
+		} else if testFunc.Call(s, slip.List{v, item}, d2) != nil {
+			// Already on list so return the original list.
+			return list
 		}
 	}
-	return
+	return append(slip.List{args[0]}, list...)
 }
