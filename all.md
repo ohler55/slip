@@ -86,7 +86,7 @@
  * [ ] BROADCAST-STREAM
  * [ ] BROADCAST-STREAM-STREAMS
  * [ ] BUILT-IN-CLASS
- * [ ] BUTLAST
+ * [x] BUTLAST
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
@@ -317,7 +317,7 @@
  * [ ] LABELS
  * [ ] LAMBDA-LIST-KEYWORDS
  * [ ] LAMBDA-PARAMETERS-LIMIT
- * [ ] LAST
+ * [x] LAST
  * [ ] LCM
  * [ ] LDB
  * [ ] LDB-TEST
@@ -340,7 +340,7 @@
  * [ ] LEAST-POSITIVE-SINGLE-FLOAT
  * [ ] LISP-IMPLEMENTATION-TYPE
  * [ ] LISP-IMPLEMENTATION-VERSION
- * [ ] LIST*
+ * [x] LIST*
  * [ ] LIST-LENGTH
  * [ ] LISTEN
  * [ ] LOAD

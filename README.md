@@ -23,15 +23,14 @@ SLIce Processing is LISP for golang
   + append
   + gi:add
   + adjoin
+  + list*
+  + butlast
+  + last
   - psetq
-  - list*
-  - boundp
-  - butlast
   - do
   - dolist
   - dotimes
   - return
-  - last
   - loop (simple only)
   - merge
   - union

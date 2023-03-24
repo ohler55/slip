@@ -32,7 +32,7 @@ type List struct {
 }
 
 // Call the function with the arguments provided.
-func (f *List) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *List) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	list := make(slip.List, len(args))
 	copy(list, args)
 	return list
