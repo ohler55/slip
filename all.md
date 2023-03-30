@@ -516,7 +516,7 @@
  * [ ] PROGRAM-ERROR
  * [ ] PROGV
  * [ ] PSETF
- * [ ] PSETQ
+ * [x] PSETQ
  * [ ] PUSH
  * [ ] PUSHNEW
  * [ ] RANDOM-STATE-P

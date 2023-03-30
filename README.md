@@ -26,19 +26,20 @@ SLIce Processing is LISP for golang
   + list*
   + butlast
   + last
-  - psetq
-  - do
-  - dolist
-  - dotimes
-  - return
-  - loop (simple only)
-  - merge
+  + psetq
+  - sort
+  - reverse
   - union
   - nunion
   - intersection
   - nintersection
-  - sort
-  - reverse
+
+  - do
+  - do*
+  - dolist
+  - dotimes
+  - return
+  - loop (simple only)
   - prog
    - like let but with tags
    - maybe just treat the tags as symbols and (go tag) goes back or forward to tag
@@ -46,9 +47,21 @@ SLIce Processing is LISP for golang
    - starts like let
   - prog*
   - progn
+  - merge (starts with result-type)
   - room
-  - load - maybe handled in the compile phase
-  - gi:log - can this be made to work correctly?
+  - load - maybe handled in the compile phase as well as later)
+  - gi:log - can this be made to work correctly (not collide with cl:log)?
+
+ - package
+  - support export list
+   - ListToFunc should be f.ListToFunc
+    - lookup of func should consider the package of f
+     - if lookup is in f.pkg or lookup is exported (new flag) then ok
+    - add export flag to FuncInfo
+    - Define() and package.Define() need extra arg for export or not
+     - maybe default to export
+     - flag in FuncDoc or separate? depends on whether it's useful in docs
+
 
   - defpackage
   - in-package
