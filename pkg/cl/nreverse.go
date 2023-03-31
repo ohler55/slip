@@ -43,22 +43,30 @@ func (f *Nreverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	case nil:
 		// leave as nil
 	case slip.String:
-		ra := []rune(ta)
-		max := len(ra) - 1
-		for i := max / 2; 0 <= i; i-- {
-			ra[i], ra[max-i] = ra[max-i], ra[i]
+		if 1 < len(ta) {
+			ra := []rune(ta)
+			max := len(ra) - 1
+			for i := max / 2; 0 <= i; i-- {
+				ra[i], ra[max-i] = ra[max-i], ra[i]
+			}
+			result = slip.String(ra)
+		} else {
+			result = ta
 		}
-		result = slip.String(ra)
 	case slip.List:
-		max := len(ta) - 1
-		for i := max / 2; 0 <= i; i-- {
-			ta[i], ta[max-i] = ta[max-i], ta[i]
+		if 1 < len(ta) {
+			max := len(ta) - 1
+			for i := max / 2; 0 <= i; i-- {
+				ta[i], ta[max-i] = ta[max-i], ta[i]
+			}
 		}
 		result = ta
 	case slip.Vector:
-		max := len(ta) - 1
-		for i := max / 2; 0 <= i; i-- {
-			ta[i], ta[max-i] = ta[max-i], ta[i]
+		if 1 < len(ta) {
+			max := len(ta) - 1
+			for i := max / 2; 0 <= i; i-- {
+				ta[i], ta[max-i] = ta[max-i], ta[i]
+			}
 		}
 		result = ta
 	default:
