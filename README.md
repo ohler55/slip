@@ -28,7 +28,7 @@ SLIce Processing is LISP for golang
   + last
   + psetq
   + nreverse
-  - reverse - new sequence
+  + reverse
   - sort
   - stable-sort (sort.SliceStable)
   - union

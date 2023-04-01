@@ -562,7 +562,7 @@
  * [ ] RETURN
  * [ ] RETURN-FROM
  * [ ] REVAPPEND
- * [ ] REVERSE
+ * [x] REVERSE
  * [ ] ROOM
  * [ ] ROTATEF
  * [ ] ROW-MAJOR-AREF
