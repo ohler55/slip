@@ -40,7 +40,7 @@ indicate the first argument is less that the second. The default is a built in c
 in the _sequence_ to return a key for comparison.`,
 				},
 			},
-			Return: "boolean",
+			Return: "sequence",
 			Text: `__sort__ returns modified and sorted _sequence_. Deviating from
 the Common LISP standard the _predicate_ is option. A default comparitor is used if
 the _predicate_ is _nil_.`,

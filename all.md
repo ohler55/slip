@@ -86,7 +86,6 @@
  * [ ] BROADCAST-STREAM
  * [ ] BROADCAST-STREAM-STREAMS
  * [ ] BUILT-IN-CLASS
- * [x] BUTLAST
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
@@ -317,7 +316,6 @@
  * [ ] LABELS
  * [ ] LAMBDA-LIST-KEYWORDS
  * [ ] LAMBDA-PARAMETERS-LIMIT
- * [x] LAST
  * [ ] LCM
  * [ ] LDB
  * [ ] LDB-TEST
@@ -340,7 +338,6 @@
  * [ ] LEAST-POSITIVE-SINGLE-FLOAT
  * [ ] LISP-IMPLEMENTATION-TYPE
  * [ ] LISP-IMPLEMENTATION-VERSION
- * [x] LIST*
  * [ ] LIST-LENGTH
  * [ ] LISTEN
  * [ ] LOAD
@@ -440,7 +437,6 @@
  * [ ] NOTEVERY
  * [ ] NOTINLINE
  * [ ] NRECONC
- * [x] NREVERSE
  * [ ] NSET-DIFFERENCE
  * [ ] NSET-EXCLUSIVE-OR
  * [ ] NSTRING-CAPITALIZE
@@ -457,7 +453,6 @@
  * [ ] NTHCDR
  * [ ] NUMBER
  * [ ] NUMERATOR
- * [ ] NUNION
  * [ ] OPEN
  * [ ] OPEN-STREAM-P
  * [ ] OPTIMIZE
@@ -516,7 +511,6 @@
  * [ ] PROGRAM-ERROR
  * [ ] PROGV
  * [ ] PSETF
- * [x] PSETQ
  * [ ] PUSH
  * [ ] PUSHNEW
  * [ ] RANDOM-STATE-P
@@ -562,7 +556,6 @@
  * [ ] RETURN
  * [ ] RETURN-FROM
  * [ ] REVAPPEND
- * [x] REVERSE
  * [ ] ROOM
  * [ ] ROTATEF
  * [ ] ROW-MAJOR-AREF
@@ -625,7 +618,6 @@
  * [ ] SPECIAL-OPERATOR-P
  * [ ] SPEED
  * [ ] SQRT
- * [ ] STABLE-SORT
  * [ ] STANDARD
  * [ ] STANDARD-CHAR
  * [ ] STANDARD-CHAR-P
@@ -711,7 +703,6 @@
  * [ ] UNBOUND-VARIABLE
  * [ ] UNDEFINED-FUNCTION
  * [ ] UNEXPORT
- * [ ] UNION
  * [ ] UNREAD-CHAR
  * [ ] UNSIGNED-BYTE
  * [ ] UNTRACE
@@ -810,6 +801,7 @@
  * [x] ASSOC-IF
  * [x] ASSOC-IF-NOT
  * [x] ATAN
+ * [x] BUTLAST
  * [x] CAAAAR
  * [x] CAAADR
  * [x] CAAAR
@@ -883,10 +875,12 @@
  * [x] INTEGERP
  * [x] INTERN
  * [x] LAMBDA
+ * [x] LAST
  * [x] LENGTH
  * [x] LET
  * [x] LET*
  * [x] LIST
+ * [x] LIST*
  * [x] LIST-ALL-PACKAGES
  * [x] LISTP
  * [x] LOG
@@ -906,9 +900,11 @@
  * [x] MOD
  * [x] NCONC
  * [x] NOT
+ * [x] NREVERSE
  * [x] NTH
  * [x] NULL
  * [x] NUMBERP
+ * [x] NUNION
  * [x] ODDP
  * [x] OR
  * [x] OUTPUT-STREAM-P
@@ -918,12 +914,14 @@
  * [x] PRIN1
  * [x] PRINC
  * [x] PRINT
+ * [x] PSETQ
  * [x] QUOTE
  * [x] RANDOM
  * [x] RANDOM-STATE
  * [x] REM
  * [x] REMHASH
  * [x] REQUIRE
+ * [x] REVERSE
  * [x] ROUND
  * [x] RPLACA
  * [x] RPLACD
@@ -934,6 +932,7 @@
  * [x] SIN
  * [x] SLEEP
  * [x] SORT
+ * [x] STABLE-SORT
  * [x] STREAMP
  * [x] STRINGP
  * [x] SXHASH
@@ -945,6 +944,7 @@
  * [x] TYPE-OF
  * [x] TYPEP
  * [x] UNINTERN
+ * [x] UNION
  * [x] UNLESS
  * [x] VALUES
  * [x] WHEN
