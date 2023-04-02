@@ -29,7 +29,7 @@ SLIce Processing is LISP for golang
   + psetq
   + nreverse
   + reverse
-  - sort
+  + sort
   - stable-sort (sort.SliceStable)
   - union
   - nunion
