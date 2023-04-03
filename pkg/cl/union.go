@@ -3,9 +3,6 @@
 package cl
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/ohler55/slip"
 )
 
@@ -58,59 +55,12 @@ type Union struct {
 
 // Call the the function with the arguments provided.
 func (f *Union) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 6)
-	var (
-		lists    []slip.List
-		keyFunc  slip.Caller
-		testFunc slip.Caller
-	)
-	switch ta := args[0].(type) {
-	case nil:
-		// ok
-	case slip.List:
-		lists = append(lists, ta)
-	default:
-		slip.PanicType("list-1", ta, "list")
-	}
-	switch ta := args[1].(type) {
-	case nil:
-		// ok
-	case slip.List:
-		lists = append(lists, ta)
-	default:
-		slip.PanicType("list-2", ta, "list")
-	}
-	if 2 < len(args) {
-		for pos := 2; pos < len(args); pos += 2 {
-			sym, ok := args[pos].(slip.Symbol)
-			if !ok {
-				slip.PanicType("keyword", args[pos], "keyword")
-			}
-			if len(args)-1 <= pos {
-				panic(fmt.Sprintf("%s missing an argument", sym))
-			}
-			switch strings.ToLower(string(sym)) {
-			case ":key":
-				keyFunc = resolveToCaller(s, args[pos+1], depth)
-			case ":test":
-				testFunc = resolveToCaller(s, args[pos+1], depth)
-			default:
-				slip.PanicType("keyword", sym, ":key", ":test")
-			}
-		}
-	}
+	lists, keyFunc, testFunc := list2TestKeyArgs(s, f, args, depth)
 	var rlist slip.List
 	if testFunc == nil && keyFunc == nil {
 		for _, list := range lists {
 			for _, obj := range list {
-				found := false
-				for _, x := range rlist {
-					if slip.ObjectEqual(x, obj) {
-						found = true
-						break
-					}
-				}
-				if !found {
+				if !objInList(obj, rlist) {
 					rlist = append(rlist, obj)
 				}
 			}
