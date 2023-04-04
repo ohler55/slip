@@ -90,18 +90,22 @@ func (f *Intersection) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 			if keyFunc != nil {
 				k1 = keyFunc.Call(s, slip.List{k1}, d2)
 			}
-			if objInListTest(s, k1, keys, testFunc, d2) {
+			if testFunc == nil {
+				if objInList(k1, keys) {
+					continue
+				}
+			} else if objInListTest(s, k1, keys, testFunc, d2) {
 				continue
 			}
-			for i, k2 := range keys2 {
+			for _, k2 := range keys2 {
 				if testFunc == nil {
 					if slip.ObjectEqual(k1, k2) {
-						rlist = append(rlist, list2[i])
+						rlist = append(rlist, obj1)
 						keys = append(keys, k1)
 						break
 					}
 				} else if testFunc.Call(s, slip.List{k1, k2}, d2) != nil {
-					rlist = append(rlist, list2[i])
+					rlist = append(rlist, obj1)
 					keys = append(keys, k1)
 					break
 				}
