@@ -32,7 +32,7 @@ func init() {
 			},
 			Return: "object",
 			Text: `__set__ the value of the _symbol_ to _value_. Note that _symbol_ is not evaluated.
-Repeated pairs of _symbol_ and _value_ are supported`,
+Repeated pairs of _symbol_ and _value_ are supported.`,
 			Examples: []string{
 				"(setq) => nil",
 				"(setq x 7) => 7",

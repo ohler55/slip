@@ -24,7 +24,7 @@ func init() {
 					Text: "The lists to concatenate.",
 				},
 			},
-			Return: "object",
+			Return: "list",
 			Text: `__nconc__ concatenates the _lists_ modifying the left most list to include the rest.
 Unlike common LISP the original lists are not always modified.`,
 			Examples: []string{
@@ -45,7 +45,6 @@ func (f *Nconc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		switch ta := args[i].(type) {
 		case nil:
 			// no change
-			break
 		case slip.List:
 			if len(ta) == 0 {
 				// no change

@@ -2,7 +2,12 @@
 
 package cl
 
-import "github.com/ohler55/slip"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/ohler55/slip"
+)
 
 func resolveToCaller(s *slip.Scope, fn slip.Object, depth int) (caller slip.Caller) {
 	d2 := depth + 1
@@ -20,6 +25,69 @@ CallFunc:
 		goto CallFunc
 	default:
 		slip.PanicType("function", tf, "function")
+	}
+	return
+}
+
+func objInList(obj slip.Object, list slip.List) bool {
+	for _, x := range list {
+		if slip.ObjectEqual(x, obj) {
+			return true
+		}
+	}
+	return false
+}
+
+func objInListTest(s *slip.Scope, obj slip.Object, list slip.List, testFunc slip.Caller, depth int) bool {
+	for _, x := range list {
+		if testFunc.Call(s, slip.List{x, obj}, depth) != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func list2TestKeyArgs(
+	s *slip.Scope,
+	f slip.Object,
+	args slip.List,
+	depth int) (lists []slip.List, keyFunc slip.Caller, testFunc slip.Caller) {
+
+	slip.ArgCountCheck(f, args, 2, 6)
+	switch ta := args[0].(type) {
+	case nil:
+		// ok
+	case slip.List:
+		lists = append(lists, ta)
+	default:
+		slip.PanicType("list-1", ta, "list")
+	}
+	switch ta := args[1].(type) {
+	case nil:
+		// ok
+	case slip.List:
+		lists = append(lists, ta)
+	default:
+		slip.PanicType("list-2", ta, "list")
+	}
+	if 2 < len(args) {
+		for pos := 2; pos < len(args); pos += 2 {
+			sym, ok := args[pos].(slip.Symbol)
+			if !ok {
+				slip.PanicType("keyword", args[pos], "keyword")
+			}
+			if len(args)-1 <= pos {
+				panic(fmt.Sprintf("%s missing an argument", sym))
+			}
+			switch strings.ToLower(string(sym)) {
+			case ":key":
+				keyFunc = resolveToCaller(s, args[pos+1], depth)
+			case ":test":
+				testFunc = resolveToCaller(s, args[pos+1], depth)
+			default:
+				slip.PanicType("keyword", sym, ":key", ":test")
+			}
+		}
 	}
 	return
 }
