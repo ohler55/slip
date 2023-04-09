@@ -17,6 +17,28 @@ func TestDoSimple(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDoReturn(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(do ((x 0 (1+ x))
+                      (y 0 (1- y)))
+                     ((> (- x y) 5) x)
+                  (return-from nil 7))`,
+		Expect: "7",
+	}).Test(t)
+}
+
+func TestDoReturnHandoff(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(block done
+                  (do ((x 0 (1+ x))
+                       (y 0 (1- y)))
+                      ((> (- x y) 5) x)
+                   (return-from done 7))
+                  8)`,
+		Expect: "7",
+	}).Test(t)
+}
+
 func TestDoBindNil(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(do ((x)
@@ -60,9 +82,17 @@ func TestDoBadTest(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDoBadReturn(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(do ((x 0 (1+ x))
+                      (y 0 (1- y)))
+                     ((> (- x y) 5) x)
+                  (return-from done 7))`,
+		Panics: true,
+	}).Test(t)
+}
+
 // TBD with multiple forms for result
-// TBD with body forms
-// TBD with return
 // TBD with no steps - use body for setting up condition
 // TBD validate parallel assignment
 // TBD go and tag
