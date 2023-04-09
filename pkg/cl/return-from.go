@@ -60,7 +60,8 @@ func (f *ReturnFrom) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	if !s.Block {
 		panic(fmt.Sprintf("return from unknown block: %s", rr.Tag))
 	}
-	rr.Result = f.EvalArg(s, args, 1, depth+1)
-
+	if 1 < len(args) {
+		rr.Result = f.EvalArg(s, args, 1, depth+1)
+	}
 	return &rr
 }

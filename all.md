@@ -61,7 +61,7 @@
  * [ ] BIT-VECTOR
  * [ ] BIT-VECTOR-P
  * [ ] BIT-XOR
- * [ ] BLOCK
+ * [x] BLOCK
  * [ ] BOOLE
  * [ ] BOOLE-1
  * [ ] BOOLE-2
@@ -553,8 +553,8 @@
  * [ ] RESTART-BIND
  * [ ] RESTART-CASE
  * [ ] RESTART-NAME
- * [ ] RETURN
- * [ ] RETURN-FROM
+ * [x] RETURN
+ * [x] RETURN-FROM
  * [ ] REVAPPEND
  * [ ] ROOM
  * [ ] ROTATEF

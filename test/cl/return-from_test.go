@@ -8,28 +8,28 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestReturnOk(t *testing.T) {
+func TestReturnFromOk(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(block nil (+ 1 2) (return-from nil 1) (+ 2 3))`,
 		Expect: "1",
 	}).Test(t)
 }
 
-func TestReturnEmpty(t *testing.T) {
+func TestReturnFromEmpty(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(block nil (return-from) (+ 2 3))`,
 		Panics: true,
 	}).Test(t)
 }
 
-func TestReturnBadName(t *testing.T) {
+func TestReturnFromBadName(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(block nil (return-from t 1) (+ 2 3))`,
 		Panics: true,
 	}).Test(t)
 }
 
-func TestReturnNotInBlock(t *testing.T) {
+func TestReturnFromNotInBlock(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(return-from nil 1)`,
 		Panics: true,

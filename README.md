@@ -20,16 +20,8 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-  - block
-   - skip eval
-   - for each arg, eval
-   - select on result type (ReturnResult, GoTo)
-
   - go - check scope for TagBody
-  - return - check scope for Block
-  - return-from - check scope for Block
   - do
-   -
   - do*
   - dolist
   - dotimes

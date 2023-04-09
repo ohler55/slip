@@ -54,6 +54,19 @@ func TestDoBindNil(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDoGo(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(do ((x 0 (1+ x))
+                      (count 0 (1+ count)))
+                     ((> x 5) count)
+                  (go faster)
+                  (setq x (1- x))
+                  faster
+                  (setq x (1+ x)))`,
+		Expect: "3",
+	}).Test(t)
+}
+
 func TestDoBadBindings(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(do t ((> (- x y) 5) x))`,
@@ -92,7 +105,4 @@ func TestDoBadReturn(t *testing.T) {
 	}).Test(t)
 }
 
-// TBD with multiple forms for result
-// TBD with no steps - use body for setting up condition
 // TBD validate parallel assignment
-// TBD go and tag
