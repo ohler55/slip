@@ -20,8 +20,6 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-  - go - check scope for TagBody
-  - do
   - do*
   - dolist
   - dotimes

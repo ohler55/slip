@@ -54,7 +54,7 @@ func (f *Go) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		gt.Tag = ta
 	}
 	if !s.TagBody {
-		panic(fmt.Sprintf("return from unknown block: %s", gt.Tag))
+		panic(fmt.Sprintf("attempt to go to nonexistent tag:: %s", gt.Tag))
 	}
 	return &gt
 }

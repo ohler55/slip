@@ -191,7 +191,7 @@
  * [ ] DIRECTORY-NAMESTRING
  * [ ] DISASSEMBLE
  * [ ] DIVISION-BY-ZERO
- * [ ] DO
+ * [x] DO
  * [ ] DO*
  * [ ] DO-ALL-SYMBOLS
  * [ ] DO-EXTERNAL-SYMBOLS
@@ -284,7 +284,7 @@
  * [ ] GET-SETF-EXPANSION
  * [ ] GET-UNIVERSAL-TIME
  * [ ] GETF
- * [ ] GO
+ * [x] GO
  * [ ] GRAPHIC-CHAR-P
  * [ ] HANDLER-BIND
  * [ ] HANDLER-CASE

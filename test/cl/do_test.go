@@ -17,6 +17,16 @@ func TestDoSimple(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDoParallel(t *testing.T) {
+	// If parallel step evaluation then y should be one less than x.
+	(&sliptest.Function{
+		Source: `(do ((x 0 (1+ x))
+                      (y 0 x))
+                     ((> x 2) y))`,
+		Expect: "2",
+	}).Test(t)
+}
+
 func TestDoReturn(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(do ((x 0 (1+ x))
@@ -104,5 +114,3 @@ func TestDoBadReturn(t *testing.T) {
 		Panics: true,
 	}).Test(t)
 }
-
-// TBD validate parallel assignment
