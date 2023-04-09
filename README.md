@@ -20,12 +20,25 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
+  - block
+   - skip eval
+   - for each arg, eval
+   - select on result type (ReturnResult, GoTo)
+
+  - go - check scope for TagBody
+  - return - check scope for Block
+  - return-from - check scope for Block
   - do
    -
   - do*
   - dolist
   - dotimes
   - return
+   - store on scope?
+   - return special type?
+    - need value as well, maybe Return{From string, Value slip.Object}
+    - in loop, check return of each
+    - if return name matches current then return value else return Return up the call stack
   - loop (simple only)
   - prog
    - like let but with tags
@@ -38,6 +51,9 @@ SLIce Processing is LISP for golang
   - room
   - load - maybe handled in the compile phase as well as later)
   - gi:log - can this be made to work correctly (not collide with cl:log)?
+  - tagbody
+  - go
+   - return a special goto type
 
  - package
   - support export list
