@@ -74,23 +74,26 @@ func (f *Dox) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 			break
 		}
 		for i := 2; i < len(args); i++ {
-			switch tr := slip.EvalArg(ns, args, i, d2).(type) {
-			case *ReturnResult:
-				if tr.Tag == nil {
-					return tr.Result
-				}
-				if s.Block {
-					return tr
-				}
-				panic(fmt.Sprintf("return from unknown block: %s", tr.Tag))
-			case *GoTo:
-				for i++; i < len(args); i++ {
-					if slip.ObjectEqual(args[i], tr.Tag) {
-						break
+			switch args[i].(type) {
+			case slip.List, slip.Funky:
+				switch tr := slip.EvalArg(ns, args, i, d2).(type) {
+				case *ReturnResult:
+					if tr.Tag == nil {
+						return tr.Result
+					}
+					if s.Block {
+						return tr
+					}
+					panic(fmt.Sprintf("return from unknown block: %s", tr.Tag))
+				case *GoTo:
+					for i++; i < len(args); i++ {
+						if slip.ObjectEqual(args[i], tr.Tag) {
+							break
+						}
 					}
 				}
+				// Anything other than ReturnResult or GoTo just continues.
 			}
-			// Anything other than ReturnResult or GoTo just continues.
 		}
 		for _, sb := range steps {
 			ns.Set(sb.sym, ns.Eval(sb.step, d2))

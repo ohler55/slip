@@ -58,6 +58,18 @@ func (s *Scope) Let(sym Symbol, value Object) {
 	s.moo.Unlock()
 }
 
+// UnsafeLet a symbol be bound to the value in this Scope. No case conversion
+// is performed and no checks are performed.
+func (s *Scope) UnsafeLet(sym Symbol, value Object) {
+	s.moo.Lock()
+	if s.Vars == nil {
+		s.Vars = map[string]Object{string(sym): value}
+	} else {
+		s.Vars[string(sym)] = value
+	}
+	s.moo.Unlock()
+}
+
 // Get a named variable value.
 func (s *Scope) Get(sym Symbol) Object {
 	return s.get(strings.ToLower(string(sym)))

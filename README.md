@@ -20,12 +20,12 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-  - dolist
   - dotimes
+
+  - load - maybe handled in the compile phase as well as later)
 
   - merge (starts with result-type)
   - room
-  - load - maybe handled in the compile phase as well as later)
 
   - error, warn, (add info and debug?)
   - loop (simple only)
