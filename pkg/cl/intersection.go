@@ -53,7 +53,7 @@ type Intersection struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Intersection) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	lists, keyFunc, testFunc := list2TestKeyArgs(s, f, args, depth)
 	if len(lists) != 2 {

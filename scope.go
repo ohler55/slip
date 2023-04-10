@@ -8,18 +8,14 @@ import (
 	"sync"
 )
 
-type returnFrom struct {
-	tag    Object // Symbol or nil
-	result Object
-}
-
 // Scope encapsulates the scope for a function.
 type Scope struct {
-	parent     *Scope
-	Name       Object // can be nil so type can't be Symbol
-	Vars       map[string]Object
-	returnFrom *returnFrom
-	moo        sync.Mutex
+	parent  *Scope
+	Name    Object // can be nil so type can't be Symbol
+	Vars    map[string]Object
+	moo     sync.Mutex
+	Block   bool
+	TagBody bool
 }
 
 // NewScope create a new top level Scope.
@@ -32,8 +28,10 @@ func NewScope() *Scope {
 // NewScope create a new Scope with a parent of the current Scope.
 func (s *Scope) NewScope() *Scope {
 	return &Scope{
-		parent: s,
-		Vars:   map[string]Object{},
+		parent:  s,
+		Vars:    map[string]Object{},
+		Block:   s.Block,
+		TagBody: s.TagBody,
 	}
 }
 
@@ -56,6 +54,18 @@ func (s *Scope) Let(sym Symbol, value Object) {
 		s.Vars = map[string]Object{name: value}
 	} else {
 		s.Vars[name] = value
+	}
+	s.moo.Unlock()
+}
+
+// UnsafeLet a symbol be bound to the value in this Scope. No case conversion
+// is performed and no checks are performed.
+func (s *Scope) UnsafeLet(sym Symbol, value Object) {
+	s.moo.Lock()
+	if s.Vars == nil {
+		s.Vars = map[string]Object{string(sym): value}
+	} else {
+		s.Vars[string(sym)] = value
 	}
 	s.moo.Unlock()
 }

@@ -38,7 +38,7 @@ type Subtract struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Subtract) Call(s *slip.Scope, args slip.List, depth int) (dif slip.Object) {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)

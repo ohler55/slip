@@ -55,7 +55,7 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	for i := 0; i < len(args)-1; i++ {
 		p := args[i]
 		i++
-		result = f.EvalArg(s, args, i, d2)
+		result = slip.EvalArg(s, args, i, d2)
 		if vs, ok := result.(slip.Values); ok {
 			result = vs.First()
 		}

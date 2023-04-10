@@ -140,20 +140,6 @@ func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
 	return f.Self.Call(s, args, depth)
 }
 
-// EvalArg converts lists arguments to functions and replaces the
-// argument. Then the argument is evaluated and returned. Non-list arguments
-// are just evaluated.
-func (f *Function) EvalArg(s *Scope, args List, index, depth int) (v Object) {
-	if list, ok := args[index].(List); ok {
-		args[index] = ListToFunc(s, list, depth+1)
-	}
-	v = s.Eval(args[index], depth)
-	if list, ok := v.(List); ok && len(list) == 0 {
-		v = nil
-	}
-	return
-}
-
 // String representation of the Object.
 func (f *Function) String() string {
 	return string(f.Append([]byte{}))
@@ -322,4 +308,18 @@ func DescribeFunction(sym Symbol) *FuncDoc {
 		return fi.Doc
 	}
 	return nil
+}
+
+// EvalArg converts lists arguments to functions and replaces the
+// argument. Then the argument is evaluated and returned. Non-list arguments
+// are just evaluated.
+func EvalArg(s *Scope, args List, index, depth int) (v Object) {
+	if list, ok := args[index].(List); ok {
+		args[index] = ListToFunc(s, list, depth+1)
+	}
+	v = s.Eval(args[index], depth)
+	if list, ok := v.(List); ok && len(list) == 0 {
+		v = nil
+	}
+	return
 }

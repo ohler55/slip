@@ -33,7 +33,7 @@ type Values struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Values) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	return slip.Values(args)
 }

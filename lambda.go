@@ -19,7 +19,7 @@ const (
 // defined.
 type Lambda struct {
 	Doc     *FuncDoc
-	Forms   List // reverse order
+	Forms   List
 	Closure *Scope
 }
 
@@ -143,19 +143,6 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	d2 := depth + 1
 	for _, form := range lam.Forms {
 		result = ss.Eval(form, d2)
-		if ss.returnFrom != nil {
-			switch {
-			case ss.returnFrom.tag == nil:
-				if ss.Name == nil {
-					return ss.returnFrom.result
-				}
-			case ss.returnFrom.tag.Equal(ss.Name):
-				return ss.returnFrom.result
-			default:
-				s.returnFrom = ss.returnFrom
-			}
-			break
-		}
 	}
 	return
 }

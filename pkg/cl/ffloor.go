@@ -47,7 +47,7 @@ type Ffloor struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Ffloor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	values := floor(f, args)
 	switch tv := values[0].(type) {

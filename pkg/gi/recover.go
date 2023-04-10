@@ -69,7 +69,7 @@ func (f *Recover) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		}
 	}()
 	for i := 2; i < len(args); i++ {
-		result = f.EvalArg(s, args, i, d2)
+		result = slip.EvalArg(s, args, i, d2)
 	}
 	return
 }

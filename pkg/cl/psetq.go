@@ -46,7 +46,7 @@ type Psetq struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Psetq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args)%2 != 0 {
 		panic(fmt.Sprintf("psetq expected symbol value pairs. Not %d arguments.", len(f.Args)))
@@ -62,7 +62,7 @@ func (f *Psetq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			slip.PanicType("symbol argument to psetq", args[i], "symbol")
 		}
 		i++
-		result = f.EvalArg(s, args, i, d2)
+		result = slip.EvalArg(s, args, i, d2)
 		syms = append(syms, sym)
 		vals = append(vals, result)
 	}

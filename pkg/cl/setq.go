@@ -46,7 +46,7 @@ type Setq struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Setq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args)%2 != 0 {
 		panic(fmt.Sprintf("setq expected symbol value pairs. Not %d arguments.", len(f.Args)))
@@ -59,7 +59,7 @@ func (f *Setq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			slip.PanicType("symbol argument to setq", args[i], "symbol")
 		}
 		i++
-		result = f.EvalArg(s, args, i, d2)
+		result = slip.EvalArg(s, args, i, d2)
 		s.Set(sym, result)
 	}
 	return

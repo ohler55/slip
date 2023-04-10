@@ -91,3 +91,37 @@ func list2TestKeyArgs(
 	}
 	return
 }
+
+func processBinding(s, ns *slip.Scope, arg slip.Object, depth int) {
+	var bindings slip.List
+	switch ta := arg.(type) {
+	case nil:
+	case slip.List:
+		bindings = ta
+	default:
+		slip.PanicType("bindings", arg, "list")
+	}
+	for _, binding := range bindings {
+		switch tb := binding.(type) {
+		case slip.Symbol:
+			ns.Let(tb, nil)
+		case slip.List:
+			if len(tb) < 1 {
+				slip.PanicType("binding variable", nil, "list", "symbol")
+			}
+			sym, ok := tb[0].(slip.Symbol)
+			if !ok {
+				slip.PanicType("binding variable", tb[0], "symbol")
+			}
+			if 1 < len(tb) {
+				// Use the original scope to avoid using the new bindings since
+				// they are evaluated in apparent parallel.
+				ns.Let(sym, slip.EvalArg(s, tb, 1, depth))
+			} else {
+				ns.Let(sym, nil)
+			}
+		default:
+			slip.PanicType("binding", tb, "list", "symbol")
+		}
+	}
+}

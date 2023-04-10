@@ -39,12 +39,12 @@ type Or struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Or) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	result = nil
 	d2 := depth + 1
 	for i := range args {
-		if result = f.EvalArg(s, args, i, d2); result != nil {
+		if result = slip.EvalArg(s, args, i, d2); result != nil {
 			break
 		}
 	}

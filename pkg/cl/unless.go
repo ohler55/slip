@@ -44,7 +44,7 @@ type Unless struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Unless) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
@@ -52,9 +52,9 @@ func (f *Unless) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	result = nil
 	d2 := depth + 1
 	pos := 0
-	if f.EvalArg(s, args, pos, d2) == nil {
+	if slip.EvalArg(s, args, pos, d2) == nil {
 		for pos++; pos < len(args); pos++ {
-			result = f.EvalArg(s, args, pos, d2)
+			result = slip.EvalArg(s, args, pos, d2)
 		}
 	}
 	return

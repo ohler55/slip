@@ -48,7 +48,7 @@ type Ceiling struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Ceiling) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return ceiling(f, args)
 }

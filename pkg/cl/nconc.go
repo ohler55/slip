@@ -39,7 +39,7 @@ type Nconc struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Nconc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	for i := len(args) - 1; 0 <= i; i-- {
 		switch ta := args[i].(type) {

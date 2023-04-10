@@ -44,42 +44,16 @@ type Let struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Let) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
 	}
-	bindings, ok := args[0].(slip.List)
-	if !ok {
-		slip.PanicType("let bindings", args[0], "list")
-	}
 	ns := s.NewScope()
 	d2 := depth + 1
-	for _, binding := range bindings {
-		switch tb := binding.(type) {
-		case slip.Symbol:
-			ns.Let(tb, nil)
-		case slip.List:
-			if len(tb) < 1 {
-				slip.PanicType("let local variable binding", nil, "list", "symbol")
-			}
-			var sym slip.Symbol
-			if sym, ok = tb[0].(slip.Symbol); !ok {
-				slip.PanicType("let local variable binding", tb[0], "symbol")
-			}
-			if 1 < len(tb) {
-				// Use the original scope to avoid using the new bindings since
-				// they are evaluated in apparent parallel.
-				ns.Let(sym, f.EvalArg(s, tb, 1, d2))
-			} else {
-				ns.Let(sym, nil)
-			}
-		default:
-			slip.PanicType("let binding", f, "list", "symbol")
-		}
-	}
+	processBinding(s, ns, args[0], d2)
 	for i := 1; i < len(args); i++ {
-		result = f.EvalArg(ns, args, i, d2)
+		result = slip.EvalArg(ns, args, i, d2)
 	}
 	return
 }

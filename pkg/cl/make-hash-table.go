@@ -39,7 +39,7 @@ type MakeHashTable struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *MakeHashTable) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if 1 < len(args) {
 		slip.PanicArgCount(f, 0, 8)

@@ -40,7 +40,7 @@ type Eval struct {
 // Call the function with the arguments provided.
 func (f *Eval) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	result = f.EvalArg(s, args, 0, depth+1)
+	result = slip.EvalArg(s, args, 0, depth+1)
 
 	return s.Eval(result, depth+1)
 }

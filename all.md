@@ -61,7 +61,6 @@
  * [ ] BIT-VECTOR
  * [ ] BIT-VECTOR-P
  * [ ] BIT-XOR
- * [ ] BLOCK
  * [ ] BOOLE
  * [ ] BOOLE-1
  * [ ] BOOLE-2
@@ -191,14 +190,10 @@
  * [ ] DIRECTORY-NAMESTRING
  * [ ] DISASSEMBLE
  * [ ] DIVISION-BY-ZERO
- * [ ] DO
- * [ ] DO*
  * [ ] DO-ALL-SYMBOLS
  * [ ] DO-EXTERNAL-SYMBOLS
  * [ ] DO-SYMBOLS
  * [ ] DOCUMENTATION
- * [ ] DOLIST
- * [ ] DOTIMES
  * [ ] DOUBLE-FLOAT
  * [ ] DOUBLE-FLOAT-EPSILON
  * [ ] DOUBLE-FLOAT-NEGATIVE-EPSILON
@@ -284,7 +279,6 @@
  * [ ] GET-SETF-EXPANSION
  * [ ] GET-UNIVERSAL-TIME
  * [ ] GETF
- * [ ] GO
  * [ ] GRAPHIC-CHAR-P
  * [ ] HANDLER-BIND
  * [ ] HANDLER-CASE
@@ -305,7 +299,6 @@
  * [ ] INTEGER-LENGTH
  * [ ] INTERACTIVE-STREAM-P
  * [ ] INTERNAL-TIME-UNITS-PER-SECOND
- * [x] INTERSECTION
  * [ ] INVALID-METHOD-ERROR
  * [ ] INVOKE-DEBUGGER
  * [ ] INVOKE-RESTART
@@ -428,8 +421,6 @@
  * [ ] NAMESTRING
  * [ ] NBUTLAST
  * [ ] NEXT-METHOD-P
- * [x] NIL
- * [x] NINTERSECTION
  * [ ] NINTH
  * [ ] NO-APPLICABLE-METHOD
  * [ ] NO-NEXT-METHOD
@@ -503,11 +494,6 @@
  * [ ] PRINT-UNREADABLE-OBJECT
  * [ ] PROBE-FILE
  * [ ] PROCLAIM
- * [ ] PROG
- * [ ] PROG*
- * [ ] PROG1
- * [ ] PROG2
- * [ ] PROGN
  * [ ] PROGRAM-ERROR
  * [ ] PROGV
  * [ ] PSETF
@@ -553,8 +539,6 @@
  * [ ] RESTART-BIND
  * [ ] RESTART-CASE
  * [ ] RESTART-NAME
- * [ ] RETURN
- * [ ] RETURN-FROM
  * [ ] REVAPPEND
  * [ ] ROOM
  * [ ] ROTATEF
@@ -801,6 +785,7 @@
  * [x] ASSOC-IF
  * [x] ASSOC-IF-NOT
  * [x] ATAN
+ * [x] BLOCK
  * [x] BUTLAST
  * [x] CAAAAR
  * [x] CAAADR
@@ -845,6 +830,10 @@
  * [x] DEFUN
  * [x] DEFVAR
  * [x] DESCRIBE
+ * [x] DO
+ * [x] DO*
+ * [x] DOLIST
+ * [x] DOTIMES
  * [x] EQ
  * [x] EQL
  * [x] EQUAL
@@ -863,6 +852,7 @@
  * [x] FROUND
  * [x] FUNCTION
  * [x] GETHASH
+ * [x] GO
  * [x] HASH-TABLE
  * [x] HASH-TABLE-COUNT
  * [x] HASH-TABLE-P
@@ -874,6 +864,7 @@
  * [x] INPUT-STREAM-P
  * [x] INTEGERP
  * [x] INTERN
+ * [x] INTERSECTION
  * [x] LAMBDA
  * [x] LAST
  * [x] LENGTH
@@ -899,6 +890,8 @@
  * [x] MINUSP
  * [x] MOD
  * [x] NCONC
+ * [x] NIL
+ * [x] NINTERSECTION
  * [x] NOT
  * [x] NREVERSE
  * [x] NTH
@@ -914,6 +907,11 @@
  * [x] PRIN1
  * [x] PRINC
  * [x] PRINT
+ * [x] PROG
+ * [x] PROG*
+ * [x] PROG1
+ * [x] PROG2
+ * [x] PROGN
  * [x] PSETQ
  * [x] QUOTE
  * [x] RANDOM
@@ -921,6 +919,8 @@
  * [x] REM
  * [x] REMHASH
  * [x] REQUIRE
+ * [x] RETURN
+ * [x] RETURN-FROM
  * [x] REVERSE
  * [x] ROUND
  * [x] RPLACA

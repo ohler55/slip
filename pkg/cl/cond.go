@@ -41,7 +41,7 @@ type Cond struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Cond) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	result = nil
 	d2 := depth + 1
@@ -50,11 +50,11 @@ func (f *Cond) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		if !ok || len(clause) == 0 {
 			slip.PanicType("clause", a, "list")
 		}
-		if f.EvalArg(s, clause, 0, d2) == nil {
+		if slip.EvalArg(s, clause, 0, d2) == nil {
 			continue
 		}
 		for i := 1; i < len(clause); i++ {
-			result = f.EvalArg(s, clause, i, d2)
+			result = slip.EvalArg(s, clause, i, d2)
 		}
 		break
 	}

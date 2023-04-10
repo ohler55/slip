@@ -50,7 +50,7 @@ type Defvar struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Defvar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 3)
 	name, ok := args[0].(slip.Symbol)
@@ -66,7 +66,7 @@ func (f *Defvar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		doc slip.String
 	)
 	if 1 < len(args) {
-		iv = f.EvalArg(s, args, 1, depth+1)
+		iv = slip.EvalArg(s, args, 1, depth+1)
 		if 2 < len(args) {
 			var ok bool
 			if doc, ok = args[2].(slip.String); !ok {

@@ -38,7 +38,7 @@ type Append struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Append) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	for _, a := range args {
 		if a == nil {

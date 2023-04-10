@@ -38,7 +38,7 @@ type Add struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Add) Call(s *slip.Scope, args slip.List, depth int) (sum slip.Object) {
 	sum = slip.Fixnum(0)
 	for _, arg := range args {
