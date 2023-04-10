@@ -20,6 +20,7 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
+  - where to replace let with unsafe version
   - dotimes
 
   - load - maybe handled in the compile phase as well as later)

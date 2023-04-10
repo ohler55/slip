@@ -82,6 +82,7 @@ func (f *Dolist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	} else {
 		slip.PanicType("dolist input", args[0], "list")
 	}
+	ns.Let(sym, nil) // use the safe way to verify it's a valid symbol to use for a let.
 	for _, v := range list {
 		ns.UnsafeLet(sym, v)
 		for i := 1; i < len(args); i++ {
@@ -106,5 +107,6 @@ func (f *Dolist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	}
+	ns.UnsafeLet(sym, nil)
 	return ns.Eval(rform, d2)
 }
