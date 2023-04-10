@@ -51,7 +51,7 @@ type AssocIf struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *AssocIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 4)
 	pos := 0

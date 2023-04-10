@@ -44,13 +44,13 @@ type Tagbody struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Tagbody) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	ns := s.NewScope()
 	ns.TagBody = true
 	d2 := depth + 1
 	for i := 0; i < len(args); i++ {
-		if gt, _ := f.EvalArg(ns, args, i, d2).(*GoTo); gt != nil {
+		if gt, _ := slip.EvalArg(ns, args, i, d2).(*GoTo); gt != nil {
 			for i++; i < len(args); i++ {
 				if slip.ObjectEqual(args[i], gt.Tag) {
 					break

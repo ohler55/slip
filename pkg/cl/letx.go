@@ -44,7 +44,7 @@ type Letx struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Letx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
@@ -70,7 +70,7 @@ func (f *Letx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			if 1 < len(tb) {
 				// Use the original scope to avoid using the new bindings since
 				// they are evaluated in apparent parallel.
-				ns.Let(sym, f.EvalArg(ns, tb, 1, d2))
+				ns.Let(sym, slip.EvalArg(ns, tb, 1, d2))
 			} else {
 				ns.Let(sym, nil)
 			}
@@ -79,7 +79,7 @@ func (f *Letx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		}
 	}
 	for i := 1; i < len(args); i++ {
-		result = f.EvalArg(ns, args, i, d2)
+		result = slip.EvalArg(ns, args, i, d2)
 	}
 	return
 }

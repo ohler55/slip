@@ -36,14 +36,14 @@ type Return struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Return) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	rr := ReturnResult{}
 	if !s.Block {
 		panic("return from unknown block: nil")
 	}
 	if 0 < len(args) {
-		rr.Result = f.EvalArg(s, args, 0, depth+1)
+		rr.Result = slip.EvalArg(s, args, 0, depth+1)
 	}
 	return &rr
 }

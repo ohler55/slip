@@ -20,30 +20,19 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-  - do*
   - dolist
   - dotimes
-  - return
-   - store on scope?
-   - return special type?
-    - need value as well, maybe Return{From string, Value slip.Object}
-    - in loop, check return of each
-    - if return name matches current then return value else return Return up the call stack
-  - loop (simple only)
-  - prog
-   - like let but with tags
-   - maybe just treat the tags as symbols and (go tag) goes back or forward to tag
-   - support return
-   - starts like let
-  - prog*
-  - progn
+
   - merge (starts with result-type)
   - room
   - load - maybe handled in the compile phase as well as later)
-  - gi:log - can this be made to work correctly (not collide with cl:log)?
-  - tagbody
-  - go
-   - return a special goto type
+
+  - error, warn, (add info and debug?)
+  - loop (simple only)
+  - gi:logger (error, warn, info, debug)
+   - log- for file writing or writing to stdout
+   - maybe a logger flavor with sub-flavors for file-logger and term-logger
+   - base checks level, forms message, and then sends self log
 
  - package
   - support export list

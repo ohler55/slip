@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
 
 package cl
 
@@ -46,7 +46,7 @@ type Block struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
@@ -64,7 +64,7 @@ func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	ns.Block = true
 	d2 := depth + 1
 	for i := 1; i < len(args); i++ {
-		result = f.EvalArg(ns, args, i, d2)
+		result = slip.EvalArg(ns, args, i, d2)
 		if rr, _ := result.(*ReturnResult); rr != nil {
 			if slip.ObjectEqual(name, rr.Tag) {
 				return rr.Result

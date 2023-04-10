@@ -48,7 +48,7 @@ type Round struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Round) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return round(f, args)
 }

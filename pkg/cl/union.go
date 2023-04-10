@@ -53,7 +53,7 @@ type Union struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Union) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	lists, keyFunc, testFunc := list2TestKeyArgs(s, f, args, depth)
 	var rlist slip.List

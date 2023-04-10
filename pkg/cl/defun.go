@@ -60,7 +60,7 @@ type Defun struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	name, ok := args[0].(slip.Symbol)
 	if !ok {

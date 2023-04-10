@@ -43,7 +43,7 @@ type ReturnFrom struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *ReturnFrom) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
@@ -61,7 +61,7 @@ func (f *ReturnFrom) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 		panic(fmt.Sprintf("return from unknown block: %s", rr.Tag))
 	}
 	if 1 < len(args) {
-		rr.Result = f.EvalArg(s, args, 1, depth+1)
+		rr.Result = slip.EvalArg(s, args, 1, depth+1)
 	}
 	return &rr
 }
