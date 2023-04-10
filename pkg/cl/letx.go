@@ -39,7 +39,7 @@ a closure that includes the bindings. All bindings are performed in sequence unl
 		}, &slip.CLPkg)
 }
 
-// Letx represents the letx function.
+// Letx represents the let* function.
 type Letx struct {
 	slip.Function
 }

@@ -4,6 +4,7 @@ package cl
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ohler55/slip"
 )
@@ -31,7 +32,7 @@ is assigned to the _var_.`,
 					Type: "list",
 					Text: `_(end-test result-form*)_ A list of one or more forms. The first
 form is the _end-test_ form that is evaluated on each iteration. If _end-form_ evaluates to
-true (_t_) the iteratoin stops and the _result-forms_ are evaluated with the last result
+true (_t_) the iteration stops and the _result-forms_ are evaluated with the last result
 returned from the __do__ call.`,
 				},
 				{Name: "&rest"},
@@ -105,7 +106,7 @@ func (f *Do) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object)
 			sb.result = ns.Eval(sb.step, d2)
 		}
 		for _, sb := range steps {
-			ns.Set(sb.sym, sb.result)
+			ns.UnsafeLet(sb.sym, sb.result)
 		}
 	}
 	return
@@ -123,7 +124,7 @@ func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, t
 		switch tb := binding.(type) {
 		case slip.Symbol:
 			ns.Let(tb, nil)
-			steps[i] = &stepBind{sym: tb}
+			steps[i] = &stepBind{sym: slip.Symbol(strings.ToLower(string(tb)))}
 		case slip.List:
 			if len(tb) < 1 {
 				slip.PanicType("do binding", nil, "list", "symbol")
@@ -132,12 +133,13 @@ func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, t
 			if sym, ok = tb[0].(slip.Symbol); !ok {
 				slip.PanicType("do binding", tb[0], "symbol")
 			}
+			sym = slip.Symbol(strings.ToLower(string(sym)))
 			sb := stepBind{sym: sym}
 			steps[i] = &sb
 			if 1 < len(tb) {
 				// Use the original scope to avoid using the new bindings since
 				// they are evaluated in apparent parallel.
-				ns.Let(sym, slip.EvalArg(s, tb, 1, depth))
+				ns.UnsafeLet(sym, slip.EvalArg(s, tb, 1, depth))
 				if 2 < len(tb) {
 					sb.step = tb[2]
 					if list, ok := sb.step.(slip.List); ok {
@@ -145,7 +147,7 @@ func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, t
 					}
 				}
 			} else {
-				ns.Let(sym, nil)
+				ns.UnsafeLet(sym, nil)
 			}
 		default:
 			slip.PanicType("do binding", tb, "list", "symbol")

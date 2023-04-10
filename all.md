@@ -190,13 +190,10 @@
  * [ ] DIRECTORY-NAMESTRING
  * [ ] DISASSEMBLE
  * [ ] DIVISION-BY-ZERO
- * [x] DO*
  * [ ] DO-ALL-SYMBOLS
  * [ ] DO-EXTERNAL-SYMBOLS
  * [ ] DO-SYMBOLS
  * [ ] DOCUMENTATION
- * [x] DOLIST
- * [ ] DOTIMES
  * [ ] DOUBLE-FLOAT
  * [ ] DOUBLE-FLOAT-EPSILON
  * [ ] DOUBLE-FLOAT-NEGATIVE-EPSILON
@@ -497,8 +494,6 @@
  * [ ] PRINT-UNREADABLE-OBJECT
  * [ ] PROBE-FILE
  * [ ] PROCLAIM
- * [x] PROG
- * [x] PROG*
  * [ ] PROGRAM-ERROR
  * [ ] PROGV
  * [ ] PSETF
@@ -836,6 +831,9 @@
  * [x] DEFVAR
  * [x] DESCRIBE
  * [x] DO
+ * [x] DO*
+ * [x] DOLIST
+ * [x] DOTIMES
  * [x] EQ
  * [x] EQL
  * [x] EQUAL
@@ -909,6 +907,8 @@
  * [x] PRIN1
  * [x] PRINC
  * [x] PRINT
+ * [x] PROG
+ * [x] PROG*
  * [x] PROG1
  * [x] PROG2
  * [x] PROGN

@@ -31,7 +31,7 @@ is assigned to the _var_.`,
 					Type: "list",
 					Text: `_(end-test result-form*)_ A list of one or more forms. The first
 form is the _end-test_ form that is evaluated on each iteration. If _end-form_ evaluates to
-true (_t_) the iteratoin stops and the _result-forms_ are evaluated with the last result
+true (_t_) the iteration stops and the _result-forms_ are evaluated with the last result
 returned from the __do__ call.`,
 				},
 				{Name: "&rest"},
@@ -96,7 +96,7 @@ func (f *Dox) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 			}
 		}
 		for _, sb := range steps {
-			ns.Set(sb.sym, ns.Eval(sb.step, d2))
+			ns.UnsafeLet(sb.sym, ns.Eval(sb.step, d2))
 		}
 	}
 	return
