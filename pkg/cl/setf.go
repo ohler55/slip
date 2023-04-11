@@ -64,15 +64,14 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		case slip.Symbol:
 			s.Set(ta, result)
 		case slip.List:
-			p = slip.ListToFunc(s, ta, depth+1)
+			p = slip.ListToFunc(s, ta, d2)
 			goto Retry
 		case slip.Placer:
 			targs := ta.GetArgs()
 			pargs := make(slip.List, len(targs))
-			for j := 0; j < len(targs); j++ {
-				v := targs[j]
+			for j, v := range targs {
 				if list, ok := v.(slip.List); ok {
-					v = slip.ListToFunc(s, list, depth+1)
+					v = slip.ListToFunc(s, list, d2)
 				}
 				pargs[j] = s.Eval(v, d2)
 			}
