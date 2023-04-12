@@ -154,7 +154,6 @@
  * [ ] COUNT-IF-NOT
  * [ ] CTYPECASE
  * [ ] DEBUG
- * [ ] DECF
  * [ ] DECLAIM
  * [ ] DECLARATION
  * [ ] DECLARE
@@ -290,7 +289,6 @@
  * [ ] IMAGPART
  * [ ] IMPORT
  * [ ] IN-PACKAGE
- * [ ] INCF
  * [ ] INITIALIZE-INSTANCE
  * [ ] INLINE
  * [ ] INSPECT
@@ -826,6 +824,7 @@
  * [x] CONS
  * [x] CONSP
  * [x] COS
+ * [x] DECF
  * [x] DEFPARAMETER
  * [x] DEFUN
  * [x] DEFVAR
@@ -861,6 +860,7 @@
  * [x] HASH-TABLE-SIZE
  * [x] HASH-TABLE-TEST
  * [x] IF
+ * [x] INCF
  * [x] INPUT-STREAM-P
  * [x] INTEGERP
  * [x] INTERN

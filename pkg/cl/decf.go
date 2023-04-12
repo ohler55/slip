@@ -65,13 +65,12 @@ func (f *Decf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			z := (*big.Int)(td)
 			result = (*slip.Bignum)(z.Neg(z))
 		case *slip.Ratio:
-			var z big.Int
 			den := (*big.Rat)(td).Denom()
-			num := z.Sub((*big.Rat)(td).Num(), den)
+			num := (*big.Rat)(td).Num()
 			num = (num.Neg(num))
-			result = (*slip.Ratio)((*big.Rat)(td).SetFrac(num, den))
+			delta = (*slip.Ratio)((*big.Rat)(td).SetFrac(num, den))
 		case slip.Complex:
-			result = slip.Complex(complex(-real(td), imag(td)))
+			delta = slip.Complex(complex(-real(td), -imag(td)))
 		default:
 			slip.PanicType("decf value", td, "number")
 		}
