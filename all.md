@@ -1,10 +1,6 @@
  * [ ] &ALLOW-OTHER-KEYS
  * [ ] &WHOLE
  * [ ] *GENSYM-COUNTER*
- * [ ] *LOAD-PATHNAME*
- * [ ] *LOAD-PRINT*
- * [ ] *LOAD-TRUENAME*
- * [ ] *LOAD-VERBOSE*
  * [ ] *MACROEXPAND-HOOK*
  * [ ] *MODULES*
  * [ ] *PRINT-PPRINT-DISPATCH*
@@ -331,7 +327,6 @@
  * [ ] LISP-IMPLEMENTATION-VERSION
  * [ ] LIST-LENGTH
  * [ ] LISTEN
- * [ ] LOAD
  * [ ] LOAD-LOGICAL-PATHNAME-TRANSLATIONS
  * [ ] LOAD-TIME-VALUE
  * [ ] LOCALLY
@@ -736,6 +731,10 @@
  * [x] *DEFAULT-PATHNAME-DEFAULTS*
  * [x] *ERROR-OUTPUT*
  * [x] *FEATURES*
+ * [x] *LOAD-PATHNAME*
+ * [x] *LOAD-PRINT*
+ * [x] *LOAD-TRUENAME*
+ * [x] *LOAD-VERBOSE*
  * [x] *PACKAGE*
  * [x] *PRINT-ARRAY*
  * [x] *PRINT-BASE*
@@ -874,6 +873,7 @@
  * [x] LIST*
  * [x] LIST-ALL-PACKAGES
  * [x] LISTP
+ * [x] LOAD
  * [x] LOG
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE

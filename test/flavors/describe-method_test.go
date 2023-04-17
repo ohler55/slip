@@ -16,7 +16,7 @@ func TestDescribeMethodPlain(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString("(describe-method vanilla-flavor :id out)").Eval(scope)
+	_ = slip.ReadString("(describe-method vanilla-flavor :id out)").Eval(scope, nil)
 	tt.Equal(t, `:id is a method of vanilla-flavor
   vanilla-flavor :primary
     :id => string
@@ -29,7 +29,7 @@ func TestDescribeMethodAnsi(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), slip.True)
-	_ = slip.ReadString("(describe-method vanilla-flavor :id out)").Eval(scope)
+	_ = slip.ReadString("(describe-method vanilla-flavor :id out)").Eval(scope, nil)
 	tt.Equal(t, "\x1b[1m:id\x1b[m is a method of \x1b[1mvanilla-flavor\x1b[m\n"+
 		"  \x1b[1mvanilla-flavor\x1b[m :primary\n"+
 		"    \x1b[1m:id\x1b[m => \x1b[4mstring\x1b[m\n"+
@@ -46,8 +46,8 @@ func TestDescribeMethodDaemons(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString(`(defwhopper (berry :rot) () "Does nothing." (continue-whopper))`).Eval(scope)
-	_ = slip.ReadString("(describe-method 'blueberry :rot out)").Eval(scope)
+	_ = slip.ReadString(`(defwhopper (berry :rot) () "Does nothing." (continue-whopper))`).Eval(scope, nil)
+	_ = slip.ReadString("(describe-method 'blueberry :rot out)").Eval(scope, nil)
 	tt.Equal(t, `:rot is a method of blueberry
   berry :whopper
     Does nothing.

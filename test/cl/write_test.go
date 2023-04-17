@@ -16,7 +16,7 @@ func TestWriteStream(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString("(write 123 :stream out)").Eval(scope)
+	result := slip.ReadString("(write 123 :stream out)").Eval(scope, nil)
 
 	tt.Equal(t, slip.Fixnum(123), result)
 	tt.Equal(t, "123", out.String())
@@ -26,7 +26,7 @@ func TestWriteBaseRadix(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(write 123 :stream out :base 8 :radix t)").Eval(scope)
+	_ = slip.ReadString("(write 123 :stream out :base 8 :radix t)").Eval(scope, nil)
 
 	tt.Equal(t, "#o173", out.String())
 }
@@ -35,8 +35,8 @@ func TestWriteCase(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(write 'aBc :stream out :case nil)").Eval(scope)
-	_ = slip.ReadString("(write 'aBc :stream out :case :upcase)").Eval(scope)
+	_ = slip.ReadString("(write 'aBc :stream out :case nil)").Eval(scope, nil)
+	_ = slip.ReadString("(write 'aBc :stream out :case :upcase)").Eval(scope, nil)
 
 	tt.Equal(t, "aBcABC", out.String())
 }
@@ -45,8 +45,8 @@ func TestWriteArray(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(write #2A((1 2)(3 4)) :stream out :array nil)").Eval(scope)
-	_ = slip.ReadString("(write #2A((1 2)(3 4)) :stream out :array t)").Eval(scope)
+	_ = slip.ReadString("(write #2A((1 2)(3 4)) :stream out :array nil)").Eval(scope, nil)
+	_ = slip.ReadString("(write #2A((1 2)(3 4)) :stream out :array t)").Eval(scope, nil)
 
 	tt.Equal(t, "#<(ARRAY T (2 2))>#2A((1 2) (3 4))", out.String())
 }
@@ -55,8 +55,8 @@ func TestWriteEscape(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(write #\\X :stream out :escape nil :circle t)").Eval(scope)
-	_ = slip.ReadString("(write #\\X :stream out :escape t)").Eval(scope)
+	_ = slip.ReadString("(write #\\X :stream out :escape nil :circle t)").Eval(scope, nil)
+	_ = slip.ReadString("(write #\\X :stream out :escape t)").Eval(scope, nil)
 
 	tt.Equal(t, "X#\\X", out.String())
 }
@@ -65,7 +65,7 @@ func TestWriteGensym(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(write 'abc :stream out :gensym t)").Eval(scope)
+	_ = slip.ReadString("(write 'abc :stream out :gensym t)").Eval(scope, nil)
 
 	// TBD try with (gensym)
 
@@ -76,8 +76,8 @@ func TestWriteLength(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(write '(0 1 2 3 4 5) :stream out :length nil :pretty nil)").Eval(scope)
-	_ = slip.ReadString("(write '(0 1 2 3 4 5) :stream out :length 4 :pretty nil)").Eval(scope)
+	_ = slip.ReadString("(write '(0 1 2 3 4 5) :stream out :length nil :pretty nil)").Eval(scope, nil)
+	_ = slip.ReadString("(write '(0 1 2 3 4 5) :stream out :length 4 :pretty nil)").Eval(scope, nil)
 
 	tt.Equal(t, "(0 1 2 3 4 5)(0 1 2 3 ...)", out.String())
 }
@@ -86,8 +86,8 @@ func TestWriteLevel(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(write '(0 (1 (2 (3 (4))))) :stream out :level nil :pretty nil)").Eval(scope)
-	_ = slip.ReadString("(write '(0 (1 (2 (3 (4))))) :stream out :level 3 :pretty nil)").Eval(scope)
+	_ = slip.ReadString("(write '(0 (1 (2 (3 (4))))) :stream out :level nil :pretty nil)").Eval(scope, nil)
+	_ = slip.ReadString("(write '(0 (1 (2 (3 (4))))) :stream out :level 3 :pretty nil)").Eval(scope, nil)
 
 	tt.Equal(t, "(0 (1 (2 (3 (4)))))(0 (1 (2 #)))", out.String())
 }
@@ -96,9 +96,9 @@ func TestWriteLines(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(write '(0 (1 (2 (3 (4))))) :stream out :lines nil :right-margin 10 :pretty t)").Eval(scope)
+	_ = slip.ReadString("(write '(0 (1 (2 (3 (4))))) :stream out :lines nil :right-margin 10 :pretty t)").Eval(scope, nil)
 	out.WriteString("\n")
-	_ = slip.ReadString("(write '(0 (1 (2 (3 (4))))) :stream out :lines 4 :right-margin 10 :pretty t)").Eval(scope)
+	_ = slip.ReadString("(write '(0 (1 (2 (3 (4))))) :stream out :lines 4 :right-margin 10 :pretty t)").Eval(scope, nil)
 
 	tt.Equal(t, `(0
  (1
@@ -115,9 +115,9 @@ func TestWriteReadably(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(write 1.2s+3 :stream out :readably nil :miser-width nil)`).Eval(scope)
+	_ = slip.ReadString(`(write 1.2s+3 :stream out :readably nil :miser-width nil)`).Eval(scope, nil)
 	out.WriteString(" ")
-	_ = slip.ReadString(`(write 1.2s+3 :stream out :readably t :miser-width 10)`).Eval(scope)
+	_ = slip.ReadString(`(write 1.2s+3 :stream out :readably t :miser-width 10)`).Eval(scope, nil)
 
 	tt.Equal(t, "1200 1.2s+03", out.String())
 }
@@ -161,7 +161,7 @@ func TestWriteBadStream(t *testing.T) {
 	}).Test(t)
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
-	tt.Panic(t, func() { _ = slip.ReadString("(write 7 :stream out)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(write 7 :stream out)").Eval(scope, nil) })
 }
 
 func TestWriteBadFixnum(t *testing.T) {

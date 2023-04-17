@@ -32,6 +32,10 @@ var (
 				Set: setErrorOutput,
 				Doc: "is a stream used as the default for warnings and errors when not in interaction mode.",
 			},
+			"*load-pathname*": {Val: nil, Doc: "load path set during load."},
+			"*load-print*":    {Val: nil, Doc: "default value for print during loading."},
+			"*load-truename*": {Val: nil, Doc: "load path set during load."},
+			"*load-verbose*":  {Val: nil, Doc: "default value for verbose during loading."},
 			"*standard-input*": {
 				Get: getStandardInput,
 				Set: setStandardInput,

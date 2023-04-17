@@ -5,6 +5,7 @@ package slip
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"math/big"
 	"regexp"
 	"strconv"
@@ -935,10 +936,13 @@ func (c Code) Compile() {
 }
 
 // Eval all code elements and return the value of the last evaluation.
-func (c Code) Eval(scope *Scope) (result Object) {
+func (c Code) Eval(scope *Scope, w io.Writer) (result Object) {
 	for _, obj := range c {
 		if obj != nil {
 			result = obj.Eval(scope, 0)
+			if w != nil {
+				_, _ = fmt.Fprintf(w, ";;  %s\n", ObjectString(result))
+			}
 		}
 	}
 	return

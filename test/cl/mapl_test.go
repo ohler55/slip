@@ -12,7 +12,7 @@ import (
 
 func TestMaplLambda(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq collect '())`).Eval(scope)
+	_ = slip.ReadString(`(setq collect '())`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(mapl (lambda (x y) (setq collect (cons (+ (car x) (car y)) collect))) '(1 2 3 4) '(2 4 6))`,

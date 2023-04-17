@@ -47,7 +47,7 @@ func TestCddddrWrongNotList(t *testing.T) {
 
 func TestCddddrSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a . (b . (c . (d . e)))))").Eval(slip.NewScope())
+	_ = slip.ReadString("(setq target '(a . (b . (c . (d . e)))))").Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (cddddr target) 'x)",

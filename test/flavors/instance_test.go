@@ -19,7 +19,7 @@ func TestInstance(t *testing.T) {
 (setq berry (make-instance 'blueberry))
 `)
 	scope := slip.NewScope()
-	berry := code.Eval(scope)
+	berry := code.Eval(scope, nil)
 
 	tt.Equal(t, "{flavor: blueberry vars: {size: medium}}", pretty.SEN(berry))
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
@@ -49,7 +49,7 @@ func TestInstance(t *testing.T) {
 	tt.Equal(t, "/\x1b\\[1m#<blueberry [0-9a-h]+>\x1b\\[m, an instance of flavor \x1b\\[1mblueberry\x1b\\[m,\n"+
 		"  has instance variable values:\n    size: \"medium\".*/", string(out))
 
-	b2 := slip.ReadString("(make-instance blueberry)").Eval(slip.NewScope()).(*flavors.Instance)
+	b2 := slip.ReadString("(make-instance blueberry)").Eval(slip.NewScope(), nil).(*flavors.Instance)
 	tt.Equal(t, true, b2.Equal(berry))
 
 	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
@@ -67,7 +67,7 @@ func TestInstance(t *testing.T) {
 	bi.Any = "abc"
 	tt.Equal(t, 3, bi.Length())
 
-	_ = slip.ReadString(`(defmethod (blueberry :length) () 5)`).Eval(scope)
+	_ = slip.ReadString(`(defmethod (blueberry :length) () 5)`).Eval(scope, nil)
 	tt.Equal(t, 5, bi.Length())
 
 }

@@ -12,7 +12,7 @@ import (
 
 func TestMapcLambda(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq collect '())`).Eval(scope)
+	_ = slip.ReadString(`(setq collect '())`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(mapc (lambda (x) (setq collect (cons x collect))) '(1 2 3))`,
@@ -23,7 +23,7 @@ func TestMapcLambda(t *testing.T) {
 
 func TestMapcFunction(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq collect '())`).Eval(scope)
+	_ = slip.ReadString(`(setq collect '())`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(mapc (lambda (x y) (setq collect (cons (cons x y) collect))) '(a b c d) '(1 2 3))`,

@@ -14,7 +14,7 @@ func TestClrhashOk(t *testing.T) {
 	_ = slip.ReadString(`
 (setq table (make-hash-table))
 (setf (gethash 'a table) 1)
-`).Eval(scope)
+`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(clrhash table)`,
@@ -24,7 +24,7 @@ func TestClrhashOk(t *testing.T) {
 
 func TestClrhashArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq table (make-hash-table))").Eval(scope)
+	_ = slip.ReadString("(setq table (make-hash-table))").Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(clrhash table t)`,
