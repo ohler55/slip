@@ -11,13 +11,13 @@ import (
 
 func TestHashTableCount(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq table (make-hash-table))").Eval(scope)
+	_ = slip.ReadString("(setq table (make-hash-table))").Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(hash-table-count table)`,
 		Expect: "0",
 	}).Test(t)
-	_ = slip.ReadString("(setf (gethash 'one table) 1)").Eval(scope)
+	_ = slip.ReadString("(setf (gethash 'one table) 1)").Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(hash-table-count table)`,

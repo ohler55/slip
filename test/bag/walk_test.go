@@ -12,8 +12,8 @@ import (
 
 func TestBagWalkPathLisp(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq result '())`).Eval(scope)
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope)
+	_ = slip.ReadString(`(setq result '())`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-walk bag (lambda (x) (setq result (cons x result))) "*" t)`,
@@ -24,8 +24,8 @@ func TestBagWalkPathLisp(t *testing.T) {
 
 func TestBagWalkPathBag(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq result '())`).Eval(scope)
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope)
+	_ = slip.ReadString(`(setq result '())`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-walk bag '(lambda (x) (setq result (cons (bag-native x) result))) "*")`,
@@ -36,10 +36,10 @@ func TestBagWalkPathBag(t *testing.T) {
 
 func TestBagWalkFuncLisp(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq result '())`).Eval(scope)
-	_ = slip.ReadString(`(defun walk-add (x) (setq result (cons x result)))`).Eval(scope)
+	_ = slip.ReadString(`(setq result '())`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun walk-add (x) (setq result (cons x result)))`).Eval(scope, nil)
 	// TBD setup a defer to undefine walk-add
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-walk bag 'walk-add "*" t)`,
@@ -50,10 +50,10 @@ func TestBagWalkFuncLisp(t *testing.T) {
 
 func TestBagWalkFuncBag(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq result '())`).Eval(scope)
-	_ = slip.ReadString(`(defun walk-add-bag (x) (setq result (cons (bag-native x) result)))`).Eval(scope)
+	_ = slip.ReadString(`(setq result '())`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun walk-add-bag (x) (setq result (cons (bag-native x) result)))`).Eval(scope, nil)
 	// TBD setup a defer to undefine walk-add
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-walk bag #'walk-add-bag (make-bag-path "*") nil)`,

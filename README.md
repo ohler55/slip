@@ -20,7 +20,6 @@ SLIce Processing is LISP for golang
 
 - next
  - cl
-  - load - maybe handled in the compile phase as well as later)
 
   - merge (starts with result-type)
   - room

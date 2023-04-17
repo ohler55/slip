@@ -24,22 +24,22 @@ func TestVanillaMethods(t *testing.T) {
 (setq berry (make-instance 'strawberry :size "medium"))
 `)
 	scope := slip.NewScope()
-	_ = code.Eval(scope)
-	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope)
+	_ = code.Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope, nil)
 
-	id := slip.ReadString("(send berry :id)").Eval(scope)
+	id := slip.ReadString("(send berry :id)").Eval(scope, nil)
 	tt.SameType(t, slip.Fixnum(0), id)
 
-	f := slip.ReadString("(send berry :flavor)").Eval(scope)
+	f := slip.ReadString("(send berry :flavor)").Eval(scope, nil)
 	tt.Equal(t, "#<flavor strawberry>", f.String())
 
-	has := slip.ReadString("(send berry :operation-handled-p :size)").Eval(scope)
+	has := slip.ReadString("(send berry :operation-handled-p :size)").Eval(scope, nil)
 	tt.Equal(t, slip.True, has)
-	has = slip.ReadString("(send berry :operation-handled-p :x)").Eval(scope)
+	has = slip.ReadString("(send berry :operation-handled-p :x)").Eval(scope, nil)
 	tt.Nil(t, has)
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :operation-handled-p)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :operation-handled-p)").Eval(scope, nil) })
 
-	methods := slip.ReadString("(send berry :which-operations)").Eval(scope)
+	methods := slip.ReadString("(send berry :which-operations)").Eval(scope, nil)
 	tt.Equal(t,
 		"(:describe :eval-inside-yourself :flavor :id :init :inspect :operation-handled-p :print-self "+
 			":send-if-handles :set-size\n           :size :which-operations)",
@@ -54,7 +54,7 @@ func TestVanillaMethods(t *testing.T) {
 
 	scope.Set("*print-ansi*", nil)
 
-	_ = slip.ReadString("(send berry :describe)").Eval(scope)
+	_ = slip.ReadString("(send berry :describe)").Eval(scope, nil)
 
 	pw.Close()
 	var out []byte
@@ -70,28 +70,28 @@ func TestVanillaMethods(t *testing.T) {
 	defer func() { _ = pw2.Close(); _ = pr2.Close() }()
 
 	scope.Let(slip.Symbol("out"), (*slip.FileStream)(pw2))
-	_ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope)
+	_ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope, nil)
 	pw2.Close()
 	out, err = ioutil.ReadAll(pr2)
 	tt.Nil(t, err)
 	tt.Equal(t, "/#<strawberry [0-9a-f]+>/", string(out))
 
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self out 0)").Eval(scope) })
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self t 0 t)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self out 0)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self t 0 t)").Eval(scope, nil) })
 	// try to write to a closed stream
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope, nil) })
 
-	size := slip.ReadString("(send berry :send-if-handles :size)").Eval(scope)
+	size := slip.ReadString("(send berry :send-if-handles :size)").Eval(scope, nil)
 	tt.Equal(t, slip.String("medium"), size)
-	result := slip.ReadString("(send berry :send-if-handles :nothing)").Eval(scope)
+	result := slip.ReadString("(send berry :send-if-handles :nothing)").Eval(scope, nil)
 	tt.Nil(t, result)
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :send-if-handles)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :send-if-handles)").Eval(scope, nil) })
 
-	size = slip.ReadString("(send berry :eval-inside-yourself 'size)").Eval(scope)
+	size = slip.ReadString("(send berry :eval-inside-yourself 'size)").Eval(scope, nil)
 	tt.Equal(t, slip.String("medium"), size)
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :eval-inside-yourself)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :eval-inside-yourself)").Eval(scope, nil) })
 
-	bag := slip.ReadString("(send berry :inspect)").Eval(scope)
+	bag := slip.ReadString("(send berry :inspect)").Eval(scope, nil)
 	tt.SameType(t, &flavors.Instance{}, bag)
 	inst := bag.(*flavors.Instance)
 	tt.Equal(t, "{flavor: strawberry vars: {size: medium}}", pretty.SEN(inst.Any))
@@ -200,7 +200,7 @@ func testVanillaDocs(t *testing.T, method, expect string) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString(fmt.Sprintf("(describe-method vanilla-flavor %s out)", method)).Eval(scope)
+	_ = slip.ReadString(fmt.Sprintf("(describe-method vanilla-flavor %s out)", method)).Eval(scope, nil)
 	tt.Equal(t, expect, out.String())
 }
 
@@ -208,9 +208,9 @@ func TestVanillaDescribeStream(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString("(setq obj (make-instance 'vanilla-flavor))").Eval(scope)
-	_ = slip.ReadString("(send obj :describe out)").Eval(scope)
+	_ = slip.ReadString("(setq obj (make-instance 'vanilla-flavor))").Eval(scope, nil)
+	_ = slip.ReadString("(send obj :describe out)").Eval(scope, nil)
 	tt.Equal(t, `/#<vanilla-flavor [0-9a-f]+>.*, an instance of .*vanilla-flavor.*/`, out.String())
 
-	tt.Panic(t, func() { _ = slip.ReadString("(send obj :describe t)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send obj :describe t)").Eval(scope, nil) })
 }

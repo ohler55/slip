@@ -12,7 +12,7 @@ import (
 )
 
 func TestLambdaSelf(t *testing.T) {
-	lambda := slip.ReadString("(lambda (x) (car x))").Eval(slip.NewScope())
+	lambda := slip.ReadString("(lambda (x) (car x))").Eval(slip.NewScope(), nil)
 	(&sliptest.Object{
 		Target:    lambda,
 		String:    `/^#<function \(lambda \(x\)\) \{[a-h0-9]+\}>$/`,
@@ -26,7 +26,7 @@ func TestLambdaSelf(t *testing.T) {
 }
 
 func TestLambdaNoArgs(t *testing.T) {
-	lambda := slip.ReadString("(lambda () (terpri))").Eval(slip.NewScope())
+	lambda := slip.ReadString("(lambda () (terpri))").Eval(slip.NewScope(), nil)
 	(&sliptest.Object{
 		Target:    lambda,
 		String:    `/^#<function \(lambda \(\)\) \{[a-h0-9]+\}>$/`,
@@ -40,7 +40,7 @@ func TestLambdaNoArgs(t *testing.T) {
 }
 
 func TestLambdaFuncEval(t *testing.T) {
-	result := slip.ReadString("((lambda (x) (car x)) '(1 2 3))").Eval(slip.NewScope())
+	result := slip.ReadString("((lambda (x) (car x)) '(1 2 3))").Eval(slip.NewScope(), nil)
 	tt.Equal(t, slip.Fixnum(1), result)
 
 	code := slip.ReadString("((lambda (x) (car x)) '(1 2 3))")
@@ -51,10 +51,10 @@ func TestLambdaFuncEval(t *testing.T) {
 }
 
 func TestLambdaClosure(t *testing.T) {
-	result := slip.ReadString("(let ((x 3)) ((lambda () x)))").Eval(slip.NewScope())
+	result := slip.ReadString("(let ((x 3)) ((lambda () x)))").Eval(slip.NewScope(), nil)
 	tt.Equal(t, slip.Fixnum(3), result)
 }
 
 func TestLambdaBadArgCount(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(lambda)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(lambda)").Eval(slip.NewScope(), nil) })
 }

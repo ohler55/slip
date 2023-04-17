@@ -39,5 +39,5 @@ func TestListBasic(t *testing.T) {
 func TestListValues(t *testing.T) {
 	code := slip.ReadString(`(list 'a (values 'b 'c) 'd)`)
 	scope := slip.NewScope()
-	tt.Equal(t, "(a b d)", slip.ObjectString(code.Eval(scope)))
+	tt.Equal(t, "(a b d)", slip.ObjectString(code.Eval(scope, nil)))
 }

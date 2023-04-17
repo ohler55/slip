@@ -116,11 +116,11 @@ func TestCarSetfNotList(t *testing.T) {
 func TestCarValues(t *testing.T) {
 	code := slip.ReadString(`(car (values '(a b) 'c))`)
 	scope := slip.NewScope()
-	tt.Equal(t, slip.Symbol("a"), code.Eval(scope))
+	tt.Equal(t, slip.Symbol("a"), code.Eval(scope, nil))
 }
 
 func TestCarPlaceValues(t *testing.T) {
 	code := slip.ReadString(`(setq target '(a b)) (setf (car target) (values 'c 'd))`)
 	scope := slip.NewScope()
-	tt.Equal(t, slip.Symbol("c"), code.Eval(scope))
+	tt.Equal(t, slip.Symbol("c"), code.Eval(scope, nil))
 }

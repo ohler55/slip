@@ -26,7 +26,7 @@ func TestCaddarCons(t *testing.T) {
 
 func TestCaddarSetf(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '((a b c)))").Eval(slip.NewScope())
+	_ = slip.ReadString("(setq target '((a b c)))").Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (caddar target) 'x)",

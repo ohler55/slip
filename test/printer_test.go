@@ -231,7 +231,7 @@ func TestPrintLambda(t *testing.T) {
 	tt.Equal(t, slip.True, val)
 
 	scope := slip.NewScope()
-	lam := slip.ReadString("(lambda (x y) (+ x y))").Eval(scope)
+	lam := slip.ReadString("(lambda (x y) (+ x y))").Eval(scope, nil)
 	out := slip.Append([]byte{}, lam)
 	tt.Equal(t, "(lambda (x y) (+ x y))", string(out))
 

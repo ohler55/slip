@@ -20,8 +20,8 @@ func TestFlavorSimple(t *testing.T) {
 (defflavor blueberry ((size "medium")) ())
 `)
 	scope := slip.NewScope()
-	_ = code.Eval(scope)
-	f := slip.ReadString("blueberry").Eval(scope)
+	_ = code.Eval(scope, nil)
+	f := slip.ReadString("blueberry").Eval(scope, nil)
 
 	simple := sen.MustParse([]byte(`{
   abstract: false
@@ -71,8 +71,8 @@ func TestFlavorDescribeBasic(t *testing.T) {
 (defflavor blueberry ((size "medium")) ())
 `)
 	scope := slip.NewScope()
-	_ = code.Eval(scope)
-	f := slip.ReadString("blueberry").Eval(scope)
+	_ = code.Eval(scope, nil)
+	f := slip.ReadString("blueberry").Eval(scope, nil)
 
 	out := f.(*flavors.Flavor).Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `blueberry is a flavor:
@@ -124,8 +124,8 @@ func TestFlavorDescribeOptions(t *testing.T) {
  (:required-methods :x))
 `)
 	scope := slip.NewScope()
-	_ = code.Eval(scope)
-	f := slip.ReadString("abbey").Eval(scope)
+	_ = code.Eval(scope, nil)
+	f := slip.ReadString("abbey").Eval(scope, nil)
 
 	out := f.(*flavors.Flavor).Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `abbey is an abstract flavor:
@@ -149,12 +149,12 @@ func TestFlavorReceive(t *testing.T) {
 (defflavor blueberry ((size "medium")) ())
 `)
 	scope := slip.NewScope()
-	_ = code.Eval(scope)
+	_ = code.Eval(scope, nil)
 
-	result := slip.ReadString("(send blueberry :name)").Eval(scope)
+	result := slip.ReadString("(send blueberry :name)").Eval(scope, nil)
 	tt.Equal(t, slip.String("blueberry"), result)
 
-	result = slip.ReadString("(send blueberry :inspect)").Eval(scope)
+	result = slip.ReadString("(send blueberry :inspect)").Eval(scope, nil)
 	tt.SameType(t, &flavors.Instance{}, result)
 	tt.Equal(t, `{
   abstract: false
@@ -185,7 +185,7 @@ func TestFlavorReceive(t *testing.T) {
   requiredVars: []
 }`, pretty.SEN((result.(*flavors.Instance)).Any))
 
-	result = slip.ReadString("(send blueberry :WHICH-OPERATIONS)").Eval(scope)
+	result = slip.ReadString("(send blueberry :WHICH-OPERATIONS)").Eval(scope, nil)
 	tt.Equal(t, "(:describe :inspect :name :which-operations)", slip.ObjectString(result))
 
 	var out strings.Builder
@@ -196,7 +196,7 @@ func TestFlavorReceive(t *testing.T) {
 	slip.CurrentPackage.Set("*print-ansi*", nil)
 
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString("(send blueberry :describe out)").Eval(scope)
+	_ = slip.ReadString("(send blueberry :describe out)").Eval(scope, nil)
 	tt.Equal(t, `blueberry is a flavor:
   Inherits: vanilla-flavor
   Variables:
@@ -214,6 +214,6 @@ func TestFlavorReceive(t *testing.T) {
     :which-operations
 `, out.String())
 
-	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :describe t)").Eval(scope) })
-	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :not-a-method)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :describe t)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :not-a-method)").Eval(scope, nil) })
 }

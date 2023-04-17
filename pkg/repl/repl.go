@@ -105,11 +105,18 @@ func SetConfigDir(dir string) {
 
 	_ = os.MkdirAll(dir, 0755)
 	var buf []byte
+	defer func() {
+		_ = slip.CurrentPackage.Set("*load-pathname*", nil)
+		_ = slip.CurrentPackage.Set("*load-truename*", nil)
+	}()
 	if buf, err = os.ReadFile(cfgPath); err == nil {
 		configFilename = "" // Turn off writing while evaluating config file.
 		code := slip.Read(buf)
+		pathname := slip.String(filepath.Join(slip.WorkingDir, cfgPath))
+		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
+		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
 		code.Compile()
-		code.Eval(&scope)
+		code.Eval(&scope, nil) // TBD look at load-verbose and load-print
 	} else {
 		if os.IsNotExist(err) {
 			if err = os.WriteFile(cfgPath, []byte(configHeader), 0666); err != nil {
@@ -120,9 +127,12 @@ func SetConfigDir(dir string) {
 		}
 	}
 	if buf, err = os.ReadFile(customPath); err == nil {
+		pathname := slip.String(filepath.Join(slip.WorkingDir, customPath))
+		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
+		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
 		code := slip.Read(buf)
 		code.Compile()
-		code.Eval(&scope)
+		code.Eval(&scope, nil) // TBD look at load-verbose and load-print
 	}
 	configFilename = cfgPath
 }
