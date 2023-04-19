@@ -16,7 +16,7 @@ func TestUndefflavorBasic(t *testing.T) {
 	slip.ReadString("(undefflavor 'f1)").Eval(scope, nil)
 
 	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor vanilla-flavor)", names.String())
+	tt.Equal(t, "(bag-flavor logger vanilla-flavor)", names.String())
 }
 
 func TestUndefflavorByFlavor(t *testing.T) {
@@ -26,7 +26,7 @@ func TestUndefflavorByFlavor(t *testing.T) {
 	slip.ReadString("(undefflavor f1)").Eval(scope, nil)
 
 	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor vanilla-flavor)", names.String())
+	tt.Equal(t, "(bag-flavor logger vanilla-flavor)", names.String())
 }
 
 func TestUndefflavorBadFlavor(t *testing.T) {
