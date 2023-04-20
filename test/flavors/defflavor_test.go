@@ -73,7 +73,7 @@ func TestDefflavorInherit(t *testing.T) {
 `).Eval(scope, nil)
 
 	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor f1 f2 f3 logger vanilla-flavor)", names.String())
+	tt.Equal(t, "(bag-flavor f1 f2 f3 logger-flavor vanilla-flavor)", names.String())
 
 	sf := slip.ReadString("f3").Eval(scope, nil).Simplify()
 	tt.Equal(t, "[f2 f1 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
@@ -83,7 +83,7 @@ func TestDefflavorInherit(t *testing.T) {
 
 	// undefflavor should remove all flavors that inherit from f1 as well as f1.
 	names = slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor logger vanilla-flavor)", names.String())
+	tt.Equal(t, "(bag-flavor logger-flavor vanilla-flavor)", names.String())
 }
 
 func TestDefflavorInheritSame(t *testing.T) {
@@ -196,7 +196,7 @@ func TestDefflavorInclude(t *testing.T) {
 `).Eval(scope, nil)
 
 	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor f1 f2 f3 logger vanilla-flavor)", names.String())
+	tt.Equal(t, "(bag-flavor f1 f2 f3 logger-flavor vanilla-flavor)", names.String())
 
 	sf := slip.ReadString("f3").Eval(scope, nil).Simplify()
 	tt.Equal(t, "[f2 f1 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
@@ -213,7 +213,7 @@ func TestDefflavorIncludeAbstract(t *testing.T) {
 `).Eval(scope, nil)
 
 	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor f1 f2 f3 logger vanilla-flavor)", names.String())
+	tt.Equal(t, "(bag-flavor f1 f2 f3 logger-flavor vanilla-flavor)", names.String())
 
 	sf := slip.ReadString("f3").Eval(scope, nil).Simplify()
 	tt.Equal(t, "[f2 f1 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
@@ -312,7 +312,7 @@ func TestDefflavorRequired(t *testing.T) {
 `).Eval(scope, nil)
 
 	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor f1 f2 f3 logger vanilla-flavor)", names.String())
+	tt.Equal(t, "(bag-flavor f1 f2 f3 logger-flavor vanilla-flavor)", names.String())
 
 	sf := slip.ReadString("f3").Eval(scope, nil).Simplify()
 	tt.Equal(t, "[f2 f1 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))

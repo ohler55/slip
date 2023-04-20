@@ -3,27 +3,40 @@
 package gi
 
 import (
+	"fmt"
 	"io"
 	"time"
 
+	"github.com/ohler55/ojg"
+	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
+type logQueue struct {
+	queue chan []byte
+	done  chan bool
+}
+
 var logger *flavors.Flavor
+
+var colorCodes = []string{
+	"\x1b[31m",
+	"\x1b[33m",
+	"",
+	"\x1b[35m",
+}
 
 func init() {
 	logger = flavors.DefFlavor(
-		"logger",
+		"logger-flavor",
 		map[string]slip.Object{ // instance variables
 			"level":      slip.Fixnum(1),
 			"with-time":  nil, // boolean
 			"with-level": slip.True,
 			"colorize":   nil,
-			"out":        nil,
 			"json":       nil,
-			"sen":        nil,
 		},
 		nil, // inherit
 		slip.List{ // options
@@ -31,8 +44,15 @@ func init() {
 			slip.Symbol(":settable-instance-variables"),
 			slip.Symbol(":inittable-instance-variables"),
 			slip.List{
+				slip.Symbol(":default-init-plist"),
+				slip.List{
+					slip.Symbol(":out"),
+					nil,
+				},
+			},
+			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`Logs messages to *standard-output* with various options.`),
+				slip.String(`Logs messages to a stream with various options.`),
 			},
 		},
 	)
@@ -41,6 +61,8 @@ func init() {
 	logger.DefMethod(":warn", "", warnCaller(true))
 	logger.DefMethod(":info", "", infoCaller(true))
 	logger.DefMethod(":debug", "", debugCaller(true))
+	logger.DefMethod(":out", "", outCaller(true))
+	logger.DefMethod(":set-out", "", setOutCaller(true))
 	logger.DefMethod(":write", "", writeCaller(true))
 	logger.DefMethod(":shutdown", "", shutdownCaller(true))
 }
@@ -54,18 +76,40 @@ type initCaller bool
 
 func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	queue := make(chan []byte, 100)
-	obj.Any = queue
+	queue := logQueue{
+		queue: make(chan []byte, 100),
+		done:  make(chan bool, 1),
+	}
+	var out slip.Object = slip.StandardOutput
+	if 0 < len(args) {
+		if list, ok := args[0].(slip.List); ok {
+			for i := 0; i < len(list)-1; i++ {
+				if slip.Symbol(":out") == list[i] {
+					switch list[i+1].(type) {
+					case nil:
+						out = slip.StandardOutput
+					case io.Writer:
+						out = list[i+1]
+					default:
+						slip.PanicType(":out", list[i+1], "output-stream")
+					}
+				}
+			}
+		}
+	}
+	s.Let("out", out)
+	obj.Any = &queue
 	go func() {
 		wargs := slip.List{nil}
 		for {
-			message := <-queue
+			message := <-queue.queue
 			if len(message) == 0 {
 				break
 			}
 			wargs[0] = slip.String(message)
 			obj.Receive(":write", wargs, 0)
 		}
+		queue.done <- true
 	}()
 	return nil
 }
@@ -79,33 +123,36 @@ func logFormat(s *slip.Scope, level int, args slip.List) {
 	if int(limit) < level {
 		return
 	}
-	if level < 0 {
-		level = 0
-	} else if 3 < level {
-		level = 3
-	}
 	asJSON := s.Get("json") != nil
-	asSEN := s.Get("sen") != nil
+	color := s.Get("colorize") != nil
 	message := cl.FormatArgs(s, args)
 	var buf []byte
-	if asJSON || asSEN {
-		// TBD setup map
-		// encode according to flags
-		//
+	if asJSON {
+		entry := map[string]any{
+			"when":    time.Now().UTC().Format(time.RFC3339Nano),
+			"level":   []string{"error", "warn", "info", "debug"}[level],
+			"message": string(message),
+		}
+		buf = append(buf, oj.JSON(entry, &ojg.Options{Sort: true})...)
 	} else {
 		if s.Get("with-time") != nil {
 			buf = time.Now().UTC().AppendFormat(buf, time.RFC3339Nano)
 			buf = append(buf, ' ')
 		}
-		// TBD color
+		if color {
+			buf = append(buf, colorCodes[level]...)
+		}
 		if s.Get("with-level") != nil {
 			buf = append(buf, "EWID"[level])
 			buf = append(buf, ' ')
 		}
 		buf = append(buf, message...)
+		if color {
+			buf = append(buf, "\x1b[m"...)
+		}
 	}
 	obj := s.Get("self").(*flavors.Instance)
-	obj.Any.(chan []byte) <- buf
+	obj.Any.(*logQueue).queue <- buf
 }
 
 type errorCaller bool
@@ -164,23 +211,53 @@ Log a debug message if the logger _level_ is at or above 3.
 `
 }
 
+type outCaller bool
+
+func (caller outCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	return s.Get("out")
+}
+
+func (caller outCaller) Docs() string {
+	return `__:out__
+Returns the output stream.
+
+`
+}
+
+type setOutCaller bool
+
+func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	if len(args) != 1 {
+		panic(fmt.Sprintf("Method logger-flavor :set-out method expects one arguments but received %d.", len(args)))
+	}
+	switch args[0].(type) {
+	case nil:
+		s.Let("out", slip.StandardOutput)
+	case io.Writer:
+		s.Let("out", args[0])
+	default:
+		slip.PanicType(":out", args[0], "output-stream")
+	}
+	return nil
+}
+
+func (caller setOutCaller) Docs() string {
+	return `__:set-out__
+Sets the output stream.
+
+`
+}
+
 type writeCaller bool
 
 func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	out := s.Get("out")
-	if out == nil {
-		out = slip.StandardOutput
+	if w, ok := out.(io.Writer); ok {
+		var message slip.String
+		if message, ok = args[0].(slip.String); ok {
+			_, _ = w.Write(append([]byte(message), '\n'))
+		}
 	}
-	w, ok := out.(io.Writer)
-	if !ok {
-		slip.PanicType("stream", out, "output-stream", "nil")
-	}
-	var message slip.String
-	if message, ok = args[0].(slip.String); !ok {
-		slip.PanicType("message", args[0], "string")
-	}
-	_, _ = w.Write(append([]byte(message), '\n'))
-
 	return nil
 }
 
@@ -196,7 +273,10 @@ type shutdownCaller bool
 
 func (caller shutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	obj.Any.(chan []byte) <- nil
+	lg := obj.Any.(*logQueue)
+	lg.queue <- nil
+	<-lg.done
+
 	return nil
 }
 

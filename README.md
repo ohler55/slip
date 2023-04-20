@@ -21,24 +21,6 @@ SLIce Processing is LISP for golang
 - next
  - cl
 
- - gi
-  -
-  - logging
-   - (log:info "format string" args)
-    - efficient
-   - as a stream(s)
-    - handle rotate
-    - need to handle error, warn, etc
-   - gi logger flavor
-    - easy to extend
-    - nicely encapsulated
-    - use format but prepend EWID and potentially time and color
-     - need to make some func public
-    - make :format or :log
-    - sub-flavor or just one flavor
-     - terminal: print-logger
-     - rotating file: file-logger
-
   - merge (starts with result-type)
   - room
 
@@ -48,6 +30,13 @@ SLIce Processing is LISP for golang
    - log- for file writing or writing to stdout
    - maybe a logger flavor with sub-flavors for file-logger and term-logger
    - base checks level, forms message, and then sends self log
+
+ - watch (as in watch variables on a scope)
+  - (defun watch (var-symbol &optional location) ...)
+   - location is a list of horizontal and vertical postions
+    - only works with editor (how to implement that?)
+   - with no location simple print
+    - incorporate with trace or is that a side effect?
 
  - package
   - support export list
