@@ -23,6 +23,10 @@ SLIce Processing is LISP for golang
   + remove
   - modify
   - compare
+   - paths can be
+    - string
+    - list
+    - json-path limited to child, nth, wildcard (root and at are ok)
 
  - defmacro
 

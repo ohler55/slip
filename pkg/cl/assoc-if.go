@@ -55,7 +55,7 @@ type AssocIf struct {
 func (f *AssocIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 4)
 	pos := 0
-	predicate := resolveToCaller(s, args[pos], depth)
+	predicate := ResolveToCaller(s, args[pos], depth)
 	pos++
 	alist, ok := args[pos].(slip.List)
 	if !ok {
@@ -69,7 +69,7 @@ func (f *AssocIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Obj
 			slip.PanicType("keyword", args[pos], "keyword")
 		}
 		if keyword := strings.ToLower(string(sym)); keyword == ":key" {
-			keyFunc = resolveToCaller(s, args[pos+1], depth)
+			keyFunc = ResolveToCaller(s, args[pos+1], depth)
 		} else {
 			slip.PanicType("keyword", sym, ":key")
 		}

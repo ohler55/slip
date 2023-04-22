@@ -47,17 +47,15 @@ type Mapc struct {
 // Call the function with the arguments provided.
 func (f *Mapc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
-	pos := 0
-	fn := args[pos]
+	fn := args[0]
 	d2 := depth + 1
-	caller := resolveToCaller(s, fn, d2)
+	caller := ResolveToCaller(s, fn, d2)
 
-	pos++
-	list, ok := args[pos].(slip.List)
+	list, ok := args[1].(slip.List)
 	if !ok {
-		slip.PanicType("lists", args[pos], "list")
+		slip.PanicType("lists", args[1], "list")
 	}
-	if pos < len(args)-1 {
+	if 1 < len(args)-1 {
 		min := len(list)
 		var l2 slip.List
 		for i := 1; i < len(args); i++ {
