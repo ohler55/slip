@@ -54,7 +54,7 @@ func (f *Maphash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	}
 	fn := args[0]
 	d2 := depth + 1
-	caller := resolveToCaller(s, fn, d2)
+	caller := ResolveToCaller(s, fn, d2)
 	for k, v := range ht {
 		_ = caller.Call(s, slip.List{v, k}, d2)
 	}

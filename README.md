@@ -19,17 +19,11 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
- - cl
 
-  - merge (starts with result-type)
-  - room
+ - defmacro
 
-  - error, warn, (add info and debug?)
-  - loop (simple only)
-  - gi:logger (error, warn, info, debug)
-   - log- for file writing or writing to stdout
-   - maybe a logger flavor with sub-flavors for file-logger and term-logger
-   - base checks level, forms message, and then sends self log
+ - merge (starts with result-type)
+ - room
 
  - watch (as in watch variables on a scope)
   - (defun watch (var-symbol &optional location) ...)
@@ -71,12 +65,6 @@ SLIce Processing is LISP for golang
   - do-symbols
   - do-all-symbols
   - do-external-symbols
-
- - bag
-  - remove
-  - modify
-
- - defmacro
 
 
  - future repl options

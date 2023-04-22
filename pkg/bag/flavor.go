@@ -38,6 +38,8 @@ nil and boolean false.`),
 	flavor.DefMethod(":parse", "", parseCaller(true))
 	flavor.DefMethod(":get", "", getCaller(true))
 	flavor.DefMethod(":has", "", hasCaller(true))
+	flavor.DefMethod(":remove", "", removeCaller(true))
+	flavor.DefMethod(":modify", "", modifyCaller(true))
 	flavor.DefMethod(":native", "", nativeCaller(true))
 	flavor.DefMethod(":write", "", writeCaller(true))
 	flavor.DefMethod(":walk", "", walkCaller(true))
@@ -74,7 +76,7 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 			}
 		}
 	default:
-		panic(fmt.Sprintf("Method bag-flavor init method expects zero or two arguments but received %d.", len(args)))
+		panic(fmt.Sprintf("Method bag-flavor :init method expects zero or two arguments but received %d.", len(args)))
 	}
 	return nil
 }
@@ -98,7 +100,7 @@ func (caller setCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	case 2:
 		setBag(obj, args[0], args[1])
 	default:
-		panic(fmt.Sprintf("Method bag-flavor set method expects one or two arguments but received %d.", len(args)))
+		panic(fmt.Sprintf("Method bag-flavor :set method expects one or two arguments but received %d.", len(args)))
 	}
 	return obj
 }
@@ -124,7 +126,7 @@ func (caller parseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	case 2:
 		parseBag(obj, args[0], args[1])
 	default:
-		panic(fmt.Sprintf("Method bag-flavor parse method expects one or two arguments but received %d.", len(args)))
+		panic(fmt.Sprintf("Method bag-flavor :parse method expects one or two arguments but received %d.", len(args)))
 	}
 	return obj
 }
@@ -153,15 +155,15 @@ func (caller getCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.O
 	case 2:
 		value = getBag(obj, args[0], args[1] != nil)
 	default:
-		panic(fmt.Sprintf("Method bag-flavor get method expects one or two arguments but received %d.", len(args)))
+		panic(fmt.Sprintf("Method bag-flavor :get method expects one or two arguments but received %d.", len(args)))
 	}
 	return
 }
 
 func (caller getCaller) Docs() string {
-	return `__:get__ &optional _path_ _as-lisp_ => _object_|_bag_
+	return `__:get__ &optional _path_ _as-bag_ => _object_|_bag_
   _path_ to the location in the bag to get the _value_ from. The path must follow the JSONPath format.
-  _as-lisp_ if not nil then the returned value is a LISP value otherwise a new _bag_ is returned.
+  _as-bag_ if not nil then the returned value is a _bag_ otherwise a new LISP value is returned.
 
 
 Gets a _value_ at the location described by _path_.
@@ -176,7 +178,7 @@ func (caller hasCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.O
 	if len(args) == 1 {
 		value = hasBag(obj, args[0])
 	} else {
-		panic(fmt.Sprintf("Method bag-flavor has method expects one arguments but received %d.", len(args)))
+		panic(fmt.Sprintf("Method bag-flavor :has method expects one arguments but received %d.", len(args)))
 	}
 	return
 }
@@ -190,12 +192,52 @@ Returns true if a value at the location described by _path_ exists.
 `
 }
 
+type removeCaller bool
+
+func (caller removeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if len(args) == 1 {
+		removeBag(obj, args[0])
+	} else {
+		panic(fmt.Sprintf("Method bag-flavor :remove method expects one arguments but received %d.", len(args)))
+	}
+	return obj
+}
+
+func (caller removeCaller) Docs() string {
+	return `__:remove__ _path_ => _object_
+  _path_ to the location in the bag to remove. The path must follow the JSONPath format.
+
+
+Returns the object itself.
+`
+}
+
+type modifyCaller bool
+
+func (caller modifyCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	modifyBag(s, obj, args, depth+1)
+	return obj
+}
+
+func (caller modifyCaller) Docs() string {
+	return `__:modify__ _function_ &optional _path_ &key _:as-bag_ => _object_
+  _function_ to modify the value at _path_
+  _path_ to the location in the bag to modify. The path must follow the JSONPath format.
+  _:as-bag_ if true the _function_ expects a _bag_ otherwise it expects a lisp object.
+
+
+Returns the object itself.
+`
+}
+
 type nativeCaller bool
 
 func (caller nativeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		panic(fmt.Sprintf("Method bag-flavor native method expects no arguments but received %d.", len(args)))
+		panic(fmt.Sprintf("Method bag-flavor :native method expects no arguments but received %d.", len(args)))
 	}
 	return slip.SimpleObject(obj.Any)
 }

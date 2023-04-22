@@ -9,7 +9,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func resolveToCaller(s *slip.Scope, fn slip.Object, depth int) (caller slip.Caller) {
+// ResolveToCaller resolve an object to a slip.Caller.
+func ResolveToCaller(s *slip.Scope, fn slip.Object, depth int) (caller slip.Caller) {
 	d2 := depth + 1
 CallFunc:
 	switch tf := fn.(type) {
@@ -81,9 +82,9 @@ func list2TestKeyArgs(
 			}
 			switch strings.ToLower(string(sym)) {
 			case ":key":
-				keyFunc = resolveToCaller(s, args[pos+1], depth)
+				keyFunc = ResolveToCaller(s, args[pos+1], depth)
 			case ":test":
-				testFunc = resolveToCaller(s, args[pos+1], depth)
+				testFunc = ResolveToCaller(s, args[pos+1], depth)
 			default:
 				slip.PanicType("keyword", sym, ":key", ":test")
 			}

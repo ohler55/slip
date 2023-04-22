@@ -77,9 +77,9 @@ func (f *Adjoin) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
 		case ":key":
-			keyFunc = resolveToCaller(s, args[pos+1], depth)
+			keyFunc = ResolveToCaller(s, args[pos+1], depth)
 		case ":test":
-			testFunc = resolveToCaller(s, args[pos+1], depth)
+			testFunc = ResolveToCaller(s, args[pos+1], depth)
 		default:
 			slip.PanicType("keyword", sym, ":key", ":test")
 		}

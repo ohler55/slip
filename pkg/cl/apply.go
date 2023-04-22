@@ -47,7 +47,7 @@ func (f *Apply) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	slip.ArgCountCheck(f, args, 2, -1)
 	fn := args[0]
 	d2 := depth + 1
-	caller := resolveToCaller(s, fn, d2)
+	caller := ResolveToCaller(s, fn, d2)
 	var larg slip.List
 	switch ta := args[len(args)-1].(type) {
 	case nil:

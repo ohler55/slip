@@ -65,7 +65,7 @@ func (f *StableSort) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	)
 	if 1 < len(args) {
 		if args[1] != nil {
-			predicate = resolveToCaller(s, args[1], depth)
+			predicate = ResolveToCaller(s, args[1], depth)
 		}
 		for pos := 2; pos < len(args); pos += 2 {
 			sym, ok := args[pos].(slip.Symbol)
@@ -73,7 +73,7 @@ func (f *StableSort) Call(s *slip.Scope, args slip.List, depth int) (result slip
 				slip.PanicType("keyword", args[pos], "keyword")
 			}
 			if strings.EqualFold(string(sym), ":key") && pos < len(args)-1 {
-				keyFunc = resolveToCaller(s, args[pos+1], depth)
+				keyFunc = ResolveToCaller(s, args[pos+1], depth)
 			} else {
 				slip.PanicType("keyword", sym, ":key")
 			}

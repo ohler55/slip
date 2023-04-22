@@ -36,9 +36,9 @@ func init() {
 The path must follow the JSONPath format. Default: ".."`,
 				},
 				{
-					Name: "as-lisp",
+					Name: "as-bag",
 					Type: "boolean",
-					Text: `If not nil then the value to the _function_ is a LISP value otherwise a new _bag_.`,
+					Text: `If not nil then the value to the _function_ is a _bag_ value otherwise a new LISP object.`,
 				},
 			},
 			Return: "bag",
@@ -74,7 +74,7 @@ func (f *Walk) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {
 	fn := args[0]
 	path := jp.D()
-	var lisp bool
+	var asBag bool
 	if 1 < len(args) {
 		switch p := args[1].(type) {
 		case nil:
@@ -85,35 +85,35 @@ func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {
 		default:
 			slip.PanicType("path", p, "string", "bag-path")
 		}
-		lisp = 2 < len(args) && args[2] != nil
+		asBag = 2 < len(args) && args[2] != nil
 	}
 	d2 := depth + 1
 CallFunc:
 	switch tf := fn.(type) {
 	case *slip.Lambda:
-		if lisp {
+		if asBag {
 			for _, v := range path.Get(obj.Any) {
-				arg := slip.SimpleObject(v)
+				arg := flavor.MakeInstance()
+				arg.Any = v
 				_ = tf.Call(s, slip.List{arg}, d2)
 			}
 		} else {
 			for _, v := range path.Get(obj.Any) {
-				arg := flavor.MakeInstance()
-				arg.Any = v
+				arg := slip.SimpleObject(v)
 				_ = tf.Call(s, slip.List{arg}, d2)
 			}
 		}
 	case *slip.FuncInfo:
-		if lisp {
-			for _, v := range path.Get(obj.Any) {
-				arg := slip.SimpleObject(v)
-				tf.Apply(s, slip.List{arg}, d2)
-			}
-		} else {
+		if asBag {
 			for _, v := range path.Get(obj.Any) {
 				arg := flavor.MakeInstance()
 				arg.Any = v
 				_ = tf.Apply(s, slip.List{arg}, d2)
+			}
+		} else {
+			for _, v := range path.Get(obj.Any) {
+				arg := slip.SimpleObject(v)
+				tf.Apply(s, slip.List{arg}, d2)
 			}
 		}
 	case slip.Symbol:

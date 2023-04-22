@@ -48,7 +48,7 @@ func (f *Mapcar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	pos := 0
 	fn := args[pos]
 	d2 := depth + 1
-	caller := resolveToCaller(s, fn, d2)
+	caller := ResolveToCaller(s, fn, d2)
 
 	pos++
 	list, ok := args[pos].(slip.List)
