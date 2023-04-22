@@ -159,6 +159,28 @@ func TestBagFlavorRemove(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(str, "is a method of"))
 }
 
+// Tested more heavily in the bag-remove tests.
+func TestBagFlavorModify(t *testing.T) {
+	scope := slip.NewScope()
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a: 7 b: [1 2 3]}"))`).Eval(scope, nil).(*flavors.Instance)
+
+	_ = slip.ReadString(`(send bag :modify 'reverse "b" :as-bag nil)`).Eval(scope, nil)
+	tt.Equal(t, "{a: 7 b: [3 2 1]}", pretty.SEN(obj.Any))
+
+	tt.Panic(t, func() { slip.ReadString(`(send bag :modify t)`).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadString(`(send bag :modify t "a")`).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadString(`(send bag :modify 'reverse t)`).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadString(`(send bag :modify 'reverse "a" :as-bag)`).Eval(scope, nil) })
+
+	var out strings.Builder
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+	_ = slip.ReadString(`(describe-method bag-flavor :modify out)`).Eval(scope, nil)
+	str := out.String()
+	tt.Equal(t, true, strings.Contains(str, "bag-flavor"))
+	tt.Equal(t, true, strings.Contains(str, "is a method of"))
+}
+
 // Tested more heavily in the bag-native tests.
 func TestBagFlavorNative(t *testing.T) {
 	scope := slip.NewScope()

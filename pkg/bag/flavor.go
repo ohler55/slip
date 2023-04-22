@@ -39,6 +39,7 @@ nil and boolean false.`),
 	flavor.DefMethod(":get", "", getCaller(true))
 	flavor.DefMethod(":has", "", hasCaller(true))
 	flavor.DefMethod(":remove", "", removeCaller(true))
+	flavor.DefMethod(":modify", "", modifyCaller(true))
 	flavor.DefMethod(":native", "", nativeCaller(true))
 	flavor.DefMethod(":write", "", writeCaller(true))
 	flavor.DefMethod(":walk", "", walkCaller(true))
@@ -206,6 +207,25 @@ func (caller removeCaller) Call(s *slip.Scope, args slip.List, _ int) (value sli
 func (caller removeCaller) Docs() string {
 	return `__:remove__ _path_ => _object_
   _path_ to the location in the bag to remove. The path must follow the JSONPath format.
+
+
+Returns the object itself.
+`
+}
+
+type modifyCaller bool
+
+func (caller modifyCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	modifyBag(s, obj, args, depth+1)
+	return obj
+}
+
+func (caller modifyCaller) Docs() string {
+	return `__:modify__ _function_ &optional _path_ &key _:as-bag_ => _object_
+  _function_ to modify the value at _path_
+  _path_ to the location in the bag to modify. The path must follow the JSONPath format.
+  _:as-bag_ if true the _function_ expects a _bag_ otherwise it expects a lisp object.
 
 
 Returns the object itself.

@@ -72,42 +72,43 @@ func (f *Modify) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	if !ok || obj.Flavor != flavor {
 		slip.PanicType("bag", args[0], "bag")
 	}
-	var asBag bool
-	if 3 < len(args) {
-		for pos := 3; pos < len(args); pos += 2 {
-			sym, ok := args[pos].(slip.Symbol)
-			if !ok {
-				slip.PanicType("keyword", args[pos], "keyword")
-			}
-			if len(args)-1 <= pos {
-				panic(fmt.Sprintf("%s missing an argument", sym))
-			}
-			if strings.EqualFold(string(sym), ":as-bag") {
-				asBag = args[pos+1] != nil
-			} else {
-				slip.PanicType("keyword", sym, ":as-bag")
-			}
-		}
-	}
-	if 2 < len(args) {
-		modifyBag(s, obj, args[1], args[2], asBag, depth+1)
-	} else {
-		modifyBag(s, obj, args[1], nil, asBag, depth+1)
-	}
+	modifyBag(s, obj, args[1:], depth+1)
+
 	return obj
 }
 
-func modifyBag(s *slip.Scope, obj *flavors.Instance, fn slip.Object, path slip.Object, asBag bool, depth int) {
-	caller := cl.ResolveToCaller(s, fn, depth)
-	var x jp.Expr
-	switch p := path.(type) {
-	case nil:
-	case slip.String:
-		x = jp.MustParseString(string(p))
-	case Path:
-		x = jp.Expr(p)
-	default:
-		slip.PanicType("path", p, "string")
+func modifyBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {
+	caller := cl.ResolveToCaller(s, args[0], depth)
+	var (
+		x     jp.Expr
+		asBag bool
+	)
+	if 1 < len(args) {
+		switch p := args[1].(type) {
+		case nil:
+		case slip.String:
+			x = jp.MustParseString(string(p))
+		case Path:
+			x = jp.Expr(p)
+		default:
+			slip.PanicType("path", p, "string")
+		}
+		if 2 < len(args) {
+			for pos := 2; pos < len(args); pos += 2 {
+				sym, ok := args[pos].(slip.Symbol)
+				if !ok {
+					slip.PanicType("keyword", args[pos], "keyword")
+				}
+				if len(args)-1 <= pos {
+					panic(fmt.Sprintf("%s missing an argument", sym))
+				}
+				if strings.EqualFold(string(sym), ":as-bag") {
+					asBag = args[pos+1] != nil
+				} else {
+					slip.PanicType("keyword", sym, ":as-bag")
+				}
+			}
+		}
 	}
 	if x == nil {
 		obj.Any = modifyValue(s, obj.Any, caller, asBag, depth)
