@@ -16,7 +16,7 @@ func TestBagWalkPathLisp(t *testing.T) {
 	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(bag-walk bag (lambda (x) (setq result (cons x result))) "*" t)`,
+		Source: `(bag-walk bag (lambda (x) (setq result (cons x result))) "*")`,
 		Expect: "nil",
 	}).Test(t)
 	tt.Equal(t, "(3 2 1)", scope.Get(slip.Symbol("result")).String())
@@ -28,7 +28,7 @@ func TestBagWalkPathBag(t *testing.T) {
 	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(bag-walk bag '(lambda (x) (setq result (cons (bag-native x) result))) "*")`,
+		Source: `(bag-walk bag '(lambda (x) (setq result (cons (bag-native x) result))) "*" t)`,
 		Expect: "nil",
 	}).Test(t)
 	tt.Equal(t, "(3 2 1)", scope.Get(slip.Symbol("result")).String())
@@ -42,7 +42,7 @@ func TestBagWalkFuncLisp(t *testing.T) {
 	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(bag-walk bag 'walk-add "*" t)`,
+		Source: `(bag-walk bag 'walk-add "*")`,
 		Expect: "nil",
 	}).Test(t)
 	tt.Equal(t, "(3 2 1)", scope.Get(slip.Symbol("result")).String())
@@ -56,7 +56,7 @@ func TestBagWalkFuncBag(t *testing.T) {
 	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(bag-walk bag #'walk-add-bag (make-bag-path "*") nil)`,
+		Source: `(bag-walk bag #'walk-add-bag (make-bag-path "*") t)`,
 		Expect: "nil",
 	}).Test(t)
 	tt.Equal(t, "(3 2 1)", scope.Get(slip.Symbol("result")).String())

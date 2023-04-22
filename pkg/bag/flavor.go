@@ -161,9 +161,9 @@ func (caller getCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.O
 }
 
 func (caller getCaller) Docs() string {
-	return `__:get__ &optional _path_ _as-lisp_ => _object_|_bag_
+	return `__:get__ &optional _path_ _as-bag_ => _object_|_bag_
   _path_ to the location in the bag to get the _value_ from. The path must follow the JSONPath format.
-  _as-lisp_ if not nil then the returned value is a LISP value otherwise a new _bag_ is returned.
+  _as-bag_ if not nil then the returned value is a _bag_ otherwise a new LISP value is returned.
 
 
 Gets a _value_ at the location described by _path_.

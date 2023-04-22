@@ -54,7 +54,7 @@ func TestBagModifyLambdaBagObj(t *testing.T) {
 		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(bag-modify bag (lambda (b) (send b :get "[1]" t)) "b" :as-bag t)`,
+		Source: `(bag-modify bag (lambda (b) (send b :get "[1]")) "b" :as-bag t)`,
 		Expect: "/#<bag-flavor [0-9a-f]+>/",
 	}).Test(t)
 	tt.Equal(t, "{a: 1 b: 2}", pretty.SEN(obj.Any))

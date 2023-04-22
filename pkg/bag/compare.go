@@ -73,7 +73,7 @@ func (f *Compare) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip.Object) {
 	other, ok := args[0].(*flavors.Instance)
 	if !ok || other.Flavor != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		return slip.List{nil}
 	}
 	var ignores []alt.Path
 	if 1 < len(args) {
@@ -82,34 +82,51 @@ func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List) (result sl
 			slip.PanicType("ignores", args[1], "list")
 		}
 		for _, p := range ilist {
+		whichPath:
 			switch tp := p.(type) {
 			case slip.String:
-				// TBD parse as path and then iterate to build alt.Path
+				p = Path(jp.MustParseString(string(tp)))
+				goto whichPath
 			case slip.List:
-				// TBD
-			case Path:
-				// TBD
 				ign := make(alt.Path, len(tp))
-				for i, f := range tp {
+				for i, e := range tp {
+					switch te := e.(type) {
+					case slip.String:
+						ign[i] = string(te)
+					case slip.Symbol:
+						ign[i] = string(te)
+					case slip.Fixnum:
+						ign[i] = int(te)
+					case nil:
+						ign[i] = nil
+					default:
+						slip.PanicType("ignores path element", te, "string", "symbol", "fixnum", "nil")
+					}
+				}
+				ignores = append(ignores, ign)
+			case Path:
+				ign := make(alt.Path, 0, len(tp))
+				for _, f := range tp {
 					switch tf := f.(type) {
 					case jp.Child:
-						ign[i] = string(tf)
+						ign = append(ign, string(tf))
 					case jp.Nth:
-						ign[i] = int(tf)
+						ign = append(ign, int(tf))
 					case jp.Wildcard:
-						ign[i] = nil
+						ign = append(ign, nil)
 					case jp.Root, jp.At:
 						// ignore
 					default:
-						panic(fmt.Sprintf("ignores path fragment must be child, nth, and wildcard and not %s (%T)", tf, tf))
+						panic(fmt.Sprintf("ignores path fragment must be child, nth, and wildcard and not %s (%T)",
+							jp.Expr{tf}, tf))
 					}
 				}
+				ignores = append(ignores, ign)
 			default:
 				slip.PanicType("ignores element", tp, "list", "string", "bag-path")
 			}
 		}
 	}
-	// TBD build ignores
 	if diff := alt.Compare(obj.Any, other.Any, ignores...); 0 < len(diff) {
 		path := make(slip.List, len(diff))
 		for i, p := range diff {

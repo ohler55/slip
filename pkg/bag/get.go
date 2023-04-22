@@ -31,9 +31,9 @@ func init() {
 The path must follow the JSONPath format.`,
 				},
 				{
-					Name: "as-lisp",
+					Name: "as-bag",
 					Type: "boolean",
-					Text: `If not nil then the returned value is a LISP value otherwise a new _bag_ is returned.`,
+					Text: `If not nil then the returned value is a _bag_ otherwise a new LISP value is returned.`,
 				},
 			},
 			Return: "bag",
@@ -74,7 +74,7 @@ func (f *Get) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	return
 }
 
-func getBag(obj *flavors.Instance, path slip.Object, lisp bool) slip.Object {
+func getBag(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -94,11 +94,11 @@ func getBag(obj *flavors.Instance, path slip.Object, lisp bool) slip.Object {
 	if value == nil {
 		return nil
 	}
-	if lisp {
-		return slip.SimpleObject(value)
-	}
-	obj = flavor.MakeInstance()
-	obj.Any = value
+	if asBag {
+		obj = flavor.MakeInstance()
+		obj.Any = value
 
-	return obj
+		return obj
+	}
+	return slip.SimpleObject(value)
 }

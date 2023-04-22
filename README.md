@@ -19,16 +19,6 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
- - bag
-  - make-bag-path should handle '(one 2 nil) => "one[2].*"
-  - flip get :as-lisp to :as-bag
-  + remove
-  + modify
-  - compare
-   - paths can be
-    - string
-    - list
-    - json-path limited to child, nth, wildcard (root and at are ok)
 
  - defmacro
 

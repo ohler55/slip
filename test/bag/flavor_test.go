@@ -100,14 +100,14 @@ func TestBagFlavorGet(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a: 7}"))`).Eval(scope, nil)
 
-	result := slip.ReadString(`(send bag :get "a" t)`).Eval(scope, nil)
+	result := slip.ReadString(`(send bag :get "a")`).Eval(scope, nil)
 	tt.Equal(t, "7", pretty.SEN(result))
 
-	result = slip.ReadString(`(send bag :get "a")`).Eval(scope, nil)
+	result = slip.ReadString(`(send bag :get "a" t)`).Eval(scope, nil)
 	tt.Equal(t, "7", pretty.SEN(result.(*flavors.Instance).Any))
 
 	result = slip.ReadString(`(send bag :get)`).Eval(scope, nil)
-	tt.Equal(t, "{a: 7}", pretty.SEN(result.(*flavors.Instance).Any))
+	tt.Equal(t, `(("a" . 7))`, slip.ObjectString(result))
 
 	tt.Panic(t, func() { slip.ReadString(`(send bag :get t t)`).Eval(scope, nil) })
 	tt.Panic(t, func() { slip.ReadString(`(send bag :get "a" nil 7)`).Eval(scope, nil) })
@@ -221,7 +221,7 @@ func TestBagFlavorWalk(t *testing.T) {
 	_ = slip.ReadString(`(setq result '())`).Eval(scope, nil)
 	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "[1 2]"))`).Eval(scope, nil)
 
-	_ = slip.ReadString(`(send bag :walk (lambda (x) (setq result (cons x result))) "*" t)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send bag :walk (lambda (x) (setq result (cons x result))) "*")`).Eval(scope, nil)
 	tt.Equal(t, "(2 1)", scope.Get(slip.Symbol("result")).String())
 
 	var out strings.Builder
