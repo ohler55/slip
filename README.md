@@ -20,8 +20,10 @@ SLIce Processing is LISP for golang
 
 - next
  - bag
+  - make-bag-path should handle '(one 2 nil) => "one[2].*"
+  - flip get :as-lisp to :as-bag
   + remove
-  - modify
+  + modify
   - compare
    - paths can be
     - string
