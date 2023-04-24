@@ -5,7 +5,9 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -34,4 +36,10 @@ func TestBackquoteBadArgCount(t *testing.T) {
 		Simple: []interface{}{"backquote"},
 		Panics: true,
 	}).Test(t)
+}
+
+func TestBackquoteSpecialCount(t *testing.T) {
+	var b cl.Backquote
+
+	tt.Equal(t, '`', b.SpecialChar())
 }

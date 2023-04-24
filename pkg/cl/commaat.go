@@ -9,13 +9,13 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Comma{Function: slip.Function{Name: "comma", Args: args}}
+			f := CommaAt{Function: slip.Function{Name: "comma-at", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
 			Kind: slip.MacroSymbol,
-			Name: "comma",
+			Name: "comma-at",
 			Args: []*slip.DocArg{
 				{
 					Name: "value",
@@ -24,36 +24,44 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `__comma__ is only allowed within a backquote. It evaluates and returns the value
+			Text: `__commaAt__ is only allowed within a backquote. It evaluates and returns the value
 of it's argument despite being in a backquoted expression.`,
 			Examples: []string{
 				"(setq x 3)",
-				"`(comma x) => 3",
+				"`(commaAt x) => 3",
 				"`(1 ,x) => (1 2)",
 			},
 		}, &slip.CLPkg)
 }
 
-// Comma represents the comma function.
-type Comma struct {
+// CommaAt represents the commaAt function.
+type CommaAt struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Comma) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *CommaAt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	return args[0]
+	switch ta := args[0].(type) {
+	case nil:
+		result = atList{}
+	case slip.List:
+		result = atList(ta)
+	default:
+		result = atList{slip.Tail{Value: ta}}
+	}
+	return
 }
 
 // String representation of the Object.
-func (f *Comma) String() string {
+func (f *CommaAt) String() string {
 	return string(f.Append([]byte{}))
 }
 
 // Append a buffer with a representation of the Object.
-func (f *Comma) Append(b []byte) (out []byte) {
+func (f *CommaAt) Append(b []byte) (out []byte) {
 	if 0 < len(f.Args) {
 		b = append(b, ',')
 		out = slip.Append(b, f.Args[0])
@@ -62,6 +70,6 @@ func (f *Comma) Append(b []byte) (out []byte) {
 }
 
 // SpecialChar returns the prefix character for writing.
-func (f *Comma) SpecialChar() byte {
-	return ','
+func (f *CommaAt) SpecialChar() byte {
+	return '@'
 }

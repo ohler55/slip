@@ -19,6 +19,8 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
+ - ,@
+  - when reading start with , then replace with commaAt
 
  - backquote, comma, commaAt (,@), quoteComma
  - defmacro

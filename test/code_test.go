@@ -271,6 +271,7 @@ func TestCodeQuote(t *testing.T) {
 func TestCodeBackquote(t *testing.T) {
 	for i, ct := range []*codeTest{
 		{src: "`(a ,b)", expect: "[`(a ,b)]"},
+		{src: ",b", raise: true},
 	} {
 		ct.test(t, i)
 	}

@@ -506,6 +506,9 @@ func (r *reader) read(src []byte) Code {
 		case backquote:
 			r.stack = append(r.stack, backquoteMarker)
 		case comma:
+			if !r.inBackquote() {
+				r.raise("comma not inside a backquote")
+			}
 			r.stack = append(r.stack, commaMarker)
 
 		default:
@@ -542,6 +545,15 @@ func (r *reader) read(src []byte) Code {
 		r.partial("list not terminated")
 	}
 	return r.code
+}
+
+func (r *reader) inBackquote() bool {
+	for _, v := range r.stack {
+		if backquoteMarker == v {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *reader) raise(format string, args ...interface{}) {

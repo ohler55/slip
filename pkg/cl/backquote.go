@@ -51,9 +51,17 @@ func (f *Backquote) expand(s *slip.Scope, arg slip.Object, depth int) slip.Objec
 	switch ta := arg.(type) {
 	case slip.List:
 		if 0 < len(ta) {
-			xl := make(slip.List, len(ta))
-			for i, a := range ta {
-				xl[i] = f.expand(s, a, depth)
+			// TBD if ,@ then return value should be atList type and get expanded in place
+			// or maybe note the a is a commaAt function and then use the returned list
+			xl := make(slip.List, 0, len(ta))
+			for _, a := range ta {
+				x := f.expand(s, a, depth)
+				if al, ok := x.(atList); ok {
+					// TBD if tail...
+					xl = append(xl, al...)
+				} else {
+					xl = append(xl, x)
+				}
 			}
 			arg = xl
 		}
