@@ -66,13 +66,17 @@ const (
 	swallowOpen  = '{'
 
 	singleQuote = 'q'
+	backquote   = 'B'
+	comma       = ',' // TBD
+	commaAt     = '@' // TBD requires a comma mode or maybe an at function
+	// ',  // TBD maybe covered with quote and comma functions
 
 	//   0123456789abcdef0123456789abcdef
 	valueMode = "" +
 		".........ak..a.................." + // 0x00
-		"a.Q#..tq()t+.+ttddddddddddt;ttt." + // 0x20
+		"a.Q#..tq()t+,+ttddddddddddt;ttt." + // 0x20
 		"ttttttttttttttttttttttttttt...tt" + // 0x40
-		".tttttttttttttttttttttttttt.P.t." + // 0x60
+		"Btttttttttttttttttttttttttt.P.t." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -234,6 +238,8 @@ const (
 
 	quoteMarker      = marker('q')
 	sharpQuoteMarker = marker('#')
+	backquoteMarker  = marker('b')
+	commaMarker      = marker(',')
 )
 
 var (
@@ -247,6 +253,8 @@ var (
 	// package.
 	newQuote      func(args List) Object
 	newSharpQuote func(args List) Object
+	newBackquote  func(args List) Object
+	newComma      func(args List) Object
 )
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
@@ -495,6 +503,11 @@ func (r *reader) read(src []byte) Code {
 			r.stack = append(r.stack, sharpQuoteMarker)
 			mode = valueMode
 
+		case backquote:
+			r.stack = append(r.stack, backquoteMarker)
+		case comma:
+			r.stack = append(r.stack, commaMarker)
+
 		default:
 			switch mode {
 			case sharpMode:
@@ -579,8 +592,8 @@ func (r *reader) closeList() {
 			obj = list
 		}
 		if 0 < start {
-			switch {
-			case r.stack[start-1] == quoteMarker:
+			switch r.stack[start-1] {
+			case quoteMarker:
 				if newQuote == nil {
 					newQuote = CLPkg.Funcs["quote"].Create
 				}
@@ -588,7 +601,7 @@ func (r *reader) closeList() {
 				start--
 				r.stack[start] = nil
 				r.stack = r.stack[:start+1]
-			case r.stack[start-1] == sharpQuoteMarker:
+			case sharpQuoteMarker:
 				if newSharpQuote == nil {
 					newSharpQuote = CLPkg.Funcs["function"].Create
 				}
@@ -596,7 +609,24 @@ func (r *reader) closeList() {
 				start--
 				r.stack[start] = nil
 				r.stack = r.stack[:start+1]
+			case backquoteMarker:
+				if newBackquote == nil {
+					newBackquote = CLPkg.Funcs["backquote"].Create
+				}
+				obj = newBackquote(List{obj})
+				start--
+				r.stack[start] = nil
+				r.stack = r.stack[:start+1]
+			case commaMarker:
+				if newComma == nil {
+					newComma = CLPkg.Funcs["comma"].Create
+				}
+				obj = newComma(List{obj})
+				start--
+				r.stack[start] = nil
+				r.stack = r.stack[:start+1]
 			}
+			// TBD ,@ and ', or maybe just @
 		}
 	}
 	if 0 < start {
@@ -634,8 +664,8 @@ func (r *reader) pushToken(src []byte) {
 		goto Push
 	}
 	if 0 < len(r.stack) {
-		switch {
-		case r.stack[len(r.stack)-1] == quoteMarker:
+		switch r.stack[len(r.stack)-1] {
+		case quoteMarker:
 			if newQuote == nil {
 				newQuote = CLPkg.Funcs["quote"].Create
 			}
@@ -647,7 +677,7 @@ func (r *reader) pushToken(src []byte) {
 				r.stack[len(r.stack)-1] = newQuote(List{Symbol(token)})
 			}
 			return
-		case r.stack[len(r.stack)-1] == sharpQuoteMarker:
+		case sharpQuoteMarker:
 			if newSharpQuote == nil {
 				newSharpQuote = CLPkg.Funcs["function"].Create
 			}
@@ -659,7 +689,32 @@ func (r *reader) pushToken(src []byte) {
 				r.stack[len(r.stack)-1] = newSharpQuote(List{Symbol(token)})
 			}
 			return
+		case backquoteMarker:
+			if newBackquote == nil {
+				newBackquote = CLPkg.Funcs["backquote"].Create
+			}
+			if len(r.stack) == 1 {
+				r.code = append(r.code, newBackquote(List{Symbol(token)}))
+				r.stack[len(r.stack)-1] = nil
+				r.stack = r.stack[:0]
+			} else {
+				r.stack[len(r.stack)-1] = newBackquote(List{Symbol(token)})
+			}
+			return
+		case commaMarker:
+			if newComma == nil {
+				newComma = CLPkg.Funcs["comma"].Create
+			}
+			if len(r.stack) == 1 {
+				r.code = append(r.code, newComma(List{Symbol(token)}))
+				r.stack[len(r.stack)-1] = nil
+				r.stack = r.stack[:0]
+			} else {
+				r.stack[len(r.stack)-1] = newComma(List{Symbol(token)})
+			}
+			return
 		}
+		// TBD ,@ and ', or maybe just @
 	}
 	switch token[0] {
 	case '@':

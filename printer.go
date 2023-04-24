@@ -42,7 +42,7 @@ type node struct {
 	value    Object
 	elements []*node
 	size     int
-	quote    bool
+	special  byte
 	funky    bool
 
 	buf []byte
@@ -399,15 +399,13 @@ Top:
 			b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(to))), 16)
 			b = append(b, "}>"...)
 		}
+	case SpecialSyntax:
+		b = append(b, to.SpecialChar())
+		obj = to.GetArgs()[0]
+		goto Top
 	case Funky:
 		name := to.GetName()
-		args := to.GetArgs()
-		if name == "quote" {
-			b = append(b, '\'')
-			obj = args[0]
-		} else {
-			obj = append(List{Symbol(name)}, args...)
-		}
+		obj = append(List{Symbol(name)}, to.GetArgs()...)
 		goto Top
 	case *Package:
 		b = append(b, "#<"...)
@@ -461,17 +459,16 @@ Top:
 	case Symbol:
 		n.buf = []byte(p.caseName(string(to)))
 		n.size = len(n.buf)
+	case SpecialSyntax:
+		obj = to.GetArgs()[0]
+		n.special = to.SpecialChar()
+		n.funky = true
+		goto Top
 	case Funky:
 		name := to.GetName()
-		args := to.GetArgs()
-		if name == "quote" {
-			obj = args[0]
-			n.quote = true
-			n.funky = true
-		} else {
-			obj = append(List{Symbol(name)}, args...)
-		}
+		obj = append(List{Symbol(name)}, to.GetArgs()...)
 		goto Top
+
 	default:
 		n.buf = p.Append([]byte{}, obj, 0)
 		n.size = len(n.buf)
@@ -482,8 +479,8 @@ Top:
 var spaces = []byte{'\n'}
 
 func (p *Printer) appendTree(b []byte, n *node, offset, closes int) []byte {
-	if n.quote {
-		b = append(b, '\'')
+	if n.special != 0 {
+		b = append(b, n.special)
 	}
 	if 0 < len(n.buf) {
 		return append(b, n.buf...)

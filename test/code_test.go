@@ -27,7 +27,7 @@ func (ct *codeTest) test(t *testing.T, i int) {
 	} else {
 		code = slip.Read([]byte(ct.src))
 	}
-	tt.Equal(t, ct.expect, code.String(), i, ct.src)
+	tt.Equal(t, ct.expect, code.String(), i, ": ", ct.src)
 	if 0 < len(ct.kind) {
 		tt.Equal(t, ct.kind, string(code[0].Hierarchy()[0]))
 	}
@@ -262,6 +262,15 @@ func TestCodeQuote(t *testing.T) {
 		{src: `'abc`, expect: `['abc]`, kind: "macro"},
 		{src: `('abc)`, expect: `[('abc)]`, kind: "list"},
 		{src: `#'(lambda () nil)`, expect: `[#'(lambda () nil)]`, kind: "macro"},
+	} {
+		ct.test(t, i)
+	}
+}
+
+// Checks comma as well since they are used together.
+func TestCodeBackquote(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: "`(a ,b)", expect: "[`(a ,b)]"},
 	} {
 		ct.test(t, i)
 	}
