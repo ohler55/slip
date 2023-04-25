@@ -50,7 +50,7 @@ func (f *CommaAt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	case slip.List:
 		result = atList(ta)
 	default:
-		result = atList{slip.Tail{Value: ta}}
+		result = slip.Tail{Value: ta}
 	}
 	return
 }
@@ -63,13 +63,13 @@ func (f *CommaAt) String() string {
 // Append a buffer with a representation of the Object.
 func (f *CommaAt) Append(b []byte) (out []byte) {
 	if 0 < len(f.Args) {
-		b = append(b, ',')
+		b = append(b, ',', '@')
 		out = slip.Append(b, f.Args[0])
 	}
 	return
 }
 
-// SpecialChar returns the prefix character for writing.
-func (f *CommaAt) SpecialChar() byte {
-	return '@'
+// SpecialPrefix returns the prefix character for writing.
+func (f *CommaAt) SpecialPrefix() string {
+	return ",@"
 }

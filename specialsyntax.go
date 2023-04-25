@@ -6,7 +6,7 @@ package slip
 // reading. This include quote, backquote, and comma.
 type SpecialSyntax interface {
 	// SpecialChar returns the special character for the function.
-	SpecialChar() byte
+	SpecialPrefix() string
 
 	// GetArgs returns the function arguments.
 	GetArgs() List

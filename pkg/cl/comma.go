@@ -61,7 +61,7 @@ func (f *Comma) Append(b []byte) (out []byte) {
 	return
 }
 
-// SpecialChar returns the prefix character for writing.
-func (f *Comma) SpecialChar() byte {
-	return ','
+// SpecialPrefix returns the prefix character for writing.
+func (f *Comma) SpecialPrefix() string {
+	return ","
 }

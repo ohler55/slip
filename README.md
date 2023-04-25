@@ -19,11 +19,8 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
- - ,@
-  - when reading start with , then replace with commaAt
-
- - backquote, comma, commaAt (,@), quoteComma
  - defmacro
+
 - how to handle marco characters in compile
  - backquote ` of list allow use of , options
   - , eval

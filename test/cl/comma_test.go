@@ -41,5 +41,5 @@ func TestCommaString(t *testing.T) {
 
 	tt.Equal(t, ",x", comma.String())
 
-	tt.Equal(t, ',', comma.SpecialChar())
+	tt.Equal(t, ",", comma.SpecialPrefix())
 }

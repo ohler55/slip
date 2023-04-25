@@ -41,5 +41,5 @@ func TestBackquoteBadArgCount(t *testing.T) {
 func TestBackquoteSpecialCount(t *testing.T) {
 	var b cl.Backquote
 
-	tt.Equal(t, '`', b.SpecialChar())
+	tt.Equal(t, "`", b.SpecialPrefix())
 }

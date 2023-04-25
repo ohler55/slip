@@ -67,15 +67,14 @@ const (
 
 	singleQuote = 'q'
 	backquote   = 'B'
-	comma       = ',' // TBD
-	commaAt     = '@' // TBD requires a comma mode or maybe an at function
-	// ',  // TBD maybe covered with quote and comma functions
+	comma       = ','
+	commaAt     = '@'
 
 	//   0123456789abcdef0123456789abcdef
 	valueMode = "" +
 		".........ak..a.................." + // 0x00
 		"a.Q#..tq()t+,+ttddddddddddt;ttt." + // 0x20
-		"ttttttttttttttttttttttttttt...tt" + // 0x40
+		"@tttttttttttttttttttttttttt...tt" + // 0x40
 		"Btttttttttttttttttttttttttt.P.t." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
@@ -240,6 +239,7 @@ const (
 	sharpQuoteMarker = marker('#')
 	backquoteMarker  = marker('b')
 	commaMarker      = marker(',')
+	commaAtMarker    = marker('@')
 )
 
 var (
@@ -255,6 +255,7 @@ var (
 	newSharpQuote func(args List) Object
 	newBackquote  func(args List) Object
 	newComma      func(args List) Object
+	newCommaAt    func(args List) Object
 )
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
@@ -510,6 +511,13 @@ func (r *reader) read(src []byte) Code {
 				r.raise("comma not inside a backquote")
 			}
 			r.stack = append(r.stack, commaMarker)
+		case commaAt:
+			if 0 < len(r.stack) && r.stack[len(r.stack)-1] == commaMarker {
+				r.stack[len(r.stack)-1] = commaAtMarker
+			} else if mode != tokenMode {
+				r.tokenStart = r.pos
+				mode = tokenMode
+			}
 
 		default:
 			switch mode {
@@ -637,8 +645,15 @@ func (r *reader) closeList() {
 				start--
 				r.stack[start] = nil
 				r.stack = r.stack[:start+1]
+			case commaAtMarker:
+				if newCommaAt == nil {
+					newCommaAt = CLPkg.Funcs["comma-at"].Create
+				}
+				obj = newCommaAt(List{obj})
+				start--
+				r.stack[start] = nil
+				r.stack = r.stack[:start+1]
 			}
-			// TBD ,@ and ', or maybe just @
 		}
 	}
 	if 0 < start {
@@ -725,8 +740,19 @@ func (r *reader) pushToken(src []byte) {
 				r.stack[len(r.stack)-1] = newComma(List{Symbol(token)})
 			}
 			return
+		case commaAtMarker:
+			if newCommaAt == nil {
+				newCommaAt = CLPkg.Funcs["comma-at"].Create
+			}
+			if len(r.stack) == 1 {
+				r.code = append(r.code, newCommaAt(List{Symbol(token)}))
+				r.stack[len(r.stack)-1] = nil
+				r.stack = r.stack[:0]
+			} else {
+				r.stack[len(r.stack)-1] = newCommaAt(List{Symbol(token)})
+			}
+			return
 		}
-		// TBD ,@ and ', or maybe just @
 	}
 	switch token[0] {
 	case '@':

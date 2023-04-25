@@ -3,6 +3,8 @@
 package cl
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
 )
 
@@ -51,16 +53,21 @@ func (f *Backquote) expand(s *slip.Scope, arg slip.Object, depth int) slip.Objec
 	switch ta := arg.(type) {
 	case slip.List:
 		if 0 < len(ta) {
-			// TBD if ,@ then return value should be atList type and get expanded in place
-			// or maybe note the a is a commaAt function and then use the returned list
 			xl := make(slip.List, 0, len(ta))
-			for _, a := range ta {
+			for i, a := range ta {
 				x := f.expand(s, a, depth)
-				if al, ok := x.(atList); ok {
-					// TBD if tail...
-					xl = append(xl, al...)
-				} else {
-					xl = append(xl, x)
+				switch tx := x.(type) {
+				case nil:
+					// don't append
+				case atList:
+					xl = append(xl, tx...)
+				case slip.Tail:
+					if len(ta)-1 != i {
+						panic(fmt.Sprintf("%s is not of type LIST", tx.Value))
+					}
+					xl = append(xl, tx)
+				default:
+					xl = append(xl, tx)
 				}
 			}
 			arg = xl
@@ -87,7 +94,7 @@ func (f *Backquote) Append(b []byte) (out []byte) {
 	return
 }
 
-// SpecialChar returns the prefix character for writing.
-func (f *Backquote) SpecialChar() byte {
-	return '`'
+// SpecialPrefix returns the prefix character for writing.
+func (f *Backquote) SpecialPrefix() string {
+	return "`"
 }

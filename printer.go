@@ -42,7 +42,7 @@ type node struct {
 	value    Object
 	elements []*node
 	size     int
-	special  byte
+	special  string
 	funky    bool
 
 	buf []byte
@@ -400,7 +400,7 @@ Top:
 			b = append(b, "}>"...)
 		}
 	case SpecialSyntax:
-		b = append(b, to.SpecialChar())
+		b = append(b, to.SpecialPrefix()...)
 		obj = to.GetArgs()[0]
 		goto Top
 	case Funky:
@@ -461,7 +461,7 @@ Top:
 		n.size = len(n.buf)
 	case SpecialSyntax:
 		obj = to.GetArgs()[0]
-		n.special = to.SpecialChar()
+		n.special = to.SpecialPrefix()
 		n.funky = true
 		goto Top
 	case Funky:
@@ -479,8 +479,8 @@ Top:
 var spaces = []byte{'\n'}
 
 func (p *Printer) appendTree(b []byte, n *node, offset, closes int) []byte {
-	if n.special != 0 {
-		b = append(b, n.special)
+	if 0 < len(n.special) {
+		b = append(b, n.special...)
 	}
 	if 0 < len(n.buf) {
 		return append(b, n.buf...)
