@@ -1,19 +1,21 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
 
 package cl
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Quote{Function: slip.Function{Name: "quote", Args: args, SkipEval: []bool{true}}}
+			f := Comma{Function: slip.Function{Name: "comma", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
 			Kind: slip.MacroSymbol,
-			Name: "quote",
+			Name: "comma",
 			Args: []*slip.DocArg{
 				{
 					Name: "value",
@@ -22,22 +24,23 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text:   `__quote__ returns _value_ without evaluating it.`,
+			Text: `__comma__ is only allowed within a backquote. It evaluates and returns the value
+of it's argument despite being in a backquoted expression.`,
 			Examples: []string{
-				"(quote nil) => nil",
-				"(quote (a . b)) => (a . b)",
-				"'(a b) => (a b)",
+				"(setq x 3)",
+				"`(comma x) => 3",
+				"`(1 ,x) => (1 2)",
 			},
 		}, &slip.CLPkg)
 }
 
-// Quote represents the quote function.
-type Quote struct {
+// Comma represents the comma function.
+type Comma struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Quote) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Comma) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
@@ -45,20 +48,20 @@ func (f *Quote) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 }
 
 // String representation of the Object.
-func (f *Quote) String() string {
+func (f *Comma) String() string {
 	return string(f.Append([]byte{}))
 }
 
 // Append a buffer with a representation of the Object.
-func (f *Quote) Append(b []byte) (out []byte) {
+func (f *Comma) Append(b []byte) (out []byte) {
 	if 0 < len(f.Args) {
-		b = append(b, '\'')
+		b = append(b, ',')
 		out = slip.Append(b, f.Args[0])
 	}
 	return
 }
 
 // SpecialPrefix returns the prefix character for writing.
-func (f *Quote) SpecialPrefix() string {
-	return "'"
+func (f *Comma) SpecialPrefix() string {
+	return ","
 }
