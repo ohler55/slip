@@ -21,6 +21,7 @@ type Lambda struct {
 	Doc     *FuncDoc
 	Forms   List
 	Closure *Scope
+	Macro   bool
 }
 
 // Call the the function with the arguments provided.
@@ -28,7 +29,9 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	ss := NewScope()
 	if lam.Closure != nil {
 		ss.parent = lam.Closure
+		ss.Macro = lam.Closure.Macro
 	}
+	ss.Macro = lam.Macro
 	mode := reqMode
 	ai := 0
 	var rest List

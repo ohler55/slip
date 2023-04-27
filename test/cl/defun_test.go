@@ -90,14 +90,12 @@ func TestDefunBadLambdaListArg(t *testing.T) {
 
 func TestDefunAgain(t *testing.T) {
 	var out bytes.Buffer
-	orig := slip.ErrorOutput
-	defer func() { slip.ErrorOutput = orig }()
-	slip.ErrorOutput = &slip.OutputStream{Writer: &out}
+	scope := slip.NewScope()
+	scope.Let("*error-output*", &slip.OutputStream{Writer: &out})
 	code := slip.ReadString(`
 (defun again () 3)
 (defun again () 7)
 (again)`)
-	scope := slip.NewScope()
 	tt.Equal(t, slip.Fixnum(7), code.Eval(scope, nil))
 	tt.Equal(t, "WARNING: redefining common-lisp-user:again in defun\n", out.String())
 }

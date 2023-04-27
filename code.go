@@ -1004,11 +1004,9 @@ func (c Code) Compile() {
 		}
 		var f Object
 		switch strings.ToLower(string(sym)) {
-		case "defun", "defvar", "defparameter":
+		case "defun", "defmacro", "defvar", "defparameter":
 			f = ListToFunc(scope, list, 0)
 			c[i] = f
-		case "defmacro":
-			panic("Defmacro not implemented yet")
 		}
 		if f != nil {
 			name := f.Eval(scope, 0)
