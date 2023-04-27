@@ -16,6 +16,7 @@ type Scope struct {
 	moo     sync.Mutex
 	Block   bool
 	TagBody bool
+	Macro   bool
 }
 
 // NewScope create a new top level Scope.
@@ -32,6 +33,7 @@ func (s *Scope) NewScope() *Scope {
 		Vars:    map[string]Object{},
 		Block:   s.Block,
 		TagBody: s.TagBody,
+		Macro:   s.Macro,
 	}
 }
 

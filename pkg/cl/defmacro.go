@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
 
 package cl
 
@@ -13,13 +13,13 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Defun{Function: slip.Function{Name: "defun", Args: args, SkipEval: []bool{true}}}
+			f := Defmacro{Function: slip.Function{Name: "defmacro", Args: args, SkipEval: []bool{true}}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
 			Kind: slip.MacroSymbol,
-			Name: "defun",
+			Name: "defmacro",
 			Args: []*slip.DocArg{
 				{
 					Name: "name",
@@ -29,7 +29,7 @@ func init() {
 				{
 					Name: "lambda-list",
 					Type: "list",
-					Text: `A list of the function's argument. Arguments can be a symbol, a list of a symbol and a
+					Text: `A list of the macro's argument. Arguments can be a symbol, a list of a symbol and a
 default value, or one of &optional, &rest, &key, or &body. Arguments declarations following &optional are optional.
 Argument declarations following &key represent key values. An argument declaration following &rest or &body indicates
 one or more values follow.`,
@@ -38,7 +38,7 @@ one or more values follow.`,
 				{
 					Name: "documentation",
 					Type: "string",
-					Text: "Documentation for the function.",
+					Text: "Documentation for the macro.",
 				},
 				{Name: slip.AmpBody},
 				{
@@ -48,42 +48,44 @@ one or more values follow.`,
 				},
 			},
 			Return: "object",
-			Text:   `__defun__ defines a function with the given _name_ in the current package.`,
+			Text:   `__defmacro__ defines a macro with the given _name_ in the current package.`,
 			Examples: []string{
-				"(defun funny () nil) => funny",
+				"(defmacro funny (x) `(* ,x 2)) => funny",
 			},
 		}, &slip.CLPkg)
 }
 
-// Defun represents the defun function.
-type Defun struct {
+// Defmacro represents the defmacro function.
+type Defmacro struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Defmacro) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defun", args[0], "symbol")
+		slip.PanicType("name argument to defmacro", args[0], "symbol")
 	}
 	low := strings.ToLower(string(name))
-	lc := slip.DefLambda("defun", s, args[1:])
+	lc := slip.DefLambda("defmacro", s, args[1:])
+	lc.Macro = true
 	fc := func(fargs slip.List) slip.Object {
 		return &slip.Dynamic{
 			Function: slip.Function{
-				Name: low,
-				Self: lc,
-				Args: fargs,
+				Name:     low,
+				Self:     lc,
+				Args:     fargs,
+				SkipEval: []bool{true},
 			},
 		}
 	}
 	if fi := slip.CurrentPackage.Funcs[low]; fi != nil {
 		if fi.Pkg.Locked {
-			panic(fmt.Sprintf("Redefining %s:%s in defun. Package %s is locked.",
+			panic(fmt.Sprintf("Redefining %s:%s in defmacro. Package %s is locked.",
 				slip.CurrentPackage.Name, low, slip.CurrentPackage.Name))
 		}
 		w := s.Get("*error-output*").(io.Writer)
-		_, _ = fmt.Fprintf(w, "WARNING: redefining %s:%s in defun\n", slip.CurrentPackage.Name, low)
+		_, _ = fmt.Fprintf(w, "WARNING: redefining %s:%s in defmacro\n", slip.CurrentPackage.Name, low)
 	}
 	slip.CurrentPackage.Lambdas[low] = lc
 	slip.CurrentPackage.Funcs[low] = &slip.FuncInfo{
@@ -91,7 +93,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		Doc:    lc.Doc,
 		Create: fc,
 		Pkg:    slip.CurrentPackage,
-		Kind:   slip.FunctionSymbol,
+		Kind:   slip.MacroSymbol,
 	}
 	if s.Parent() != nil {
 		lc.Closure = s

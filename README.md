@@ -19,19 +19,8 @@ SLIce Processing is LISP for golang
     - or pull from multiple sources
 
 - next
- - defmacro
-
-- how to handle marco characters in compile
- - backquote ` of list allow use of , options
-  - , eval
-  - ,@ is like: if foo is (a b) the ,@foo becomes a b
-  - ', as is, no eval, (as string?)
-  - maybe treat like (quote foo) but (backquote (foo bar))
-   - (comma x)
-   - (comma-at x)
-   - (quote-comma x)
- - or maybe expand to normal functions
-  - (foo ,bar) => (list 'foo bar)
+ - ggql package
+  -
 
  - merge (starts with result-type)
  - room

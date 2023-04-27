@@ -278,10 +278,7 @@ func TestCodeBackquote(t *testing.T) {
 }
 
 func TestCodeCompile(t *testing.T) {
-	code := slip.ReadString("(defmacro foo (&rest args) nil)")
-	tt.Panic(t, func() { code.Compile() })
-
-	code = slip.ReadString("(5)")
+	code := slip.ReadString("(5)")
 	tt.Panic(t, func() { code.Compile() })
 
 	code = slip.ReadString("((x))")
