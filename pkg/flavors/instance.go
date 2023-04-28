@@ -56,13 +56,27 @@ func (obj *Instance) Simplify() interface{} {
 }
 
 // Equal returns true if this Object and the other are equal in value.
-func (obj *Instance) Equal(other slip.Object) (eq bool) {
-	return obj == other
+func (obj *Instance) Equal(other slip.Object) bool {
+	if obj == other {
+		return true
+	}
+	if o, ok := other.(*Instance); ok && obj.Flavor == o.Flavor {
+		for k, val := range obj.Vars {
+			if k == "self" {
+				continue
+			}
+			if !slip.ObjectEqual(val, o.Vars[k]) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *Instance) Hierarchy() []slip.Symbol {
-	return []slip.Symbol{InstanceSymbol, slip.TrueSymbol}
+	return []slip.Symbol{slip.Symbol(obj.Flavor.name), InstanceSymbol, slip.TrueSymbol}
 }
 
 // Eval returns self.
@@ -159,4 +173,24 @@ func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
 		}
 	}
 	return b
+}
+
+// Length returns the length of the object.
+func (obj Instance) Length() (size int) {
+	if 0 < len(obj.Flavor.methods[":length"]) {
+		v := obj.Receive(":length", slip.List{}, 0)
+		if num, ok := v.(slip.Fixnum); ok {
+			size = int(num)
+		}
+	} else {
+		switch tv := obj.Any.(type) {
+		case string:
+			size = len(tv)
+		case []any:
+			size = len(tv)
+		case map[string]any:
+			size = len(tv)
+		}
+	}
+	return
 }

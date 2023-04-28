@@ -38,19 +38,18 @@ type Divide struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Object) {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
 	}
-	var arg slip.Object
-	for pos := len(args) - 1; 0 <= pos; pos-- {
+	for pos, a := range args {
 		if quot == nil {
-			quot = args[pos]
+			quot = a
 			if _, ok := quot.(slip.Number); !ok {
 				slip.PanicType("numbers", quot, "number")
 			}
-			if pos == 0 {
+			if pos == len(args)-1 {
 				switch td := quot.(type) {
 				case slip.Fixnum:
 					if td == 1 {
@@ -84,7 +83,8 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 			}
 			continue
 		}
-		arg, quot = normalizeNumber(args[pos], quot)
+		var arg slip.Object
+		arg, quot = normalizeNumber(a, quot)
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			if quot.(slip.Fixnum)%ta == 0 {

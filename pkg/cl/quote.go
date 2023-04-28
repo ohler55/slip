@@ -12,6 +12,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "quote",
 			Args: []*slip.DocArg{
 				{
@@ -35,7 +36,7 @@ type Quote struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Quote) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
@@ -55,4 +56,9 @@ func (f *Quote) Append(b []byte) (out []byte) {
 		out = slip.Append(b, f.Args[0])
 	}
 	return
+}
+
+// SpecialPrefix returns the prefix character for writing.
+func (f *Quote) SpecialPrefix() string {
+	return "'"
 }

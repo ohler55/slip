@@ -41,7 +41,7 @@ type Lt struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Lt) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	switch len(args) {
 	case 0:
@@ -53,13 +53,13 @@ func (f *Lt) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		return slip.True
 	}
 	var arg slip.Object
-	pos := len(args) - 1
+	pos := 0
 	target := args[pos]
 	if _, ok := target.(slip.Real); !ok {
 		slip.PanicType("numbers", target, "real")
 	}
-	pos--
-	for ; 0 <= pos; pos-- {
+	pos++
+	for ; pos < len(args); pos++ {
 		arg, target = normalizeNumber(args[pos], target)
 		switch ta := arg.(type) {
 		case slip.Fixnum:

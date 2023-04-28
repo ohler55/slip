@@ -31,9 +31,9 @@ func init() {
 The path must follow the JSONPath format.`,
 				},
 				{
-					Name: "as-lisp",
+					Name: "as-bag",
 					Type: "boolean",
-					Text: `If not nil then the returned value is a LISP value otherwise a new _bag_ is returned.`,
+					Text: `If not nil then the returned value is a _bag_ otherwise a new LISP value is returned.`,
 				},
 			},
 			Return: "bag",
@@ -46,7 +46,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-get bag "a") => 3`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Get represents the get function.
@@ -59,23 +59,22 @@ func (f *Get) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if len(args) < 1 || 3 < len(args) {
 		slip.PanicArgCount(f, 1, 3)
 	}
-	pos := len(args) - 1
-	obj, ok := args[pos].(*flavors.Instance)
+	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[pos], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
-	pos--
-	var lisp bool
-	if 0 <= pos {
-		lisp = 0 < pos && args[0] != nil
-		result = getBag(obj, args[pos], lisp)
-	} else {
+	switch len(args) {
+	case 1:
 		result = getBag(obj, nil, false)
+	case 2:
+		result = getBag(obj, args[1], false)
+	case 3:
+		result = getBag(obj, args[1], args[2] != nil)
 	}
 	return
 }
 
-func getBag(obj *flavors.Instance, path slip.Object, lisp bool) slip.Object {
+func getBag(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -95,11 +94,11 @@ func getBag(obj *flavors.Instance, path slip.Object, lisp bool) slip.Object {
 	if value == nil {
 		return nil
 	}
-	if lisp {
-		return slip.SimpleObject(value)
-	}
-	obj = flavor.MakeInstance()
-	obj.Any = value
+	if asBag {
+		obj = flavor.MakeInstance()
+		obj.Any = value
 
-	return obj
+		return obj
+	}
+	return slip.SimpleObject(value)
 }

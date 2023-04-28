@@ -36,17 +36,12 @@ type Atom struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Atom) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	switch ta := args[0].(type) {
-	case slip.List:
-		if 0 < len(ta) {
-			return nil
-		}
-	case slip.Cons:
+	if list, ok := args[0].(slip.List); ok && 0 < len(list) {
 		return nil
 	}
 	return slip.True

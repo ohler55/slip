@@ -25,7 +25,7 @@ func TestCdrEmpty(t *testing.T) {
 
 func TestCdrCons(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.Cons{slip.Symbol("b"), slip.Symbol("a")})
+	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("a"), slip.Tail{Value: slip.Symbol("b")}})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("cdr", slip.List{slip.Symbol("arg")}),
@@ -37,13 +37,34 @@ func TestCdrCons(t *testing.T) {
 
 func TestCdrList(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("c"), slip.Symbol("b"), slip.Symbol("a")})
+	scope.Let(slip.Symbol("arg"), slip.List{slip.Symbol("a"), slip.Symbol("b"), slip.Symbol("c")})
 	(&sliptest.Object{
 		Scope:  scope,
 		Target: slip.NewFunc("cdr", slip.List{slip.Symbol("arg")}),
 		String: "(cdr arg)",
 		Simple: []interface{}{"cdr", "arg"},
-		Eval:   slip.List{slip.Symbol('c'), slip.Symbol('b')},
+		Eval:   slip.List{slip.Symbol('b'), slip.Symbol('c')},
+	}).Test(t)
+}
+
+func TestCdrSetfCons(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '(a . b))").Eval(slip.NewScope(), nil)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (cdr target) 'x)",
+		Expect: "x",
+	}).Test(t)
+	tt.Equal(t, "(a . x)", slip.ObjectString(scope.Get(slip.Symbol("target"))))
+}
+
+func TestCdrSetfList(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString("(setq target '(a b))").Eval(slip.NewScope(), nil)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: "(setf (cdr target) 'x)",
+		Panics: true,
 	}).Test(t)
 }
 
@@ -77,5 +98,19 @@ func TestCdrBadArgCount(t *testing.T) {
 func TestCdrValues(t *testing.T) {
 	code := slip.ReadString(`(cdr (values '(a b) 'c))`)
 	scope := slip.NewScope()
-	tt.Equal(t, slip.List{slip.Symbol("b")}, code.Eval(scope))
+	tt.Equal(t, slip.List{slip.Symbol("b")}, code.Eval(scope, nil))
+}
+
+func TestCdrSetfArgCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(setf (cdr) 'x)",
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCdrSetfNotConsOunt(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(setf (cdr t) 'x)",
+		Panics: true,
+	}).Test(t)
 }

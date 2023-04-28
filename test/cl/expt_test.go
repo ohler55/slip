@@ -5,6 +5,8 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -41,6 +43,12 @@ func TestExptComplexReal(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(expt #C(1 2) 2)`,
 		Expect: "#C(-2.999999999999999 4.000000000000001)",
+		Validate: func(t *testing.T, result slip.Object) {
+			c, ok := result.(slip.Complex)
+			tt.Equal(t, true, ok)
+			tt.Equal(t, true, -3.1 < real(c) && real(c) < -2.9)
+			tt.Equal(t, true, 3.99 < imag(c) && imag(c) < 4.01)
+		},
 	}).Test(t)
 }
 

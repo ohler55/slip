@@ -18,6 +18,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "defflavor",
 			Args: []*slip.DocArg{
 				{
@@ -50,6 +51,7 @@ variables can be provided an initial value. (also spelled :inittable-instance-va
  :required-flavors lists the flavor names that must be included in any flavor inheriting this flavor.
  :included-flavors lists the flavor names that must be included. If not included they are automatically included.
  :no-vanilla-flavor will not inherit the vanilla-flavor.
+ :default-init-plist is a list of supported keyword to make-instance for the flavor
  :default-handler is the function called when no method is found with a send call.
  :abstract-flavor indicates an instance can not be made from this flavor.
  :documentation with a string provides documentation for the flavor.
@@ -75,42 +77,39 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	if len(args) < 3 {
 		slip.PanicArgCount(f, 3, 14)
 	}
-	pos := len(args) - 1
-	name, ok := args[pos].(slip.Symbol)
+	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defflavor", args[pos], "symbol")
+		slip.PanicType("name argument to defflavor", args[0], "symbol")
 	}
-	pos--
 	var vars slip.List
-	switch tl := args[pos].(type) {
+	switch tl := args[1].(type) {
 	case slip.List:
 		vars = tl
 	case nil:
 		// leave as empty list
 	default:
-		slip.PanicType("vars of defflavor", args[pos], "list")
+		slip.PanicType("vars of defflavor", tl, "list")
 	}
-	pos--
 
 	var inherit []string
-	switch tl := args[pos].(type) {
+	switch tl := args[2].(type) {
 	case slip.List:
-		for i := len(tl) - 1; 0 <= i; i-- {
-			if sym, ok2 := tl[i].(slip.Symbol); ok2 {
+		for _, a := range tl {
+			if sym, ok2 := a.(slip.Symbol); ok2 {
 				inherit = append(inherit, string(sym))
 			} else {
-				slip.PanicType("flavors of defflavor", args[pos], "list of symbols")
+				slip.PanicType("flavors of defflavor", tl, "list of symbols")
 			}
 		}
 	case nil:
 		// leave as empty list
 	default:
-		slip.PanicType("flavors of defflavor", args[pos], "list")
+		slip.PanicType("flavors of defflavor", tl, "list")
 	}
 
 	defVars := map[string]slip.Object{}
-	for i := len(vars) - 1; 0 <= i; i-- {
-		switch tv := vars[i].(type) {
+	for _, v := range vars {
+		switch tv := v.(type) {
 		case slip.Symbol:
 			defVars[strings.ToLower(string(tv))] = nil
 		case slip.List:
@@ -118,19 +117,19 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 				slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
 			}
 			var sym slip.Symbol
-			if sym, ok = tv[1].(slip.Symbol); !ok {
+			if sym, ok = tv[0].(slip.Symbol); !ok {
 				slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
 			}
-			if tv[0] == nil {
+			if tv[1] == nil {
 				defVars[strings.ToLower(string(sym))] = nil
 			} else {
-				defVars[strings.ToLower(string(sym))] = tv[0].Eval(s, depth+1)
+				defVars[strings.ToLower(string(sym))] = tv[1].Eval(s, depth+1)
 			}
 		default:
-			slip.PanicType("xx vars element of defflavor", tv, "symbol", "list of symbol and value")
+			slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
 		}
 	}
-	_ = DefFlavor(string(name), defVars, inherit, args[:pos])
+	_ = DefFlavor(string(name), defVars, inherit, args[3:])
 
 	return name
 }
@@ -221,11 +220,11 @@ func validateFlavor(nf *Flavor) {
 }
 
 func valsStringList(vals slip.List) (sa []string) {
-	for i := len(vals) - 1; 0 <= i; i-- {
-		if sym, ok := vals[i].(slip.Symbol); ok {
+	for _, v := range vals {
+		if sym, ok := v.(slip.Symbol); ok {
 			sa = append(sa, string(sym))
 		} else {
-			panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+			panic(fmt.Sprintf("%s is not a symbol.", v))
 		}
 	}
 	return
@@ -243,7 +242,7 @@ Top:
 		goto Top
 	case slip.List:
 		if 1 < len(tv) {
-			if sym, ok := tv[len(tv)-1].(slip.Symbol); ok {
+			if sym, ok := tv[0].(slip.Symbol); ok {
 				if strings.EqualFold("lambda", string(sym)) {
 					s := slip.NewScope()
 					lambdaDef := slip.ListToFunc(s, tv, 0)
@@ -269,10 +268,10 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 				slip.PanicType("options element of defflavor", opt, "symbol", "list of symbol and values")
 			}
 			var ok bool
-			if key, ok = to[len(to)-1].(slip.Symbol); !ok {
+			if key, ok = to[0].(slip.Symbol); !ok {
 				slip.PanicType("options element of defflavor", opt, "symbol", "list of symbol and values")
 			}
-			vals = to[:len(to)-1]
+			vals = to[1:]
 		default:
 			slip.PanicType("options element of defflavor", opt, "symbol", "list of symbol and values")
 		}
@@ -283,21 +282,21 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 			if len(vals) != 1 {
 				slip.PanicType(":default-handler of defflavor", nil, "symbol")
 			}
-			setDefaultHandler(nf, vals[0])
+			setDefaultHandler(nf, vals[len(vals)-1])
 		case ":default-init-plist":
-			for i := len(vals) - 1; 0 <= i; i-- {
-				if plist, ok := vals[i].(slip.List); ok && len(plist) == 2 {
-					if sym, ok := plist[1].(slip.Symbol); ok {
+			for _, v := range vals {
+				if plist, ok := v.(slip.List); ok && len(plist) == 2 {
+					if sym, ok := plist[0].(slip.Symbol); ok {
 						if sym == slip.Symbol(":allow-other-keys") {
-							nf.allowOtherKeys = plist[0] == slip.True
+							nf.allowOtherKeys = plist[1] == slip.True
 						} else {
-							nf.keywords[string(sym)] = plist[0]
+							nf.keywords[string(sym)] = plist[1]
 						}
 					} else {
-						panic(fmt.Sprintf("In :default-init-plist list car, %s is not a symbol.", plist[1]))
+						panic(fmt.Sprintf("In :default-init-plist list car, %s is not a symbol.", plist[0]))
 					}
 				} else {
-					panic(fmt.Sprintf("In :default-init-plist, %s is not a list.", vals[i]))
+					panic(fmt.Sprintf("In :default-init-plist, %s is not a list.", v))
 				}
 			}
 		case ":documentation":
@@ -306,23 +305,33 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 					nf.docs = string(ss)
 					break
 				}
+				slip.PanicType("defflavor :documentation", vals[0], "string")
 			}
-			slip.PanicType("defflavor :documentation", vals[0], "string")
-		case ":gettable-instance-variables":
-			for k := range nf.defaultVars {
-				if k != "self" {
-					nf.DefMethod(":"+k, "", getter(k))
+		case ":gettable-instance-variables", ":readable-instance-variables":
+			if 0 < len(vals) {
+				for _, v := range vals {
+					if sym, ok := v.(slip.Symbol); ok {
+						nf.DefMethod(":"+string(sym), "", getter(sym))
+					} else {
+						panic(fmt.Sprintf("%s is not a symbol.", v))
+					}
+				}
+			} else {
+				for k := range nf.defaultVars {
+					if k != "self" {
+						nf.DefMethod(":"+k, "", getter(k))
+					}
 				}
 			}
 		case ":included-flavors":
 			nf.included = valsStringList(vals)
 		case ":initable-instance-variables", ":inittable-instance-variables":
 			if 0 < len(vals) {
-				for i := len(vals) - 1; 0 <= i; i-- {
-					if sym, ok := vals[i].(slip.Symbol); ok {
+				for _, v := range vals {
+					if sym, ok := v.(slip.Symbol); ok {
 						nf.initable[":"+string(sym)] = true
 					} else {
-						panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+						panic(fmt.Sprintf("%s is not a symbol.", v))
 					}
 				}
 			} else {
@@ -333,11 +342,11 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 				}
 			}
 		case ":init-keywords":
-			for i := len(vals) - 1; 0 <= i; i-- {
-				if sym, ok := vals[i].(slip.Symbol); ok {
+			for _, v := range vals {
+				if sym, ok := v.(slip.Symbol); ok {
 					nf.keywords[string(sym)] = nil
 				} else {
-					panic(fmt.Sprintf("%s is not a symbol.", vals[i]))
+					panic(fmt.Sprintf("%s is not a symbol.", v))
 				}
 			}
 		case ":no-vanilla-flavor":
@@ -350,10 +359,20 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 			nf.requiredVars = valsStringList(vals)
 		case ":required-methods":
 			nf.requiredMethods = valsStringList(vals)
-		case ":settable-instance-variables":
-			for k := range nf.defaultVars {
-				if k != "self" {
-					nf.DefMethod(":set-"+k, "", setter(k))
+		case ":settable-instance-variables", ":writable-instance-variables":
+			if 0 < len(vals) {
+				for _, v := range vals {
+					if sym, ok := v.(slip.Symbol); ok {
+						nf.DefMethod(":set-"+string(sym), "", setter(sym))
+					} else {
+						panic(fmt.Sprintf("%s is not a symbol.", v))
+					}
+				}
+			} else {
+				for k := range nf.defaultVars {
+					if k != "self" {
+						nf.DefMethod(":set-"+k, "", setter(k))
+					}
 				}
 			}
 		default:

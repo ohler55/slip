@@ -5,6 +5,7 @@ package gi_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/gi"
 	"github.com/ohler55/slip/sliptest"
@@ -23,4 +24,5 @@ func TestChannel(t *testing.T) {
 		},
 		Eval: ch,
 	}).Test(t)
+	tt.Equal(t, 0, ch.Length())
 }

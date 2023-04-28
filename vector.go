@@ -20,15 +20,14 @@ func (obj Vector) String() string {
 // Append a buffer with a representation of the Object.
 func (obj Vector) Append(b []byte) []byte {
 	b = append(b, "#("...)
-	for i := len(obj) - 1; 0 <= i; i-- {
-		v := obj[i]
+	for i, v := range obj {
+		if 0 < i {
+			b = append(b, ' ')
+		}
 		if v == nil {
 			b = append(b, "nil"...)
 		} else {
 			b = v.Append(b)
-		}
-		if 0 < i {
-			b = append(b, ' ')
 		}
 	}
 	return append(b, ')')
@@ -39,9 +38,9 @@ func (obj Vector) Simplify() interface{} {
 	out := make([]interface{}, len(obj))
 	for i, o := range obj {
 		if o == nil {
-			out[len(out)-i-1] = nil
+			out[i] = nil
 		} else {
-			out[len(out)-i-1] = o.Simplify()
+			out[i] = o.Simplify()
 		}
 	}
 	return out
@@ -71,6 +70,11 @@ func (obj Vector) Hierarchy() []Symbol {
 // SequenceType returns 'vector.
 func (obj Vector) SequenceType() Symbol {
 	return VectorSymbol
+}
+
+// Length returns the length of the object.
+func (obj Vector) Length() int {
+	return len(obj)
 }
 
 // ArrayType returns 'vector.

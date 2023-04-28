@@ -14,6 +14,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "let*",
 			Args: []*slip.DocArg{
 				{
@@ -38,24 +39,24 @@ a closure that includes the bindings. All bindings are performed in sequence unl
 		}, &slip.CLPkg)
 }
 
-// Letx represents the letx function.
+// Letx represents the let* function.
 type Letx struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Letx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
 	}
-	bindings, ok := args[len(args)-1].(slip.List)
+	bindings, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("let* bindings", args[len(args)-1], "list")
+		slip.PanicType("let* bindings", args[0], "list")
 	}
 	ns := s.NewScope()
 	d2 := depth + 1
-	for i := len(bindings) - 1; 0 <= i; i-- {
-		switch tb := bindings[i].(type) {
+	for _, binding := range bindings {
+		switch tb := binding.(type) {
 		case slip.Symbol:
 			ns.Let(tb, nil)
 		case slip.List:
@@ -63,13 +64,13 @@ func (f *Letx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 				slip.PanicType("let* local variable binding", nil, "list", "symbol")
 			}
 			var sym slip.Symbol
-			if sym, ok = tb[len(tb)-1].(slip.Symbol); !ok {
-				slip.PanicType("let* local variable binding", tb[len(tb)-1], "symbol")
+			if sym, ok = tb[0].(slip.Symbol); !ok {
+				slip.PanicType("let* local variable binding", tb[0], "symbol")
 			}
 			if 1 < len(tb) {
 				// Use the original scope to avoid using the new bindings since
 				// they are evaluated in apparent parallel.
-				ns.Let(sym, f.EvalArg(ns, tb, 0, d2))
+				ns.Let(sym, slip.EvalArg(ns, tb, 1, d2))
 			} else {
 				ns.Let(sym, nil)
 			}
@@ -77,8 +78,8 @@ func (f *Letx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			slip.PanicType("let* binding", f, "list", "symbol")
 		}
 	}
-	for i := len(args) - 2; 0 <= i; i-- {
-		result = f.EvalArg(ns, args, i, d2)
+	for i := 1; i < len(args); i++ {
+		result = slip.EvalArg(ns, args, i, d2)
 	}
 	return
 }

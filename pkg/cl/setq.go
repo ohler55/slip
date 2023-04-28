@@ -16,6 +16,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "setq",
 			Args: []*slip.DocArg{
 				{
@@ -31,7 +32,7 @@ func init() {
 			},
 			Return: "object",
 			Text: `__set__ the value of the _symbol_ to _value_. Note that _symbol_ is not evaluated.
-Repeated pairs of _symbol_ and _value_ are supported`,
+Repeated pairs of _symbol_ and _value_ are supported.`,
 			Examples: []string{
 				"(setq) => nil",
 				"(setq x 7) => 7",
@@ -45,19 +46,20 @@ type Setq struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Setq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args)%2 != 0 {
 		panic(fmt.Sprintf("setq expected symbol value pairs. Not %d arguments.", len(f.Args)))
 	}
 	d2 := depth + 1
-	for i := len(args) - 1; 0 <= i; i-- {
+	last := len(args) - 1
+	for i := 0; i < last; i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok {
 			slip.PanicType("symbol argument to setq", args[i], "symbol")
 		}
-		i--
-		result = f.EvalArg(s, args, i, d2)
+		i++
+		result = slip.EvalArg(s, args, i, d2)
 		s.Set(sym, result)
 	}
 	return

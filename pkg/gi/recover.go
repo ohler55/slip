@@ -14,6 +14,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "recover",
 			Args: []*slip.DocArg{
 				{
@@ -50,29 +51,25 @@ type Recover struct {
 
 // Call the function with the arguments provided.
 func (f *Recover) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 2 {
-		slip.PanicArgCount(f, 2, -1)
-	}
-	pos := len(args) - 1
-	sym, ok := args[pos].(slip.Symbol)
+	slip.ArgCountCheck(f, args, 2, -1)
+	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol", args[pos], "symbol")
+		slip.PanicType("symbol", args[0], "symbol")
 	}
-	pos -= 2
 	d2 := depth + 1
 	defer func() {
 		if rec := recover(); rec != nil {
 			s2 := s.NewScope()
 			s2.Let(sym, slip.SimpleObject(rec))
-			form := args[len(args)-2]
+			form := args[1]
 			result = nil
 			if form != nil {
 				result = form.Eval(s2, d2)
 			}
 		}
 	}()
-	for ; 0 <= pos; pos-- {
-		result = f.EvalArg(s, args, pos, d2)
+	for i := 2; i < len(args); i++ {
+		result = slip.EvalArg(s, args, i, d2)
 	}
 	return
 }

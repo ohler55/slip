@@ -48,7 +48,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-set bag 3 "a") => #<bag-flavor 12345> ;; content is now {a:3}`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Set represents the set function.
@@ -61,16 +61,14 @@ func (f *Set) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if len(args) < 2 || 3 < len(args) {
 		slip.PanicArgCount(f, 2, 3)
 	}
-	pos := len(args) - 1
-	obj, ok := args[pos].(*flavors.Instance)
+	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[pos], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
-	pos--
-	if 0 < pos {
-		setBag(obj, args[pos], args[0])
+	if 2 < len(args) {
+		setBag(obj, args[1], args[2])
 	} else {
-		setBag(obj, args[pos], nil)
+		setBag(obj, args[1], nil)
 	}
 	return obj
 }
@@ -110,33 +108,39 @@ func objectToBag(obj slip.Object) (v any) {
 			break
 		}
 		// If an assoc list then assume a map and if it fails then panic.
-		if _, ok := val[0].(slip.Cons); ok {
-			m := map[string]any{}
-			for _, e := range val {
-				var c slip.Cons
-				if c, ok = e.(slip.Cons); !ok {
-					slip.PanicType("assoc list item", e, "cons")
+		if pair, ok := val[0].(slip.List); ok && len(pair) == 2 {
+			if _, ok = pair[1].(slip.Tail); ok {
+				m := map[string]any{}
+				for _, e := range val {
+					if pair, ok = e.(slip.List); !ok || len(pair) != 2 {
+						slip.PanicType("assoc list item", e, "cons")
+					}
+					var key string
+					switch tk := pair[0].(type) {
+					case slip.Symbol:
+						key = string(tk)
+					case slip.String:
+						key = string(tk)
+					default:
+						slip.PanicType("assoc list item car", tk, "symbol", "string")
+					}
+					cdr := pair[1]
+					var tail slip.Tail
+					if tail, ok = cdr.(slip.Tail); ok {
+						cdr = tail.Value
+					}
+					m[key] = objectToBag(cdr)
 				}
-				var key string
-				switch tk := c.Car().(type) {
-				case slip.Symbol:
-					key = string(tk)
-				case slip.String:
-					key = string(tk)
-				default:
-					slip.PanicType("assoc list item car", tk, "symbol", "string")
-				}
-				m[key] = objectToBag(c.Cdr())
+				v = m
+				break
 			}
-			v = m
-			break
 		}
 		list := make([]any, len(val))
 		for i, o := range val {
 			if o == nil {
-				list[len(val)-i-1] = nil
+				list[i] = nil
 			} else {
-				list[len(val)-i-1] = objectToBag(o)
+				list[i] = objectToBag(o)
 			}
 		}
 		v = list

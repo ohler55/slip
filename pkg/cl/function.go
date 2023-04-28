@@ -17,6 +17,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "function",
 			Args: []*slip.DocArg{
 				{
@@ -40,7 +41,7 @@ type Function struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Function) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
@@ -50,7 +51,7 @@ func (f *Function) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		return slip.FindFunc(string(ta))
 	case slip.List:
 		if 1 < len(ta) {
-			if sym, ok := ta[len(ta)-1].(slip.Symbol); ok {
+			if sym, ok := ta[0].(slip.Symbol); ok {
 				if strings.EqualFold("lambda", string(sym)) {
 					lambdaDef := slip.ListToFunc(s, ta, depth+1)
 					return s.Eval(lambdaDef, depth).(*slip.Lambda)

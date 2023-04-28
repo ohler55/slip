@@ -61,6 +61,10 @@ func TestArraySetAll(t *testing.T) {
 	tt.Panic(t, func() { a.SetAll(slip.List{nil, nil}) })
 }
 
+func TestArraySetBadData(t *testing.T) {
+	tt.Panic(t, func() { slip.ReadString("#2A(nil (1 2 3)(4 5 6))") })
+}
+
 func TestArrayMisc(t *testing.T) {
 	a := testArray()
 	tt.Equal(t, 24, a.Size())

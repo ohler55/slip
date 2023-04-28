@@ -19,9 +19,7 @@ func (obj String) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj String) Append(b []byte) []byte {
-	b = append(b, '"')
-	b = append(b, obj...)
-	return append(b, '"')
+	return printer.Append(b, obj, 0)
 }
 
 // Simplify the Object into a string.
@@ -37,6 +35,16 @@ func (obj String) Equal(other Object) bool {
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj String) Hierarchy() []Symbol {
 	return []Symbol{StringSymbol, VectorSymbol, ArraySymbol, SequenceSymbol, TrueSymbol}
+}
+
+// SequenceType returns 'vector.
+func (obj String) SequenceType() Symbol {
+	return StringSymbol
+}
+
+// Length returns the length of the object.
+func (obj String) Length() int {
+	return len(obj)
 }
 
 // Eval returns self.

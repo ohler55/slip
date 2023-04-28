@@ -34,7 +34,7 @@ func TestScopeSet(t *testing.T) {
 	child := parent.NewScope()
 	child.Let(y, slip.Fixnum(0))
 
-	child.Set(x, slip.Values{nil, slip.Fixnum(1)})
+	child.Set(x, slip.Values{slip.Fixnum(1), nil})
 	child.Set(y, slip.Fixnum(2))
 	child.Set(z, slip.Fixnum(3))
 
@@ -44,11 +44,13 @@ func TestScopeSet(t *testing.T) {
 
 	tt.Equal(t, slip.Fixnum(2), child.Get(y))
 	tt.Equal(t, false, parent.Has(y))
+	tt.Equal(t, false, parent.Bound(y))
 	tt.Equal(t, false, slip.CurrentPackage.Has(string(y)))
 
 	tt.Equal(t, slip.Fixnum(3), child.Get(z))
 	tt.Equal(t, slip.Fixnum(3), parent.Get(z))
 	tt.Equal(t, true, slip.CurrentPackage.Has(string(z)))
+	tt.Equal(t, true, parent.Bound(z))
 
 	tt.Equal(t, slip.Fixnum(9223372036854775807), child.Get(slip.Symbol("most-positive-fixnum")))
 
@@ -64,7 +66,7 @@ func TestScopeRemove(t *testing.T) {
 	child := parent.NewScope()
 	child.Let(y, slip.Fixnum(0))
 
-	child.Set(x, slip.Values{nil, slip.Fixnum(1)})
+	child.Set(x, slip.Values{slip.Fixnum(1), nil})
 	child.Set(y, slip.Fixnum(2))
 
 	child.Remove(x)

@@ -47,8 +47,14 @@ func (f *ContinueWhopper) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 		}
 		ws := self.Scope.NewScope()
 		ws.Let("~whopper-location~", &whopLoc{methods: loc.methods, current: loc.current + 1})
-		(wrap.(*slip.Lambda)).Closure = ws
-
+	whopper:
+		switch tw := wrap.(type) {
+		case *slip.Lambda:
+			(wrap.(*slip.Lambda)).Closure = ws
+		case *Daemon:
+			wrap = tw.caller
+			goto whopper
+		}
 		return wrap.Call(ws, args, depth)
 	}
 	return self.innerReceive(loc.methods, args, depth)

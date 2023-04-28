@@ -9,6 +9,7 @@ type Panic struct {
 	Message string
 	Stack   []string
 	Value   Object // used when the panic function is called
+	Fatal   bool
 }
 
 // Bytes returns the original error and stack in a format for display or
@@ -30,6 +31,11 @@ func (p *Panic) Bytes() []byte {
 // Error returns the panic message.
 func (p *Panic) Error() string {
 	return p.Message
+}
+
+// NewPanic returns a Panic object that can then be used with a call to panic.
+func NewPanic(format string, args ...any) *Panic {
+	return &Panic{Message: fmt.Sprintf(format, args...)}
 }
 
 // PanicType raises a panic describing an incorrect type being used.
@@ -57,6 +63,14 @@ func PanicType(use string, value Object, wants ...string) {
 	b = append(b, '.')
 
 	panic(&Panic{Message: string(b)})
+}
+
+// ArgCountCheck panics if the number of arguments is outside the range
+// specified.
+func ArgCountCheck(obj Object, args List, min, max int) {
+	if len(args) < min || (0 <= max && max < len(args)) {
+		PanicArgCount(obj, min, max)
+	}
 }
 
 // PanicArgCount raises a panic describing the wrong number of arguments to a

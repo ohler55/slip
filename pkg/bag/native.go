@@ -32,7 +32,7 @@ daemons are invoked hence it native a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-native bag) => (("a" . 7))`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Native represents the native function.
@@ -47,7 +47,7 @@ func (f *Native) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	}
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[1], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
 	return slip.SimpleObject(obj.Any)
 }

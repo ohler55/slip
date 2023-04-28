@@ -1,0 +1,128 @@
+Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.<newline> 
+<esc> [2K
+<esc> [1;94m▶ <esc> [m
+=> 10 up
+=> 10 historyBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(caddr foo)
+<esc> [1m
+(
+<esc> [m
+=> 20 historyBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(cddr foo)
+=> 20 historyBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(cadr foo)
+=> 20 historyBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(cdr foo)
+=> 20 historyBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(car foo)
+=> 20 historyBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(a b . c))
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(a b . c))
+(
+<esc> [1m
+(
+<esc> [m
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(a b . c))
+(
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(a b . c))
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(a b . c))
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(a b . c))
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(a b . c))
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(a b . c))
+=> 7f delBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(ab . c))
+=> 7f delBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(b . c))
+=> 0d enter
+<esc> [2K
+<esc> [1;94m▶ <esc> [m
+=> 10 up
+=> 10 historyBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(setq foo '(b . c))
+<esc> [1m
+(
+<esc> [m
+=> 20 historyForward
+<esc> [2K
+<esc> [1;94m▶ <esc> [m
+=> 28 addByte
+(
+(
+=> 63 addByte
+c
+=> 61 addByte
+a
+=> 72 addByte
+r
+=> 20 addByte
+ 
+=> 66 addByte
+f
+=> 6f addByte
+o
+=> 6f addByte
+o
+=> 29 addByte
+)
+<esc> [1m
+(
+<esc> [m
+=> 0d enter
+(
+<esc> [2K
+<esc> [1;94m▶ <esc> [m
+=> 10 up
+=> 10 historyBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(car foo)
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(car foo)
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(car foo)
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(car foo)
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(car foo)
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(car foo)
+=> 02 back
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(car foo)
+=> 7f delBack
+<esc> [2K
+<esc> [1;94m▶ <esc> [m(cr foo)
+=> 64 addByte
+dr foo)
+=> 0d enter
+<esc> [2K
+<esc> [1;94m▶ <esc> [m
+=> 04 delForward
+=> 04 done

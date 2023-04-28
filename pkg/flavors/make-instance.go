@@ -48,20 +48,26 @@ type MakeInstance struct {
 
 // Call the the function with the arguments provided.
 func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 {
-		slip.PanicArgCount(f, 1, -1)
-	}
+	inst, plist := allocateInstance(f, s, args, "make-instance")
+
+	_ = inst.Receive(":init", slip.List{plist}, depth+1)
+
+	return inst
+}
+
+func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string) (*Instance, slip.List) {
+	slip.ArgCountCheck(f, args, 1, -1)
 	var cf *Flavor
-	switch ta := args[len(args)-1].(type) {
+	switch ta := args[0].(type) {
 	case slip.Symbol:
 		cf = allFlavors[string(ta)]
 	case *Flavor:
 		cf = ta
 	default:
-		slip.PanicType("flavor argument to make-instance", ta, "symbol", "flavor")
+		slip.PanicType(fmt.Sprintf("flavor argument to %s", label), ta, "symbol", "flavor")
 	}
 	if cf == nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[len(args)-1]))
+		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
 	}
 	if cf.abstract {
 		panic(fmt.Sprintf("Can not create an instance of abstract flavor %s.", cf.name))
@@ -69,16 +75,16 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	inst := cf.MakeInstance()
 	var plist slip.List
 	keys := map[string]bool{}
-	for i := len(args) - 2; 0 < i; i-- {
+	for i := 1; i < len(args); i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok || len(sym) < 2 || sym[0] != ':' {
-			slip.PanicType("make-instance option keyword", args[i], "keyword")
+			slip.PanicType(fmt.Sprintf("%s option keyword", label), args[i], "keyword")
 		}
 		key := strings.ToLower(string(sym))
 		if key == ":self" {
-			panic("make-instance option keyword 'self' is not initable.")
+			panic(fmt.Sprintf("%s option keyword 'self' is not initable.", label))
 		}
-		i--
+		i++
 		val := args[i]
 		if len(cf.initable) == 0 || cf.initable[key] {
 			vkey := key[1:]
@@ -89,19 +95,17 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		}
 		keys[key] = true
 		if cf.allowOtherKeys {
-			plist = append(plist, val, sym)
+			plist = append(plist, sym, val)
 		} else if _, has := cf.keywords[key]; has {
-			plist = append(plist, val, sym)
+			plist = append(plist, sym, val)
 		} else {
 			panic(fmt.Sprintf("%s is not an init keyword for flavor %s.", sym, cf.name))
 		}
 	}
 	for _, k := range cf.requiredKeywords {
 		if !keys[k] {
-			panic(fmt.Sprintf("Keyword %s missing from make-instance for flavor %s.", k, cf.name))
+			panic(fmt.Sprintf("Keyword %s missing from %s for flavor %s.", k, label, cf.name))
 		}
 	}
-	_ = inst.Receive(":init", slip.List{plist}, depth+1)
-
-	return inst
+	return inst, plist
 }

@@ -3,15 +3,19 @@
 package flavors_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func TestVanilla(t *testing.T) {
+func TestVanillaMethods(t *testing.T) {
 	code := slip.ReadString(`
 (defflavor strawberry ((size "medium")) ()
  :gettable-instance-variables
@@ -20,22 +24,25 @@ func TestVanilla(t *testing.T) {
 (setq berry (make-instance 'strawberry :size "medium"))
 `)
 	scope := slip.NewScope()
-	_ = code.Eval(scope)
-	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope)
+	_ = code.Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope, nil)
 
-	id := slip.ReadString("(send berry :id)").Eval(scope)
+	id := slip.ReadString("(send berry :id)").Eval(scope, nil)
 	tt.SameType(t, slip.Fixnum(0), id)
 
-	has := slip.ReadString("(send berry :operation-handler-p :size)").Eval(scope)
-	tt.Equal(t, slip.True, has)
-	has = slip.ReadString("(send berry :operation-handler-p :x)").Eval(scope)
-	tt.Nil(t, has)
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :operation-handler-p)").Eval(scope) })
+	f := slip.ReadString("(send berry :flavor)").Eval(scope, nil)
+	tt.Equal(t, "#<flavor strawberry>", f.String())
 
-	methods := slip.ReadString("(send berry :which-operations)").Eval(scope)
+	has := slip.ReadString("(send berry :operation-handled-p :size)").Eval(scope, nil)
+	tt.Equal(t, slip.True, has)
+	has = slip.ReadString("(send berry :operation-handled-p :x)").Eval(scope, nil)
+	tt.Nil(t, has)
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :operation-handled-p)").Eval(scope, nil) })
+
+	methods := slip.ReadString("(send berry :which-operations)").Eval(scope, nil)
 	tt.Equal(t,
-		"(:describe :eval-inside-yourself :id :init :operation-handler-p :print-self "+
-			":send-if-handles :set-size :size\n           :which-operations)",
+		"(:describe :eval-inside-yourself :flavor :id :init :inspect :operation-handled-p :print-self "+
+			":send-if-handles :set-size\n           :size :which-operations)",
 		methods.String())
 
 	pr, pw, err := os.Pipe()
@@ -47,7 +54,7 @@ func TestVanilla(t *testing.T) {
 
 	scope.Set("*print-ansi*", nil)
 
-	_ = slip.ReadString("(send berry :describe)").Eval(scope)
+	_ = slip.ReadString("(send berry :describe)").Eval(scope, nil)
 
 	pw.Close()
 	var out []byte
@@ -63,24 +70,147 @@ func TestVanilla(t *testing.T) {
 	defer func() { _ = pw2.Close(); _ = pr2.Close() }()
 
 	scope.Let(slip.Symbol("out"), (*slip.FileStream)(pw2))
-	_ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope)
+	_ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope, nil)
 	pw2.Close()
 	out, err = ioutil.ReadAll(pr2)
 	tt.Nil(t, err)
 	tt.Equal(t, "/#<strawberry [0-9a-f]+>/", string(out))
 
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self out 0)").Eval(scope) })
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self t 0 t)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self out 0)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self t 0 t)").Eval(scope, nil) })
 	// try to write to a closed stream
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :print-self out 0 t)").Eval(scope, nil) })
 
-	size := slip.ReadString("(send berry :send-if-handles :size)").Eval(scope)
+	size := slip.ReadString("(send berry :send-if-handles :size)").Eval(scope, nil)
 	tt.Equal(t, slip.String("medium"), size)
-	result := slip.ReadString("(send berry :send-if-handles :nothing)").Eval(scope)
+	result := slip.ReadString("(send berry :send-if-handles :nothing)").Eval(scope, nil)
 	tt.Nil(t, result)
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :send-if-handles)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :send-if-handles)").Eval(scope, nil) })
 
-	size = slip.ReadString("(send berry :eval-inside-yourself 'size)").Eval(scope)
+	size = slip.ReadString("(send berry :eval-inside-yourself 'size)").Eval(scope, nil)
 	tt.Equal(t, slip.String("medium"), size)
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :eval-inside-yourself)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send berry :eval-inside-yourself)").Eval(scope, nil) })
+
+	bag := slip.ReadString("(send berry :inspect)").Eval(scope, nil)
+	tt.SameType(t, &flavors.Instance{}, bag)
+	inst := bag.(*flavors.Instance)
+	tt.Equal(t, "{flavor: strawberry vars: {size: medium}}", pretty.SEN(inst.Any))
+}
+
+func TestVanillaDescribeDocs(t *testing.T) {
+	testVanillaDocs(t, ":describe",
+		`:describe is a method of vanilla-flavor
+  vanilla-flavor :primary
+    Writes a description of the instance to *standard-output*.
+`)
+}
+
+func TestVanillaEvalSelfDocs(t *testing.T) {
+	testVanillaDocs(t, ":eval-inside-yourself",
+		`:eval-inside-yourself is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :eval-inside-yourself form => object
+     form to evaluate in the scope of the instance.
+`+"   "+`
+    Evaluates the form in the instance's scope.
+`)
+}
+
+func TestVanillaFlavorDocs(t *testing.T) {
+	testVanillaDocs(t, ":flavor",
+		`:flavor is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :flavor => flavor
+    Returns the flavor of the instance.
+`)
+}
+
+func TestVanillaIDDocs(t *testing.T) {
+	testVanillaDocs(t, ":id",
+		`:id is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :id => string
+    Returns the identifier of the instance.
+`)
+}
+
+func TestVanillaInitDocs(t *testing.T) {
+	testVanillaDocs(t, ":init",
+		`:init is a method of vanilla-flavor
+  vanilla-flavor :primary
+    Does nothing but is a placeholder for daemons in sub-flavors.
+`)
+}
+
+func TestVanillaInspectDocs(t *testing.T) {
+	testVanillaDocs(t, ":inspect",
+		`:inspect is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :inspect => bag
+`+"   "+`
+    Returns a bag with the details of the instance.
+`)
+}
+
+func TestVanillaOpHandledDocs(t *testing.T) {
+	testVanillaDocs(t, ":operation-handled-p",
+		`:operation-handled-p is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :operation-handled-p method => boolean
+`+"   "+`
+    Returns t if the instance handles the method and nil otherwise.
+`)
+}
+
+func TestVanillaPrintSelfDocs(t *testing.T) {
+	testVanillaDocs(t, ":print-self",
+		`:print-self is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :print-self &optional stream &rest ignored
+     stream to write the description to. The default is *standard-output*
+`+"   "+`
+    Writes a description of the instance to the stream.
+`)
+}
+
+func TestVanillaSendIfDocs(t *testing.T) {
+	testVanillaDocs(t, ":send-if-handles",
+		`:send-if-handles is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :send-if-handles method arguments* => object
+     method to send to the instance if the instance has the method.
+     arguments* to pass to the method call.
+`+"   "+`
+    Sends to the instance if the instance has the method.
+`)
+}
+
+func TestVanillaWhichOpsDocs(t *testing.T) {
+	testVanillaDocs(t, ":which-operations",
+		`:which-operations is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :which-operations => list
+`+"   "+`
+    Returns a list of all the methods the instance handles.
+`)
+}
+
+func testVanillaDocs(t *testing.T, method, expect string) {
+	var out strings.Builder
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+	scope.Let(slip.Symbol("*print-ansi*"), nil)
+	_ = slip.ReadString(fmt.Sprintf("(describe-method vanilla-flavor %s out)", method)).Eval(scope, nil)
+	tt.Equal(t, expect, out.String())
+}
+
+func TestVanillaDescribeStream(t *testing.T) {
+	var out strings.Builder
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+	_ = slip.ReadString("(setq obj (make-instance 'vanilla-flavor))").Eval(scope, nil)
+	_ = slip.ReadString("(send obj :describe out)").Eval(scope, nil)
+	tt.Equal(t, `/#<vanilla-flavor [0-9a-f]+>.*, an instance of .*vanilla-flavor.*/`, out.String())
+
+	tt.Panic(t, func() { _ = slip.ReadString("(send obj :describe t)").Eval(scope, nil) })
 }

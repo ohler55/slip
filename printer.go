@@ -12,6 +12,8 @@ import (
 	"strings"
 	"unicode"
 	"unsafe"
+
+	"github.com/ohler55/ojg"
 )
 
 const (
@@ -27,7 +29,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	needPipeMap = "" +
 		"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" + // 0x00
-		"xxxxxxxxxx..x..x..........xx...." + // 0x20
+		"xxxxxxxxxx..x..x...........x...." + // 0x20
 		"...........................xxx.." + // 0x40
 		"x..........................xxx.x" + // 0x60
 		"................................" + // 0x80
@@ -40,7 +42,7 @@ type node struct {
 	value    Object
 	elements []*node
 	size     int
-	quote    bool
+	special  string
 	funky    bool
 
 	buf []byte
@@ -302,6 +304,14 @@ Top:
 			}
 		}
 		b = append(b, p.caseName(string(to))...)
+	case String:
+		if p.Readably {
+			b = ojg.AppendJSONString(b, string(to), false)
+		} else {
+			b = append(b, '"')
+			b = append(b, to...)
+			b = append(b, '"')
+		}
 	case List:
 		if len(to) == 0 {
 			return append(b, p.caseName("nil")...)
@@ -314,8 +324,8 @@ Top:
 		} else {
 			l2 := level + 1
 			b = append(b, '(')
-			for i := 0; i < len(to); i++ {
-				element := to[len(to)-i-1]
+			for i, element := range to {
+				// TBD handle Tail
 				if 0 < i {
 					b = append(b, ' ')
 				}
@@ -363,14 +373,13 @@ Top:
 	case *Lambda:
 		if p.Lambda {
 			list := make(List, 0, len(to.Forms)+2)
-			for _, form := range to.Forms {
-				list = append(list, form)
-			}
+			list = append(list, Symbol("lambda"))
 			args := make(List, 0, len(to.Doc.Args))
-			for i := len(to.Doc.Args) - 1; 0 <= i; i-- {
-				args = append(args, Symbol(to.Doc.Args[i].Name))
+			for _, ad := range to.Doc.Args {
+				args = append(args, Symbol(ad.Name))
 			}
-			list = append(list, args, Symbol("lambda"))
+			list = append(list, args)
+			list = append(list, to.Forms...)
 			obj = list
 			goto Top
 		} else {
@@ -390,17 +399,13 @@ Top:
 			b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(to))), 16)
 			b = append(b, "}>"...)
 		}
+	case SpecialSyntax:
+		b = append(b, to.SpecialPrefix()...)
+		obj = to.GetArgs()[0]
+		goto Top
 	case Funky:
 		name := to.GetName()
-		args := to.GetArgs()
-		if name == "quote" {
-			b = append(b, '\'')
-			obj = args[0]
-		} else {
-			// This double assignment is just stupid but it silences the linter.
-			args = append(args, Symbol(name))
-			obj = args
-		}
+		obj = append(List{Symbol(name)}, to.GetArgs()...)
 		goto Top
 	case *Package:
 		b = append(b, "#<"...)
@@ -434,12 +439,15 @@ Top:
 		if 0 < len(to) {
 			l2 := level + 1
 			n.size = 1 + len(to)
-			for i := 0; i < len(to); i++ {
-				element := to[len(to)-i-1]
+			for i, element := range to {
 				if int(p.Length) <= i {
 					n.elements = append(n.elements, &node{value: Symbol("..."), size: 3, buf: []byte("...")})
 					n.size += 3
 					break
+				}
+				if tail, ok := element.(Tail); ok { // cons
+					n.elements = append(n.elements, &node{value: Symbol("."), size: 1, buf: []byte{'.'}})
+					element = tail.Value
 				}
 				t := p.createTree(element, l2)
 				n.elements = append(n.elements, t)
@@ -451,23 +459,16 @@ Top:
 	case Symbol:
 		n.buf = []byte(p.caseName(string(to)))
 		n.size = len(n.buf)
-	case Cons:
-		obj = List{to.Car(), Symbol("."), to.Cdr()}
+	case SpecialSyntax:
+		obj = to.GetArgs()[0]
+		n.special = to.SpecialPrefix()
+		n.funky = true
 		goto Top
-
 	case Funky:
 		name := to.GetName()
-		args := to.GetArgs()
-		if name == "quote" {
-			obj = args[0]
-			n.quote = true
-			n.funky = true
-		} else {
-			// This double assignment is just stupid but it silences the linter.
-			args = append(args, Symbol(name))
-			obj = args
-		}
+		obj = append(List{Symbol(name)}, to.GetArgs()...)
 		goto Top
+
 	default:
 		n.buf = p.Append([]byte{}, obj, 0)
 		n.size = len(n.buf)
@@ -478,8 +479,8 @@ Top:
 var spaces = []byte{'\n'}
 
 func (p *Printer) appendTree(b []byte, n *node, offset, closes int) []byte {
-	if n.quote {
-		b = append(b, '\'')
+	if 0 < len(n.special) {
+		b = append(b, n.special...)
 	}
 	if 0 < len(n.buf) {
 		return append(b, n.buf...)
@@ -837,7 +838,9 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 		ret       bool
 	)
 	b = append(b, indentSpaces[:indent]...)
-	for _, c := range []byte(text) {
+	ba := []byte(text)
+	last := len(ba) - 1
+	for i, c := range ba {
 		if c == '_' {
 			if ansi {
 				emp++
@@ -875,15 +878,21 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 			}
 		case '\n':
 			if ret {
-				b[len(b)-1] = '\n'
-				b = append(b, indentSpaces[:indent]...)
+				if 0 < len(b) && b[len(b)-1] != '\n' {
+					b[len(b)-1] = '\n'
+				}
+				if i < last {
+					b = append(b, indentSpaces[:indent]...)
+				}
 				lastSpace = 0
 				spaceCol = indent
 				col = indent
 			} else {
 				lastSpace = len(b)
 				spaceCol = col
-				b = append(b, ' ')
+				if i < last {
+					b = append(b, ' ')
+				}
 				col++
 				ret = true
 			}

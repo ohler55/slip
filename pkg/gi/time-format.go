@@ -47,13 +47,13 @@ func (f *TimeFormat) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	t, ok := args[1].(slip.Time)
+	t, ok := args[0].(slip.Time)
 	if !ok {
-		slip.PanicType("time", args[1], "time")
+		slip.PanicType("time", args[0], "time")
 	}
 	var layout slip.String
-	if layout, ok = args[0].(slip.String); !ok {
-		slip.PanicType("layout", args[0], "string")
+	if layout, ok = args[1].(slip.String); !ok {
+		slip.PanicType("layout", args[1], "string")
 	}
 	return slip.String(time.Time(t).Format(string(layout)))
 }

@@ -38,12 +38,29 @@ type MakeBagPath struct {
 
 // Call the function with the arguments provided.
 func (f *MakeBagPath) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
+	slip.ArgCountCheck(f, args, 1, 1)
+	var path Path
+	switch ta := args[0].(type) {
+	case slip.String:
+		path = Path(jp.MustParseString(string(ta)))
+	case slip.List:
+		path = make(Path, len(ta))
+		for i, e := range ta {
+			switch te := e.(type) {
+			case nil:
+				path[i] = jp.Wildcard('*')
+			case slip.String:
+				path[i] = jp.Child(te)
+			case slip.Symbol:
+				path[i] = jp.Child(te)
+			case slip.Integer:
+				path[i] = jp.Nth(te.Int64())
+			default:
+				slip.PanicType("path fragment", e, "string", "symbol", "integer", "nil")
+			}
+		}
+	default:
+		slip.PanicType("path", args[0], "string", "list")
 	}
-	str, ok := args[0].(slip.String)
-	if !ok {
-		slip.PanicType("path", args[0], "string")
-	}
-	return Path(jp.MustParseString(string(str)))
+	return path
 }

@@ -36,9 +36,9 @@ func init() {
 The path must follow the JSONPath format. Default: ".."`,
 				},
 				{
-					Name: "as-lisp",
+					Name: "as-bag",
 					Type: "boolean",
-					Text: `If not nil then the value to the function is a LISP value otherwise a new _bag_.`,
+					Text: `If not nil then the value to the _function_ is a _bag_ value otherwise a new LISP object.`,
 				},
 			},
 			Return: "bag",
@@ -51,7 +51,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(bag-walk bag (lambda (x) (setq result cons x result)) "*") => nil`,
 				`result => (7 8)`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Walk represents the walk function.
@@ -61,27 +61,22 @@ type Walk struct {
 
 // Call the the function with the arguments provided.
 func (f *Walk) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) < 2 || 4 < len(args) {
-		slip.PanicArgCount(f, 2, 4)
-	}
-	pos := len(args) - 1
-	obj, ok := args[pos].(*flavors.Instance)
+	slip.ArgCountCheck(f, args, 2, 4)
+	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[pos], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
-	pos--
-	walkBag(s, obj, args, pos, depth)
+	walkBag(s, obj, args[1:], depth)
 
 	return nil
 }
 
-func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, pos, depth int) {
-	fn := args[pos]
-	pos--
+func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {
+	fn := args[0]
 	path := jp.D()
-	var lisp bool
-	if 0 <= pos {
-		switch p := args[pos].(type) {
+	var asBag bool
+	if 1 < len(args) {
+		switch p := args[1].(type) {
 		case nil:
 		case slip.String:
 			path = jp.MustParseString(string(p))
@@ -90,38 +85,35 @@ func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, pos, depth in
 		default:
 			slip.PanicType("path", p, "string", "bag-path")
 		}
-		pos--
-		if 0 <= pos {
-			lisp = args[pos] != nil
-		}
+		asBag = 2 < len(args) && args[2] != nil
 	}
 	d2 := depth + 1
 CallFunc:
 	switch tf := fn.(type) {
 	case *slip.Lambda:
-		if lisp {
+		if asBag {
 			for _, v := range path.Get(obj.Any) {
-				arg := slip.SimpleObject(v)
+				arg := flavor.MakeInstance()
+				arg.Any = v
 				_ = tf.Call(s, slip.List{arg}, d2)
 			}
 		} else {
 			for _, v := range path.Get(obj.Any) {
-				arg := flavor.MakeInstance()
-				arg.Any = v
+				arg := slip.SimpleObject(v)
 				_ = tf.Call(s, slip.List{arg}, d2)
 			}
 		}
 	case *slip.FuncInfo:
-		if lisp {
-			for _, v := range path.Get(obj.Any) {
-				arg := slip.SimpleObject(v)
-				tf.Apply(s, slip.List{arg}, d2)
-			}
-		} else {
+		if asBag {
 			for _, v := range path.Get(obj.Any) {
 				arg := flavor.MakeInstance()
 				arg.Any = v
 				_ = tf.Apply(s, slip.List{arg}, d2)
+			}
+		} else {
+			for _, v := range path.Get(obj.Any) {
+				arg := slip.SimpleObject(v)
+				tf.Apply(s, slip.List{arg}, d2)
 			}
 		}
 	case slip.Symbol:

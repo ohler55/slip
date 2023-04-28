@@ -8,18 +8,15 @@ import (
 	"sync"
 )
 
-type returnFrom struct {
-	tag    Object // Symbol or nil
-	result Object
-}
-
 // Scope encapsulates the scope for a function.
 type Scope struct {
-	parent     *Scope
-	Name       Object // can be nil so type can't be Symbol
-	Vars       map[string]Object
-	returnFrom *returnFrom
-	moo        sync.Mutex
+	parent  *Scope
+	Name    Object // can be nil so type can't be Symbol
+	Vars    map[string]Object
+	moo     sync.Mutex
+	Block   bool
+	TagBody bool
+	Macro   bool
 }
 
 // NewScope create a new top level Scope.
@@ -32,8 +29,11 @@ func NewScope() *Scope {
 // NewScope create a new Scope with a parent of the current Scope.
 func (s *Scope) NewScope() *Scope {
 	return &Scope{
-		parent: s,
-		Vars:   map[string]Object{},
+		parent:  s,
+		Vars:    map[string]Object{},
+		Block:   s.Block,
+		TagBody: s.TagBody,
+		Macro:   s.Macro,
 	}
 }
 
@@ -60,6 +60,18 @@ func (s *Scope) Let(sym Symbol, value Object) {
 	s.moo.Unlock()
 }
 
+// UnsafeLet a symbol be bound to the value in this Scope. No case conversion
+// is performed and no checks are performed.
+func (s *Scope) UnsafeLet(sym Symbol, value Object) {
+	s.moo.Lock()
+	if s.Vars == nil {
+		s.Vars = map[string]Object{string(sym): value}
+	} else {
+		s.Vars[string(sym)] = value
+	}
+	s.moo.Unlock()
+}
+
 // Get a named variable value.
 func (s *Scope) Get(sym Symbol) Object {
 	return s.get(strings.ToLower(string(sym)))
@@ -80,10 +92,10 @@ func (s *Scope) get(name string) Object {
 	if s.parent != nil {
 		return s.parent.get(name)
 	}
-	if value, has := CurrentPackage.Get(name); has {
+	if value, has := CurrentPackage.Get(name); has && Unbound != value {
 		return value
 	}
-	panic(fmt.Sprintf("Variable %s is unbound.", name))
+	panic(NewPanic("Variable %s is unbound.", name))
 }
 
 // Set a variable to the provided value. If sym is bound in this scope the
@@ -117,7 +129,7 @@ func (s *Scope) set(name string, value Object) {
 	CurrentPackage.Set(name, value)
 }
 
-// Has returns true if the variable is bound.
+// Has returns true if the variable is exists.
 func (s *Scope) Has(sym Symbol) bool {
 	return s.has(strings.ToLower(string(sym)))
 }
@@ -138,6 +150,32 @@ func (s *Scope) has(name string) bool {
 		return s.parent.has(name)
 	}
 	return CurrentPackage.Has(name)
+}
+
+// Bound returns true if the variable is bound.
+func (s *Scope) Bound(sym Symbol) bool {
+	return s.bound(strings.ToLower(string(sym)))
+}
+
+func (s *Scope) bound(name string) bool {
+	if _, has := constantValues[name]; has {
+		return true
+	}
+	s.moo.Lock()
+	if s.Vars != nil {
+		if _, has := s.Vars[name]; has {
+			s.moo.Unlock()
+			return true
+		}
+	}
+	s.moo.Unlock()
+	if s.parent != nil {
+		return s.parent.bound(name)
+	}
+	if v, has := CurrentPackage.Get(name); has && Unbound != v {
+		return true
+	}
+	return false
 }
 
 // Remove a variable binding.

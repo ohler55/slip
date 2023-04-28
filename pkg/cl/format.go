@@ -165,7 +165,7 @@ Control directives and operations are:
              Parameters are:
              __mincol__         - minimum width
              __padchar__        - padding character (e.g., #\Tab)
-             __commachar__      - comma character (e.g., #\_)
+             __commachar__      - comma character (e.g., #\space)
              __comma-interval__ - interval between commas
 
  __~E__          Output a number as a floating point. The full form is:
@@ -303,13 +303,13 @@ type Format struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) < 2 {
 		slip.PanicArgCount(f, 2, -1)
 	}
 	var w io.Writer
-	switch ta := args[len(args)-1].(type) {
+	switch ta := args[0].(type) {
 	case nil:
 		// leave w as nil
 	case io.Writer:
@@ -322,20 +322,26 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		}
 		slip.PanicType("destination", ta, "output-stream")
 	}
-	cs, ok := args[len(args)-2].(slip.String)
-	if !ok {
-		slip.PanicType("control", args[len(args)-2], "string")
-	}
-	ctrl := control{scope: s, str: []byte(cs), args: args[:len(args)-2], argPos: len(args) - 3}
-	ctrl.end = len(ctrl.str)
-
-	ctrl.process()
-
+	out := FormatArgs(s, args[1:])
 	if w == nil {
-		return slip.String(ctrl.out)
+		return slip.String(out)
 	}
-	if _, err := w.Write(ctrl.out); err != nil {
+	if _, err := w.Write(out); err != nil {
 		panic(err)
 	}
 	return nil
+}
+
+// FormatArgs uses the provided args as if a format function would to append
+// to a buffer.
+func FormatArgs(s *slip.Scope, args slip.List) []byte {
+	cs, ok := args[0].(slip.String)
+	if !ok {
+		slip.PanicType("control", args[0], "string")
+	}
+	ctrl := control{scope: s, str: []byte(cs), args: args[1:], argPos: 0}
+	ctrl.end = len(ctrl.str)
+	ctrl.process()
+
+	return ctrl.out
 }

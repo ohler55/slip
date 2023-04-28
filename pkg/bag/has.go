@@ -39,7 +39,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-has bag "a") => t`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Has represents the has function.
@@ -52,11 +52,11 @@ func (f *Has) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	obj, ok := args[1].(*flavors.Instance)
+	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[1], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
-	return hasBag(obj, args[0])
+	return hasBag(obj, args[1])
 }
 
 func hasBag(obj *flavors.Instance, path slip.Object) slip.Object {

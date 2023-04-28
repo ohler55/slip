@@ -84,7 +84,7 @@ daemons are invoked hence it write a slight performance advantage.`,
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-write bag) => "{a: 7}")`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Write represents the write function.
@@ -94,39 +94,16 @@ type Write struct {
 
 // Call the the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 16 < len(args) {
-		slip.PanicArgCount(f, 1, 16)
-	}
-	pos := len(args) - 1
-	obj, ok := args[pos].(*flavors.Instance)
+	slip.ArgCountCheck(f, args, 1, 16)
+	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[1], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
-	return writeBag(obj, args, pos)
+	return writeBag(obj, args[1:])
 }
 
-func writeBag(obj *flavors.Instance, args slip.List, pos int) (result slip.Object) {
+func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
 	var out io.Writer
-	if 0 < pos {
-		pos--
-		switch ta := args[pos].(type) {
-		case nil:
-			// leave as nil for output to string
-			pos--
-		case io.Writer:
-			out = ta
-			pos--
-		case slip.Symbol:
-			// probably a key or an error
-		default:
-			if ta == slip.True {
-				out = slip.StandardOutput.(io.Writer)
-				pos--
-			} else {
-				slip.PanicType("stream", ta, "nil", "t", "output-stream")
-			}
-		}
-	}
 	dp := slip.DefaultPrinter()
 	pw := pretty.Writer{
 		Options:  options,
@@ -136,52 +113,71 @@ func writeBag(obj *flavors.Instance, args slip.List, pos int) (result slip.Objec
 	}
 	pw.Indent = 2
 	prty := dp.Pretty
-	for ; 0 < pos; pos -= 2 {
-		sym := args[pos].(slip.Symbol)
-		switch string(sym) {
-		case ":pretty":
-			prty = args[pos-1] != nil
-		case ":depth":
-			num, ok := args[pos-1].(slip.Fixnum)
-			if !ok {
-				slip.PanicType(":depth", args[pos-1], "fixnum")
-			}
-			pw.MaxDepth = int(num)
-			if pw.MaxDepth <= 0 {
-				pw.Indent = 0
-			}
-		case ":right-margin":
-			num, ok := args[pos-1].(slip.Fixnum)
-			if !ok {
-				slip.PanicType(":right-margin", args[pos-1], "fixnum")
-			}
-			pw.Width = int(num)
-		case ":time-format":
-			switch ta := args[pos-1].(type) {
-			case nil:
-				pw.TimeFormat = ""
-			case slip.String:
-				pw.TimeFormat = string(ta)
-			default:
-				slip.PanicType(":time-format", args[pos-1], "string")
-			}
-		case ":time-wrap":
-			switch ta := args[pos-1].(type) {
-			case nil:
-				pw.TimeWrap = ""
-			case slip.String:
-				pw.TimeWrap = string(ta)
-			default:
-				slip.PanicType(":time-wrap", args[pos-1], "string")
-			}
-		case ":json":
-			pw.SEN = args[pos-1] == nil
-		case ":color":
-			pw.Color = args[pos-1] != nil
-
+	if 0 < len(args) {
+		pos := 0
+		switch ta := args[0].(type) {
+		case nil:
+			// leave as nil for output to string
+		case io.Writer:
+			out = ta
+			pos++
+		case slip.Symbol:
+			// probably a key or an error
 		default:
-			slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin",
-				":time-format", ":time-wrap", ":json", ":color")
+			if ta == slip.True {
+				out = slip.StandardOutput.(io.Writer)
+			} else {
+				slip.PanicType("stream", ta, "nil", "t", "output-stream")
+			}
+			pos++
+		}
+		for ; pos < len(args)-1; pos += 2 {
+			sym := args[pos].(slip.Symbol)
+			switch string(sym) {
+			case ":pretty":
+				prty = args[pos+1] != nil
+			case ":depth":
+				num, ok := args[pos+1].(slip.Fixnum)
+				if !ok {
+					slip.PanicType(":depth", args[pos+1], "fixnum")
+				}
+				pw.MaxDepth = int(num)
+				if pw.MaxDepth <= 0 {
+					pw.Indent = 0
+				}
+			case ":right-margin":
+				num, ok := args[pos+1].(slip.Fixnum)
+				if !ok {
+					slip.PanicType(":right-margin", args[pos+1], "fixnum")
+				}
+				pw.Width = int(num)
+			case ":time-format":
+				switch ta := args[pos+1].(type) {
+				case nil:
+					pw.TimeFormat = ""
+				case slip.String:
+					pw.TimeFormat = string(ta)
+				default:
+					slip.PanicType(":time-format", args[pos+1], "string")
+				}
+			case ":time-wrap":
+				switch ta := args[pos+1].(type) {
+				case nil:
+					pw.TimeWrap = ""
+				case slip.String:
+					pw.TimeWrap = string(ta)
+				default:
+					slip.PanicType(":time-wrap", args[pos+1], "string")
+				}
+			case ":json":
+				pw.SEN = args[pos+1] == nil
+			case ":color":
+				pw.Color = args[pos+1] != nil
+
+			default:
+				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin",
+					":time-format", ":time-wrap", ":json", ":color")
+			}
 		}
 	}
 	var b []byte

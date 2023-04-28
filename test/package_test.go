@@ -16,7 +16,7 @@ import (
 
 func TestPackage(t *testing.T) {
 	pkgs := slip.PackageNames()
-	tt.Equal(t, `("bag" "common-lisp" "common-lisp-user" "flavors" "gi")`, pkgs.String())
+	tt.Equal(t, `("bag" "common-lisp" "common-lisp-user" "flavors" "gi" "keyword")`, pkgs.String())
 }
 
 func TestPackageUser(t *testing.T) {
@@ -35,7 +35,7 @@ func TestPackageUser(t *testing.T) {
 }
 
 func checkUserPkgSimplify(t *testing.T, simple interface{}) {
-	tt.Equal(t, []interface{}{"common-lisp", "flavors", "gi", "bag"}, jp.C("uses").First(simple))
+	tt.Equal(t, []interface{}{"keyword", "common-lisp", "flavors", "gi", "bag"}, jp.C("uses").First(simple))
 	tt.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
 }
 
@@ -52,6 +52,7 @@ func TestPackageCL(t *testing.T) {
 		},
 		Eval: &slip.CLPkg,
 	}).Test(t)
+	tt.Panic(t, func() { slip.CLPkg.Set("*common-lisp*", slip.True) })
 }
 
 func checkCLPkgSimplify(t *testing.T, simple interface{}) {
@@ -118,11 +119,11 @@ func TestPackageVars(t *testing.T) {
 	tt.Equal(t, false, has)
 	tt.Nil(t, val)
 
-	tt.Panic(t, func() { slip.CurrentPackage.Remove("*print-pretty*") })
+	tt.Panic(t, func() { slip.CLPkg.Remove("*print-pretty*") })
 
 	cl := slip.FindPackage("common-lisp")
-	cl.Set(key, slip.Fixnum(7))
-	cl.Remove(key)
+	tt.Panic(t, func() { cl.Set(key, slip.Fixnum(7)) })
+	tt.Panic(t, func() { cl.Remove(key) })
 	val, has = cl.Get(key)
 	tt.Equal(t, false, has)
 	tt.Nil(t, val)

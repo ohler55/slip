@@ -97,14 +97,14 @@ func SimpleObject(val any) (obj Object) {
 
 	case []any:
 		list := make(List, 0, len(tv))
-		for i := len(tv) - 1; 0 <= i; i-- {
-			list = append(list, SimpleObject(tv[i]))
+		for _, v := range tv {
+			list = append(list, SimpleObject(v))
 		}
 		obj = list
 	case map[string]any:
 		list := make(List, 0, len(tv))
 		for k, v2 := range tv {
-			list = append(list, Cons{String(k), SimpleObject(v2)})
+			list = append(list, List{String(k), Tail{Value: SimpleObject(v2)}})
 		}
 		obj = list
 

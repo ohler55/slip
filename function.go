@@ -7,8 +7,16 @@ import (
 	"strings"
 )
 
-// FunctionSymbol is the symbol with a value of "function".
-const FunctionSymbol = Symbol("function")
+const (
+	// BuiltInSymbol is the symbol with a value of "built-in".
+	BuiltInSymbol = Symbol("built-in")
+	// FunctionSymbol is the symbol with a value of "function".
+	FunctionSymbol = Symbol("function")
+	// MacroSymbol is the symbol with a value of "macro".
+	MacroSymbol = Symbol("macro")
+	// LambdaSymbol is the symbol with a value of "lambda".
+	LambdaSymbol = Symbol("lambda")
+)
 
 // Function is the base type for most if not all functions.
 type Function struct {
@@ -41,25 +49,30 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
 func NewFunc(name string, args List, pkgs ...*Package) Object {
-	name = strings.ToLower(name)
-	pkg := CurrentPackage
-	if 0 < len(pkgs) {
-		pkg = pkgs[0]
-	}
-	if fi := pkg.Funcs[name]; fi != nil {
-		return fi.Create(args)
-	}
-	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
+	return FindFunc(name, pkgs...).Create(args)
 }
 
 // FindFunc finds the FuncInfo for a provided name or panics if none exists.
 func FindFunc(name string, pkgs ...*Package) *FuncInfo {
-	name = strings.ToLower(name)
 	pkg := CurrentPackage
-	if 0 < len(pkgs) {
+	if i := strings.IndexByte(name, ':'); 0 < i {
+		if pkg = FindPackage(name[:i]); pkg == nil {
+			panic(fmt.Sprintf("package %s is not defined.", printer.caseName(name[:i])))
+		}
+		i++
+		if i < len(name) && name[i] == ':' {
+			i++
+		}
+		name = name[i:]
+	} else if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	if fi := pkg.Funcs[name]; fi != nil {
+	fi := pkg.Funcs[name]
+	if fi == nil {
+		name = strings.ToLower(name)
+		fi = pkg.Funcs[name]
+	}
+	if fi != nil {
 		return fi
 	}
 	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
@@ -74,12 +87,13 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	d2 := depth + 1
 	si := -1
 	var update []int
-	for i := len(f.Args) - 1; 0 <= i; i-- {
+	for i, arg := range f.Args {
 		si++
-		arg := f.Args[i]
+		skip := false
 		if 0 < len(f.SkipEval) {
 			if len(f.SkipEval) <= si {
 				if f.SkipEval[len(f.SkipEval)-1] {
+					skip = true
 					args[i] = arg
 					if _, ok := arg.(List); ok {
 						update = append(update, i)
@@ -87,6 +101,7 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 					continue
 				}
 			} else if f.SkipEval[si] {
+				skip = true
 				args[i] = arg
 				if _, ok := arg.(List); ok {
 					update = append(update, i)
@@ -98,7 +113,11 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 			arg = ListToFunc(s, list, depth+1)
 			f.Args[i] = arg
 		}
-		args[i] = s.Eval(arg, d2)
+		v := s.Eval(arg, d2)
+		if vs, ok := v.(Values); ok && !skip {
+			v = vs[0]
+		}
+		args[i] = v
 	}
 	result = f.Self.Call(s, args, depth)
 
@@ -121,16 +140,6 @@ func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
 	return f.Self.Call(s, args, depth)
 }
 
-// EvalArg converts lists arguments to functions and replaces the
-// argument. Then the argument is evaluated and returned. Non-list arguments
-// are just evaluated.
-func (f *Function) EvalArg(s *Scope, args List, index, depth int) Object {
-	if list, ok := args[index].(List); ok {
-		args[index] = ListToFunc(s, list, depth+1)
-	}
-	return s.Eval(args[index], depth)
-}
-
 // String representation of the Object.
 func (f *Function) String() string {
 	return string(f.Append([]byte{}))
@@ -140,9 +149,9 @@ func (f *Function) String() string {
 func (f *Function) Append(b []byte) []byte {
 	b = append(b, '(')
 	b = printer.Append(b, Symbol(f.Name), 0)
-	for i := len(f.Args) - 1; 0 <= i; i-- {
+	for _, a := range f.Args {
 		b = append(b, ' ')
-		b = Append(b, f.Args[i])
+		b = Append(b, a)
 	}
 	return append(b, ')')
 }
@@ -151,8 +160,8 @@ func (f *Function) Append(b []byte) []byte {
 func (f *Function) Simplify() interface{} {
 	simple := make([]interface{}, 0, len(f.Args)+1)
 	simple = append(simple, f.Name)
-	for i := len(f.Args) - 1; 0 <= i; i-- {
-		simple = append(simple, Simplify(f.Args[i]))
+	for _, a := range f.Args {
+		simple = append(simple, Simplify(a))
 	}
 	return simple
 }
@@ -164,6 +173,11 @@ func (f *Function) Equal(other Object) bool {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (f *Function) Hierarchy() []Symbol {
+	for _, skip := range f.SkipEval {
+		if skip {
+			return []Symbol{MacroSymbol, TrueSymbol}
+		}
+	}
 	return []Symbol{FunctionSymbol, TrueSymbol}
 }
 
@@ -182,19 +196,19 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 	if len(list) == 0 {
 		return nil
 	}
-	switch ta := list[len(list)-1].(type) {
+	switch ta := list[0].(type) {
 	case Symbol:
-		return NewFunc(string(ta), list[:len(list)-1])
+		return NewFunc(string(ta), list[1:])
 	case List:
 		if 1 < len(ta) {
-			if sym, ok := ta[len(ta)-1].(Symbol); ok {
+			if sym, ok := ta[0].(Symbol); ok {
 				if strings.EqualFold("lambda", string(sym)) {
 					lambdaDef := ListToFunc(s, ta, depth+1)
 					lc := s.Eval(lambdaDef, depth).(*Lambda)
 					return &Dynamic{
 						Function: Function{
 							Self: lc,
-							Args: list[:len(list)-1],
+							Args: list[1:],
 						},
 					}
 				}
@@ -202,7 +216,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 		}
 	}
 	panic(&Panic{
-		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[len(list)-1])),
+		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[0])),
 		Stack:   []string{list.String()},
 	})
 }
@@ -237,11 +251,11 @@ func (f *Function) Caller() Caller {
 // CompileList a list into a function or an undefined function.
 func CompileList(list List) (f Object) {
 	if 0 < len(list) {
-		switch ta := list[len(list)-1].(type) {
+		switch ta := list[0].(type) {
 		case Symbol:
 			name := strings.ToLower(string(ta))
 			if fi := CurrentPackage.Funcs[name]; fi != nil {
-				f = fi.Create(list[:len(list)-1])
+				f = fi.Create(list[1:])
 			} else {
 				lc := Lambda{
 					Doc: &FuncDoc{
@@ -260,14 +274,14 @@ func CompileList(list List) (f Object) {
 					}
 				}
 				CurrentPackage.Funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage}
-				f = fc(list[:len(list)-1])
+				f = fc(list[1:])
 			}
 			if funk, ok := f.(Funky); ok {
 				funk.CompileArgs()
 			}
 		case List:
 			if 1 < len(ta) {
-				if sym, ok := ta[len(ta)-1].(Symbol); ok {
+				if sym, ok := ta[0].(Symbol); ok {
 					if strings.EqualFold("lambda", string(sym)) {
 						s := NewScope()
 						lambdaDef := ListToFunc(s, ta, 0)
@@ -275,7 +289,7 @@ func CompileList(list List) (f Object) {
 						return &Dynamic{
 							Function: Function{
 								Self: lc,
-								Args: list[:len(list)-1],
+								Args: list[1:],
 							},
 						}
 					}
@@ -294,4 +308,18 @@ func DescribeFunction(sym Symbol) *FuncDoc {
 		return fi.Doc
 	}
 	return nil
+}
+
+// EvalArg converts lists arguments to functions and replaces the
+// argument. Then the argument is evaluated and returned. Non-list arguments
+// are just evaluated.
+func EvalArg(s *Scope, args List, index, depth int) (v Object) {
+	if list, ok := args[index].(List); ok {
+		args[index] = ListToFunc(s, list, depth+1)
+	}
+	v = s.Eval(args[index], depth)
+	if list, ok := v.(List); ok && len(list) == 0 {
+		v = nil
+	}
+	return
 }

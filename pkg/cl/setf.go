@@ -16,6 +16,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "setf",
 			Args: []*slip.DocArg{
 				{
@@ -51,10 +52,10 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		panic(fmt.Sprintf("setf expected placer/value pairs. Not %d arguments.", len(f.Args)))
 	}
 	d2 := depth + 1
-	for i := len(args) - 1; 0 <= i; i-- {
+	for i := 0; i < len(args)-1; i++ {
 		p := args[i]
-		i--
-		result = f.EvalArg(s, args, i, d2)
+		i++
+		result = slip.EvalArg(s, args, i, d2)
 		if vs, ok := result.(slip.Values); ok {
 			result = vs.First()
 		}
@@ -63,15 +64,14 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		case slip.Symbol:
 			s.Set(ta, result)
 		case slip.List:
-			p = slip.ListToFunc(s, ta, depth+1)
+			p = slip.ListToFunc(s, ta, d2)
 			goto Retry
 		case slip.Placer:
 			targs := ta.GetArgs()
 			pargs := make(slip.List, len(targs))
-			for j := len(targs) - 1; 0 <= j; j-- {
-				v := targs[j]
+			for j, v := range targs {
 				if list, ok := v.(slip.List); ok {
-					v = slip.ListToFunc(s, list, depth+1)
+					v = slip.ListToFunc(s, list, d2)
 				}
 				pargs[j] = s.Eval(v, d2)
 			}

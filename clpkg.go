@@ -13,22 +13,29 @@ func init() {
 
 // CLPkg is the COMMON-LISP package.
 var (
-	CLPkg = Package{
+	pkgVarVal = VarVal{Set: setCLPkg, Doc: "the common lisp package"}
+	CLPkg     = Package{
 		Name:      "common-lisp",
 		Nicknames: []string{"cl"},
 		Doc:       "Home of symbols defined by the ANSI language spcification.",
 		Vars: map[string]*VarVal{
-			"*package*": {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
+			"*common-lisp*": &pkgVarVal,
+			"*package*":     {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
 			"*default-pathname-defaults*": {
 				Get: getWorkingDir,
 				Set: setWorkingDir,
 				Doc: "is the pathname for the current working directory.",
 			},
+			"*package-load-path*": {Val: List{}, Doc: "package load paths"},
 			"*error-output*": {
 				Get: getErrorOutput,
 				Set: setErrorOutput,
 				Doc: "is a stream used as the default for warnings and errors when not in interaction mode.",
 			},
+			"*load-pathname*": {Val: nil, Doc: "load path set during load."},
+			"*load-print*":    {Val: nil, Doc: "default value for print during loading."},
+			"*load-truename*": {Val: nil, Doc: "load path set during load."},
+			"*load-verbose*":  {Val: nil, Doc: "default value for verbose during loading."},
 			"*standard-input*": {
 				Get: getStandardInput,
 				Set: setStandardInput,
@@ -137,9 +144,11 @@ and raises an error if not possible to print readably.`,
 				Set: setPrintRightMargin,
 				Doc: "establishes the right margin for pretty printing.",
 			},
+			"*random-state*": {Val: nil},
 		},
 		Lambdas: map[string]*Lambda{},
 		Funcs:   map[string]*FuncInfo{},
+		PreSet:  DefaultPreSet,
 		Locked:  true,
 	}
 
@@ -167,7 +176,7 @@ func init() {
 	for _, vv := range CLPkg.Vars {
 		vv.Pkg = &CLPkg
 	}
-	CLPkg.Set("*common-lisp*", &CLPkg)
+	pkgVarVal.Get = getCLPkg
 }
 
 func getCurrentPackage() Object {
@@ -228,4 +237,12 @@ func setStandardInput(value Object) {
 	} else {
 		PanicType("*standard-input*", value, "stream")
 	}
+}
+
+func getCLPkg() Object {
+	return &CLPkg
+}
+
+func setCLPkg(_ Object) {
+	panic("*common-lisp* is a read only variable")
 }

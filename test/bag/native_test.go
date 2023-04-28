@@ -12,7 +12,7 @@ import (
 
 func TestBagNativeOk(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope).(*flavors.Instance)
+	_ = slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-native bag)`,

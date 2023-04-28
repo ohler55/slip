@@ -45,16 +45,16 @@ type Log struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Log) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) != 1 && len(args) != 2 {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	isE := true
 	var baseArg slip.Object = slip.DoubleFloat(math.E)
-	numArg := args[len(args)-1]
+	numArg := args[0]
 	if 1 < len(args) {
-		baseArg = args[0]
+		baseArg = args[1]
 		isE = false
 	}
 	switch num := numArg.(type) {

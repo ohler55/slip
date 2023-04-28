@@ -40,7 +40,7 @@ type Uniq struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Uniq) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	switch len(args) {
 	case 0:

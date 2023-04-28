@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestNumbertpTrue(t *testing.T) {
+func TestNumberpTrue(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(numberp 4)`,
 		Expect: "t",
@@ -19,14 +19,14 @@ func TestNumbertpTrue(t *testing.T) {
 	}).Test(t)
 }
 
-func TestNumbertpFalse(t *testing.T) {
+func TestNumberpFalse(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(numberp t)`,
 		Expect: "nil",
 	}).Test(t)
 }
 
-func TestNumbertpBadArgCount(t *testing.T) {
+func TestNumberpBadArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(numberp)`,
 		Panics: true,

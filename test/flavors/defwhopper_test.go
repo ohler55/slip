@@ -21,10 +21,11 @@ func TestDefwhopperBasic(t *testing.T) {
 (defmethod (berry :rot) () (princ "berry rot" out) (terpri out))
 (defmethod (berry :after :rot) () (princ "berry after rot" out) (terpri out))
 (defwhopper (berry :rot) ()
+ "What a whopper!"
  (princ "berry whopper rot start" out) (terpri out)
  (continue-whopper)
  (princ "berry whopper rot done" out) (terpri out))
-`).Eval(scope)
+`).Eval(scope, nil)
 	_ = slip.ReadString(`
 (defflavor blueberry () (berry))
 (defmethod (blueberry :before :rot) () (princ "blueberry before rot" out) (terpri out))
@@ -34,11 +35,11 @@ func TestDefwhopperBasic(t *testing.T) {
  (continue-whopper)
  (princ "blueberry whopper rot done" out) (terpri out)
 )
-`).Eval(scope)
+`).Eval(scope, nil)
 
-	_ = slip.ReadString("(setq blue (make-instance blueberry))").Eval(scope)
+	_ = slip.ReadString("(setq blue (make-instance blueberry))").Eval(scope, nil)
 
-	_ = slip.ReadString("(send blue :rot)").Eval(scope)
+	_ = slip.ReadString("(send blue :rot)").Eval(scope, nil)
 	tt.Equal(t, `blueberry whopper rot start
 berry whopper rot start
 blueberry before rot
@@ -49,7 +50,7 @@ berry whopper rot done
 blueberry whopper rot done
 `, b.String())
 
-	f := slip.ReadString("blueberry").Eval(scope)
+	f := slip.ReadString("blueberry").Eval(scope, nil)
 	sf := f.Simplify()
 	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].whopper").First(sf))
 }
@@ -63,7 +64,7 @@ func TestDefwhopperOneWrap(t *testing.T) {
 (defflavor berry (color) ())
 (defmethod (berry :rot) () (princ "berry rot" out) (terpri out))
 (defmethod (berry :after :rot) () (princ "berry after rot" out) (terpri out))
-`).Eval(scope)
+`).Eval(scope, nil)
 	_ = slip.ReadString(`
 (defflavor blueberry () (berry))
 (defmethod (blueberry :before :rot) () (princ "blueberry before rot" out) (terpri out))
@@ -73,11 +74,11 @@ func TestDefwhopperOneWrap(t *testing.T) {
  (continue-whopper)
  (princ "blueberry whopper rot done" out) (terpri out)
 )
-`).Eval(scope)
+`).Eval(scope, nil)
 
-	_ = slip.ReadString("(setq blue (make-instance blueberry))").Eval(scope)
+	_ = slip.ReadString("(setq blue (make-instance blueberry))").Eval(scope, nil)
 
-	_ = slip.ReadString("(send blue :rot)").Eval(scope)
+	_ = slip.ReadString("(send blue :rot)").Eval(scope, nil)
 	tt.Equal(t, `blueberry whopper rot start
 blueberry before rot
 berry rot
@@ -92,13 +93,13 @@ func TestDefwhopperPanics(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`
 (defflavor berry (color) ())
-`).Eval(scope)
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper ())").Eval(scope) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper t ())").Eval(scope) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry) ())").Eval(scope) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry :before :rot) ())").Eval(scope) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (not-defined :rot) ())").Eval(scope) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry t) ())").Eval(scope) })
+`).Eval(scope, nil)
+	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper ())").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper t ())").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry) ())").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry :before :rot) ())").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (not-defined :rot) ())").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry t) ())").Eval(scope, nil) })
 }
 
 func TestContinueWhopperLocation(t *testing.T) {
@@ -107,9 +108,9 @@ func TestContinueWhopperLocation(t *testing.T) {
 	_ = slip.ReadString(`
 (defflavor berry (color) ())
 (defwhopper (berry :rot) () (setq loc ~whopper-location~))
-`).Eval(scope)
-	_ = slip.ReadString("(setq bb (make-instance berry))").Eval(scope)
-	_ = slip.ReadString("(send bb :rot)").Eval(scope)
+`).Eval(scope, nil)
+	_ = slip.ReadString("(setq bb (make-instance berry))").Eval(scope, nil)
+	_ = slip.ReadString("(send bb :rot)").Eval(scope, nil)
 	loc := scope.Get(slip.Symbol("loc"))
 	tt.Equal(t, "#<whopper-location>", slip.ObjectString(loc))
 	tt.Equal(t, "#<whopper-location>", slip.Simplify(loc))

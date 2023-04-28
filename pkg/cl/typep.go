@@ -43,16 +43,16 @@ type Typep struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Typep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	sym, ok := args[0].(slip.Symbol)
+	sym, ok := args[1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("type", args[0], "symbol")
+		slip.PanicType("type", args[1], "symbol")
 	}
-	switch ta := args[1].(type) {
+	switch ta := args[0].(type) {
 	case nil:
 		if strings.EqualFold("null", string(sym)) {
 			return slip.True
@@ -61,12 +61,16 @@ func (f *Typep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if len(ta) == 0 && strings.EqualFold("null", string(sym)) {
 			return slip.True
 		}
-		if strings.EqualFold(string(ta.Hierarchy()[0]), string(sym)) {
-			return slip.True
+		for _, h := range ta.Hierarchy() {
+			if strings.EqualFold(string(h), string(sym)) {
+				return slip.True
+			}
 		}
 	default:
-		if strings.EqualFold(string(ta.Hierarchy()[0]), string(sym)) {
-			return slip.True
+		for _, h := range ta.Hierarchy() {
+			if strings.EqualFold(string(h), string(sym)) {
+				return slip.True
+			}
 		}
 	}
 	return nil

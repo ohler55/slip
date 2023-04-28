@@ -39,13 +39,12 @@ type Same struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Same) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
 	}
 	var target slip.Object
-	var arg slip.Object
 	for pos := len(args) - 1; 0 <= pos; pos-- {
 		if target == nil {
 			target = args[pos]
@@ -54,37 +53,44 @@ func (f *Same) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 			continue
 		}
-		arg, target = normalizeNumber(args[pos], target)
-		switch ta := arg.(type) {
-		case slip.Fixnum:
-			if target.(slip.Fixnum) != ta {
-				return nil
-			}
-		case slip.SingleFloat:
-			if target.(slip.SingleFloat) != ta {
-				return nil
-			}
-		case slip.DoubleFloat:
-			if target.(slip.DoubleFloat) != ta {
-				return nil
-			}
-		case *slip.LongFloat:
-			if (*big.Float)(target.(*slip.LongFloat)).Cmp((*big.Float)(ta)) != 0 {
-				return nil
-			}
-		case *slip.Bignum:
-			if (*big.Int)(target.(*slip.Bignum)).Cmp((*big.Int)(ta)) != 0 {
-				return nil
-			}
-		case *slip.Ratio:
-			if (*big.Rat)(target.(*slip.Ratio)).Cmp((*big.Rat)(ta)) != 0 {
-				return nil
-			}
-		case slip.Complex:
-			if complex128(target.(slip.Complex)) != complex128(ta) {
-				return nil
-			}
+		if target = same(args[pos], target); target == nil {
+			return nil
 		}
 	}
 	return slip.True
+}
+
+func same(x, y slip.Object) slip.Object {
+	x, y = normalizeNumber(x, y)
+	switch tx := x.(type) {
+	case slip.Fixnum:
+		if y.(slip.Fixnum) != tx {
+			return nil
+		}
+	case slip.SingleFloat:
+		if y.(slip.SingleFloat) != tx {
+			return nil
+		}
+	case slip.DoubleFloat:
+		if y.(slip.DoubleFloat) != tx {
+			return nil
+		}
+	case *slip.LongFloat:
+		if (*big.Float)(y.(*slip.LongFloat)).Cmp((*big.Float)(tx)) != 0 {
+			return nil
+		}
+	case *slip.Bignum:
+		if (*big.Int)(y.(*slip.Bignum)).Cmp((*big.Int)(tx)) != 0 {
+			return nil
+		}
+	case *slip.Ratio:
+		if (*big.Rat)(y.(*slip.Ratio)).Cmp((*big.Rat)(tx)) != 0 {
+			return nil
+		}
+	case slip.Complex:
+		if complex128(y.(slip.Complex)) != complex128(tx) {
+			return nil
+		}
+	}
+	return y
 }

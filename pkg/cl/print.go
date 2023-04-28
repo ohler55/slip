@@ -46,19 +46,19 @@ type Print struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Print) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	p := *slip.DefaultPrinter()
 	p.Escape = true
-	obj := args[len(args)-1]
+	obj := args[0]
 	var w io.Writer = slip.StandardOutput.(io.Writer)
 	if 1 < len(args) {
 		var ok bool
-		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType("print output-stream", args[0], "output-stream")
+		if w, ok = args[1].(io.Writer); !ok {
+			slip.PanicType("print output-stream", args[1], "output-stream")
 		}
 	}
 	b := p.Append([]byte{'\n'}, obj, 0)

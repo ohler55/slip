@@ -38,18 +38,18 @@ type Min struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Min) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) == 0 {
 		slip.PanicArgCount(f, 1, -1)
 	}
-	pos := len(args) - 1
+	pos := 0
 	min := args[pos]
 	if _, ok := min.(slip.Real); !ok {
 		slip.PanicType("reals", min, "real")
 	}
-	pos--
-	for ; 0 <= pos; pos-- {
+	pos++
+	for ; pos < len(args); pos++ {
 		arg, mx := normalizeNumber(args[pos], min)
 		switch ta := arg.(type) {
 		case slip.Fixnum:

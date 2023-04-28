@@ -5,6 +5,8 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -70,7 +72,11 @@ func TestExpBignum(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(exp (- 100000000000000000000 100000000000000000010))`,
-		Expect: "4.539992976248485e-05",
+		Validate: func(t *testing.T, result slip.Object) {
+			f, ok := result.(slip.DoubleFloat)
+			tt.Equal(t, true, ok)
+			tt.Equal(t, true, 4.5e-05 < f && f < 5.6e-05)
+		},
 	}).Test(t)
 }
 

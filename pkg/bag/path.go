@@ -39,8 +39,8 @@ func (obj Path) Simplify() interface{} {
 func (obj Path) Equal(other slip.Object) (eq bool) {
 	if x, ok := other.(Path); ok {
 		if len(obj) == len(x) {
-			for i := len(obj) - 1; 0 <= i; i-- {
-				if obj[i] != x[i] {
+			for i, v := range obj {
+				if v != x[i] {
 					return false
 				}
 			}

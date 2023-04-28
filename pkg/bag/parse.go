@@ -47,7 +47,7 @@ daemons are invoked hence it has a slight performance advantage.`,
 				`(parseq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
 				`(bag-parse bag "{b:5}" "a") => #<bag-flavor 12345> ;; content is now {a:{b:5}}`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Parse represents the parse function.
@@ -57,19 +57,16 @@ type Parse struct {
 
 // Call the the function with the arguments provided.
 func (f *Parse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 2 || 3 < len(args) {
-		slip.PanicArgCount(f, 2, 3)
-	}
-	pos := len(args) - 1
-	obj, ok := args[pos].(*flavors.Instance)
+	slip.ArgCountCheck(f, args, 2, 3)
+	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Flavor != flavor {
-		slip.PanicType("bag", args[pos], "bag")
+		slip.PanicType("bag", args[0], "bag")
 	}
-	pos--
-	if 0 < pos {
-		parseBag(obj, args[pos], args[0])
+
+	if 2 < len(args) {
+		parseBag(obj, args[1], args[2])
 	} else {
-		parseBag(obj, args[pos], nil)
+		parseBag(obj, args[1], nil)
 	}
 	return obj
 }

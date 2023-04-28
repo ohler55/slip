@@ -19,8 +19,9 @@ const (
 // defined.
 type Lambda struct {
 	Doc     *FuncDoc
-	Forms   List // reverse order
+	Forms   List
 	Closure *Scope
+	Macro   bool
 }
 
 // Call the the function with the arguments provided.
@@ -28,13 +29,15 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	ss := NewScope()
 	if lam.Closure != nil {
 		ss.parent = lam.Closure
+		ss.Macro = lam.Closure.Macro
 	}
+	ss.Macro = lam.Macro
 	mode := reqMode
-	ai := len(args) - 1
+	ai := 0
 	var rest List
 	var restSym Symbol
 	for i, ad := range lam.Doc.Args {
-		if ai < 0 {
+		if len(args) <= ai {
 			break
 		}
 	Mode:
@@ -49,7 +52,7 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 				mode = keyMode
 			default:
 				ss.Let(Symbol(ad.Name), args[ai])
-				ai--
+				ai++
 			}
 		case optMode:
 			switch strings.ToLower(ad.Name) {
@@ -59,10 +62,10 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 				mode = keyMode
 			default:
 				ss.Let(Symbol(ad.Name), args[ai])
-				ai--
+				ai++
 			}
 		case restMode:
-			for 0 <= ai {
+			for ai < len(args) {
 				a := args[ai]
 				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
 					sym = sym[1:]
@@ -73,38 +76,33 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 						}
 					}
 				}
-				ai--
+				ai++
 				if len(restSym) == 0 {
 					restSym = Symbol(ad.Name)
 				}
 				rest = append(rest, a)
 			}
 		case keyMode:
-			for 0 <= ai {
+			for ai < len(args) {
 				a := args[ai]
-				ai--
+				ai++
 				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
 					sym = sym[1:]
-					if ai < 0 {
+					if len(args) <= ai {
 						panic(fmt.Sprintf("Missing value for key :%s.", sym))
 					}
 					ss.Let(sym, args[ai])
-					ai--
+					ai++
 					continue
 				}
 				PanicType("keyword to function", a, "symbol")
 			}
 		}
 	}
-	if 0 <= ai {
+	if ai < len(args) {
 		panic(&Panic{Message: fmt.Sprintf("Too many arguments to %s. There are %d extra.", lam, ai+1)})
 	}
 	if 0 < len(rest) {
-		// Reverse rest since it was build with append in the wrong order for
-		// a List.
-		for i := len(rest)/2 - 1; 0 <= i; i-- {
-			rest[i], rest[len(rest)-i-1] = rest[len(rest)-i-1], rest[i]
-		}
 		ss.Let(restSym, rest)
 	}
 	mode = reqMode
@@ -126,7 +124,7 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 			case AmpKey:
 				mode = keyMode
 			default:
-				if !ss.Has(Symbol(ad.Name)) {
+				if !ss.Bound(Symbol(ad.Name)) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
@@ -135,32 +133,19 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 			case AmpKey:
 				mode = keyMode
 			default:
-				if !ss.Has(Symbol(ad.Name)) {
+				if !ss.Bound(Symbol(ad.Name)) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
 		case keyMode:
-			if !ss.Has(Symbol(ad.Name)) {
+			if !ss.Bound(Symbol(ad.Name)) {
 				ss.Let(Symbol(ad.Name), ad.Default)
 			}
 		}
 	}
 	d2 := depth + 1
-	for i := len(lam.Forms) - 1; 0 <= i; i-- {
-		result = ss.Eval(lam.Forms[i], d2)
-		if ss.returnFrom != nil {
-			switch {
-			case ss.returnFrom.tag == nil:
-				if ss.Name == nil {
-					return ss.returnFrom.result
-				}
-			case ss.returnFrom.tag.Equal(ss.Name):
-				return ss.returnFrom.result
-			default:
-				s.returnFrom = ss.returnFrom
-			}
-			break
-		}
+	for _, form := range lam.Forms {
+		result = ss.Eval(form, d2)
 	}
 	return
 }
@@ -169,7 +154,7 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 // lambda-list followed by an optional documentation strings and then the
 // forms to evaluate when the Lambda is called.
 func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
-	pos := len(args) - 1
+	pos := 0
 	var ll List
 	switch tl := args[pos].(type) {
 	case List:
@@ -179,31 +164,30 @@ func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 	default:
 		PanicType(fmt.Sprintf("lambda list of %s", defName), args[pos], "list")
 	}
-	pos--
+	pos++
 	var (
 		docStr String
 		ok     bool
 	)
 	switch {
-	case pos < 0:
-		pos = 0
-	case 0 < pos:
+	case len(args) <= pos:
+		pos = len(args) - 1
+	case pos < len(args):
 		docStr, ok = args[pos].(String)
-		if !ok {
+		if ok {
 			pos++
 		}
-	default:
-		pos++
 	}
 	lam = &Lambda{
 		Doc: &FuncDoc{
 			Return: "object",
 			Text:   string(docStr),
+			Kind:   LambdaSymbol,
 		},
-		Forms: args[:pos],
+		Forms: args[pos:],
 	}
-	for i := len(ll) - 1; 0 <= i; i-- {
-		switch ta := ll[i].(type) {
+	for _, a := range ll {
+		switch ta := a.(type) {
 		case Symbol: // variable name
 			lam.Doc.Args = append(lam.Doc.Args, &DocArg{Name: string(ta), Type: "object"})
 		case List: // variable name and default value
@@ -211,14 +195,14 @@ func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 				PanicType("lambda list element with default value", ta, "list of two elements")
 			}
 			var name Symbol
-			if name, ok = ta[1].(Symbol); !ok {
+			if name, ok = ta[0].(Symbol); !ok {
 				PanicType("lambda list element with default value", ta, "list with a symbol as the first element")
 			}
-			if ta[0] == nil {
+			if ta[1] == nil {
 				lam.Doc.Args = append(lam.Doc.Args, &DocArg{Name: string(name), Type: "object"})
 			} else {
 				lam.Doc.Args = append(lam.Doc.Args,
-					&DocArg{Name: string(name), Type: string(ta[0].Hierarchy()[0]), Default: ta[0]})
+					&DocArg{Name: string(name), Type: string(ta[1].Hierarchy()[0]), Default: ta[1]})
 			}
 		default:
 			PanicType("lambda list element", ta, "symbol", "list")
@@ -244,7 +228,7 @@ func (lam *Lambda) Equal(other Object) bool {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (lam *Lambda) Hierarchy() []Symbol {
-	return []Symbol{FunctionSymbol, TrueSymbol}
+	return []Symbol{LambdaSymbol, TrueSymbol}
 }
 
 // Simplify the function.

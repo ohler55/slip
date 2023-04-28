@@ -38,32 +38,36 @@ type Add struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Add) Call(s *slip.Scope, args slip.List, depth int) (sum slip.Object) {
 	sum = slip.Fixnum(0)
-	var arg slip.Object
-	for pos := len(args) - 1; 0 <= pos; pos-- {
-		arg, sum = normalizeNumber(args[pos], sum)
-		switch ta := arg.(type) {
-		case slip.Fixnum:
-			sum = ta + sum.(slip.Fixnum)
-		case slip.SingleFloat:
-			sum = ta + sum.(slip.SingleFloat)
-		case slip.DoubleFloat:
-			sum = ta + sum.(slip.DoubleFloat)
-		case *slip.LongFloat:
-			syncFloatPrec(ta, sum.(*slip.LongFloat))
-			sum = (*slip.LongFloat)(((*big.Float)(sum.(*slip.LongFloat))).Add(
-				(*big.Float)(sum.(*slip.LongFloat)),
-				(*big.Float)(ta)),
-			)
-		case *slip.Bignum:
-			sum = (*slip.Bignum)(((*big.Int)(sum.(*slip.Bignum))).Add((*big.Int)(sum.(*slip.Bignum)), (*big.Int)(ta)))
-		case *slip.Ratio:
-			sum = (*slip.Ratio)(((*big.Rat)(sum.(*slip.Ratio))).Add((*big.Rat)(sum.(*slip.Ratio)), (*big.Rat)(ta)))
-		case slip.Complex:
-			sum = slip.Complex(complex128(sum.(slip.Complex)) + complex128(ta))
-		}
+	for _, arg := range args {
+		sum = addNumbers(arg, sum)
 	}
 	return
+}
+
+func addNumbers(n0, n1 slip.Object) slip.Object {
+	n0, n1 = normalizeNumber(n0, n1)
+	switch t0 := n0.(type) {
+	case slip.Fixnum:
+		n1 = t0 + n1.(slip.Fixnum)
+	case slip.SingleFloat:
+		n1 = t0 + n1.(slip.SingleFloat)
+	case slip.DoubleFloat:
+		n1 = t0 + n1.(slip.DoubleFloat)
+	case *slip.LongFloat:
+		syncFloatPrec(t0, n1.(*slip.LongFloat))
+		n1 = (*slip.LongFloat)(((*big.Float)(n1.(*slip.LongFloat))).Add(
+			(*big.Float)(n1.(*slip.LongFloat)),
+			(*big.Float)(t0)),
+		)
+	case *slip.Bignum:
+		n1 = (*slip.Bignum)(((*big.Int)(n1.(*slip.Bignum))).Add((*big.Int)(n1.(*slip.Bignum)), (*big.Int)(t0)))
+	case *slip.Ratio:
+		n1 = (*slip.Ratio)(((*big.Rat)(n1.(*slip.Ratio))).Add((*big.Rat)(n1.(*slip.Ratio)), (*big.Rat)(t0)))
+	case slip.Complex:
+		n1 = slip.Complex(complex128(n1.(slip.Complex)) + complex128(t0))
+	}
+	return n1
 }

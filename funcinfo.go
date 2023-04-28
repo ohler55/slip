@@ -6,11 +6,11 @@ import "github.com/ohler55/ojg/alt"
 
 // FuncInfo stores information about a function.
 type FuncInfo struct {
-	Name    string
-	Create  func(args List) Object
-	Doc     *FuncDoc
-	Pkg     *Package // package interned in
-	BuiltIn bool
+	Name   string
+	Create func(args List) Object
+	Doc    *FuncDoc
+	Pkg    *Package // package interned in
+	Kind   Symbol
 }
 
 // String representation of the Object.
@@ -43,7 +43,10 @@ func (obj *FuncInfo) Equal(other Object) (eq bool) {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *FuncInfo) Hierarchy() []Symbol {
-	return []Symbol{FunctionSymbol, TrueSymbol}
+	if len(obj.Kind) == 0 {
+		obj.Kind = FunctionSymbol
+	}
+	return []Symbol{obj.Kind, TrueSymbol}
 }
 
 // Eval returns self.

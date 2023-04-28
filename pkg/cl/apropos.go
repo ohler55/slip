@@ -48,13 +48,13 @@ type Apropos struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) < 1 || 2 < len(args) {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	var pat string
-	switch ta := args[len(args)-1].(type) {
+	switch ta := args[0].(type) {
 	case slip.Symbol:
 		pat = strings.ToLower(string(ta))
 	case slip.String:
@@ -65,7 +65,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var pkg *slip.Package
 	if 1 < len(args) {
 		var name string
-		switch ta := args[0].(type) {
+		switch ta := args[1].(type) {
 		case slip.Symbol:
 			name = string(ta)
 		case slip.String:
@@ -77,13 +77,16 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			panic(fmt.Sprintf("Package %s not found.", name))
 		}
 	}
+	pr := *slip.DefaultPrinter()
+	pr.Readably = true
+
 	var lines []string
 	if pkg != nil {
 		for k, vv := range pkg.Vars {
 			if !strings.Contains(k, pat) {
 				continue
 			}
-			lines = append(lines, f.formVarLine(k, vv))
+			lines = append(lines, f.formVarLine(k, vv, &pr))
 		}
 		for k, fi := range pkg.Funcs {
 			if !strings.Contains(k, pat) {
@@ -98,7 +101,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				if vv.Pkg != pkg || !strings.Contains(k, pat) {
 					continue
 				}
-				lines = append(lines, f.formVarLine(k, vv))
+				lines = append(lines, f.formVarLine(k, vv, &pr))
 			}
 			for k, fi := range pkg.Funcs {
 				if fi.Pkg != pkg || !strings.Contains(k, pat) {
@@ -118,16 +121,16 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return slip.Novalue
 }
 
-func (f *Apropos) formVarLine(k string, vv *slip.VarVal) string {
+func (f *Apropos) formVarLine(k string, vv *slip.VarVal, pr *slip.Printer) string {
 	var line []byte
 	p := vv.Pkg
 	if p != &slip.CLPkg {
 		line = slip.Append(line, slip.Symbol(p.Name))
-		line = append(line, "::"...)
+		line = append(line, ':')
 	}
 	line = slip.Append(line, slip.Symbol(k))
 	line = append(line, " = "...)
-	line = slip.ObjectAppend(line, vv.Value())
+	line = pr.Append(line, vv.Value(), 0)
 
 	return string(line)
 }
@@ -137,13 +140,12 @@ func (f *Apropos) formFuncLine(k string, fi *slip.FuncInfo) string {
 	p := fi.Pkg
 	if p != &slip.CLPkg {
 		line = slip.Append(line, slip.Symbol(p.Name))
-		line = append(line, "::"...)
+		line = append(line, ':')
 	}
 	line = slip.Append(line, slip.Symbol(k))
-	if fi.BuiltIn {
-		line = append(line, " (built-in)"...)
-	} else {
-		line = append(line, " (lambda)"...)
-	}
+	line = append(line, " ("...)
+	line = append(line, fi.Hierarchy()[0]...)
+	line = append(line, ')')
+
 	return string(line)
 }

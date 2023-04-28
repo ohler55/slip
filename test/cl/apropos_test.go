@@ -35,7 +35,7 @@ func TestAproposSymbol(t *testing.T) {
 		Expect: "",
 	}).Test(t)
 	tt.Equal(t, `/.*print-lambda. = nil
-.*lambda \(built-in\)
+.*lambda \(macro\)
 .*/`, out.String())
 }
 
@@ -49,8 +49,8 @@ func TestAproposPkg(t *testing.T) {
 		Source: `(apropos 'deff 'flavors)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `flavors::defflavor (built-in)
-flavors::undefflavor (built-in)
+	tt.Equal(t, `flavors:defflavor (macro)
+flavors:undefflavor (built-in)
 `, out.String())
 }
 
@@ -64,7 +64,7 @@ func TestAproposPkgVars(t *testing.T) {
 		Source: `(apropos 'vanilla 'flavors)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `flavors::vanilla-flavor = #<flavor vanilla-flavor>
+	tt.Equal(t, `flavors:vanilla-flavor = #<flavor vanilla-flavor>
 `, out.String())
 }
 
@@ -74,13 +74,13 @@ func TestAproposDefun(t *testing.T) {
 	var out strings.Builder
 	slip.StandardOutput = &slip.OutputStream{Writer: &out}
 
-	_ = slip.CompileString("(defun apropos-test () nil)")
+	_ = slip.CompileString("(defun apropos-testy () nil)")
 
 	(&sliptest.Function{
-		Source: `(apropos 'test 'user)`,
+		Source: `(apropos 'testy 'user)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `common-lisp-user::apropos-test (lambda)
+	tt.Equal(t, `common-lisp-user:apropos-testy (function)
 `, out.String())
 }
 

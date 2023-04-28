@@ -16,6 +16,7 @@ func TestFunctionNew(t *testing.T) {
 	tt.Equal(t, "(car nil)", slip.ObjectString(f))
 
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing", slip.List{}) })
+	tt.Panic(t, func() { _ = slip.NewFunc("nothing:at-all", slip.List{}) })
 }
 
 func TestFunctionFind(t *testing.T) {
@@ -33,13 +34,27 @@ func TestFunctionApply(t *testing.T) {
 	tt.Equal(t, "7", slip.ObjectString(result))
 }
 
+func TestFunctionPkgApply(t *testing.T) {
+	scope := slip.NewScope()
+	f := slip.NewFunc("cl:car", slip.List{}).(slip.Funky)
+	result := f.Apply(scope, slip.List{slip.List{slip.Fixnum(7)}}, 0)
+	tt.Equal(t, "7", slip.ObjectString(result))
+}
+
+func TestFunctionPkg2Apply(t *testing.T) {
+	scope := slip.NewScope()
+	f := slip.NewFunc("cl::car", slip.List{}).(slip.Funky)
+	result := f.Apply(scope, slip.List{slip.List{slip.Fixnum(7)}}, 0)
+	tt.Equal(t, "7", slip.ObjectString(result))
+}
+
 func TestFunctionEvalArg(t *testing.T) {
 	scope := slip.NewScope()
 	defer func() { slip.CurrentPackage.Remove("x") }()
 
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("setq", slip.List{slip.Fixnum(7), slip.Symbol("x")}),
+		Target: slip.NewFunc("setq", slip.List{slip.Symbol("x"), slip.Fixnum(7)}),
 		String: "(setq x 7)",
 		Simple: []interface{}{"setq", "x", 7},
 		Eval:   slip.Fixnum(7),

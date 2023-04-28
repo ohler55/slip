@@ -1,0 +1,70 @@
+Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.<newline> 
+<esc> [2K
+<esc> [1;94m▶ <esc> [m
+=> 08 help
+<esc> [1mSLIP REPL Editor<esc> [m<newline>   <newline>    This editor includes history, tab completions, word (symbol) descriptions, and parenthesis matching.<newline>    In the key binding table <esc> [1mM-<esc> [m indicates pressing the meta or option key or pressing the escape key<newline>    before the rest of the sequence. A <esc> [1mC-<esc> [m indicates the control key is held while pressing the key. A<newline>    shift key is denoted with a <esc> [1mS-<esc> [m. Some keys have different behavior if the current form is blank. The<newline>    alternate behavior is included in parenthesis. Key bindings are:<newline> <newline>    <esc> [1mC-a<esc> [m   move to line start                 <esc> [1mM-C-b<esc> [m move back to matching paren        <newline>    <esc> [1mC-b<esc> [m   move left one                      <esc> [1mM-C-f<esc> [m move forward to matching paren     <newline>    <esc> [1mC-c<esc> [m   exit                               <esc> [1mC-/<esc> [m   describe word                      <newline>    <esc> [1mC-d<esc> [m   delete one forward (exit)          <esc> [1mM-/<esc> [m   describe word                      <newline>    <esc> [1mC-e<esc> [m   move to line end                   <esc> [1mM-?<esc> [m   describe word                      <newline>    <esc> [1mC-f<esc> [m   move right one                     <esc> [1mM-\<esc> [m   collapse space                     <newline>    <esc> [1mC-h<esc> [m   show this help page                <esc> [1mM-b<esc> [m   move back one word                 <newline>    <esc> [1mTAB<esc> [m   word completion or help scroll     <esc> [1mM-d<esc> [m   delete one word                    <newline>    <esc> [1mS-TAB<esc> [m help scroll back                   <esc> [1mM-e<esc> [m   evaluate current form              <newline>    <esc> [1mC-k<esc> [m   delete to line end                 <esc> [1mM-f<esc> [m   move forward one word              <newline>    <esc> [1mC-j<esc> [m   insert newline                     <esc> [1mM-u<esc> [m   enter 4 byte unicode               <newline>    <esc> [1mC-n<esc> [m   move down one (next in history)    <esc> [1mM-U<esc> [m   enter 8 byte unicode               <newline>    <esc> [1mC-o<esc> [m   insert newline after               <esc> [1mM-v<esc> [m   previous in history                <newline>    <esc> [1mC-p<esc> [m   move up one (previous in history)  <esc> [1m🔼<esc> [m    move up one                      <newline>    <esc> [1mC-r<esc> [m   search history back                <esc> [1m🔽<esc> [m    move down one                    <newline>    <esc> [1mC-s<esc> [m   search history forward             <esc> [1m▶️<esc> [m     move right one                <newline>    <esc> [1mC-t<esc> [m   swap characters                    <esc> [1m◀️<esc> [m     move left one                 <newline>    <esc> [1mC-u<esc> [m   clear current form                 <esc> [1mM-DEL<esc> [m delete previous word               <newline>    <esc> [1mC-v<esc> [m   next in history                    <esc> [1mENTER<esc> [m evaluate form                      <newline>    <esc> [1mDEL<esc> [m   delete one back                    <newline> 
+<esc> 7<esc> [?25l
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┒
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+│
+┃
+┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+<esc> 8<esc> [?25h
+<esc> [J
+=> 01 lineBegin
+<esc> [J
+=> 04 delForward
+=> 04 done

@@ -36,7 +36,7 @@ type Boundp struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Boundp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
@@ -45,7 +45,7 @@ func (f *Boundp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if !ok {
 		slip.PanicType("symbol", args[0], "symbol")
 	}
-	if s.Has(sym) {
+	if s.Bound(sym) {
 		return slip.True
 	}
 	if _, has := slip.CurrentPackage.Funcs[string(sym)]; has {

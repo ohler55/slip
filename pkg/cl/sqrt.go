@@ -38,7 +38,7 @@ type Sqrt struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Sqrt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)

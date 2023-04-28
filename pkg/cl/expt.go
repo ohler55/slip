@@ -44,13 +44,13 @@ type Expt struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Expt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	if base, ok := args[1].(slip.Fixnum); ok {
-		if pow, ok2 := args[0].(slip.Fixnum); ok2 {
+	if base, ok := args[0].(slip.Fixnum); ok {
+		if pow, ok2 := args[1].(slip.Fixnum); ok2 {
 			x := math.Pow(float64(base), float64(pow))
 			if (-1.0 < x && x < 1.0) || float64(math.MaxInt64) < x || x < float64(math.MinInt64) {
 				return slip.DoubleFloat(x)
@@ -58,9 +58,9 @@ func (f *Expt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			return slip.Fixnum(x)
 		}
 	}
-	switch base := args[1].(type) {
+	switch base := args[0].(type) {
 	case slip.Real:
-		switch pow := args[0].(type) {
+		switch pow := args[1].(type) {
 		case slip.Real:
 			result = slip.DoubleFloat(math.Pow(base.RealValue(), pow.RealValue()))
 		case slip.Complex:
@@ -69,7 +69,7 @@ func (f *Expt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			slip.PanicType("power", pow, "number")
 		}
 	case slip.Complex:
-		switch pow := args[0].(type) {
+		switch pow := args[1].(type) {
 		case slip.Real:
 			result = slip.Complex(cmplx.Pow(complex128(base), complex(pow.RealValue(), 0.0)))
 		case slip.Complex:

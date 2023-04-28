@@ -18,6 +18,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "defun",
 			Args: []*slip.DocArg{
 				{
@@ -59,14 +60,14 @@ type Defun struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	name, ok := args[len(args)-1].(slip.Symbol)
+	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defun", args[len(args)-1], "symbol")
+		slip.PanicType("name argument to defun", args[0], "symbol")
 	}
 	low := strings.ToLower(string(name))
-	lc := slip.DefLambda("defun", s, args[:len(args)-1])
+	lc := slip.DefLambda("defun", s, args[1:])
 	fc := func(fargs slip.List) slip.Object {
 		return &slip.Dynamic{
 			Function: slip.Function{
@@ -78,16 +79,20 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	}
 	if fi := slip.CurrentPackage.Funcs[low]; fi != nil {
 		if fi.Pkg.Locked {
-			panic(fmt.Sprintf("Redefining %s::%s in defun. Package %s is locked.",
+			panic(fmt.Sprintf("Redefining %s:%s in defun. Package %s is locked.",
 				slip.CurrentPackage.Name, low, slip.CurrentPackage.Name))
 		}
-		var w io.Writer
-		if w, ok = slip.ErrorOutput.(io.Writer); ok {
-			_, _ = fmt.Fprintf(w, "WARNING: redefining %s::%s in defun\n", slip.CurrentPackage.Name, low)
-		}
+		w := s.Get("*error-output*").(io.Writer)
+		_, _ = fmt.Fprintf(w, "WARNING: redefining %s:%s in defun\n", slip.CurrentPackage.Name, low)
 	}
 	slip.CurrentPackage.Lambdas[low] = lc
-	slip.CurrentPackage.Funcs[low] = &slip.FuncInfo{Name: low, Doc: lc.Doc, Create: fc, Pkg: slip.CurrentPackage}
+	slip.CurrentPackage.Funcs[low] = &slip.FuncInfo{
+		Name:   low,
+		Doc:    lc.Doc,
+		Create: fc,
+		Pkg:    slip.CurrentPackage,
+		Kind:   slip.FunctionSymbol,
+	}
 	if s.Parent() != nil {
 		lc.Closure = s
 	}

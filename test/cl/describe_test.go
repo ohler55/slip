@@ -8,6 +8,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -27,7 +28,7 @@ func TestDescribeBasic(t *testing.T) {
 	tt.Equal(t, `car
   [symbol]
 
-car names a function:
+car names a built-in:
   Lambda-List: (arg)
   Return: object
   Documentation:
@@ -100,4 +101,11 @@ func TestDescribeWriteFail(t *testing.T) {
 		Source: `(describe 'sample)`,
 		Panics: true,
 	}).Test(t)
+}
+
+func TestAppendDescribe(t *testing.T) {
+	slip.CurrentPackage.Set("*package-load-path*", nil)
+	b := cl.AppendDescribe(nil, slip.Symbol("*package-load-path*"), slip.NewScope(), 2, 80, false)
+	tt.Equal(t, "  *package-load-path*\n    [symbol]\n  \n  *package-load-path* names a null:\n"+
+		"    Documentation:\n        package load paths\n      Value = nil\n", string(b))
 }

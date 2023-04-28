@@ -61,7 +61,7 @@ func (obj *Array) calcAndSet(list List) {
 			obj.sizes[i] = size
 			size *= len(list)
 			if i < len(obj.dims)-1 {
-				if list, ok = list[0].(List); !ok {
+				if list, ok = list[0].(List); !ok { // TBD last?
 					panic(fmt.Sprintf("Invalid data for a %d dimension array. %s", len(obj.dims), list))
 				}
 			}
@@ -162,7 +162,7 @@ func (obj *Array) Get(indexes ...int) Object {
 		if index < 0 || d <= index {
 			dims := make(List, len(obj.dims))
 			for j, d2 := range obj.dims {
-				dims[len(dims)-j-1] = Fixnum(d2)
+				dims[j] = Fixnum(d2)
 			}
 			panic(fmt.Sprintf("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
 				index, i, dims, d))
@@ -183,7 +183,7 @@ func (obj *Array) Set(value Object, indexes ...int) {
 		if index < 0 || d <= index {
 			dims := make(List, len(obj.dims))
 			for j, d2 := range obj.dims {
-				dims[len(dims)-j-1] = Fixnum(d2)
+				dims[j] = Fixnum(d2)
 			}
 			panic(fmt.Sprintf("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
 				index, i, dims, d))
@@ -207,13 +207,13 @@ func (obj *Array) listifyDim(di, ei int) (List, int) {
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
 			e := obj.elements[ei]
-			list[len(list)-i-1] = e
+			list[i] = e
 			ei++
 		}
 	} else {
 		d2 := di + 1
 		for i := 0; i < d; i++ {
-			list[len(list)-i-1], ei = obj.listifyDim(d2, ei)
+			list[i], ei = obj.listifyDim(d2, ei)
 		}
 	}
 	return list, ei
@@ -234,15 +234,15 @@ func (obj *Array) setDim(list List, di, ei int) int {
 	}
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
-			obj.elements[ei] = list[len(list)-i-1]
+			obj.elements[ei] = list[i]
 			ei++
 		}
 	} else {
 		d2 := di + 1
 		for i := 0; i < d; i++ {
-			sub, ok := list[len(list)-i-1].(List)
+			sub, ok := list[i].(List)
 			if !ok {
-				PanicType("array initial-content", list[len(list)-i-1], "list")
+				PanicType("array initial-content", list[i], "list")
 			}
 			ei = obj.setDim(sub, d2, ei)
 		}

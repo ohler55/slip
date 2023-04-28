@@ -15,7 +15,7 @@ func TestTerpriStream(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString("(terpri out)").Eval(scope)
+	result := slip.ReadString("(terpri out)").Eval(scope, nil)
 	tt.Nil(t, result)
 	tt.Equal(t, "\n", out.String())
 }
@@ -27,21 +27,21 @@ func TestTerpriStdout(t *testing.T) {
 	orig := slip.StandardOutput
 	defer func() { slip.StandardOutput = orig }()
 	slip.StandardOutput = &slip.OutputStream{Writer: &out}
-	result := slip.ReadString("(terpri)").Eval(scope)
+	result := slip.ReadString("(terpri)").Eval(scope, nil)
 	tt.Nil(t, result)
 	tt.Equal(t, "\n", out.String())
 }
 
 func TestTerpriArgCount(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(terpri nil nil)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(terpri nil nil)").Eval(slip.NewScope(), nil) })
 }
 
 func TestTerpriBadStream(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(terpri t)").Eval(slip.NewScope()) })
+	tt.Panic(t, func() { _ = slip.ReadString("(terpri t)").Eval(slip.NewScope(), nil) })
 }
 
 func TestTerpriWriteFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
-	tt.Panic(t, func() { _ = slip.ReadString("(terpri out)").Eval(scope) })
+	tt.Panic(t, func() { _ = slip.ReadString("(terpri out)").Eval(scope, nil) })
 }

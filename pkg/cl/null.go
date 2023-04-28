@@ -23,7 +23,7 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text:   `__null__ returns _true_ if _object_ is an empty list otherwise nil is returned.`,
+			Text:   `__null__ returns _t_ if _object_ is an empty list or _nil_ otherwise _nil_ is returned.`,
 			Examples: []string{
 				"(null 1.2) => nil",
 				"(null '()) => t",
@@ -36,7 +36,7 @@ type Null struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Null) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)

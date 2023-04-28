@@ -47,11 +47,11 @@ func (f *TimeIn) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}
-	t, ok := args[1].(slip.Time)
+	t, ok := args[0].(slip.Time)
 	if !ok {
-		slip.PanicType("time", args[1], "time")
+		slip.PanicType("time", args[0], "time")
 	}
-	loc := getLocArg(args[0])
+	loc := getLocArg(args[1])
 
 	return slip.Time(time.Time(t).In(loc))
 }

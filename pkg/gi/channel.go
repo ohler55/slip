@@ -41,6 +41,11 @@ func (obj Channel) Hierarchy() []slip.Symbol {
 	return []slip.Symbol{ChannelSymbol, slip.TrueSymbol}
 }
 
+// Length returns the length of the object.
+func (obj Channel) Length() int {
+	return len(obj)
+}
+
 // Eval returns self.
 func (obj Channel) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj

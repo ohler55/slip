@@ -19,9 +19,11 @@ var vanilla = Flavor{
 	methods: map[string][]*method{
 		":describe":             {{name: ":describe", primary: describeCaller(true)}},
 		":eval-inside-yourself": {{name: ":eval-inside-yourself", primary: insideCaller(true)}},
+		":flavor":               {{name: ":flavor", primary: flavorCaller(true)}},
 		":init":                 {{name: ":init", primary: initCaller(true)}},
 		":id":                   {{name: ":id", primary: idCaller(true)}},
-		":operation-handler-p":  {{name: ":operation-handler-p", primary: hasOpCaller(true)}},
+		":inspect":              {{name: ":inspect", primary: inspectCaller(true)}},
+		":operation-handled-p":  {{name: ":operation-handled-p", primary: hasOpCaller(true)}},
 		":print-self":           {{name: ":print-self", primary: printCaller(true)}},
 		":send-if-handles":      {{name: ":send-if-handles", primary: sendIfCaller(true)}},
 		":which-operations":     {{name: ":which-operations", primary: whichOpsCaller(true)}},
@@ -42,6 +44,11 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 	return nil
 }
 
+func (caller initCaller) Docs() string {
+	return `Does nothing but is a placeholder for daemons in sub-flavors.
+`
+}
+
 type describeCaller bool
 
 func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
@@ -49,9 +56,21 @@ func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	ansi := s.Get("*print-ansi*") != nil
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
 	b := obj.Describe([]byte{}, 0, right, ansi)
-	_, _ = slip.StandardOutput.(io.Writer).Write(b)
+	w := s.Get("*standard-output*").(io.Writer)
+	if 0 < len(args) {
+		var ok bool
+		if w, ok = args[0].(io.Writer); !ok {
+			slip.PanicType(":describe output-stream", args[0], "output-stream")
+		}
+	}
+	_, _ = w.Write(b)
 
 	return nil
+}
+
+func (caller describeCaller) Docs() string {
+	return `Writes a description of the instance to _*standard-output*_.
+`
 }
 
 type idCaller bool
@@ -61,12 +80,33 @@ func (caller idCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	return slip.Fixnum(uintptr(unsafe.Pointer(obj)))
 }
 
+func (caller idCaller) Docs() string {
+	return `__:id__ => _string_
+
+Returns the identifier of the instance.
+`
+}
+
+type flavorCaller bool
+
+func (caller flavorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*Instance)
+	return obj.Flavor
+}
+
+func (caller flavorCaller) Docs() string {
+	return `__:flavor__ => _flavor_
+
+Returns the flavor of the instance.
+`
+}
+
 type hasOpCaller bool
 
 func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
 	if len(args) != 1 {
-		panic(fmt.Sprintf("Method operation-handler-p expects 1 argument but received %d.", len(args)))
+		panic(fmt.Sprintf("Method operation-handled-p expects 1 argument but received %d.", len(args)))
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		if _, has := obj.Flavor.methods[string(sym)]; has {
@@ -76,24 +116,40 @@ func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	return nil
 }
 
+func (caller hasOpCaller) Docs() string {
+	return `__:operation-handled-p__ _method_ => _boolean_
+
+
+Returns _t_ if the instance handles the method and _nil_ otherwise.
+`
+}
+
 type printCaller bool
 
 func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	// Args should be stream printdepth escape-p. The second two arguments are
+	// Args should be stream print-depth escape-p. The second two arguments are
 	// ignored.
 	obj := s.Get("self").(*Instance)
-	if len(args) != 3 {
-		panic(fmt.Sprintf("Method print-self expects 3 argument but received %d.", len(args)))
+	w := s.Get("*standard-output*").(io.Writer)
+	if 0 < len(args) {
+		var ok bool
+		if w, ok = args[0].(io.Writer); !ok {
+			slip.PanicType(":describe output-stream", args[0], "output-stream")
+		}
 	}
-	w, ok := args[len(args)-1].(io.Writer)
-	if !ok {
-		panic(fmt.Sprintf("Method print-self expects the first argument to be an output-stream not a %T.",
-			args[len(args)-1]))
-	}
-	if _, err := w.Write(obj.Append([]byte{})); err != nil {
+	if _, err := w.Write(obj.Append(nil)); err != nil {
 		panic(err)
 	}
 	return nil
+}
+
+func (caller printCaller) Docs() string {
+	return `__:print-self__ &optional _stream_ &rest _ignored_
+  _stream_ to write the description to. The default is _*standard-output*_
+
+
+Writes a description of the instance to the _stream_.
+`
 }
 
 type sendIfCaller bool
@@ -103,13 +159,22 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	if len(args) == 0 {
 		panic("Method send-if-handles expects at least 1 argument but received 0.")
 	}
-	pos := len(args) - 1
-	if sym, ok := args[pos].(slip.Symbol); ok {
+	if sym, ok := args[0].(slip.Symbol); ok {
 		if _, has := obj.Flavor.methods[string(sym)]; has {
-			return obj.Receive(string(sym), args[:pos], depth+1)
+			return obj.Receive(string(sym), args[1:], depth+1)
 		}
 	}
 	return nil
+}
+
+func (caller sendIfCaller) Docs() string {
+	return `__:send-if-handles__ _method_ _arguments*_ => _object_
+  _method_ to send to the instance if the instance has the _method_.
+  _arguments*_ to pass to the _method_ call.
+
+
+Sends to the instance if the instance has the _method_.
+`
 }
 
 type whichOpsCaller bool
@@ -120,12 +185,20 @@ func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	for k := range obj.Flavor.methods {
 		names = append(names, k)
 	}
-	sort.Slice(names, func(i, j int) bool { return 0 < strings.Compare(names[i], names[j]) })
+	sort.Slice(names, func(i, j int) bool { return 0 > strings.Compare(names[i], names[j]) })
 	methods := make(slip.List, 0, len(names))
 	for _, name := range names {
 		methods = append(methods, slip.Symbol(name))
 	}
 	return methods
+}
+
+func (caller whichOpsCaller) Docs() string {
+	return `__:which-operations__ => _list_
+
+
+Returns a list of all the methods the instance handles.
+`
 }
 
 type insideCaller bool
@@ -135,4 +208,32 @@ func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 		panic(fmt.Sprintf("Method eval-inside-yourself expects 1 argument but received %d.", len(args)))
 	}
 	return s.Eval(args[0], depth+1)
+}
+
+func (caller insideCaller) Docs() string {
+	return `__:eval-inside-yourself__ _form_ => _object_
+  _form_ to evaluate in the scope of the instance.
+
+
+Evaluates the _form_ in the instance's scope.
+`
+}
+
+type inspectCaller bool
+
+func (caller inspectCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*Instance)
+	cf := allFlavors["bag-flavor"]
+	inst := cf.MakeInstance()
+	inst.Any = obj.Simplify()
+
+	return inst
+}
+
+func (caller inspectCaller) Docs() string {
+	return `__:inspect__ => _bag_
+
+
+Returns a _bag_ with the details of the instance.
+`
 }

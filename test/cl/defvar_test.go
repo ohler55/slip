@@ -17,7 +17,7 @@ func TestDefvarBasic(t *testing.T) {
 		Expect: `*defvar-test-basic*`,
 	}).Test(t)
 	val, has := slip.CurrentPackage.Get("*defvar-test-basic*")
-	tt.Nil(t, val)
+	tt.Equal(t, slip.Unbound, val)
 	tt.Equal(t, true, has)
 
 	(&sliptest.Function{
@@ -25,7 +25,7 @@ func TestDefvarBasic(t *testing.T) {
 		Expect: `*defvar-test-basic*`,
 	}).Test(t)
 	val, _ = slip.CurrentPackage.Get("*defvar-test-basic*")
-	tt.Nil(t, val)
+	tt.Equal(t, slip.Fixnum(7), val)
 }
 
 func TestDefvarInitial(t *testing.T) {
@@ -34,6 +34,14 @@ func TestDefvarInitial(t *testing.T) {
 		Expect: `*defvar-test-initial*`,
 	}).Test(t)
 	val, has := slip.CurrentPackage.Get("*defvar-test-initial*")
+	tt.Equal(t, slip.Fixnum(7), val)
+	tt.Equal(t, true, has)
+
+	(&sliptest.Function{
+		Source: `(defvar *defvar-test-initial* 8)`,
+		Expect: `*defvar-test-initial*`,
+	}).Test(t)
+	val, has = slip.CurrentPackage.Get("*defvar-test-initial*")
 	tt.Equal(t, slip.Fixnum(7), val)
 	tt.Equal(t, true, has)
 }

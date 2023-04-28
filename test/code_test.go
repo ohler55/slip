@@ -27,7 +27,7 @@ func (ct *codeTest) test(t *testing.T, i int) {
 	} else {
 		code = slip.Read([]byte(ct.src))
 	}
-	tt.Equal(t, ct.expect, code.String(), i, ct.src)
+	tt.Equal(t, ct.expect, code.String(), i, ": ", ct.src)
 	if 0 < len(ct.kind) {
 		tt.Equal(t, ct.kind, string(code[0].Hierarchy()[0]))
 	}
@@ -41,6 +41,8 @@ func TestCodeToken(t *testing.T) {
 		{src: "1a", expect: "[1a]", kind: "symbol"},
 		{src: "1e2e3", expect: "[1e2e3]", kind: "symbol"},
 		{src: "-a", expect: "[-a]", kind: "symbol"},
+		{src: ":abc", expect: "[:abc]", kind: "symbol"},
+		{src: "cl:abc", expect: "[cl:abc]", kind: "symbol"},
 		{src: "\nt\n", expect: "[t]", kind: "t"},
 		{src: "@2022-04-10T18:52:17Z", expect: "[@2022-04-10T18:52:17Z]", kind: "time"},
 	} {
@@ -255,21 +257,28 @@ func TestCodeArray(t *testing.T) {
 
 func TestCodeQuote(t *testing.T) {
 	for i, ct := range []*codeTest{
-		{src: `#'car`, expect: `[#'car]`, kind: "function"},
+		{src: `#'car`, expect: `[#'car]`, kind: "macro"},
 		{src: `(list #'car)`, expect: `[(list (name car))]`, kind: "list"},
-		{src: `'abc`, expect: `['abc]`, kind: "function"},
+		{src: `'abc`, expect: `['abc]`, kind: "macro"},
 		{src: `('abc)`, expect: `[('abc)]`, kind: "list"},
-		{src: `#'(lambda () nil)`, expect: `[#'(lambda () nil)]`, kind: "function"},
+		{src: `#'(lambda () nil)`, expect: `[#'(lambda () nil)]`, kind: "macro"},
+	} {
+		ct.test(t, i)
+	}
+}
+
+// Checks comma as well since they are used together.
+func TestCodeBackquote(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: "`(a ,b)", expect: "[`(a ,b)]"},
+		{src: ",b", raise: true},
 	} {
 		ct.test(t, i)
 	}
 }
 
 func TestCodeCompile(t *testing.T) {
-	code := slip.ReadString("(defmacro foo (&rest args) nil)")
-	tt.Panic(t, func() { code.Compile() })
-
-	code = slip.ReadString("(5)")
+	code := slip.ReadString("(5)")
 	tt.Panic(t, func() { code.Compile() })
 
 	code = slip.ReadString("((x))")

@@ -16,6 +16,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "defvar",
 			Args: []*slip.DocArg{
 				{
@@ -49,29 +50,27 @@ type Defvar struct {
 	slip.Function
 }
 
-// Call the the function with the arguments provided.
+// Call the function with the arguments provided.
 func (f *Defvar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 3 < len(args) {
-		slip.PanicArgCount(f, 1, 3)
-	}
-	name, ok := args[len(args)-1].(slip.Symbol)
+	slip.ArgCountCheck(f, args, 1, 3)
+	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defvar", args[len(args)-1], "symbol")
+		slip.PanicType("name argument to defvar", args[0], "symbol")
 	}
 	name = slip.Symbol(strings.ToLower(string(name)))
-	if slip.CurrentPackage.Has(string(name)) {
+	if v, has := slip.CurrentPackage.Get(string(name)); has && v != slip.Unbound {
 		return name
 	}
 	var (
-		iv  slip.Object
+		iv  slip.Object = slip.Unbound
 		doc slip.String
 	)
 	if 1 < len(args) {
-		iv = f.EvalArg(s, args, len(args)-2, depth+1)
+		iv = slip.EvalArg(s, args, 1, depth+1)
 		if 2 < len(args) {
 			var ok bool
-			if doc, ok = args[0].(slip.String); !ok {
-				slip.PanicType("documentation argument to defvar", args[0], "string")
+			if doc, ok = args[2].(slip.String); !ok {
+				slip.PanicType("documentation argument to defvar", args[2], "string")
 			}
 		}
 	}

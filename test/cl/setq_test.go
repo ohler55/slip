@@ -14,7 +14,7 @@ func TestSetqBasic(t *testing.T) {
 	scope := slip.NewScope()
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("setq", slip.List{slip.Fixnum(7), slip.Symbol("x")}),
+		Target: slip.NewFunc("setq", slip.List{slip.Symbol("x"), slip.Fixnum(7)}),
 		String: "(setq x 7)",
 		Simple: []interface{}{"setq", "x", 7},
 		Eval:   slip.Fixnum(7),
@@ -35,7 +35,7 @@ func TestSetqMultiple(t *testing.T) {
 	scope := slip.NewScope()
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("setq", slip.List{slip.Fixnum(8), slip.Symbol("y"), slip.Fixnum(7), slip.Symbol("x")}),
+		Target: slip.NewFunc("setq", slip.List{slip.Symbol("x"), slip.Fixnum(7), slip.Symbol("y"), slip.Fixnum(8)}),
 		String: "(setq x 7 y 8)",
 		Simple: []interface{}{"setq", "x", 7, "y", 8},
 		Eval:   slip.Fixnum(8),
@@ -49,7 +49,7 @@ func TestSetqUpdateFunc(t *testing.T) {
 	scope := slip.NewScope()
 	(&sliptest.Object{
 		Scope:  scope,
-		Target: slip.NewFunc("setq", slip.List{slip.List{list, slip.Symbol("car")}, slip.Symbol("x")}),
+		Target: slip.NewFunc("setq", slip.List{slip.Symbol("x"), slip.List{slip.Symbol("car"), list}}),
 		String: "(setq x (car '(7)))",
 		Simple: []interface{}{"setq", "x", []interface{}{"car", []interface{}{"quote", []interface{}{7}}}},
 		Eval:   slip.Fixnum(7),
