@@ -257,7 +257,7 @@ func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip
 }
 
 func (caller writeCaller) Docs() string {
-	return `:write &optional _stream_ &key _pretty_ _depth_ _right-margin_ _time-format_ _time-wrap_ _json_ _color_
+	return `__:write__ &optional _stream_ &key _pretty_ _depth_ _right-margin_ _time-format_ _time-wrap_ _json_ _color_
   _stream_ an output-stream. Default: nil (return a string).
   _:pretty_ The value to use in place of the _*print-pretty*_ value. If _t_ then the
 JSON or SEN output is indented according to the other keyword options.
@@ -286,7 +286,7 @@ func (caller walkCaller) Call(s *slip.Scope, args slip.List, depth int) (value s
 }
 
 func (caller walkCaller) Docs() string {
-	return `:walk _function_ &optional _path_ _as-lisp_
+	return `__:walk__ _function_ &optional _path_ _as-lisp_
   _function_ The function to apply to each node in the instance matching the _path_.
   _path_ The path to the location in the bag to walk. The path must follow the JSONPath format. Default: ".."
   _as-lisp_ If not nil then the value to the _function_ is a LISP value otherwise a new _bag_.
