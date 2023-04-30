@@ -154,28 +154,23 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 // lambda-list followed by an optional documentation strings and then the
 // forms to evaluate when the Lambda is called.
 func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
-	pos := 0
 	var ll List
-	switch tl := args[pos].(type) {
+	switch tl := args[0].(type) {
 	case List:
 		ll = tl
 	case nil:
 		// leave as empty list
 	default:
-		PanicType(fmt.Sprintf("lambda list of %s", defName), args[pos], "list")
+		PanicType(fmt.Sprintf("lambda list of %s", defName), tl, "list")
 	}
-	pos++
 	var (
 		docStr String
 		ok     bool
 	)
-	switch {
-	case len(args) <= pos:
-		pos = len(args) - 1
-	case pos < len(args):
-		docStr, ok = args[pos].(String)
-		if ok {
-			pos++
+	args = args[1:]
+	if 1 < len(args) {
+		if docStr, ok = args[0].(String); ok {
+			args = args[1:]
 		}
 	}
 	lam = &Lambda{
@@ -184,7 +179,7 @@ func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 			Text:   string(docStr),
 			Kind:   LambdaSymbol,
 		},
-		Forms: args[pos:],
+		Forms: args,
 	}
 	for _, a := range ll {
 		switch ta := a.(type) {

@@ -20,6 +20,14 @@ func TestDefunBasic(t *testing.T) {
 	tt.Equal(t, slip.Fixnum(7), code.Eval(scope, nil))
 }
 
+func TestDefunJustString(t *testing.T) {
+	code := slip.ReadString(`
+(defun funny-hello () "hello")
+(funny-hello)`)
+	scope := slip.NewScope()
+	tt.Equal(t, slip.String("hello"), code.Eval(scope, nil))
+}
+
 func TestDefunDefaultArgValue(t *testing.T) {
 	code := slip.ReadString(`
 (defun funny2 (&optional (x 3)) x)
