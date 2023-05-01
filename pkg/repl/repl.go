@@ -155,6 +155,11 @@ func Run() {
 	}
 }
 
+// Stop and reset the terminal.
+func Stop() {
+	replReader.stop()
+}
+
 // ZeroMods resets the modified variables list.
 func ZeroMods() {
 	modifiedVars = map[string]bool{}

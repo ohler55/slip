@@ -78,6 +78,7 @@ func run() {
 				fmt.Printf("\n## error: %s\n\n", tr)
 			}
 		}
+		repl.Stop()
 	}()
 	if showVersion {
 		fmt.Printf("slip version %s built on %s\n", version, built)
