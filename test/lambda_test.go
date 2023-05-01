@@ -15,7 +15,7 @@ func TestDefLambdaNoArgs(t *testing.T) {
 	(&sliptest.Object{
 		Target:    lam,
 		String:    `/^#<function \(lambda \(\)\) {[0-9a-f]+}>/`,
-		Simple:    []any{"lambda", []any{}, []any{}},
+		Simple:    []any{"lambda", []any{}},
 		Hierarchy: "lambda.t",
 		Equals: []*sliptest.EqTest{
 			{Other: lam, Expect: true},
