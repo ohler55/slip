@@ -69,12 +69,16 @@ func TestInstanceMisc(t *testing.T) {
 
 	_ = slip.ReadString(`(defmethod (blueberry :length) () 5)`).Eval(scope, nil)
 	tt.Equal(t, 5, bi.Length())
+
+	_ = slip.ReadString(`(defmethod (blueberry :get-size) () size)`).Eval(scope, nil)
+	result := slip.ReadString(`(send berry :get-size)`).Eval(scope, nil)
+	tt.Equal(t, slip.String("medium"), result)
 }
 
 func TestInstanceBoundCall(t *testing.T) {
 	defer undefFlavors("blueberry")
 	code := slip.ReadString(`
-(defflavor blueberry ((size "medium")) ())
+(defflavor blueberry ((size "medium")) () :gettable-instance-variables :settable-instance-variables)
 (defmethod (blueberry :length) () 5)
 (defmethod (blueberry :double) (x) (* 2 x))
 (setq berry (make-instance 'blueberry))
@@ -89,4 +93,12 @@ func TestInstanceBoundCall(t *testing.T) {
 	bindings.Let(slip.Symbol("x"), slip.Fixnum(3))
 	result = berry.BoundReceive(":double", bindings, 0)
 	tt.Equal(t, "6", slip.ObjectString(result))
+
+	result = berry.BoundReceive(":size", nil, 0)
+	tt.Equal(t, `"medium"`, slip.ObjectString(result))
+
+	result = berry.BoundReceive(":set-size", bindings, 0)
+	tt.Equal(t, "3", slip.ObjectString(result))
+
+	tt.Panic(t, func() { _ = berry.BoundReceive(":set-size", slip.NewScope(), 0) })
 }

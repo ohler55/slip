@@ -17,6 +17,7 @@ type Scope struct {
 	Block   bool
 	TagBody bool
 	Macro   bool
+	Keep    bool
 }
 
 // NewScope create a new top level Scope.

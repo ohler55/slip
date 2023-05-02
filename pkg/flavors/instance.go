@@ -134,7 +134,7 @@ func (obj *Instance) BoundReceive(message string, bindings *slip.Scope, depth in
 	s := obj.NewScope()
 	if bindings != nil {
 		for k, v := range bindings.Vars {
-			obj.Vars[k] = v
+			s.Vars[k] = v
 		}
 	}
 	ma := obj.Flavor.methods[message]

@@ -30,8 +30,10 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	if lam.Closure != nil {
 		ss.parent = lam.Closure
 		ss.Macro = lam.Closure.Macro
+	} else if s.Keep { // flavors instance uses this
+		ss.parent = s
 	}
-	ss.Macro = lam.Macro
+	ss.Macro = ss.Macro || lam.Macro
 	mode := reqMode
 	ai := 0
 	var rest List

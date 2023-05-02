@@ -73,6 +73,7 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 		panic(fmt.Sprintf("Can not create an instance of abstract flavor %s.", cf.name))
 	}
 	inst := cf.MakeInstance()
+	inst.Keep = true
 	var plist slip.List
 	keys := map[string]bool{}
 	for i := 1; i < len(args); i++ {

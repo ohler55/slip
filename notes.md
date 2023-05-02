@@ -3,9 +3,6 @@
 
 - next
 
- - ggql package (slip-ggql repo)
-  - tag slip for use in plugin
-
  - http package
   - flavors
    - server

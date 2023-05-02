@@ -388,6 +388,11 @@ func (g getter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	return scope.Get(slip.Symbol(g))
 }
 
+// BoundCall the caller member.
+func (g getter) BoundCall(scope *slip.Scope, _ int) slip.Object {
+	return scope.Get(slip.Symbol(g))
+}
+
 type setter string
 
 // Call sets the value of a variable in the instance.
@@ -398,6 +403,15 @@ func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	scope.Set(slip.Symbol(s), args[0])
 
 	return args[0]
+}
+
+// BoundCall the caller member.
+func (s setter) BoundCall(scope *slip.Scope, _ int) slip.Object {
+	for _, value := range scope.Vars {
+		scope.Set(slip.Symbol(s), value)
+		return value
+	}
+	panic(fmt.Sprintf("no value given for set-%s.", s))
 }
 
 type defHand bool
