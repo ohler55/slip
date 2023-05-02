@@ -3,6 +3,7 @@
 package flavors
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"unsafe"
@@ -123,6 +124,62 @@ func (obj *Instance) innerReceive(ma []*method, args slip.List, depth int) slip.
 	for _, m := range ma {
 		if m.after != nil {
 			m.after.Call(&obj.Scope, args, depth)
+		}
+	}
+	return result
+}
+
+// BoundReceive receives a method invocation with all arguments already bound to a scope.
+func (obj *Instance) BoundReceive(message string, bindings *slip.Scope, depth int) slip.Object {
+	s := obj.NewScope()
+	if bindings != nil {
+		for k, v := range bindings.Vars {
+			obj.Vars[k] = v
+		}
+	}
+	ma := obj.Flavor.methods[message]
+	if len(ma) == 0 {
+		if bc, _ := obj.Flavor.defaultHandler.(slip.BoundCaller); bc != nil {
+			s.Let(slip.Symbol("method"), slip.Symbol(message))
+			var args slip.List
+			for k, v := range bindings.Vars {
+				args = append(args, slip.List{slip.Symbol(k), slip.Tail{Value: v}})
+			}
+			s.Let(slip.Symbol("args"), args)
+			return bc.BoundCall(s, depth)
+		}
+		panic(fmt.Sprintf("%s is not a method of flavor %s.", message, obj.Flavor.name))
+	}
+	for i, m := range ma {
+		if m.wrap != nil {
+			loc := &whopLoc{methods: ma, current: i}
+			ws := s.NewScope()
+			ws.Let("~whopper-location~", loc)
+			(m.wrap.(*slip.Lambda)).Closure = s
+			if bc, _ := m.wrap.(slip.BoundCaller); bc != nil {
+				return bc.BoundCall(ws, depth)
+			}
+		}
+	}
+	return obj.innerBoundReceive(ma, s, depth)
+}
+
+func (obj *Instance) innerBoundReceive(ma []*method, s *slip.Scope, depth int) slip.Object {
+	for _, m := range ma {
+		if bc, _ := m.before.(slip.BoundCaller); bc != nil {
+			bc.BoundCall(s, depth)
+		}
+	}
+	var result slip.Object
+	for _, m := range ma {
+		if bc, _ := m.primary.(slip.BoundCaller); bc != nil {
+			result = bc.BoundCall(s, depth)
+			break
+		}
+	}
+	for _, m := range ma {
+		if bc, _ := m.after.(slip.BoundCaller); bc != nil {
+			bc.BoundCall(s, depth)
 		}
 	}
 	return result

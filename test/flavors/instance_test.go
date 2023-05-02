@@ -12,7 +12,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestInstance(t *testing.T) {
+func TestInstanceMisc(t *testing.T) {
 	defer undefFlavors("blueberry")
 	code := slip.ReadString(`
 (defflavor blueberry ((size "medium")) ())
@@ -69,5 +69,24 @@ func TestInstance(t *testing.T) {
 
 	_ = slip.ReadString(`(defmethod (blueberry :length) () 5)`).Eval(scope, nil)
 	tt.Equal(t, 5, bi.Length())
+}
 
+func TestInstanceBoundCall(t *testing.T) {
+	defer undefFlavors("blueberry")
+	code := slip.ReadString(`
+(defflavor blueberry ((size "medium")) ())
+(defmethod (blueberry :length) () 5)
+(defmethod (blueberry :double) (x) (* 2 x))
+(setq berry (make-instance 'blueberry))
+`)
+	scope := slip.NewScope()
+	berry := code.Eval(scope, nil).(*flavors.Instance)
+
+	result := berry.BoundReceive(":length", nil, 0)
+	tt.Equal(t, "5", slip.ObjectString(result))
+
+	bindings := slip.NewScope()
+	bindings.Let(slip.Symbol("x"), slip.Fixnum(3))
+	result = berry.BoundReceive(":double", bindings, 0)
+	tt.Equal(t, "6", slip.ObjectString(result))
 }

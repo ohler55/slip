@@ -143,9 +143,14 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 			}
 		}
 	}
+	return lam.BoundCall(ss, depth)
+}
+
+// BoundCall the the function with the bindings provided.
+func (lam *Lambda) BoundCall(s *Scope, depth int) (result Object) {
 	d2 := depth + 1
 	for _, form := range lam.Forms {
-		result = ss.Eval(form, d2)
+		result = s.Eval(form, d2)
 	}
 	return
 }

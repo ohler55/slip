@@ -9,6 +9,7 @@ import (
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func TestDefwhopperBasic(t *testing.T) {
@@ -76,9 +77,19 @@ func TestDefwhopperOneWrap(t *testing.T) {
 )
 `).Eval(scope, nil)
 
-	_ = slip.ReadString("(setq blue (make-instance blueberry))").Eval(scope, nil)
+	blue := slip.ReadString("(setq blue (make-instance blueberry))").Eval(scope, nil).(*flavors.Instance)
 
 	_ = slip.ReadString("(send blue :rot)").Eval(scope, nil)
+	tt.Equal(t, `blueberry whopper rot start
+blueberry before rot
+berry rot
+blueberry after rot
+berry after rot
+blueberry whopper rot done
+`, b.String())
+
+	b.Reset()
+	_ = blue.BoundReceive(":rot", nil, 0)
 	tt.Equal(t, `blueberry whopper rot start
 blueberry before rot
 berry rot
@@ -109,7 +120,7 @@ func TestContinueWhopperLocation(t *testing.T) {
 (defflavor berry (color) ())
 (defwhopper (berry :rot) () (setq loc ~whopper-location~))
 `).Eval(scope, nil)
-	_ = slip.ReadString("(setq bb (make-instance berry))").Eval(scope, nil)
+	_ = slip.ReadString("(setq bb (make-instance berry))").Eval(scope, nil).(*flavors.Instance)
 	_ = slip.ReadString("(send bb :rot)").Eval(scope, nil)
 	loc := scope.Get(slip.Symbol("loc"))
 	tt.Equal(t, "#<whopper-location>", slip.ObjectString(loc))
