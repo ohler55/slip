@@ -9,6 +9,7 @@ import (
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func defineBerry(t *testing.T) {
@@ -61,8 +62,11 @@ func TestDefmethodInherit(t *testing.T) {
 	orig := scope.Get(slip.Symbol("*standard-output*"))
 	scope.Set(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	defer scope.Set(slip.Symbol("*standard-output*"), orig)
-	_ = slip.ReadString("(setq obj (make-instance 'blueberry))").Eval(scope, nil)
+	bb := slip.ReadString("(setq obj (make-instance 'blueberry))").Eval(scope, nil).(*flavors.Instance)
 	result := slip.ReadString("(send obj :rot)").Eval(scope, nil)
+	tt.Equal(t, "brown", slip.ObjectString(result))
+
+	result = bb.BoundReceive(":rot", nil, 0)
 	tt.Equal(t, "brown", slip.ObjectString(result))
 }
 

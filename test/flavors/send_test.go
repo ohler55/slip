@@ -8,6 +8,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func TestSendGetSet(t *testing.T) {
@@ -47,6 +48,12 @@ func TestSendDefHand(t *testing.T) {
 
 	result := slip.ReadString("(send hand :nothing 7)").Eval(scope, nil)
 	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Symbol(":nothing")}, result)
+
+	hand := slip.ReadString("hand").Eval(scope, nil).(*flavors.Instance)
+	bindings := slip.NewScope()
+	bindings.Let(slip.Symbol("x"), slip.Fixnum(7))
+	result = hand.BoundReceive(":nothing", bindings, 0)
+	tt.Equal(t, "((x . 7))", slip.ObjectString(result))
 }
 
 func TestSendDefHandLambda(t *testing.T) {
@@ -75,6 +82,20 @@ func TestSendMissingArg(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'missy)").Eval(scope, nil)
 
 	tt.Panic(t, func() { _ = slip.ReadString("(send miss)").Eval(scope, nil) })
+}
+
+func TestSendNoMethod(t *testing.T) {
+	code := slip.ReadString(`
+(defflavor missy (x) () :gettable-instance-variables)
+(setq miss (make-instance 'missy))
+`)
+	scope := slip.NewScope()
+	code.Compile()
+	_ = code.Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'missy)").Eval(scope, nil)
+
+	miss := scope.Get(slip.Symbol("miss")).(*flavors.Instance)
+	tt.Panic(t, func() { _ = miss.BoundReceive(":nothing", nil, 0) })
 }
 
 func TestSendNotInstance(t *testing.T) {

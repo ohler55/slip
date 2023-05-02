@@ -141,6 +141,11 @@ func (obj *Instance) BoundReceive(message string, bindings *slip.Scope, depth in
 	if len(ma) == 0 {
 		if bc, _ := obj.Flavor.defaultHandler.(slip.BoundCaller); bc != nil {
 			s.Let(slip.Symbol("method"), slip.Symbol(message))
+			var args slip.List
+			for k, v := range bindings.Vars {
+				args = append(args, slip.List{slip.Symbol(k), slip.Tail{Value: v}})
+			}
+			s.Let(slip.Symbol("args"), args)
 			return bc.BoundCall(s, depth)
 		}
 		panic(fmt.Sprintf("%s is not a method of flavor %s.", message, obj.Flavor.name))
