@@ -38,8 +38,8 @@ SLIP is based on go slices instead of __cons__ cells. The same list,
 ```
 
 A __cons__ cell in SLIP is a list of two elements with a special
-_tail_ structure used when a __cons__ is expected such as in an
-association list.
+_tail_ structure used when a __cons__ `(1 . 2)` is expected such as in
+an association list.
 
 ```
 [1][tail{value:2}]
