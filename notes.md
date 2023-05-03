@@ -1,7 +1,29 @@
 # SLIP Notes
 
-
 - next
+ - [ ] STRING
+ - [ ] STRING-CAPITALIZE
+ - [ ] STRING-DOWNCASE
+ - [ ] STRING-EQUAL
+ - [ ] STRING-GREATERP
+ - [ ] STRING-LEFT-TRIM
+ - [ ] STRING-LESSP
+ - [ ] STRING-NOT-EQUAL
+ - [ ] STRING-NOT-GREATERP
+ - [ ] STRING-NOT-LESSP
+ - [ ] STRING-RIGHT-TRIM
+ - [ ] STRING-STREAM
+ - [ ] STRING-TRIM
+ - [ ] STRING-UPCASE
+ - [ ] STRING/=
+ - [ ] STRING<
+ - [ ] STRING<=
+ - [ ] STRING=
+ - [ ] STRING>
+ - [ ] STRING>=
+ - [ ] CONCATENATE
+ - [ ] JOIN separator &rest strings
+
 
  - http package
   - flavors
