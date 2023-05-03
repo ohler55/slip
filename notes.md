@@ -21,6 +21,9 @@
  - [ ] STRING=
  - [ ] STRING>
  - [ ] STRING>=
+ - [ ] CONCATENATE
+ - [ ] JOIN separator &rest strings
+
 
  - http package
   - flavors
