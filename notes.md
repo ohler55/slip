@@ -1,7 +1,7 @@
 # SLIP Notes
 
 - next
- - [ ] STRING
+ - [x] STRING
  - [ ] STRING-CAPITALIZE
  - [ ] STRING-DOWNCASE
  - [ ] STRING-EQUAL
