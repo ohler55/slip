@@ -126,3 +126,37 @@ func processBinding(s, ns *slip.Scope, arg slip.Object, depth int) {
 		}
 	}
 }
+
+func getStartEndKeywords(args slip.List, max int) (start, end int) {
+	end = max
+	for pos := 0; pos < len(args); pos += 2 {
+		sym, ok := args[pos].(slip.Symbol)
+		if !ok {
+			slip.PanicType("keyword", args[pos], "keyword")
+		}
+		if len(args)-1 <= pos {
+			panic(fmt.Sprintf("%s missing an argument", sym))
+		}
+		var n slip.Fixnum
+		switch strings.ToLower(string(sym)) {
+		case ":start":
+			if n, ok = args[pos+1].(slip.Fixnum); ok {
+				start = int(n)
+			} else {
+				slip.PanicType(string(sym), args[pos+1], "fixnum")
+			}
+		case ":end":
+			if n, ok = args[pos+1].(slip.Fixnum); ok {
+				end = int(n)
+			} else {
+				slip.PanicType(string(sym), args[pos+1], "fixnum")
+			}
+		default:
+			slip.PanicType("keyword", sym, ":start", ":end")
+		}
+	}
+	if end < start || max < end || start < 0 {
+		panic(fmt.Sprintf("start and end of %d, %d are not valid for a string of length %d", start, end, max))
+	}
+	return
+}

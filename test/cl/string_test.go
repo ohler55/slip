@@ -29,6 +29,13 @@ func TestStringCharacter(t *testing.T) {
 	}).Test(t)
 }
 
+func TestStringOther(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(string 123)`,
+		Expect: `"123"`,
+	}).Test(t)
+}
+
 func TestStringBadArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(string)`,
