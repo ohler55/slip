@@ -160,3 +160,64 @@ func getStartEndKeywords(args slip.List, max int) (start, end int) {
 	}
 	return
 }
+
+func getStartEnd2Keywords(f slip.Object, args slip.List) (str1, str2 string, start1, end1, start2, end2 int) {
+	slip.ArgCountCheck(f, args, 2, 8)
+	if ss, ok := args[0].(slip.String); ok {
+		str1 = string(ss)
+	} else {
+		slip.PanicType("string1", args[0], "string")
+	}
+	if ss, ok := args[0].(slip.String); ok {
+		str1 = string(ss)
+	} else {
+		slip.PanicType("string1", args[0], "string")
+	}
+	end1 = len(str1)
+	end2 = len(str2)
+	for pos := 0; pos < len(args); pos += 2 {
+		sym, ok := args[pos].(slip.Symbol)
+		if !ok {
+			slip.PanicType("keyword", args[pos], "keyword")
+		}
+		if len(args)-1 <= pos {
+			panic(fmt.Sprintf("%s missing an argument", sym))
+		}
+		var n slip.Fixnum
+		switch strings.ToLower(string(sym)) {
+		case ":start1":
+			if n, ok = args[pos+1].(slip.Fixnum); ok {
+				start1 = int(n)
+			} else {
+				slip.PanicType(string(sym), args[pos+1], "fixnum")
+			}
+		case ":end1":
+			if n, ok = args[pos+1].(slip.Fixnum); ok {
+				end1 = int(n)
+			} else {
+				slip.PanicType(string(sym), args[pos+1], "fixnum")
+			}
+		case ":start2":
+			if n, ok = args[pos+1].(slip.Fixnum); ok {
+				start2 = int(n)
+			} else {
+				slip.PanicType(string(sym), args[pos+1], "fixnum")
+			}
+		case ":end2":
+			if n, ok = args[pos+1].(slip.Fixnum); ok {
+				end2 = int(n)
+			} else {
+				slip.PanicType(string(sym), args[pos+1], "fixnum")
+			}
+		default:
+			slip.PanicType("keyword", sym, ":start1", ":end1", ":start2", ":end2")
+		}
+	}
+	if end1 < start1 || len(str1) < end1 || start1 < 0 {
+		panic(fmt.Sprintf("start1 and end1 of %d, %d are not valid for a string of length %d", start1, end1, len(str1)))
+	}
+	if end2 < start2 || len(str2) < end2 || start2 < 0 {
+		panic(fmt.Sprintf("start2 and end2 of %d, %d are not valid for a string of length %d", start2, end2, len(str2)))
+	}
+	return
+}

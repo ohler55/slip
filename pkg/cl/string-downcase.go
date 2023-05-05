@@ -23,6 +23,17 @@ func init() {
 					Type: "string",
 					Text: "The string to downcase.",
 				},
+				{Name: "&key"},
+				{
+					Name: "start",
+					Type: "fixnum",
+					Text: "The index of the start of the portion of the string to modify.",
+				},
+				{
+					Name: "end",
+					Type: "fixnum",
+					Text: "The index of the end of the portion of the string to modify.",
+				},
 			},
 			Return: "string",
 			Text: `__string-downcase__ returns _string_ downcased. All uppercase chacters converted
