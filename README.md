@@ -70,6 +70,10 @@ The exception or error handling in SLIP differs from Common
 LISP. Similar features exist in SLIP but they are different as they
 integrate better with the underlying go components.
 
+In go strings are immutable which is reflected in SLIP so the
+_nstring_ functions so not modify the original string but instead are
+the same as the _string_ versions of the functions.
+
 ### Added Features
 
 While Common LISP is the modern version of LISP it is lacking in
