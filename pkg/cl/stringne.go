@@ -3,19 +3,17 @@
 package cl
 
 import (
-	"strings"
-
 	"github.com/ohler55/slip"
 )
 
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := StringEqual{
+			f := StringNe{
 				stringCompare: stringCompare{
-					Function: slip.Function{Name: "string-equal", Args: args},
+					Function: slip.Function{Name: "string/=", Args: args},
 					compare: func(s1, s2 string) slip.Object {
-						if strings.EqualFold(s1, s2) {
+						if s1 != s2 {
 							return slip.True
 						}
 						return nil
@@ -26,19 +24,19 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
-			Name:   "string-equal",
+			Name:   "string/=",
 			Args:   stringCompareDocArgs,
 			Return: "string",
-			Text: `__string-equal__ returns true (_t_) if the _string1_ is equal to _string2_
-ignoring differences in case. If not equal then _nil_ is returned.`,
+			Text: `__string/=__ returns true (_t_) if the _string1_ is not equal to _string2_
+otherwise _nil_ is returned.`,
 			Examples: []string{
-				`(string-equal "Abc" "aBc") => t`,
-				`(string-equal "abc" "abcd") => nil`,
+				`(string/= "abc" "abc") => nil`,
+				`(string/= "Abc" "aBc") => t`,
 			},
 		}, &slip.CLPkg)
 }
 
-// StringEqual represents the string-equal function.
-type StringEqual struct {
+// StringNe represents the string= function.
+type StringNe struct {
 	stringCompare
 }

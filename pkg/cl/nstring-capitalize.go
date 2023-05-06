@@ -4,48 +4,38 @@ package cl
 
 import (
 	"github.com/ohler55/slip"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := NstringCapitalize{
-				StringCapitalize: StringCapitalize{Function: slip.Function{Name: "nstring-capitalize", Args: args}},
+				stringModify: stringModify{
+					Function: slip.Function{Name: "nstring-capitalize", Args: args},
+					modify: func(str string) string {
+						return cases.Title(language.Und).String(str)
+					},
+				},
 			}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "nstring-capitalize",
-			Args: []*slip.DocArg{
-				{
-					Name: "string",
-					Type: "string",
-					Text: "The string to capitalize.",
-				},
-				{Name: "&key"},
-				{
-					Name: "start",
-					Type: "fixnum",
-					Text: "The index of the start of the portion of the string to modify.",
-				},
-				{
-					Name: "end",
-					Type: "fixnum",
-					Text: "The index of the end of the portion of the string to modify.",
-				},
-			},
+			Name:   "nstring-capitalize",
+			Args:   stringModifyDocArgs,
 			Return: "string",
-			Text: `__string-capitalize__ returns _string_ with each word in the string capitalized.
+			Text: `__nstring-capitalize__ returns _string_ with each word in the string capitalized.
 Word delimiter are any non-alphanumeric character. As an extension to Common LISP unicode character
 are considered as non-punctuation unless they are actually punctuation.`,
 			Examples: []string{
-				`(nstring-capitalize "abc" DeF) => "Abc Def"`,
+				`(nstring-capitalize "abc DeF") => "Abc Def"`,
 			},
 		}, &slip.CLPkg)
 }
 
 // NstringCapitalize represents the string-capitalize function.
 type NstringCapitalize struct {
-	StringCapitalize
+	stringModify
 }

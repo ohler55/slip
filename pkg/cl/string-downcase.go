@@ -11,63 +11,28 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := StringDowncase{Function: slip.Function{Name: "string-downcase", Args: args}}
+			f := StringDowncase{
+				stringModify: stringModify{
+					Function: slip.Function{Name: "string-downcase", Args: args},
+					modify:   strings.ToLower,
+				},
+			}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "string-downcase",
-			Args: []*slip.DocArg{
-				{
-					Name: "string",
-					Type: "string",
-					Text: "The string to downcase.",
-				},
-				{Name: "&key"},
-				{
-					Name: "start",
-					Type: "fixnum",
-					Text: "The index of the start of the portion of the string to modify.",
-				},
-				{
-					Name: "end",
-					Type: "fixnum",
-					Text: "The index of the end of the portion of the string to modify.",
-				},
-			},
+			Name:   "string-downcase",
+			Args:   stringModifyDocArgs,
 			Return: "string",
-			Text: `__string-downcase__ returns _string_ downcased. All uppercase chacters converted
+			Text: `__string-downcase__ returns _string_ downcased. All uppercase characters converted
 to lowercase in a copy of the _string_.`,
 			Examples: []string{
-				`(string-downcase "Abc" Def) => "abc def"`,
+				`(string-downcase "Abc Def") => "abc def"`,
 			},
 		}, &slip.CLPkg)
 }
 
 // StringDowncase represents the string-downcase function.
 type StringDowncase struct {
-	slip.Function
-}
-
-// Call the function with the arguments provided.
-func (f *StringDowncase) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 5)
-	var str string
-	if ss, ok := args[0].(slip.String); ok {
-		str = string(ss)
-	} else {
-		slip.PanicType("string", args[0], "string")
-	}
-	if 1 < len(args) {
-		ra := []rune(str)
-		start, end := getStartEndKeywords(args[1:], len(ra))
-		buf := make([]rune, 0, len(ra))
-		buf = append(buf, ra[:start]...)
-		buf = append(buf, []rune(strings.ToLower(string(ra[start:end])))...)
-		buf = append(buf, ra[end:]...)
-		result = slip.String(buf)
-	} else {
-		result = slip.String(strings.ToLower(str))
-	}
-	return
+	stringModify
 }

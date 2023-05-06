@@ -3,6 +3,8 @@
 package cl
 
 import (
+	"strings"
+
 	"github.com/ohler55/slip"
 )
 
@@ -10,41 +12,27 @@ func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := NstringDowncase{
-				StringDowncase: StringDowncase{Function: slip.Function{Name: "nstring-downcase", Args: args}},
+				stringModify: stringModify{
+					Function: slip.Function{Name: "nstring-downcase", Args: args},
+					modify:   strings.ToLower,
+				},
 			}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "nstring-downcase",
-			Args: []*slip.DocArg{
-				{
-					Name: "string",
-					Type: "string",
-					Text: "The string to downcase.",
-				},
-				{Name: "&key"},
-				{
-					Name: "start",
-					Type: "fixnum",
-					Text: "The index of the start of the portion of the string to modify.",
-				},
-				{
-					Name: "end",
-					Type: "fixnum",
-					Text: "The index of the end of the portion of the string to modify.",
-				},
-			},
+			Name:   "nstring-downcase",
+			Args:   stringModifyDocArgs,
 			Return: "string",
-			Text: `__nstring-downcase__ returns _string_ downcased. All uppercase chacters converted
+			Text: `__nstring-downcase__ returns _string_ downcased. All uppercase characters converted
 to lowercase in a copy of the _string_.`,
 			Examples: []string{
-				`(nstring-downcase "Abc" Def) => "abc def"`,
+				`(nstring-downcase "Abc Def") => "abc def"`,
 			},
 		}, &slip.CLPkg)
 }
 
 // NstringDowncase represents the string-downcase function.
 type NstringDowncase struct {
-	StringDowncase
+	stringModify
 }

@@ -607,7 +607,7 @@
  * [ ] STREAM-ERROR
  * [ ] STREAM-ERROR-STREAM
  * [ ] STREAM-EXTERNAL-FORMAT
- * [ ] STRING-EQUAL
+ * [x] STRING-EQUAL
  * [ ] STRING-GREATERP
  * [ ] STRING-LEFT-TRIM
  * [ ] STRING-LESSP
@@ -617,10 +617,10 @@
  * [ ] STRING-RIGHT-TRIM
  * [ ] STRING-STREAM
  * [ ] STRING-TRIM
- * [ ] STRING/=
+ * [x] STRING/=
  * [ ] STRING<
  * [ ] STRING<=
- * [ ] STRING=
+ * [x] STRING=
  * [ ] STRING>
  * [ ] STRING>=
  * [ ] STRUCTURE
