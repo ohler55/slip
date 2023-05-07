@@ -22,6 +22,28 @@ func TestStringEqualFalse(t *testing.T) {
 	}).Test(t)
 }
 
+func TestStringEqualCharacter(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(string-equal #\A #\a)`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(string-equal "a" #\a)`,
+		Expect: "t",
+	}).Test(t)
+}
+
+func TestStringEqualSymbol(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(string-equal 'ABC 'abc)`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(string-equal "abc" 'abc)`,
+		Expect: "t",
+	}).Test(t)
+}
+
 func TestStringEqualStartEnd(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(string-equal "xbcdef" "xabcdex" :start1 1 :end1 4 :start2 2 :end2 5)`,

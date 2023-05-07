@@ -12,12 +12,12 @@ import (
 var stringCompareDocArgs = []*slip.DocArg{
 	{
 		Name: "string1",
-		Type: "string",
+		Type: "string|symbol|character",
 		Text: "The first string to compare.",
 	},
 	{
 		Name: "string2",
-		Type: "string",
+		Type: "string|symbol|character",
 		Text: "The second string to compare.",
 	},
 	{Name: "&key"},
@@ -58,15 +58,25 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 		start1 int
 		start2 int
 	)
-	if ss, ok := args[0].(slip.String); ok {
-		str1 = string(ss)
-	} else {
-		slip.PanicType("string1", args[0], "string")
+	switch ta := args[0].(type) {
+	case slip.String:
+		str1 = string(ta)
+	case slip.Symbol:
+		str1 = string(ta)
+	case slip.Character:
+		str1 = string([]rune{rune(ta)})
+	default:
+		slip.PanicType("string1", args[0], "string", "symbol", "character")
 	}
-	if ss, ok := args[1].(slip.String); ok {
-		str2 = string(ss)
-	} else {
-		slip.PanicType("string2", args[1], "string")
+	switch ta := args[1].(type) {
+	case slip.String:
+		str2 = string(ta)
+	case slip.Symbol:
+		str2 = string(ta)
+	case slip.Character:
+		str2 = string([]rune{rune(ta)})
+	default:
+		slip.PanicType("string2", args[1], "string", "symbol", "character")
 	}
 	end1 := len(str1)
 	end2 := len(str2)

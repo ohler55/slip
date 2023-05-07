@@ -8,25 +8,24 @@
  - [x] NSTRING-CAPITALIZE
  - [x] NSTRING-DOWNCASE
  - [x] NSTRING-UPCASE
- - [x] STRING-EQUAL
- - [ ] STRING-GREATERP
  - [ ] STRING-LEFT-TRIM
+ - [ ] STRING-RIGHT-TRIM
+ - [ ] STRING-TRIM
+ - [x] STRING-EQUAL
+ - [x] STRING/=
+ - [x] STRING<
+ - [x] STRING<=
+ - [x] STRING=
+ - [x] STRING>
+ - [x] STRING>=
+ - [ ] STRING-GREATERP
  - [ ] STRING-LESSP
  - [ ] STRING-NOT-EQUAL
  - [ ] STRING-NOT-GREATERP
  - [ ] STRING-NOT-LESSP
- - [ ] STRING-RIGHT-TRIM
  - [ ] STRING-STREAM
- - [ ] STRING-TRIM
- - [x] STRING/=
- - [ ] STRING<
- - [ ] STRING<=
- - [x] STRING=
- - [ ] STRING>
- - [ ] STRING>=
  - [ ] CONCATENATE
  - [ ] JOIN separator &rest strings
-
 
  - http package
   - flavors
