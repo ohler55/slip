@@ -162,6 +162,7 @@ func compareStringFold(s1, s2 string) (i, diff int) {
 		}
 		return i, 1
 	}
+	i++
 	if len(ra1) < len(ra2) {
 		return i, -1
 	}

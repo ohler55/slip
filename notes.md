@@ -8,9 +8,9 @@
  - [x] NSTRING-CAPITALIZE
  - [x] NSTRING-DOWNCASE
  - [x] NSTRING-UPCASE
- - [ ] STRING-LEFT-TRIM
- - [ ] STRING-RIGHT-TRIM
- - [ ] STRING-TRIM
+ - [x] STRING-LEFT-TRIM
+ - [x] STRING-RIGHT-TRIM
+ - [x] STRING-TRIM
  - [x] STRING-EQUAL
  - [x] STRING/=
  - [x] STRING<
@@ -19,13 +19,24 @@
  - [x] STRING>
  - [x] STRING>=
  - [x] STRING-GREATERP
- - [ ] STRING-LESSP
- - [ ] STRING-NOT-EQUAL
- - [ ] STRING-NOT-GREATERP
- - [ ] STRING-NOT-LESSP
- - [ ] STRING-STREAM
+ - [x] STRING-LESSP
+ - [x] STRING-NOT-EQUAL
+ - [x] STRING-NOT-GREATERP
+ - [x] STRING-NOT-LESSP
  - [ ] CONCATENATE
- - [ ] JOIN separator &rest strings
+   - result-type ['string, 'list, 'vector]
+   - handle string, list, #*1011 (a bit vector)
+   - must copy even if same result type and only one &rest arg
+   - look at result-type first and drop into separate sub-functions
+ - [ ] JOIN separator &rest strings, symbols, characters
+
+ - string-stream branch
+  - [ ] STRING-STREAM (type string-stream,stream,t) (in cl or top level?)
+   - [ ] MAKE-STRING-OUTPUT-STREAM
+   - [ ] GET-OUTPUT-STREAM-STRING
+   - [ ] WITH-OUTPUT-TO-STRING
+   - [ ] MAKE-STRING-INPUT-STREAM
+   - [ ] WITH-INPUT-TO-STRING
 
  - http package
   - flavors

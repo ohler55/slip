@@ -22,7 +22,7 @@ func init() {
 					Text: "The object to check.",
 				},
 			},
-			Return: "nil",
+			Return: "t|nil",
 			Text:   `__stringp__ returns _true_ if _object_ is a string.`,
 			Examples: []string{
 				`(stringp "abc") => t`,
