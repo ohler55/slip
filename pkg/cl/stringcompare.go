@@ -5,6 +5,7 @@ package cl
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/ohler55/slip"
 )
@@ -131,4 +132,38 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 		str2 = str2[start2:end2]
 	}
 	return f.compare(str1, str2)
+}
+
+func compareStringFold(s1, s2 string) (i, diff int) {
+	ra1 := []rune(s1)
+	if s1 == s2 {
+		return len(ra1), 0
+	}
+	ra2 := []rune(s2)
+	var (
+		r1 rune
+		r2 rune
+	)
+	for i, r1 = range ra1 {
+		if len(ra2) <= i {
+			return i, 1 // s1 > s2
+		}
+		r2 = ra2[i]
+		if r1 == r2 {
+			continue
+		}
+		r1 = unicode.ToLower(r1)
+		r2 = unicode.ToLower(r2)
+		if r1 == r2 {
+			continue
+		}
+		if r1 < r2 {
+			return i, -1
+		}
+		return i, 1
+	}
+	if len(ra1) < len(ra2) {
+		return i, -1
+	}
+	return
 }

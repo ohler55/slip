@@ -18,7 +18,7 @@
  - [x] STRING=
  - [x] STRING>
  - [x] STRING>=
- - [ ] STRING-GREATERP
+ - [x] STRING-GREATERP
  - [ ] STRING-LESSP
  - [ ] STRING-NOT-EQUAL
  - [ ] STRING-NOT-GREATERP
