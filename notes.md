@@ -1,29 +1,14 @@
 # SLIP Notes
 
 - next
- - [ ] STRING
- - [ ] STRING-CAPITALIZE
- - [ ] STRING-DOWNCASE
- - [ ] STRING-EQUAL
- - [ ] STRING-GREATERP
- - [ ] STRING-LEFT-TRIM
- - [ ] STRING-LESSP
- - [ ] STRING-NOT-EQUAL
- - [ ] STRING-NOT-GREATERP
- - [ ] STRING-NOT-LESSP
- - [ ] STRING-RIGHT-TRIM
- - [ ] STRING-STREAM
- - [ ] STRING-TRIM
- - [ ] STRING-UPCASE
- - [ ] STRING/=
- - [ ] STRING<
- - [ ] STRING<=
- - [ ] STRING=
- - [ ] STRING>
- - [ ] STRING>=
- - [ ] CONCATENATE
- - [ ] JOIN separator &rest strings
 
+ - string-stream branch
+  - [ ] STRING-STREAM (type string-stream,stream,t) (in cl or top level?)
+   - [ ] MAKE-STRING-OUTPUT-STREAM
+   - [ ] GET-OUTPUT-STREAM-STRING
+   - [ ] WITH-OUTPUT-TO-STRING
+   - [ ] MAKE-STRING-INPUT-STREAM
+   - [ ] WITH-INPUT-TO-STRING
 
  - http package
   - flavors

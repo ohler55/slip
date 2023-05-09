@@ -8,21 +8,21 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestStringtpTrue(t *testing.T) {
+func TestStringpTrue(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(stringp "abc")`,
 		Expect: "t",
 	}).Test(t)
 }
 
-func TestStringtpFalse(t *testing.T) {
+func TestStringpFalse(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(stringp t)`,
 		Expect: "nil",
 	}).Test(t)
 }
 
-func TestStringtpBadArgCount(t *testing.T) {
+func TestStringpBadArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(stringp)`,
 		Panics: true,
