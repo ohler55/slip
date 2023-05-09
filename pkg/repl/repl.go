@@ -31,6 +31,9 @@ const (
 )
 
 var (
+	// Interactive is set to true when the REPL is interactive.
+	Interactive bool
+
 	modifiedVars    = map[string]bool{}
 	configFilename  = ""
 	historyFilename = ""
@@ -149,6 +152,7 @@ func Run() {
 		_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte("\nBye\n"))
 		replReader.stop()
 	}()
+	Interactive = true
 	replReader.initialize()
 	for {
 		process()
@@ -157,6 +161,7 @@ func Run() {
 
 // Stop and reset the terminal.
 func Stop() {
+	Interactive = false
 	replReader.stop()
 }
 
@@ -373,4 +378,15 @@ func getREPL() slip.Object {
 
 func setREPL(_ slip.Object) {
 	panic("*repl* is a read only variable")
+}
+
+func getInteractive() slip.Object {
+	if Interactive {
+		return slip.True
+	}
+	return nil
+}
+
+func setInteractive(_ slip.Object) {
+	panic("*repl-interactive* is a read only variable")
 }
