@@ -1,6 +1,31 @@
 # SLIP Notes
 
 - next
+ - *interactive* set to true when using the repl
+  - ggql start option to block
+ - pathname-directory
+ - env
+ - getenv
+ - setenv
+ - unsetenv
+
+ - file-fun
+  - close
+  - delete-file
+  - directory-p
+  - directory
+  - ensure-directories-exist
+  - length
+  - merge-pathnames
+  - open
+  - pathname-directory
+  - pathname-join
+  - pathname-name
+  - position
+  - rename-file
+  - truncate
+  - with-open-file
+
 
  - string-stream branch
   - [ ] STRING-STREAM (type string-stream,stream,t) (in cl or top level?)

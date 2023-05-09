@@ -101,7 +101,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	switch ta := args[0].(type) {
 	case slip.String:
 		path = filepath.Join(slip.WorkingDir, string(ta))
-		if buf, err = os.ReadFile(string(ta)); err != nil {
+		if buf, err = os.ReadFile(path); err != nil {
 			if os.IsNotExist(err) && ifNotExist == nil {
 				return nil
 			}
