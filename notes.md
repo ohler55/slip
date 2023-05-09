@@ -1,34 +1,6 @@
 # SLIP Notes
 
 - next
- - [x] STRING
- - [x] STRING-CAPITALIZE
- - [x] STRING-DOWNCASE
- - [x] STRING-UPCASE
- - [x] NSTRING-CAPITALIZE
- - [x] NSTRING-DOWNCASE
- - [x] NSTRING-UPCASE
- - [x] STRING-LEFT-TRIM
- - [x] STRING-RIGHT-TRIM
- - [x] STRING-TRIM
- - [x] STRING-EQUAL
- - [x] STRING/=
- - [x] STRING<
- - [x] STRING<=
- - [x] STRING=
- - [x] STRING>
- - [x] STRING>=
- - [x] STRING-GREATERP
- - [x] STRING-LESSP
- - [x] STRING-NOT-EQUAL
- - [x] STRING-NOT-GREATERP
- - [x] STRING-NOT-LESSP
- - [ ] CONCATENATE
-   - result-type ['string, 'list, 'vector]
-   - handle string, list, #*1011 (a bit vector)
-   - must copy even if same result type and only one &rest arg
-   - look at result-type first and drop into separate sub-functions
- - [ ] JOIN separator &rest strings, symbols, characters
 
  - string-stream branch
   - [ ] STRING-STREAM (type string-stream,stream,t) (in cl or top level?)
