@@ -107,6 +107,9 @@ func run() {
 	if verbose != nil || print != nil {
 		w, _ = scope.Get("*standard-output*").(io.Writer)
 	}
+	if interactive || len(evalCode) == 0 {
+		repl.Interactive = true
+	}
 	if allAtOnce {
 		var paths slip.List
 		for _, path = range flag.Args() {

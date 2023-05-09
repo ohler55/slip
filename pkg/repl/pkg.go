@@ -32,7 +32,12 @@ var (
 			"*repl-eval-on-close*": {
 				Get: getEvalOnClose,
 				Set: setEvalOnClose,
-				Doc: "if true evaluate a form when the close parenthensis typed",
+				Doc: "if true evaluate a form when the close parenthensis typed.",
+			},
+			"*repl-interactive*": {
+				Get: getInteractive,
+				Set: setInteractive,
+				Doc: "true if the repl is interactive.",
 			},
 		},
 		Lambdas: map[string]*slip.Lambda{},
