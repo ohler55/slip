@@ -1,13 +1,7 @@
 # SLIP Notes
 
 - next
- - *interactive* set to true when using the repl
-  - ggql start option to block
- - pathname-directory
- - env
- - getenv
- - setenv
- - unsetenv
+ - parse-integer
 
  - file-fun
   - close
