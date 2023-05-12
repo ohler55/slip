@@ -54,7 +54,17 @@ func TestBagFlavorInitParseTime(t *testing.T) {
 	obj := slip.ReadString(`
 (setq bag (make-instance 'bag-flavor :parse "[\"2022-09-19T01:02:03Z\"]"))`).Eval(scope, nil).(*flavors.Instance)
 	tt.Equal(t, "[1663549323.000000000]", pretty.SEN(obj.Any, &ojg.Options{TimeFormat: "second"}))
+}
 
+func TestBagFlavorInitReadTime(t *testing.T) {
+	r := strings.NewReader("[\"2022-09-19T01:02:03Z\"]")
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	obj := slip.ReadString(`
+(setq bag (make-instance 'bag-flavor :read input))`).Eval(scope, nil).(*flavors.Instance)
+	tt.Equal(t, "[1663549323.000000000]", pretty.SEN(obj.Any, &ojg.Options{TimeFormat: "second"}))
+
+	tt.Panic(t, func() { slip.ReadString("(make-instance bag-flavor :read t)").Eval(scope, nil) })
 }
 
 // Tested more heavily in the bag-set tests.
@@ -90,6 +100,26 @@ func TestBagFlavorParse(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	_ = slip.ReadString(`(describe-method bag-flavor :parse out)`).Eval(scope, nil)
+	str := out.String()
+	tt.Equal(t, true, strings.Contains(str, "bag-flavor"))
+	tt.Equal(t, true, strings.Contains(str, "is a method of"))
+}
+
+// Tested more heavily in the bag-read tests.
+func TestBagFlavorRead(t *testing.T) {
+	r := strings.NewReader("{a:3}")
+	scope := slip.NewScope()
+	obj := slip.ReadString("(setq bag (make-instance 'bag-flavor))").Eval(scope, nil).(*flavors.Instance)
+	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	_ = slip.ReadString(`(send bag :read input)`).Eval(scope, nil)
+	tt.Equal(t, "{a: 3}", pretty.SEN(obj.Any))
+
+	tt.Panic(t, func() { slip.ReadString(`(send bag :read input t)`).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadString(`(send bag :read input nil t)`).Eval(scope, nil) })
+
+	var out strings.Builder
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+	_ = slip.ReadString(`(describe-method bag-flavor :read out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, "bag-flavor"))
 	tt.Equal(t, true, strings.Contains(str, "is a method of"))

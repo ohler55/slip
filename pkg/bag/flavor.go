@@ -4,6 +4,7 @@ package bag
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/ohler55/ojg/sen"
@@ -29,6 +30,7 @@ nil and boolean false.`),
 			slip.List{
 				slip.Symbol(":init-keywords"),
 				slip.Symbol(":parse"),
+				slip.Symbol(":read"),
 				slip.Symbol(":set"),
 			},
 		},
@@ -36,6 +38,7 @@ nil and boolean false.`),
 	flavor.DefMethod(":init", "", initCaller(true))
 	flavor.DefMethod(":set", "", setCaller(true))
 	flavor.DefMethod(":parse", "", parseCaller(true))
+	flavor.DefMethod(":read", "", readCaller(true))
 	flavor.DefMethod(":get", "", getCaller(true))
 	flavor.DefMethod(":has", "", hasCaller(true))
 	flavor.DefMethod(":remove", "", removeCaller(true))
@@ -74,6 +77,15 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 			if options.Converter != nil {
 				obj.Any = options.Converter.Convert(obj.Any)
 			}
+		case strings.EqualFold(":read", string(key)):
+			r, ok := args[1].(io.Reader)
+			if !ok {
+				slip.PanicType("bag :init :read", args[1], "input-stream")
+			}
+			obj.Any = sen.MustParseReader(r)
+			if options.Converter != nil {
+				obj.Any = options.Converter.Convert(obj.Any)
+			}
 		}
 	default:
 		panic(fmt.Sprintf("Method bag-flavor :init method expects zero or two arguments but received %d.", len(args)))
@@ -85,6 +97,7 @@ func (caller initCaller) Docs() string {
 	return `__:init__ &key _set_ _parse_
    _:set_ sets the contents with the LISP construct provided.
    _:parse_ parses a JSON or SEN string to forms the contents.
+   _:read_ reads from an _input-stream_ and parses read JSON or SEN to forms the contents.
 
 Sets the initial value when _make-instance_ is called.
 `
@@ -139,6 +152,33 @@ The path must follow the JSONPath format.
 
 
 Parses _string_ and sets the parsed value at the location described by _path_.
+If no _path_ is provided the entire contents of the bag is replaced.
+`
+}
+
+type readCaller bool
+
+func (caller readCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	switch len(args) {
+	case 1:
+		readBag(obj, args[0], nil)
+	case 2:
+		readBag(obj, args[0], args[1])
+	default:
+		panic(fmt.Sprintf("Method bag-flavor :read method expects one or two arguments but received %d.", len(args)))
+	}
+	return obj
+}
+
+func (caller readCaller) Docs() string {
+	return `__:read__ _string_ &optional _path_ => _self_
+  _stream_ The _input-stream_ to read and set in the instance according to the _path_.
+  _path_ The path to the location in the bag to set the readd value.
+The path must follow the JSONPath format.
+
+
+Read from _stream_ and sets the parsed value at the location described by _path_.
 If no _path_ is provided the entire contents of the bag is replaced.
 `
 }

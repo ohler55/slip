@@ -423,5 +423,5 @@ type defHand bool
 // Call the default handler.
 func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
-	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.Flavor.name, args[len(args)-1]))
+	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.Flavor.name, args[0]))
 }
