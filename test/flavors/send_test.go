@@ -47,7 +47,7 @@ func TestSendDefHand(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'handy)").Eval(scope, nil)
 
 	result := slip.ReadString("(send hand :nothing 7)").Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Symbol(":nothing")}, result)
+	tt.Equal(t, slip.List{slip.Symbol(":nothing"), slip.Fixnum(7)}, result)
 
 	hand := slip.ReadString("hand").Eval(scope, nil).(*flavors.Instance)
 	bindings := slip.NewScope()
@@ -68,7 +68,7 @@ func TestSendDefHandLambda(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'handy)").Eval(scope, nil)
 
 	result := slip.ReadString("(send hand :nothing 7)").Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Symbol(":nothing")}, result)
+	tt.Equal(t, slip.List{slip.Symbol(":nothing"), slip.Fixnum(7)}, result)
 }
 
 func TestSendMissingArg(t *testing.T) {

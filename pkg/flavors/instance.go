@@ -91,8 +91,9 @@ func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 func (obj *Instance) Receive(message string, args slip.List, depth int) slip.Object {
 	ma := obj.Flavor.methods[message]
 	if len(ma) == 0 {
-		xargs := args
+		xargs := make(slip.List, 0, len(args)+1)
 		xargs = append(xargs, slip.Symbol(message))
+		xargs = append(xargs, args...)
 		return obj.Flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
 	}
 	for i, m := range ma {

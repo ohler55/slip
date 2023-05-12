@@ -22,7 +22,7 @@ func TestMaphashLambda(t *testing.T) {
 		Source: `(maphash (lambda (k v) (setq entries (cons (list k v) entries))) table)`,
 		Expect: "nil",
 	}).Test(t)
-	tt.Equal(t, slip.List{slip.List{slip.Fixnum(1), slip.Symbol("a")}}, scope.Get(slip.Symbol("entries")))
+	tt.Equal(t, slip.List{slip.List{slip.Symbol("a"), slip.Fixnum(1)}}, scope.Get(slip.Symbol("entries")))
 }
 
 func TestMaphashLambdaList(t *testing.T) {
@@ -37,7 +37,7 @@ func TestMaphashLambdaList(t *testing.T) {
 		Source: `(maphash '(lambda (k v) (setq entries (cons (list k v) entries))) table)`,
 		Expect: "nil",
 	}).Test(t)
-	tt.Equal(t, slip.List{slip.List{slip.Fixnum(1), slip.Symbol("a")}}, scope.Get(slip.Symbol("entries")))
+	tt.Equal(t, slip.List{slip.List{slip.Symbol("a"), slip.Fixnum(1)}}, scope.Get(slip.Symbol("entries")))
 }
 
 func TestMaphashSymbol(t *testing.T) {
@@ -53,7 +53,7 @@ func TestMaphashSymbol(t *testing.T) {
 		Source: `(maphash 'entry-push table)`,
 		Expect: "nil",
 	}).Test(t)
-	tt.Equal(t, slip.List{slip.List{slip.Fixnum(1), slip.Symbol("a")}}, scope.Get(slip.Symbol("entries")))
+	tt.Equal(t, slip.List{slip.List{slip.Symbol("a"), slip.Fixnum(1)}}, scope.Get(slip.Symbol("entries")))
 }
 
 func TestMaphashArgCount(t *testing.T) {

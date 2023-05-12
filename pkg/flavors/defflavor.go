@@ -141,21 +141,25 @@ func DefFlavor(name string, vars map[string]slip.Object, inherit []string, optio
 		panic(fmt.Sprintf("Flavor %s already defined.", name))
 	}
 	nf := &Flavor{
-		name:           name,
-		defaultVars:    vars,
-		keywords:       map[string]slip.Object{},
-		methods:        map[string][]*method{},
-		initable:       map[string]bool{},
-		defaultHandler: defHand(true),
+		name:        name,
+		defaultVars: vars,
+		keywords:    map[string]slip.Object{},
+		methods:     map[string][]*method{},
+		initable:    map[string]bool{},
 	}
 	for _, fname := range inherit {
 		if cf := allFlavors[strings.ToLower(fname)]; cf != nil {
 			nf.inheritFlavor(cf)
+			if nf.defaultHandler == nil {
+				nf.defaultHandler = cf.defaultHandler
+			}
 		} else {
 			panic(fmt.Sprintf("Flavor %s not defined.", fname))
 		}
 	}
-
+	if nf.defaultHandler == nil {
+		nf.defaultHandler = defHand(true)
+	}
 	processFlavorOptions(nf, options)
 	if !nf.abstract {
 		addIncludes(nf)
