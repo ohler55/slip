@@ -1,8 +1,8 @@
 # SLIP Notes
 
 - next
+ + directory pathspec => list of pathnames
  - with-open-file
- - directory pathspec => list of pathnames
  - make-string-input-stream
  - make-string-output-stream
  - with-input-from-string
