@@ -3,6 +3,9 @@
 - next
  + directory pathspec => list of pathnames
  - with-open-file
+ - open
+  - common arg parser for with-open-file
+ - close
  - make-string-input-stream
  - make-string-output-stream
  - with-input-from-string
