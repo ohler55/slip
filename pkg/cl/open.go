@@ -42,6 +42,11 @@ func init() {
 					Type: "symbol",
 					Text: "The action to take if the file does not exist.",
 				},
+				{
+					Name: "permission",
+					Type: "fixnum",
+					Text: "The file permissions when creating a file. This is not a common LISP standard.",
+				},
 			},
 			Return: "file-stream",
 			Text: `__open__ returns a _file-stream_ opened according to the keyword arguments.
@@ -52,7 +57,8 @@ func init() {
     __:probe__ opens the file then closes it.
   __:if-exists__ describes the action to take if the file exists.
     __:error__ an error (panic) is raised.
-    __:new-version__ creates a new file with a larger version.
+    __:new-version__ not supported.
+    __:rename-and-delete__ not supported.
     __:rename__ renames the existing file before creating the file.
     __:overwrite__ modifies the existing file.
     __:append__ writes to the file will be appended.
@@ -81,19 +87,18 @@ func (f *Open) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 }
 
 func (f *Open) openFile(args slip.List) *slip.FileStream {
-	slip.ArgCountCheck(f, args, 1, 7)
+	slip.ArgCountCheck(f, args, 1, 9)
 	path, ok := args[0].(slip.String)
 	if !ok {
 		slip.PanicType("filepath", args[0], "string")
 	}
 	var (
-		exists   slip.Object
-		notExist slip.Object
 		flags    int
 		perm     fs.FileMode = 0666
 		nilError bool
-		// TBD set flag options
-		// TBD add perm to keyword options, default to 0666
+		probe    bool
+		zero     bool // on open
+		rename   bool
 	)
 	for pos := 1; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
@@ -122,53 +127,68 @@ func (f *Open) openFile(args slip.List) *slip.FileStream {
 			case slip.Symbol(":io"):
 				flags |= os.O_RDWR
 			case slip.Symbol(":probe"):
-				// TBD probe = true
+				probe = true
 			default:
 				slip.PanicType(string(sym), val, ":input", ":output", ":io", ":probe")
 			}
 		case ":if-exists":
-			exists = val
 			switch val {
 			case nil:
 				nilError = true
 			case slip.Symbol(":error"):
 				flags |= os.O_EXCL
-			case slip.Symbol(":new-version"):
-				// TBD
 			case slip.Symbol(":rename"):
-				// TBD
+				rename = true
 			case slip.Symbol(":overwrite"):
 				flags |= os.O_APPEND
-				// TBD set pos to 0
+				zero = true
 			case slip.Symbol(":append"):
 				flags |= os.O_APPEND
 			case slip.Symbol(":supersede"):
 				flags |= os.O_TRUNC | os.O_APPEND
+			case slip.Symbol(":new-version"), slip.Symbol(":rename-and-delete"):
+				// not supported
 			default:
-				slip.PanicType(string(sym), val, ":error", ":new-version", ":rename", ":overwrite", ":append", ":supersede", "nil")
+				slip.PanicType(string(sym), val,
+					":error", ":new-version", ":rename", ":overwrite", ":append", ":supersede", "nil")
 			}
 		case ":if-does-not-exists":
-			notExist = val
 			switch val {
 			case nil:
 				nilError = true
 			case slip.Symbol(":error"):
+				// default is to report errors
 			case slip.Symbol(":create"):
 				flags |= os.O_CREATE
 			default:
 				slip.PanicType(string(sym), val, ":error", ":create", "nil")
 			}
+		case ":permissions":
+			var num slip.Fixnum
+			if num, ok = val.(slip.Fixnum); ok {
+				perm = fs.FileMode(num)
+			} else {
+				slip.PanicType(string(sym), val, "fixnum")
+			}
 		default:
 			slip.PanicType("keyword", sym, ":direction", ":if-exists", ":if-does-not-exist")
 		}
 	}
-	fmt.Printf("*** path: %q exists: %s not-exist: %s flags: %x\n", path, exists, notExist, flags)
+	if rename {
+		// TBD check if exists and rename to name.bak
+	}
 	file, err := os.OpenFile(string(path), flags, perm)
 	if err != nil {
 		if !nilError {
 			panic(err)
 		}
 		return nil
+	}
+	switch {
+	case probe:
+		_ = file.Close()
+	case zero:
+		_, _ = file.Seek(0, 0)
 	}
 	return (*slip.FileStream)(file)
 }
