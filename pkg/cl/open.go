@@ -86,7 +86,7 @@ func (f *Open) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return f.openFile(args)
 }
 
-func (f *Open) openFile(args slip.List) *slip.FileStream {
+func (f *Open) openFile(args slip.List) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 9)
 	path, ok := args[0].(slip.String)
 	if !ok {
@@ -97,7 +97,6 @@ func (f *Open) openFile(args slip.List) *slip.FileStream {
 		perm     fs.FileMode = 0666
 		nilError bool
 		probe    bool
-		zero     bool // on open
 		rename   bool
 	)
 	for pos := 1; pos < len(args); pos += 2 {
@@ -108,15 +107,7 @@ func (f *Open) openFile(args slip.List) *slip.FileStream {
 		if len(args)-1 <= pos {
 			panic(fmt.Sprintf("%s missing an argument", sym))
 		}
-		var val slip.Object
-		switch ta := args[pos+1].(type) {
-		case nil:
-			// leave as nil
-		case slip.Symbol:
-			val = slip.Symbol(strings.ToLower(string(ta)))
-		default:
-			slip.PanicType(string(sym), ta, "symbol", "nil")
-		}
+		val := args[pos+1]
 		switch strings.ToLower(string(sym)) {
 		case ":direction":
 			switch val {
@@ -135,13 +126,14 @@ func (f *Open) openFile(args slip.List) *slip.FileStream {
 			switch val {
 			case nil:
 				nilError = true
+				flags |= os.O_EXCL
 			case slip.Symbol(":error"):
 				flags |= os.O_EXCL
 			case slip.Symbol(":rename"):
 				rename = true
+				flags |= os.O_CREATE
 			case slip.Symbol(":overwrite"):
-				flags |= os.O_APPEND
-				zero = true
+				// normal with no other flags
 			case slip.Symbol(":append"):
 				flags |= os.O_APPEND
 			case slip.Symbol(":supersede"):
@@ -152,7 +144,7 @@ func (f *Open) openFile(args slip.List) *slip.FileStream {
 				slip.PanicType(string(sym), val,
 					":error", ":new-version", ":rename", ":overwrite", ":append", ":supersede", "nil")
 			}
-		case ":if-does-not-exists":
+		case ":if-does-not-exist":
 			switch val {
 			case nil:
 				nilError = true
@@ -175,7 +167,11 @@ func (f *Open) openFile(args slip.List) *slip.FileStream {
 		}
 	}
 	if rename {
-		// TBD check if exists and rename to name.bak
+		if _, err := os.Stat(string(path)); err == nil {
+			if err = os.Rename(string(path), string(path)+".bak"); err != nil {
+				panic(err)
+			}
+		}
 	}
 	file, err := os.OpenFile(string(path), flags, perm)
 	if err != nil {
@@ -184,11 +180,8 @@ func (f *Open) openFile(args slip.List) *slip.FileStream {
 		}
 		return nil
 	}
-	switch {
-	case probe:
+	if probe {
 		_ = file.Close()
-	case zero:
-		_, _ = file.Seek(0, 0)
 	}
 	return (*slip.FileStream)(file)
 }

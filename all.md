@@ -119,7 +119,7 @@
  * [ ] CLASS
  * [ ] CLEAR-INPUT
  * [ ] CLEAR-OUTPUT
- * [ ] CLOSE
+ * [x] CLOSE
  * [ ] CODE-CHAR
  * [ ] COERCE
  * [ ] COMPLEMENT
@@ -434,7 +434,7 @@
  * [ ] NTHCDR
  * [ ] NUMBER
  * [ ] NUMERATOR
- * [ ] OPEN
+ * [x] OPEN
  * [ ] OPEN-STREAM-P
  * [ ] OPTIMIZE
  * [ ] OTHERWISE

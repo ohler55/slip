@@ -50,7 +50,8 @@ func (f *Close) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if !ok {
 		slip.PanicType("stream", args[0], "stream")
 	}
-	closer.Close()
-
+	if closer.Close() != nil {
+		return nil
+	}
 	return slip.True
 }
