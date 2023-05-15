@@ -2,7 +2,7 @@
 
 - next
  + directory pathspec => list of pathnames
- - with-open-file
+ + with-open-file
  + open
  + close
  - make-string-input-stream

@@ -71,7 +71,7 @@ func init() {
 
 `,
 			Examples: []string{
-				`(open "../*.lisp") => ("/top/one/x.lisp" "/top/one/y.lisp")`,
+				`(open "test.json") => #<FILE-STREAM test.json {5}>`,
 			},
 		}, &slip.CLPkg)
 }
