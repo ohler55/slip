@@ -61,7 +61,13 @@ func (f *WithOpenFile) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	if sym, ok = fargs[0].(slip.Symbol); !ok {
 		slip.PanicType("stream", fargs[0], "symbol")
 	}
-	file := f.openFile(fargs[1:])
+	d2 := depth + 1
+	fargs = fargs[1:]
+	eargs := make(slip.List, len(fargs))
+	for i := range fargs {
+		eargs[i] = slip.EvalArg(s, fargs, i, d2)
+	}
+	file := f.openFile(eargs)
 	defer func() {
 		if closer, _ := file.(io.Closer); closer != nil {
 			_ = closer.Close()
@@ -70,7 +76,6 @@ func (f *WithOpenFile) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	s2 := s.NewScope()
 	s2.Let(sym, file)
 	args = args[1:]
-	d2 := depth + 1
 	for i := range args {
 		result = slip.EvalArg(s2, args, i, d2)
 	}
