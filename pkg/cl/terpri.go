@@ -41,9 +41,7 @@ type Terpri struct {
 
 // Call the function with the arguments provided.
 func (f *Terpri) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if 1 < len(args) {
-		slip.PanicArgCount(f, 0, 1)
-	}
+	slip.ArgCountCheck(f, args, 0, 1)
 	var w io.Writer = slip.StandardOutput.(io.Writer)
 	if 0 < len(args) {
 		var ok bool
