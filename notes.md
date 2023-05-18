@@ -10,6 +10,7 @@
   - [ ] pathname-join
   - [ ] pathname-name
   - [ ] position
+  - [ ] probe-file
   - [ ] rename-file
   - [ ] truncate
   - [ ] with-input-from-string

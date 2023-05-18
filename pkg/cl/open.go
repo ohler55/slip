@@ -155,7 +155,7 @@ func (f *Open) openFile(args slip.List) slip.Object {
 			default:
 				slip.PanicType(string(sym), val, ":error", ":create", "nil")
 			}
-		case ":permissions":
+		case ":permission":
 			var num slip.Fixnum
 			if num, ok = val.(slip.Fixnum); ok {
 				perm = fs.FileMode(num)
@@ -163,7 +163,7 @@ func (f *Open) openFile(args slip.List) slip.Object {
 				slip.PanicType(string(sym), val, "fixnum")
 			}
 		default:
-			slip.PanicType("keyword", sym, ":direction", ":if-exists", ":if-does-not-exist")
+			slip.PanicType("keyword", sym, ":direction", ":if-exists", ":if-does-not-exist", ":permission")
 		}
 	}
 	if rename {
