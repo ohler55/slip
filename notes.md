@@ -2,7 +2,7 @@
 
 - next
  - file-fun
-  - [ ] ensure-directories-exist
+  - [x] ensure-directories-exist
   - [ ] make-string-input-stream
   - [ ] make-string-output-stream
   - [ ] merge-pathnames
@@ -10,9 +10,8 @@
   - [ ] pathname-join
   - [ ] pathname-name
   - [ ] position
-  - [ ] probe-file
-  - [ ] rename-file
-  - [ ] truncate
+  - [x] probe-file
+  - [x] rename-file
   - [ ] with-input-from-string
   - [x] close
   - [x] delete-file

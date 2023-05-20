@@ -60,7 +60,7 @@ func TestOpenInput(t *testing.T) {
 	tt.Equal(t, `"{a: 1 b: 2}"`, slip.ObjectString(result))
 }
 
-func TestOpenOutputCreat(t *testing.T) {
+func TestOpenOutputCreate(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("file"), nil)
 	filename := "testdata/test.out"
@@ -168,7 +168,7 @@ func TestOpenOutputIOPermissions(t *testing.T) {
 	}()
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: fmt.Sprintf(`(setq file (open %q :direction :io :if-does-not-exist :create :permissions #o644))`, filename),
+		Source: fmt.Sprintf(`(setq file (open %q :direction :io :if-does-not-exist :create :permission #o644))`, filename),
 		Expect: fmt.Sprintf("/#<FILE-STREAM %s {.+}>/", filename),
 	}).Test(t)
 	_ = slip.ReadString(`(princ "something" file)`).Eval(scope, nil)
@@ -277,7 +277,7 @@ func TestOpenBadIfNotExist(t *testing.T) {
 
 func TestOpenBadPermissions(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" :permissions t)`,
+		Source: `(open "testdata/map.sen" :permission t)`,
 		Panics: true,
 	}).Test(t)
 }

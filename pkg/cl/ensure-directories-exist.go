@@ -56,12 +56,12 @@ type EnsureDirectoriesExist struct {
 
 // Call the function with the arguments provided.
 func (f *EnsureDirectoriesExist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.ArgCountCheck(f, args, 1, 5)
 	path, ok := args[0].(slip.String)
 	if !ok {
 		slip.PanicType("string", args[0], "string")
 	}
-	var perm fs.FileMode = 0666
+	var perm fs.FileMode = 0755
 	for pos := 1; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
