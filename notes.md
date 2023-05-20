@@ -2,22 +2,24 @@
 
 - next
  - file-fun
-  - [x] ensure-directories-exist
   - [ ] make-string-input-stream
   - [ ] make-string-output-stream
   - [ ] merge-pathnames
-  - [ ] pathname-directory
-  - [ ] pathname-join
-  - [ ] pathname-name
   - [ ] position
-  - [x] probe-file
-  - [x] rename-file
   - [ ] with-input-from-string
   - [x] close
   - [x] delete-file
   - [x] directory
+  - [x] ensure-directories-exist
   - [x] file-length
+  - [x] filepath-base (in gi)
+  - [x] filepath-join (in gi)
   - [x] open
+  - [x] pathname-directory
+  - [x] pathname-name
+  - [x] pathname-type
+  - [x] probe-file
+  - [x] rename-file
   - [x] with-open-file
 
 
