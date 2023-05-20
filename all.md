@@ -119,7 +119,6 @@
  * [ ] CLASS
  * [ ] CLEAR-INPUT
  * [ ] CLEAR-OUTPUT
- * [x] CLOSE
  * [ ] CODE-CHAR
  * [ ] COERCE
  * [ ] COMPLEMENT
@@ -181,7 +180,6 @@
  * [ ] DESTRUCTURING-BIND
  * [ ] DIGIT-CHAR
  * [ ] DIGIT-CHAR-P
- * [x] DIRECTORY
  * [ ] DIRECTORY-NAMESTRING
  * [ ] DISASSEMBLE
  * [ ] DIVISION-BY-ZERO
@@ -222,7 +220,6 @@
  * [ ] FILE-AUTHOR
  * [ ] FILE-ERROR
  * [ ] FILE-ERROR-PATHNAME
- * [ ] FILE-LENGTH
  * [ ] FILE-NAMESTRING
  * [ ] FILE-POSITION
  * [ ] FILE-STREAM
@@ -387,7 +384,6 @@
  * [ ] MEMBER-IF
  * [ ] MEMBER-IF-NOT
  * [ ] MERGE
- * [ ] MERGE-PATHNAMES
  * [ ] METHOD
  * [ ] METHOD-COMBINATION
  * [ ] METHOD-COMBINATION-ERROR
@@ -434,7 +430,6 @@
  * [ ] NTHCDR
  * [ ] NUMBER
  * [ ] NUMERATOR
- * [x] OPEN
  * [ ] OPEN-STREAM-P
  * [ ] OPTIMIZE
  * [ ] OTHERWISE
@@ -453,11 +448,8 @@
  * [ ] PARSE-NAMESTRING
  * [ ] PATHNAME
  * [ ] PATHNAME-DEVICE
- * [x] PATHNAME-DIRECTORY
  * [ ] PATHNAME-HOST
  * [ ] PATHNAME-MATCH-P
- * [ ] PATHNAME-NAME
- * [ ] PATHNAME-TYPE
  * [ ] PATHNAME-VERSION
  * [ ] PATHNAMEP
  * [ ] PEEK-CHAR
@@ -607,7 +599,6 @@
  * [ ] STREAM-ERROR
  * [ ] STREAM-ERROR-STREAM
  * [ ] STREAM-EXTERNAL-FORMAT
- * [x] STRING-EQUAL
  * [ ] STRING-GREATERP
  * [ ] STRING-LEFT-TRIM
  * [ ] STRING-LESSP
@@ -617,10 +608,8 @@
  * [ ] STRING-RIGHT-TRIM
  * [ ] STRING-STREAM
  * [ ] STRING-TRIM
- * [x] STRING/=
  * [ ] STRING<
  * [ ] STRING<=
- * [x] STRING=
  * [ ] STRING>
  * [ ] STRING>=
  * [ ] STRUCTURE
@@ -699,7 +688,6 @@
  * [ ] WITH-CONDITION-RESTARTS
  * [ ] WITH-HASH-TABLE-ITERATOR
  * [ ] WITH-INPUT-FROM-STRING
- * [x] WITH-OPEN-FILE
  * [ ] WITH-OPEN-STREAM
  * [ ] WITH-OUTPUT-TO-STRING
  * [ ] WITH-PACKAGE-ITERATOR
@@ -811,6 +799,7 @@
  * [x] CHARACTERP
  * [x] CLASS-NAME
  * [x] CLASS-OF
+ * [x] CLOSE
  * [x] CLRHASH
  * [x] COND
  * [x] CONS
@@ -821,6 +810,7 @@
  * [x] DEFUN
  * [x] DEFVAR
  * [x] DESCRIBE
+ * [x] DIRECTORY
  * [x] DO
  * [x] DO*
  * [x] DOLIST
@@ -833,6 +823,7 @@
  * [x] EXP
  * [x] EXPT
  * [x] FCEILING
+ * [x] FILE-LENGTH
  * [x] FIND-CLASS
  * [x] FIND-PACKAGE
  * [x] FIND-SYMBOL
@@ -879,6 +870,7 @@
  * [x] MAPL
  * [x] MAPLIST
  * [x] MAX
+ * [x] MERGE-PATHNAMES
  * [x] MIN
  * [x] MINUSP
  * [x] MOD
@@ -895,8 +887,12 @@
  * [x] NUMBERP
  * [x] NUNION
  * [x] ODDP
+ * [x] OPEN
  * [x] OR
  * [x] OUTPUT-STREAM-P
+ * [x] PATHNAME-DIRECTORY
+ * [x] PATHNAME-NAME
+ * [x] PATHNAME-TYPE
  * [x] PI
  * [x] PLUSP
  * [x] PPRINT
@@ -933,7 +929,10 @@
  * [x] STRING
  * [x] STRING-CAPITALIZE
  * [x] STRING-DOWNCASE
+ * [x] STRING-EQUAL
  * [x] STRING-UPCASE
+ * [x] STRING/=
+ * [x] STRING=
  * [x] STRINGP
  * [x] SXHASH
  * [x] SYMBOLP
@@ -948,6 +947,7 @@
  * [x] UNLESS
  * [x] VALUES
  * [x] WHEN
+ * [x] WITH-OPEN-FILE
  * [x] WRITE
  * [x] ZEROP
  - [-] &AUX

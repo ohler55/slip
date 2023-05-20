@@ -40,7 +40,7 @@ type FileLength struct {
 
 // Call the function with the arguments provided.
 func (f *FileLength) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 0, 1)
+	slip.ArgCountCheck(f, args, 1, 1)
 	fs, ok := args[0].(*slip.FileStream)
 	if !ok {
 		slip.PanicType("stream", args[0], "file-stream")

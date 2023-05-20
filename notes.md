@@ -2,18 +2,23 @@
 
 - next
  - file-fun
+  - [ ] file-string-length (if open and writeable then number of byte for slip.Append)
   - [ ] make-string-input-stream
   - [ ] make-string-output-stream
-  - [ ] merge-pathnames
-  - [ ] position
   - [ ] with-input-from-string
   - [x] close
   - [x] delete-file
   - [x] directory
+  - [x] directory-namestring
   - [x] ensure-directories-exist
+  - [x] file-author
   - [x] file-length
-  - [x] filepath-base (in gi)
+  - [x] file-namestring
+  - [x] file-position
+  - [x] file-write-date
   - [x] filepath-join (in gi)
+  - [x] merge-pathnames
+  - [x] namestring
   - [x] open
   - [x] pathname-directory
   - [x] pathname-name

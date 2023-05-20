@@ -1,6 +1,6 @@
 // Copyright (c) 2023, Peter Ohler, All rights reserved.
 
-package gi_test
+package cl_test
 
 import (
 	"testing"
@@ -8,16 +8,16 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestFilepathBase(t *testing.T) {
+func TestFileNamestring(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(filepath-base "../one/two/three.lisp")`,
+		Source: `(file-namestring "../one/two/three.lisp")`,
 		Expect: `"three.lisp"`,
 	}).Test(t)
 }
 
-func TestFilepathBaseBadPath(t *testing.T) {
+func TestFileNamestringBadPath(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(filepath-base t)`,
+		Source: `(file-namestring t)`,
 		Panics: true,
 	}).Test(t)
 }

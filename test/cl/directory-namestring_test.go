@@ -1,6 +1,6 @@
 // Copyright (c) 2023, Peter Ohler, All rights reserved.
 
-package gi_test
+package cl_test
 
 import (
 	"testing"
@@ -8,16 +8,16 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestFilepathDirectory(t *testing.T) {
+func TestDirectoryNamestring(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(filepath-directory "../one/two/three.lisp")`,
+		Source: `(directory-namestring "../one/two/three.lisp")`,
 		Expect: `"../one/two"`,
 	}).Test(t)
 }
 
-func TestFilepathDirectoryBadPath(t *testing.T) {
+func TestDirectoryNamestringBadPath(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(filepath-directory t)`,
+		Source: `(directory-namestring t)`,
 		Panics: true,
 	}).Test(t)
 }

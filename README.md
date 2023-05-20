@@ -2,7 +2,7 @@
 
 SLIce Processing is LISP for golang
 
-SLIP is a Common LISP implementation lacking some features and
+SLIP is a mostly Common LISP implementation lacking some features and
 including many non standard features. Most notable of the extra
 features is the ability to extend LISP with go code. Also included is
 a Read Eval Print Loop (REPL) that provides an environment for
