@@ -170,7 +170,6 @@
  * [ ] DEFTYPE
  * [ ] DELETE
  * [ ] DELETE-DUPLICATES
- * [ ] DELETE-FILE
  * [ ] DELETE-IF
  * [ ] DELETE-IF-NOT
  * [ ] DELETE-PACKAGE
@@ -180,7 +179,6 @@
  * [ ] DESTRUCTURING-BIND
  * [ ] DIGIT-CHAR
  * [ ] DIGIT-CHAR-P
- * [ ] DIRECTORY-NAMESTRING
  * [ ] DISASSEMBLE
  * [ ] DIVISION-BY-ZERO
  * [ ] DO-ALL-SYMBOLS
@@ -204,7 +202,6 @@
  * [ ] END-OF-FILE
  * [ ] ENDP
  * [ ] ENOUGH-NAMESTRING
- * [ ] ENSURE-DIRECTORIES-EXIST
  * [ ] ENSURE-GENERIC-FUNCTION
  * [ ] ERROR
  * [ ] ETYPECASE
@@ -217,14 +214,9 @@
  * [ ] FDEFINITION
  * [ ] FFLOOR
  * [ ] FIFTH
- * [ ] FILE-AUTHOR
  * [ ] FILE-ERROR
  * [ ] FILE-ERROR-PATHNAME
- * [ ] FILE-NAMESTRING
- * [ ] FILE-POSITION
  * [ ] FILE-STREAM
- * [ ] FILE-STRING-LENGTH
- * [ ] FILE-WRITE-DATE
  * [ ] FILL
  * [ ] FILL-POINTER
  * [ ] FIND
@@ -407,7 +399,6 @@
  * [ ] MULTIPLE-VALUE-SETQ
  * [ ] MULTIPLE-VALUES-LIMIT
  * [ ] NAME-CHAR
- * [ ] NAMESTRING
  * [ ] NBUTLAST
  * [ ] NEXT-METHOD-P
  * [ ] NINTH
@@ -474,7 +465,6 @@
  * [ ] PRINT-NOT-READABLE-OBJECT
  * [ ] PRINT-OBJECT
  * [ ] PRINT-UNREADABLE-OBJECT
- * [ ] PROBE-FILE
  * [ ] PROCLAIM
  * [ ] PROGRAM-ERROR
  * [ ] PROGV
@@ -513,7 +503,6 @@
  * [ ] REMOVE-IF-NOT
  * [ ] REMOVE-METHOD
  * [ ] REMPROP
- * [ ] RENAME-FILE
  * [ ] RENAME-PACKAGE
  * [ ] REPLACE
  * [ ] REST
@@ -809,12 +798,15 @@
  * [x] DEFPARAMETER
  * [x] DEFUN
  * [x] DEFVAR
+ * [x] DELETE-FILE
  * [x] DESCRIBE
  * [x] DIRECTORY
+ * [x] DIRECTORY-NAMESTRING
  * [x] DO
  * [x] DO*
  * [x] DOLIST
  * [x] DOTIMES
+ * [x] ENSURE-DIRECTORIES-EXIST
  * [x] EQ
  * [x] EQL
  * [x] EQUAL
@@ -823,7 +815,12 @@
  * [x] EXP
  * [x] EXPT
  * [x] FCEILING
+ * [x] FILE-AUTHOR
  * [x] FILE-LENGTH
+ * [x] FILE-NAMESTRING
+ * [x] FILE-POSITION
+ * [x] FILE-STRING-LENGTH
+ * [x] FILE-WRITE-DATE
  * [x] FIND-CLASS
  * [x] FIND-PACKAGE
  * [x] FIND-SYMBOL
@@ -874,6 +871,7 @@
  * [x] MIN
  * [x] MINUSP
  * [x] MOD
+ * [x] NAMESTRING
  * [x] NCONC
  * [x] NIL
  * [x] NINTERSECTION
@@ -899,6 +897,7 @@
  * [x] PRIN1
  * [x] PRINC
  * [x] PRINT
+ * [x] PROBE-FILE
  * [x] PROG
  * [x] PROG*
  * [x] PROG1
@@ -910,6 +909,7 @@
  * [x] RANDOM-STATE
  * [x] REM
  * [x] REMHASH
+ * [x] RENAME-FILE
  * [x] REQUIRE
  * [x] RETURN
  * [x] RETURN-FROM

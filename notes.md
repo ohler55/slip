@@ -2,7 +2,6 @@
 
 - next
  - file-fun
-  - [ ] file-string-length (if open and writeable then number of byte for slip.Append)
   - [ ] make-string-input-stream
   - [ ] make-string-output-stream
   - [ ] with-input-from-string
@@ -15,6 +14,7 @@
   - [x] file-length
   - [x] file-namestring
   - [x] file-position
+  - [x] file-string-length
   - [x] file-write-date
   - [x] filepath-join (in gi)
   - [x] merge-pathnames
