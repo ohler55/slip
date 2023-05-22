@@ -42,7 +42,7 @@ func (f *FileNamestring) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	slip.ArgCountCheck(f, args, 1, 1)
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.PanicType("pathname", args[0], "string")
 	}
 	return slip.String(filepath.Base(string(path)))
 }
