@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"fmt"
 	"io"
 	"unicode/utf8"
 )
@@ -71,14 +72,41 @@ func (obj *InputStream) Close() (err error) {
 
 // ReadRune reads a rune.
 func (obj *InputStream) ReadRune() (r rune, size int, err error) {
-	if rr, ok := obj.Reader.(io.RuneReader); ok {
-		r, size, err = rr.ReadRune()
-		obj.lastRune = r
-	} else if obj.useLast {
+	if obj.useLast {
 		r = obj.lastRune
 		size = utf8.RuneLen(r)
+		obj.useLast = false
+	} else if rr, ok := obj.Reader.(io.RuneReader); ok {
+		r, size, err = rr.ReadRune()
+		obj.lastRune = r
 	} else {
-		// TBD read 1 byte, check hi bit, read more as needed
+		buf := make([]byte, 4)
+		var cnt int
+		if cnt, err = obj.Read(buf[:1]); cnt == 1 && err == nil {
+			switch {
+			case buf[0] < 0x80:
+				r = rune(buf[0])
+				size = 1
+			case (buf[0] & 0xf8) == 0xf0: // 11110xxx
+				// 4 byte rune
+				if cnt, err = obj.Read(buf[1:]); cnt == 3 && err == nil {
+					r, size = utf8.DecodeRune(buf)
+				}
+			case (buf[0] & 0xf0) == 0xe0: // 1110xxxx
+				// 3 byte rune
+				if cnt, err = obj.Read(buf[1:3]); cnt == 2 && err == nil {
+					r, size = utf8.DecodeRune(buf)
+				}
+			case (buf[0] & 0xe0) == 0xc0: // 110xxxxx
+				// 2 byte rune
+				if cnt, err = obj.Read(buf[1:2]); cnt == 1 && err == nil {
+					r, size = utf8.DecodeRune(buf)
+				}
+			}
+		}
+		if size == 0 && err == nil {
+			err = fmt.Errorf("invalid UTF8 character")
+		}
 	}
 	return
 }
@@ -87,14 +115,33 @@ func (obj *InputStream) ReadRune() (r rune, size int, err error) {
 func (obj *InputStream) UnreadRune() (err error) {
 	if ur, ok := obj.Reader.(io.RuneScanner); ok {
 		err = ur.UnreadRune()
+		obj.useLast = false
 	} else if obj.useLast || obj.lastRune == 0 {
-		// TBD panic
+		err = fmt.Errorf("cannot unread a character more than once before a read")
 	} else {
 		obj.useLast = true
 	}
 	return
 }
 
-// TBD ReadByte() (byte, error)
-//  if useLast and 1 byte rune then ok, else panic
-//
+// ReadByte reads a byte.
+func (obj *InputStream) ReadByte() (b byte, err error) {
+	if obj.useLast {
+		if 0x80 <= obj.lastRune {
+			fmt.Errorf("cannot read a byte from a multiple byte character that was unread, %s",
+				string([]rune{obj.lastRune}))
+		}
+		b = byte(obj.lastRune)
+		obj.useLast = false
+	} else if br, ok := obj.Reader.(io.ByteReader); ok {
+		b, err = br.ReadByte()
+		obj.lastRune = rune(b)
+	} else {
+		buf := []byte{0}
+		var cnt int
+		if cnt, err = obj.Read(buf); cnt == 1 && err == nil {
+			b = buf[0]
+		}
+	}
+	return
+}

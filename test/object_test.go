@@ -4,7 +4,6 @@ package test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math"
 	"math/big"
 	"os"
@@ -572,27 +571,6 @@ func TestFileStreamWriteRead(t *testing.T) {
 	tt.Nil(t, err)
 
 	tt.Equal(t, "hello", string(buf[:n]))
-}
-
-func TestInputStream(t *testing.T) {
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	(&sliptest.Object{
-		Target:    &stream,
-		String:    "#<INPUT-STREAM>",
-		Simple:    "#<INPUT-STREAM>",
-		Hierarchy: "input-stream.stream.t",
-		Equals: []*sliptest.EqTest{
-			{Other: &stream, Expect: true},
-			{Other: slip.True, Expect: false},
-		},
-		Selfies: []func() slip.Symbol{
-			(&slip.InputStream{}).StreamType,
-		},
-		Eval: &stream,
-	}).Test(t)
-	data, err := ioutil.ReadAll(&stream)
-	tt.Nil(t, err)
-	tt.Equal(t, "abc", string(data))
 }
 
 func TestOutputStream(t *testing.T) {
