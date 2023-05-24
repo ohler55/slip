@@ -41,9 +41,13 @@ func keywordPreSet(p *Package, name string, value Object) (string, Object) {
 		name = ":" + name
 	}
 	name = strings.ToLower(name)
-	if _, has := p.Vars[name]; has {
+	if vv, has := p.Vars[name]; has {
+		if ObjectEqual(value, vv.Val) {
+			return name, value
+		}
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
 	value = Symbol(name)
+
 	return name, value
 }

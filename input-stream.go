@@ -107,6 +107,7 @@ func (obj *InputStream) ReadRune() (r rune, size int, err error) {
 		if size == 0 && err == nil {
 			err = fmt.Errorf("invalid UTF8 character")
 		}
+		obj.lastRune = r
 	}
 	return
 }

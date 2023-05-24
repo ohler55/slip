@@ -297,6 +297,8 @@ func TestString(t *testing.T) {
 		},
 		Eval: slip.String("abc"),
 	}).Test(t)
+	tt.Equal(t, slip.Symbol("string"), slip.String("x").SequenceType())
+	tt.Equal(t, 3, slip.String("abc").Length())
 }
 
 func TestSymbolKey(t *testing.T) {
@@ -367,6 +369,7 @@ func TestListObj(t *testing.T) {
 	tt.Equal(t, slip.List{slip.Fixnum(2)}, slip.List{slip.Fixnum(1), slip.Fixnum(2)}.Cdr())
 	tt.Equal(t, slip.List{slip.Fixnum(2), slip.Fixnum(3)},
 		slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}.Cdr())
+	tt.Equal(t, 2, slip.List{slip.True, nil}.Length())
 }
 
 func TestListObjEmpty(t *testing.T) {
@@ -428,6 +431,7 @@ func TestVector(t *testing.T) {
 			slip.Vector{}.ArrayType,
 		},
 	}).Test(t)
+	tt.Equal(t, 2, slip.Vector{slip.True, nil}.Length())
 }
 
 func TestCharacterUnicode(t *testing.T) {

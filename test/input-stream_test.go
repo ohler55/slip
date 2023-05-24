@@ -53,6 +53,8 @@ func TestInputStreamReadRune(t *testing.T) {
 
 	_, _, err = stream.ReadRune()
 	tt.NotNil(t, err)
+
+	_ = stream.Close()
 }
 
 type justReader struct {
@@ -69,8 +71,12 @@ func (r *justReader) Read(b []byte) (int, error) {
 	return len(b), nil
 }
 
+func (r *justReader) Close() error {
+	return nil
+}
+
 func TestInputStreamReadRuneHard(t *testing.T) {
-	stream := slip.InputStream{Reader: &justReader{buf: []byte("a𝄢c")}}
+	stream := slip.InputStream{Reader: &justReader{buf: []byte("a𝄢༒¥")}}
 	r, size, err := stream.ReadRune()
 	tt.Equal(t, 'a', r)
 	tt.Equal(t, 1, size)
@@ -82,11 +88,43 @@ func TestInputStreamReadRuneHard(t *testing.T) {
 	tt.Nil(t, err)
 
 	r, size, err = stream.ReadRune()
-	tt.Equal(t, 'c', r)
-	tt.Equal(t, 1, size)
+	tt.Equal(t, '༒', r)
+	tt.Equal(t, 3, size)
+	tt.Nil(t, err)
+
+	r, size, err = stream.ReadRune()
+	tt.Equal(t, '¥', r)
+	tt.Equal(t, 2, size)
+	tt.Nil(t, err)
+
+	err = stream.UnreadRune()
+	tt.Nil(t, err)
+
+	r, size, err = stream.ReadRune()
+	tt.Equal(t, '¥', r)
+	tt.Equal(t, 2, size)
 	tt.Nil(t, err)
 
 	_, _, err = stream.ReadRune()
 	tt.NotNil(t, err)
-	// fmt.Printf("*** rune: %s  size: %d  err: %v\n", string([]rune{r}), size, err)
+
+	stream.Close()
+}
+
+func TestInputStreamReadRuneHardBad(t *testing.T) {
+	stream := slip.InputStream{Reader: &justReader{buf: []byte("\x90")}}
+	_, _, err := stream.ReadRune()
+	tt.NotNil(t, err)
+}
+
+func TestInputStreamUnreadRune(t *testing.T) {
+
+	// TBD
+
+}
+
+func TestInputStreamReadByte(t *testing.T) {
+
+	// TBD
+
 }
