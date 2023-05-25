@@ -36,11 +36,6 @@ the end of the stream. The default is _t_.`,
 					Type: "object",
 					Text: "The value to return on EOF if _eof-error-p_ is nil.",
 				},
-				{
-					Name: "recursive-p",
-					Type: "boolean",
-					Text: "If true the call is embedded in a higher level function. Has no impact on behavior.",
-				},
 			},
 			Return: "fixnum",
 			Text:   `__read-byte__ reads a byte from the _stream_.`,
@@ -57,7 +52,7 @@ type ReadByte struct {
 
 // Call the function with the arguments provided.
 func (f *ReadByte) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 4)
+	slip.ArgCountCheck(f, args, 0, 3)
 	var is slip.Object = s.Get(slip.Symbol("*standard-input*"))
 	if 0 < len(args) {
 		is = args[0]
