@@ -1,35 +1,18 @@
 # SLIP Notes
 
 - next
- - InputStream
-  - ReadRune() (r rune, size int, err error)
-  - ReadByte() (byte, error)
-  - UnreadRune() error
-  - on any of the read calls other than read-all create a bufio.Reader
-   - still need to be able to close the reader so can't replace
-   - maybe a second pointer
-    - point to original or buffered?
-   - Reader() as a method or change close to look at the correct reader
-  - **or maybe build the buffer into InputStream**
-   - no need to let anyone access Reader except on creation
-   - add Close() also
-   - buffer as []byte or []rune?
-  - only need to save 1 char
-   - could just read the slow way with 1 rune buffering only
-   - or maybe a gi function to buffer input at some point
-    - or just a flag to turn on buffering in InputStream
 
  - file-fun
-  - [ ] make-string-input-stream (use for read functions)
+  - [x] make-string-input-stream
   - [ ] make-string-output-stream
   - [ ] with-input-from-string
   - [ ] read
   - [ ] read-all (in gi)
   - [ ] read-line
-  - [ ] read-char
-  - [ ] read-byte
+  - [x] read-char
+  - [x] read-byte
   - [ ] unread-char
-  - [ ] peek-char
+  - [ ] peek-char (read and unread)
   - [ ] listen
   - [ ] read-char-no-hang
   - [ ] clear-input

@@ -12,12 +12,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := ReadChar{Function: slip.Function{Name: "read-char", Args: args}}
+			f := ReadByte{Function: slip.Function{Name: "read-byte", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "read-char",
+			Name: "read-byte",
 			Args: []*slip.DocArg{
 				{Name: "&optional"},
 				{
@@ -42,31 +42,31 @@ the end of the stream. The default is _t_.`,
 					Text: "If true the call is embedded in a higher level function. Has no impact on behavior.",
 				},
 			},
-			Return: "character",
-			Text:   `__read-char__ reads a character from the _stream_.`,
+			Return: "fixnum",
+			Text:   `__read-byte__ reads a byte from the _stream_.`,
 			Examples: []string{
-				`(read-char (make-string-input-stream "abc")) => #\a>`,
+				`(read-byte (make-string-input-stream "abc")) => 97>`,
 			},
 		}, &slip.CLPkg)
 }
 
-// ReadChar represents the read-char function.
-type ReadChar struct {
+// ReadByte represents the read-byte function.
+type ReadByte struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *ReadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *ReadByte) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 0, 4)
 	var is slip.Object = s.Get(slip.Symbol("*standard-input*"))
 	if 0 < len(args) {
 		is = args[0]
 	}
-	rr, ok := is.(io.RuneReader)
+	rr, ok := is.(io.ByteReader)
 	if !ok {
 		slip.PanicType("stream", args[0], "input-stream")
 	}
-	r, _, err := rr.ReadRune()
+	b, err := rr.ReadByte()
 	if err != nil {
 		if errors.Is(err, io.EOF) && 1 < len(args) && args[1] == nil {
 			var result slip.Object
@@ -77,5 +77,5 @@ func (f *ReadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 		panic(err)
 	}
-	return slip.Character(r)
+	return slip.Fixnum(b)
 }
