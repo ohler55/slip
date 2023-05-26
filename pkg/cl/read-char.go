@@ -45,7 +45,7 @@ the end of the stream. The default is _t_.`,
 			Return: "character",
 			Text:   `__read-char__ reads a character from the _stream_.`,
 			Examples: []string{
-				`(read-char (make-string-input-stream "abc")) => #\a>`,
+				`(read-char (make-string-input-stream "abc")) => #\a`,
 			},
 		}, &slip.CLPkg)
 }

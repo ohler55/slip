@@ -8,14 +8,14 @@
   - [ ] with-input-from-string
   - [ ] read
   - [ ] read-all (in gi)
-  - [ ] read-line
+  - [ ] read-line (one char at a time until \n or eof)
   - [x] read-char
   - [x] read-byte
-  - [ ] unread-char
-  - [ ] peek-char (read and unread)
+  - [x] unread-char
+  - [ ] peek-char (read and unread, like a skip)
   - [ ] listen
-  - [ ] read-char-no-hang
-  - [ ] clear-input
+  - [ ] read-char-no-hang (can't do this without a non-blocking stream)
+  - [ ] clear-input (does nothing since streams are all blocking)
   - [x] close
   - [x] delete-file
   - [x] directory
