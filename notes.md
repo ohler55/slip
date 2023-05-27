@@ -6,8 +6,6 @@
   - [ ] make-string-output-stream
   - [ ] peek-char (read and unread, like a skip)
   - [ ] read
-  - [ ] read-all (in gi)
-  - [x] read-line
   - [ ] with-input-from-string
   - [x] close
   - [x] delete-file
@@ -29,8 +27,10 @@
   - [x] pathname-name
   - [x] pathname-type
   - [x] probe-file
+  - [x] read-all
   - [x] read-byte
   - [x] read-char
+  - [x] read-line
   - [x] rename-file
   - [x] unread-char
   - [x] with-open-file

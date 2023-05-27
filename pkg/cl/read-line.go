@@ -47,8 +47,8 @@ the end of the stream. The default is _t_.`,
 a missing-newline indicator. The newline is not included in the returned string. The missing-newline
 indicator is only true at the end of the stream or file.`,
 			Examples: []string{
-				`(read-line (make-string-input-stream "abc\ndef")) => "abc",nil`,
-				`(read-line (make-string-input-stream "abc")) => "abc",t`,
+				`(read-line (make-string-input-stream (format nil "abc~%def"))) => "abc", nil`,
+				`(read-line (make-string-input-stream "abc")) => "abc", t`,
 			},
 		}, &slip.CLPkg)
 }
