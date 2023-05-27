@@ -3,19 +3,12 @@
 - next
 
  - file-fun
-  - [x] make-string-input-stream
   - [ ] make-string-output-stream
-  - [ ] with-input-from-string
+  - [ ] peek-char (read and unread, like a skip)
   - [ ] read
   - [ ] read-all (in gi)
-  - [ ] read-line (one char at a time until \n or eof)
-  - [x] read-char
-  - [x] read-byte
-  - [x] unread-char
-  - [ ] peek-char (read and unread, like a skip)
-  - [ ] listen
-  - [ ] read-char-no-hang (can't do this without a non-blocking stream)
-  - [ ] clear-input (does nothing since streams are all blocking)
+  - [x] read-line
+  - [ ] with-input-from-string
   - [x] close
   - [x] delete-file
   - [x] directory
@@ -28,6 +21,7 @@
   - [x] file-string-length
   - [x] file-write-date
   - [x] filepath-join (in gi)
+  - [x] make-string-input-stream
   - [x] merge-pathnames
   - [x] namestring
   - [x] open
@@ -35,7 +29,10 @@
   - [x] pathname-name
   - [x] pathname-type
   - [x] probe-file
+  - [x] read-byte
+  - [x] read-char
   - [x] rename-file
+  - [x] unread-char
   - [x] with-open-file
 
 
