@@ -3,10 +3,7 @@
 - next
 
  - file-fun
-  - [ ] make-string-output-stream
   - [ ] peek-char (read and unread, like a skip)
-  - [ ] read
-  - [ ] with-input-from-string
   - [x] close
   - [x] delete-file
   - [x] directory
@@ -19,7 +16,9 @@
   - [x] file-string-length
   - [x] file-write-date
   - [x] filepath-join (in gi)
+  - [x] get-output-stream-string
   - [x] make-string-input-stream
+  - [x] make-string-output-stream
   - [x] merge-pathnames
   - [x] namestring
   - [x] open
