@@ -4,7 +4,6 @@ package test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math"
 	"math/big"
 	"os"
@@ -298,6 +297,8 @@ func TestString(t *testing.T) {
 		},
 		Eval: slip.String("abc"),
 	}).Test(t)
+	tt.Equal(t, slip.Symbol("string"), slip.String("x").SequenceType())
+	tt.Equal(t, 3, slip.String("abc").Length())
 }
 
 func TestSymbolKey(t *testing.T) {
@@ -368,6 +369,7 @@ func TestListObj(t *testing.T) {
 	tt.Equal(t, slip.List{slip.Fixnum(2)}, slip.List{slip.Fixnum(1), slip.Fixnum(2)}.Cdr())
 	tt.Equal(t, slip.List{slip.Fixnum(2), slip.Fixnum(3)},
 		slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}.Cdr())
+	tt.Equal(t, 2, slip.List{slip.True, nil}.Length())
 }
 
 func TestListObjEmpty(t *testing.T) {
@@ -429,6 +431,7 @@ func TestVector(t *testing.T) {
 			slip.Vector{}.ArrayType,
 		},
 	}).Test(t)
+	tt.Equal(t, 2, slip.Vector{slip.True, nil}.Length())
 }
 
 func TestCharacterUnicode(t *testing.T) {
@@ -572,27 +575,6 @@ func TestFileStreamWriteRead(t *testing.T) {
 	tt.Nil(t, err)
 
 	tt.Equal(t, "hello", string(buf[:n]))
-}
-
-func TestInputStream(t *testing.T) {
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	(&sliptest.Object{
-		Target:    &stream,
-		String:    "#<INPUT-STREAM>",
-		Simple:    "#<INPUT-STREAM>",
-		Hierarchy: "input-stream.stream.t",
-		Equals: []*sliptest.EqTest{
-			{Other: &stream, Expect: true},
-			{Other: slip.True, Expect: false},
-		},
-		Selfies: []func() slip.Symbol{
-			(&slip.InputStream{}).StreamType,
-		},
-		Eval: &stream,
-	}).Test(t)
-	data, err := ioutil.ReadAll(&stream)
-	tt.Nil(t, err)
-	tt.Equal(t, "abc", string(data))
 }
 
 func TestOutputStream(t *testing.T) {

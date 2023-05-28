@@ -44,7 +44,7 @@ func (obj String) SequenceType() Symbol {
 
 // Length returns the length of the object.
 func (obj String) Length() int {
-	return len(obj)
+	return len([]rune(obj))
 }
 
 // Eval returns self.

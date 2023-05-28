@@ -1,29 +1,6 @@
 # SLIP Notes
 
 - next
- + directory pathspec => list of pathnames
- - with-open-file
- - make-string-input-stream
- - make-string-output-stream
- - with-input-from-string
-
- - file-fun
-  - close
-  - delete-file
-  - directory-p
-  - directory
-  - ensure-directories-exist
-  - length
-  - merge-pathnames
-  - open
-  - pathname-directory
-  - pathname-join
-  - pathname-name
-  - position
-  - rename-file
-  - truncate
-  - with-open-file
-
 
  - string-stream branch
   - [ ] STRING-STREAM (type string-stream,stream,t) (in cl or top level?)

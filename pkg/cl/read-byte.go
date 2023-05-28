@@ -1,0 +1,76 @@
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
+
+package cl
+
+import (
+	"errors"
+	"io"
+
+	"github.com/ohler55/slip"
+)
+
+func init() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := ReadByte{Function: slip.Function{Name: "read-byte", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "read-byte",
+			Args: []*slip.DocArg{
+				{Name: "&optional"},
+				{
+					Name: "stream",
+					Type: "input-stream",
+					Text: "The stream to read from. The default is _*standard-input*_",
+				},
+				{
+					Name: "eof-error-p",
+					Type: "boolean",
+					Text: `If true an EOF error is raised when a read attempt is made at
+the end of the stream. The default is _t_.`,
+				},
+				{
+					Name: "eof-value",
+					Type: "object",
+					Text: "The value to return on EOF if _eof-error-p_ is nil.",
+				},
+			},
+			Return: "fixnum",
+			Text:   `__read-byte__ reads a byte from the _stream_.`,
+			Examples: []string{
+				`(read-byte (make-string-input-stream "abc")) => 97>`,
+			},
+		}, &slip.CLPkg)
+}
+
+// ReadByte represents the read-byte function.
+type ReadByte struct {
+	slip.Function
+}
+
+// Call the function with the arguments provided.
+func (f *ReadByte) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.ArgCountCheck(f, args, 0, 3)
+	var is slip.Object = s.Get(slip.Symbol("*standard-input*"))
+	if 0 < len(args) {
+		is = args[0]
+	}
+	rr, ok := is.(io.ByteReader)
+	if !ok {
+		slip.PanicType("stream", args[0], "input-stream")
+	}
+	b, err := rr.ReadByte()
+	if err != nil {
+		if errors.Is(err, io.EOF) && 1 < len(args) && args[1] == nil {
+			var result slip.Object
+			if 2 < len(args) {
+				result = args[2]
+			}
+			return result
+		}
+		panic(err)
+	}
+	return slip.Fixnum(b)
+}

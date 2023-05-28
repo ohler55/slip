@@ -5,6 +5,7 @@ package test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -35,6 +36,7 @@ func TestHashTableSymbol(t *testing.T) {
 		},
 		Eval: slip.HashTable{slip.Symbol("a"): nil},
 	}).Test(t)
+	tt.Equal(t, 2, slip.HashTable{slip.Symbol("a"): slip.True, slip.Symbol("b"): nil}.Length())
 }
 
 func TestHashTableString(t *testing.T) {
