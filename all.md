@@ -39,7 +39,6 @@
  * [ ] ASINH
  * [ ] ASSERT
  * [ ] ATANH
- * [ ] ATOM
  * [ ] BASE-CHAR
  * [ ] BASE-STRING
  * [ ] BIGNUM
@@ -76,7 +75,6 @@
  * [ ] BOOLE-XOR
  * [ ] BOOLEAN
  * [ ] BOTH-CASE-P
- * [ ] BOUNDP
  * [ ] BREAK
  * [ ] BROADCAST-STREAM
  * [ ] BROADCAST-STREAM-STREAMS
@@ -161,8 +159,6 @@
  * [ ] DEFINE-MODIFY-MACRO
  * [ ] DEFINE-SETF-EXPANDER
  * [ ] DEFINE-SYMBOL-MACRO
- * [ ] DEFMACRO
- * [ ] DEFMETHOD
  * [ ] DEFPACKAGE
  * [ ] DEFSETF
  * [ ] DEFSTRUCT
@@ -184,7 +180,6 @@
  * [ ] DO-EXTERNAL-SYMBOLS
  * [ ] DO-SYMBOLS
  * [ ] DOCUMENTATION
- * [ ] DOUBLE-FLOAT
  * [ ] DOUBLE-FLOAT-EPSILON
  * [ ] DOUBLE-FLOAT-NEGATIVE-EPSILON
  * [ ] DPB
@@ -205,17 +200,14 @@
  * [ ] ERROR
  * [ ] ETYPECASE
  * [ ] EVAL-WHEN
- * [ ] EVENP
  * [ ] EVERY
  * [ ] EXPORT
  * [ ] EXTENDED-CHAR
  * [ ] FBOUNDP
  * [ ] FDEFINITION
- * [ ] FFLOOR
  * [ ] FIFTH
  * [ ] FILE-ERROR
  * [ ] FILE-ERROR-PATHNAME
- * [ ] FILE-STREAM
  * [ ] FILL
  * [ ] FILL-POINTER
  * [ ] FIND
@@ -226,7 +218,6 @@
  * [ ] FIND-RESTART
  * [ ] FINISH-OUTPUT
  * [ ] FIRST
- * [ ] FIXNUM
  * [ ] FLET
  * [ ] FLOAT-DIGITS
  * [ ] FLOAT-PRECISION
@@ -241,7 +232,6 @@
  * [ ] FORMATTER
  * [ ] FOURTH
  * [ ] FRESH-LINE
- * [ ] FTRUNCATE
  * [ ] FTYPE
  * [ ] FUNCALL
  * [ ] FUNCTION-KEYWORDS
@@ -257,7 +247,6 @@
  * [ ] GET-INTERNAL-REAL-TIME
  * [ ] GET-INTERNAL-RUN-TIME
  * [ ] GET-MACRO-CHARACTER
- * [x] GET-OUTPUT-STREAM-STRING
  * [ ] GET-PROPERTIES
  * [ ] GET-SETF-EXPANSION
  * [ ] GET-UNIVERSAL-TIME
@@ -276,7 +265,6 @@
  * [ ] INITIALIZE-INSTANCE
  * [ ] INLINE
  * [ ] INSPECT
- * [ ] INTEGER
  * [ ] INTEGER-DECODE-FLOAT
  * [ ] INTEGER-LENGTH
  * [ ] INTERACTIVE-STREAM-P
@@ -333,7 +321,6 @@
  * [ ] LOGORC2
  * [ ] LOGTEST
  * [ ] LOGXOR
- * [ ] LONG-FLOAT
  * [ ] LONG-FLOAT-EPSILON
  * [ ] LONG-FLOAT-NEGATIVE-EPSILON
  * [ ] LONG-SITE-NAME
@@ -361,7 +348,6 @@
  * [ ] MAKE-PATHNAME
  * [ ] MAKE-SEQUENCE
  * [ ] MAKE-STRING
- * [x] MAKE-STRING-OUTPUT-STREAM
  * [ ] MAKE-SYMBOL
  * [ ] MAKE-SYNONYM-STREAM
  * [ ] MAKE-TWO-WAY-STREAM
@@ -373,7 +359,6 @@
  * [ ] MEMBER-IF
  * [ ] MEMBER-IF-NOT
  * [ ] MERGE
- * [ ] METHOD
  * [ ] METHOD-COMBINATION
  * [ ] METHOD-COMBINATION-ERROR
  * [ ] METHOD-QUALIFIERS
@@ -432,7 +417,6 @@
  * [ ] PACKAGEP
  * [ ] PAIRLIS
  * [ ] PARSE-ERROR
- * [ ] PARSE-INTEGER
  * [ ] PARSE-NAMESTRING
  * [ ] PATHNAME
  * [ ] PATHNAME-DEVICE
@@ -440,7 +424,6 @@
  * [ ] PATHNAME-MATCH-P
  * [ ] PATHNAME-VERSION
  * [ ] PATHNAMEP
- * [ ] PEEK-CHAR
  * [ ] PHASE
  * [ ] POP
  * [ ] POSITION
@@ -472,21 +455,17 @@
  * [ ] RASSOC
  * [ ] RASSOC-IF
  * [ ] RASSOC-IF-NOT
- * [ ] RATIO
- * [ ] RATIONAL
  * [ ] RATIONALIZE
  * [ ] RATIONALP
  * [ ] READ
  * [ ] READ-DELIMITED-LIST
  * [ ] READ-FROM-STRING
- * [x] READ-LINE
  * [ ] READ-PRESERVING-WHITESPACE
  * [ ] READ-SEQUENCE
  * [ ] READER-ERROR
  * [ ] READTABLE
  * [ ] READTABLE-CASE
  * [ ] READTABLEP
- * [ ] REAL
  * [ ] REALP
  * [ ] REALPART
  * [ ] REDUCE
@@ -515,7 +494,6 @@
  * [ ] SCHAR
  * [ ] SEARCH
  * [ ] SECOND
- * [ ] SEQUENCE
  * [ ] SERIOUS-CONDITION
  * [ ] SET-DIFFERENCE
  * [ ] SET-DISPATCH-MACRO-CHARACTER
@@ -528,7 +506,6 @@
  * [ ] SHADOWING-IMPORT
  * [ ] SHARED-INITIALIZE
  * [ ] SHIFTF
- * [ ] SHORT-FLOAT
  * [ ] SHORT-FLOAT-EPSILON
  * [ ] SHORT-FLOAT-NEGATIVE-EPSILON
  * [ ] SHORT-SITE-NAME
@@ -566,7 +543,6 @@
  * [ ] SPECIAL
  * [ ] SPECIAL-OPERATOR-P
  * [ ] SPEED
- * [ ] SQRT
  * [ ] STANDARD
  * [ ] STANDARD-CHAR
  * [ ] STANDARD-CHAR-P
@@ -591,10 +567,6 @@
  * [ ] STRING-RIGHT-TRIM
  * [ ] STRING-STREAM
  * [ ] STRING-TRIM
- * [ ] STRING<
- * [ ] STRING<=
- * [ ] STRING>
- * [ ] STRING>=
  * [ ] STRUCTURE
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
@@ -610,7 +582,6 @@
  * [ ] SUBSTITUTE-IF-NOT
  * [ ] SUBTYPEP
  * [ ] SVREF
- * [ ] SYMBOL
  * [ ] SYMBOL-FUNCTION
  * [ ] SYMBOL-MACROLET
  * [ ] SYMBOL-NAME
@@ -635,7 +606,6 @@
  * [ ] TWO-WAY-STREAM
  * [ ] TWO-WAY-STREAM-INPUT-STREAM
  * [ ] TWO-WAY-STREAM-OUTPUT-STREAM
- * [ ] TYPE
  * [ ] TYPE-ERROR
  * [ ] TYPE-ERROR-DATUM
  * [ ] TYPE-ERROR-EXPECTED-TYPE
@@ -645,7 +615,6 @@
  * [ ] UNBOUND-VARIABLE
  * [ ] UNDEFINED-FUNCTION
  * [ ] UNEXPORT
- * [ ] UNREAD-CHAR
  * [ ] UNSIGNED-BYTE
  * [ ] UNTRACE
  * [ ] UNUSE-PACKAGE
@@ -658,7 +627,6 @@
  * [ ] USER-HOMEDIR-PATHNAME
  * [ ] VALUES-LIST
  * [ ] VARIABLE
- * [ ] VECTOR
  * [ ] VECTOR-POP
  * [ ] VECTOR-PUSH
  * [ ] VECTOR-PUSH-EXTEND
@@ -746,7 +714,9 @@
  * [x] ASSOC-IF
  * [x] ASSOC-IF-NOT
  * [x] ATAN
+ * [x] ATOM
  * [x] BLOCK
+ * [x] BOUNDP
  * [x] BUTLAST
  * [x] CAAAAR
  * [x] CAAADR
@@ -789,6 +759,8 @@
  * [x] CONSP
  * [x] COS
  * [x] DECF
+ * [x] DEFMACRO
+ * [x] DEFMETHOD
  * [x] DEFPARAMETER
  * [x] DEFUN
  * [x] DEFVAR
@@ -800,30 +772,37 @@
  * [x] DO*
  * [x] DOLIST
  * [x] DOTIMES
+ * [x] DOUBLE-FLOAT
  * [x] ENSURE-DIRECTORIES-EXIST
  * [x] EQ
  * [x] EQL
  * [x] EQUAL
  * [x] EQUALP
  * [x] EVAL
+ * [x] EVENP
  * [x] EXP
  * [x] EXPT
  * [x] FCEILING
+ * [x] FFLOOR
  * [x] FILE-AUTHOR
  * [x] FILE-LENGTH
  * [x] FILE-NAMESTRING
  * [x] FILE-POSITION
+ * [x] FILE-STREAM
  * [x] FILE-STRING-LENGTH
  * [x] FILE-WRITE-DATE
  * [x] FIND-CLASS
  * [x] FIND-PACKAGE
  * [x] FIND-SYMBOL
+ * [x] FIXNUM
  * [x] FLOAT
  * [x] FLOATP
  * [x] FLOOR
  * [x] FORMAT
  * [x] FROUND
+ * [x] FTRUNCATE
  * [x] FUNCTION
+ * [x] GET-OUTPUT-STREAM-STRING
  * [x] GETHASH
  * [x] GO
  * [x] HASH-TABLE
@@ -836,6 +815,7 @@
  * [x] IF
  * [x] INCF
  * [x] INPUT-STREAM-P
+ * [x] INTEGER
  * [x] INTEGERP
  * [x] INTERN
  * [x] INTERSECTION
@@ -850,10 +830,12 @@
  * [x] LISTP
  * [x] LOAD
  * [x] LOG
+ * [x] LONG-FLOAT
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
  * [x] MAKE-RANDOM-STATE
  * [x] MAKE-STRING-INPUT-STREAM
+ * [x] MAKE-STRING-OUTPUT-STREAM
  * [x] MAPC
  * [x] MAPCAN
  * [x] MAPCAR
@@ -863,6 +845,7 @@
  * [x] MAPLIST
  * [x] MAX
  * [x] MERGE-PATHNAMES
+ * [x] METHOD
  * [x] MIN
  * [x] MINUSP
  * [x] MOD
@@ -883,9 +866,11 @@
  * [x] OPEN
  * [x] OR
  * [x] OUTPUT-STREAM-P
+ * [x] PARSE-INTEGER
  * [x] PATHNAME-DIRECTORY
  * [x] PATHNAME-NAME
  * [x] PATHNAME-TYPE
+ * [x] PEEK-CHAR
  * [x] PI
  * [x] PLUSP
  * [x] PPRINT
@@ -902,8 +887,12 @@
  * [x] QUOTE
  * [x] RANDOM
  * [x] RANDOM-STATE
+ * [x] RATIO
+ * [x] RATIONAL
  * [x] READ-BYTE
  * [x] READ-CHAR
+ * [x] READ-LINE
+ * [x] REAL
  * [x] REM
  * [x] REMHASH
  * [x] RENAME-FILE
@@ -914,13 +903,16 @@
  * [x] ROUND
  * [x] RPLACA
  * [x] RPLACD
+ * [x] SEQUENCE
  * [x] SET
  * [x] SETF
  * [x] SETQ
+ * [x] SHORT-FLOAT
  * [x] SIGNUM
  * [x] SIN
  * [x] SLEEP
  * [x] SORT
+ * [x] SQRT
  * [x] STABLE-SORT
  * [x] STREAMP
  * [x] STRING
@@ -929,20 +921,28 @@
  * [x] STRING-EQUAL
  * [x] STRING-UPCASE
  * [x] STRING/=
+ * [x] STRING<
+ * [x] STRING<=
  * [x] STRING=
+ * [x] STRING>
+ * [x] STRING>=
  * [x] STRINGP
  * [x] SXHASH
+ * [x] SYMBOL
  * [x] SYMBOLP
  * [x] T
  * [x] TAN
  * [x] TERPRI
  * [x] TRUNCATE
+ * [x] TYPE
  * [x] TYPE-OF
  * [x] TYPEP
  * [x] UNINTERN
  * [x] UNION
  * [x] UNLESS
+ * [x] UNREAD-CHAR
  * [x] VALUES
+ * [x] VECTOR
  * [x] WHEN
  * [x] WITH-OPEN-FILE
  * [x] WRITE
