@@ -2,17 +2,44 @@
 
 - next
 
- - test or verify package
-  - in lisp or go?
-   - if lisp then how to include?
-    - embed?
-
  - misc
+  + internal-time-units-per-second
+  + get-internal-real-time and get-internal-run-time
+  - time (time a form eval)
+   - to *trace-output* a dynamic var
+   - print elapsed time and mem used or other info if possible
   - gensym
   - loop (simple only)
   - rassoc
   - subseq
   - tree-equal
+
+ - test package
+  - in go
+  - flavor or suite and test types as receivers
+    - suite
+     - run
+     - report
+     - results (as assoc or list?)
+      - flavor then :passed, :skipped, and :failed
+    - test
+     - run
+     - report
+     - results (as assoc or list?)
+      - flavor then :passed, :skipped, and :failed
+      - if verbose or trace or ??? then print trace
+   - does it buy us anything? maybe not
+  - suite type
+   - set *current-suite*
+  - test type
+   - set *current-test*
+  - assert-equal
+  - assert-match
+  - refute-equal
+  - assert-nil
+  - refute-nil
+  - benchmark _form_ &key _iterations_ _duration_
+   - evaluate for multiple times until enough time for run is good enough
 
  - conversions
   - to fixnum
