@@ -99,6 +99,26 @@ func (s *Scope) get(name string) Object {
 	panic(NewPanic("Variable %s is unbound.", name))
 }
 
+// LocalGet a named variable value.
+func (s *Scope) LocalGet(sym Symbol) (Object, bool) {
+	return s.localGet(strings.ToLower(string(sym)))
+}
+
+func (s *Scope) localGet(name string) (Object, bool) {
+	s.moo.Lock()
+	if s.Vars != nil {
+		if value, has := s.Vars[name]; has {
+			s.moo.Unlock()
+			return value, true
+		}
+	}
+	s.moo.Unlock()
+	if s.parent != nil {
+		return s.parent.localGet(name)
+	}
+	return nil, false
+}
+
 // Set a variable to the provided value. If sym is bound in this scope the
 // binding is changed to the new value. If not then the parent Set() is
 // called. If no bindings are found before reaching the World then a new world

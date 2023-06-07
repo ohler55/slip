@@ -182,7 +182,7 @@ func TestEditorDescribeScroll(t *testing.T) {
 		until("<scroll-up 1>"),
 		expect("<set-cursor 23:4>"),
 		expect("<bold>"),
-		expect("car"),
+		expect("common-lisp:car"),
 		expect("<normal>"),
 		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 		expect("<set-cursor 21:7>"),

@@ -46,6 +46,11 @@ var (
 				Set: setStandardOutput,
 				Doc: "is a stream used as the default output destination for writing.",
 			},
+			"*trace-output*": {
+				Get: getTraceOutput,
+				Set: setTraceOutput,
+				Doc: "is a stream used as the output destination for writing trace information.",
+			},
 			"*print-ansi*": {
 				Get: getPrintANSI,
 				Set: setPrintANSI,
@@ -158,6 +163,9 @@ and raises an error if not possible to print readably.`,
 	// StandardOutput backs *standard-output*.
 	StandardOutput Object = (*FileStream)(os.Stdout)
 
+	// TrqaceOutput backs *trace-output*.
+	TraceOutput Object = (*FileStream)(os.Stdout)
+
 	// StandardInput backs *standard-input*.
 	StandardInput Object = (*FileStream)(os.Stdin)
 
@@ -224,6 +232,18 @@ func setStandardOutput(value Object) {
 		StandardOutput = value
 	} else {
 		PanicType("*standard-output*", value, "stream")
+	}
+}
+
+func getTraceOutput() Object {
+	return TraceOutput
+}
+
+func setTraceOutput(value Object) {
+	if _, ok := value.(io.Writer); ok {
+		TraceOutput = value
+	} else {
+		PanicType("*trace-output*", value, "stream")
 	}
 }
 

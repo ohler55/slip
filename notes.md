@@ -5,9 +5,7 @@
  - misc
   + internal-time-units-per-second
   + get-internal-real-time and get-internal-run-time
-  - time (time a form eval)
-   - to *trace-output* a dynamic var
-   - print elapsed time and mem used or other info if possible
+  + time
   - gensym
   - loop (simple only)
   - rassoc

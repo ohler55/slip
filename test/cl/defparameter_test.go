@@ -56,7 +56,7 @@ func TestDefparameterDoc(t *testing.T) {
 		Source: `(describe '*defparameter-test-doc*)`,
 		Expect: "",
 	}).Test(t)
-	tt.Equal(t, `*defparameter-test-doc*
+	tt.Equal(t, `common-lisp-user:*defparameter-test-doc*
   [symbol]
 
 *defparameter-test-doc* names a fixnum:
