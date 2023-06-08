@@ -32,6 +32,11 @@ var (
 				Set: setErrorOutput,
 				Doc: "is a stream used as the default for warnings and errors when not in interaction mode.",
 			},
+			"*gensym-counter*": {
+				Get: getGensymCounter,
+				Set: setGensymCounter,
+				Doc: "the gensym counter used when calling gensym.",
+			},
 			"*load-pathname*": {Val: nil, Doc: "load path set during load."},
 			"*load-print*":    {Val: nil, Doc: "default value for print during loading."},
 			"*load-truename*": {Val: nil, Doc: "load path set during load."},
@@ -178,6 +183,8 @@ and raises an error if not possible to print readably.`,
 
 	// CurrentPackage is the current package.
 	CurrentPackage *Package
+
+	gensymCounter = Fixnum(99)
 )
 
 func init() {
@@ -220,6 +227,18 @@ func setErrorOutput(value Object) {
 		ErrorOutput = value
 	} else {
 		PanicType("*error-output*", value, "stream")
+	}
+}
+
+func getGensymCounter() Object {
+	return gensymCounter
+}
+
+func setGensymCounter(value Object) {
+	if counter, ok := value.(Fixnum); ok {
+		gensymCounter = counter
+	} else {
+		PanicType("*gensym-counter*", value, "fixnum")
 	}
 }
 
