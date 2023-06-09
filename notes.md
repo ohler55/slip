@@ -6,12 +6,12 @@
   + internal-time-units-per-second
   + get-internal-real-time and get-internal-run-time
   + time
-  - gensym
-  - make-symbol
-  - loop (simple only)
+  + gensym
+  + make-symbol
   - rassoc
   - subseq
   - tree-equal
+  - loop (simple only)
 
  - test package
   - in go

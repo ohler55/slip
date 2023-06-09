@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/repl"
@@ -19,8 +20,7 @@ import (
 )
 
 var (
-	version = "unknown"
-	built   = "unknown"
+	version = ""
 
 	showVersion bool
 	cfgDir      = "~/.slip"
@@ -53,6 +53,15 @@ usage: %s [<options>] [<filepath>]...
 	if w, _, err := term.GetSize(0); err == nil {
 		slip.CurrentPackage.Set("*print-right-margin*", slip.Fixnum(w-2))
 	}
+	if showVersion {
+		if len(version) == 0 {
+			if bi, _ := debug.ReadBuildInfo(); bi != nil {
+				version = bi.Main.Version
+			}
+		}
+		fmt.Printf("slip version: %s\n", version)
+		return
+	}
 	run()
 }
 
@@ -80,9 +89,6 @@ func run() {
 		}
 		repl.Stop()
 	}()
-	if showVersion {
-		fmt.Printf("slip version %s built on %s\n", version, built)
-	}
 	if trace {
 		slip.Trace(true)
 	}
