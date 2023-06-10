@@ -46,7 +46,7 @@ if there is no match.`,
 		}, &slip.CLPkg)
 }
 
-// AssocIf represents the assocIf function.
+// AssocIf represents the assoc-if function.
 type AssocIf struct {
 	slip.Function
 }

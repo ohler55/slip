@@ -8,7 +8,9 @@
   + time
   + gensym
   + make-symbol
-  - rassoc
+  - make-string size &key initial-element element-type
+  + rassoc
+  + rassoc-if
   - subseq
   - tree-equal
   - loop (simple only)

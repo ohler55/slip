@@ -11,18 +11,18 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := AssocIfNot{Function: slip.Function{Name: "assoc-if-not", Args: args}}
+			f := RassocIf{Function: slip.Function{Name: "rassoc-if", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "assoc-if-not",
+			Name: "rassoc-if",
 			Args: []*slip.DocArg{
 				{
 					Name: "predicate",
 					Type: "symbol|lambda",
 					Text: `A function that expects one argument to apply to the car of each element
-in the _alist_. If nil is returned then the associated _cons_ is return.`,
+in the _alist_. If non-nil is returned then the rassociated _cons_ is return.`,
 				},
 				{
 					Name: "alist",
@@ -37,22 +37,22 @@ in the _alist_. If nil is returned then the associated _cons_ is return.`,
 in the _alist_ to return a key for comparison.`,
 				},
 			},
-			Return: "cons|list",
-			Text: `__assoc-if-not__ returns the first _cons_ whose _car_ does not satisfy _predicate_ or _nil_
+			Return: "cons",
+			Text: `__rassoc-if__ returns the first _cons_ whose _cdr_ satisfies _predicate_ or _nil_
 if there is no match.`,
 			Examples: []string{
-				"(assoc-if-not (lambda (k) (equal 'x k)) '((x . 1) (y. 2) (z . 3))) => (y . 2)",
+				"(rassoc-if (lambda (k) (equal 'x k)) '((1 . x) (2 . y) (3 . z))) => (1 . x)",
 			},
 		}, &slip.CLPkg)
 }
 
-// AssocIfNot represents the assoc-if-not function.
-type AssocIfNot struct {
+// RassocIf represents the rassoc-if function.
+type RassocIf struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *AssocIfNot) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
+func (f *RassocIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 4)
 	pos := 0
 	predicate := ResolveToCaller(s, args[pos], depth)
@@ -81,14 +81,14 @@ func (f *AssocIfNot) Call(s *slip.Scope, args slip.List, depth int) (found slip.
 		case nil:
 			continue
 		case slip.List:
-			k = tv.Car()
+			k = tv.Cdr()
 		default:
-			slip.PanicType("assoc list element", tv, "cons", "list")
+			slip.PanicType("rassoc list element", tv, "cons")
 		}
 		if keyFunc != nil {
 			k = keyFunc.Call(s, slip.List{k}, d2)
 		}
-		if predicate.Call(s, slip.List{k}, d2) == nil {
+		if predicate.Call(s, slip.List{k}, d2) != nil {
 			found = a
 			break
 		}
