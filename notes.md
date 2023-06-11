@@ -8,7 +8,7 @@
   + time
   + gensym
   + make-symbol
-  - make-string size &key initial-element element-type
+  + make-string
   + rassoc
   + rassoc-if
   - subseq
