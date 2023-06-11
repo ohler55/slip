@@ -12,8 +12,8 @@
   + rassoc
   + rassoc-if
   - subseq
+   - also as a placer to replace sections
   - tree-equal
-  - loop (simple only)
 
  - test package
   - in go
