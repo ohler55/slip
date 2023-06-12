@@ -11,9 +11,9 @@
   + make-string
   + rassoc
   + rassoc-if
+  + tree-equal
   - subseq
    - also as a placer to replace sections
-  - tree-equal
 
  - test package
   - in go
