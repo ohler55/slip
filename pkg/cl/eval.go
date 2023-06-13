@@ -26,8 +26,8 @@ func init() {
 			Return: "nil",
 			Text:   `__eval__ evaluates the _form_.`,
 			Examples: []string{
-				`(eval (+ 1 2)) => 3"`,
-				`(eval '(+ 1 2)) => 3"`,
+				`(eval (+ 1 2)) => 3`,
+				`(eval '(+ 1 2)) => 3`,
 			},
 		}, &slip.CLPkg)
 }

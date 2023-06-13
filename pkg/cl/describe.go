@@ -4,6 +4,7 @@ package cl
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"strings"
 
@@ -76,16 +77,80 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 
 // AppendDescribe appends a symbol description to a buffer.
 func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int, ansi bool) []byte {
+	sym, ok := obj.(slip.Symbol)
+	if !ok {
+		b, _ = describeHead(b, nil, obj, indent, right, ansi)
+		return b
+	}
+	pkg := slip.CurrentPackage
+	if strings.ContainsRune(string(sym), ':') {
+		parts := strings.SplitN(string(sym), ":", 2)
+		sym = slip.Symbol(parts[1])
+		if pkg = slip.FindPackage(parts[0]); pkg == nil {
+			panic(fmt.Sprintf("Package %s does not exist", parts[0]))
+		}
+	}
 	var pad []byte
+	if v, has := s.LocalGet(sym); has {
+		b, pad = describeHead(b, pkg, obj, indent, right, ansi)
+		b = append(b, '\n')
+		obj = v
+		b = describeSymNames(b, sym, obj, pad, ansi)
+	} else if fi := pkg.Funcs[string(sym)]; fi != nil {
+		obj = fi
+		if pkg != fi.Pkg {
+			pkg = fi.Pkg
+		}
+		b, pad = describeHead(b, pkg, sym, indent, right, ansi)
+		b = append(b, '\n')
+		b = describeSymNames(b, sym, obj, pad, ansi)
+	} else if vv, _ := pkg.Vars[strings.ToLower(string(sym))]; vv != nil && 0 < len(vv.Doc) {
+		obj = vv.Value()
+		pkg = vv.Pkg
+		b, pad = describeHead(b, pkg, sym, indent, right, ansi)
+		b = append(b, '\n')
+		b = append(b, pad...)
+		b = describeSymNames(b, sym, obj, pad, ansi)
+		b = append(b, "  Documentation:\n"...)
+		b = append(b, pad...)
+		b = slip.AppendDoc(b, vv.Doc, indent+4, right, ansi)
+		b = append(b, '\n')
+		b = append(b, pad...)
+	} else {
+		b, _ = describeHead(b, pkg, sym, indent, right, ansi)
+		b = append(b, "  unbound\n"...)
+		return b
+	}
+	indent += 2
+	if d, ok := obj.(slip.Describer); ok {
+		b = d.Describe(b, indent, right, ansi)
+	} else {
+		b = append(b, spaces[:indent]...)
+		b = append(b, "Value = "...)
+		b = slip.Append(b, obj)
+		b = append(b, '\n')
+	}
+	return b
+}
+
+func describeHead(b []byte, pkg *slip.Package, obj slip.Object, indent, right int, ansi bool) (out, pad []byte) {
 	if 0 < indent {
 		pad = bytes.Repeat([]byte{' '}, indent)
 	}
 	b = append(b, pad...)
 	if ansi {
 		b = append(b, bold...)
+		if pkg != nil {
+			b = append(b, pkg.Name...)
+			b = append(b, ':')
+		}
 		b = slip.Append(b, obj)
 		b = append(b, colorOff...)
 	} else {
+		if pkg != nil {
+			b = append(b, pkg.Name...)
+			b = append(b, ':')
+		}
 		b = slip.Append(b, obj)
 	}
 	b = append(b, "\n  "...)
@@ -97,51 +162,26 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 		b = append(b, string(obj.Hierarchy()[0])...)
 	}
 	b = append(b, "]\n"...)
-	b = append(b, pad...)
-Details:
-	switch to := obj.(type) {
-	case slip.Symbol:
-		b = append(b, '\n')
-		b = append(b, pad...)
-		if s.Has(to) {
-			obj = s.Get(to)
-		} else if fi := slip.CurrentPackage.Funcs[string(to)]; fi != nil {
-			obj = fi
-		}
-		if obj != to {
-			if ansi {
-				b = append(b, bold...)
-				b = slip.Append(b, to)
-				b = append(b, colorOff...)
-			} else {
-				b = slip.Append(b, to)
-			}
-			b = append(b, " names a "...)
-			if obj == nil {
-				b = append(b, "null"...)
-			} else {
-				b = append(b, string(obj.Hierarchy()[0])...)
-			}
-			b = append(b, ":\n"...)
-			b = append(b, pad...)
-			var vv *slip.VarVal
-			if vv, _ = slip.CurrentPackage.Vars[strings.ToLower(string(to))]; vv != nil && 0 < len(vv.Doc) {
-				b = append(b, "  Documentation:\n"...)
-				b = append(b, pad...)
-				b = slip.AppendDoc(b, vv.Doc, indent+4, right, ansi)
-				b = append(b, '\n')
-				b = append(b, pad...)
-			}
-			indent += 2
-			goto Details
-		}
-	case slip.Describer:
-		b = to.Describe(b, indent, right, ansi)
-	default:
-		b = append(b, spaces[:indent]...)
-		b = append(b, "Value = "...)
-		b = slip.Append(b, to)
-		b = append(b, '\n')
+
+	out = b
+	return
+}
+
+func describeSymNames(b []byte, sym slip.Symbol, obj slip.Object, pad []byte, ansi bool) []byte {
+	if ansi {
+		b = append(b, bold...)
+		b = slip.Append(b, sym)
+		b = append(b, colorOff...)
+	} else {
+		b = slip.Append(b, sym)
 	}
+	b = append(b, " names a "...)
+	if obj == nil {
+		b = append(b, "null"...)
+	} else {
+		b = append(b, string(obj.Hierarchy()[0])...)
+	}
+	b = append(b, ":\n"...)
+	b = append(b, pad...)
 	return b
 }

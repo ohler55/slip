@@ -32,6 +32,11 @@ var (
 				Set: setErrorOutput,
 				Doc: "is a stream used as the default for warnings and errors when not in interaction mode.",
 			},
+			"*gensym-counter*": {
+				Get: getGensymCounter,
+				Set: setGensymCounter,
+				Doc: "the gensym counter used when calling gensym.",
+			},
 			"*load-pathname*": {Val: nil, Doc: "load path set during load."},
 			"*load-print*":    {Val: nil, Doc: "default value for print during loading."},
 			"*load-truename*": {Val: nil, Doc: "load path set during load."},
@@ -45,6 +50,11 @@ var (
 				Get: getStandardOutput,
 				Set: setStandardOutput,
 				Doc: "is a stream used as the default output destination for writing.",
+			},
+			"*trace-output*": {
+				Get: getTraceOutput,
+				Set: setTraceOutput,
+				Doc: "is a stream used as the output destination for writing trace information.",
 			},
 			"*print-ansi*": {
 				Get: getPrintANSI,
@@ -158,6 +168,9 @@ and raises an error if not possible to print readably.`,
 	// StandardOutput backs *standard-output*.
 	StandardOutput Object = (*FileStream)(os.Stdout)
 
+	// TrqaceOutput backs *trace-output*.
+	TraceOutput Object = (*FileStream)(os.Stdout)
+
 	// StandardInput backs *standard-input*.
 	StandardInput Object = (*FileStream)(os.Stdin)
 
@@ -170,6 +183,8 @@ and raises an error if not possible to print readably.`,
 
 	// CurrentPackage is the current package.
 	CurrentPackage *Package
+
+	gensymCounter = Fixnum(99)
 )
 
 func init() {
@@ -215,6 +230,18 @@ func setErrorOutput(value Object) {
 	}
 }
 
+func getGensymCounter() Object {
+	return gensymCounter
+}
+
+func setGensymCounter(value Object) {
+	if counter, ok := value.(Fixnum); ok {
+		gensymCounter = counter
+	} else {
+		PanicType("*gensym-counter*", value, "fixnum")
+	}
+}
+
 func getStandardOutput() Object {
 	return StandardOutput
 }
@@ -224,6 +251,18 @@ func setStandardOutput(value Object) {
 		StandardOutput = value
 	} else {
 		PanicType("*standard-output*", value, "stream")
+	}
+}
+
+func getTraceOutput() Object {
+	return TraceOutput
+}
+
+func setTraceOutput(value Object) {
+	if _, ok := value.(io.Writer); ok {
+		TraceOutput = value
+	} else {
+		PanicType("*trace-output*", value, "stream")
 	}
 }
 

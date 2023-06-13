@@ -43,7 +43,7 @@ in the _list_ to return a key for comparison.`,
 			Return: "list",
 			Text:   `__union__ returns a list of all the unique elements of both list. Order is arbitrary.`,
 			Examples: []string{
-				`(union '(a b c b a) '(d a b) => (a c b d)`,
+				`(union '(a b c b a) '(d a b)) => (a c b d)`,
 			},
 		}, &slip.CLPkg)
 }
