@@ -46,11 +46,16 @@ func (obj *Instance) Simplify() interface{} {
 	vars := map[string]any{}
 	for name, val := range obj.Vars {
 		if name != "self" {
-			vars[name] = slip.Simplify(val)
+			if iv, ok := val.(*Instance); ok {
+				vars[name] = iv.String()
+			} else {
+				vars[name] = slip.Simplify(val)
+			}
 		}
 	}
 	simple := map[string]any{
 		"flavor": obj.Flavor.name,
+		"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(obj))), 16),
 		"vars":   vars,
 	}
 	return simple

@@ -4,28 +4,36 @@
 
  - test package
   - in go
+   - pkg.go
+   - suite.go (flavor)
+   - test.go (flavor)
   - flavor or suite and test types as receivers
     - suite
      - run
      - report
      - results (as assoc or list?)
-      - flavor then :passed, :skipped, and :failed
+      - test name then :passed, :skipped, and :failed
+     - find - find child test or suite
+     - parent
     - test
      - run
      - report
      - results (as assoc or list?)
-      - flavor then :passed, :skipped, and :failed
-      - if verbose or trace or ??? then print trace
-   - does it buy us anything? maybe not
+      - test name then :passed, :skipped, and :failed
+      - if verbose or trace or ??? then print trace or maybe just let trace be set globally?
+       - if local only then set and unset
+     - show/print/inspect - print test body
+     - parent
   - suite type
-   - set *current-suite*
+   - set *current-suite* when running
   - test type
-   - set *current-test*
+   - set *current-test* when running
   - assert-equal
   - assert-match
   - refute-equal
   - assert-nil
-  - refute-nil
+  - refute-nil or assert-true
+  - assert-panic
   - benchmark _form_ &key _iterations_ _duration_
    - evaluate for multiple times until enough time for run is good enough
 
