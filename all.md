@@ -342,7 +342,6 @@
  * [ ] MAKE-PACKAGE
  * [ ] MAKE-PATHNAME
  * [ ] MAKE-SEQUENCE
- * [x] MAKE-STRING
  * [ ] MAKE-SYNONYM-STREAM
  * [ ] MAKE-TWO-WAY-STREAM
  * [ ] MAKUNBOUND
@@ -566,7 +565,6 @@
  * [ ] STRUCTURE-OBJECT
  * [ ] STYLE-WARNING
  * [ ] SUBLIS
- * [ ] SUBSEQ
  * [ ] SUBSETP
  * [ ] SUBST
  * [ ] SUBST-IF
@@ -594,7 +592,6 @@
  * [ ] TRACE
  * [ ] TRANSLATE-LOGICAL-PATHNAME
  * [ ] TRANSLATE-PATHNAME
- * [x] TREE-EQUAL
  * [ ] TRUENAME
  * [ ] TWO-WAY-STREAM
  * [ ] TWO-WAY-STREAM-INPUT-STREAM
@@ -832,6 +829,7 @@
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
  * [x] MAKE-RANDOM-STATE
+ * [x] MAKE-STRING
  * [x] MAKE-STRING-INPUT-STREAM
  * [x] MAKE-STRING-OUTPUT-STREAM
  * [x] MAKE-SYMBOL
@@ -926,6 +924,7 @@
  * [x] STRING>
  * [x] STRING>=
  * [x] STRINGP
+ * [x] SUBSEQ
  * [x] SXHASH
  * [x] SYMBOL
  * [x] SYMBOLP
@@ -933,6 +932,7 @@
  * [x] TAN
  * [x] TERPRI
  * [x] TIME
+ * [x] TREE-EQUAL
  * [x] TRUNCATE
  * [x] TYPE
  * [x] TYPE-OF

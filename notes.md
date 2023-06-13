@@ -2,19 +2,6 @@
 
 - next
 
- - misc
-  + internal-time-units-per-second
-  + get-internal-real-time and get-internal-run-time
-  + time
-  + gensym
-  + make-symbol
-  + make-string
-  + rassoc
-  + rassoc-if
-  + tree-equal
-  - subseq
-   - also as a placer to replace sections
-
  - test package
   - in go
   - flavor or suite and test types as receivers

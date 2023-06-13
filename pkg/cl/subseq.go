@@ -50,12 +50,54 @@ type Subseq struct {
 
 // Call the function with the arguments provided.
 func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	start, end, seq := f.getArgs(args)
+	switch ta := seq.(type) {
+	case slip.List:
+		result = ta[start:end]
+	case slip.String:
+		ra := []rune(ta)
+		result = slip.String(ra[start:end])
+	case slip.Vector:
+		result = ta[start:end]
+	}
+	return
+}
+
+// Place a value in the first position of a list or cons.
+func (f *Subseq) Place(args slip.List, value slip.Object) {
+	start, end, seq := f.getArgs(args)
+	switch ta := seq.(type) {
+	case slip.List:
+		if rep, ok := value.(slip.List); ok {
+			cnt := end - start
+			for i := 0; i < cnt && i < len(rep); i++ {
+				ta[start+i] = rep[i]
+			}
+		} else {
+			slip.PanicType("newvalue", value, "list")
+		}
+	case slip.String:
+		panic(fmt.Sprintf("setf called on constant value %s", ta))
+	case slip.Vector:
+		if rep, ok := value.(slip.Vector); ok {
+			cnt := end - start
+			for i := 0; i < cnt && i < len(rep); i++ {
+				ta[start+i] = rep[i]
+			}
+		} else {
+			slip.PanicType("newvalue", value, "list")
+		}
+	}
+}
+
+func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 3)
-	start, ok := args[1].(slip.Fixnum)
-	if !ok {
+	if v, ok := args[1].(slip.Fixnum); ok && 0 <= v {
+		start = int(v)
+	} else {
 		slip.PanicType("start", args[1], "fixnum")
 	}
-	end := -1
+	end = -1
 	if 2 < len(args) {
 		switch ta := args[2].(type) {
 		case nil:
@@ -74,37 +116,29 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		if end < 0 {
 			end = len(ta)
 		}
-		if start < 0 || len(ta) < int(start) || len(ta) < end {
+		if start < 0 || len(ta) < start || len(ta) < end {
 			panic(fmt.Sprintf("indices %s and %d are out of bounds for list of length %d", start, end, len(ta)))
 		}
-		result = ta[start:end]
+		seq = ta
 	case slip.String:
 		ra := []rune(ta)
 		if end < 0 {
 			end = len(ra)
 		}
-		if start < 0 || len(ra) < int(start) || len(ra) < end {
+		if start < 0 || len(ra) < start || len(ra) < end {
 			panic(fmt.Sprintf("indices %s and %d are out of bounds for string of length %d", start, end, len(ra)))
 		}
-		result = slip.String(ra[start:end])
+		seq = ta
 	case slip.Vector:
 		if end < 0 {
 			end = len(ta)
 		}
-		if start < 0 || len(ta) < int(start) || len(ta) < end {
+		if start < 0 || len(ta) < start || len(ta) < end {
 			panic(fmt.Sprintf("indices %s and %d are out of bounds for vector of length %d", start, end, len(ta)))
 		}
-		result = ta[start:end]
+		seq = ta
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
 	return
-}
-
-// Place a value in the first position of a list or cons.
-func (f *Subseq) Place(args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
-
-	// TBD
-
 }
