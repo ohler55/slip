@@ -3,29 +3,9 @@
 - next
 
  - test package
-  - in go
-   - pkg.go
-   - suite.go (flavor)
-   - test.go (flavor)
-  - flavor or suite and test types as receivers
-    - suite
-     - run
-     - report
-     - results (as assoc or list?)
-      - test name then :passed, :skipped, and :failed
-     - find - find child test or suite
-     - parent
-    - test
-     - run
-     - report
-     - results (as assoc or list?)
-      - test name then :passed, :skipped, and :failed
-      - if verbose or trace or ??? then print trace or maybe just let trace be set globally?
-       - if local only then set and unset
-     - show/print/inspect - print test body
-     - parent
-  - suite type
-   - set *current-suite* when running
+  - defsuite
+  - deftest
+
   - test type
    - set *current-test* when running
   - assert-equal
