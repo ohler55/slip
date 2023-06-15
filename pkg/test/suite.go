@@ -3,6 +3,9 @@
 package test
 
 import (
+	"fmt"
+	"io"
+
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -42,12 +45,52 @@ func SuiteFlavor() *flavors.Flavor {
 type suiteRunCaller bool
 
 func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	// TBD run
-	// reset all
-	// call run on all children matching
-	//   let children report as needed
-	// if verbose print name at start and result summary
-
+	children, _ := s.Get("children").(slip.List)
+	for _, child := range children {
+		if ci, _ := child.(*flavors.Instance); ci != nil {
+			_ = ci.Receive(":reset", nil, depth+1)
+		}
+	}
+	self := s.Get("self").(*flavors.Instance)
+	name, _ := s.Get("name").(slip.String)
+	var indent []byte
+	for t, _ := self.Get("parent").(*flavors.Instance); t != nil; t, _ = t.Get("parent").(*flavors.Instance) {
+		indent = append(indent, ' ', ' ')
+	}
+	w, _ := s.Get("*standard-output*").(io.Writer)
+	filter, verbose, _ := getRunKeys(args)
+	if verbose {
+		fmt.Fprintf(w, "%s%s:\n", indent, name)
+	}
+	var childKey slip.Object
+	if 0 < len(filter) {
+		childKey = filter[0]
+		filter = filter[1:]
+	}
+	cargs := make(slip.List, len(args))
+	copy(cargs, args)
+	// TBD update filter
+	//  look for :filter and replace value after
+	for _, child := range children {
+		if ci, _ := child.(*flavors.Instance); ci != nil {
+			if childKey != nil {
+				cn, _ := ci.Get("name").(slip.String)
+				if !keysMatch(childKey, cn) {
+					continue
+				}
+			}
+			_ = ci.Receive(":run", cargs, depth+1)
+		}
+	}
+	if verbose {
+		// TBD call func to gather passed, failed, and skipped
+		// use in :results as well
+		// maybe have run return the values as a list
+		fmt.Fprintf(w, "%s-------------- %s:\n", indent, name)
+		fmt.Fprintf(w, "%s  passed:  %d\n", indent, 0) // TBD
+		fmt.Fprintf(w, "%s  failed:  %d\n", indent, 0) // TBD
+		fmt.Fprintf(w, "%s  skipped: %d\n", indent, 0) // TBD
+	}
 	return nil
 }
 
@@ -65,11 +108,10 @@ Runs the test suite.
 type suiteResetCaller bool
 
 func (caller suiteResetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	s.Set("result", nil)
 	children, _ := s.Get("children").(slip.List)
 	for _, child := range children {
 		if ci, _ := child.(*flavors.Instance); ci != nil {
-			ci.Receive(":reset", nil, depth+1)
+			_ = ci.Receive(":reset", nil, depth+1)
 		}
 	}
 	return nil
@@ -88,6 +130,12 @@ type suiteReportCaller bool
 func (caller suiteReportCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 
 	// TBD
+	// top:
+	//   leaf: pass
+	// -------------- top
+	//   passed:  1
+	//   failed:  0
+	//   skipped: 0
 
 	return nil
 }
@@ -122,11 +170,12 @@ is the name of the suite or test.
 type suiteFindCaller bool
 
 func (caller suiteFindCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	// TBD handle multiple args as path
 	if 0 < len(args) {
-		path, _ := args[0].(slip.List)
 		self := s.Get("self").(*flavors.Instance)
-
+		path, ok := args[0].(slip.List)
+		if !ok {
+			path = args
+		}
 		return findChild(self, path, depth)
 	}
 	return nil
@@ -146,22 +195,16 @@ func findChild(obj *flavors.Instance, path slip.List, depth int) slip.Object {
 	if len(path) == 0 {
 		return obj
 	}
-	var name string
-	switch tp := path[0].(type) {
-	case slip.String:
-		name = string(tp)
-	case slip.Symbol:
-		name = string(tp)
-	default:
-		return nil
-	}
+	name := path[0]
 	children, _ := obj.Get("children").(slip.List)
 	for _, child := range children {
 		if ci, _ := child.(*flavors.Instance); ci != nil {
-			cn, _ := ci.Receive(":name", nil, depth+1).(slip.String)
-			if name == string(cn) {
+			cn, _ := ci.Get("name").(slip.String)
+			if keysMatch(cn, name) {
 				if 1 < len(path) {
-					// TBD verify it is a suite or has method :find (need func on instance)
+					if !ci.HasMethod(":find") {
+						return nil
+					}
 					return ci.Receive(":find", slip.List{path[1:]}, depth+1)
 				}
 				return ci
@@ -169,4 +212,28 @@ func findChild(obj *flavors.Instance, path slip.List, depth int) slip.Object {
 		}
 	}
 	return nil
+}
+
+func keysMatch(k0, k1 slip.Object) bool {
+	var (
+		s0 string
+		s1 string
+	)
+	switch t0 := k0.(type) {
+	case slip.String:
+		s0 = string(t0)
+	case slip.Symbol:
+		s0 = string(t0)
+	default:
+		return false
+	}
+	switch t1 := k1.(type) {
+	case slip.String:
+		s1 = string(t1)
+	case slip.Symbol:
+		s1 = string(t1)
+	default:
+		return false
+	}
+	return s0 == s1
 }

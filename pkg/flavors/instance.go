@@ -257,3 +257,10 @@ func (obj Instance) Length() (size int) {
 	}
 	return
 }
+
+// HasMethod returns true if the instance handles the named method.
+func (obj *Instance) HasMethod(method string) bool {
+	_, has := obj.Flavor.methods[method]
+
+	return has
+}

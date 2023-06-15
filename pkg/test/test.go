@@ -29,7 +29,7 @@ func TestFlavor() *flavors.Flavor {
 		testFlavor = flavors.DefFlavor("test-flavor",
 			map[string]slip.Object{ // variables
 				"forms":  nil, // once compiled place on self.Any or maybe replace forms variable
-				"result": nil, // :passed, :failed, :skipped (same as nil)
+				"result": nil, // :pass, :fail, nil
 			},
 			[]string{"testable-flavor"}, // inherited
 			slip.List{ // options
@@ -81,8 +81,8 @@ func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 			indent = append(indent, ' ', ' ')
 		}
 		if rec := recover(); rec != nil {
-			s.Set("result", slip.Symbol(":failed"))
-			fmt.Fprintf(w, "%s%s: %sfailed%s\n%s  %s%s%s\n",
+			s.Set("result", slip.Symbol(":fail"))
+			fmt.Fprintf(w, "%s%s: %sFAIL%s\n%s  %s%s%s\n",
 				indent, string(name), bold, normal, indent, red, rec, normal)
 			if p, ok := rec.(*slip.Panic); ok && verbose {
 				for _, frame := range p.Stack {
@@ -90,7 +90,7 @@ func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 				}
 			}
 		} else if verbose || trace {
-			fmt.Fprintf(w, "%s%s: %spassed%s\n", indent, string(name), bold, normal)
+			fmt.Fprintf(w, "%s%s: %sPASS%s\n", indent, string(name), bold, normal)
 		}
 	}()
 	if forms, ok := s.Get("forms").(slip.List); ok {
@@ -99,7 +99,7 @@ func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 			_ = slip.EvalArg(s, forms, i, depth)
 		}
 	}
-	s.Set("result", slip.Symbol(":passed"))
+	s.Set("result", slip.Symbol(":pass"))
 
 	return nil
 }
@@ -156,12 +156,12 @@ func (caller testReportCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	name, _ := s.Get("name").(slip.String)
 	var result string
 	switch s.Get("result") {
-	case slip.Symbol(":passed"):
-		result = "passed"
-	case slip.Symbol(":failed"):
-		result = "failed"
+	case slip.Symbol(":pass"):
+		result = "PASS"
+	case slip.Symbol(":fail"):
+		result = "FAIL"
 	default:
-		result = "skipped"
+		result = "SKIP"
 	}
 	fmt.Fprintf(w, "%s%s: %s%s%s\n", indent, string(name), bold, result, normal)
 

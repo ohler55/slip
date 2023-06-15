@@ -94,7 +94,7 @@ func TestVanillaMethods(t *testing.T) {
 	bag := slip.ReadString("(send berry :inspect)").Eval(scope, nil)
 	tt.SameType(t, &flavors.Instance{}, bag)
 	inst := bag.(*flavors.Instance)
-	tt.Equal(t, "{flavor: strawberry vars: {size: medium}}", pretty.SEN(inst.Any))
+	tt.Equal(t, `/{flavor: strawberry id: "[0-9a-fA-F]+" vars: {size: medium}}/`, pretty.SEN(inst.Any))
 }
 
 func TestVanillaDescribeDocs(t *testing.T) {

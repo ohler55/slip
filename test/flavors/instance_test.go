@@ -3,7 +3,9 @@
 package flavors_test
 
 import (
+	"strconv"
 	"testing"
+	"unsafe"
 
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
@@ -21,7 +23,7 @@ func TestInstanceMisc(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope, nil)
 
-	tt.Equal(t, "{flavor: blueberry vars: {size: medium}}", pretty.SEN(berry))
+	tt.Equal(t, "/{flavor: blueberry id: \"[0-9a-f]+\" vars: {size: medium}}/", pretty.SEN(berry))
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 
 	(&sliptest.Object{
@@ -29,6 +31,7 @@ func TestInstanceMisc(t *testing.T) {
 		String: "/#<blueberry [0-9a-f]+>/",
 		Simple: map[string]any{
 			"flavor": "blueberry",
+			"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(berry.(*flavors.Instance)))), 16),
 			"vars":   map[string]any{"size": "medium"},
 		},
 		Hierarchy: "blueberry.instance.t",
@@ -40,13 +43,13 @@ func TestInstanceMisc(t *testing.T) {
 	}).Test(t)
 
 	out := berry.(*flavors.Instance).Describe([]byte{}, 0, 80, false)
-	tt.Equal(t, `/#<blueberry [0-9a-h]+>, an instance of flavor blueberry,
+	tt.Equal(t, `/#<blueberry [0-9a-f]+>, an instance of flavor blueberry,
   has instance variable values:
     size: "medium"
 /`, string(out))
 
 	out = berry.(*flavors.Instance).Describe([]byte{}, 0, 80, true)
-	tt.Equal(t, "/\x1b\\[1m#<blueberry [0-9a-h]+>\x1b\\[m, an instance of flavor \x1b\\[1mblueberry\x1b\\[m,\n"+
+	tt.Equal(t, "/\x1b\\[1m#<blueberry [0-9a-f]+>\x1b\\[m, an instance of flavor \x1b\\[1mblueberry\x1b\\[m,\n"+
 		"  has instance variable values:\n    size: \"medium\".*/", string(out))
 
 	b2 := slip.ReadString("(make-instance blueberry)").Eval(slip.NewScope(), nil).(*flavors.Instance)
@@ -101,4 +104,29 @@ func TestInstanceBoundCall(t *testing.T) {
 	tt.Equal(t, "3", slip.ObjectString(result))
 
 	tt.Panic(t, func() { _ = berry.BoundReceive(":set-size", slip.NewScope(), 0) })
+}
+
+func TestInstanceSimplify(t *testing.T) {
+	defer undefFlavors("blueberry")
+	code := slip.ReadString(`
+(defflavor blueberry (me) () :settable-instance-variables)
+(setq berry (make-instance 'blueberry))
+(send berry :set-me berry)
+berry
+`)
+	scope := slip.NewScope()
+	berry := code.Eval(scope, nil)
+
+	(&sliptest.Object{
+		Target: berry,
+		String: "/#<blueberry [0-9a-f]+>/",
+		Simple: map[string]any{
+			"flavor": "blueberry",
+			"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(berry.(*flavors.Instance)))), 16),
+			"vars":   map[string]any{"me": berry.String()},
+		},
+		Hierarchy: "blueberry.instance.t",
+		Eval:      berry,
+	}).Test(t)
+
 }
