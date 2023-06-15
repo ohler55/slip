@@ -6,8 +6,6 @@
   - defsuite
   - deftest
 
-  - test type
-   - set *current-test* when running
   - assert-equal
   - assert-match
   - refute-equal
