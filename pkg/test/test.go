@@ -14,6 +14,8 @@ const (
 	ansiBold   = "\x1b[1m"
 	ansiNormal = "\x1b[m"
 	ansiRed    = "\x1b[0;31m"
+	passSymbol = slip.Symbol(":pass")
+	failSymbol = slip.Symbol(":fail")
 )
 
 var testFlavor *flavors.Flavor
@@ -81,7 +83,7 @@ func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 			indent = append(indent, ' ', ' ')
 		}
 		if rec := recover(); rec != nil {
-			s.Set("result", slip.Symbol(":fail"))
+			s.Set("result", failSymbol)
 			fmt.Fprintf(w, "%s%s: %sFAIL%s\n%s  %s%s%s\n",
 				indent, string(name), bold, normal, indent, red, rec, normal)
 			if p, ok := rec.(*slip.Panic); ok && verbose {
@@ -99,7 +101,7 @@ func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 			_ = slip.EvalArg(s, forms, i, depth)
 		}
 	}
-	s.Set("result", slip.Symbol(":pass"))
+	s.Set("result", passSymbol)
 
 	return nil
 }
@@ -142,12 +144,15 @@ func (caller testReportCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 		}
 	}
 	var (
-		indent []byte
-		bold   = ""
-		normal = ""
+		indent  []byte
+		pre     = ""
+		normal  = ""
+		bold    = ""
+		boldRed = ""
 	)
 	if s.Get("*print-ansi*") != nil {
-		bold = "\x1b[1;31m" // bright red or bold-red
+		bold = ansiBold
+		boldRed = "\x1b[1;31m" // bright red or bold-red
 		normal = ansiNormal
 	}
 	for t, _ := self.Get("parent").(*flavors.Instance); t != nil; t, _ = t.Get("parent").(*flavors.Instance) {
@@ -156,14 +161,16 @@ func (caller testReportCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	name, _ := s.Get("name").(slip.String)
 	var result string
 	switch s.Get("result") {
-	case slip.Symbol(":pass"):
+	case passSymbol:
 		result = "PASS"
-	case slip.Symbol(":fail"):
+		pre = bold
+	case failSymbol:
 		result = "FAIL"
+		pre = boldRed
 	default:
 		result = "SKIP"
 	}
-	fmt.Fprintf(w, "%s%s: %s%s%s\n", indent, string(name), bold, result, normal)
+	fmt.Fprintf(w, "%s%s: %s%s%s\n", indent, string(name), pre, result, normal)
 
 	return nil
 }

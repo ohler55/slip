@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/ohler55/ojg/alt"
+	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -60,17 +63,20 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	w, _ := s.Get("*standard-output*").(io.Writer)
 	filter, verbose, _ := getRunKeys(args)
 	if verbose {
-		fmt.Fprintf(w, "%s%s:\n", indent, name)
-	}
-	var childKey slip.Object
-	if 0 < len(filter) {
-		childKey = filter[0]
-		filter = filter[1:]
+		fmt.Fprintf(w, "%s%s:\n", indent, string(name))
 	}
 	cargs := make(slip.List, len(args))
 	copy(cargs, args)
-	// TBD update filter
-	//  look for :filter and replace value after
+	var childKey slip.Object
+	if 0 < len(filter) {
+		childKey = filter[0]
+		for i, a := range cargs {
+			if slip.Symbol(":filter") == a {
+				// if args is short it would have been caught in getRunKeys
+				cargs[i+1] = filter[1:]
+			}
+		}
+	}
 	for _, child := range children {
 		if ci, _ := child.(*flavors.Instance); ci != nil {
 			if childKey != nil {
@@ -83,13 +89,11 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 		}
 	}
 	if verbose {
-		// TBD call func to gather passed, failed, and skipped
-		// use in :results as well
-		// maybe have run return the values as a list
-		fmt.Fprintf(w, "%s-------------- %s:\n", indent, name)
-		fmt.Fprintf(w, "%s  passed:  %d\n", indent, 0) // TBD
-		fmt.Fprintf(w, "%s  failed:  %d\n", indent, 0) // TBD
-		fmt.Fprintf(w, "%s  skipped: %d\n", indent, 0) // TBD
+		r := getResults(self)
+		fmt.Fprintf(w, "%s-------------- %s:\n", indent, string(name))
+		fmt.Fprintf(w, "%s  passed:  %d\n", indent, alt.Int(jp.C("pass").First(r)))
+		fmt.Fprintf(w, "%s  failed:  %d\n", indent, alt.Int(jp.C("fail").First(r)))
+		fmt.Fprintf(w, "%s  skipped: %d\n", indent, alt.Int(jp.C("skip").First(r)))
 	}
 	return nil
 }
@@ -128,14 +132,31 @@ Resets the suite.
 type suiteReportCaller bool
 
 func (caller suiteReportCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-
-	// TBD
-	// top:
-	//   leaf: pass
-	// -------------- top
-	//   passed:  1
-	//   failed:  0
-	//   skipped: 0
+	children, _ := s.Get("children").(slip.List)
+	self := s.Get("self").(*flavors.Instance)
+	name, _ := s.Get("name").(slip.String)
+	var indent []byte
+	for t, _ := self.Get("parent").(*flavors.Instance); t != nil; t, _ = t.Get("parent").(*flavors.Instance) {
+		indent = append(indent, ' ', ' ')
+	}
+	w, _ := s.Get("*standard-output*").(io.Writer)
+	if 0 < len(args) {
+		var ok bool
+		if w, ok = args[0].(io.Writer); !ok {
+			panic(fmt.Sprintf("stream argument to :report must be an output-stream, not %s", args[0]))
+		}
+	}
+	fmt.Fprintf(w, "%s%s:\n", indent, string(name))
+	for _, child := range children {
+		if ci, _ := child.(*flavors.Instance); ci != nil {
+			_ = ci.Receive(":report", args, depth+1)
+		}
+	}
+	r := getResults(self)
+	fmt.Fprintf(w, "%s-------------- %s:\n", indent, string(name))
+	fmt.Fprintf(w, "%s  passed:  %d\n", indent, alt.Int(jp.C("pass").First(r)))
+	fmt.Fprintf(w, "%s  failed:  %d\n", indent, alt.Int(jp.C("fail").First(r)))
+	fmt.Fprintf(w, "%s  skipped: %d\n", indent, alt.Int(jp.C("skip").First(r)))
 
 	return nil
 }
@@ -152,10 +173,11 @@ Reports prints the suite result.
 type suiteResultCaller bool
 
 func (caller suiteResultCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	r := bag.Flavor().MakeInstance()
+	r.Any = getResults(self)
 
-	// TBD
-
-	return nil
+	return r
 }
 
 func (caller suiteResultCaller) Docs() string {
@@ -189,6 +211,56 @@ a child of the parent suite.
 
 Finds prints the suite result.
 `
+}
+
+// Return a tree of results.
+// {top: {pass: 0 fail: 0 skip: 0 subs: {leaf: pass}}}
+func getResults(obj *flavors.Instance) (result any) {
+	switch {
+	case obj.Flavor == testFlavor:
+		switch obj.Get("result") {
+		case passSymbol:
+			result = "pass"
+		case failSymbol:
+			result = "fail"
+		}
+	case obj.Flavor == suiteFlavor:
+		var (
+			pass int64
+			fail int64
+			skip int64
+		)
+		subs := map[string]any{}
+		children, _ := obj.Get("children").(slip.List)
+		for _, child := range children {
+			if ci, _ := child.(*flavors.Instance); ci != nil {
+				cn, _ := ci.Get("name").(slip.String)
+				r := getResults(ci)
+				subs[string(cn)] = r
+				switch tr := r.(type) {
+				case nil:
+					skip++
+				case string:
+					if tr == "pass" {
+						pass++
+					} else if tr == "fail" {
+						fail++
+					}
+				case map[string]any:
+					pass += alt.Int(jp.C("pass").First(tr))
+					fail += alt.Int(jp.C("fail").First(tr))
+					skip += alt.Int(jp.C("skip").First(tr))
+				}
+			}
+		}
+		result = map[string]any{
+			"pass": pass,
+			"fail": fail,
+			"skip": skip,
+			"subs": subs,
+		}
+	}
+	return
 }
 
 func findChild(obj *flavors.Instance, path slip.List, depth int) slip.Object {
