@@ -91,7 +91,7 @@ func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 }
 
 // Receive a method invocation from the send function. Not intended to be
-// call by any code other than the send function but is public to allow it
+// called by any code other than the send function but is public to allow it
 // to be over-ridden.
 func (obj *Instance) Receive(message string, args slip.List, depth int) slip.Object {
 	ma := obj.Flavor.methods[message]
