@@ -3,6 +3,7 @@
 package test
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 
@@ -11,14 +12,12 @@ import (
 )
 
 func TestTraceOk(t *testing.T) {
-	var out strings.Builder
-	orig := slip.StandardOutput
-	defer func() { slip.StandardOutput = orig }()
-
-	slip.StandardOutput = &slip.OutputStream{Writer: &out}
+	var out bytes.Buffer
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("*trace-output*"), &slip.OutputStream{Writer: &out})
 
 	slip.Trace(true)
-	_ = slip.ReadString("(car (car (car '(((a))))))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(car (car (car '(((a))))))").Eval(scope, nil)
 	slip.Trace(false)
 
 	tt.Equal(t, `0: (car (car (car '(((a))))))
@@ -33,16 +32,14 @@ func TestTraceOk(t *testing.T) {
 }
 
 func TestTracePanicANSI(t *testing.T) {
-	var out strings.Builder
-	orig := slip.StandardOutput
-	defer func() { slip.StandardOutput = orig }()
-
-	slip.StandardOutput = &slip.OutputStream{Writer: &out}
+	var out bytes.Buffer
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("*trace-output*"), &slip.OutputStream{Writer: &out})
 
 	slip.CurrentPackage.Set("*repl-warning-ansi*", slip.String("\x1b[31m"))
 
 	slip.Trace(true)
-	tt.Panic(t, func() { _ = slip.ReadString("(car (car (car 7)))").Eval(slip.NewScope(), nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(car (car (car 7)))").Eval(scope, nil) })
 	slip.Trace(false)
 
 	tt.Equal(t, "0: (car (car (car 7)))\n"+
@@ -55,14 +52,12 @@ func TestTracePanicANSI(t *testing.T) {
 }
 
 func TestTracePanicNotANSI(t *testing.T) {
-	var out strings.Builder
-	orig := slip.StandardOutput
-	defer func() { slip.StandardOutput = orig }()
-
-	slip.StandardOutput = &slip.OutputStream{Writer: &out}
-	slip.CurrentPackage.Set("*print-ansi*", nil)
+	var out bytes.Buffer
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("*trace-output*"), &slip.OutputStream{Writer: &out})
+	scope.Let("*print-ansi*", nil)
 	slip.Trace(true)
-	tt.Panic(t, func() { _ = slip.ReadString("(car (car (car 7)))").Eval(slip.NewScope(), nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(car (car (car 7)))").Eval(scope, nil) })
 	slip.Trace(false)
 
 	tt.Equal(t, "0: (car (car (car 7)))\n"+
@@ -75,12 +70,10 @@ func TestTracePanicNotANSI(t *testing.T) {
 }
 
 func TestTracePanicDeep(t *testing.T) {
-	var out strings.Builder
-	orig := slip.StandardOutput
-	defer func() { slip.StandardOutput = orig }()
-
-	slip.StandardOutput = &slip.OutputStream{Writer: &out}
-	slip.CurrentPackage.Set("*print-ansi*", nil)
+	var out bytes.Buffer
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("*trace-output*"), &slip.OutputStream{Writer: &out})
+	scope.Let("*print-ansi*", nil)
 	slip.Trace(true)
 	var deep []byte
 	cnt := 42
@@ -90,7 +83,7 @@ func TestTracePanicDeep(t *testing.T) {
 	for i := cnt; 0 <= i; i-- {
 		deep = append(deep, ')')
 	}
-	tt.Panic(t, func() { _ = slip.Read(deep).Eval(slip.NewScope(), nil) })
+	tt.Panic(t, func() { _ = slip.Read(deep).Eval(scope, nil) })
 	slip.Trace(false)
 	// Indent is capped at 80 spaces.
 	tt.Equal(t, false, strings.Contains(out.String(), strings.Repeat(" ", 81)))
@@ -109,14 +102,12 @@ func TestTracePanicString(t *testing.T) {
 			Return: "nil",
 		}, &slip.CLPkg)
 
-	var out strings.Builder
-	orig := slip.StandardOutput
-	defer func() { slip.StandardOutput = orig }()
-
-	slip.StandardOutput = &slip.OutputStream{Writer: &out}
-	slip.CurrentPackage.Set("*print-ansi*", nil)
+	var out bytes.Buffer
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("*trace-output*"), &slip.OutputStream{Writer: &out})
+	scope.Let("*print-ansi*", nil)
 	slip.Trace(true)
-	tt.Panic(t, func() { _ = slip.ReadString("(panic-test)").Eval(slip.NewScope(), nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(panic-test)").Eval(scope, nil) })
 	slip.Trace(false)
 
 	tt.Equal(t, `0: (panic-test)

@@ -60,5 +60,5 @@ func (f *Send) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if method, ok = args[1].(slip.Symbol); !ok {
 		slip.PanicType("method of send", args[1], "keyword")
 	}
-	return receiver.Receive(string(method), args[2:], depth)
+	return receiver.Receive(s, string(method), args[2:], depth)
 }

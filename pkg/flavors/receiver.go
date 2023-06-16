@@ -12,5 +12,5 @@ type Receiver interface {
 	// Receive a method invocation from the send function. Not intended to be
 	// called by any code other than the send function but is public to allow
 	// it to be over-ridden.
-	Receive(message string, args slip.List, depth int) slip.Object
+	Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object
 }

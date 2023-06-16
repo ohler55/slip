@@ -19,7 +19,7 @@ func TestWithOpenFileBasic(t *testing.T) {
 	tf.Test(t)
 	inst, ok := tf.Result.(*flavors.Instance)
 	tt.Equal(t, true, ok)
-	result := inst.Receive(":write", nil, 0)
+	result := inst.Receive(tf.Scope, ":write", nil, 0)
 	tt.Equal(t, `"{a: 1 b: 2}"`, slip.ObjectString(result))
 }
 

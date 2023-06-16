@@ -159,7 +159,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		if _, has := obj.Flavor.methods[string(sym)]; has {
-			return obj.Receive(string(sym), args[1:], depth+1)
+			return obj.Receive(s, string(sym), args[1:], depth+1)
 		}
 	}
 	return nil

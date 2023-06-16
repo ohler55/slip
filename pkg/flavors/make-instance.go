@@ -50,7 +50,7 @@ type MakeInstance struct {
 func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	inst, plist := allocateInstance(f, s, args, "make-instance")
 
-	_ = inst.Receive(":init", slip.List{plist}, depth+1)
+	_ = inst.Receive(s, ":init", slip.List{plist}, depth+1)
 
 	return inst
 }

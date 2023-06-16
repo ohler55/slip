@@ -2,12 +2,12 @@
 
 - next
 
- - change Receiver.Receive to take a scope
-
  - test package
+  + test-flavor
+  - suite-flavor
+
   - defsuite
   - deftest
-
   - assert-equal
   - assert-match
   - refute-equal

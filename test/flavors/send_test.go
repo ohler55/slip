@@ -52,7 +52,7 @@ func TestSendDefHand(t *testing.T) {
 	hand := slip.ReadString("hand").Eval(scope, nil).(*flavors.Instance)
 	bindings := slip.NewScope()
 	bindings.Let(slip.Symbol("x"), slip.Fixnum(7))
-	result = hand.BoundReceive(":nothing", bindings, 0)
+	result = hand.BoundReceive(scope, ":nothing", bindings, 0)
 	tt.Equal(t, "((x . 7))", slip.ObjectString(result))
 }
 
@@ -95,7 +95,7 @@ func TestSendNoMethod(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'missy)").Eval(scope, nil)
 
 	miss := scope.Get(slip.Symbol("miss")).(*flavors.Instance)
-	tt.Panic(t, func() { _ = miss.BoundReceive(":nothing", nil, 0) })
+	tt.Panic(t, func() { _ = miss.BoundReceive(scope, ":nothing", nil, 0) })
 }
 
 func TestSendNotInstance(t *testing.T) {

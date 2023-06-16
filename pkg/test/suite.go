@@ -51,7 +51,7 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	children, _ := s.Get("children").(slip.List)
 	for _, child := range children {
 		if ci, _ := child.(*flavors.Instance); ci != nil {
-			_ = ci.Receive(":reset", nil, depth+1)
+			_ = ci.Receive(s, ":reset", nil, depth+1)
 		}
 	}
 	self := s.Get("self").(*flavors.Instance)
@@ -85,7 +85,7 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 					continue
 				}
 			}
-			_ = ci.Receive(":run", cargs, depth+1)
+			_ = ci.Receive(s, ":run", cargs, depth+1)
 		}
 	}
 	if verbose {
@@ -115,7 +115,7 @@ func (caller suiteResetCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	children, _ := s.Get("children").(slip.List)
 	for _, child := range children {
 		if ci, _ := child.(*flavors.Instance); ci != nil {
-			_ = ci.Receive(":reset", nil, depth+1)
+			_ = ci.Receive(s, ":reset", nil, depth+1)
 		}
 	}
 	return nil
@@ -149,7 +149,7 @@ func (caller suiteReportCaller) Call(s *slip.Scope, args slip.List, depth int) s
 	fmt.Fprintf(w, "%s%s:\n", indent, string(name))
 	for _, child := range children {
 		if ci, _ := child.(*flavors.Instance); ci != nil {
-			_ = ci.Receive(":report", args, depth+1)
+			_ = ci.Receive(s, ":report", args, depth+1)
 		}
 	}
 	r := getResults(self)
@@ -277,7 +277,7 @@ func findChild(obj *flavors.Instance, path slip.List, depth int) slip.Object {
 					if !ci.HasMethod(":find") {
 						return nil
 					}
-					return ci.Receive(":find", slip.List{path[1:]}, depth+1)
+					return ci.Receive(nil, ":find", slip.List{path[1:]}, depth+1)
 				}
 				return ci
 			}

@@ -35,6 +35,7 @@ func (s *Scope) NewScope() *Scope {
 		Block:   s.Block,
 		TagBody: s.TagBody,
 		Macro:   s.Macro,
+		Keep:    s.Keep,
 	}
 }
 

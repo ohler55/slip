@@ -107,7 +107,7 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 				break
 			}
 			wargs[0] = slip.String(message)
-			obj.Receive(":write", wargs, 0)
+			obj.Receive(s, ":write", wargs, 0)
 		}
 		queue.done <- true
 	}()

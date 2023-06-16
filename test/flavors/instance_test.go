@@ -89,21 +89,21 @@ func TestInstanceBoundCall(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope, nil).(*flavors.Instance)
 
-	result := berry.BoundReceive(":length", nil, 0)
+	result := berry.BoundReceive(scope, ":length", nil, 0)
 	tt.Equal(t, "5", slip.ObjectString(result))
 
 	bindings := slip.NewScope()
 	bindings.Let(slip.Symbol("x"), slip.Fixnum(3))
-	result = berry.BoundReceive(":double", bindings, 0)
+	result = berry.BoundReceive(scope, ":double", bindings, 0)
 	tt.Equal(t, "6", slip.ObjectString(result))
 
-	result = berry.BoundReceive(":size", nil, 0)
+	result = berry.BoundReceive(scope, ":size", nil, 0)
 	tt.Equal(t, `"medium"`, slip.ObjectString(result))
 
-	result = berry.BoundReceive(":set-size", bindings, 0)
+	result = berry.BoundReceive(scope, ":set-size", bindings, 0)
 	tt.Equal(t, "3", slip.ObjectString(result))
 
-	tt.Panic(t, func() { _ = berry.BoundReceive(":set-size", slip.NewScope(), 0) })
+	tt.Panic(t, func() { _ = berry.BoundReceive(scope, ":set-size", slip.NewScope(), 0) })
 }
 
 func TestInstanceSimplify(t *testing.T) {

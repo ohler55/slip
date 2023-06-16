@@ -52,10 +52,10 @@ func TestLoggerTimeLevelColor(t *testing.T) {
 func TestLoggerJSON(t *testing.T) {
 	var log bytes.Buffer
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &log})
+	scope.Let(slip.Symbol("log-out"), &slip.OutputStream{Writer: &log})
 	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor :json t))").Eval(scope, nil)
 	_ = slip.ReadString("(send logger :set-level 5)").Eval(scope, nil)
-	_ = slip.ReadString("(send logger :set-out out)").Eval(scope, nil)
+	_ = slip.ReadString("(send logger :set-out log-out)").Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope: scope,

@@ -89,7 +89,7 @@ blueberry whopper rot done
 `, b.String())
 
 	b.Reset()
-	_ = blue.BoundReceive(":rot", nil, 0)
+	_ = blue.BoundReceive(nil, ":rot", nil, 0)
 	tt.Equal(t, `blueberry whopper rot start
 blueberry before rot
 berry rot
