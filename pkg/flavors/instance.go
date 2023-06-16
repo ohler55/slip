@@ -94,8 +94,6 @@ func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 // called by any code other than the send function but is public to allow it
 // to be over-ridden.
 func (obj *Instance) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
-	fmt.Printf("*** receive %s - %v  %v\n", message, obj, s)
-
 	ma := obj.Flavor.methods[message]
 	if len(ma) == 0 {
 		xargs := make(slip.List, 0, len(args)+1)
@@ -124,7 +122,6 @@ func (obj *Instance) innerReceive(s *slip.Scope, ma []*method, args slip.List, d
 	if s != nil {
 		scope.AddParent(s)
 	}
-	fmt.Printf("*** inner %v\n", s)
 	for _, m := range ma {
 		if m.before != nil {
 			m.before.Call(scope, args, depth)

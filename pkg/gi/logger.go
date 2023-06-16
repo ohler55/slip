@@ -97,7 +97,7 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 			}
 		}
 	}
-	s.Let("out", out)
+	obj.Let("out", out)
 	obj.Any = &queue
 	go func() {
 		wargs := slip.List{nil}
@@ -230,11 +230,12 @@ func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Objec
 	if len(args) != 1 {
 		panic(fmt.Sprintf("Method logger-flavor :set-out method expects one arguments but received %d.", len(args)))
 	}
+	self := s.Get(slip.Symbol("self")).(*flavors.Instance)
 	switch args[0].(type) {
 	case nil:
-		s.Let("out", slip.StandardOutput)
+		self.Let("out", slip.StandardOutput)
 	case io.Writer:
-		s.Let("out", args[0])
+		self.Let("out", args[0])
 	default:
 		slip.PanicType(":out", args[0], "output-stream")
 	}
