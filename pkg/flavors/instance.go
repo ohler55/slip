@@ -239,7 +239,7 @@ func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
 }
 
 // Length returns the length of the object.
-func (obj Instance) Length() (size int) {
+func (obj *Instance) Length() (size int) {
 	if 0 < len(obj.Flavor.methods[":length"]) {
 		v := obj.Receive(":length", slip.List{}, 0)
 		if num, ok := v.(slip.Fixnum); ok {

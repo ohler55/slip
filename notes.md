@@ -1,10 +1,8 @@
 # SLIP Notes
 
 - next
- - Scope
-  - change parent to parents
-   - Scope.AddParent(*Scope)
-  - change Receiver.Receive to take a scope
+
+ - change Receiver.Receive to take a scope
 
  - test package
   - defsuite

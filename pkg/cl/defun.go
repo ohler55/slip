@@ -93,7 +93,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		Pkg:    slip.CurrentPackage,
 		Kind:   slip.FunctionSymbol,
 	}
-	if s.Parent() != nil {
+	if 0 < len(s.Parents()) {
 		lc.Closure = s
 	}
 	return name
