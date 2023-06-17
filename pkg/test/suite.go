@@ -74,6 +74,7 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 			if slip.Symbol(":filter") == a {
 				// if args is short it would have been caught in getRunKeys
 				cargs[i+1] = filter[1:]
+				break
 			}
 		}
 	}
@@ -81,7 +82,7 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 		if ci, _ := child.(*flavors.Instance); ci != nil {
 			if childKey != nil {
 				cn, _ := ci.Get("name").(slip.String)
-				if !keysMatch(childKey, cn) {
+				if !keyMatchName(string(cn), childKey) {
 					continue
 				}
 			}
@@ -272,7 +273,7 @@ func findChild(obj *flavors.Instance, path slip.List, depth int) slip.Object {
 	for _, child := range children {
 		if ci, _ := child.(*flavors.Instance); ci != nil {
 			cn, _ := ci.Get("name").(slip.String)
-			if keysMatch(cn, name) {
+			if keyMatchName(string(cn), name) {
 				if 1 < len(path) {
 					var found slip.Object
 					if ci.HasMethod(":find") {
@@ -287,26 +288,15 @@ func findChild(obj *flavors.Instance, path slip.List, depth int) slip.Object {
 	return nil
 }
 
-func keysMatch(k0, k1 slip.Object) bool {
-	var (
-		s0 string
-		s1 string
-	)
-	switch t0 := k0.(type) {
+func keyMatchName(name string, k slip.Object) bool {
+	var sk string
+	switch tk := k.(type) {
 	case slip.String:
-		s0 = string(t0)
+		sk = string(tk)
 	case slip.Symbol:
-		s0 = string(t0)
+		sk = string(tk)
 	default:
 		return false
 	}
-	switch t1 := k1.(type) {
-	case slip.String:
-		s1 = string(t1)
-	case slip.Symbol:
-		s1 = string(t1)
-	default:
-		return false
-	}
-	return s0 == s1
+	return name == sk
 }

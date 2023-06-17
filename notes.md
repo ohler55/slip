@@ -4,16 +4,18 @@
 
  - test package
   + test-flavor
-  - suite-flavor
+  + suite-flavor
 
-  - defsuite
-  - deftest
+  - setup and teardownm for suite
+
   - assert-equal
   - assert-match
   - refute-equal
   - assert-nil
-  - refute-nil or assert-true
+  - refute-nil
   - assert-panic
+  - defsuite
+  - deftest
   - benchmark _form_ &key _iterations_ _duration_
    - evaluate for multiple times until enough time for run is good enough
 
