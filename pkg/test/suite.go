@@ -274,10 +274,11 @@ func findChild(obj *flavors.Instance, path slip.List, depth int) slip.Object {
 			cn, _ := ci.Get("name").(slip.String)
 			if keysMatch(cn, name) {
 				if 1 < len(path) {
-					if !ci.HasMethod(":find") {
-						return nil
+					var found slip.Object
+					if ci.HasMethod(":find") {
+						found = ci.Receive(nil, ":find", slip.List{path[1:]}, depth+1)
 					}
-					return ci.Receive(nil, ":find", slip.List{path[1:]}, depth+1)
+					return found
 				}
 				return ci
 			}
