@@ -5,6 +5,7 @@ package test
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -84,8 +85,11 @@ func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 		}
 		if rec := recover(); rec != nil {
 			s.Set("result", failSymbol)
+			msg := fmt.Sprintf("%s", rec)
+			i2 := append([]byte{'\n', ' ', ' '}, indent...)
+			msg = strings.TrimRight(strings.ReplaceAll(msg, "\n", string(i2)), " ")
 			fmt.Fprintf(w, "%s%s: %sFAIL%s\n%s  %s%s%s\n",
-				indent, string(name), bold, normal, indent, red, rec, normal)
+				indent, string(name), bold, normal, indent, red, msg, normal)
 			if p, ok := rec.(*slip.Panic); ok && verbose {
 				for _, frame := range p.Stack {
 					fmt.Fprintf(w, "%s  %s%s%s\n", indent, red, frame, normal)
