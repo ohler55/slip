@@ -6,8 +6,6 @@
   + test-flavor
   + suite-flavor
 
-  - setup and teardownm for suite
-
   - assert-equal
   - assert-match
   - refute-equal

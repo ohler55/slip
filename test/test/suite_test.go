@@ -165,3 +165,16 @@ func buildSuiteScope() *slip.Scope {
 `).Eval(scope, nil)
 	return scope
 }
+
+func TestSuiteRunSetup(t *testing.T) {
+	scope := buildSuiteScope()
+	var out bytes.Buffer
+	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
+	scope.Let("*print-ansi*", nil)
+	_ = slip.ReadString(`(send sweet :set-setup (lambda () (setq suite-setup t)))`).Eval(scope, nil)
+	_ = slip.ReadString(`(send sweet :set-teardown (lambda () (setq suite-teardown t)))`).Eval(scope, nil)
+	_ = slip.ReadString(`(send top :run)`).Eval(scope, nil)
+
+	tt.NotNil(t, scope.Get("suite-setup"))
+	tt.NotNil(t, scope.Get("suite-teardown"))
+}

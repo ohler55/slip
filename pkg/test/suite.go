@@ -10,6 +10,7 @@ import (
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/bag"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -26,6 +27,8 @@ func SuiteFlavor() *flavors.Flavor {
 		suiteFlavor = flavors.DefFlavor("suite-flavor",
 			map[string]slip.Object{ // variables
 				"children": nil,
+				"setup":    nil, // function to call before running tests
+				"teardown": nil, // function to call after running tests
 			},
 			[]string{"testable-flavor"}, // inherited
 			slip.List{ // options
@@ -33,7 +36,19 @@ func SuiteFlavor() *flavors.Flavor {
 					slip.Symbol(":documentation"),
 					slip.String(`A suite is a container for child suites and tests.`),
 				},
+				slip.List{
+					slip.Symbol(":inittable-instance-variables"),
+					slip.Symbol("setup"),
+					slip.Symbol("teardown"),
+					slip.Symbol("name"),
+					slip.Symbol("parent"),
+				},
 				slip.Symbol(":gettable-instance-variables"),
+				slip.List{
+					slip.Symbol(":settable-instance-variables"),
+					slip.Symbol("setup"),
+					slip.Symbol("teardown"),
+				},
 			},
 		)
 		suiteFlavor.DefMethod(":run", "", suiteRunCaller(true))
@@ -53,6 +68,16 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 		if ci, _ := child.(*flavors.Instance); ci != nil {
 			_ = ci.Receive(s, ":reset", nil, depth+1)
 		}
+	}
+	if setup := s.Get("setup"); setup != nil {
+		caller := cl.ResolveToCaller(s, setup, depth+1)
+		_ = caller.Call(s, nil, depth+1)
+	}
+	if teardown := s.Get("teardown"); teardown != nil {
+		defer func() {
+			caller := cl.ResolveToCaller(s, teardown, depth+1)
+			_ = caller.Call(s, nil, depth+1)
+		}()
 	}
 	self := s.Get("self").(*flavors.Instance)
 	name, _ := s.Get("name").(slip.String)
