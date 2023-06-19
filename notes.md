@@ -7,8 +7,8 @@
   + suite-flavor
 
   + assert-equal
+  + refute-equal
   - assert-match
-  - refute-equal
   - assert-nil
   - refute-nil
   - assert-panic
