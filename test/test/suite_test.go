@@ -43,7 +43,9 @@ func TestSuiteDocs(t *testing.T) {
 
 func TestSuiteRunBasic(t *testing.T) {
 	scope := buildSuiteScope()
+	var stdout bytes.Buffer
 	var out bytes.Buffer
+	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &stdout})
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
 	_ = slip.ReadString(`(send sweet :run)`).Eval(scope, nil)
@@ -69,6 +71,10 @@ func TestSuiteRunBasic(t *testing.T) {
   failed:  1
   skipped: 0
 `, out.String())
+
+	tt.Equal(t, `    boom: FAIL
+      runtime error: integer divide by zero
+`, stdout.String())
 }
 
 func TestSuiteRunVerbose(t *testing.T) {

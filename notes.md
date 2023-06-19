@@ -6,7 +6,7 @@
   + test-flavor
   + suite-flavor
 
-  - assert-equal
+  + assert-equal
   - assert-match
   - refute-equal
   - assert-nil

@@ -65,8 +65,9 @@ func (f *AssertEqual) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if expect, ok := args[0].(slip.String); ok && ansi {
 		var actual slip.String
 		if actual, ok = args[1].(slip.String); ok {
+			b = append(b, '"')
 			b = append(b, expect...)
-			b = append(b, "\nactual: "...)
+			b = append(b, "\"\nactual: \""...)
 			re := []rune(expect)
 			ra := []rune(actual)
 			for i, r := range re {
@@ -75,6 +76,7 @@ func (f *AssertEqual) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 				}
 				b = utf8.AppendRune(b, ra[i])
 			}
+			b = append(b, '"')
 		}
 	} else {
 		b = slip.ObjectAppend(b, args[0])
