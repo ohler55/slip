@@ -8,10 +8,10 @@
 
   + assert-equal
   + refute-equal
-  - assert-match
-  - assert-nil
-  - refute-nil
-  - assert-panic
+  + assert-match
+  + assert-nil
+  + refute-nil
+  + assert-panic
   - defsuite name parent &key setup teardown
   - deftest name parent &rest forms
   - benchmark _form_ &key _iterations_ _duration_
