@@ -323,3 +323,23 @@ func EvalArg(s *Scope, args List, index, depth int) (v Object) {
 	}
 	return
 }
+
+// GetArgsKeyValue returns the value for a key in args. Args must be the
+// arguments after any required or optional arguments.
+func GetArgsKeyValue(args List, key Symbol) (value Object, has bool) {
+	for pos := 0; pos < len(args); pos += 2 {
+		sym, ok := args[pos].(Symbol)
+		if !ok {
+			PanicType("keyword", args[pos], "keyword")
+		}
+		if len(args)-1 <= pos {
+			panic(fmt.Sprintf("%s missing an argument", sym))
+		}
+		if strings.EqualFold(string(key), string(sym)) {
+			value = args[pos+1]
+			has = true
+			break
+		}
+	}
+	return
+}
