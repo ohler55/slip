@@ -3,10 +3,20 @@
 - next
 
  - conversions
-  - to fixnum
-  - to string
-  - to float
-  - others?
+  - rational (big.Rat SetFloat()
+  - rationalize (same as rational)
+  - coerce
+  - identity
+  - parse-float (in gi package?, no cl anyway)
+   - parse-float string &key start end default-format => float
+   - parse-float string &key type start end
+   - parse-float (string &key start end radix junk-allowed decimal-character exponent-character type)
+   - http://www.lispworks.com/documentation/lw51/LWRM/html/lwref-228.htm
+  - read-from-string
+  - write-to-string
+  - prin1-to-string
+  - princ-to-string
+
 
  - http package
   - flavors
