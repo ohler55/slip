@@ -10,7 +10,7 @@ import (
 
 // Scope encapsulates the scope for a function.
 type Scope struct {
-	parent  *Scope
+	parents []*Scope
 	Name    Object // can be nil so type can't be Symbol
 	Vars    map[string]Object
 	moo     sync.Mutex
@@ -30,17 +30,23 @@ func NewScope() *Scope {
 // NewScope create a new Scope with a parent of the current Scope.
 func (s *Scope) NewScope() *Scope {
 	return &Scope{
-		parent:  s,
+		parents: []*Scope{s},
 		Vars:    map[string]Object{},
 		Block:   s.Block,
 		TagBody: s.TagBody,
 		Macro:   s.Macro,
+		Keep:    s.Keep,
 	}
 }
 
-// Parent returns the parent scope or nil.
-func (s *Scope) Parent() *Scope {
-	return s.parent
+// Parents returns the parent scope or nil.
+func (s *Scope) Parents() []*Scope {
+	return s.parents
+}
+
+// AddParent adds a parent to the scope.
+func (s *Scope) AddParent(p *Scope) {
+	s.parents = append(s.parents, p)
 }
 
 // Let a symbol be bound to the value in this Scope.
@@ -90,8 +96,10 @@ func (s *Scope) get(name string) Object {
 		}
 	}
 	s.moo.Unlock()
-	if s.parent != nil {
-		return s.parent.get(name)
+	for _, p := range s.parents {
+		if value, has := p.localGet(name); has {
+			return value
+		}
 	}
 	if value, has := CurrentPackage.Get(name); has && Unbound != value {
 		return value
@@ -113,8 +121,10 @@ func (s *Scope) localGet(name string) (Object, bool) {
 		}
 	}
 	s.moo.Unlock()
-	if s.parent != nil {
-		return s.parent.localGet(name)
+	for _, p := range s.parents {
+		if value, has := p.localGet(name); has {
+			return value, true
+		}
 	}
 	return nil, false
 }
@@ -127,10 +137,10 @@ func (s *Scope) Set(sym Symbol, value Object) {
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
 	}
-	s.set(strings.ToLower(string(sym)), value)
+	_ = s.set(strings.ToLower(string(sym)), value)
 }
 
-func (s *Scope) set(name string, value Object) {
+func (s *Scope) set(name string, value Object) bool {
 	if _, has := constantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
@@ -139,15 +149,17 @@ func (s *Scope) set(name string, value Object) {
 		if _, has := s.Vars[name]; has {
 			s.Vars[name] = value
 			s.moo.Unlock()
-			return
+			return true
 		}
 	}
 	s.moo.Unlock()
-	if s.parent != nil {
-		s.parent.set(name, value)
-		return
+	for _, p := range s.parents {
+		if has := p.set(name, value); has {
+			return true
+		}
 	}
 	CurrentPackage.Set(name, value)
+	return true
 }
 
 // Has returns true if the variable is exists.
@@ -167,8 +179,10 @@ func (s *Scope) has(name string) bool {
 		}
 	}
 	s.moo.Unlock()
-	if s.parent != nil {
-		return s.parent.has(name)
+	for _, p := range s.parents {
+		if p.has(name) {
+			return true
+		}
 	}
 	return CurrentPackage.Has(name)
 }
@@ -190,8 +204,10 @@ func (s *Scope) bound(name string) bool {
 		}
 	}
 	s.moo.Unlock()
-	if s.parent != nil {
-		return s.parent.bound(name)
+	for _, p := range s.parents {
+		if p.bound(name) {
+			return true
+		}
 	}
 	if v, has := CurrentPackage.Get(name); has && Unbound != v {
 		return true
@@ -214,8 +230,8 @@ func (s *Scope) remove(name string) {
 		}
 	}
 	s.moo.Unlock()
-	if s.parent != nil {
-		s.parent.remove(name)
+	for _, p := range s.parents {
+		p.remove(name)
 	}
 }
 

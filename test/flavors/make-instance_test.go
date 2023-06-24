@@ -19,7 +19,7 @@ func TestMakeInstanceSimple(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope, nil)
 
-	tt.Equal(t, "{flavor: blueberry vars: {size: small}}", pretty.SEN(berry))
+	tt.Equal(t, "/{flavor: blueberry id: \"[0-9a-f]+\" vars: {size: small}}/", pretty.SEN(berry))
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
@@ -32,7 +32,7 @@ func TestMakeInstanceKeywords(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope, nil)
 
-	tt.Equal(t, "{flavor: blueberry vars: {}}", pretty.SEN(berry))
+	tt.Equal(t, "/{flavor: blueberry id: \"[0-9a-f]+\" vars: {}}/", pretty.SEN(berry))
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 

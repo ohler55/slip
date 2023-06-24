@@ -156,6 +156,7 @@ func (ed *editor) reset() {
 	ed.lines = ed.lines[:0]
 	ed.line = 0
 	ed.pos = 0
+	ed.mode = topMode
 }
 
 func (ed *editor) addWord(word string) {

@@ -55,7 +55,7 @@ type Lambda struct {
 func (f *Lambda) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, -1)
 	lc := slip.DefLambda("lambda", s, args)
-	if s.Parent() != nil {
+	if 0 < len(s.Parents()) {
 		lc.Closure = s
 	}
 	return lc

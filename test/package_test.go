@@ -16,7 +16,24 @@ import (
 
 func TestPackage(t *testing.T) {
 	pkgs := slip.PackageNames()
-	tt.Equal(t, `("bag" "common-lisp" "common-lisp-user" "flavors" "gi" "keyword")`, pkgs.String())
+	for _, want := range []slip.String{
+		"bag",
+		"common-lisp",
+		"common-lisp-user",
+		"flavors",
+		"gi",
+		"keyword",
+		"test",
+	} {
+		var has bool
+		for _, name := range pkgs {
+			if name == want {
+				has = true
+				break
+			}
+		}
+		tt.Equal(t, true, has)
+	}
 }
 
 func TestPackageUser(t *testing.T) {
@@ -34,8 +51,25 @@ func TestPackageUser(t *testing.T) {
 	}).Test(t)
 }
 
-func checkUserPkgSimplify(t *testing.T, simple interface{}) {
-	tt.Equal(t, []interface{}{"keyword", "common-lisp", "flavors", "gi", "bag"}, jp.C("uses").First(simple))
+func checkUserPkgSimplify(t *testing.T, simple any) {
+	uses, _ := jp.C("uses").First(simple).([]any)
+	for _, want := range []string{
+		"bag",
+		"common-lisp",
+		"flavors",
+		"gi",
+		"keyword",
+		"test",
+	} {
+		var has bool
+		for _, name := range uses {
+			if name == want {
+				has = true
+				break
+			}
+		}
+		tt.Equal(t, true, has)
+	}
 	tt.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
 }
 
@@ -55,8 +89,8 @@ func TestPackageCL(t *testing.T) {
 	tt.Panic(t, func() { slip.CLPkg.Set("*common-lisp*", slip.True) })
 }
 
-func checkCLPkgSimplify(t *testing.T, simple interface{}) {
-	tt.Equal(t, []interface{}{}, jp.C("uses").First(simple))
+func checkCLPkgSimplify(t *testing.T, simple any) {
+	tt.Equal(t, []any{}, jp.C("uses").First(simple))
 	tt.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
 }
 

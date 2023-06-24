@@ -72,7 +72,7 @@ var (
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
 		bad, bad, backWord, bad, delForwardWord, eval, forwardWord, bad, // 0x60
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x68
-		bad, bad, bad, bad, bad, enterUnicode, historyBack, bad, // 0x70
+		bad, bad, resetTerm, bad, bad, enterUnicode, historyBack, bad, // 0x70
 		bad, bad, bad, bad, bad, bad, bad, delBackWord, // 0x78
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x80
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x90
@@ -234,6 +234,17 @@ func eval(ed *editor, b byte) bool {
 	ed.logf("=> %02x eval\n", b)
 	ed.evalForm()
 	ed.mode = topMode
+	return true
+}
+
+func resetTerm(ed *editor, b byte) bool {
+	ed.logf("=> %02x reset\n", b)
+	ed.reset()
+	ed.clearScreen()
+	ed.home()
+	ed.v0, _ = ed.getCursor()
+	ed.setCursor(ed.v0, 1)
+
 	return true
 }
 
@@ -759,6 +770,7 @@ bindings are:
 		"\x1b[1mM-d\x1b[m   delete one word",
 		"\x1b[1mM-e\x1b[m   evaluate current form",
 		"\x1b[1mM-f\x1b[m   move forward one word",
+		"\x1b[1mM-r\x1b[m   reset terminal",
 		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
 		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
 		"\x1b[1mM-v\x1b[m   previous in history",

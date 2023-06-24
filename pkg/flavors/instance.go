@@ -46,11 +46,16 @@ func (obj *Instance) Simplify() interface{} {
 	vars := map[string]any{}
 	for name, val := range obj.Vars {
 		if name != "self" {
-			vars[name] = slip.Simplify(val)
+			if iv, ok := val.(*Instance); ok {
+				vars[name] = iv.String()
+			} else {
+				vars[name] = slip.Simplify(val)
+			}
 		}
 	}
 	simple := map[string]any{
 		"flavor": obj.Flavor.name,
+		"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(obj))), 16),
 		"vars":   vars,
 	}
 	return simple
@@ -86,9 +91,9 @@ func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 }
 
 // Receive a method invocation from the send function. Not intended to be
-// call by any code other than the send function but is public to allow it
+// called by any code other than the send function but is public to allow it
 // to be over-ridden.
-func (obj *Instance) Receive(message string, args slip.List, depth int) slip.Object {
+func (obj *Instance) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
 	ma := obj.Flavor.methods[message]
 	if len(ma) == 0 {
 		xargs := make(slip.List, 0, len(args)+1)
@@ -100,39 +105,49 @@ func (obj *Instance) Receive(message string, args slip.List, depth int) slip.Obj
 		if m.wrap != nil {
 			loc := &whopLoc{methods: ma, current: i}
 			ws := obj.Scope.NewScope()
+			if s != nil {
+				ws.AddParent(s)
+			}
 			ws.Let("~whopper-location~", loc)
 			(m.wrap.(*slip.Lambda)).Closure = ws
 
 			return m.wrap.Call(ws, args, depth)
 		}
 	}
-	return obj.innerReceive(ma, args, depth)
+	return obj.innerReceive(s, ma, args, depth)
 }
 
-func (obj *Instance) innerReceive(ma []*method, args slip.List, depth int) slip.Object {
+func (obj *Instance) innerReceive(s *slip.Scope, ma []*method, args slip.List, depth int) slip.Object {
+	scope := obj.NewScope()
+	if s != nil {
+		scope.AddParent(s)
+	}
 	for _, m := range ma {
 		if m.before != nil {
-			m.before.Call(&obj.Scope, args, depth)
+			m.before.Call(scope, args, depth)
 		}
 	}
 	var result slip.Object
 	for _, m := range ma {
 		if m.primary != nil {
-			result = m.primary.Call(&obj.Scope, args, depth)
+			result = m.primary.Call(scope, args, depth)
 			break
 		}
 	}
 	for _, m := range ma {
 		if m.after != nil {
-			m.after.Call(&obj.Scope, args, depth)
+			m.after.Call(scope, args, depth)
 		}
 	}
 	return result
 }
 
 // BoundReceive receives a method invocation with all arguments already bound to a scope.
-func (obj *Instance) BoundReceive(message string, bindings *slip.Scope, depth int) slip.Object {
+func (obj *Instance) BoundReceive(ps *slip.Scope, message string, bindings *slip.Scope, depth int) slip.Object {
 	s := obj.NewScope()
+	if ps != nil {
+		s.AddParent(ps)
+	}
 	if bindings != nil {
 		for k, v := range bindings.Vars {
 			s.Vars[k] = v
@@ -234,9 +249,9 @@ func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
 }
 
 // Length returns the length of the object.
-func (obj Instance) Length() (size int) {
+func (obj *Instance) Length() (size int) {
 	if 0 < len(obj.Flavor.methods[":length"]) {
-		v := obj.Receive(":length", slip.List{}, 0)
+		v := obj.Receive(nil, ":length", slip.List{}, 0)
 		if num, ok := v.(slip.Fixnum); ok {
 			size = int(num)
 		}
@@ -251,4 +266,11 @@ func (obj Instance) Length() (size int) {
 		}
 	}
 	return
+}
+
+// HasMethod returns true if the instance handles the named method.
+func (obj *Instance) HasMethod(method string) bool {
+	_, has := obj.Flavor.methods[method]
+
+	return has
 }

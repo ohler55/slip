@@ -28,10 +28,10 @@ type Lambda struct {
 func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	ss := NewScope()
 	if lam.Closure != nil {
-		ss.parent = lam.Closure
+		ss.parents = append(ss.parents, lam.Closure)
 		ss.Macro = lam.Closure.Macro
 	} else if s.Keep { // flavors instance uses this
-		ss.parent = s
+		ss.parents = append(ss.parents, s)
 	}
 	ss.Macro = ss.Macro || lam.Macro
 	mode := reqMode

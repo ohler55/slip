@@ -55,7 +55,9 @@ func traceBefore(s *Scope, name string, args List, depth int) {
 	b = append(b, ": "...)
 	b = ObjectAppend(b, append(List{Symbol(name)}, args...))
 	b = append(b, '\n')
-	_, _ = StandardOutput.(io.Writer).Write(b)
+	if w, _ := s.Get(Symbol("*trace-output*")).(io.Writer); w != nil {
+		_, _ = w.Write(b)
+	}
 }
 
 func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
@@ -75,7 +77,9 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 	case nil:
 		b = ObjectAppend(b, *result)
 		b = append(b, '\n')
-		_, _ = StandardOutput.(io.Writer).Write(b)
+		if w, _ := s.Get(Symbol("*trace-output*")).(io.Writer); w != nil {
+			_, _ = w.Write(b)
+		}
 	case *Panic:
 		tr.Stack = append(tr.Stack, ObjectString(append(List{Symbol(name)}, args...)))
 		traceWriterPanic(s, b, tr)
@@ -90,7 +94,7 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 }
 
 func traceWriterPanic(s *Scope, b []byte, p *Panic) {
-	if printer.ANSI {
+	if s.Get(Symbol("*print-ansi*")) != nil {
 		color := "\x1b[31m"
 		sym := Symbol(warnANSIKey)
 		if s.Bound(sym) {
@@ -105,5 +109,7 @@ func traceWriterPanic(s *Scope, b []byte, p *Panic) {
 		b = append(b, p.Message...)
 	}
 	b = append(b, '\n')
-	_, _ = StandardOutput.(io.Writer).Write(b)
+	if w, _ := s.Get(Symbol("*trace-output*")).(io.Writer); w != nil {
+		_, _ = w.Write(b)
+	}
 }

@@ -95,7 +95,7 @@ func (f *Defmacro) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		Pkg:    slip.CurrentPackage,
 		Kind:   slip.MacroSymbol,
 	}
-	if s.Parent() != nil {
+	if 0 < len(s.Parents()) {
 		lc.Closure = s
 	}
 	return name

@@ -66,7 +66,7 @@ func TestDefmethodInherit(t *testing.T) {
 	result := slip.ReadString("(send obj :rot)").Eval(scope, nil)
 	tt.Equal(t, "brown", slip.ObjectString(result))
 
-	result = bb.BoundReceive(":rot", nil, 0)
+	result = bb.BoundReceive(nil, ":rot", nil, 0)
 	tt.Equal(t, "brown", slip.ObjectString(result))
 }
 

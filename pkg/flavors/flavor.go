@@ -330,7 +330,7 @@ func (obj *Flavor) describeStrings(b []byte, label string, list []string, indent
 // Receive a method invocation from the send function. Not intended to be
 // call by any code other than the send function but is public to allow it
 // to be over-ridden.
-func (obj *Flavor) Receive(message string, args slip.List, depth int) (result slip.Object) {
+func (obj *Flavor) Receive(_ *slip.Scope, message string, args slip.List, depth int) (result slip.Object) {
 	var lo bool
 top:
 	switch message {

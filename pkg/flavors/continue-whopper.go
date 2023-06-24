@@ -57,5 +57,5 @@ func (f *ContinueWhopper) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 		}
 		return wrap.Call(ws, args, depth)
 	}
-	return self.innerReceive(loc.methods, args, depth)
+	return self.innerReceive(s, loc.methods, args, depth)
 }

@@ -108,10 +108,8 @@ func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	if len(args) != 1 {
 		panic(fmt.Sprintf("Method operation-handled-p expects 1 argument but received %d.", len(args)))
 	}
-	if sym, ok := args[0].(slip.Symbol); ok {
-		if _, has := obj.Flavor.methods[string(sym)]; has {
-			return slip.True
-		}
+	if sym, ok := args[0].(slip.Symbol); ok && obj.HasMethod(string(sym)) {
+		return slip.True
 	}
 	return nil
 }
@@ -161,7 +159,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		if _, has := obj.Flavor.methods[string(sym)]; has {
-			return obj.Receive(string(sym), args[1:], depth+1)
+			return obj.Receive(s, string(sym), args[1:], depth+1)
 		}
 	}
 	return nil
