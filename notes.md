@@ -44,13 +44,6 @@
  - merge (starts with result-type)
  - room
 
- - watch (as in watch variables on a scope)
-  - (defun watch (var-symbol &optional location) ...)
-   - location is a list of horizontal and vertical postions
-    - only works with editor (how to implement that?)
-   - with no location simple print
-    - incorporate with trace or is that a side effect?
-
  - package
   - support export list
    - ListToFunc should be f.ListToFunc
