@@ -4,17 +4,9 @@
 
  - conversions
   + rational
-  - rationalize (same as rational but try simplify or maybe work with orginal if float)
-   - or just shift float left or right until int64 is same
-   - maybe to string and process that first
-   - or
-    - abs
-    - keep shifting until if 1 <= x (limit to 20? shifts)
-     - x *= 10 then abs(float(int(x)) - x) < (x * 0.1e-16) (or some limit) then use that
-      - limit based on x
-     - limit num and denom to max-int/10
+  + rationalize
+  + identity
   - coerce
-  - identity
   - parse-float (in gi package?, no cl anyway)
    - parse-float string &key start end default-format => float
    - parse-float string &key type start end

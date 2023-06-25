@@ -24,11 +24,11 @@ func init() {
 					Text: "The number to convert to a _rational_.",
 				},
 			},
-			Return: "boolean",
+			Return: "raio|integer",
 			Text:   `__rational__ returns _numbers_ converted to a rational.`,
 			Examples: []string{
 				"(rational 1/2) => 1/2",
-				"(rational 0.1) => 1/10",
+				"(rational 0.1) => 3602879701896397/36028797018963968",
 			},
 		}, &slip.CLPkg)
 }
