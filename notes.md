@@ -7,6 +7,82 @@
   + rationalize
   + identity
   - coerce
+   list
+   string
+   vector
+   character
+   float double-float
+   short-float single-float
+   long-float
+   integer
+   fixnum
+   bignum
+   rational
+   ratio
+   complex
+   symbol
+   assoc
+   hash-table
+
+              |list
+              | |string
+              | | |vector
+              | | | |character
+              | | | | |integer
+              | | | | | |fixnum
+              | | | | | | |bignum
+              | | | | | | | |float
+              | | | | | | | | |short-float
+              | | | | | | | | | |single-float
+              | | | | | | | | | | |double-float
+              | | | | | | | | | | | |long-float
+              | | | | | | | | | | | | |rational
+              | | | | | | | | | | | | | |ratio
+              | | | | | | | | | | | | | | |complex
+              | | | | | | | | | | | | | | | |symbol
+              | | | | | | | | | | | | | | | | |assoc
+              | | | | | | | | | | | | | | | | | |hash-table
+   list       |x|x|x| | | | | | | | | | | | | | | |
+   string     |x|x|x| | | | | | | | | | | | | | | |
+   vector     |x|x|x| | | | | | | | | | | | | | | |
+   character  | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | |
+   integer    | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | |
+   float      | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | |
+   ratio      | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | |
+   complex    | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | |
+   symbol     |x|x|x| | | | | | | | | | | | | | | |
+   assoc      |x| | | | | | | | | | | | | | | |x|x|
+   hash-table | | | | | | | | | | | | | | | | |x|x|
+
+
+
+   double-float
+   short-float
+   single-float
+   long-float
+   integer
+   fixnum
+   bignum
+   rational
+   ratio
+   complex
+   symbol
+   assoc
+   hash-table
+
+
+
+	// sequence (list string vector)
+	// character
+	// complex
+	// float, short-float, single-float, double-float, long-float
+	// non-standard fixnum, integer, bignum, rational, ratio
+	//   string, symbol
+	//   assoc to hash-table and vice versus
+	//
+	// t - return object
+	// nil - error
+
   - parse-float (in gi package?, no cl anyway)
    - parse-float string &key start end default-format => float
    - parse-float string &key type start end
@@ -16,6 +92,15 @@
   - write-to-string
   - prin1-to-string
   - princ-to-string
+  - char-code
+  - code-char
+  - char-int
+
+
+ - char
+  - digit-char-p
+  - graphics-char-p
+  - char???
 
 
  - http package

@@ -251,7 +251,7 @@
  * [ ] HANDLER-BIND
  * [ ] HANDLER-CASE
  * [ ] HOST-NAMESTRING
- * [ ] IDENTITY
+ * [x] IDENTITY
  * [ ] IGNORABLE
  * [ ] IGNORE
  * [ ] IGNORE-ERRORS
@@ -448,7 +448,7 @@
  * [ ] RASSOC
  * [ ] RASSOC-IF
  * [ ] RASSOC-IF-NOT
- * [ ] RATIONALIZE
+ * [x] RATIONALIZE
  * [ ] RATIONALP
  * [ ] READ
  * [ ] READ-DELIMITED-LIST
