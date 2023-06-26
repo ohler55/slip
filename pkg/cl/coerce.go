@@ -4,6 +4,8 @@ package cl
 
 import (
 	"fmt"
+	"math/big"
+	"unicode/utf8"
 
 	"github.com/ohler55/slip"
 )
@@ -87,13 +89,13 @@ func (f *Coerce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case slip.Symbol("vector"):
 		result = f.toVector(args[0])
 	case slip.Symbol("character"):
-		// TBD
+		result = f.toChar(args[0])
 	case slip.Symbol("integer"):
-		// TBD
+		result = f.toInteger(args[0])
 	case slip.Symbol("fixnum"):
-		// TBD
+		result = f.toFixnum(args[0])
 	case slip.Symbol("bignum"):
-		// TBD
+		result = f.toBignum(args[0])
 	case slip.Symbol("float"):
 		// TBD
 	case slip.Symbol("short-float"), slip.Symbol("single-float"):
@@ -188,6 +190,148 @@ func (f *Coerce) toString(arg slip.Object) (result slip.Object) {
 		result = f.listToString(slip.List(ta))
 	default:
 		f.panicNotPossible(ta, "string")
+	}
+	return
+}
+
+func (f *Coerce) toChar(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = ta
+	case slip.Integer:
+		code := ta.Int64()
+		if 0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) {
+			result = slip.Character(rune(code))
+		} else {
+			f.panicNotPossible(ta, "character")
+		}
+	case slip.Real:
+		num := ta.RealValue()
+		code := int64(num)
+		if num == float64(code) && 0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) {
+			result = slip.Character(rune(code))
+		} else {
+			f.panicNotPossible(ta, "character")
+		}
+	case slip.Complex:
+		code := int64(real(ta))
+		if imag(ta) == 0 && 0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) {
+			result = slip.Character(rune(code))
+		} else {
+			f.panicNotPossible(ta, "character")
+		}
+	default:
+		f.panicNotPossible(ta, "character")
+	}
+	return
+}
+
+func (f *Coerce) toInteger(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = slip.Fixnum(ta)
+	case slip.Integer:
+		result = ta
+	case *slip.LongFloat:
+		bf := (*big.Float)(ta)
+		if bf.IsInt() {
+			var bi big.Int
+			_, _ = bf.Int(&bi)
+			result = (*slip.Bignum)(&bi)
+		} else {
+			f.panicNotPossible(ta, "integer")
+		}
+	case slip.Real: // other floats and ratio
+		num := ta.RealValue()
+		if num == float64(int64(num)) {
+			result = slip.Fixnum(num)
+		} else {
+			f.panicNotPossible(ta, "integer")
+		}
+	case slip.Complex:
+		num := int64(real(ta))
+		if imag(ta) == 0 {
+			result = slip.Fixnum(num)
+		} else {
+			f.panicNotPossible(ta, "integer")
+		}
+	default:
+		f.panicNotPossible(ta, "integer")
+	}
+	return
+}
+
+func (f *Coerce) toFixnum(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = slip.Fixnum(ta)
+	case slip.Fixnum:
+		result = ta
+	case *slip.Bignum:
+		if (*big.Int)(ta).IsInt64() {
+			result = slip.Fixnum((*big.Int)(ta).Int64())
+		} else {
+			f.panicNotPossible(ta, "fixnum")
+		}
+	case *slip.LongFloat:
+		i64, acc := (*big.Float)(ta).Int64()
+		if acc == 0 {
+			result = slip.Fixnum(i64)
+		} else {
+			f.panicNotPossible(ta, "fixnum")
+		}
+	case slip.Real: // other floats and ratio
+		num := ta.RealValue()
+		if num == float64(int64(num)) {
+			result = slip.Fixnum(num)
+		} else {
+			f.panicNotPossible(ta, "fixnum")
+		}
+	case slip.Complex:
+		num := int64(real(ta))
+		if imag(ta) == 0 {
+			result = slip.Fixnum(num)
+		} else {
+			f.panicNotPossible(ta, "fixnum")
+		}
+	default:
+		f.panicNotPossible(ta, "fixnum")
+	}
+	return
+}
+
+func (f *Coerce) toBignum(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = (*slip.Bignum)(big.NewInt(int64(ta)))
+	case slip.Fixnum:
+		result = (*slip.Bignum)(big.NewInt(int64(ta)))
+	case *slip.Bignum:
+		result = ta
+	case *slip.LongFloat:
+		var bi big.Int
+		_, acc := (*big.Float)(ta).Int(&bi)
+		if acc == 0 {
+			result = (*slip.Bignum)(&bi)
+		} else {
+			f.panicNotPossible(ta, "bignum")
+		}
+	case slip.Real: // other floats and ratio
+		num := ta.RealValue()
+		if num == float64(int64(num)) {
+			result = (*slip.Bignum)(big.NewInt(int64(num)))
+		} else {
+			f.panicNotPossible(ta, "bignum")
+		}
+	case slip.Complex:
+		num := int64(real(ta))
+		if imag(ta) == 0 {
+			result = (*slip.Bignum)(big.NewInt(int64(num)))
+		} else {
+			f.panicNotPossible(ta, "bignum")
+		}
+	default:
+		f.panicNotPossible(ta, "bignum")
 	}
 	return
 }
