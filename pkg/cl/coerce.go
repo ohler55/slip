@@ -53,14 +53,14 @@ _object_ type and the horizontal axis the the _type_:
              | | | | | | | | | | | | | | | | | |hash-table
              | | | | | | | | | | | | | | | | | | |function
   list       |x|x|x| | | | | | | | | | | | | | | | |
-  string     |x|x|x| | | | | | | | | | | | | | | |x|
+  string     |x|x|x| | | | | | | | | | | | |x| | |x|
   vector     |x|x|x| | | | | | | | | | | | | | | | |
-  character  | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | |
-  integer    | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | |
-  float      | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | |
-  ratio      | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | |
-  complex    | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | |
-  symbol     |x|x|x| | | | | | | | | | | | | | | |x|
+  character  | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  integer    | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  float      | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  ratio      | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  complex    | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  symbol     |x|x|x| | | | | | | | | | | | |x| | |x|
   assoc      |x| | | | | | | | | | | | | | | |x|x| |
   hash-table | | | | | | | | | | | | | | | | |x|x| |
 
@@ -97,23 +97,23 @@ func (f *Coerce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case slip.Symbol("bignum"):
 		result = f.toBignum(args[0])
 	case slip.Symbol("float"):
-		// TBD
+		result = f.toFloat(args[0])
 	case slip.Symbol("short-float"), slip.Symbol("single-float"):
-		// TBD
+		result = f.toSingleFloat(args[0])
 	case slip.Symbol("double-float"):
-		// TBD
+		result = f.toDoubleFloat(args[0])
 	case slip.Symbol("long-float"):
-		// TBD
+		result = f.toLongFloat(args[0])
 	case slip.Symbol("rational"):
-		// TBD
+		result = f.toRational(args[0])
 	case slip.Symbol("ratio"):
-		// TBD
+		result = f.toRatio(args[0])
 	case slip.Symbol("complex"):
-		// TBD
+		result = f.toComplex(args[0])
 	case slip.Symbol("symbol"):
-		// TBD
+		result = f.toSymbol(args[0])
 	case slip.Symbol("assoc"):
-		// TBD
+		result = f.toAssoc(args[0])
 	case slip.Symbol("hash-table"):
 		// TBD
 	case slip.Symbol("function"):
@@ -214,8 +214,9 @@ func (f *Coerce) toChar(arg slip.Object) (result slip.Object) {
 			f.panicNotPossible(ta, "character")
 		}
 	case slip.Complex:
-		code := int64(real(ta))
-		if imag(ta) == 0 && 0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) {
+		code := real(ta)
+		if imag(ta) == 0.0 &&
+			0.0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) && code == float64(int64(code)) {
 			result = slip.Character(rune(code))
 		} else {
 			f.panicNotPossible(ta, "character")
@@ -249,8 +250,8 @@ func (f *Coerce) toInteger(arg slip.Object) (result slip.Object) {
 			f.panicNotPossible(ta, "integer")
 		}
 	case slip.Complex:
-		num := int64(real(ta))
-		if imag(ta) == 0 {
+		num := real(ta)
+		if imag(ta) == 0.0 && num == float64(int64(num)) {
 			result = slip.Fixnum(num)
 		} else {
 			f.panicNotPossible(ta, "integer")
@@ -288,8 +289,8 @@ func (f *Coerce) toFixnum(arg slip.Object) (result slip.Object) {
 			f.panicNotPossible(ta, "fixnum")
 		}
 	case slip.Complex:
-		num := int64(real(ta))
-		if imag(ta) == 0 {
+		num := real(ta)
+		if imag(ta) == 0.0 && num == float64(int64(num)) {
 			result = slip.Fixnum(num)
 		} else {
 			f.panicNotPossible(ta, "fixnum")
@@ -324,14 +325,190 @@ func (f *Coerce) toBignum(arg slip.Object) (result slip.Object) {
 			f.panicNotPossible(ta, "bignum")
 		}
 	case slip.Complex:
-		num := int64(real(ta))
-		if imag(ta) == 0 {
+		num := real(ta)
+		if imag(ta) == 0.0 && num == float64(int64(num)) {
 			result = (*slip.Bignum)(big.NewInt(int64(num)))
 		} else {
 			f.panicNotPossible(ta, "bignum")
 		}
 	default:
 		f.panicNotPossible(ta, "bignum")
+	}
+	return
+}
+
+func (f *Coerce) toFloat(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = slip.DoubleFloat(ta)
+	case slip.Float:
+		result = ta
+	case slip.Real:
+		result = slip.DoubleFloat(ta.RealValue())
+	case slip.Complex:
+		if imag(ta) == 0.0 {
+			result = slip.DoubleFloat(real(ta))
+		} else {
+			f.panicNotPossible(ta, "float")
+		}
+	default:
+		f.panicNotPossible(ta, "float")
+	}
+	return
+}
+
+func (f *Coerce) toSingleFloat(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = slip.SingleFloat(ta)
+	case slip.SingleFloat:
+		result = ta
+	case slip.Real:
+		result = slip.SingleFloat(ta.RealValue())
+	case slip.Complex:
+		if imag(ta) == 0.0 {
+			result = slip.SingleFloat(real(ta))
+		} else {
+			f.panicNotPossible(ta, "single-float")
+		}
+	default:
+		f.panicNotPossible(ta, "single-float")
+	}
+	return
+}
+
+func (f *Coerce) toDoubleFloat(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = slip.DoubleFloat(ta)
+	case slip.DoubleFloat:
+		result = ta
+	case slip.Real:
+		result = slip.DoubleFloat(ta.RealValue())
+	case slip.Complex:
+		if imag(ta) == 0.0 {
+			result = slip.DoubleFloat(real(ta))
+		} else {
+			f.panicNotPossible(ta, "double-float")
+		}
+	default:
+		f.panicNotPossible(ta, "double-float")
+	}
+	return
+}
+
+func (f *Coerce) toLongFloat(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = (*slip.LongFloat)(big.NewFloat(float64(ta)))
+	case *slip.LongFloat:
+		result = ta
+	case slip.Real:
+		result = (*slip.LongFloat)(big.NewFloat(ta.RealValue()))
+	case slip.Complex:
+		if imag(ta) == 0.0 {
+			result = (*slip.LongFloat)(big.NewFloat(real(ta)))
+		} else {
+			f.panicNotPossible(ta, "long-float")
+		}
+	default:
+		f.panicNotPossible(ta, "long-float")
+	}
+	return
+}
+
+func (f *Coerce) toRational(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = slip.Fixnum(ta)
+	case slip.Rational:
+		result = ta
+	case slip.Real:
+		var rat big.Rat
+		rat.SetFloat64(ta.RealValue())
+		result = (*slip.Ratio)(&rat)
+	case slip.Complex:
+		if imag(ta) == 0 {
+			result = slip.Fixnum(real(ta))
+		} else {
+			f.panicNotPossible(ta, "rational")
+		}
+	default:
+		f.panicNotPossible(ta, "rational")
+	}
+	return
+}
+
+func (f *Coerce) toRatio(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = (*slip.Ratio)(big.NewRat(int64(ta), 1))
+	case *slip.Ratio:
+		result = ta
+	case slip.Integer:
+		result = (*slip.Ratio)(big.NewRat(ta.Int64(), 1))
+	case slip.Real:
+		var rat big.Rat
+		rat.SetFloat64(ta.RealValue())
+		result = (*slip.Ratio)(&rat)
+	case slip.Complex:
+		if imag(ta) == 0 {
+			result = (*slip.Ratio)(big.NewRat(int64(real(ta)), 1))
+		} else {
+			f.panicNotPossible(ta, "ratio")
+		}
+	default:
+		f.panicNotPossible(ta, "ratio")
+	}
+	return
+}
+
+func (f *Coerce) toComplex(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Character:
+		result = slip.Complex(complex(float64(ta), 0))
+	case slip.Real:
+		result = slip.Complex(complex(ta.RealValue(), 0))
+	case slip.Complex:
+		result = ta
+	default:
+		f.panicNotPossible(ta, "complex")
+	}
+	return
+}
+
+func (f *Coerce) toSymbol(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.String:
+		result = slip.Symbol(ta)
+	case slip.Symbol:
+		result = ta
+	default:
+		f.panicNotPossible(ta, "symbol")
+	}
+	return
+}
+
+func (f *Coerce) toAssoc(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.List:
+		for _, e := range ta {
+			if e == nil {
+				continue
+			}
+			if c, ok := e.(slip.List); !ok || len(c) < 2 {
+				f.panicNotPossible(ta, "assoc")
+			}
+		}
+		result = ta
+	case slip.HashTable:
+		list := make(slip.List, 0, len(ta))
+		for k, v := range ta {
+			list = append(list, slip.List{k, slip.Tail{Value: v}})
+		}
+		result = list
+	default:
+		f.panicNotPossible(ta, "assoc")
 	}
 	return
 }

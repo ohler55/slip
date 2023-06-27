@@ -253,6 +253,372 @@ func TestCoerceToFixnum(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCoerceToBignum(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 30000000000000000123 'bignum)`,
+		Expect: `30000000000000000123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 123 'bignum)`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\A 'bignum)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.0 'bignum)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.1 'bignum)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 50000000000000000000000000.0L+0 'bignum)`,
+		Expect: `50000000000000000000000000`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.1L+0 'bignum)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 10/2 'bignum)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 11/2 'bignum)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 0) 'bignum)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 1) 'bignum)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(5 1) 'bignum)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToFloat(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 30000000000000000000 'float)`,
+		Expect: `3e+19`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 123 'float)`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\A 'float)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.0 'float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 50000000000000000000000000.0L+0 'float)`,
+		Expect: `5e+25`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.2L+0 'float)`,
+		Expect: `5.2`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 10/2 'float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 11/2 'float)`,
+		Expect: `5.5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 0) 'float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 1) 'float)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(5 1) 'float)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToSingleFloat(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 30000000000000000000 'single-float)`,
+		Expect: `3e+19`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 123 'single-float)`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\A 'single-float)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.0 'single-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.0s+0 'single-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 50000000000000000000000000.0L+0 'single-float)`,
+		Expect: `5e+25`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.5L+0 'single-float)`,
+		Expect: `5.5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 10/2 'single-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 11/2 'single-float)`,
+		Expect: `5.5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 0) 'single-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 1) 'single-float)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(5 1) 'single-float)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToDoubleFloat(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 30000000000000000000 'double-float)`,
+		Expect: `3e+19`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 123 'double-float)`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\A 'double-float)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.0 'double-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 50000000000000000000000000.0L+0 'double-float)`,
+		Expect: `5e+25`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.5L+0 'double-float)`,
+		Expect: `5.5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 10/2 'double-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 11/2 'double-float)`,
+		Expect: `5.5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 0) 'double-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 1) 'double-float)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(5 1) 'double-float)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToLongFloat(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 30000000000000000000 'long-float)`,
+		Expect: `3e+19`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 123 'long-float)`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\A 'long-float)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.0s+0 'long-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.0 'long-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 50000000000000000000000000.0L+0 'long-float)`,
+		Expect: `5e+25`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.5L+0 'long-float)`,
+		Expect: `5.5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 10/2 'long-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 11/2 'long-float)`,
+		Expect: `5.5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 0) 'long-float)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 1) 'long-float)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(5 1) 'long-float)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToRational(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 3 'rational)`,
+		Expect: `3`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 3.5 'rational)`,
+		Expect: `7/2`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\A 'rational)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 0) 'rational)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 1) 'rational)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(5 1) 'rational)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToRatio(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 3/2 'ratio)`,
+		Expect: `3/2`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 3 'ratio)`,
+		Expect: `3`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 3.5 'ratio)`,
+		Expect: `7/2`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\A 'ratio)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 0) 'ratio)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(5 1) 'ratio)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(5 1) 'ratio)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToComplex(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce #C(1 2) 'complex)`,
+		Expect: `#C(1 2)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 3 'complex)`,
+		Expect: `#C(3 0)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\A 'complex)`,
+		Expect: `#C(65 0)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 3.5 'complex)`,
+		Expect: `#C(3.5 0)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(1 2) 'complex)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToSymbol(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 'abc 'symbol)`,
+		Expect: `abc`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce "abc" 'symbol)`,
+		Expect: `abc`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5 'symbol)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToAssoc(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce '((a . 1) nil) 'assoc)`,
+		Expect: `((a . 1) nil)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '((a . 1) (b 2)) 'assoc)`,
+		Expect: `((a . 1) (b 2))`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (let ((table (make-hash-table))) (setf (gethash 'a table) 1) table) 'assoc)`,
+		Expect: `((a . 1))`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '((a . 1) 2) 'assoc)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 7 'assoc)`,
+		Panics: true,
+	}).Test(t)
+}
+
 func TestCoerceBadType(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce 3 5)`,
