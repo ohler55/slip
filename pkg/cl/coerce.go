@@ -115,9 +115,9 @@ func (f *Coerce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case slip.Symbol("assoc"):
 		result = f.toAssoc(args[0])
 	case slip.Symbol("hash-table"):
-		// TBD
+		result = f.toHashTable(args[0])
 	case slip.Symbol("function"):
-		// TBD
+		result = f.toFunction(args[0])
 	default:
 		panic(fmt.Sprintf("%s is not a valid coerce result type", args[1]))
 	}
@@ -509,6 +509,41 @@ func (f *Coerce) toAssoc(arg slip.Object) (result slip.Object) {
 		result = list
 	default:
 		f.panicNotPossible(ta, "assoc")
+	}
+	return
+}
+
+func (f *Coerce) toHashTable(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.List:
+		ht := slip.HashTable{}
+		for _, e := range ta {
+			if e == nil {
+				continue
+			}
+			if c, ok := e.(slip.List); !ok || len(c) < 2 {
+				f.panicNotPossible(ta, "hash-table")
+			} else {
+				ht[c[0]] = c.Cdr()
+			}
+		}
+		result = ht
+	case slip.HashTable:
+		result = ta
+	default:
+		f.panicNotPossible(ta, "hash-table")
+	}
+	return
+}
+
+func (f *Coerce) toFunction(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Symbol:
+		result = slip.FindFunc(string(ta))
+	case *slip.Lambda:
+		result = ta
+	default:
+		f.panicNotPossible(ta, "function")
 	}
 	return
 }

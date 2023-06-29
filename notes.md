@@ -6,7 +6,7 @@
   + rational
   + rationalize
   + identity
-  - coerce
+  + coerce
   - parse-float (in gi package?, no cl anyway)
    - parse-float string &key start end default-format => float
    - parse-float string &key type start end

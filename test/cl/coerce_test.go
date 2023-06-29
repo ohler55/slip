@@ -619,6 +619,44 @@ func TestCoerceToAssoc(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCoerceToHashTable(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce '((a . 1) nil) 'hash-table)`,
+		Expect: `#<hash-table eql 1/-->`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '((a . 1) (b 2)) 'hash-table)`,
+		Expect: `#<hash-table eql 2/-->`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (let ((table (make-hash-table))) (setf (gethash 'a table) 1) table) 'hash-table)`,
+		Expect: `#<hash-table eql 1/-->`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '((a . 1) 2) 'hash-table)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 7 'hash-table)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToFunction(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 'car 'function)`,
+		Expect: `#<function car>`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (lambda () nil) 'function)`,
+		Expect: `/#<function \(lambda \(\)\) {[0-9a-f]+}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 7 'function)`,
+		Panics: true,
+	}).Test(t)
+}
+
 func TestCoerceBadType(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce 3 5)`,
