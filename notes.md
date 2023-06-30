@@ -7,6 +7,9 @@
   + rationalize
   + identity
   + coerce
+  + char-code
+  + char-int
+  + code-char
   - parse-float (in gi package?, no cl anyway)
    - parse-float string &key start end default-format => float
    - parse-float string &key type start end
@@ -16,9 +19,6 @@
   - write-to-string
   - prin1-to-string
   - princ-to-string
-  - char-code
-  - code-char
-  - char-int
 
 
  - char
