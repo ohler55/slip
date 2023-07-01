@@ -92,12 +92,12 @@
  * [ ] CERROR
  * [ ] CHANGE-CLASS
  * [ ] CHAR
- * [ ] CHAR-CODE
+ * [x] CHAR-CODE
  * [ ] CHAR-CODE-LIMIT
  * [ ] CHAR-DOWNCASE
  * [ ] CHAR-EQUAL
  * [ ] CHAR-GREATERP
- * [ ] CHAR-INT
+ * [x] CHAR-INT
  * [ ] CHAR-LESSP
  * [ ] CHAR-NAME
  * [ ] CHAR-NOT-EQUAL
@@ -115,7 +115,7 @@
  * [ ] CIS
  * [ ] CLASS
  * [ ] CLEAR-OUTPUT
- * [ ] CODE-CHAR
+ * [x] CODE-CHAR
  * [ ] COERCE
  * [ ] COMPLEMENT
  * [ ] COMPLEX
@@ -640,7 +640,7 @@
  * [ ] WRITE-LINE
  * [ ] WRITE-SEQUENCE
  * [ ] WRITE-STRING
- * [ ] WRITE-TO-STRING
+ * [x] WRITE-TO-STRING
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
  * [x] &BODY

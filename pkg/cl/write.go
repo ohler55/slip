@@ -10,6 +10,23 @@ import (
 	"github.com/ohler55/slip"
 )
 
+var writeKeywords = []string{
+	":array",
+	":base",
+	":case",
+	":circle",
+	":escape",
+	":gensym",
+	":length",
+	":level",
+	":lines",
+	":miser-width",
+	":pretty",
+	":radix",
+	":readably",
+	":right-margin",
+}
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -48,7 +65,7 @@ func init() {
 			},
 			Return: "object",
 			Text: `__write__ a string representation of the _object_ to the provided stream.
-Output is produced as if according to the default print variables unless overridden by the keyword parameters.
+Output is produced according to the default print variables unless overridden by the keyword parameters.
 
   __Parameter__        __Corresponding Dynamic Variable__
   array            _*print-array*_
@@ -81,8 +98,18 @@ type Write struct {
 
 // Call the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 33 < len(args) {
-		slip.PanicArgCount(f, 1, 33)
+	b, w := writeBuf(f, args, true)
+	if _, err := w.Write(b); err != nil {
+		panic(err)
+	}
+	return args[0]
+}
+
+func writeBuf(f slip.Object, args slip.List, withStream bool) ([]byte, io.Writer) {
+	if withStream {
+		slip.ArgCountCheck(f, args, 1, 33)
+	} else {
+		slip.ArgCountCheck(f, args, 1, 31)
 	}
 	p := *slip.DefaultPrinter()
 
@@ -124,13 +151,13 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		case ":gensym":
 			p.Gensym = args[i+1] != nil
 		case ":length":
-			p.Length = f.asUint(keyword, args[i+1])
+			p.Length = kvAsUint(keyword, args[i+1])
 		case ":level":
-			p.Level = f.asUint(keyword, args[i+1])
+			p.Level = kvAsUint(keyword, args[i+1])
 		case ":lines":
-			p.Lines = f.asUint(keyword, args[i+1])
+			p.Lines = kvAsUint(keyword, args[i+1])
 		case ":miser-width":
-			p.MiserWidth = f.asUint(keyword, args[i+1])
+			p.MiserWidth = kvAsUint(keyword, args[i+1])
 		case ":pretty":
 			p.Pretty = args[i+1] != nil
 		case ":radix":
@@ -138,25 +165,26 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		case ":readably":
 			p.Readably = args[i+1] != nil
 		case ":right-margin":
-			p.RightMargin = f.asUint(keyword, args[i+1])
+			p.RightMargin = kvAsUint(keyword, args[i+1])
 		case ":stream":
+			if !withStream {
+				slip.PanicType("keyword", sym, writeKeywords...)
+			}
 			if w, ok = args[i+1].(io.Writer); !ok {
 				slip.PanicType(":stream", args[i+1], "output-stream")
 			}
 		default:
-			slip.PanicType("keyword", sym,
-				":array", ":base", ":case", ":circle", ":escape", ":gensym", ":length", ":level", ":lines",
-				":miser-width", ":pretty", ":radix", ":readably", ":right-margin", ":stream")
+			if withStream {
+				slip.PanicType("keyword", sym, append(writeKeywords, ":stream")...)
+			} else {
+				slip.PanicType("keyword", sym, writeKeywords...)
+			}
 		}
 	}
-	b := p.Append([]byte{}, obj, 0)
-	if _, err := w.Write(b); err != nil {
-		panic(err)
-	}
-	return obj
+	return p.Append([]byte{}, obj, 0), w
 }
 
-func (f *Write) asUint(keyword string, a slip.Object) uint {
+func kvAsUint(keyword string, a slip.Object) uint {
 	if a == nil {
 		return math.MaxInt
 	}
