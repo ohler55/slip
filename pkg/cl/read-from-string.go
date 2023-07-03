@@ -83,48 +83,48 @@ func (f *ReadFromString) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	)
 	if 1 < len(args) {
 		ra := []rune(ss)
-		var optPos int
+		var (
+			optPos int
+			sym    slip.Symbol
+		)
 		for pos := 1; pos < len(args); pos++ {
-			switch ta := args[pos].(type) {
-			case slip.Fixnum:
-				switch optPos {
-				case 0:
-					start = int(ta)
-					optPos++
-				case 1:
-					end = int(ta)
-					optPos++
-				default:
-					slip.PanicType("keyword", ta, "keyword")
-				}
-			case slip.Symbol:
+			if sym, ok = args[pos].(slip.Symbol); ok && 1 < len(sym) && sym[0] == ':' { // keyword
 				pos++
-				switch ta {
-				case ":start":
+				switch sym {
+				case slip.Symbol(":start"):
 					if num, ok2 := args[pos].(slip.Fixnum); ok2 {
 						start = int(num)
 					} else {
 						slip.PanicType(":start", args[pos], "fixnum")
 					}
-				case ":end":
+				case slip.Symbol(":end"):
 					if num, ok2 := args[pos].(slip.Fixnum); ok2 {
-						start = int(num)
+						end = int(num)
 					} else if args[pos] != nil {
 						slip.PanicType(":end", args[pos], "fixnum")
 					}
-				case ":preserve-whitespace":
+				case slip.Symbol(":preserve-whitespace"):
 					pw = args[pos] != nil
 				default:
-					slip.PanicType("keyword", ta, ":start", ":end", ":preserve-whitespace")
+					slip.PanicType("keyword", sym, ":start", ":end", ":preserve-whitespace")
 				}
-			default:
-				slip.PanicType("argument", ta, "keyword", "fixnum")
+			} else {
+				switch optPos {
+				case 0:
+					eofp = args[pos] != nil
+					optPos++
+				case 1:
+					eofv = args[pos]
+					optPos++
+				default:
+					slip.PanicType("keyword", args[pos], "keyword")
+				}
 			}
 		}
 		if end < 0 {
 			end = len(ra)
 		}
-		if start < 0 || len(ra) <= start || end < 0 || len(ra) < end {
+		if start < 0 || len(ra) <= start || end < 0 || len(ra) < end || end < start {
 			panic(fmt.Sprintf("the bounding indices %d and %d are not valid for string of length %d",
 				start, end, len(ra)))
 		}
@@ -134,6 +134,7 @@ func (f *ReadFromString) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 		buf = []byte(ss)
 	}
 	code, pos := slip.ReadOne(buf)
+	pos += start
 	if 0 < len(code) {
 		if !pw {
 		space:
