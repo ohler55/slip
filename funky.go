@@ -4,6 +4,8 @@ package slip
 
 // Funky is an interface shared by all functions.
 type Funky interface {
+	Object
+
 	// GetArgs returns the function arguments.
 	GetArgs() List
 

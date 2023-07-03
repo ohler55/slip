@@ -270,6 +270,7 @@ type reader struct {
 	line       int
 	lineStart  int
 	pos        int
+	one        bool
 
 	code Code
 }
@@ -282,6 +283,13 @@ func ReadString(src string) (code Code) {
 // Read LISP source code and return a Code instance.
 func Read(src []byte) (code Code) {
 	return (&reader{}).read(src)
+}
+
+// ReadOne LISP source code and return a Code instance.
+func ReadOne(src []byte) (code Code, pos int) {
+	var r reader
+	r.one = true
+	return r.read(src), r.pos
 }
 
 // CompileString LISP string source code and return an Object.
@@ -528,6 +536,9 @@ func (r *reader) read(src []byte) Code {
 			default:
 				r.raise("unexpected character: '%c' (0x%02x)", b, b)
 			}
+		}
+		if r.one && 0 < len(r.code) {
+			return r.code
 		}
 	}
 	r.pos++
