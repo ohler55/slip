@@ -2,24 +2,6 @@
 
 - next
 
- - conversions
-  + rational
-  + rationalize
-  + identity
-  + coerce
-  + char-code
-  + char-int
-  + code-char
-  + write-to-string
-  + prin1-to-string
-  + princ-to-string
-  + read-from-string
-  - parse-float (in gi package?, no cl anyway)
-   - parse-float string &key start end default-format => float
-   - parse-float string &key type start end
-   - parse-float (string &key start end radix junk-allowed decimal-character exponent-character type)
-   - http://www.lispworks.com/documentation/lw51/LWRM/html/lwref-228.htm
-
  - char
   - digit-char-p
   - graphics-char-p

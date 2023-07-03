@@ -92,12 +92,10 @@
  * [ ] CERROR
  * [ ] CHANGE-CLASS
  * [ ] CHAR
- * [x] CHAR-CODE
  * [ ] CHAR-CODE-LIMIT
  * [ ] CHAR-DOWNCASE
  * [ ] CHAR-EQUAL
  * [ ] CHAR-GREATERP
- * [x] CHAR-INT
  * [ ] CHAR-LESSP
  * [ ] CHAR-NAME
  * [ ] CHAR-NOT-EQUAL
@@ -115,7 +113,6 @@
  * [ ] CIS
  * [ ] CLASS
  * [ ] CLEAR-OUTPUT
- * [x] CODE-CHAR
  * [ ] COERCE
  * [ ] COMPLEMENT
  * [ ] COMPLEX
@@ -251,7 +248,6 @@
  * [ ] HANDLER-BIND
  * [ ] HANDLER-CASE
  * [ ] HOST-NAMESTRING
- * [x] IDENTITY
  * [ ] IGNORABLE
  * [ ] IGNORE
  * [ ] IGNORE-ERRORS
@@ -393,8 +389,6 @@
  * [ ] NSUBSTITUTE-IF
  * [ ] NSUBSTITUTE-IF-NOT
  * [ ] NTH-VALUE
- * [x] NTHCDR
- * [x] NUMBER
  * [ ] NUMERATOR
  * [ ] OPEN-STREAM-P
  * [ ] OPTIMIZE
@@ -432,8 +426,6 @@
  * [ ] PPRINT-POP
  * [ ] PPRINT-TAB
  * [ ] PPRINT-TABULAR
- * [x] PRIN1-TO-STRING
- * [x] PRINC-TO-STRING
  * [ ] PRINT-NOT-READABLE
  * [ ] PRINT-NOT-READABLE-OBJECT
  * [ ] PRINT-OBJECT
@@ -448,11 +440,9 @@
  * [ ] RASSOC
  * [ ] RASSOC-IF
  * [ ] RASSOC-IF-NOT
- * [x] RATIONALIZE
  * [ ] RATIONALP
  * [ ] READ
  * [ ] READ-DELIMITED-LIST
- * [x] READ-FROM-STRING
  * [ ] READ-PRESERVING-WHITESPACE
  * [ ] READ-SEQUENCE
  * [ ] READER-ERROR
@@ -640,7 +630,6 @@
  * [ ] WRITE-LINE
  * [ ] WRITE-SEQUENCE
  * [ ] WRITE-STRING
- * [x] WRITE-TO-STRING
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
  * [x] &BODY
@@ -740,11 +729,14 @@
  * [x] CDDR
  * [x] CDR
  * [x] CEILING
+ * [x] CHAR-CODE
+ * [x] CHAR-INT
  * [x] CHARACTERP
  * [x] CLASS-NAME
  * [x] CLASS-OF
  * [x] CLOSE
  * [x] CLRHASH
+ * [x] CODE-CHAR
  * [x] COND
  * [x] CONS
  * [x] CONSP
@@ -806,6 +798,7 @@
  * [x] HASH-TABLE-REHASH-THRESHOLD
  * [x] HASH-TABLE-SIZE
  * [x] HASH-TABLE-TEST
+ * [x] IDENTITY
  * [x] IF
  * [x] INCF
  * [x] INPUT-STREAM-P
@@ -856,7 +849,9 @@
  * [x] NSTRING-DOWNCASE
  * [x] NSTRING-UPCASE
  * [x] NTH
+ * [x] NTHCDR
  * [x] NULL
+ * [x] NUMBER
  * [x] NUMBERP
  * [x] NUNION
  * [x] ODDP
@@ -872,7 +867,9 @@
  * [x] PLUSP
  * [x] PPRINT
  * [x] PRIN1
+ * [x] PRIN1-TO-STRING
  * [x] PRINC
+ * [x] PRINC-TO-STRING
  * [x] PRINT
  * [x] PROBE-FILE
  * [x] PROG
@@ -886,8 +883,10 @@
  * [x] RANDOM-STATE
  * [x] RATIO
  * [x] RATIONAL
+ * [x] RATIONALIZE
  * [x] READ-BYTE
  * [x] READ-CHAR
+ * [x] READ-FROM-STRING
  * [x] READ-LINE
  * [x] REAL
  * [x] REM
@@ -946,6 +945,7 @@
  * [x] WHEN
  * [x] WITH-OPEN-FILE
  * [x] WRITE
+ * [x] WRITE-TO-STRING
  * [x] ZEROP
  - [-] &AUX
  - [-] &ENVIRONMENT

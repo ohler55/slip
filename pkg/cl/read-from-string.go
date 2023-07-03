@@ -45,7 +45,7 @@ the end of the stream. The default is _t_.`,
 					Name: "end",
 					Type: "fixnum",
 					Text: `The position in the string that marks the end of the substring to read from.
-Default is _nil_ menaing the end of the string.`,
+Default is _nil_ meaning the end of the string.`,
 				},
 				{
 					Name: "preserve-whitespace",
