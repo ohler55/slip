@@ -1,4 +1,3 @@
- * [ ] &ALLOW-OTHER-KEYS
  * [ ] &WHOLE
  * [ ] *MACROEXPAND-HOOK*
  * [ ] *MODULES*
@@ -7,7 +6,6 @@
  * [ ] *READ-BASE*
  * [ ] *READ-DEFAULT-FLOAT-FORMAT*
  * [ ] *TERMINAL-IO*
- * [ ] *TRACE-OUTPUT*
  * [ ] ABORT
  * [ ] ACONS
  * [ ] ACOSH
@@ -111,7 +109,6 @@
  * [ ] CHARACTER
  * [ ] CHECK-TYPE
  * [ ] CIS
- * [ ] CLASS
  * [ ] CLEAR-OUTPUT
  * [ ] COERCE
  * [ ] COMPLEMENT
@@ -141,15 +138,12 @@
  * [ ] COUNT-IF
  * [ ] COUNT-IF-NOT
  * [ ] CTYPECASE
- * [ ] DEBUG
  * [ ] DECLAIM
  * [ ] DECLARATION
  * [ ] DECLARE
  * [ ] DECODE-FLOAT
  * [ ] DECODE-UNIVERSAL-TIME
  * [ ] DEFCONSTANT
- * [ ] DEFGENERIC
- * [ ] DEFINE-COMPILER-MACRO
  * [ ] DEFINE-CONDITION
  * [ ] DEFINE-METHOD-COMBINATION
  * [ ] DEFINE-MODIFY-MACRO
@@ -391,7 +385,6 @@
  * [ ] NTH-VALUE
  * [ ] NUMERATOR
  * [ ] OPEN-STREAM-P
- * [ ] OPTIMIZE
  * [ ] OTHERWISE
  * [ ] PACKAGE
  * [ ] PACKAGE-ERROR
@@ -437,9 +430,6 @@
  * [ ] PUSH
  * [ ] PUSHNEW
  * [ ] RANDOM-STATE-P
- * [ ] RASSOC
- * [ ] RASSOC-IF
- * [ ] RASSOC-IF-NOT
  * [ ] RATIONALP
  * [ ] READ
  * [ ] READ-DELIMITED-LIST
@@ -525,7 +515,6 @@
  * [ ] SPACE
  * [ ] SPECIAL
  * [ ] SPECIAL-OPERATOR-P
- * [ ] SPEED
  * [ ] STANDARD
  * [ ] STANDARD-CHAR
  * [ ] STANDARD-CHAR-P
@@ -536,18 +525,10 @@
  * [ ] STEP
  * [ ] STORAGE-CONDITION
  * [ ] STORE-VALUE
- * [ ] STREAM
  * [ ] STREAM-ELEMENT-TYPE
  * [ ] STREAM-ERROR
  * [ ] STREAM-ERROR-STREAM
  * [ ] STREAM-EXTERNAL-FORMAT
- * [ ] STRING-GREATERP
- * [ ] STRING-LEFT-TRIM
- * [ ] STRING-LESSP
- * [ ] STRING-NOT-EQUAL
- * [ ] STRING-NOT-GREATERP
- * [ ] STRING-NOT-LESSP
- * [ ] STRING-RIGHT-TRIM
  * [ ] STRING-STREAM
  * [ ] STRING-TRIM
  * [ ] STRUCTURE
@@ -665,6 +646,7 @@
  * [x] *RANDOM-STATE*
  * [x] *STANDARD-INPUT*
  * [x] *STANDARD-OUTPUT*
+ * [x] *TRACE-OUTPUT*
  * [x] +
  * [x] ++
  * [x] +++
@@ -881,6 +863,8 @@
  * [x] QUOTE
  * [x] RANDOM
  * [x] RANDOM-STATE
+ * [x] RASSOC
+ * [x] RASSOC-IF
  * [x] RATIO
  * [x] RATIONAL
  * [x] RATIONALIZE
@@ -910,11 +894,19 @@
  * [x] SORT
  * [x] SQRT
  * [x] STABLE-SORT
+ * [x] STREAM
  * [x] STREAMP
  * [x] STRING
  * [x] STRING-CAPITALIZE
  * [x] STRING-DOWNCASE
  * [x] STRING-EQUAL
+ * [x] STRING-GREATERP
+ * [x] STRING-LEFT-TRIM
+ * [x] STRING-LESSP
+ * [x] STRING-NOT-EQUAL
+ * [x] STRING-NOT-GREATERP
+ * [x] STRING-NOT-LESSP
+ * [x] STRING-RIGHT-TRIM
  * [x] STRING-UPCASE
  * [x] STRING/=
  * [x] STRING<
@@ -947,6 +939,7 @@
  * [x] WRITE
  * [x] WRITE-TO-STRING
  * [x] ZEROP
+ - [-] &ALLOW-OTHER-KEYS
  - [-] &AUX
  - [-] &ENVIRONMENT
  - [-] *BREAK-ON-SIGNALS*
@@ -959,6 +952,7 @@
  - [-] *READ-EVAL*
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
+ - [-] CLASS
  - [-] CLEAR-INPUT
  - [-] COMPILATION-SPEED
  - [-] COMPILE
@@ -968,11 +962,17 @@
  - [-] COMPILED-FUNCTION-P
  - [-] COMPILER-MACRO
  - [-] COMPILER-MACRO-FUNCTION
+ - [-] DEBUG
  - [-] DEFCLASS (defflavor instead)
+ - [-] DEFGENERIC
+ - [-] DEFINE-COMPILER-MACRO
  - [-] LISTEN
  - [-] MAKE-INSTANCES-OBSOLETE
+ - [-] OPTIMIZE
  - [-] PROVIDE
+ - [-] RASSOC-IF-NOT
  - [-] READ-CHAR-NO-HANG
  - [-] REINITIALIZE-INSTANCE
+ - [-] SPEED
  - [-] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
  - [-] UPDATE-INSTANCE-FOR-REDEFINED-CLASS

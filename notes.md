@@ -2,11 +2,25 @@
 
 - next
 
+ - defconstant
+  - add func to GetConstant (value, doc, ok)
+ - first, second, third, ... tenth (each is a placer)
+ - nbutlast
+ - butlast
+ - array
+ - vector
+ - nth-value
+ - values-list
+ - find and find-if
+ - position and position-if
+ - search and search-if
+ - delete and delete-if
+ - remove and remove-if
+
  - char
   - digit-char-p
   - graphics-char-p
   - char???
-
 
  - http package
   - flavors

@@ -16,7 +16,10 @@ var (
 // usually called by an init() function at startup.
 func DefConstant(sym Symbol, value Object, doc string) {
 	name := strings.ToLower(string(sym))
-	if _, has := constantValues[name]; has {
+	if v, has := constantValues[name]; has {
+		if ObjectEqual(v, value) { // no change so ignore
+			return
+		}
 		panic(fmt.Sprintf("%s is already defined", sym))
 	}
 	constantValues[name] = value

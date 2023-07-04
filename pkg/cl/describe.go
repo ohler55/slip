@@ -116,6 +116,9 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 		b = slip.AppendDoc(b, vv.Doc, indent+4, right, ansi)
 		b = append(b, '\n')
 		b = append(b, pad...)
+
+		// TBD lookup constant
+
 	} else {
 		b, _ = describeHead(b, pkg, sym, indent, right, ansi)
 		b = append(b, "  unbound\n"...)
