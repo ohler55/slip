@@ -25,3 +25,13 @@ func DefConstant(sym Symbol, value Object, doc string) {
 	constantValues[name] = value
 	constantDocs[name] = doc
 }
+
+// GetConstant gets the value and documentation of the constant bound to the
+// symbol.
+func GetConstant(sym Symbol) (value Object, doc string, ok bool) {
+	name := strings.ToLower(string(sym))
+	if value, ok = constantValues[name]; ok {
+		doc = constantDocs[name]
+	}
+	return
+}

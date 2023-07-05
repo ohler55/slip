@@ -2,8 +2,7 @@
 
 - next
 
- - defconstant
-  - add func to GetConstant (value, doc, ok)
+ + defconstant
  - first, second, third, ... tenth (each is a placer)
  - nbutlast
  - butlast
@@ -12,10 +11,12 @@
  - nth-value
  - values-list
  - find and find-if
+ - member member-if
  - position and position-if
  - search and search-if
  - delete and delete-if
  - remove and remove-if
+ - count count-if
 
  - char
   - digit-char-p

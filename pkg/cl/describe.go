@@ -90,7 +90,10 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 			panic(fmt.Sprintf("Package %s does not exist", parts[0]))
 		}
 	}
-	var pad []byte
+	var (
+		pad []byte
+		doc string
+	)
 	if v, has := s.LocalGet(sym); has {
 		b, pad = describeHead(b, pkg, obj, indent, right, ansi)
 		b = append(b, '\n')
@@ -116,9 +119,16 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 		b = slip.AppendDoc(b, vv.Doc, indent+4, right, ansi)
 		b = append(b, '\n')
 		b = append(b, pad...)
-
-		// TBD lookup constant
-
+	} else if obj, doc, ok = slip.GetConstant(sym); ok {
+		b, pad = describeHead(b, nil, sym, indent, right, ansi)
+		b = append(b, '\n')
+		b = append(b, pad...)
+		b = describeSymNames(b, sym, obj, pad, ansi)
+		b = append(b, "  Documentation:\n"...)
+		b = append(b, pad...)
+		b = slip.AppendDoc(b, doc, indent+4, right, ansi)
+		b = append(b, '\n')
+		b = append(b, pad...)
 	} else {
 		b, _ = describeHead(b, pkg, sym, indent, right, ansi)
 		b = append(b, "  unbound\n"...)

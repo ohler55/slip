@@ -3,7 +3,6 @@
 package cl_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -16,14 +15,7 @@ func TestDefconstantBasic(t *testing.T) {
 		Source: `(defconstant *defconstant-test-basic* (+ 3 4) "A test doc.")`,
 		Expect: `*defconstant-test-basic*`,
 	}).Test(t)
-	fmt.Printf("*** %q\n", slip.DescribeVar(slip.Symbol("*defconstant-test-basic*")))
 	tt.Equal(t, "A test doc.", slip.DescribeVar(slip.Symbol("*defconstant-test-basic*")))
-	/*
-		(&sliptest.Function{
-			Source: `(describe '*defconstant-test-basic*)`,
-			Expect: `*defconstant-test-basic*`,
-		}).Test(t)
-	*/
 	(&sliptest.Function{
 		Source: `(defconstant *defconstant-test-basic* 7)`,
 		Expect: `*defconstant-test-basic*`,
@@ -37,6 +29,13 @@ func TestDefconstantBasic(t *testing.T) {
 func TestDefconstantNotSymbol(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(defconstant t 3)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestDefconstantDocNotString(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(defconstant *nothing* 3 t)`,
 		Panics: true,
 	}).Test(t)
 }
