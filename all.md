@@ -177,7 +177,6 @@
  * [ ] ECHO-STREAM-INPUT-STREAM
  * [ ] ECHO-STREAM-OUTPUT-STREAM
  * [ ] ED
- * [ ] EIGHTH
  * [ ] ELT
  * [ ] ENCODE-UNIVERSAL-TIME
  * [ ] END-OF-FILE
@@ -192,7 +191,6 @@
  * [ ] EXTENDED-CHAR
  * [ ] FBOUNDP
  * [ ] FDEFINITION
- * [ ] FIFTH
  * [ ] FILE-ERROR
  * [ ] FILE-ERROR-PATHNAME
  * [ ] FILL
@@ -203,7 +201,6 @@
  * [ ] FIND-METHOD
  * [ ] FIND-RESTART
  * [ ] FINISH-OUTPUT
- * [ ] FIRST
  * [ ] FLET
  * [ ] FLOAT-DIGITS
  * [ ] FLOAT-PRECISION
@@ -216,7 +213,6 @@
  * [ ] FMAKUNBOUND
  * [ ] FORCE-OUTPUT
  * [ ] FORMATTER
- * [ ] FOURTH
  * [ ] FRESH-LINE
  * [ ] FTYPE
  * [ ] FUNCALL
@@ -362,7 +358,6 @@
  * [ ] NAME-CHAR
  * [ ] NBUTLAST
  * [ ] NEXT-METHOD-P
- * [ ] NINTH
  * [ ] NO-APPLICABLE-METHOD
  * [ ] NO-NEXT-METHOD
  * [ ] NOTANY
@@ -460,7 +455,6 @@
  * [ ] SCALE-FLOAT
  * [ ] SCHAR
  * [ ] SEARCH
- * [ ] SECOND
  * [ ] SERIOUS-CONDITION
  * [ ] SET-DIFFERENCE
  * [ ] SET-DISPATCH-MACRO-CHARACTER
@@ -468,7 +462,6 @@
  * [ ] SET-MACRO-CHARACTER
  * [ ] SET-PPRINT-DISPATCH
  * [ ] SET-SYNTAX-FROM-CHAR
- * [ ] SEVENTH
  * [ ] SHADOW
  * [ ] SHADOWING-IMPORT
  * [ ] SHARED-INITIALIZE
@@ -496,7 +489,6 @@
  * [ ] SINGLE-FLOAT-EPSILON
  * [ ] SINGLE-FLOAT-NEGATIVE-EPSILON
  * [ ] SINH
- * [ ] SIXTH
  * [ ] SLOT-BOUNDP
  * [ ] SLOT-EXISTS-P
  * [ ] SLOT-MAKUNBOUND
@@ -550,9 +542,7 @@
  * [ ] TAGBODY
  * [ ] TAILP
  * [ ] TANH
- * [ ] TENTH
  * [ ] THE
- * [ ] THIRD
  * [ ] THROW
  * [ ] TRACE
  * [ ] TRANSLATE-LOGICAL-PATHNAME
@@ -733,6 +723,7 @@
  * [x] DOLIST
  * [x] DOTIMES
  * [x] DOUBLE-FLOAT
+ * [x] EIGHTH
  * [x] ENSURE-DIRECTORIES-EXIST
  * [x] EQ
  * [x] EQL
@@ -744,6 +735,7 @@
  * [x] EXPT
  * [x] FCEILING
  * [x] FFLOOR
+ * [x] FIFTH
  * [x] FILE-AUTHOR
  * [x] FILE-LENGTH
  * [x] FILE-NAMESTRING
@@ -754,11 +746,13 @@
  * [x] FIND-CLASS
  * [x] FIND-PACKAGE
  * [x] FIND-SYMBOL
+ * [x] FIRST
  * [x] FIXNUM
  * [x] FLOAT
  * [x] FLOATP
  * [x] FLOOR
  * [x] FORMAT
+ * [x] FOURTH
  * [x] FROUND
  * [x] FTRUNCATE
  * [x] FUNCTION
@@ -820,6 +814,7 @@
  * [x] NCONC
  * [x] NIL
  * [x] NINTERSECTION
+ * [x] NINTH
  * [x] NOT
  * [x] NREVERSE
  * [x] NSTRING-CAPITALIZE
@@ -878,13 +873,16 @@
  * [x] ROUND
  * [x] RPLACA
  * [x] RPLACD
+ * [x] SECOND
  * [x] SEQUENCE
  * [x] SET
  * [x] SETF
  * [x] SETQ
+ * [x] SEVENTH
  * [x] SHORT-FLOAT
  * [x] SIGNUM
  * [x] SIN
+ * [x] SIXTH
  * [x] SLEEP
  * [x] SORT
  * [x] SQRT
@@ -916,7 +914,9 @@
  * [x] SYMBOLP
  * [x] T
  * [x] TAN
+ * [x] TENTH
  * [x] TERPRI
+ * [x] THIRD
  * [x] TIME
  * [x] TREE-EQUAL
  * [x] TRUNCATE

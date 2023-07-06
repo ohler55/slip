@@ -3,7 +3,7 @@
 - next
 
  + defconstant
- - first, second, third, ... tenth (each is a placer)
+ + first, second, third, ... tenth
  - nbutlast
  - butlast
  - array
