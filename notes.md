@@ -4,12 +4,10 @@
 
  + defconstant
  + first, second, third, ... tenth
- - nbutlast
- - butlast
- - array
- - vector
- - nth-value
- - values-list
+ + vector
+ + vectorp
+ + nth-value
+ + values-list
  - find and find-if
  - member member-if
  - position and position-if
@@ -17,6 +15,12 @@
  - delete and delete-if
  - remove and remove-if
  - count count-if
+
+ - array
+  - add fill-pointer for one dimensional arrays
+ - vector-pop - takes 1 dimentional arrays, fials on simple vector or array
+ - vector-push - ...
+ - vector-push-extend - ...
 
  - char
   - digit-char-p

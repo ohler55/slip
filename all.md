@@ -575,7 +575,7 @@
  * [ ] VECTOR-POP
  * [ ] VECTOR-PUSH
  * [ ] VECTOR-PUSH-EXTEND
- * [ ] VECTORP
+ * [x] VECTORP
  * [ ] WARN
  * [ ] WARNING
  * [ ] WILD-PATHNAME-P

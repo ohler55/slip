@@ -48,9 +48,7 @@ type Nth struct {
 
 // Call the function with the arguments provided.
 func (f *Nth) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.ArgCountCheck(f, args, 2, 2)
 	switch list := args[1].(type) {
 	case nil:
 	case slip.List:
@@ -71,9 +69,7 @@ func (f *Nth) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 
 // Place a value in the first position of a list or cons.
 func (f *Nth) Place(args slip.List, value slip.Object) {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.ArgCountCheck(f, args, 2, 2)
 	list, ok := args[1].(slip.List)
 	if !ok {
 		slip.PanicType("list", args[1], "list")
