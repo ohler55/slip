@@ -8,12 +8,18 @@
  + vectorp
  + nth-value
  + values-list
- - find and find-if
- - member member-if
- - position and position-if
- - search and search-if
- - delete and delete-if
- - remove and remove-if
+ + find
+ - find-if
+ - member
+ - member-if
+ - position
+ - position-if
+ - search
+ - search-if
+ - delete
+ - delete-if
+ - remove
+ - remove-if
  - count count-if
 
  - array
