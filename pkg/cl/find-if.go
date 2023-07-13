@@ -11,34 +11,28 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Find{Function: slip.Function{Name: "find", Args: args}}
+			f := FindIf{Function: slip.Function{Name: "find-if", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "find",
+			Name: "find-if",
 			Args: []*slip.DocArg{
 				{
-					Name: "item",
-					Type: "object",
-					Text: "The value to match against the elements of _sequence_.",
+					Name: "predicate",
+					Type: "symbol|lambda",
+					Text: "The function to apply to each element of _sequence_.",
 				},
 				{
 					Name: "sequence",
 					Type: "sequence",
-					Text: "The sequence to search for _item_ in.",
+					Text: "The sequence to search.",
 				},
 				{Name: "&key"},
 				{
 					Name: "from-end",
 					Type: "boolean",
 					Text: `If true the search is in reverse or or from the end to the start.`,
-				},
-				{
-					Name: "test",
-					Type: "symbol|lambda",
-					Text: `A function that expects two arguments and returns a boolean to
-indicate a match. The default is _equal_`,
 				},
 				{
 					Name: "start",
@@ -59,32 +53,31 @@ in the _sequence_ to return a key for comparison.`,
 				},
 			},
 			Return: "object",
-			Text:   `__find__ returns the first element that satisfies _test_ or _nil_ if there is no match.`,
+			Text:   `__find-if__ returns the first element that satisfies _test_ or _nil_ if there is no match.`,
 			Examples: []string{
-				"(find 'x '((y . 1) (y. 2) (z . 3)) :key 'car) => (x . 1)",
+				"(find-if 'x '((y . 1) (y. 2) (z . 3)) :key 'car) => (x . 1)",
 			},
 		}, &slip.CLPkg)
 }
 
-// Find represents the find function.
-type Find struct {
+// FindIf represents the find-if function.
+type FindIf struct {
 	slip.Function
 }
 
-type findInfo struct {
-	item    slip.Object
-	start   int
-	end     int
-	test    slip.Caller
-	key     slip.Caller
-	fromEnd bool
+type findIfInfo struct {
+	start     int
+	end       int
+	predicate slip.Caller
+	key       slip.Caller
+	fromEnd   bool
 }
 
 // Call the function with the arguments provided.
-func (f *Find) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 12)
-	var fi findInfo
-	fi.item = args[0]
+func (f *FindIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
+	slip.ArgCountCheck(f, args, 2, 10)
+	var fi findIfInfo
+	fi.predicate = ResolveToCaller(s, args[0], depth)
 	fi.end = -1
 	for pos := 2; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
@@ -95,8 +88,6 @@ func (f *Find) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object
 		switch keyword {
 		case ":key":
 			fi.key = ResolveToCaller(s, args[pos+1], depth)
-		case ":test":
-			fi.test = ResolveToCaller(s, args[pos+1], depth)
 		case ":start":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
 				fi.start = int(num)
@@ -132,7 +123,7 @@ func (f *Find) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object
 	return
 }
 
-func (fi *findInfo) inList(s *slip.Scope, seq slip.List, depth int) slip.Object {
+func (fi *findIfInfo) inList(s *slip.Scope, seq slip.List, depth int) slip.Object {
 	if len(seq) <= fi.start {
 		return nil
 	}
@@ -148,14 +139,8 @@ func (fi *findInfo) inList(s *slip.Scope, seq slip.List, depth int) slip.Object 
 			if fi.key != nil {
 				key = fi.key.Call(s, slip.List{key}, d2)
 			}
-			if fi.test == nil {
-				if slip.ObjectEqual(fi.item, key) {
-					return element
-				}
-			} else {
-				if fi.test.Call(s, slip.List{fi.item, key}, d2) != nil {
-					return element
-				}
+			if fi.predicate.Call(s, slip.List{key}, d2) != nil {
+				return element
 			}
 		}
 	}
@@ -164,20 +149,14 @@ func (fi *findInfo) inList(s *slip.Scope, seq slip.List, depth int) slip.Object 
 		if fi.key != nil {
 			key = fi.key.Call(s, slip.List{key}, d2)
 		}
-		if fi.test == nil {
-			if slip.ObjectEqual(fi.item, key) {
-				return seq[i]
-			}
-		} else {
-			if fi.test.Call(s, slip.List{fi.item, key}, d2) != nil {
-				return seq[i]
-			}
+		if fi.predicate.Call(s, slip.List{key}, d2) != nil {
+			return seq[i]
 		}
 	}
 	return nil
 }
 
-func (fi *findInfo) inString(s *slip.Scope, seq slip.String, depth int) (found slip.Object) {
+func (fi *findIfInfo) inString(s *slip.Scope, seq slip.String, depth int) (found slip.Object) {
 	ra := []rune(seq)
 	if len(ra) <= fi.start {
 		return nil
@@ -195,14 +174,8 @@ func (fi *findInfo) inString(s *slip.Scope, seq slip.String, depth int) (found s
 			if fi.key != nil {
 				key = fi.key.Call(s, slip.List{key}, d2)
 			}
-			if fi.test == nil {
-				if slip.ObjectEqual(fi.item, key) {
-					return slip.Character(element)
-				}
-			} else {
-				if fi.test.Call(s, slip.List{fi.item, key}, d2) != nil {
-					return slip.Character(element)
-				}
+			if fi.predicate.Call(s, slip.List{key}, d2) != nil {
+				return slip.Character(element)
 			}
 		}
 	}
@@ -211,14 +184,8 @@ func (fi *findInfo) inString(s *slip.Scope, seq slip.String, depth int) (found s
 		if fi.key != nil {
 			key = fi.key.Call(s, slip.List{key}, d2)
 		}
-		if fi.test == nil {
-			if slip.ObjectEqual(fi.item, key) {
-				return slip.Character(ra[i])
-			}
-		} else {
-			if fi.test.Call(s, slip.List{fi.item, key}, d2) != nil {
-				return slip.Character(ra[i])
-			}
+		if fi.predicate.Call(s, slip.List{key}, d2) != nil {
+			return slip.Character(ra[i])
 		}
 	}
 	return nil

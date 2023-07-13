@@ -9,7 +9,7 @@
  + nth-value
  + values-list
  + find
- - find-if
+ + find-if
  - member
  - member-if
  - position

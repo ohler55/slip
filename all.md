@@ -196,7 +196,7 @@
  * [ ] FILL
  * [ ] FILL-POINTER
  * [ ] FIND-ALL-SYMBOLS
- * [ ] FIND-IF
+ * [x] FIND-IF
  * [ ] FIND-METHOD
  * [ ] FINISH-OUTPUT
  * [ ] FLET
