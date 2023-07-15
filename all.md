@@ -151,7 +151,7 @@
  * [ ] DEFSETF
  * [ ] DEFSTRUCT
  * [ ] DEFTYPE
- * [ ] DELETE
+ * [x] DELETE
  * [ ] DELETE-DUPLICATES
  * [ ] DELETE-IF
  * [ ] DELETE-PACKAGE

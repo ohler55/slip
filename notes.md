@@ -10,16 +10,15 @@
  + values-list
  + find
  + find-if
+ + delete
+ - delete-if
+ - remove - alias for delete
+ - remove-if
  - member
  - member-if
  - position
  - position-if
  - search
- - search-if
- - delete
- - delete-if
- - remove
- - remove-if
  - count count-if
 
  - array
