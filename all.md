@@ -153,7 +153,7 @@
  * [ ] DEFTYPE
  * [x] DELETE
  * [ ] DELETE-DUPLICATES
- * [ ] DELETE-IF
+ * [x] DELETE-IF
  * [ ] DELETE-PACKAGE
  * [ ] DENOMINATOR
  * [ ] DEPOSIT-FIELD
@@ -429,9 +429,9 @@
  * [ ] REALPART
  * [ ] REDUCE
  * [ ] REMF
- * [ ] REMOVE
+ * [x] REMOVE
  * [ ] REMOVE-DUPLICATES
- * [ ] REMOVE-IF
+ * [x] REMOVE-IF
  * [ ] REMOVE-METHOD
  * [ ] REMPROP
  * [ ] RENAME-PACKAGE

@@ -11,9 +11,11 @@
  + find
  + find-if
  + delete
- - delete-if
- - remove - alias for delete
- - remove-if
+ + delete-if
+ - delete-duplicates
+ + remove
+ + remove-if
+ - remove-duplicates
  - member
  - member-if
  - position
