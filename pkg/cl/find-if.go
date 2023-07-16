@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"strings"
-
 	"github.com/ohler55/slip"
 )
 
@@ -65,126 +63,89 @@ type FindIf struct {
 	slip.Function
 }
 
-type findIfInfo struct {
-	start     int
-	end       int
-	predicate slip.Caller
-	key       slip.Caller
-	fromEnd   bool
-}
-
 // Call the function with the arguments provided.
 func (f *FindIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 10)
-	var fi findIfInfo
-	fi.predicate = ResolveToCaller(s, args[0], depth)
-	fi.end = -1
-	for pos := 2; pos < len(args)-1; pos += 2 {
-		sym, ok := args[pos].(slip.Symbol)
-		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
-		}
-		keyword := strings.ToLower(string(sym))
-		switch keyword {
-		case ":key":
-			fi.key = ResolveToCaller(s, args[pos+1], depth)
-		case ":start":
-			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
-				fi.start = int(num)
-			} else {
-				slip.PanicType("start", args[pos+1], "fixnum")
-			}
-		case ":end":
-			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
-				fi.end = int(num)
-			} else if args[pos+1] == nil {
-				fi.end = -1
-			} else {
-				slip.PanicType("end", args[pos+1], "fixnum")
-			}
-		case ":from-end":
-			fi.fromEnd = args[pos+1] != nil
-		default:
-			slip.PanicType("keyword", sym, ":key", ":test")
-		}
-	}
+	var sfv seqFunVars
+	sfv.noCount = true
+	sfv.setKeysIf(f, s, args, depth)
+
 	switch ta := args[1].(type) {
 	case nil:
 		// nothing found
 	case slip.List:
-		found = fi.inList(s, ta, depth)
+		found = f.inList(s, ta, depth, &sfv)
 	case slip.String:
-		found = fi.inString(s, ta, depth)
+		found = f.inString(s, ta, depth, &sfv)
 	case slip.Vector:
-		found = fi.inList(s, slip.List(ta), depth)
+		found = f.inList(s, slip.List(ta), depth, &sfv)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
 	return
 }
 
-func (fi *findIfInfo) inList(s *slip.Scope, seq slip.List, depth int) slip.Object {
-	if len(seq) <= fi.start {
+func (f *FindIf) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars) slip.Object {
+	if len(seq) <= sfv.start {
 		return nil
 	}
-	if 0 <= fi.end && fi.end < len(seq) {
-		seq = seq[fi.start:fi.end]
+	if 0 <= sfv.end && sfv.end < len(seq) {
+		seq = seq[sfv.start:sfv.end]
 	} else {
-		seq = seq[fi.start:]
+		seq = seq[sfv.start:]
 	}
 	d2 := depth + 1
-	if !fi.fromEnd {
+	if !sfv.fromEnd {
 		for _, element := range seq {
 			key := element
-			if fi.key != nil {
-				key = fi.key.Call(s, slip.List{key}, d2)
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
-			if fi.predicate.Call(s, slip.List{key}, d2) != nil {
+			if sfv.test.Call(s, slip.List{key}, d2) != nil {
 				return element
 			}
 		}
 	}
 	for i := len(seq) - 1; 0 <= i; i-- {
 		key := seq[i]
-		if fi.key != nil {
-			key = fi.key.Call(s, slip.List{key}, d2)
+		if sfv.key != nil {
+			key = sfv.key.Call(s, slip.List{key}, d2)
 		}
-		if fi.predicate.Call(s, slip.List{key}, d2) != nil {
+		if sfv.test.Call(s, slip.List{key}, d2) != nil {
 			return seq[i]
 		}
 	}
 	return nil
 }
 
-func (fi *findIfInfo) inString(s *slip.Scope, seq slip.String, depth int) (found slip.Object) {
+func (f *FindIf) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFunVars) (found slip.Object) {
 	ra := []rune(seq)
-	if len(ra) <= fi.start {
+	if len(ra) <= sfv.start {
 		return nil
 	}
-	if 0 <= fi.end && fi.end < len(ra) {
-		ra = ra[fi.start:fi.end]
+	if 0 <= sfv.end && sfv.end < len(ra) {
+		ra = ra[sfv.start:sfv.end]
 	} else {
-		ra = ra[fi.start:]
+		ra = ra[sfv.start:]
 	}
 	d2 := depth + 1
 	var key slip.Object
-	if !fi.fromEnd {
+	if !sfv.fromEnd {
 		for _, element := range ra {
 			key = slip.Character(element)
-			if fi.key != nil {
-				key = fi.key.Call(s, slip.List{key}, d2)
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
-			if fi.predicate.Call(s, slip.List{key}, d2) != nil {
+			if sfv.test.Call(s, slip.List{key}, d2) != nil {
 				return slip.Character(element)
 			}
 		}
 	}
 	for i := len(ra) - 1; 0 <= i; i-- {
 		key = slip.Character(ra[i])
-		if fi.key != nil {
-			key = fi.key.Call(s, slip.List{key}, d2)
+		if sfv.key != nil {
+			key = sfv.key.Call(s, slip.List{key}, d2)
 		}
-		if fi.predicate.Call(s, slip.List{key}, d2) != nil {
+		if sfv.test.Call(s, slip.List{key}, d2) != nil {
 			return slip.Character(ra[i])
 		}
 	}

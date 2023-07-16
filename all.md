@@ -134,8 +134,8 @@
  * [ ] COPY-SYMBOL
  * [ ] COPY-TREE
  * [ ] COSH
- * [ ] COUNT
- * [ ] COUNT-IF
+ * [x] COUNT
+ * [x] COUNT-IF
  * [ ] CTYPECASE
  * [ ] DECLAIM
  * [ ] DECLARATION
@@ -151,9 +151,6 @@
  * [ ] DEFSETF
  * [ ] DEFSTRUCT
  * [ ] DEFTYPE
- * [x] DELETE
- * [ ] DELETE-DUPLICATES
- * [x] DELETE-IF
  * [ ] DELETE-PACKAGE
  * [ ] DENOMINATOR
  * [ ] DEPOSIT-FIELD
@@ -196,7 +193,6 @@
  * [ ] FILL
  * [ ] FILL-POINTER
  * [ ] FIND-ALL-SYMBOLS
- * [x] FIND-IF
  * [ ] FIND-METHOD
  * [ ] FINISH-OUTPUT
  * [ ] FLET
@@ -429,9 +425,6 @@
  * [ ] REALPART
  * [ ] REDUCE
  * [ ] REMF
- * [x] REMOVE
- * [ ] REMOVE-DUPLICATES
- * [x] REMOVE-IF
  * [ ] REMOVE-METHOD
  * [ ] REMPROP
  * [ ] RENAME-PACKAGE
@@ -705,7 +698,10 @@
  * [x] DEFPARAMETER
  * [x] DEFUN
  * [x] DEFVAR
+ * [x] DELETE
+ * [x] DELETE-DUPLICATES
  * [x] DELETE-FILE
+ * [x] DELETE-IF
  * [x] DESCRIBE
  * [x] DIRECTORY
  * [x] DIRECTORY-NAMESTRING
@@ -736,6 +732,7 @@
  * [x] FILE-WRITE-DATE
  * [x] FIND
  * [x] FIND-CLASS
+ * [x] FIND-IF
  * [x] FIND-PACKAGE
  * [x] FIND-SYMBOL
  * [x] FIRST
@@ -857,6 +854,9 @@
  * [x] REAL
  * [x] REM
  * [x] REMHASH
+ * [x] REMOVE
+ * [x] REMOVE-DUPLICATES
+ * [x] REMOVE-IF
  * [x] RENAME-FILE
  * [x] REQUIRE
  * [x] RETURN

@@ -3,9 +3,6 @@
 package cl
 
 import (
-	"math"
-	"strings"
-
 	"github.com/ohler55/slip"
 )
 
@@ -77,98 +74,48 @@ type Delete struct {
 	slip.Function
 }
 
-type deleteInfo struct {
-	item    slip.Object
-	start   int
-	end     int
-	count   int
-	test    slip.Caller
-	key     slip.Caller
-	fromEnd bool
-}
-
 // Call the function with the arguments provided.
 func (f *Delete) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 14)
-	var di deleteInfo
-	di.item = args[0]
-	di.end = -1
-	di.count = math.MaxInt
-	for pos := 2; pos < len(args)-1; pos += 2 {
-		sym, ok := args[pos].(slip.Symbol)
-		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
-		}
-		keyword := strings.ToLower(string(sym))
-		switch keyword {
-		case ":key":
-			di.key = ResolveToCaller(s, args[pos+1], depth)
-		case ":test":
-			di.test = ResolveToCaller(s, args[pos+1], depth)
-		case ":start":
-			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
-				di.start = int(num)
-			} else {
-				slip.PanicType("start", args[pos+1], "fixnum")
-			}
-		case ":end":
-			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
-				di.end = int(num)
-			} else if args[pos+1] == nil {
-				di.end = -1
-			} else {
-				slip.PanicType("end", args[pos+1], "fixnum")
-			}
-		case ":count":
-			if num, ok := args[pos+1].(slip.Fixnum); ok {
-				di.count = int(num)
-			} else {
-				slip.PanicType("count", args[pos+1], "fixnum")
-			}
-		case ":from-end":
-			di.fromEnd = args[pos+1] != nil
-		default:
-			slip.PanicType("keyword", sym, ":key", ":test")
-		}
-	}
+	var sfv seqFunVars
+	sfv.setKeysItem(f, s, args, depth)
 	switch ta := args[1].(type) {
 	case nil:
 		// nothing to delete
 	case slip.List:
-		result = di.inList(s, ta, depth)
+		result = f.inList(s, ta, depth, &sfv)
 	case slip.String:
-		result = di.inString(s, ta, depth)
+		result = f.inString(s, ta, depth, &sfv)
 	case slip.Vector:
-		result = slip.Vector(di.inList(s, slip.List(ta), depth))
+		result = slip.Vector(f.inList(s, slip.List(ta), depth, &sfv))
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
 	return
 }
 
-func (di *deleteInfo) inList(s *slip.Scope, seq slip.List, depth int) (list slip.List) {
-	if di.end < 0 || len(seq) < di.end {
-		di.end = len(seq)
+func (f *Delete) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars) (list slip.List) {
+	if sfv.end < 0 || len(seq) < sfv.end {
+		sfv.end = len(seq)
 	}
 	d2 := depth + 1
 	var count int
-	if di.fromEnd {
+	if sfv.fromEnd {
 		for i := len(seq) - 1; 0 <= i; i-- {
-			if i < di.start || di.end <= i || di.count <= count {
+			if i < sfv.start || sfv.end <= i || sfv.count <= count {
 				list = append(list, seq[i])
 				continue
 			}
 			key := seq[i]
-			if di.key != nil {
-				key = di.key.Call(s, slip.List{key}, d2)
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
-			if di.test == nil {
-				if slip.ObjectEqual(di.item, key) {
+			if sfv.test == nil {
+				if slip.ObjectEqual(sfv.item, key) {
 					count++
 					continue
 				}
 			} else {
-				if di.test.Call(s, slip.List{di.item, key}, d2) != nil {
+				if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
 					count++
 					continue
 				}
@@ -181,21 +128,21 @@ func (di *deleteInfo) inList(s *slip.Scope, seq slip.List, depth int) (list slip
 		}
 	} else {
 		for i := 0; i < len(seq); i++ {
-			if i < di.start || di.end <= i || di.count <= count {
+			if i < sfv.start || sfv.end <= i || sfv.count <= count {
 				list = append(list, seq[i])
 				continue
 			}
 			key := seq[i]
-			if di.key != nil {
-				key = di.key.Call(s, slip.List{key}, d2)
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
-			if di.test == nil {
-				if slip.ObjectEqual(di.item, key) {
+			if sfv.test == nil {
+				if slip.ObjectEqual(sfv.item, key) {
 					count++
 					continue
 				}
 			} else {
-				if di.test.Call(s, slip.List{di.item, key}, d2) != nil {
+				if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
 					count++
 					continue
 				}
@@ -206,10 +153,10 @@ func (di *deleteInfo) inList(s *slip.Scope, seq slip.List, depth int) (list slip
 	return list
 }
 
-func (di *deleteInfo) inString(s *slip.Scope, seq slip.String, depth int) slip.Object {
+func (f *Delete) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFunVars) slip.Object {
 	ra := []rune(seq)
-	if di.end < 0 || len(seq) < di.end {
-		di.end = len(seq)
+	if sfv.end < 0 || len(seq) < sfv.end {
+		sfv.end = len(seq)
 	}
 	d2 := depth + 1
 	var (
@@ -217,23 +164,23 @@ func (di *deleteInfo) inString(s *slip.Scope, seq slip.String, depth int) slip.O
 		nra   []rune
 		key   slip.Object
 	)
-	if di.fromEnd {
+	if sfv.fromEnd {
 		for i := len(ra) - 1; 0 <= i; i-- {
-			if i < di.start || di.end <= i || di.count <= count {
+			if i < sfv.start || sfv.end <= i || sfv.count <= count {
 				nra = append(nra, ra[i])
 				continue
 			}
 			key = slip.Character(ra[i])
-			if di.key != nil {
-				key = di.key.Call(s, slip.List{key}, d2)
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
-			if di.test == nil {
-				if slip.ObjectEqual(di.item, key) {
+			if sfv.test == nil {
+				if slip.ObjectEqual(sfv.item, key) {
 					count++
 					continue
 				}
 			} else {
-				if di.test.Call(s, slip.List{di.item, key}, d2) != nil {
+				if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
 					count++
 					continue
 				}
@@ -246,21 +193,21 @@ func (di *deleteInfo) inString(s *slip.Scope, seq slip.String, depth int) slip.O
 		}
 	} else {
 		for i := 0; i < len(ra); i++ {
-			if i < di.start || di.end <= i || di.count <= count {
+			if i < sfv.start || sfv.end <= i || sfv.count <= count {
 				nra = append(nra, ra[i])
 				continue
 			}
 			key = slip.Character(ra[i])
-			if di.key != nil {
-				key = di.key.Call(s, slip.List{key}, d2)
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
-			if di.test == nil {
-				if slip.ObjectEqual(di.item, key) {
+			if sfv.test == nil {
+				if slip.ObjectEqual(sfv.item, key) {
 					count++
 					continue
 				}
 			} else {
-				if di.test.Call(s, slip.List{di.item, key}, d2) != nil {
+				if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
 					count++
 					continue
 				}

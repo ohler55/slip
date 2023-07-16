@@ -187,4 +187,8 @@ func TestDeleteBadKeyword(t *testing.T) {
 		Source: "(delete 'b '(a b c) :bad 3)",
 		Panics: true,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: "(delete 'b '(a b c) :count)",
+		Panics: true,
+	}).Test(t)
 }

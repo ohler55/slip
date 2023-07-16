@@ -9,15 +9,15 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := DeleteIf{Function: slip.Function{Name: "delete-if", Args: args}}
+			f := CountIf{Function: slip.Function{Name: "count-if", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "delete-if",
+			Name: "count-if",
 			Args: []*slip.DocArg{
 				{
-					Name: "test",
+					Name: "predicate",
 					Type: "object",
 					Text: "The test to apply to each elements of _sequence_.",
 				},
@@ -44,11 +44,6 @@ func init() {
 the length of the _sequence_.`,
 				},
 				{
-					Name: "count",
-					Type: "fixnum",
-					Text: `The maximum number of element to remove. Default is _nil_ for unlimited.`,
-				},
-				{
 					Name: "key",
 					Type: "symbol|lambda",
 					Text: `A function that expects one argument to apply to each element
@@ -56,131 +51,95 @@ in the _sequence_ to return a key for comparison.`,
 				},
 			},
 			Return: "object",
-			Text:   `__delete-if__ returns a sequence with the matching elements removed.`,
+			Text:   `__count-if__ returns the number of elements in _sequence_ where _predicate_ returns non-nil.`,
 			Examples: []string{
-				"(delete-if 'numberp '((y . 1) (1 . 2) (z . 3)) :key 'car) => ((y . 1) (z. 3))",
+				"(count-if 'numberp '(a 1 b 2 c 3)) => 3",
 			},
 		}, &slip.CLPkg)
 }
 
-// DeleteIf represents the delete-if function.
-type DeleteIf struct {
+// CountIf represents the count-if function.
+type CountIf struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *DeleteIf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *CountIf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	var sfv seqFunVars
+	sfv.noCount = true
 	sfv.setKeysIf(f, s, args, depth)
 
 	switch ta := args[1].(type) {
 	case nil:
-		// nothing to delete-if
+		result = slip.Fixnum(0)
 	case slip.List:
-		result = f.inList(s, ta, depth, &sfv)
+		result = slip.Fixnum(f.inList(s, ta, depth, &sfv))
 	case slip.String:
-		result = f.inString(s, ta, depth, &sfv)
+		result = slip.Fixnum(f.inString(s, ta, depth, &sfv))
 	case slip.Vector:
-		result = slip.Vector(f.inList(s, slip.List(ta), depth, &sfv))
+		result = slip.Fixnum(f.inList(s, slip.List(ta), depth, &sfv))
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
 	return
 }
 
-func (f *DeleteIf) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars) (list slip.List) {
+func (f *CountIf) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars) (count int) {
 	if sfv.end < 0 || len(seq) < sfv.end {
 		sfv.end = len(seq)
 	}
 	d2 := depth + 1
-	var count int
 	if sfv.fromEnd {
-		for i := len(seq) - 1; 0 <= i; i-- {
-			if i < sfv.start || sfv.end <= i || sfv.count <= count {
-				list = append(list, seq[i])
-				continue
-			}
+		for i := sfv.end - 1; sfv.start <= i; i-- {
 			key := seq[i]
 			if sfv.key != nil {
 				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
 			if sfv.test.Call(s, slip.List{key}, d2) != nil {
 				count++
-				continue
 			}
-			list = append(list, seq[i])
-		}
-		// reverse list
-		for i := len(list)/2 - 1; 0 <= i; i-- {
-			list[i], list[len(list)-i-1] = list[len(list)-i-1], list[i]
 		}
 	} else {
-		for i := 0; i < len(seq); i++ {
-			if i < sfv.start || sfv.end <= i || sfv.count <= count {
-				list = append(list, seq[i])
-				continue
-			}
+		for i := sfv.start; i < sfv.end; i++ {
 			key := seq[i]
 			if sfv.key != nil {
 				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
 			if sfv.test.Call(s, slip.List{key}, d2) != nil {
 				count++
-				continue
 			}
-			list = append(list, seq[i])
 		}
 	}
-	return list
+	return
 }
 
-func (f *DeleteIf) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFunVars) slip.Object {
+func (f *CountIf) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFunVars) (count int) {
 	ra := []rune(seq)
 	if sfv.end < 0 || len(seq) < sfv.end {
 		sfv.end = len(seq)
 	}
 	d2 := depth + 1
-	var (
-		count int
-		nra   []rune
-		key   slip.Object
-	)
+	var key slip.Object
 	if sfv.fromEnd {
-		for i := len(ra) - 1; 0 <= i; i-- {
-			if i < sfv.start || sfv.end <= i || sfv.count <= count {
-				nra = append(nra, ra[i])
-				continue
-			}
+		for i := sfv.end - 1; sfv.start <= i; i-- {
 			key = slip.Character(ra[i])
 			if sfv.key != nil {
 				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
 			if sfv.test.Call(s, slip.List{key}, d2) != nil {
 				count++
-				continue
 			}
-			nra = append(nra, ra[i])
-		}
-		// reverse nra
-		for i := len(nra)/2 - 1; 0 <= i; i-- {
-			nra[i], nra[len(nra)-i-1] = nra[len(nra)-i-1], nra[i]
 		}
 	} else {
-		for i := 0; i < len(ra); i++ {
-			if i < sfv.start || sfv.end <= i || sfv.count <= count {
-				nra = append(nra, ra[i])
-				continue
-			}
+		for i := sfv.start; i < sfv.end; i++ {
 			key = slip.Character(ra[i])
 			if sfv.key != nil {
 				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
 			if sfv.test.Call(s, slip.List{key}, d2) != nil {
 				count++
-				continue
 			}
-			nra = append(nra, ra[i])
 		}
 	}
-	return slip.String(nra)
+	return
 }

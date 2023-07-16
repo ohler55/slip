@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Find{Function: slip.Function{Name: "find", Args: args}}
+			f := Count{Function: slip.Function{Name: "count", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "find",
+			Name: "count",
 			Args: []*slip.DocArg{
 				{
 					Name: "item",
@@ -57,126 +57,119 @@ in the _sequence_ to return a key for comparison.`,
 				},
 			},
 			Return: "object",
-			Text:   `__find__ returns the first element that satisfies _test_ or _nil_ if there is no match.`,
+			Text:   `__count__ returns the number of elements in _sequence_ that match _item_.`,
 			Examples: []string{
-				"(find 'x '((y . 1) (y. 2) (z . 3)) :key 'car) => (x . 1)",
+				"(count 'b '(a b c b a)) => 2",
 			},
 		}, &slip.CLPkg)
 }
 
-// Find represents the find function.
-type Find struct {
+// Count represents the count function.
+type Count struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Find) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
+func (f *Count) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	var sfv seqFunVars
 	sfv.noCount = true
 	sfv.setKeysItem(f, s, args, depth)
+
 	switch ta := args[1].(type) {
 	case nil:
-		// nothing found
+		result = slip.Fixnum(0)
 	case slip.List:
-		found = f.inList(s, ta, depth, &sfv)
+		result = slip.Fixnum(f.inList(s, ta, depth, &sfv))
 	case slip.String:
-		found = f.inString(s, ta, depth, &sfv)
+		result = slip.Fixnum(f.inString(s, ta, depth, &sfv))
 	case slip.Vector:
-		found = f.inList(s, slip.List(ta), depth, &sfv)
+		result = slip.Fixnum(f.inList(s, slip.List(ta), depth, &sfv))
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
 	return
 }
 
-func (f *Find) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars) slip.Object {
-	if len(seq) <= sfv.start {
-		return nil
-	}
-	if 0 <= sfv.end && sfv.end < len(seq) {
-		seq = seq[sfv.start:sfv.end]
-	} else {
-		seq = seq[sfv.start:]
+func (f *Count) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars) (count int) {
+	if sfv.end < 0 || len(seq) < sfv.end {
+		sfv.end = len(seq)
 	}
 	d2 := depth + 1
-	if !sfv.fromEnd {
-		for _, element := range seq {
-			key := element
+	if sfv.fromEnd {
+		for i := sfv.end - 1; sfv.start <= i; i-- {
+			key := seq[i]
 			if sfv.key != nil {
 				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
 			if sfv.test == nil {
 				if slip.ObjectEqual(sfv.item, key) {
-					return element
+					count++
 				}
 			} else {
 				if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
-					return element
+					count++
+				}
+			}
+		}
+	} else {
+		for i := sfv.start; i < sfv.end; i++ {
+			key := seq[i]
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
+			}
+			if sfv.test == nil {
+				if slip.ObjectEqual(sfv.item, key) {
+					count++
+				}
+			} else {
+				if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
+					count++
 				}
 			}
 		}
 	}
-	for i := len(seq) - 1; 0 <= i; i-- {
-		key := seq[i]
-		if sfv.key != nil {
-			key = sfv.key.Call(s, slip.List{key}, d2)
-		}
-		if sfv.test == nil {
-			if slip.ObjectEqual(sfv.item, key) {
-				return seq[i]
-			}
-		} else {
-			if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
-				return seq[i]
-			}
-		}
-	}
-	return nil
+	return
 }
 
-func (f *Find) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFunVars) (found slip.Object) {
+func (f *Count) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFunVars) (count int) {
 	ra := []rune(seq)
-	if len(ra) <= sfv.start {
-		return nil
-	}
-	if 0 <= sfv.end && sfv.end < len(ra) {
-		ra = ra[sfv.start:sfv.end]
-	} else {
-		ra = ra[sfv.start:]
+	if sfv.end < 0 || len(seq) < sfv.end {
+		sfv.end = len(seq)
 	}
 	d2 := depth + 1
 	var key slip.Object
-	if !sfv.fromEnd {
-		for _, element := range ra {
-			key = slip.Character(element)
+	if sfv.fromEnd {
+		for i := sfv.end - 1; sfv.start <= i; i-- {
+			key = slip.Character(ra[i])
 			if sfv.key != nil {
 				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
 			if sfv.test == nil {
 				if slip.ObjectEqual(sfv.item, key) {
-					return slip.Character(element)
+					count++
 				}
 			} else {
 				if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
-					return slip.Character(element)
+					count++
+				}
+			}
+		}
+	} else {
+		for i := sfv.start; i < sfv.end; i++ {
+			key = slip.Character(ra[i])
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
+			}
+			if sfv.test == nil {
+				if slip.ObjectEqual(sfv.item, key) {
+					count++
+				}
+			} else {
+				if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
+					count++
 				}
 			}
 		}
 	}
-	for i := len(ra) - 1; 0 <= i; i-- {
-		key = slip.Character(ra[i])
-		if sfv.key != nil {
-			key = sfv.key.Call(s, slip.List{key}, d2)
-		}
-		if sfv.test == nil {
-			if slip.ObjectEqual(sfv.item, key) {
-				return slip.Character(ra[i])
-			}
-		} else {
-			if sfv.test.Call(s, slip.List{sfv.item, key}, d2) != nil {
-				return slip.Character(ra[i])
-			}
-		}
-	}
-	return nil
+	return
 }

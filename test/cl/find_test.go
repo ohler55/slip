@@ -164,4 +164,8 @@ func TestFindBadKeyword(t *testing.T) {
 		Source: "(find 'b '(a b c) :bad 3)",
 		Panics: true,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: "(find 'b '(a b c) :count 3)",
+		Panics: true,
+	}).Test(t)
 }
