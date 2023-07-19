@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := FindIf{Function: slip.Function{Name: "find-if", Args: args}}
+			f := PositionIf{Function: slip.Function{Name: "position-if", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "find-if",
+			Name: "position-if",
 			Args: []*slip.DocArg{
 				{
 					Name: "predicate",
@@ -50,21 +50,22 @@ the length of the _sequence_.`,
 in the _sequence_ to return a key for comparison.`,
 				},
 			},
-			Return: "object",
-			Text:   `__find-if__ returns the first element that satisfies _test_ or _nil_ if there is no match.`,
+			Return: "fixnum|nil",
+			Text: `__position-if__ returns the index to the first element that satisfies
+_test_ or _nil_ if there is no match.`,
 			Examples: []string{
-				"(find-if 'oddp '((x . 1) (y . 2) (z . 3)) :key 'cdr) => (x . 1)",
+				"(position-if 'oddp '((x . 1) (y . 2) (z . 3)) :key 'cdr) => 0",
 			},
 		}, &slip.CLPkg)
 }
 
-// FindIf represents the find-if function.
-type FindIf struct {
+// PositionIf represents the position-if function.
+type PositionIf struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *FindIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
+func (f *PositionIf) Call(s *slip.Scope, args slip.List, depth int) (index slip.Object) {
 	var sfv seqFunVars
 	sfv.noCount = true
 	sfv.setKeysIf(f, s, args, depth)
@@ -73,18 +74,18 @@ func (f *FindIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Obje
 	case nil:
 		// nothing found
 	case slip.List:
-		found = f.inList(s, ta, depth, &sfv)
+		index = f.inList(s, ta, depth, &sfv)
 	case slip.String:
-		found = f.inString(s, ta, depth, &sfv)
+		index = f.inString(s, ta, depth, &sfv)
 	case slip.Vector:
-		found = f.inList(s, slip.List(ta), depth, &sfv)
+		index = f.inList(s, slip.List(ta), depth, &sfv)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
 	return
 }
 
-func (f *FindIf) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars) slip.Object {
+func (f *PositionIf) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars) slip.Object {
 	if len(seq) <= sfv.start {
 		return nil
 	}
@@ -95,13 +96,13 @@ func (f *FindIf) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars
 	}
 	d2 := depth + 1
 	if !sfv.fromEnd {
-		for _, element := range seq {
+		for i, element := range seq {
 			key := element
 			if sfv.key != nil {
 				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
 			if sfv.test.Call(s, slip.List{key}, d2) != nil {
-				return element
+				return slip.Fixnum(sfv.start + i)
 			}
 		}
 	}
@@ -111,13 +112,13 @@ func (f *FindIf) inList(s *slip.Scope, seq slip.List, depth int, sfv *seqFunVars
 			key = sfv.key.Call(s, slip.List{key}, d2)
 		}
 		if sfv.test.Call(s, slip.List{key}, d2) != nil {
-			return seq[i]
+			return slip.Fixnum(sfv.start + i)
 		}
 	}
 	return nil
 }
 
-func (f *FindIf) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFunVars) (found slip.Object) {
+func (f *PositionIf) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFunVars) slip.Object {
 	ra := []rune(seq)
 	if len(ra) <= sfv.start {
 		return nil
@@ -130,13 +131,13 @@ func (f *FindIf) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFun
 	d2 := depth + 1
 	var key slip.Object
 	if !sfv.fromEnd {
-		for _, element := range ra {
+		for i, element := range ra {
 			key = slip.Character(element)
 			if sfv.key != nil {
 				key = sfv.key.Call(s, slip.List{key}, d2)
 			}
 			if sfv.test.Call(s, slip.List{key}, d2) != nil {
-				return slip.Character(element)
+				return slip.Fixnum(sfv.start + i)
 			}
 		}
 	}
@@ -146,7 +147,7 @@ func (f *FindIf) inString(s *slip.Scope, seq slip.String, depth int, sfv *seqFun
 			key = sfv.key.Call(s, slip.List{key}, d2)
 		}
 		if sfv.test.Call(s, slip.List{key}, d2) != nil {
-			return slip.Character(ra[i])
+			return slip.Fixnum(sfv.start + i)
 		}
 	}
 	return nil

@@ -18,11 +18,11 @@
  + remove-duplicates
  + count
  + count-if
+ + position
+ + position-if
+ - search
  - member
  - member-if
- - position
- - position-if
- - search
 
  - array
   - add fill-pointer for one dimensional arrays

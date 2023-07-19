@@ -389,8 +389,8 @@
  * [ ] PATHNAMEP
  * [ ] PHASE
  * [ ] POP
- * [ ] POSITION
- * [ ] POSITION-IF
+ * [x] POSITION
+ * [x] POSITION-IF
  * [ ] PPRINT-DISPATCH
  * [ ] PPRINT-EXIT-IF-LIST-EXHAUSTED
  * [ ] PPRINT-FILL

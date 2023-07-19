@@ -59,7 +59,7 @@ in the _sequence_ to return a key for comparison.`,
 			Return: "object",
 			Text:   `__find__ returns the first element that satisfies _test_ or _nil_ if there is no match.`,
 			Examples: []string{
-				"(find 'x '((y . 1) (y. 2) (z . 3)) :key 'car) => (x . 1)",
+				"(find 'x '((x . 1) (y . 2) (z . 3)) :key 'car) => (x . 1)",
 			},
 		}, &slip.CLPkg)
 }
