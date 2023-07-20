@@ -198,9 +198,72 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 		panic(fmt.Sprintf("bounding indices %d and %d are invalid for sequence of length %d",
 			sv.start2, sv.end2, len(seq2)))
 	}
-	// TBD check start and end in bounds
-
+	seq1 = seq1[sv.start1:sv.end1]
+	seq1 = seq2[sv.start2:sv.end2]
+	if len(seq1) == 0 {
+		return slip.Fixnum(0)
+	}
+	if len(seq2) == 0 {
+		return nil
+	}
+	d2 := depth + 1
+	if sv.key != nil {
+		kseq := make(slip.List, len(seq1))
+		for i, v := range seq1 {
+			kseq[i] = sv.key.Call(s, slip.List{v}, d2)
+		}
+		seq1 = kseq
+		kseq = make(slip.List, len(seq2))
+		for i, v := range seq2 {
+			kseq[i] = sv.key.Call(s, slip.List{v}, d2)
+		}
+		seq2 = kseq
+	}
+	if sv.fromEnd {
+		// TBD
+	} else {
+		first := seq1[0]
+		for i, v2 := range seq2 {
+			if sv.test == nil {
+				if slip.ObjectEqual(first, v2) {
+					if sv.listMatchNoTest(seq1, seq2[i:]) {
+						return slip.Fixnum(i)
+					}
+				}
+			} else {
+				if sv.test.Call(s, slip.List{first, v2}, d2) != nil {
+					if sv.listMatchWithTest(s, seq1, seq2[i:], d2) {
+						return slip.Fixnum(i)
+					}
+				}
+			}
+		}
+	}
 	return nil
+}
+
+func (sv *searchVars) listMatchNoTest(seq1, seq2 slip.List) bool {
+	if len(seq2) < len(seq1) {
+		return false
+	}
+	for i, v1 := range seq1 {
+		if !slip.ObjectEqual(v1, seq2[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func (sv *searchVars) listMatchWithTest(s *slip.Scope, seq1, seq2 slip.List, depth int) bool {
+	if len(seq2) < len(seq1) {
+		return false
+	}
+	for i, v1 := range seq1 {
+		if sv.test.Call(s, slip.List{v1, seq2[i]}, depth) == nil {
+			return false
+		}
+	}
+	return true
 }
 
 func (sv *searchVars) inString(s *slip.Scope, seq2 slip.String, depth int) slip.Object {
