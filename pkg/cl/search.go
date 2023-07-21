@@ -98,6 +98,7 @@ type searchVars struct {
 // Call the function with the arguments provided.
 func (f *Search) Call(s *slip.Scope, args slip.List, depth int) (index slip.Object) {
 	var sv searchVars
+	sv.setKeysItem(f, s, args, depth)
 	switch ta := args[1].(type) {
 	case nil:
 		index = sv.inList(s, slip.List{}, depth)
@@ -173,6 +174,8 @@ func (sv *searchVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List, 
 func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Object {
 	var seq1 slip.List
 	switch s1 := sv.seq1.(type) {
+	case nil:
+		seq1 = slip.List{}
 	case slip.List:
 		seq1 = s1
 	case slip.Vector:
@@ -183,9 +186,8 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 		}
 		return slip.Fixnum(0)
 	default:
-		slip.PanicType("sequence-1", s1, "fixnum")
+		slip.PanicType("sequence-1", s1, "sequence")
 	}
-	fmt.Printf("*** seq1: %s\n", seq1)
 	if sv.end1 < 0 {
 		sv.end1 = len(seq1)
 	} else if len(seq1) < sv.end1 {
@@ -199,7 +201,7 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 			sv.start2, sv.end2, len(seq2)))
 	}
 	seq1 = seq1[sv.start1:sv.end1]
-	seq1 = seq2[sv.start2:sv.end2]
+	seq2 = seq2[sv.start2:sv.end2]
 	if len(seq1) == 0 {
 		return slip.Fixnum(0)
 	}
