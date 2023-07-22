@@ -229,13 +229,13 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 			if sv.test == nil {
 				if slip.ObjectEqual(first, v2) {
 					if sv.listMatchNoTest(seq1, seq2[i:]) {
-						return slip.Fixnum(i)
+						return slip.Fixnum(sv.start2 + i)
 					}
 				}
 			} else {
 				if sv.test.Call(s, slip.List{first, v2}, d2) != nil {
 					if sv.listMatchWithTest(s, seq1, seq2[i:], d2) {
-						return slip.Fixnum(i)
+						return slip.Fixnum(sv.start2 + i)
 					}
 				}
 			}

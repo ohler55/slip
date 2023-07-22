@@ -21,6 +21,8 @@
  + position
  + position-if
  - search
+  - from-end
+  - string
  - member
  - member-if
 
