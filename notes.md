@@ -20,9 +20,7 @@
  + count-if
  + position
  + position-if
- - search
-  - from-end
-  - string
+ + search
  - member
  - member-if
 

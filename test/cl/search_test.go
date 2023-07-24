@@ -20,6 +20,10 @@ func TestSearchNilList(t *testing.T) {
 		Source: "(search nil '(a b c d))",
 		Expect: "0",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: "(search nil '(a b c d) :from-end t)",
+		Expect: "4",
+	}).Test(t)
 }
 
 func TestSearchListNil(t *testing.T) {
@@ -31,11 +35,19 @@ func TestSearchListNil(t *testing.T) {
 
 func TestSearchListList(t *testing.T) {
 	(&sliptest.Function{
-		Source: "(search '(b c) '(a b c d))",
+		Source: "(search '(b c) '(a b c d b c))",
 		Expect: "1",
 	}).Test(t)
 	(&sliptest.Function{
+		Source: "(search '(b c) '(a b c d b c) :from-end t)",
+		Expect: "4",
+	}).Test(t)
+	(&sliptest.Function{
 		Source: "(search '(d e) '(a b c d))",
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: "(search '(b a) '(a b c d) :from-end t)",
 		Expect: "nil",
 	}).Test(t)
 	(&sliptest.Function{
@@ -83,6 +95,10 @@ func TestSearchListTest(t *testing.T) {
 		Expect: "3",
 	}).Test(t)
 	(&sliptest.Function{
+		Source: "(search '(3 4) '(2 4 3 5 6 7) :test '< :from-end t)",
+		Expect: "4",
+	}).Test(t)
+	(&sliptest.Function{
 		Source: "(search '(3 4) '(2 4 3 5) :test '<)",
 		Expect: "nil",
 	}).Test(t)
@@ -96,6 +112,57 @@ func TestSearchListStartEnd(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(search '(a b c) '(x y b c z w) :start1 1 :end1 nil :start2 1 :end2 nil)",
 		Expect: "2",
+	}).Test(t)
+}
+
+func TestSearchNilString(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search nil "abcd")`,
+		Expect: "0",
+	}).Test(t)
+}
+
+func TestSearchStringString(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search "bc" "abcd")`,
+		Expect: "1",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(search "bc" "πbcd")`,
+		Expect: "1",
+	}).Test(t)
+}
+
+func TestSearchListString(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search '() "abcd")`,
+		Expect: "0",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(search '(a) "abcd")`,
+		Expect: "nil",
+	}).Test(t)
+}
+
+func TestSearchVectorString(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search #() "abcd")`,
+		Expect: "0",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(search #(a) "abcd")`,
+		Expect: "nil",
+	}).Test(t)
+}
+
+func TestSearchNotString(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search nil t)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(search t "abc")`,
+		Panics: true,
 	}).Test(t)
 }
 

@@ -188,6 +188,10 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 	default:
 		slip.PanicType("sequence-1", s1, "sequence")
 	}
+	return sv.searchList(s, seq1, seq2, depth)
+}
+
+func (sv *searchVars) searchList(s *slip.Scope, seq1, seq2 slip.List, depth int) slip.Object {
 	if sv.end1 < 0 {
 		sv.end1 = len(seq1)
 	} else if len(seq1) < sv.end1 {
@@ -203,9 +207,12 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 	seq1 = seq1[sv.start1:sv.end1]
 	seq2 = seq2[sv.start2:sv.end2]
 	if len(seq1) == 0 {
+		if sv.fromEnd {
+			return slip.Fixnum(len(seq2))
+		}
 		return slip.Fixnum(0)
 	}
-	if len(seq2) == 0 {
+	if len(seq2) == 0 || len(seq2) < len(seq1) {
 		return nil
 	}
 	d2 := depth + 1
@@ -222,10 +229,29 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 		seq2 = kseq
 	}
 	if sv.fromEnd {
-		// TBD
+		last := seq1[len(seq1)-1]
+		for i := len(seq2) - 1; 0 <= i; i-- {
+			if i < len(seq1) {
+				break
+			}
+			v2 := seq2[i]
+			if sv.test == nil {
+				if slip.ObjectEqual(last, v2) {
+					if sv.listMatchNoTest(seq1, seq2[i-len(seq1)+1:]) {
+						return slip.Fixnum(sv.start2 + i - len(seq1) + 1)
+					}
+				}
+			} else {
+				if sv.test.Call(s, slip.List{last, v2}, d2) != nil {
+					if sv.listMatchWithTest(s, seq1, seq2[i-len(seq1)+1:], d2) {
+						return slip.Fixnum(sv.start2 + i - len(seq1) + 1)
+					}
+				}
+			}
+		}
 	} else {
 		first := seq1[0]
-		for i, v2 := range seq2 {
+		for i, v2 := range seq2[:len(seq2)-len(seq1)+1] {
 			if sv.test == nil {
 				if slip.ObjectEqual(first, v2) {
 					if sv.listMatchNoTest(seq1, seq2[i:]) {
@@ -245,9 +271,6 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 }
 
 func (sv *searchVars) listMatchNoTest(seq1, seq2 slip.List) bool {
-	if len(seq2) < len(seq1) {
-		return false
-	}
 	for i, v1 := range seq1 {
 		if !slip.ObjectEqual(v1, seq2[i]) {
 			return false
@@ -257,9 +280,6 @@ func (sv *searchVars) listMatchNoTest(seq1, seq2 slip.List) bool {
 }
 
 func (sv *searchVars) listMatchWithTest(s *slip.Scope, seq1, seq2 slip.List, depth int) bool {
-	if len(seq2) < len(seq1) {
-		return false
-	}
 	for i, v1 := range seq1 {
 		if sv.test.Call(s, slip.List{v1, seq2[i]}, depth) == nil {
 			return false
@@ -269,8 +289,37 @@ func (sv *searchVars) listMatchWithTest(s *slip.Scope, seq1, seq2 slip.List, dep
 }
 
 func (sv *searchVars) inString(s *slip.Scope, seq2 slip.String, depth int) slip.Object {
-
-	// TBD
-
-	return nil
+	// go handles strings as []rune sometimes and as []bytes for other
+	// functions. The index functions are []byte based which is contrary to
+	// what is needed by this function so instead convert to a []rune and then
+	// a list.
+	var seq1 slip.List
+	switch s1 := sv.seq1.(type) {
+	case nil:
+		seq1 = slip.List{}
+	case slip.List:
+		if 0 < len(s1) {
+			return nil
+		}
+		return slip.Fixnum(0)
+	case slip.Vector:
+		if 0 < len(s1) {
+			return nil
+		}
+		return slip.Fixnum(0)
+	case slip.String:
+		ra := []rune(s1)
+		seq1 = make(slip.List, len(ra))
+		for i, r := range ra {
+			seq1[i] = slip.Character(r)
+		}
+	default:
+		slip.PanicType("sequence-1", s1, "sequence")
+	}
+	ra := []rune(seq2)
+	sq2 := make(slip.List, len(ra))
+	for i, r := range ra {
+		sq2[i] = slip.Character(r)
+	}
+	return sv.searchList(s, seq1, sq2, depth)
 }
