@@ -134,8 +134,6 @@
  * [ ] COPY-SYMBOL
  * [ ] COPY-TREE
  * [ ] COSH
- * [x] COUNT
- * [x] COUNT-IF
  * [ ] CTYPECASE
  * [ ] DECLAIM
  * [ ] DECLARATION
@@ -322,9 +320,6 @@
  * [ ] MAP
  * [ ] MAP-INTO
  * [ ] MASK-FIELD
- * [ ] MEMBER
- * [ ] MEMBER-IF
- * [ ] MEMBER-IF-NOT
  * [ ] MERGE
  * [ ] METHOD-COMBINATION
  * [ ] METHOD-COMBINATION-ERROR
@@ -389,8 +384,6 @@
  * [ ] PATHNAMEP
  * [ ] PHASE
  * [ ] POP
- * [x] POSITION
- * [x] POSITION-IF
  * [ ] PPRINT-DISPATCH
  * [ ] PPRINT-EXIT-IF-LIST-EXHAUSTED
  * [ ] PPRINT-FILL
@@ -439,7 +432,6 @@
  * [ ] SBIT
  * [ ] SCALE-FLOAT
  * [ ] SCHAR
- * [x] SEARCH
  * [ ] SERIOUS-CONDITION
  * [ ] SET-DIFFERENCE
  * [ ] SET-DISPATCH-MACRO-CHARACTER
@@ -691,6 +683,8 @@
  * [x] CONS
  * [x] CONSP
  * [x] COS
+ * [x] COUNT
+ * [x] COUNT-IF
  * [x] DECF
  * [x] DEFCONSTANT
  * [x] DEFMACRO
@@ -794,6 +788,8 @@
  * [x] MAPL
  * [x] MAPLIST
  * [x] MAX
+ * [x] MEMBER
+ * [x] MEMBER-IF
  * [x] MERGE-PATHNAMES
  * [x] METHOD
  * [x] MIN
@@ -826,6 +822,8 @@
  * [x] PEEK-CHAR
  * [x] PI
  * [x] PLUSP
+ * [x] POSITION
+ * [x] POSITION-IF
  * [x] PPRINT
  * [x] PRIN1
  * [x] PRIN1-TO-STRING
@@ -865,6 +863,7 @@
  * [x] ROUND
  * [x] RPLACA
  * [x] RPLACD
+ * [x] SEARCH
  * [x] SECOND
  * [x] SEQUENCE
  * [x] SET
@@ -962,6 +961,7 @@
  - [-] INVOKE-RESTART-INTERACTIVELY
  - [-] LISTEN
  - [-] MAKE-INSTANCES-OBSOLETE
+ - [-] MEMBER-IF-NOT
  - [-] OPTIMIZE
  - [-] POSITION-IF-NOT
  - [-] PROVIDE

@@ -2,28 +2,6 @@
 
 - next
 
- + defconstant
- + first, second, third, ... tenth
- + vector
- + vectorp
- + nth-value
- + values-list
- + find
- + find-if
- + delete
- + delete-if
- + delete-duplicates
- + remove
- + remove-if
- + remove-duplicates
- + count
- + count-if
- + position
- + position-if
- + search
- - member
- - member-if
-
  - array
   - add fill-pointer for one dimensional arrays
  - vector-pop - takes 1 dimentional arrays, fials on simple vector or array
