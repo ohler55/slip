@@ -87,6 +87,28 @@ func TestDescribeVar(t *testing.T) {
 		out.String())
 }
 
+func TestDescribeConstant(t *testing.T) {
+	var out strings.Builder
+	scope := slip.NewScope()
+	scope.Let("*standard-output*", &slip.OutputStream{Writer: &out})
+	scope.Let("*print-ansi*", nil)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(describe 'pi)`,
+		Expect: "",
+	}).Test(t)
+
+	tt.Equal(t, `pi
+  [symbol]
+
+pi names a double-float:
+  Documentation:
+    The value of PI.
+  Value = 3.141592653589793
+`,
+		out.String())
+}
+
 func TestDescribeBaseType(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()

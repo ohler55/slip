@@ -126,3 +126,36 @@ func processBinding(s, ns *slip.Scope, arg slip.Object, depth int) {
 		}
 	}
 }
+
+// callN is used by second, third, fourth, etc.
+func callN(f slip.Object, args slip.List, n int) (result slip.Object) {
+	slip.ArgCountCheck(f, args, 1, 1)
+	a := args[0]
+	switch list := a.(type) {
+	case nil:
+		// leave result as nil
+	case slip.List:
+		if n < len(list) {
+			result = list[n]
+			if tail, ok := result.(slip.Tail); ok {
+				result = tail.Value
+			}
+		}
+	default:
+		slip.PanicType("list", list, "cons", "list")
+	}
+	return
+}
+
+// placeN is used by second, third, fourth, etc.
+func placeN(f slip.Object, args slip.List, n int, value slip.Object) {
+	slip.ArgCountCheck(f, args, 1, 1)
+	if list, ok := args[0].(slip.List); ok && n < len(list) {
+		if _, ok := list[n].(slip.Tail); ok {
+			value = slip.Tail{Value: value}
+		}
+		list[n] = value
+		return
+	}
+	slip.PanicType("list", args[0], "cons", "list")
+}

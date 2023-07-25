@@ -2,11 +2,16 @@
 
 - next
 
+ - array
+  - add fill-pointer for one dimensional arrays
+ - vector-pop - takes 1 dimentional arrays, fials on simple vector or array
+ - vector-push - ...
+ - vector-push-extend - ...
+
  - char
   - digit-char-p
   - graphics-char-p
   - char???
-
 
  - http package
   - flavors
@@ -43,6 +48,12 @@
 
  - merge (starts with result-type)
  - room
+
+ - property lists
+  - can modify but not add to or remove as list changes
+  - getf for existing only
+  - setf for existing only
+  - remf replace key and value with nil
 
  - package
   - support export list

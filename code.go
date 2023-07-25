@@ -1015,7 +1015,7 @@ func (c Code) Compile() {
 		}
 		var f Object
 		switch strings.ToLower(string(sym)) {
-		case "defun", "defmacro", "defvar", "defparameter":
+		case "defun", "defmacro", "defvar", "defparameter", "defconstant":
 			f = ListToFunc(scope, list, 0)
 			c[i] = f
 		}
