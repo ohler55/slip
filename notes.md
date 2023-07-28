@@ -2,16 +2,44 @@
 
 - next
 
+ - char (http://www.lispworks.com/documentation/HyperSpec/Body/13_aa.htm)
+  + alpha-char-p
+  + alphanumericp (IsLetter || IsNumber)
+  + both-case-p
+  - char (placer not supported)
+  - char-code-limit
+  - char-downcase
+  - char-equal
+  - char-greaterp
+  - char-lessp
+  - char-name
+  - char-not-equal
+  - char-not-greaterp
+  - char-not-lessp
+  - char-upcase
+  - char/=
+  - char<
+  - char<=
+  - char=
+  - char>
+  - char>=
+  - character
+  - code-char
+  - digit-char
+  - digit-char-p
+  - graphics-char-p (unicode.IsGraphic or **IsPrint** check space and tab)
+  - lower-case-p
+  - name-char
+  - schar
+  - standard-char-p
+  - upper-case-p
+
+
  - array
   - add fill-pointer for one dimensional arrays
- - vector-pop - takes 1 dimentional arrays, fials on simple vector or array
+ - vector-pop - takes 1 dimentional arrays, fails on simple vector or array
  - vector-push - ...
  - vector-push-extend - ...
-
- - char
-  - digit-char-p
-  - graphics-char-p
-  - char???
 
  - http package
   - flavors

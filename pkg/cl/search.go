@@ -107,7 +107,6 @@ func (f *Search) Call(s *slip.Scope, args slip.List, depth int) (index slip.Obje
 	case slip.String:
 		index = sv.inString(s, ta, depth)
 	case slip.Vector:
-		// TBD check sv.seq1 as vector
 		index = sv.inList(s, slip.List(ta), depth)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
