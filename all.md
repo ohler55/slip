@@ -12,8 +12,6 @@
  * [ ] ADD-METHOD
  * [ ] ADJUST-ARRAY
  * [ ] ADJUSTABLE-ARRAY-P
- * [x] ALPHA-CHAR-P
- * [x] ALPHANUMERICP
  * [ ] AREF
  * [ ] ARITHMETIC-ERROR
  * [ ] ARITHMETIC-ERROR-OPERANDS
@@ -71,7 +69,6 @@
  * [ ] BOOLE-SET
  * [ ] BOOLE-XOR
  * [ ] BOOLEAN
- * [x] BOTH-CASE-P
  * [ ] BREAK
  * [ ] BROADCAST-STREAM
  * [ ] BROADCAST-STREAM-STREAMS
@@ -91,7 +88,6 @@
  * [ ] CHANGE-CLASS
  * [ ] CHAR
  * [ ] CHAR-CODE-LIMIT
- * [ ] CHAR-DOWNCASE
  * [ ] CHAR-EQUAL
  * [ ] CHAR-GREATERP
  * [ ] CHAR-LESSP
@@ -99,7 +95,6 @@
  * [ ] CHAR-NOT-EQUAL
  * [ ] CHAR-NOT-GREATERP
  * [ ] CHAR-NOT-LESSP
- * [ ] CHAR-UPCASE
  * [ ] CHAR/=
  * [ ] CHAR<
  * [ ] CHAR<=
@@ -222,7 +217,6 @@
  * [ ] GET-SETF-EXPANSION
  * [ ] GET-UNIVERSAL-TIME
  * [ ] GETF
- * [ ] GRAPHIC-CHAR-P
  * [ ] HANDLER-BIND
  * [ ] HANDLER-CASE
  * [ ] HOST-NAMESTRING
@@ -293,7 +287,6 @@
  * [ ] LONG-SITE-NAME
  * [ ] LOOP
  * [ ] LOOP-FINISH
- * [ ] LOWER-CASE-P
  * [ ] MACHINE-INSTANCE
  * [ ] MACHINE-TYPE
  * [ ] MACHINE-VERSION
@@ -478,13 +471,6 @@
  * [ ] SPACE
  * [ ] SPECIAL
  * [ ] SPECIAL-OPERATOR-P
- * [ ] STANDARD
- * [ ] STANDARD-CHAR
- * [ ] STANDARD-CHAR-P
- * [ ] STANDARD-CLASS
- * [ ] STANDARD-GENERIC-FUNCTION
- * [ ] STANDARD-METHOD
- * [ ] STANDARD-OBJECT
  * [ ] STEP
  * [ ] STORAGE-CONDITION
  * [ ] STORE-VALUE
@@ -543,7 +529,6 @@
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
- * [ ] UPPER-CASE-P
  * [ ] USE-PACKAGE
  * [ ] USE-VALUE
  * [ ] USER-HOMEDIR-PATHNAME
@@ -626,6 +611,8 @@
  * [x] ACOS
  * [x] ADJOIN
  * [x] ALLOCATE-INSTANCE
+ * [x] ALPHA-CHAR-P
+ * [x] ALPHANUMERICP
  * [x] AND
  * [x] APPEND
  * [x] APPLY
@@ -638,6 +625,7 @@
  * [x] ATAN
  * [x] ATOM
  * [x] BLOCK
+ * [x] BOTH-CASE-P
  * [x] BOUNDP
  * [x] BUTLAST
  * [x] CAAAAR
@@ -672,7 +660,9 @@
  * [x] CDR
  * [x] CEILING
  * [x] CHAR-CODE
+ * [x] CHAR-DOWNCASE
  * [x] CHAR-INT
+ * [x] CHAR-UPCASE
  * [x] CHARACTERP
  * [x] CLASS-NAME
  * [x] CLASS-OF
@@ -745,6 +735,7 @@
  * [x] GET-OUTPUT-STREAM-STRING
  * [x] GETHASH
  * [x] GO
+ * [x] GRAPHIC-CHAR-P
  * [x] HASH-TABLE
  * [x] HASH-TABLE-COUNT
  * [x] HASH-TABLE-P
@@ -773,6 +764,7 @@
  * [x] LOAD
  * [x] LOG
  * [x] LONG-FLOAT
+ * [x] LOWER-CASE-P
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
  * [x] MAKE-RANDOM-STATE
@@ -878,6 +870,8 @@
  * [x] SORT
  * [x] SQRT
  * [x] STABLE-SORT
+ * [x] STANDARD-CHAR
+ * [x] STANDARD-CHAR-P
  * [x] STREAM
  * [x] STREAMP
  * [x] STRING
@@ -918,6 +912,7 @@
  * [x] UNION
  * [x] UNLESS
  * [x] UNREAD-CHAR
+ * [x] UPPER-CASE-P
  * [x] VALUES
  * [x] VECTOR
  * [x] VECTORP
@@ -974,5 +969,10 @@
  - [-] RESTART-CASE
  - [-] RESTART-NAME
  - [-] SPEED
+ - [-] STANDARD
+ - [-] STANDARD-CLASS
+ - [-] STANDARD-GENERIC-FUNCTION
+ - [-] STANDARD-METHOD
+ - [-] STANDARD-OBJECT
  - [-] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
  - [-] UPDATE-INSTANCE-FOR-REDEFINED-CLASS

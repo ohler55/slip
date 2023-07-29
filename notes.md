@@ -4,11 +4,11 @@
 
  - char (http://www.lispworks.com/documentation/HyperSpec/Body/13_aa.htm)
   + alpha-char-p
-  + alphanumericp (IsLetter || IsNumber)
+  + alphanumericp
   + both-case-p
   - char (placer not supported)
   - char-code-limit
-  - char-downcase
+  + char-downcase
   - char-equal
   - char-greaterp
   - char-lessp
@@ -16,7 +16,7 @@
   - char-not-equal
   - char-not-greaterp
   - char-not-lessp
-  - char-upcase
+  + char-upcase
   - char/=
   - char<
   - char<=
@@ -27,12 +27,12 @@
   - code-char
   - digit-char
   - digit-char-p
-  - graphics-char-p (unicode.IsGraphic or **IsPrint** check space and tab)
-  - lower-case-p
+  + graphic-char-p
+  + lower-case-p
   - name-char
   - schar
-  - standard-char-p
-  - upper-case-p
+  + standard-char-p
+  + upper-case-p
 
 
  - array
