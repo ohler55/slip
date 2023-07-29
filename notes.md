@@ -7,7 +7,7 @@
   + alphanumericp
   + both-case-p
   - char (placer not supported)
-  - char-code-limit
+  + char-code-limit
   + char-downcase
   - char-equal
   - char-greaterp

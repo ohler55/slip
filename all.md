@@ -87,7 +87,7 @@
  * [ ] CERROR
  * [ ] CHANGE-CLASS
  * [ ] CHAR
- * [ ] CHAR-CODE-LIMIT
+ * [x] CHAR-CODE-LIMIT
  * [ ] CHAR-EQUAL
  * [ ] CHAR-GREATERP
  * [ ] CHAR-LESSP
