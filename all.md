@@ -86,12 +86,12 @@
  * [ ] CELL-ERROR-NAME
  * [ ] CERROR
  * [ ] CHANGE-CLASS
- * [ ] CHAR
+ * [x] CHAR
  * [x] CHAR-CODE-LIMIT
  * [ ] CHAR-EQUAL
  * [ ] CHAR-GREATERP
  * [ ] CHAR-LESSP
- * [ ] CHAR-NAME
+ * [x] CHAR-NAME
  * [ ] CHAR-NOT-EQUAL
  * [ ] CHAR-NOT-GREATERP
  * [ ] CHAR-NOT-LESSP
@@ -101,7 +101,7 @@
  * [ ] CHAR=
  * [ ] CHAR>
  * [ ] CHAR>=
- * [ ] CHARACTER
+ * [x] CHARACTER
  * [ ] CHECK-TYPE
  * [ ] CIS
  * [ ] CLEAR-OUTPUT
@@ -335,7 +335,7 @@
  * [ ] MULTIPLE-VALUE-PROG1
  * [ ] MULTIPLE-VALUE-SETQ
  * [ ] MULTIPLE-VALUES-LIMIT
- * [ ] NAME-CHAR
+ * [x] NAME-CHAR
  * [ ] NBUTLAST
  * [ ] NEXT-METHOD-P
  * [ ] NO-APPLICABLE-METHOD
@@ -424,7 +424,7 @@
  * [ ] SATISFIES
  * [ ] SBIT
  * [ ] SCALE-FLOAT
- * [ ] SCHAR
+ * [x] SCHAR
  * [ ] SERIOUS-CONDITION
  * [ ] SET-DIFFERENCE
  * [ ] SET-DISPATCH-MACRO-CHARACTER

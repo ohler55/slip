@@ -6,33 +6,33 @@
   + alpha-char-p
   + alphanumericp
   + both-case-p
-  - char (placer not supported)
+  + char
   + char-code-limit
   + char-downcase
+  + char-name
+  + char-upcase
+  + character
+  + code-char
+  + graphic-char-p
+  + lower-case-p
+  + name-char
+  + schar
+  + standard-char-p
+  + upper-case-p
   - char-equal
   - char-greaterp
   - char-lessp
-  - char-name
   - char-not-equal
   - char-not-greaterp
   - char-not-lessp
-  + char-upcase
   - char/=
   - char<
   - char<=
   - char=
   - char>
   - char>=
-  - character
-  - code-char
   - digit-char
   - digit-char-p
-  + graphic-char-p
-  + lower-case-p
-  - name-char
-  - schar
-  + standard-char-p
-  + upper-case-p
 
 
  - array
