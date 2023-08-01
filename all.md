@@ -88,19 +88,19 @@
  * [ ] CHANGE-CLASS
  * [x] CHAR
  * [x] CHAR-CODE-LIMIT
- * [ ] CHAR-EQUAL
+ * [x] CHAR-EQUAL
  * [ ] CHAR-GREATERP
- * [ ] CHAR-LESSP
+ * [x] CHAR-LESSP
  * [x] CHAR-NAME
  * [ ] CHAR-NOT-EQUAL
  * [ ] CHAR-NOT-GREATERP
  * [ ] CHAR-NOT-LESSP
  * [ ] CHAR/=
- * [ ] CHAR<
- * [ ] CHAR<=
- * [ ] CHAR=
- * [ ] CHAR>
- * [ ] CHAR>=
+ * [x] CHAR<
+ * [x] CHAR<=
+ * [x] CHAR=
+ * [x] CHAR>
+ * [x] CHAR>=
  * [x] CHARACTER
  * [ ] CHECK-TYPE
  * [ ] CIS
