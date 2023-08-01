@@ -10,8 +10,14 @@
   + char-code-limit
   + char-downcase
   + char-equal
+  + char-greaterp
+  + char-lessp
   + char-name
+  + char-not-equal
+  + char-not-greaterp
+  + char-not-lessp
   + char-upcase
+  + char/=
   + char<
   + char<=
   + char=
@@ -25,12 +31,6 @@
   + schar
   + standard-char-p
   + upper-case-p
-  - char-greaterp
-  + char-lessp
-  - char-not-equal
-  - char-not-greaterp
-  - char-not-lessp
-  - char/=
   - digit-char
   - digit-char-p
 

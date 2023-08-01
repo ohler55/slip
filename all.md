@@ -89,13 +89,13 @@
  * [x] CHAR
  * [x] CHAR-CODE-LIMIT
  * [x] CHAR-EQUAL
- * [ ] CHAR-GREATERP
+ * [x] CHAR-GREATERP
  * [x] CHAR-LESSP
  * [x] CHAR-NAME
- * [ ] CHAR-NOT-EQUAL
- * [ ] CHAR-NOT-GREATERP
- * [ ] CHAR-NOT-LESSP
- * [ ] CHAR/=
+ * [x] CHAR-NOT-EQUAL
+ * [x] CHAR-NOT-GREATERP
+ * [x] CHAR-NOT-LESSP
+ * [x] CHAR/=
  * [x] CHAR<
  * [x] CHAR<=
  * [x] CHAR=
