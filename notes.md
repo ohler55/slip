@@ -2,16 +2,12 @@
 
 - next
 
+
  - array
   - add fill-pointer for one dimensional arrays
- - vector-pop - takes 1 dimentional arrays, fials on simple vector or array
+ - vector-pop - takes 1 dimentional arrays, fails on simple vector or array
  - vector-push - ...
  - vector-push-extend - ...
-
- - char
-  - digit-char-p
-  - graphics-char-p
-  - char???
 
  - http package
   - flavors
