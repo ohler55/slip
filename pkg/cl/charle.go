@@ -23,7 +23,7 @@ func init() {
 					Text: "The characters to compare.",
 				},
 			},
-			Return: "nil",
+			Return: "boolean",
 			Text: `__char<=__ returns _true_ if all _characters_ are is ascending order with equality allowed.
 If _characters_ is not a character an error is raised.`,
 			Examples: []string{

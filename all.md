@@ -86,22 +86,6 @@
  * [ ] CELL-ERROR-NAME
  * [ ] CERROR
  * [ ] CHANGE-CLASS
- * [x] CHAR
- * [x] CHAR-CODE-LIMIT
- * [x] CHAR-EQUAL
- * [x] CHAR-GREATERP
- * [x] CHAR-LESSP
- * [x] CHAR-NAME
- * [x] CHAR-NOT-EQUAL
- * [x] CHAR-NOT-GREATERP
- * [x] CHAR-NOT-LESSP
- * [x] CHAR/=
- * [x] CHAR<
- * [x] CHAR<=
- * [x] CHAR=
- * [x] CHAR>
- * [x] CHAR>=
- * [x] CHARACTER
  * [ ] CHECK-TYPE
  * [ ] CIS
  * [ ] CLEAR-OUTPUT
@@ -149,8 +133,6 @@
  * [ ] DEPOSIT-FIELD
  * [ ] DESCRIBE-OBJECT
  * [ ] DESTRUCTURING-BIND
- * [ ] DIGIT-CHAR
- * [ ] DIGIT-CHAR-P
  * [ ] DISASSEMBLE
  * [ ] DIVISION-BY-ZERO
  * [ ] DO-ALL-SYMBOLS
@@ -335,7 +317,6 @@
  * [ ] MULTIPLE-VALUE-PROG1
  * [ ] MULTIPLE-VALUE-SETQ
  * [ ] MULTIPLE-VALUES-LIMIT
- * [x] NAME-CHAR
  * [ ] NBUTLAST
  * [ ] NEXT-METHOD-P
  * [ ] NO-APPLICABLE-METHOD
@@ -424,7 +405,6 @@
  * [ ] SATISFIES
  * [ ] SBIT
  * [ ] SCALE-FLOAT
- * [x] SCHAR
  * [ ] SERIOUS-CONDITION
  * [ ] SET-DIFFERENCE
  * [ ] SET-DISPATCH-MACRO-CHARACTER
@@ -659,10 +639,26 @@
  * [x] CDDR
  * [x] CDR
  * [x] CEILING
+ * [x] CHAR
  * [x] CHAR-CODE
+ * [x] CHAR-CODE-LIMIT
  * [x] CHAR-DOWNCASE
+ * [x] CHAR-EQUAL
+ * [x] CHAR-GREATERP
  * [x] CHAR-INT
+ * [x] CHAR-LESSP
+ * [x] CHAR-NAME
+ * [x] CHAR-NOT-EQUAL
+ * [x] CHAR-NOT-GREATERP
+ * [x] CHAR-NOT-LESSP
  * [x] CHAR-UPCASE
+ * [x] CHAR/=
+ * [x] CHAR<
+ * [x] CHAR<=
+ * [x] CHAR=
+ * [x] CHAR>
+ * [x] CHAR>=
+ * [x] CHARACTER
  * [x] CHARACTERP
  * [x] CLASS-NAME
  * [x] CLASS-OF
@@ -687,6 +683,8 @@
  * [x] DELETE-FILE
  * [x] DELETE-IF
  * [x] DESCRIBE
+ * [x] DIGIT-CHAR
+ * [x] DIGIT-CHAR-P
  * [x] DIRECTORY
  * [x] DIRECTORY-NAMESTRING
  * [x] DO
@@ -787,6 +785,7 @@
  * [x] MIN
  * [x] MINUSP
  * [x] MOD
+ * [x] NAME-CHAR
  * [x] NAMESTRING
  * [x] NCONC
  * [x] NIL
@@ -855,6 +854,7 @@
  * [x] ROUND
  * [x] RPLACA
  * [x] RPLACD
+ * [x] SCHAR
  * [x] SEARCH
  * [x] SECOND
  * [x] SEQUENCE

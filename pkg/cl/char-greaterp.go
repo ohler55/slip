@@ -25,7 +25,7 @@ func init() {
 					Text: "The characters to compare.",
 				},
 			},
-			Return: "nil",
+			Return: "boolean",
 			Text: `__char-greaterp__ returns _true_ if all _characters_ are is descending order ignoring case.
 If _characters_ is not a character an error is raised.`,
 			Examples: []string{

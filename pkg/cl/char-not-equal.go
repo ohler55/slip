@@ -25,7 +25,7 @@ func init() {
 					Text: "The characters to compare.",
 				},
 			},
-			Return: "nil",
+			Return: "boolean",
 			Text: `__char-not-equal__ returns _true_ if _characters_ are equal.
 If _characters_ is not a character an error is raised.`,
 			Examples: []string{

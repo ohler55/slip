@@ -22,7 +22,7 @@ func init() {
 					Text: "The object to check.",
 				},
 			},
-			Return: "nil",
+			Return: "boolean",
 			Text:   `__characterp__ returns _true_ if _object_ is a character otherwise nil is returned.`,
 			Examples: []string{
 				`(characterp #\A) => t`,
