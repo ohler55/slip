@@ -80,6 +80,9 @@ func (ed *editor) initialize() {
 	for name := range slip.CurrentPackage.Vars {
 		ed.completer.Insert(name)
 	}
+	for name := range slip.ConstantValues {
+		ed.completer.Insert(name)
+	}
 	ed.completer.Sort()
 
 	go ed.chanRead()

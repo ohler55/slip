@@ -23,6 +23,10 @@ digits and a maximum exponent of 38.`)
 		"The smallest non-zero positive value a _single-float_ can have.")
 	DefConstant(Symbol("least-negative-single-float"), SingleFloat(-math.SmallestNonzeroFloat32),
 		"The smallest non-zero negative value a _single-float_ can have.")
+	DefConstant(Symbol("least-positive-normalized-single-float"), SingleFloat(math.SmallestNonzeroFloat32),
+		"The smallest non-zero positive value a _single-float_ can have.")
+	DefConstant(Symbol("least-negative-normalized-single-float"), SingleFloat(-math.SmallestNonzeroFloat32),
+		"The smallest non-zero negative value a _single-float_ can have.")
 	DefConstant(Symbol("single-float-epsilon"), SingleFloat(5.960465e-8),
 		`The smallest positive _single-float_ such the addition of the epsilon value to
 1.0s0 returns a value greater than 1.0s0.`)
