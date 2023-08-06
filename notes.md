@@ -2,12 +2,11 @@
 
 - next
 - constants
- - lisp-implementation-type
- - lisp-implementation-version
- - machine-instance
-  - Utsname from syscall.Uname()
- - machine-type
- - machine-version
+ + lisp-implementation-type
+ + lisp-implementation-version
+ + machine-instance
+ + machine-type
+ + machine-version
  - *query-io*
  - keywordp
 

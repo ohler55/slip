@@ -24,7 +24,7 @@ func init() {
 					Text: "The character to check.",
 				},
 			},
-			Return: "nil",
+			Return: "boolean",
 			Text: `__alphanumericp__ returns _true_ if _character_ is an alphabetic character
 otherwise nil is returned. If _character_ is not a character an error is raised.`,
 			Examples: []string{
