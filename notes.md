@@ -1,7 +1,14 @@
 # SLIP Notes
 
 - next
-
+- constants
+ + lisp-implementation-type
+ + lisp-implementation-version
+ + machine-instance
+ + machine-type
+ + machine-version
+ - *query-io*
+ - keywordp
 
  - array
   - add fill-pointer for one dimensional arrays

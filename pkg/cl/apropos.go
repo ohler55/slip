@@ -111,6 +111,12 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	}
+	for k, v := range slip.ConstantValues {
+		if !strings.Contains(k, pat) {
+			continue
+		}
+		lines = append(lines, f.formConstantLine(k, v, &pr))
+	}
 	sort.Strings(lines)
 	var w io.Writer = slip.StandardOutput.(io.Writer)
 	for _, line := range lines {
@@ -131,6 +137,15 @@ func (f *Apropos) formVarLine(k string, vv *slip.VarVal, pr *slip.Printer) strin
 	line = slip.Append(line, slip.Symbol(k))
 	line = append(line, " = "...)
 	line = pr.Append(line, vv.Value(), 0)
+
+	return string(line)
+}
+
+func (f *Apropos) formConstantLine(k string, v slip.Object, pr *slip.Printer) string {
+	var line []byte
+	line = slip.Append(line, slip.Symbol(k))
+	line = append(line, " = "...)
+	line = pr.Append(line, v, 0)
 
 	return string(line)
 }

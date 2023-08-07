@@ -22,6 +22,10 @@ digits and a maximum exponent of 38.`)
 		"The smallest non-zero positive value a _short-float_ can have.")
 	DefConstant(Symbol("least-negative-short-float"), ShortFloat(-math.SmallestNonzeroFloat32),
 		"The smallest non-zero negative value a _short-float_ can have.")
+	DefConstant(Symbol("least-positive-normalized-short-float"), ShortFloat(math.SmallestNonzeroFloat32),
+		"The smallest non-zero positive value a _short-float_ can have.")
+	DefConstant(Symbol("least-negative-normalized-short-float"), ShortFloat(-math.SmallestNonzeroFloat32),
+		"The smallest non-zero negative value a _short-float_ can have.")
 	DefConstant(Symbol("short-float-epsilon"), ShortFloat(5.960465e-8),
 		`The smallest positive _short-float_ such the addition of the epsilon value to
 1.0s0 returns a value greater than 1.0s0.`)

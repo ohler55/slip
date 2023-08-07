@@ -68,6 +68,20 @@ func TestAproposPkgVars(t *testing.T) {
 `, out.String())
 }
 
+func TestAproposConstants(t *testing.T) {
+	orig := slip.StandardOutput
+	defer func() { slip.StandardOutput = orig }()
+	var out strings.Builder
+	slip.StandardOutput = &slip.OutputStream{Writer: &out}
+
+	(&sliptest.Function{
+		Source: `(apropos 'most-positive-fixnum)`,
+		Expect: "",
+	}).Test(t)
+	tt.Equal(t, `most-positive-fixnum = 9223372036854775807
+`, out.String())
+}
+
 func TestAproposDefun(t *testing.T) {
 	orig := slip.StandardOutput
 	defer func() { slip.StandardOutput = orig }()

@@ -116,7 +116,7 @@ func (obj *Package) Import(pkg *Package, varName string) {
 // Set a variable.
 func (obj *Package) Set(name string, value Object) *VarVal {
 	name, value = obj.PreSet(obj, name, value)
-	if _, has := constantValues[name]; has {
+	if _, has := ConstantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
 	if vv, has := obj.Vars[name]; has {

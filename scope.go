@@ -52,7 +52,7 @@ func (s *Scope) AddParent(p *Scope) {
 // Let a symbol be bound to the value in this Scope.
 func (s *Scope) Let(sym Symbol, value Object) {
 	name := strings.ToLower(string(sym))
-	if _, has := constantValues[name]; has {
+	if _, has := ConstantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
 	if vs, ok := value.(Values); ok {
@@ -85,7 +85,7 @@ func (s *Scope) Get(sym Symbol) Object {
 }
 
 func (s *Scope) get(name string) Object {
-	if v, has := constantValues[name]; has {
+	if v, has := ConstantValues[name]; has {
 		return v
 	}
 	s.moo.Lock()
@@ -141,7 +141,7 @@ func (s *Scope) Set(sym Symbol, value Object) {
 }
 
 func (s *Scope) set(name string, value Object) bool {
-	if _, has := constantValues[name]; has {
+	if _, has := ConstantValues[name]; has {
 		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
 	}
 	s.moo.Lock()
@@ -168,7 +168,7 @@ func (s *Scope) Has(sym Symbol) bool {
 }
 
 func (s *Scope) has(name string) bool {
-	if _, has := constantValues[name]; has {
+	if _, has := ConstantValues[name]; has {
 		return true
 	}
 	s.moo.Lock()
@@ -193,7 +193,7 @@ func (s *Scope) Bound(sym Symbol) bool {
 }
 
 func (s *Scope) bound(name string) bool {
-	if _, has := constantValues[name]; has {
+	if _, has := ConstantValues[name]; has {
 		return true
 	}
 	s.moo.Lock()
