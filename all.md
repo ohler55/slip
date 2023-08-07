@@ -2,7 +2,6 @@
  * [ ] *MACROEXPAND-HOOK*
  * [ ] *MODULES*
  * [ ] *PRINT-PPRINT-DISPATCH*
- * [ ] *QUERY-IO*
  * [ ] *READ-BASE*
  * [ ] *READ-DEFAULT-FLOAT-FORMAT*
  * [ ] *TERMINAL-IO*
@@ -217,7 +216,10 @@
  * [ ] INVALID-METHOD-ERROR
  * [ ] INVOKE-DEBUGGER
  * [ ] ISQRT
+<<<<<<< HEAD
  * [ ] KEYWORDP
+=======
+>>>>>>> const-stuff
  * [ ] LABELS
  * [ ] LAMBDA-LIST-KEYWORDS
  * [ ] LAMBDA-PARAMETERS-LIMIT
@@ -225,8 +227,11 @@
  * [ ] LDB
  * [ ] LDB-TEST
  * [ ] LDIFF
+<<<<<<< HEAD
  * [x] LISP-IMPLEMENTATION-TYPE
  * [x] LISP-IMPLEMENTATION-VERSION
+=======
+>>>>>>> const-stuff
  * [ ] LIST-LENGTH
  * [ ] LOAD-LOGICAL-PATHNAME-TRANSLATIONS
  * [ ] LOAD-TIME-VALUE
@@ -252,9 +257,12 @@
  * [ ] LONG-SITE-NAME
  * [ ] LOOP
  * [ ] LOOP-FINISH
+<<<<<<< HEAD
  * [x] MACHINE-INSTANCE
  * [x] MACHINE-TYPE
  * [x] MACHINE-VERSION
+=======
+>>>>>>> const-stuff
  * [ ] MACRO-FUNCTION
  * [ ] MACROEXPAND
  * [ ] MACROEXPAND-1
@@ -724,6 +732,10 @@
  * [x] INTERNAL-TIME-UNITS-PER-SECOND
  * [x] INTERSECTION
  * [x] KEYWORD
+<<<<<<< HEAD
+=======
+ * [x] KEYWORDP
+>>>>>>> const-stuff
  * [x] LAMBDA
  * [x] LAST
  * [x] LEAST-NEGATIVE-DOUBLE-FLOAT
@@ -745,6 +757,8 @@
  * [x] LENGTH
  * [x] LET
  * [x] LET*
+ * [x] LISP-IMPLEMENTATION-TYPE
+ * [x] LISP-IMPLEMENTATION-VERSION
  * [x] LIST
  * [x] LIST*
  * [x] LIST-ALL-PACKAGES
@@ -753,6 +767,9 @@
  * [x] LOG
  * [x] LONG-FLOAT
  * [x] LOWER-CASE-P
+ * [x] MACHINE-INSTANCE
+ * [x] MACHINE-TYPE
+ * [x] MACHINE-VERSION
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
  * [x] MAKE-RANDOM-STATE
@@ -931,6 +948,7 @@
  - [-] *COMPILE-VERBOSE*
  - [-] *DEBUG-IO*
  - [-] *DEBUGGER-HOOK*
+ - [-] *QUERY-IO*
  - [-] *READ-EVAL*
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
