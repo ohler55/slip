@@ -12,9 +12,6 @@
  * [ ] ADJUST-ARRAY
  * [ ] ADJUSTABLE-ARRAY-P
  * [ ] AREF
- * [ ] ARITHMETIC-ERROR
- * [ ] ARITHMETIC-ERROR-OPERANDS
- * [ ] ARITHMETIC-ERROR-OPERATION
  * [ ] ARRAY
  * [ ] ARRAY-DIMENSION
  * [ ] ARRAY-DIMENSION-LIMIT
@@ -83,7 +80,6 @@
  * [ ] CCASE
  * [ ] CELL-ERROR
  * [ ] CELL-ERROR-NAME
- * [ ] CERROR
  * [ ] CHANGE-CLASS
  * [ ] CHECK-TYPE
  * [ ] CIS
@@ -216,10 +212,6 @@
  * [ ] INVALID-METHOD-ERROR
  * [ ] INVOKE-DEBUGGER
  * [ ] ISQRT
-<<<<<<< HEAD
- * [ ] KEYWORDP
-=======
->>>>>>> const-stuff
  * [ ] LABELS
  * [ ] LAMBDA-LIST-KEYWORDS
  * [ ] LAMBDA-PARAMETERS-LIMIT
@@ -227,11 +219,6 @@
  * [ ] LDB
  * [ ] LDB-TEST
  * [ ] LDIFF
-<<<<<<< HEAD
- * [x] LISP-IMPLEMENTATION-TYPE
- * [x] LISP-IMPLEMENTATION-VERSION
-=======
->>>>>>> const-stuff
  * [ ] LIST-LENGTH
  * [ ] LOAD-LOGICAL-PATHNAME-TRANSLATIONS
  * [ ] LOAD-TIME-VALUE
@@ -257,12 +244,6 @@
  * [ ] LONG-SITE-NAME
  * [ ] LOOP
  * [ ] LOOP-FINISH
-<<<<<<< HEAD
- * [x] MACHINE-INSTANCE
- * [x] MACHINE-TYPE
- * [x] MACHINE-VERSION
-=======
->>>>>>> const-stuff
  * [ ] MACRO-FUNCTION
  * [ ] MACROEXPAND
  * [ ] MACROEXPAND-1
@@ -444,7 +425,6 @@
  * [ ] STRUCTURE
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
- * [ ] STYLE-WARNING
  * [ ] SUBLIS
  * [ ] SUBSETP
  * [ ] SUBST
@@ -732,10 +712,7 @@
  * [x] INTERNAL-TIME-UNITS-PER-SECOND
  * [x] INTERSECTION
  * [x] KEYWORD
-<<<<<<< HEAD
-=======
  * [x] KEYWORDP
->>>>>>> const-stuff
  * [x] LAMBDA
  * [x] LAST
  * [x] LEAST-NEGATIVE-DOUBLE-FLOAT
@@ -952,6 +929,7 @@
  - [-] *READ-EVAL*
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
+ - [-] CERROR
  - [-] CLASS
  - [-] CLEAR-INPUT
  - [-] COMPILATION-SPEED
@@ -992,5 +970,6 @@
  - [-] STANDARD-GENERIC-FUNCTION
  - [-] STANDARD-METHOD
  - [-] STANDARD-OBJECT
+ - [-] STYLE-WARNING
  - [-] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
  - [-] UPDATE-INSTANCE-FOR-REDEFINED-CLASS

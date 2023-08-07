@@ -2,11 +2,100 @@
 
 - next
 
+ - errors (use when panicing)
+  - should they be classes/flavors? both?
+   - class-of and describe
+   - is there a short term simplified option?
+    - no methods
+    - keep class hierarchy
+    - maybe class package where all the built in classes exist
+     - top level is not connected in that fixnum does not know about fixnum class
+      - (class-of 5) would return from class package
+     - all others packages would need to use classes for condition instances
+      - or keep the built-in type at the top level and classes separate
+     - (class-of error) would use switch for top level plus class.instance type
+      - can that be made to work for flavors? maybe through an interface
+  - warning type
+  - error type
+  - warn (panic or just output to error-output?)
+  - error (panic)
+   - first arg can be an error type or a format control string
+  - make-condition (used to make all errors)
+  - type-error
+   - type-error-datum
+   - type-error-expected-type
+  - arithmetic-error
+   - arithmetic-error-operands
+   - arithmetic-error-operation
+  - cell-error
+   - cell-error-name
+  - control-error
+  - file-error
+   - file-error-pathname
+  - ignore-errors (recover with no action)
+  - invalid-method-error
+  - method-combination-error (in pkg/class, maybe use in flavors or create a similar one)
+  - package-error
+   - package-error-package
+  - parse-error
+  - program-error
+  - reader-error
+  - simple-condition
+   - simple-condition-format-control
+   - simple-condition-format-arguments
+  - simple-error
+  - simple-type-error
+  - simple-warning
+  - stream-error
+   - stream-error-stream
+
+  - hierarchy
+   - error, serious-condition, condition, t
+  - use Append and Bytes for generating output message
+  - simple-condition
+   - has format-control string and format-arguments
+  - maybe __any__ slot for class when make-condition is implemented
+
+  - plan
+   - condition
+    - Condition, SeriousCondition, and Error becomes interfaces for Panic
+     - add functions to support interface
+     - IsSeriousCondition() { return true }
+     - of course all Object interface functions as well
+    - TypeError also an interface and TypePanic is the actual class
+   - Warning interface
+    - a Condition
+    - SimpleCondition interface
+     - format-control
+     - format-arguments
+   - SimpleWarning interface or type?
+    - SimpleWarningImpl or ASimpleWarning or SimpleWarningType or SimpleWarningActual
+
+
+ - class
+  - deal with classes for core types
+   - maybe just have class-of return and support describe and other class based ops
+  - implement at top level or in a class package?
+
+ - trace
+  - should trace by function be supported instead of overall trace?
+   - maybe (trace t) to turn on all as currently implemented and nil to turn off
+    - (untrace) turns off all
+   - move trace to pkg/cl
+   - function names (specs) can be symbol, string, (METHOD name qualifiers) - qualifiers could be flavor and daemon?
+    - for methods
+     - special case for :send and look at sendMap
+      - method then flavor sub-map
+      - or submap for daemon before that?
+      - or maybe method includes daemon (:before:foo as key)
+
+
  - array
   - add fill-pointer for one dimensional arrays
- - vector-pop - takes 1 dimentional arrays, fails on simple vector or array
+ - vector-pop - takes 1 dimensional arrays, fails on simple vector or array
  - vector-push - ...
  - vector-push-extend - ...
+
 
  - http package
   - flavors
