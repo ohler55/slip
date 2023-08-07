@@ -8,21 +8,21 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestSymboltpTrue(t *testing.T) {
+func TestSymbolpTrue(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(symbolp 'abc)`,
 		Expect: "t",
 	}).Test(t)
 }
 
-func TestSymboltpFalse(t *testing.T) {
+func TestSymbolpFalse(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(symbolp t)`,
 		Expect: "nil",
 	}).Test(t)
 }
 
-func TestSymboltpBadArgCount(t *testing.T) {
+func TestSymbolpBadArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(symbolp)`,
 		Panics: true,

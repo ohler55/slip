@@ -37,7 +37,7 @@ func (f *MachineInstance) Call(s *slip.Scope, args slip.List, depth int) (result
 	// Need something unique that works across multiple OSs. A Mac Address should do.
 	if ints, err := net.Interfaces(); err == nil && 0 < len(ints) {
 		for i := 0; i < len(ints); i++ {
-			in := &ints[0]
+			in := &ints[i]
 			if in.Flags&net.FlagUp == 0 || len(in.HardwareAddr) == 0 {
 				continue
 			}
