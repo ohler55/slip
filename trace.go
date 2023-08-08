@@ -32,8 +32,8 @@ func noopBefore(s *Scope, name string, args List, depth int) {
 func normalAfter(s *Scope, name string, args List, depth int, result *Object) {
 	switch tr := recover().(type) {
 	case nil:
-	case *Panic:
-		tr.Stack = append(tr.Stack, ObjectString(append(List{Symbol(name)}, args...)))
+	case Error:
+		tr.AppendToStack(name, args)
 		panic(tr)
 	default:
 		panic(&Panic{

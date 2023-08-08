@@ -193,7 +193,7 @@ func process() {
 			if 0 < len(tr.Message) {
 				var buf []byte
 				buf = append(buf, warnPrefix...)
-				buf = append(buf, tr.Bytes()...)
+				buf = tr.Append(buf)
 				buf = append(buf, suffix...)
 				_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			}

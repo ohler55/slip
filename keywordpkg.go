@@ -35,7 +35,7 @@ func init() {
 
 func keywordPreSet(p *Package, name string, value Object) (string, Object) {
 	if len(name) == 0 {
-		panic("An empty sysmbol is not a valid keyword.")
+		panic("An empty symbol is not a valid keyword.")
 	}
 	if name[0] != ':' {
 		name = ":" + name

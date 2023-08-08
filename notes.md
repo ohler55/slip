@@ -57,12 +57,18 @@
   - maybe __any__ slot for class when make-condition is implemented
 
   - plan
-   - condition
-    - Condition, SeriousCondition, and Error becomes interfaces for Panic
-     - add functions to support interface
-     - IsSeriousCondition() { return true }
-     - of course all Object interface functions as well
-    - TypeError also an interface and TypePanic is the actual class
+   - add error types for top slip package
+    - ParsePanic (parse-error)
+    - ArithmeticPanic (arithmetic-error)
+    - PackagePanic (package-error)
+    - create some new error types?
+
+    - simple-error and simple-condition (simple
+   - add simple-error and SimplePanic
+    - use for general errors (how?)
+     - have to use format-control
+
+   - update tests to use PanicType if for type
    - Warning interface
     - a Condition
     - SimpleCondition interface

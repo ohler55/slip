@@ -12,11 +12,20 @@ type Panic struct {
 	Fatal   bool
 }
 
-// Bytes returns the original error and stack in a format for display or
-// writing.
-func (p *Panic) Bytes() []byte {
-	var b []byte
+// IsCondition indicates Panic is a Condition.
+func (p *Panic) IsCondition() {
+}
 
+// IsSeriousCondition indicates Panic is a Condition.
+func (p *Panic) IsSeriousCondition() {
+}
+
+// IsError indicates Panic is a Condition.
+func (p *Panic) IsError() {
+}
+
+// Append the object to a byte slice.
+func (p *Panic) Append(b []byte) []byte {
 	b = append(b, "## "...)
 	b = append(b, p.Message...)
 	b = append(b, '\n')
@@ -28,41 +37,45 @@ func (p *Panic) Bytes() []byte {
 	return b
 }
 
+// Simplify the Object into simple go types of nil, bool, int64, float64,
+// string, []any, map[string]any, or time.Time.
+func (p *Panic) Simplify() any {
+	return p.Message
+}
+
+// Equal returns true if this Object and the other are equal in value.
+func (p *Panic) Equal(other Object) bool {
+	return p == other
+}
+
+// Hierarchy returns the class hierarchy as symbols for the instance.
+func (p *Panic) Hierarchy() []Symbol {
+	return []Symbol{ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+}
+
+// Eval the object.
+func (p *Panic) Eval(s *Scope, depth int) Object {
+	return p
+}
+
 // Error returns the panic message.
 func (p *Panic) Error() string {
 	return p.Message
 }
 
+// String returns the panic message.
+func (p *Panic) String() string {
+	return p.Message
+}
+
+// AppendToStack appends a function name and argument to the stack.
+func (p *Panic) AppendToStack(name string, args List) {
+	p.Stack = append(p.Stack, ObjectString(append(List{Symbol(name)}, args...)))
+}
+
 // NewPanic returns a Panic object that can then be used with a call to panic.
 func NewPanic(format string, args ...any) *Panic {
 	return &Panic{Message: fmt.Sprintf(format, args...)}
-}
-
-// PanicType raises a panic describing an incorrect type being used.
-func PanicType(use string, value Object, wants ...string) {
-	var b []byte
-
-	b = append(b, use...)
-	b = append(b, " must be a "...)
-	for i, want := range wants {
-		if 0 < i {
-			if i == len(wants)-1 {
-				b = append(b, " or "...)
-			} else {
-				b = append(b, ", "...)
-			}
-		}
-		b = append(b, want...)
-	}
-	b = append(b, " not "...)
-	b = append(b, ObjectString(value)...)
-	if value != nil {
-		b = append(b, ", a "...)
-		b = append(b, value.Hierarchy()[0]...)
-	}
-	b = append(b, '.')
-
-	panic(&Panic{Message: string(b)})
 }
 
 // ArgCountCheck panics if the number of arguments is outside the range

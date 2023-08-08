@@ -42,7 +42,7 @@ func TestPanicArgCountHigh(t *testing.T) {
 func recoverPanic(obj slip.Object) (msg, stack string) {
 	defer func() {
 		if p, ok := recover().(*slip.Panic); ok {
-			stack = string(p.Bytes())
+			stack = string(p.Append(nil))
 			msg = p.Error()
 		}
 	}()
