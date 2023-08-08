@@ -58,9 +58,9 @@
 
   - plan
    - add error types for top slip package
+    - PackagePanic (package-error)
     - ParsePanic (parse-error)
     - ArithmeticPanic (arithmetic-error)
-    - PackagePanic (package-error)
     - create some new error types?
 
     - simple-error and simple-condition (simple

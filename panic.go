@@ -9,7 +9,7 @@ type Panic struct {
 	Message string
 	Stack   []string
 	Value   Object // used when the panic function is called
-	Fatal   bool
+	Fatal   bool   // used in repl to indicate an exit should be made
 }
 
 // IsCondition indicates Panic is a Condition.

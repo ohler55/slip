@@ -16,6 +16,7 @@ func TestPanicBytes(t *testing.T) {
 	tt.Equal(t, `## argument to cdr must be a cons or list not t, a t.
 ##  (cdr t)
 ##  (car (cdr t))
+##  (recover)
 `, stack)
 }
 
@@ -41,9 +42,11 @@ func TestPanicArgCountHigh(t *testing.T) {
 
 func recoverPanic(obj slip.Object) (msg, stack string) {
 	defer func() {
-		if p, ok := recover().(*slip.Panic); ok {
-			stack = string(p.Append(nil))
-			msg = p.Error()
+		if se, ok := recover().(slip.Error); ok {
+			se.AppendToStack("recover", nil)
+			// stack = string(p.Append(nil))
+			msg = se.Error()
+			stack = string(se.Append(nil))
 		}
 	}()
 	_ = obj.Eval(slip.NewScope(), 0)

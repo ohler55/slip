@@ -10,6 +10,7 @@ const ErrorSymbol = Symbol("error")
 // also an Object.
 type Error interface {
 	SeriousCondition
+	error
 
 	// IsError need not do anything other than exist.
 	IsError()
