@@ -74,8 +74,8 @@ func (p *Panic) AppendToStack(name string, args List) {
 }
 
 // NewPanic returns a Panic object that can then be used with a call to panic.
-func NewPanic(format string, args ...any) *Panic {
-	return &Panic{Message: fmt.Sprintf(format, args...)}
+func NewPanic(format string, args ...any) {
+	panic(&Panic{Message: fmt.Sprintf(format, args...)})
 }
 
 // ArgCountCheck panics if the number of arguments is outside the range

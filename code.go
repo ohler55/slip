@@ -580,7 +580,7 @@ func (r *reader) raise(format string, args ...interface{}) {
 	f = append(f, format...)
 	f = append(f, " at %d:%d"...)
 	args = append(args, r.line, r.pos-r.lineStart)
-	panic(fmt.Sprintf(string(f), args...))
+	PanicParse(string(f), args...)
 }
 
 func (r *reader) partial(format string, args ...interface{}) {
@@ -588,7 +588,10 @@ func (r *reader) partial(format string, args ...interface{}) {
 	f = append(f, format...)
 	f = append(f, " at %d:%d"...)
 	args = append(args, r.line, r.pos-r.lineStart)
-	panic(&Partial{Reason: fmt.Sprintf(string(f), args...), Depth: len(r.starts)})
+	panic(&PartialPanic{
+		ParsePanic: ParsePanic{Panic: Panic{Message: fmt.Sprintf(string(f), args...)}},
+		Depth:      len(r.starts)},
+	)
 }
 
 func (r *reader) closeList() {
@@ -1009,9 +1012,9 @@ func (c Code) Compile() {
 					}
 				}
 			}
-			panic(fmt.Sprintf("%s is not a function", tv))
+			PanicParse("%s is not a function", tv)
 		default:
-			panic(fmt.Sprintf("%s is not a function", tv))
+			PanicParse("%s is not a function", tv)
 		}
 		var f Object
 		switch strings.ToLower(string(sym)) {

@@ -187,7 +187,7 @@ func process() {
 			suffix = "\x1b[m"
 		}
 		switch tr := rec.(type) {
-		case *slip.Partial:
+		case *slip.PartialPanic:
 			replReader.setDepth(tr.Depth)
 		case *slip.Panic:
 			if 0 < len(tr.Message) {

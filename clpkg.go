@@ -283,5 +283,5 @@ func getCLPkg() Object {
 }
 
 func setCLPkg(_ Object) {
-	panic("*common-lisp* is a read only variable")
+	PanicPackage(CurrentPackage, "*common-lisp* is a read only variable")
 }

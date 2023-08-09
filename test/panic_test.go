@@ -44,7 +44,6 @@ func recoverPanic(obj slip.Object) (msg, stack string) {
 	defer func() {
 		if se, ok := recover().(slip.Error); ok {
 			se.AppendToStack("recover", nil)
-			// stack = string(p.Append(nil))
 			msg = se.Error()
 			stack = string(se.Append(nil))
 		}
@@ -54,7 +53,7 @@ func recoverPanic(obj slip.Object) (msg, stack string) {
 }
 
 func TestPanicParcial(t *testing.T) {
-	p := slip.Partial{Reason: "test", Depth: 3}
+	p := slip.PartialPanic{ParsePanic: slip.ParsePanic{Panic: slip.Panic{Message: "test"}}, Depth: 3}
 	tt.Equal(t, "test", p.String())
 	tt.Equal(t, "test", p.Error())
 }

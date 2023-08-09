@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 )
@@ -53,7 +52,7 @@ func (s *Scope) AddParent(p *Scope) {
 func (s *Scope) Let(sym Symbol, value Object) {
 	name := strings.ToLower(string(sym))
 	if _, has := ConstantValues[name]; has {
-		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
+		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
@@ -101,10 +100,12 @@ func (s *Scope) get(name string) Object {
 			return value
 		}
 	}
-	if value, has := CurrentPackage.Get(name); has && Unbound != value {
-		return value
+	value, has := CurrentPackage.Get(name)
+
+	if !has || Unbound == value {
+		NewPanic("Variable %s is unbound.", name)
 	}
-	panic(NewPanic("Variable %s is unbound.", name))
+	return value
 }
 
 // LocalGet a named variable value.
@@ -142,7 +143,7 @@ func (s *Scope) Set(sym Symbol, value Object) {
 
 func (s *Scope) set(name string, value Object) bool {
 	if _, has := ConstantValues[name]; has {
-		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
+		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
 	s.moo.Lock()
 	if s.Vars != nil {

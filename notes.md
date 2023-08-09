@@ -48,6 +48,8 @@
   - simple-warning
   - stream-error
    - stream-error-stream
+  - cell-error
+   - cell-error-name
 
   - hierarchy
    - error, serious-condition, condition, t
@@ -58,8 +60,11 @@
 
   - plan
    - add error types for top slip package
-    - PackagePanic (package-error)
-    - ParsePanic (parse-error)
+    - stream-error (use in printer and input-stream)
+    - undefined-function (use in undefined.go and function.go)
+    - cell-error
+     - :name
+
     - ArithmeticPanic (arithmetic-error)
     - create some new error types?
 

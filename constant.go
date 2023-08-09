@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -22,7 +21,7 @@ func DefConstant(sym Symbol, value Object, doc string) {
 		if ObjectEqual(v, value) { // no change so ignore
 			return
 		}
-		panic(fmt.Sprintf("%s is already defined", sym))
+		PanicPackage(CurrentPackage, "%s is already defined", sym)
 	}
 	ConstantValues[name] = value
 	ConstantDocs[name] = doc
