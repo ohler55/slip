@@ -36,8 +36,8 @@ func TestPrintANSI(t *testing.T) {
 		Expect: "t",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `nothing`,
-		Panics: true,
+		Source:    `nothing`,
+		PanicType: slip.Symbol("unbound-variable"),
 	}).Test(t)
 }
 

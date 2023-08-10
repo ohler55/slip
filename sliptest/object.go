@@ -58,6 +58,9 @@ type Object struct {
 
 	// Panics if true indicated the call to .Eval() should panic.
 	Panics bool
+
+	// PanicType is the expected panic type as a Symbol. If nil then no check.
+	PanicType slip.Object
 }
 
 // Test the object test specification.
@@ -101,9 +104,16 @@ func (to *Object) Test(t *testing.T) {
 	if to.Scope == nil {
 		to.Scope = slip.NewScope()
 	}
-	if to.Panics {
+	switch {
+	case to.PanicType != nil:
+		r := tt.Panic(t, func() { to.Target.Eval(to.Scope, 0) })
+		so, ok := r.(slip.Object)
+		tt.Equal(t, true, ok, "expected a panic of %s not a %T", to.PanicType, r)
+		tt.Equal(t, to.PanicType, so.Hierarchy()[0], "expected a panic of %s not a %s", to.PanicType, so.Hierarchy()[0])
+
+	case to.Panics:
 		tt.Panic(t, func() { to.Target.Eval(to.Scope, 0) })
-	} else {
+	default:
 		result := to.Target.Eval(to.Scope, 0)
 		tt.Equal(t, true, slip.ObjectEqual(to.Eval, result),
 			"Eval returned '%s' but expected '%s'", slip.ObjectString(result), slip.ObjectString(to.Eval))

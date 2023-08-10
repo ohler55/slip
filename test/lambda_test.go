@@ -70,15 +70,15 @@ func TestLambdaCallWithScope(t *testing.T) {
 
 func TestLambdaCallBadKeyword(t *testing.T) {
 	(&sliptest.Function{
-		Source: `((lambda (&key :test) test) :test)`,
-		Panics: true,
+		Source:    `((lambda (&key :test) test) :test)`,
+		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
 
 func TestLambdaCallTooManyArgs(t *testing.T) {
 	(&sliptest.Function{
-		Source: `((lambda () nil) 5)`,
-		Panics: true,
+		Source:    `((lambda () nil) 5)`,
+		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
 

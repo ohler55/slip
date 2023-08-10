@@ -75,7 +75,12 @@ func FindFunc(name string, pkgs ...*Package) *FuncInfo {
 	if fi != nil {
 		return fi
 	}
-	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
+	panic(&UndefinedFunctionPanic{
+		CellPanic: CellPanic{
+			Panic: Panic{Message: fmt.Sprintf("Function %s is not defined.", printer.caseName(name))},
+			name:  name,
+		},
+	})
 }
 
 // Eval the object.

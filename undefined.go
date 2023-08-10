@@ -34,5 +34,10 @@ func (obj Undefined) Hierarchy() []Symbol {
 
 // Eval returns self.
 func (obj Undefined) Eval(s *Scope, depth int) Object {
-	panic(fmt.Sprintf("Function %s is not defined.", obj))
+	panic(&UndefinedFunctionPanic{
+		CellPanic: CellPanic{
+			Panic: Panic{Message: fmt.Sprintf("Function %s is not defined.", obj)},
+			name:  string(obj),
+		},
+	})
 }

@@ -328,7 +328,7 @@ func TestSymbol(t *testing.T) {
 			{Other: slip.String("xyz"), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		Panics: true,
+		PanicType: slip.Symbol("unbound-variable"),
 	}).Test(t)
 }
 
@@ -361,7 +361,7 @@ func TestListObj(t *testing.T) {
 			{Other: slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}, Expect: false}, // cons
 			{Other: slip.True, Expect: false},
 		},
-		Panics: true,
+		PanicType: slip.Symbol("error"),
 		Selfies: []func() slip.Symbol{
 			slip.List{}.SequenceType,
 		},
@@ -392,7 +392,7 @@ func TestCons(t *testing.T) {
 			{Other: slip.List{slip.Fixnum(1), nil}, Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		Panics: true,
+		PanicType: slip.Symbol("error"),
 		Selfies: []func() slip.Symbol{
 			slip.List{slip.Tail{}}.SequenceType,
 		},
@@ -680,7 +680,7 @@ func TestUndefined(t *testing.T) {
 			{Other: obj, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
-		Panics: true,
+		PanicType: slip.Symbol("undefined-function"),
 	}).Test(t)
 }
 

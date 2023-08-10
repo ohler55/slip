@@ -144,7 +144,7 @@ func Append(b []byte, obj Object) []byte {
 // Write an Object to *standard-output* using the Printer variables.
 func (p *Printer) Write(obj Object) {
 	if _, err := StandardOutput.(io.Writer).Write(p.Append([]byte{}, obj, 0)); err != nil {
-		panic(err)
+		PanicStream(StandardOutput.(Stream), "%s", err)
 	}
 }
 
@@ -416,7 +416,7 @@ Top:
 	default:
 		b = to.Append(b)
 		if p.Readably && bytes.HasPrefix(b, []byte("#<")) {
-			panic(fmt.Sprintf("%s can not be written readably", to))
+			NewPanic("%s can not be written readably", to)
 		}
 	}
 	/* TBD

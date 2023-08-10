@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -62,7 +61,7 @@ func (obj *Array) calcAndSet(list List) {
 			size *= len(list)
 			if i < len(obj.dims)-1 {
 				if list, ok = list[0].(List); !ok { // TBD last?
-					panic(fmt.Sprintf("Invalid data for a %d dimension array. %s", len(obj.dims), list))
+					NewPanic("Invalid data for a %d dimension array. %s", len(obj.dims), list)
 				}
 			}
 		}
@@ -154,7 +153,7 @@ func (obj *Array) Size() int {
 // Get the value at the location identified by the indexes.
 func (obj *Array) Get(indexes ...int) Object {
 	if len(indexes) != len(obj.dims) {
-		panic(fmt.Sprintf("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims)))
+		NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims))
 	}
 	pos := 0
 	for i, index := range indexes {
@@ -164,8 +163,8 @@ func (obj *Array) Get(indexes ...int) Object {
 			for j, d2 := range obj.dims {
 				dims[j] = Fixnum(d2)
 			}
-			panic(fmt.Sprintf("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
-				index, i, dims, d))
+			NewPanic("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
+				index, i, dims, d)
 		}
 		pos += index * obj.sizes[i]
 	}
@@ -175,7 +174,7 @@ func (obj *Array) Get(indexes ...int) Object {
 // Set a value at the location identified by the indexes.
 func (obj *Array) Set(value Object, indexes ...int) {
 	if len(indexes) != len(obj.dims) {
-		panic(fmt.Sprintf("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims)))
+		NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims))
 	}
 	pos := 0
 	for i, index := range indexes {
@@ -185,8 +184,8 @@ func (obj *Array) Set(value Object, indexes ...int) {
 			for j, d2 := range obj.dims {
 				dims[j] = Fixnum(d2)
 			}
-			panic(fmt.Sprintf("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
-				index, i, dims, d))
+			NewPanic("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
+				index, i, dims, d)
 		}
 		pos += index * obj.sizes[i]
 	}
@@ -229,8 +228,8 @@ func (obj *Array) SetAll(all List) {
 func (obj *Array) setDim(list List, di, ei int) int {
 	d := obj.dims[di]
 	if d != len(list) {
-		panic(fmt.Sprintf("Malformed :initial-contents: Dimension of axis %d is %d but received %d long.",
-			di, d, len(list)))
+		NewPanic("Malformed :initial-contents: Dimension of axis %d is %d but received %d long.",
+			di, d, len(list))
 	}
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {

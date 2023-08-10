@@ -18,26 +18,24 @@
   - warning type
   - error type
   - warn (panic or just output to error-output?)
-  - error (panic)
+  + error (panic)
    - first arg can be an error type or a format control string
   - make-condition (used to make all errors)
-  - type-error
+  + type-error
    - type-error-datum
    - type-error-expected-type
   - arithmetic-error
    - arithmetic-error-operands
    - arithmetic-error-operation
-  - cell-error
-   - cell-error-name
   - control-error
   - file-error
    - file-error-pathname
   - ignore-errors (recover with no action)
   - invalid-method-error
   - method-combination-error (in pkg/class, maybe use in flavors or create a similar one)
-  - package-error
+  + package-error
    - package-error-package
-  - parse-error
+  + parse-error
   - program-error
   - reader-error
   - simple-condition
@@ -46,24 +44,24 @@
   - simple-error
   - simple-type-error
   - simple-warning
-  - stream-error
+  + stream-error
    - stream-error-stream
-  - cell-error
+  + cell-error
    - cell-error-name
+  + unbound-slot (in flavors and class)
+   - unbound-slot-instance
 
-  - hierarchy
-   - error, serious-condition, condition, t
-  - use Append and Bytes for generating output message
   - simple-condition
    - has format-control string and format-arguments
   - maybe __any__ slot for class when make-condition is implemented
 
   - plan
-   - add error types for top slip package
-    - stream-error (use in printer and input-stream)
-    - undefined-function (use in undefined.go and function.go)
-    - cell-error
-     - :name
+   - each pkg
+    - bag
+    - cl
+    - flavors
+    - gi
+    - repl
 
     - ArithmeticPanic (arithmetic-error)
     - create some new error types?
