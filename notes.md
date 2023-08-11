@@ -57,7 +57,6 @@
 
   - plan
    - each pkg
-    - bag
     - cl
     - flavors
     - gi
