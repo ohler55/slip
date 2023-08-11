@@ -56,9 +56,38 @@
   - maybe __any__ slot for class when make-condition is implemented
 
   - plan
+   - reorg branch
+    - package to pkg dir
+    - eval.Object evaluates object
+     - if HasEval then call else switch on type
+      - handle symbol, tail, etc
+   - eval directory? or slip/slip directory (might get confusing?)
+    - code
+    - function
+    - funcdoc
+    - funcinfo
+    - lambda
+    - dynamic
+    - scope
+    - printer? maybe leave at top
+     - replace Panics with panic
+     - or have init of errors set the printer panic function
+   - **panics** or errors dir
+    - unboundvariable.go
+     - UnboundVariable interface
+     - UnboundVariableObj struct
+     - can function have same name as type? else NewUnboundVariable or RaiseUnboundVariable
+   -
    - each pkg
     - cl
     - flavors
+     - class-not-found-error from cell-error (top level)
+     - should an errors pkg be created for errors? (condition, errors, panics, ???)
+      - creates loop with Object
+
+      - what if types stay at top but functions, printer, scope move?
+     -
+
     - gi
     - repl
 

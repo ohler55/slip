@@ -10,7 +10,7 @@ type UnboundVariablePanic struct {
 }
 
 // IsUnboundVariableError need not do anything other than exist.
-func (uv *UnboundVariablePanic) IsUnboundVariableError() {
+func (uv *UnboundVariablePanic) IsUnboundVariable() {
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
