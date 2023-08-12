@@ -2,6 +2,8 @@
 
 package slip
 
+import "fmt"
+
 // UnboundVariableSymbol is the symbol with a value of "unbound-variable".
 const UnboundVariableSymbol = Symbol("unbound-variable")
 
@@ -11,4 +13,41 @@ type UnboundVariable interface {
 
 	// IsUnboundVariable need not do anything other than exist.
 	IsUnboundVariable()
+}
+
+// UnboundVariablePanic represents a unboundVariable-error.
+type UnboundVariablePanic struct {
+	CellPanic
+}
+
+// IsUnboundVariableError need not do anything other than exist.
+func (uv *UnboundVariablePanic) IsUnboundVariable() {
+}
+
+// Hierarchy returns the class hierarchy as symbols for the instance.
+func (uv *UnboundVariablePanic) Hierarchy() []Symbol {
+	return []Symbol{
+		UnboundVariableSymbol,
+		CellErrorSymbol,
+		ErrorSymbol,
+		SeriousConditionSymbol,
+		ConditionSymbol,
+		TrueSymbol,
+	}
+}
+
+// Eval the object.
+func (uv *UnboundVariablePanic) Eval(s *Scope, depth int) Object {
+	return uv
+}
+
+// PanicUnboundVariable raises a UnboundVariablePanic (unbound-variable)
+// describing a unbound-variable error.
+func PanicUnboundVariable(name string, format string, args ...any) {
+	panic(&UnboundVariablePanic{
+		CellPanic: CellPanic{
+			Panic: Panic{Message: fmt.Sprintf(format, args...)},
+			name:  name,
+		},
+	})
 }

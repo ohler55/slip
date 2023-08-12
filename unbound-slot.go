@@ -2,6 +2,8 @@
 
 package slip
 
+import "fmt"
+
 // UnboundSlotSymbol is the symbol with a value of "unbound-slot".
 const UnboundSlotSymbol = Symbol("unbound-slot")
 
@@ -14,4 +16,47 @@ type UnboundSlot interface {
 
 	// Instance returns the instance associated with the unbound slot.
 	Instance() Object
+}
+
+// UnboundSlotPanic represents a unbound-slot.
+type UnboundSlotPanic struct {
+	CellPanic
+	instance Object
+}
+
+// IsUnboundSlot need not do anything other than exist.
+func (uv *UnboundSlotPanic) IsUnboundSlot() {
+}
+
+// Instance need not do anything other than exist.
+func (uv *UnboundSlotPanic) Instance() Object {
+	return uv.instance
+}
+
+// Hierarchy returns the class hierarchy as symbols for the instance.
+func (uv *UnboundSlotPanic) Hierarchy() []Symbol {
+	return []Symbol{
+		UnboundSlotSymbol,
+		CellErrorSymbol,
+		ErrorSymbol,
+		SeriousConditionSymbol,
+		ConditionSymbol,
+		TrueSymbol,
+	}
+}
+
+// Eval the object.
+func (uv *UnboundSlotPanic) Eval(s *Scope, depth int) Object {
+	return uv
+}
+
+// PanicUnboundSlot raises a UnboundSlotPanic (unbound-slot)
+// describing a unbound-slot error.
+func PanicUnboundSlot(name string, format string, args ...any) {
+	panic(&UnboundSlotPanic{
+		CellPanic: CellPanic{
+			Panic: Panic{Message: fmt.Sprintf(format, args...)},
+			name:  name,
+		},
+	})
 }

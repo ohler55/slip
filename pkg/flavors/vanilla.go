@@ -3,7 +3,6 @@
 package flavors
 
 import (
-	"fmt"
 	"io"
 	"sort"
 	"strings"
@@ -58,6 +57,9 @@ func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	b := obj.Describe([]byte{}, 0, right, ansi)
 	w := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
+		if 1 < len(args) {
+			PanicMethodArgCount(obj, ":describe", len(args), 0, 1)
+		}
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
 			slip.PanicType(":describe output-stream", args[0], "output-stream")
@@ -106,7 +108,7 @@ type hasOpCaller bool
 func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
 	if len(args) != 1 {
-		panic(fmt.Sprintf("Method operation-handled-p expects 1 argument but received %d.", len(args)))
+		PanicMethodArgChoice(obj, ":has", len(args), "1")
 	}
 	if sym, ok := args[0].(slip.Symbol); ok && obj.HasMethod(string(sym)) {
 		return slip.True
@@ -155,7 +157,7 @@ type sendIfCaller bool
 func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*Instance)
 	if len(args) == 0 {
-		panic("Method send-if-handles expects at least 1 argument but received 0.")
+		PanicMethodArgCount(obj, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		if _, has := obj.Flavor.methods[string(sym)]; has {
@@ -203,7 +205,8 @@ type insideCaller bool
 
 func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
-		panic(fmt.Sprintf("Method eval-inside-yourself expects 1 argument but received %d.", len(args)))
+		obj := s.Get("self").(*Instance)
+		PanicMethodArgChoice(obj, ":eval-inside-yourself", len(args), "1")
 	}
 	return s.Eval(args[0], depth+1)
 }
