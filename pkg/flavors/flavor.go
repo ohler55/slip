@@ -3,7 +3,6 @@
 package flavors
 
 import (
-	"fmt"
 	"io"
 	"sort"
 	"strings"
@@ -65,7 +64,7 @@ func (obj *Flavor) DefMethod(name string, methodType string, caller slip.Caller)
 	case ":whopper", ":wrapper":
 		m.wrap = caller
 	default:
-		panic(fmt.Sprintf("%s is not a valid method type.", methodType))
+		slip.NewPanic("%s is not a valid method type.", methodType)
 	}
 	if add {
 		obj.methods[name] = ma
@@ -362,7 +361,7 @@ top:
 		result = inst
 	default:
 		if lo {
-			panic(fmt.Sprintf("%s is not a valid method for a Flavor.", message))
+			slip.PanicUnboundSlot(obj, message, "%s is not a valid method for a Flavor.", message)
 		}
 		message = strings.ToLower(message)
 		lo = true

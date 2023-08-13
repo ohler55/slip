@@ -130,15 +130,17 @@ func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	// Args should be stream print-depth escape-p. The second two arguments are
 	// ignored.
 	obj := s.Get("self").(*Instance)
-	w := s.Get("*standard-output*").(io.Writer)
+	so := s.Get("*standard-output*").(slip.Stream)
+	w := so.(io.Writer)
 	if 0 < len(args) {
 		var ok bool
+		so, _ = args[0].(slip.Stream)
 		if w, ok = args[0].(io.Writer); !ok {
 			slip.PanicType(":describe output-stream", args[0], "output-stream")
 		}
 	}
 	if _, err := w.Write(obj.Append(nil)); err != nil {
-		panic(err)
+		slip.PanicStream(so, "%s", err)
 	}
 	return nil
 }

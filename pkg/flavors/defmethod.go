@@ -3,8 +3,6 @@
 package flavors
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -70,7 +68,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	)
 	switch len(ml) {
 	case 0, 1:
-		panic(fmt.Sprintf("Too few elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml)))
+		slip.NewPanic("Too few elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml))
 	case 2:
 		if sym, ok2 := ml[0].(slip.Symbol); ok2 {
 			flavor = allFlavors[string(sym)]
@@ -83,7 +81,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			daemon = string(sym)
 		}
 	default:
-		panic(fmt.Sprintf("Too many elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml)))
+		slip.NewPanic("Too many elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml))
 	}
 	if sym, ok2 := ml[len(ml)-1].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
 		method = string(sym)

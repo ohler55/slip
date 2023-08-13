@@ -51,5 +51,5 @@ func getAllFlavorNames() slip.Object {
 }
 
 func setPanic(value slip.Object) {
-	panic("*all-flavor-names* can not be set.")
+	slip.NewPanic("*all-flavor-names* can not be set.")
 }

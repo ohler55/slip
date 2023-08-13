@@ -3,7 +3,6 @@
 package flavors
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -138,7 +137,7 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 func DefFlavor(name string, vars map[string]slip.Object, inherit []string, options slip.List) *Flavor {
 	name = strings.ToLower(name)
 	if _, has := allFlavors[name]; has {
-		panic(fmt.Sprintf("Flavor %s already defined.", name))
+		slip.NewPanic("Flavor %s already defined.", name)
 	}
 	nf := &Flavor{
 		name:        name,
@@ -154,7 +153,7 @@ func DefFlavor(name string, vars map[string]slip.Object, inherit []string, optio
 				nf.defaultHandler = cf.defaultHandler
 			}
 		} else {
-			panic(fmt.Sprintf("Flavor %s not defined.", fname))
+			slip.PanicClassNotFound(fname, "%s is not a defined flavor.", fname)
 		}
 	}
 	if nf.defaultHandler == nil {
@@ -182,7 +181,7 @@ func addIncludes(nf *Flavor) {
 			if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
 				nf.inheritFlavor(cf)
 			} else {
-				panic(fmt.Sprintf("Flavor %s not defined.", fn))
+				slip.PanicClassNotFound(fn, "%s is not a defined flavor.", fn)
 			}
 		}
 	}
@@ -193,7 +192,7 @@ func addIncludes(nf *Flavor) {
 				if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
 					nf.inheritFlavor(cf)
 				} else {
-					panic(fmt.Sprintf("Flavor %s not defined.", fn))
+					slip.PanicClassNotFound(fn, "%s is not a defined flavor.", fn)
 				}
 			}
 		}
@@ -207,17 +206,17 @@ func validateFlavor(nf *Flavor) {
 	for _, cf := range full {
 		for _, fn := range cf.required {
 			if !nf.inheritsFlavor(fn) {
-				panic(fmt.Sprintf("%s does not inherit from required flavor %s.", nf.name, fn))
+				slip.NewPanic("%s does not inherit from required flavor %s.", nf.name, fn)
 			}
 		}
 		for _, mn := range cf.requiredMethods {
 			if _, has := nf.methods[mn]; !has {
-				panic(fmt.Sprintf("%s does not include the required method %s.", nf.name, mn))
+				slip.NewPanic("%s does not include the required method %s.", nf.name, mn)
 			}
 		}
 		for _, vn := range cf.requiredVars {
 			if _, has := nf.defaultVars[vn]; !has {
-				panic(fmt.Sprintf("%s does not include the required variable %s.", nf.name, vn))
+				slip.NewPanic("%s does not include the required variable %s.", nf.name, vn)
 			}
 		}
 	}
@@ -228,7 +227,7 @@ func valsStringList(vals slip.List) (sa []string) {
 		if sym, ok := v.(slip.Symbol); ok {
 			sa = append(sa, string(sym))
 		} else {
-			panic(fmt.Sprintf("%s is not a symbol.", v))
+			slip.NewPanic("%s is not a symbol.", v)
 		}
 	}
 	return
@@ -297,10 +296,10 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 							nf.keywords[string(sym)] = plist[1]
 						}
 					} else {
-						panic(fmt.Sprintf("In :default-init-plist list car, %s is not a symbol.", plist[0]))
+						slip.NewPanic("In :default-init-plist list car, %s is not a symbol.", plist[0])
 					}
 				} else {
-					panic(fmt.Sprintf("In :default-init-plist, %s is not a list.", v))
+					slip.NewPanic("In :default-init-plist, %s is not a list.", v)
 				}
 			}
 		case ":documentation":
@@ -317,7 +316,7 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 					if sym, ok := v.(slip.Symbol); ok {
 						nf.DefMethod(":"+string(sym), "", getter(sym))
 					} else {
-						panic(fmt.Sprintf("%s is not a symbol.", v))
+						slip.NewPanic("%s is not a symbol.", v)
 					}
 				}
 			} else {
@@ -335,7 +334,7 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 					if sym, ok := v.(slip.Symbol); ok {
 						nf.initable[":"+string(sym)] = true
 					} else {
-						panic(fmt.Sprintf("%s is not a symbol.", v))
+						slip.NewPanic("%s is not a symbol.", v)
 					}
 				}
 			} else {
@@ -350,7 +349,7 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 				if sym, ok := v.(slip.Symbol); ok {
 					nf.keywords[string(sym)] = nil
 				} else {
-					panic(fmt.Sprintf("%s is not a symbol.", v))
+					slip.NewPanic("%s is not a symbol.", v)
 				}
 			}
 		case ":no-vanilla-flavor":
@@ -369,7 +368,7 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 					if sym, ok := v.(slip.Symbol); ok {
 						nf.DefMethod(":set-"+string(sym), "", setter(sym))
 					} else {
-						panic(fmt.Sprintf("%s is not a symbol.", v))
+						slip.NewPanic("%s is not a symbol.", v)
 					}
 				}
 			} else {
@@ -380,7 +379,7 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 				}
 			}
 		default:
-			panic(fmt.Sprintf("%s is not an option to defflavor", key))
+			slip.NewPanic("%s is not an option to defflavor", key)
 		}
 	}
 }
@@ -402,7 +401,7 @@ type setter string
 // Call sets the value of a variable in the instance.
 func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	if len(args) < 1 {
-		panic(fmt.Sprintf("no value given for set-%s.", s))
+		slip.NewPanic("no value given for set-%s.", s)
 	}
 	scope.Set(slip.Symbol(s), args[0])
 
@@ -410,12 +409,13 @@ func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 }
 
 // BoundCall the caller member.
-func (s setter) BoundCall(scope *slip.Scope, _ int) slip.Object {
+func (s setter) BoundCall(scope *slip.Scope, _ int) (value slip.Object) {
 	for _, value := range scope.Vars {
 		scope.Set(slip.Symbol(s), value)
 		return value
 	}
-	panic(fmt.Sprintf("no value given for set-%s.", s))
+	defer slip.NewPanic("no value given for set-%s.", s)
+	return nil
 }
 
 type defHand bool
@@ -423,5 +423,8 @@ type defHand bool
 // Call the default handler.
 func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
-	panic(fmt.Sprintf("Flavor %s does not include the %s method.", inst.Flavor.name, args[0]))
+	method, _ := args[0].(slip.Symbol)
+	defer slip.PanicUnboundSlot(inst, string(method),
+		"Flavor %s does not include the %s method.", inst.Flavor.name, args[0])
+	return nil
 }

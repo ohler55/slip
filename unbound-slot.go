@@ -52,11 +52,12 @@ func (uv *UnboundSlotPanic) Eval(s *Scope, depth int) Object {
 
 // PanicUnboundSlot raises a UnboundSlotPanic (unbound-slot)
 // describing a unbound-slot error.
-func PanicUnboundSlot(name string, format string, args ...any) {
+func PanicUnboundSlot(instance Object, name string, format string, args ...any) {
 	panic(&UnboundSlotPanic{
 		CellPanic: CellPanic{
 			Panic: Panic{Message: fmt.Sprintf(format, args...)},
 			name:  name,
 		},
+		instance: instance,
 	})
 }
