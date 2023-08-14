@@ -54,5 +54,5 @@ func (f *Character) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	default:
 		slip.PanicType("character", args[0], "string", "symbol", "character")
 	}
-	panic(fmt.Sprintf("%s is not a valid character designator"))
+	panic(&slip.ParsePanic{Panic: slip.Panic{Message: fmt.Sprintf("%s is not a valid character designator", args[0])}})
 }

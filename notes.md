@@ -16,18 +16,17 @@
      - (class-of error) would use switch for top level plus class.instance type
       - can that be made to work for flavors? maybe through an interface
   - warning type
-  - error type
   - warn (panic or just output to error-output?)
   + error (panic)
    - first arg can be an error type or a format control string
   - make-condition (used to make all errors)
   + type-error
    - type-error-datum
-   - type-error-expected-type
+   - type-error-expected-type (return Values if more than one)
   - arithmetic-error
    - arithmetic-error-operands
    - arithmetic-error-operation
-  - control-error
+  - control-error (update go and return-from)
   - file-error
    - file-error-pathname
   - ignore-errors (recover with no action)
@@ -53,27 +52,10 @@
 
   - simple-condition
    - has format-control string and format-arguments
-  - maybe __any__ slot for class when make-condition is implemented
 
   - plan
-   - each pkg
-    - cl
-    - flavors
-     - class-not-found-error from cell-error (top level)
-    - gi
-    - repl
-
-    - ArithmeticPanic (arithmetic-error)
-    - create some new error types?
-
-    - simple-error and simple-condition (simple
-   - add simple-error and SimplePanic
-    - use for general errors (how?)
-     - have to use format-control
-
-   - update tests to use PanicType if for type
-   - Warning interface
-    - a Condition
+   - add functions to access error slots when appropriate
+   - make-condition
     - SimpleCondition interface
      - format-control
      - format-arguments

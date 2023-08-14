@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -65,7 +64,7 @@ func (f *MakeStringInputStream) Call(s *slip.Scope, args slip.List, depth int) s
 		if num, ok := args[1].(slip.Fixnum); ok {
 			start = int(num)
 			if start < 0 || len(ra) <= start {
-				panic(fmt.Sprintf("start, %d is outside the bounds of the string of length %d", start, len(ra)))
+				slip.NewPanic("start, %d is outside the bounds of the string of length %d", start, len(ra))
 			}
 		} else {
 			slip.PanicType("start", args[1], "fixnum")
@@ -74,10 +73,10 @@ func (f *MakeStringInputStream) Call(s *slip.Scope, args slip.List, depth int) s
 			if num, ok := args[2].(slip.Fixnum); ok {
 				end = int(num)
 				if end < 0 || len(ra) < end {
-					panic(fmt.Sprintf("end, %d is outside the bounds of the string of length %d", end, len(ra)))
+					slip.NewPanic("end, %d is outside the bounds of the string of length %d", end, len(ra))
 				}
 				if end <= start {
-					panic(fmt.Sprintf("end, %d is before start %d", end, start))
+					slip.NewPanic("end, %d is before start %d", end, start)
 				}
 			} else {
 				slip.PanicType("end", args[2], "fixnum", "nil")

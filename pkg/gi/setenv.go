@@ -61,7 +61,7 @@ func (f *Setenv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		slip.PanicType("value", args[1], "string")
 	}
 	if err := os.Setenv(name, value); err != nil {
-		panic(err)
+		slip.NewPanic("setenv of %s to %s failed. %s", name, value, err)
 	}
 	return nil
 }

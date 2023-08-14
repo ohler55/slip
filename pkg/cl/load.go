@@ -105,12 +105,13 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if os.IsNotExist(err) && ifNotExist == nil {
 				return nil
 			}
-			panic(fmt.Sprintf("loading %s: %s", path, err))
+			slip.NewPanic("loading %s: %s", path, err)
 		}
 	case io.Reader:
 		path = slip.ObjectString(args[0])
 		if buf, err = io.ReadAll(ta); err != nil {
-			panic(fmt.Sprintf("loading %s: %s", path, err))
+			ss, _ := args[0].(slip.Stream)
+			slip.PanicStream(ss, "loading %s: %s", path, err)
 		}
 	default:
 		slip.PanicType("filespec", ta, "stream", "string")

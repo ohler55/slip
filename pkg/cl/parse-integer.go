@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"math"
 	"math/big"
 	"strings"
@@ -93,7 +92,7 @@ func (f *ParseInteger) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 			slip.PanicType("keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			panic(fmt.Sprintf("%s missing an argument", sym))
+			slip.NewPanic("%s missing an argument", sym)
 		}
 		var n slip.Fixnum
 		switch strings.ToLower(string(sym)) {
@@ -122,7 +121,7 @@ func (f *ParseInteger) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 		}
 	}
 	if end < start || len(ra) < end || start < 0 {
-		panic(fmt.Sprintf("start and end of %d, %d are not valid for a string of length %d", start, end, len(ra)))
+		slip.NewPanic("start and end of %d, %d are not valid for a string of length %d", start, end, len(ra))
 	}
 	// strconv.ParseInt can not be used as it does not report the end position
 	// and does not handle junk other than returning an error.
@@ -141,7 +140,7 @@ done:
 	for pos, r = range ra {
 		if 0x7a < r {
 			if !junk {
-				panic(fmt.Sprintf("junk in string %q at %d", string(ra), start+pos))
+				slip.NewPanic("junk in string %q at %d", string(ra), start+pos)
 			}
 			pos--
 			break
@@ -154,7 +153,7 @@ done:
 			}
 			if radix <= uint64(x) || space {
 				if !junk {
-					panic(fmt.Sprintf("junk in string %q at %d", string(ra), start+pos))
+					slip.NewPanic("junk in string %q at %d", string(ra), start+pos)
 				}
 				pos--
 				break
@@ -179,13 +178,13 @@ done:
 			// space
 		case '.':
 			if !junk {
-				panic(fmt.Sprintf("no non-whitespace in string %q", string(ra)))
+				slip.NewPanic("no non-whitespace in string %q", string(ra))
 			}
 			return slip.Values{nil, slip.Fixnum(start + pos)}
 		default:
 			if radix <= uint64(x) {
 				if !junk {
-					panic(fmt.Sprintf("junk in string %q at %d", string(ra), start+pos))
+					slip.NewPanic("junk in string %q at %d", string(ra), start+pos)
 				}
 				pos--
 				break done

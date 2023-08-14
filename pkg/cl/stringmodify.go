@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -53,7 +52,7 @@ func (f *stringModify) Call(s *slip.Scope, args slip.List, _ int) (result slip.O
 			slip.PanicType("keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			panic(fmt.Sprintf("%s missing an argument", sym))
+			slip.NewPanic("%s missing an argument", sym)
 		}
 		var n slip.Fixnum
 		switch strings.ToLower(string(sym)) {
@@ -74,7 +73,7 @@ func (f *stringModify) Call(s *slip.Scope, args slip.List, _ int) (result slip.O
 		}
 	}
 	if end < start || len(str) < end || start < 0 {
-		panic(fmt.Sprintf("start and end of %d, %d are not valid for a string of length %d", start, end, len(str)))
+		slip.NewPanic("start and end of %d, %d are not valid for a string of length %d", start, end, len(str))
 	}
 	if 0 < start || end < len(str) {
 		ra := []rune(str)

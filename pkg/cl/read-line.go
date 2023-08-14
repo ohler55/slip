@@ -90,7 +90,8 @@ func (f *ReadLine) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 					}
 					return slip.Values{result, slip.True}
 				}
-				panic(err)
+				ss, _ := is.(slip.Stream)
+				slip.PanicStream(ss, "read failed. %s", err)
 			}
 		}
 		if r == '\n' {

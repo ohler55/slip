@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -65,11 +63,11 @@ func (f *Intern) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		switch ta := args[1].(type) {
 		case slip.Symbol:
 			if p = slip.FindPackage(string(ta)); p == nil {
-				panic(fmt.Sprintf("package %s not found", ta))
+				slip.NewPanic("package %s not found", ta)
 			}
 		case slip.String:
 			if p = slip.FindPackage(string(ta)); p == nil {
-				panic(fmt.Sprintf("package %s not found", ta))
+				slip.NewPanic("package %s not found", ta)
 			}
 		case *slip.Package:
 			p = ta

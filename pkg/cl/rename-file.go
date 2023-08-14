@@ -58,7 +58,7 @@ func (f *RenameFile) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	oldPath, _ := filepath.Abs(string(name))
 	newPath, _ := filepath.Abs(string(newName))
 	if err := os.Rename(oldPath, newPath); err != nil {
-		panic(err)
+		slip.NewPanic("rename %s to %s failed. %s", oldPath, newPath, err)
 	}
 	return slip.Values{newName, slip.String(oldPath), slip.String(newPath)}
 }

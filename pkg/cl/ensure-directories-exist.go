@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -68,7 +67,7 @@ func (f *EnsureDirectoriesExist) Call(s *slip.Scope, args slip.List, depth int) 
 			slip.PanicType("keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			panic(fmt.Sprintf("%s missing an argument", sym))
+			slip.NewPanic("%s missing an argument", sym)
 		}
 		val := args[pos+1]
 		switch strings.ToLower(string(sym)) {
@@ -86,7 +85,7 @@ func (f *EnsureDirectoriesExist) Call(s *slip.Scope, args slip.List, depth int) 
 		}
 	}
 	if err := os.MkdirAll(string(path), perm); err != nil {
-		panic(err)
+		slip.NewPanic("mkdir failed: %s", err)
 	}
 	spath, _ := filepath.Abs(string(path))
 

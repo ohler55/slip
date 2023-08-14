@@ -61,7 +61,7 @@ func cadPlace(f slip.Object, args slip.List, ops []bool, value slip.Object) {
 					return
 				}
 			}
-			panic("setf on cdr of a list is not supported")
+			slip.NewPanic("setf on cdr of a list is not supported")
 		}
 	}
 	slip.PanicType(fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), a, "cons", "list")

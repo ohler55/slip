@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"io"
 	"sort"
 	"strings"
@@ -74,7 +73,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			slip.PanicType("package", ta, "string", "symbol")
 		}
 		if pkg = slip.FindPackage(name); pkg == nil {
-			panic(fmt.Sprintf("Package %s not found.", name))
+			slip.NewPanic("Package %s not found.", name)
 		}
 	}
 	pr := *slip.DefaultPrinter()
@@ -121,7 +120,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var w io.Writer = slip.StandardOutput.(io.Writer)
 	for _, line := range lines {
 		if _, err := w.Write(append([]byte(line), '\n')); err != nil {
-			panic(err)
+			slip.PanicStream(slip.StandardOutput.(slip.Stream), "%s", err)
 		}
 	}
 	return slip.Novalue

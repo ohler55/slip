@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -80,7 +78,7 @@ func (f *Nth) Place(args slip.List, value slip.Object) {
 	}
 	n := int(num.Int64())
 	if len(list) <= n || n < 0 {
-		panic(fmt.Sprintf("%d is outside the bounds a list of length %d", n, len(list)))
+		slip.NewPanic("%d is outside the bounds a list of length %d", n, len(list))
 	}
 	list[n] = value
 }

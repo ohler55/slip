@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -72,7 +70,7 @@ func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			if s.Block {
 				return rr
 			}
-			panic(fmt.Sprintf("return from unknown block: %s", rr.Tag))
+			slip.NewPanic("return from unknown block: %s", rr.Tag)
 		}
 	}
 	return

@@ -4,7 +4,6 @@ package cl
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"strings"
 
@@ -58,9 +57,12 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		slip.PanicArgCount(f, 1, 2)
 	}
 	obj := args[0]
-	w := s.Get("*standard-output*").(io.Writer)
+	so := s.Get("*standard-output*")
+	ss, _ := so.(slip.Stream)
+	w := so.(io.Writer)
 	if 1 < len(args) {
 		var ok bool
+		ss, _ = args[1].(slip.Stream)
 		if w, ok = args[1].(io.Writer); !ok {
 			slip.PanicType("describe output-stream", args[1], "output-stream")
 		}
@@ -70,7 +72,7 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 
 	b := AppendDescribe(nil, obj, s, 0, right, ansi)
 	if _, err := w.Write(b); err != nil {
-		panic(err)
+		slip.PanicStream(ss, "write failed: %s", err)
 	}
 	return slip.Novalue
 }
@@ -87,7 +89,7 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 		parts := strings.SplitN(string(sym), ":", 2)
 		sym = slip.Symbol(parts[1])
 		if pkg = slip.FindPackage(parts[0]); pkg == nil {
-			panic(fmt.Sprintf("Package %s does not exist", parts[0]))
+			slip.NewPanic("Package %s does not exist", parts[0])
 		}
 	}
 	var (

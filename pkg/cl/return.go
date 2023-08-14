@@ -40,7 +40,7 @@ type Return struct {
 func (f *Return) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	rr := ReturnResult{}
 	if !s.Block {
-		panic("return from unknown block: nil")
+		slip.NewPanic("return from unknown block: nil")
 	}
 	if 0 < len(args) {
 		rr.Result = slip.EvalArg(s, args, 0, depth+1)
