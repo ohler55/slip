@@ -7,6 +7,10 @@ import "fmt"
 // StreamErrorSymbol is the symbol with a value of "stream-error".
 const StreamErrorSymbol = Symbol("stream-error")
 
+func init() {
+	RegisterCondition("stream-error", makeStreamError)
+}
+
 // StreamError is the interface for all stream-errors.
 type StreamError interface {
 	Error
@@ -21,7 +25,7 @@ type StreamError interface {
 // StreamPanic represents a stream-error.
 type StreamPanic struct {
 	Panic
-	stream Stream
+	stream Object
 }
 
 // IsStreamError need not do anything other than exist.
@@ -39,7 +43,7 @@ func (sp *StreamPanic) Eval(s *Scope, depth int) Object {
 }
 
 // Stream returns the stream associated with the error.
-func (sp *StreamPanic) Stream() Stream {
+func (sp *StreamPanic) Stream() Object {
 	return sp.stream
 }
 
@@ -50,4 +54,14 @@ func PanicStream(stream Stream, format string, args ...any) {
 		Panic:  Panic{Message: fmt.Sprintf(format, args...)},
 		stream: stream,
 	})
+}
+
+func makeStreamError(args List) Condition {
+	c := &StreamPanic{}
+	for k, v := range parseInitList(args) {
+		if k == ":stream" {
+			c.stream = v
+		}
+	}
+	return c
 }

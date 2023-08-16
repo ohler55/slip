@@ -7,6 +7,10 @@ import "fmt"
 // UnboundSlotSymbol is the symbol with a value of "unbound-slot".
 const UnboundSlotSymbol = Symbol("unbound-slot")
 
+func init() {
+	RegisterCondition("unbound-slot", makeUnboundSlot)
+}
+
 // UnboundSlot is the interface for all unbound-slots.
 type UnboundSlot interface {
 	CellError
@@ -52,7 +56,7 @@ func (uv *UnboundSlotPanic) Eval(s *Scope, depth int) Object {
 
 // PanicUnboundSlot raises a UnboundSlotPanic (unbound-slot)
 // describing a unbound-slot error.
-func PanicUnboundSlot(instance Object, name string, format string, args ...any) {
+func PanicUnboundSlot(instance Object, name Object, format string, args ...any) {
 	panic(&UnboundSlotPanic{
 		CellPanic: CellPanic{
 			Panic: Panic{Message: fmt.Sprintf(format, args...)},
@@ -60,4 +64,17 @@ func PanicUnboundSlot(instance Object, name string, format string, args ...any) 
 		},
 		instance: instance,
 	})
+}
+
+func makeUnboundSlot(args List) Condition {
+	c := &UnboundSlotPanic{}
+	for k, v := range parseInitList(args) {
+		switch k {
+		case ":name":
+			c.name = v
+		case ":instance":
+			c.instance = v
+		}
+	}
+	return c
 }

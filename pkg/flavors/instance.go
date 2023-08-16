@@ -163,7 +163,7 @@ func (obj *Instance) BoundReceive(ps *slip.Scope, message string, bindings *slip
 			s.Let(slip.Symbol("args"), args)
 			return bc.BoundCall(s, depth)
 		}
-		slip.PanicUnboundSlot(obj, message, "%s is not a method of flavor %s.", message, obj.Flavor.name)
+		slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a method of flavor %s.", message, obj.Flavor.name)
 	}
 	for i, m := range ma {
 		if m.wrap != nil {

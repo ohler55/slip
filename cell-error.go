@@ -7,6 +7,10 @@ import "fmt"
 // CellErrorSymbol is the symbol with a value of "cell-error".
 const CellErrorSymbol = Symbol("cell-error")
 
+func init() {
+	RegisterCondition("cell-error", makeCellError)
+}
+
 // CellError is the interface for all cell-errors.
 type CellError interface {
 	Error
@@ -15,13 +19,13 @@ type CellError interface {
 	IsCellError()
 
 	// Name returns the name associated with the error.
-	Name() string
+	Name() Object
 }
 
 // CellPanic represents a cell-error.
 type CellPanic struct {
 	Panic
-	name string
+	name Object
 }
 
 // IsCellError need not do anything other than exist.
@@ -39,15 +43,25 @@ func (cp *CellPanic) Eval(s *Scope, depth int) Object {
 }
 
 // Name returns the name associated with the error.
-func (cp *CellPanic) Name() string {
+func (cp *CellPanic) Name() Object {
 	return cp.name
 }
 
 // PanicCell raises a CellPanic (cell-error) describing a cell
 // error.
-func PanicCell(name string, format string, args ...any) {
+func PanicCell(name Object, format string, args ...any) {
 	panic(&CellPanic{
 		Panic: Panic{Message: fmt.Sprintf(format, args...)},
 		name:  name,
 	})
+}
+
+func makeCellError(args List) Condition {
+	c := &CellPanic{}
+	for k, v := range parseInitList(args) {
+		if k == ":name" {
+			c.name = v
+		}
+	}
+	return c
 }

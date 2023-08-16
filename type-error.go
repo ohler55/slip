@@ -5,6 +5,10 @@ package slip
 // TypeErrorSymbol is the symbol with a value of "type-error".
 const TypeErrorSymbol = Symbol("type-error")
 
+func init() {
+	RegisterCondition("type-error", makeTypeError)
+}
+
 // TypeError is the interface for all type-errors.
 type TypeError interface {
 	Error
@@ -24,6 +28,7 @@ type TypeError interface {
 type TypePanic struct {
 	Panic
 	datum         Object
+	context       Object
 	expectedTypes List
 }
 
@@ -34,6 +39,11 @@ func (tp *TypePanic) IsTypeError() {
 // Datum is the object provided.
 func (tp *TypePanic) Datum() Object {
 	return tp.datum
+}
+
+// Context is the context provided.
+func (tp *TypePanic) Context() Object {
+	return tp.context
 }
 
 // ExpectedTypes are the expected types. This deviates from common LSIP
@@ -85,4 +95,23 @@ func PanicType(use string, value Object, wants ...string) {
 		datum:         value,
 		expectedTypes: expected,
 	})
+}
+
+func makeTypeError(args List) Condition {
+	c := &TypePanic{}
+	for k, v := range parseInitList(args) {
+		switch k {
+		case ":datum":
+			c.datum = v
+		case ":expected-type":
+			if list, ok := v.(List); ok {
+				c.expectedTypes = list
+			} else {
+				c.expectedTypes = List{v}
+			}
+		case ":context":
+			c.context = v
+		}
+	}
+	return c
 }

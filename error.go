@@ -7,6 +7,10 @@ import "fmt"
 // ErrorSymbol is the symbol with a value of "error".
 const ErrorSymbol = Symbol("error")
 
+func init() {
+	RegisterCondition("error", makeError)
+}
+
 // Error is the interface for all errors. It has no functions that provide
 // useful information other than to indicate the type is an Error which is
 // also an Object.
@@ -23,18 +27,12 @@ type Error interface {
 
 // Panic is used to gather a stack trace when panic occurs.
 type Panic struct {
+	SeriousCondition
+
 	Message string
 	Stack   []string
 	Value   Object // used when the panic function is called
 	Fatal   bool   // used in repl to indicate an exit should be made
-}
-
-// IsCondition indicates Panic is a Condition.
-func (p *Panic) IsCondition() {
-}
-
-// IsSeriousCondition indicates Panic is a Condition.
-func (p *Panic) IsSeriousCondition() {
 }
 
 // IsError indicates Panic is a Condition.
@@ -93,4 +91,14 @@ func (p *Panic) AppendToStack(name string, args List) {
 // NewPanic returns a Panic object that can then be used with a call to panic.
 func NewPanic(format string, args ...any) {
 	panic(&Panic{Message: fmt.Sprintf(format, args...)})
+}
+
+func makeError(args List) Condition {
+	msg := ""
+	if 0 < len(args) {
+		if ss, ok := args[0].(String); ok {
+			msg = string(ss)
+		}
+	}
+	return &Panic{Message: msg}
 }

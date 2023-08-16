@@ -361,7 +361,7 @@ top:
 		result = inst
 	default:
 		if lo {
-			slip.PanicUnboundSlot(obj, message, "%s is not a valid method for a Flavor.", message)
+			slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a valid method for a Flavor.", message)
 		}
 		message = strings.ToLower(message)
 		lo = true

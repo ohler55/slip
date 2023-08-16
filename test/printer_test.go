@@ -589,7 +589,7 @@ func TestPrinterWrite(t *testing.T) {
 	tt.Panic(t, func() { slip.Write(slip.List{slip.True, nil}) })
 }
 
-func TestWarningStandardOutput(t *testing.T) {
+func TestWarnStandardOutput(t *testing.T) {
 	pr, pw, err := os.Pipe()
 	tt.Nil(t, err)
 	defer func() { _ = pw.Close(); _ = pr.Close() }()
@@ -600,7 +600,7 @@ func TestWarningStandardOutput(t *testing.T) {
 
 	slip.SetVar(key, (*slip.FileStream)(pw))
 
-	slip.Warning("duck")
+	slip.Warn("duck")
 
 	pw.Close()
 	var out []byte
@@ -609,7 +609,7 @@ func TestWarningStandardOutput(t *testing.T) {
 	tt.Equal(t, "Warning: duck\n", string(out))
 }
 
-func TestWarningInteractive(t *testing.T) {
+func TestWarnInteractive(t *testing.T) {
 	pr, pw, err := os.Pipe()
 	tt.Nil(t, err)
 	defer func() { _ = pw.Close(); _ = pr.Close() }()
@@ -630,9 +630,9 @@ func TestWarningInteractive(t *testing.T) {
 	slip.SetVar(key, (*slip.FileStream)(pw))
 
 	slip.SetVar(ansiKey, slip.True)
-	slip.Warning("duck")
+	slip.Warn("duck")
 	slip.SetVar(ansiKey, nil)
-	slip.Warning("duck")
+	slip.Warn("duck")
 
 	pw.Close()
 	var out []byte

@@ -7,6 +7,10 @@ import "fmt"
 // ParseErrorSymbol is the symbol with a value of "parse-error".
 const ParseErrorSymbol = Symbol("parse-error")
 
+func init() {
+	RegisterCondition("parse-error", makeParseError)
+}
+
 // ParseError is the interface for all parse-errors.
 type ParseError interface {
 	Error
@@ -38,4 +42,14 @@ func (pp *ParsePanic) Eval(s *Scope, depth int) Object {
 // error.
 func PanicParse(format string, args ...any) {
 	panic(&ParsePanic{Panic: Panic{Message: fmt.Sprintf(format, args...)}})
+}
+
+func makeParseError(args List) Condition {
+	msg := ""
+	if 0 < len(args) {
+		if ss, ok := args[0].(String); ok {
+			msg = string(ss)
+		}
+	}
+	return &ParsePanic{Panic: Panic{Message: msg}}
 }

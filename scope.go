@@ -103,7 +103,7 @@ func (s *Scope) get(name string) Object {
 	value, has := CurrentPackage.Get(name)
 
 	if !has || Unbound == value {
-		PanicUnboundVariable(name, "Variable %s is unbound.", name)
+		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
 	}
 	return value
 }

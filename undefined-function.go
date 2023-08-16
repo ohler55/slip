@@ -7,6 +7,10 @@ import "fmt"
 // UndefinedFunctionSymbol is the symbol with a value of "undefined-function".
 const UndefinedFunctionSymbol = Symbol("undefined-function")
 
+func init() {
+	RegisterCondition("undefined-function", makeUndefinedFunction)
+}
+
 // UndefinedFunction is the interface for all undefined-functions.
 type UndefinedFunction interface {
 	CellError
@@ -43,11 +47,21 @@ func (uf *UndefinedFunctionPanic) Eval(s *Scope, depth int) Object {
 
 // PanicUndefinedFunction raises a UndefinedFunctionPanic (undefined-function)
 // describing a undefined-function error.
-func PanicUndefinedFunction(name string, format string, args ...any) {
+func PanicUndefinedFunction(name Object, format string, args ...any) {
 	panic(&UndefinedFunctionPanic{
 		CellPanic: CellPanic{
 			Panic: Panic{Message: fmt.Sprintf(format, args...)},
 			name:  name,
 		},
 	})
+}
+
+func makeUndefinedFunction(args List) Condition {
+	c := &UndefinedFunctionPanic{}
+	for k, v := range parseInitList(args) {
+		if k == ":name" {
+			c.name = v
+		}
+	}
+	return c
 }

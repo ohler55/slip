@@ -55,7 +55,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		if cf = allFlavors[string(ta)]; cf == nil {
-			slip.PanicClassNotFound(string(ta), "%s is not a defined flavor.", ta)
+			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
 		}
 	case *Flavor:
 		cf = ta
@@ -65,7 +65,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	meth, _ := args[1].(slip.Symbol)
 	ma := cf.methods[string(meth)]
 	if len(ma) == 0 {
-		slip.PanicUnboundSlot(cf, string(meth), "%s is not a method on %s.", args[1], cf.name)
+		slip.PanicUnboundSlot(cf, meth, "%s is not a method on %s.", args[1], cf.name)
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 2 < len(args) {

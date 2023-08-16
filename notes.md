@@ -1,25 +1,17 @@
 # SLIP Notes
 
 - next
+ - implement cl/make-condition
+ - unit test various errors and warning
+  - with make-condition and sliptest.function and sliptest.object
 
  - errors (use when panicing)
-  - should they be classes/flavors? both?
-   - class-of and describe
-   - is there a short term simplified option?
-    - no methods
-    - keep class hierarchy
-    - maybe class package where all the built in classes exist
-     - top level is not connected in that fixnum does not know about fixnum class
-      - (class-of 5) would return from class package
-     - all others packages would need to use classes for condition instances
-      - or keep the built-in type at the top level and classes separate
-     - (class-of error) would use switch for top level plus class.instance type
-      - can that be made to work for flavors? maybe through an interface
-  - warning type
+  + warning type - condition
   - warn (panic or just output to error-output?)
   + error (panic)
    - first arg can be an error type or a format control string
   - make-condition (used to make all errors)
+   - use slip.MakeCondition
   + type-error
    - type-error-datum
    - type-error-expected-type (return Values if more than one)
@@ -67,6 +59,18 @@
   - deal with classes for core types
    - maybe just have class-of return and support describe and other class based ops
   - implement at top level or in a class package?
+  - should they be classes/flavors? both?
+   - class-of and describe
+   - is there a short term simplified option?
+    - no methods
+    - keep class hierarchy
+    - maybe class package where all the built in classes exist
+     - top level is not connected in that fixnum does not know about fixnum class
+      - (class-of 5) would return from class package
+     - all others packages would need to use classes for condition instances
+      - or keep the built-in type at the top level and classes separate
+     - (class-of error) would use switch for top level plus class.instance type
+      - can that be made to work for flavors? maybe through an interface
 
  - trace
   - should trace by function be supported instead of overall trace?

@@ -153,7 +153,7 @@ func DefFlavor(name string, vars map[string]slip.Object, inherit []string, optio
 				nf.defaultHandler = cf.defaultHandler
 			}
 		} else {
-			slip.PanicClassNotFound(fname, "%s is not a defined flavor.", fname)
+			slip.PanicClassNotFound(slip.Symbol(fname), "%s is not a defined flavor.", fname)
 		}
 	}
 	if nf.defaultHandler == nil {
@@ -181,7 +181,7 @@ func addIncludes(nf *Flavor) {
 			if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
 				nf.inheritFlavor(cf)
 			} else {
-				slip.PanicClassNotFound(fn, "%s is not a defined flavor.", fn)
+				slip.PanicClassNotFound(slip.Symbol(fn), "%s is not a defined flavor.", fn)
 			}
 		}
 	}
@@ -192,7 +192,7 @@ func addIncludes(nf *Flavor) {
 				if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
 					nf.inheritFlavor(cf)
 				} else {
-					slip.PanicClassNotFound(fn, "%s is not a defined flavor.", fn)
+					slip.PanicClassNotFound(slip.Symbol(fn), "%s is not a defined flavor.", fn)
 				}
 			}
 		}
@@ -424,7 +424,7 @@ type defHand bool
 func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
 	method, _ := args[0].(slip.Symbol)
-	defer slip.PanicUnboundSlot(inst, string(method),
+	defer slip.PanicUnboundSlot(inst, method,
 		"Flavor %s does not include the %s method.", inst.Flavor.name, args[0])
 	return nil
 }

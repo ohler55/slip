@@ -61,7 +61,7 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		if cf = allFlavors[string(ta)]; cf == nil {
-			slip.PanicClassNotFound(string(ta), "%s is not a defined flavor.", ta)
+			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
 		}
 	case *Flavor:
 		cf = ta

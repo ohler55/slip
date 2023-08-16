@@ -7,6 +7,10 @@ import "fmt"
 // ClassNotFoundSymbol is the symbol with a value of "unbound-slot".
 const ClassNotFoundSymbol = Symbol("class-not-found")
 
+func init() {
+	RegisterCondition("class-not-found", makeClassNotFound)
+}
+
 // ClassNotFound is the interface for the class-not-found error.
 type ClassNotFound interface {
 	CellError
@@ -44,11 +48,24 @@ func (uv *ClassNotFoundPanic) Eval(s *Scope, depth int) Object {
 
 // PanicClassNotFound raises a ClassNotFoundPanic (unbound-slot)
 // describing a unbound-slot error.
-func PanicClassNotFound(name string, format string, args ...any) {
+func PanicClassNotFound(name Object, format string, args ...any) {
 	panic(&ClassNotFoundPanic{
 		CellPanic: CellPanic{
 			Panic: Panic{Message: fmt.Sprintf(format, args...)},
 			name:  name,
 		},
 	})
+}
+
+func makeClassNotFound(args List) Condition {
+	c := &ClassNotFoundPanic{}
+	for k, v := range parseInitList(args) {
+		switch k {
+		case ":name":
+			c.name = v
+		case ":instance":
+			c.instance = v
+		}
+	}
+	return c
 }

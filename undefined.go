@@ -37,7 +37,7 @@ func (obj Undefined) Eval(s *Scope, depth int) Object {
 	panic(&UndefinedFunctionPanic{
 		CellPanic: CellPanic{
 			Panic: Panic{Message: fmt.Sprintf("Function %s is not defined.", obj)},
-			name:  string(obj),
+			name:  obj,
 		},
 	})
 }

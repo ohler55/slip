@@ -206,7 +206,7 @@ func (obj *Package) String() string {
 func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	name := strings.ToLower(doc.Name)
 	if _, has := obj.Funcs[name]; has {
-		Warning("redefining %s", printer.caseName(name))
+		Warn("redefining %s", printer.caseName(name))
 	}
 	fi := FuncInfo{
 		Name:   name,

@@ -7,6 +7,10 @@ import "fmt"
 // PackageErrorSymbol is the symbol with a value of "package-error".
 const PackageErrorSymbol = Symbol("package-error")
 
+func init() {
+	RegisterCondition("package-error", makePackageError)
+}
+
 // PackageError is the interface for all package-errors.
 type PackageError interface {
 	Error
@@ -50,4 +54,14 @@ func PanicPackage(pkg *Package, format string, args ...any) {
 		pkg:   pkg,
 		Panic: Panic{Message: fmt.Sprintf(format, args...)},
 	})
+}
+
+func makePackageError(args List) Condition {
+	c := &PackagePanic{}
+	for k, v := range parseInitList(args) {
+		if k == ":package" {
+			c.pkg, _ = v.(*Package)
+		}
+	}
+	return c
 }
