@@ -2,8 +2,6 @@
 
 package slip
 
-import "fmt"
-
 // ArgCountCheck panics if the number of arguments is outside the range
 // specified.
 func ArgCountCheck(obj Object, args List, min, max int) {
@@ -19,25 +17,13 @@ func PanicArgCount(obj Object, min, max int) {
 	args := f.GetArgs()
 	if min == max {
 		if len(args) < min {
-			panic(&Panic{
-				Message: fmt.Sprintf("Too few arguments to %s. %d expected but got %d.",
-					f.GetName(), min, len(args)),
-			})
+			NewPanic("Too few arguments to %s. %d expected but got %d.", f.GetName(), min, len(args))
 		} else {
-			panic(&Panic{
-				Message: fmt.Sprintf("Too many arguments to %s. %d expected but got %d.",
-					f.GetName(), min, len(args)),
-			})
+			NewPanic("Too many arguments to %s. %d expected but got %d.", f.GetName(), min, len(args))
 		}
 	}
 	if len(args) < min {
-		panic(&Panic{
-			Message: fmt.Sprintf("Too few arguments to %s. At least %d expected but got %d.",
-				f.GetName(), min, len(args)),
-		})
+		NewPanic("Too few arguments to %s. At least %d expected but got %d.", f.GetName(), min, len(args))
 	}
-	panic(&Panic{
-		Message: fmt.Sprintf("Too many arguments to %s. At most %d expected but got %d.",
-			f.GetName(), max, len(args)),
-	})
+	panic(NewError("Too many arguments to %s. At most %d expected but got %d.", f.GetName(), max, len(args)))
 }

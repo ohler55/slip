@@ -7,6 +7,8 @@ import "fmt"
 // ErrorSymbol is the symbol with a value of "error".
 const ErrorSymbol = Symbol("error")
 
+var errorHierarchy = []Symbol{ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+
 func init() {
 	RegisterCondition("error", makeError)
 }
@@ -23,11 +25,14 @@ type Error interface {
 
 	// AppendToStack appends a function name and argument to the stack.
 	AppendToStack(name string, args List)
+
+	// AppendFull appends the message and stack of the error to a byte slice.
+	AppendFull(b []byte) []byte
 }
 
 // Panic is used to gather a stack trace when panic occurs.
 type Panic struct {
-	SeriousCondition
+	SeriousConditionObj
 
 	Message string
 	Stack   []string
@@ -39,8 +44,8 @@ type Panic struct {
 func (p *Panic) IsError() {
 }
 
-// Append the object to a byte slice.
-func (p *Panic) Append(b []byte) []byte {
+// AppendFull appends the message and stack of the error to a byte slice.
+func (p *Panic) AppendFull(b []byte) []byte {
 	b = append(b, "## "...)
 	b = append(b, p.Message...)
 	b = append(b, '\n')
@@ -52,20 +57,9 @@ func (p *Panic) Append(b []byte) []byte {
 	return b
 }
 
-// Simplify the Object into simple go types of nil, bool, int64, float64,
-// string, []any, map[string]any, or time.Time.
-func (p *Panic) Simplify() any {
-	return p.Message
-}
-
 // Equal returns true if this Object and the other are equal in value.
 func (p *Panic) Equal(other Object) bool {
 	return p == other
-}
-
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (p *Panic) Hierarchy() []Symbol {
-	return []Symbol{ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
 }
 
 // Eval the object.
@@ -78,27 +72,30 @@ func (p *Panic) Error() string {
 	return p.Message
 }
 
-// String returns the panic message.
-func (p *Panic) String() string {
-	return p.Message
-}
-
 // AppendToStack appends a function name and argument to the stack.
 func (p *Panic) AppendToStack(name string, args List) {
 	p.Stack = append(p.Stack, ObjectString(append(List{Symbol(name)}, args...)))
 }
 
+// NewError returns a Panic object that can then be used with a call to panic.
+func NewError(format string, args ...any) *Panic {
+	var p Panic
+	p.hierarchy = errorHierarchy
+	p.Message = fmt.Sprintf(format, args...)
+	return &p
+}
+
 // NewPanic returns a Panic object that can then be used with a call to panic.
 func NewPanic(format string, args ...any) {
-	panic(&Panic{Message: fmt.Sprintf(format, args...)})
+	panic(NewError(format, args...))
 }
 
 func makeError(args List) Condition {
-	msg := ""
-	if 0 < len(args) {
-		if ss, ok := args[0].(String); ok {
-			msg = string(ss)
+	var msg String
+	for k, v := range parseInitList(args) {
+		if k == ":message" {
+			msg, _ = v.(String)
 		}
 	}
-	return &Panic{Message: msg}
+	return NewError("%s", string(msg))
 }

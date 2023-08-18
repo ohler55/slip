@@ -102,7 +102,7 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 		}
 	}
 	if ai < len(args) {
-		panic(&Panic{Message: fmt.Sprintf("Too many arguments to %s. There are %d extra.", lam, ai+1)})
+		NewPanic("Too many arguments to %s. There are %d extra.", lam, ai+1)
 	}
 	if 0 < len(rest) {
 		ss.Let(restSym, rest)

@@ -2,10 +2,14 @@
 
 package slip
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // CellErrorSymbol is the symbol with a value of "cell-error".
 const CellErrorSymbol = Symbol("cell-error")
+
+var cellErrorHierarchy = []Symbol{CellErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
 
 func init() {
 	RegisterCondition("cell-error", makeCellError)
@@ -32,9 +36,9 @@ type CellPanic struct {
 func (cp *CellPanic) IsCellError() {
 }
 
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (cp *CellPanic) Hierarchy() []Symbol {
-	return []Symbol{CellErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+// Equal returns true if this Object and the other are equal in value.
+func (cp *CellPanic) Equal(other Object) bool {
+	return cp == other
 }
 
 // Eval the object.
@@ -47,21 +51,33 @@ func (cp *CellPanic) Name() Object {
 	return cp.name
 }
 
+// NewCellError raises a CellPanic (cell-error) describing a cell
+// error.
+func NewCellError(name Object, format string, args ...any) *CellPanic {
+	var cond CellPanic
+	cond.hierarchy = unboundSlotHierarchy
+	cond.name = name
+	cond.Message = fmt.Sprintf(format, args...)
+	return &cond
+}
+
 // PanicCell raises a CellPanic (cell-error) describing a cell
 // error.
 func PanicCell(name Object, format string, args ...any) {
-	panic(&CellPanic{
-		Panic: Panic{Message: fmt.Sprintf(format, args...)},
-		name:  name,
-	})
+	panic(NewCellError(name, format, args...))
 }
 
 func makeCellError(args List) Condition {
-	c := &CellPanic{}
+	var c CellPanic
+	c.hierarchy = cellErrorHierarchy
 	for k, v := range parseInitList(args) {
-		if k == ":name" {
+		switch k {
+		case ":name":
 			c.name = v
+		case ":message":
+			msg, _ := v.(String)
+			c.Message = string(msg)
 		}
 	}
-	return c
+	return &c
 }

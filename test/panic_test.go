@@ -45,15 +45,15 @@ func recoverPanic(obj slip.Object) (msg, stack string) {
 		if se, ok := recover().(slip.Error); ok {
 			se.AppendToStack("recover", nil)
 			msg = se.Error()
-			stack = string(se.Append(nil))
+			stack = string(se.AppendFull(nil))
 		}
 	}()
 	_ = obj.Eval(slip.NewScope(), 0)
 	return
 }
 
-func TestPanicParcial(t *testing.T) {
-	p := slip.PartialPanic{ParsePanic: slip.ParsePanic{Panic: slip.Panic{Message: "test"}}, Depth: 3}
-	tt.Equal(t, "test", p.String())
+func TestPanicPartial(t *testing.T) {
+	p := slip.NewPartial(3, "test")
+	tt.Equal(t, "/^#<PARSE-ERROR [0-9a-f]+>$/", p.String())
 	tt.Equal(t, "test", p.Error())
 }

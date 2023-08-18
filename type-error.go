@@ -5,6 +5,8 @@ package slip
 // TypeErrorSymbol is the symbol with a value of "type-error".
 const TypeErrorSymbol = Symbol("type-error")
 
+var typeErrorHierarchy = []Symbol{TypeErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+
 func init() {
 	RegisterCondition("type-error", makeTypeError)
 }
@@ -52,9 +54,9 @@ func (tp *TypePanic) ExpectedTypes() List {
 	return tp.expectedTypes
 }
 
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (tp *TypePanic) Hierarchy() []Symbol {
-	return []Symbol{TypeErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+// Equal returns true if this Object and the other are equal in value.
+func (tp *TypePanic) Equal(other Object) bool {
+	return tp == other
 }
 
 // Eval the object.
@@ -62,9 +64,9 @@ func (tp *TypePanic) Eval(s *Scope, depth int) Object {
 	return tp
 }
 
-// PanicType raises a TypePanic (type-error) describing an incorrect type
-// being used.
-func PanicType(use string, value Object, wants ...string) {
+// NewTypeError returns a new TypePanic (type-error) describing an incorrect
+// type being used.
+func NewTypeError(use string, value Object, wants ...string) *TypePanic {
 	var b []byte
 
 	b = append(b, use...)
@@ -90,28 +92,57 @@ func PanicType(use string, value Object, wants ...string) {
 	for i, w := range wants {
 		expected[i] = Symbol(w)
 	}
-	panic(&TypePanic{
-		Panic:         Panic{Message: string(b)},
-		datum:         value,
-		expectedTypes: expected,
-	})
+	var tp TypePanic
+	tp.datum = value
+	tp.expectedTypes = expected
+	tp.context = String(use)
+	tp.hierarchy = typeErrorHierarchy
+	tp.Message = string(b)
+
+	return &tp
+}
+
+// PanicType raises a TypePanic (type-error) describing an incorrect type
+// being used.
+func PanicType(use string, value Object, wants ...string) {
+	panic(NewTypeError(use, value, wants...))
 }
 
 func makeTypeError(args List) Condition {
-	c := &TypePanic{}
+	var (
+		use     String
+		context Object
+		value   Object
+		wants   []string
+	)
 	for k, v := range parseInitList(args) {
 		switch k {
 		case ":datum":
-			c.datum = v
+			value = v
 		case ":expected-type":
-			if list, ok := v.(List); ok {
-				c.expectedTypes = list
-			} else {
-				c.expectedTypes = List{v}
+			switch tv := v.(type) {
+			case List:
+				for _, e := range tv {
+					switch te := e.(type) {
+					case String:
+						wants = append(wants, string(te))
+					case Symbol:
+						wants = append(wants, string(te))
+					}
+
+				}
+			case String:
+				wants = []string{string(tv)}
+			case Symbol:
+				wants = []string{string(tv)}
 			}
 		case ":context":
-			c.context = v
+			use, _ = v.(String)
+			context = v
 		}
 	}
-	return c
+	tp := NewTypeError(string(use), value, wants...)
+	tp.context = context
+
+	return tp
 }

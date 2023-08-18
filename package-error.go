@@ -7,6 +7,8 @@ import "fmt"
 // PackageErrorSymbol is the symbol with a value of "package-error".
 const PackageErrorSymbol = Symbol("package-error")
 
+var packageErrorHierarchy = []Symbol{PackageErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+
 func init() {
 	RegisterCondition("package-error", makePackageError)
 }
@@ -37,9 +39,9 @@ func (pp *PackagePanic) Package() *Package {
 	return pp.pkg
 }
 
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (pp *PackagePanic) Hierarchy() []Symbol {
-	return []Symbol{PackageErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+// Equal returns true if this Object and the other are equal in value.
+func (pp *PackagePanic) Equal(other Object) bool {
+	return pp == other
 }
 
 // Eval the object.
@@ -47,21 +49,35 @@ func (pp *PackagePanic) Eval(s *Scope, depth int) Object {
 	return pp
 }
 
+// NewPackageError returns a new PackagePanic (package-error) describing a
+// package error.
+func NewPackageError(pkg *Package, format string, args ...any) *PackagePanic {
+	var pp PackagePanic
+	pp.hierarchy = packageErrorHierarchy
+	pp.pkg = pkg
+	pp.Message = fmt.Sprintf(format, args...)
+	return &pp
+}
+
 // PanicPackage raises a PackagePanic (package-error) describing a package
 // error.
 func PanicPackage(pkg *Package, format string, args ...any) {
-	panic(&PackagePanic{
-		pkg:   pkg,
-		Panic: Panic{Message: fmt.Sprintf(format, args...)},
-	})
+	panic(NewPackageError(pkg, format, args...))
 }
 
 func makePackageError(args List) Condition {
-	c := &PackagePanic{}
+	var (
+		pkg *Package
+		msg String
+	)
+
 	for k, v := range parseInitList(args) {
-		if k == ":package" {
-			c.pkg, _ = v.(*Package)
+		switch k {
+		case ":package":
+			pkg, _ = v.(*Package)
+		case ":message":
+			msg, _ = v.(String)
 		}
 	}
-	return c
+	return NewPackageError(pkg, "%s", string(msg))
 }

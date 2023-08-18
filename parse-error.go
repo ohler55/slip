@@ -7,6 +7,8 @@ import "fmt"
 // ParseErrorSymbol is the symbol with a value of "parse-error".
 const ParseErrorSymbol = Symbol("parse-error")
 
+var parseErrorHierarchy = []Symbol{ParseErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+
 func init() {
 	RegisterCondition("parse-error", makeParseError)
 }
@@ -28,9 +30,9 @@ type ParsePanic struct {
 func (pp *ParsePanic) IsParseError() {
 }
 
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (pp *ParsePanic) Hierarchy() []Symbol {
-	return []Symbol{ParseErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+// Equal returns true if this Object and the other are equal in value.
+func (pp *ParsePanic) Equal(other Object) bool {
+	return pp == other
 }
 
 // Eval the object.
@@ -38,18 +40,26 @@ func (pp *ParsePanic) Eval(s *Scope, depth int) Object {
 	return pp
 }
 
+// NewParseError creates a ParsePanic (parse-error) describing a parse error.
+func NewParseError(format string, args ...any) *ParsePanic {
+	var cond ParsePanic
+	cond.hierarchy = parseErrorHierarchy
+	cond.Message = fmt.Sprintf(format, args...)
+	return &cond
+}
+
 // PanicParse raises a ParsePanic (parse-error) describing a parse
 // error.
 func PanicParse(format string, args ...any) {
-	panic(&ParsePanic{Panic: Panic{Message: fmt.Sprintf(format, args...)}})
+	panic(NewParseError(format, args...))
 }
 
 func makeParseError(args List) Condition {
-	msg := ""
-	if 0 < len(args) {
-		if ss, ok := args[0].(String); ok {
-			msg = string(ss)
+	var msg String
+	for k, v := range parseInitList(args) {
+		if k == ":message" {
+			msg, _ = v.(String)
 		}
 	}
-	return &ParsePanic{Panic: Panic{Message: msg}}
+	return NewParseError("%s", msg)
 }

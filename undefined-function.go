@@ -7,6 +7,15 @@ import "fmt"
 // UndefinedFunctionSymbol is the symbol with a value of "undefined-function".
 const UndefinedFunctionSymbol = Symbol("undefined-function")
 
+var undefinedFunctionHierarchy = []Symbol{
+	UndefinedFunctionSymbol,
+	CellErrorSymbol,
+	ErrorSymbol,
+	SeriousConditionSymbol,
+	ConditionSymbol,
+	TrueSymbol,
+}
+
 func init() {
 	RegisterCondition("undefined-function", makeUndefinedFunction)
 }
@@ -28,16 +37,9 @@ type UndefinedFunctionPanic struct {
 func (uf *UndefinedFunctionPanic) IsUndefinedFunction() {
 }
 
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (uf *UndefinedFunctionPanic) Hierarchy() []Symbol {
-	return []Symbol{
-		UndefinedFunctionSymbol,
-		CellErrorSymbol,
-		ErrorSymbol,
-		SeriousConditionSymbol,
-		ConditionSymbol,
-		TrueSymbol,
-	}
+// Equal returns true if this Object and the other are equal in value.
+func (uf *UndefinedFunctionPanic) Equal(other Object) bool {
+	return uf == other
 }
 
 // Eval the object.
@@ -45,23 +47,34 @@ func (uf *UndefinedFunctionPanic) Eval(s *Scope, depth int) Object {
 	return uf
 }
 
+// NewUndefinedFunction returns a new UndefinedFunctionPanic
+// (undefined-function) describing a undefined-function error.
+func NewUndefinedFunction(name Object, format string, args ...any) *UndefinedFunctionPanic {
+	var cond UndefinedFunctionPanic
+	cond.hierarchy = undefinedFunctionHierarchy
+	cond.name = name
+	cond.Message = fmt.Sprintf(format, args...)
+	return &cond
+}
+
 // PanicUndefinedFunction raises a UndefinedFunctionPanic (undefined-function)
 // describing a undefined-function error.
 func PanicUndefinedFunction(name Object, format string, args ...any) {
-	panic(&UndefinedFunctionPanic{
-		CellPanic: CellPanic{
-			Panic: Panic{Message: fmt.Sprintf(format, args...)},
-			name:  name,
-		},
-	})
+	panic(NewUndefinedFunction(name, format, args...))
 }
 
 func makeUndefinedFunction(args List) Condition {
-	c := &UndefinedFunctionPanic{}
+	var (
+		name Object
+		msg  String
+	)
 	for k, v := range parseInitList(args) {
-		if k == ":name" {
-			c.name = v
+		switch k {
+		case ":name":
+			name = v
+		case ":message":
+			msg, _ = v.(String)
 		}
 	}
-	return c
+	return NewUndefinedFunction(name, "%s", string(msg))
 }

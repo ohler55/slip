@@ -11,6 +11,8 @@ import (
 // ConditionSymbol is the symbol with a value of "condition".
 const ConditionSymbol = Symbol("condition")
 
+var conditionHierarchy = []Symbol{ConditionSymbol, TrueSymbol}
+
 var conditionMakers = map[string]func(args List) Condition{
 	"condition": makeCondition,
 }
@@ -26,6 +28,7 @@ type Condition interface {
 
 // ConditionObj is used to gather a stack trace when panic occurs.
 type ConditionObj struct {
+	hierarchy []Symbol
 }
 
 // IsCondition indicates ConditionObj is a Condition.
@@ -34,7 +37,13 @@ func (c *ConditionObj) IsCondition() {
 
 // Append the object to a byte slice.
 func (c *ConditionObj) Append(b []byte) []byte {
-	b = append(b, "#<CONDITION "...)
+	typeName := "CONDITION"
+	if 0 < len(c.hierarchy) {
+		typeName = strings.ToUpper(string(c.hierarchy[0]))
+	}
+	b = append(b, "#<"...)
+	b = append(b, typeName...)
+	b = append(b, ' ')
 	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(c))), 16)
 	return append(b, '>')
 }
@@ -52,7 +61,11 @@ func (c *ConditionObj) Equal(other Object) bool {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (c *ConditionObj) Hierarchy() []Symbol {
-	return []Symbol{ConditionSymbol, TrueSymbol}
+	if len(c.hierarchy) == 0 {
+		// TBD remove when all conditions are updated
+		c.hierarchy = conditionHierarchy
+	}
+	return c.hierarchy
 }
 
 // Eval the object.
@@ -71,7 +84,7 @@ func (c *ConditionObj) String() string {
 }
 
 func makeCondition(args List) Condition {
-	return &ConditionObj{}
+	return &ConditionObj{hierarchy: conditionHierarchy}
 }
 
 // RegisterCondition associates a condition maker function with a condition

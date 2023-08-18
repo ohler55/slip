@@ -2,10 +2,21 @@
 
 package slip
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // UnboundSlotSymbol is the symbol with a value of "unbound-slot".
 const UnboundSlotSymbol = Symbol("unbound-slot")
+
+var unboundSlotHierarchy = []Symbol{
+	UnboundSlotSymbol,
+	CellErrorSymbol,
+	ErrorSymbol,
+	SeriousConditionSymbol,
+	ConditionSymbol,
+	TrueSymbol,
+}
 
 func init() {
 	RegisterCondition("unbound-slot", makeUnboundSlot)
@@ -37,16 +48,9 @@ func (uv *UnboundSlotPanic) Instance() Object {
 	return uv.instance
 }
 
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (uv *UnboundSlotPanic) Hierarchy() []Symbol {
-	return []Symbol{
-		UnboundSlotSymbol,
-		CellErrorSymbol,
-		ErrorSymbol,
-		SeriousConditionSymbol,
-		ConditionSymbol,
-		TrueSymbol,
-	}
+// Equal returns true if this Object and the other are equal in value.
+func (uv *UnboundSlotPanic) Equal(other Object) bool {
+	return uv == other
 }
 
 // Eval the object.
@@ -54,27 +58,42 @@ func (uv *UnboundSlotPanic) Eval(s *Scope, depth int) Object {
 	return uv
 }
 
+// NewUnboundSlot raises a UnboundSlotPanic (unbound-slot)
+// describing a unbound-slot error.
+func NewUnboundSlot(instance Object, name Object, format string, args ...any) *UnboundSlotPanic {
+	var cond UnboundSlotPanic
+	cond.hierarchy = unboundSlotHierarchy
+	cond.instance = instance
+	cond.name = name
+	cond.Message = fmt.Sprintf(format, args...)
+	return &cond
+}
+
 // PanicUnboundSlot raises a UnboundSlotPanic (unbound-slot)
 // describing a unbound-slot error.
 func PanicUnboundSlot(instance Object, name Object, format string, args ...any) {
-	panic(&UnboundSlotPanic{
-		CellPanic: CellPanic{
-			Panic: Panic{Message: fmt.Sprintf(format, args...)},
-			name:  name,
-		},
-		instance: instance,
-	})
+	panic(NewUnboundSlot(instance, name, format, args...))
 }
 
 func makeUnboundSlot(args List) Condition {
-	c := &UnboundSlotPanic{}
+	var (
+		name     Object
+		instance Object
+		msg      String
+	)
+
 	for k, v := range parseInitList(args) {
 		switch k {
 		case ":name":
-			c.name = v
+			name = v
 		case ":instance":
-			c.instance = v
+			instance = v
+		case ":message":
+			msg, _ = v.(String)
 		}
 	}
-	return c
+	if len(msg) == 0 {
+		return NewUnboundSlot(instance, name, "%s is not a slot in %s", name, instance)
+	}
+	return NewUnboundSlot(instance, name, "%s", string(msg))
 }

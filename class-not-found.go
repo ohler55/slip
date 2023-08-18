@@ -7,6 +7,15 @@ import "fmt"
 // ClassNotFoundSymbol is the symbol with a value of "unbound-slot".
 const ClassNotFoundSymbol = Symbol("class-not-found")
 
+var classNotFoundHierarchy = []Symbol{
+	ClassNotFoundSymbol,
+	CellErrorSymbol,
+	ErrorSymbol,
+	SeriousConditionSymbol,
+	ConditionSymbol,
+	TrueSymbol,
+}
+
 func init() {
 	RegisterCondition("class-not-found", makeClassNotFound)
 }
@@ -29,43 +38,42 @@ type ClassNotFoundPanic struct {
 func (uv *ClassNotFoundPanic) IsClassNotFound() {
 }
 
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (uv *ClassNotFoundPanic) Hierarchy() []Symbol {
-	return []Symbol{
-		ClassNotFoundSymbol,
-		CellErrorSymbol,
-		ErrorSymbol,
-		SeriousConditionSymbol,
-		ConditionSymbol,
-		TrueSymbol,
-	}
-}
-
 // Eval the object.
 func (uv *ClassNotFoundPanic) Eval(s *Scope, depth int) Object {
 	return uv
 }
 
+// NewClassNotFound creates a new ClassNotFoundPanic (class-not-found)
+// describing a class-not-found error.
+func NewClassNotFound(name Object, format string, args ...any) *ClassNotFoundPanic {
+	var cond ClassNotFoundPanic
+	cond.hierarchy = classNotFoundHierarchy
+	cond.name = name
+	cond.Message = fmt.Sprintf(format, args...)
+	return &cond
+}
+
 // PanicClassNotFound raises a ClassNotFoundPanic (unbound-slot)
 // describing a unbound-slot error.
 func PanicClassNotFound(name Object, format string, args ...any) {
-	panic(&ClassNotFoundPanic{
-		CellPanic: CellPanic{
-			Panic: Panic{Message: fmt.Sprintf(format, args...)},
-			name:  name,
-		},
-	})
+	panic(NewClassNotFound(name, format, args...))
 }
 
 func makeClassNotFound(args List) Condition {
-	c := &ClassNotFoundPanic{}
+	var (
+		name     Object
+		instance Object
+	)
 	for k, v := range parseInitList(args) {
 		switch k {
 		case ":name":
-			c.name = v
+			name = v
 		case ":instance":
-			c.instance = v
+			instance = v
 		}
 	}
+	c := NewClassNotFound(name, "class %s not found", name)
+	c.instance = instance
+
 	return c
 }

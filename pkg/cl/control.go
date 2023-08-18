@@ -440,7 +440,7 @@ func scanDirBlock(buf []byte, pos int, dirName string, open, close byte, colonOk
 			tilde = false
 		}
 	}
-	panic(&slip.Panic{Message: fmt.Sprintf("%s directive not terminated at %d of %q", dirName, pos, buf)})
+	panic(slip.NewError("%s directive not terminated at %d of %q", dirName, pos, buf))
 }
 
 func (c *control) dirCase(colon, at bool, params []any) {
@@ -694,7 +694,7 @@ func (c *control) scanJustify(buf []byte, pos int) ([]*control, *control, int) {
 			tilde = false
 		}
 	}
-	panic(&slip.Panic{Message: fmt.Sprintf("justification directive not terminated at %d of %q", pos, buf)})
+	panic(slip.NewError("justification directive not terminated at %d of %q", pos, buf))
 }
 
 func (c *control) dirEval(colon, at bool, params []any) {
@@ -1531,7 +1531,7 @@ func scanCond(buf []byte, pos int) ([]string, string, int) {
 			tilde = false
 		}
 	}
-	panic(&slip.Panic{Message: fmt.Sprintf("conditional directive not terminated at %d of %q", pos, buf)})
+	panic(slip.NewError("conditional directive not terminated at %d of %q", pos, buf))
 }
 
 func (c *control) subProcess(str string) {

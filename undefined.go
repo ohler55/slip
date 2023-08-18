@@ -2,8 +2,6 @@
 
 package slip
 
-import "fmt"
-
 // Undefined represents an undefined value.
 type Undefined string
 
@@ -34,10 +32,5 @@ func (obj Undefined) Hierarchy() []Symbol {
 
 // Eval returns self.
 func (obj Undefined) Eval(s *Scope, depth int) Object {
-	panic(&UndefinedFunctionPanic{
-		CellPanic: CellPanic{
-			Panic: Panic{Message: fmt.Sprintf("Function %s is not defined.", obj)},
-			name:  obj,
-		},
-	})
+	panic(NewUndefinedFunction(obj, "Function %s is not defined.", obj))
 }

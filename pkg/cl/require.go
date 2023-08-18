@@ -105,5 +105,5 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			return slip.Novalue
 		}
 	}
-	panic(slip.Panic{Message: fmt.Sprintf("Failed to find %s in any of the load paths.", name)})
+	panic(slip.NewError("Failed to find %s in any of the load paths.", name))
 }

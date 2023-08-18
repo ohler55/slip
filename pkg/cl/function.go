@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -59,7 +58,7 @@ func (f *Function) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	}
-	panic(slip.Panic{Message: fmt.Sprintf("|%s| is not a function name or lambda", slip.ObjectString(args[0]))})
+	panic(slip.NewError("|%s| is not a function name or lambda", slip.ObjectString(args[0])))
 }
 
 // String representation of the Object.

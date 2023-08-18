@@ -1,17 +1,15 @@
 # SLIP Notes
 
 - next
- - implement cl/make-condition
  - unit test various errors and warning
   - with make-condition and sliptest.function and sliptest.object
 
+ + make-condition
  - errors (use when panicing)
   + warning type - condition
   - warn (panic or just output to error-output?)
   + error (panic)
    - first arg can be an error type or a format control string
-  - make-condition (used to make all errors)
-   - use slip.MakeCondition
   + type-error
    - type-error-datum
    - type-error-expected-type (return Values if more than one)

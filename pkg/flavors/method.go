@@ -3,8 +3,6 @@
 package flavors
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -48,23 +46,17 @@ func (m *method) Simplify() any {
 // to a method.
 func PanicMethodArgCount(inst *Instance, method string, cnt, min, max int) {
 	if cnt < min {
-		panic(&slip.Panic{
-			Message: fmt.Sprintf("Too few arguments to the %s %s method. At least %d expected but got %d.",
-				inst.Flavor.name, method, min, cnt),
-		})
+		slip.NewPanic("Too few arguments to the %s %s method. At least %d expected but got %d.",
+			inst.Flavor.name, method, min, cnt)
 	}
-	panic(&slip.Panic{
-		Message: fmt.Sprintf("Too many arguments to the %s %s method. At most %d expected but got %d.",
-			inst.Flavor.name, method, min, cnt),
-	})
+	panic(slip.NewError("Too many arguments to the %s %s method. At most %d expected but got %d.",
+		inst.Flavor.name, method, min, cnt))
 }
 
 // PanicMethodArgChoice raises a panic describing the wrong number of
 // arguments to a method when the expected argument are a choice of a set of
 // values.
 func PanicMethodArgChoice(inst *Instance, method string, cnt int, choices string) {
-	panic(&slip.Panic{
-		Message: fmt.Sprintf("Wrong number of arguments to the %s %s method. Either %s expected but got %d.",
-			inst.Flavor.name, method, choices, cnt),
-	})
+	slip.NewPanic("Wrong number of arguments to the %s %s method. Either %s expected but got %d.",
+		inst.Flavor.name, method, choices, cnt)
 }

@@ -588,10 +588,7 @@ func (r *reader) partial(format string, args ...interface{}) {
 	f = append(f, format...)
 	f = append(f, " at %d:%d"...)
 	args = append(args, r.line, r.pos-r.lineStart)
-	panic(&PartialPanic{
-		ParsePanic: ParsePanic{Panic: Panic{Message: fmt.Sprintf(string(f), args...)}},
-		Depth:      len(r.starts)},
-	)
+	panic(NewPartial(len(r.starts), string(f), args...))
 }
 
 func (r *reader) closeList() {
