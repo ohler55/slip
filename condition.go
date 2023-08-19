@@ -62,7 +62,6 @@ func (c *ConditionObj) Equal(other Object) bool {
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (c *ConditionObj) Hierarchy() []Symbol {
 	if len(c.hierarchy) == 0 {
-		// TBD remove when all conditions are updated
 		c.hierarchy = conditionHierarchy
 	}
 	return c.hierarchy
@@ -84,6 +83,7 @@ func (c *ConditionObj) String() string {
 }
 
 func makeCondition(args List) Condition {
+	_ = parseInitList(args)
 	return &ConditionObj{hierarchy: conditionHierarchy}
 }
 
@@ -97,7 +97,7 @@ func RegisterCondition(typeName string, f func(args List) Condition) {
 func MakeCondition(typeName string, args List) Condition {
 	f := conditionMakers[typeName]
 	if f == nil {
-		f := conditionMakers[strings.ToLower(typeName)]
+		f = conditionMakers[strings.ToLower(typeName)]
 		if f == nil {
 			return nil
 		}
@@ -115,6 +115,9 @@ func parseInitList(args List) map[string]Object {
 		}
 		keyword := strings.ToLower(string(sym))
 		kv[keyword] = args[pos+1]
+	}
+	if pos < len(args) {
+		NewPanic("odd-length initializer list: %s", args)
 	}
 	return kv
 }

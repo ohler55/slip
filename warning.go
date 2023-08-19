@@ -2,8 +2,16 @@
 
 package slip
 
+import "fmt"
+
 // WarningSymbol is the symbol with a value of "serious-condition".
 const WarningSymbol = Symbol("warning")
+
+var warningHierarchy = []Symbol{WarningSymbol, ConditionSymbol, TrueSymbol}
+
+func init() {
+	RegisterCondition("warning", makeWarning)
+}
 
 // Warning is the interface for all warnings. It has no functions that provide
 // useful information other than to indicate the type is a Warning which is
@@ -13,11 +21,16 @@ type Warning interface {
 
 	// IsWarning need not do anything other than exist.
 	IsWarning()
+
+	// Message of the warning.
+	Message() string
 }
 
 // WarningObj is used to gather a stack trace when panic occurs.
 type WarningObj struct {
-	Message string
+	ConditionObj
+
+	message string
 }
 
 // IsCondition indicates WarningObj is a Condition.
@@ -28,25 +41,9 @@ func (w *WarningObj) IsCondition() {
 func (w *WarningObj) IsWarning() {
 }
 
-// Append the object to a byte slice.
-func (w *WarningObj) Append(b []byte) []byte {
-	return append(b, w.Message...)
-}
-
-// Simplify the Object into simple go types of nil, bool, int64, float64,
-// string, []any, map[string]any, or time.Time.
-func (w *WarningObj) Simplify() any {
-	return w.Message
-}
-
 // Equal returns true if this Object and the other are equal in value.
 func (w *WarningObj) Equal(other Object) bool {
 	return w == other
-}
-
-// Hierarchy returns the class hierarchy as symbols for the instance.
-func (w *WarningObj) Hierarchy() []Symbol {
-	return []Symbol{WarningSymbol, ConditionSymbol, TrueSymbol}
 }
 
 // Eval the object.
@@ -54,12 +51,25 @@ func (w *WarningObj) Eval(s *Scope, depth int) Object {
 	return w
 }
 
-// Error returns the panic message.
-func (w *WarningObj) Error() string {
-	return w.Message
+// Message returns the message.
+func (w *WarningObj) Message() string {
+	return w.message
 }
 
-// String returns the panic message.
-func (w *WarningObj) String() string {
-	return w.Message
+// NewWarning returns a Warning object.
+func NewWarning(format string, args ...any) *WarningObj {
+	var w WarningObj
+	w.hierarchy = warningHierarchy
+	w.message = fmt.Sprintf(format, args...)
+	return &w
+}
+
+func makeWarning(args List) Condition {
+	var msg String
+	for k, v := range parseInitList(args) {
+		if k == ":message" {
+			msg, _ = v.(String)
+		}
+	}
+	return NewWarning("%s", string(msg))
 }
