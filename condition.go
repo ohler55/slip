@@ -22,6 +22,7 @@ var conditionMakers = map[string]func(args List) Condition{
 // indicate the type is a Condition which is also an Object.
 type Condition interface {
 	Object
+	error
 	// IsCondition need not do anything other than exist.
 	IsCondition()
 }
