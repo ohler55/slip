@@ -27,7 +27,7 @@ type StreamError interface {
 // StreamPanic represents a stream-error.
 type StreamPanic struct {
 	Panic
-	stream Object
+	stream Stream
 }
 
 // IsStreamError need not do anything other than exist.
@@ -35,7 +35,7 @@ func (sp *StreamPanic) IsStreamError() {
 }
 
 // Stream returns the stream associated with the error.
-func (sp *StreamPanic) Stream() Object {
+func (sp *StreamPanic) Stream() Stream {
 	return sp.stream
 }
 

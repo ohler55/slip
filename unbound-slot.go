@@ -93,7 +93,7 @@ func makeUnboundSlot(args List) Condition {
 		}
 	}
 	if len(msg) == 0 {
-		return NewUnboundSlot(instance, name, "%s is not a slot in %s", name, instance)
+		return NewUnboundSlot(instance, name, "%s is not a slot in %s.", name, instance)
 	}
 	return NewUnboundSlot(instance, name, "%s", string(msg))
 }

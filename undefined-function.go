@@ -76,5 +76,8 @@ func makeUndefinedFunction(args List) Condition {
 			msg, _ = v.(String)
 		}
 	}
+	if len(msg) == 0 {
+		return NewUndefinedFunction(name, "The function %s is undefined.", name)
+	}
 	return NewUndefinedFunction(name, "%s", string(msg))
 }

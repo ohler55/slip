@@ -76,5 +76,8 @@ func makeUnboundVariable(args List) Condition {
 			msg, _ = v.(String)
 		}
 	}
+	if len(msg) == 0 {
+		return NewUnboundVariable(name, "The variable %s is unbound.", name)
+	}
 	return NewUnboundVariable(name, "%s", string(msg))
 }

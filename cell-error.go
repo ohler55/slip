@@ -55,7 +55,7 @@ func (cp *CellPanic) Name() Object {
 // error.
 func NewCellError(name Object, format string, args ...any) *CellPanic {
 	var cond CellPanic
-	cond.hierarchy = unboundSlotHierarchy
+	cond.hierarchy = cellErrorHierarchy
 	cond.name = name
 	cond.Message = fmt.Sprintf(format, args...)
 	return &cond

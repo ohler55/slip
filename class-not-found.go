@@ -31,16 +31,20 @@ type ClassNotFound interface {
 // ClassNotFoundPanic represents a unbound-slot.
 type ClassNotFoundPanic struct {
 	CellPanic
-	instance Object
 }
 
 // IsClassNotFound need not do anything other than exist.
-func (uv *ClassNotFoundPanic) IsClassNotFound() {
+func (cnf *ClassNotFoundPanic) IsClassNotFound() {
+}
+
+// Equal returns true if this Object and the other are equal in value.
+func (cnf *ClassNotFoundPanic) Equal(other Object) bool {
+	return cnf == other
 }
 
 // Eval the object.
-func (uv *ClassNotFoundPanic) Eval(s *Scope, depth int) Object {
-	return uv
+func (cnf *ClassNotFoundPanic) Eval(s *Scope, depth int) Object {
+	return cnf
 }
 
 // NewClassNotFound creates a new ClassNotFoundPanic (class-not-found)
@@ -60,20 +64,13 @@ func PanicClassNotFound(name Object, format string, args ...any) {
 }
 
 func makeClassNotFound(args List) Condition {
-	var (
-		name     Object
-		instance Object
-	)
+	var name Object
 	for k, v := range parseInitList(args) {
-		switch k {
-		case ":name":
+		if k == ":name" {
 			name = v
-		case ":instance":
-			instance = v
 		}
 	}
 	c := NewClassNotFound(name, "class %s not found", name)
-	c.instance = instance
 
 	return c
 }
