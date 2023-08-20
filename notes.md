@@ -1,57 +1,34 @@
 # SLIP Notes
 
 - next
- - unit test various errors and warning
-  - with make-condition and sliptest.function and sliptest.object
-
- + make-condition
- - errors (use when panicing)
-  + warning type - condition
-  - warn (panic or just output to error-output?)
-  + error (panic)
-   - first arg can be an error type or a format control string
-  + type-error
-   - type-error-datum
-   - type-error-expected-type (return Values if more than one)
-   - type-error-context (slip special)
+ - add additional error
   - arithmetic-error
-   - arithmetic-error-operands
-   - arithmetic-error-operation
   - control-error (update go and return-from)
   - file-error
-   - file-error-pathname
-  - ignore-errors (recover with no action)
-  - invalid-method-error
-  - method-combination-error (in pkg/class, maybe use in flavors or create a similar one)
-  + package-error
-   - package-error-package
-  + parse-error
   - program-error
   - reader-error
   - simple-condition
-   - simple-condition-format-control
-   - simple-condition-format-arguments
   - simple-error
   - simple-type-error
   - simple-warning
-  + stream-error
-   - stream-error-stream
-  + cell-error
-   - cell-error-name
-  + unbound-slot (in flavors and class)
-   - unbound-slot-instance
+  - invalid-method-error
+  - method-combination-error (in pkg/class, maybe use in flavors or create a similar one)
+ - add error access function
+  - cell-error-name
+  - type-error-datum
+  - type-error-expected-type (return Values if more than one)
+  - type-error-context (slip special)
+  - package-error-package
+  - stream-error-stream
+  - unbound-slot-instance
+  - arithmetic-error-operands
+  - arithmetic-error-operation
+  - file-error-pathname
+  - simple-condition-format-control
+  - simple-condition-format-arguments
 
-  - simple-condition
-   - has format-control string and format-arguments
-
-  - plan
-   - add functions to access error slots when appropriate
-   - make-condition
-    - SimpleCondition interface
-     - format-control
-     - format-arguments
-   - SimpleWarning interface or type?
-    - SimpleWarningImpl or ASimpleWarning or SimpleWarningType or SimpleWarningActual
+ - warn (panic or just output to error-output?)
+ - ignore-errors (recover with no action)
 
 
  - class

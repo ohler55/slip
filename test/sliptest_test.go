@@ -26,3 +26,35 @@ func TestSliptestFunctionReadably(t *testing.T) {
 		Readably: true,
 	}).Test(t)
 }
+
+func TestSliptestFunctionPanics(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(/ 1 0) ",
+		Panics: true,
+	}).Test(t)
+}
+
+func TestSliptestFunctionPanicType(t *testing.T) {
+	(&sliptest.Function{
+		Source:    "(/ 1 0)",
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+}
+
+func TestSliptestObjectPanics(t *testing.T) {
+	(&sliptest.Object{
+		Target: slip.Symbol("not-bound"),
+		String: "not-bound",
+		Simple: "not-bound",
+		Panics: true,
+	}).Test(t)
+}
+
+func TestSliptestObjectPanicType(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Symbol("not-bound"),
+		String:    "not-bound",
+		Simple:    "not-bound",
+		PanicType: slip.Symbol("unbound-variable"),
+	}).Test(t)
+}

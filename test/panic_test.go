@@ -40,6 +40,11 @@ func TestPanicArgCountHigh(t *testing.T) {
 	tt.Equal(t, "Too many arguments to random. At most 2 expected but got 3.", msg)
 }
 
+func TestArgCountCheck(t *testing.T) {
+	fun := slip.NewFunc("car", slip.List{})
+	tt.Panic(t, func() { slip.ArgCountCheck(fun, slip.List{}, 1, 2) })
+}
+
 func recoverPanic(obj slip.Object) (msg, stack string) {
 	defer func() {
 		if se, ok := recover().(slip.Error); ok {

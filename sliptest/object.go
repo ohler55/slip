@@ -39,7 +39,7 @@ type Object struct {
 	// error a panic is expected. If the values is a function then that
 	// function is called with the result of Simplify() and should fail the
 	// test if the simplified value is not as expected.
-	Simple interface{}
+	Simple any
 
 	// Hierarchy is the expected return from .Hierarchy() but joined with a
 	// '.' character.

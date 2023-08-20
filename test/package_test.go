@@ -94,6 +94,37 @@ func checkCLPkgSimplify(t *testing.T, simple any) {
 	tt.Equal(t, "common-lisp-user", jp.C("vars").C("*package*").C("val").First(simple))
 }
 
+func TestPackageCLGensymCounter(t *testing.T) {
+	cl := slip.FindPackage("common-lisp")
+	tt.NotNil(t, cl)
+	v, has := cl.Get("*gensym-counter*")
+	orig, _ := v.(slip.Fixnum)
+	tt.Equal(t, true, has)
+	tt.SameType(t, slip.Fixnum(0), orig)
+	_ = cl.Set("*gensym-counter*", orig+1)
+	current, _ := cl.Get("*gensym-counter*")
+	tt.Equal(t, orig+1, current)
+	tt.Panic(t, func() { _ = cl.Set("*gensym-counter*", nil) })
+}
+
+func TestPackageCLTraceOutput(t *testing.T) {
+	cl := slip.FindPackage("common-lisp")
+	tt.NotNil(t, cl)
+	out, has := cl.Get("*trace-output*")
+	tt.Equal(t, true, has)
+	_ = cl.Set("*trace-output*", out)
+	tt.Panic(t, func() { _ = cl.Set("*trace-output*", nil) })
+}
+
+func TestPackageKeyword(t *testing.T) {
+	kp := slip.FindPackage("keyword")
+	tt.NotNil(t, kp)
+	tt.Panic(t, func() { kp.Set("", slip.True) })
+	tt.Panic(t, func() { kp.Set(":yes", slip.True) })
+	// Should not panic.
+	kp.Set(":yes", slip.Symbol(":yes"))
+}
+
 func TestPackageFind(t *testing.T) {
 	tt.Equal(t, &slip.UserPkg, slip.FindPackage("COMMON-LISP-USER"))
 	tt.Equal(t, &slip.UserPkg, slip.FindPackage("common-lisp-user"))
