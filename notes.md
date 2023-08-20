@@ -13,6 +13,7 @@
   + type-error
    - type-error-datum
    - type-error-expected-type (return Values if more than one)
+   - type-error-context (slip special)
   - arithmetic-error
    - arithmetic-error-operands
    - arithmetic-error-operation

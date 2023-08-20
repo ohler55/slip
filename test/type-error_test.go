@@ -1,0 +1,68 @@
+// Copyright (c) 2023, Peter Ohler, All rights reserved.
+
+package test
+
+import (
+	"testing"
+
+	"github.com/ohler55/ojg/tt"
+	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/sliptest"
+)
+
+func TestTypeErrorObj(t *testing.T) {
+	cond := slip.NewTypeError("testing", slip.Fixnum(3), "symbol")
+	(&sliptest.Object{
+		Target: cond,
+		String: "/^#<TYPE-ERROR [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
+		Eval:   cond,
+		Equals: []*sliptest.EqTest{
+			{Other: cond, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+	}).Test(t)
+	tt.Equal(t, "testing must be a symbol not 3, a fixnum.", cond.Error())
+}
+
+func TestTypeErrorMake(t *testing.T) {
+	tf := sliptest.Function{
+		Source: `(make-condition 'Type-Error :datum 3 :expected-type 'symbol :context "testing")`,
+		Expect: "/^#<TYPE-ERROR [0-9a-f]+>$/",
+	}
+	tf.Test(t)
+	te, ok := tf.Result.(slip.TypeError)
+	tt.Equal(t, ok, true)
+	tt.Equal(t, "testing must be a symbol not 3, a fixnum.", te.Error())
+	tt.Equal(t, slip.Fixnum(3), te.Datum())
+	tt.Equal(t, `"testing"`, slip.ObjectString(te.Context()))
+	tt.Equal(t, "(symbol)", slip.ObjectString(te.ExpectedTypes()))
+
+	tf = sliptest.Function{
+		Source: `(make-condition 'Type-Error :datum 3 :expected-type "symbol" :context "testing")`,
+		Expect: "/^#<TYPE-ERROR [0-9a-f]+>$/",
+	}
+	tf.Test(t)
+	te, ok = tf.Result.(slip.TypeError)
+	tt.Equal(t, ok, true)
+	tt.Equal(t, "testing must be a symbol not 3, a fixnum.", te.Error())
+	tt.Equal(t, slip.Fixnum(3), te.Datum())
+	tt.Equal(t, `"testing"`, slip.ObjectString(te.Context()))
+	tt.Equal(t, "(symbol)", slip.ObjectString(te.ExpectedTypes()))
+
+	tf = sliptest.Function{
+		Source: `(make-condition 'Type-Error :datum 3 :expected-type '(symbol "string")  :context "testing")`,
+		Expect: "/^#<TYPE-ERROR [0-9a-f]+>$/",
+	}
+	tf.Test(t)
+	te, ok = tf.Result.(slip.TypeError)
+	tt.Equal(t, ok, true)
+	tt.Equal(t, "testing must be a symbol or string not 3, a fixnum.", te.Error())
+	tt.Equal(t, slip.Fixnum(3), te.Datum())
+	tt.Equal(t, `"testing"`, slip.ObjectString(te.Context()))
+	tt.Equal(t, "(symbol string)", slip.ObjectString(te.ExpectedTypes()))
+}
+
+func TestTypeErrorPanic(t *testing.T) {
+	tt.Panic(t, func() { slip.PanicType("testing", slip.Fixnum(3), "symbol") })
+}

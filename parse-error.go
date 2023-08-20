@@ -61,5 +61,5 @@ func makeParseError(args List) Condition {
 			msg, _ = v.(String)
 		}
 	}
-	return NewParseError("%s", msg)
+	return NewParseError("%s", string(msg))
 }

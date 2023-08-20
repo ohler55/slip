@@ -23,7 +23,10 @@ type TypeError interface {
 
 	// ExpectedTypes are the expected types. This deviates from common LSIP
 	// where this is only one expected-type.
-	ExpectedTypes() Object
+	ExpectedTypes() List
+
+	// Context of the error.
+	Context() Object
 }
 
 // TypePanic represents a type-error.
