@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -24,6 +25,10 @@ func TestModFixnum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(mod -1 -5)`,
 		Expect: "-1",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(mod -1 0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
 	}).Test(t)
 }
 
@@ -48,6 +53,10 @@ func TestModBignum(t *testing.T) {
 		Source: `(mod -10000000000000000000 -50000000000000000000)`,
 		Expect: "-10000000000000000000",
 	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(mod 10000000000000000000 (- 10000000000000000000 10000000000000000000))`,
+		PanicType: slip.Symbol("arithmetic-error"),
+	}).Test(t)
 }
 
 func TestModReal(t *testing.T) {
@@ -66,6 +75,10 @@ func TestModReal(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(mod -1.5 -5.0)`,
 		Expect: "-1.5",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(mod 7.5 0.0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
 	}).Test(t)
 }
 

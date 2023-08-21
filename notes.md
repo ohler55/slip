@@ -2,7 +2,7 @@
 
 - next
  - add additional error
-  - arithmetic-error
+  + arithmetic-error
   - control-error (update go and return-from)
   - file-error
   - program-error

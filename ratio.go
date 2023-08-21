@@ -2,7 +2,9 @@
 
 package slip
 
-import "math/big"
+import (
+	"math/big"
+)
 
 // RatioSymbol is the symbol with a value of "ratio".
 const RatioSymbol = Symbol("ratio")
@@ -17,6 +19,9 @@ type Ratio big.Rat
 
 // NewRatio creates a new Ratio.
 func NewRatio(num, denom int64) *Ratio {
+	if denom == 0 {
+		PanicArithmetic(Symbol("/"), List{Fixnum(num), Fixnum(denom)}, "division by zero")
+	}
 	return (*Ratio)(big.NewRat(num, denom))
 }
 

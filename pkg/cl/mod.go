@@ -56,6 +56,9 @@ func (f *Mod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	switch num := n.(type) {
 	case slip.Fixnum:
 		div := int64(d.(slip.Fixnum))
+		if div == 0 {
+			slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+		}
 		m := int64(num) % div
 		if (0 < div && m < 0) || (div < 0 && 0 < m) {
 			m += div
@@ -63,6 +66,9 @@ func (f *Mod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		result = slip.Fixnum(m)
 	case *slip.Bignum:
 		div := (*big.Int)(d.(*slip.Bignum))
+		if div.Sign() == 0 {
+			slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+		}
 		var z big.Int
 		_ = z.Mod((*big.Int)(num), div)
 		zs := z.Sign()
@@ -73,6 +79,9 @@ func (f *Mod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		result = (*slip.Bignum)(&z)
 	case slip.Real:
 		div := (d.(slip.Real)).RealValue()
+		if div == 0.0 {
+			slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+		}
 		nf := num.RealValue()
 		m := math.Mod(nf, div)
 		if (0.0 < div && m < 0) || (div < 0 && 0 < m) {
