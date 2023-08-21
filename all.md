@@ -98,7 +98,7 @@
  * [ ] CONSTANTLY
  * [ ] CONSTANTP
  * [ ] CONTINUE
- * [ ] CONTROL-ERROR
+ * [x] CONTROL-ERROR
  * [ ] COPY-ALIST
  * [ ] COPY-LIST
  * [ ] COPY-PPRINT-DISPATCH
@@ -158,7 +158,7 @@
  * [ ] EXTENDED-CHAR
  * [ ] FBOUNDP
  * [ ] FDEFINITION
- * [ ] FILE-ERROR
+ * [x] FILE-ERROR
  * [ ] FILE-ERROR-PATHNAME
  * [ ] FILL
  * [ ] FILL-POINTER
@@ -335,7 +335,7 @@
  * [ ] PRINT-OBJECT
  * [ ] PRINT-UNREADABLE-OBJECT
  * [ ] PROCLAIM
- * [ ] PROGRAM-ERROR
+ * [x] PROGRAM-ERROR
  * [ ] PROGV
  * [ ] PSETF
  * [ ] PUSH

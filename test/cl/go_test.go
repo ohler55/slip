@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -49,7 +50,7 @@ func TestGoBadTag(t *testing.T) {
   "xyz"
   (setq x (1+ x)))
  x)`,
-		Panics: true,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
@@ -61,6 +62,6 @@ func TestGoNotInTagbody(t *testing.T) {
  (setq x (1+ x))
  1
  (setq x (1+ x)))`,
-		Panics: true,
+		PanicType: slip.Symbol("control-error"),
 	}).Test(t)
 }

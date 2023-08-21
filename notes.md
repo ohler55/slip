@@ -3,16 +3,17 @@
 - next
  - add additional error
   + arithmetic-error
-  - control-error (update go and return-from)
-  - file-error
-  - program-error
-  - reader-error
+  + control-error
+  + file-error
+  + program-error
+  - invalid-method-error
+   - same as unbound-slot but class instead of instance
+  - method-combination-error
+  - reader-error (seems the same as parse error but?, inherits from parse-error AND stream-error)
   - simple-condition
   - simple-error
   - simple-type-error
   - simple-warning
-  - invalid-method-error
-  - method-combination-error (in pkg/class, maybe use in flavors or create a similar one)
  - add error access function
   - cell-error-name
   - type-error-datum
@@ -26,6 +27,11 @@
   - file-error-pathname
   - simple-condition-format-control
   - simple-condition-format-arguments
+  - invalid-method-error (function)
+   - maybe create a type with the same name
+   - provide access function for class/flavor and method
+  - method-combination-error (function)
+   - maybe create a type with the same name
 
  - warn (panic or just output to error-output?)
  - ignore-errors (recover with no action)

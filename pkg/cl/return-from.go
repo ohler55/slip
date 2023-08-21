@@ -56,7 +56,7 @@ func (f *ReturnFrom) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 		slip.PanicType("name", ta, "symbol", "nil")
 	}
 	if !s.Block {
-		slip.NewPanic("return from unknown block: %s", rr.Tag)
+		slip.PanicControl("return from unknown block: %s", rr.Tag)
 	}
 	if 1 < len(args) {
 		rr.Result = slip.EvalArg(s, args, 1, depth+1)

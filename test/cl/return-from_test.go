@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -24,14 +25,14 @@ func TestReturnFromEmpty(t *testing.T) {
 
 func TestReturnFromBadName(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(block nil (return-from t 1) (+ 2 3))`,
-		Panics: true,
+		Source:    `(block nil (return-from t 1) (+ 2 3))`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestReturnFromNotInBlock(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(return-from nil 1)`,
-		Panics: true,
+		Source:    `(return-from nil 1)`,
+		PanicType: slip.Symbol("control-error"),
 	}).Test(t)
 }
