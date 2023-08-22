@@ -70,7 +70,7 @@ func PanicCell(name Object, format string, args ...any) {
 func makeCellError(args List) Condition {
 	var c CellPanic
 	c.hierarchy = cellErrorHierarchy
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":name":
 			c.name = v

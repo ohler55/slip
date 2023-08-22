@@ -71,7 +71,7 @@ func makeStreamError(args List) Condition {
 		msg    String
 	)
 
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":stream":
 			stream, _ = v.(Stream)

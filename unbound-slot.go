@@ -82,7 +82,7 @@ func makeUnboundSlot(args List) Condition {
 		msg      String
 	)
 
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":name":
 			name = v

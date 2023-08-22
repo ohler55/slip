@@ -63,7 +63,7 @@ func PanicProgram(format string, args ...any) {
 func makeProgramError(args List) Condition {
 	var msg String
 
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		if k == ":message" {
 			msg, _ = v.(String)
 		}

@@ -86,7 +86,7 @@ func makeArithmeticError(args List) Condition {
 		operands  List
 		msg       String
 	)
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":message":
 			msg, _ = v.(String)

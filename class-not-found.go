@@ -65,7 +65,7 @@ func PanicClassNotFound(name Object, format string, args ...any) {
 
 func makeClassNotFound(args List) Condition {
 	var name Object
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		if k == ":name" {
 			name = v
 		}

@@ -94,7 +94,7 @@ func makeMethodError(args List) Condition {
 		qualifier Object
 		msg       String
 	)
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":name", ":method":
 			name = v

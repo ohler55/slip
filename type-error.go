@@ -118,7 +118,7 @@ func makeTypeError(args List) Condition {
 		value   Object
 		wants   []string
 	)
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":datum":
 			value = v

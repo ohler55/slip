@@ -75,7 +75,7 @@ func makeFileError(args List) Condition {
 		msg      String
 		pathname Object
 	)
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":pathname":
 			pathname = v

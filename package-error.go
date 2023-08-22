@@ -71,7 +71,7 @@ func makePackageError(args List) Condition {
 		msg String
 	)
 
-	for k, v := range parseInitList(args) {
+	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":package":
 			pkg, _ = v.(*Package)

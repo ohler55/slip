@@ -68,6 +68,12 @@ func (c *ConditionObj) Hierarchy() []Symbol {
 	return c.hierarchy
 }
 
+// SetHierarchy sets the hierarchy. This should only be used by sub-types of
+// ConditionObj.
+func (c *ConditionObj) SetHierarchy(hierarchy []Symbol) {
+	c.hierarchy = hierarchy
+}
+
 // Eval the object.
 func (c *ConditionObj) Eval(s *Scope, depth int) Object {
 	return c
@@ -84,7 +90,7 @@ func (c *ConditionObj) String() string {
 }
 
 func makeCondition(args List) Condition {
-	_ = parseInitList(args)
+	_ = ParseInitList(args)
 	return &ConditionObj{hierarchy: conditionHierarchy}
 }
 
@@ -106,7 +112,8 @@ func MakeCondition(typeName string, args List) Condition {
 	return f(args)
 }
 
-func parseInitList(args List) map[string]Object {
+// ParseInitList parses an initialization list into a map.
+func ParseInitList(args List) map[string]Object {
 	kv := map[string]Object{}
 	var pos int
 	for ; pos < len(args)-1; pos += 2 {
