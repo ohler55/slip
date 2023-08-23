@@ -765,9 +765,12 @@ func (c *control) dirA(colon, at bool, params []any) {
 			arg = c.args[c.argPos]
 			c.argPos++
 		}
-		if s, ok := arg.(slip.String); ok {
-			c.out = append(c.out, s...)
-		} else {
+		switch ta := arg.(type) {
+		case slip.String:
+			c.out = append(c.out, ta...)
+		case slip.Condition:
+			c.out = append(c.out, ta.Error()...)
+		default:
 			p := *slip.DefaultPrinter()
 			p.Escape = false
 			p.Readably = false
@@ -1303,6 +1306,12 @@ func (c *control) dirAS(colon, at bool, params []any, p *slip.Printer) {
 			out = p.Append(out, ta, 0)
 		} else {
 			out = append(out, ta...)
+		}
+	case slip.Condition:
+		if p.Readably {
+			out = ta.Append(out)
+		} else {
+			out = append(out, ta.Error()...)
 		}
 	default:
 		out = p.Append(out, ta, 0)

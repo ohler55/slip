@@ -1,11 +1,6 @@
 # SLIP Notes
 
 - next
- - condition/error string should return message if ~A but #<Cond> otherwise
-   - if p.Readably = false then message (Error())
-   - if true then #<COND>
-   - only in format control, all others #<cond>
-
  - add error access function
   - cell-error-name
   - type-error-datum
