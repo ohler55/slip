@@ -59,8 +59,8 @@ func NewSimpleCondition(s *slip.Scope, ctrl string, args ...slip.Object) *Simple
 	return &sc
 }
 
-// NewSimpleConditionObj returns a SimpleConditionObj object that can then be used with a call to panic.
-func NewSimpleConditionObj(s *slip.Scope, ctrl string, args ...slip.Object) {
+// PanicSimpleCondition raises a SimpleConditionObj instance.
+func PanicSimpleCondition(s *slip.Scope, ctrl string, args ...slip.Object) {
 	panic(NewSimpleCondition(s, ctrl, args...))
 }
 
@@ -84,5 +84,5 @@ func makeSimpleCondition(args slip.List) slip.Condition {
 			}
 		}
 	}
-	return NewSimpleCondition(nil, ctrl, fargs)
+	return NewSimpleCondition(nil, ctrl, fargs...)
 }

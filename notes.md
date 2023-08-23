@@ -1,28 +1,11 @@
 # SLIP Notes
 
 - next
- - condition/error string shoud return message if ~A but #<Cond> otherwise
+ - condition/error string should return message if ~A but #<Cond> otherwise
    - if p.Readably = false then message (Error())
    - if true then #<COND>
    - only in format control, all others #<cond>
 
- - should cl/control.go be moved to top?
-  - other than errors is control needed anywhere else?
- - add additional error
-  + arithmetic-error
-  + control-error
-  + file-error
-  + program-error
-  + method-error
-  - reader-error (seems the same as parse error but?, inherits from parse-error AND stream-error)
-  - simple-condition (in cl package)
-   - can still inherit from Condition
-    - need mixin approach for simples (simple-formatter interface and SimpleFormatEmbed
-     - maybe has format-control and format-arguments
-     - could call from cl with control, args, and generated message
-  - simple-error (in cl package)
-  - simple-type-error (in cl package)
-  - simple-warning (in cl package)
  - add error access function
   - cell-error-name
   - type-error-datum
