@@ -2,10 +2,10 @@
 
 - next
  - add error access function
-  - cell-error-name
+  + cell-error-name
   - type-error-datum
   - type-error-expected-type (return Values if more than one)
-  - type-error-context (slip special)
+  - type-error-context (sbcl has this in sb-kernel)
   - package-error-package
   - stream-error-stream
   - unbound-slot-instance

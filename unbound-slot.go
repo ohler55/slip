@@ -65,7 +65,11 @@ func NewUnboundSlot(instance Object, name Object, format string, args ...any) *U
 	cond.hierarchy = unboundSlotHierarchy
 	cond.instance = instance
 	cond.name = name
-	cond.Message = fmt.Sprintf(format, args...)
+	if 0 < len(format) {
+		cond.Message = fmt.Sprintf(format, args...)
+	} else {
+		cond.Message = fmt.Sprintf("%s is not a slot in %s.", name, instance)
+	}
 	return &cond
 }
 
@@ -80,6 +84,7 @@ func makeUnboundSlot(args List) Condition {
 		name     Object
 		instance Object
 		msg      String
+		format   string
 	)
 
 	for k, v := range ParseInitList(args) {
@@ -90,10 +95,8 @@ func makeUnboundSlot(args List) Condition {
 			instance = v
 		case ":message":
 			msg, _ = v.(String)
+			format = "%s"
 		}
 	}
-	if len(msg) == 0 {
-		return NewUnboundSlot(instance, name, "%s is not a slot in %s.", name, instance)
-	}
-	return NewUnboundSlot(instance, name, "%s", string(msg))
+	return NewUnboundSlot(instance, name, format, string(msg))
 }

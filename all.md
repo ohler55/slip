@@ -79,7 +79,7 @@
  * [ ] CATCH
  * [ ] CCASE
  * [x] CELL-ERROR
- * [ ] CELL-ERROR-NAME
+ * [x] CELL-ERROR-NAME
  * [ ] CHANGE-CLASS
  * [ ] CHECK-TYPE
  * [ ] CIS
