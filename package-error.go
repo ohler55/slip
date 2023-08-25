@@ -70,7 +70,6 @@ func makePackageError(args List) Condition {
 		pkg *Package
 		msg String
 	)
-
 	for k, v := range ParseInitList(args) {
 		switch k {
 		case ":package":

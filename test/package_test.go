@@ -39,7 +39,7 @@ func TestPackage(t *testing.T) {
 func TestPackageUser(t *testing.T) {
 	(&sliptest.Object{
 		Target:    &slip.UserPkg,
-		String:    `#<package "common-lisp-user">`,
+		String:    `#<package common-lisp-user>`,
 		Simple:    checkUserPkgSimplify,
 		Hierarchy: "package.t",
 		Equals: []*sliptest.EqTest{
@@ -76,7 +76,7 @@ func checkUserPkgSimplify(t *testing.T, simple any) {
 func TestPackageCL(t *testing.T) {
 	(&sliptest.Object{
 		Target:    &slip.CLPkg,
-		String:    `#<package "common-lisp">`,
+		String:    `#<package common-lisp>`,
 		Simple:    checkCLPkgSimplify,
 		Hierarchy: "package.t",
 		Equals: []*sliptest.EqTest{
@@ -148,7 +148,7 @@ func TestPackageDef(t *testing.T) {
 	tt.Equal(t, `{
   doc: Sailing.
   functions: []
-  imports: {bb: {name: bb pkg: "#<package \"b\">"}}
+  imports: {bb: {name: bb pkg: "#<package b>"}}
   name: c
   nicknames: [sea see]
   uses: [a]

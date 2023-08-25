@@ -11,7 +11,7 @@ import (
 func TestFindPackageString(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(find-package "User")`,
-		Expect: `#<package "common-lisp-user">`,
+		Expect: `#<package common-lisp-user>`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(find-package "not-a-package")`,
@@ -22,7 +22,7 @@ func TestFindPackageString(t *testing.T) {
 func TestFindPackageSymbol(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(find-package 'User)`,
-		Expect: `#<package "common-lisp-user">`,
+		Expect: `#<package common-lisp-user>`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(find-package 'not-a-package)`,

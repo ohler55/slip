@@ -6,9 +6,9 @@
   + type-error-datum
   + type-error-expected-type
   + type-error-context
-  - package-error-package
-  - stream-error-stream
-  - unbound-slot-instance
+  + package-error-package
+  + stream-error-stream
+  + unbound-slot-instance
   - arithmetic-error-operands
   - arithmetic-error-operation
   - file-error-pathname

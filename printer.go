@@ -410,9 +410,9 @@ Top:
 	case *Package:
 		b = append(b, "#<"...)
 		b = append(b, p.caseName("package")...)
-		b = append(b, ` "`...)
+		b = append(b, ' ')
 		b = append(b, to.Name...)
-		b = append(b, `">`...)
+		b = append(b, '>')
 	default:
 		b = to.Append(b)
 		if p.Readably && bytes.HasPrefix(b, []byte("#<")) {
