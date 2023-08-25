@@ -33,7 +33,7 @@ func TestControlErrorMake(t *testing.T) {
 	tf.Test(t)
 	ce, ok := tf.Result.(slip.ControlError)
 	tt.Equal(t, ok, true)
-	tt.Equal(t, "", ce.Error())
+	tt.Equal(t, "/^#<CONTROL-ERROR [0-9a-f]+>$/", ce.Error())
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Control-Error :message "raise")`,

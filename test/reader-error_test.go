@@ -33,7 +33,7 @@ func TestReaderErrorMake(t *testing.T) {
 	tf.Test(t)
 	re, ok := tf.Result.(slip.ReaderError)
 	tt.Equal(t, ok, true)
-	tt.Equal(t, "", re.Error())
+	tt.Equal(t, "/^#<READER-ERROR [0-9a-f]+>$/", re.Error())
 	tt.Nil(t, re.Stream())
 
 	tf = sliptest.Function{

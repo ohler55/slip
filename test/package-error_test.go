@@ -34,7 +34,7 @@ func TestPackageErrorMake(t *testing.T) {
 	pe, ok := tf.Result.(slip.PackageError)
 	tt.Equal(t, ok, true)
 	tt.Equal(t, &slip.CLPkg, pe.Package())
-	tt.Equal(t, "", pe.Error())
+	tt.Equal(t, "/^#<PACKAGE-ERROR [0-9a-f]+>$/", pe.Error())
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Package-Error :package (find-package 'cl) :message "raise")`,

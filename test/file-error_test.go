@@ -33,7 +33,7 @@ func TestFileErrorMake(t *testing.T) {
 	tf.Test(t)
 	ce, ok := tf.Result.(slip.FileError)
 	tt.Equal(t, ok, true)
-	tt.Equal(t, "", ce.Error())
+	tt.Equal(t, "/^#<FILE-ERROR [0-9a-f]+>$/", ce.Error())
 	tt.Equal(t, nil, ce.Pathname())
 
 	tf = sliptest.Function{

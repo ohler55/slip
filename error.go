@@ -69,7 +69,10 @@ func (p *Panic) Eval(s *Scope, depth int) Object {
 
 // Error returns the panic message.
 func (p *Panic) Error() string {
-	return p.Message
+	if 0 < len(p.Message) {
+		return p.Message
+	}
+	return p.String()
 }
 
 // AppendToStack appends a function name and argument to the stack.

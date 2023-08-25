@@ -33,7 +33,7 @@ func TestParseErrorMake(t *testing.T) {
 	tf.Test(t)
 	pe, ok := tf.Result.(slip.ParseError)
 	tt.Equal(t, ok, true)
-	tt.Equal(t, "", pe.Error())
+	tt.Equal(t, "/^#<PARSE-ERROR [0-9a-f]+>$/", pe.Error())
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Parse-Error :message "raise")`,

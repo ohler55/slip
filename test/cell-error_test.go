@@ -34,7 +34,7 @@ func TestCellErrorMake(t *testing.T) {
 	ce, ok := tf.Result.(slip.CellError)
 	tt.Equal(t, ok, true)
 	tt.Equal(t, slip.Symbol(":sell"), ce.Name())
-	tt.Equal(t, "", ce.Error())
+	tt.Equal(t, "/^#<CELL-ERROR [0-9a-f]+>$/", ce.Error())
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Cell-Error :name :sell :message "raise")`,

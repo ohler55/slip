@@ -34,7 +34,7 @@ func TestStreamErrorMake(t *testing.T) {
 	se, ok := tf.Result.(slip.StreamError)
 	tt.Equal(t, ok, true)
 	tt.Equal(t, "#<OUTPUT-STREAM>", slip.ObjectString(se.Stream()))
-	tt.Equal(t, "", se.Error())
+	tt.Equal(t, "/^#<STREAM-ERROR [0-9a-f]+>$/", se.Error())
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Stream-Error :stream (make-string-output-stream) :message "raise")`,

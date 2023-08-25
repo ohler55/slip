@@ -37,7 +37,7 @@ func TestArithmeticErrorMake(t *testing.T) {
 	tf.Test(t)
 	ae, ok := tf.Result.(slip.ArithmeticError)
 	tt.Equal(t, ok, true)
-	tt.Equal(t, "", ae.Error())
+	tt.Equal(t, "/^#<ARITHMETIC-ERROR [0-9a-f]+>$/", ae.Error())
 	tt.Equal(t, "nil", slip.ObjectString(ae.Operation()))
 	tt.Equal(t, "nil", slip.ObjectString(ae.Operands()))
 

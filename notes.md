@@ -3,9 +3,9 @@
 - next
  - add error access function
   + cell-error-name
-  - type-error-datum
-  - type-error-expected-type (return Values if more than one)
-  - type-error-context (sbcl has this in sb-kernel)
+  + type-error-datum
+  + type-error-expected-type
+  + type-error-context
   - package-error-package
   - stream-error-stream
   - unbound-slot-instance

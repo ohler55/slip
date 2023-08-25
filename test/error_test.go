@@ -33,7 +33,7 @@ func TestErrorMake(t *testing.T) {
 	tf.Test(t)
 	e, ok := tf.Result.(slip.Error)
 	tt.Equal(t, ok, true)
-	tt.Equal(t, "", e.Error())
+	tt.Equal(t, "/^#<ERROR [0-9a-f]+>$/", e.Error())
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Error :message "raise")`,
