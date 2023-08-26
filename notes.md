@@ -9,9 +9,9 @@
   + package-error-package
   + stream-error-stream
   + unbound-slot-instance
-  - arithmetic-error-operands
-  - arithmetic-error-operation
-  - file-error-pathname
+  + arithmetic-error-operands
+  + arithmetic-error-operation
+  + file-error-pathname
   - simple-condition-format-control
   - simple-condition-format-arguments
   - invalid-method-error (function)
