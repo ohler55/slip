@@ -37,36 +37,34 @@ type SimpleErrorObj struct {
 }
 
 // IsSimpleCondition indicates SimpleConditionObj is a Condition.
-func (sw *SimpleErrorObj) IsSimpleCondition() {
+func (se *SimpleErrorObj) IsSimpleCondition() {
 }
 
 // IsSimpleError indicates SimpleErrorObj is a Error.
-func (sw *SimpleErrorObj) IsSimpleError() {
+func (se *SimpleErrorObj) IsSimpleError() {
 }
 
 // Equal returns true if this Object and the other are equal in value.
-func (sw *SimpleErrorObj) Equal(other slip.Object) bool {
-	return sw == other
+func (se *SimpleErrorObj) Equal(other slip.Object) bool {
+	return se == other
 }
 
 // Eval the object.
-func (sw *SimpleErrorObj) Eval(s *slip.Scope, depth int) slip.Object {
-	return sw
+func (se *SimpleErrorObj) Eval(s *slip.Scope, depth int) slip.Object {
+	return se
 }
 
 // Error returns the error message.
-func (sw *SimpleErrorObj) Error() string {
-	return sw.output
+func (se *SimpleErrorObj) Error() string {
+	return se.output
 }
 
 // NewSimpleError returns a SimpleErrorObj object that can then be used with a call to panic.
 func NewSimpleError(s *slip.Scope, ctrl string, args ...slip.Object) *SimpleErrorObj {
-	var sw SimpleErrorObj
-	sw.SetHierarchy(simpleErrorHierarchy)
-	sw.ctrl = ctrl
-	sw.args = args
-	sw.formOutput(s)
-	return &sw
+	var se SimpleErrorObj
+	se.SetHierarchy(simpleErrorHierarchy)
+	se.Init(s, ctrl, args)
+	return &se
 }
 
 // PanicSimpleError raises a SimpleErrorObj instance.

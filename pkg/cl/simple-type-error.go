@@ -88,9 +88,7 @@ func (ste *SimpleTypeErrorObj) Error() string {
 func NewSimpleTypeError(s *slip.Scope, ctrl string, args ...slip.Object) *SimpleTypeErrorObj {
 	var ste SimpleTypeErrorObj
 	ste.SetHierarchy(simpleTypeErrorHierarchy)
-	ste.ctrl = ctrl
-	ste.args = args
-	ste.formOutput(s)
+	ste.Init(s, ctrl, args)
 	return &ste
 }
 

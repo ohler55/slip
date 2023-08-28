@@ -53,9 +53,7 @@ func (sc *SimpleConditionObj) Error() string {
 func NewSimpleCondition(s *slip.Scope, ctrl string, args ...slip.Object) *SimpleConditionObj {
 	var sc SimpleConditionObj
 	sc.SetHierarchy(simpleConditionHierarchy)
-	sc.ctrl = ctrl
-	sc.args = args
-	sc.formOutput(s)
+	sc.Init(s, ctrl, args)
 	return &sc
 }
 

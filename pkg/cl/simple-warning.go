@@ -60,16 +60,14 @@ func (sw *SimpleWarningObj) Eval(s *slip.Scope, depth int) slip.Object {
 
 // Error returns the error message.
 func (sw *SimpleWarningObj) Error() string {
-	return sw.output
+	return sw.Output()
 }
 
 // NewSimpleWarning returns a SimpleWarningObj object that can then be used with a call to panic.
 func NewSimpleWarning(s *slip.Scope, ctrl string, args ...slip.Object) *SimpleWarningObj {
 	var sw SimpleWarningObj
 	sw.SetHierarchy(simpleWarningHierarchy)
-	sw.ctrl = ctrl
-	sw.args = args
-	sw.formOutput(s)
+	sw.Init(s, ctrl, args)
 	return &sw
 }
 

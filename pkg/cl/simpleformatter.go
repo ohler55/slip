@@ -23,6 +23,13 @@ type SimpleFormatterEmbed struct {
 	output string
 }
 
+// Init the instance with a control and arguments.
+func (sf *SimpleFormatterEmbed) Init(s *slip.Scope, ctrl string, args slip.List) {
+	sf.ctrl = ctrl
+	sf.args = args
+	sf.formOutput(s)
+}
+
 // Control return the control string for the instance.
 func (sf *SimpleFormatterEmbed) Control() string {
 	return sf.ctrl
@@ -31,6 +38,11 @@ func (sf *SimpleFormatterEmbed) Control() string {
 // Arguments return the format-arguments for the instance.
 func (sf *SimpleFormatterEmbed) Arguments() slip.List {
 	return sf.args
+}
+
+// Output of the formatting.
+func (sf *SimpleFormatterEmbed) Output() string {
+	return sf.output
 }
 
 func (sf *SimpleFormatterEmbed) formOutput(s *slip.Scope) {

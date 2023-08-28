@@ -14,11 +14,11 @@
   + file-error-pathname
   + simple-condition-format-control
   + simple-condition-format-arguments
+  + method-error-class
+  + method-error-qualifier
   - invalid-method-error (function)
-   - creates a method-error
-  - method-error-class
-  - method-error-qualifier
-  - method-combination-error (function)
+   - creates a method-error using simpleformatter to generate the message
+  - method-combination-error (function - alias for invalid-method-error)
    - maybe create a type with the same name
 
  - warn (panic or just output to error-output?)
