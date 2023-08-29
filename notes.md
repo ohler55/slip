@@ -16,10 +16,8 @@
   + simple-condition-format-arguments
   + method-error-class
   + method-error-qualifier
-  - invalid-method-error (function)
-   - creates a method-error using simpleformatter to generate the message
+  + invalid-method-error (function)
   - method-combination-error (function - alias for invalid-method-error)
-   - maybe create a type with the same name
 
  - warn (panic or just output to error-output?)
  - ignore-errors (recover with no action)

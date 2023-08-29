@@ -77,7 +77,12 @@ func NewMethodError(class, qualifier, name Object, format string, args ...any) *
 	cond.class = class
 	cond.name = name
 	cond.qualifier = qualifier
-	cond.Message = fmt.Sprintf(format, args...)
+	if 0 < len(format) {
+		cond.Message = fmt.Sprintf(format, args...)
+	} else {
+		cond.Message = fmt.Sprintf("%s %s is not a valid method combination for %s.",
+			qualifier, name, class)
+	}
 	return &cond
 }
 
@@ -93,6 +98,7 @@ func makeMethodError(args List) Condition {
 		class     Object
 		qualifier Object
 		msg       String
+		ctrl      string
 	)
 	for k, v := range ParseInitList(args) {
 		switch k {
@@ -104,11 +110,8 @@ func makeMethodError(args List) Condition {
 			qualifier = v
 		case ":message":
 			msg, _ = v.(String)
+			ctrl = "%s"
 		}
 	}
-	if len(msg) == 0 {
-		return NewMethodError(class, qualifier, name, "%s %s is not a valid method combination for %s.",
-			qualifier, name, class)
-	}
-	return NewMethodError(class, qualifier, name, "%s", string(msg))
+	return NewMethodError(class, qualifier, name, ctrl, string(msg))
 }

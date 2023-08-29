@@ -64,7 +64,7 @@ func (obj *Flavor) DefMethod(name string, methodType string, caller slip.Caller)
 	case ":whopper", ":wrapper":
 		m.wrap = caller
 	default:
-		slip.PanicMethod(obj, slip.Symbol(methodType), slip.Symbol(name), "%s is not a valid method type.", methodType)
+		slip.PanicMethod(obj, slip.Symbol(methodType), slip.Symbol(name), "")
 	}
 	if add {
 		obj.methods[name] = ma
