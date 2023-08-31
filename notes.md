@@ -17,10 +17,10 @@
   + method-error-class
   + method-error-qualifier
   + invalid-method-error (function)
-  - method-combination-error (function - alias for invalid-method-error)
+  + method-combination-error (function - alias for invalid-method-error)
 
- - warn (panic or just output to error-output?)
- - ignore-errors (recover with no action)
+ - warn (just output to error-output?)
+ - ignore-errors (like recover but different return rules)
 
 
  - class
