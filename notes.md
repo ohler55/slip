@@ -1,27 +1,6 @@
 # SLIP Notes
 
 - next
- - add error access function
-  + cell-error-name
-  + type-error-datum
-  + type-error-expected-type
-  + type-error-context
-  + package-error-package
-  + stream-error-stream
-  + unbound-slot-instance
-  + arithmetic-error-operands
-  + arithmetic-error-operation
-  + file-error-pathname
-  + simple-condition-format-control
-  + simple-condition-format-arguments
-  + method-error-class
-  + method-error-qualifier
-  + invalid-method-error (function)
-  + method-combination-error (function - alias for invalid-method-error)
-
- - warn (just output to error-output?)
- - ignore-errors (like recover but different return rules)
-
 
  - class
   - deal with classes for core types

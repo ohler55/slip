@@ -56,6 +56,11 @@ func (w *WarningObj) Message() string {
 	return w.message
 }
 
+// Error returns the message.
+func (w *WarningObj) Error() string {
+	return w.message
+}
+
 // NewWarning returns a Warning object.
 func NewWarning(format string, args ...any) *WarningObj {
 	var w WarningObj
