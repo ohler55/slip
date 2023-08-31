@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -71,7 +70,7 @@ func (f *AproposList) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 			slip.PanicType("package", ta, "string", "symbol")
 		}
 		if pkg = slip.FindPackage(name); pkg == nil {
-			panic(fmt.Sprintf("Package %s not found.", name))
+			slip.NewPanic("Package %s not found.", name)
 		}
 	}
 	var list slip.List

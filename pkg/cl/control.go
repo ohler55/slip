@@ -129,17 +129,17 @@ func (c *control) readDir() {
 		switch b {
 		case ':':
 			if colon {
-				panic(fmt.Sprintf("invalid directive at %d of %q", c.pos-1, c.str))
+				invalidDir(c.str, c.pos-1)
 			}
 			colon = true
 		case '@':
 			if at {
-				panic(fmt.Sprintf("invalid directive at %d of %q", c.pos-1, c.str))
+				invalidDir(c.str, c.pos-1)
 			}
 			at = true
 		case ',':
 			if colon || at {
-				panic(fmt.Sprintf("invalid directive at %d of %q", c.pos-1, c.str))
+				invalidDir(c.str, c.pos-1)
 			}
 			prev := c.str[c.pos-2]
 			if prev == '~' || prev == ',' {
@@ -163,7 +163,7 @@ func (c *control) readDir() {
 			if n, err := strconv.ParseInt(string(p), 10, 64); err == nil {
 				params = append(params, int(n))
 			} else {
-				panic(fmt.Sprintf("invalid directive at %d of %q. %s", c.pos-1, c.str, err))
+				slip.NewPanic("invalid directive at %d of %q. %s", c.pos-1, c.str, err)
 			}
 		case '\n':
 			c.dirNewline(colon, at, params)
@@ -256,7 +256,7 @@ func (c *control) readDir() {
 			c.dirTilde(colon, at, params)
 			return
 		default:
-			panic(fmt.Sprintf("invalid directive at %d of %q", c.pos, c.str))
+			invalidDir(c.str, c.pos)
 		}
 	}
 }
@@ -274,7 +274,7 @@ func (c *control) readParam() []byte {
 func (c *control) dirNewline(colon, at bool, params []any) {
 	switch {
 	case colon && at:
-		panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+		invalidDirParam(c.str, c.pos)
 	case colon:
 		return
 	case at:
@@ -312,7 +312,7 @@ func (c *control) dirMoney(colon, at bool, params []any) {
 		if r, ok := arg.(slip.Real); ok {
 			val = r.RealValue()
 		} else {
-			panic(fmt.Sprintf("expected a real argument for directive at %d of %q", c.pos, c.str))
+			slip.NewPanic("expected a real argument for directive at %d of %q", c.pos, c.str)
 		}
 	}
 	if colon {
@@ -374,7 +374,7 @@ func (c *control) dirPercent(colon, at bool, params []any) {
 		case slip.Integer:
 			n = int(tp.RealValue())
 		default:
-			panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+			invalidDirParam(c.str, c.pos)
 		}
 	}
 	for ; 0 < n; n-- {
@@ -391,7 +391,7 @@ func (c *control) dirAmp(colon, at bool, params []any) {
 		case slip.Integer:
 			n = int(tp.RealValue())
 		default:
-			panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+			invalidDirParam(c.str, c.pos)
 		}
 	}
 	if 0 < len(c.out) && c.out[len(c.out)-1] == '\n' {
@@ -423,7 +423,7 @@ func scanDirBlock(buf []byte, pos int, dirName string, open, close byte, colonOk
 				pos = scanDirBlock(buf, pos, dirName, open, close, colonOk) + 2
 			case close:
 				if at || (colon && !colonOk) {
-					panic(fmt.Sprintf("invalid directive at %d of %q", pos-1, buf))
+					invalidDir(buf, pos)
 				}
 				if colon {
 					return pos - 3
@@ -440,7 +440,7 @@ func scanDirBlock(buf []byte, pos int, dirName string, open, close byte, colonOk
 			tilde = false
 		}
 	}
-	panic(fmt.Sprintf("%s directive not terminated at %d of %q", dirName, pos, buf))
+	panic(slip.NewError("%s directive not terminated at %d of %q", dirName, pos, buf))
 }
 
 func (c *control) dirCase(colon, at bool, params []any) {
@@ -486,12 +486,12 @@ func (c *control) dirMove(colon, at bool, params []any) {
 			n = int(tp.RealValue())
 			changed = true
 		default:
-			panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+			invalidDirParam(c.str, c.pos)
 		}
 	}
 	switch {
 	case colon && at:
-		panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+		invalidDirParam(c.str, c.pos)
 	case colon:
 		c.argPos -= n
 	case at:
@@ -512,14 +512,14 @@ func (c *control) dirCall(colon, at bool, params []any) {
 		}
 	}
 	if c.end <= c.pos {
-		panic(fmt.Sprintf("call directive not terminated at %d of %q", c.pos, c.str))
+		slip.NewPanic("call directive not terminated at %d of %q", c.pos, c.str)
 	}
 	c.pos++
 	p := &slip.UserPkg
 	name := c.str[start : c.pos-1]
 	if i := bytes.Index(name, []byte{':'}); 0 < i {
 		if p = slip.FindPackage(string(name[:i])); p == nil {
-			panic(fmt.Sprintf("package %s not found at %d of %q", name[:i], c.pos, c.str))
+			slip.NewPanic("package %s not found at %d of %q", name[:i], c.pos, c.str)
 		}
 		name = name[i+1:]
 		if 0 < len(name) && name[0] == ':' {
@@ -662,7 +662,7 @@ func (c *control) scanJustify(buf []byte, pos int) ([]*control, *control, int) {
 				tilde = false
 			case '>':
 				if at || colon {
-					panic(fmt.Sprintf("invalid directive at %d of %q", pos-1, buf))
+					invalidDir(buf, pos)
 				}
 				str := string(buf[start : pos-2])
 				c2 := control{
@@ -694,7 +694,7 @@ func (c *control) scanJustify(buf []byte, pos int) ([]*control, *control, int) {
 			tilde = false
 		}
 	}
-	panic(fmt.Sprintf("justification directive not terminated at %d of %q", pos, buf))
+	panic(slip.NewError("justification directive not terminated at %d of %q", pos, buf))
 }
 
 func (c *control) dirEval(colon, at bool, params []any) {
@@ -706,7 +706,7 @@ func (c *control) dirEval(colon, at bool, params []any) {
 		}
 	}
 	if end <= c.pos {
-		panic(fmt.Sprintf("eval directive not terminated at %d of %q", c.pos, c.str))
+		slip.NewPanic("eval directive not terminated at %d of %q", c.pos, c.str)
 	}
 	val := slip.Read(c.str[start:c.pos]).Eval(c.scope, nil)
 	if s, ok := val.(slip.String); ok {
@@ -725,7 +725,7 @@ func (c *control) dirProc(colon, at bool, params []any) {
 	if c.argPos < len(c.args) {
 		ss, ok := c.args[c.argPos].(slip.String)
 		if !ok {
-			panic(fmt.Sprintf("recursive processing directive expected a control string at %d of %q", c.pos, c.str))
+			slip.NewPanic("recursive processing directive expected a control string at %d of %q", c.pos, c.str)
 		}
 		ctrl = []byte(ss)
 		c.argPos++
@@ -743,7 +743,7 @@ func (c *control) dirProc(colon, at bool, params []any) {
 		if c.argPos < len(c.args) {
 			var ok bool
 			if args, ok = c.args[c.argPos].(slip.List); !ok {
-				panic(fmt.Sprintf("recursive processing directive expected an argument list at %d of %q", c.pos, c.str))
+				slip.NewPanic("recursive processing directive expected an argument list at %d of %q", c.pos, c.str)
 			}
 		}
 		c2.args = args
@@ -765,9 +765,12 @@ func (c *control) dirA(colon, at bool, params []any) {
 			arg = c.args[c.argPos]
 			c.argPos++
 		}
-		if s, ok := arg.(slip.String); ok {
-			c.out = append(c.out, s...)
-		} else {
+		switch ta := arg.(type) {
+		case slip.String:
+			c.out = append(c.out, ta...)
+		case slip.Condition:
+			c.out = append(c.out, ta.Error()...)
+		default:
 			p := *slip.DefaultPrinter()
 			p.Escape = false
 			p.Readably = false
@@ -795,7 +798,7 @@ func (c *control) dirC(colon, at bool, params []any) {
 		c.argPos++
 	}
 	if !ok {
-		panic(fmt.Sprintf("character directive expected a character argument at %d of %q", c.pos, c.str))
+		slip.NewPanic("character directive expected a character argument at %d of %q", c.pos, c.str)
 	}
 	switch {
 	case colon && at:
@@ -835,7 +838,7 @@ func (c *control) dirInt(colon, at bool, params []any, base int) {
 	commachar = c.getCharParam(2, params, commachar)
 	commaint = c.getIntParam(3, params, commaint, true)
 	if commaint < 1 {
-		panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+		invalidDir(c.str, c.pos)
 	}
 	switch ta := arg.(type) {
 	case slip.Fixnum:
@@ -980,11 +983,11 @@ func (c *control) dirEsetup(params []any) *floatFormatter {
 	if 0 < ff.d {
 		if 0 < ff.k {
 			if ff.d+2 <= ff.k {
-				panic("a positive k value for a floating-point directive must be less than d+2")
+				slip.NewPanic("a positive k value for a floating-point directive must be less than d+2")
 			}
 		} else if ff.k < 0 {
 			if ff.k <= -ff.d {
-				panic("a negative k value for a floating-point directive must be greater than -d")
+				slip.NewPanic("a negative k value for a floating-point directive must be greater than -d")
 			}
 		}
 	}
@@ -1139,7 +1142,7 @@ func (c *control) dirP(colon, at bool, params []any) {
 		c.argPos--
 	}
 	if c.argPos < 0 || len(c.args) <= c.argPos {
-		panic(fmt.Sprintf("missing argument for Plural directive at %d of %q", c.pos, c.str))
+		slip.NewPanic("missing argument for Plural directive at %d of %q", c.pos, c.str)
 	}
 	arg := c.args[c.argPos]
 	c.argPos++
@@ -1158,7 +1161,7 @@ func (c *control) dirP(colon, at bool, params []any) {
 
 func (c *control) dirR(colon, at bool, params []any) {
 	if len(c.args) <= c.argPos {
-		panic(fmt.Sprintf("missing argument for Radix directive at %d of %q", c.pos, c.str))
+		slip.NewPanic("missing argument for Radix directive at %d of %q", c.pos, c.str)
 	}
 	var (
 		digits []byte
@@ -1177,10 +1180,10 @@ func (c *control) dirR(colon, at bool, params []any) {
 	}
 	if at {
 		if digits[0] == '-' {
-			panic(fmt.Sprintf("number too small to print using the Radix directive at %d of %q", c.pos, c.str))
+			slip.NewPanic("number too small to print using the Radix directive at %d of %q", c.pos, c.str)
 		}
 		if 4 < len(digits) || (3 < len(digits) && '3' < digits[0]) {
-			panic(fmt.Sprintf("number too large to print using the Radix directive at %d of %q", c.pos, c.str))
+			slip.NewPanic("number too large to print using the Radix directive at %d of %q", c.pos, c.str)
 		}
 		// prints arg as a Roman numeral: IV.
 		table := romanNumerals
@@ -1304,6 +1307,12 @@ func (c *control) dirAS(colon, at bool, params []any, p *slip.Printer) {
 		} else {
 			out = append(out, ta...)
 		}
+	case slip.Condition:
+		if p.Readably {
+			out = ta.Append(out)
+		} else {
+			out = append(out, ta.Error()...)
+		}
 	default:
 		out = p.Append(out, ta, 0)
 	}
@@ -1413,7 +1422,7 @@ func (c *control) dirTilde(colon, at bool, params []any) {
 		case slip.Integer:
 			n = int(tp.RealValue())
 		default:
-			panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+			invalidDir(c.str, c.pos)
 		}
 	}
 	for ; 0 < n; n-- {
@@ -1430,7 +1439,7 @@ func (c *control) dirCond(colon, at bool, params []any) {
 		case slip.Integer:
 			n = int(tp.RealValue())
 		default:
-			panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+			invalidDir(c.str, c.pos)
 		}
 	}
 	var arg slip.Object
@@ -1443,11 +1452,10 @@ func (c *control) dirCond(colon, at bool, params []any) {
 	strs, def, pos := scanCond(c.str, c.pos)
 	switch {
 	case colon && at:
-		panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+		invalidDir(c.str, c.pos)
 	case colon:
 		if len(strs) != 2 || 0 < len(def) {
-			panic(fmt.Sprintf("invalid form for conditional directive with : modifier at %d of %q",
-				c.pos, c.str))
+			slip.NewPanic("invalid form for conditional directive with : modifier at %d of %q", c.pos, c.str)
 		}
 		if arg == nil {
 			c.subProcess(strs[0])
@@ -1456,8 +1464,7 @@ func (c *control) dirCond(colon, at bool, params []any) {
 		}
 	case at:
 		if len(strs) != 1 || 0 < len(def) {
-			panic(fmt.Sprintf("invalid form for conditional directive with @ modifier at %d of %q",
-				c.pos, c.str))
+			slip.NewPanic("invalid form for conditional directive with @ modifier at %d of %q", c.pos, c.str)
 		}
 		if arg != nil {
 			c.argPos--
@@ -1513,7 +1520,7 @@ func scanCond(buf []byte, pos int) ([]string, string, int) {
 				pos += 2
 			case ']':
 				if at || colon {
-					panic(fmt.Sprintf("invalid directive at %d of %q", pos-1, buf))
+					invalidDir(buf, pos)
 				}
 				var def string
 				if defNext {
@@ -1533,7 +1540,7 @@ func scanCond(buf []byte, pos int) ([]string, string, int) {
 			tilde = false
 		}
 	}
-	panic(fmt.Sprintf("conditional directive not terminated at %d of %q", pos, buf))
+	panic(slip.NewError("conditional directive not terminated at %d of %q", pos, buf))
 }
 
 func (c *control) subProcess(str string) {
@@ -1650,7 +1657,7 @@ func (c *control) dirPage(colon, at bool, params []any) {
 		case slip.Integer:
 			n = int(tp.RealValue())
 		default:
-			panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+			invalidDir(c.str, c.pos)
 		}
 	}
 	for ; 0 < n; n-- {
@@ -1665,17 +1672,17 @@ func (c *control) getIntParam(pos int, params []any, defVal int, notNeg bool) in
 			// leave as is
 		case int:
 			if notNeg && tp < 0 {
-				panic(fmt.Sprintf("directive parameter is negative at %d of %q", c.pos, c.str))
+				slip.NewPanic("directive parameter is negative at %d of %q", c.pos, c.str)
 			}
 			return tp
 		case slip.Integer:
 			n := int(tp.RealValue())
 			if notNeg && n < 0 {
-				panic(fmt.Sprintf("directive parameter is negative at %d of %q", c.pos, c.str))
+				slip.NewPanic("directive parameter is negative at %d of %q", c.pos, c.str)
 			}
 			return n
 		default:
-			panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+			invalidDir(c.str, c.pos)
 		}
 	}
 	return defVal
@@ -1689,7 +1696,7 @@ func (c *control) getCharParam(pos int, params []any, defVal []byte) []byte {
 		case slip.Character:
 			return []byte(string([]rune{rune(tp)}))
 		default:
-			panic(fmt.Sprintf("invalid directive parameter at %d of %q", c.pos, c.str))
+			invalidDir(c.str, c.pos)
 		}
 	}
 	return defVal
@@ -1705,4 +1712,12 @@ func objAsList(obj slip.Object, loc string) (list slip.List) {
 		slip.PanicType(loc, obj, "list")
 	}
 	return
+}
+
+func invalidDir(buf []byte, pos int) {
+	slip.NewPanic("invalid directive at %d of %q", pos-1, buf)
+}
+
+func invalidDirParam(buf []byte, pos int) {
+	slip.NewPanic("invalid directive parameter at %d of %q", pos-1, buf)
 }

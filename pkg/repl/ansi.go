@@ -81,7 +81,7 @@ func (f *Ansi) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case ":white":
 			color = 37
 		default:
-			panic(fmt.Sprintf("%s is not a valid keyword for the ansi function", sym))
+			slip.NewPanic("%s is not a valid keyword for the ansi function", sym)
 		}
 	}
 	if reset {

@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -67,7 +65,7 @@ func (f *Backquote) expand(s *slip.Scope, arg slip.Object, depth int) slip.Objec
 					xl = append(xl, tx...)
 				case slip.Tail:
 					if len(ta)-1 != i {
-						panic(fmt.Sprintf("%s is not of type LIST", tx.Value))
+						slip.NewPanic("%s is not of type LIST", tx.Value)
 					}
 					xl = append(xl, tx)
 				default:

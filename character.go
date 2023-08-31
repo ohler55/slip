@@ -4,7 +4,6 @@ package slip
 
 import (
 	"bytes"
-	"fmt"
 	"unicode"
 	"unicode/utf8"
 )
@@ -49,7 +48,7 @@ type Character rune
 func ReadCharacter(src []byte) (c Character) {
 	switch len(src) {
 	case 0:
-		panic(`'#\' is not a valid character`)
+		PanicParse(`'#\' is not a valid character`)
 	case 1:
 		c = Character(src[0])
 	default:
@@ -75,7 +74,7 @@ func ReadCharacter(src []byte) (c Character) {
 		}
 	}
 	if c == 0 {
-		panic(fmt.Sprintf(`'#\%s' is not a valid character`, src))
+		PanicParse(`'#\%s' is not a valid character`, src)
 	}
 	return
 }

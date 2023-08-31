@@ -26,6 +26,14 @@ func TestDivideFixnum(t *testing.T) {
 		Source: `(/ 5 4 3)`,
 		Expect: "5/12",
 	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 5 0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
+	}).Test(t)
 }
 
 func TestDivideSingleFloat(t *testing.T) {
@@ -41,6 +49,14 @@ func TestDivideSingleFloat(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(/ 9 3.0s+0 1.5s+0 1)`,
 		Expect: "2s+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 0.0s+0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 3.0s+0 0.0s+0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
 	}).Test(t)
 }
 
@@ -61,6 +77,14 @@ func TestDivideDoubleFloat(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(/ 3.0s+0 1.5d+0 1.0d+0)`,
 		Expect: "2d+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 0.0d+0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 3.0d+0 0.0d+0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
 	}).Test(t)
 }
 
@@ -85,6 +109,14 @@ func TestDivideLongFloat(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(/ 3.0d+0 1.5L+0 1.0d+0)`,
 		Expect: "2L+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 0.0L+0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 3.0L+0 0.0L+0)`,
+		PanicType: slip.Symbol("arithmetic-error"),
 	}).Test(t)
 }
 
@@ -131,6 +163,14 @@ func TestDivideBignum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(/ 4.0L+0 2.0000000000000000L+0)`,
 		Expect: "2L+00",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ (- 20000000000000000000 20000000000000000000))`,
+		PanicType: slip.Symbol("arithmetic-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 10000000000000000000 (- 20000000000000000000 20000000000000000000))`,
+		PanicType: slip.Symbol("arithmetic-error"),
 	}).Test(t)
 }
 
@@ -189,6 +229,14 @@ func TestDivideRatio(t *testing.T) {
                      1/3
                      (/ 20000000000000001000 20000000000000000000))`,
 		Expect: "3",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 0/2)`,
+		PanicType: slip.Symbol("arithmetic-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(/ 1/2 0/2)`,
+		PanicType: slip.Symbol("arithmetic-error"),
 	}).Test(t)
 }
 

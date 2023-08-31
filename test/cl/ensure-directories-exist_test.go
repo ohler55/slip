@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -49,39 +50,39 @@ func TestEnsureDirectoriesExistFailMkdir(t *testing.T) {
 		_ = os.RemoveAll("testdata/one")
 	}()
 	(&sliptest.Function{
-		Source: `(ensure-directories-exist "testdata/one")`,
-		Panics: true,
+		Source:    `(ensure-directories-exist "testdata/one")`,
+		PanicType: slip.Symbol("file-error"),
 	}).Test(t)
 }
 
 func TestEnsureDirectoriesExistNotString(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(ensure-directories-exist t)`,
-		Panics: true,
+		Source:    `(ensure-directories-exist t)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestEnsureDirectoriesExistPermNotFixnum(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(ensure-directories-exist "testdata/one" :permission t)`,
-		Panics: true,
+		Source:    `(ensure-directories-exist "testdata/one" :permission t)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestEnsureDirectoriesExistBadKeyword(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(ensure-directories-exist "testdata/one" :bad t)`,
-		Panics: true,
+		Source:    `(ensure-directories-exist "testdata/one" :bad t)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(ensure-directories-exist "testdata/one" t t)`,
-		Panics: true,
+		Source:    `(ensure-directories-exist "testdata/one" t t)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestEnsureDirectoriesExistNoKeyArg(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(ensure-directories-exist "testdata/one" :verbose)`,
-		Panics: true,
+		Source:    `(ensure-directories-exist "testdata/one" :verbose)`,
+		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }

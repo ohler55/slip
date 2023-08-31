@@ -98,14 +98,14 @@ type Write struct {
 
 // Call the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	b, w := writeBuf(f, args, true)
+	b, w, ss := writeBuf(f, args, true)
 	if _, err := w.Write(b); err != nil {
-		panic(err)
+		slip.PanicStream(ss, "write failed. %s", err)
 	}
 	return args[0]
 }
 
-func writeBuf(f slip.Object, args slip.List, withStream bool) ([]byte, io.Writer) {
+func writeBuf(f slip.Object, args slip.List, withStream bool) ([]byte, io.Writer, slip.Stream) {
 	if withStream {
 		slip.ArgCountCheck(f, args, 1, 33)
 	} else {
@@ -115,6 +115,7 @@ func writeBuf(f slip.Object, args slip.List, withStream bool) ([]byte, io.Writer
 
 	obj := args[0]
 	var w io.Writer = slip.StandardOutput.(io.Writer)
+	ss, _ := slip.StandardOutput.(slip.Stream)
 
 	for i := 1; i < len(args)-1; i += 2 {
 		sym, ok := args[i].(slip.Symbol)
@@ -170,6 +171,7 @@ func writeBuf(f slip.Object, args slip.List, withStream bool) ([]byte, io.Writer
 			if !withStream {
 				slip.PanicType("keyword", sym, writeKeywords...)
 			}
+			ss, _ = args[i+1].(slip.Stream)
 			if w, ok = args[i+1].(io.Writer); !ok {
 				slip.PanicType(":stream", args[i+1], "output-stream")
 			}
@@ -181,7 +183,7 @@ func writeBuf(f slip.Object, args slip.List, withStream bool) ([]byte, io.Writer
 			}
 		}
 	}
-	return p.Append([]byte{}, obj, 0), w
+	return p.Append([]byte{}, obj, 0), w, ss
 }
 
 func kvAsUint(keyword string, a slip.Object) uint {

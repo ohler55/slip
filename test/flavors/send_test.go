@@ -82,6 +82,8 @@ func TestSendMissingArg(t *testing.T) {
 	defer slip.ReadString("(undefflavor 'missy)").Eval(scope, nil)
 
 	tt.Panic(t, func() { _ = slip.ReadString("(send miss)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send miss :describe nil nil)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(send miss :send-if-handles)").Eval(scope, nil) })
 }
 
 func TestSendNoMethod(t *testing.T) {

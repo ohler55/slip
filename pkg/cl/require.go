@@ -100,10 +100,10 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		filepath := fmt.Sprintf("%s/%s.so", path, name)
 		if _, err := os.Stat(filepath); err == nil {
 			if _, err = plugin.Open(filepath); err != nil {
-				panic(err)
+				slip.NewPanic("plugin %s open failed. %s", filepath, err)
 			}
 			return slip.Novalue
 		}
 	}
-	panic(fmt.Sprintf("Failed to find %s in any of the load paths.", name))
+	panic(slip.NewError("Failed to find %s in any of the load paths.", name))
 }

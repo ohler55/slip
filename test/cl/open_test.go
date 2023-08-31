@@ -133,9 +133,9 @@ func TestOpenOutputExists(t *testing.T) {
 		Expect: "nil",
 	}).Test(t)
 	(&sliptest.Function{
-		Scope:  scope,
-		Source: fmt.Sprintf(`(setq file (open %q :direction :output :if-exists :error :if-does-not-exist :create))`, filename),
-		Panics: true,
+		Scope:     scope,
+		Source:    fmt.Sprintf(`(setq file (open %q :direction :output :if-exists :error :if-does-not-exist :create))`, filename),
+		PanicType: slip.Symbol("file-error"),
 	}).Test(t)
 }
 
@@ -216,76 +216,76 @@ func TestOpenOutputCantRename(t *testing.T) {
 		_ = os.RemoveAll("testdata/test.out.bak")
 	}()
 	(&sliptest.Function{
-		Scope:  scope,
-		Source: fmt.Sprintf(`(setq file (open %q :direction :output :if-exists :rename))`, filename),
-		Panics: true,
+		Scope:     scope,
+		Source:    fmt.Sprintf(`(setq file (open %q :direction :output :if-exists :rename))`, filename),
+		PanicType: slip.Symbol("file-error"),
 	}).Test(t)
 }
 
 func TestOpenNotString(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open t)`,
-		Panics: true,
+		Source:    `(open t)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestOpenBadKeyword(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" t)`,
-		Panics: true,
+		Source:    `(open "testdata/map.sen" t)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" :bad t)`,
-		Panics: true,
+		Source:    `(open "testdata/map.sen" :bad t)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestOpenNoKeyValue(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" :direction)`,
-		Panics: true,
+		Source:    `(open "testdata/map.sen" :direction)`,
+		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
 
 func TestOpenKeyBadValue(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" :direction 7)`,
-		Panics: true,
+		Source:    `(open "testdata/map.sen" :direction 7)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestOpenBadDirection(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" :direction :bad)`,
-		Panics: true,
+		Source:    `(open "testdata/map.sen" :direction :bad)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestOpenBadIfExists(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" :if-exists :bad)`,
-		Panics: true,
+		Source:    `(open "testdata/map.sen" :if-exists :bad)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestOpenBadIfNotExist(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" :if-does-not-exist :bad)`,
-		Panics: true,
+		Source:    `(open "testdata/map.sen" :if-does-not-exist :bad)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestOpenBadPermissions(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/map.sen" :permission t)`,
-		Panics: true,
+		Source:    `(open "testdata/map.sen" :permission t)`,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
 func TestOpenNotExist(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(open "testdata/nothing" :if-does-not-exist :error)`,
-		Panics: true,
+		Source:    `(open "testdata/nothing" :if-does-not-exist :error)`,
+		PanicType: slip.Symbol("file-error"),
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(open "testdata/nothing" :if-does-not-exist nil)`,

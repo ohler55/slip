@@ -3,12 +3,12 @@
 package slip
 
 import (
-	"fmt"
 	"strings"
 )
 
 // KeywordPkg is the KEYWORD package.
 var (
+	keywordPkg *Package
 	KeywordPkg = Package{
 		Name:      "keyword",
 		Nicknames: []string{},
@@ -31,11 +31,12 @@ func init() {
 	KeywordPkg.Set("keyword", &KeywordPkg)
 	AddPackage(&KeywordPkg)
 	UserPkg.Use(&KeywordPkg)
+	keywordPkg = &KeywordPkg
 }
 
 func keywordPreSet(p *Package, name string, value Object) (string, Object) {
 	if len(name) == 0 {
-		panic("An empty sysmbol is not a valid keyword.")
+		PanicPackage(keywordPkg, "An empty symbol is not a valid keyword.")
 	}
 	if name[0] != ':' {
 		name = ":" + name
@@ -45,7 +46,7 @@ func keywordPreSet(p *Package, name string, value Object) (string, Object) {
 		if ObjectEqual(value, vv.Val) {
 			return name, value
 		}
-		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
+		PanicPackage(keywordPkg, "%s is a constant and thus can't be set", name)
 	}
 	value = Symbol(name)
 

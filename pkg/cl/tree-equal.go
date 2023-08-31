@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -61,7 +60,7 @@ func (f *TreeEqual) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				slip.PanicType("keyword", args[pos], "keyword")
 			}
 			if len(args)-1 <= pos {
-				panic(fmt.Sprintf("%s missing an argument", sym))
+				slip.NewPanic("%s missing an argument", sym)
 			}
 			if strings.EqualFold(string(sym), ":test") {
 				testFunc = ResolveToCaller(s, args[pos+1], depth)

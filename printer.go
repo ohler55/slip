@@ -144,7 +144,7 @@ func Append(b []byte, obj Object) []byte {
 // Write an Object to *standard-output* using the Printer variables.
 func (p *Printer) Write(obj Object) {
 	if _, err := StandardOutput.(io.Writer).Write(p.Append([]byte{}, obj, 0)); err != nil {
-		panic(err)
+		PanicStream(StandardOutput.(Stream), "%s", err)
 	}
 }
 
@@ -410,13 +410,13 @@ Top:
 	case *Package:
 		b = append(b, "#<"...)
 		b = append(b, p.caseName("package")...)
-		b = append(b, ` "`...)
+		b = append(b, ' ')
 		b = append(b, to.Name...)
-		b = append(b, `">`...)
+		b = append(b, '>')
 	default:
 		b = to.Append(b)
 		if p.Readably && bytes.HasPrefix(b, []byte("#<")) {
-			panic(fmt.Sprintf("%s can not be written readably", to))
+			NewPanic("%s can not be written readably", to)
 		}
 	}
 	/* TBD
@@ -803,8 +803,8 @@ func setPrintRightMargin(value Object) {
 	}
 }
 
-// Warning outputs a warning.
-func Warning(format string, args ...interface{}) {
+// Warn outputs a warning.
+func Warn(format string, args ...interface{}) {
 	var b []byte
 	if Interactive {
 		if printer.ANSI {

@@ -81,7 +81,7 @@ func (sfv *seqFunVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List,
 		}
 	}
 	if pos < len(args) {
-		panic("extra arguments that are not keyword and value pairs")
+		slip.NewPanic("extra arguments that are not keyword and value pairs")
 	}
 }
 
@@ -137,6 +137,6 @@ func (sfv *seqFunVars) setKeysIf(f slip.Object, s *slip.Scope, args slip.List, d
 		}
 	}
 	if pos < len(args) {
-		panic("extra arguments that are not keyword and value pairs")
+		slip.NewPanic("extra arguments that are not keyword and value pairs")
 	}
 }

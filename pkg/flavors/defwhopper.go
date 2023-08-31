@@ -3,8 +3,6 @@
 package flavors
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -63,11 +61,11 @@ func (f *Defwhopper) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	)
 	switch len(ml) {
 	case 0, 1:
-		panic(fmt.Sprintf("Too few elements in the whopper for defwhopper. Expected 2 but got %d.", len(ml)))
+		slip.NewPanic("Too few elements in the whopper for defwhopper. Expected 2 but got %d.", len(ml))
 	case 2:
 		// okay
 	default:
-		panic(fmt.Sprintf("Too many elements in the whopper for defwhopper. Expected 2 but got %d.", len(ml)))
+		slip.NewPanic("Too many elements in the whopper for defwhopper. Expected 2 but got %d.", len(ml))
 	}
 	if sym, ok2 := ml[0].(slip.Symbol); ok2 {
 		flavor = allFlavors[string(sym)]

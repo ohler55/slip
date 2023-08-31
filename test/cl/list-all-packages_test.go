@@ -17,8 +17,8 @@ func TestListAllPackagesOk(t *testing.T) {
 	// Turn off pretty so regexp doesn't fail on the newline.
 	(&sliptest.Function{
 		Source: `(list-all-packages)`,
-		Expect: `/^\(#<package "bag"> .*#<package "common-lisp"> #<package "common-lisp-user"> ` +
-			`.*#<package "flavors">.*#<package "gi">.*#<package "keyword">.*#<package "test">\)$/`,
+		Expect: `/^\(#<package bag> .*#<package common-lisp> #<package common-lisp-user> ` +
+			`.*#<package flavors>.*#<package gi>.*#<package keyword>.*#<package test>\)$/`,
 	}).Test(t)
 }
 

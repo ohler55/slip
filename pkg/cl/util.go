@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -78,7 +77,7 @@ func list2TestKeyArgs(
 				slip.PanicType("keyword", args[pos], "keyword")
 			}
 			if len(args)-1 <= pos {
-				panic(fmt.Sprintf("%s missing an argument", sym))
+				slip.NewPanic("%s missing an argument", sym)
 			}
 			switch strings.ToLower(string(sym)) {
 			case ":key":

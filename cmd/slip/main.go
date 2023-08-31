@@ -73,9 +73,9 @@ func run() {
 			// normal exit
 		case *slip.Panic:
 			if slip.CurrentPackage.JustGet("*print-ansi*") != nil {
-				_, _ = os.Stdout.Write(tr.Bytes())
+				_, _ = os.Stdout.Write(tr.Append(nil))
 			} else {
-				buf := tr.Bytes()
+				buf := tr.Append(nil)
 				buf = append([]byte("\x1b[31m"), buf...)
 				buf = append(buf, "\x1b[m"...)
 				_, _ = os.Stdout.Write(buf)

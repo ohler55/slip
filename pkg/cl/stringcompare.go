@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"strings"
 	"unicode"
 
@@ -87,7 +86,7 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 			slip.PanicType("keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			panic(fmt.Sprintf("%s missing an argument", sym))
+			slip.NewPanic("%s missing an argument", sym)
 		}
 		var n slip.Fixnum
 		switch strings.ToLower(string(sym)) {
@@ -120,10 +119,10 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 		}
 	}
 	if end1 < start1 || len(str1) < end1 || start1 < 0 {
-		panic(fmt.Sprintf("start1 and end1 of %d, %d are not valid for a string of length %d", start1, end1, len(str1)))
+		slip.NewPanic("start1 and end1 of %d, %d are not valid for a string of length %d", start1, end1, len(str1))
 	}
 	if end2 < start2 || len(str2) < end2 || start2 < 0 {
-		panic(fmt.Sprintf("start2 and end2 of %d, %d are not valid for a string of length %d", start2, end2, len(str2)))
+		slip.NewPanic("start2 and end2 of %d, %d are not valid for a string of length %d", start2, end2, len(str2))
 	}
 	if 0 < start1 || end1 < len(str1) {
 		str1 = str1[start1:end1]

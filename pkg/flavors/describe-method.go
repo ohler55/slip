@@ -3,7 +3,6 @@
 package flavors
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/ohler55/slip"
@@ -55,19 +54,18 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	var cf *Flavor
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		cf = allFlavors[string(ta)]
+		if cf = allFlavors[string(ta)]; cf == nil {
+			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
+		}
 	case *Flavor:
 		cf = ta
 	default:
 		slip.PanicType("flavor argument to describe-method", ta, "symbol", "flavor")
 	}
-	if cf == nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
-	}
 	meth, _ := args[1].(slip.Symbol)
 	ma := cf.methods[string(meth)]
 	if len(ma) == 0 {
-		panic(fmt.Sprintf("%s is not a method on %s.", args[1], cf.name))
+		slip.PanicUnboundSlot(cf, meth, "%s is not a method on %s.", args[1], cf.name)
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 2 < len(args) {

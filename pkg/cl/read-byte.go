@@ -70,7 +70,8 @@ func (f *ReadByte) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 			return result
 		}
-		panic(err)
+		ss, _ := is.(slip.Stream)
+		slip.PanicStream(ss, "read failed. %s", err)
 	}
 	return slip.Fixnum(b)
 }

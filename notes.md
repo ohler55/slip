@@ -2,11 +2,42 @@
 
 - next
 
+ - class
+  - deal with classes for core types
+   - maybe just have class-of return and support describe and other class based ops
+  - implement at top level or in a class package?
+  - should they be classes/flavors? both?
+   - class-of and describe
+   - is there a short term simplified option?
+    - no methods
+    - keep class hierarchy
+    - maybe class package where all the built in classes exist
+     - top level is not connected in that fixnum does not know about fixnum class
+      - (class-of 5) would return from class package
+     - all others packages would need to use classes for condition instances
+      - or keep the built-in type at the top level and classes separate
+     - (class-of error) would use switch for top level plus class.instance type
+      - can that be made to work for flavors? maybe through an interface
+
+ - trace
+  - should trace by function be supported instead of overall trace?
+   - maybe (trace t) to turn on all as currently implemented and nil to turn off
+    - (untrace) turns off all
+   - move trace to pkg/cl
+   - function names (specs) can be symbol, string, (METHOD name qualifiers) - qualifiers could be flavor and daemon?
+    - for methods
+     - special case for :send and look at sendMap
+      - method then flavor sub-map
+      - or submap for daemon before that?
+      - or maybe method includes daemon (:before:foo as key)
+
+
  - array
   - add fill-pointer for one dimensional arrays
- - vector-pop - takes 1 dimentional arrays, fails on simple vector or array
+ - vector-pop - takes 1 dimensional arrays, fails on simple vector or array
  - vector-push - ...
  - vector-push-extend - ...
+
 
  - http package
   - flavors

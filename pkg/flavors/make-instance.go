@@ -60,17 +60,16 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 	var cf *Flavor
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		cf = allFlavors[string(ta)]
+		if cf = allFlavors[string(ta)]; cf == nil {
+			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
+		}
 	case *Flavor:
 		cf = ta
 	default:
 		slip.PanicType(fmt.Sprintf("flavor argument to %s", label), ta, "symbol", "flavor")
 	}
-	if cf == nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
-	}
 	if cf.abstract {
-		panic(fmt.Sprintf("Can not create an instance of abstract flavor %s.", cf.name))
+		slip.NewPanic("Can not create an instance of abstract flavor %s.", cf.name)
 	}
 	inst := cf.MakeInstance()
 	inst.Keep = true
@@ -83,7 +82,7 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 		}
 		key := strings.ToLower(string(sym))
 		if key == ":self" {
-			panic(fmt.Sprintf("%s option keyword 'self' is not initable.", label))
+			slip.NewPanic("%s option keyword 'self' is not initable.", label)
 		}
 		i++
 		val := args[i]
@@ -100,12 +99,12 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 		} else if _, has := cf.keywords[key]; has {
 			plist = append(plist, sym, val)
 		} else {
-			panic(fmt.Sprintf("%s is not an init keyword for flavor %s.", sym, cf.name))
+			slip.NewPanic("%s is not an init keyword for flavor %s.", sym, cf.name)
 		}
 	}
 	for _, k := range cf.requiredKeywords {
 		if !keys[k] {
-			panic(fmt.Sprintf("Keyword %s missing from %s for flavor %s.", k, label, cf.name))
+			slip.NewPanic("Keyword %s missing from %s for flavor %s.", k, label, cf.name)
 		}
 	}
 	return inst, plist

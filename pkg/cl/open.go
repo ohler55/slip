@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"strings"
@@ -105,7 +104,7 @@ func (f *Open) openFile(args slip.List) slip.Object {
 			slip.PanicType("keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			panic(fmt.Sprintf("%s missing an argument", sym))
+			slip.NewPanic("%s missing an argument", sym)
 		}
 		val := args[pos+1]
 		switch strings.ToLower(string(sym)) {
@@ -169,14 +168,14 @@ func (f *Open) openFile(args slip.List) slip.Object {
 	if rename {
 		if _, err := os.Stat(string(path)); err == nil {
 			if err = os.Rename(string(path), string(path)+".bak"); err != nil {
-				panic(err)
+				slip.PanicFile(path, "rename failed: %s", err)
 			}
 		}
 	}
 	file, err := os.OpenFile(string(path), flags, perm)
 	if err != nil {
 		if !nilError {
-			panic(err)
+			slip.PanicFile(path, "failed to open %s. %s", path, err)
 		}
 		return nil
 	}

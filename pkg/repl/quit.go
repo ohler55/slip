@@ -27,5 +27,7 @@ type Quit struct {
 
 // Call the the function with the arguments provided.
 func (f *Quit) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	panic(&slip.Panic{Fatal: true})
+	p := slip.NewError("")
+	p.Fatal = true
+	panic(p)
 }

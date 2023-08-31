@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -166,7 +165,7 @@ func (sv *searchVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List, 
 		}
 	}
 	if pos < len(args) {
-		panic("extra arguments that are not keyword and value pairs")
+		slip.NewPanic("extra arguments that are not keyword and value pairs")
 	}
 }
 
@@ -194,14 +193,12 @@ func (sv *searchVars) searchList(s *slip.Scope, seq1, seq2 slip.List, depth int)
 	if sv.end1 < 0 {
 		sv.end1 = len(seq1)
 	} else if len(seq1) < sv.end1 {
-		panic(fmt.Sprintf("bounding indices %d and %d are invalid for sequence of length %d",
-			sv.start1, sv.end1, len(seq1)))
+		slip.NewPanic("bounding indices %d and %d are invalid for sequence of length %d", sv.start1, sv.end1, len(seq1))
 	}
 	if sv.end2 < 0 {
 		sv.end2 = len(seq2)
 	} else if len(seq2) < sv.end2 {
-		panic(fmt.Sprintf("bounding indices %d and %d are invalid for sequence of length %d",
-			sv.start2, sv.end2, len(seq2)))
+		slip.NewPanic("bounding indices %d and %d are invalid for sequence of length %d", sv.start2, sv.end2, len(seq2))
 	}
 	seq1 = seq1[sv.start1:sv.end1]
 	seq2 = seq2[sv.start2:sv.end2]

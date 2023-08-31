@@ -16,6 +16,7 @@ func TestPanicBytes(t *testing.T) {
 	tt.Equal(t, `## argument to cdr must be a cons or list not t, a t.
 ##  (cdr t)
 ##  (car (cdr t))
+##  (recover)
 `, stack)
 }
 
@@ -39,19 +40,25 @@ func TestPanicArgCountHigh(t *testing.T) {
 	tt.Equal(t, "Too many arguments to random. At most 2 expected but got 3.", msg)
 }
 
+func TestArgCountCheck(t *testing.T) {
+	fun := slip.NewFunc("car", slip.List{})
+	tt.Panic(t, func() { slip.ArgCountCheck(fun, slip.List{}, 1, 2) })
+}
+
 func recoverPanic(obj slip.Object) (msg, stack string) {
 	defer func() {
-		if p, ok := recover().(*slip.Panic); ok {
-			stack = string(p.Bytes())
-			msg = p.Error()
+		if se, ok := recover().(slip.Error); ok {
+			se.AppendToStack("recover", nil)
+			msg = se.Error()
+			stack = string(se.AppendFull(nil))
 		}
 	}()
 	_ = obj.Eval(slip.NewScope(), 0)
 	return
 }
 
-func TestPanicParcial(t *testing.T) {
-	p := slip.Partial{Reason: "test", Depth: 3}
-	tt.Equal(t, "test", p.String())
+func TestPanicPartial(t *testing.T) {
+	p := slip.NewPartial(3, "test")
+	tt.Equal(t, "/^#<PARSE-ERROR [0-9a-f]+>$/", p.String())
 	tt.Equal(t, "test", p.Error())
 }

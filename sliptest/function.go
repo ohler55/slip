@@ -34,6 +34,9 @@ type Function struct {
 	// Panics if true indicated the call to .Eval() should panic.
 	Panics bool
 
+	// PanicType is the expected panic type as a Symbol. If nil then no check.
+	PanicType slip.Object
+
 	// Result of the function call.
 	Result slip.Object
 }
@@ -44,12 +47,21 @@ func (tf *Function) Test(t *testing.T) {
 	if scope == nil {
 		scope = slip.NewScope()
 	}
-	if tf.Panics {
+	switch {
+	case tf.PanicType != nil:
+		r := tt.Panic(t, func() {
+			obj := slip.CompileString(tf.Source)
+			obj.Eval(scope, 0)
+		}, tf.Source)
+		so, ok := r.(slip.Object)
+		tt.Equal(t, true, ok, "expected a panic of %s not a %T", tf.PanicType, r)
+		tt.Equal(t, tf.PanicType, so.Hierarchy()[0], "expected a panic of %s not a %s", tf.PanicType, so.Hierarchy()[0])
+	case tf.Panics:
 		tt.Panic(t, func() {
 			obj := slip.CompileString(tf.Source)
 			obj.Eval(scope, 0)
 		}, tf.Source)
-	} else {
+	default:
 		obj := slip.CompileString(tf.Source)
 		tf.Result = scope.Eval(obj, 0)
 		switch {

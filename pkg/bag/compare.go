@@ -3,8 +3,6 @@
 package bag
 
 import (
-	"fmt"
-
 	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/slip"
@@ -117,8 +115,8 @@ func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List) (result sl
 					case jp.Root, jp.At:
 						// ignore
 					default:
-						panic(fmt.Sprintf("ignores path fragment must be child, nth, and wildcard and not %s (%T)",
-							jp.Expr{tf}, tf))
+						slip.NewPanic("ignores path fragment must be child, nth, and wildcard and not %s (%T)",
+							jp.Expr{tf}, tf)
 					}
 				}
 				ignores = append(ignores, ign)

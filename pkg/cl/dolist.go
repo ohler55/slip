@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -76,7 +75,7 @@ func (f *Dolist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if 2 < len(input) {
 			rform = input[2]
 			if 3 < len(input) {
-				panic(fmt.Sprintf("too many elements in %s", input))
+				slip.NewPanic("too many elements in %s", input)
 			}
 		}
 	} else {
@@ -96,7 +95,7 @@ func (f *Dolist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 					if s.Block {
 						return tr
 					}
-					panic(fmt.Sprintf("return from unknown block: %s", tr.Tag))
+					slip.NewPanic("return from unknown block: %s", tr.Tag)
 				case *GoTo:
 					for i++; i < len(args); i++ {
 						if slip.ObjectEqual(args[i], tr.Tag) {
@@ -108,5 +107,6 @@ func (f *Dolist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	}
 	ns.UnsafeLet(sym, nil)
+
 	return ns.Eval(rform, d2)
 }

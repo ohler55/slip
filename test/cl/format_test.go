@@ -442,6 +442,14 @@ func TestFormatA(t *testing.T) {
 		Expect: `"---12"`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(format nil "~A" (make-condition 'parse-error :message "raise"))`,
+		Expect: `"raise"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(format nil "~#A" (make-condition 'parse-error :message "raise"))`,
+		Expect: `"raise"`,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(format nil "~1,v:@A" t 12)`,
 		Panics: true,
 	}).Test(t)
@@ -766,6 +774,10 @@ func TestFormatS(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(format nil "~S" "abc")`,
 		Expect: `""abc""`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(format nil "~S" (make-condition 'parse-error :message "raise"))`,
+		Expect: `/^"#<PARSE-ERROR [0-9a-f]+>"$/`,
 	}).Test(t)
 }
 

@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -65,7 +63,7 @@ func (f *Progx) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if s.Block {
 				return tr
 			}
-			panic(fmt.Sprintf("return from unknown block: %s", tr.Tag))
+			slip.NewPanic("return from unknown block: %s", tr.Tag)
 		case *GoTo:
 			for i++; i < len(args); i++ {
 				if slip.ObjectEqual(args[i], tr.Tag) {

@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 )
@@ -109,7 +108,7 @@ func (obj *Package) Import(pkg *Package, varName string) {
 		obj.Funcs[name] = fi
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
 	} else {
-		panic(fmt.Sprintf("%s is not a variable or function in %s", name, pkg))
+		PanicPackage(obj, "%s is not a variable or function in %s", name, pkg)
 	}
 }
 
@@ -117,7 +116,7 @@ func (obj *Package) Import(pkg *Package, varName string) {
 func (obj *Package) Set(name string, value Object) *VarVal {
 	name, value = obj.PreSet(obj, name, value)
 	if _, has := ConstantValues[name]; has {
-		panic(fmt.Sprintf("%s is a constant and thus can't be set", name))
+		PanicPackage(obj, "%s is a constant and thus can't be set", name)
 	}
 	if vv, has := obj.Vars[name]; has {
 		if vv.Set != nil {
@@ -129,7 +128,7 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		return vv
 	}
 	if obj.Locked {
-		panic(fmt.Sprintf("Package %s is locked thus no new variables can be set.", obj.Name))
+		PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
 	}
 	vv := &VarVal{Val: value, Pkg: obj}
 	obj.Vars[name] = vv
@@ -176,7 +175,7 @@ func (obj *Package) JustGet(name string) (value Object) {
 // Remove a variable.
 func (obj *Package) Remove(name string) (removed bool) {
 	if obj.Locked {
-		panic(fmt.Sprintf("Package %s is locked.", obj.Name))
+		PanicPackage(obj, "Package %s is locked.", obj.Name)
 	}
 	name = strings.ToLower(name)
 	if _, has := obj.Vars[name]; has {
@@ -207,7 +206,7 @@ func (obj *Package) String() string {
 func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	name := strings.ToLower(doc.Name)
 	if _, has := obj.Funcs[name]; has {
-		Warning("redefining %s", printer.caseName(name))
+		Warn("redefining %s", printer.caseName(name))
 	}
 	fi := FuncInfo{
 		Name:   name,

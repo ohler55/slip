@@ -3,7 +3,6 @@
 package flavors
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/ohler55/slip"
@@ -50,14 +49,13 @@ func (f *DescribeFlavor) Call(s *slip.Scope, args slip.List, depth int) (result 
 	var cf *Flavor
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		cf = allFlavors[string(ta)]
+		if cf = allFlavors[string(ta)]; cf == nil {
+			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
+		}
 	case *Flavor:
 		cf = ta
 	default:
 		slip.PanicType("flavor argument to describe-flavor", ta, "symbol", "flavor")
-	}
-	if cf == nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 1 < len(args) {

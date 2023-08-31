@@ -75,7 +75,7 @@ func FindFunc(name string, pkgs ...*Package) *FuncInfo {
 	if fi != nil {
 		return fi
 	}
-	panic(fmt.Sprintf("Function %s is not defined.", printer.caseName(name)))
+	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined.", printer.caseName(name)))
 }
 
 // Eval the object.
@@ -215,10 +215,9 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 			}
 		}
 	}
-	panic(&Panic{
-		Message: fmt.Sprintf("|%s| is not a function", ObjectString(list[0])),
-		Stack:   []string{list.String()},
-	})
+	p := NewError("|%s| is not a function", ObjectString(list[0]))
+	p.Stack = []string{list.String()}
+	panic(p)
 }
 
 // CompileArgs for the function.

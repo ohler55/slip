@@ -244,7 +244,7 @@ func TestDynamicAmpNoKeyValue(t *testing.T) {
 		String:    "((lambda (&optional x &key k1) (list x k1)) 1 :k1)",
 		Simple:    sen.MustParse([]byte(`[[lambda ["&optional" x "&key" k1] [list x k1]] 1 ":k1"]`)),
 		Hierarchy: "function.t",
-		Panics:    true,
+		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
 
@@ -273,6 +273,6 @@ func TestDynamicAmpKeyExtraSymbol(t *testing.T) {
 		String:    "((lambda (&optional x &key k1) (list x k1)) 1 :k1 2 3)",
 		Simple:    sen.MustParse([]byte(`[[lambda ["&optional" x "&key" k1] [list x k1]] 1 ":k1" 2 3]`)),
 		Hierarchy: "function.t",
-		Panics:    true,
+		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }

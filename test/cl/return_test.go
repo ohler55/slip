@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -24,7 +25,7 @@ func TestReturnEmpty(t *testing.T) {
 
 func TestReturnNotInBlock(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(return 1)`,
-		Panics: true,
+		Source:    `(return 1)`,
+		PanicType: slip.Symbol("control-error"),
 	}).Test(t)
 }

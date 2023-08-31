@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -70,7 +71,7 @@ func TestAbsBadArgCount(t *testing.T) {
 
 func TestAbsNotNumber(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(abs t)`,
-		Panics: true,
+		Source:    `(abs t)`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

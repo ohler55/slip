@@ -187,13 +187,13 @@ func process() {
 			suffix = "\x1b[m"
 		}
 		switch tr := rec.(type) {
-		case *slip.Partial:
+		case *slip.PartialPanic:
 			replReader.setDepth(tr.Depth)
 		case *slip.Panic:
 			if 0 < len(tr.Message) {
 				var buf []byte
 				buf = append(buf, warnPrefix...)
-				buf = append(buf, tr.Bytes()...)
+				buf = tr.Append(buf)
 				buf = append(buf, suffix...)
 				_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			}

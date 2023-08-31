@@ -54,9 +54,13 @@ func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	p.Escape = false
 	p.Readably = false
 	obj := args[0]
-	var w io.Writer = slip.StandardOutput.(io.Writer)
+	var (
+		w     io.Writer = slip.StandardOutput.(io.Writer)
+		ss, _           = slip.StandardOutput.(slip.Stream)
+	)
 	if 1 < len(args) {
 		var ok bool
+		ss, _ = args[1].(slip.Stream)
 		if w, ok = args[1].(io.Writer); !ok {
 			slip.PanicType("princ output-stream", args[1], "output-stream")
 		}
@@ -68,7 +72,7 @@ func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		_, err = w.Write(p.Append([]byte{}, obj, 0))
 	}
 	if err != nil {
-		panic(err)
+		slip.PanicStream(ss, "princ write failed. %s", err)
 	}
 	return obj
 }

@@ -3,8 +3,6 @@
 package flavors
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -44,14 +42,13 @@ func (f *Undefflavor) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	var cf *Flavor
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		cf = allFlavors[string(ta)]
+		if cf = allFlavors[string(ta)]; cf == nil {
+			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
+		}
 	case *Flavor:
 		cf = ta
 	default:
 		slip.PanicType("flavor argument to undefflavor", ta, "symbol", "flavor")
-	}
-	if cf == nil {
-		panic(fmt.Sprintf("%s is not a defined flavor.", args[0]))
 	}
 	f.removeFlavor(cf)
 

@@ -3,7 +3,6 @@
 package bag
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/ojg/jp"
@@ -100,7 +99,7 @@ func modifyBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 					slip.PanicType("keyword", args[pos], "keyword")
 				}
 				if len(args)-1 <= pos {
-					panic(fmt.Sprintf("%s missing an argument", sym))
+					slip.NewPanic("keyword %s is missing a value", sym)
 				}
 				if strings.EqualFold(string(sym), ":as-bag") {
 					asBag = args[pos+1] != nil

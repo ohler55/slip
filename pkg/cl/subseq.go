@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -77,7 +75,7 @@ func (f *Subseq) Place(args slip.List, value slip.Object) {
 			slip.PanicType("newvalue", value, "list")
 		}
 	case slip.String:
-		panic(fmt.Sprintf("setf called on constant value %s", ta))
+		slip.NewPanic("setf called on constant value %s", ta)
 	case slip.Vector:
 		if rep, ok := value.(slip.Vector); ok {
 			cnt := end - start
@@ -117,7 +115,7 @@ func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 			end = len(ta)
 		}
 		if start < 0 || len(ta) < start || len(ta) < end {
-			panic(fmt.Sprintf("indices %d and %d are out of bounds for list of length %d", start, end, len(ta)))
+			slip.NewPanic("indices %d and %d are out of bounds for list of length %d", start, end, len(ta))
 		}
 		seq = ta
 	case slip.String:
@@ -126,7 +124,7 @@ func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 			end = len(ra)
 		}
 		if start < 0 || len(ra) < start || len(ra) < end {
-			panic(fmt.Sprintf("indices %d and %d are out of bounds for string of length %d", start, end, len(ra)))
+			slip.NewPanic("indices %d and %d are out of bounds for string of length %d", start, end, len(ra))
 		}
 		seq = ta
 	case slip.Vector:
@@ -134,7 +132,7 @@ func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 			end = len(ta)
 		}
 		if start < 0 || len(ta) < start || len(ta) < end {
-			panic(fmt.Sprintf("indices %d and %d are out of bounds for vector of length %d", start, end, len(ta)))
+			slip.NewPanic("indices %d and %d are out of bounds for vector of length %d", start, end, len(ta))
 		}
 		seq = ta
 	default:

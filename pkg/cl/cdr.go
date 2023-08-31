@@ -79,7 +79,7 @@ func (f *Cdr) Place(args slip.List, value slip.Object) {
 				return
 			}
 		}
-		panic("setf on cdr of a list is not implemented")
+		slip.NewPanic("setf on cdr of a list is not implemented")
 	default:
 		slip.PanicType("argument to cdr", list, "cons", "list")
 	}

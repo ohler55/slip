@@ -308,15 +308,21 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	if len(args) < 2 {
 		slip.PanicArgCount(f, 2, -1)
 	}
-	var w io.Writer
+	var (
+		w  io.Writer
+		ss slip.Stream
+	)
 	switch ta := args[0].(type) {
 	case nil:
 		// leave w as nil
 	case io.Writer:
 		w = ta
+		ss, _ = args[0].(slip.Stream)
 	default:
 		if ta == slip.True {
-			if w, _ = s.Get("*standard-output*").(io.Writer); w != nil {
+			so := s.Get("*standard-output*")
+			ss, _ = so.(slip.Stream)
+			if w, _ = so.(io.Writer); w != nil {
 				break
 			}
 		}
@@ -327,7 +333,7 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		return slip.String(out)
 	}
 	if _, err := w.Write(out); err != nil {
-		panic(err)
+		slip.PanicStream(ss, "write failed. %s", err)
 	}
 	return nil
 }

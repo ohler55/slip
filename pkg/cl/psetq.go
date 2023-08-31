@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -49,7 +47,7 @@ type Psetq struct {
 // Call the function with the arguments provided.
 func (f *Psetq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args)%2 != 0 {
-		panic(fmt.Sprintf("psetq expected symbol value pairs. Not %d arguments.", len(f.Args)))
+		slip.NewPanic("psetq expected symbol value pairs. Not %d arguments.", len(f.Args))
 	}
 	d2 := depth + 1
 	last := len(args) - 1

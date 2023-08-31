@@ -3,7 +3,6 @@
 package gi
 
 import (
-	"fmt"
 	"io"
 	"time"
 
@@ -227,10 +226,10 @@ Returns the output stream.
 type setOutCaller bool
 
 func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	if len(args) != 1 {
-		panic(fmt.Sprintf("Method logger-flavor :set-out method expects one arguments but received %d.", len(args)))
-	}
 	self := s.Get(slip.Symbol("self")).(*flavors.Instance)
+	if len(args) != 1 {
+		flavors.PanicMethodArgChoice(self, ":set-out", len(args), "1")
+	}
 	switch args[0].(type) {
 	case nil:
 		self.Let("out", slip.StandardOutput)
