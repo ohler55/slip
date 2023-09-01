@@ -3,6 +3,37 @@
 - next
 
  - class
+  - interface for class (classy?)
+   - to support describe
+   - name
+   - slots (or vars for instance)
+   - direct superclasses (built-in-class and integer
+    - maybe SuperClasses(direct bool) List
+   - direct subclasses
+    - search built in as well as flavors if a flavor
+   - direct methods
+    -
+   - methods (unique to slip)
+   - documentation
+   - finalized-p
+   - class precedence list (hierarchy, cpl)
+   - prototype
+  - identify functions for classes
+   - class-of
+  - class (clas, standard-object, t)
+   - base for built-in-class
+  - built-in-class (type, maybe of fixnum, etc)
+   - same as Class but different hierarchy
+  - class-name (update for classy and move to pkg/class)
+  - class-of
+   - if has Class() (define some interface) then call that
+    - should core type have that method or have class map in class, class map probably better
+  - find-class (update for built in and other classes)
+  - change-class (for flavors instances only for now)
+   - parts of instance interface? same as class-of
+
+
+
   - deal with classes for core types
    - maybe just have class-of return and support describe and other class based ops
   - implement at top level or in a class package?
