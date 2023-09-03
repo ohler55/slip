@@ -2,26 +2,13 @@
 
 - next
 
- - class
-  - interface for class (classy?)
-   - to support describe
-   - name
-   - slots (or vars for instance)
-   - direct superclasses (built-in-class and integer
-    - maybe SuperClasses(direct bool) List
-   - direct subclasses
-    - search built in as well as flavors if a flavor
-   - direct methods
+ - clos
+  - MakeInstance()
+   - make-instance should be moved to clos
+    - add Initialize() or Init() to slip.Instance
     -
-   - methods (unique to slip)
-   - documentation
-   - finalized-p
-   - class precedence list (hierarchy, cpl)
-   - prototype
-  - identify functions for classes
-   - class-of
-  - class (clas, standard-object, t)
-   - base for built-in-class
+
+
   - built-in-class (type, maybe of fixnum, etc)
    - same as Class but different hierarchy
   - class-name (update for classy and move to pkg/class)

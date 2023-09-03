@@ -273,3 +273,8 @@ func (obj *Instance) HasMethod(method string) bool {
 
 	return has
 }
+
+// Class returns the flavor of the instance.
+func (obj *Instance) Class() slip.Class {
+	return obj.Flavor
+}

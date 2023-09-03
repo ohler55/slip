@@ -204,7 +204,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 }
 
 // MakeInstance creates a new instance but does not call the :init method.
-func (obj *Flavor) MakeInstance() *Instance {
+func (obj *Flavor) MakeInstance() slip.Instance {
 	inst := Instance{Flavor: obj}
 	inst.Scope.Vars = map[string]slip.Object{}
 	for k, v := range obj.defaultVars {
@@ -215,7 +215,7 @@ func (obj *Flavor) MakeInstance() *Instance {
 	return &inst
 }
 
-// Describe the instance in detail.
+// Describe the flavor in detail.
 func (obj *Flavor) Describe(b []byte, indent, right int, ansi bool) []byte {
 	b = append(b, indentSpaces[:indent]...)
 	if ansi {
@@ -356,7 +356,7 @@ top:
 		}
 	case ":inspect":
 		cf := allFlavors["bag-flavor"]
-		inst := cf.MakeInstance()
+		inst := cf.MakeInstance().(*Instance)
 		inst.Any = obj.Simplify()
 		result = inst
 	default:
@@ -368,4 +368,20 @@ top:
 		goto top
 	}
 	return
+}
+
+// Name of the class.
+func (obj *Flavor) Name() string {
+	return obj.name
+}
+
+// Documentation of the class.
+func (obj *Flavor) Documentation() string {
+	return obj.docs
+}
+
+// Abstract returns true if the class is an abstract flavor or if
+// make-instance should signal an error..
+func (obj *Flavor) Abstract() bool {
+	return obj.abstract
 }
