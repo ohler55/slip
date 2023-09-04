@@ -4,7 +4,6 @@ package flavors
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/ohler55/slip"
 )
@@ -48,14 +47,14 @@ type MakeInstance struct {
 
 // Call the the function with the arguments provided.
 func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	inst, plist := allocateInstance(f, s, args, "make-instance")
-
-	_ = inst.Receive(s, ":init", slip.List{plist}, depth+1)
+	c := classFromArg0(f, s, args, "make-instance")
+	inst := c.MakeInstance()
+	inst.Init(s, args[1:], depth)
 
 	return inst
 }
 
-func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string) (*Instance, slip.List) {
+func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, label string) *Flavor {
 	slip.ArgCountCheck(f, args, 1, -1)
 	var cf *Flavor
 	switch ta := args[0].(type) {
@@ -71,41 +70,5 @@ func allocateInstance(f slip.Object, s *slip.Scope, args slip.List, label string
 	if cf.abstract {
 		slip.NewPanic("Can not create an instance of abstract flavor %s.", cf.name)
 	}
-	inst := cf.MakeInstance().(*Instance) // TBD
-	inst.Keep = true
-	var plist slip.List
-	keys := map[string]bool{}
-	for i := 1; i < len(args); i++ {
-		sym, ok := args[i].(slip.Symbol)
-		if !ok || len(sym) < 2 || sym[0] != ':' {
-			slip.PanicType(fmt.Sprintf("%s option keyword", label), args[i], "keyword")
-		}
-		key := strings.ToLower(string(sym))
-		if key == ":self" {
-			slip.NewPanic("%s option keyword 'self' is not initable.", label)
-		}
-		i++
-		val := args[i]
-		if len(cf.initable) == 0 || cf.initable[key] {
-			vkey := key[1:]
-			if _, has := cf.defaultVars[vkey]; has {
-				inst.Let(slip.Symbol(vkey), val)
-				continue
-			}
-		}
-		keys[key] = true
-		if cf.allowOtherKeys {
-			plist = append(plist, sym, val)
-		} else if _, has := cf.keywords[key]; has {
-			plist = append(plist, sym, val)
-		} else {
-			slip.NewPanic("%s is not an init keyword for flavor %s.", sym, cf.name)
-		}
-	}
-	for _, k := range cf.requiredKeywords {
-		if !keys[k] {
-			slip.NewPanic("Keyword %s missing from %s for flavor %s.", k, label, cf.name)
-		}
-	}
-	return inst, plist
+	return cf
 }

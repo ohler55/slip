@@ -5,6 +5,7 @@ package flavors
 import (
 	"sort"
 	"strconv"
+	"strings"
 	"unsafe"
 
 	"github.com/ohler55/slip"
@@ -87,6 +88,50 @@ func (obj *Instance) Hierarchy() []slip.Symbol {
 // Eval returns self.
 func (obj *Instance) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
+}
+
+// Init the instance slots from the provided args list. If the scope is not
+// nil then send :init is called.
+func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
+	obj.Keep = true
+	var plist slip.List
+	keys := map[string]bool{}
+	cf := obj.Flavor
+	for i := 0; i < len(args); i++ {
+		sym, ok := args[i].(slip.Symbol)
+		if !ok || len(sym) < 2 || sym[0] != ':' {
+			slip.PanicType("initialization keyword", args[i], "keyword")
+		}
+		key := strings.ToLower(string(sym))
+		if key == ":self" {
+			slip.NewPanic("initialization keyword 'self' is not initable.")
+		}
+		i++
+		val := args[i]
+		if len(cf.initable) == 0 || cf.initable[key] {
+			vkey := key[1:]
+			if _, has := cf.defaultVars[vkey]; has {
+				obj.Let(slip.Symbol(vkey), val)
+				continue
+			}
+		}
+		keys[key] = true
+		if cf.allowOtherKeys {
+			plist = append(plist, sym, val)
+		} else if _, has := cf.keywords[key]; has {
+			plist = append(plist, sym, val)
+		} else {
+			slip.NewPanic("%s is not an init keyword for flavor %s.", sym, cf.name)
+		}
+	}
+	for _, k := range cf.requiredKeywords {
+		if !keys[k] {
+			slip.NewPanic("Keyword %s missing from initialization list for flavor %s.", k, cf.name)
+		}
+	}
+	if scope != nil {
+		_ = obj.Receive(scope, ":init", slip.List{plist}, depth+1)
+	}
 }
 
 // Receive a method invocation from the send function. Not intended to be

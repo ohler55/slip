@@ -120,7 +120,7 @@ func modifyBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 
 func modifyValue(s *slip.Scope, value any, caller slip.Caller, asBag bool, depth int) any {
 	if asBag {
-		bg := flavor.MakeInstance()
+		bg := flavor.MakeInstance().(*flavors.Instance)
 		bg.Any = value
 		obj := caller.Call(s, slip.List{bg}, depth)
 		if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Flavor == flavor {

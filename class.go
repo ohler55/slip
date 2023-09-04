@@ -3,6 +3,7 @@
 package slip
 
 type Class interface {
+	Object
 
 	// Name of the class.
 	Name() string
@@ -16,4 +17,7 @@ type Class interface {
 	// Abstract returns true if the class is an abstract flavor or if
 	// make-instance should signal an error..
 	Abstract() bool
+
+	// MakeInstance creates a new instance but does not call the :init method.
+	MakeInstance() Instance
 }
