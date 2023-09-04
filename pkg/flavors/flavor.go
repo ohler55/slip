@@ -41,6 +41,14 @@ type Flavor struct {
 	allowOtherKeys   bool
 }
 
+// Find the named flavor.
+func Find(name string) (f *Flavor) {
+	if f = allFlavors[name]; f == nil {
+		f = allFlavors[strings.ToLower(name)]
+	}
+	return
+}
+
 // DefMethod adds a method to the Flavor.
 func (obj *Flavor) DefMethod(name string, methodType string, caller slip.Caller) {
 	name = strings.ToLower(name)
