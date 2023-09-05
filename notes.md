@@ -3,19 +3,25 @@
 - next
 
  - clos
-  - MakeInstance()
-   - make-instance should be moved to clos
-    - add Initialize() or Init() to slip.Instance
-    -
+  - clos/Class
+   - make fields for:
+    - name
+    - supers/inherit
+    - prototype
+    - final
+    - slots (just map[string]Object for now)
+    - methods (just []Symbol for now)
+   - FindClass(name string)
+    - allClasses map
+     - initialize statically
+    - in init() function set up inheritance
 
 
   - built-in-class (type, maybe of fixnum, etc)
    - same as Class but different hierarchy
-  - class-name (update for classy and move to pkg/class)
+  - class-name
   - class-of
-   - if has Class() (define some interface) then call that
-    - should core type have that method or have class map in class, class map probably better
-  - find-class (update for built in and other classes)
+  - find-class (call FindClass and flavors.Find
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
 

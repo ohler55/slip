@@ -1,6 +1,6 @@
 // Copyright (c) 2023, Peter Ohler, All rights reserved.
 
-package flavors
+package clos
 
 import (
 	"github.com/ohler55/slip"

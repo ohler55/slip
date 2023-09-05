@@ -54,6 +54,7 @@ func TestInstanceMisc(t *testing.T) {
 
 	b2 := slip.ReadString("(make-instance blueberry)").Eval(slip.NewScope(), nil).(*flavors.Instance)
 	tt.Equal(t, true, b2.Equal(berry))
+	tt.Equal(t, slip.ReadString(`blueberry`).Eval(scope, nil), b2.Class())
 
 	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
 	tt.Equal(t, false, b2.Equal(berry))
@@ -130,3 +131,5 @@ berry
 	}).Test(t)
 
 }
+
+// TBD test Init()

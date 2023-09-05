@@ -141,6 +141,11 @@ func TestFlavorDescribeOptions(t *testing.T) {
   Required Methods:
     :x
 `, string(out))
+
+	tt.Equal(t, "abbey", f.(*flavors.Flavor).Name())
+	tt.Equal(t, "an abstract", f.(*flavors.Flavor).Documentation())
+
+	tt.Equal(t, f, flavors.Find("Abbey"))
 }
 
 func TestFlavorReceive(t *testing.T) {

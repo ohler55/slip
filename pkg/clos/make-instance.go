@@ -1,11 +1,12 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
-package flavors
+package clos
 
 import (
 	"fmt"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func init() {
@@ -58,12 +59,12 @@ func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, label string) (
 	slip.ArgCountCheck(f, args, 1, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		class = Find(string(ta))
+		class = flavors.Find(string(ta))
 		// TBD look for built-in class if class is nil
 		if class == nil {
 			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
 		}
-	case *Flavor:
+	case *flavors.Flavor:
 		class = ta
 	default:
 		slip.PanicType(fmt.Sprintf("flavor argument to %s", label), ta, "symbol", "flavor", "class")
