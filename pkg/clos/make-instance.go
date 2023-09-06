@@ -20,7 +20,7 @@ func init() {
 			Name: "make-instance",
 			Args: []*slip.DocArg{
 				{
-					Name: "flavor",
+					Name: "class",
 					Type: "symbol",
 					Text: "The name of the flavor or class to make an instance of.",
 				},
@@ -33,7 +33,7 @@ An init-value can be the variable name prefixed with a colon or a plist option.`
 				},
 			},
 			Return: "instance",
-			Text: `__make-instance__ makes an instance of _flavor_ or _class_ with the provided
+			Text: `__make-instance__ makes an instance of _class_ with the provided
 variable values and plist options.`,
 			Examples: []string{
 				"(make-instance 'strawberry :color 'red) => #<strawberry 123456>",
@@ -59,18 +59,24 @@ func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, label string) (
 	slip.ArgCountCheck(f, args, 1, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		class = flavors.Find(string(ta))
-		// TBD look for built-in class if class is nil
-		if class == nil {
-			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
+		if cf := flavors.Find(string(ta)); cf == nil {
+			if c := Find(string(ta)); c == nil {
+				slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
+			} else {
+				class = c
+			}
+		} else {
+			class = cf
 		}
 	case *flavors.Flavor:
 		class = ta
+	case *Class:
+		class = ta
 	default:
-		slip.PanicType(fmt.Sprintf("flavor argument to %s", label), ta, "symbol", "flavor", "class")
+		slip.PanicType(fmt.Sprintf("class argument to %s", label), ta, "symbol", "flavor", "class")
 	}
 	if class.Abstract() {
-		slip.NewPanic("Can not create an instance of abstract flavor %s.", class.Name())
+		slip.NewPanic("Can not create an instance of abstract class or flavor %s.", class.Name())
 	}
 	return
 }

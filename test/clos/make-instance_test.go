@@ -103,3 +103,18 @@ func TestMakeInstanceMissingKeyword(t *testing.T) {
 `).Eval(slip.NewScope(), nil)
 	})
 }
+
+func TestMakeInstanceNotFound(t *testing.T) {
+	tt.Panic(t, func() {
+		_ = slip.ReadString(`(make-instance 'nothing)`).Eval(slip.NewScope(), nil)
+	})
+}
+
+func TestMakeInstanceBuiltIn(t *testing.T) {
+	tt.Panic(t, func() {
+		_ = slip.ReadString(`(make-instance 'fixnum)`).Eval(slip.NewScope(), nil)
+	})
+	tt.Panic(t, func() {
+		_ = slip.ReadString(`(make-instance (find-class 'fixnum))`).Eval(slip.NewScope(), nil)
+	})
+}

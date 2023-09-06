@@ -4,24 +4,12 @@
 
  - clos
   - clos/Class
-   - make fields for:
-    - name
-    - supers/inherit
-    - prototype
-    - final
-    - slots (just map[string]Object for now)
-    - methods (just []Symbol for now)
-   - FindClass(name string)
-    - allClasses map
-     - initialize statically
+   - built-in.go
     - in init() function set up inheritance
 
-
-  - built-in-class (type, maybe of fixnum, etc)
-   - same as Class but different hierarchy
   - class-name
   - class-of
-  - find-class (call FindClass and flavors.Find
+
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
 

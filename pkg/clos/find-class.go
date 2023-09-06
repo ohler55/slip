@@ -1,9 +1,10 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
-package flavors
+package clos
 
 import (
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func init() {
@@ -44,14 +45,15 @@ type FindClass struct {
 // Call the the function with the arguments provided.
 func (f *FindClass) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 2)
-	var cf *Flavor
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
 		slip.PanicType("name", args[0], "symbol")
 	}
-	cf = allFlavors[string(sym)]
-	if cf != nil {
+	if cf := flavors.Find(string(sym)); cf != nil {
 		return cf
+	}
+	if c := Find(string(sym)); c != nil {
+		return c
 	}
 	if 1 < len(args) && args[1] != nil {
 		slip.PanicClassNotFound(sym, "%s is not a defined flavor.", sym)

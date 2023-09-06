@@ -108,7 +108,6 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"    :print-self\n"+
 		"    :send-if-handles\n"+
 		"    :which-operations\n", string(out))
-
 }
 
 func TestFlavorDescribeOptions(t *testing.T) {
