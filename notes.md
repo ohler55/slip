@@ -3,9 +3,10 @@
 - next
 
  - clos
-  - clos/Class
-   - built-in.go
-    - in init() function set up inheritance
+  - set up all built-ins
+   - include errors and warnings
+   - in cl and others, add somehow
+    - move class management to top or *add built-in in clos*
 
   - class-name
   - class-of

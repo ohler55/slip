@@ -27,7 +27,7 @@ var allClasses = map[string]*Class{}
 type Class struct {
 	name      string
 	docs      string
-	inherit   []*Class
+	inherit   []*Class // direct supers
 	prototype slip.Object
 	final     bool
 	slots     map[string]slip.Object
@@ -39,6 +39,24 @@ func Find(name string) (c *Class) {
 	if c = allClasses[name]; c == nil {
 		c = allClasses[strings.ToLower(name)]
 	}
+	return
+}
+
+// DefClass creates a Class.
+func DefClass(name, docs string, slots map[string]slip.Object, supers []*Class, final bool) (class *Class) {
+	name = strings.ToLower(name)
+	if _, has := allClasses[name]; has {
+		slip.NewPanic("Class %s already defined.", name)
+	}
+	class = &Class{
+		name:    name,
+		docs:    docs,
+		slots:   slots,
+		inherit: supers,
+		methods: map[string]slip.Object{},
+		final:   final,
+	}
+	allClasses[name] = class
 	return
 }
 
@@ -104,6 +122,25 @@ func (c *Class) Documentation() string {
 	return c.docs
 }
 
+func inClassList(c *Class, cpl []*Class) bool {
+	for _, s := range cpl {
+		if c == s {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Class) precedenceList(cpl []*Class) []*Class {
+	for _, s := range c.inherit {
+		if !inClassList(s, cpl) {
+			cpl = append(cpl, s)
+			cpl = s.precedenceList(cpl)
+		}
+	}
+	return cpl
+}
+
 // Describe the class in detail.
 func (c *Class) Describe(b []byte, indent, right int, ansi bool) []byte {
 	b = append(b, indentSpaces[:indent]...)
@@ -127,15 +164,23 @@ func (c *Class) Describe(b []byte, indent, right int, ansi bool) []byte {
 		b = slip.AppendDoc(b, c.docs, i3, right, ansi)
 		b = append(b, '\n')
 	}
-	if 0 < len(c.inherit) {
-		b = append(b, indentSpaces[:i2]...)
-		b = append(b, "Class precedence list:"...)
-		for _, f := range c.inherit {
-			b = append(b, ' ')
-			b = append(b, f.name...)
-		}
-		b = append(b, '\n')
+
+	b = append(b, indentSpaces[:i2]...)
+	b = append(b, "Direct superclasses:"...)
+	for _, f := range c.inherit {
+		b = append(b, ' ')
+		b = append(b, f.name...)
 	}
+	b = append(b, '\n')
+
+	b = append(b, indentSpaces[:i2]...)
+	b = append(b, "Class precedence list:"...)
+	for _, f := range c.precedenceList(nil) {
+		b = append(b, ' ')
+		b = append(b, f.name...)
+	}
+	b = append(b, '\n')
+
 	b = append(b, indentSpaces[:i2]...)
 	b = append(b, "Slots:"...)
 	if 0 < len(c.slots) {
@@ -191,4 +236,9 @@ func (c *Class) Abstract() bool {
 func (c *Class) MakeInstance() slip.Instance {
 	// TBD when Class can be used to creat instances change this.
 	panic(slip.NewError("Can not create an instance of %s.", c.Name()))
+}
+
+// DefMethod defines a method for the class. TBD place holder for now.
+func (c *Class) DefMethod(name string) {
+	c.methods[name] = nil
 }
