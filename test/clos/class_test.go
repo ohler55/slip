@@ -13,8 +13,9 @@ import (
 
 func TestClassBasic(t *testing.T) {
 	c := slip.ReadString(`(find-class 'fixnum)`).Eval(slip.NewScope(), nil)
+	c2 := c
 	tt.Equal(t, c, c.Eval(nil, 0))
-	tt.Equal(t, true, c.Equal(c))
+	tt.Equal(t, true, c.Equal(c2))
 	tt.Equal(t, false, c.Equal(nil))
 	tt.Equal(t, "[class standard-object t]", pretty.SEN(c.Hierarchy()))
 	tt.Equal(t, "built-in fixed number class", c.(slip.Class).Documentation())
