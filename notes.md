@@ -2,6 +2,43 @@
 
 - next
 
+ - http package
+  - flavors
+   - server
+    - start
+    - shutdown
+    - add-handler (path handler)
+   - request
+    - method
+    - url
+    - headers
+    - body
+    - trailers
+    - remote-address
+    - proto
+   - response
+    - write
+    - add-header
+    - :status
+    - :headers
+    - body
+    - trailers
+    - proto
+   - some common base for request and response (http-message)
+    -
+   - handler
+    - handle (req resp)
+    - subclass for file and static pages (string)
+  - client
+   - get
+   - put
+   - post
+   - etc
+
+ - graphql
+  - client
+  - server
+
  - clos methods/generics
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
@@ -35,40 +72,6 @@
  - vector-pop - takes 1 dimensional arrays, fails on simple vector or array
  - vector-push - ...
  - vector-push-extend - ...
-
-
- - http package
-  - flavors
-   - server
-    - start
-    - shutdown
-    - add-handler (path handler)
-   - request
-    - method
-    - url
-    - headers
-    - body
-    - trailers
-    - remote-address
-    - proto
-   - response
-    - write
-    - add-header
-    - :status
-    - :headers
-    - body
-    - trailers
-    - proto
-   - some common base for request and response (http-message)
-    -
-   - handler
-    - handle (req resp)
-    - subclass for file and static pages (string)
-  - client
-   - get
-   - put
-   - post
-   - etc
 
  - merge (starts with result-type)
  - room
