@@ -93,7 +93,7 @@ CallFunc:
 	case *slip.Lambda:
 		if asBag {
 			for _, v := range path.Get(obj.Any) {
-				arg := flavor.MakeInstance()
+				arg := flavor.MakeInstance().(*flavors.Instance)
 				arg.Any = v
 				_ = tf.Call(s, slip.List{arg}, d2)
 			}
@@ -106,7 +106,7 @@ CallFunc:
 	case *slip.FuncInfo:
 		if asBag {
 			for _, v := range path.Get(obj.Any) {
-				arg := flavor.MakeInstance()
+				arg := flavor.MakeInstance().(*flavors.Instance)
 				arg.Any = v
 				_ = tf.Apply(s, slip.List{arg}, d2)
 			}

@@ -49,8 +49,7 @@ func (f *FindFlavor) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	if !ok {
 		slip.PanicType("name", args[0], "symbol")
 	}
-	cf = allFlavors[string(sym)]
-	if cf != nil {
+	if cf = Find(string(sym)); cf != nil {
 		return cf
 	}
 	if 1 < len(args) && args[1] != nil {

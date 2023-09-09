@@ -16,6 +16,9 @@ import (
 	// Pull in bag functions.
 	_ "github.com/ohler55/slip/pkg/bag"
 
+	// Pull in clos functions.
+	_ "github.com/ohler55/slip/pkg/clos"
+
 	// Pull in test functions.
 	_ "github.com/ohler55/slip/pkg/test"
 )

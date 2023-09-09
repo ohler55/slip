@@ -54,6 +54,7 @@ func TestInstanceMisc(t *testing.T) {
 
 	b2 := slip.ReadString("(make-instance blueberry)").Eval(slip.NewScope(), nil).(*flavors.Instance)
 	tt.Equal(t, true, b2.Equal(berry))
+	tt.Equal(t, slip.ReadString(`blueberry`).Eval(scope, nil), b2.Class())
 
 	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
 	tt.Equal(t, false, b2.Equal(berry))
@@ -128,5 +129,45 @@ berry
 		Hierarchy: "blueberry.instance.t",
 		Eval:      berry,
 	}).Test(t)
+}
 
+func TestInstanceInit(t *testing.T) {
+	defer undefFlavors("blueberry", "cranberry")
+	code := slip.ReadString(`
+(defflavor blueberry ((size "medium")) ()
+           :gettable-instance-variables
+           :inittable-instance-variables
+           (:init-keywords :x))
+blueberry
+`)
+	scope := slip.NewScope()
+	blueberry := code.Eval(scope, nil).(*flavors.Flavor)
+
+	inst := blueberry.MakeInstance()
+	inst.Init(scope, slip.List{
+		slip.Symbol(":size"), slip.Fixnum(3),
+		slip.Symbol(":x"), slip.Fixnum(7),
+	}, 0)
+	tt.Equal(t, slip.Fixnum(3), inst.(*flavors.Instance).Get(slip.Symbol("size")))
+
+	tt.Panic(t, func() { inst.Init(nil, slip.List{slip.True, slip.Fixnum(3)}, 0) })
+	tt.Panic(t, func() { inst.Init(nil, slip.List{slip.Symbol(":self"), slip.Fixnum(3)}, 0) })
+	tt.Panic(t, func() { inst.Init(nil, slip.List{slip.Symbol(":nothing"), slip.Fixnum(3)}, 0) })
+
+	code = slip.ReadString(`
+(defflavor cranberry ((size "medium")) ()
+           :gettable-instance-variables
+           :inittable-instance-variables
+           (:init-keywords :x)
+           (:required-init-keywords :x)
+           (:default-init-plist (:allow-other-keys t)))
+cranberry
+`)
+	cranberry := code.Eval(scope, nil).(*flavors.Flavor)
+	inst = cranberry.MakeInstance()
+	inst.Init(nil, slip.List{
+		slip.Symbol(":nothing"), slip.Fixnum(3),
+		slip.Symbol(":x"), slip.Fixnum(3),
+	}, 0)
+	tt.Panic(t, func() { inst.Init(nil, slip.List{}, 0) })
 }

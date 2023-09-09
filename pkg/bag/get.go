@@ -95,7 +95,7 @@ func getBag(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {
 		return nil
 	}
 	if asBag {
-		obj = flavor.MakeInstance()
+		obj = flavor.MakeInstance().(*flavors.Instance)
 		obj.Any = value
 
 		return obj

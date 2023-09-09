@@ -228,7 +228,7 @@ type inspectCaller bool
 func (caller inspectCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*Instance)
 	cf := allFlavors["bag-flavor"]
-	inst := cf.MakeInstance()
+	inst := cf.MakeInstance().(*Instance)
 	inst.Any = obj.Simplify()
 
 	return inst

@@ -60,7 +60,7 @@ const (
 // Call the function with the arguments provided.
 func (f *Defsuite) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 6)
-	inst := suiteFlavor.MakeInstance()
+	inst := suiteFlavor.MakeInstance().(*flavors.Instance)
 	if name, ok := args[0].(slip.String); ok {
 		inst.Let(slip.Symbol("name"), name)
 	} else {

@@ -189,19 +189,21 @@ func process() {
 		switch tr := rec.(type) {
 		case *slip.PartialPanic:
 			replReader.setDepth(tr.Depth)
-		case *slip.Panic:
-			if 0 < len(tr.Message) {
+		case slip.Error:
+			msg := tr.Error()
+			if 0 < len(msg) {
 				var buf []byte
 				buf = append(buf, warnPrefix...)
-				buf = tr.Append(buf)
+				buf = tr.AppendFull(buf)
 				buf = append(buf, suffix...)
+				buf = append(buf, '\n')
 				_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			}
 			reset()
 			if scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
 			}
-			if tr.Fatal {
+			if p, ok := tr.(*slip.Panic); ok && p.Fatal {
 				panic("")
 			}
 		case die:

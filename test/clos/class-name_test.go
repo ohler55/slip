@@ -1,6 +1,6 @@
 // Copyright (c) 2023, Peter Ohler, All rights reserved.
 
-package flavors_test
+package clos_test
 
 import (
 	"testing"

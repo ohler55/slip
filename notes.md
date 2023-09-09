@@ -2,22 +2,20 @@
 
 - next
 
- - class
-  - deal with classes for core types
-   - maybe just have class-of return and support describe and other class based ops
-  - implement at top level or in a class package?
-  - should they be classes/flavors? both?
-   - class-of and describe
-   - is there a short term simplified option?
-    - no methods
-    - keep class hierarchy
-    - maybe class package where all the built in classes exist
-     - top level is not connected in that fixnum does not know about fixnum class
-      - (class-of 5) would return from class package
-     - all others packages would need to use classes for condition instances
-      - or keep the built-in type at the top level and classes separate
-     - (class-of error) would use switch for top level plus class.instance type
-      - can that be made to work for flavors? maybe through an interface
+ - clos methods/generics
+  - change-class (for flavors instances only for now)
+   - parts of instance interface? same as class-of
+  - generic functions and methods
+   - GenericCaller
+    - defines an expected argument set that gets checked first
+    - keep a collection that matches argument types with methods
+     - list and pick best so far until end
+     - or nested maps
+      - type check has to look at inheritance so maybe not that helpful to have a map
+    - method is like flavors, uses a class preference list
+     - list is from type/class and is built on defmethod
+     - what does it mean to have before and after on multiple type functions?
+
 
  - trace
   - should trace by function be supported instead of overall trace?

@@ -200,7 +200,7 @@ type suiteResultCaller bool
 
 func (caller suiteResultCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	r := bag.Flavor().MakeInstance()
+	r := bag.Flavor().MakeInstance().(*flavors.Instance)
 	r.Any = getResults(self)
 
 	return r

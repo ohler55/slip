@@ -108,7 +108,6 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"    :print-self\n"+
 		"    :send-if-handles\n"+
 		"    :which-operations\n", string(out))
-
 }
 
 func TestFlavorDescribeOptions(t *testing.T) {
@@ -141,6 +140,11 @@ func TestFlavorDescribeOptions(t *testing.T) {
   Required Methods:
     :x
 `, string(out))
+
+	tt.Equal(t, "abbey", f.(*flavors.Flavor).Name())
+	tt.Equal(t, "an abstract", f.(*flavors.Flavor).Documentation())
+
+	tt.Equal(t, f, flavors.Find("Abbey"))
 }
 
 func TestFlavorReceive(t *testing.T) {

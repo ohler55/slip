@@ -1,6 +1,6 @@
 // Copyright (c) 2023, Peter Ohler, All rights reserved.
 
-package flavors
+package clos
 
 import (
 	"github.com/ohler55/slip"
@@ -46,7 +46,9 @@ type AllocateInstance struct {
 
 // Call the the function with the arguments provided.
 func (f *AllocateInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	inst, _ := allocateInstance(f, s, args, "allocate-instance")
+	c := classFromArg0(f, s, args, "allocate-instance")
+	inst := c.MakeInstance()
+	inst.Init(nil, args[1:], 0)
 
 	return inst
 }

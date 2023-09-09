@@ -1,6 +1,6 @@
 // Copyright (c) 2023, Peter Ohler, All rights reserved.
 
-package flavors_test
+package clos_test
 
 import (
 	"testing"
@@ -12,6 +12,10 @@ func TestFindClassFound(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(find-class 'vanilla-flavor)`,
 		Expect: "#<flavor vanilla-flavor>",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find-class 'fixnum)`,
+		Expect: "#<class fixnum>",
 	}).Test(t)
 }
 
