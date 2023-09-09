@@ -1,6 +1,6 @@
 // Copyright (c) 2022, Peter Ohler, All rights reserved.
 
-package flavors
+package clos
 
 import (
 	"github.com/ohler55/slip"
@@ -18,11 +18,11 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "class",
-					Type: "flavor",
-					Text: "The name of the flavor.",
+					Type: "class|flavor",
+					Text: "The name of the class or flavor.",
 				},
 			},
-			Text: `__class-name__ returns the name of a flavor.`,
+			Text: `__class-name__ returns the name of a class od flavor.`,
 			Examples: []string{
 				"(class-name 'vanilla-flavor) => vanilla-flavor",
 			},
@@ -36,18 +36,5 @@ type ClassName struct {
 
 // Call the the function with the arguments provided.
 func (f *ClassName) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
-	pos := len(args) - 1
-	var cf *Flavor
-	switch ta := args[pos].(type) {
-	case slip.Symbol:
-		if cf = allFlavors[string(ta)]; cf == nil {
-			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
-		}
-	case *Flavor:
-		cf = ta
-	default:
-		slip.PanicType("class argument to class-name", ta, "flavor")
-	}
-	return slip.Symbol(cf.name)
+	return slip.Symbol(classFromArg0(f, s, args, "class-name").Name())
 }

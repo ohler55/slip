@@ -1,6 +1,6 @@
 // Copyright (c) 2023, Peter Ohler, All rights reserved.
 
-package flavors
+package clos
 
 import (
 	"github.com/ohler55/slip"
@@ -19,14 +19,15 @@ func init() {
 				{
 					Name: "object",
 					Type: "instance",
-					Text: "The instance to get the flavor of.",
+					Text: "The instance to get the class or flavor of.",
 				},
 			},
 			Return: "flavor",
-			Text: `__class-of__ returns the _flavor_ of the _object_ or nil if the _object_ is not an _instance_.
-This is an alias for __flavor-of__.`,
+			Text: `__class-of__ returns the _class_ or _flavor_ of the _object_ or nil if
+the _object_ is not an _instance_.`,
 			Examples: []string{
 				"(class-of (make-instance 'strawberry)) => #<flavor strawberry>",
+				"(class-of 7) => #<class fixnum>",
 			},
 		}, &Pkg)
 }
@@ -41,8 +42,8 @@ func (f *ClassOf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	if inst, ok := args[0].(*Instance); ok {
-		return inst.Flavor
+	if inst, ok := args[0].(slip.Instance); ok {
+		return inst.Class()
 	}
 	return nil
 }
