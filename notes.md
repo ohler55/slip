@@ -3,6 +3,35 @@
 - next
 
  - http package
+  - response
+   - slots
+    - status (code as fixnum)
+    - proto
+    - header
+    - body (input-stream)
+     - support a close on this or close response instead?
+    - content-length
+    - encoding
+    - trailer
+
+  - client (flavor)
+   - slots
+    - timeout
+   - methods
+    - get url &rest
+     - &rest are keyword and value for header
+     - maybe use assoc list instead or just pairs of key value
+    - head url
+    - post url content-type content
+     - content can be string, bag, input-stream
+    - put
+    - patch
+    - delete
+    - connect
+    - options
+    - trace
+    - do (add this later when request is defined for server)
+
   - flavors
    - server
     - start
@@ -29,11 +58,7 @@
    - handler
     - handle (req resp)
     - subclass for file and static pages (string)
-  - client
-   - get
-   - put
-   - post
-   - etc
+
 
  - graphql
   - client
