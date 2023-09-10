@@ -30,6 +30,7 @@ type Class struct {
 	inherit   []*Class // direct supers
 	prototype slip.Object
 	final     bool
+	noMake    bool
 	slots     map[string]slip.Object
 	methods   map[string]slip.Object // TBD change once needed
 }
@@ -226,10 +227,10 @@ func (c *Class) Describe(b []byte, indent, right int, ansi bool) []byte {
 	return b
 }
 
-// Abstract returns true if the class is an abstract flavor or if
-// make-instance should signal an error..
-func (c *Class) Abstract() bool {
-	return c.final
+// NoMake returns true if the class does not allows creating a new instance
+// with make-instance which should signal an error.
+func (c *Class) NoMake() bool {
+	return c.noMake
 }
 
 // MakeInstance creates a new instance but does not call the :init method.

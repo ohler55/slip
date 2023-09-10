@@ -2,8 +2,8 @@
 
 - next
 
- - http package
-  - response
+ - http package => net package
+  - response (flavor, should be final)
    - slots
     - status (code as fixnum)
     - proto
@@ -31,6 +31,11 @@
     - options
     - trace
     - do (add this later when request is defined for server)
+
+  - http://www.sbcl.org/manual/#Networking
+  - socket
+   - make flavor and target for generic functions
+    - socket-bind and (send socket :bind &rest address)
 
   - flavors
    - server

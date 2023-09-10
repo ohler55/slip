@@ -49,6 +49,9 @@ type MakeInstance struct {
 // Call the the function with the arguments provided.
 func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	c := classFromArg0(f, s, args, "make-instance")
+	if c.NoMake() {
+		slip.NewPanic("Can not create an instance of class or flavor %s.", c.Name())
+	}
 	inst := c.MakeInstance()
 	inst.Init(s, args[1:], depth)
 
@@ -74,9 +77,6 @@ func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, label string) (
 		class = ta
 	default:
 		slip.PanicType(fmt.Sprintf("class argument to %s", label), ta, "symbol", "flavor", "class")
-	}
-	if class.Abstract() {
-		slip.NewPanic("Can not create an instance of abstract class or flavor %s.", class.Name())
 	}
 	return
 }
