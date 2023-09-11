@@ -13,22 +13,6 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-type bodyReader struct {
-	sr *strings.Reader
-}
-
-func newBodyReader(s string) *bodyReader {
-	return &bodyReader{sr: strings.NewReader(s)}
-}
-
-func (r *bodyReader) Read(b []byte) (n int, err error) {
-	return r.sr.Read(b)
-}
-
-func (r *bodyReader) Close() (err error) {
-	return nil
-}
-
 func sampleResponse() slip.Object {
 	return net.MakeResponse(&http.Response{
 		StatusCode:    200,

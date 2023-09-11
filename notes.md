@@ -4,6 +4,7 @@
 
  - http package => net package
   - response (flavor, should be final)
+   - should name be http-response-flavor instead? yes
 
   - client (flavor)
    - slots

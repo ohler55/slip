@@ -228,5 +228,4 @@ func MakeResponse(resp *http.Response) (inst *flavors.Instance) {
 	inst = responseFlavor.MakeInstance().(*flavors.Instance)
 	inst.Any = resp
 	return
-
 }
