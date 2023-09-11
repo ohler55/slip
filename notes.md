@@ -4,15 +4,6 @@
 
  - http package => net package
   - response (flavor, should be final)
-   - slots
-    - status (code as fixnum)
-    - proto
-    - header
-    - body (input-stream)
-     - support a close on this or close response instead?
-    - content-length
-    - encoding
-    - trailer
 
   - client (flavor)
    - slots
