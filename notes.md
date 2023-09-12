@@ -4,56 +4,30 @@
 
  - http package => net package
   - client (flavor)
-   - methods
-    - get url &rest
-     - add header as key then value pairs
-     - &rest are keyword and value for header
-     - maybe use assoc list instead or just pairs of key value
-    - head url
-    - post url content-type content
-     - content can be string, bag, input-stream
-    - put
-    - patch
-    - delete
-    - connect
-    - options
-    - trace
-    - do (add this later when request is defined for server)
+
+  - request
+   - method
+   - url
+   - headers
+   - body
+   - trailers
+   - remote-address
+   - proto
+  - server
+   - start
+   - shutdown
+   - add-handler (path handler)
+   - handler
+    - handle (req resp) - a lambda
+    - file-handler for static pages
 
   - http://www.sbcl.org/manual/#Networking
   - socket
    - make flavor and target for generic functions
     - socket-bind and (send socket :bind &rest address)
 
-  - flavors
-   - server
-    - start
-    - shutdown
-    - add-handler (path handler)
-   - request
-    - method
-    - url
-    - headers
-    - body
-    - trailers
-    - remote-address
-    - proto
-   - response
-    - write
-    - add-header
-    - :status
-    - :headers
-    - body
-    - trailers
-    - proto
-   - some common base for request and response (http-message)
-    -
-   - handler
-    - handle (req resp)
-    - subclass for file and static pages (string)
 
-
- - graphql
+ - graphql (part of net or separate?)
   - client
   - server
 

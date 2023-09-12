@@ -4,6 +4,7 @@ package net_test
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -51,7 +52,7 @@ func TestClientGet(t *testing.T) {
 	}
 	scope := slip.NewScope()
 	scope.Let("url", slip.String(su))
-	_ = slip.ReadString(`(defvar client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
 	tf := &sliptest.Function{
 		Scope:  scope,
 		Source: `(send client :get)`,
@@ -59,12 +60,25 @@ func TestClientGet(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
 	result := slip.ReadString(`(send resp :status)`).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
 
 	// Instance.Any should already be set.
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(200), result)
+
+	tf = &sliptest.Function{
+		Scope:  scope,
+		Source: `(send client :get '(("Accept" "text/plain")))`,
+		Expect: "/#<http-response-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	scope.Let("resp", tf.Result)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
 	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
 
@@ -82,12 +96,261 @@ func TestClientGet(t *testing.T) {
 
 	(&sliptest.Function{
 		Scope:     scope,
-		Source:    `(send client :get t)`,
+		Source:    `(send client :get t t)`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 
 	(&sliptest.Function{
-		Source:    `(send (make-instance 'http-client-flavor :url ":9999") :get)`,
+		Scope:     scope,
+		Source:    `(send client :get t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send client :get '(t))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send client :get '((t "text/plain")))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send client :get '(("Accept" t)))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'http-client-flavor :url ":#\u0010") :get '(("Accept" "text/plain")))`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'http-client-flavor :url "http://localhost:9999") :get)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+}
+
+func TestClientPutString(t *testing.T) {
+	port := availablePort()
+	hs := http.Server{
+		Addr: fmt.Sprintf(":%d", port),
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Body == nil { // the GET ping
+				w.Write([]byte("ready"))
+				return
+			}
+			b, err := io.ReadAll(r.Body)
+			if err != nil {
+				fmt.Fprintf(w, "error: %s\n", err)
+			} else {
+				w.Write([]byte(r.Header.Get("Content-Type")))
+				w.Write([]byte{'-'})
+				w.Write(b)
+			}
+		}),
+	}
+	go hs.ListenAndServe()
+	defer hs.Close()
+
+	su := fmt.Sprintf("http://localhost:%d", port)
+	start := time.Now()
+	for time.Since(start) < time.Second*2 {
+		time.Sleep(time.Millisecond * 50)
+		if resp, err := http.Get(su); err == nil {
+			resp.Body.Close()
+			break
+		}
+	}
+	scope := slip.NewScope()
+	scope.Let("url", slip.String(su))
+	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
+	tf := &sliptest.Function{
+		Scope:  scope,
+		Source: `(send client :put "Putty" "text/plain")`,
+		Expect: "/#<http-response-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	scope.Let("resp", tf.Result)
+	result := slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(200), result)
+	result = slip.ReadString(`(read-all (send resp :body))`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	tt.Equal(t, slip.String("text/plain-Putty"), result)
+
+	tf = &sliptest.Function{
+		Scope:  scope,
+		Source: `(send client :put "Putty" "text/plain" '(("Content-type" "text/html")))`,
+		Expect: "/#<http-response-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	scope.Let("resp", tf.Result)
+	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(200), result)
+	result = slip.ReadString(`(read-all (send resp :body))`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	tt.Equal(t, slip.String("text/html-Putty"), result)
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send client :put "Putty" t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send client :put "Putty" t '(("Content-type" "text/html")))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send client :put "Putty" "text/plain" '(("Content-type" "text/html")) t)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'http-client-flavor :url ":#\u0010") :put "x")`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'http-client-flavor :url "http://localhost:9999") :put "x")`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send client :put (make-instance 'vanilla-flavor))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send client :put t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+
+	var out strings.Builder
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+
+	_ = slip.ReadString(`(describe-method http-client-flavor :put out)`).Eval(scope, nil)
+	str := out.String()
+	tt.Equal(t, true, strings.Contains(str, ":put"))
+}
+
+func TestClientPostBag(t *testing.T) {
+	port := availablePort()
+	hs := http.Server{
+		Addr: fmt.Sprintf(":%d", port),
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Body == nil { // the GET ping
+				w.Write([]byte("ready"))
+				return
+			}
+			b, err := io.ReadAll(r.Body)
+			if err != nil {
+				fmt.Fprintf(w, "error: %s\n", err)
+			} else {
+				w.Write([]byte(r.Header.Get("Content-Type")))
+				w.Write([]byte{'-'})
+				w.Write(b)
+			}
+		}),
+	}
+	go hs.ListenAndServe()
+	defer hs.Close()
+
+	su := fmt.Sprintf("http://localhost:%d", port)
+	start := time.Now()
+	for time.Since(start) < time.Second*2 {
+		time.Sleep(time.Millisecond * 50)
+		if resp, err := http.Get(su); err == nil {
+			resp.Body.Close()
+			break
+		}
+	}
+	scope := slip.NewScope()
+	scope.Let("url", slip.String(su))
+	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
+	tf := &sliptest.Function{
+		Scope:  scope,
+		Source: `(send client :post (make-instance 'bag-flavor :parse "{x:3}"))`,
+		Expect: "/#<http-response-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	scope.Let("resp", tf.Result)
+	result := slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(200), result)
+	result = slip.ReadString(`(read-all (send resp :body))`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	tt.Equal(t, slip.String(`application/json-{"x":3}`), result)
+
+	tf = &sliptest.Function{
+		Scope:  scope,
+		Source: `(send client :post (make-instance 'bag-flavor :parse "{x:3}") nil)`,
+		Expect: "/#<http-response-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	scope.Let("resp", tf.Result)
+	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(200), result)
+
+	tf = &sliptest.Function{
+		Scope:  scope,
+		Source: `(send client :post (make-instance 'bag-flavor :parse "{x:3}") nil '())`,
+		Expect: "/#<http-response-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	scope.Let("resp", tf.Result)
+	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(200), result)
+}
+
+func TestClientPutStream(t *testing.T) {
+	port := availablePort()
+	hs := http.Server{
+		Addr: fmt.Sprintf(":%d", port),
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Body == nil { // the GET ping
+				w.Write([]byte("ready"))
+				return
+			}
+			b, err := io.ReadAll(r.Body)
+			if err != nil {
+				fmt.Fprintf(w, "error: %s\n", err)
+			} else {
+				w.Write([]byte(r.Header.Get("Content-Type")))
+				w.Write([]byte{'-'})
+				w.Write(b)
+			}
+		}),
+	}
+	go hs.ListenAndServe()
+	defer hs.Close()
+
+	su := fmt.Sprintf("http://localhost:%d", port)
+	start := time.Now()
+	for time.Since(start) < time.Second*2 {
+		time.Sleep(time.Millisecond * 50)
+		if resp, err := http.Get(su); err == nil {
+			resp.Body.Close()
+			break
+		}
+	}
+	scope := slip.NewScope()
+	scope.Let("url", slip.String(su))
+	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
+	tf := &sliptest.Function{
+		Scope:  scope,
+		Source: `(send client :put (make-string-input-stream "Posty") nil '(("Content-Type" "text/plain")))`,
+		Expect: "/#<http-response-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	scope.Let("resp", tf.Result)
+	result := slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(200), result)
+	result = slip.ReadString(`(read-all (send resp :body))`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	tt.Equal(t, slip.String(`text/plain-Posty`), result)
 }
