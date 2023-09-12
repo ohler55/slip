@@ -12,7 +12,7 @@ import (
 var responseFlavor *flavors.Flavor
 
 func init() {
-	responseFlavor = flavors.DefFlavor("response-flavor", map[string]slip.Object{}, nil,
+	responseFlavor = flavors.DefFlavor("http-response-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
 				slip.Symbol(":documentation"),

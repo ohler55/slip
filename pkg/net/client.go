@@ -59,10 +59,12 @@ type getCaller bool
 
 func (caller getCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
+	// TBD add headers, check len(args) is even
 	if 0 < len(args) {
 		flavors.PanicMethodArgChoice(obj, ":get", len(args), "0")
 	}
 	client, u := ensureClient(obj)
+	// TBD if header then client.Do()
 	resp, err := client.Get(u)
 	if err != nil {
 		slip.NewPanic("GET with URL %s failed. %s", u, err)

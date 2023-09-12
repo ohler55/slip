@@ -36,7 +36,7 @@ func TestResponseStatus(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :status out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :status out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":status"))
 
@@ -59,7 +59,7 @@ func TestResponseProtocol(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :protocol out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :protocol out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":protocol"))
 
@@ -82,7 +82,7 @@ func TestResponseContentLength(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :content-length out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :content-length out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":content-length"))
 
@@ -105,7 +105,7 @@ func TestResponseHeader(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :header out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :header out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":header"))
 
@@ -133,7 +133,7 @@ func TestResponseHeaderGet(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :header-get out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :header-get out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":header-get"))
 
@@ -161,7 +161,7 @@ func TestResponseTrailer(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :trailer out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :trailer out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":trailer"))
 
@@ -189,7 +189,7 @@ func TestResponseTrailerGet(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :trailer-get out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :trailer-get out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":trailer-get"))
 
@@ -217,7 +217,7 @@ func TestResponseBody(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :body out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :body out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":body"))
 
@@ -240,7 +240,7 @@ func TestResponseClose(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method response-flavor :close out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-flavor :close out)`).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":close"))
 

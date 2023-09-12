@@ -3,14 +3,10 @@
 - next
 
  - http package => net package
-  - response (flavor, should be final)
-   - should name be http-response-flavor instead? yes
-
   - client (flavor)
-   - slots
-    - timeout
    - methods
     - get url &rest
+     - add header as key then value pairs
      - &rest are keyword and value for header
      - maybe use assoc list instead or just pairs of key value
     - head url
