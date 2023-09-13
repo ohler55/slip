@@ -3,22 +3,14 @@
 - next
 
  - http package => net package
-  - client (flavor)
-
-  - request
-   - method
-   - url
-   - headers
-   - body
-   - trailers
-   - remote-address
-   - proto
   - server
    - start
    - shutdown
    - add-handler (path handler)
+    - should have a mux on the server
    - handler
     - handle (req resp) - a lambda
+     - need go struct or function that calls handler lambda
     - file-handler for static pages
 
   - http://www.sbcl.org/manual/#Networking
@@ -30,49 +22,6 @@
  - graphql (part of net or separate?)
   - client
   - server
-
- - clos methods/generics
-  - change-class (for flavors instances only for now)
-   - parts of instance interface? same as class-of
-  - generic functions and methods
-   - GenericCaller
-    - defines an expected argument set that gets checked first
-    - keep a collection that matches argument types with methods
-     - list and pick best so far until end
-     - or nested maps
-      - type check has to look at inheritance so maybe not that helpful to have a map
-    - method is like flavors, uses a class preference list
-     - list is from type/class and is built on defmethod
-     - what does it mean to have before and after on multiple type functions?
-
-
- - trace
-  - should trace by function be supported instead of overall trace?
-   - maybe (trace t) to turn on all as currently implemented and nil to turn off
-    - (untrace) turns off all
-   - move trace to pkg/cl
-   - function names (specs) can be symbol, string, (METHOD name qualifiers) - qualifiers could be flavor and daemon?
-    - for methods
-     - special case for :send and look at sendMap
-      - method then flavor sub-map
-      - or submap for daemon before that?
-      - or maybe method includes daemon (:before:foo as key)
-
-
- - array
-  - add fill-pointer for one dimensional arrays
- - vector-pop - takes 1 dimensional arrays, fails on simple vector or array
- - vector-push - ...
- - vector-push-extend - ...
-
- - merge (starts with result-type)
- - room
-
- - property lists
-  - can modify but not add to or remove as list changes
-  - getf for existing only
-  - setf for existing only
-  - remf replace key and value with nil
 
  - package
   - support export list
@@ -107,6 +56,50 @@
   - do-symbols
   - do-all-symbols
   - do-external-symbols
+
+
+ - clos methods/generics
+  - change-class (for flavors instances only for now)
+   - parts of instance interface? same as class-of
+  - generic functions and methods
+   - GenericCaller
+    - defines an expected argument set that gets checked first
+    - keep a collection that matches argument types with methods
+     - list and pick best so far until end
+     - or nested maps
+      - type check has to look at inheritance so maybe not that helpful to have a map
+    - method is like flavors, uses a class preference list
+     - list is from type/class and is built on defmethod
+     - what does it mean to have before and after on multiple type functions?
+  - class slots
+
+ - trace
+  - should trace by function be supported instead of overall trace?
+   - maybe (trace t) to turn on all as currently implemented and nil to turn off
+    - (untrace) turns off all
+   - move trace to pkg/cl
+   - function names (specs) can be symbol, string, (METHOD name qualifiers) - qualifiers could be flavor and daemon?
+    - for methods
+     - special case for :send and look at sendMap
+      - method then flavor sub-map
+      - or submap for daemon before that?
+      - or maybe method includes daemon (:before:foo as key)
+
+
+ - array
+  - add fill-pointer for one dimensional arrays
+ - vector-pop - takes 1 dimensional arrays, fails on simple vector or array
+ - vector-push - ...
+ - vector-push-extend - ...
+
+ - merge (starts with result-type)
+ - room
+
+ - property lists
+  - can modify but not add to or remove as list changes
+  - getf for existing only
+  - setf for existing only
+  - remf replace key and value with nil
 
 
  - future repl options

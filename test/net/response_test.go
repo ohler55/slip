@@ -3,6 +3,7 @@
 package net_test
 
 import (
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -20,7 +21,7 @@ func sampleResponse() slip.Object {
 		ContentLength: 123,
 		Header:        http.Header{"Accept": []string{"text/html", "text/plain"}},
 		Trailer:       http.Header{"From": []string{"user@example.ca"}},
-		Body:          newBodyReader("Sample body"),
+		Body:          io.NopCloser(strings.NewReader("Sample body")),
 	})
 }
 
