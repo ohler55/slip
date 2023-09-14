@@ -4,7 +4,16 @@
 
  - http package => net package
   - server
-   - start
+   - slots
+    - addr
+    - handler
+    - tls-config (an assoc list with keys of ???) add later
+    - read-timeout
+    - write-timeout
+    - idle-timeout
+    - max-header-bytes
+   - start (ListenAndServer or ListenAndServerTLS
+   - close
    - shutdown
    - add-handler (path handler)
     - should have a mux on the server
