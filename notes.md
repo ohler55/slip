@@ -23,6 +23,7 @@
     - file-handler for static pages
 
   - http://www.sbcl.org/manual/#Networking
+  - https://marketsplash.com/tutorials/lisp/lisp-network-programming/
   - socket
    - make flavor and target for generic functions
     - socket-bind and (send socket :bind &rest address)
