@@ -5,17 +5,43 @@ package net
 import (
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-var requestFlavor *flavors.Flavor
+var (
+	requestFlavor *flavors.Flavor
+	methodChoices = map[string]bool{
+		"GET":     true,
+		"HEAD":    true,
+		"POST":    true,
+		"PUT":     true,
+		"PATCH":   true,
+		"DELETE":  true,
+		"CONNECT": true,
+		"OPTIONS": true,
+		"TRACE":   true,
+	}
+)
 
 func init() {
 	requestFlavor = flavors.DefFlavor("http-request-flavor", map[string]slip.Object{}, nil,
 		slip.List{
+			slip.List{
+				slip.Symbol(":init-keywords"),
+				slip.Symbol(":method"),
+				slip.Symbol(":protocol"),
+				slip.Symbol(":url"),
+				slip.Symbol(":remote-addr"),
+				slip.Symbol(":header"),
+				slip.Symbol(":trailer"),
+				slip.Symbol(":content-length"),
+				slip.Symbol(":body"),
+			},
 			slip.List{
 				slip.Symbol(":documentation"),
 				slip.String(`A request is returned from an HTTP client request. It contains
@@ -24,6 +50,7 @@ the data associated with the HTTP reply.`),
 		},
 	)
 	requestFlavor.Final = true
+	requestFlavor.DefMethod(":init", "", reqInitCaller(true))
 	requestFlavor.DefMethod(":method", "", reqMethodCaller(true))
 	requestFlavor.DefMethod(":protocol", "", reqProtocolCaller(true))
 	requestFlavor.DefMethod(":url", "", reqURLCaller(true))
@@ -38,6 +65,136 @@ the data associated with the HTTP reply.`),
 	requestFlavor.DefMethod(":write", "", reqWriteCaller(true))
 
 	// TBD set methods for use with client?
+}
+
+type reqInitCaller bool
+
+func getStrArg(arg slip.Object, use string) string {
+	ss, ok := arg.(slip.String)
+	if !ok {
+		slip.PanicType(use, arg, "string")
+	}
+	return string(ss)
+}
+
+func assocToHeader(value slip.Object, field string) http.Header {
+	alist, ok := value.(slip.List)
+	if !ok {
+		slip.PanicType(field, value, "assoc")
+	}
+	header := http.Header{}
+	for _, element := range alist {
+		elist, ok2 := element.(slip.List)
+		if !ok2 || len(elist) < 2 {
+			slip.PanicType("assoc element", element, "list")
+		}
+		var (
+			key    slip.String
+			values []string
+		)
+		if key, ok = elist[0].(slip.String); !ok {
+			slip.PanicType("header key", elist[0], "string")
+		}
+		for _, v := range elist[1:] {
+			var ss slip.String
+			if ss, ok = v.(slip.String); !ok {
+				slip.PanicType("header value", v, "string")
+			}
+			values = append(values, string(ss))
+		}
+		header[string(key)] = values
+	}
+	return header
+}
+
+func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		args = args[0].(slip.List)
+	}
+	if len(args)%2 != 0 {
+		flavors.PanicMethodArgChoice(obj, ":init", len(args), "key value pairs")
+	}
+	req := http.Request{}
+	obj.Any = &req
+	for i := 0; i < len(args); i += 2 {
+		key, _ := args[i].(slip.Symbol)
+		k := string(key)
+		switch {
+		case strings.EqualFold(":method", k):
+			req.Method = getStrArg(args[i+1], k)
+			if !methodChoices[req.Method] {
+				slip.PanicType("method", slip.String(req.Method),
+					"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE")
+			}
+		case strings.EqualFold(":protocol", k):
+			req.Proto = getStrArg(args[i+1], k)
+			if pos := strings.IndexByte(req.Proto, '/'); 0 < pos {
+				pos++
+				if dot := strings.IndexByte(req.Proto[pos+1:], '.'); 0 < dot {
+					if num, err := strconv.ParseInt(req.Proto[pos:pos+dot], 10, 64); err == nil {
+						req.ProtoMajor = int(num)
+					} else {
+						panic(err)
+					}
+					if num, err := strconv.ParseInt(req.Proto[pos+dot+1:], 10, 64); err == nil {
+						req.ProtoMinor = int(num)
+					} else {
+						panic(err)
+					}
+				}
+			}
+		case strings.EqualFold(":url", k):
+			var err error
+			req.RequestURI = getStrArg(args[i+1], k)
+			if req.URL, err = url.Parse(req.RequestURI); err != nil {
+				panic(err)
+			}
+			req.Host = req.URL.Host
+		case strings.EqualFold(":remote-addr", k):
+			req.RemoteAddr = getStrArg(args[i+1], k)
+		case strings.EqualFold(":header", k):
+			req.Header = assocToHeader(args[i+1], ":header")
+		case strings.EqualFold(":trailer", k):
+			req.Trailer = assocToHeader(args[i+1], ":trailer")
+		case strings.EqualFold(":content-length", k):
+			num, ok := args[i+1].(slip.Integer)
+			if !ok {
+				slip.PanicType(":content-length", args[i+1], "integer")
+			}
+			req.ContentLength = num.Int64()
+		case strings.EqualFold(":body", k):
+			switch tb := args[i+1].(type) {
+			case slip.String:
+				req.Body = bodyWrapString(string(tb))
+			case io.ReadCloser:
+				req.Body = tb
+			case io.Reader:
+				req.Body = bodyWrapReader(tb)
+			default:
+				slip.PanicType(":body", args[i+1], "string", "input-stream")
+			}
+		default:
+			slip.PanicType("keyword", key,
+				":method", ":protocol", ":url", "remote-addr", ":header", ":trailer", ":content-length", ":body")
+		}
+	}
+	return nil
+}
+
+func (caller reqInitCaller) Docs() string {
+	return `__:init__ &key _method_ _protocol_ _url_ _remote-addr_ _header_ _trailer_ _content-length_ _body_
+   _:method_ one of "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", or "TRACE"
+   _:protocol_ such as "HTTP/1.0"
+   _:url_ for the request
+   _:remote-addr_ remote address of the request
+   _:header_ an association list with the values as a list such as (("Content-Length" 123))
+   _:trailer_ an association list
+   _:content-length_ is the length of the body
+   _:body_ can be a _string_ or an _input-stream_.
+
+Sets the initial values when _make-instance_ is called.
+`
 }
 
 type reqMethodCaller bool
