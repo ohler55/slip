@@ -112,9 +112,6 @@ func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	if len(args)%2 != 0 {
-		flavors.PanicMethodArgChoice(obj, ":init", len(args), "key value pairs")
-	}
 	req := http.Request{}
 	obj.Any = &req
 	for i := 0; i < len(args); i += 2 {
@@ -169,14 +166,9 @@ func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 				req.Body = bodyWrapString(string(tb))
 			case io.ReadCloser:
 				req.Body = tb
-			case io.Reader:
-				req.Body = bodyWrapReader(tb)
 			default:
 				slip.PanicType(":body", args[i+1], "string", "input-stream")
 			}
-		default:
-			slip.PanicType("keyword", key,
-				":method", ":protocol", ":url", "remote-addr", ":header", ":trailer", ":content-length", ":body")
 		}
 	}
 	return nil

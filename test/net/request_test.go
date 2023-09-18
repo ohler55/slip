@@ -460,25 +460,67 @@ func TestRequestInit2(t *testing.T) {
 	tt.Equal(t, "bidy", string(b))
 }
 
-func TestRequestInit3(t *testing.T) {
-	scope := slip.NewScope()
-	scope.Let(slip.Symbol("body"), &slip.InputStream{Reader: strings.NewReader("bidy")})
-	tf := sliptest.Function{
-		Scope: scope,
-		Source: `(make-instance 'http-request-flavor
-                                 :method "GET"
-                                 :protocol "HTTP/1.1"
-                                 :url "http://127.0.0.1:9999/test"
-                                 :content-length 4
-                                 :body body)`,
-		Expect: "/#<http-request-flavor [0-9a-f]+>/",
-	}
-	tf.Test(t)
-	inst, ok := tf.Result.(*flavors.Instance)
-	tt.Equal(t, true, ok)
-	var req *http.Request
-	req, ok = inst.Any.(*http.Request)
-	tt.Equal(t, true, ok)
-	b, _ := io.ReadAll(req.Body)
-	tt.Equal(t, "bidy", string(b))
+func TestRequestInitBadStrArg(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :method t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestRequestInitBadHeader(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :header t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :header '(t))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :header '((t nil)))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :header '(("Host" t)))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestRequestInitBadMethod(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :method "BAD")`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestRequestInitBadProto(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :protocol "HTTP/1.x")`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :protocol "HTTP/x.1")`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+}
+
+func TestRequestInitBadURL(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :url ":#\u0010")`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+}
+
+func TestRequestInitBadContentLength(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :content-length t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestRequestInitBadBody(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-request-flavor :body t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
 }
