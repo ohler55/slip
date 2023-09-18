@@ -10,8 +10,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/pkg/net"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -392,4 +394,91 @@ func TestRequestWriteStdoutError(t *testing.T) {
 	scope.Let("request", sampleRequest())
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: badWriter(0)})
 	tt.Panic(t, func() { _ = slip.ReadString(`(send request :write t)`).Eval(scope, nil) })
+}
+
+func TestRequestInit(t *testing.T) {
+	tf := sliptest.Function{
+		Source: `(make-instance 'http-request-flavor
+                                 :method "GET"
+                                 :protocol "HTTP/1.1"
+                                 :url "http://127.0.0.1:9999/test"
+                                 :header '(("Accept" "text/plain" "text/html"))
+                                 :trailer '(("Transfer-Encoding" "compress"))
+                                 :content-length 4
+                                 :body "bidy"
+                                 :remote-addr "localhost:12345")`,
+		Expect: "/#<http-request-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	inst, ok := tf.Result.(*flavors.Instance)
+	tt.Equal(t, true, ok)
+	var req *http.Request
+	req, ok = inst.Any.(*http.Request)
+	tt.Equal(t, true, ok)
+	tt.Equal(t, "GET", req.Method)
+	tt.Equal(t, "localhost:12345", req.RemoteAddr)
+	tt.Equal(t, "http://127.0.0.1:9999/test", req.URL.String())
+	tt.Equal(t, `{Accept: ["text/plain" "text/html"]}`, pretty.SEN(req.Header))
+	tt.Equal(t, `{Transfer-Encoding: [compress]}`, pretty.SEN(req.Trailer))
+	tt.Equal(t, "HTTP/1.1", req.Proto)
+	tt.Equal(t, "127.0.0.1:9999", req.Host)
+	tt.Equal(t, 1, req.ProtoMajor)
+	tt.Equal(t, 1, req.ProtoMinor)
+	tt.Equal(t, 4, req.ContentLength)
+	b, _ := io.ReadAll(req.Body)
+	tt.Equal(t, "bidy", string(b))
+
+	var out strings.Builder
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+
+	_ = slip.ReadString(`(describe-method http-request-flavor :init out)`).Eval(scope, nil)
+	str := out.String()
+	tt.Equal(t, true, strings.Contains(str, ":init"))
+}
+
+func TestRequestInit2(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("body"), &slip.InputStream{Reader: strings.NewReader("bidy")})
+	tf := sliptest.Function{
+		Scope: scope,
+		Source: `(make-instance 'http-request-flavor
+                                 :method "GET"
+                                 :protocol "HTTP/1.1"
+                                 :url "http://127.0.0.1:9999/test"
+                                 :content-length 4
+                                 :body body)`,
+		Expect: "/#<http-request-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	inst, ok := tf.Result.(*flavors.Instance)
+	tt.Equal(t, true, ok)
+	var req *http.Request
+	req, ok = inst.Any.(*http.Request)
+	tt.Equal(t, true, ok)
+	b, _ := io.ReadAll(req.Body)
+	tt.Equal(t, "bidy", string(b))
+}
+
+func TestRequestInit3(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("body"), &slip.InputStream{Reader: strings.NewReader("bidy")})
+	tf := sliptest.Function{
+		Scope: scope,
+		Source: `(make-instance 'http-request-flavor
+                                 :method "GET"
+                                 :protocol "HTTP/1.1"
+                                 :url "http://127.0.0.1:9999/test"
+                                 :content-length 4
+                                 :body body)`,
+		Expect: "/#<http-request-flavor [0-9a-f]+>/",
+	}
+	tf.Test(t)
+	inst, ok := tf.Result.(*flavors.Instance)
+	tt.Equal(t, true, ok)
+	var req *http.Request
+	req, ok = inst.Any.(*http.Request)
+	tt.Equal(t, true, ok)
+	b, _ := io.ReadAll(req.Body)
+	tt.Equal(t, "bidy", string(b))
 }

@@ -131,7 +131,7 @@ func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 			req.Proto = getStrArg(args[i+1], k)
 			if pos := strings.IndexByte(req.Proto, '/'); 0 < pos {
 				pos++
-				if dot := strings.IndexByte(req.Proto[pos+1:], '.'); 0 < dot {
+				if dot := strings.IndexByte(req.Proto[pos:], '.'); 0 < dot {
 					if num, err := strconv.ParseInt(req.Proto[pos:pos+dot], 10, 64); err == nil {
 						req.ProtoMajor = int(num)
 					} else {

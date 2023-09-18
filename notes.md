@@ -3,7 +3,8 @@
 - next
 
  - net package
-  - change reponse and request to create/set Any on init
+  - change request to create/set Any on init
+  - should input-stream be a ReadCloser?
   - server
    - slots
     - addr
