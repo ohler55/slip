@@ -63,8 +63,6 @@ the data associated with the HTTP reply.`),
 	requestFlavor.DefMethod(":body", "", reqBodyCaller(true))
 	requestFlavor.DefMethod(":close", "", reqCloseCaller(true))
 	requestFlavor.DefMethod(":write", "", reqWriteCaller(true))
-
-	// TBD set methods for use with client?
 }
 
 type reqInitCaller bool
@@ -271,9 +269,9 @@ func (caller reqContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int) 
 }
 
 func (caller reqContentLengthCaller) Docs() string {
-	return `__:contentLength__ => _fixnum_
+	return `__:content-length__ => _fixnum_
 
-Returns the contentLength of the request.
+Returns the content length of the request.
 `
 }
 
