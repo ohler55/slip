@@ -3,8 +3,10 @@
 package net
 
 import (
+	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -28,18 +30,15 @@ func init() {
 			},
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A server is returned from an HTTP client server. It contains
-the data associated with the HTTP reply.`),
+				slip.String(`An HTTP server is returned.`),
 			},
 		},
 	)
 	serverFlavor.Final = true
 	serverFlavor.DefMethod(":init", "", serverInitCaller(true))
 	serverFlavor.DefMethod(":start", "", serverStartCaller(true))
-	serverFlavor.DefMethod(":close", "", serverCloseCaller(true))
 	serverFlavor.DefMethod(":shutdown", "", serverShutdownCaller(true))
 	serverFlavor.DefMethod(":add-handler", "", serverAddHandlerCaller(true))
-	serverFlavor.DefMethod(":handlers", "", serverHandlersCaller(true))
 }
 
 type serverInitCaller bool
@@ -49,8 +48,7 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	server := http.Server{}
-	// TBD add mux
+	server := http.Server{Handler: http.NewServeMux()}
 	obj.Any = &server
 	for i := 0; i < len(args); i += 2 {
 		key, _ := args[i].(slip.Symbol)
@@ -60,14 +58,14 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 			server.Addr = getStrArg(args[i+1], k)
 		case strings.EqualFold(":tls-config", k):
 			// TBD
-		case strings.EqualFold(":close", k):
-			// TBD
-		case strings.EqualFold(":shutdown", k):
-			// TBD
-		case strings.EqualFold(":add-handler", k):
-			// TBD
-		case strings.EqualFold(":handlers", k):
-			// TBD
+		case strings.EqualFold(":read-timeout", k):
+			server.ReadTimeout = getDurationArg(args[i+1], k)
+		case strings.EqualFold(":write-timeout", k):
+			server.WriteTimeout = getDurationArg(args[i+1], k)
+		case strings.EqualFold(":idle-timeout", k):
+			server.IdleTimeout = getDurationArg(args[i+1], k)
+		case strings.EqualFold(":maximum-header-length", k):
+			server.MaxHeaderBytes = int(getIntArg(args[i+1], k))
 		}
 	}
 	return nil
@@ -90,35 +88,35 @@ type serverStartCaller bool
 
 func (caller serverStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":start", len(args), "0")
+	if 1 < len(args) {
+		flavors.PanicMethodArgChoice(obj, ":start", len(args), "0 or 1")
 	}
-	// TBD
+	// TBD if server.TLSConfig is not nil then ListenAndServeTLS()
+
+	server := obj.Any.(*http.Server)
+	go server.ListenAndServe()
+	if 0 < len(args) {
+		dur := getDurationArg(args[0], "wait-ready")
+		start := time.Now()
+		var err error
+		for time.Since(start) < dur {
+			time.Sleep(time.Millisecond * 10)
+			if _, err = http.Get(server.Addr); err != nil {
+				break
+			}
+		}
+		if err != nil {
+			panic(err)
+		}
+	}
 	return nil
 }
 
 func (caller serverStartCaller) Docs() string {
-	return `__:start__ => _nil_
+	return `__:start__ &optional _wait-ready_ => _nil_
+   _wait-ready_ is the maximum duration in seconds to wait for the server to be ready.
 
 Starts the server.
-`
-}
-
-type serverCloseCaller bool
-
-func (caller serverCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*flavors.Instance)
-	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":close", len(args), "0")
-	}
-	// TBD
-	return nil
-}
-
-func (caller serverCloseCaller) Docs() string {
-	return `__:close__ => _nil_
-
-Closes the server with a hard, immediate shutdown.
 `
 }
 
@@ -129,12 +127,20 @@ func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	if 0 < len(args) {
 		flavors.PanicMethodArgChoice(obj, ":shutdown", len(args), "0")
 	}
-	// TBD
+	server := obj.Any.(*http.Server)
+	if 0 < len(args) && args[0] != nil {
+		_ = server.Close()
+	} else {
+		cx, cf := context.WithTimeout(context.Background(), server.IdleTimeout)
+		defer cf()
+		_ = server.Shutdown(cx)
+	}
 	return nil
 }
 
 func (caller serverShutdownCaller) Docs() string {
-	return `__:shutdown__ => _nil_
+	return `__:shutdown__ &optional _immediate_ => _nil_
+   _immediate_ if true shuts down immediately and not gracefully.
 
 Gracefully shuts down the server.
 `
@@ -147,33 +153,17 @@ func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	if len(args) != 2 {
 		flavors.PanicMethodArgChoice(obj, ":add-handler", len(args), "2")
 	}
-	// TBD
+	// TBD get path and handler
+	//  wrap handler function with scope of self/obj
+	//  if string then file handler http.FileServer(http.Dir("xxx"))
 	return nil
 }
 
 func (caller serverAddHandlerCaller) Docs() string {
 	return `__:add-handler__ _path_ _handler_ => _nil_
-   _path_
-   _handler_
+   _path_ to be handled by the _handler_.
+   _handler_ function to handle requests on _path_ or a _string_ that is the path to a directory.
 
 Adds a _handler_ function to handle requests on the _path_ server.
-`
-}
-
-type serverHandlersCaller bool
-
-func (caller serverHandlersCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*flavors.Instance)
-	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":handlers", len(args), "0")
-	}
-	// TBD handles as an assoc with path/handler
-	return nil
-}
-
-func (caller serverHandlersCaller) Docs() string {
-	return `__:add-handler__ => _assoc_
-
-Returns the handlers for the server.
 `
 }
