@@ -3,24 +3,13 @@
 - next
 
  - net package
+  - http-response-writer-flavor
+   - header
+   - write string
+   - write-status fixnum
+
   - server
-   - slots
-    - addr
-    - handler
-    - tls-config (an assoc list with keys of ???) add later
-    - read-timeout
-    - write-timeout
-    - idle-timeout
-    - max-header-bytes
-   - start (ListenAndServer or ListenAndServerTLS
-   - close
-   - shutdown
-   - add-handler (path handler)
-    - should have a mux on the server
-   - handler
-    - handle (req resp) - a lambda
-     - need go struct or function that calls handler lambda
-    - file-handler for static pages
+  - file-handler for static pages
 
   - http://www.sbcl.org/manual/#Networking
   - https://marketsplash.com/tutorials/lisp/lisp-network-programming/

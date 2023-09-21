@@ -4,11 +4,13 @@ package net
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -94,14 +96,21 @@ func (caller serverStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	// TBD if server.TLSConfig is not nil then ListenAndServeTLS()
 
 	server := obj.Any.(*http.Server)
-	go server.ListenAndServe()
+	go func() { _ = server.ListenAndServe() }()
 	if 0 < len(args) {
+		// TBD create URL from server.Addr
+		var u string
+		if 0 < len(server.Addr) && server.Addr[0] == ':' {
+			u = fmt.Sprintf("http://localhost%s", server.Addr)
+		} else {
+			u = fmt.Sprintf("http://%s", server.Addr)
+		}
 		dur := getDurationArg(args[0], "wait-ready")
 		start := time.Now()
 		var err error
 		for time.Since(start) < dur {
 			time.Sleep(time.Millisecond * 10)
-			if _, err = http.Get(server.Addr); err != nil {
+			if _, err = http.Get(u); err == nil {
 				break
 			}
 		}
@@ -148,14 +157,27 @@ Gracefully shuts down the server.
 
 type serverAddHandlerCaller bool
 
-func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 2 {
 		flavors.PanicMethodArgChoice(obj, ":add-handler", len(args), "2")
 	}
-	// TBD get path and handler
-	//  wrap handler function with scope of self/obj
-	//  if string then file handler http.FileServer(http.Dir("xxx"))
+	path, ok := args[0].(slip.String)
+	if !ok {
+		slip.PanicType("add-handler path", args[0], "string")
+	}
+	reqCaller := cl.ResolveToCaller(s, args[1], depth)
+	server := obj.Any.(*http.Server)
+	server.Handler.(*http.ServeMux).HandleFunc(
+		string(path),
+		func(w http.ResponseWriter, r *http.Request) {
+			cargs := slip.List{
+				MakeResponseWriter(w),
+				MakeRequest(r),
+			}
+			reqCaller.Call(s, cargs, depth+1)
+		},
+	)
 	return nil
 }
 
