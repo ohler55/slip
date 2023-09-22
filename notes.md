@@ -1,5 +1,7 @@
 # SLIP Notes
 
+- multipass or utm for linux
+
 - next
 
  - net package
