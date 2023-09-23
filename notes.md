@@ -5,13 +5,6 @@
 - next
 
  - net package
-  - http-response-writer-flavor
-   - header
-   - write string
-   - write-status fixnum
-
-  - server
-  - file-handler for static pages
 
   - http://www.sbcl.org/manual/#Networking
   - https://marketsplash.com/tutorials/lisp/lisp-network-programming/

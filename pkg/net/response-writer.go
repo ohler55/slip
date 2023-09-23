@@ -23,8 +23,8 @@ func init() {
 	responseWriterFlavor.Final = true
 	responseWriterFlavor.DefMethod(":write-status", "", respWriterStatusCaller(true))
 	responseWriterFlavor.DefMethod(":write", "", respWriterWriteCaller(true))
-	responseWriterFlavor.DefMethod(":header", "", respHeaderCaller(true))
-	responseWriterFlavor.DefMethod(":header-get", "", respHeaderGetCaller(true))
+	responseWriterFlavor.DefMethod(":header", "", respWriterHeaderCaller(true))
+	responseWriterFlavor.DefMethod(":header-get", "", respWriterHeaderGetCaller(true))
 }
 
 type respWriterStatusCaller bool

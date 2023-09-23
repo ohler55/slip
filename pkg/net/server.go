@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -133,8 +134,8 @@ type serverShutdownCaller bool
 
 func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":shutdown", len(args), "0")
+	if 1 < len(args) {
+		flavors.PanicMethodArgChoice(obj, ":shutdown", len(args), "0 or 1")
 	}
 	server := obj.Any.(*http.Server)
 	if 0 < len(args) && args[0] != nil {
@@ -151,7 +152,7 @@ func (caller serverShutdownCaller) Docs() string {
 	return `__:shutdown__ &optional _immediate_ => _nil_
    _immediate_ if true shuts down immediately and not gracefully.
 
-Gracefully shuts down the server.
+Shuts down the server.
 `
 }
 
@@ -166,8 +167,18 @@ func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, depth i
 	if !ok {
 		slip.PanicType("add-handler path", args[0], "string")
 	}
-	reqCaller := cl.ResolveToCaller(s, args[1], depth)
 	server := obj.Any.(*http.Server)
+	if fpath, ok := args[1].(slip.String); ok {
+		server.Handler.(*http.ServeMux).HandleFunc(
+			string(path),
+			func(w http.ResponseWriter, r *http.Request) {
+				p := filepath.Join(string(fpath), strings.TrimPrefix(r.URL.Path, string(path)))
+				http.ServeFile(w, r, p)
+			},
+		)
+		return nil
+	}
+	reqCaller := cl.ResolveToCaller(s, args[1], depth)
 	server.Handler.(*http.ServeMux).HandleFunc(
 		string(path),
 		func(w http.ResponseWriter, r *http.Request) {
