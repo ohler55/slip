@@ -1,14 +1,76 @@
 # SLIP Notes
 
-- multipass or utm for linux
+- **multipass** or utm for linux
 
 - next
 
- - net package
+ - csv package
+ - parquet package
+ - spark package - does this make sense?
+ - flow package
+  - classes/flavors
+   - task-flavor
+    - methods
+     - start
+      - starts processing loop
+     - stop
+     - submit box/data/bag
+      - drops data on to processing channel
+      - initially copy but later wrap with box that dups on set
+       - or maybe enhance bag to have option for copy on set (immuttable flag)
+     - handle-error
+     - flow return flow task is in
+     - links - returns link names with task as assoc list
+    - subclass for specific behavior
+  - flow-flavor
+   - init should take a config but allow for changes later
+   - can subclass for specific flows
+   - methods
+     - start (starts all tasks)
+     - stop &optional wait (all tasks)
+    - submit data &optional wait
+    - handle-error
+    - logger field points to gi/logger
+    - tasks
+    - add-task
+    - set-entry
+    - link name task (or task-name)
+     - optional flow for external links
+   - vars
+    - entry
+    - tasks
+  - syntax for describing, json or lisp
 
+
+ - net package
+  - implement sbcl networking or something closer to golang?
   - http://www.sbcl.org/manual/#Networking
   - https://marketsplash.com/tutorials/lisp/lisp-network-programming/
   - socket
+   - abstract flavor
+   - Any
+    - maybe struct with various options
+     - Dialer - probably not, too much crap
+     - Conn
+     - other stuff as needed
+    - connect then picks the correct Dial call
+   - methods
+    - bind
+    - accept
+    - connect
+    - peername
+    - name
+    - receiver
+    - send
+    - listen
+    - open-p
+    - close
+    - shutdown
+    - make-stream
+    - non-blocking-mode (question)
+    - socket-error
+    - all options
+
    - make flavor and target for generic functions
     - socket-bind and (send socket :bind &rest address)
 

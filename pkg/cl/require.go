@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"plugin"
-	"runtime"
 
 	"github.com/ohler55/slip"
 )
@@ -100,10 +99,6 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for _, path := range paths {
 		filepath := fmt.Sprintf("%s/%s.so", path, name)
 		if _, err := os.Stat(filepath); err == nil {
-			// TBD remove when plugins are support with macOS
-			if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-				slip.NewPanic("require not supported on macOS")
-			}
 			if _, err = plugin.Open(filepath); err != nil {
 				slip.NewPanic("plugin %s open failed. %s", filepath, err)
 			}

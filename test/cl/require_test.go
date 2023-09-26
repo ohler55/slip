@@ -3,7 +3,6 @@
 package cl_test
 
 import (
-	"runtime"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -12,10 +11,6 @@ import (
 )
 
 func TestRequireLoadPath(t *testing.T) {
-	// TBD remove this when plugins work on macOS.
-	if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-		return
-	}
 	slip.CurrentPackage.Set("*package-load-path*", slip.String("testplugin"))
 	tf := sliptest.Function{
 		Source: `(require 'testplugin)`,
