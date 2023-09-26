@@ -24,14 +24,14 @@ func TestRequireLoadPath(t *testing.T) {
 func TestRequirePathArg(t *testing.T) {
 	slip.CurrentPackage.Set("*package-load-path*", nil)
 	(&sliptest.Function{
-		Source: `(require "testplugin" "no-a-good-path")`,
+		Source: `(require "testplugin" "not-a-good-path")`,
 		Panics: true,
 	}).Test(t)
 }
 
 func TestRequireArgCount(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(require 'testplugin "no-a-good-path" t)`,
+		Source: `(require 'testplugin "not-a-good-path" t)`,
 		Panics: true,
 	}).Test(t)
 }

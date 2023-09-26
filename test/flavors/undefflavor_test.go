@@ -3,6 +3,7 @@
 package flavors_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -16,7 +17,7 @@ func TestUndefflavorBasic(t *testing.T) {
 	slip.ReadString("(undefflavor 'f1)").Eval(scope, nil)
 
 	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor logger-flavor suite-flavor test-flavor testable-flavor vanilla-flavor)", names.String())
+	tt.Equal(t, false, strings.Contains(names.String(), "f1"))
 }
 
 func TestUndefflavorByFlavor(t *testing.T) {
@@ -26,7 +27,7 @@ func TestUndefflavorByFlavor(t *testing.T) {
 	slip.ReadString("(undefflavor f1)").Eval(scope, nil)
 
 	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
-	tt.Equal(t, "(bag-flavor logger-flavor suite-flavor test-flavor testable-flavor vanilla-flavor)", names.String())
+	tt.Equal(t, false, strings.Contains(names.String(), "f1"))
 }
 
 func TestUndefflavorBadFlavor(t *testing.T) {

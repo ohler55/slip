@@ -1,83 +1,83 @@
 # SLIP Notes
 
+- **multipass** or utm for linux
+
 - next
 
- - clos methods/generics
-  - change-class (for flavors instances only for now)
-   - parts of instance interface? same as class-of
-  - generic functions and methods
-   - GenericCaller
-    - defines an expected argument set that gets checked first
-    - keep a collection that matches argument types with methods
-     - list and pick best so far until end
-     - or nested maps
-      - type check has to look at inheritance so maybe not that helpful to have a map
-    - method is like flavors, uses a class preference list
-     - list is from type/class and is built on defmethod
-     - what does it mean to have before and after on multiple type functions?
+ - csv package
+ - parquet package
+ - spark package - does this make sense?
+ - flow package
+  - classes/flavors
+   - task-flavor
+    - methods
+     - start
+      - starts processing loop
+     - stop
+     - submit box/data/bag
+      - drops data on to processing channel
+      - initially copy but later wrap with box that dups on set
+       - or maybe enhance bag to have option for copy on set (immuttable flag)
+     - handle-error
+     - flow return flow task is in
+     - links - returns link names with task as assoc list
+    - subclass for specific behavior
+  - flow-flavor
+   - init should take a config but allow for changes later
+   - can subclass for specific flows
+   - methods
+     - start (starts all tasks)
+     - stop &optional wait (all tasks)
+    - submit data &optional wait
+    - handle-error
+    - logger field points to gi/logger
+    - tasks
+    - add-task
+    - set-entry
+    - link name task (or task-name)
+     - optional flow for external links
+   - vars
+    - entry
+    - tasks
+  - syntax for describing, json or lisp
 
 
- - trace
-  - should trace by function be supported instead of overall trace?
-   - maybe (trace t) to turn on all as currently implemented and nil to turn off
-    - (untrace) turns off all
-   - move trace to pkg/cl
-   - function names (specs) can be symbol, string, (METHOD name qualifiers) - qualifiers could be flavor and daemon?
-    - for methods
-     - special case for :send and look at sendMap
-      - method then flavor sub-map
-      - or submap for daemon before that?
-      - or maybe method includes daemon (:before:foo as key)
-
-
- - array
-  - add fill-pointer for one dimensional arrays
- - vector-pop - takes 1 dimensional arrays, fails on simple vector or array
- - vector-push - ...
- - vector-push-extend - ...
-
-
- - http package
-  - flavors
-   - server
-    - start
+ - net package
+  - implement sbcl networking or something closer to golang?
+  - http://www.sbcl.org/manual/#Networking
+  - https://marketsplash.com/tutorials/lisp/lisp-network-programming/
+  - socket
+   - abstract flavor
+   - Any
+    - maybe struct with various options
+     - Dialer - probably not, too much crap
+     - Conn
+     - other stuff as needed
+    - connect then picks the correct Dial call
+   - methods
+    - bind
+    - accept
+    - connect
+    - peername
+    - name
+    - receiver
+    - send
+    - listen
+    - open-p
+    - close
     - shutdown
-    - add-handler (path handler)
-   - request
-    - method
-    - url
-    - headers
-    - body
-    - trailers
-    - remote-address
-    - proto
-   - response
-    - write
-    - add-header
-    - :status
-    - :headers
-    - body
-    - trailers
-    - proto
-   - some common base for request and response (http-message)
-    -
-   - handler
-    - handle (req resp)
-    - subclass for file and static pages (string)
+    - make-stream
+    - non-blocking-mode (question)
+    - socket-error
+    - all options
+
+   - make flavor and target for generic functions
+    - socket-bind and (send socket :bind &rest address)
+
+
+ - graphql (part of net or separate?)
   - client
-   - get
-   - put
-   - post
-   - etc
-
- - merge (starts with result-type)
- - room
-
- - property lists
-  - can modify but not add to or remove as list changes
-  - getf for existing only
-  - setf for existing only
-  - remf replace key and value with nil
+  - server
 
  - package
   - support export list
@@ -112,6 +112,50 @@
   - do-symbols
   - do-all-symbols
   - do-external-symbols
+
+
+ - clos methods/generics
+  - change-class (for flavors instances only for now)
+   - parts of instance interface? same as class-of
+  - generic functions and methods
+   - GenericCaller
+    - defines an expected argument set that gets checked first
+    - keep a collection that matches argument types with methods
+     - list and pick best so far until end
+     - or nested maps
+      - type check has to look at inheritance so maybe not that helpful to have a map
+    - method is like flavors, uses a class preference list
+     - list is from type/class and is built on defmethod
+     - what does it mean to have before and after on multiple type functions?
+  - class slots
+
+ - trace
+  - should trace by function be supported instead of overall trace?
+   - maybe (trace t) to turn on all as currently implemented and nil to turn off
+    - (untrace) turns off all
+   - move trace to pkg/cl
+   - function names (specs) can be symbol, string, (METHOD name qualifiers) - qualifiers could be flavor and daemon?
+    - for methods
+     - special case for :send and look at sendMap
+      - method then flavor sub-map
+      - or submap for daemon before that?
+      - or maybe method includes daemon (:before:foo as key)
+
+
+ - array
+  - add fill-pointer for one dimensional arrays
+ - vector-pop - takes 1 dimensional arrays, fails on simple vector or array
+ - vector-push - ...
+ - vector-push-extend - ...
+
+ - merge (starts with result-type)
+ - room
+
+ - property lists
+  - can modify but not add to or remove as list changes
+  - getf for existing only
+  - setf for existing only
+  - remf replace key and value with nil
 
 
  - future repl options

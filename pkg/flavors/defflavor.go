@@ -147,7 +147,7 @@ func DefFlavor(name string, vars map[string]slip.Object, inherit []string, optio
 		initable:    map[string]bool{},
 	}
 	for _, fname := range inherit {
-		if cf := allFlavors[strings.ToLower(fname)]; cf != nil {
+		if cf := allFlavors[strings.ToLower(fname)]; cf != nil && !cf.Final {
 			nf.inheritFlavor(cf)
 			if nf.defaultHandler == nil {
 				nf.defaultHandler = cf.defaultHandler

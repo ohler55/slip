@@ -29,7 +29,7 @@ func (obj *OutputStream) Append(b []byte) []byte {
 }
 
 // Simplify the Object into an int64.
-func (obj *OutputStream) Simplify() interface{} {
+func (obj *OutputStream) Simplify() any {
 	return obj.String()
 }
 

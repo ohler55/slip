@@ -41,7 +41,7 @@ if provided. If __path__ is __nil__ then __*package-load-path*__ is used.`,
 		}, &slip.CLPkg)
 }
 
-// Require represents the != function.
+// Require represents the require function.
 type Require struct {
 	slip.Function
 }

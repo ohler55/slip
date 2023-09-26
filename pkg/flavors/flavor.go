@@ -39,6 +39,7 @@ type Flavor struct {
 	abstract         bool
 	noVanilla        bool
 	allowOtherKeys   bool
+	Final            bool
 }
 
 // Find the named flavor.
@@ -388,8 +389,8 @@ func (obj *Flavor) Documentation() string {
 	return obj.docs
 }
 
-// Abstract returns true if the class is an abstract flavor or if
-// make-instance should signal an error..
-func (obj *Flavor) Abstract() bool {
+// NoMake returns true if the class does not allows creating a new instance
+// with make-instance which should signal an error.
+func (obj *Flavor) NoMake() bool {
 	return obj.abstract
 }

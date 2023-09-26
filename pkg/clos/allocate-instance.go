@@ -17,9 +17,9 @@ func init() {
 			Name: "allocate-instance",
 			Args: []*slip.DocArg{
 				{
-					Name: "flavor",
+					Name: "class",
 					Type: "symbol",
-					Text: "The name of the flavor to make an instance of.",
+					Text: "The name of the class or flavor to make an instance of.",
 				},
 				{Name: slip.AmpRest},
 				{
@@ -31,7 +31,7 @@ method is not called after the instance is created.`,
 				},
 			},
 			Return: "instance",
-			Text: `__allocate-instance__ makes an instance of _flavor_ with the provided
+			Text: `__allocate-instance__ makes an instance of _class_ or _flavor_ with the provided
 variable values and plist options.`,
 			Examples: []string{
 				"(allocate-instance 'strawberry :color 'red) => #<strawberry 123456>",
@@ -47,6 +47,9 @@ type AllocateInstance struct {
 // Call the the function with the arguments provided.
 func (f *AllocateInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	c := classFromArg0(f, s, args, "allocate-instance")
+	if c.NoMake() {
+		slip.NewPanic("Can not create an instance of class or flavor %s.", c.Name())
+	}
 	inst := c.MakeInstance()
 	inst.Init(nil, args[1:], 0)
 

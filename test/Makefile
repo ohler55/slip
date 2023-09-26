@@ -13,12 +13,14 @@ github.com/ohler55/slip/sliptest\
 	make -C gi
 	make -C bag
 	make -C clos
+	make -C net
 	make -C repl
 	$Q grep github cl/cov.out >> cov.out
 	$Q grep github flavors/cov.out >> cov.out
 	$Q grep github gi/cov.out >> cov.out
 	$Q grep github bag/cov.out >> cov.out
 	$Q grep github clos/cov.out >> cov.out
+	$Q grep github net/cov.out >> cov.out
 	$Q grep github repl/cov.out >> cov.out
 	$Q go tool cover -func=cov.out | grep "total:"
 
