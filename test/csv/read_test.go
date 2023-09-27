@@ -79,6 +79,10 @@ func TestReadBadKeyword(t *testing.T) {
 		Source:    `(csv-read "A,B\n1,2\n3,4\n" t t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(csv-read "A,B\n1,2\n3,4\n" :as-bag t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
 }
 
 func TestReadStreamError(t *testing.T) {

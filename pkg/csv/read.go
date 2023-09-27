@@ -80,7 +80,31 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	cr := csv.NewReader(ir)
 	cr.ReuseRecord = true
-	for pos := 1; pos < len(args); pos += 2 {
+	_ = csvSetReaderOptions(cr, args[1:], false)
+	var list slip.List
+	for {
+		rec, err := cr.Read()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			panic(err)
+		}
+		row := make(slip.List, len(rec))
+		for i, str := range rec {
+			if cr.TrimLeadingSpace {
+				row[i] = slip.String(strings.TrimSpace(str))
+			} else {
+				row[i] = slip.String(str)
+			}
+		}
+		list = append(list, row)
+	}
+	return list
+}
+
+func csvSetReaderOptions(cr *csv.Reader, args slip.List, bagOk bool) (bagIt bool) {
+	for pos := 0; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
 			slip.PanicType("keyword", args[pos], "keyword")
@@ -105,28 +129,18 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			cr.LazyQuotes = args[pos+1] != nil
 		case ":trim":
 			cr.TrimLeadingSpace = args[pos+1] != nil
-		default:
-			slip.PanicType("keyword", sym, ":separator", ":comment-char", "lazy-quotes", "trim")
-		}
-	}
-	var list slip.List
-	for {
-		rec, err := cr.Read()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			panic(err)
-		}
-		row := make(slip.List, len(rec))
-		for i, str := range rec {
-			if cr.TrimLeadingSpace {
-				row[i] = slip.String(strings.TrimSpace(str))
+		case ":as-bag":
+			if bagOk {
+				bagIt = args[pos+1] != nil
 			} else {
-				row[i] = slip.String(str)
+				slip.PanicType("keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim")
 			}
+		default:
+			if bagOk {
+				slip.PanicType("keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim", ":as-bag")
+			}
+			slip.PanicType("keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim")
 		}
-		list = append(list, row)
 	}
-	return list
+	return
 }

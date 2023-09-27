@@ -10,15 +10,12 @@
   - make sure write can be used to write tight
 
  - csv package
-  - csv-read
-  - csv-iterate [same as read but like mapc for each row]
-   - option to create a bag for each
-   - support return to stop iteration
+  + csv-read
+  + csv-iterate
   - csv-write
   - csv-write-row
 
  - parquet package
- - spark package - does this make sense?
  - flow package
   - classes/flavors
    - task-flavor
