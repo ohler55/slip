@@ -5,6 +5,13 @@
 - next
 
  - csv package
+  - csv-read
+  - csv-read-row
+  - csv-iterate [same as read but like mapc for each row]
+  - csv-write
+  - csv-write-row
+  - csv-parse-error
+
  - parquet package
  - spark package - does this make sense?
  - flow package
