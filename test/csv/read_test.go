@@ -37,7 +37,7 @@ func TestReadString(t *testing.T) {
 
 func TestReadSeparator(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(csv-read "A\tB\n1\t2\n3\t4\n" :separator #\tab)`,
+		Source: `(csv-read "A|B\n1|2\n3|4\n" :separator #\|)`,
 		Expect: `(("A" "B") ("1" "2") ("3" "4"))`,
 	}).Test(t)
 }
@@ -51,7 +51,7 @@ func TestReadTrim(t *testing.T) {
 
 func TestReadComment(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(csv-read "A,B\n1,2\n# comment\n3,4\n" :comment-char #\u0023)`,
+		Source: `(csv-read "A,B\n1,2\n# comment\n3,4\n" :comment-char #\#)`,
 		Expect: `(("A" "B") ("1" "2") ("3" "4"))`,
 	}).Test(t)
 }

@@ -4,13 +4,18 @@
 
 - next
 
+ - pkg/bag
+  - add function for reading multiple
+   - mapc like but given and input string or stream
+  - make sure write can be used to write tight
+
  - csv package
   - csv-read
-  - csv-read-row
   - csv-iterate [same as read but like mapc for each row]
+   - option to create a bag for each
+   - support return to stop iteration
   - csv-write
   - csv-write-row
-  - csv-parse-error
 
  - parquet package
  - spark package - does this make sense?
