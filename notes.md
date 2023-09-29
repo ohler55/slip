@@ -4,9 +4,17 @@
 
 - next
 
+ - pkg/bag
+  - add function for reading multiple
+   - mapc like but given and input string or stream
+
  - csv package
+  + csv-read
+  + csv-iterate
+  + csv-write
+  + csv-write-row
+
  - parquet package
- - spark package - does this make sense?
  - flow package
   - classes/flavors
    - task-flavor

@@ -24,4 +24,7 @@ import (
 
 	// Pull in test functions.
 	_ "github.com/ohler55/slip/pkg/test"
+
+	// Pull in CSV functions.
+	_ "github.com/ohler55/slip/pkg/csv"
 )
