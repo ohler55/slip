@@ -12,6 +12,7 @@ import (
 	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/pkg/gi"
 )
 
 func init() {
@@ -83,7 +84,11 @@ type Iterate struct {
 func (f *Iterate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 12)
 	d2 := depth + 1
-	caller := cl.ResolveToCaller(s, args[0], d2)
+	var caller slip.Caller
+	channel, ok := args[0].(gi.Channel)
+	if !ok {
+		caller = cl.ResolveToCaller(s, args[0], d2)
+	}
 	var ir io.Reader
 	switch ta := args[1].(type) {
 	case slip.String:
@@ -118,7 +123,11 @@ func (f *Iterate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 			inst := bag.Flavor().MakeInstance().(*flavors.Instance)
 			inst.Any = bm
-			_ = caller.Call(s, slip.List{inst}, d2)
+			if caller != nil {
+				_ = caller.Call(s, slip.List{inst}, d2)
+			} else {
+				channel <- inst
+			}
 		} else {
 			row := make(slip.List, len(rec))
 			for i, str := range rec {
@@ -128,7 +137,11 @@ func (f *Iterate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 					row[i] = slip.String(str)
 				}
 			}
-			_ = caller.Call(s, slip.List{row}, d2)
+			if caller != nil {
+				_ = caller.Call(s, slip.List{row}, d2)
+			} else {
+				channel <- row
+			}
 		}
 	}
 	return nil

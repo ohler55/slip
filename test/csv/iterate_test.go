@@ -8,6 +8,8 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/pkg/gi"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -51,6 +53,35 @@ func TestIterateBag(t *testing.T) {
 	}).Test(t)
 	out := scope.Get(slip.Symbol("csv-test-out"))
 	tt.Equal(t, `("{A: "3" B: "4"}" "{A: "1" B: "2"}")`, slip.ObjectString(out))
+}
+
+func TestIterateChannel(t *testing.T) {
+	scope := slip.NewScope()
+	channel := make(gi.Channel, 10)
+	scope.Set(slip.Symbol("chan"), channel)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(csv-iterate chan "A,B\n1,2\n3,4\n")`,
+		Expect: "nil",
+	}).Test(t)
+	var result slip.List
+	for i := 0; i < 3; i++ {
+		result = append(result, <-channel)
+	}
+	tt.Equal(t, `(("A" "B") ("1" "2") ("3" "4"))`, result.String())
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(csv-iterate chan "A,B\n1,2\n3,4\n" :as-bag t)`,
+		Expect: "nil",
+	}).Test(t)
+	result = result[:0]
+	for i := 0; i < 2; i++ {
+		b := <-channel
+		b = b.(*flavors.Instance).Receive(scope, ":native", nil, 0)
+		result = append(result, b)
+	}
+	tt.Equal(t, `((("A" . "1") ("B" . "2")) (("A" . "3") ("B" . "4")))`, result.String())
 }
 
 func TestIterateBadKeyword(t *testing.T) {

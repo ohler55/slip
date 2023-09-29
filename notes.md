@@ -11,11 +11,8 @@
  - csv package
   + csv-read
   + csv-iterate
-  - csv-write
-   - separator
-   - crlf
-   - output (stream, t, nil)
-  - csv-write-row
+  + csv-write
+  + csv-write-row
 
  - parquet package
  - flow package
