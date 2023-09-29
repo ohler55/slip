@@ -35,7 +35,7 @@ func init() {
 				{
 					Name: "path",
 					Type: "string|bag-path",
-					Text: `The path to the location in the bag to set the readd value.
+					Text: `The path to the location in the bag to set the read value.
 The path must follow the JSONPath format.`,
 				},
 			},

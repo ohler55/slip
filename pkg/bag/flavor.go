@@ -300,7 +300,8 @@ func (caller writeCaller) Docs() string {
   _stream_ an output-stream. Default: nil (return a string).
   _:pretty_ The value to use in place of the _*print-pretty*_ value. If _t_ then the
 JSON or SEN output is indented according to the other keyword options.
-  _:depth_ The maximum number of nested elements on a line in the output. Default: 4.
+  _:depth_ The maximum number of nested elements on a line in the output. A value
+of zero outputs a tight single line output. Default: 4.
   _:right-margin_ The value to use in place of the _*print-right-margin*_ value.
   _:time-format_ The value to use in place of the _*bag-time-format*_ value.
   _:time-wrap_ The value to use in place of the _*bag-time-wrap*_ value.

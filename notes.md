@@ -5,14 +5,11 @@
 - next
 
  - pkg/bag
-  - add function for reading multiple
-   - mapc like but given and input string or stream
-
- - csv package
-  + csv-read
-  + csv-iterate
-  + csv-write
-  + csv-write-row
+  - json-read or json-parse
+   - json-parse or json-read func input &key :strict
+   - reading multiple
+    - mapc like but given and input string or stream
+    - also channel
 
  - parquet package
  - flow package
@@ -49,6 +46,7 @@
     - tasks
   - syntax for describing, json or lisp
 
+ - messaging
 
  - net package
   - implement sbcl networking or something closer to golang?
