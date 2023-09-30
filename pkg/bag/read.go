@@ -35,7 +35,7 @@ func init() {
 				{
 					Name: "path",
 					Type: "string|bag-path",
-					Text: `The path to the location in the bag to set the readd value.
+					Text: `The path to the location in the bag to set the read value.
 The path must follow the JSONPath format.`,
 				},
 			},
@@ -46,7 +46,7 @@ described by _path_. If no _path_ is provided the entire contents of the bag is 
 This is the same as the _:read_ method of the _bag-flavor_ except none of the method's
 daemons are invoked hence it has a slight performance advantage.`,
 			Examples: []string{
-				`(readq bag (make-instance 'bag-flavor :read "{a:7}"))`,
+				`(setq bag (make-instance 'bag-flavor :read "{a:7}"))`,
 				`(bag-read bag (make-string-input-stream "{b:5}") "a") => #<bag-flavor 12345> ;; content is {a:{b:5}}`,
 			},
 		}, &Pkg)

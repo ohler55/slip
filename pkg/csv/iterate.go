@@ -27,8 +27,8 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "function",
-					Type: "symbol|lambda",
-					Text: "The function to call for each row in _input_.",
+					Type: "symbol|lambda|channel",
+					Text: "The function to call for each row in _input_ or a _channel_ to put the row on.",
 				},
 				{
 					Name: "input",

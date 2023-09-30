@@ -4,17 +4,8 @@
 
 - next
 
- - pkg/bag
-  - add function for reading multiple
-   - mapc like but given and input string or stream
-
- - csv package
-  + csv-read
-  + csv-iterate
-  + csv-write
-  + csv-write-row
-
  - parquet package
+
  - flow package
   - classes/flavors
    - task-flavor
@@ -49,6 +40,11 @@
     - tasks
   - syntax for describing, json or lisp
 
+ - messaging
+  - msg-hub - abstract for message hub
+  - nats-hub-flavor
+  - mem-hub-flavor
+  - subject configuration out of band possibly
 
  - net package
   - implement sbcl networking or something closer to golang?

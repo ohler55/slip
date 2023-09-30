@@ -43,7 +43,8 @@ JSON or SEN output is indented according to the other keyword options.`,
 				{
 					Name: "depth",
 					Type: "integer",
-					Text: "The maximum number of nested elements on a line in the output. Default: 4.",
+					Text: `The maximum number of nested elements on a line in the output. A value
+of zero outputs a tight single line output. Default: 4.`,
 				},
 				{
 					Name: "right-margin",
