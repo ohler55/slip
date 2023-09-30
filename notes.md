@@ -4,14 +4,8 @@
 
 - next
 
- - pkg/bag
-  - json-read or json-parse
-   - json-parse or json-read func input &key :strict
-   - reading multiple
-    - mapc like but given and input string or stream
-    - also channel
-
  - parquet package
+
  - flow package
   - classes/flavors
    - task-flavor
@@ -47,6 +41,10 @@
   - syntax for describing, json or lisp
 
  - messaging
+  - msg-hub - abstract for message hub
+  - nats-hub-flavor
+  - mem-hub-flavor
+  - subject configuration out of band possibly
 
  - net package
   - implement sbcl networking or something closer to golang?
