@@ -5,6 +5,52 @@
 - next
 
  - parquet package
+  - samples
+   - simple
+   - multiple value
+  - reader
+   - call file.OpenParquetFile(path, true, options)
+    - set ReaderProperties.BufferedStreamEnabled to true
+   - methods
+    - filepath
+    - close
+    - row-count
+    - row-group???
+    - writer-version or just version
+    - schema
+  - metadata type or **method on reader**
+   - Version
+   - Schema (from FileMetaData.schema or format.FileMetaData.Schema?)
+   - NumRows
+   - RowGroups
+   - KeyValueMetadata
+   - CreatedBy
+   - ColumnOrders
+   - FooterSigningKeyMetadata
+  - writer
+   - options
+    - with metadata
+    - with props
+   - methods
+    - close
+    - row-count
+    - column-count
+    - row-group-count
+    - properties
+
+ - messaging
+  - body can be json, sen, or lisp. If first character is ( then lisp else sen
+  - msg-hub - abstract for message hub
+  - nats-hub-flavor
+  - mem-hub-flavor
+  - subject configuration out of band possibly
+   - will a simple string be enough or are jetstream variations needed?
+  - publish or send is always the same
+   - handling is configured out of band or through the hub
+  - listen with callback
+  - (:get subject) for queues
+  - explicit ack if configured
+
 
  - flow package
   - classes/flavors
@@ -39,12 +85,6 @@
     - entry
     - tasks
   - syntax for describing, json or lisp
-
- - messaging
-  - msg-hub - abstract for message hub
-  - nats-hub-flavor
-  - mem-hub-flavor
-  - subject configuration out of band possibly
 
  - net package
   - implement sbcl networking or something closer to golang?
