@@ -4,11 +4,16 @@
 
 - next
 
- - parquet package
+ - parquet package (https://github.com/apache/parquet-format)
+  - start without meta/schema/header
   - samples
    - simple
    - multiple value
   - reader
+   - init
+    - file name
+    - optional schema
+    - optional header
    - call file.OpenParquetFile(path, true, options)
     - set ReaderProperties.BufferedStreamEnabled to true
    - methods
@@ -18,6 +23,20 @@
     - row-group???
     - writer-version or just version
     - schema
+  - schema
+   - name
+   - columns
+    - name
+    - type
+     - boolean
+     - int32
+     - int64
+     - int96
+     - float
+     - double
+     - byte_array (utf8)
+     - fixed_len_byte_array
+    - optional
   - metadata type or **method on reader**
    - Version
    - Schema (from FileMetaData.schema or format.FileMetaData.Schema?)
@@ -51,6 +70,18 @@
   - (:get subject) for queues
   - explicit ack if configured
 
+ - xml
+  - maybe each element maps to {name:xxx, attrs:{a:x,b:y}, value: <string or list of string and maps/element>}
+   - maybe value is always a list
+  - no-attrs format
+     [{name:value}...]
+  - xml-read
+   - input input-stream
+   - format - bag or lisp
+   - org - full or no-attrs
+  - xml-write
+   - expect format according to arg, maybe autodetect if possible
+    - detect by list/array first for no-attr or assoc/map for full
 
  - flow package
   - classes/flavors
