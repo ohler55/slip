@@ -5,20 +5,12 @@
 - next
 
  - parquet package (https://github.com/apache/parquet-format)
-  - start without meta/schema/header
-  - samples
-   - simple
-   - multiple value
+  - https://pkg.go.dev/github.com/apache/arrow/go/v13@v13.0.0/parquet#Version
   - reader
-   - init
-    - file name
-    - optional schema
-    - optional header
-   - call file.OpenParquetFile(path, true, options)
-    - set ReaderProperties.BufferedStreamEnabled to true
    - methods
     - filepath
     - close
+    - column-count
     - row-count
     - row-group???
     - writer-version or just version
