@@ -33,8 +33,18 @@ func TestReaderBasic(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
+		Source: `(send reader :created-by)`,
+		Expect: `"parquet-mr version 1.10.1 (build 7d648c1076647085126b685ba8288c8b8bf719ce)"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
 		Source: `(send reader :row-count)`,
 		Expect: "5",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :group-count)`,
+		Expect: "1",
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
@@ -58,7 +68,6 @@ func TestReaderBasic(t *testing.T) {
 			break
 		}
 	}
-	fmt.Printf("*** %s\n", b)
 	tt.Equal(t, `(:name . "event_date")
 (:path . "event_date")
 (:logical-type . "Date")
@@ -74,7 +83,18 @@ func TestReaderBasic(t *testing.T) {
 (:physical-type . "BYTE_ARRAY")
 (:max-repetition . 0)
 (:max-definitions . 1)
+
 `, string(b))
+
+	schema := slip.ReadString(`(send reader :foo)`).Eval(scope, nil).(slip.List)
+	b = b[:0]
+	for _, element := range schema {
+		scope.Let(slip.Symbol("element"), element)
+		b = slip.Append(b, slip.ReadString(`(send element :name)`).Eval(scope, nil))
+		b = append(b, '\n')
+	}
+	fmt.Printf("*** %s\n", b)
+	// TBD schema should have a way to write as in the schema file
 
 	// TBD other methods about the details of the file
 }

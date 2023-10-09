@@ -7,20 +7,17 @@
  - parquet package (https://github.com/apache/parquet-format)
   - https://pkg.go.dev/github.com/apache/arrow/go/v13@v13.0.0/parquet#Version
   - reader
-   - methods
-    - filepath
-    - close
-    - column-count
-    - row-count
-    - row-group???
-    - writer-version or just version
-    - schema
-     -
-  - schema
-   - name
-   - columns
+   - groups (list of group instances)
+
+ - brew oj
+
+  - parquet-schema-flavor or parquet-schema-element-flavor
+   - nested
+    optional binary name (UTF8);
+   - same fields as in schema assoc or SchemaElement
+    - is optional missing or is that captured differently? metadata SchemaElement.RepetitionType
     - name
-    - type
+    - type (same as physical type I think)
      - boolean
      - int32
      - int64
@@ -30,16 +27,16 @@
      - byte_array (utf8)
      - fixed_len_byte_array
     - optional
-  - metadata type or **method on reader**
-   - Version
-   - Schema (from FileMetaData.schema or format.FileMetaData.Schema?)
-   - NumRows
-   - RowGroups
-   - KeyValueMetadata
-   - CreatedBy
-   - ColumnOrders
-   - FooterSigningKeyMetadata
-  - writer
+
+  - parquet-group-flavor
+   - columns -> parquet-column-flavor instance list
+   - column
+    - walk - callback or on channel
+    - values - list
+  - schema
+   - should schema columns be flavor instances?
+
+  - writer - future
    - options
     - with metadata
     - with props

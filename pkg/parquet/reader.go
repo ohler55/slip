@@ -34,9 +34,12 @@ access the content of that file.`),
 	readerFlavor.DefMethod(":init", "", readerInitCaller(true))
 	readerFlavor.DefMethod(":close", "", readerCloseCaller(true))
 	readerFlavor.DefMethod(":version", "", readerVersionCaller(true))
+	readerFlavor.DefMethod(":created-by", "", readerCreatedByCaller(true))
 	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
 	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
+	readerFlavor.DefMethod(":group-count", "", readerGroupCountCaller(true))
 	readerFlavor.DefMethod(":schema", "", readerSchemaCaller(true))
+	readerFlavor.DefMethod(":foo", "", readerFooCaller(true))
 	// TBD other methods
 }
 
@@ -111,6 +114,23 @@ Returns the version of the reader file.
 `
 }
 
+type readerCreatedByCaller bool
+
+func (caller readerCreatedByCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		result = slip.String(pr.MetaData().GetCreatedBy())
+	}
+	return
+}
+
+func (caller readerCreatedByCaller) Docs() string {
+	return `__:created-by__ => _string_
+
+Returns a description of the application that created of the reader file.
+`
+}
+
 type readerRowCountCaller bool
 
 func (caller readerRowCountCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
@@ -124,7 +144,24 @@ func (caller readerRowCountCaller) Call(s *slip.Scope, args slip.List, _ int) (r
 func (caller readerRowCountCaller) Docs() string {
 	return `__:row-count__ => _fixnum_
 
-Returns the number of rows int the reader file.
+Returns the number of rows in the reader file.
+`
+}
+
+type readerGroupCountCaller bool
+
+func (caller readerGroupCountCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		result = slip.Fixnum(pr.NumRowGroups())
+	}
+	return
+}
+
+func (caller readerGroupCountCaller) Docs() string {
+	return `__:group-count__ => _fixnum_
+
+Returns the number of row groups in the reader file.
 `
 }
 
@@ -189,5 +226,43 @@ func (caller readerSchemaCaller) Docs() string {
 	return `__:schema__ => _list_
 
 Returns the schema of the reader file.
+`
+}
+
+type readerFooCaller bool
+
+func (caller readerFooCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		schema := pr.MetaData().FileMetaData.Schema
+		elements := make(slip.List, len(schema))
+		for i, element := range schema {
+			var se schemaElement
+			se.name = element.Name
+			if se.IsSetType() {
+				se.typ = element.GetType().String()
+			}
+
+			// TBD other fields
+			// GetTypeLength()
+			// GetRepetitionType().String()
+			// GetConvertedType() after IsSetConvertedType()
+			// Scale
+			// Precision
+			// FieldID
+			// LogicalType
+			// NumChildren ???
+
+			elements[i] = makeSchemaElement(&se)
+		}
+		result = elements
+	}
+	return
+}
+
+func (caller readerFooCaller) Docs() string {
+	return `__:foo__ => _list_
+
+Returns the foo of the reader file.
 `
 }
