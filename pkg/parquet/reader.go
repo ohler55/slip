@@ -34,6 +34,9 @@ access the content of that file.`),
 	readerFlavor.DefMethod(":init", "", readerInitCaller(true))
 	readerFlavor.DefMethod(":close", "", readerCloseCaller(true))
 	readerFlavor.DefMethod(":version", "", readerVersionCaller(true))
+	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
+	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
+	readerFlavor.DefMethod(":schema", "", readerSchemaCaller(true))
 	// TBD other methods
 }
 
@@ -105,5 +108,86 @@ func (caller readerVersionCaller) Docs() string {
 	return `__:version__ => _string_
 
 Returns the version of the reader file.
+`
+}
+
+type readerRowCountCaller bool
+
+func (caller readerRowCountCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		result = slip.Fixnum(pr.NumRows())
+	}
+	return
+}
+
+func (caller readerRowCountCaller) Docs() string {
+	return `__:row-count__ => _fixnum_
+
+Returns the number of rows int the reader file.
+`
+}
+
+type readerColumnCountCaller bool
+
+func (caller readerColumnCountCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		result = slip.Fixnum(len(pr.MetaData().FileMetaData.ColumnOrders))
+	}
+	return
+}
+
+func (caller readerColumnCountCaller) Docs() string {
+	return `__:column-count__ => _fixnum_
+
+Returns the number of columes int the reader file.
+`
+}
+
+type readerSchemaCaller bool
+
+func (caller readerSchemaCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		schema := pr.MetaData().Schema
+		colCnt := schema.NumColumns()
+		cols := make(slip.List, colCnt)
+		for i := 0; i < colCnt; i++ {
+			col := schema.Column(i)
+			alist := make(slip.List, 0, 9)
+			alist = append(alist, slip.List{slip.Symbol(":name"), slip.Tail{Value: slip.String(col.Name())}})
+			alist = append(alist, slip.List{slip.Symbol(":path"), slip.Tail{Value: slip.String(col.Path())}})
+			if lt := col.LogicalType().String(); lt != "None" {
+				alist = append(alist, slip.List{slip.Symbol(":logical-type"), slip.Tail{Value: slip.String(lt)}})
+			}
+			if ct := col.ConvertedType().String(); ct != "NONE" {
+				alist = append(alist, slip.List{slip.Symbol(":converted-type"), slip.Tail{Value: slip.String(ct)}})
+			}
+			if pt := col.PhysicalType().String(); pt != "NONE" {
+				alist = append(alist, slip.List{slip.Symbol(":physical-type"), slip.Tail{Value: slip.String(pt)}})
+			}
+			if ln := col.TypeLength(); 0 < ln {
+				alist = append(alist, slip.List{slip.Symbol(":type-length"), slip.Tail{Value: slip.Fixnum(ln)}})
+			}
+			alist = append(alist, slip.List{
+				slip.Symbol(":max-repetition"),
+				slip.Tail{Value: slip.Fixnum(col.MaxRepetitionLevel())},
+			})
+			alist = append(alist, slip.List{
+				slip.Symbol(":max-definitions"),
+				slip.Tail{Value: slip.Fixnum(col.MaxDefinitionLevel())},
+			})
+			cols[i] = alist
+		}
+		result = cols
+	}
+	return
+}
+
+func (caller readerSchemaCaller) Docs() string {
+	return `__:schema__ => _list_
+
+Returns the schema of the reader file.
 `
 }
