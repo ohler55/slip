@@ -45,18 +45,16 @@ Returns the name of the schema element.
 }
 
 type schemaElement struct {
-	name string
-	typ  string
-	/*
-		TypeLength     int32 // SchemaElement.GetTypeLength()
-		RepetitionType *FieldRepetitionType `thrift:"repetition_type,3" db:"repetition_type" json:"repetition_type,omitempty"`
-		NumChildren    *int32               `thrift:"num_children,5" db:"num_children" json:"num_children,omitempty"`
-		ConvertedType  *ConvertedType       `thrift:"converted_type,6" db:"converted_type" json:"converted_type,omitempty"`
-		Scale          *int32               `thrift:"scale,7" db:"scale" json:"scale,omitempty"`
-		Precision      *int32               `thrift:"precision,8" db:"precision" json:"precision,omitempty"`
-		FieldID        *int32               `thrift:"field_id,9" db:"field_id" json:"field_id,omitempty"`
-		LogicalType    *LogicalType         `thrift:"logicalType,10" db:"logicalType" json:"logicalType,omitempty"`
-	*/
+	name       string
+	typ        string
+	typeLen    int32
+	repetition string
+	convType   string
+	logType    string
+	scale      int32
+	precision  int32
+	fieldID    int32
+	childCnt   int32
 }
 
 func makeSchemaElement(se *schemaElement) (inst *flavors.Instance) {

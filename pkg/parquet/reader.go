@@ -237,22 +237,18 @@ func (caller readerFooCaller) Call(s *slip.Scope, args slip.List, _ int) (result
 		schema := pr.MetaData().FileMetaData.Schema
 		elements := make(slip.List, len(schema))
 		for i, element := range schema {
-			var se schemaElement
-			se.name = element.Name
-			if se.IsSetType() {
-				se.typ = element.GetType().String()
+			se := schemaElement{
+				name:       element.Name,
+				typ:        element.GetType().String(),
+				typeLen:    element.GetTypeLength(),
+				repetition: element.GetRepetitionType().String(),
+				convType:   element.GetConvertedType().String(),
+				logType:    element.GetLogicalType().String(),
+				scale:      element.GetScale(),
+				precision:  element.GetPrecision(),
+				fieldID:    element.GetFieldID(),
+				childCnt:   element.GetNumChildren(),
 			}
-
-			// TBD other fields
-			// GetTypeLength()
-			// GetRepetitionType().String()
-			// GetConvertedType() after IsSetConvertedType()
-			// Scale
-			// Precision
-			// FieldID
-			// LogicalType
-			// NumChildren ???
-
 			elements[i] = makeSchemaElement(&se)
 		}
 		result = elements
