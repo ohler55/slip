@@ -234,24 +234,13 @@ type readerFooCaller bool
 func (caller readerFooCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if pr, ok := obj.Any.(*file.Reader); ok {
-		schema := pr.MetaData().FileMetaData.Schema
-		elements := make(slip.List, len(schema))
-		for i, element := range schema {
-			se := schemaElement{
-				name:       element.Name,
-				typ:        element.GetType().String(),
-				typeLen:    element.GetTypeLength(),
-				repetition: element.GetRepetitionType().String(),
-				convType:   element.GetConvertedType().String(),
-				logType:    element.GetLogicalType().String(),
-				scale:      element.GetScale(),
-				precision:  element.GetPrecision(),
-				fieldID:    element.GetFieldID(),
-				childCnt:   element.GetNumChildren(),
-			}
-			elements[i] = makeSchemaElement(&se)
+		schema := pr.MetaData().Schema
+		colCnt := schema.NumColumns()
+		cols := make(slip.List, colCnt)
+		for i := 0; i < colCnt; i++ {
+			cols[i] = makeSchemaElement(schema.Column(i))
 		}
-		result = elements
+		result = cols
 	}
 	return
 }

@@ -94,6 +94,26 @@ func TestReaderBasic(t *testing.T) {
 		b = append(b, '\n')
 	}
 	fmt.Printf("*** %s\n", b)
+
+	b = b[:0]
+	for _, element := range schema {
+		scope.Let(slip.Symbol("element"), element)
+		b = append(b, slip.ReadString(`(send element :write nil)`).Eval(scope, nil).(slip.String)...)
+	}
+	fmt.Printf("*** %s\n", b)
+
+	b = b[:0]
+	for _, element := range schema {
+		scope.Let(slip.Symbol("element"), element)
+		b = append(b, slip.ReadString(`(send element :name)`).Eval(scope, nil).(slip.String)...)
+		b = append(b, ' ')
+		b = append(b, slip.ReadString(`(send element :type)`).Eval(scope, nil).(slip.String)...)
+		b = append(b, ' ')
+		b = append(b, slip.ReadString(`(send element :path)`).Eval(scope, nil).(slip.String)...)
+		b = append(b, '\n')
+	}
+	fmt.Printf("*** %s\n", b)
+
 	// TBD schema should have a way to write as in the schema file
 
 	// TBD other methods about the details of the file

@@ -12,7 +12,7 @@
  - brew oj
 
   - parquet-schema-flavor or parquet-schema-element-flavor
-   - write
+   - write - comment after with path?
    - nested
     optional binary name (UTF8);
    - same fields as in schema assoc or SchemaElement
