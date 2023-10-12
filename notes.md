@@ -11,31 +11,13 @@
 
  - brew oj
 
-  - parquet-schema-flavor or parquet-schema-element-flavor
-   - write - comment after with path?
-   - nested
-    optional binary name (UTF8);
-   - same fields as in schema assoc or SchemaElement
-    - is optional missing or is that captured differently? metadata SchemaElement.RepetitionType
-    - name
-    - type (same as physical type I think)
-     - boolean
-     - int32
-     - int64
-     - int96
-     - float
-     - double
-     - byte_array (utf8)
-     - fixed_len_byte_array
-    - optional
-
   - parquet-group-flavor
+    - reader RowGroup(i) returns RowGroupReader
    - columns -> parquet-column-flavor instance list
-   - column
+   - parquet-column-flavor
     - walk - callback or on channel
     - values - list
-  - schema
-   - should schema columns be flavor instances?
+    - row-count
 
   - writer - future
    - options

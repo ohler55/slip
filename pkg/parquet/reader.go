@@ -39,7 +39,6 @@ access the content of that file.`),
 	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
 	readerFlavor.DefMethod(":group-count", "", readerGroupCountCaller(true))
 	readerFlavor.DefMethod(":schema", "", readerSchemaCaller(true))
-	readerFlavor.DefMethod(":foo", "", readerFooCaller(true))
 	// TBD other methods
 }
 
@@ -191,31 +190,7 @@ func (caller readerSchemaCaller) Call(s *slip.Scope, args slip.List, _ int) (res
 		colCnt := schema.NumColumns()
 		cols := make(slip.List, colCnt)
 		for i := 0; i < colCnt; i++ {
-			col := schema.Column(i)
-			alist := make(slip.List, 0, 9)
-			alist = append(alist, slip.List{slip.Symbol(":name"), slip.Tail{Value: slip.String(col.Name())}})
-			alist = append(alist, slip.List{slip.Symbol(":path"), slip.Tail{Value: slip.String(col.Path())}})
-			if lt := col.LogicalType().String(); lt != "None" {
-				alist = append(alist, slip.List{slip.Symbol(":logical-type"), slip.Tail{Value: slip.String(lt)}})
-			}
-			if ct := col.ConvertedType().String(); ct != "NONE" {
-				alist = append(alist, slip.List{slip.Symbol(":converted-type"), slip.Tail{Value: slip.String(ct)}})
-			}
-			if pt := col.PhysicalType().String(); pt != "NONE" {
-				alist = append(alist, slip.List{slip.Symbol(":physical-type"), slip.Tail{Value: slip.String(pt)}})
-			}
-			if ln := col.TypeLength(); 0 < ln {
-				alist = append(alist, slip.List{slip.Symbol(":type-length"), slip.Tail{Value: slip.Fixnum(ln)}})
-			}
-			alist = append(alist, slip.List{
-				slip.Symbol(":max-repetition"),
-				slip.Tail{Value: slip.Fixnum(col.MaxRepetitionLevel())},
-			})
-			alist = append(alist, slip.List{
-				slip.Symbol(":max-definitions"),
-				slip.Tail{Value: slip.Fixnum(col.MaxDefinitionLevel())},
-			})
-			cols[i] = alist
+			cols[i] = makeSchemaElement(schema.Column(i))
 		}
 		result = cols
 	}
@@ -226,28 +201,5 @@ func (caller readerSchemaCaller) Docs() string {
 	return `__:schema__ => _list_
 
 Returns the schema of the reader file.
-`
-}
-
-type readerFooCaller bool
-
-func (caller readerFooCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
-	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		schema := pr.MetaData().Schema
-		colCnt := schema.NumColumns()
-		cols := make(slip.List, colCnt)
-		for i := 0; i < colCnt; i++ {
-			cols[i] = makeSchemaElement(schema.Column(i))
-		}
-		result = cols
-	}
-	return
-}
-
-func (caller readerFooCaller) Docs() string {
-	return `__:foo__ => _list_
-
-Returns the foo of the reader file.
 `
 }

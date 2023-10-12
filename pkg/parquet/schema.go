@@ -28,7 +28,12 @@ func init() {
 	schemaFlavor.Final = true
 	schemaFlavor.DefMethod(":name", "", schemaNameCaller(true))
 	schemaFlavor.DefMethod(":type", "", schemaTypeCaller(true))
+	schemaFlavor.DefMethod(":logical-type", "", schemaLogicalTypeCaller(true))
+	schemaFlavor.DefMethod(":converted-type", "", schemaConvertedTypeCaller(true))
 	schemaFlavor.DefMethod(":path", "", schemaPathCaller(true))
+	schemaFlavor.DefMethod(":type-length", "", schemaTypeLengthCaller(true))
+	schemaFlavor.DefMethod(":repetition", "", schemaRepetitionCaller(true))
+	schemaFlavor.DefMethod(":max-definitions", "", schemaMaxDefinitionsCaller(true))
 
 	schemaFlavor.DefMethod(":write", "", schemaWriteCaller(true))
 
@@ -69,6 +74,44 @@ Returns the type of the schema element.
 `
 }
 
+type schemaLogicalTypeCaller bool
+
+func (caller schemaLogicalTypeCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if sc, ok := obj.Any.(*schema.Column); ok {
+		if lt := sc.LogicalType(); lt.IsValid() && !lt.IsNone() {
+			result = slip.String(lt.String())
+		}
+	}
+	return
+}
+
+func (caller schemaLogicalTypeCaller) Docs() string {
+	return `__:logical-type__ => _string_
+
+Returns the logical type of the schema element.
+`
+}
+
+type schemaConvertedTypeCaller bool
+
+func (caller schemaConvertedTypeCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if sc, ok := obj.Any.(*schema.Column); ok {
+		if ct := sc.ConvertedType(); 0 <= ct {
+			result = slip.String(ct.String())
+		}
+	}
+	return
+}
+
+func (caller schemaConvertedTypeCaller) Docs() string {
+	return `__:converted-type__ => _string_
+
+Returns the converted type of the schema element.
+`
+}
+
 type schemaPathCaller bool
 
 func (caller schemaPathCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
@@ -83,6 +126,68 @@ func (caller schemaPathCaller) Docs() string {
 	return `__:path__ => _string_
 
 Returns the path of the schema element.
+`
+}
+
+type schemaTypeLengthCaller bool
+
+func (caller schemaTypeLengthCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if sc, ok := obj.Any.(*schema.Column); ok {
+		if tl := sc.TypeLength(); 0 < tl {
+			result = slip.Fixnum(tl)
+		}
+	}
+	return
+}
+
+func (caller schemaTypeLengthCaller) Docs() string {
+	return `__:type-length__ => _fixnum_
+
+Returns the type length of the schema element.
+`
+}
+
+type schemaRepetitionCaller bool
+
+func (caller schemaRepetitionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if sc, ok := obj.Any.(*schema.Column); ok {
+		switch sc.MaxRepetitionLevel() {
+		case 0:
+			result = slip.String("required")
+		case 1:
+			result = slip.String("optional")
+		case 2:
+			result = slip.String("repeated")
+		}
+	}
+	return
+}
+
+func (caller schemaRepetitionCaller) Docs() string {
+	return `__:repetition__ => _string_
+
+Returns the repetition of the schema element.
+`
+}
+
+type schemaMaxDefinitionsCaller bool
+
+func (caller schemaMaxDefinitionsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if sc, ok := obj.Any.(*schema.Column); ok {
+		if md := sc.MaxDefinitionLevel(); 0 < md {
+			result = slip.Fixnum(md)
+		}
+	}
+	return
+}
+
+func (caller schemaMaxDefinitionsCaller) Docs() string {
+	return `__:max-definitions__ => _fixnum_
+
+Returns the maximum definitions of the schema element.
 `
 }
 
