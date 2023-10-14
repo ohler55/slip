@@ -11,13 +11,9 @@
 
  - brew oj
 
-  - parquet-group-flavor
-    - reader RowGroup(i) returns RowGroupReader
-   - columns -> parquet-column-flavor instance list
-   - parquet-column-flavor
-    - walk - callback or on channel
+  - parquet-column-flavor
+    - walk or each or each-value - callback or on channel
     - values - list
-    - row-count
 
   - writer - future
    - options

@@ -39,7 +39,7 @@ access the content of that file.`),
 	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
 	readerFlavor.DefMethod(":group-count", "", readerGroupCountCaller(true))
 	readerFlavor.DefMethod(":schema", "", readerSchemaCaller(true))
-	// TBD other methods
+	readerFlavor.DefMethod(":groups", "", readerGroupsCaller(true))
 }
 
 type readerInitCaller bool
@@ -201,5 +201,27 @@ func (caller readerSchemaCaller) Docs() string {
 	return `__:schema__ => _list_
 
 Returns the schema of the reader file.
+`
+}
+
+type readerGroupsCaller bool
+
+func (caller readerGroupsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		groupCnt := pr.NumRowGroups()
+		groups := make(slip.List, groupCnt)
+		for i := 0; i < groupCnt; i++ {
+			groups[i] = makeGroup(pr.RowGroup(i))
+		}
+		result = groups
+	}
+	return
+}
+
+func (caller readerGroupsCaller) Docs() string {
+	return `__:groups__ => _list_
+
+Returns the row groups of the reader file.
 `
 }

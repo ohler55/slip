@@ -34,10 +34,7 @@ func init() {
 	schemaFlavor.DefMethod(":type-length", "", schemaTypeLengthCaller(true))
 	schemaFlavor.DefMethod(":repetition", "", schemaRepetitionCaller(true))
 	schemaFlavor.DefMethod(":max-definitions", "", schemaMaxDefinitionsCaller(true))
-
 	schemaFlavor.DefMethod(":write", "", schemaWriteCaller(true))
-
-	// TBD other methods
 }
 
 type schemaNameCaller bool

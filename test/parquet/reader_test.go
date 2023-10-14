@@ -52,11 +52,15 @@ func TestReaderBasic(t *testing.T) {
 		Expect: "45",
 	}).Test(t)
 
+	testSchema(t, scope, slip.ReadString(`(send reader :schema)`).Eval(scope, nil).(slip.List))
+	testGroups(t, scope, slip.ReadString(`(send reader :groups)`).Eval(scope, nil).(slip.List))
+}
+
+func testSchema(t *testing.T, scope *slip.Scope, schema slip.List) {
 	var b []byte
 	// Verify schema elements. For element the target method ouput along with
 	// the name is collected and placed in a bufffer. That buffer is then
 	// checked.
-	schema := slip.ReadString(`(send reader :schema)`).Eval(scope, nil).(slip.List)
 	for _, element := range schema {
 		scope.Let(slip.Symbol("element"), element)
 		b = append(b, slip.ReadString(`(send element :write nil)`).Eval(scope, nil).(slip.String)...)
@@ -499,6 +503,82 @@ avg_heart_rate 1
 classification 1
 symptoms 1
 `, string(b))
+
+}
+
+func testGroups(t *testing.T, scope *slip.Scope, groups slip.List) {
+	tt.Equal(t, 1, len(groups))
+	scope.Let(slip.Symbol("group"), groups[0])
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send group :size)`,
+		Expect: "618938",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send group :row-count)`,
+		Expect: "5",
+	}).Test(t)
+	tf := sliptest.Function{
+		Scope:  scope,
+		Source: `(send group :columns)`,
+		Expect: "/<parquet-column-flavor/",
+	}
+	tf.Test(t)
+	var b []byte
+	for _, col := range tf.Result.(slip.List) {
+		scope.Let(slip.Symbol("col"), col)
+		typ := slip.ReadString(`(send col :type)`).Eval(scope, nil)
+		b = appendValue(b, typ)
+		b = append(b, '\n')
+	}
+	tt.Equal(t, `INT32
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+INT96
+BYTE_ARRAY
+BYTE_ARRAY
+INT96
+INT96
+INT96
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+INT64
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+BYTE_ARRAY
+INT96
+INT64
+DOUBLE
+DOUBLE
+BYTE_ARRAY
+BYTE_ARRAY
+INT64
+INT64
+INT96
+INT96
+INT96
+BYTE_ARRAY
+DOUBLE
+INT64
+DOUBLE
+DOUBLE
+BYTE_ARRAY
+INT64
+`, string(b))
+	// TBD check values and walk
 }
 
 func appendValue(b []byte, value slip.Object) []byte {
