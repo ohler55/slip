@@ -5,6 +5,7 @@ package parquet
 import (
 	"strings"
 
+	"github.com/apache/arrow/go/v13/parquet"
 	"github.com/apache/arrow/go/v13/parquet/file"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -35,11 +36,13 @@ access the content of that file.`),
 	readerFlavor.DefMethod(":close", "", readerCloseCaller(true))
 	readerFlavor.DefMethod(":version", "", readerVersionCaller(true))
 	readerFlavor.DefMethod(":created-by", "", readerCreatedByCaller(true))
-	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
-	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
-	readerFlavor.DefMethod(":group-count", "", readerGroupCountCaller(true))
 	readerFlavor.DefMethod(":schema", "", readerSchemaCaller(true))
-	readerFlavor.DefMethod(":groups", "", readerGroupsCaller(true))
+	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
+	readerFlavor.DefMethod(":columns", "", readerColumnsCaller(true))
+	readerFlavor.DefMethod(":each-column", "", readerEachColumnCaller(true))
+	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
+	readerFlavor.DefMethod(":rows", "", readerRowsCaller(true))
+	readerFlavor.DefMethod(":each-row", "", readerEachRowCaller(true))
 }
 
 type readerInitCaller bool
@@ -147,23 +150,6 @@ Returns the number of rows in the reader file.
 `
 }
 
-type readerGroupCountCaller bool
-
-func (caller readerGroupCountCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
-	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		result = slip.Fixnum(pr.NumRowGroups())
-	}
-	return
-}
-
-func (caller readerGroupCountCaller) Docs() string {
-	return `__:group-count__ => _fixnum_
-
-Returns the number of row groups in the reader file.
-`
-}
-
 type readerColumnCountCaller bool
 
 func (caller readerColumnCountCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
@@ -204,24 +190,205 @@ Returns the schema of the reader file.
 `
 }
 
-type readerGroupsCaller bool
+type readerColumnsCaller bool
 
-func (caller readerGroupsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller readerColumnsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if pr, ok := obj.Any.(*file.Reader); ok {
-		groupCnt := pr.NumRowGroups()
-		groups := make(slip.List, groupCnt)
-		for i := 0; i < groupCnt; i++ {
-			groups[i] = makeGroup(pr.RowGroup(i))
+		colCnt := pr.MetaData().Schema.NumColumns()
+		columns := make(slip.List, 0, colCnt)
+		rowCnt := pr.NumRows()
+		rgCnt := pr.NumRowGroups()
+		for i := 0; i < colCnt; i++ {
+			col := make(slip.List, 0, rowCnt)
+			for j := 0; j < rgCnt; j++ {
+				ccr, err := pr.RowGroup(j).Column(i)
+				if err != nil {
+					panic(err)
+				}
+				col = readColumn(col, ccr)
+			}
+			columns[i] = col
 		}
-		result = groups
+		result = columns
 	}
 	return
 }
 
-func (caller readerGroupsCaller) Docs() string {
-	return `__:groups__ => _list_
+func (caller readerColumnsCaller) Docs() string {
+	return `__:columns__ => _list_
 
-Returns the row groups of the reader file.
+Returns the row columns of the reader file.
 `
+}
+
+type readerEachColumnCaller bool
+
+func (caller readerEachColumnCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		colCnt := pr.MetaData().Schema.NumColumns()
+		columns := make(slip.List, colCnt)
+
+		// TBD for each row group read columns
+
+		result = columns
+	}
+	return
+}
+
+func (caller readerEachColumnCaller) Docs() string {
+	return `__:each-column__ _function_ => _nil_
+   _function_ the function to for each column.
+
+Applies the _function_ to each column which is a list of values.
+`
+}
+
+type readerRowsCaller bool
+
+func (caller readerRowsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		rowCnt := pr.NumRows()
+		rows := make(slip.List, rowCnt)
+
+		// TBD for each row group read rows
+
+		result = rows
+	}
+	return
+}
+
+func (caller readerRowsCaller) Docs() string {
+	return `__:rows__ => _list_
+
+Returns the row columns of the reader file.
+`
+}
+
+type readerEachRowCaller bool
+
+func (caller readerEachRowCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if pr, ok := obj.Any.(*file.Reader); ok {
+		rowCnt := pr.NumRows()
+		rows := make(slip.List, rowCnt)
+
+		// TBD for each row group read columns
+
+		// TBD option for row as list, assoc, or bag
+
+		result = rows
+	}
+	return
+}
+
+func (caller readerEachRowCaller) Docs() string {
+	return `__:each-row__ _function_ => _nil_
+   _function_ the function to for each rwo.
+
+Applies the _function_ to each row which is a list of values.
+`
+}
+
+var batchSize int64 = 4096
+
+func readColumn(col slip.List, ccr file.ColumnChunkReader) slip.List {
+	var (
+		total int64
+		err   error
+	)
+	for {
+		switch tr := ccr.(type) {
+		case *file.BooleanColumnChunkReader:
+			values := make([]bool, batchSize)
+			for {
+				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+					break
+				}
+				for _, v := range values[:total] {
+					if v {
+						col = append(col, slip.True)
+					} else {
+						col = append(col, nil)
+					}
+				}
+			}
+		case *file.ByteArrayColumnChunkReader:
+			values := make([]parquet.ByteArray, batchSize)
+			for {
+				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+					break
+				}
+				for _, v := range values[:total] {
+					col = append(col, slip.String(v))
+				}
+			}
+		case *file.FixedLenByteArrayColumnChunkReader:
+			values := make([]parquet.FixedLenByteArray, batchSize)
+			for {
+				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+					break
+				}
+				for _, v := range values[:total] {
+					col = append(col, slip.String(v))
+				}
+			}
+		case *file.Int32ColumnChunkReader:
+			values := make([]int32, batchSize)
+			for {
+				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+					break
+				}
+				for _, v := range values[:total] {
+					col = append(col, slip.Fixnum(v))
+				}
+			}
+		case *file.Int64ColumnChunkReader:
+			values := make([]int64, batchSize)
+			for {
+				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+					break
+				}
+				for _, v := range values[:total] {
+					col = append(col, slip.Fixnum(v))
+				}
+			}
+		case *file.Int96ColumnChunkReader:
+			values := make([]parquet.Int96, batchSize)
+			for {
+				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+					break
+				}
+				for _, v := range values[:total] {
+					col = append(col, slip.Time(v.ToTime()))
+				}
+			}
+		case *file.Float32ColumnChunkReader:
+			values := make([]float32, batchSize)
+			for {
+				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+					break
+				}
+				for _, v := range values[:total] {
+					col = append(col, slip.SingleFloat(v))
+				}
+			}
+		case *file.Float64ColumnChunkReader:
+			values := make([]float64, batchSize)
+			for {
+				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+					break
+				}
+				for _, v := range values[:total] {
+					col = append(col, slip.DoubleFloat(v))
+				}
+			}
+		}
+		if err != nil {
+			panic(err)
+		}
+	}
+	return col
 }

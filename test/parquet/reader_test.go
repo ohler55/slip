@@ -43,17 +43,11 @@ func TestReaderBasic(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send reader :group-count)`,
-		Expect: "1",
-	}).Test(t)
-	(&sliptest.Function{
-		Scope:  scope,
 		Source: `(send reader :column-count)`,
 		Expect: "45",
 	}).Test(t)
 
 	testSchema(t, scope, slip.ReadString(`(send reader :schema)`).Eval(scope, nil).(slip.List))
-	testGroups(t, scope, slip.ReadString(`(send reader :groups)`).Eval(scope, nil).(slip.List))
 }
 
 func testSchema(t *testing.T, scope *slip.Scope, schema slip.List) {
@@ -506,6 +500,7 @@ symptoms 1
 
 }
 
+/*
 func testGroups(t *testing.T, scope *slip.Scope, groups slip.List) {
 	tt.Equal(t, 1, len(groups))
 	scope.Let(slip.Symbol("group"), groups[0])
@@ -580,6 +575,7 @@ INT64
 `, string(b))
 	// TBD check values and walk
 }
+*/
 
 func appendValue(b []byte, value slip.Object) []byte {
 	switch tv := value.(type) {
@@ -613,9 +609,6 @@ func TestReaderDocs(t *testing.T) {
 
 	_ = slip.ReadString(`(describe-method parquet-reader-flavor :column-count out)`).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":column-count"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :group-count out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":group-count"))
 
 	_ = slip.ReadString(`(describe-method parquet-reader-flavor :schema out)`).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":schema"))

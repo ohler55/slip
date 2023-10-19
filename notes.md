@@ -7,13 +7,11 @@
  - parquet package (https://github.com/apache/parquet-format)
   - https://pkg.go.dev/github.com/apache/arrow/go/v13@v13.0.0/parquet#Version
   - reader
-   - groups (list of group instances)
+   - columns and rows
+    - handle details to avoid row groups exposure
+    - columns first
 
  - brew oj
-
-  - parquet-column-flavor
-    - walk or each or each-value - callback or on channel
-    - values - list
 
   - writer - future
    - options
@@ -40,17 +38,17 @@
   - explicit ack if configured
 
  - xml
-  - maybe each element maps to {name:xxx, attrs:{a:x,b:y}, value: <string or list of string and maps/element>}
-   - maybe value is always a list
-  - no-attrs format
-     [{name:value}...]
+  - directly to lisp
+   - (element1 element2)
+   - element: (name attrs children...)
+   - attrs: assoc list
+  - callback SAX option also using a SAX-flavor with methods for each callback
   - xml-read
    - input input-stream
-   - format - bag or lisp
-   - org - full or no-attrs
+  -
   - xml-write
-   - expect format according to arg, maybe autodetect if possible
-    - detect by list/array first for no-attr or assoc/map for full
+   - destination (stream, nil, t)
+   - data
 
  - flow package
   - classes/flavors
