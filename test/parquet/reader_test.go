@@ -623,3 +623,15 @@ func TestReaderBadInitFile(t *testing.T) {
 		_ = slip.ReadString(`(make-instance 'parquet-reader-flavor :file t)`).Eval(scope, nil)
 	})
 }
+
+func TestReaderColumns(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :columns)`,
+		Expect: "/^xxxx$/",
+	}).Test(t)
+}

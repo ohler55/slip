@@ -3,6 +3,7 @@
 package parquet
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/apache/arrow/go/v13/parquet"
@@ -39,9 +40,12 @@ access the content of that file.`),
 	readerFlavor.DefMethod(":schema", "", readerSchemaCaller(true))
 	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
 	readerFlavor.DefMethod(":columns", "", readerColumnsCaller(true))
+	// readerFlavor.DefMethod(":column", "", readerColumnCaller(true))
 	readerFlavor.DefMethod(":each-column", "", readerEachColumnCaller(true))
 	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
 	readerFlavor.DefMethod(":rows", "", readerRowsCaller(true))
+	// readerFlavor.DefMethod(":row", "", readerRowCaller(true))
+	//  with arg for format :list, :assoc, :bag
 	readerFlavor.DefMethod(":each-row", "", readerEachRowCaller(true))
 }
 
@@ -196,9 +200,10 @@ func (caller readerColumnsCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 	obj := s.Get("self").(*flavors.Instance)
 	if pr, ok := obj.Any.(*file.Reader); ok {
 		colCnt := pr.MetaData().Schema.NumColumns()
-		columns := make(slip.List, 0, colCnt)
+		columns := make(slip.List, colCnt)
 		rowCnt := pr.NumRows()
 		rgCnt := pr.NumRowGroups()
+		fmt.Printf("*** num rows: %d  num groups: %d\n", rowCnt, rgCnt)
 		for i := 0; i < colCnt; i++ {
 			col := make(slip.List, 0, rowCnt)
 			for j := 0; j < rgCnt; j++ {
@@ -295,100 +300,100 @@ Applies the _function_ to each row which is a list of values.
 var batchSize int64 = 4096
 
 func readColumn(col slip.List, ccr file.ColumnChunkReader) slip.List {
+	fmt.Printf("*** readColumn %T\n", ccr)
 	var (
 		total int64
 		err   error
 	)
-	for {
-		switch tr := ccr.(type) {
-		case *file.BooleanColumnChunkReader:
-			values := make([]bool, batchSize)
-			for {
-				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-					break
-				}
-				for _, v := range values[:total] {
-					if v {
-						col = append(col, slip.True)
-					} else {
-						col = append(col, nil)
-					}
-				}
+	switch tr := ccr.(type) {
+	case *file.BooleanColumnChunkReader:
+		values := make([]bool, batchSize)
+		for {
+			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+				break
 			}
-		case *file.ByteArrayColumnChunkReader:
-			values := make([]parquet.ByteArray, batchSize)
-			for {
-				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-					break
-				}
-				for _, v := range values[:total] {
-					col = append(col, slip.String(v))
-				}
-			}
-		case *file.FixedLenByteArrayColumnChunkReader:
-			values := make([]parquet.FixedLenByteArray, batchSize)
-			for {
-				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-					break
-				}
-				for _, v := range values[:total] {
-					col = append(col, slip.String(v))
-				}
-			}
-		case *file.Int32ColumnChunkReader:
-			values := make([]int32, batchSize)
-			for {
-				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-					break
-				}
-				for _, v := range values[:total] {
-					col = append(col, slip.Fixnum(v))
-				}
-			}
-		case *file.Int64ColumnChunkReader:
-			values := make([]int64, batchSize)
-			for {
-				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-					break
-				}
-				for _, v := range values[:total] {
-					col = append(col, slip.Fixnum(v))
-				}
-			}
-		case *file.Int96ColumnChunkReader:
-			values := make([]parquet.Int96, batchSize)
-			for {
-				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-					break
-				}
-				for _, v := range values[:total] {
-					col = append(col, slip.Time(v.ToTime()))
-				}
-			}
-		case *file.Float32ColumnChunkReader:
-			values := make([]float32, batchSize)
-			for {
-				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-					break
-				}
-				for _, v := range values[:total] {
-					col = append(col, slip.SingleFloat(v))
-				}
-			}
-		case *file.Float64ColumnChunkReader:
-			values := make([]float64, batchSize)
-			for {
-				if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-					break
-				}
-				for _, v := range values[:total] {
-					col = append(col, slip.DoubleFloat(v))
+			for _, v := range values[:total] {
+				if v {
+					col = append(col, slip.True)
+				} else {
+					col = append(col, nil)
 				}
 			}
 		}
-		if err != nil {
-			panic(err)
+	case *file.ByteArrayColumnChunkReader:
+		values := make([]parquet.ByteArray, batchSize)
+		for {
+			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+				break
+			}
+			for _, v := range values[:total] {
+				col = append(col, slip.String(v))
+			}
 		}
+	case *file.FixedLenByteArrayColumnChunkReader:
+		values := make([]parquet.FixedLenByteArray, batchSize)
+		for {
+			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+				break
+			}
+			for _, v := range values[:total] {
+				col = append(col, slip.String(v))
+			}
+		}
+	case *file.Int32ColumnChunkReader:
+		values := make([]int32, batchSize)
+		for {
+			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+				break
+			}
+			fmt.Printf("*** total: %d\n", total, values[:total])
+			for _, v := range values[:total] {
+				col = append(col, slip.Fixnum(v))
+			}
+		}
+	case *file.Int64ColumnChunkReader:
+		values := make([]int64, batchSize)
+		for {
+			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+				break
+			}
+			for _, v := range values[:total] {
+				col = append(col, slip.Fixnum(v))
+			}
+		}
+	case *file.Int96ColumnChunkReader:
+		values := make([]parquet.Int96, batchSize)
+		for {
+			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+				break
+			}
+			for _, v := range values[:total] {
+				col = append(col, slip.Time(v.ToTime()))
+			}
+		}
+	case *file.Float32ColumnChunkReader:
+		values := make([]float32, batchSize)
+		for {
+			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+				break
+			}
+			for _, v := range values[:total] {
+				col = append(col, slip.SingleFloat(v))
+			}
+		}
+	case *file.Float64ColumnChunkReader:
+		values := make([]float64, batchSize)
+		for {
+			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
+				break
+			}
+			for _, v := range values[:total] {
+				col = append(col, slip.DoubleFloat(v))
+			}
+		}
+	}
+	if err != nil {
+		panic(err)
 	}
 	return col
 }
