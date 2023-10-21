@@ -3,11 +3,16 @@
 package parquet
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/apache/arrow/go/v13/arrow"
+	"github.com/apache/arrow/go/v13/arrow/array"
+	"github.com/apache/arrow/go/v13/arrow/memory"
 	"github.com/apache/arrow/go/v13/parquet"
 	"github.com/apache/arrow/go/v13/parquet/file"
+	"github.com/apache/arrow/go/v13/parquet/pqarrow"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -38,6 +43,7 @@ access the content of that file.`),
 	readerFlavor.DefMethod(":version", "", readerVersionCaller(true))
 	readerFlavor.DefMethod(":created-by", "", readerCreatedByCaller(true))
 	readerFlavor.DefMethod(":schema", "", readerSchemaCaller(true))
+	// TBD similar code to write-schema to gather nested info
 	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
 	readerFlavor.DefMethod(":columns", "", readerColumnsCaller(true))
 	// readerFlavor.DefMethod(":column", "", readerColumnCaller(true))
@@ -72,8 +78,51 @@ func (caller readerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	if err != nil {
 		panic(err)
 	}
-	obj.Any = pr
+	var fr *pqarrow.FileReader
+	if fr, err = pqarrow.NewFileReader(pr, pqarrow.ArrowReadProperties{}, memory.DefaultAllocator); err != nil {
+		panic(err)
+	}
+	obj.Any = fr
 	obj.Let(slip.Symbol("filepath"), slip.String(path))
+
+	return nil
+
+	var schem *arrow.Schema
+	if schem, err = fr.Schema(); err != nil {
+		panic(err)
+	}
+	fmt.Printf("*** schema: %v\n", schem)
+	for i := 0; i < schem.NumFields(); i++ {
+		fmt.Printf("*** field %d: %s %s\n", i, schem.Field(i).Name, schem.Field(i).Type)
+		var cr *pqarrow.ColumnReader
+		cr, _ = fr.GetColumn(context.Background(), i)
+		fmt.Printf("*** cr %d: %T %v\n", i, cr, cr)
+		if cr == nil {
+			break
+		}
+		if i == 12 {
+			fmt.Printf("********** skipping %d\n", i)
+			// TBD why does this panic if not skipped?
+			continue
+		}
+		var ac *arrow.Chunked
+		if ac, err = cr.NextBatch(100); err != nil {
+			panic(err)
+		}
+		fmt.Printf("*** ac: %v\n", ac)
+		for j, chunk := range ac.Chunks() {
+			fmt.Printf("*** chunk %d %T len: %d\n", j, chunk, chunk.Len())
+			if al, ok := chunk.(*array.List); ok {
+				fmt.Printf("*** list values: %T\n", al.ListValues())
+				if as, ok2 := al.ListValues().(*array.Struct); ok2 {
+					fmt.Printf("*** struct size: %d %T\n", as.NumField(), as.Field(1))
+					fmt.Printf("*** field values type: %T\n", as.Field(1).(*array.List).ListValues())
+					af := as.Field(1).(*array.List).ListValues().(*array.Float64)
+					fmt.Printf("*** floats: %d\n", af.Len())
+				}
+			}
+		}
+	}
 
 	return nil
 }
@@ -90,8 +139,8 @@ type readerCloseCaller bool
 
 func (caller readerCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		_ = pr.Close()
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		_ = fr.ParquetReader().Close()
 	}
 	return nil
 }
@@ -107,8 +156,8 @@ type readerVersionCaller bool
 
 func (caller readerVersionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		result = slip.String(pr.MetaData().Version().String())
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		result = slip.String(fr.ParquetReader().MetaData().Version().String())
 	}
 	return
 }
@@ -124,8 +173,8 @@ type readerCreatedByCaller bool
 
 func (caller readerCreatedByCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		result = slip.String(pr.MetaData().GetCreatedBy())
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		result = slip.String(fr.ParquetReader().MetaData().GetCreatedBy())
 	}
 	return
 }
@@ -141,8 +190,8 @@ type readerRowCountCaller bool
 
 func (caller readerRowCountCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		result = slip.Fixnum(pr.NumRows())
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		result = slip.Fixnum(fr.ParquetReader().NumRows())
 	}
 	return
 }
@@ -158,8 +207,12 @@ type readerColumnCountCaller bool
 
 func (caller readerColumnCountCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		result = slip.Fixnum(len(pr.MetaData().FileMetaData.ColumnOrders))
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		sch, err := fr.Schema()
+		if err != nil {
+			panic(err)
+		}
+		result = slip.Fixnum(sch.NumFields())
 	}
 	return
 }
@@ -175,14 +228,8 @@ type readerSchemaCaller bool
 
 func (caller readerSchemaCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		schema := pr.MetaData().Schema
-		colCnt := schema.NumColumns()
-		cols := make(slip.List, colCnt)
-		for i := 0; i < colCnt; i++ {
-			cols[i] = makeSchemaElement(schema.Column(i))
-		}
-		result = cols
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		result = makeSchemaInstance(fr.ParquetReader().MetaData().Schema.Root())
 	}
 	return
 }
@@ -198,24 +245,28 @@ type readerColumnsCaller bool
 
 func (caller readerColumnsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		colCnt := pr.MetaData().Schema.NumColumns()
-		columns := make(slip.List, colCnt)
-		rowCnt := pr.NumRows()
-		rgCnt := pr.NumRowGroups()
-		fmt.Printf("*** num rows: %d  num groups: %d\n", rowCnt, rgCnt)
-		for i := 0; i < colCnt; i++ {
-			col := make(slip.List, 0, rowCnt)
-			for j := 0; j < rgCnt; j++ {
-				ccr, err := pr.RowGroup(j).Column(i)
-				if err != nil {
-					panic(err)
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		// TBD
+		fmt.Printf("*** arrow file reader: %v\n", fr)
+		/*
+			colCnt := pr.MetaData().Schema.NumColumns()
+			columns := make(slip.List, colCnt)
+			rowCnt := pr.NumRows()
+			rgCnt := pr.NumRowGroups()
+			fmt.Printf("*** num rows: %d  num groups: %d\n", rowCnt, rgCnt)
+			for i := 0; i < colCnt; i++ {
+				col := make(slip.List, 0, rowCnt)
+				for j := 0; j < rgCnt; j++ {
+					ccr, err := pr.RowGroup(j).Column(i)
+					if err != nil {
+						panic(err)
+					}
+					col = readColumn(col, ccr)
 				}
-				col = readColumn(col, ccr)
+				columns[i] = col
 			}
-			columns[i] = col
-		}
-		result = columns
+			result = columns
+		*/
 	}
 	return
 }
@@ -231,13 +282,11 @@ type readerEachColumnCaller bool
 
 func (caller readerEachColumnCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		colCnt := pr.MetaData().Schema.NumColumns()
-		columns := make(slip.List, colCnt)
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		fmt.Printf("*** arrow file reader: %v\n", fr)
 
 		// TBD for each row group read columns
 
-		result = columns
 	}
 	return
 }
@@ -254,10 +303,11 @@ type readerRowsCaller bool
 
 func (caller readerRowsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		rowCnt := pr.NumRows()
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		rowCnt := fr.ParquetReader().NumRows()
 		rows := make(slip.List, rowCnt)
 
+		fmt.Printf("*** row count: %d\n", rowCnt)
 		// TBD for each row group read rows
 
 		result = rows
@@ -274,19 +324,18 @@ Returns the row columns of the reader file.
 
 type readerEachRowCaller bool
 
-func (caller readerEachRowCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller readerEachRowCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	if pr, ok := obj.Any.(*file.Reader); ok {
-		rowCnt := pr.NumRows()
-		rows := make(slip.List, rowCnt)
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		rowCnt := fr.ParquetReader().NumRows()
 
+		fmt.Printf("*** row count: %d\n", rowCnt)
 		// TBD for each row group read columns
 
 		// TBD option for row as list, assoc, or bag
 
-		result = rows
 	}
-	return
+	return nil
 }
 
 func (caller readerEachRowCaller) Docs() string {

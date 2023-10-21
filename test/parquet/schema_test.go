@@ -8,6 +8,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestSchemaDocs(t *testing.T) {
@@ -21,6 +22,14 @@ func TestSchemaDocs(t *testing.T) {
 	out.Reset()
 	_ = slip.ReadString(`(describe-method parquet-schema-flavor :type out)`).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":type"))
+
+	out.Reset()
+	_ = slip.ReadString(`(describe-method parquet-schema-flavor :field-id out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":field-id"))
+
+	out.Reset()
+	_ = slip.ReadString(`(describe-method parquet-schema-flavor :repetition out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":repetition"))
 
 	out.Reset()
 	_ = slip.ReadString(`(describe-method parquet-schema-flavor :logical-type out)`).Eval(scope, nil)
@@ -39,14 +48,180 @@ func TestSchemaDocs(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(out.String(), ":type-length"))
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method parquet-schema-flavor :repetition out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":repetition"))
+	_ = slip.ReadString(`(describe-method parquet-schema-flavor :precision out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":precision"))
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method parquet-schema-flavor :max-definitions out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":max-definitions"))
+	_ = slip.ReadString(`(describe-method parquet-schema-flavor :scale out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":scale"))
 
 	out.Reset()
 	_ = slip.ReadString(`(describe-method parquet-schema-flavor :write out)`).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":write"))
+
+	out.Reset()
+	_ = slip.ReadString(`(describe-method parquet-schema-flavor :parent out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":parent"))
+
+	out.Reset()
+	_ = slip.ReadString(`(describe-method parquet-schema-flavor :fields out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":fields"))
+
+	out.Reset()
+	_ = slip.ReadString(`(describe-method parquet-schema-flavor :find out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":find"))
+}
+
+func TestSchemaFindName(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :name)`,
+		Expect: `"spark_schema"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 0) :name)`,
+		Expect: `"event_date"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find '(leads list element lead_name)) :name)`,
+		Expect: `"lead_name"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find "leads" 0 0 'lead_name) :name)`,
+		Expect: `"lead_name"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :find -1)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :find -1)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :find 1 1)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :find "nothing")`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :find 'nothing)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send schema :find t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestSchemaWrite(t *testing.T) {
+	var out strings.Builder
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+	scope.Let("out", &slip.OutputStream{Writer: &out})
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :write out)`,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t,
+		`required group spark_schema {
+  optional int32 event_date (Date);
+  optional byte_array request_id (String);
+  optional byte_array upload_id (String);
+  optional byte_array subject_id (String);
+  optional int96 received_time;
+  optional byte_array sample_type (String);
+  optional byte_array sample_id (String);
+  optional int96 creation_time;
+  optional int96 start_time;
+  optional int96 end_time;
+  optional group source {
+    optional byte_array name (String);
+    optional byte_array revision_product_type (String);
+    optional byte_array bundle_id (String);
+    optional int64 options;
+    optional byte_array version (String);
+    optional byte_array product_type (String);
+    optional byte_array os_version (String);
+  }
+  optional group device {
+    optional byte_array name (String);
+    optional byte_array manufacturer (String);
+    optional byte_array model (String);
+    optional byte_array hardware_version (String);
+    optional byte_array firmware_version (String);
+    optional byte_array software_version (String);
+    optional byte_array local_id (String);
+    optional byte_array udi_id (String);
+  }
+  optional group metadata {
+    optional group kv (Map) {
+      repeated group key_value {
+        required byte_array key (String);
+        optional group value {
+          optional byte_array string_value (String);
+          optional int96 time_value;
+          optional int64 integer_value;
+          optional double double_value;
+          optional group quantity_value {
+            optional double original_value;
+            optional byte_array original_unit (String);
+          }
+          optional byte_array data_value;
+        }
+      }
+    }
+  }
+  optional group query {
+    optional int64 start_sequence;
+    optional int64 end_sequence;
+    optional int96 start_time;
+    optional int96 end_time;
+    optional int96 creation_time;
+  }
+  optional group leads (List) {
+    repeated group list {
+      optional group element {
+        optional byte_array lead_name (String);
+        optional group value_microvolts (List) {
+          repeated group list {
+            required double element;
+          }
+        }
+      }
+    }
+  }
+  optional int64 count;
+  optional double frequency;
+  optional double avg_heart_rate;
+  optional byte_array classification (String);
+  optional int64 symptoms;
+}
+`, out.String())
+}
+
+func setupSchemaTest(t *testing.T) *slip.Scope {
+	scope := slip.NewScope()
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	schema := slip.ReadString(`(send reader :schema)`).Eval(scope, nil)
+	scope.Let("schema", schema)
+
+	return scope
 }

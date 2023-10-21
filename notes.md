@@ -7,9 +7,11 @@
  - parquet package (https://github.com/apache/parquet-format)
   - https://pkg.go.dev/github.com/apache/arrow/go/v13@v13.0.0/parquet#Version
   - reader
-   - columns and rows
-    - handle details to avoid row groups exposure
-    - columns first
+   - build schema and test with pqarrow
+   - read column(s)
+    - build value from data recursively
+     - either list, assoc, or bag for each
+    - if all, use ReadTable() or is each column just as good?
 
  - brew oj
 
