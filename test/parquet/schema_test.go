@@ -8,6 +8,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -128,6 +129,186 @@ func TestSchemaFindName(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSchemaType(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :type)`,
+		Expect: ":group",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 0) :type)`,
+		Expect: ":primitive",
+	}).Test(t)
+}
+
+func TestSchemaFieldID(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :field-id)`,
+		Expect: "nil",
+	}).Test(t)
+}
+
+func TestSchemaLogicalType(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :logical-type)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 0) :logical-type)`,
+		Expect: `"Date"`,
+	}).Test(t)
+}
+
+func TestSchemaConvertedType(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :converted-type)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 0) :converted-type)`,
+		Expect: `"DATE"`,
+	}).Test(t)
+}
+
+func TestSchemaPath(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :path)`,
+		Expect: `""`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find '(leads list element lead_name)) :path)`,
+		Expect: `"leads.list.element.lead_name"`,
+	}).Test(t)
+}
+
+func TestSchemaTypeLength(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :type-length)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find '(source name)) :type-length)`,
+		Expect: "nil",
+	}).Test(t)
+	// TBD load a different sample file for this
+}
+
+func TestSchemaPrecision(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :precision)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 'frequency) :precision)`,
+		Expect: "0",
+	}).Test(t)
+	// TBD load a different sample file for this
+}
+
+func TestSchemaScale(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :scale)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 'avg_heart_rate) :scale)`,
+		Expect: "0",
+	}).Test(t)
+	// TBD load a different sample file for this
+}
+
+func TestSchemaRepetition(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :repetition)`,
+		Expect: ":required",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 0) :repetition)`,
+		Expect: ":optional",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 'leads 'list) :repetition)`,
+		Expect: ":repeated",
+	}).Test(t)
+	// TBD load a different sample file for this
+}
+
+func TestSchemaParent(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :parent)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send (send schema :find 0) :parent) :name)`,
+		Expect: `"spark_schema"`,
+	}).Test(t)
+}
+
+func TestSchemaFields(t *testing.T) {
+	scope := setupSchemaTest(t)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :fields)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			list := v.(slip.List)
+			tt.Equal(t, 20, len(list))
+			inst := list[0].(*flavors.Instance)
+			tt.Equal(t, "parquet-schema-flavor", inst.Flavor.Name())
+		},
+	}).Test(t)
+}
+
 func TestSchemaWrite(t *testing.T) {
 	var out strings.Builder
 	scope := setupSchemaTest(t)
@@ -214,6 +395,22 @@ func TestSchemaWrite(t *testing.T) {
   optional int64 symptoms;
 }
 `, out.String())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 0) :write nil)`,
+		Expect: `"optional int32 event_date (Date);
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send schema :write 7)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send schema :write)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
 }
 
 func setupSchemaTest(t *testing.T) *slip.Scope {

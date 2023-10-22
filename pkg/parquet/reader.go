@@ -43,16 +43,19 @@ access the content of that file.`),
 	readerFlavor.DefMethod(":version", "", readerVersionCaller(true))
 	readerFlavor.DefMethod(":created-by", "", readerCreatedByCaller(true))
 	readerFlavor.DefMethod(":schema", "", readerSchemaCaller(true))
-	// TBD similar code to write-schema to gather nested info
+
 	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
 	readerFlavor.DefMethod(":columns", "", readerColumnsCaller(true))
 	// readerFlavor.DefMethod(":column", "", readerColumnCaller(true))
+	// readerFlavor.DefMethod(":each-column-value", "", readerEachColumnValueCaller(true))
 	readerFlavor.DefMethod(":each-column", "", readerEachColumnCaller(true))
+
 	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
 	readerFlavor.DefMethod(":rows", "", readerRowsCaller(true))
 	// readerFlavor.DefMethod(":row", "", readerRowCaller(true))
 	//  with arg for format :list, :assoc, :bag
 	readerFlavor.DefMethod(":each-row", "", readerEachRowCaller(true))
+	// TBD maybe option to just include specific columns
 }
 
 type readerInitCaller bool

@@ -183,16 +183,14 @@ type schemaPrecisionCaller bool
 
 func (caller schemaPrecisionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if hp, ok := obj.Any.(hasPrecision); ok {
-		if pre := hp.Precision(); 0 < pre {
-			result = slip.Fixnum(pre)
-		}
+	if pn, ok := obj.Any.(*schema.PrimitiveNode); ok {
+		result = slip.Fixnum(pn.DecimalMetadata().Precision)
 	}
 	return
 }
 
 func (caller schemaPrecisionCaller) Docs() string {
-	return `__:precision__ => _fixnum_|_nil_
+	return `__:precision__ => _fixnum_
 
 Returns the type precision of the schema node if the type has precision of _nil_ otherwise.
 `
@@ -206,10 +204,8 @@ type schemaScaleCaller bool
 
 func (caller schemaScaleCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	if hp, ok := obj.Any.(hasScale); ok {
-		if pre := hp.Scale(); 0 < pre {
-			result = slip.Fixnum(pre)
-		}
+	if pn, ok := obj.Any.(*schema.PrimitiveNode); ok {
+		result = slip.Fixnum(pn.DecimalMetadata().Scale)
 	}
 	return
 }
