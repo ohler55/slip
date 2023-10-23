@@ -40,6 +40,11 @@ func init() {
 	schemaFlavor.DefMethod(":find", "", schemaFindCaller(true))
 }
 
+// SchemaFlavor returns the schema flavor.
+func SchemaFlavor() *flavors.Flavor {
+	return schemaFlavor
+}
+
 type schemaNameCaller bool
 
 func (caller schemaNameCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {

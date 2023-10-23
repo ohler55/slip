@@ -3,14 +3,23 @@
 package parquet_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/apache/arrow/go/v13/parquet/schema"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/pkg/parquet"
 	"github.com/ohler55/slip/sliptest"
 )
+
+type badWriter int
+
+func (w badWriter) Write([]byte) (int, error) {
+	return 0, fmt.Errorf("failed")
+}
 
 func TestSchemaDocs(t *testing.T) {
 	scope := slip.NewScope()
@@ -154,6 +163,16 @@ func TestSchemaFieldID(t *testing.T) {
 		Source: `(send schema :field-id)`,
 		Expect: "nil",
 	}).Test(t)
+
+	pn := schema.NewFixedLenByteArrayNode("dummy", 0, 5, 7)
+	inst := parquet.SchemaFlavor().MakeInstance().(*flavors.Instance)
+	inst.Any = pn
+	scope.Let("schema", inst)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :field-id)`,
+		Expect: "7",
+	}).Test(t)
 }
 
 func TestSchemaLogicalType(t *testing.T) {
@@ -218,7 +237,16 @@ func TestSchemaTypeLength(t *testing.T) {
 		Source: `(send (send schema :find '(source name)) :type-length)`,
 		Expect: "nil",
 	}).Test(t)
-	// TBD load a different sample file for this
+
+	pn := schema.NewFixedLenByteArrayNode("dummy", 0, 5, 7)
+	inst := parquet.SchemaFlavor().MakeInstance().(*flavors.Instance)
+	inst.Any = pn
+	scope.Let("schema", inst)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send schema :type-length)`,
+		Expect: "5",
+	}).Test(t)
 }
 
 func TestSchemaPrecision(t *testing.T) {
@@ -274,7 +302,6 @@ func TestSchemaRepetition(t *testing.T) {
 		Source: `(send (send schema :find 'leads 'list) :repetition)`,
 		Expect: ":repeated",
 	}).Test(t)
-	// TBD load a different sample file for this
 }
 
 func TestSchemaParent(t *testing.T) {
@@ -401,6 +428,16 @@ func TestSchemaWrite(t *testing.T) {
 		Expect: `"optional int32 event_date (Date);
 "`,
 	}).Test(t)
+	out.Reset()
+	scope.Let("*standard-output*", &slip.OutputStream{Writer: &out})
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send (send schema :find 0) :write t)`,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t, `optional int32 event_date (Date);
+`, out.String())
+
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send schema :write 7)`,
@@ -409,6 +446,19 @@ func TestSchemaWrite(t *testing.T) {
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send schema :write)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+
+	scope.Let("*standard-output*", &slip.OutputStream{Writer: badWriter(0)})
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send schema :write t)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	scope.Let("out", &slip.OutputStream{Writer: badWriter(0)})
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send schema :write out)`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
