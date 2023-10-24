@@ -7,6 +7,10 @@ import (
 	"fmt"
 	"strings"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
+	"github.com/apache/arrow/go/v13/parquet"
 	"github.com/apache/arrow/go/v13/parquet/schema"
 )
 
@@ -16,57 +20,60 @@ type schemaAppender struct {
 	pad    int
 }
 
+type primitiveLike interface {
+	PhysicalType() parquet.Type
+	DecimalMetadata() schema.DecimalMetadata
+}
+
 func (sa *schemaAppender) VisitPre(n schema.Node) bool {
 	sa.buf = append(sa.buf, bytes.Repeat([]byte{' '}, sa.indent)...)
+	lt := n.LogicalType()
+	ct := n.ConvertedType()
+	invalid := true
+	none := true
+	if lt != nil {
+		_, invalid = lt.(schema.UnknownLogicalType)
+		_, none = lt.(schema.NoLogicalType)
+	}
+	sa.buf = append(sa.buf, n.RepetitionType().String()...)
 	if n.Type() == schema.Group {
-		g := n.(*schema.GroupNode)
-		lt := g.LogicalType()
-		ct := g.ConvertedType()
-		sa.buf = append(sa.buf, g.RepetitionType().String()...)
 		sa.buf = append(sa.buf, " group "...)
-		if 0 <= g.FieldID() {
-			sa.buf = fmt.Appendf(sa.buf, "field_id=%d ", g.FieldID())
+		if 0 <= n.FieldID() {
+			sa.buf = fmt.Appendf(sa.buf, "field_id=%d ", n.FieldID())
 		}
-		sa.buf = append(sa.buf, g.Name()...)
-		_, invalid := lt.(schema.UnknownLogicalType)
-		_, none := lt.(schema.NoLogicalType)
-
-		if lt != nil && !invalid && !none {
+		sa.buf = append(sa.buf, n.Name()...)
+		if !invalid && !none {
 			sa.buf = append(sa.buf, ' ', '(')
 			sa.buf = append(sa.buf, lt.String()...)
 			sa.buf = append(sa.buf, ')')
 		} else if ct != schema.ConvertedTypes.None {
 			sa.buf = append(sa.buf, ' ', '(')
-			sa.buf = append(sa.buf, ct.String()...)
+			sa.buf = append(sa.buf, cases.Title(language.Und).String(ct.String())...)
 			sa.buf = append(sa.buf, ')')
 		}
 		sa.buf = append(sa.buf, ' ', '{', '\n')
 		sa.indent += sa.pad
 	} else {
-		p := n.(*schema.PrimitiveNode)
-		lt := p.LogicalType()
-		ct := p.ConvertedType()
-		sa.buf = append(sa.buf, p.RepetitionType().String()...)
+		p := n.(primitiveLike)
 		sa.buf = append(sa.buf, ' ')
 		sa.buf = append(sa.buf, strings.ToLower(p.PhysicalType().String())...)
 		sa.buf = append(sa.buf, ' ')
-		if 0 <= p.FieldID() {
-			sa.buf = fmt.Appendf(sa.buf, "field_id=%d ", p.FieldID())
+		if 0 <= n.FieldID() {
+			sa.buf = fmt.Appendf(sa.buf, "field_id=%d ", n.FieldID())
 		}
-		sa.buf = append(sa.buf, p.Name()...)
-		_, invalid := lt.(schema.UnknownLogicalType)
-		_, none := lt.(schema.NoLogicalType)
-
+		sa.buf = append(sa.buf, n.Name()...)
 		switch {
-		case lt != nil && !invalid && !none:
+		case !invalid && !none:
 			sa.buf = append(sa.buf, ' ', '(')
 			sa.buf = append(sa.buf, lt.String()...)
 			sa.buf = append(sa.buf, ')')
 		case ct == schema.ConvertedTypes.Decimal:
-			sa.buf = fmt.Appendf(sa.buf, " (%s(%d,%d))", ct, p.DecimalMetadata().Precision, p.DecimalMetadata().Scale)
+			sa.buf = fmt.Appendf(sa.buf, " (%s(precision=%d, scale=%d))",
+				cases.Title(language.Und).String(ct.String()),
+				p.DecimalMetadata().Precision, p.DecimalMetadata().Scale)
 		case ct != schema.ConvertedTypes.None:
 			sa.buf = append(sa.buf, ' ', '(')
-			sa.buf = append(sa.buf, ct.String()...)
+			sa.buf = append(sa.buf, cases.Title(language.Und).String(ct.String())...)
 			sa.buf = append(sa.buf, ')')
 		}
 		sa.buf = append(sa.buf, ';', '\n')
