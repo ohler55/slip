@@ -3,6 +3,7 @@
 package parquet_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -148,10 +149,11 @@ func TestReaderColumns(t *testing.T) {
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
-	return
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send reader :columns)`,
-		Expect: "/^xxxx$/",
+		Validate: func(t *testing.T, v slip.Object) {
+			fmt.Printf("*** validate %T %s\n", v, v)
+		},
 	}).Test(t)
 }

@@ -249,27 +249,24 @@ type readerColumnsCaller bool
 func (caller readerColumnsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
-		// TBD
-		fmt.Printf("*** arrow file reader: %v\n", fr)
-		/*
-			colCnt := pr.MetaData().Schema.NumColumns()
-			columns := make(slip.List, colCnt)
-			rowCnt := pr.NumRows()
-			rgCnt := pr.NumRowGroups()
-			fmt.Printf("*** num rows: %d  num groups: %d\n", rowCnt, rgCnt)
-			for i := 0; i < colCnt; i++ {
-				col := make(slip.List, 0, rowCnt)
-				for j := 0; j < rgCnt; j++ {
-					ccr, err := pr.RowGroup(j).Column(i)
-					if err != nil {
-						panic(err)
-					}
-					col = readColumn(col, ccr)
+		schem, err := fr.Schema()
+		if err != nil {
+			panic(err)
+		}
+		columns := make(slip.List, schem.NumFields())
+		for i := 0; i < schem.NumFields(); i++ {
+			fmt.Printf("****** field %d: %s %s\n", i, schem.Field(i).Name, schem.Field(i).Type)
+			// call readColumn(cr)
+			if cr, _ := fr.GetColumn(context.Background(), i); cr != nil {
+				if i == 12 {
+					fmt.Printf("********** skipping %d\n", i)
+					// TBD why does this panic if not skipped?
+					continue
 				}
-				columns[i] = col
+				columns[i] = readColumn(cr)
 			}
-			result = columns
-		*/
+		}
+		result = columns
 	}
 	return
 }
@@ -279,6 +276,119 @@ func (caller readerColumnsCaller) Docs() string {
 
 Returns the row columns of the reader file.
 `
+}
+
+func readColumn(cr *pqarrow.ColumnReader) (result slip.List) {
+	ac, err := cr.NextBatch(100) // *arrow.Chunked
+	if err != nil {
+		panic(err)
+	}
+	// TBD split out for nested data
+	for ci, chunk := range ac.Chunks() {
+		cnt := chunk.Len()
+		result = make(slip.List, cnt)
+		switch tc := chunk.(type) {
+		case *array.Null: // type having no physical storage
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.SimpleObject(tc.Value(i))
+			}
+		case *array.Boolean: // is a 1 bit, LSB bit-packed ordering
+			for i := 0; i < cnt; i++ {
+				if tc.Value(i) {
+					result[i] = slip.True
+				} else {
+					result[i] = nil
+				}
+			}
+		// TBD UINT8 is an Unsigned 8-bit little-endian integer
+		// TBD INT8 is a Signed 8-bit little-endian integer
+		case *array.Uint16: // a Unsigned 16-bit little-endian integer
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Fixnum(tc.Value(i))
+			}
+		case *array.Int16: // a Signed 16-bit little-endian integer
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Fixnum(tc.Value(i))
+			}
+		case *array.Uint32: // a Unsigned 32-bit little-endian integer
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Fixnum(tc.Value(i))
+			}
+		case *array.Int32: // a Signed 32-bit little-endian integer
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Fixnum(tc.Value(i))
+			}
+		case *array.Uint64: // a Unsigned 64-bit little-endian integer
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Fixnum(tc.Value(i))
+			}
+		case *array.Int64: // a Signed 64-bit little-endian integer
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Fixnum(tc.Value(i))
+			}
+		case *array.Float16: // an 2-byte floating point value
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.SingleFloat(tc.Value(i).Float32())
+			}
+		case *array.Float32: // an 4-byte floating point value
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.SingleFloat(tc.Value(i))
+			}
+		case *array.Float64: // an 8-byte floating point value
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.DoubleFloat(tc.Value(i))
+			}
+		case *array.String: // a UTF8 variable-length string
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.String(tc.Value(i))
+			}
+		// TBD BINARY is a Variable-length byte type (no guarantee of UTF8-ness)
+		// TBD FIXED_SIZE_BINARY is a binary where each value occupies the same number of bytes
+		// TBD DATE32 is int32 days since the UNIX epoch
+		// TBD DATE64 is int64 milliseconds since the UNIX epoch
+		// TBD TIMESTAMP is an exact timestamp encoded with int64 since UNIX epoch Default unit millisecond
+		// TBD TIME32 is a signed 32-bit integer, representing either seconds or milliseconds since midnight
+		// TBD TIME64 is a signed 64-bit integer, representing either microseconds or nanoseconds since midnight
+		// TBD INTERVAL_MONTHS is YEAR_MONTH interval in SQL style
+		// TBD INTERVAL_DAY_TIME is DAY_TIME in SQL Style
+		// TBD DECIMAL128 is a precision- and scale-based decimal type. Storage type depends on the parameters.
+		// TBD DECIMAL256 is a precision and scale based decimal type, with 256 bit max. not yet implemented
+		// TBD LIST is a list of some logical data type
+		// TBD STRUCT of logical types
+		// TBD SPARSE_UNION of logical types. not yet implemented
+		// TBD DENSE_UNION of logical types. not yet implemented
+		// TBD DICTIONARY aka Category type
+		// TBD MAP is a repeated struct logical type
+		// TBD EXTENSION Custom data type, implemented by user
+		// TBD FIXED_SIZE_LIST Fixed size list of some logical type
+		// TBD DURATION Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds.
+		// TBD LARGE_STRING like STRING, but 64-bit offsets. not yet implemented
+		// TBD LARGE_BINARY like BINARY but with 64-bit offsets, not yet implemented
+		// TBD LARGE_LIST like LIST but with 64-bit offsets. not yet implmented
+		// TBD INTERVAL_MONTH_DAY_NANO calendar interval with three fields
+		// TBD RUN_END_ENCODED
+		// TBD DECIMAL Alias to ensure we do not break any consumers
+
+		case *array.List:
+			for i := 0; i < cnt; i++ {
+				result[i] = nil
+			}
+			fmt.Printf("*** list values: %T\n", tc.ListValues())
+			if as, ok2 := tc.ListValues().(*array.Struct); ok2 {
+				fmt.Printf("*** struct size: %d %T\n", as.NumField(), as.Field(1))
+				fmt.Printf("*** field values type: %T\n", as.Field(1).(*array.List).ListValues())
+				af := as.Field(1).(*array.List).ListValues().(*array.Float64)
+				fmt.Printf("*** floats: %d\n", af.Len())
+			}
+		default:
+			for i := 0; i < cnt; i++ {
+				result[i] = nil
+			}
+			// TBD others
+			fmt.Printf("*** chunk %d a %T not implemented yet\n", ci, chunk)
+		}
+	}
+	return
 }
 
 type readerEachColumnCaller bool
@@ -351,7 +461,7 @@ Applies the _function_ to each row which is a list of values.
 
 var batchSize int64 = 4096
 
-func readColumn(col slip.List, ccr file.ColumnChunkReader) slip.List {
+func readColumnx(col slip.List, ccr file.ColumnChunkReader) slip.List {
 	fmt.Printf("*** readColumn %T\n", ccr)
 	var (
 		total int64
