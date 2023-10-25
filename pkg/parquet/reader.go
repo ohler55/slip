@@ -344,17 +344,51 @@ func readColumn(cr *pqarrow.ColumnReader) (result slip.List) {
 			}
 		// TBD BINARY is a Variable-length byte type (no guarantee of UTF8-ness)
 		// TBD FIXED_SIZE_BINARY is a binary where each value occupies the same number of bytes
-		// TBD DATE32 is int32 days since the UNIX epoch
-		// TBD DATE64 is int64 milliseconds since the UNIX epoch
-		// TBD TIMESTAMP is an exact timestamp encoded with int64 since UNIX epoch Default unit millisecond
+		case *array.Date32: // int32 days since the UNIX epoch
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Time(tc.Value(i).ToTime())
+			}
+		case *array.Date64: // int64 milliseconds since the UNIX epoch
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Time(tc.Value(i).ToTime())
+			}
+		case *array.Timestamp: // an exact timestamp encoded with int64 since UNIX epoch Default unit millisecond
+			for i := 0; i < cnt; i++ {
+				result[i] = slip.Time(tc.Value(i).ToTime(arrow.Millisecond))
+			}
 		// TBD TIME32 is a signed 32-bit integer, representing either seconds or milliseconds since midnight
-		// TBD TIME64 is a signed 64-bit integer, representing either microseconds or nanoseconds since midnight
+		case *array.Time32: // a signed 32-bit integer, representing either seconds or milliseconds since midnight
+			for i := 0; i < cnt; i++ {
+				// TBD there does not seem to be a way to determine if the
+				// time is in seconds or milliseconds yet that needs to be
+				// provided to the ToTime() function.
+				result[i] = slip.Time(tc.Value(i).ToTime(arrow.Millisecond))
+			}
+		case *array.Time64: // a signed 64-bit integer, representing either microseconds or nanoseconds since midnight
+			for i := 0; i < cnt; i++ {
+				// TBD there does not seem to be a way to determine if the
+				// time is in microseconds or nanoseconds yet that needs to be
+				// provided to the ToTime() function.
+				result[i] = slip.Time(tc.Value(i).ToTime(arrow.Nanosecond))
+			}
 		// TBD INTERVAL_MONTHS is YEAR_MONTH interval in SQL style
 		// TBD INTERVAL_DAY_TIME is DAY_TIME in SQL Style
 		// TBD DECIMAL128 is a precision- and scale-based decimal type. Storage type depends on the parameters.
 		// TBD DECIMAL256 is a precision and scale based decimal type, with 256 bit max. not yet implemented
 		// TBD LIST is a list of some logical data type
 		// TBD STRUCT of logical types
+		case *array.Struct: // struct of logical types
+			fcnt := tc.NumField()
+			fmt.Printf("*** num fields: %d\n", fcnt)
+			for i := 0; i < fcnt; i++ {
+				fmt.Printf("*** %T %v\n", tc.Field(i), tc.Field(i))
+			}
+			// TBD need to recurse, form column list then join on the way up
+			//  struct walks and appends child to struct list
+			//  maybe use arrow.Array or arrow.ArrayData and use that for building
+			//  arrow.Array.Data() for all chunks, returns an ArrayData
+			//  try out here before using it for all
+
 		// TBD SPARSE_UNION of logical types. not yet implemented
 		// TBD DENSE_UNION of logical types. not yet implemented
 		// TBD DICTIONARY aka Category type
