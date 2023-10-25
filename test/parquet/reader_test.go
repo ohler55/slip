@@ -14,7 +14,7 @@ import (
 
 func TestReaderBasic(t *testing.T) {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 	(&sliptest.Function{
@@ -26,19 +26,19 @@ func TestReaderBasic(t *testing.T) {
 
 func TestReaderFilepath(t *testing.T) {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send reader :filepath)`,
-		Expect: `"testdata/sample.parquet"`,
+		Expect: `"testdata/primitive.parquet"`,
 	}).Test(t)
 }
 
 func TestReaderVersion(t *testing.T) {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 	(&sliptest.Function{
@@ -50,43 +50,43 @@ func TestReaderVersion(t *testing.T) {
 
 func TestReaderCreatedBy(t *testing.T) {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send reader :created-by)`,
-		Expect: `"parquet-mr version 1.10.1 (build 7d648c1076647085126b685ba8288c8b8bf719ce)"`,
+		Expect: `"impala version 1.3.0-INTERNAL (build 8a48ddb1eff84592b3fc06bc6f51ec120e1fffc9)"`,
 	}).Test(t)
 }
 
 func TestReaderRowCount(t *testing.T) {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send reader :row-count)`,
-		Expect: "5",
+		Expect: "8",
 	}).Test(t)
 }
 
 func TestReaderColumnCount(t *testing.T) {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send reader :column-count)`,
-		Expect: "20",
+		Expect: "11",
 	}).Test(t)
 }
 
 func TestReaderSchema(t *testing.T) {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 	(&sliptest.Function{
@@ -143,9 +143,9 @@ func TestReaderBadInitFile(t *testing.T) {
 	})
 }
 
-func TestReaderColumns(t *testing.T) {
+func TestReaderColumnsPrimitive(t *testing.T) {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 

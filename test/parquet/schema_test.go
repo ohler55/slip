@@ -84,7 +84,7 @@ func TestSchemaDocs(t *testing.T) {
 }
 
 func TestSchemaFindName(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "nested-maps.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -95,17 +95,17 @@ func TestSchemaFindName(t *testing.T) {
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send (send schema :find 0) :name)`,
-		Expect: `"event_date"`,
+		Expect: `"a"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find '(leads list element lead_name)) :name)`,
-		Expect: `"lead_name"`,
+		Source: `(send (send schema :find '(a key_value key)) :name)`,
+		Expect: `"key"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find "leads" 0 0 'lead_name) :name)`,
-		Expect: `"lead_name"`,
+		Source: `(send (send schema :find "a" 0 0) :name)`,
+		Expect: `"key"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
@@ -140,7 +140,7 @@ func TestSchemaFindName(t *testing.T) {
 }
 
 func TestSchemaType(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "nested-maps.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -150,13 +150,13 @@ func TestSchemaType(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find 0) :type)`,
+		Source: `(send (send schema :find 1) :type)`,
 		Expect: ":primitive",
 	}).Test(t)
 }
 
 func TestSchemaFieldID(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "primitive.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -177,7 +177,7 @@ func TestSchemaFieldID(t *testing.T) {
 }
 
 func TestSchemaLogicalType(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "byte-array-decimal.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -188,12 +188,12 @@ func TestSchemaLogicalType(t *testing.T) {
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send (send schema :find 0) :logical-type)`,
-		Expect: `"Date"`,
+		Expect: `"Decimal(precision=4, scale=2)"`,
 	}).Test(t)
 }
 
 func TestSchemaConvertedType(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "byte-array-decimal.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -204,12 +204,12 @@ func TestSchemaConvertedType(t *testing.T) {
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send (send schema :find 0) :converted-type)`,
-		Expect: `"DATE"`,
+		Expect: `"DECIMAL"`,
 	}).Test(t)
 }
 
 func TestSchemaPath(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "nested-maps.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -219,13 +219,13 @@ func TestSchemaPath(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find '(leads list element lead_name)) :path)`,
-		Expect: `"leads.list.element.lead_name"`,
+		Source: `(send (send schema :find '(0 0 1 0 0)) :path)`,
+		Expect: `"a.key_value.value.key_value.key"`,
 	}).Test(t)
 }
 
 func TestSchemaTypeLength(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "primitive.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -235,7 +235,7 @@ func TestSchemaTypeLength(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find '(source name)) :type-length)`,
+		Source: `(send (send schema :find 9) :type-length)`,
 		Expect: "nil",
 	}).Test(t)
 
@@ -251,7 +251,7 @@ func TestSchemaTypeLength(t *testing.T) {
 }
 
 func TestSchemaPrecision(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "byte-array-decimal.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -261,8 +261,8 @@ func TestSchemaPrecision(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find 'frequency) :precision)`,
-		Expect: "0",
+		Source: `(send (send schema :find 0) :precision)`,
+		Expect: "4",
 	}).Test(t)
 
 	type Dummy struct {
@@ -282,7 +282,7 @@ func TestSchemaPrecision(t *testing.T) {
 }
 
 func TestSchemaScale(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "byte-array-decimal.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -292,28 +292,13 @@ func TestSchemaScale(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find 'avg_heart_rate) :scale)`,
-		Expect: "0",
-	}).Test(t)
-
-	type Dummy struct {
-		Dec int64 `parquet:"logical=decimal, logical.precision=9, logical.scale=3"`
-	}
-	sch, err := schema.NewSchemaFromStruct(Dummy{})
-	tt.Nil(t, err)
-	node := sch.Root().Field(0)
-	inst := parquet.SchemaFlavor().MakeInstance().(*flavors.Instance)
-	inst.Any = node
-	scope.Let("schema", inst)
-	(&sliptest.Function{
-		Scope:  scope,
-		Source: `(send schema :scale)`,
-		Expect: "3",
+		Source: `(send (send schema :find 0) :scale)`,
+		Expect: "2",
 	}).Test(t)
 }
 
 func TestSchemaRepetition(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "nested-maps.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -328,13 +313,13 @@ func TestSchemaRepetition(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find 'leads 'list) :repetition)`,
+		Source: `(send (send schema :find 'a 'key_value) :repetition)`,
 		Expect: ":repeated",
 	}).Test(t)
 }
 
 func TestSchemaParent(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "nested-maps.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -350,7 +335,7 @@ func TestSchemaParent(t *testing.T) {
 }
 
 func TestSchemaFields(t *testing.T) {
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "nested-maps.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -358,7 +343,7 @@ func TestSchemaFields(t *testing.T) {
 		Source: `(send schema :fields)`,
 		Validate: func(t *testing.T, v slip.Object) {
 			list := v.(slip.List)
-			tt.Equal(t, 20, len(list))
+			tt.Equal(t, 3, len(list))
 			inst := list[0].(*flavors.Instance)
 			tt.Equal(t, "parquet-schema-flavor", inst.Flavor.Name())
 		},
@@ -367,7 +352,7 @@ func TestSchemaFields(t *testing.T) {
 
 func TestSchemaWrite(t *testing.T) {
 	var out strings.Builder
-	scope := setupSchemaTest(t)
+	scope := setupSchemaTest(t, "nested-maps.parquet")
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 	scope.Let("out", &slip.OutputStream{Writer: &out})
 
@@ -378,93 +363,35 @@ func TestSchemaWrite(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t,
 		`required group spark_schema {
-  optional int32 event_date (Date);
-  optional byte_array request_id (String);
-  optional byte_array upload_id (String);
-  optional byte_array subject_id (String);
-  optional int96 received_time;
-  optional byte_array sample_type (String);
-  optional byte_array sample_id (String);
-  optional int96 creation_time;
-  optional int96 start_time;
-  optional int96 end_time;
-  optional group source {
-    optional byte_array name (String);
-    optional byte_array revision_product_type (String);
-    optional byte_array bundle_id (String);
-    optional int64 options;
-    optional byte_array version (String);
-    optional byte_array product_type (String);
-    optional byte_array os_version (String);
-  }
-  optional group device {
-    optional byte_array name (String);
-    optional byte_array manufacturer (String);
-    optional byte_array model (String);
-    optional byte_array hardware_version (String);
-    optional byte_array firmware_version (String);
-    optional byte_array software_version (String);
-    optional byte_array local_id (String);
-    optional byte_array udi_id (String);
-  }
-  optional group metadata {
-    optional group kv (Map) {
-      repeated group key_value {
-        required byte_array key (String);
-        optional group value {
-          optional byte_array string_value (String);
-          optional int96 time_value;
-          optional int64 integer_value;
-          optional double double_value;
-          optional group quantity_value {
-            optional double original_value;
-            optional byte_array original_unit (String);
-          }
-          optional byte_array data_value;
+  optional group a (Map) {
+    repeated group key_value {
+      required byte_array key (String);
+      optional group value (Map) {
+        repeated group key_value {
+          required int32 key;
+          required boolean value;
         }
       }
     }
   }
-  optional group query {
-    optional int64 start_sequence;
-    optional int64 end_sequence;
-    optional int96 start_time;
-    optional int96 end_time;
-    optional int96 creation_time;
-  }
-  optional group leads (List) {
-    repeated group list {
-      optional group element {
-        optional byte_array lead_name (String);
-        optional group value_microvolts (List) {
-          repeated group list {
-            required double element;
-          }
-        }
-      }
-    }
-  }
-  optional int64 count;
-  optional double frequency;
-  optional double avg_heart_rate;
-  optional byte_array classification (String);
-  optional int64 symptoms;
+  required int32 b;
+  required double c;
 }
 `, out.String())
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find 0) :write nil)`,
-		Expect: `"optional int32 event_date (Date);
+		Source: `(send (send schema :find 0 0 0) :write nil)`,
+		Expect: `"required byte_array key (String);
 "`,
 	}).Test(t)
 	out.Reset()
 	scope.Let("*standard-output*", &slip.OutputStream{Writer: &out})
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(send (send schema :find 0) :write t)`,
+		Source: `(send (send schema :find 0 0 0) :write t)`,
 		Expect: "nil",
 	}).Test(t)
-	tt.Equal(t, `optional int32 event_date (Date);
+	tt.Equal(t, `required byte_array key (String);
 `, out.String())
 
 	(&sliptest.Function{
@@ -608,9 +535,10 @@ func TestSchemaWrite2(t *testing.T) {
 
 }
 
-func setupSchemaTest(t *testing.T) *slip.Scope {
+func setupSchemaTest(t *testing.T, filename string) *slip.Scope {
 	scope := slip.NewScope()
-	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/sample.parquet")`).Eval(scope, nil)
+	pr := slip.ReadString(
+		fmt.Sprintf(`(make-instance 'parquet-reader-flavor :file "testdata/%s")`, filename)).Eval(scope, nil)
 	scope.Let("reader", pr)
 	schema := slip.ReadString(`(send reader :schema)`).Eval(scope, nil)
 	scope.Let("schema", schema)

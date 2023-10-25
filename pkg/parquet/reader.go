@@ -279,150 +279,155 @@ Returns the row columns of the reader file.
 }
 
 func readColumn(cr *pqarrow.ColumnReader) (result slip.List) {
+	// TBD is this the way to read chunks?
 	ac, err := cr.NextBatch(100) // *arrow.Chunked
 	if err != nil {
 		panic(err)
 	}
-	// TBD split out for nested data
-	for ci, chunk := range ac.Chunks() {
-		cnt := chunk.Len()
-		result = make(slip.List, cnt)
-		switch tc := chunk.(type) {
-		case *array.Null: // type having no physical storage
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.SimpleObject(tc.Value(i))
-			}
-		case *array.Boolean: // is a 1 bit, LSB bit-packed ordering
-			for i := 0; i < cnt; i++ {
-				if tc.Value(i) {
-					result[i] = slip.True
-				} else {
-					result[i] = nil
-				}
-			}
-		// TBD UINT8 is an Unsigned 8-bit little-endian integer
-		// TBD INT8 is a Signed 8-bit little-endian integer
-		case *array.Uint16: // a Unsigned 16-bit little-endian integer
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Fixnum(tc.Value(i))
-			}
-		case *array.Int16: // a Signed 16-bit little-endian integer
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Fixnum(tc.Value(i))
-			}
-		case *array.Uint32: // a Unsigned 32-bit little-endian integer
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Fixnum(tc.Value(i))
-			}
-		case *array.Int32: // a Signed 32-bit little-endian integer
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Fixnum(tc.Value(i))
-			}
-		case *array.Uint64: // a Unsigned 64-bit little-endian integer
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Fixnum(tc.Value(i))
-			}
-		case *array.Int64: // a Signed 64-bit little-endian integer
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Fixnum(tc.Value(i))
-			}
-		case *array.Float16: // an 2-byte floating point value
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.SingleFloat(tc.Value(i).Float32())
-			}
-		case *array.Float32: // an 4-byte floating point value
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.SingleFloat(tc.Value(i))
-			}
-		case *array.Float64: // an 8-byte floating point value
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.DoubleFloat(tc.Value(i))
-			}
-		case *array.String: // a UTF8 variable-length string
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.String(tc.Value(i))
-			}
-		// TBD BINARY is a Variable-length byte type (no guarantee of UTF8-ness)
-		// TBD FIXED_SIZE_BINARY is a binary where each value occupies the same number of bytes
-		case *array.Date32: // int32 days since the UNIX epoch
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Time(tc.Value(i).ToTime())
-			}
-		case *array.Date64: // int64 milliseconds since the UNIX epoch
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Time(tc.Value(i).ToTime())
-			}
-		case *array.Timestamp: // an exact timestamp encoded with int64 since UNIX epoch Default unit millisecond
-			for i := 0; i < cnt; i++ {
-				result[i] = slip.Time(tc.Value(i).ToTime(arrow.Millisecond))
-			}
-		// TBD TIME32 is a signed 32-bit integer, representing either seconds or milliseconds since midnight
-		case *array.Time32: // a signed 32-bit integer, representing either seconds or milliseconds since midnight
-			for i := 0; i < cnt; i++ {
-				// TBD there does not seem to be a way to determine if the
-				// time is in seconds or milliseconds yet that needs to be
-				// provided to the ToTime() function.
-				result[i] = slip.Time(tc.Value(i).ToTime(arrow.Millisecond))
-			}
-		case *array.Time64: // a signed 64-bit integer, representing either microseconds or nanoseconds since midnight
-			for i := 0; i < cnt; i++ {
-				// TBD there does not seem to be a way to determine if the
-				// time is in microseconds or nanoseconds yet that needs to be
-				// provided to the ToTime() function.
-				result[i] = slip.Time(tc.Value(i).ToTime(arrow.Nanosecond))
-			}
-		// TBD INTERVAL_MONTHS is YEAR_MONTH interval in SQL style
-		// TBD INTERVAL_DAY_TIME is DAY_TIME in SQL Style
-		// TBD DECIMAL128 is a precision- and scale-based decimal type. Storage type depends on the parameters.
-		// TBD DECIMAL256 is a precision and scale based decimal type, with 256 bit max. not yet implemented
-		// TBD LIST is a list of some logical data type
-		// TBD STRUCT of logical types
-		case *array.Struct: // struct of logical types
-			fcnt := tc.NumField()
-			fmt.Printf("*** num fields: %d\n", fcnt)
-			for i := 0; i < fcnt; i++ {
-				fmt.Printf("*** %T %v\n", tc.Field(i), tc.Field(i))
-			}
-			// TBD need to recurse, form column list then join on the way up
-			//  struct walks and appends child to struct list
-			//  maybe use arrow.Array or arrow.ArrayData and use that for building
-			//  arrow.Array.Data() for all chunks, returns an ArrayData
-			//  try out here before using it for all
-
-		// TBD SPARSE_UNION of logical types. not yet implemented
-		// TBD DENSE_UNION of logical types. not yet implemented
-		// TBD DICTIONARY aka Category type
-		// TBD MAP is a repeated struct logical type
-		// TBD EXTENSION Custom data type, implemented by user
-		// TBD FIXED_SIZE_LIST Fixed size list of some logical type
-		// TBD DURATION Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds.
-		// TBD LARGE_STRING like STRING, but 64-bit offsets. not yet implemented
-		// TBD LARGE_BINARY like BINARY but with 64-bit offsets, not yet implemented
-		// TBD LARGE_LIST like LIST but with 64-bit offsets. not yet implmented
-		// TBD INTERVAL_MONTH_DAY_NANO calendar interval with three fields
-		// TBD RUN_END_ENCODED
-		// TBD DECIMAL Alias to ensure we do not break any consumers
-
-		case *array.List:
-			for i := 0; i < cnt; i++ {
-				result[i] = nil
-			}
-			fmt.Printf("*** list values: %T\n", tc.ListValues())
-			if as, ok2 := tc.ListValues().(*array.Struct); ok2 {
-				fmt.Printf("*** struct size: %d %T\n", as.NumField(), as.Field(1))
-				fmt.Printf("*** field values type: %T\n", as.Field(1).(*array.List).ListValues())
-				af := as.Field(1).(*array.List).ListValues().(*array.Float64)
-				fmt.Printf("*** floats: %d\n", af.Len())
-			}
-		default:
-			for i := 0; i < cnt; i++ {
-				result[i] = nil
-			}
-			// TBD others
-			fmt.Printf("*** chunk %d a %T not implemented yet\n", ci, chunk)
-		}
+	for _, chunk := range ac.Chunks() {
+		result = arrayToLisp(result, chunk)
 	}
 	return
+}
+
+func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
+	fmt.Printf("*** arrayToLisp: %T\n", aa)
+	cnt := aa.Len()
+	switch tc := aa.(type) {
+	case *array.Null: // type having no physical storage
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.SimpleObject(tc.Value(i)))
+		}
+	case *array.Boolean: // is a 1 bit, LSB bit-packed ordering
+		for i := 0; i < cnt; i++ {
+			if tc.Value(i) {
+				col = append(col, slip.True)
+			} else {
+				col = append(col, nil)
+			}
+		}
+	// TBD UINT8 is an Unsigned 8-bit little-endian integer
+	// TBD INT8 is a Signed 8-bit little-endian integer
+	case *array.Uint16: // a Unsigned 16-bit little-endian integer
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
+	case *array.Int16: // a Signed 16-bit little-endian integer
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
+	case *array.Uint32: // a Unsigned 32-bit little-endian integer
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
+	case *array.Int32: // a Signed 32-bit little-endian integer
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
+	case *array.Uint64: // a Unsigned 64-bit little-endian integer
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
+	case *array.Int64: // a Signed 64-bit little-endian integer
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
+	case *array.Float16: // an 2-byte floating point value
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.SingleFloat(tc.Value(i).Float32()))
+		}
+	case *array.Float32: // an 4-byte floating point value
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.SingleFloat(tc.Value(i)))
+		}
+	case *array.Float64: // an 8-byte floating point value
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.DoubleFloat(tc.Value(i)))
+		}
+	case *array.String: // a UTF8 variable-length string
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.String(tc.Value(i)))
+		}
+	// TBD BINARY is a Variable-length byte type (no guarantee of UTF8-ness)
+	// TBD FIXED_SIZE_BINARY is a binary where each value occupies the same number of bytes
+	case *array.Date32: // int32 days since the UNIX epoch
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Time(tc.Value(i).ToTime()))
+		}
+	case *array.Date64: // int64 milliseconds since the UNIX epoch
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Time(tc.Value(i).ToTime()))
+		}
+	case *array.Timestamp: // an exact timestamp encoded with int64 since UNIX epoch Default unit millisecond
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Time(tc.Value(i).ToTime(arrow.Millisecond)))
+		}
+	// TBD TIME32 is a signed 32-bit integer, representing either seconds or milliseconds since midnight
+	case *array.Time32: // a signed 32-bit integer, representing either seconds or milliseconds since midnight
+		for i := 0; i < cnt; i++ {
+			// TBD there does not seem to be a way to determine if the
+			// time is in seconds or milliseconds yet that needs to be
+			// provided to the ToTime() function.
+			col = append(col, slip.Time(tc.Value(i).ToTime(arrow.Millisecond)))
+		}
+	case *array.Time64: // a signed 64-bit integer, representing either microseconds or nanoseconds since midnight
+		for i := 0; i < cnt; i++ {
+			// TBD there does not seem to be a way to determine if the
+			// time is in microseconds or nanoseconds yet that needs to be
+			// provided to the ToTime() function.
+			col = append(col, slip.Time(tc.Value(i).ToTime(arrow.Nanosecond)))
+		}
+	// TBD INTERVAL_MONTHS is YEAR_MONTH interval in SQL style
+	// TBD INTERVAL_DAY_TIME is DAY_TIME in SQL Style
+	// TBD DECIMAL128 is a precision- and scale-based decimal type. Storage type depends on the parameters.
+	// TBD DECIMAL256 is a precision and scale based decimal type, with 256 bit max. not yet implemented
+	// TBD LIST is a list of some logical data type
+	// TBD STRUCT of logical types
+	case *array.Struct: // struct of logical types
+		fcnt := tc.NumField()
+		fmt.Printf("*** num fields: %d\n", fcnt)
+		for i := 0; i < fcnt; i++ {
+			fmt.Printf("*** %T %v\n", tc.Field(i), tc.Field(i))
+		}
+		// TBD need to recurse, form column list then join on the way up
+		//  struct walks and appends child to struct list
+		//  maybe use arrow.Array or arrow.ArrayData and use that for building
+		//  arrow.Array.Data() for all chunks, returns an ArrayData
+		//  try out here before using it for all
+
+	// TBD SPARSE_UNION of logical types. not yet implemented
+	// TBD DENSE_UNION of logical types. not yet implemented
+	// TBD DICTIONARY aka Category type
+	// TBD MAP is a repeated struct logical type
+	// TBD EXTENSION Custom data type, implemented by user
+	// TBD FIXED_SIZE_LIST Fixed size list of some logical type
+	// TBD DURATION Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds.
+	// TBD LARGE_STRING like STRING, but 64-bit offsets. not yet implemented
+	// TBD LARGE_BINARY like BINARY but with 64-bit offsets, not yet implemented
+	// TBD LARGE_LIST like LIST but with 64-bit offsets. not yet implmented
+	// TBD INTERVAL_MONTH_DAY_NANO calendar interval with three fields
+	// TBD RUN_END_ENCODED
+	// TBD DECIMAL Alias to ensure we do not break any consumers
+
+	case *array.List:
+		for i := 0; i < cnt; i++ {
+			col = append(col, nil)
+		}
+		fmt.Printf("*** list values: %T\n", tc.ListValues())
+		if as, ok2 := tc.ListValues().(*array.Struct); ok2 {
+			fmt.Printf("*** struct size: %d %T\n", as.NumField(), as.Field(1))
+			fmt.Printf("*** field values type: %T\n", as.Field(1).(*array.List).ListValues())
+			af := as.Field(1).(*array.List).ListValues().(*array.Float64)
+			fmt.Printf("*** floats: %d\n", af.Len())
+		}
+	default:
+		for i := 0; i < cnt; i++ {
+			col = append(col, nil)
+		}
+		// TBD others
+		fmt.Printf("*** chunk %T not implemented yet\n", aa)
+	}
+	return col
 }
 
 type readerEachColumnCaller bool
