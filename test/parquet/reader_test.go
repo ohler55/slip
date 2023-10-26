@@ -153,6 +153,72 @@ func TestReaderColumnsPrimitive(t *testing.T) {
 		Scope:  scope,
 		Source: `(send reader :columns)`,
 		Validate: func(t *testing.T, v slip.Object) {
+			vlist := v.(slip.List)
+			for i, x := range []string{
+				"(4 5 6 7 2 3 0 1)",
+				"(t nil t nil t nil t nil)",
+				"(0 1 0 1 0 1 0 1)",
+				"(0 1 0 1 0 1 0 1)",
+				"(0 1 0 1 0 1 0 1)",
+				"(0 10 0 10 0 10 0 10)",
+				"(0 1.1 0 1.1 0 1.1 0 1.1)",
+				"(0 10.1 0 10.1 0 10.1 0 10.1)",
+				`("03/01/09" "03/01/09" "04/01/09" "04/01/09" "02/01/09" "02/01/09" "01/01/09" "01/01/09")`,
+				`("0" "1" "0" "1" "0" "1" "0" "1")`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(vlist[i]))
+			}
+			for i, x := range []string{
+				"@2009-03-01T00:00:00Z",
+				"@2009-03-01T00:01:00Z",
+				"@2009-04-01T00:00:00Z",
+				"@2009-04-01T00:01:00Z",
+				"@2009-02-01T00:00:00Z",
+				"@2009-02-01T00:01:00Z",
+				"@2009-01-01T00:00:00Z",
+				"@2009-01-01T00:01:00Z",
+			} {
+				tt.Equal(t, x, slip.ObjectString(vlist[10].(slip.List)[i]))
+			}
+		},
+	}).Test(t)
+}
+
+func TestReaderColumnsNestedList(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(
+		`(make-instance 'parquet-reader-flavor :file "testdata/nested-list.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :columns)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			vlist := v.(slip.List)
+			for i, x := range []string{
+				`((("a" "b") ("c")) (nil ("d")))`,
+				`((("a" "b") ("c" "d")) (nil ("e")))`,
+				`((("a" "b") ("c" "d") ("e")) (nil ("f")))`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(vlist[0].(slip.List)[i]))
+			}
+			tt.Equal(t, "(1 1 1)", slip.ObjectString(vlist[1]))
+		},
+	}).Test(t)
+}
+
+func TestReaderColumnsNestedMap(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(
+		`(make-instance 'parquet-reader-flavor :file "testdata/nested-maps.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :columns)`,
+		Validate: func(t *testing.T, v slip.Object) {
 			fmt.Printf("*** validate %T %s\n", v, v)
 		},
 	}).Test(t)

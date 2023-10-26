@@ -4,6 +4,7 @@ package parquet
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/apache/arrow/go/v13/parquet"
 	"github.com/apache/arrow/go/v13/parquet/file"
 	"github.com/apache/arrow/go/v13/parquet/pqarrow"
+	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -348,7 +350,10 @@ func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
 		for i := 0; i < cnt; i++ {
 			col = append(col, slip.String(tc.Value(i)))
 		}
-	// TBD BINARY is a Variable-length byte type (no guarantee of UTF8-ness)
+	case *array.Binary: // a Variable-length byte type (no guarantee of UTF8-ness)
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.String(tc.Value(i)))
+		}
 	// TBD FIXED_SIZE_BINARY is a binary where each value occupies the same number of bytes
 	case *array.Date32: // int32 days since the UNIX epoch
 		for i := 0; i < cnt; i++ {
@@ -359,29 +364,44 @@ func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
 			col = append(col, slip.Time(tc.Value(i).ToTime()))
 		}
 	case *array.Timestamp: // an exact timestamp encoded with int64 since UNIX epoch Default unit millisecond
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Time(tc.Value(i).ToTime(arrow.Millisecond)))
+		tu := arrow.Millisecond
+		if at, ok := tc.DataType().(*arrow.TimestampType); ok {
+			tu = at.Unit
 		}
-	// TBD TIME32 is a signed 32-bit integer, representing either seconds or milliseconds since midnight
-	case *array.Time32: // a signed 32-bit integer, representing either seconds or milliseconds since midnight
 		for i := 0; i < cnt; i++ {
-			// TBD there does not seem to be a way to determine if the
-			// time is in seconds or milliseconds yet that needs to be
-			// provided to the ToTime() function.
-			col = append(col, slip.Time(tc.Value(i).ToTime(arrow.Millisecond)))
+			col = append(col, slip.Time(tc.Value(i).ToTime(tu)))
+		}
+	case *array.Time32: // a signed 32-bit integer, representing either seconds or milliseconds since midnight
+		tu := arrow.Millisecond
+		if at, ok := tc.DataType().(*arrow.Time32Type); ok {
+			tu = at.Unit
+		}
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Time(tc.Value(i).ToTime(tu)))
 		}
 	case *array.Time64: // a signed 64-bit integer, representing either microseconds or nanoseconds since midnight
+		tu := arrow.Nanosecond
+		if at, ok := tc.DataType().(*arrow.Time64Type); ok {
+			tu = at.Unit
+		}
 		for i := 0; i < cnt; i++ {
-			// TBD there does not seem to be a way to determine if the
-			// time is in microseconds or nanoseconds yet that needs to be
-			// provided to the ToTime() function.
-			col = append(col, slip.Time(tc.Value(i).ToTime(arrow.Nanosecond)))
+			col = append(col, slip.Time(tc.Value(i).ToTime(tu)))
 		}
 	// TBD INTERVAL_MONTHS is YEAR_MONTH interval in SQL style
 	// TBD INTERVAL_DAY_TIME is DAY_TIME in SQL Style
 	// TBD DECIMAL128 is a precision- and scale-based decimal type. Storage type depends on the parameters.
 	// TBD DECIMAL256 is a precision and scale based decimal type, with 256 bit max. not yet implemented
-	// TBD LIST is a list of some logical data type
+	case *array.List: // a list of some logical data type There does no appear
+		// to be any way to get the data for each item so the horribly
+		// inefficient approach is taken of getting the JSON encoded values
+		// and parsing.
+		for i := 0; i < cnt; i++ {
+			if js, ok := tc.GetOneForMarshal(i).(json.RawMessage); ok {
+				col = append(col, slip.SimpleObject(oj.MustParse([]byte(js))))
+			} else {
+				col = append(col, nil)
+			}
+		}
 	// TBD STRUCT of logical types
 	case *array.Struct: // struct of logical types
 		fcnt := tc.NumField()
@@ -398,7 +418,10 @@ func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
 	// TBD SPARSE_UNION of logical types. not yet implemented
 	// TBD DENSE_UNION of logical types. not yet implemented
 	// TBD DICTIONARY aka Category type
-	// TBD MAP is a repeated struct logical type
+	case *array.Map: // a repeated struct logical type
+		fmt.Printf("*** map items: %T %v\n", tc.Items(), tc.Items())
+		fmt.Printf("*** map keys: %T %v\n", tc.Keys(), tc.Keys())
+
 	// TBD EXTENSION Custom data type, implemented by user
 	// TBD FIXED_SIZE_LIST Fixed size list of some logical type
 	// TBD DURATION Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds.
@@ -409,17 +432,6 @@ func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
 	// TBD RUN_END_ENCODED
 	// TBD DECIMAL Alias to ensure we do not break any consumers
 
-	case *array.List:
-		for i := 0; i < cnt; i++ {
-			col = append(col, nil)
-		}
-		fmt.Printf("*** list values: %T\n", tc.ListValues())
-		if as, ok2 := tc.ListValues().(*array.Struct); ok2 {
-			fmt.Printf("*** struct size: %d %T\n", as.NumField(), as.Field(1))
-			fmt.Printf("*** field values type: %T\n", as.Field(1).(*array.List).ListValues())
-			af := as.Field(1).(*array.List).ListValues().(*array.Float64)
-			fmt.Printf("*** floats: %d\n", af.Len())
-		}
 	default:
 		for i := 0; i < cnt; i++ {
 			col = append(col, nil)
