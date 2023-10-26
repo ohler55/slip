@@ -3,12 +3,13 @@
 package parquet_test
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -123,11 +124,23 @@ func TestReaderDocs(t *testing.T) {
 	_ = slip.ReadString(`(describe-method parquet-reader-flavor :created-by out)`).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":created-by"))
 
+	_ = slip.ReadString(`(describe-method parquet-reader-flavor :column-count out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":column-count"))
+
+	_ = slip.ReadString(`(describe-method parquet-reader-flavor :columns out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":columns"))
+
+	_ = slip.ReadString(`(describe-method parquet-reader-flavor :each-column out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":each-column"))
+
 	_ = slip.ReadString(`(describe-method parquet-reader-flavor :row-count out)`).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":row-count"))
 
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :column-count out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":column-count"))
+	_ = slip.ReadString(`(describe-method parquet-reader-flavor :rows out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":rows"))
+
+	_ = slip.ReadString(`(describe-method parquet-reader-flavor :each-row out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":each-row"))
 
 	_ = slip.ReadString(`(describe-method parquet-reader-flavor :schema out)`).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":schema"))
@@ -219,7 +232,40 @@ func TestReaderColumnsNestedMap(t *testing.T) {
 		Scope:  scope,
 		Source: `(send reader :columns)`,
 		Validate: func(t *testing.T, v slip.Object) {
-			fmt.Printf("*** validate %T %s\n", v, v)
+			vlist := v.(slip.List)
+			for i, x := range []string{
+				`(("a" . (1 . t)) ("b" . (2 . nil)) ("c" . (1 . t)) ("d" . (1 . t)) ("e" . (3 . t)) ("f" . (4 . nil)))`,
+				`(1 1 1 1 1 1)`,
+				`(1 1 1 1 1 1)`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(vlist[i]))
+			}
+		},
+	}).Test(t)
+}
+
+func TestReaderColumnsNestedStruct(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(
+		`(make-instance 'parquet-reader-flavor :file "testdata/nested-struct.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :columns)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			vlist := v.(slip.List)
+			tt.Equal(t, 36, len(vlist))
+			// Pick a few at random and verify the contents.
+			// Order is arbitrary since a map is created first so convert
+			// back to a map and use pretty.SEN to sort the output.
+			tt.Equal(t, "[{count: 495 max: 742 mean: 416 min: 115 sum: 206195 variance: 10374}]",
+				pretty.SEN(bag.ObjectToBag(vlist[1]), 100.3))
+			tt.Equal(t, "[{count: 495 max: 0 mean: 0 min: 0 sum: 0 variance: 0}]",
+				pretty.SEN(bag.ObjectToBag(vlist[20]), 100.3))
+			tt.Equal(t, "[{count: 81 max: 100 mean: 1.2345679012345678 min: 0 sum: 100 variance: 123.45679012345684}]",
+				pretty.SEN(bag.ObjectToBag(vlist[26]), 100.3))
 		},
 	}).Test(t)
 }

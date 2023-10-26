@@ -66,7 +66,7 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 		key, _ := args[0].(slip.Symbol)
 		switch {
 		case strings.EqualFold(":set", string(key)):
-			obj.Any = objectToBag(args[1])
+			obj.Any = ObjectToBag(args[1])
 		case strings.EqualFold(":parse", string(key)):
 			so, ok := args[1].(slip.String)
 			if !ok {

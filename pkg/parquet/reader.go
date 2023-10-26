@@ -11,13 +11,14 @@ import (
 	"github.com/apache/arrow/go/v13/arrow"
 	"github.com/apache/arrow/go/v13/arrow/array"
 	"github.com/apache/arrow/go/v13/arrow/memory"
-	"github.com/apache/arrow/go/v13/parquet"
 	"github.com/apache/arrow/go/v13/parquet/file"
 	"github.com/apache/arrow/go/v13/parquet/pqarrow"
 	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
+
+const batchSize int64 = 4096
 
 var (
 	readerFlavor *flavors.Flavor
@@ -89,45 +90,6 @@ func (caller readerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	}
 	obj.Any = fr
 	obj.Let(slip.Symbol("filepath"), slip.String(path))
-
-	return nil
-
-	var schem *arrow.Schema
-	if schem, err = fr.Schema(); err != nil {
-		panic(err)
-	}
-	fmt.Printf("*** schema: %v\n", schem)
-	for i := 0; i < schem.NumFields(); i++ {
-		fmt.Printf("*** field %d: %s %s\n", i, schem.Field(i).Name, schem.Field(i).Type)
-		var cr *pqarrow.ColumnReader
-		cr, _ = fr.GetColumn(context.Background(), i)
-		fmt.Printf("*** cr %d: %T %v\n", i, cr, cr)
-		if cr == nil {
-			break
-		}
-		if i == 12 {
-			fmt.Printf("********** skipping %d\n", i)
-			// TBD why does this panic if not skipped?
-			continue
-		}
-		var ac *arrow.Chunked
-		if ac, err = cr.NextBatch(100); err != nil {
-			panic(err)
-		}
-		fmt.Printf("*** ac: %v\n", ac)
-		for j, chunk := range ac.Chunks() {
-			fmt.Printf("*** chunk %d %T len: %d\n", j, chunk, chunk.Len())
-			if al, ok := chunk.(*array.List); ok {
-				fmt.Printf("*** list values: %T\n", al.ListValues())
-				if as, ok2 := al.ListValues().(*array.Struct); ok2 {
-					fmt.Printf("*** struct size: %d %T\n", as.NumField(), as.Field(1))
-					fmt.Printf("*** field values type: %T\n", as.Field(1).(*array.List).ListValues())
-					af := as.Field(1).(*array.List).ListValues().(*array.Float64)
-					fmt.Printf("*** floats: %d\n", af.Len())
-				}
-			}
-		}
-	}
 
 	return nil
 }
@@ -257,14 +219,7 @@ func (caller readerColumnsCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 		}
 		columns := make(slip.List, schem.NumFields())
 		for i := 0; i < schem.NumFields(); i++ {
-			fmt.Printf("****** field %d: %s %s\n", i, schem.Field(i).Name, schem.Field(i).Type)
-			// call readColumn(cr)
 			if cr, _ := fr.GetColumn(context.Background(), i); cr != nil {
-				if i == 12 {
-					fmt.Printf("********** skipping %d\n", i)
-					// TBD why does this panic if not skipped?
-					continue
-				}
 				columns[i] = readColumn(cr)
 			}
 		}
@@ -281,19 +236,22 @@ Returns the row columns of the reader file.
 }
 
 func readColumn(cr *pqarrow.ColumnReader) (result slip.List) {
-	// TBD is this the way to read chunks?
-	ac, err := cr.NextBatch(100) // *arrow.Chunked
-	if err != nil {
-		panic(err)
-	}
-	for _, chunk := range ac.Chunks() {
-		result = arrayToLisp(result, chunk)
+	for {
+		ac, err := cr.NextBatch(batchSize) // *arrow.Chunked
+		if err != nil {
+			panic(err)
+		}
+		if ac.Len() == 0 {
+			break
+		}
+		for _, chunk := range ac.Chunks() {
+			result = arrayToLisp(result, chunk)
+		}
 	}
 	return
 }
 
 func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
-	fmt.Printf("*** arrayToLisp: %T\n", aa)
 	cnt := aa.Len()
 	switch tc := aa.(type) {
 	case *array.Null: // type having no physical storage
@@ -308,8 +266,14 @@ func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
 				col = append(col, nil)
 			}
 		}
-	// TBD UINT8 is an Unsigned 8-bit little-endian integer
-	// TBD INT8 is a Signed 8-bit little-endian integer
+	case *array.Uint8: // a Unsigned 8-bit little-endian integer
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
+	case *array.Int8: // a Signed 8-bit little-endian integer
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
 	case *array.Uint16: // a Unsigned 16-bit little-endian integer
 		for i := 0; i < cnt; i++ {
 			col = append(col, slip.Fixnum(tc.Value(i)))
@@ -387,59 +351,37 @@ func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
 		for i := 0; i < cnt; i++ {
 			col = append(col, slip.Time(tc.Value(i).ToTime(tu)))
 		}
-	// TBD INTERVAL_MONTHS is YEAR_MONTH interval in SQL style
-	// TBD INTERVAL_DAY_TIME is DAY_TIME in SQL Style
-	// TBD DECIMAL128 is a precision- and scale-based decimal type. Storage type depends on the parameters.
-	// TBD DECIMAL256 is a precision and scale based decimal type, with 256 bit max. not yet implemented
-	case *array.List: // a list of some logical data type There does no appear
-		// to be any way to get the data for each item so the horribly
+	case *array.Struct: // struct of logical types
+		for i := 0; i < cnt; i++ {
+			col = append(col, forMarshalToLisp(tc.GetOneForMarshal(i)))
+		}
+	case *array.Map: // a repeated struct logical type
+		items := arrayToLisp(nil, tc.Items())
+		keys := arrayToLisp(nil, tc.Keys())
+		for i, k := range keys {
+			col = append(col, slip.List{k, slip.Tail{Value: items[i]}})
+		}
+
+	// TBD FIXED_SIZE_LIST Fixed size list of some logical type
+	// TBD DURATION Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds.
+
+	default:
+		// Includes array.Struct and array.List since there does not appear to
+		// be any way to get the data for each item so the horribly
 		// inefficient approach is taken of getting the JSON encoded values
 		// and parsing.
 		for i := 0; i < cnt; i++ {
-			if js, ok := tc.GetOneForMarshal(i).(json.RawMessage); ok {
-				col = append(col, slip.SimpleObject(oj.MustParse([]byte(js))))
-			} else {
-				col = append(col, nil)
-			}
+			col = append(col, forMarshalToLisp(tc.GetOneForMarshal(i)))
 		}
-	// TBD STRUCT of logical types
-	case *array.Struct: // struct of logical types
-		fcnt := tc.NumField()
-		fmt.Printf("*** num fields: %d\n", fcnt)
-		for i := 0; i < fcnt; i++ {
-			fmt.Printf("*** %T %v\n", tc.Field(i), tc.Field(i))
-		}
-		// TBD need to recurse, form column list then join on the way up
-		//  struct walks and appends child to struct list
-		//  maybe use arrow.Array or arrow.ArrayData and use that for building
-		//  arrow.Array.Data() for all chunks, returns an ArrayData
-		//  try out here before using it for all
-
-	// TBD SPARSE_UNION of logical types. not yet implemented
-	// TBD DENSE_UNION of logical types. not yet implemented
-	// TBD DICTIONARY aka Category type
-	case *array.Map: // a repeated struct logical type
-		fmt.Printf("*** map items: %T %v\n", tc.Items(), tc.Items())
-		fmt.Printf("*** map keys: %T %v\n", tc.Keys(), tc.Keys())
-
-	// TBD EXTENSION Custom data type, implemented by user
-	// TBD FIXED_SIZE_LIST Fixed size list of some logical type
-	// TBD DURATION Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds.
-	// TBD LARGE_STRING like STRING, but 64-bit offsets. not yet implemented
-	// TBD LARGE_BINARY like BINARY but with 64-bit offsets, not yet implemented
-	// TBD LARGE_LIST like LIST but with 64-bit offsets. not yet implmented
-	// TBD INTERVAL_MONTH_DAY_NANO calendar interval with three fields
-	// TBD RUN_END_ENCODED
-	// TBD DECIMAL Alias to ensure we do not break any consumers
-
-	default:
-		for i := 0; i < cnt; i++ {
-			col = append(col, nil)
-		}
-		// TBD others
-		fmt.Printf("*** chunk %T not implemented yet\n", aa)
 	}
 	return col
+}
+
+func forMarshalToLisp(m any) slip.Object {
+	if raw, ok := m.(json.RawMessage); ok {
+		m = oj.MustParse([]byte(raw))
+	}
+	return slip.SimpleObject(m)
 }
 
 type readerEachColumnCaller bool
@@ -508,105 +450,4 @@ func (caller readerEachRowCaller) Docs() string {
 
 Applies the _function_ to each row which is a list of values.
 `
-}
-
-var batchSize int64 = 4096
-
-func readColumnx(col slip.List, ccr file.ColumnChunkReader) slip.List {
-	fmt.Printf("*** readColumn %T\n", ccr)
-	var (
-		total int64
-		err   error
-	)
-	switch tr := ccr.(type) {
-	case *file.BooleanColumnChunkReader:
-		values := make([]bool, batchSize)
-		for {
-			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-				break
-			}
-			for _, v := range values[:total] {
-				if v {
-					col = append(col, slip.True)
-				} else {
-					col = append(col, nil)
-				}
-			}
-		}
-	case *file.ByteArrayColumnChunkReader:
-		values := make([]parquet.ByteArray, batchSize)
-		for {
-			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-				break
-			}
-			for _, v := range values[:total] {
-				col = append(col, slip.String(v))
-			}
-		}
-	case *file.FixedLenByteArrayColumnChunkReader:
-		values := make([]parquet.FixedLenByteArray, batchSize)
-		for {
-			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-				break
-			}
-			for _, v := range values[:total] {
-				col = append(col, slip.String(v))
-			}
-		}
-	case *file.Int32ColumnChunkReader:
-		values := make([]int32, batchSize)
-		for {
-			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-				break
-			}
-			fmt.Printf("*** total: %d\n", total, values[:total])
-			for _, v := range values[:total] {
-				col = append(col, slip.Fixnum(v))
-			}
-		}
-	case *file.Int64ColumnChunkReader:
-		values := make([]int64, batchSize)
-		for {
-			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-				break
-			}
-			for _, v := range values[:total] {
-				col = append(col, slip.Fixnum(v))
-			}
-		}
-	case *file.Int96ColumnChunkReader:
-		values := make([]parquet.Int96, batchSize)
-		for {
-			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-				break
-			}
-			for _, v := range values[:total] {
-				col = append(col, slip.Time(v.ToTime()))
-			}
-		}
-	case *file.Float32ColumnChunkReader:
-		values := make([]float32, batchSize)
-		for {
-			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-				break
-			}
-			for _, v := range values[:total] {
-				col = append(col, slip.SingleFloat(v))
-			}
-		}
-	case *file.Float64ColumnChunkReader:
-		values := make([]float64, batchSize)
-		for {
-			if total, _, err = tr.ReadBatch(batchSize, values, nil, nil); err != nil || total == 0 {
-				break
-			}
-			for _, v := range values[:total] {
-				col = append(col, slip.DoubleFloat(v))
-			}
-		}
-	}
-	if err != nil {
-		panic(err)
-	}
-	return col
 }

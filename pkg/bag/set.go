@@ -84,7 +84,7 @@ func setBag(obj *flavors.Instance, value, path slip.Object) {
 	default:
 		slip.PanicType("path", p, "string")
 	}
-	v := objectToBag(value)
+	v := ObjectToBag(value)
 	if x == nil {
 		obj.Any = v
 	} else {
@@ -92,7 +92,9 @@ func setBag(obj *flavors.Instance, value, path slip.Object) {
 	}
 }
 
-func objectToBag(obj slip.Object) (v any) {
+// ObjectToBag is the same as slip.Simplify except for assoc lists which are
+// converted to map[string]any.
+func ObjectToBag(obj slip.Object) (v any) {
 	switch val := obj.(type) {
 	case nil:
 		// leave v as nil
@@ -129,7 +131,7 @@ func objectToBag(obj slip.Object) (v any) {
 					if tail, ok = cdr.(slip.Tail); ok {
 						cdr = tail.Value
 					}
-					m[key] = objectToBag(cdr)
+					m[key] = ObjectToBag(cdr)
 				}
 				v = m
 				break
@@ -140,7 +142,7 @@ func objectToBag(obj slip.Object) (v any) {
 			if o == nil {
 				list[i] = nil
 			} else {
-				list[i] = objectToBag(o)
+				list[i] = ObjectToBag(o)
 			}
 		}
 		v = list
