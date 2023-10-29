@@ -80,12 +80,12 @@ func (caller readerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 			path = string(ss)
 		}
 	}
-	pr, err := file.OpenParquetFile(path, true)
-	if err != nil {
-		panic(err)
-	}
 	var fr *pqarrow.FileReader
-	if fr, err = pqarrow.NewFileReader(pr, pqarrow.ArrowReadProperties{}, memory.DefaultAllocator); err != nil {
+	pr, err := file.OpenParquetFile(path, true)
+	if err == nil {
+		fr, err = pqarrow.NewFileReader(pr, pqarrow.ArrowReadProperties{}, memory.DefaultAllocator)
+	}
+	if err != nil {
 		panic(err)
 	}
 	obj.Any = fr
@@ -318,7 +318,10 @@ func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
 		for i := 0; i < cnt; i++ {
 			col = append(col, slip.String(tc.Value(i)))
 		}
-	// TBD FIXED_SIZE_BINARY is a binary where each value occupies the same number of bytes
+	case *array.FixedSizeBinary: // a binary where each value occupies the same number of bytes
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.String(tc.Value(i)))
+		}
 	case *array.Date32: // int32 days since the UNIX epoch
 		for i := 0; i < cnt; i++ {
 			col = append(col, slip.Time(tc.Value(i).ToTime()))
@@ -361,10 +364,10 @@ func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
 		for i, k := range keys {
 			col = append(col, slip.List{k, slip.Tail{Value: items[i]}})
 		}
-
-	// TBD FIXED_SIZE_LIST Fixed size list of some logical type
-	// TBD DURATION Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds.
-
+	case *array.Duration: // Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds
+		for i := 0; i < cnt; i++ {
+			col = append(col, slip.Fixnum(tc.Value(i)))
+		}
 	default:
 		// Includes array.Struct and array.List since there does not appear to
 		// be any way to get the data for each item so the horribly

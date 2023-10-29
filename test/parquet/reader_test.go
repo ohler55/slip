@@ -269,3 +269,25 @@ func TestReaderColumnsNestedStruct(t *testing.T) {
 		},
 	}).Test(t)
 }
+
+func TestReaderColumnsBinary(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(
+		`(make-instance 'parquet-reader-flavor :file "testdata/binary.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	scope.Set("*print-readably*", slip.True)
+	defer func() {
+		_ = slip.ReadString(`(progn (setq *print-readably* nil)(send reader :close))`).Eval(scope, nil)
+	}()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :columns)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			vlist := v.(slip.List)
+			tt.Equal(t,
+				`("\u0000" "\u0001" "\u0002" "\u0003" "\u0004" "\u0005" "\u0006" "\u0007" "\b" "\t" "\n" "\u000b")`,
+				slip.ObjectString(vlist[0]))
+		},
+	}).Test(t)
+}
