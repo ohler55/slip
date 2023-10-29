@@ -9,14 +9,10 @@
   - https://github.com/apache/parquet-testing/tree/master/data
   - https://platform.opentargets.org/downloads
   - reader
-   - build schema and test with pqarrow
-   - read column(s)
-    - build value from data recursively
-     - either list, assoc, or bag for each
-    - if all, use ReadTable() or is each column just as good?
-
- - brew oj
-
+   - :each-column
+   - :rows
+   - :each-row
+  - writer
   - writer - future
    - options
     - with metadata
@@ -27,6 +23,8 @@
     - column-count
     - row-group-count
     - properties
+   - if all, use ReadTable() or is each column just as good?
+ - brew oj
 
  - messaging
   - body can be json, sen, or lisp. If first character is ( then lisp else sen

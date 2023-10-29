@@ -49,16 +49,13 @@ access the content of that file.`),
 
 	readerFlavor.DefMethod(":column-count", "", readerColumnCountCaller(true))
 	readerFlavor.DefMethod(":columns", "", readerColumnsCaller(true))
-	// readerFlavor.DefMethod(":column", "", readerColumnCaller(true))
-	// readerFlavor.DefMethod(":each-column-value", "", readerEachColumnValueCaller(true))
-	readerFlavor.DefMethod(":each-column", "", readerEachColumnCaller(true))
+	readerFlavor.DefMethod(":column", "", readerColumnCaller(true))
 
 	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
 	readerFlavor.DefMethod(":rows", "", readerRowsCaller(true))
-	// readerFlavor.DefMethod(":row", "", readerRowCaller(true))
 	//  with arg for format :list, :assoc, :bag
 	readerFlavor.DefMethod(":each-row", "", readerEachRowCaller(true))
-	// TBD maybe option to just include specific columns
+	// TBD option to just include specific columns as well as format
 }
 
 type readerInitCaller bool
@@ -231,7 +228,98 @@ func (caller readerColumnsCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 func (caller readerColumnsCaller) Docs() string {
 	return `__:columns__ => _list_
 
+Returns the columns of the reader file.
+`
+}
+
+type readerColumnCaller bool
+
+func (caller readerColumnCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if len(args) != 1 {
+		flavors.PanicMethodArgChoice(obj, ":column", len(args), "1")
+	}
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		schem, err := fr.Schema()
+		if err != nil {
+			panic(err)
+		}
+		var cr *pqarrow.ColumnReader
+		switch id := args[0].(type) {
+		case slip.Fixnum:
+			if 0 <= id && int(id) < schem.NumFields() {
+				cr, _ = fr.GetColumn(context.Background(), int(id))
+			}
+		case slip.String:
+			if fa := schem.FieldIndices(string(id)); 0 < len(fa) {
+				cr, _ = fr.GetColumn(context.Background(), fa[0])
+			}
+		case slip.Symbol:
+			if fa := schem.FieldIndices(string(id)); 0 < len(fa) {
+				cr, _ = fr.GetColumn(context.Background(), fa[0])
+			}
+		default:
+			slip.PanicType("id", id, "fixnum", "string", "symbol")
+		}
+		if cr != nil {
+			result = readColumn(cr)
+		}
+	}
+	return
+}
+
+func (caller readerColumnCaller) Docs() string {
+	return `__:column__ _id_ => _list_
+   _id_ the name or numeric index of the column to read.
+
+Returns the specified column of the reader file.
+`
+}
+
+type readerRowsCaller bool
+
+func (caller readerRowsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		rowCnt := fr.ParquetReader().NumRows()
+		rows := make(slip.List, rowCnt)
+
+		fmt.Printf("*** row count: %d\n", rowCnt)
+		// TBD for each row group read rows
+
+		result = rows
+	}
+	return
+}
+
+func (caller readerRowsCaller) Docs() string {
+	return `__:rows__ => _list_
+
 Returns the row columns of the reader file.
+`
+}
+
+type readerEachRowCaller bool
+
+func (caller readerEachRowCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
+		rowCnt := fr.ParquetReader().NumRows()
+
+		fmt.Printf("*** row count: %d\n", rowCnt)
+		// TBD for each row group read columns
+
+		// TBD option for row as list, assoc, or bag
+
+	}
+	return nil
+}
+
+func (caller readerEachRowCaller) Docs() string {
+	return `__:each-row__ _function_ => _nil_
+   _function_ the function to for each rwo.
+
+Applies the _function_ to each row which is a list of values.
 `
 }
 
@@ -385,72 +473,4 @@ func forMarshalToLisp(m any) slip.Object {
 		m = oj.MustParse([]byte(raw))
 	}
 	return slip.SimpleObject(m)
-}
-
-type readerEachColumnCaller bool
-
-func (caller readerEachColumnCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
-	obj := s.Get("self").(*flavors.Instance)
-	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
-		fmt.Printf("*** arrow file reader: %v\n", fr)
-
-		// TBD for each row group read columns
-
-	}
-	return
-}
-
-func (caller readerEachColumnCaller) Docs() string {
-	return `__:each-column__ _function_ => _nil_
-   _function_ the function to for each column.
-
-Applies the _function_ to each column which is a list of values.
-`
-}
-
-type readerRowsCaller bool
-
-func (caller readerRowsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
-	obj := s.Get("self").(*flavors.Instance)
-	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
-		rowCnt := fr.ParquetReader().NumRows()
-		rows := make(slip.List, rowCnt)
-
-		fmt.Printf("*** row count: %d\n", rowCnt)
-		// TBD for each row group read rows
-
-		result = rows
-	}
-	return
-}
-
-func (caller readerRowsCaller) Docs() string {
-	return `__:rows__ => _list_
-
-Returns the row columns of the reader file.
-`
-}
-
-type readerEachRowCaller bool
-
-func (caller readerEachRowCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*flavors.Instance)
-	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
-		rowCnt := fr.ParquetReader().NumRows()
-
-		fmt.Printf("*** row count: %d\n", rowCnt)
-		// TBD for each row group read columns
-
-		// TBD option for row as list, assoc, or bag
-
-	}
-	return nil
-}
-
-func (caller readerEachRowCaller) Docs() string {
-	return `__:each-row__ _function_ => _nil_
-   _function_ the function to for each rwo.
-
-Applies the _function_ to each row which is a list of values.
-`
 }

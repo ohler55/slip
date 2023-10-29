@@ -3,6 +3,7 @@
 package parquet_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -112,38 +113,22 @@ func TestReaderDocs(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :init out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":init"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :close out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":close"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :version out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":version"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :created-by out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":created-by"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :column-count out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":column-count"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :columns out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":columns"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :each-column out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":each-column"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :row-count out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":row-count"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :rows out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":rows"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :each-row out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":each-row"))
-
-	_ = slip.ReadString(`(describe-method parquet-reader-flavor :schema out)`).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":schema"))
+	for _, method := range []string{
+		":init",
+		":close",
+		":version",
+		":created-by",
+		":column-count",
+		":columns",
+		":column",
+		":row-count",
+		":rows",
+		":each-row",
+		":schema",
+	} {
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method parquet-reader-flavor %s out)`, method)).Eval(scope, nil)
+		tt.Equal(t, true, strings.Contains(out.String(), method))
+	}
 }
 
 func TestReaderBadInitFile(t *testing.T) {
@@ -289,5 +274,65 @@ func TestReaderColumnsBinary(t *testing.T) {
 				`("\u0000" "\u0001" "\u0002" "\u0003" "\u0004" "\u0005" "\u0006" "\u0007" "\b" "\t" "\n" "\u000b")`,
 				slip.ObjectString(vlist[0]))
 		},
+	}).Test(t)
+}
+
+func TestReaderColumnFixnum(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :column 0)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			tt.Equal(t, "(4 5 6 7 2 3 0 1)", slip.ObjectString(v))
+		},
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send reader :column 1.5)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestReaderColumnNamed(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :column "id")`,
+		Validate: func(t *testing.T, v slip.Object) {
+			tt.Equal(t, "(4 5 6 7 2 3 0 1)", slip.ObjectString(v))
+		},
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :column 'id)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			tt.Equal(t, "(4 5 6 7 2 3 0 1)", slip.ObjectString(v))
+		},
+	}).Test(t)
+}
+
+func TestReaderColumnErrors(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send reader :column 1.5)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send reader :column)`,
+		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }
