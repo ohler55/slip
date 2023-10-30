@@ -9,7 +9,6 @@
   - https://github.com/apache/parquet-testing/tree/master/data
   - https://platform.opentargets.org/downloads
   - reader
-   - :each-column
    - :rows
    - :each-row
   - writer

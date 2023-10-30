@@ -244,24 +244,7 @@ func (caller readerColumnCaller) Call(s *slip.Scope, args slip.List, _ int) (res
 		if err != nil {
 			panic(err)
 		}
-		var cr *pqarrow.ColumnReader
-		switch id := args[0].(type) {
-		case slip.Fixnum:
-			if 0 <= id && int(id) < schem.NumFields() {
-				cr, _ = fr.GetColumn(context.Background(), int(id))
-			}
-		case slip.String:
-			if fa := schem.FieldIndices(string(id)); 0 < len(fa) {
-				cr, _ = fr.GetColumn(context.Background(), fa[0])
-			}
-		case slip.Symbol:
-			if fa := schem.FieldIndices(string(id)); 0 < len(fa) {
-				cr, _ = fr.GetColumn(context.Background(), fa[0])
-			}
-		default:
-			slip.PanicType("id", id, "fixnum", "string", "symbol")
-		}
-		if cr != nil {
+		if cr, _ := findColReader(fr, schem, args[0]); cr != nil {
 			result = readColumn(cr)
 		}
 	}
@@ -276,26 +259,37 @@ Returns the specified column of the reader file.
 `
 }
 
-type readerRowsCaller bool
-
 func (caller readerRowsCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
 		rowCnt := fr.ParquetReader().NumRows()
-		rows := make(slip.List, rowCnt)
-
-		fmt.Printf("*** row count: %d\n", rowCnt)
-		// TBD for each row group read rows
-
+		rows := make(slip.List, 0, rowCnt)
+		var ids slip.Object
+		if 1 < len(args) {
+			ids = args[1]
+		}
+		rr := newRowReader(fr, ids, args[0])
+		for {
+			row := rr.next()
+			if row == nil {
+				break
+			}
+			rows = append(rows, row)
+		}
 		result = rows
 	}
 	return
 }
 
 func (caller readerRowsCaller) Docs() string {
-	return `__:rows__ => _list_
+	return `__:rows__ _format_ &optional _column-ids_ => _list_
+   _format_ can be one of _:list_ for a list of column values in order,
+_:assoc_ for column names as the car and the values as the cdr of each
+element in an assoc list, or _:bag_ for each value as a field in a
+_bag-flavor_ instance identified by the column name.
+   _column-ids_ is a list of the column indexes or names for the columns to get values from.
 
-Returns the row columns of the reader file.
+Returns the rows of the reader file.
 `
 }
 
