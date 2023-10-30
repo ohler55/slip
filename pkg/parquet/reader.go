@@ -53,7 +53,7 @@ access the content of that file.`),
 
 	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
 	readerFlavor.DefMethod(":rows", "", readerRowsCaller(true))
-	//  with arg for format :list, :assoc, :bag
+	//  with arg for format :list, :assoc
 	readerFlavor.DefMethod(":each-row", "", readerEachRowCaller(true))
 	// TBD option to just include specific columns as well as format
 }
@@ -285,8 +285,7 @@ func (caller readerRowsCaller) Docs() string {
 	return `__:rows__ _format_ &optional _column-ids_ => _list_
    _format_ can be one of _:list_ for a list of column values in order,
 _:assoc_ for column names as the car and the values as the cdr of each
-element in an assoc list, or _:bag_ for each value as a field in a
-_bag-flavor_ instance identified by the column name.
+element in an assoc list for each key value pair.
    _column-ids_ is a list of the column indexes or names for the columns to get values from.
 
 Returns the rows of the reader file.

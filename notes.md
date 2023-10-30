@@ -9,7 +9,11 @@
   - https://github.com/apache/parquet-testing/tree/master/data
   - https://platform.opentargets.org/downloads
   - reader
+   - columns
+    - nested is not right
+     - try fields instead?
    - :rows
+    - broken for map
    - :each-row
   - writer
   - writer - future

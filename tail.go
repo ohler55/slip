@@ -22,8 +22,11 @@ func (t Tail) Append(b []byte) []byte {
 
 // Simplify the Object into simple go types of nil, bool, int64, float64,
 // string, []any, map[string]any, or time.Time.
-func (t Tail) Simplify() any {
-	return t.Value.Simplify()
+func (t Tail) Simplify() (a any) {
+	if t.Value != nil {
+		a = t.Value.Simplify()
+	}
+	return
 }
 
 // Equal returns true if this Object and the other are equal in value.
