@@ -214,9 +214,9 @@ func arrayValue(aa arrow.Array, i int, format byte) (value any) {
 		}
 		value = tc.Value(i).ToTime(tu)
 	case *array.Map: // a repeated struct logical type
-		fmt.Printf("*** amap: %v\n", tc)
-		fmt.Printf("*** items: %v\n", tc.Items())
 		fmt.Printf("*** 4 marshal: %s\n", tc.GetOneForMarshal(i))
+		fmt.Printf("*** a map: %v\n", tc)
+		fmt.Printf("*** items: %v\n\n", tc.Items())
 
 		// TBD return a key/value pair
 		//  if kcr, split and use key from kcr

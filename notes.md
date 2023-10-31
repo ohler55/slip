@@ -14,6 +14,7 @@
      - try fields instead?
    - :rows
     - broken for map
+    - try fr.GetRecordReader()
    - :each-row
   - writer
   - writer - future
