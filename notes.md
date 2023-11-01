@@ -4,31 +4,13 @@
 
 - next
 
- - parquet package (https://github.com/apache/parquet-format)
-  - https://pkg.go.dev/github.com/apache/arrow/go/v13@v13.0.0/parquet#Version
-  - https://github.com/apache/parquet-testing/tree/master/data
-  - https://platform.opentargets.org/downloads
-  - reader
-   - :each-row
-    - why does local scoped var not work for set?
-  - writer - future?
-   - options
-    - with metadata
-    - with props
-   - methods
-    - close
-    - row-count
-    - column-count
-    - row-group-count
-    - properties
-   - if all, use ReadTable() or is each column just as good?
-
  - brew oj
 
  - messaging
   - body can be json, sen, or lisp. If first character is ( then lisp else sen
   - msg-hub - abstract for message hub
   - nats-hub-flavor
+  - jetstream-hub-flavor
   - mem-hub-flavor
   - subject configuration out of band possibly
    - will a simple string be enough or are jetstream variations needed?
@@ -37,6 +19,7 @@
   - listen with callback
   - (:get subject) for queues
   - explicit ack if configured
+
 
  - xml
   - directly to lisp
@@ -84,6 +67,22 @@
     - entry
     - tasks
   - syntax for describing, json or lisp
+
+ - parquet writer - future
+  - parquet package (https://github.com/apache/parquet-format)
+   - https://pkg.go.dev/github.com/apache/arrow/go/v13@v13.0.0/parquet#Version
+   - https://github.com/apache/parquet-testing/tree/master/data
+   - https://platform.opentargets.org/downloads
+  - options
+   - with metadata
+   - with props
+  - methods
+   - close
+   - row-count
+   - column-count
+   - row-group-count
+   - properties
+  - if all, use ReadTable() or is each column just as good?
 
  - net package
   - implement sbcl networking or something closer to golang?

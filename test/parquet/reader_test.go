@@ -472,16 +472,23 @@ func TestReaderRowsError(t *testing.T) {
 func TestReaderEachRowPrimitive(t *testing.T) {
 	scope := slip.NewScope()
 	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
+	scope.Set("*print-right-margin*", slip.Fixnum(80))
 	scope.Let("reader", pr)
-	scope.Set("result", slip.List{slip.Fixnum(7)})
+	scope.Let("result", nil)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
-		Scope:  scope,
-		Source: `(send reader :each-row (lambda (row) (setq result (add result row))) :assoc)`,
+		Scope: scope,
+		Source: `(send reader :each-row
+                       (lambda (row) (setq result (add result row)))
+                       :assoc
+                       '(0 "bool_col" date_string_col))`,
 		Validate: func(t *testing.T, v slip.Object) {
-			result := scope.Get(slip.Symbol("result"))
-			fmt.Printf("*** result: %s\n", result)
+			result := scope.Get(slip.Symbol("result")).(slip.List)
+			tt.Equal(t, 8, len(result))
+			tt.Equal(t,
+				`(("id" . 4) ("bool_col" . t) ("date_string_col" . "03/01/09"))`,
+				slip.ObjectString(result[0]))
 		},
 	}).Test(t)
 }

@@ -3,8 +3,10 @@
 package slip
 
 import (
+	"strconv"
 	"strings"
 	"sync"
+	"unsafe"
 )
 
 // Scope encapsulates the scope for a function.
@@ -48,16 +50,19 @@ func (s *Scope) AddParent(p *Scope) {
 	s.parents = append(s.parents, p)
 }
 
+// AllVars returns a map of all the variables in the scope and it's parents.
 func (s *Scope) AllVars() map[string]Object {
 	all := map[string]Object{}
-	for _, p := range s.parents {
-		for k, v := range p.Vars {
+	for i := len(s.parents) - 1; 0 <= i; i-- {
+		for k, v := range s.parents[i].AllVars() {
 			all[k] = v
 		}
 	}
+	s.moo.Lock()
 	for k, v := range s.Vars {
 		all[k] = v
 	}
+	s.moo.Unlock()
 	return all
 }
 
@@ -151,7 +156,9 @@ func (s *Scope) Set(sym Symbol, value Object) {
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
 	}
-	_ = s.set(strings.ToLower(string(sym)), value)
+	if !s.set(strings.ToLower(string(sym)), value) {
+		CurrentPackage.Set(string(sym), value)
+	}
 }
 
 func (s *Scope) set(name string, value Object) bool {
@@ -172,8 +179,7 @@ func (s *Scope) set(name string, value Object) bool {
 			return true
 		}
 	}
-	CurrentPackage.Set(name, value)
-	return true
+	return false
 }
 
 // Has returns true if the variable is exists.
@@ -255,4 +261,25 @@ func (s *Scope) Eval(obj Object, depth int) (result Object) {
 		result = obj.Eval(s, depth)
 	}
 	return
+}
+
+// String returns a string representation of the scope.
+func (s *Scope) String() string {
+	var b []byte
+	b = append(b, "Scope-"...)
+	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(s))), 16)
+	b = append(b, ' ', '[')
+	for _, p := range s.parents {
+		b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(p))), 16)
+		b = append(b, ' ')
+	}
+	b = append(b, ']', '\n')
+	for k, v := range s.AllVars() {
+		b = append(b, ' ', ' ')
+		b = append(b, k...)
+		b = append(b, ':', ' ')
+		b = ObjectAppend(b, v)
+		b = append(b, '\n')
+	}
+	return string(b)
 }
