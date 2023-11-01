@@ -33,8 +33,8 @@ github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 h1:AMFGa4R4MiIpsp
 github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8/go.mod h1:mC1jAcsrzbxHt8iiaC+zU4b1ylILSosueou12R++wfY=
 github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3 h1:+n/aFZefKZp7spd8DFdX7uMikMLXX4oubIzJF4kv/wI=
 github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3/go.mod h1:RagcQ7I8IeTMnF8JTXieKnO4Z6JCsikNEzj0DwauVzE=
-github.com/ohler55/ojg v1.19.3 h1:rFmEc33aZOvlwb7tibAmwVGEiPfMZkgvurK0YDDr1HI=
-github.com/ohler55/ojg v1.19.3/go.mod h1:uHcD1ErbErC27Zhb5Df2jUjbseLLcmOCo6oxSr3jZxo=
+github.com/ohler55/ojg v1.20.2 h1:ragZXnawcsq/knqIHaflvIX/8RzzAKMZSluAZAz+RFs=
+github.com/ohler55/ojg v1.20.2/go.mod h1:uHcD1ErbErC27Zhb5Df2jUjbseLLcmOCo6oxSr3jZxo=
 github.com/pierrec/lz4/v4 v4.1.17 h1:kV4Ip+/hUBC+8T6+2EgburRtkE9ef4nbY3f4dFhGjMc=
 github.com/pierrec/lz4/v4 v4.1.17/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

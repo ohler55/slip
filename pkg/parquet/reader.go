@@ -4,17 +4,13 @@ package parquet
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"strings"
 
-	"github.com/apache/arrow/go/v13/arrow"
-	"github.com/apache/arrow/go/v13/arrow/array"
 	"github.com/apache/arrow/go/v13/arrow/memory"
 	"github.com/apache/arrow/go/v13/parquet/file"
 	"github.com/apache/arrow/go/v13/parquet/pqarrow"
-	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -53,9 +49,7 @@ access the content of that file.`),
 
 	readerFlavor.DefMethod(":row-count", "", readerRowCountCaller(true))
 	readerFlavor.DefMethod(":rows", "", readerRowsCaller(true))
-	//  with arg for format :list, :assoc
 	readerFlavor.DefMethod(":each-row", "", readerEachRowCaller(true))
-	// TBD option to just include specific columns as well as format
 }
 
 type readerInitCaller bool
@@ -294,25 +288,36 @@ Returns the rows of the reader file.
 
 type readerEachRowCaller bool
 
-func (caller readerEachRowCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readerEachRowCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
+	d2 := depth + 1
+	fun := cl.ResolveToCaller(s, args[0], d2)
 	if fr, ok := obj.Any.(*pqarrow.FileReader); ok {
-		rowCnt := fr.ParquetReader().NumRows()
-
-		fmt.Printf("*** row count: %d\n", rowCnt)
-		// TBD for each row group read columns
-
-		// TBD option for row as list, assoc, or bag
-
+		var ids slip.Object
+		if 2 < len(args) {
+			ids = args[2]
+		}
+		rr := newRowReader(fr, ids, args[1])
+		for {
+			row := rr.next()
+			if row == nil {
+				break
+			}
+			_ = fun.Call(s, slip.List{row}, d2)
+		}
 	}
 	return nil
 }
 
 func (caller readerEachRowCaller) Docs() string {
-	return `__:each-row__ _function_ => _nil_
-   _function_ the function to for each rwo.
+	return `__:each-row__ _function_ _format_ &optional _column-ids_ => _nil_
+   _function_ a function or lambda to call on each row.
+   _format_ can be one of _:list_ for a list of column values in order,
+_:assoc_ for column names as the car and the values as the cdr of each
+element in an assoc list for each key value pair.
+   _column-ids_ is a list of the column indexes or names for the columns to get values from.
 
-Applies the _function_ to each row which is a list of values.
+Calls the _function_ on each row.
 `
 }
 
@@ -326,144 +331,11 @@ func readColumn(cr *pqarrow.ColumnReader) (result slip.List) {
 			break
 		}
 		for _, chunk := range ac.Chunks() {
-			result = arrayToLisp(result, chunk)
+			cnt := chunk.Len()
+			for i := 0; i < cnt; i++ {
+				result = append(result, ArrayValue(chunk, i))
+			}
 		}
 	}
 	return
-}
-
-func arrayToLisp(col slip.List, aa arrow.Array) slip.List {
-	cnt := aa.Len()
-	switch tc := aa.(type) {
-	case *array.Null: // type having no physical storage
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.SimpleObject(tc.Value(i)))
-		}
-	case *array.Boolean: // is a 1 bit, LSB bit-packed ordering
-		for i := 0; i < cnt; i++ {
-			if tc.Value(i) {
-				col = append(col, slip.True)
-			} else {
-				col = append(col, nil)
-			}
-		}
-	case *array.Uint8: // a Unsigned 8-bit little-endian integer
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	case *array.Int8: // a Signed 8-bit little-endian integer
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	case *array.Uint16: // a Unsigned 16-bit little-endian integer
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	case *array.Int16: // a Signed 16-bit little-endian integer
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	case *array.Uint32: // a Unsigned 32-bit little-endian integer
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	case *array.Int32: // a Signed 32-bit little-endian integer
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	case *array.Uint64: // a Unsigned 64-bit little-endian integer
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	case *array.Int64: // a Signed 64-bit little-endian integer
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	case *array.Float16: // an 2-byte floating point value
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.SingleFloat(tc.Value(i).Float32()))
-		}
-	case *array.Float32: // an 4-byte floating point value
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.SingleFloat(tc.Value(i)))
-		}
-	case *array.Float64: // an 8-byte floating point value
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.DoubleFloat(tc.Value(i)))
-		}
-	case *array.String: // a UTF8 variable-length string
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.String(tc.Value(i)))
-		}
-	case *array.Binary: // a Variable-length byte type (no guarantee of UTF8-ness)
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.String(tc.Value(i)))
-		}
-	case *array.FixedSizeBinary: // a binary where each value occupies the same number of bytes
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.String(tc.Value(i)))
-		}
-	case *array.Date32: // int32 days since the UNIX epoch
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Time(tc.Value(i).ToTime()))
-		}
-	case *array.Date64: // int64 milliseconds since the UNIX epoch
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Time(tc.Value(i).ToTime()))
-		}
-	case *array.Timestamp: // an exact timestamp encoded with int64 since UNIX epoch Default unit millisecond
-		tu := arrow.Millisecond
-		if at, ok := tc.DataType().(*arrow.TimestampType); ok {
-			tu = at.Unit
-		}
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Time(tc.Value(i).ToTime(tu)))
-		}
-	case *array.Time32: // a signed 32-bit integer, representing either seconds or milliseconds since midnight
-		tu := arrow.Millisecond
-		if at, ok := tc.DataType().(*arrow.Time32Type); ok {
-			tu = at.Unit
-		}
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Time(tc.Value(i).ToTime(tu)))
-		}
-	case *array.Time64: // a signed 64-bit integer, representing either microseconds or nanoseconds since midnight
-		tu := arrow.Nanosecond
-		if at, ok := tc.DataType().(*arrow.Time64Type); ok {
-			tu = at.Unit
-		}
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Time(tc.Value(i).ToTime(tu)))
-		}
-	case *array.Struct: // struct of logical types
-		for i := 0; i < cnt; i++ {
-			col = append(col, forMarshalToLisp(tc.GetOneForMarshal(i)))
-		}
-	case *array.Map: // a repeated struct logical type
-		items := arrayToLisp(nil, tc.Items())
-		keys := arrayToLisp(nil, tc.Keys())
-		for i, k := range keys {
-			col = append(col, slip.List{k, slip.Tail{Value: items[i]}})
-		}
-	case *array.Duration: // Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds
-		for i := 0; i < cnt; i++ {
-			col = append(col, slip.Fixnum(tc.Value(i)))
-		}
-	default:
-		// Includes array.Struct and array.List since there does not appear to
-		// be any way to get the data for each item so the horribly
-		// inefficient approach is taken of getting the JSON encoded values
-		// and parsing.
-		for i := 0; i < cnt; i++ {
-			col = append(col, forMarshalToLisp(tc.GetOneForMarshal(i)))
-		}
-	}
-	return col
-}
-
-func forMarshalToLisp(m any) slip.Object {
-	if raw, ok := m.(json.RawMessage); ok {
-		m = oj.MustParse([]byte(raw))
-	}
-	return slip.SimpleObject(m)
 }

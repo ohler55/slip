@@ -5,7 +5,7 @@ package parquet
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"time"
 
 	"github.com/apache/arrow/go/v13/arrow"
 	"github.com/apache/arrow/go/v13/arrow/array"
@@ -38,7 +38,7 @@ type rowReader struct {
 	format byte
 }
 
-func (kcr *keyColReader) next() (value any, done bool) {
+func (kcr *keyColReader) next() (value slip.Object, done bool) {
 begin:
 	if kcr.ac == nil {
 		var err error
@@ -53,13 +53,13 @@ begin:
 		kcr.ccnt = kcr.chunks[0].Len()
 	}
 	if kcr.ci < kcr.ccnt {
-		value = arrayValue(kcr.chunks[0], kcr.ci, kcr.format)
+		value = ArrayValue(kcr.chunks[0], kcr.ci)
 		kcr.ci++
 	} else {
 		kcr.chunks = kcr.chunks[1:]
 		if 0 < len(kcr.chunks) {
 			kcr.ccnt = kcr.chunks[0].Len()
-			value = arrayValue(kcr.chunks[0], 0, kcr.format)
+			value = ArrayValue(kcr.chunks[0], 0)
 			kcr.ci = 1
 		} else {
 			kcr.ac = nil
@@ -112,7 +112,7 @@ func (rr *rowReader) next() (row slip.Object) {
 			if done {
 				return
 			}
-			rlist[i] = slip.SimpleObject(value)
+			rlist[i] = value
 		}
 		row = rlist
 	case assocRow:
@@ -122,7 +122,7 @@ func (rr *rowReader) next() (row slip.Object) {
 			if done {
 				return
 			}
-			alist[i] = slip.List{slip.String(kcr.key), slip.Tail{Value: slip.SimpleObject(value)}}
+			alist[i] = slip.List{slip.String(kcr.key), slip.Tail{Value: value}}
 		}
 		row = alist
 	}
@@ -156,91 +156,147 @@ func findColReader(
 	return
 }
 
-// The validity of the index is checked before making this call.
-func arrayValue(aa arrow.Array, i int, format byte) (value any) {
+// ArrayValue returns a value in an arrow.Array. The validity of the index is
+// checked before making this call.
+func ArrayValue(aa arrow.Array, i int) (value slip.Object) {
 	switch tc := aa.(type) {
 	case *array.Null: // type having no physical storage
-		value = tc.Value(i)
+		value = JSONToLisp(tc.Value(i))
 	case *array.Boolean: // is a 1 bit, LSB bit-packed ordering
-		value = tc.Value(i)
+		if tc.Value(i) {
+			value = slip.True
+		}
 	case *array.Uint8: // a Unsigned 8-bit little-endian integer
-		value = tc.Value(i)
+		value = slip.Fixnum(tc.Value(i))
 	case *array.Int8: // a Signed 8-bit little-endian integer
-		value = tc.Value(i)
+		value = slip.Fixnum(tc.Value(i))
 	case *array.Uint16: // a Unsigned 16-bit little-endian integer
-		value = tc.Value(i)
+		value = slip.Fixnum(tc.Value(i))
 	case *array.Int16: // a Signed 16-bit little-endian integer
-		value = tc.Value(i)
+		value = slip.Fixnum(tc.Value(i))
 	case *array.Uint32: // a Unsigned 32-bit little-endian integer
-		value = tc.Value(i)
+		value = slip.Fixnum(tc.Value(i))
 	case *array.Int32: // a Signed 32-bit little-endian integer
-		value = tc.Value(i)
+		value = slip.Fixnum(tc.Value(i))
 	case *array.Uint64: // a Unsigned 64-bit little-endian integer
-		value = tc.Value(i)
+		value = slip.Fixnum(tc.Value(i))
 	case *array.Int64: // a Signed 64-bit little-endian integer
-		value = tc.Value(i)
+		value = slip.Fixnum(tc.Value(i))
 	case *array.Float16: // an 2-byte floating point value
-		value = tc.Value(i)
+		value = slip.SingleFloat(tc.Value(i).Float32())
 	case *array.Float32: // an 4-byte floating point value
-		value = tc.Value(i)
+		value = slip.SingleFloat(tc.Value(i))
 	case *array.Float64: // an 8-byte floating point value
-		value = tc.Value(i)
+		value = slip.DoubleFloat(tc.Value(i))
 	case *array.String: // a UTF8 variable-length string
-		value = tc.Value(i)
+		value = slip.String(tc.Value(i))
 	case *array.Binary: // a Variable-length byte type (no guarantee of UTF8-ness)
-		value = string(tc.Value(i))
+		value = slip.String(tc.Value(i))
 	case *array.FixedSizeBinary: // a binary where each value occupies the same number of bytes
-		value = string(tc.Value(i))
+		value = slip.String(tc.Value(i))
 	case *array.Date32: // int32 days since the UNIX epoch
-		value = tc.Value(i).ToTime()
+		value = slip.Time(tc.Value(i).ToTime())
 	case *array.Date64: // int64 milliseconds since the UNIX epoch
-		value = tc.Value(i).ToTime()
+		value = slip.Time(tc.Value(i).ToTime())
 	case *array.Timestamp: // an exact timestamp encoded with int64 since UNIX epoch Default unit millisecond
 		tu := arrow.Millisecond
 		if at, ok := tc.DataType().(*arrow.TimestampType); ok {
 			tu = at.Unit
 		}
-		value = tc.Value(i).ToTime(tu)
+		value = slip.Time(tc.Value(i).ToTime(tu))
 	case *array.Time32: // a signed 32-bit integer, representing either seconds or milliseconds since midnight
 		tu := arrow.Millisecond
 		if at, ok := tc.DataType().(*arrow.Time32Type); ok {
 			tu = at.Unit
 		}
-		value = tc.Value(i).ToTime(tu)
+		value = slip.Time(tc.Value(i).ToTime(tu))
 	case *array.Time64: // a signed 64-bit integer, representing either microseconds or nanoseconds since midnight
 		tu := arrow.Nanosecond
 		if at, ok := tc.DataType().(*arrow.Time64Type); ok {
 			tu = at.Unit
 		}
-		value = tc.Value(i).ToTime(tu)
-	case *array.Map: // a repeated struct logical type
-		fmt.Printf("*** 4 marshal: %s\n", tc.GetOneForMarshal(i))
-		fmt.Printf("*** a map: %v\n", tc)
-		fmt.Printf("*** items: %v\n\n", tc.Items())
-
-		// TBD return a key/value pair
-		//  if kcr, split and use key from kcr
-		//  here combine in map ?? need same code to determine a may?
-
-		switch format {
-		case listRow:
-			value = arrayValue(tc.Items(), i, format)
-		case assocRow:
-			k := slip.SimpleObject(arrayValue(tc.Keys(), i, format))
-			v := slip.SimpleObject(arrayValue(tc.Items(), i, format))
-			value = slip.List{k, slip.Tail{Value: v}}
-		}
+		value = slip.Time(tc.Value(i).ToTime(tu))
 	case *array.Duration: // Measure of elapsed time in either seconds, milliseconds, microseconds or nanoseconds
-		value = int64(tc.Value(i))
+		value = slip.Fixnum(tc.Value(i))
+
 	default:
-		// Includes array.Struct and array.List since there does not appear to
-		// be any way to get the data for each item so the horribly
-		// inefficient approach is taken of getting the JSON encoded values
-		// and parsing.
-		value = tc.GetOneForMarshal(i)
-		if raw, ok := value.(json.RawMessage); ok {
-			value = oj.MustParse([]byte(raw))
+		// Includes array.Struct, array.List, and array.Map since there does
+		// not appear to be any way to get the data for each item so the
+		// horribly inefficient approach is taken of getting the JSON encoded
+		// values and parsing. The issue is that the API is based on top level
+		// columns and does not expose which elements in the column match up
+		// with a row.
+		value = JSONToLisp(tc.GetOneForMarshal(i))
+	}
+	return
+}
+
+// JSONToLisp convertes parquet JSON to lisp. It differs from
+// slip.SimpleObject in that []any can also be representations of maps.
+func JSONToLisp(val any) (obj slip.Object) {
+	if raw, ok := val.(json.RawMessage); ok {
+		val = oj.MustParse([]byte(raw))
+	}
+	switch tv := val.(type) {
+	case slip.Object:
+		obj = tv
+	case bool:
+		if tv {
+			obj = slip.True
 		}
+	case int:
+		obj = slip.Fixnum(tv)
+	case int8:
+		obj = slip.Fixnum(tv)
+	case int16:
+		obj = slip.Fixnum(tv)
+	case int32:
+		obj = slip.Fixnum(tv)
+	case int64:
+		obj = slip.Fixnum(tv)
+
+	case uint:
+		obj = slip.Fixnum(tv)
+	case uint8:
+		obj = slip.Fixnum(tv)
+	case uint16:
+		obj = slip.Fixnum(tv)
+	case uint32:
+		obj = slip.Fixnum(tv)
+	case uint64:
+		obj = slip.Fixnum(tv)
+
+	case float32:
+		obj = slip.SingleFloat(tv)
+	case float64:
+		obj = slip.DoubleFloat(tv)
+
+	case string:
+		obj = slip.String(tv)
+	case []byte:
+		obj = slip.String(tv)
+
+	case time.Time:
+		obj = slip.Time(tv)
+
+	case []any:
+		list := make(slip.List, 0, len(tv))
+		for _, v := range tv {
+			if m, ok := v.(map[string]any); ok && len(m) == 2 {
+				if key, has := m["key"]; has {
+					list = append(list, slip.List{JSONToLisp(key), slip.Tail{Value: JSONToLisp(m["value"])}})
+					continue
+				}
+			}
+			list = append(list, JSONToLisp(v))
+		}
+		obj = list
+	case map[string]any:
+		list := make(slip.List, 0, len(tv))
+		for k, v2 := range tv {
+			list = append(list, slip.List{slip.String(k), slip.Tail{Value: JSONToLisp(v2)}})
+		}
+		obj = list
 	}
 	return
 }

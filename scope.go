@@ -48,6 +48,19 @@ func (s *Scope) AddParent(p *Scope) {
 	s.parents = append(s.parents, p)
 }
 
+func (s *Scope) AllVars() map[string]Object {
+	all := map[string]Object{}
+	for _, p := range s.parents {
+		for k, v := range p.Vars {
+			all[k] = v
+		}
+	}
+	for k, v := range s.Vars {
+		all[k] = v
+	}
+	return all
+}
+
 // Let a symbol be bound to the value in this Scope.
 func (s *Scope) Let(sym Symbol, value Object) {
 	name := strings.ToLower(string(sym))

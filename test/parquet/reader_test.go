@@ -211,6 +211,7 @@ func TestReaderColumnsNestedMap(t *testing.T) {
 	pr := slip.ReadString(
 		`(make-instance 'parquet-reader-flavor :file "testdata/nested-maps.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
+	scope.Set("*print-right-margin*", slip.Fixnum(80))
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
 
 	(&sliptest.Function{
@@ -218,9 +219,9 @@ func TestReaderColumnsNestedMap(t *testing.T) {
 		Source: `(send reader :columns)`,
 		Validate: func(t *testing.T, v slip.Object) {
 			vlist := v.(slip.List)
-			// TBD not correct, print with %v
 			for i, x := range []string{
-				`(("a" . (1 . t)) ("b" . (2 . nil)) ("c" . (1 . t)) ("d" . (1 . t)) ("e" . (3 . t)) ("f" . (4 . nil)))`,
+				`((("a" . ((1 . t) (2 . nil)))) (("b" . ((1 . t)))) (("c" . nil)) (("d" . ())) (("e" . ((1 . t))))
+                         (("f" . ((3 . t) (4 . nil) (5 . t)))))`,
 				`(1 1 1 1 1 1)`,
 				`(1 1 1 1 1 1)`,
 			} {
@@ -261,6 +262,7 @@ func TestReaderColumnsBinary(t *testing.T) {
 	pr := slip.ReadString(
 		`(make-instance 'parquet-reader-flavor :file "testdata/binary.parquet")`).Eval(scope, nil)
 	scope.Let("reader", pr)
+	scope.Set("*print-right-margin*", slip.Fixnum(80))
 	scope.Set("*print-readably*", slip.True)
 	defer func() {
 		_ = slip.ReadString(`(progn (setq *print-readably* nil)(send reader :close))`).Eval(scope, nil)
@@ -272,7 +274,8 @@ func TestReaderColumnsBinary(t *testing.T) {
 		Validate: func(t *testing.T, v slip.Object) {
 			vlist := v.(slip.List)
 			tt.Equal(t,
-				`("\u0000" "\u0001" "\u0002" "\u0003" "\u0004" "\u0005" "\u0006" "\u0007" "\b" "\t" "\n" "\u000b")`,
+				`("\u0000" "\u0001" "\u0002" "\u0003" "\u0004" "\u0005" "\u0006" "\u0007" "\b"
+          "\t" "\n" "\u000b")`,
 				slip.ObjectString(vlist[0]))
 		},
 	}).Test(t)
@@ -316,6 +319,25 @@ func TestReaderColumnNamed(t *testing.T) {
 		Source: `(send reader :column 'id)`,
 		Validate: func(t *testing.T, v slip.Object) {
 			tt.Equal(t, "(4 5 6 7 2 3 0 1)", slip.ObjectString(v))
+		},
+	}).Test(t)
+}
+
+func TestReaderColumnNested(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(
+		`(make-instance 'parquet-reader-flavor :file "testdata/nested-maps.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :column "a")`,
+		Validate: func(t *testing.T, v slip.Object) {
+			tt.Equal(t,
+				`((("a" . ((1 . t) (2 . nil)))) (("b" . ((1 . t)))) (("c" . nil)) (("d" . ())) (("e" . ((1 . t))))
+                         (("f" . ((3 . t) (4 . nil) (5 . t)))))`,
+				slip.ObjectString(v))
 		},
 	}).Test(t)
 }
@@ -388,29 +410,35 @@ func TestReaderRowsNested(t *testing.T) {
 	scope.Let("reader", pr)
 	scope.Set("*print-right-margin*", slip.Fixnum(80))
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
-	/*
-		(&sliptest.Function{
-			Scope:  scope,
-			Source: `(send reader :rows :list)`,
-			Validate: func(t *testing.T, v slip.Object) {
-				vlist := v.(slip.List)
-				tt.Equal(t, `((t 1 1) (nil 1 1) (t 1 1) (t 1 1) (t 1 1) (nil 1 1))`, vlist.String())
-			},
-		}).Test(t)
-	*/
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :rows :list)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			vlist := v.(slip.List)
+			for i, x := range []string{
+				`((("a" . ((1 . t) (2 . nil)))) 1 1)`,
+				`((("b" . ((1 . t)))) 1 1)`,
+				`((("c" . nil)) 1 1)`,
+				`((("d" . ())) 1 1)`,
+				`((("e" . ((1 . t)))) 1 1)`,
+				`((("f" . ((3 . t) (4 . nil) (5 . t)))) 1 1)`,
+			} {
+				tt.Equal(t, x, slip.ObjectString(vlist[i]))
+			}
+		},
+	}).Test(t)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send reader :rows :assoc)`,
 		Validate: func(t *testing.T, v slip.Object) {
 			vlist := v.(slip.List)
 			for i, x := range []string{
-				// `(("a" . ("a" . ((1 . t) (2 . nil))) ("b" . 1) ("c" . 1))`,
-				`(("a" . ("a" . (1 . t))) ("b" . 1) ("c" . 1))`,
-				`(("a" . ("b" . (2 . nil))) ("b" . 1) ("c" . 1))`,
-				`(("a" . ("c" . (1 . t))) ("b" . 1) ("c" . 1))`,
-				`(("a" . ("d" . (1 . t))) ("b" . 1) ("c" . 1))`,
-				`(("a" . ("e" . (3 . t))) ("b" . 1) ("c" . 1))`,
-				`(("a" . ("f" . (4 . nil))) ("b" . 1) ("c" . 1))`,
+				`(("a" . (("a" . ((1 . t) (2 . nil))))) ("b" . 1) ("c" . 1))`,
+				`(("a" . (("b" . ((1 . t))))) ("b" . 1) ("c" . 1))`,
+				`(("a" . (("c" . nil))) ("b" . 1) ("c" . 1))`,
+				`(("a" . (("d" . ()))) ("b" . 1) ("c" . 1))`,
+				`(("a" . (("e" . ((1 . t))))) ("b" . 1) ("c" . 1))`,
+				`(("a" . (("f" . ((3 . t) (4 . nil) (5 . t))))) ("b" . 1) ("c" . 1))`,
 			} {
 				tt.Equal(t, x, slip.ObjectString(vlist[i]))
 			}
@@ -428,5 +456,32 @@ func TestReaderRowsError(t *testing.T) {
 		Scope:     scope,
 		Source:    `(send reader :rows :what)`,
 		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send reader :rows :assoc '(20))`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send reader :rows :assoc t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}
+
+func TestReaderEachRowPrimitive(t *testing.T) {
+	scope := slip.NewScope()
+	pr := slip.ReadString(`(make-instance 'parquet-reader-flavor :file "testdata/primitive.parquet")`).Eval(scope, nil)
+	scope.Let("reader", pr)
+	scope.Set("result", slip.List{slip.Fixnum(7)})
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send reader :each-row (lambda (row) (setq result (add result row))) :assoc)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			result := scope.Get(slip.Symbol("result"))
+			fmt.Printf("*** result: %s\n", result)
+		},
 	}).Test(t)
 }

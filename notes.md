@@ -9,15 +9,9 @@
   - https://github.com/apache/parquet-testing/tree/master/data
   - https://platform.opentargets.org/downloads
   - reader
-   - columns
-    - nested is not right
-     - try fields instead?
-   - :rows
-    - broken for map
-    - try fr.GetRecordReader()
    - :each-row
-  - writer
-  - writer - future
+    - why does local scoped var not work for set?
+  - writer - future?
    - options
     - with metadata
     - with props
@@ -28,6 +22,7 @@
     - row-group-count
     - properties
    - if all, use ReadTable() or is each column just as good?
+
  - brew oj
 
  - messaging
