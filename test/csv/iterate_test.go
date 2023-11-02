@@ -58,7 +58,7 @@ func TestIterateBag(t *testing.T) {
 func TestIterateChannel(t *testing.T) {
 	scope := slip.NewScope()
 	channel := make(gi.Channel, 10)
-	scope.Set(slip.Symbol("chan"), channel)
+	scope.Let(slip.Symbol("chan"), channel)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(csv-iterate chan "A,B\n1,2\n3,4\n")`,
@@ -81,7 +81,11 @@ func TestIterateChannel(t *testing.T) {
 		b = b.(*flavors.Instance).Receive(scope, ":native", nil, 0)
 		result = append(result, b)
 	}
-	tt.Equal(t, `((("A" . "1") ("B" . "2")) (("A" . "3") ("B" . "4")))`, result.String())
+	scope.Let("result", result)
+	tt.Equal(t, `"1"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "A" (car result)))`).Eval(scope, nil)))
+	tt.Equal(t, `"2"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "B" (car result)))`).Eval(scope, nil)))
+	tt.Equal(t, `"3"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "A" (cadr result)))`).Eval(scope, nil)))
+	tt.Equal(t, `"4"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "B" (cadr result)))`).Eval(scope, nil)))
 }
 
 func TestIterateBadKeyword(t *testing.T) {

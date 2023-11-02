@@ -4,7 +4,33 @@
 
 - next
 
- - parquet package
+ - messaging
+  - body can be json, sen, or lisp. If first character is ( then lisp else sen
+  - msg-hub - abstract for message hub
+  - nats-hub-flavor
+  - jetstream-hub-flavor
+  - mem-hub-flavor
+  - subject configuration out of band possibly
+   - will a simple string be enough or are jetstream variations needed?
+  - publish or send is always the same
+   - handling is configured out of band or through the hub
+  - listen with callback
+  - (:get subject) for queues
+  - explicit ack if configured
+
+
+ - xml
+  - directly to lisp
+   - (element1 element2)
+   - element: (name attrs children...)
+   - attrs: assoc list
+  - callback SAX option also using a SAX-flavor with methods for each callback
+  - xml-read
+   - input input-stream
+  -
+  - xml-write
+   - destination (stream, nil, t)
+   - data
 
  - flow package
   - classes/flavors
@@ -40,11 +66,21 @@
     - tasks
   - syntax for describing, json or lisp
 
- - messaging
-  - msg-hub - abstract for message hub
-  - nats-hub-flavor
-  - mem-hub-flavor
-  - subject configuration out of band possibly
+ - parquet writer - future
+  - parquet package (https://github.com/apache/parquet-format)
+   - https://pkg.go.dev/github.com/apache/arrow/go/v13@v13.0.0/parquet#Version
+   - https://github.com/apache/parquet-testing/tree/master/data
+   - https://platform.opentargets.org/downloads
+  - options
+   - with metadata
+   - with props
+  - methods
+   - close
+   - row-count
+   - column-count
+   - row-group-count
+   - properties
+  - if all, use ReadTable() or is each column just as good?
 
  - net package
   - implement sbcl networking or something closer to golang?
