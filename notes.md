@@ -4,8 +4,6 @@
 
 - next
 
- - brew oj
-
  - messaging
   - body can be json, sen, or lisp. If first character is ( then lisp else sen
   - msg-hub - abstract for message hub

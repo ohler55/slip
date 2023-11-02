@@ -5,6 +5,7 @@ package test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 )
@@ -79,4 +80,30 @@ func TestScopeRemove(t *testing.T) {
 	tt.Equal(t, false, parent.Has(y))
 
 	tt.Equal(t, true, child.Has(slip.Symbol("most-positive-fixnum")))
+}
+
+func TestScopeAllVars(t *testing.T) {
+	var parent slip.Scope
+	parent.Let("x", slip.Fixnum(0))
+	child := parent.NewScope()
+	child.Let("y", slip.Fixnum(1))
+
+	tt.Equal(t, "{x: 0 y: 1}", pretty.SEN(child.AllVars()))
+	tt.Equal(t, `/Scope-[0-9a-f]+ \[\]
+  x: 0
+/`, parent.String())
+}
+
+func TestScopeString(t *testing.T) {
+	parent := slip.NewScope()
+	var child slip.Scope
+	child.AddParent(parent)
+	child.UnsafeLet("x", slip.Fixnum(0))
+	child.UnsafeLet("x", slip.Fixnum(1))
+
+	x, _ := child.LocalGet("x")
+	tt.Equal(t, slip.Fixnum(1), x)
+	tt.Equal(t, `/Scope-[0-9a-f]+ \[[0-9a-f]+ \]
+  x: 1
+/`, child.String())
 }
