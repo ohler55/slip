@@ -9,7 +9,6 @@ require (
 )
 
 require (
-	github.com/apache/arrow/go/v13 v13.0.0
 	github.com/apache/arrow/go/v14 v14.0.0
 	golang.org/x/sys v0.13.0
 )
