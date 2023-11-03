@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	pq "github.com/apache/arrow/go/v13/parquet"
-	"github.com/apache/arrow/go/v13/parquet/schema"
+	pq "github.com/apache/arrow/go/v14/parquet"
+	"github.com/apache/arrow/go/v14/parquet/schema"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"

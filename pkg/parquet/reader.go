@@ -6,9 +6,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/apache/arrow/go/v13/arrow/memory"
-	"github.com/apache/arrow/go/v13/parquet/file"
-	"github.com/apache/arrow/go/v13/parquet/pqarrow"
+	"github.com/apache/arrow/go/v14/parquet/pqarrow"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -71,16 +69,7 @@ func (caller readerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 			path = string(ss)
 		}
 	}
-	var fr *pqarrow.FileReader
-	pr, err := file.OpenParquetFile(path, true)
-	if err == nil {
-		fr, err = pqarrow.NewFileReader(pr, pqarrow.ArrowReadProperties{}, memory.DefaultAllocator)
-	}
-	if err != nil {
-		panic(err)
-	}
-	obj.Any = fr
-	obj.Let(slip.Symbol("filepath"), slip.String(path))
+	initReader(obj, path)
 
 	return nil
 }
