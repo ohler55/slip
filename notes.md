@@ -5,9 +5,18 @@
 - next
  - parquet
   - helper functions like
-   - make-parquet-reader (file)
-   - parquet-row-count (pr)
-   - etc
+   + parquet-open (file)
+   + parquet-close (reader)
+   + parquet-version (reader)
+   + parquet-created-by (reader)
+   + parquet-schema (reader)
+   + parquet-column-count (reader)
+   - parquet-columns (reader)
+   - parquet-column (reader)
+   + parquet-row-count (reader)
+   - parquet-rows (reader format &optional column-ids)
+   - parquet-each-row (reader function format &optional column-ids)
+
  - repl fix end of window invisibility issue
  - completion of method names
   - if send and can determine instance type then use method for completion

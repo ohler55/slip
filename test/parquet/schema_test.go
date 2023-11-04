@@ -545,3 +545,26 @@ func setupSchemaTest(t *testing.T, filename string) *slip.Scope {
 
 	return scope
 }
+
+func TestSchemaOk(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let("reader", nil)
+	_ = slip.ReadString(`(setq reader (parquet-open "testdata/primitive.parquet"))`).Eval(scope, nil)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(parquet-schema reader)`,
+		Expect: "/#<parquet-schema-flavor [0-9a-f]+>/",
+	}).Test(t)
+}
+
+func TestSchemaBadReader(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(parquet-schema 7)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(parquet-schema (make-instance 'vanilla-flavor))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+}

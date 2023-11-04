@@ -9,21 +9,25 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestOpenOk(t *testing.T) {
+func TestVersionOk(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let("reader", nil)
+	_ = slip.ReadString(`(setq reader (parquet-open "testdata/primitive.parquet"))`).Eval(scope, nil)
 	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
-
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(setq reader (parquet-open "testdata/primitive.parquet"))`,
-		Expect: "/#<parquet-reader-flavor [0-9a-f]+>/",
+		Source: `(parquet-version reader)`,
+		Expect: `"v1.0"`,
 	}).Test(t)
 }
 
-func TestOpenBadFile(t *testing.T) {
+func TestVersionBadReader(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(parquet-open 7)`,
+		Source:    `(parquet-version 7)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(parquet-version (make-instance 'vanilla-flavor))`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
