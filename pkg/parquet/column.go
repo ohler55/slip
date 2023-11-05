@@ -26,7 +26,7 @@ func init() {
 				{
 					Name: "id",
 					Type: "fixnum|string|symbol",
-					Text: "The column identifier as either the column ID or name..",
+					Text: "The column identifier as either the column ID or name.",
 				},
 			},
 			Return: "list",
