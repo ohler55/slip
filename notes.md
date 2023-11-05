@@ -3,6 +3,10 @@
 - **multipass** or utm for linux
 
 - next
+ - separate parquet package
+ - repl fix end of window invisibility issue
+ - completion of method names
+  - if send and can determine instance type then use method for completion
 
  - messaging
   - body can be json, sen, or lisp. If first character is ( then lisp else sen

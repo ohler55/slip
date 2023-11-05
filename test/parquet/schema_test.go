@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	pq "github.com/apache/arrow/go/v13/parquet"
-	"github.com/apache/arrow/go/v13/parquet/schema"
+	pq "github.com/apache/arrow/go/v14/parquet"
+	"github.com/apache/arrow/go/v14/parquet/schema"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -544,4 +544,27 @@ func setupSchemaTest(t *testing.T, filename string) *slip.Scope {
 	scope.Let("schema", schema)
 
 	return scope
+}
+
+func TestSchemaOk(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let("reader", nil)
+	_ = slip.ReadString(`(setq reader (parquet-open "testdata/primitive.parquet"))`).Eval(scope, nil)
+	defer func() { _ = slip.ReadString(`(send reader :close)`).Eval(scope, nil) }()
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(parquet-schema reader)`,
+		Expect: "/#<parquet-schema-flavor [0-9a-f]+>/",
+	}).Test(t)
+}
+
+func TestSchemaBadReader(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(parquet-schema 7)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(parquet-schema (make-instance 'vanilla-flavor))`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
 }

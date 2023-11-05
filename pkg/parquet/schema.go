@@ -5,12 +5,16 @@ package parquet
 import (
 	"io"
 
-	"github.com/apache/arrow/go/v13/parquet/schema"
+	"github.com/apache/arrow/go/v14/parquet/pqarrow"
+	"github.com/apache/arrow/go/v14/parquet/schema"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
 var schemaFlavor *flavors.Flavor
+
+// Both the schema flavor and the parquet-schema function are defined in this
+// file.
 
 func init() {
 	schemaFlavor = flavors.DefFlavor("parquet-schema-flavor",
@@ -38,6 +42,51 @@ func init() {
 	schemaFlavor.DefMethod(":parent", "", schemaParentCaller(true))
 	schemaFlavor.DefMethod(":fields", "", schemaFieldsCaller(true))
 	schemaFlavor.DefMethod(":find", "", schemaFindCaller(true))
+
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := Schema{Function: slip.Function{Name: "parquet-schema", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "parquet-schema",
+			Args: []*slip.DocArg{
+				{
+					Name: "reader",
+					Type: "parquet-reader-flavor instance",
+					Text: "The parquet reader to get the schema of.",
+				},
+			},
+			Return: "nil",
+			Text: `__parquet-schema__ returns the schema a parquet reader.
+
+This is the same as sending _:schema_ to an instance of the _parquet-reader-flavor_ except
+that none of the _:schema_ daemons are called.`,
+			Examples: []string{
+				`(setq reader (parquet-open "sample.parquet"))`,
+				`(parquet-schema reader) => nil`,
+			},
+		}, &Pkg)
+}
+
+// Schema represents the parquet-schema function.
+type Schema struct {
+	slip.Function
+}
+
+// Call the function with the arguments provided.
+func (f *Schema) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.ArgCountCheck(f, args, 1, 1)
+	inst, ok := args[0].(*flavors.Instance)
+	if !ok {
+		slip.PanicType("reader", args[0], "parquet-reader-flavor instance")
+	}
+	var fr *pqarrow.FileReader
+	if fr, ok = inst.Any.(*pqarrow.FileReader); !ok {
+		slip.PanicType("reader", args[0], "parquet-reader-flavor instance")
+	}
+	return makeSchemaInstance(fr.ParquetReader().MetaData().Schema.Root())
 }
 
 // SchemaFlavor returns the schema flavor.
