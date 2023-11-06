@@ -3,12 +3,9 @@
 - **multipass** or utm for linux
 
 - next
- - separate parquet package
  - repl fix end of window invisibility issue
- - completion of method names
-  - if send and can determine instance type then use method for completion
 
- - messaging
+ - messaging in separate slip-message
   - body can be json, sen, or lisp. If first character is ( then lisp else sen
   - msg-hub - abstract for message hub
   - nats-hub-flavor
@@ -21,7 +18,6 @@
   - listen with callback
   - (:get subject) for queues
   - explicit ack if configured
-
 
  - xml
   - directly to lisp
@@ -36,7 +32,7 @@
    - destination (stream, nil, t)
    - data
 
- - flow package
+ - flow package in separate repo
   - classes/flavors
    - task-flavor
     - methods
@@ -70,22 +66,6 @@
     - tasks
   - syntax for describing, json or lisp
 
- - parquet writer - future
-  - parquet package (https://github.com/apache/parquet-format)
-   - https://pkg.go.dev/github.com/apache/arrow/go/v13@v13.0.0/parquet#Version
-   - https://github.com/apache/parquet-testing/tree/master/data
-   - https://platform.opentargets.org/downloads
-  - options
-   - with metadata
-   - with props
-  - methods
-   - close
-   - row-count
-   - column-count
-   - row-group-count
-   - properties
-  - if all, use ReadTable() or is each column just as good?
-
  - net package
   - implement sbcl networking or something closer to golang?
   - http://www.sbcl.org/manual/#Networking
@@ -117,11 +97,6 @@
 
    - make flavor and target for generic functions
     - socket-bind and (send socket :bind &rest address)
-
-
- - graphql (part of net or separate?)
-  - client
-  - server
 
  - package
   - support export list
