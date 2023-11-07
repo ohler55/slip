@@ -57,9 +57,9 @@ func (ed *editor) initialize() {
 	if ed.out != nil {
 		return
 	}
-	// Uncomment for debugging.
-	ed.log, _ = os.Create("editor.log")
-
+	if DebugEditor {
+		ed.log, _ = os.Create("editor.log")
+	}
 	ed.out = scope.Get(slip.Symbol(stdOutput)).(io.Writer)
 	ed.mode = topMode
 	ed.key.buf = make([]byte, 32)
@@ -156,9 +156,13 @@ func (ed *editor) reset() {
 	for i := range ed.lines {
 		ed.lines[i] = nil
 	}
+	if ed.out != nil {
+		ed.out.Write([]byte{'\x1b', '[', 'm'})
+	}
 	ed.lines = ed.lines[:0]
 	ed.line = 0
 	ed.pos = 0
+	ed.shift = 0
 	ed.mode = topMode
 }
 

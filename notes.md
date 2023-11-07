@@ -4,13 +4,28 @@
 
 - next
  - repl fix end of window invisibility issue
+  - how to trigger?
 
  - messaging in separate slip-message
   - body can be json, sen, or lisp. If first character is ( then lisp else sen
-  - msg-hub - abstract for message hub
-  - nats-hub-flavor
+  - should subscribers be objects?
+   - maybe msg-subscribe create a subscriber
+    - close to stop listening
+    - provide callback that takes subscriber, message, and message id
+     - ack with message id when processed
+  - subject identifies a stream
+   - manage stream characteristics separately
+  - msg-hub - abstract for message hub (msg-service?) not needed, duck typing is enough
+   - publish
+   - request (request reply)
+   - subscribe (hub subject callback &keys :content-type [:raw :json :lisp nil])
+    - if callback is nil then expect the user to (send subscriber :next)
+   - receive - receive on from stream, with timeout
+   - close
+   -
   - jetstream-hub-flavor
-  - mem-hub-flavor
+  - local-hub-flavor or process-hub-flavor
+
   - subject configuration out of band possibly
    - will a simple string be enough or are jetstream variations needed?
   - publish or send is always the same
