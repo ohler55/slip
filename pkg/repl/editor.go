@@ -157,7 +157,7 @@ func (ed *editor) reset() {
 		ed.lines[i] = nil
 	}
 	if ed.out != nil {
-		ed.out.Write([]byte{'\x1b', '[', 'm'})
+		_, _ = ed.out.Write([]byte{'\x1b', '[', 'm'})
 	}
 	ed.lines = ed.lines[:0]
 	ed.line = 0
