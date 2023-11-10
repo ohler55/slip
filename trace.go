@@ -36,7 +36,7 @@ func normalAfter(s *Scope, name string, args List, depth int, result *Object) {
 		panic(tr)
 	default:
 		p := NewError("%s", tr)
-		p.Stack = []string{ObjectString(append(List{Symbol(name)}, args...))}
+		p.stack = []string{ObjectString(append(List{Symbol(name)}, args...))}
 		p.Value = SimpleObject(tr)
 		panic(p)
 	}
@@ -85,7 +85,7 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 		panic(tr)
 	default:
 		p := NewError("%s", tr)
-		p.Stack = []string{ObjectString(append(List{Symbol(name)}, args...))}
+		p.stack = []string{ObjectString(append(List{Symbol(name)}, args...))}
 		traceWriterPanic(s, b, p)
 		panic(p)
 	}

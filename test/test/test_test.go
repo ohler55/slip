@@ -48,10 +48,10 @@ func TestTestFail(t *testing.T) {
 	_ = slip.ReadString(`(send toot :report)`).Eval(scope, nil)
 	tt.Equal(t, `0: (+ 1 (/ 2 0))
   1: (/ 2 0)
-  1: (/ 2 0) => runtime error: integer divide by zero
-0: (+ 1 (/ 2 0)) => runtime error: integer divide by zero
+  1: (/ 2 0) => divide by zero
+0: (+ 1 (/ 2 0)) => divide by zero
 toot: FAIL
-  runtime error: integer divide by zero
+  divide by zero
 toot: FAIL
 `, out.String())
 
@@ -98,7 +98,7 @@ func TestTestVerbose(t *testing.T) {
                                                    :forms '((+ 1 (/ 2 0)))))`).Eval(scope, nil)
 	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
 	tt.Equal(t, `toot: FAIL
-  runtime error: integer divide by zero
+  divide by zero
   (/ 2 0)
   (+ 1 (/ 2 0))
 `, out.String())
