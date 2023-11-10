@@ -3,5 +3,11 @@
 package slip
 
 func init() {
-	DefConstant(Symbol("*features*"), List{Symbol(":slip")}, `Features of the implementation.`)
+	ConstantDocs["*features*"] = "Features of the implementation."
+	addFeature("slip")
+}
+
+func addFeature(name string) {
+	features, _ := ConstantValues["*features*"].(List)
+	ConstantValues["*features*"] = append(features, Symbol(":"+name))
 }

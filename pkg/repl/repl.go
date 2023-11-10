@@ -157,6 +157,10 @@ func Run() {
 		replReader.stop()
 	}()
 	Interactive = true
+	if _, ok := replReader.(*termReader); ok {
+		fmt.Println(`Currently using a basic terminal editor. For a more interactive editor enter
+(setq *repl-editor* t).`)
+	}
 	replReader.initialize()
 	for {
 		process()

@@ -67,6 +67,7 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		PreSet:    DefaultPreSet,
 	}
 	packages[pkg.Name] = &pkg
+	addFeature(pkg.Name)
 
 	return &pkg
 }
@@ -79,6 +80,7 @@ func DefaultPreSet(p *Package, name string, value Object) (string, Object) {
 // AddPackage adds a package.
 func AddPackage(pkg *Package) {
 	packages[pkg.Name] = pkg
+	addFeature(pkg.Name)
 }
 
 // Use another package

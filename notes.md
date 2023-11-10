@@ -6,9 +6,6 @@
  - repl fix end of window invisibility issue
   - how to trigger?
 
- - add to *features*
- - make help better or print a line indicating how to use the editor if term
-
  - xml
   - directly to lisp
    - (element1 element2)
