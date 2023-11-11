@@ -216,7 +216,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 		}
 	}
 	p := NewError("|%s| is not a function", ObjectString(list[0]))
-	p.Stack = []string{list.String()}
+	p.stack = []string{list.String()}
 	panic(p)
 }
 

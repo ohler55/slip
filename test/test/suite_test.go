@@ -73,7 +73,7 @@ func TestSuiteRunBasic(t *testing.T) {
 `, out.String())
 
 	tt.Equal(t, `    boom: FAIL
-      runtime error: integer divide by zero
+      divide by zero
 `, stdout.String())
 }
 
@@ -87,7 +87,7 @@ func TestSuiteRunVerbose(t *testing.T) {
   sweet:
     toot: PASS
     boom: FAIL
-      runtime error: integer divide by zero
+      divide by zero
       (/ 1 0)
   -------------- sweet:
     passed:  1

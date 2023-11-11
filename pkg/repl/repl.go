@@ -34,6 +34,10 @@ var (
 	// Interactive is set to true when the REPL is interactive.
 	Interactive bool
 
+	// DebugEditor if set before Run() is called will log keystrokes to
+	// editor.log when using the editor.
+	DebugEditor bool
+
 	modifiedVars    = map[string]bool{}
 	configFilename  = ""
 	historyFilename = ""
@@ -153,6 +157,10 @@ func Run() {
 		replReader.stop()
 	}()
 	Interactive = true
+	if _, ok := replReader.(*termReader); ok {
+		fmt.Println(`Currently using a basic terminal editor. For a more interactive editor enter
+(setq *repl-editor* t).`)
+	}
 	replReader.initialize()
 	for {
 		process()

@@ -58,7 +58,7 @@ func (f *Deftest) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	inst.Let(slip.Symbol("parent"), args[1])
 	if args[1] != nil {
-		if parent, ok := args[1].(*flavors.Instance); !ok || parent.Flavor != testFlavor {
+		if parent, ok := args[1].(*flavors.Instance); !ok || parent.Flavor != suiteFlavor {
 			slip.PanicType("parent", args[1], "instance of test-flavor")
 		}
 	}

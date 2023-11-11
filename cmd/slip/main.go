@@ -33,6 +33,7 @@ var (
 func init() {
 	flag.BoolVar(&showVersion, "v", showVersion, "version")
 	flag.BoolVar(&trace, "t", trace, "trace")
+	flag.BoolVar(&repl.DebugEditor, "debug", repl.DebugEditor, "log each keypress to editor.log")
 	flag.StringVar(&evalCode, "e", evalCode, "code to evaluate")
 	flag.StringVar(&cfgDir, "c", cfgDir, "configuration directory (an empty string or - indicates none)")
 	flag.BoolVar(&interactive, "i", interactive, "interactive mode")

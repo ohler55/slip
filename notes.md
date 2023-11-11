@@ -4,20 +4,7 @@
 
 - next
  - repl fix end of window invisibility issue
-
- - messaging in separate slip-message
-  - body can be json, sen, or lisp. If first character is ( then lisp else sen
-  - msg-hub - abstract for message hub
-  - nats-hub-flavor
-  - jetstream-hub-flavor
-  - mem-hub-flavor
-  - subject configuration out of band possibly
-   - will a simple string be enough or are jetstream variations needed?
-  - publish or send is always the same
-   - handling is configured out of band or through the hub
-  - listen with callback
-  - (:get subject) for queues
-  - explicit ack if configured
+  - how to trigger?
 
  - xml
   - directly to lisp
