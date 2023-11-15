@@ -136,6 +136,7 @@ func TestEditorEval(t *testing.T) {
 		until("x"),
 		provide("\r"),
 		until("3\n"),
+		expect("<normal>"),
 		promptSeq,
 		provide("\x03"),
 	})

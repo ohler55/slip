@@ -40,6 +40,7 @@ type Flavor struct {
 	noVanilla        bool
 	allowOtherKeys   bool
 	Final            bool
+	GoMakeOnly       bool
 }
 
 // Find the named flavor.
@@ -392,5 +393,5 @@ func (obj *Flavor) Documentation() string {
 // NoMake returns true if the class does not allows creating a new instance
 // with make-instance which should signal an error.
 func (obj *Flavor) NoMake() bool {
-	return obj.abstract
+	return obj.abstract || obj.GoMakeOnly
 }

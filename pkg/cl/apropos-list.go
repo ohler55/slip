@@ -34,7 +34,7 @@ func init() {
 			Return: "list",
 			Text:   `Return all symbols that contain the provided _string_ and returns the matchs in a list.`,
 			Examples: []string{
-				`(aproposList "terpri") => (terpri)`,
+				`(apropos-list "terpri") => (terpri)`,
 			},
 		}, &slip.CLPkg)
 }

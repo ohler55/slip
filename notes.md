@@ -2,10 +2,21 @@
 
 - **multipass** or utm for linux
 
-- next
- - repl fix end of window invisibility issue
-  - how to trigger?
+- *core-pathname* for where binary is
 
+- shift-end should add new line like ^j
+- return should add new line if not eval
+
+lora - AI training
+rlhf - AI training
+transformer models
+bert
+cdeid - project on github
+miniforge - python
+ https://conda-forge.org/miniforge/ - Miniforge3
+
+
+- next
  - xml
   - directly to lisp
    - (element1 element2)
