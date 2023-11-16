@@ -11,4 +11,5 @@ type reader interface {
 	addWord(word string)
 	removeWord(word string)
 	addToHistory()
+	afterEval()
 }

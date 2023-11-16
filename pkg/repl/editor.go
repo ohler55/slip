@@ -229,6 +229,11 @@ func (ed *editor) chanRead() {
 	}
 }
 
+func (ed *editor) afterEval() {
+	ed.key.cnt = 0
+	ed.depth = 0
+}
+
 func (ed *editor) read() (out []byte) {
 	if len(ed.lines) == 0 {
 		ed.v0, _ = ed.getCursor()
@@ -240,6 +245,9 @@ func (ed *editor) read() (out []byte) {
 	} else {
 		ed.adjustShift(true)
 		ed.setCursorCurrent()
+	}
+	if ed.key.cnt == 1 && ed.key.buf[0] == '\r' {
+		nl(ed, '\r')
 	}
 top:
 	for {

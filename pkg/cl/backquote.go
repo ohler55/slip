@@ -59,8 +59,6 @@ func (f *Backquote) expand(s *slip.Scope, arg slip.Object, depth int) slip.Objec
 			for i, a := range ta {
 				x := f.expand(s, a, depth)
 				switch tx := x.(type) {
-				case nil:
-					// don't append
 				case atList:
 					xl = append(xl, tx...)
 				case slip.Tail:
