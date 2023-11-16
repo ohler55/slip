@@ -60,3 +60,6 @@ func (r *termReader) removeWord(word string) {
 
 func (r *termReader) addToHistory() {
 }
+
+func (r *termReader) afterEval() {
+}

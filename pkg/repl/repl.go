@@ -197,6 +197,7 @@ func process() {
 		switch tr := rec.(type) {
 		case *slip.PartialPanic:
 			replReader.setDepth(tr.Depth)
+			return
 		case slip.Error:
 			msg := tr.Error()
 			if 0 < len(msg) {
@@ -233,12 +234,14 @@ func process() {
 			}
 			reset()
 		}
+		replReader.addToHistory()
 	}()
 	buf := replReader.read()
-	// Enter was pressed so save to history.
-	replReader.addToHistory()
-
 	code := slip.Read(buf)
+	// Enter was pressed and eval was successful so save to history. If a
+	// recoverable panic then that also adds to history in the defer.
+	replReader.addToHistory()
+	replReader.afterEval()
 	for _, obj := range code {
 		var skipWrite bool
 

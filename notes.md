@@ -2,11 +2,6 @@
 
 - **multipass** or utm for linux
 
-- *core-pathname* for where binary is
-
-- shift-end should add new line like ^j
-- return should add new line if not eval
-
 lora - AI training
 rlhf - AI training
 transformer models

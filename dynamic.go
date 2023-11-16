@@ -2,7 +2,7 @@
 
 package slip
 
-// Dynamic represents the a function defined by a call to defun or lambda.
+// Dynamic represents a function defined by a call to defun or lambda.
 type Dynamic struct {
 	Function
 	// Function.Self must point to a LispCaller.
