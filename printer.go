@@ -902,11 +902,16 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 			col++
 		}
 		if right < col && 0 < lastSpace {
-			// Append indent to the end just as a way to expand b.
-			b = append(b, indentSpaces[:indent]...)
-			copy(b[lastSpace+1+indent:], b[lastSpace+1:])
-			copy(b[lastSpace+1:], indentSpaces[:indent])
-			b[lastSpace] = '\n'
+			if lastSpace < len(b) {
+				// Append indent to the end just as a way to expand b.
+				b = append(b, indentSpaces[:indent]...)
+				copy(b[lastSpace+1+indent:], b[lastSpace+1:])
+				copy(b[lastSpace+1:], indentSpaces[:indent])
+				b[lastSpace] = '\n'
+			} else {
+				b = append(b, indentSpaces[:indent]...)
+				b = append(b, '\n')
+			}
 			col = indent + col - spaceCol
 			lastSpace = 0
 			spaceCol = 0

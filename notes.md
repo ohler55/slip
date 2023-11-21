@@ -2,15 +2,6 @@
 
 - **multipass** or utm for linux
 
-lora - AI training
-rlhf - AI training
-transformer models
-bert
-cdeid - project on github
-miniforge - python
- https://conda-forge.org/miniforge/ - Miniforge3
-
-
 - next
  - xml
   - directly to lisp
