@@ -5,7 +5,8 @@ package clos_test
 import (
 	"testing"
 
-	"github.com/ohler55/ojg/pretty"
+	"github.com/ohler55/ojg"
+	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	_ "github.com/ohler55/slip/pkg"
@@ -20,7 +21,8 @@ func TestAllocateInstanceSimple(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope, nil)
 
-	tt.Equal(t, "/{flavor: blueberry id: \"[0-9a-f]+\" vars: {size: small}}/", pretty.SEN(berry))
+	tt.Equal(t, `/{"flavor":"blueberry","id":"[0-9a-f]+","vars":{"size":"small"}}/`,
+		oj.JSON(berry, &ojg.Options{Sort: true, Indent: 0}))
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
@@ -33,7 +35,8 @@ func TestAllocateInstanceKeywords(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope, nil)
 
-	tt.Equal(t, "/{flavor: blueberry id: \"[0-9a-f]+\" vars: {}}/", pretty.SEN(berry))
+	tt.Equal(t, `/{"flavor":"blueberry","id":"[0-9a-f]+","vars":{}}/`,
+		oj.JSON(berry, &ojg.Options{Sort: true, Indent: 0}))
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 }
 
