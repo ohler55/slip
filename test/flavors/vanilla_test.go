@@ -9,7 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ohler55/ojg/pretty"
+	"github.com/ohler55/ojg"
+	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -94,7 +95,8 @@ func TestVanillaMethods(t *testing.T) {
 	bag := slip.ReadString("(send berry :inspect)").Eval(scope, nil)
 	tt.SameType(t, &flavors.Instance{}, bag)
 	inst := bag.(*flavors.Instance)
-	tt.Equal(t, `/{flavor: strawberry id: "[0-9a-fA-F]+" vars: {size: medium}}/`, pretty.SEN(inst.Any))
+	tt.Equal(t, `/{"flavor":"strawberry","id":"[0-9a-fA-F]+","vars":{"size":"medium"}}/`,
+		oj.JSON(inst.Any, &ojg.Options{Sort: true, Indent: 0}))
 }
 
 func TestVanillaDescribeDocs(t *testing.T) {

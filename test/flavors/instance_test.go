@@ -7,7 +7,8 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/ohler55/ojg/pretty"
+	"github.com/ohler55/ojg"
+	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -23,7 +24,8 @@ func TestInstanceMisc(t *testing.T) {
 	scope := slip.NewScope()
 	berry := code.Eval(scope, nil)
 
-	tt.Equal(t, "/{flavor: blueberry id: \"[0-9a-f]+\" vars: {size: medium}}/", pretty.SEN(berry))
+	tt.Equal(t, `/{"flavor":"blueberry","id":"[0-9a-f]+","vars":{"size":"medium"}}/`,
+		oj.JSON(berry, &ojg.Options{Sort: true, Indent: 0}))
 	tt.Equal(t, "/#<blueberry [0-9a-f]+>/", berry.String())
 
 	(&sliptest.Object{
