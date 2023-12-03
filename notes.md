@@ -14,7 +14,7 @@
   -
   - xml-write
    - destination (stream, nil, t)
-   - data
+   - data as lisp
 
  - flow package in separate repo
   - classes/flavors
