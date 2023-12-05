@@ -13,13 +13,12 @@ var (
 		Nicknames: []string{"csv"},
 		Doc:       "Home of symbols defined for the CSV functions, variables, and constants.",
 		Vars:      map[string]*slip.VarVal{},
-		Lambdas:   map[string]*slip.Lambda{},
-		Funcs:     map[string]*slip.FuncInfo{},
 		PreSet:    slip.DefaultPreSet,
 	}
 )
 
 func init() {
+	Pkg.Initialize()
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*csv*", &Pkg)

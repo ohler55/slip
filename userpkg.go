@@ -10,8 +10,8 @@ var (
 		Doc:       "The default package for user code and variables.",
 		Vars:      map[string]*VarVal{},
 		Imports:   map[string]*Import{},
-		Lambdas:   map[string]*Lambda{},
-		Funcs:     map[string]*FuncInfo{},
+		lambdas:   map[string]*Lambda{},
+		funcs:     map[string]*FuncInfo{},
 		PreSet:    DefaultPreSet,
 	}
 )

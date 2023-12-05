@@ -16,8 +16,6 @@ var (
 		Name:      "bag",
 		Nicknames: []string{},
 		Doc:       "Home of symbols defined for the bag package.",
-		Lambdas:   map[string]*slip.Lambda{},
-		Funcs:     map[string]*slip.FuncInfo{},
 		PreSet:    slip.DefaultPreSet,
 		Vars: map[string]*slip.VarVal{
 			"*bag-time-format*": {
@@ -38,6 +36,7 @@ the _*bag-time_wrap*_ value and the time encoded according to the _*bag-time-for
 )
 
 func init() {
+	Pkg.Initialize()
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*bag*", &Pkg)

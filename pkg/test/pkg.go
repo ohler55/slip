@@ -12,8 +12,6 @@ var (
 		Name:      "test",
 		Nicknames: []string{},
 		Doc:       "Home of symbols defined for the test package.",
-		Lambdas:   map[string]*slip.Lambda{},
-		Funcs:     map[string]*slip.FuncInfo{},
 		PreSet:    slip.DefaultPreSet,
 		Vars: map[string]*slip.VarVal{
 			"*current-test*": {
@@ -25,6 +23,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize()
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*test*", &Pkg)

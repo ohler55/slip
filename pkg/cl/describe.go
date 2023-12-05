@@ -101,7 +101,7 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 		b = append(b, '\n')
 		obj = v
 		b = describeSymNames(b, sym, obj, pad, ansi)
-	} else if fi := pkg.Funcs[string(sym)]; fi != nil {
+	} else if fi := pkg.GetFunc(string(sym)); fi != nil {
 		obj = fi
 		if pkg != fi.Pkg {
 			pkg = fi.Pkg

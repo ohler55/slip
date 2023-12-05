@@ -18,8 +18,8 @@ var (
 			":yes": {Val: Symbol(":yes")},
 			":no":  {Val: Symbol(":no")},
 		},
-		Lambdas: map[string]*Lambda{},
-		Funcs:   map[string]*FuncInfo{},
+		lambdas: map[string]*Lambda{},
+		funcs:   map[string]*FuncInfo{},
 		PreSet:  keywordPreSet,
 	}
 )

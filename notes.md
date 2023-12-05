@@ -3,14 +3,33 @@
 - **multipass** or utm for linux
 
 - next
+ - mutex for Package
+  - vars
+   - package.Initialize should take map of vars
+
+ - changelog
+
  - xml
   - directly to lisp
    - (element1 element2)
    - element: (name attrs children...)
    - attrs: assoc list
+   - text - string
+   - comment - (:comment string)
+   - directive - (:directive string)
+   - proc inst - (:processing-instruction target instruction)
   - callback SAX option also using a SAX-flavor with methods for each callback
-  - xml-read
-   - input input-stream
+   - start element
+   - end element
+   - text
+   - comment
+   - directive
+   - processing instruction
+
+  - xml-read (input &key :strict)
+   - input input-stream or string
+   - :strict bool
+
   -
   - xml-write
    - destination (stream, nil, t)

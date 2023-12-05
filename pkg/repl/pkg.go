@@ -40,14 +40,13 @@ var (
 				Doc: "true if the repl is interactive.",
 			},
 		},
-		Lambdas: map[string]*slip.Lambda{},
-		Funcs:   map[string]*slip.FuncInfo{},
-		PreSet:  slip.DefaultPreSet,
-		Locked:  true,
+		PreSet: slip.DefaultPreSet,
+		Locked: true,
 	}
 )
 
 func init() {
+	Pkg.Initialize()
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	pkgVarVal.Get = getREPL

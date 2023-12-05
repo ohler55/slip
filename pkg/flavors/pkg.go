@@ -22,13 +22,12 @@ var (
 				Doc: "the names of all the defined Flavors.",
 			},
 		},
-		Lambdas: map[string]*slip.Lambda{},
-		Funcs:   map[string]*slip.FuncInfo{},
-		PreSet:  slip.DefaultPreSet,
+		PreSet: slip.DefaultPreSet,
 	}
 )
 
 func init() {
+	Pkg.Initialize()
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	for _, vv := range Pkg.Vars {

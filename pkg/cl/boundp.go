@@ -48,7 +48,7 @@ func (f *Boundp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if s.Bound(sym) {
 		return slip.True
 	}
-	if _, has := slip.CurrentPackage.Funcs[string(sym)]; has {
+	if slip.CurrentPackage.GetFunc(string(sym)) != nil {
 		return slip.True
 	}
 	return nil
