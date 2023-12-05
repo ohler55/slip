@@ -205,10 +205,9 @@ func TestPackageDescribe(t *testing.T) {
 
 	p := slip.Package{
 		Name:    "fake",
-		Vars:    map[string]*slip.VarVal{},
 		Imports: map[string]*slip.Import{},
 	}
-	p.Initialize()
+	p.Initialize(nil)
 	p.Import(cl, "car")
 	out = p.Describe(nil, 0, 40, false)
 	tt.Equal(t, true, bytes.Contains(out, []byte("Name: fake")))

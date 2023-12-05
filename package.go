@@ -40,7 +40,6 @@ type Package struct {
 	Name      string
 	Nicknames []string
 	Doc       string
-	Vars      map[string]*VarVal
 	Imports   map[string]*Import
 	Uses      []*Package
 	Users     []*Package
@@ -51,6 +50,7 @@ type Package struct {
 	// will have an Object that evaluates to an undefined function panic.
 	lambdas map[string]*Lambda
 	funcs   map[string]*FuncInfo
+	vars    map[string]*VarVal
 	PreSet  func(p *Package, name string, value Object) (string, Object)
 	mu      sync.Mutex
 	Locked  bool
@@ -63,7 +63,7 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		Name:      strings.ToLower(name),
 		Nicknames: nicknames,
 		Doc:       doc,
-		Vars:      map[string]*VarVal{},
+		vars:      map[string]*VarVal{},
 		Imports:   map[string]*Import{},
 		lambdas:   map[string]*Lambda{},
 		funcs:     map[string]*FuncInfo{},
@@ -87,12 +87,19 @@ func AddPackage(pkg *Package) {
 }
 
 // Initialize the package.
-func (obj *Package) Initialize() {
+func (obj *Package) Initialize(vars map[string]*VarVal) {
 	if obj.funcs == nil {
 		obj.funcs = map[string]*FuncInfo{}
 	}
 	if obj.lambdas == nil {
 		obj.lambdas = map[string]*Lambda{}
+	}
+	if obj.vars == nil {
+		obj.vars = map[string]*VarVal{}
+	}
+	for k, vv := range vars {
+		vv.Pkg = obj
+		obj.vars[k] = vv
 	}
 }
 
@@ -111,8 +118,11 @@ func (obj *Package) Use(pkg *Package) {
 	}
 	obj.Uses = append(obj.Uses, pkg)
 	pkg.Users = append(pkg.Users, obj)
-	for name, vv := range pkg.Vars {
-		obj.Vars[name] = vv
+	if obj.vars == nil {
+		obj.vars = map[string]*VarVal{}
+	}
+	for name, vv := range pkg.vars {
+		obj.vars[name] = vv
 	}
 	for name, fi := range pkg.funcs {
 		obj.funcs[name] = fi
@@ -128,8 +138,8 @@ func (obj *Package) Import(pkg *Package, varName string) {
 		pkg.mu.Unlock()
 	}()
 	name := strings.ToLower(varName)
-	if vv := pkg.Vars[name]; vv != nil {
-		obj.Vars[name] = vv
+	if vv := pkg.vars[name]; vv != nil {
+		obj.vars[name] = vv
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
 	} else if fi := pkg.funcs[name]; fi != nil {
 		obj.funcs[name] = fi
@@ -146,7 +156,7 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		PanicPackage(obj, "%s is a constant and thus can't be set", name)
 	}
 	obj.mu.Lock()
-	if vv, has := obj.Vars[name]; has {
+	if vv, has := obj.vars[name]; has {
 		obj.mu.Unlock()
 		if vv.Set != nil {
 			vv.Set(value)
@@ -161,10 +171,10 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
 	}
 	vv := &VarVal{Val: value, Pkg: obj}
-	obj.Vars[name] = vv
+	obj.vars[name] = vv
 	for _, u := range obj.Users {
-		if _, has := u.Vars[name]; !has {
-			u.Vars[name] = vv
+		if _, has := u.vars[name]; !has {
+			u.vars[name] = vv
 		}
 	}
 	obj.mu.Unlock()
@@ -197,11 +207,11 @@ func (obj *Package) GetVarVal(name string) (vv *VarVal) {
 }
 
 func (obj *Package) getVarVal(name string) (vv *VarVal) {
-	if vv, _ = obj.Vars[name]; vv != nil {
+	if vv, _ = obj.vars[name]; vv != nil {
 		return vv
 	}
 	name = strings.ToLower(name)
-	if vv, _ = obj.Vars[name]; vv != nil {
+	if vv, _ = obj.vars[name]; vv != nil {
 		return vv
 	}
 	return nil
@@ -220,12 +230,12 @@ func (obj *Package) Remove(name string) (removed bool) {
 	}
 	name = strings.ToLower(name)
 	obj.mu.Lock()
-	if _, has := obj.Vars[name]; has {
-		delete(obj.Vars, name)
+	if _, has := obj.vars[name]; has {
+		delete(obj.vars, name)
 		removed = true
 		for _, u := range obj.Users {
-			if vv, _ := u.Vars[name]; vv != nil && vv.Pkg == obj {
-				delete(u.Vars, name)
+			if vv, _ := u.vars[name]; vv != nil && vv.Pkg == obj {
+				delete(u.vars, name)
 			}
 		}
 	}
@@ -237,7 +247,7 @@ func (obj *Package) Remove(name string) (removed bool) {
 // Has a variable.
 func (obj *Package) Has(name string) (has bool) {
 	obj.mu.Lock()
-	_, has = obj.Vars[strings.ToLower(name)]
+	_, has = obj.vars[strings.ToLower(name)]
 	obj.mu.Unlock()
 	return
 }
@@ -294,7 +304,7 @@ func (obj *Package) Simplify() interface{} {
 	vars := map[string]interface{}{}
 	obj.mu.Lock()
 	defer obj.mu.Unlock()
-	for k, vv := range obj.Vars {
+	for k, vv := range obj.vars {
 		vars[k] = vv.Simplify()
 	}
 	imports := map[string]interface{}{}
@@ -425,7 +435,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 		}
 	}
 	var keys []string
-	for k, vv := range obj.Vars {
+	for k, vv := range obj.vars {
 		if obj != vv.Pkg {
 			continue
 		}
@@ -436,7 +446,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 		b = append(b, "Variables:\n"...)
 		sort.Strings(keys)
 		for _, k := range keys {
-			vv := obj.Vars[k]
+			vv := obj.vars[k]
 			b = append(b, indentSpaces[:indent+2]...)
 			b = append(b, k...)
 			b = append(b, " = "...)
@@ -499,8 +509,17 @@ func (obj *Package) EachFuncInfo(cb func(fi *FuncInfo)) {
 // EachVarName call the cb for each function name in the package.
 func (obj *Package) EachVarName(cb func(name string)) {
 	obj.mu.Lock()
-	for name := range obj.Vars {
+	for name := range obj.vars {
 		cb(name)
+	}
+	obj.mu.Unlock()
+}
+
+// EachVarVal call the cb for each var in the package.
+func (obj *Package) EachVarVal(cb func(name string, vv *VarVal)) {
+	obj.mu.Lock()
+	for name, vv := range obj.vars {
+		cb(name, vv)
 	}
 	obj.mu.Unlock()
 }

@@ -13,7 +13,7 @@ var (
 		Name:      "keyword",
 		Nicknames: []string{},
 		Doc:       "Home of keyword symbols.",
-		Vars: map[string]*VarVal{
+		vars: map[string]*VarVal{
 			// Add a few examples...
 			":yes": {Val: Symbol(":yes")},
 			":no":  {Val: Symbol(":no")},
@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	for _, vv := range KeywordPkg.Vars {
+	for _, vv := range KeywordPkg.vars {
 		vv.Pkg = &KeywordPkg
 	}
 	KeywordPkg.Set("keyword", &KeywordPkg)
@@ -42,7 +42,7 @@ func keywordPreSet(p *Package, name string, value Object) (string, Object) {
 		name = ":" + name
 	}
 	name = strings.ToLower(name)
-	if vv, has := p.Vars[name]; has {
+	if vv, has := p.vars[name]; has {
 		if ObjectEqual(value, vv.Val) {
 			return name, value
 		}

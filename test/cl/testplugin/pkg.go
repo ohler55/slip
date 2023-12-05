@@ -13,12 +13,11 @@ var (
 		Nicknames: []string{},
 		Doc:       "Plugin test package.",
 		PreSet:    slip.DefaultPreSet,
-		Vars:      map[string]*slip.VarVal{},
 	}
 )
 
 func init() {
-	Pkg.Initialize()
+	Pkg.Initialize(nil)
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*testplugin*", &Pkg)

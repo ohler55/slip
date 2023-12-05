@@ -24,7 +24,7 @@ func SetVar(sym Symbol, value Object) {
 // HasVar returns true if the sym argument is bound to a value.
 func HasVar(sym Symbol) bool {
 	name := strings.ToLower(string(sym))
-	if _, has := CurrentPackage.Vars[name]; has {
+	if _, has := CurrentPackage.vars[name]; has {
 		return true
 	}
 	if _, has := ConstantValues[name]; has {
@@ -36,14 +36,14 @@ func HasVar(sym Symbol) bool {
 // RemoveVar removes the binding to the sym argument.
 func RemoveVar(sym Symbol) {
 	name := strings.ToLower(string(sym))
-	delete(CurrentPackage.Vars, name)
+	delete(CurrentPackage.vars, name)
 }
 
 // DescribeVar returns the documentation for the variable bound to the sym
 // argument.
 func DescribeVar(sym Symbol) string {
 	name := strings.ToLower(string(sym))
-	if vv, has := CurrentPackage.Vars[name]; has {
+	if vv, has := CurrentPackage.vars[name]; has {
 		return vv.Doc
 	}
 	if doc, has := ConstantDocs[name]; has {

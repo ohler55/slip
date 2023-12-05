@@ -12,13 +12,12 @@ var (
 		Name:      "clos",
 		Nicknames: []string{"clos"},
 		Doc:       "Home of symbols defined for the CLOS functions, variables, and constants.",
-		Vars:      map[string]*slip.VarVal{},
 		PreSet:    slip.DefaultPreSet,
 	}
 )
 
 func init() {
-	Pkg.Initialize()
+	Pkg.Initialize(nil)
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*clos*", &Pkg)

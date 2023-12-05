@@ -18,7 +18,7 @@ var (
 		Name:      "common-lisp",
 		Nicknames: []string{"cl"},
 		Doc:       "Home of symbols defined by the ANSI language spcification.",
-		Vars: map[string]*VarVal{
+		vars: map[string]*VarVal{
 			"*common-lisp*":   &pkgVarVal,
 			"*package*":       {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
 			"*core-pathname*": {Val: nil, Doc: "The absolute pathname of the running SLIP application."},
@@ -189,11 +189,11 @@ and raises an error if not possible to print readably.`,
 )
 
 func init() {
-	for _, vv := range CLPkg.Vars {
+	for _, vv := range CLPkg.vars {
 		vv.Pkg = &CLPkg
 	}
 	xpath, _ := os.Executable()
-	CLPkg.Vars["*core-pathname*"].Val = String(xpath)
+	CLPkg.vars["*core-pathname*"].Val = String(xpath)
 	pkgVarVal.Get = getCLPkg
 }
 

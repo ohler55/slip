@@ -12,47 +12,44 @@ var (
 		Name:      "repl",
 		Nicknames: []string{},
 		Doc:       "A package for REPL related functions.",
-		Vars: map[string]*slip.VarVal{
-			"*repl*":                &pkgVarVal,
-			"*repl-prompt*":         {Get: getPrompt, Set: setPrompt, Doc: "the REPL prompt"},
-			"*repl-warning-prefix*": {Get: getWarnPrefix, Set: setWarnPrefix, Doc: "prefix to print before a warning"},
-			"*repl-match-color*": {
-				Get: getMatchColor,
-				Set: setMatchColor,
-				Doc: "sets the ANSI sequence for matching parenthesis colorization",
-			},
-			"*repl-editor*": {
-				Get: getEditor,
-				Set: setEditor,
-				Doc: "if true use the SLIP REPL editor as the reader else use a simple line reader.",
-			},
-			"*repl-history-limit*": {Get: getHistoryLimit, Set: setHistoryLimit, Doc: "the form history limit."},
-			"*repl-help-box*":      {Val: slip.True, Doc: "if true display help in a box."},
-			"*repl-debug*":         {Val: nil, Doc: "if true the go stack is printed on error."},
-			"*repl-eval-on-close*": {
-				Get: getEvalOnClose,
-				Set: setEvalOnClose,
-				Doc: "if true evaluate a form when the close parenthensis typed.",
-			},
-			"*repl-interactive*": {
-				Get: getInteractive,
-				Set: setInteractive,
-				Doc: "true if the repl is interactive.",
-			},
-		},
-		PreSet: slip.DefaultPreSet,
-		Locked: true,
+		PreSet:    slip.DefaultPreSet,
+		Locked:    true,
 	}
 )
 
 func init() {
-	Pkg.Initialize()
+	Pkg.Initialize(map[string]*slip.VarVal{
+		"*repl*":                &pkgVarVal,
+		"*repl-prompt*":         {Get: getPrompt, Set: setPrompt, Doc: "the REPL prompt"},
+		"*repl-warning-prefix*": {Get: getWarnPrefix, Set: setWarnPrefix, Doc: "prefix to print before a warning"},
+		"*repl-match-color*": {
+			Get: getMatchColor,
+			Set: setMatchColor,
+			Doc: "sets the ANSI sequence for matching parenthesis colorization",
+		},
+		"*repl-editor*": {
+			Get: getEditor,
+			Set: setEditor,
+			Doc: "if true use the SLIP REPL editor as the reader else use a simple line reader.",
+		},
+		"*repl-history-limit*": {Get: getHistoryLimit, Set: setHistoryLimit, Doc: "the form history limit."},
+		"*repl-help-box*":      {Val: slip.True, Doc: "if true display help in a box."},
+		"*repl-debug*":         {Val: nil, Doc: "if true the go stack is printed on error."},
+		"*repl-eval-on-close*": {
+			Get: getEvalOnClose,
+			Set: setEvalOnClose,
+			Doc: "if true evaluate a form when the close parenthensis typed.",
+		},
+		"*repl-interactive*": {
+			Get: getInteractive,
+			Set: setInteractive,
+			Doc: "true if the repl is interactive.",
+		},
+	})
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	pkgVarVal.Get = getREPL
-	for _, vv := range Pkg.Vars {
-		vv.Pkg = &Pkg
-	}
+
 	slip.DefConstant(slip.Symbol("*bold*"), slip.String("\x1b[1m"), "bold ANSI sequence")
 	slip.DefConstant(slip.Symbol("*underline*"), slip.String("\x1b[4m"), "underline ANSI sequence")
 	slip.DefConstant(slip.Symbol("*ansi-reset*"), slip.String("\x1b[m"), "reset ANSI sequence")

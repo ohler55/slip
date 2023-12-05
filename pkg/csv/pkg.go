@@ -12,13 +12,12 @@ var (
 		Name:      "csv",
 		Nicknames: []string{"csv"},
 		Doc:       "Home of symbols defined for the CSV functions, variables, and constants.",
-		Vars:      map[string]*slip.VarVal{},
 		PreSet:    slip.DefaultPreSet,
 	}
 )
 
 func init() {
-	Pkg.Initialize()
+	Pkg.Initialize(nil)
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*csv*", &Pkg)

@@ -13,12 +13,11 @@ var (
 		Nicknames: []string{"networking", "network"},
 		Doc:       "Home of symbols defined for the net (networking) package.",
 		PreSet:    slip.DefaultPreSet,
-		Vars:      map[string]*slip.VarVal{},
 	}
 )
 
 func init() {
-	Pkg.Initialize()
+	Pkg.Initialize(nil)
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*net*", &Pkg)

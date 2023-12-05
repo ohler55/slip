@@ -12,13 +12,12 @@ var (
 		Name:      "gi",
 		Nicknames: []string{"go-integration", "golang-integration"},
 		Doc:       "Home of symbols defined for the Go Integration functions, variables, and constants.",
-		Vars:      map[string]*slip.VarVal{},
 		PreSet:    slip.DefaultPreSet,
 	}
 )
 
 func init() {
-	Pkg.Initialize()
+	Pkg.Initialize(nil)
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*gi*", &Pkg)
