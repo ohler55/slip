@@ -17,14 +17,14 @@ func TestOctetsToString(t *testing.T) {
 
 func TestOctetsToStringEmpty(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(octets-to-string '( ))`,
+		Source: `(octets-to-string '())`,
 		Expect: `""`,
 	}).Test(t)
 }
 
 func TestOctetsToStringBadArg(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(octets-to-string "foo" "bar")`,
+		Source: `(octets-to-string 4)`,
 		Panics: true,
 	}).Test(t)
 }
