@@ -24,7 +24,14 @@ func TestOctetsToStringEmpty(t *testing.T) {
 
 func TestOctetsToStringBadArg(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(octets-to-string)`,
+		Source: `(octets-to-string "foo" "bar")`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestOctetsToStringBadList(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(octets-to-string '("foo" "bar"))`,
 		Panics: true,
 	}).Test(t)
 }
