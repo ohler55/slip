@@ -8,15 +8,13 @@ var (
 		Name:      "common-lisp-user",
 		Nicknames: []string{"cl-user", "user"},
 		Doc:       "The default package for user code and variables.",
-		Vars:      map[string]*VarVal{},
 		Imports:   map[string]*Import{},
-		Lambdas:   map[string]*Lambda{},
-		Funcs:     map[string]*FuncInfo{},
 		PreSet:    DefaultPreSet,
 	}
 )
 
 func init() {
+	UserPkg.Initialize(nil)
 	UserPkg.Use(&CLPkg)
 	UserPkg.Set("*common-lisp-user*", &UserPkg)
 }

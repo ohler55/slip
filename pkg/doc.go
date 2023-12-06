@@ -27,4 +27,7 @@ import (
 
 	// Pull in CSV functions.
 	_ "github.com/ohler55/slip/pkg/csv"
+
+	// Pull in XML functions.
+	_ "github.com/ohler55/slip/pkg/xml"
 )

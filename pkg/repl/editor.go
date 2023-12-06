@@ -74,15 +74,8 @@ func (ed *editor) initialize() {
 		ed.origState = term.MakeRaw(ed.fd)
 	}
 	ed.completer.Init()
-	for name := range slip.CurrentPackage.Funcs {
-		ed.completer.Insert(name)
-	}
-	for name := range slip.CurrentPackage.Vars {
-		ed.completer.Insert(name)
-	}
-	for name := range slip.ConstantValues {
-		ed.completer.Insert(name)
-	}
+	slip.CurrentPackage.EachFuncName(ed.completer.Insert)
+	slip.CurrentPackage.EachVarName(ed.completer.Insert)
 	ed.completer.Sort()
 
 	go ed.chanRead()

@@ -67,10 +67,10 @@ func FindFunc(name string, pkgs ...*Package) *FuncInfo {
 	} else if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	fi := pkg.Funcs[name]
+	fi := pkg.funcs[name]
 	if fi == nil {
 		name = strings.ToLower(name)
-		fi = pkg.Funcs[name]
+		fi = pkg.funcs[name]
 	}
 	if fi != nil {
 		return fi
@@ -253,7 +253,7 @@ func CompileList(list List) (f Object) {
 		switch ta := list[0].(type) {
 		case Symbol:
 			name := strings.ToLower(string(ta))
-			if fi := CurrentPackage.Funcs[name]; fi != nil {
+			if fi := CurrentPackage.funcs[name]; fi != nil {
 				f = fi.Create(list[1:])
 			} else {
 				lc := Lambda{
@@ -263,7 +263,7 @@ func CompileList(list List) (f Object) {
 					},
 					Forms: List{Undefined(name)},
 				}
-				CurrentPackage.Lambdas[name] = &lc
+				CurrentPackage.lambdas[name] = &lc
 				fc := func(args List) Object {
 					return &Dynamic{
 						Function: Function{
@@ -272,7 +272,7 @@ func CompileList(list List) (f Object) {
 						},
 					}
 				}
-				CurrentPackage.Funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage}
+				CurrentPackage.funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage}
 				f = fc(list[1:])
 			}
 			if funk, ok := f.(Funky); ok {
@@ -303,7 +303,7 @@ func CompileList(list List) (f Object) {
 // sym argument.
 func DescribeFunction(sym Symbol) *FuncDoc {
 	name := strings.ToLower(string(sym))
-	if fi, has := CurrentPackage.Funcs[name]; has {
+	if fi, has := CurrentPackage.funcs[name]; has {
 		return fi.Doc
 	}
 	return nil

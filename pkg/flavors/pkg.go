@@ -15,25 +15,20 @@ var (
 		Name:      "flavors",
 		Nicknames: []string{},
 		Doc:       "Home of symbols defined for the Flavors object model.",
-		Vars: map[string]*slip.VarVal{
-			"*all-flavor-names*": {
-				Get: getAllFlavorNames,
-				Set: setPanic,
-				Doc: "the names of all the defined Flavors.",
-			},
-		},
-		Lambdas: map[string]*slip.Lambda{},
-		Funcs:   map[string]*slip.FuncInfo{},
-		PreSet:  slip.DefaultPreSet,
+		PreSet:    slip.DefaultPreSet,
 	}
 )
 
 func init() {
+	Pkg.Initialize(map[string]*slip.VarVal{
+		"*all-flavor-names*": {
+			Get: getAllFlavorNames,
+			Set: setPanic,
+			Doc: "the names of all the defined Flavors.",
+		},
+	})
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	for _, vv := range Pkg.Vars {
-		vv.Pkg = &Pkg
-	}
 	Pkg.Set("*flavors*", &Pkg)
 }
 

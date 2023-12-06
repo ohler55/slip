@@ -77,7 +77,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			},
 		}
 	}
-	if fi := slip.CurrentPackage.Funcs[low]; fi != nil {
+	if fi := slip.CurrentPackage.GetFunc(low); fi != nil {
 		if fi.Pkg.Locked {
 			slip.PanicPackage(slip.CurrentPackage, "Redefining %s:%s in defun. Package %s is locked.",
 				slip.CurrentPackage.Name, low, slip.CurrentPackage.Name)
@@ -85,14 +85,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		w := s.Get("*error-output*").(io.Writer)
 		_, _ = fmt.Fprintf(w, "WARNING: redefining %s:%s in defun\n", slip.CurrentPackage.Name, low)
 	}
-	slip.CurrentPackage.Lambdas[low] = lc
-	slip.CurrentPackage.Funcs[low] = &slip.FuncInfo{
-		Name:   low,
-		Doc:    lc.Doc,
-		Create: fc,
-		Pkg:    slip.CurrentPackage,
-		Kind:   slip.FunctionSymbol,
-	}
+	slip.CurrentPackage.DefLambda(low, lc, fc, slip.FunctionSymbol)
 	if 0 < len(s.Parents()) {
 		lc.Closure = s
 	}

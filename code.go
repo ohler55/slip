@@ -626,7 +626,7 @@ func (r *reader) closeList() {
 			switch r.stack[start-1] {
 			case quoteMarker:
 				if newQuote == nil {
-					newQuote = CLPkg.Funcs["quote"].Create
+					newQuote = CLPkg.GetFunc("quote").Create
 				}
 				obj = newQuote(List{obj})
 				start--
@@ -634,7 +634,7 @@ func (r *reader) closeList() {
 				r.stack = r.stack[:start+1]
 			case sharpQuoteMarker:
 				if newSharpQuote == nil {
-					newSharpQuote = CLPkg.Funcs["function"].Create
+					newSharpQuote = CLPkg.GetFunc("function").Create
 				}
 				obj = newSharpQuote(List{obj})
 				start--
@@ -642,7 +642,7 @@ func (r *reader) closeList() {
 				r.stack = r.stack[:start+1]
 			case backquoteMarker:
 				if newBackquote == nil {
-					newBackquote = CLPkg.Funcs["backquote"].Create
+					newBackquote = CLPkg.GetFunc("backquote").Create
 				}
 				obj = newBackquote(List{obj})
 				start--
@@ -650,7 +650,7 @@ func (r *reader) closeList() {
 				r.stack = r.stack[:start+1]
 			case commaMarker:
 				if newComma == nil {
-					newComma = CLPkg.Funcs["comma"].Create
+					newComma = CLPkg.GetFunc("comma").Create
 				}
 				obj = newComma(List{obj})
 				start--
@@ -658,7 +658,7 @@ func (r *reader) closeList() {
 				r.stack = r.stack[:start+1]
 			case commaAtMarker:
 				if newCommaAt == nil {
-					newCommaAt = CLPkg.Funcs["comma-at"].Create
+					newCommaAt = CLPkg.GetFunc("comma-at").Create
 				}
 				obj = newCommaAt(List{obj})
 				start--
@@ -705,7 +705,7 @@ func (r *reader) pushToken(src []byte) {
 		switch r.stack[len(r.stack)-1] {
 		case quoteMarker:
 			if newQuote == nil {
-				newQuote = CLPkg.Funcs["quote"].Create
+				newQuote = CLPkg.GetFunc("quote").Create
 			}
 			if len(r.stack) == 1 {
 				r.code = append(r.code, newQuote(List{Symbol(token)}))
@@ -717,7 +717,7 @@ func (r *reader) pushToken(src []byte) {
 			return
 		case sharpQuoteMarker:
 			if newSharpQuote == nil {
-				newSharpQuote = CLPkg.Funcs["function"].Create
+				newSharpQuote = CLPkg.GetFunc("function").Create
 			}
 			if len(r.stack) == 1 {
 				r.code = append(r.code, newSharpQuote(List{Symbol(token)}))
@@ -729,7 +729,7 @@ func (r *reader) pushToken(src []byte) {
 			return
 		case backquoteMarker:
 			if newBackquote == nil {
-				newBackquote = CLPkg.Funcs["backquote"].Create
+				newBackquote = CLPkg.GetFunc("backquote").Create
 			}
 			if len(r.stack) == 1 {
 				r.code = append(r.code, newBackquote(List{Symbol(token)}))
@@ -741,7 +741,7 @@ func (r *reader) pushToken(src []byte) {
 			return
 		case commaMarker:
 			if newComma == nil {
-				newComma = CLPkg.Funcs["comma"].Create
+				newComma = CLPkg.GetFunc("comma").Create
 			}
 			if len(r.stack) == 1 {
 				r.code = append(r.code, newComma(List{Symbol(token)}))
@@ -753,7 +753,7 @@ func (r *reader) pushToken(src []byte) {
 			return
 		case commaAtMarker:
 			if newCommaAt == nil {
-				newCommaAt = CLPkg.Funcs["comma-at"].Create
+				newCommaAt = CLPkg.GetFunc("comma-at").Create
 			}
 			if len(r.stack) == 1 {
 				r.code = append(r.code, newCommaAt(List{Symbol(token)}))
@@ -1022,7 +1022,7 @@ func (c Code) Compile() {
 		if f != nil {
 			name := f.Eval(scope, 0)
 			if newQuote == nil {
-				newQuote = CLPkg.Funcs["quote"].Create
+				newQuote = CLPkg.GetFunc("quote").Create
 			}
 			c[i] = newQuote(List{name})
 		}

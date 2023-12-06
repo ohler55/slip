@@ -4,17 +4,8 @@
 
 - next
  - xml
-  - directly to lisp
-   - (element1 element2)
-   - element: (name attrs children...)
-   - attrs: assoc list
-  - callback SAX option also using a SAX-flavor with methods for each callback
-  - xml-read
-   - input input-stream
-  -
   - xml-write
-   - destination (stream, nil, t)
-   - data as lisp
+   - :html bool
 
  - flow package in separate repo
   - classes/flavors

@@ -81,33 +81,29 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 
 	var lines []string
 	if pkg != nil {
-		for k, vv := range pkg.Vars {
-			if !strings.Contains(k, pat) {
-				continue
+		pkg.EachVarVal(func(name string, vv *slip.VarVal) {
+			if strings.Contains(name, pat) {
+				lines = append(lines, f.formVarLine(name, vv, &pr))
 			}
-			lines = append(lines, f.formVarLine(k, vv, &pr))
-		}
-		for k, fi := range pkg.Funcs {
-			if !strings.Contains(k, pat) {
-				continue
+		})
+		pkg.EachFuncInfo(func(fi *slip.FuncInfo) {
+			if strings.Contains(fi.Name, pat) {
+				lines = append(lines, f.formFuncLine(fi.Name, fi))
 			}
-			lines = append(lines, f.formFuncLine(k, fi))
-		}
+		})
 	} else {
 		for _, pn := range slip.PackageNames() {
 			pkg := slip.FindPackage(string(pn.(slip.String)))
-			for k, vv := range pkg.Vars {
-				if vv.Pkg != pkg || !strings.Contains(k, pat) {
-					continue
+			pkg.EachVarVal(func(name string, vv *slip.VarVal) {
+				if vv.Pkg == pkg && strings.Contains(name, pat) {
+					lines = append(lines, f.formVarLine(name, vv, &pr))
 				}
-				lines = append(lines, f.formVarLine(k, vv, &pr))
-			}
-			for k, fi := range pkg.Funcs {
-				if fi.Pkg != pkg || !strings.Contains(k, pat) {
-					continue
+			})
+			pkg.EachFuncInfo(func(fi *slip.FuncInfo) {
+				if fi.Pkg == pkg && strings.Contains(fi.Name, pat) {
+					lines = append(lines, f.formFuncLine(fi.Name, fi))
 				}
-				lines = append(lines, f.formFuncLine(k, fi))
-			}
+			})
 		}
 	}
 	for k, v := range slip.ConstantValues {

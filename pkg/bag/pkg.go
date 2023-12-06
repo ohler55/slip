@@ -16,34 +16,29 @@ var (
 		Name:      "bag",
 		Nicknames: []string{},
 		Doc:       "Home of symbols defined for the bag package.",
-		Lambdas:   map[string]*slip.Lambda{},
-		Funcs:     map[string]*slip.FuncInfo{},
 		PreSet:    slip.DefaultPreSet,
-		Vars: map[string]*slip.VarVal{
-			"*bag-time-format*": {
-				Get: getTimeFormat,
-				Set: setTimeFormat,
-				Doc: "is the format for writing time as a string in bag-format and the format for parsing time.",
-			},
-			"*bag-time-wrap*": {
-				Get: getTimeWrap,
-				Set: setTimeWrap,
-				Doc: `if non-nil then the writing and parsing of time is as a hash-map with a key of
-the _*bag-time_wrap*_ value and the time encoded according to the _*bag-time-format*_.`,
-			},
-		},
 	}
 
 	options = ojg.DefaultOptions
 )
 
 func init() {
+	Pkg.Initialize(map[string]*slip.VarVal{
+		"*bag-time-format*": {
+			Get: getTimeFormat,
+			Set: setTimeFormat,
+			Doc: "is the format for writing time as a string in bag-format and the format for parsing time.",
+		},
+		"*bag-time-wrap*": {
+			Get: getTimeWrap,
+			Set: setTimeWrap,
+			Doc: `if non-nil then the writing and parsing of time is as a hash-map with a key of
+the _*bag-time_wrap*_ value and the time encoded according to the _*bag-time-format*_.`,
+		},
+	})
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*bag*", &Pkg)
-	for _, vv := range Pkg.Vars {
-		vv.Pkg = &Pkg
-	}
 	slip.DefConstant(slip.Symbol("*rfc3339nano*"), slip.String(time.RFC3339Nano), "")
 }
 

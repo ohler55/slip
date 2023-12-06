@@ -75,33 +75,29 @@ func (f *AproposList) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	}
 	var list slip.List
 	if pkg != nil {
-		for k := range pkg.Vars {
-			if !strings.Contains(k, pat) {
-				continue
+		pkg.EachVarName(func(name string) {
+			if strings.Contains(name, pat) {
+				list = append(list, slip.Symbol(name))
 			}
-			list = append(list, slip.Symbol(k))
-		}
-		for k := range pkg.Funcs {
-			if !strings.Contains(k, pat) {
-				continue
+		})
+		pkg.EachFuncName(func(name string) {
+			if strings.Contains(name, pat) {
+				list = append(list, slip.Symbol(name))
 			}
-			list = append(list, slip.Symbol(k))
-		}
+		})
 	} else {
 		for _, pn := range slip.PackageNames() {
 			pkg := slip.FindPackage(string(pn.(slip.String)))
-			for k, vv := range pkg.Vars {
-				if vv.Pkg != pkg || !strings.Contains(k, pat) {
-					continue
+			pkg.EachVarVal(func(name string, vv *slip.VarVal) {
+				if vv.Pkg == pkg && strings.Contains(name, pat) {
+					list = append(list, slip.Symbol(name))
 				}
-				list = append(list, slip.Symbol(k))
-			}
-			for k, fi := range pkg.Funcs {
-				if fi.Pkg != pkg || !strings.Contains(k, pat) {
-					continue
+			})
+			pkg.EachFuncInfo(func(fi *slip.FuncInfo) {
+				if fi.Pkg == pkg && strings.Contains(fi.Name, pat) {
+					list = append(list, slip.Symbol(fi.Name))
 				}
-				list = append(list, slip.Symbol(k))
-			}
+			})
 		}
 	}
 	sort.Slice(list, func(i, j int) bool { return string(list[i].(slip.Symbol)) < string(list[j].(slip.Symbol)) })

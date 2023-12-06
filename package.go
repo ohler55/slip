@@ -3,8 +3,10 @@
 package slip
 
 import (
+	"fmt"
 	"sort"
 	"strings"
+	"sync"
 )
 
 // PackageSymbol is the symbol with a value of "package".
@@ -38,7 +40,6 @@ type Package struct {
 	Name      string
 	Nicknames []string
 	Doc       string
-	Vars      map[string]*VarVal
 	Imports   map[string]*Import
 	Uses      []*Package
 	Users     []*Package
@@ -47,9 +48,11 @@ type Package struct {
 	// implicitly by referencing a function not yet defined. In that case the
 	// caller in the map will have Forms list of length 1 and the single form
 	// will have an Object that evaluates to an undefined function panic.
-	Lambdas map[string]*Lambda
-	Funcs   map[string]*FuncInfo
+	lambdas map[string]*Lambda
+	funcs   map[string]*FuncInfo
+	vars    map[string]*VarVal
 	PreSet  func(p *Package, name string, value Object) (string, Object)
+	mu      sync.Mutex
 	Locked  bool
 }
 
@@ -60,10 +63,10 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		Name:      strings.ToLower(name),
 		Nicknames: nicknames,
 		Doc:       doc,
-		Vars:      map[string]*VarVal{},
+		vars:      map[string]*VarVal{},
 		Imports:   map[string]*Import{},
-		Lambdas:   map[string]*Lambda{},
-		Funcs:     map[string]*FuncInfo{},
+		lambdas:   map[string]*Lambda{},
+		funcs:     map[string]*FuncInfo{},
 		PreSet:    DefaultPreSet,
 	}
 	packages[pkg.Name] = &pkg
@@ -83,8 +86,31 @@ func AddPackage(pkg *Package) {
 	addFeature(pkg.Name)
 }
 
+// Initialize the package.
+func (obj *Package) Initialize(vars map[string]*VarVal) {
+	if obj.funcs == nil {
+		obj.funcs = map[string]*FuncInfo{}
+	}
+	if obj.lambdas == nil {
+		obj.lambdas = map[string]*Lambda{}
+	}
+	if obj.vars == nil {
+		obj.vars = map[string]*VarVal{}
+	}
+	for k, vv := range vars {
+		vv.Pkg = obj
+		obj.vars[k] = vv
+	}
+}
+
 // Use another package
 func (obj *Package) Use(pkg *Package) {
+	obj.mu.Lock()
+	pkg.mu.Lock()
+	defer func() {
+		obj.mu.Unlock()
+		pkg.mu.Unlock()
+	}()
 	for _, p := range obj.Uses {
 		if pkg.Name == p.Name {
 			return
@@ -92,22 +118,31 @@ func (obj *Package) Use(pkg *Package) {
 	}
 	obj.Uses = append(obj.Uses, pkg)
 	pkg.Users = append(pkg.Users, obj)
-	for name, vv := range pkg.Vars {
-		obj.Vars[name] = vv
+	if obj.vars == nil {
+		obj.vars = map[string]*VarVal{}
 	}
-	for name, fi := range pkg.Funcs {
-		obj.Funcs[name] = fi
+	for name, vv := range pkg.vars {
+		obj.vars[name] = vv
+	}
+	for name, fi := range pkg.funcs {
+		obj.funcs[name] = fi
 	}
 }
 
 // Import another package variable
 func (obj *Package) Import(pkg *Package, varName string) {
+	obj.mu.Lock()
+	pkg.mu.Lock()
+	defer func() {
+		obj.mu.Unlock()
+		pkg.mu.Unlock()
+	}()
 	name := strings.ToLower(varName)
-	if vv := pkg.Vars[name]; vv != nil {
-		obj.Vars[name] = vv
+	if vv := pkg.vars[name]; vv != nil {
+		obj.vars[name] = vv
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
-	} else if fi := pkg.Funcs[name]; fi != nil {
-		obj.Funcs[name] = fi
+	} else if fi := pkg.funcs[name]; fi != nil {
+		obj.funcs[name] = fi
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
 	} else {
 		PanicPackage(obj, "%s is not a variable or function in %s", name, pkg)
@@ -120,7 +155,9 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 	if _, has := ConstantValues[name]; has {
 		PanicPackage(obj, "%s is a constant and thus can't be set", name)
 	}
-	if vv, has := obj.Vars[name]; has {
+	obj.mu.Lock()
+	if vv, has := obj.vars[name]; has {
+		obj.mu.Unlock()
 		if vv.Set != nil {
 			vv.Set(value)
 		} else {
@@ -130,22 +167,27 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		return vv
 	}
 	if obj.Locked {
+		obj.mu.Unlock()
 		PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
 	}
 	vv := &VarVal{Val: value, Pkg: obj}
-	obj.Vars[name] = vv
+	obj.vars[name] = vv
 	for _, u := range obj.Users {
-		if _, has := u.Vars[name]; !has {
-			u.Vars[name] = vv
+		if _, has := u.vars[name]; !has {
+			u.vars[name] = vv
 		}
 	}
+	obj.mu.Unlock()
 	SetHook(obj, name)
+
 	return vv
 }
 
 // Get a variable.
 func (obj *Package) Get(name string) (value Object, has bool) {
-	if vv := obj.GetVarVal(name); vv != nil {
+	obj.mu.Lock()
+	defer obj.mu.Unlock()
+	if vv := obj.getVarVal(name); vv != nil {
 		if vv.Get != nil {
 			value = vv.Get()
 		} else {
@@ -158,11 +200,18 @@ func (obj *Package) Get(name string) (value Object, has bool) {
 
 // GetVarVal a variable.
 func (obj *Package) GetVarVal(name string) (vv *VarVal) {
-	if vv, _ = obj.Vars[name]; vv != nil {
+	obj.mu.Lock()
+	vv = obj.getVarVal(name)
+	obj.mu.Unlock()
+	return
+}
+
+func (obj *Package) getVarVal(name string) (vv *VarVal) {
+	if vv, _ = obj.vars[name]; vv != nil {
 		return vv
 	}
 	name = strings.ToLower(name)
-	if vv, _ = obj.Vars[name]; vv != nil {
+	if vv, _ = obj.vars[name]; vv != nil {
 		return vv
 	}
 	return nil
@@ -180,22 +229,26 @@ func (obj *Package) Remove(name string) (removed bool) {
 		PanicPackage(obj, "Package %s is locked.", obj.Name)
 	}
 	name = strings.ToLower(name)
-	if _, has := obj.Vars[name]; has {
-		delete(obj.Vars, name)
+	obj.mu.Lock()
+	if _, has := obj.vars[name]; has {
+		delete(obj.vars, name)
 		removed = true
 		for _, u := range obj.Users {
-			if vv, _ := u.Vars[name]; vv != nil && vv.Pkg == obj {
-				delete(u.Vars, name)
+			if vv, _ := u.vars[name]; vv != nil && vv.Pkg == obj {
+				delete(u.vars, name)
 			}
 		}
 	}
+	obj.mu.Unlock()
 	UnsetHook(obj, name)
 	return
 }
 
 // Has a variable.
 func (obj *Package) Has(name string) (has bool) {
-	_, has = obj.Vars[strings.ToLower(name)]
+	obj.mu.Lock()
+	_, has = obj.vars[strings.ToLower(name)]
+	obj.mu.Unlock()
 	return
 }
 
@@ -207,9 +260,6 @@ func (obj *Package) String() string {
 // Define a new golang function.
 func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	name := strings.ToLower(doc.Name)
-	if _, has := obj.Funcs[name]; has {
-		Warn("redefining %s", printer.caseName(name))
-	}
 	fi := FuncInfo{
 		Name:   name,
 		Create: creator,
@@ -220,10 +270,23 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	if len(fi.Kind) == 0 {
 		fi.Kind = BuiltInSymbol
 	}
-	obj.Funcs[name] = &fi
-	for _, pkg := range obj.Users {
-		pkg.Funcs[name] = &fi
+	obj.mu.Lock()
+	if obj.funcs == nil {
+		obj.funcs = map[string]*FuncInfo{}
 	}
+	if _, has := obj.funcs[name]; has {
+		Warn("redefining %s", printer.caseName(name))
+	}
+	if obj.funcs == nil {
+		fmt.Printf("*** pkg: %s define %s\n", obj.Name, name)
+	}
+	obj.funcs[name] = &fi
+	for _, pkg := range obj.Users {
+		pkg.mu.Lock()
+		pkg.funcs[name] = &fi
+		pkg.mu.Unlock()
+	}
+	obj.mu.Unlock()
 	DefunHook(obj, name)
 }
 
@@ -239,7 +302,9 @@ func (obj *Package) Simplify() interface{} {
 		nicknames[i] = nn
 	}
 	vars := map[string]interface{}{}
-	for k, vv := range obj.Vars {
+	obj.mu.Lock()
+	defer obj.mu.Unlock()
+	for k, vv := range obj.vars {
 		vars[k] = vv.Simplify()
 	}
 	imports := map[string]interface{}{}
@@ -250,8 +315,8 @@ func (obj *Package) Simplify() interface{} {
 	for i, p := range obj.Uses {
 		uses[i] = p.Name
 	}
-	funcs := make([]string, 0, len(obj.Funcs))
-	for name := range obj.Funcs {
+	funcs := make([]string, 0, len(obj.funcs))
+	for name := range obj.funcs {
 		funcs = append(funcs, name)
 		// TBD maybe show package defined in?
 	}
@@ -319,6 +384,8 @@ func FindPackage(name string) *Package {
 
 // Describe the instance in detail.
 func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
+	obj.mu.Lock()
+	defer obj.mu.Unlock()
 	b = append(b, indentSpaces[:indent]...)
 	b = append(b, "Name: "...)
 	b = append(b, obj.Name...)
@@ -368,7 +435,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 		}
 	}
 	var keys []string
-	for k, vv := range obj.Vars {
+	for k, vv := range obj.vars {
 		if obj != vv.Pkg {
 			continue
 		}
@@ -379,7 +446,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 		b = append(b, "Variables:\n"...)
 		sort.Strings(keys)
 		for _, k := range keys {
-			vv := obj.Vars[k]
+			vv := obj.vars[k]
 			b = append(b, indentSpaces[:indent+2]...)
 			b = append(b, k...)
 			b = append(b, " = "...)
@@ -389,7 +456,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 	}
 	var names []string
 	max := 0
-	for k, fi := range obj.Funcs {
+	for k, fi := range obj.funcs {
 		if obj != fi.Pkg {
 			continue
 		}
@@ -419,4 +486,64 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 		}
 	}
 	return append(b, '\n')
+}
+
+// EachFuncName call the cb for each function name in the package.
+func (obj *Package) EachFuncName(cb func(name string)) {
+	obj.mu.Lock()
+	for name := range obj.funcs {
+		cb(name)
+	}
+	obj.mu.Unlock()
+}
+
+// EachFuncInfo call the cb for each function in the package.
+func (obj *Package) EachFuncInfo(cb func(fi *FuncInfo)) {
+	obj.mu.Lock()
+	for _, fi := range obj.funcs {
+		cb(fi)
+	}
+	obj.mu.Unlock()
+}
+
+// EachVarName call the cb for each function name in the package.
+func (obj *Package) EachVarName(cb func(name string)) {
+	obj.mu.Lock()
+	for name := range obj.vars {
+		cb(name)
+	}
+	obj.mu.Unlock()
+}
+
+// EachVarVal call the cb for each var in the package.
+func (obj *Package) EachVarVal(cb func(name string, vv *VarVal)) {
+	obj.mu.Lock()
+	for name, vv := range obj.vars {
+		cb(name, vv)
+	}
+	obj.mu.Unlock()
+}
+
+// GetFunc returns the FuncInfo associated with the name which must be
+// lowercase.
+func (obj *Package) GetFunc(name string) (fi *FuncInfo) {
+	obj.mu.Lock()
+	fi = obj.funcs[name]
+	obj.mu.Unlock()
+	return
+}
+
+// DefLambda registers a named lambda function. This is called by defun.
+func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Object, kind Symbol) (fi *FuncInfo) {
+	obj.mu.Lock()
+	obj.lambdas[name] = lam
+	obj.funcs[name] = &FuncInfo{
+		Name:   name,
+		Doc:    lam.Doc,
+		Create: fc,
+		Pkg:    obj,
+		Kind:   kind,
+	}
+	obj.mu.Unlock()
+	return
 }
