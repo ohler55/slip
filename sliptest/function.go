@@ -70,9 +70,14 @@ func (tf *Function) Test(t *testing.T) {
 		case tf.Readably:
 			p := *slip.DefaultPrinter()
 			p.Readably = true
+			p.RightMargin = 80
+			p.Pretty = true
 			tt.Equal(t, tf.Expect, string(p.Append(nil, tf.Result, 0)), tf.Source)
 		default:
-			tt.Equal(t, tf.Expect, slip.ObjectString(tf.Result), tf.Source)
+			p := *slip.DefaultPrinter()
+			p.RightMargin = 80
+			p.Pretty = true
+			tt.Equal(t, tf.Expect, string(p.Append(nil, tf.Result, 0)), tf.Source)
 		}
 	}
 }
