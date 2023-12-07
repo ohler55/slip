@@ -31,7 +31,12 @@ func init() {
 				{
 					Name: "strict",
 					Type: "boolean",
-					Text: "If non-nil parsing will be strict so will handle HTML better. (default is _t_)",
+					Text: "If non-nil parsing will be strict so will handle invalid XML better. (default is _t_)",
+				},
+				{
+					Name: "html",
+					Type: "boolean",
+					Text: "If non-nil parsing will handle HTML. (default is _nil_)",
 				},
 				{
 					Name: "trim",
@@ -64,7 +69,7 @@ type Read struct {
 
 // Call the function with the arguments provided.
 func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.ArgCountCheck(f, args, 1, 7)
 	var ir io.Reader
 	switch ta := args[0].(type) {
 	case slip.String:
@@ -87,6 +92,12 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		switch string(sym) {
 		case ":strict":
 			dec.Strict = args[pos+1] != nil
+		case ":html":
+			if args[pos+1] != nil {
+				dec.Strict = false
+				dec.AutoClose = xml.HTMLAutoClose
+				dec.Entity = xml.HTMLEntity
+			}
 		case ":trim":
 			trim = args[pos+1] != nil
 		default:

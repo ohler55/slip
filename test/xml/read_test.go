@@ -53,6 +53,13 @@ func TestReadString(t *testing.T) {
 	}).Test(t)
 }
 
+func TestReadHTML(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(xml-read "<!DOCTYPE html><html><body><p>Hello.</p></body></html>" :html t)`,
+		Expect: `((:directive "DOCTYPE html") ("html" () ("body" () ("p" () "Hello."))))`,
+	}).Test(t)
+}
+
 func TestReadNoTrim(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(xml-read "<top id=\"123\"> <child>Some text. </child></top>" :trim nil :strict nil)`,
