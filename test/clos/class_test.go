@@ -19,6 +19,7 @@ func TestClassBasic(t *testing.T) {
 	tt.Equal(t, false, c.Equal(nil))
 	tt.Equal(t, "[class standard-object t]", pretty.SEN(c.Hierarchy()))
 	tt.Equal(t, "built-in fixed number class", c.(slip.Class).Documentation())
+	tt.Equal(t, "#<class fixnum>", c.String())
 	tt.Equal(t, `{
   docs: "built-in fixed number class"
   final: true
