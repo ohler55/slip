@@ -70,6 +70,36 @@ func TestLoggerJSON(t *testing.T) {
 /`, log.String())
 }
 
+func TestLoggerLog(t *testing.T) {
+	var log bytes.Buffer
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("log-out"), &slip.OutputStream{Writer: &log})
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))").Eval(scope, nil)
+	_ = slip.ReadString("(send logger :set-out log-out)").Eval(scope, nil)
+
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(progn
+                  (send logger :log :error "error ~A" 0)
+                  (send logger :log :warn "warn ~A" 1)
+                  (send logger :log :info "info ~A" 2)
+                  (send logger :log :debug "debug ~A" 3)
+                  (send logger :log 2 "info ~A" 4)
+                  (send logger :log -1 "low ~A" 5)
+                  (send logger :log 4 "high ~A" 6)
+                  (send logger :shutdown))`,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t, `E error 0
+W warn 1
+I info 2
+D debug 3
+I info 4
+E low 5
+D high 6
+`, log.String())
+}
+
 func TestLoggerDescribe(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
@@ -81,6 +111,7 @@ func TestLoggerDescribe(t *testing.T) {
 		":warn",
 		":info",
 		":debug",
+		":log",
 		":out",
 		":set-out",
 		":write",

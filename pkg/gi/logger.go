@@ -60,6 +60,7 @@ func init() {
 	logger.DefMethod(":warn", "", warnCaller(true))
 	logger.DefMethod(":info", "", infoCaller(true))
 	logger.DefMethod(":debug", "", debugCaller(true))
+	logger.DefMethod(":log", "", logCaller(true))
 	logger.DefMethod(":out", "", outCaller(true))
 	logger.DefMethod(":set-out", "", setOutCaller(true))
 	logger.DefMethod(":write", "", writeCaller(true))
@@ -117,10 +118,12 @@ func (caller initCaller) Docs() string {
 	return `__:init__`
 }
 
-func logFormat(s *slip.Scope, level int, args slip.List) {
-	limit, _ := s.Get("level").(slip.Fixnum)
-	if int(limit) < level {
-		return
+func logFormat(s *slip.Scope, level int, args slip.List, check bool) {
+	if check {
+		limit, _ := s.Get("level").(slip.Fixnum)
+		if int(limit) < level {
+			return
+		}
 	}
 	asJSON := s.Get("json") != nil
 	color := s.Get("colorize") != nil
@@ -157,56 +160,102 @@ func logFormat(s *slip.Scope, level int, args slip.List) {
 type errorCaller bool
 
 func (caller errorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	logFormat(s, 0, args)
+	logFormat(s, 0, args, true)
 	return nil
 }
 
 func (caller errorCaller) Docs() string {
 	return `__:error__ _format_ &rest _args_
-Log an error message if the logger _level_ is at or above 0.
 
+
+Log an error message if the logger _level_ is at or above 0.
 `
 }
 
 type warnCaller bool
 
 func (caller warnCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	logFormat(s, 1, args)
+	logFormat(s, 1, args, true)
 	return nil
 }
 
 func (caller warnCaller) Docs() string {
 	return `__:warn__ _format_ &rest _args_
-Log a warn message if the logger _level_ is at or above 1.
 
+
+Log a warn message if the logger _level_ is at or above 1.
 `
 }
 
 type infoCaller bool
 
 func (caller infoCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	logFormat(s, 2, args)
+	logFormat(s, 2, args, true)
 	return nil
 }
 
 func (caller infoCaller) Docs() string {
 	return `__:info__ _format_ &rest _args_
-Log an info message if the logger _level_ is at or above 2.
 
+
+Log an info message if the logger _level_ is at or above 2.
 `
 }
 
 type debugCaller bool
 
 func (caller debugCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	logFormat(s, 3, args)
+	logFormat(s, 3, args, true)
+
 	return nil
 }
 
 func (caller debugCaller) Docs() string {
 	return `__:debug__ _format_ &rest _args_
-Log a debug message if the logger _level_ is at or above 3.
 
+
+Log a debug message if the logger _level_ is at or above 3.
+`
+}
+
+type logCaller bool
+
+func (caller logCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	level := 0
+	switch ta := args[0].(type) {
+	case slip.Fixnum:
+		level = int(ta)
+		if level < 0 {
+			level = 0
+		} else if 3 < level {
+			level = 3
+		}
+	case slip.Symbol:
+		switch ta {
+		case slip.Symbol("error"), slip.Symbol(":error"):
+			level = 0
+		case slip.Symbol("warn"), slip.Symbol(":warn"):
+			level = 1
+		case slip.Symbol("info"), slip.Symbol(":info"):
+			level = 2
+		case slip.Symbol("debug"), slip.Symbol(":debug"):
+			level = 3
+		}
+	}
+	logFormat(s, level, args[1:], false)
+
+	return nil
+}
+
+func (caller logCaller) Docs() string {
+	return `__:log__ _level_ _control_ &rest _args_
+   _level_ [fixnum|symbol] of the log entry. Can be a fixnum between 0 and 3
+inclusive or :error, :warn, :info, or :debug.
+   _control_ [string] of the the log entry where _control_ is the control string to the __format__ function.
+   _rest_ of the arguments to the _control_ string.
+
+
+Log a message at the specified level ignoring the current logger _level_.
 `
 }
 
@@ -218,8 +267,9 @@ func (caller outCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 
 func (caller outCaller) Docs() string {
 	return `__:out__
-Returns the output stream.
 
+
+Returns the output stream.
 `
 }
 
@@ -243,8 +293,9 @@ func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Objec
 
 func (caller setOutCaller) Docs() string {
 	return `__:set-out__
-Sets the output stream.
 
+
+Sets the output stream.
 `
 }
 
@@ -264,8 +315,9 @@ func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 func (caller writeCaller) Docs() string {
 	return `__:write__ _message_ => _nil_
   _message_ The message to write to the stream.
-Write _message_ to _stream_.
 
+
+Write _message_ to _stream_.
 `
 }
 
@@ -282,7 +334,8 @@ func (caller shutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 
 func (caller shutdownCaller) Docs() string {
 	return `__:shutdown__
-Shutdown the logger.
 
+
+Shutdown the logger.
 `
 }
