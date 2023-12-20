@@ -13,4 +13,9 @@ type Instance interface {
 	Init(scope *Scope, args List, depth int)
 
 	// TBD maybe ChangeClass(nc Classy)
+
+	// Receive a method invocation from the send function. It is typically
+	// called by the send function but can be called directly so effectively
+	// send a method to an instance.
+	Receive(s *Scope, message string, args List, depth int) Object
 }
