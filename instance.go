@@ -18,4 +18,7 @@ type Instance interface {
 	// called by the send function but can be called directly so effectively
 	// send a method to an instance.
 	Receive(s *Scope, message string, args List, depth int) Object
+
+	// HasMethod returns true if the instance handles the named method.
+	HasMethod(method string) bool
 }
