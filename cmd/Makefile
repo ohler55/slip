@@ -5,7 +5,7 @@ build:
 	make -C slip
 
 clean:
-	make -C slip
+	make -C slip clean
 
 lint:
 	golangci-lint run
