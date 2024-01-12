@@ -5,7 +5,7 @@ build:
 	make -C cmd
 
 clean:
-	make -C cmd
+	make -C cmd clean
 
 lint:
 	golangci-lint run
