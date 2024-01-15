@@ -5,6 +5,7 @@ package slip
 import (
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func init() {
@@ -193,6 +194,7 @@ func init() {
 		vv.Pkg = &CLPkg
 	}
 	xpath, _ := os.Executable()
+	xpath, _ = filepath.EvalSymlinks(xpath)
 	CLPkg.vars["*core-pathname*"].Val = String(xpath)
 	pkgVarVal.Get = getCLPkg
 }
