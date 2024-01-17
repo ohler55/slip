@@ -150,7 +150,7 @@
  * [ ] EVERY
  * [ ] EXPORT
  * [ ] EXTENDED-CHAR
- * [ ] FBOUNDP
+ * [x] FBOUNDP
  * [ ] FDEFINITION
  * [ ] FILL
  * [ ] FILL-POINTER
