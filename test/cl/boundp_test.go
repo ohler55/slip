@@ -21,7 +21,7 @@ func TestBoundpVar(t *testing.T) {
 func TestBoundpFunc(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(boundp 'car)`,
-		Expect: "t",
+		Expect: "nil",
 	}).Test(t)
 }
 

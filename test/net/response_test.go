@@ -3,10 +3,12 @@
 package net_test
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
+	"testing/iotest"
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
@@ -225,6 +227,43 @@ func TestResponseBody(t *testing.T) {
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send response :body t)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+}
+
+func TestResponseContent(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let("response", sampleResponse())
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send response :content)`,
+		Expect: `"Sample body"`,
+	}).Test(t)
+
+	var out strings.Builder
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+
+	_ = slip.ReadString(`(describe-method http-response-flavor :content out)`).Eval(scope, nil)
+	str := out.String()
+	tt.Equal(t, true, strings.Contains(str, ":content"))
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send response :content t)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+
+	scope.Let("response", net.MakeResponse(&http.Response{
+		StatusCode:    200,
+		Proto:         "HTTP/1.1",
+		ContentLength: 123,
+		Header:        http.Header{"Accept": []string{"text/html", "text/plain"}},
+		Trailer:       http.Header{"From": []string{"user@example.ca"}},
+		Body:          io.NopCloser(iotest.ErrReader(fmt.Errorf("broken"))),
+	}))
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send response :content)`,
 		PanicType: slip.Symbol("error"),
 	}).Test(t)
 }

@@ -3,6 +3,7 @@
 package net
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/ohler55/slip"
@@ -24,6 +25,7 @@ the data associated with the HTTP reply.`),
 	responseFlavor.Final = true
 	responseFlavor.DefMethod(":status", "", respStatusCaller(true))
 	responseFlavor.DefMethod(":protocol", "", respProtocolCaller(true))
+	responseFlavor.DefMethod(":content", "", respContentCaller(true))
 	responseFlavor.DefMethod(":content-length", "", respContentLengthCaller(true))
 	responseFlavor.DefMethod(":header", "", respHeaderCaller(true))
 	responseFlavor.DefMethod(":header-get", "", respHeaderGetCaller(true))
@@ -67,6 +69,28 @@ Returns the protocol of the response.
 `
 }
 
+type respContentCaller bool
+
+func (caller respContentCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		flavors.PanicMethodArgChoice(obj, ":content", len(args), "0")
+	}
+	content, err := io.ReadAll(obj.Any.(*http.Response).Body)
+	_ = obj.Any.(*http.Response).Body.Close()
+	if err != nil {
+		panic(err)
+	}
+	return slip.String(content)
+}
+
+func (caller respContentCaller) Docs() string {
+	return `__:content__ => _string_
+
+Returns the content of the response as a string.
+`
+}
+
 type respContentLengthCaller bool
 
 func (caller respContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
@@ -78,9 +102,9 @@ func (caller respContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int)
 }
 
 func (caller respContentLengthCaller) Docs() string {
-	return `__:contentLength__ => _fixnum_
+	return `__:content-length__ => _fixnum_
 
-Returns the contentLength of the response.
+Returns the content length of the response.
 `
 }
 
