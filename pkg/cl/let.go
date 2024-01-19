@@ -54,6 +54,10 @@ func (f *Let) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	processBinding(s, ns, args[0], d2)
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
+		switch result.(type) {
+		case *ReturnResult, *GoTo:
+			return result
+		}
 	}
 	return
 }

@@ -33,7 +33,7 @@ func (s *Scope) NewScope() *Scope {
 	return &Scope{
 		parents: []*Scope{s},
 		Vars:    map[string]Object{},
-		Block:   s.Block,
+		Block:   false,
 		TagBody: s.TagBody,
 		Macro:   s.Macro,
 		Keep:    s.Keep,
@@ -48,6 +48,20 @@ func (s *Scope) Parents() []*Scope {
 // AddParent adds a parent to the scope.
 func (s *Scope) AddParent(p *Scope) {
 	s.parents = append(s.parents, p)
+}
+
+// InBlock returns true if the scope is a block and has a matching name or one
+// of the parents IsBlock() returns true.
+func (s *Scope) InBlock(name Object) bool {
+	if s.Block && name == s.Name {
+		return true
+	}
+	for _, p := range s.parents {
+		if p.InBlock(name) {
+			return true
+		}
+	}
+	return false
 }
 
 // AllVars returns a map of all the variables in the scope and it's parents.

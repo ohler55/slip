@@ -55,7 +55,7 @@ func (f *ReturnFrom) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	default:
 		slip.PanicType("name", ta, "symbol", "nil")
 	}
-	if !s.Block {
+	if !s.InBlock(rr.Tag) {
 		slip.PanicControl("return from unknown block: %s", rr.Tag)
 	}
 	if 1 < len(args) {

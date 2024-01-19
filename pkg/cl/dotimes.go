@@ -90,13 +90,10 @@ func (f *Dotimes) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 					if tr.Tag == nil {
 						return tr.Result
 					}
-					if s.Block {
-						return tr
-					}
-					slip.NewPanic("return from unknown block: %s", tr.Tag)
+					return tr
 				case *GoTo:
 					for i++; i < len(args); i++ {
-						if slip.ObjectEqual(args[i], tr.Tag) {
+						if args[i] == tr.Tag {
 							break
 						}
 					}

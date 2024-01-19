@@ -52,7 +52,7 @@ func (f *Tagbody) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for i := 0; i < len(args); i++ {
 		if gt, _ := slip.EvalArg(ns, args, i, d2).(*GoTo); gt != nil {
 			for i++; i < len(args); i++ {
-				if slip.ObjectEqual(args[i], gt.Tag) {
+				if args[i] == gt.Tag {
 					break
 				}
 			}
