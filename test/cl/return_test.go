@@ -23,6 +23,21 @@ func TestReturnEmpty(t *testing.T) {
 	}).Test(t)
 }
 
+func TestReturnNested(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(block nil (let () (block nil (let () (return 1)) 2) 3))`,
+		Expect: "3",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(block xyz (let () (block nil (let () (return 1)) 2) 3))`,
+		Expect: "3",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(block nil (let () (block xyz (let () (return 1)) 2) 3))`,
+		Expect: "1",
+	}).Test(t)
+}
+
 func TestReturnNotInBlock(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(return 1)`,

@@ -80,6 +80,10 @@ func (f *Letx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	}
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
+		switch result.(type) {
+		case *ReturnResult, *GoTo:
+			return result
+		}
 	}
 	return
 }

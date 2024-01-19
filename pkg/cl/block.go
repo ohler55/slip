@@ -49,28 +49,24 @@ func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
 	}
-	var name slip.Object
+	ns := s.NewScope()
+	ns.Block = true
 	switch ta := args[0].(type) {
 	case nil:
 		// leave as nil
 	case slip.Symbol:
-		name = ta
+		ns.Name = ta
 	default:
 		slip.PanicType("name", ta, "symbol", "nil")
 	}
-	ns := s.NewScope()
-	ns.Block = true
 	d2 := depth + 1
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
 		if rr, _ := result.(*ReturnResult); rr != nil {
-			if slip.ObjectEqual(name, rr.Tag) {
+			if ns.Name == rr.Tag {
 				return rr.Result
 			}
-			if s.Block {
-				return rr
-			}
-			slip.NewPanic("return from unknown block: %s", rr.Tag)
+			return
 		}
 	}
 	return
