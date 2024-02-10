@@ -4,6 +4,13 @@
 
 - next
 
+ - intern
+ - unintern
+ - fmakunbound
+ - makunbound
+ - find-symbol
+ - find-all-symbols
+
  - net package
   - implement sbcl networking or something closer to golang?
   - http://www.sbcl.org/manual/#Networking
@@ -64,7 +71,7 @@
   - unuse-package
   - use-package
   - package-use-list
-  - require
+  - require (with lisp code)
   - find-all-symbols
   - do-symbols
   - do-all-symbols
