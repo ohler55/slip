@@ -4,12 +4,11 @@
 
 - next
 
- - intern
- - unintern
- - fmakunbound
- - makunbound
- - find-symbol
- - find-all-symbols
+ - find-symbol (string|symbol)
+  - find func or var
+  - sbcl is case sensitive, maybe don't be
+ - find-all-symbols  (string|symbol)
+  - all packages search and return list of symbols
 
  - net package
   - implement sbcl networking or something closer to golang?
@@ -62,8 +61,6 @@
   - shadow
   - package-shadowing-symbols
   - shadowing-import
-  - intern
-  - unintern
   - find-symbol
   - export
   - unexport

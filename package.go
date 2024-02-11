@@ -290,6 +290,18 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	DefunHook(obj, name)
 }
 
+// Undefine a function.
+func (obj *Package) Undefine(name string) {
+	name = strings.ToLower(name)
+	obj.mu.Lock()
+	if obj.funcs != nil {
+		delete(obj.funcs, name)
+	}
+	obj.mu.Unlock()
+	// TBD define hook
+	// UndefineHook(obj, name)
+}
+
 // Append a buffer with a representation of the Object.
 func (obj *Package) Append(b []byte) []byte {
 	return printer.Append(b, obj, 0)
