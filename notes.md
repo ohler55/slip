@@ -4,11 +4,18 @@
 
 - next
 
- - find-symbol (string|symbol)
+ - find-symbol (string|symbol &optional package) => symbol, status
+  - status
+   - :internal - in package
+   - :external - what does this mean? maybe when package provide it is external?
+    - if exported to another package
+   - :inherited - through use-package
+  - return nil, nil if not present
+
   - find func or var
   - sbcl is case sensitive, maybe don't be
  - find-all-symbols  (string|symbol)
-  - all packages search and return list of symbols
+  - all packages search and return list of symbols with package included foo:car
 
  - net package
   - implement sbcl networking or something closer to golang?
@@ -52,7 +59,6 @@
      - maybe default to export
      - flag in FuncDoc or separate? depends on whether it's useful in docs
 
-
   - defpackage
   - in-package
   - package-name
@@ -61,7 +67,6 @@
   - shadow
   - package-shadowing-symbols
   - shadowing-import
-  - find-symbol
   - export
   - unexport
   - package-used-by-list
@@ -69,13 +74,24 @@
   - use-package
   - package-use-list
   - require (with lisp code)
-  - find-all-symbols
   - do-symbols
   - do-all-symbols
   - do-external-symbols
 
 
- - clos methods/generics
+ - clos methods/generics (flavors and clos mix as flos)
+  - flos
+   - same method combination
+    - leave in flavors? probably best
+    - move to slip top?
+    - use approach taken in slip-flow but have func call receive
+    - maybe a defclosfun links function name to flavor method
+     - link-method or method-alias
+    - defmethod needs to pick which one to used
+     - based on arguments
+      - clos version is missing (flavor daemon method)
+   - defgeneric is only used to check defmethod
+
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
   - generic functions and methods
@@ -140,9 +156,6 @@
   - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
 
 
- - macro
-  - expand on read
-
 - base64 (encode and decode in gi package)
 
  - other method combinations?
@@ -152,19 +165,3 @@
   - or
   - and
   - list
-
-
-- would building our own stack be a better approach?
- - could reuse scope but would need to clear vars
- - could replace args key lookups for lispcaller with an index to arg to avoid using maps
-
-
-- support marcos
- - represented as scoped fun
- - support macro chars of , and ,@ in a backquoted (not single quote) list
-  - , eval
-  - ,@ is like: if foo is (a b) the ,@foo becomes a b
-  - ', as is, no eval, (as string?)
-  - https://lisp-journey.gitlab.io/blog/common-lisp-macros-by-example-tutorial/
-  - defmacro defined should expand at compile time
-  - golang macro should just not eval args

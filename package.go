@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -277,9 +276,6 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	if _, has := obj.funcs[name]; has {
 		Warn("redefining %s", printer.caseName(name))
 	}
-	if obj.funcs == nil {
-		fmt.Printf("*** pkg: %s define %s\n", obj.Name, name)
-	}
 	obj.funcs[name] = &fi
 	for _, pkg := range obj.Users {
 		pkg.mu.Lock()
@@ -298,8 +294,7 @@ func (obj *Package) Undefine(name string) {
 		delete(obj.funcs, name)
 	}
 	obj.mu.Unlock()
-	// TBD define hook
-	// UndefineHook(obj, name)
+	UnsetHook(obj, name)
 }
 
 // Append a buffer with a representation of the Object.
