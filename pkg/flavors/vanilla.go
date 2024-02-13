@@ -71,7 +71,11 @@ func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 }
 
 func (caller describeCaller) Docs() string {
-	return `Writes a description of the instance to _*standard-output*_.
+	return `__:describe__ &optional _output-stream_
+  _output-stream_ [output-stream] to write to. (default: _*standard-output*_)
+
+
+Writes a description of the instance to _output-stream_.
 `
 }
 
@@ -84,6 +88,7 @@ func (caller idCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 
 func (caller idCaller) Docs() string {
 	return `__:id__ => _string_
+
 
 Returns the identifier of the instance.
 `
@@ -98,6 +103,7 @@ func (caller flavorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Objec
 
 func (caller flavorCaller) Docs() string {
 	return `__:flavor__ => _flavor_
+
 
 Returns the flavor of the instance.
 `
@@ -118,6 +124,7 @@ func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 
 func (caller hasOpCaller) Docs() string {
 	return `__:operation-handled-p__ _method_ => _boolean_
+  _method_ [keyword] to check.
 
 
 Returns _t_ if the instance handles the method and _nil_ otherwise.
@@ -148,7 +155,7 @@ func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 
 func (caller printCaller) Docs() string {
 	return `__:print-self__ &optional _stream_ &rest _ignored_
-  _stream_ to write the description to. The default is _*standard-output*_
+  _stream_ [output-stream] to write the description to. The default is _*standard-output*_
 
 
 Writes a description of the instance to the _stream_.
@@ -172,7 +179,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 
 func (caller sendIfCaller) Docs() string {
 	return `__:send-if-handles__ _method_ _arguments*_ => _object_
-  _method_ to send to the instance if the instance has the _method_.
+  _method_ [keyword] to send to the instance if the instance has the _method_.
   _arguments*_ to pass to the _method_ call.
 
 
@@ -216,7 +223,7 @@ func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 
 func (caller insideCaller) Docs() string {
 	return `__:eval-inside-yourself__ _form_ => _object_
-  _form_ to evaluate in the scope of the instance.
+  _form_ [object] to evaluate in the scope of the instance.
 
 
 Evaluates the _form_ in the instance's scope.

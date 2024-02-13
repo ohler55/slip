@@ -4,6 +4,12 @@
 
 - next
 
+ - defpackage
+ - use-package
+  - needed for tests
+ - defvar should honor package if present
+ - defun should honor package if present
+
  - find-symbol (string|symbol &optional package) => symbol, status
   - status
    - :internal - in package
@@ -15,7 +21,11 @@
   - find func or var
   - sbcl is case sensitive, maybe don't be
  - find-all-symbols  (string|symbol)
-  - all packages search and return list of symbols with package included foo:car
+  - all packages search and return list of symbols
+   - symbols not in current package should be printed with package
+    - create the symbol with the package
+   - test by
+
 
  - net package
   - implement sbcl networking or something closer to golang?
@@ -83,28 +93,15 @@
   - flos
    - same method combination
     - leave in flavors? probably best
-    - move to slip top?
-    - use approach taken in slip-flow but have func call receive
-    - maybe a defclosfun links function name to flavor method
-     - link-method or method-alias
-    - defmethod needs to pick which one to used
-     - based on arguments
-      - clos version is missing (flavor daemon method)
    - defgeneric is only used to check defmethod
+   - flosfun to create a wrapper around send :xxx
+   - maybe a a key in function doc string to link method to function
+   - inherit flos-flavor to generate functions for all method with a designaed prefix
+  - possibly add a flag indicating the flavor is a class vs flavor or flos
+  - is a standard-class needed instead of vanilla or maybe just expand vanilla?
 
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
-  - generic functions and methods
-   - GenericCaller
-    - defines an expected argument set that gets checked first
-    - keep a collection that matches argument types with methods
-     - list and pick best so far until end
-     - or nested maps
-      - type check has to look at inheritance so maybe not that helpful to have a map
-    - method is like flavors, uses a class preference list
-     - list is from type/class and is built on defmethod
-     - what does it mean to have before and after on multiple type functions?
-  - class slots
 
  - trace
   - should trace by function be supported instead of overall trace?

@@ -48,3 +48,15 @@ func getAllFlavorNames() slip.Object {
 func setPanic(value slip.Object) {
 	slip.NewPanic("*all-flavor-names* can not be set.")
 }
+
+func mustBeString(arg slip.Object, name string) (str string) {
+	switch ta := arg.(type) {
+	case slip.String:
+		str = string(ta)
+	case slip.Symbol:
+		str = string(ta)
+	default:
+		slip.PanicType(name, arg, "string", "symbol")
+	}
+	return
+}

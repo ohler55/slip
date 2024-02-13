@@ -20,6 +20,7 @@ func TestDescribeMethodPlain(t *testing.T) {
 	tt.Equal(t, `:id is a method of vanilla-flavor
   vanilla-flavor :primary
     :id => string
+`+"   "+`
     Returns the identifier of the instance.
 `, out.String())
 }
@@ -33,6 +34,7 @@ func TestDescribeMethodAnsi(t *testing.T) {
 	tt.Equal(t, "\x1b[1m:id\x1b[m is a method of \x1b[1mvanilla-flavor\x1b[m\n"+
 		"  \x1b[1mvanilla-flavor\x1b[m :primary\n"+
 		"    \x1b[1m:id\x1b[m => \x1b[4mstring\x1b[m\n"+
+		"   \n"+
 		"    Returns the identifier of the instance.\n",
 		out.String())
 }
