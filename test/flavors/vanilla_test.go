@@ -103,7 +103,10 @@ func TestVanillaDescribeDocs(t *testing.T) {
 	testVanillaDocs(t, ":describe",
 		`:describe is a method of vanilla-flavor
   vanilla-flavor :primary
-    Writes a description of the instance to *standard-output*.
+    :describe &optional output-stream
+     output-stream [output-stream] to write to. (default: *standard-output*)
+`+"   "+`
+    Writes a description of the instance to output-stream.
 `)
 }
 
@@ -112,7 +115,7 @@ func TestVanillaEvalSelfDocs(t *testing.T) {
 		`:eval-inside-yourself is a method of vanilla-flavor
   vanilla-flavor :primary
     :eval-inside-yourself form => object
-     form to evaluate in the scope of the instance.
+     form [object] to evaluate in the scope of the instance.
 `+"   "+`
     Evaluates the form in the instance's scope.
 `)
@@ -123,6 +126,7 @@ func TestVanillaFlavorDocs(t *testing.T) {
 		`:flavor is a method of vanilla-flavor
   vanilla-flavor :primary
     :flavor => flavor
+`+"   "+`
     Returns the flavor of the instance.
 `)
 }
@@ -132,6 +136,7 @@ func TestVanillaIDDocs(t *testing.T) {
 		`:id is a method of vanilla-flavor
   vanilla-flavor :primary
     :id => string
+`+"   "+`
     Returns the identifier of the instance.
 `)
 }
@@ -159,6 +164,7 @@ func TestVanillaOpHandledDocs(t *testing.T) {
 		`:operation-handled-p is a method of vanilla-flavor
   vanilla-flavor :primary
     :operation-handled-p method => boolean
+     method [keyword] to check.
 `+"   "+`
     Returns t if the instance handles the method and nil otherwise.
 `)
@@ -169,7 +175,7 @@ func TestVanillaPrintSelfDocs(t *testing.T) {
 		`:print-self is a method of vanilla-flavor
   vanilla-flavor :primary
     :print-self &optional stream &rest ignored
-     stream to write the description to. The default is *standard-output*
+     stream [output-stream] to write the description to. The default is *standard-output*
 `+"   "+`
     Writes a description of the instance to the stream.
 `)
@@ -180,7 +186,7 @@ func TestVanillaSendIfDocs(t *testing.T) {
 		`:send-if-handles is a method of vanilla-flavor
   vanilla-flavor :primary
     :send-if-handles method arguments* => object
-     method to send to the instance if the instance has the method.
+     method [keyword] to send to the instance if the instance has the method.
      arguments* to pass to the method call.
 `+"   "+`
     Sends to the instance if the instance has the method.

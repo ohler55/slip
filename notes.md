@@ -4,6 +4,49 @@
 
 - next
 
+ - package
+  - support export list
+   - ListToFunc should be f.ListToFunc
+    - lookup of func should consider the package of f
+     - if lookup is in f.pkg or lookup is exported (new flag) then ok
+    - add export flag to FuncInfo
+    - Define() and package.Define() need extra arg for export or not
+     - maybe default to export
+     - flag in FuncDoc or separate? depends on whether it's useful in docs
+
+  - defpackage
+  - use-package
+  - in-package
+  - package-name
+  - package-nicknames
+  - rename-package
+  - shadow
+  - package-shadowing-symbols
+  - shadowing-import
+  - export
+  - unexport
+  - package-used-by-list
+  - unuse-package
+  - use-package
+  - package-use-list
+  - require (with lisp code)
+  - do-symbols
+  - do-all-symbols
+  - do-external-symbols
+  - find-symbol (string|symbol &optional package) => symbol, status
+   - status
+    - :internal - in package
+    - :external - what does this mean? maybe when package provide it is external?
+     - if exported to another package
+    - :inherited - through use-package
+   - return nil, nil if not present
+   - find func or var
+   - sbcl is case sensitive, maybe don't be
+  - find-all-symbols  (string|symbol)
+   - all packages search and return list of symbols
+    - symbols not in current package should be printed with package
+     - create the symbol with the package
+
  - net package
   - implement sbcl networking or something closer to golang?
   - http://www.sbcl.org/manual/#Networking
@@ -32,59 +75,20 @@
     - non-blocking-mode (question)
     - socket-error
     - all options
-
    - make flavor and target for generic functions
     - socket-bind and (send socket :bind &rest address)
 
- - package
-  - support export list
-   - ListToFunc should be f.ListToFunc
-    - lookup of func should consider the package of f
-     - if lookup is in f.pkg or lookup is exported (new flag) then ok
-    - add export flag to FuncInfo
-    - Define() and package.Define() need extra arg for export or not
-     - maybe default to export
-     - flag in FuncDoc or separate? depends on whether it's useful in docs
+ - clos methods/generics (flavors and clos mix as flos)
+  - flos
+   - defgeneric is only used to check defmethod
+   + flosfun to create a wrapper around send :xxx
+   - maybe a a key in function doc string to link method to function
+   - inherit flos-flavor to generate functions for all method with a designated prefix
+  - possibly add a flag indicating the flavor is a class vs flavor or flos
+  - is a standard-class needed instead of vanilla or maybe just expand vanilla?
 
-
-  - defpackage
-  - in-package
-  - package-name
-  - package-nicknames
-  - rename-package
-  - shadow
-  - package-shadowing-symbols
-  - shadowing-import
-  - intern
-  - unintern
-  - find-symbol
-  - export
-  - unexport
-  - package-used-by-list
-  - unuse-package
-  - use-package
-  - package-use-list
-  - require
-  - find-all-symbols
-  - do-symbols
-  - do-all-symbols
-  - do-external-symbols
-
-
- - clos methods/generics
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
-  - generic functions and methods
-   - GenericCaller
-    - defines an expected argument set that gets checked first
-    - keep a collection that matches argument types with methods
-     - list and pick best so far until end
-     - or nested maps
-      - type check has to look at inheritance so maybe not that helpful to have a map
-    - method is like flavors, uses a class preference list
-     - list is from type/class and is built on defmethod
-     - what does it mean to have before and after on multiple type functions?
-  - class slots
 
  - trace
   - should trace by function be supported instead of overall trace?
@@ -136,9 +140,6 @@
   - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
 
 
- - macro
-  - expand on read
-
 - base64 (encode and decode in gi package)
 
  - other method combinations?
@@ -148,19 +149,3 @@
   - or
   - and
   - list
-
-
-- would building our own stack be a better approach?
- - could reuse scope but would need to clear vars
- - could replace args key lookups for lispcaller with an index to arg to avoid using maps
-
-
-- support marcos
- - represented as scoped fun
- - support macro chars of , and ,@ in a backquoted (not single quote) list
-  - , eval
-  - ,@ is like: if foo is (a b) the ,@foo becomes a b
-  - ', as is, no eval, (as string?)
-  - https://lisp-journey.gitlab.io/blog/common-lisp-macros-by-example-tutorial/
-  - defmacro defined should expand at compile time
-  - golang macro should just not eval args

@@ -250,23 +250,26 @@ func (s *Scope) bound(name string) bool {
 }
 
 // Remove a variable binding.
-func (s *Scope) Remove(sym Symbol) {
-	s.remove(strings.ToLower(string(sym)))
+func (s *Scope) Remove(sym Symbol) bool {
+	return s.remove(strings.ToLower(string(sym)))
 }
 
-func (s *Scope) remove(name string) {
+func (s *Scope) remove(name string) bool {
 	s.moo.Lock()
 	if s.Vars != nil {
 		if _, has := s.Vars[name]; has {
 			delete(s.Vars, name)
 			s.moo.Unlock()
-			return
+			return true
 		}
 	}
 	s.moo.Unlock()
 	for _, p := range s.parents {
-		p.remove(name)
+		if p.remove(name) {
+			return true
+		}
 	}
+	return false
 }
 
 // Eval evaluates an object and returns the result.

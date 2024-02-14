@@ -108,6 +108,7 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 		}
 		b, pad = describeHead(b, pkg, sym, indent, right, ansi)
 		b = append(b, '\n')
+		b = append(b, pad...)
 		b = describeSymNames(b, sym, obj, pad, ansi)
 	} else if vv := pkg.GetVarVal(strings.ToLower(string(sym))); vv != nil && 0 < len(vv.Doc) {
 		obj = vv.Value()
