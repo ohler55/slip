@@ -251,10 +251,14 @@ func process() {
 
 		value3 = value2
 		value2 = value1
-		value1 = obj.Eval(&scope, 0)
-		if value1 == slip.Novalue {
+		if obj == nil {
 			value1 = nil
-			skipWrite = true
+		} else {
+			value1 = obj.Eval(&scope, 0)
+			if value1 == slip.Novalue {
+				value1 = nil
+				skipWrite = true
+			}
 		}
 		scope.Set(slip.Symbol(form1Key), form1)
 		scope.Set(slip.Symbol(form2Key), form2)

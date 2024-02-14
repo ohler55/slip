@@ -230,6 +230,12 @@ func (ed *editor) afterEval() {
 func (ed *editor) read() (out []byte) {
 	if len(ed.lines) == 0 {
 		ed.v0, _ = ed.getCursor()
+		if int(ed.height)-1 <= ed.v0 {
+			// Keep one above the bottom of the terminal to avoid the typed
+			// characters from not displaying.
+			ed.scroll(1)
+			ed.v0--
+		}
 		ed.setCursor(ed.v0, 1)
 		ed.clearLine()
 		ed.write([]byte(prompt))

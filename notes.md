@@ -4,28 +4,48 @@
 
 - next
 
- - defpackage
- - use-package
-  - needed for tests
- - defvar should honor package if present
- - defun should honor package if present
+ - package
+  - support export list
+   - ListToFunc should be f.ListToFunc
+    - lookup of func should consider the package of f
+     - if lookup is in f.pkg or lookup is exported (new flag) then ok
+    - add export flag to FuncInfo
+    - Define() and package.Define() need extra arg for export or not
+     - maybe default to export
+     - flag in FuncDoc or separate? depends on whether it's useful in docs
 
- - find-symbol (string|symbol &optional package) => symbol, status
-  - status
-   - :internal - in package
-   - :external - what does this mean? maybe when package provide it is external?
-    - if exported to another package
-   - :inherited - through use-package
-  - return nil, nil if not present
-
-  - find func or var
-  - sbcl is case sensitive, maybe don't be
- - find-all-symbols  (string|symbol)
-  - all packages search and return list of symbols
-   - symbols not in current package should be printed with package
-    - create the symbol with the package
-   - test by
-
+  - defpackage
+  - use-package
+  - in-package
+  - package-name
+  - package-nicknames
+  - rename-package
+  - shadow
+  - package-shadowing-symbols
+  - shadowing-import
+  - export
+  - unexport
+  - package-used-by-list
+  - unuse-package
+  - use-package
+  - package-use-list
+  - require (with lisp code)
+  - do-symbols
+  - do-all-symbols
+  - do-external-symbols
+  - find-symbol (string|symbol &optional package) => symbol, status
+   - status
+    - :internal - in package
+    - :external - what does this mean? maybe when package provide it is external?
+     - if exported to another package
+    - :inherited - through use-package
+   - return nil, nil if not present
+   - find func or var
+   - sbcl is case sensitive, maybe don't be
+  - find-all-symbols  (string|symbol)
+   - all packages search and return list of symbols
+    - symbols not in current package should be printed with package
+     - create the symbol with the package
 
  - net package
   - implement sbcl networking or something closer to golang?
@@ -55,48 +75,15 @@
     - non-blocking-mode (question)
     - socket-error
     - all options
-
    - make flavor and target for generic functions
     - socket-bind and (send socket :bind &rest address)
 
- - package
-  - support export list
-   - ListToFunc should be f.ListToFunc
-    - lookup of func should consider the package of f
-     - if lookup is in f.pkg or lookup is exported (new flag) then ok
-    - add export flag to FuncInfo
-    - Define() and package.Define() need extra arg for export or not
-     - maybe default to export
-     - flag in FuncDoc or separate? depends on whether it's useful in docs
-
-  - defpackage
-  - in-package
-  - package-name
-  - package-nicknames
-  - rename-package
-  - shadow
-  - package-shadowing-symbols
-  - shadowing-import
-  - export
-  - unexport
-  - package-used-by-list
-  - unuse-package
-  - use-package
-  - package-use-list
-  - require (with lisp code)
-  - do-symbols
-  - do-all-symbols
-  - do-external-symbols
-
-
  - clos methods/generics (flavors and clos mix as flos)
   - flos
-   - same method combination
-    - leave in flavors? probably best
    - defgeneric is only used to check defmethod
-   - flosfun to create a wrapper around send :xxx
+   + flosfun to create a wrapper around send :xxx
    - maybe a a key in function doc string to link method to function
-   - inherit flos-flavor to generate functions for all method with a designaed prefix
+   - inherit flos-flavor to generate functions for all method with a designated prefix
   - possibly add a flag indicating the flavor is a class vs flavor or flos
   - is a standard-class needed instead of vanilla or maybe just expand vanilla?
 
