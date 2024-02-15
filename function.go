@@ -342,3 +342,18 @@ func GetArgsKeyValue(args List, key Symbol) (value Object, has bool) {
 	}
 	return
 }
+
+// MustBeString returns a string if the arg is a symbol or string. If not a
+// type error is raised with the name argument as the expected field in the
+// error.
+func MustBeString(arg Object, name string) (str string) {
+	switch ta := arg.(type) {
+	case String:
+		str = string(ta)
+	case Symbol:
+		str = string(ta)
+	default:
+		PanicType(name, arg, "string", "symbol")
+	}
+	return
+}

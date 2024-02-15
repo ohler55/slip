@@ -55,7 +55,7 @@ type flosWrap struct {
 // Call the the function with the arguments provided.
 func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 3)
-	fname := mustBeString(args[0], "function-name")
+	fname := slip.MustBeString(args[0], "function-name")
 	var (
 		meth string
 		docs string
