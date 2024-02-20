@@ -69,6 +69,15 @@ func (obj UUID) IsNil() bool {
 	return obj[0] == 0 && obj[1] == 0
 }
 
+// Bytes representation of the UUID.
+func (obj UUID) Bytes() []byte {
+	b := make([]byte, 16)
+	for i := 0; i < 16; i++ {
+		b[i] = byte(obj[i/8] >> (56 - (8 * (i % 8))) & 0x00000000000000FF)
+	}
+	return b
+}
+
 // UUIDParse parses a UUID formatted string and create a new UUID. The
 // function is tolerant of the format but will return a zero UUID if parsing
 // fails.

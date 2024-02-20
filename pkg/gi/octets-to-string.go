@@ -42,13 +42,13 @@ func (f *OctetsToString) Call(s *slip.Scope, args slip.List, depth int) (result 
 	if !ok {
 		slip.PanicType("octets", args[0], "list")
 	}
-	name := make([]byte, 0, len(list))
+	str := make([]byte, 0, len(list))
 	for _, octet := range list {
-		if n, ok := octet.(slip.Fixnum); ok {
-			name = append(name, byte(int32(n)))
+		if n, ok := octet.(slip.Fixnum); ok && 0 <= n && n <= 255 {
+			str = append(str, byte(n))
 		} else {
-			slip.PanicType("octet", octet, "integer")
+			slip.PanicType("octet", octet, "fixnum from 0 to 255")
 		}
 	}
-	return slip.String(name)
+	return slip.String(str)
 }
