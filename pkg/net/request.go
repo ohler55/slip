@@ -29,6 +29,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	requestFlavor = flavors.DefFlavor("http-request-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
@@ -48,6 +49,7 @@ func init() {
 the data associated with the HTTP reply.`),
 			},
 		},
+		&Pkg,
 	)
 	requestFlavor.Final = true
 	requestFlavor.DefMethod(":init", "", reqInitCaller(true))

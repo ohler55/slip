@@ -128,13 +128,19 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
 		}
 	}
-	_ = DefFlavor(string(name), defVars, inherit, args[3:])
+	_ = DefFlavor(string(name), defVars, inherit, args[3:], &Pkg)
 
 	return name
 }
 
 // DefFlavor defines a new flavor.
-func DefFlavor(name string, vars map[string]slip.Object, inherit []string, options slip.List) *Flavor {
+func DefFlavor(
+	name string,
+	vars map[string]slip.Object,
+	inherit []string,
+	options slip.List,
+	p *slip.Package) *Flavor {
+
 	name = strings.ToLower(name)
 	if _, has := allFlavors[name]; has {
 		slip.NewPanic("Flavor %s already defined.", name)
@@ -170,7 +176,7 @@ func DefFlavor(name string, vars map[string]slip.Object, inherit []string, optio
 		validateFlavor(nf)
 	}
 	allFlavors[nf.name] = nf
-	Pkg.Set(nf.name, nf)
+	p.Set(nf.name, nf)
 
 	return nf
 }

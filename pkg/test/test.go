@@ -48,6 +48,7 @@ func TestFlavor() *flavors.Flavor {
 					slip.Symbol("forms"),
 				},
 			},
+			&Pkg,
 		)
 		testFlavor.DefMethod(":run", "", testRunCaller(true))
 		testFlavor.DefMethod(":report", "", testReportCaller(true))

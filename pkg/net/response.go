@@ -13,6 +13,7 @@ import (
 var responseFlavor *flavors.Flavor
 
 func init() {
+	Pkg.Initialize(nil)
 	responseFlavor = flavors.DefFlavor("http-response-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
@@ -21,6 +22,7 @@ func init() {
 the data associated with the HTTP reply.`),
 			},
 		},
+		&Pkg,
 	)
 	responseFlavor.Final = true
 	responseFlavor.DefMethod(":status", "", respStatusCaller(true))

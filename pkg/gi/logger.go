@@ -28,6 +28,7 @@ var colorCodes = []string{
 }
 
 func init() {
+	Pkg.Initialize(nil)
 	logger = flavors.DefFlavor(
 		"logger-flavor",
 		map[string]slip.Object{ // instance variables
@@ -54,6 +55,7 @@ func init() {
 				slip.String(`Logs messages to a stream with various options.`),
 			},
 		},
+		&Pkg,
 	)
 	logger.DefMethod(":init", "", initCaller(true))
 	logger.DefMethod(":error", "", errorCaller(true))

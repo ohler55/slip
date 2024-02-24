@@ -15,6 +15,7 @@ var testableFlavor *flavors.Flavor
 // TestableFlavor returns the testable-flavor.
 func TestableFlavor() *flavors.Flavor {
 	if testableFlavor == nil {
+		Pkg.Initialize(nil)
 		testableFlavor = flavors.DefFlavor("testable-flavor",
 			map[string]slip.Object{ // variables
 				"name":   nil,
@@ -37,6 +38,7 @@ func TestableFlavor() *flavors.Flavor {
 					slip.Symbol("parent"),
 				},
 			},
+			&Pkg,
 		)
 		testableFlavor.DefMethod(":init", "", initCaller(true))
 	}

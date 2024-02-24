@@ -21,6 +21,7 @@ const defaultClientTimeout = time.Second * 10
 var clientFlavor *flavors.Flavor
 
 func init() {
+	Pkg.Initialize(nil)
 	clientFlavor = flavors.DefFlavor("http-client-flavor",
 		map[string]slip.Object{
 			"timeout": slip.Fixnum(defaultClientTimeout),
@@ -36,6 +37,7 @@ func init() {
 			slip.Symbol(":gettable-instance-variables"),
 			slip.Symbol(":settable-instance-variables"),
 		},
+		&Pkg,
 	)
 	clientFlavor.Final = true
 	clientFlavor.DefMethod(":connect", "", clientBodylessCaller(http.MethodConnect))

@@ -19,6 +19,7 @@ func init() {
 				slip.String(`A response-writer is an argument to the server handler functions.`),
 			},
 		},
+		&Pkg,
 	)
 	responseWriterFlavor.Final = true
 	responseWriterFlavor.DefMethod(":write-status", "", respWriterStatusCaller(true))

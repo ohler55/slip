@@ -50,6 +50,7 @@ func SuiteFlavor() *flavors.Flavor {
 					slip.Symbol("teardown"),
 				},
 			},
+			&Pkg,
 		)
 		suiteFlavor.DefMethod(":run", "", suiteRunCaller(true))
 		suiteFlavor.DefMethod(":reset", "", suiteResetCaller(true))

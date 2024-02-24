@@ -20,6 +20,7 @@ var (
 )
 
 func init() {
+	Pkg.Initialize(nil)
 	serverFlavor = flavors.DefFlavor("http-server-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
@@ -36,6 +37,7 @@ func init() {
 				slip.String(`An HTTP server is returned.`),
 			},
 		},
+		&Pkg,
 	)
 	serverFlavor.Final = true
 	serverFlavor.DefMethod(":init", "", serverInitCaller(true))

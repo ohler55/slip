@@ -85,7 +85,7 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			slip.PanicType("doc-source", args[2], "string", "flavor")
 		}
 	}
-	FlosFun(fname, meth, docs)
+	FlosFun(fname, meth, docs, slip.CurrentPackage)
 
 	return slip.Symbol(fname)
 }
@@ -100,7 +100,7 @@ func (f *flosWrap) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 }
 
 // FlosFun creates a function that sends a method to an instance.
-func FlosFun(fname, meth, docs string) {
+func FlosFun(fname, meth, docs string, p *slip.Package) {
 	slip.Define(
 		func(wargs slip.List) slip.Object {
 			fw := flosWrap{Function: slip.Function{Name: fname, Args: wargs}, meth: meth}
@@ -125,5 +125,5 @@ func FlosFun(fname, meth, docs string) {
 			Return: "Object",
 			Text:   fmt.Sprintf(`__%s__ sends to _instance_ %s`, fname, docs),
 			Kind:   slip.Symbol("flos-function"),
-		}, slip.CurrentPackage)
+		}, p)
 }

@@ -14,6 +14,7 @@ import (
 var flavor *flavors.Flavor
 
 func init() {
+	Pkg.Initialize(nil)
 	flavor = flavors.DefFlavor("bag-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
@@ -33,6 +34,7 @@ nil and boolean false.`),
 				slip.Symbol(":set"),
 			},
 		},
+		&Pkg,
 	)
 	flavor.DefMethod(":init", "", initCaller(true))
 	flavor.DefMethod(":set", "", setCaller(true))
