@@ -73,13 +73,10 @@ func run() {
 		case nil:
 			// normal exit
 		case *slip.Panic:
-			if slip.CurrentPackage.JustGet("*print-ansi*") != nil {
-				_, _ = os.Stdout.Write(tr.Append(nil))
+			if slip.CurrentPackage.JustGet("*print-ansi*") == nil {
+				_, _ = fmt.Printf("\n## error: %s\n\n", tr)
 			} else {
-				buf := tr.Append(nil)
-				buf = append([]byte("\x1b[31m"), buf...)
-				buf = append(buf, "\x1b[m"...)
-				_, _ = os.Stdout.Write(buf)
+				_, _ = fmt.Printf("\n\x1b[31m## error: %s\x1b[m\n", tr)
 			}
 		default:
 			if 0 < len(path) {
