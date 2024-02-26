@@ -199,6 +199,9 @@ func process() {
 			replReader.setDepth(tr.Depth)
 			return
 		case slip.Error:
+			if p, ok := tr.(*slip.Panic); ok && len(p.Message) == 0 && p.Fatal {
+				panic("")
+			}
 			msg := tr.Error()
 			if 0 < len(msg) {
 				var buf []byte
