@@ -150,7 +150,6 @@
  * [ ] EVERY
  * [ ] EXPORT
  * [ ] EXTENDED-CHAR
- * [x] FBOUNDP
  * [ ] FDEFINITION
  * [ ] FILL
  * [ ] FILL-POINTER
@@ -166,15 +165,12 @@
  * [ ] FLOATING-POINT-INVALID-OPERATION
  * [ ] FLOATING-POINT-OVERFLOW
  * [ ] FLOATING-POINT-UNDERFLOW
- * [x] FMAKUNBOUND
  * [ ] FORCE-OUTPUT
  * [ ] FORMATTER
  * [ ] FRESH-LINE
  * [ ] FTYPE
- * [ ] FUNCALL
  * [ ] FUNCTION-KEYWORDS
  * [ ] FUNCTION-LAMBDA-EXPRESSION
- * [ ] FUNCTIONP
  * [ ] GCD
  * [ ] GENERIC-FUNCTION
  * [ ] GENTEMP
@@ -250,7 +246,6 @@
  * [ ] MAKE-SEQUENCE
  * [ ] MAKE-SYNONYM-STREAM
  * [ ] MAKE-TWO-WAY-STREAM
- * [x] MAKUNBOUND
  * [ ] MAP
  * [ ] MAP-INTO
  * [ ] MASK-FIELD
@@ -325,7 +320,6 @@
  * [ ] PUSHNEW
  * [ ] RANDOM-STATE-P
  * [ ] RATIONALP
- * [x] READ
  * [ ] READ-DELIMITED-LIST
  * [ ] READ-PRESERVING-WHITESPACE
  * [ ] READ-SEQUENCE
@@ -628,6 +622,7 @@
  * [x] EVENP
  * [x] EXP
  * [x] EXPT
+ * [x] FBOUNDP
  * [x] FCEILING
  * [x] FFLOOR
  * [x] FIFTH
@@ -650,11 +645,14 @@
  * [x] FLOAT
  * [x] FLOATP
  * [x] FLOOR
+ * [x] FMAKUNBOUND
  * [x] FORMAT
  * [x] FOURTH
  * [x] FROUND
  * [x] FTRUNCATE
+ * [x] FUNCALL
  * [x] FUNCTION
+ * [x] FUNCTIONP
  * [x] GENSYM
  * [x] GET-INTERNAL-REAL-TIME
  * [x] GET-INTERNAL-RUN-TIME
@@ -726,6 +724,7 @@
  * [x] MAKE-STRING-INPUT-STREAM
  * [x] MAKE-STRING-OUTPUT-STREAM
  * [x] MAKE-SYMBOL
+ * [x] MAKUNBOUND
  * [x] MAPC
  * [x] MAPCAN
  * [x] MAPCAR
@@ -806,6 +805,7 @@
  * [x] RATIO
  * [x] RATIONAL
  * [x] RATIONALIZE
+ * [x] READ
  * [x] READ-BYTE
  * [x] READ-CHAR
  * [x] READ-FROM-STRING

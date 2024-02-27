@@ -4,6 +4,24 @@
 
 - next
 
+ - M-C-e edit current form in external editor (modal)
+ - M-s save current form to session (saved to .slip/session.lisp)
+  - when should it be cleared?
+  - (defun save-session (path) )
+ - M-p previous in session also M-uparrow
+ - M-n next in session also M-downarrow
+ - M-w for pbcopy (macOS only unless pbcopy aliased)
+ 
+ - cut & paste buffer (clipboard pbcopy and pbpaste on macos)
+  - external editor
+   - write current form/lines tmp file
+   - open editor for file
+   - on exit replace current form
+ - save to session file
+  - up and down like history
+
+ - return and return-from should work in functions (defun)
+ 
  - package
   - support export list
    - ListToFunc should be f.ListToFunc
