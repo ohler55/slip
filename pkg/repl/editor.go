@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"sync/atomic"
 	"syscall"
+	"time"
 	"unicode/utf8"
 
 	"github.com/ohler55/slip"
@@ -51,6 +52,7 @@ type editor struct {
 	resizeChan chan os.Signal
 	seqChan    chan *seq
 	log        *os.File
+	pause      atomic.Bool
 }
 
 func (ed *editor) initialize() {
@@ -211,6 +213,10 @@ func printSize(s string) (cnt int) {
 func (ed *editor) chanRead() {
 	var err error
 	for {
+		if ed.pause.Load() {
+			time.Sleep(time.Millisecond * 50)
+			continue
+		}
 		s := seq{cnt: 0, buf: make([]byte, 32)}
 		if s.cnt, err = ed.in.Read(s.buf); err != nil {
 			// shutting down

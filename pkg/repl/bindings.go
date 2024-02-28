@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"sync/atomic"
 	"unicode/utf8"
 
@@ -31,7 +32,7 @@ var (
 	rootMode = []bindFunc{
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
 		help, tab, nl, delLineEnd, bad, enter, down, nlAfter, // 0x08
-		up, bad, searchBack, searchForward, swapChar, clearForm, historyForward, bad, // 0x10
+		up, bad, searchBack, searchForward, swapChar, clearForm, historyForward, ccut, // 0x10
 		bad, bad, bad, esc, bad, bad, bad, describe, // 0x18
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x20
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x28
@@ -74,7 +75,7 @@ var (
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
 		bad, bad, backWord, bad, delForwardWord, eval, forwardWord, bad, // 0x60
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x68
-		bad, bad, resetTerm, bad, bad, enterUnicode, historyBack, bad, // 0x70
+		bad, bad, resetTerm, bad, bad, enterUnicode, historyBack, ccopy, // 0x70
 		bad, bad, bad, bad, bad, bad, bad, delBackWord, // 0x78
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x80
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x90
@@ -761,6 +762,7 @@ bindings are:
 		"\x1b[1mC-t\x1b[m   swap characters",
 		"\x1b[1mC-u\x1b[m   clear current form",
 		"\x1b[1mC-v\x1b[m   next in history",
+		"\x1b[1mC-w\x1b[m   cut to clipboard (macOS only)",
 		"\x1b[1mDEL\x1b[m   delete one back",
 		"\x1b[1mM-C-b\x1b[m move back to matching paren",
 		"\x1b[1mM-C-e\x1b[m edit current form in $EDITOR",
@@ -777,6 +779,7 @@ bindings are:
 		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
 		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
 		"\x1b[1mM-v\x1b[m   previous in history",
+		"\x1b[1mM-w\x1b[m   copy to clipboard (macOS only)",
 		"\x1b[1m🔼\x1b[m    move up one",
 		"\x1b[1m🔽\x1b[m    move down one",
 		"\x1b[1m▶️\x1b[m     move right one",
@@ -1040,6 +1043,24 @@ func (ed *editor) keyLen() (cnt int) {
 
 func editForm(ed *editor, b byte) bool {
 	ed.logf("=> %02x editForm\n", b)
+	var args []string
+	xed := externalEditor
+	if len(xed) == 0 {
+		xed = os.Getenv("EDITOR")
+		if len(xed) == 0 {
+			return false
+		}
+		parts := strings.Split(xed, " ")
+		xed = parts[0]
+		if len(editorFlags) == 0 {
+			args = append(args, parts[1:]...)
+		}
+	}
+	for _, sflag := range editorFlags {
+		if flag, _ := sflag.(slip.String); 0 < len(flag) {
+			args = append(args, string(flag))
+		}
+	}
 	f, err := os.CreateTemp("", "*.lisp")
 	if err != nil {
 		panic(err)
@@ -1057,17 +1078,21 @@ func editForm(ed *editor, b byte) bool {
 		panic(err)
 	}
 	_ = f.Close()
-	xed := os.Getenv("EDITOR")
-	var args []string
-	for _, sflag := range editorFlags {
-		if flag, _ := sflag.(slip.String); 0 < len(flag) {
-			args = append(args, string(flag))
-		}
-	}
+
 	args = append(args, f.Name())
+	ed.pause.Store(true)
+	defer func() {
+		ed.pause.Store(false)
+		// discard any key sequences pending.
+		<-ed.seqChan
+	}()
 	cmd := exec.Command(xed, args...)
-	if buf, err = cmd.CombinedOutput(); err != nil {
-		panic(fmt.Sprintf("%s: %s\n", err, buf))
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err = cmd.Run(); err != nil {
+		panic(fmt.Sprintf("%s: %s\n", err, stderr.String()))
 	}
 	if f, err = os.Open(f.Name()); err != nil {
 		panic(err)
@@ -1079,6 +1104,32 @@ func editForm(ed *editor, b byte) bool {
 	ed.mode = topMode
 
 	return false
+}
+
+// copy to clipboard on macOS or if pbcopy is defined or aliased.
+func ccopy(ed *editor, b byte) bool {
+	ed.logf("=> %02x ccopy\n", b)
+	cmd := exec.Command("pbcopy")
+	cmd.Stdin = bytes.NewReader(ed.lines.Append(nil))
+	if err := cmd.Run(); err != nil {
+		panic(err)
+	}
+	ed.mode = topMode
+
+	return false
+}
+
+// cut to clipboard on macOS or if pbcopy is defined or aliased.
+func ccut(ed *editor, b byte) bool {
+	ed.logf("=> %02x ccut\n", b)
+	cmd := exec.Command("pbcopy")
+	cmd.Stdin = bytes.NewReader(ed.lines.Append(nil))
+	if err := cmd.Run(); err != nil {
+		panic(err)
+	}
+	ed.reset()
+
+	return true
 }
 
 func (ed *editor) getKey() string {
