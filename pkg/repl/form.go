@@ -2,11 +2,22 @@
 
 package repl
 
-import "strings"
+import (
+	"bytes"
+	"strings"
+)
 
 // Form is used to represent slip forms as a sequence of lines which are
 // []rune.
 type Form [][]rune
+
+// NewForm creates a new Form from a []byte.
+func NewForm(buf []byte) (f Form) {
+	for _, line := range bytes.Split(bytes.Trim(buf, "\n"), []byte{'\n'}) {
+		f = append(f, []rune(string(line)))
+	}
+	return
+}
 
 // Dup creates a deep duplicate of the form.
 func (f Form) Dup() Form {

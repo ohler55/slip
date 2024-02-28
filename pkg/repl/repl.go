@@ -16,9 +16,10 @@ import (
 )
 
 const (
-	printANSI = "*print-ansi*"
-	stdInput  = "*standard-input*"
-	stdOutput = "*standard-output*"
+	printANSI       = "*print-ansi*"
+	stdInput        = "*standard-input*"
+	stdOutput       = "*standard-output*"
+	editorFlagsName = "*repl-editor-flags*"
 
 	form1Key  = "+"
 	form2Key  = "++"
@@ -47,6 +48,7 @@ var (
 	warnPrefix  string
 	matchColor  string
 	evalOnClose bool
+	editorFlags slip.List
 
 	form1 slip.Object
 	form2 slip.Object
@@ -293,7 +295,12 @@ func updateConfigFile() {
 		p := *slip.DefaultPrinter()
 		p.Readably = true
 		b = fmt.Appendf(b, "(setq %s ", key)
-		b = p.Append(b, value, 0)
+		if _, ok := value.(slip.List); ok {
+			b = append(b, '\'')
+			b = p.Append(b, value, 0)
+		} else {
+			b = p.Append(b, value, 0)
+		}
 		b = append(b, ")\n"...)
 	}
 	if err := os.WriteFile(configFilename, b, 0666); err != nil {
@@ -343,6 +350,18 @@ func setMatchColor(value slip.Object) {
 		matchColor = string(str)
 	} else {
 		panic("*repl-match-color* must be a string")
+	}
+}
+
+func getEditorFlags() slip.Object {
+	return editorFlags
+}
+
+func setEditorFlags(value slip.Object) {
+	if list, ok := value.(slip.List); ok {
+		editorFlags = list
+	} else {
+		panic("*repl-editor-flags* must be a list of strings")
 	}
 }
 

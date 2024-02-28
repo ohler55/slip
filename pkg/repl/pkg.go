@@ -21,6 +21,7 @@ func init() {
 	Pkg.Initialize(map[string]*slip.VarVal{
 		"*repl*":                &pkgVarVal,
 		"*repl-prompt*":         {Get: getPrompt, Set: setPrompt, Doc: "the REPL prompt"},
+		"*repl-editor-flags*":   {Get: getEditorFlags, Set: setEditorFlags, Doc: "the REPL editor flags"},
 		"*repl-warning-prefix*": {Get: getWarnPrefix, Set: setWarnPrefix, Doc: "prefix to print before a warning"},
 		"*repl-match-color*": {
 			Get: getMatchColor,

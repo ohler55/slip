@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
+	"os/exec"
 	"sync/atomic"
 	"unicode/utf8"
 
@@ -62,7 +64,7 @@ var (
 		func(ed *editor, b byte) bool { ed.msg = ""; return false },
 	}
 	escMode = []bindFunc{
-		bad, bad, matchClose, bad, bad, bad, matchOpen, bad, // 0x00
+		bad, bad, matchClose, bad, bad, editForm, matchOpen, bad, // 0x00
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x08
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x10
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x20
@@ -761,6 +763,7 @@ bindings are:
 		"\x1b[1mC-v\x1b[m   next in history",
 		"\x1b[1mDEL\x1b[m   delete one back",
 		"\x1b[1mM-C-b\x1b[m move back to matching paren",
+		"\x1b[1mM-C-e\x1b[m edit current form in $EDITOR",
 		"\x1b[1mM-C-f\x1b[m move forward to matching paren",
 		"\x1b[1mC-/\x1b[m   describe word",
 		"\x1b[1mM-/\x1b[m   describe word",
@@ -1033,6 +1036,49 @@ func (ed *editor) keyLen() (cnt int) {
 		}
 	}
 	return
+}
+
+func editForm(ed *editor, b byte) bool {
+	ed.logf("=> %02x editForm\n", b)
+	f, err := os.CreateTemp("", "*.lisp")
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = f.Close()
+		_ = os.Remove(f.Name())
+	}()
+	var buf []byte
+	for _, line := range ed.lines {
+		buf = append(buf, string(line)...)
+		buf = append(buf, '\n')
+	}
+	if _, err = f.Write(buf); err != nil {
+		panic(err)
+	}
+	_ = f.Close()
+	xed := os.Getenv("EDITOR")
+	var args []string
+	for _, sflag := range editorFlags {
+		if flag, _ := sflag.(slip.String); 0 < len(flag) {
+			args = append(args, string(flag))
+		}
+	}
+	args = append(args, f.Name())
+	cmd := exec.Command(xed, args...)
+	if buf, err = cmd.CombinedOutput(); err != nil {
+		panic(fmt.Sprintf("%s: %s\n", err, buf))
+	}
+	if f, err = os.Open(f.Name()); err != nil {
+		panic(err)
+	}
+	if buf, err = io.ReadAll(f); err != nil {
+		panic(err)
+	}
+	ed.setForm(NewForm(buf))
+	ed.mode = topMode
+
+	return false
 }
 
 func (ed *editor) getKey() string {
