@@ -552,5 +552,8 @@ func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Objec
 		Kind:   kind,
 	}
 	obj.mu.Unlock()
+	if 0 < len(name) && !strings.EqualFold(name, "lambda") {
+		DefunHook(obj, name)
+	}
 	return
 }

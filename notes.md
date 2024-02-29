@@ -4,6 +4,30 @@
 
 - next
 
+ - more funcs from https://quickref.common-lisp.net/str.html#g_t_276892_2769
+  - https://lispcookbook.github.io/cl-cookbook/strings.html
+  - split (string separator &key limit start end omit-nulls)
+  - rsplit (string separator &key limit start end omit-nulls) ;; maybe no start end end
+  - string-prefix-p (string prefix)
+  - suffixp
+  - trim-space
+  - trim-suffix
+  - trim-prefix
+  - emptyp (string)
+  - containsp -ignore-case
+  - contains-any-p
+  - strcat
+  - split-string
+  - stripln
+
+  - regex
+   - should this be a type/flavor or a package or both?
+    - if mustCompile is fast enough then no reason for regex as a class
+     - maybe just string and add regex funcs to gi
+   - functions
+    - regex-match
+    - regex-split (or just part of split?)
+    - regex-match-all
  - M-s save current form to session (saved to .slip/session.lisp)
   - when should it be cleared?
   - (defun save-session (path) )
