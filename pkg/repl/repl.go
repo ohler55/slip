@@ -296,7 +296,7 @@ func updateConfigFile() {
 		p := *slip.DefaultPrinter()
 		p.Readably = true
 		b = fmt.Appendf(b, "(setq %s ", key)
-		if _, ok := value.(slip.List); ok {
+		if list, ok := value.(slip.List); ok && 0 < len(list) {
 			b = append(b, '\'')
 			b = p.Append(b, value, 0)
 		} else {
@@ -359,9 +359,12 @@ func getEditorFlags() slip.Object {
 }
 
 func setEditorFlags(value slip.Object) {
-	if list, ok := value.(slip.List); ok {
+	switch list := value.(type) {
+	case nil:
+		editorFlags = slip.List{}
+	case slip.List:
 		editorFlags = list
-	} else {
+	default:
 		panic("*repl-editor-flags* must be a list of strings")
 	}
 }
