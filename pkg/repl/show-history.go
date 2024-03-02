@@ -51,6 +51,7 @@ func init() {
 					Text: "The end index of the history to show.",
 				},
 			},
+			Return: "nil|string",
 			Text: `__show-history__ writes history to _destination_. If _destination_ is true,
 the default value history is written to _*standard-output*_. If _nil_ history is returned as
 a _string_. If an _output-stream_ history is written to the stream.`,

@@ -74,7 +74,7 @@ var (
 		bad, bad, bad, bad, bad, enterUnicode, bad, bad, // 0x50
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
 		bad, bad, backWord, bad, delForwardWord, eval, forwardWord, bad, // 0x60
-		bad, bad, bad, bad, bad, bad, bad, bad, // 0x68
+		nthHistory, bad, bad, bad, bad, bad, bad, bad, // 0x68
 		bad, bad, resetTerm, bad, bad, enterUnicode, historyBack, ccopy, // 0x70
 		bad, bad, bad, bad, bad, bad, bad, delBackWord, // 0x78
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x80
@@ -750,20 +750,17 @@ bindings are:
 		"\x1b[1mC-e\x1b[m   move to line end",
 		"\x1b[1mC-f\x1b[m   move right one",
 		"\x1b[1mC-h\x1b[m   show this help page",
-		"\x1b[1mTAB\x1b[m   word completion or help scroll",
-		"\x1b[1mS-TAB\x1b[m help scroll back",
-		"\x1b[1mC-k\x1b[m   delete to line end",
 		"\x1b[1mC-j\x1b[m   insert newline",
+		"\x1b[1mC-k\x1b[m   delete to line end",
 		"\x1b[1mC-n\x1b[m   move down one (next in history)",
 		"\x1b[1mC-o\x1b[m   insert newline after",
 		"\x1b[1mC-p\x1b[m   move up one (previous in history)",
-		"\x1b[1mC-r\x1b[m   search history back",
+		"\x1b[1mC-r\x1b[m   search history backward",
 		"\x1b[1mC-s\x1b[m   search history forward",
 		"\x1b[1mC-t\x1b[m   swap characters",
 		"\x1b[1mC-u\x1b[m   clear current form",
 		"\x1b[1mC-v\x1b[m   next in history",
 		"\x1b[1mC-w\x1b[m   cut to clipboard (macOS only)",
-		"\x1b[1mDEL\x1b[m   delete one back",
 		"\x1b[1mM-C-b\x1b[m move back to matching paren",
 		"\x1b[1mM-C-e\x1b[m edit current form in $EDITOR",
 		"\x1b[1mM-C-f\x1b[m move forward to matching paren",
@@ -775,16 +772,20 @@ bindings are:
 		"\x1b[1mM-d\x1b[m   delete one word",
 		"\x1b[1mM-e\x1b[m   evaluate current form",
 		"\x1b[1mM-f\x1b[m   move forward one word",
+		"\x1b[1mM-h\x1b[m   nth in history",
 		"\x1b[1mM-r\x1b[m   reset terminal",
 		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
 		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
 		"\x1b[1mM-v\x1b[m   previous in history",
 		"\x1b[1mM-w\x1b[m   copy to clipboard (macOS only)",
+		"\x1b[1mTAB\x1b[m   word completion or help scroll",
+		"\x1b[1mS-TAB\x1b[m help scroll back",
+		"\x1b[1mDEL\x1b[m   delete one back",
+		"\x1b[1mM-DEL\x1b[m delete previous word",
 		"\x1b[1m🔼\x1b[m    move up one",
 		"\x1b[1m🔽\x1b[m    move down one",
 		"\x1b[1m▶️\x1b[m     move right one",
 		"\x1b[1m◀️\x1b[m     move left one",
-		"\x1b[1mM-DEL\x1b[m delete previous word",
 		"\x1b[1mENTER\x1b[m evaluate form",
 	}
 	w := int(atomic.LoadInt32(&ed.width))
@@ -998,6 +999,48 @@ func searchForward(ed *editor, b byte) bool {
 	ed.displayMessage(buf)
 	ed.override = historySearchOverride
 	TheHistory.searchDir = forwardDir
+	ed.mode = topMode
+	return false
+}
+
+func nthHistoryOverride(ed *editor) bool {
+	k := ed.getKey()
+	switch k {
+	case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
+		ed.ri = (ed.ri * 10) + uint32(k[0]-'0')
+	case "\n", "\r":
+		ed.override = nil
+		ed.clearKey()
+		if form := TheHistory.Nth(TheHistory.Size() - int(ed.ri)); 0 < len(form) {
+			ed.setForm(form)
+		} else {
+			ed.setForm(NewForm([]byte{}))
+		}
+		return false
+	case "\x1b": // esc
+		ed.clearKey()
+		ed.override = nil
+		return false
+	case "\x7f":
+		ed.clearKey()
+		ed.ri /= 10
+	default:
+		if k[0] < 0x20 {
+			ed.override = nil
+			return false
+		}
+		return true
+	}
+	ed.displayMessage(fmt.Appendf(nil, "history index: %-8d", ed.ri))
+
+	return true
+}
+
+func nthHistory(ed *editor, b byte) bool {
+	ed.logf("=> %02x nthHistory\n", b)
+	ed.ri = 0
+	ed.displayMessage([]byte("history index: 0"))
+	ed.override = nthHistoryOverride
 	ed.mode = topMode
 	return false
 }

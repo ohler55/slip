@@ -9,13 +9,13 @@
 
  + repl:show-history
  + repl:clear-history
- - repl: history
+ - repl: nth-history
  - M-h binding
 
  - history
   - clear-history (&key start end)
-  - history (index) - find and place as current
-   - key binding M-h pops up input for number
+  - nth-history (index)
+  - key binding M-h pops up input for number
 
  - stash (same backend functions as history)
   - on start look for ./stash.lisp then .slip/stash.lisp and load if found

@@ -28,7 +28,8 @@ func init() {
 					Text: "The end index of the history to clear.",
 				},
 			},
-			Text: `__clear-history__ from _start_ to _end_.`,
+			Return: "nil",
+			Text:   `__clear-history__ from _start_ to _end_.`,
 		}, &Pkg)
 }
 
