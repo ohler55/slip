@@ -65,11 +65,11 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if 1 < len(args) {
 		switch ta := args[1].(type) {
 		case slip.String:
-			paths = append(paths, string(ta))
+			paths = append(paths, expandPath(string(ta)))
 		case slip.List:
 			for _, a2 := range ta {
 				if str, ok := a2.(slip.String); ok {
-					paths = append(paths, string(str))
+					paths = append(paths, expandPath(string(str)))
 				} else {
 					slip.PanicType("path members", a2, "string")
 				}
@@ -83,11 +83,11 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		switch tp := lp.(type) {
 		case nil:
 		case slip.String:
-			paths = append(paths, string(tp))
+			paths = append(paths, expandPath(string(tp)))
 		case slip.List:
 			for _, a2 := range tp {
 				if str, ok := a2.(slip.String); ok {
-					paths = append(paths, string(str))
+					paths = append(paths, expandPath(string(str)))
 				} else {
 					slip.PanicType("*package-load-path* members", a2, "string")
 				}
@@ -106,4 +106,12 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	}
 	panic(slip.NewError("Failed to find %s in any of the load paths.", name))
+}
+
+func expandPath(path string) string {
+	if 0 < len(path) && path[0] == '~' {
+		home := os.Getenv("HOME")
+		path = home + path[1:]
+	}
+	return path
 }
