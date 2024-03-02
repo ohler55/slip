@@ -201,9 +201,9 @@ func initStash() {
 		name = "stash.lisp"
 	}
 	home, _ := os.UserHomeDir()
-	for _, spath := range stashLoadPath {
+	for _, spath := range loadPaths {
 		if path, ok := spath.(slip.String); ok {
-			fp := strings.ReplaceAll(filepath.Join(string(path), defaultStashName), "~", home)
+			fp := strings.ReplaceAll(filepath.Join(string(path), name), "~", home)
 			if fi, err := os.Stat(fp); err != nil || fi.IsDir() {
 				continue
 			}
@@ -211,8 +211,8 @@ func initStash() {
 			return
 		}
 	}
-	if path, ok := stashLoadPath[0].(slip.String); ok {
-		fp := strings.ReplaceAll(filepath.Join(string(path), defaultStashName), "~", home)
+	if path, ok := loadPaths[0].(slip.String); ok {
+		fp := strings.ReplaceAll(filepath.Join(string(path), name), "~", home)
 		if err := os.WriteFile(fp, []byte{}, 0666); err != nil {
 			fmt.Printf("failed to create a stash file at %s\n", fp)
 			return
