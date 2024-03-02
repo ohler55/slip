@@ -61,6 +61,12 @@ var (
 
 	replReader reader = &termReader{}
 
+	stashLoadPath = slip.List{
+		slip.String("."),
+		slip.String("~/.slip"),
+	}
+	defaultStashName = "stash.lisp"
+
 	sizer hasSize
 	// TBD flag to not let Run() be called more than once before (repl-exit) is called
 )
@@ -444,4 +450,39 @@ func getInteractive() slip.Object {
 
 func setInteractive(_ slip.Object) {
 	panic("*repl-interactive* is a read only variable")
+}
+
+func getStashLoadPath() slip.Object {
+	return stashLoadPath
+}
+
+func setStashLoadPath(value slip.Object) {
+	switch list := value.(type) {
+	case nil:
+		stashLoadPath = slip.List{}
+	case slip.List:
+		stashLoadPath = list
+	default:
+		panic("*stash-load-path* must be a list of strings")
+	}
+}
+
+func getDefaultStashName() (name slip.Object) {
+	if 0 < len(defaultStashName) {
+		name = slip.String(defaultStashName)
+	}
+	return
+}
+
+func setDefaultStashName(value slip.Object) {
+	switch tv := value.(type) {
+	case nil:
+		defaultStashName = ""
+	case slip.String:
+		defaultStashName = string(tv)
+	case slip.Symbol:
+		defaultStashName = string(tv)
+	default:
+		panic("*default-stash-name* must be a string or nil")
+	}
 }

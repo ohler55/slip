@@ -7,32 +7,18 @@
  - regex-match
  - regex-match-all
 
- + repl:show-history
- + repl:clear-history
- - repl: nth-history
- - M-h binding
-
- - history
-  - clear-history (&key start end)
-  - nth-history (index)
-  - key binding M-h pops up input for number
-
- - stash (same backend functions as history)
-  - on start look for ./stash.lisp then .slip/stash.lisp and load if found
+ - stash
+  - on start look for the default in load paths if both are non-nil, create if not found
+   - *stash-load-path* initially ("." "~/.slip")
+   - *default-stash-name* initially "stash.lisp"
   - use-stash (path)
    - if path has no .lisp and no / then try ./<path>.lisp the .slip/<path>.lisp and finally just path
   - show-stash
   - clear-stash
   - edit-stash
-   - pops open in editor in raw mode
-   - maybe expand
-    - on reload change all newline to tabs then all \t\t to a newline
-     - that fails if \n\n in code
-     - can't count on complete sexpr unless reject save for non-sexpr
-      - if reject bad saved then can scan saved file for complete sexpr
-  - get-stash (index)
-   - make index the current
-   - key binding M-g
+   - pops open in editor in expanded mode
+  - nth-stash (index)
+  - M-S nth-stash
   - M-s to save to stash
   - M-p for previous in stash [M-uparrow also]
   - M-n for next in stash [M-downarrow also]

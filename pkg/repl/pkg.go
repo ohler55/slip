@@ -27,32 +27,43 @@ func init() {
 		"*repl-external-editor*": {
 			Get: getExternalEditor,
 			Set: setExternalEditor,
-			Doc: "the REPL external editor application",
+			Doc: "The REPL external editor application",
 		},
-		"*repl-editor-flags*":   {Get: getEditorFlags, Set: setEditorFlags, Doc: "the REPL external editor flags"},
-		"*repl-warning-prefix*": {Get: getWarnPrefix, Set: setWarnPrefix, Doc: "prefix to print before a warning"},
+		"*repl-editor-flags*":   {Get: getEditorFlags, Set: setEditorFlags, Doc: "The REPL external editor flags"},
+		"*repl-warning-prefix*": {Get: getWarnPrefix, Set: setWarnPrefix, Doc: "Prefix to print before a warning"},
 		"*repl-match-color*": {
 			Get: getMatchColor,
 			Set: setMatchColor,
-			Doc: "sets the ANSI sequence for matching parenthesis colorization",
+			Doc: "Sets the ANSI sequence for matching parenthesis colorization",
 		},
 		"*repl-editor*": {
 			Get: getEditor,
 			Set: setEditor,
-			Doc: "if true use the SLIP REPL editor as the reader else use a simple line reader.",
+			Doc: "If true use the SLIP REPL editor as the reader else use a simple line reader.",
 		},
-		"*repl-history-limit*": {Get: getHistoryLimit, Set: setHistoryLimit, Doc: "the form history limit."},
-		"*repl-help-box*":      {Val: slip.True, Doc: "if true display help in a box."},
-		"*repl-debug*":         {Val: nil, Doc: "if true the go stack is printed on error."},
+		"*repl-history-limit*": {Get: getHistoryLimit, Set: setHistoryLimit, Doc: "The form history limit."},
+		"*repl-help-box*":      {Val: slip.True, Doc: "If true display help in a box."},
+		"*repl-debug*":         {Val: nil, Doc: "If true the go stack is printed on error."},
 		"*repl-eval-on-close*": {
 			Get: getEvalOnClose,
 			Set: setEvalOnClose,
-			Doc: "if true evaluate a form when the close parenthensis typed.",
+			Doc: "If true evaluate a form when the close parenthensis typed.",
 		},
 		"*repl-interactive*": {
 			Get: getInteractive,
 			Set: setInteractive,
-			Doc: "true if the repl is interactive.",
+			Doc: "True if the repl is interactive.",
+		},
+		"*default-stash-name*": {
+			Get: getDefaultStashName,
+			Set: setDefaultStashName,
+			Doc: `The default stash name used on REPL startup unless overridden. The default value is "stash.lisp"`,
+		},
+		"*stash-load-path*": {
+			Get: getStashLoadPath,
+			Set: setStashLoadPath,
+			Doc: `The stash load paths to search when calling the _use-stash_ function if a full path is not provided.
+The default value is ("." "~/.slip")`,
 		},
 	})
 	slip.AddPackage(&Pkg)
