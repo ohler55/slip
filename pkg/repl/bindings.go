@@ -872,15 +872,15 @@ func historyBack(ed *editor, b byte) bool {
 	ed.logf("=> %02x historyBack\n", b)
 	switch {
 	case ed.override == nil:
-		ed.hist.cur = len(ed.hist.forms) - 1
-	case ed.hist.cur <= 0:
+		TheHistory.cur = len(TheHistory.forms) - 1
+	case TheHistory.cur <= 0:
 		ed.override = historyOverride
 		ed.mode = topMode
 		return false
 	default:
-		ed.hist.cur--
+		TheHistory.cur--
 	}
-	if form := ed.hist.Get(); form != nil {
+	if form := TheHistory.Get(); form != nil {
 		ed.setForm(form)
 	}
 	ed.override = historyOverride
@@ -892,16 +892,16 @@ func historyForward(ed *editor, b byte) bool {
 	ed.logf("=> %02x historyForward\n", b)
 	switch {
 	case ed.override == nil:
-		ed.hist.cur = 0
-	case len(ed.hist.forms)-1 <= ed.hist.cur:
+		TheHistory.cur = 0
+	case len(TheHistory.forms)-1 <= TheHistory.cur:
 		ed.override = historyOverride
 		ed.setForm(Form{{}})
 		ed.mode = topMode
 		return false
 	default:
-		ed.hist.cur++
+		TheHistory.cur++
 	}
-	if form := ed.hist.Get(); form != nil {
+	if form := TheHistory.Get(); form != nil {
 		ed.setForm(form)
 	}
 	ed.override = historyOverride
@@ -917,11 +917,11 @@ func historySearchOverride(ed *editor) bool {
 		if ed.key.buf[0] < 0x20 {
 			ed.keepForm()
 			ed.override = nil
-			ed.hist.pattern = ed.hist.pattern[:0]
-			ed.hist.searchDir = 0
+			TheHistory.pattern = TheHistory.pattern[:0]
+			TheHistory.searchDir = 0
 			return false
 		}
-		if ed.hist.searchDir == forwardDir {
+		if TheHistory.searchDir == forwardDir {
 			f = searchForward
 		} else {
 			f = searchBack
@@ -936,33 +936,33 @@ func searchBack(ed *editor, b byte) bool {
 	ed.logf("=> %02x searchBack\n", b)
 	switch {
 	case ed.override == nil:
-		ed.hist.pattern = ed.hist.pattern[:0]
-		ed.hist.cur = len(ed.hist.forms) - 1
+		TheHistory.pattern = TheHistory.pattern[:0]
+		TheHistory.cur = len(TheHistory.forms) - 1
 	default:
-		orig := ed.hist.cur
-		if 0 < len(ed.hist.pattern) {
-			ed.hist.cur--
+		orig := TheHistory.cur
+		if 0 < len(TheHistory.pattern) {
+			TheHistory.cur--
 		}
 		if b == 'r' {
 			r, _ := utf8.DecodeRune(ed.key.buf)
 			if r == '\x7f' {
-				if 0 < len(ed.hist.pattern) {
-					ed.hist.pattern = ed.hist.pattern[:len(ed.hist.pattern)-1]
+				if 0 < len(TheHistory.pattern) {
+					TheHistory.pattern = TheHistory.pattern[:len(TheHistory.pattern)-1]
 				}
 			} else {
-				ed.hist.pattern = append(ed.hist.pattern, r)
+				TheHistory.pattern = append(TheHistory.pattern, r)
 			}
 		}
-		if form := ed.hist.SearchBack(string(ed.hist.pattern)); form != nil {
+		if form := TheHistory.SearchBack(string(TheHistory.pattern)); form != nil {
 			ed.setForm(form)
 		} else {
-			ed.hist.cur = orig
+			TheHistory.cur = orig
 		}
 	}
-	buf := fmt.Appendf(nil, "search backwards: %s", string(ed.hist.pattern))
+	buf := fmt.Appendf(nil, "search backwards: %s", string(TheHistory.pattern))
 	ed.displayMessage(buf)
 	ed.override = historySearchOverride
-	ed.hist.searchDir = backwardDir
+	TheHistory.searchDir = backwardDir
 	ed.mode = topMode
 	return false
 }
@@ -971,33 +971,33 @@ func searchForward(ed *editor, b byte) bool {
 	ed.logf("=> %02x searchForward\n", b)
 	switch {
 	case ed.override == nil:
-		ed.hist.pattern = ed.hist.pattern[:0]
-		ed.hist.cur = 0
+		TheHistory.pattern = TheHistory.pattern[:0]
+		TheHistory.cur = 0
 	default:
-		orig := ed.hist.cur
-		if 0 < len(ed.hist.pattern)-1 {
-			ed.hist.cur++
+		orig := TheHistory.cur
+		if 0 < len(TheHistory.pattern)-1 {
+			TheHistory.cur++
 		}
 		if b == 'r' {
 			r, _ := utf8.DecodeRune(ed.key.buf)
 			if r == '\x7f' {
-				if 0 < len(ed.hist.pattern) {
-					ed.hist.pattern = ed.hist.pattern[:len(ed.hist.pattern)-1]
+				if 0 < len(TheHistory.pattern) {
+					TheHistory.pattern = TheHistory.pattern[:len(TheHistory.pattern)-1]
 				}
 			} else {
-				ed.hist.pattern = append(ed.hist.pattern, r)
+				TheHistory.pattern = append(TheHistory.pattern, r)
 			}
 		}
-		if form := ed.hist.SearchForward(string(ed.hist.pattern)); form != nil {
+		if form := TheHistory.SearchForward(string(TheHistory.pattern)); form != nil {
 			ed.setForm(form)
 		} else {
-			ed.hist.cur = orig
+			TheHistory.cur = orig
 		}
 	}
-	buf := fmt.Appendf(nil, "search forwards: %s", string(ed.hist.pattern))
+	buf := fmt.Appendf(nil, "search forwards: %s", string(TheHistory.pattern))
 	ed.displayMessage(buf)
 	ed.override = historySearchOverride
-	ed.hist.searchDir = forwardDir
+	TheHistory.searchDir = forwardDir
 	ed.mode = topMode
 	return false
 }

@@ -55,6 +55,17 @@ func (f Form) Append(b []byte) []byte {
 	if 0 < len(f) {
 		for _, line := range f {
 			b = append(b, string(line)...)
+			b = append(b, '\n')
+		}
+	}
+	return b
+}
+
+// TabAppend the form to a byte slice using tabs as separators between lines.
+func (f Form) TabAppend(b []byte) []byte {
+	if 0 < len(f) {
+		for _, line := range f {
+			b = append(b, string(line)...)
 			b = append(b, '\t')
 		}
 		b[len(b)-1] = '\n'

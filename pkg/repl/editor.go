@@ -46,7 +46,6 @@ type editor struct {
 	depth      int
 	shift      int // rune shift on current line
 	origState  *term.State
-	hist       History
 	override   func(ed *editor) bool // return true if handled
 	completer  Completer
 	resizeChan chan os.Signal
@@ -66,8 +65,8 @@ func (ed *editor) initialize() {
 	ed.mode = topMode
 	ed.key.buf = make([]byte, 32)
 	ed.match.line = -1
-	ed.hist.SetLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
-	ed.hist.Load(historyFilename)
+	TheHistory.SetLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
+	TheHistory.Load(historyFilename)
 	ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 	ed.seqChan = make(chan *seq, 100)
 	ed.in = scope.Get(slip.Symbol(stdInput)).(io.Reader)
@@ -286,6 +285,11 @@ top:
 			ed.clearDown()
 			ed.setCursorCurrent()
 			ed.dirty.lines = nil
+			ed.dirty.cnt = 0
+			if ed.key.cnt == 1 && ed.key.buf[0] == 0x1b {
+				ed.key.cnt = 0
+				continue
+			}
 		}
 		if ed.override != nil && ed.override(ed) {
 			continue
@@ -915,7 +919,7 @@ func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
 }
 
 func (ed *editor) addToHistory() {
-	ed.hist.Add(ed.lines)
+	TheHistory.Add(ed.lines)
 }
 
 func (ed *editor) setForm(form Form) {
@@ -958,22 +962,16 @@ func (ed *editor) keepForm() {
 }
 
 func getHistoryLimit() slip.Object {
-	if ed, ok := replReader.(*editor); ok {
-		return slip.Fixnum(ed.hist.limit)
-	}
-	return nil
+	return slip.Fixnum(TheHistory.limit)
 }
 
 func setHistoryLimit(value slip.Object) {
-	ed, ok := replReader.(*editor)
-	if ok {
-		var num slip.Fixnum
-		if num, ok = value.(slip.Fixnum); !ok {
-			slip.PanicType("*repl-history-limit*", value, "fixnum")
-		}
-		if num < 0 {
-			num = 0
-		}
-		ed.hist.SetLimit(int(num))
+	num, ok := value.(slip.Fixnum)
+	if !ok {
+		slip.PanicType("*repl-history-limit*", value, "fixnum")
 	}
+	if num < 0 {
+		num = 0
+	}
+	TheHistory.SetLimit(int(num))
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/ohler55/slip/pkg/repl"
 )
 
-func TestHistoryLoad(t *testing.T) {
+func TestHistoryLoadSimple(t *testing.T) {
 	filename := "config/history"
 	err := os.WriteFile(filename, []byte("one\ntwo\nthree\t3\tthird\nfour\n"), 0666)
 	tt.Nil(t, err)
@@ -23,6 +23,66 @@ func TestHistoryLoad(t *testing.T) {
 	tt.Equal(t, "two\n", h.Nth(2).String())
 	tt.Equal(t, "one\n", h.Nth(3).String())
 	tt.Equal(t, "", h.Nth(4).String())
+}
+
+func TestHistoryLoadMultiline(t *testing.T) {
+	filename := "config/history"
+	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n(* 2\t   four)\n"), 0666)
+	tt.Nil(t, err)
+
+	var h repl.History
+	h.Load(filename)
+	tt.Equal(t, "(* 2\n   four)\n", h.Nth(0).String())
+	tt.Equal(t, "(+ 1\n   2\n   3)\n", h.Nth(1).String())
+	tt.Equal(t, "one\n", h.Nth(2).String())
+
+	tt.Equal(t, `one
+(+ 1	   2	   3)
+(* 2	   four)
+`, string(h.Append(nil, false, false, true, 0, -1)))
+
+	tt.Equal(t, `one
+(+ 1
+   2
+   3)
+(* 2
+   four)
+`, string(h.Append(nil, false, true, false, 0, -1)))
+
+	tt.Equal(t, `
+one
+
+(+ 1
+   2
+   3)
+
+(* 2
+   four)
+`, string(h.Append(nil, false, false, false, 0, -1)))
+
+	tt.Equal(t, `;; 1
+one
+;; 2
+(+ 1
+   2
+   3)
+;; 3
+(* 2
+   four)
+`, string(h.Append(nil, true, true, false, 0, -1)))
+}
+
+func TestHistoryLoadExpanded(t *testing.T) {
+	filename := "config/history"
+	err := os.WriteFile(filename, []byte("one\n(+ 1\n   2\n   3)\n\n(* 2\n   four)\n"), 0666)
+	tt.Nil(t, err)
+
+	var h repl.History
+	h.LoadExpanded(filename)
+	tt.Equal(t, `one
+(+ 1	   2	   3)
+(* 2	   four)
+`, string(h.Append(nil, false, false, true, 0, -1)))
 }
 
 func TestHistoryLoadNoFile(t *testing.T) {

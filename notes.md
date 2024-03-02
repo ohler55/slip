@@ -4,18 +4,42 @@
 
 - next
 
- - functions
-  - regex-match
-  - regex-match-all
+ - regex-match
+ - regex-match-all
 
- - M-s save current form to session (saved to .slip/session.lisp)
-  - when should it be cleared?
-  - (defun save-session (path) )
- - M-p previous in session also M-uparrow
- - M-n next in session also M-downarrow
+ - repl:show-history
+ - repl:clear-history
+ - repl: history
+ - M-h binding
 
- - save to session file
-  - up and down like history
+ - history
+  - show-history (&optional destination &key annotate tight raw start end)
+   - default destination is *standard-output*
+    - allow nil for string, t for stdout, and stream
+  - clear-history (&key start end)
+  - history (index) - find and place as current
+   - key binding M-h pops up input for number
+
+ - stash (same backend functions as history)
+  - on start look for ./stash.lisp then .slip/stash.lisp and load if found
+  - use-stash (path)
+   - if path has no .lisp and no / then try ./<path>.lisp the .slip/<path>.lisp and finally just path
+  - show-stash
+  - clear-stash
+  - edit-stash
+   - pops open in editor in raw mode
+   - maybe expand
+    - on reload change all newline to tabs then all \t\t to a newline
+     - that fails if \n\n in code
+     - can't count on complete sexpr unless reject save for non-sexpr
+      - if reject bad saved then can scan saved file for complete sexpr
+  - get-stash (index)
+   - make index the current
+   - key binding M-g
+  - M-s to save to stash
+  - M-p for previous in stash [M-uparrow also]
+  - M-n for next in stash [M-downarrow also]
+
 
  - return and return-from should work in functions (defun)
 

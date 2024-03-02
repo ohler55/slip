@@ -15,6 +15,9 @@ var (
 		PreSet:    slip.DefaultPreSet,
 		Locked:    true,
 	}
+	// TheHistory is the single global used by readers (editor and
+	// termReader).
+	TheHistory History
 )
 
 func init() {

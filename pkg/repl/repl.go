@@ -244,7 +244,7 @@ func process() {
 	}()
 	buf := replReader.read()
 	code := slip.Read(buf)
-	// Enter was pressed and eval was successful so save to history. If a
+	// Enter was pressed and read was successful so save to history. If a
 	// recoverable panic then that also adds to history in the defer.
 	replReader.addToHistory()
 	replReader.afterEval()
