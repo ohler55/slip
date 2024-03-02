@@ -162,3 +162,39 @@ func TestHistoryLimit(t *testing.T) {
 	h2.Load(filename)
 	tt.Equal(t, 10, h2.Size())
 }
+
+func TestHistoryClear(t *testing.T) {
+	var h repl.History
+	filename := "config/history"
+	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
+	tt.Nil(t, err)
+
+	h.LoadExpanded(filename)
+	h.Clear(-1, 1)
+	tt.Equal(t, 1, h.Size())
+	tt.Equal(t, "one\n", h.Nth(0).String())
+
+	var content []byte
+	content, err = os.ReadFile(filename)
+	tt.Nil(t, err)
+	tt.Equal(t, "one\n", string(content))
+}
+
+func TestHistoryAdd(t *testing.T) {
+	var h repl.History
+	h.SetLimit(100)
+	filename := "config/quux"
+	_ = os.RemoveAll(filename)
+	err := os.WriteFile(filename, []byte{}, 0666)
+	tt.Nil(t, err)
+
+	h.LoadExpanded(filename)
+	h.Add(repl.NewForm([]byte("(+ 1 2)")))
+	h.Add(repl.NewForm([]byte("(+ 1 2)")))
+	h.Add(repl.NewForm([]byte{}))
+	tt.Equal(t, 1, h.Size())
+
+	_ = os.Chmod(filename, 0x220)
+
+	tt.Panic(t, func() { h.Add(repl.NewForm([]byte("(- 1 2)"))) })
+}

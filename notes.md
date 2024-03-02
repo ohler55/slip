@@ -7,15 +7,12 @@
  - regex-match
  - regex-match-all
 
- - repl:show-history
- - repl:clear-history
+ + repl:show-history
+ + repl:clear-history
  - repl: history
  - M-h binding
 
  - history
-  - show-history (&optional destination &key annotate tight raw start end)
-   - default destination is *standard-output*
-    - allow nil for string, t for stdout, and stream
   - clear-history (&key start end)
   - history (index) - find and place as current
    - key binding M-h pops up input for number

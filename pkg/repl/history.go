@@ -92,3 +92,18 @@ func (h *History) Add(form Form) {
 		}
 	}
 }
+
+// Clear the stash entries in the range specified..
+func (h *History) Clear(start, end int) {
+	h.clear(start, end)
+	f, err := os.OpenFile(h.filename, os.O_TRUNC|os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = f.Close() }()
+	for _, frm := range h.forms {
+		if _, err = f.Write(frm.TabAppend(nil)); err != nil {
+			panic(err)
+		}
+	}
+}

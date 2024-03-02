@@ -81,7 +81,6 @@ func (s *Stash) Add(form Form) {
 	}
 	s.forms = append(s.forms, form.Dup())
 	f, err := os.OpenFile(s.filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	fmt.Printf("*** open file: %s %s\n", err, f)
 	if err == nil {
 		defer func() { _ = f.Close() }()
 		_, err = f.Write(append(form.Append(nil), '\n'))
@@ -160,6 +159,20 @@ func (s *Stash) Size() int {
 
 // Clear the stash entries in the range specified..
 func (s *Stash) Clear(start, end int) {
+	s.clear(start, end)
+	f, err := os.OpenFile(s.filename, os.O_TRUNC|os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = f.Close() }()
+	for _, frm := range s.forms {
+		if _, err = f.Write(frm.TabAppend(nil)); err != nil {
+			panic(err)
+		}
+	}
+}
+
+func (s *Stash) clear(start, end int) {
 	if 0 < len(s.forms) && start < len(s.forms) {
 		if start < 0 {
 			start = 0

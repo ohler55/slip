@@ -3,10 +3,8 @@
 package repl
 
 import (
-	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip/pkg/repl"
@@ -45,7 +43,7 @@ one
 
 (* 2
    four)
-`, string(s.Append(nil, false, false, false, 0, -1)))
+`, string(s.Append(nil, false, false, false, -1, -1)))
 
 	tt.Equal(t, `;; 1
 one
@@ -62,6 +60,8 @@ one
 (+ 1	   2	   3)
 (* 2	   four)
 `, string(s.Append(nil, false, false, true, 0, -1)))
+
+	tt.Equal(t, "", string(s.Append(nil, false, false, true, 5, -1)))
 }
 
 func TestStashLoadNoFile(t *testing.T) {
@@ -142,16 +142,33 @@ func TestStashAdd(t *testing.T) {
 	s.Add(repl.NewForm([]byte{}))
 	tt.Equal(t, 1, s.Size())
 
-	err = os.Chmod(filename, 0x220)
-	// _ = os.Remove(filename)
-	// time.Sleep(time.Second)
-	// err = os.Mkdir(filename, 0x666)
-	fmt.Printf("*** err: %s\n", err)
-	time.Sleep(time.Second * 10)
-	// defer func() { _ = os.RemoveAll(filename) }()
-	// TBD create dir?
-	s.Add(repl.NewForm([]byte("(+ 1 2)")))
+	_ = os.Chmod(filename, 0x220)
 
-	// tt.Panic(t, func() { s.Add(repl.NewForm([]byte("(+ 1 2)"))) })
+	tt.Panic(t, func() { s.Add(repl.NewForm([]byte("(- 1 2)"))) })
+}
 
+func TestStashClear(t *testing.T) {
+	var s repl.Stash
+	filename := "config/history"
+	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
+	tt.Nil(t, err)
+
+	s.LoadExpanded(filename)
+	s.Clear(-1, 1)
+	tt.Equal(t, 1, s.Size())
+	tt.Equal(t, "one\n", s.Nth(0).String())
+
+	var content []byte
+	content, err = os.ReadFile(filename)
+	tt.Nil(t, err)
+	tt.Equal(t, "one\n", string(content))
+}
+
+func TestStashLoadExpandedBadForm(t *testing.T) {
+	var s repl.Stash
+	filename := "config/history"
+	err := os.WriteFile(filename, []byte(")\n"), 0666)
+	tt.Nil(t, err)
+
+	tt.Panic(t, func() { s.LoadExpanded(filename) })
 }

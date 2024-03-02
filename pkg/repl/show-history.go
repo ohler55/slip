@@ -112,7 +112,7 @@ func (f *ShowHistory) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 		if num, ok := v.(slip.Fixnum); ok {
 			end = int(num)
 		} else {
-			slip.PanicType(":start", v, "fixnum")
+			slip.PanicType(":end", v, "fixnum")
 		}
 	}
 	buf := TheHistory.Append(nil, annotate, tight, raw, start, end)
