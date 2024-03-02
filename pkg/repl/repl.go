@@ -165,6 +165,10 @@ func Run() {
 		_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte("\nBye\n"))
 		replReader.stop()
 	}()
+	TheHistory.SetLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
+	TheHistory.Load(historyFilename)
+	initStash()
+
 	Interactive = true
 	if _, ok := replReader.(*termReader); ok {
 		fmt.Println(`Currently using a basic terminal editor. For a more interactive editor enter
@@ -185,6 +189,36 @@ func Stop() {
 // ZeroMods resets the modified variables list.
 func ZeroMods() {
 	modifiedVars = map[string]bool{}
+}
+
+func initStash() {
+	loadPaths := stashLoadPath
+	if len(loadPaths) == 0 {
+		loadPaths = append(loadPaths, slip.String("."))
+	}
+	name := defaultStashName
+	if len(name) == 0 {
+		name = "stash.lisp"
+	}
+	home, _ := os.UserHomeDir()
+	for _, spath := range stashLoadPath {
+		if path, ok := spath.(slip.String); ok {
+			fp := strings.ReplaceAll(filepath.Join(string(path), defaultStashName), "~", home)
+			if fi, err := os.Stat(fp); err != nil || fi.IsDir() {
+				continue
+			}
+			TheStash.LoadExpanded(fp)
+			return
+		}
+	}
+	if path, ok := stashLoadPath[0].(slip.String); ok {
+		fp := strings.ReplaceAll(filepath.Join(string(path), defaultStashName), "~", home)
+		if err := os.WriteFile(fp, []byte{}, 0666); err != nil {
+			fmt.Printf("failed to create a stash file at %s\n", fp)
+			return
+		}
+		TheStash.LoadExpanded(fp)
+	}
 }
 
 func reset() {

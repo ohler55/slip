@@ -8,9 +8,6 @@
  - regex-match-all
 
  - stash
-  - on start look for the default in load paths if both are non-nil, create if not found
-   - *stash-load-path* initially ("." "~/.slip")
-   - *default-stash-name* initially "stash.lisp"
   - use-stash (path)
    - if path has no .lisp and no / then try ./<path>.lisp the .slip/<path>.lisp and finally just path
   - show-stash

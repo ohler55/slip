@@ -18,6 +18,7 @@ var (
 	// TheHistory is the single global used by readers (editor and
 	// termReader).
 	TheHistory History
+	TheStash   Stash
 )
 
 func init() {

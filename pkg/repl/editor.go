@@ -65,8 +65,6 @@ func (ed *editor) initialize() {
 	ed.mode = topMode
 	ed.key.buf = make([]byte, 32)
 	ed.match.line = -1
-	TheHistory.SetLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
-	TheHistory.Load(historyFilename)
 	ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 	ed.seqChan = make(chan *seq, 100)
 	ed.in = scope.Get(slip.Symbol(stdInput)).(io.Reader)
