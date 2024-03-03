@@ -11,6 +11,8 @@ import (
 )
 
 func TestNthHistoryOk(t *testing.T) {
+	repl.TheHistory.SetLimit(100)
+	repl.TheHistory.Load("config/history")
 	repl.TheHistory.Clear(0, -1)
 	repl.TheHistory.Add(repl.NewForm([]byte("(+ 1 2)")))
 	repl.TheHistory.Add(repl.NewForm([]byte("(* 2 3)")))

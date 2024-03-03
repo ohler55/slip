@@ -14,6 +14,8 @@ import (
 )
 
 func TestShowHistoryPlain(t *testing.T) {
+	repl.TheHistory.SetLimit(100)
+	repl.TheHistory.Load("config/history")
 	repl.TheHistory.Clear(0, -1)
 	repl.TheHistory.Add(repl.NewForm([]byte("(+ 1 2)")))
 	(&sliptest.Function{
@@ -25,6 +27,8 @@ func TestShowHistoryPlain(t *testing.T) {
 }
 
 func TestShowHistoryOptions(t *testing.T) {
+	repl.TheHistory.SetLimit(100)
+	repl.TheHistory.Load("config/history")
 	repl.TheHistory.Clear(0, -1)
 	repl.TheHistory.Add(repl.NewForm([]byte("(+ 1 2)")))
 	repl.TheHistory.Add(repl.NewForm([]byte("(* 2 3)")))
@@ -37,6 +41,8 @@ func TestShowHistoryOptions(t *testing.T) {
 }
 
 func TestShowHistoryStdout(t *testing.T) {
+	repl.TheHistory.SetLimit(100)
+	repl.TheHistory.Load("config/history")
 	repl.TheHistory.Clear(0, -1)
 	repl.TheHistory.Add(repl.NewForm([]byte("(+ 1 2)")))
 	repl.TheHistory.Add(repl.NewForm([]byte("(* 2 3)")))
@@ -64,6 +70,8 @@ func TestShowHistoryStdout(t *testing.T) {
 }
 
 func TestShowHistoryStream(t *testing.T) {
+	repl.TheHistory.SetLimit(100)
+	repl.TheHistory.Load("config/history")
 	repl.TheHistory.Clear(0, -1)
 	repl.TheHistory.Add(repl.NewForm([]byte("(+ 1 2)")))
 	repl.TheHistory.Add(repl.NewForm([]byte("(* 2 3)")))
@@ -108,6 +116,8 @@ func (w badWriter) Write([]byte) (int, error) {
 }
 
 func TestShowHistoryStreamError(t *testing.T) {
+	repl.TheHistory.SetLimit(100)
+	repl.TheHistory.Load("config/history")
 	repl.TheHistory.Clear(0, -1)
 	repl.TheHistory.Add(repl.NewForm([]byte("(+ 1 2)")))
 	scope := slip.NewScope()

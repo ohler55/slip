@@ -4,7 +4,9 @@ package repl
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -64,19 +66,42 @@ type UseStash struct {
 func (f *UseStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	name := slip.MustBeString(args[0], "name")
+	if len(name) == 0 {
+		slip.NewPanic("a stash filename can not be empty")
+	}
 	home, _ := os.UserHomeDir()
-	if strings.Contains(name, "/") {
+	if strings.Contains(name, "/") || strings.HasSuffix(strings.ToLower(name), ".lisp") {
 		name = strings.ReplaceAll(name, "~", home)
 		if _, err := os.Stat(name); err != nil && errors.Is(err, os.ErrNotExist) {
 			if err = os.WriteFile(name, []byte{}, 0666); err != nil {
-				slip.NewPanic("failed to open or create a stash file at %s\n", name)
+				slip.NewPanic("failed to open or create a stash file at %s", name)
 			}
 		}
 		TheStash.LoadExpanded(name)
+		return nil
 	}
-
-	// TBD look for file in *stash-load-path*, if found load
-	//  if not found create in first one or "." if no load paths
-
+	name += ".lisp"
+	loadPaths := stashLoadPath
+	if len(loadPaths) == 0 {
+		loadPaths = append(loadPaths, slip.String("."))
+	}
+	for _, spath := range loadPaths {
+		if path, ok := spath.(slip.String); ok {
+			fp := strings.ReplaceAll(filepath.Join(string(path), name), "~", home)
+			if fi, err := os.Stat(fp); err != nil || fi.IsDir() {
+				continue
+			}
+			TheStash.LoadExpanded(fp)
+			return nil
+		}
+	}
+	if path, ok := loadPaths[0].(slip.String); ok {
+		fp := strings.ReplaceAll(filepath.Join(string(path), name), "~", home)
+		if err := os.WriteFile(fp, []byte{}, 0666); err != nil {
+			fmt.Printf("failed to create a stash file at %s\n", fp)
+			return nil
+		}
+		TheStash.LoadExpanded(fp)
+	}
 	return nil
 }

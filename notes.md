@@ -7,19 +7,7 @@
  - regex-match
  - regex-match-all
 
- - stash
-  - use-stash (path)
-   - if path has no .lisp and no / then try ./<path>.lisp the .slip/<path>.lisp and finally just path
-  - show-stash
-  - clear-stash
-  - edit-stash
-   - pops open in editor in expanded mode
-  - nth-stash (index)
-  - M-S nth-stash
-  - M-s to save to stash
-  - M-p for previous in stash [M-uparrow also]
-  - M-n for next in stash [M-downarrow also]
-
+ - stash tests
 
  - return and return-from should work in functions (defun)
 
