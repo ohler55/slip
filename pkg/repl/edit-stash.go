@@ -53,8 +53,6 @@ func (f *EditStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			xargs = append(xargs, string(flag))
 		}
 	}
-	// TBD edit in place
-
 	xargs = append(xargs, TheStash.filename)
 	cmd := exec.Command(xed, xargs...)
 	cmd.Stdin = os.Stdin

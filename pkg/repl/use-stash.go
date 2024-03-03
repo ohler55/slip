@@ -4,7 +4,6 @@ package repl
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -81,7 +80,7 @@ func (f *UseStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		return nil
 	}
 	name += ".lisp"
-	loadPaths := stashLoadPath
+	loadPaths, _ := s.Get("*stash-load-path*").(slip.List)
 	if len(loadPaths) == 0 {
 		loadPaths = append(loadPaths, slip.String("."))
 	}
@@ -98,8 +97,7 @@ func (f *UseStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if path, ok := loadPaths[0].(slip.String); ok {
 		fp := strings.ReplaceAll(filepath.Join(string(path), name), "~", home)
 		if err := os.WriteFile(fp, []byte{}, 0666); err != nil {
-			fmt.Printf("failed to create a stash file at %s\n", fp)
-			return nil
+			slip.NewPanic("failed to open or create a stash file at %s", fp)
 		}
 		TheStash.LoadExpanded(fp)
 	}

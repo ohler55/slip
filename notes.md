@@ -7,8 +7,6 @@
  - regex-match
  - regex-match-all
 
- - stash tests
-
  - return and return-from should work in functions (defun)
 
  - package

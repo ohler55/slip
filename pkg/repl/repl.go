@@ -352,7 +352,8 @@ func updateConfigFile() {
 func setHook(p *slip.Package, key string) {
 	if p == &Pkg ||
 		strings.HasPrefix(key, "*print-") ||
-		key == "*bag-time-format*" || key == "*bag-time-wrap*" {
+		key == "*bag-time-format*" ||
+		key == "*bag-time-wrap*" {
 		modifiedVars[key] = true
 		updateConfigFile()
 	}
