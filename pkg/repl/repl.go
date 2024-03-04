@@ -61,6 +61,12 @@ var (
 
 	replReader reader = &termReader{}
 
+	stashLoadPath = slip.List{
+		slip.String("."),
+		slip.String("~/.slip"),
+	}
+	defaultStashName = "stash.lisp"
+
 	sizer hasSize
 	// TBD flag to not let Run() be called more than once before (repl-exit) is called
 )
@@ -159,6 +165,10 @@ func Run() {
 		_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write([]byte("\nBye\n"))
 		replReader.stop()
 	}()
+	TheHistory.SetLimit(1000) // initial value that the user can replace by setting *repl-history-limit*
+	TheHistory.Load(historyFilename)
+	initStash()
+
 	Interactive = true
 	if _, ok := replReader.(*termReader); ok {
 		fmt.Println(`Currently using a basic terminal editor. For a more interactive editor enter
@@ -179,6 +189,36 @@ func Stop() {
 // ZeroMods resets the modified variables list.
 func ZeroMods() {
 	modifiedVars = map[string]bool{}
+}
+
+func initStash() {
+	loadPaths := stashLoadPath
+	if len(loadPaths) == 0 {
+		loadPaths = append(loadPaths, slip.String("."))
+	}
+	name := defaultStashName
+	if len(name) == 0 {
+		name = "stash.lisp"
+	}
+	home, _ := os.UserHomeDir()
+	for _, spath := range loadPaths {
+		if path, ok := spath.(slip.String); ok {
+			fp := strings.ReplaceAll(filepath.Join(string(path), name), "~", home)
+			if fi, err := os.Stat(fp); err != nil || fi.IsDir() {
+				continue
+			}
+			TheStash.LoadExpanded(fp)
+			return
+		}
+	}
+	if path, ok := loadPaths[0].(slip.String); ok {
+		fp := strings.ReplaceAll(filepath.Join(string(path), name), "~", home)
+		if err := os.WriteFile(fp, []byte{}, 0666); err != nil {
+			fmt.Printf("failed to create a stash file at %s\n", fp)
+			return
+		}
+		TheStash.LoadExpanded(fp)
+	}
 }
 
 func reset() {
@@ -312,7 +352,8 @@ func updateConfigFile() {
 func setHook(p *slip.Package, key string) {
 	if p == &Pkg ||
 		strings.HasPrefix(key, "*print-") ||
-		key == "*bag-time-format*" || key == "*bag-time-wrap*" {
+		key == "*bag-time-format*" ||
+		key == "*bag-time-wrap*" {
 		modifiedVars[key] = true
 		updateConfigFile()
 	}
@@ -444,4 +485,39 @@ func getInteractive() slip.Object {
 
 func setInteractive(_ slip.Object) {
 	panic("*repl-interactive* is a read only variable")
+}
+
+func getStashLoadPath() slip.Object {
+	return stashLoadPath
+}
+
+func setStashLoadPath(value slip.Object) {
+	switch list := value.(type) {
+	case nil:
+		stashLoadPath = slip.List{}
+	case slip.List:
+		stashLoadPath = list
+	default:
+		panic("*stash-load-path* must be a list of strings")
+	}
+}
+
+func getDefaultStashName() (name slip.Object) {
+	if 0 < len(defaultStashName) {
+		name = slip.String(defaultStashName)
+	}
+	return
+}
+
+func setDefaultStashName(value slip.Object) {
+	switch tv := value.(type) {
+	case nil:
+		defaultStashName = ""
+	case slip.String:
+		defaultStashName = string(tv)
+	case slip.Symbol:
+		defaultStashName = string(tv)
+	default:
+		panic("*default-stash-name* must be a string or nil")
+	}
 }

@@ -68,14 +68,15 @@ var (
 		bad, bad, matchClose, bad, bad, editForm, matchOpen, bad, // 0x00
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x08
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x10
-		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x20
+		bad, bad, bad, bad, bad, bad, bad, bad, // 0x20
+		bad, bad, bad, bad, searchStashBack, bad, searchStashForward, describe, // 0x28
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x30
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x40
-		bad, bad, bad, bad, bad, enterUnicode, bad, bad, // 0x50
+		bad, bad, bad, nthStash, bad, enterUnicode, bad, bad, // 0x50
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
 		bad, bad, backWord, bad, delForwardWord, eval, forwardWord, bad, // 0x60
-		nthHistory, bad, bad, bad, bad, bad, bad, bad, // 0x68
-		bad, bad, resetTerm, bad, bad, enterUnicode, historyBack, ccopy, // 0x70
+		nthHistory, bad, bad, bad, bad, bad, stashForward, bad, // 0x68
+		stashBack, bad, resetTerm, stashAdd, bad, enterUnicode, historyBack, ccopy, // 0x70
 		bad, bad, bad, bad, bad, bad, bad, delBackWord, // 0x78
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x80
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x90
@@ -135,6 +136,7 @@ var (
 	}
 	// Update this if the key bindings for history are changed.
 	historyBindings map[string]bindFunc
+	stashBindings   map[string]bindFunc
 )
 
 func init() {
@@ -149,6 +151,14 @@ func init() {
 		"\x1b\x5bA": historyBack,
 		"\x12":      searchBack,
 		"\x13":      searchForward,
+	}
+	stashBindings = map[string]bindFunc{
+		"\x1bn": stashForward,
+		// "\x1b\x1b\x5b\x42": stashForward, // TBD need 4 way mapping
+		"\x1bp": stashBack,
+		// "\x1b\x1b\x5b\x41": stashBack, // TBD need 4 way mapping
+		"\x1b,": searchStashBack,
+		"\x1b.": searchStashForward,
 	}
 }
 
@@ -774,10 +784,14 @@ bindings are:
 		"\x1b[1mM-f\x1b[m   move forward one word",
 		"\x1b[1mM-h\x1b[m   nth in history",
 		"\x1b[1mM-r\x1b[m   reset terminal",
+		"\x1b[1mM-s\x1b[m   add to stash",
+		"\x1b[1mM-S\x1b[m   nth in stash",
 		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
 		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
 		"\x1b[1mM-v\x1b[m   previous in history",
 		"\x1b[1mM-w\x1b[m   copy to clipboard (macOS only)",
+		"\x1b[1mM-,\x1b[m   search stash backward",
+		"\x1b[1mM-.\x1b[m   search stash forward",
 		"\x1b[1mTAB\x1b[m   word completion or help scroll",
 		"\x1b[1mS-TAB\x1b[m help scroll back",
 		"\x1b[1mDEL\x1b[m   delete one back",
@@ -1173,6 +1187,202 @@ func ccut(ed *editor, b byte) bool {
 	ed.reset()
 
 	return true
+}
+
+func stashAdd(ed *editor, b byte) bool {
+	ed.logf("=> %02x stashAdd\n", b)
+	TheStash.Add(ed.lines)
+	ed.mode = topMode
+
+	return false
+}
+
+func nthStashOverride(ed *editor) bool {
+	k := ed.getKey()
+	switch k {
+	case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
+		ed.ri = (ed.ri * 10) + uint32(k[0]-'0')
+	case "\n", "\r":
+		ed.override = nil
+		ed.clearKey()
+		if form := TheStash.Nth(TheStash.Size() - int(ed.ri)); 0 < len(form) {
+			ed.setForm(form)
+		} else {
+			ed.setForm(NewForm([]byte{}))
+		}
+		return false
+	case "\x1b": // esc
+		ed.clearKey()
+		ed.override = nil
+		return false
+	case "\x7f":
+		ed.clearKey()
+		ed.ri /= 10
+	default:
+		if k[0] < 0x20 {
+			ed.override = nil
+			return false
+		}
+		return true
+	}
+	ed.displayMessage(fmt.Appendf(nil, "stash index: %-8d", ed.ri))
+
+	return true
+}
+
+func nthStash(ed *editor, b byte) bool {
+	ed.logf("=> %02x nthStash\n", b)
+	ed.ri = 0
+	ed.displayMessage([]byte("stash index: 0"))
+	ed.override = nthStashOverride
+	ed.mode = topMode
+	return false
+}
+
+func stashOverride(ed *editor) bool {
+	k := string(ed.key.buf[:ed.key.cnt])
+	f := stashBindings[k]
+	if f == nil {
+		ed.keepForm()
+		ed.override = nil
+		return false
+	}
+	f(ed, ' ')
+	return true
+}
+
+func stashBack(ed *editor, b byte) bool {
+	ed.logf("=> %02x stashBack\n", b)
+	switch {
+	case ed.override == nil:
+		TheStash.cur = len(TheStash.forms) - 1
+	case TheStash.cur <= 0:
+		ed.override = stashOverride
+		ed.mode = topMode
+		return false
+	default:
+		TheStash.cur--
+	}
+	if form := TheStash.Get(); form != nil {
+		ed.setForm(form)
+	}
+	ed.override = stashOverride
+	ed.mode = topMode
+	return false
+}
+
+func stashForward(ed *editor, b byte) bool {
+	ed.logf("=> %02x stashForward\n", b)
+	switch {
+	case ed.override == nil:
+		TheStash.cur = 0
+	case len(TheStash.forms)-1 <= TheStash.cur:
+		ed.override = stashOverride
+		ed.setForm(Form{{}})
+		ed.mode = topMode
+		return false
+	default:
+		TheStash.cur++
+	}
+	if form := TheStash.Get(); form != nil {
+		ed.setForm(form)
+	}
+	ed.override = stashOverride
+	ed.mode = topMode
+	return false
+}
+
+func stashSearchOverride(ed *editor) bool {
+	k := string(ed.key.buf[:ed.key.cnt])
+	f := stashBindings[k]
+	var b byte = 'x'
+	if f == nil {
+		if ed.key.buf[0] < 0x20 {
+			ed.keepForm()
+			ed.override = nil
+			TheStash.pattern = TheStash.pattern[:0]
+			TheStash.searchDir = 0
+			return false
+		}
+		if TheStash.searchDir == forwardDir {
+			f = searchStashForward
+		} else {
+			f = searchStashBack
+		}
+		b = 'r'
+	}
+	f(ed, b)
+	return true
+}
+
+func searchStashBack(ed *editor, b byte) bool {
+	ed.logf("=> %02x searchStashBack\n", b)
+	switch {
+	case ed.override == nil:
+		TheStash.pattern = TheStash.pattern[:0]
+		TheStash.cur = len(TheStash.forms) - 1
+	default:
+		orig := TheStash.cur
+		if 0 < len(TheStash.pattern) {
+			TheStash.cur--
+		}
+		if b == 'r' {
+			r, _ := utf8.DecodeRune(ed.key.buf)
+			if r == '\x7f' {
+				if 0 < len(TheStash.pattern) {
+					TheStash.pattern = TheStash.pattern[:len(TheStash.pattern)-1]
+				}
+			} else {
+				TheStash.pattern = append(TheStash.pattern, r)
+			}
+		}
+		if form := TheStash.SearchBack(string(TheStash.pattern)); form != nil {
+			ed.setForm(form)
+		} else {
+			TheStash.cur = orig
+		}
+	}
+	buf := fmt.Appendf(nil, "search stash backwards: %s", string(TheStash.pattern))
+	ed.displayMessage(buf)
+	ed.override = stashSearchOverride
+	TheStash.searchDir = backwardDir
+	ed.mode = topMode
+	return false
+}
+
+func searchStashForward(ed *editor, b byte) bool {
+	ed.logf("=> %02x searchStashForward\n", b)
+	switch {
+	case ed.override == nil:
+		TheStash.pattern = TheStash.pattern[:0]
+		TheStash.cur = 0
+	default:
+		orig := TheStash.cur
+		if 0 < len(TheStash.pattern)-1 {
+			TheStash.cur++
+		}
+		if b == 'r' {
+			r, _ := utf8.DecodeRune(ed.key.buf)
+			if r == '\x7f' {
+				if 0 < len(TheStash.pattern) {
+					TheStash.pattern = TheStash.pattern[:len(TheStash.pattern)-1]
+				}
+			} else {
+				TheStash.pattern = append(TheStash.pattern, r)
+			}
+		}
+		if form := TheStash.SearchForward(string(TheStash.pattern)); form != nil {
+			ed.setForm(form)
+		} else {
+			TheStash.cur = orig
+		}
+	}
+	buf := fmt.Appendf(nil, "search stash forwards: %s", string(TheStash.pattern))
+	ed.displayMessage(buf)
+	ed.override = stashSearchOverride
+	TheStash.searchDir = forwardDir
+	ed.mode = topMode
+	return false
 }
 
 func (ed *editor) getKey() string {

@@ -3,8 +3,6 @@
 package repl
 
 import (
-	"io"
-
 	"github.com/ohler55/slip"
 )
 
@@ -65,63 +63,5 @@ type ShowHistory struct {
 
 // Call the the function with the arguments provided.
 func (f *ShowHistory) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 11)
-	w := s.Get("*standard-output*").(io.Writer)
-	start := 0
-	end := -1
-	var (
-		annotate bool
-		tight    bool
-		raw      bool
-	)
-	if 0 < len(args) {
-		switch ta := args[0].(type) {
-		case nil:
-			w = nil
-			args = args[1:]
-		case io.Writer:
-			w = ta
-			args = args[1:]
-		case slip.Symbol:
-			break
-		default:
-			if ta == slip.True {
-				// leave w as is
-				args = args[1:]
-				break
-			}
-			slip.PanicType("destination", ta, "output-stream", "t", "nil")
-		}
-	}
-	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":annotate")); has && v != nil {
-		annotate = true
-	}
-	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":tight")); has && v != nil {
-		tight = true
-	}
-	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":raw")); has && v != nil {
-		raw = true
-	}
-	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":start")); has {
-		if num, ok := v.(slip.Fixnum); ok {
-			start = int(num)
-		} else {
-			slip.PanicType(":start", v, "fixnum")
-		}
-	}
-	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":end")); has {
-		if num, ok := v.(slip.Fixnum); ok {
-			end = int(num)
-		} else {
-			slip.PanicType(":end", v, "fixnum")
-		}
-	}
-	buf := TheHistory.Append(nil, annotate, tight, raw, start, end)
-	if w == nil {
-		return slip.String(buf)
-	}
-	if _, err := w.Write(buf); err != nil {
-		panic(err)
-	}
-	return nil
+	return showStashCall(f, &TheHistory.Stash, s, args)
 }

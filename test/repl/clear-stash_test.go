@@ -12,42 +12,40 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestClearHistoryAll(t *testing.T) {
-	repl.TheHistory.SetLimit(100)
-	filename := "config/history"
+func TestClearStashAll(t *testing.T) {
+	filename := "config/stash"
 	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
 	tt.Nil(t, err)
-	repl.TheHistory.LoadExpanded(filename)
+	repl.TheStash.LoadExpanded(filename)
 	(&sliptest.Function{
-		Source: `(clear-history)`,
+		Source: `(clear-stash)`,
 		Expect: "nil",
 	}).Test(t)
-	tt.Equal(t, 0, repl.TheHistory.Size())
+	tt.Equal(t, 0, repl.TheStash.Size())
 }
 
-func TestClearHistoryStartEnd(t *testing.T) {
-	repl.TheHistory.SetLimit(100)
-	filename := "config/history"
+func TestClearStashStartEnd(t *testing.T) {
+	filename := "config/stash"
 	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
 	tt.Nil(t, err)
-	repl.TheHistory.LoadExpanded(filename)
+	repl.TheStash.LoadExpanded(filename)
 	(&sliptest.Function{
-		Source: `(clear-history :start 1 :end -1)`,
+		Source: `(clear-stash :start 1 :end -1)`,
 		Expect: "nil",
 	}).Test(t)
-	tt.Equal(t, 1, repl.TheHistory.Size())
+	tt.Equal(t, 1, repl.TheStash.Size())
 }
 
-func TestClearHistoryBadStart(t *testing.T) {
+func TestClearStashBadStart(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(clear-history :start t)`,
+		Source:    `(clear-stash :start t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }
 
-func TestClearHistoryBadEnd(t *testing.T) {
+func TestClearStashBadEnd(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(clear-history :end t)`,
+		Source:    `(clear-stash :end t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 }

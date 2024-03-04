@@ -80,13 +80,15 @@ func (s *Stash) Add(form Form) {
 		return
 	}
 	s.forms = append(s.forms, form.Dup())
-	f, err := os.OpenFile(s.filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err == nil {
-		defer func() { _ = f.Close() }()
-		_, err = f.Write(append(form.Append(nil), '\n'))
-	}
-	if err != nil {
-		panic(err)
+	if 0 < len(s.filename) {
+		f, err := os.OpenFile(s.filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err == nil {
+			defer func() { _ = f.Close() }()
+			_, err = f.Write(append(form.Append(nil), '\n'))
+		}
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
