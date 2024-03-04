@@ -4,9 +4,6 @@
 
 - next
 
- - regex-match
- - regex-match-all
-
  - return and return-from should work in functions (defun)
 
  - package
