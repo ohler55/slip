@@ -3,6 +3,29 @@
 - **multipass** or utm for linux
 
 - next
+ - watch-server
+  - init with :port
+   - start listening
+   - install hooks
+   -
+  - methods
+   - shutdown
+   - connections
+    - port
+    - watching
+    - periodics
+ - watch-client
+  - init with :host and :port
+   - connect
+   - set up listen loop
+   - set up call channel and sender loop
+  - methods
+   - watch (symbol &key all)
+   - forget (symbol)
+   - eval (id code)
+   - periodic (id code period)
+   - close - close connection
+
 
  - watch package
   - flavors
