@@ -11,22 +11,10 @@ import (
 // PackageSymbol is the symbol with a value of "package".
 const PackageSymbol = Symbol("package")
 
-var (
-	// SetHook is called after setting a variable or after a defvar or
-	// defparmeter is called.
-	SetHook = func(p *Package, key string) {}
-
-	// UnsetHook is called when a variable is unset or removed.
-	UnsetHook = func(p *Package, key string) {}
-
-	// DefunHook is called after a function is added.
-	DefunHook = func(p *Package, key string) {}
-
-	packages = map[string]*Package{
-		CLPkg.Name:   &CLPkg,
-		UserPkg.Name: &UserPkg,
-	}
-)
+var packages = map[string]*Package{
+	CLPkg.Name:   &CLPkg,
+	UserPkg.Name: &UserPkg,
+}
 
 func init() {
 	DefConstant(PackageSymbol, PackageSymbol, `A _package_ represents a namespace.`)
@@ -162,7 +150,9 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		} else {
 			vv.Val = value
 		}
-		SetHook(vv.Pkg, name)
+		for _, h := range setHooks {
+			h.fun(vv.Pkg, name)
+		}
 		return vv
 	}
 	if obj.Locked {
@@ -177,8 +167,9 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		}
 	}
 	obj.mu.Unlock()
-	SetHook(obj, name)
-
+	for _, h := range setHooks {
+		h.fun(obj, name)
+	}
 	return vv
 }
 
@@ -239,7 +230,9 @@ func (obj *Package) Remove(name string) (removed bool) {
 		}
 	}
 	obj.mu.Unlock()
-	UnsetHook(obj, name)
+	for _, h := range unsetHooks {
+		h.fun(obj, name)
+	}
 	return
 }
 
@@ -283,7 +276,9 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 		pkg.mu.Unlock()
 	}
 	obj.mu.Unlock()
-	DefunHook(obj, name)
+	for _, h := range defunHooks {
+		h.fun(obj, name)
+	}
 }
 
 // Undefine a function.
@@ -294,7 +289,9 @@ func (obj *Package) Undefine(name string) {
 		delete(obj.funcs, name)
 	}
 	obj.mu.Unlock()
-	UnsetHook(obj, name)
+	for _, h := range unsetHooks {
+		h.fun(obj, name)
+	}
 }
 
 // Append a buffer with a representation of the Object.
@@ -553,7 +550,9 @@ func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Objec
 	}
 	obj.mu.Unlock()
 	if 0 < len(name) && !strings.EqualFold(name, "lambda") {
-		DefunHook(obj, name)
+		for _, h := range defunHooks {
+			h.fun(obj, name)
+		}
 	}
 	return
 }

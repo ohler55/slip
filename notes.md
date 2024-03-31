@@ -4,9 +4,6 @@
 
 - next
 
- - multiple hooks
- - return and return-from should work in functions (defun)
-
  - watch package
   - flavors
    - watch-server
@@ -29,9 +26,8 @@
    - channel on each connection for outgoing lisp
 
   - start-watcher
-   - set hook (chain-hook to call existing and new one)
-    - or **changes hook to always allow multiple**
-    - update each connection
+   - add hooks
+    - update each server with separate id, maybe port
    - listen on port for connections
     - lisp with markers for start and end (STX 0x02 and ETX 0x03)
   - stop-watcher
@@ -55,6 +51,8 @@
      - changed (name value)
   - set-hook should drop onto queue for watcher
   - client should drop onto a channel then call in separate routine
+
+ - return and return-from should work in functions (defun)
 
  - package
   - support export list
