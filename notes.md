@@ -4,7 +4,6 @@
 
 - next
 
- - #\, should work
  - multiple hooks
  - return and return-from should work in functions (defun)
 

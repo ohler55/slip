@@ -159,6 +159,7 @@ func TestCodeCharacter(t *testing.T) {
 		{src: `#\A `, expect: `[#\A]`, kind: "character"},
 		{src: `#\u004d`, expect: `[#\M]`, kind: "character"},
 		{src: `#\SPACE`, expect: `[#\Space]`, kind: "character"},
+		{src: `#\,`, expect: `[#\,]`, kind: "character"},
 		{src: `#\ぴ`, expect: `[#\ぴ]`, kind: "character"},
 		{src: `#\u00`, raise: true},
 		{src: `#z`, raise: true},

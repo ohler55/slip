@@ -194,7 +194,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	charMode = "" +
 		".........CC..C.................." + // 0x00
-		"C..a....CCaa.aaaaaaaaaaaaaa.aaa." + // 0x20
+		"C..a....CCaaaaaaaaaaaaaaaaa.aaa." + // 0x20
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaa...aa" + // 0x40
 		".aaaaaaaaaaaaaaaaaaaaaaaaaa.a.a." + // 0x60
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0x80
