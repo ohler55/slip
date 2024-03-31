@@ -4,12 +4,35 @@
 
 - next
 
+ - #\, should work
+ - multiple hooks
  - return and return-from should work in functions (defun)
 
  - watch package
+  - flavors
+   - watch-server
+   - watch-client
+    - watch-tailing (watch-client)
+     - prints out changes
+    - watch-frame (watch-client)
+     - displays vars and values in a frame or window using ansi codes to move around
+  - server listens on a port for connections
+   - a connection receives lisp, switch on car for method
+    - reused part of that for client unless just a simple read-one loop
+   - keeps map of var and values along with dirty flag
+    - dirty flag is use when watching for just the latest and not :all
+   - verbs/methods for connections
+    - watch (symbol &key all)
+    - forget (symbol)
+    - eval (id code)
+    - periodic (id code period)
+    - close - close connection
+   - channel on each connection for outgoing lisp
+
   - start-watcher
    - set hook (chain-hook to call existing and new one)
     - or **changes hook to always allow multiple**
+    - update each connection
    - listen on port for connections
     - lisp with markers for start and end (STX 0x02 and ETX 0x03)
   - stop-watcher
