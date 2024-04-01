@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"sync"
+	"sync/atomic"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -34,11 +36,17 @@ func init() {
 	serverFlavor.DefMethod(":init", "", serverInitCaller{})
 	serverFlavor.DefMethod(":shutdown", "", serverShutdownCaller{})
 	serverFlavor.DefMethod(":connections", "", serverConnectionsCaller{})
+
+	// TBD serverFlavor.DefMethod(":listening", "", serverListeningCaller{})
+	// or serverFlavor.DefMethod(":activep", "", serverActivepCaller{})
 }
 
 type server struct {
 	port     int
 	listener net.Listener
+	active   atomic.Bool
+	mu       sync.Mutex
+	cons     map[string]*connection
 }
 
 type serverInitCaller struct{}
@@ -48,7 +56,9 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	var serv server
+	serv := &server{
+		cons: map[string]*connection{},
+	}
 	for i := 0; i < len(args); i += 2 {
 		if slip.Symbol(":port") == args[i] {
 			if num, ok := args[i+1].(slip.Fixnum); ok {
@@ -58,13 +68,12 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 			}
 		}
 	}
-	self.Any = &serv
+	self.Any = serv
 	var err error
 	if serv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", serv.port)); err != nil {
 		panic(err)
 	}
 	go serv.listen()
-	// TBD listen loop
 
 	return nil
 }
@@ -120,27 +129,22 @@ is an association list.
 }
 
 func (serv *server) listen() {
+	serv.active.Store(true)
 	for {
-		var c *connection
-
 		con, err := serv.listener.Accept()
 		if err != nil {
-			if c != nil {
-				c.shutdown()
-			}
-			// TBD remove connection
 			if !strings.Contains(err.Error(), "closed") {
 				fmt.Printf("*** accept failed with %T %s\n", err, err)
 				// TBD log error?
 			}
-			return
+			break
 		}
-		c = &connection{
-			con:  con,
-			serv: serv,
-		}
+		c := newConnection(con)
+		c.serv = serv
+
 		// TBD add to serv
 
 		go c.listen()
 	}
+	serv.active.Store(false)
 }

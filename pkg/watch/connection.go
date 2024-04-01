@@ -11,9 +11,11 @@ import (
 	"net"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/gi"
 )
 
 type connection struct {
+	id        string
 	con       net.Conn
 	serv      *server
 	expr      []byte
@@ -21,14 +23,23 @@ type connection struct {
 	sendQueue chan slip.Object
 }
 
-func (c *connection) listen() {
-	c.reqs = make(chan slip.Object, 100)
-	c.sendQueue = make(chan slip.Object, 100)
+func newConnection(con net.Conn) *connection {
+	c := connection{
+		con:       con,
+		reqs:      make(chan slip.Object, 100),
+		sendQueue: make(chan slip.Object, 100),
+	}
+	if addr := c.con.RemoteAddr(); addr != nil {
+		c.id = addr.String()
+	} else {
+		c.id = gi.NewUUID().String()
+	}
+	return &c
+}
 
+func (c *connection) listen() {
 	go c.methodLoop()
 	go c.sendLoop()
-
-	fmt.Printf("*** local: %s  remote: %s\n", c.con.LocalAddr(), c.con.RemoteAddr())
 	buf := make([]byte, 4096)
 	for {
 		cnt, err := c.con.Read(buf)
@@ -49,6 +60,7 @@ func (c *connection) listen() {
 			}
 		}
 	}
+	c.shutdown()
 }
 
 func (c *connection) readExpr() (obj slip.Object) {
@@ -76,8 +88,8 @@ func (c *connection) readExpr() (obj slip.Object) {
 }
 
 func (c *connection) shutdown() {
-	c.reqs <- nil
-	c.sendQueue <- nil
+	close(c.reqs)
+	close(c.sendQueue)
 	_ = c.con.Close()
 }
 
@@ -86,7 +98,7 @@ func (c *connection) methodLoop() {
 	for {
 		obj := <-c.reqs
 		if obj == nil {
-			return
+			break
 		}
 		req, ok := obj.(slip.List)
 		if !ok || len(req) < 2 { // need verb and id of request
@@ -94,6 +106,7 @@ func (c *connection) methodLoop() {
 		}
 		c.evalReq(scope, req)
 	}
+	fmt.Println("methodLoop exit")
 }
 
 func (c *connection) sendLoop() {
@@ -112,7 +125,7 @@ func (c *connection) sendLoop() {
 	for {
 		obj := <-c.sendQueue
 		if obj == nil {
-			return
+			break
 		}
 		_, err := c.con.Write(p.Append(nil, obj, 0))
 		if err != nil {
@@ -120,6 +133,7 @@ func (c *connection) sendLoop() {
 			c.shutdown()
 		}
 	}
+	fmt.Println("sendLoop exit")
 }
 
 func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
