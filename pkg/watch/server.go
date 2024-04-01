@@ -3,11 +3,9 @@
 package watch
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
-	"io"
 	"net"
+	"strings"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -123,72 +121,26 @@ is an association list.
 
 func (serv *server) listen() {
 	for {
+		var c *connection
+
 		con, err := serv.listener.Accept()
 		if err != nil {
-			// TBD exit quietly?
-			fmt.Printf("*** accept failed with %T %s\n", err, err)
+			if c != nil {
+				c.shutdown()
+			}
+			// TBD remove connection
+			if !strings.Contains(err.Error(), "closed") {
+				fmt.Printf("*** accept failed with %T %s\n", err, err)
+				// TBD log error?
+			}
 			return
 		}
-		// TBD handle connection better
-		// create a connection object
-		//  a channel and go routine
-		//  pass in serv
-		//  loop and collect bytes, try readOne until it completes without a partial panic
-		c := connection{
-			con: con,
+		c = &connection{
+			con:  con,
+			serv: serv,
 		}
 		// TBD add to serv
 
 		go c.listen()
 	}
-}
-
-type connection struct {
-	con  net.Conn
-	expr []byte
-}
-
-func (c *connection) listen() {
-	buf := make([]byte, 4096)
-	for {
-		cnt, err := c.con.Read(buf)
-		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				fmt.Printf("*** read err: %s\n", err)
-			}
-			break
-		}
-		c.expr = append(c.expr, buf[:cnt]...)
-		for {
-			obj := c.readExpr()
-			fmt.Printf("*** obj: %s\n", obj)
-			// TBD put obj on method chan for eval later
-			if obj == nil || len(c.expr) == 0 {
-				break
-			}
-		}
-	}
-}
-
-func (c *connection) readExpr() (obj slip.Object) {
-	defer func() {
-		if rec := recover(); rec != nil {
-			// TBD if *slip.PartialPanic then return else panic(rec)
-			//  where is that recovered
-			fmt.Printf("*** rec: %T %s\n", rec, rec)
-		}
-	}()
-
-	code, pos := slip.ReadOne(c.expr)
-	if 0 < len(code) {
-		obj = code[0]
-	}
-	after := len(c.expr) - pos
-	if after <= 0 {
-		c.expr = c.expr[:0]
-		return
-	}
-	copy(c.expr, c.expr[pos:])
-	c.expr = bytes.TrimSpace(c.expr[:after])
-	return
 }
