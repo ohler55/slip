@@ -4,10 +4,13 @@
 
 - next
  - watch-server
-  - init with :port
-   - start listening
-   - install hooks
-   -
+  - add connections and remove when shutdown
+   - map
+    - what is the key? c.con.RemoteAddr().String() maybe
+   - mutex all around
+
+  - install hooks
+
   - methods
    - shutdown
    - connections

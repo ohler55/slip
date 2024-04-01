@@ -289,7 +289,7 @@ func Read(src []byte) (code Code) {
 func ReadOne(src []byte) (code Code, pos int) {
 	var r reader
 	r.one = true
-	return r.read(src), r.pos + 1
+	return r.read(src), r.pos
 }
 
 // CompileString LISP string source code and return an Object.
@@ -538,6 +538,9 @@ func (r *reader) read(src []byte) Code {
 			}
 		}
 		if r.one && 0 < len(r.code) {
+			if b == ')' {
+				r.pos++
+			}
 			return r.code
 		}
 	}

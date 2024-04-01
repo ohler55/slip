@@ -28,6 +28,7 @@ func (c *connection) listen() {
 	go c.methodLoop()
 	go c.sendLoop()
 
+	fmt.Printf("*** local: %s  remote: %s\n", c.con.LocalAddr(), c.con.RemoteAddr())
 	buf := make([]byte, 4096)
 	for {
 		cnt, err := c.con.Read(buf)
