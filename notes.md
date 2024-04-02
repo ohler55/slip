@@ -3,12 +3,22 @@
 - **multipass** or utm for linux
 
 - next
- - watch-server
-  - add connections and remove when shutdown
-   - map
-    - what is the key? c.con.RemoteAddr().String() maybe
-   - mutex all around
+ - watch-client
+  - init with :host and :port
+   - connect
+   - set up listen loop
+   - set up call channel and sender loop
+  - methods
+   - eval (id code &key timeout)
+    - send and wait for result
+     - match response on either id or nil
+   - close - close connection
 
+   - watch (symbol &key all)
+   - forget (symbol)
+   - periodic (id code period)
+
+ - watch-server
   - install hooks
 
   - methods
@@ -17,17 +27,6 @@
     - port
     - watching
     - periodics
- - watch-client
-  - init with :host and :port
-   - connect
-   - set up listen loop
-   - set up call channel and sender loop
-  - methods
-   - watch (symbol &key all)
-   - forget (symbol)
-   - eval (id code)
-   - periodic (id code period)
-   - close - close connection
 
 
  - watch package

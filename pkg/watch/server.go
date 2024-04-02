@@ -97,6 +97,13 @@ func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	serv := self.Any.(*server)
 	_ = serv.listener.Close()
 
+	serv.mu.Lock()
+	for _, c := range serv.cons {
+		c.serv = nil
+		c.shutdown()
+	}
+	serv.mu.Unlock()
+
 	return nil
 }
 
@@ -141,8 +148,9 @@ func (serv *server) listen() {
 		}
 		c := newConnection(con)
 		c.serv = serv
-
-		// TBD add to serv
+		serv.mu.Lock()
+		serv.cons[c.id] = c
+		serv.mu.Unlock()
 
 		go c.listen()
 	}

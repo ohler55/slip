@@ -9,6 +9,8 @@ import (
 	"io"
 	"math"
 	"net"
+	"sync"
+	"sync/atomic"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/gi"
@@ -21,6 +23,8 @@ type connection struct {
 	expr      []byte
 	reqs      chan slip.Object
 	sendQueue chan slip.Object
+	active    atomic.Bool
+	mu        sync.Mutex
 }
 
 func newConnection(con net.Conn) *connection {
@@ -38,6 +42,7 @@ func newConnection(con net.Conn) *connection {
 }
 
 func (c *connection) listen() {
+	c.active.Store(true)
 	go c.methodLoop()
 	go c.sendLoop()
 	buf := make([]byte, 4096)
@@ -53,6 +58,11 @@ func (c *connection) listen() {
 		for {
 			obj := c.readExpr()
 			if obj != nil {
+				if serr, ok := obj.(slip.Error); ok {
+					c.expr = c.expr[:0]
+					c.sendQueue <- slip.List{slip.Symbol("error"), slip.String(serr.Error() + "\n")}
+					continue
+				}
 				c.reqs <- obj
 			}
 			if obj == nil || len(c.expr) == 0 {
@@ -67,8 +77,11 @@ func (c *connection) readExpr() (obj slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			if _, ok := rec.(*slip.PartialPanic); !ok {
-				fmt.Printf("*** rec: %T %s\n", rec, rec)
-				panic(rec)
+				if serr, ok := rec.(slip.Error); ok {
+					obj = serr
+				} else {
+					obj = slip.NewError("%s", rec)
+				}
 			}
 		}
 	}()
@@ -88,9 +101,17 @@ func (c *connection) readExpr() (obj slip.Object) {
 }
 
 func (c *connection) shutdown() {
-	close(c.reqs)
-	close(c.sendQueue)
-	_ = c.con.Close()
+	if c.active.Load() {
+		c.active.Store(false)
+		close(c.reqs)
+		close(c.sendQueue)
+		_ = c.con.Close()
+		if c.serv != nil {
+			c.serv.mu.Lock()
+			delete(c.serv.cons, c.id)
+			c.serv.mu.Unlock()
+		}
+	}
 }
 
 func (c *connection) methodLoop() {
@@ -106,7 +127,6 @@ func (c *connection) methodLoop() {
 		}
 		c.evalReq(scope, req)
 	}
-	fmt.Println("methodLoop exit")
 }
 
 func (c *connection) sendLoop() {
@@ -131,9 +151,9 @@ func (c *connection) sendLoop() {
 		if err != nil {
 			fmt.Printf("*** write error: %s\n", err)
 			c.shutdown()
+			break
 		}
 	}
-	fmt.Println("sendLoop exit")
 }
 
 func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
