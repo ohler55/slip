@@ -3,6 +3,9 @@
 package watch
 
 import (
+	"fmt"
+	"io"
+
 	"github.com/ohler55/slip"
 )
 
@@ -21,4 +24,9 @@ func init() {
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*watch*", &Pkg)
+}
+
+func displayError(format string, args ...any) {
+	eo := slip.NewScope().Get("*error-output*").(io.Writer)
+	fmt.Fprintf(eo, "\n*-*-* %s\n", fmt.Sprintf(format, args...))
 }

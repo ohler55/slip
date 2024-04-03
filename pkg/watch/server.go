@@ -91,8 +91,8 @@ type serverShutdownCaller struct{}
 
 func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	if 1 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":shutdown", len(args), "0 or 1")
+	if 0 < len(args) {
+		flavors.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
 	}
 	serv := self.Any.(*server)
 	_ = serv.listener.Close()

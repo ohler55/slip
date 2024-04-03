@@ -3,36 +3,29 @@
 package watch
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"net"
-	"sync"
-	"sync/atomic"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/gi"
 )
 
 type connection struct {
+	wcon
 	id        string
-	con       net.Conn
 	serv      *server
-	expr      []byte
 	reqs      chan slip.Object
 	sendQueue chan slip.Object
-	active    atomic.Bool
-	mu        sync.Mutex
 }
 
 func newConnection(con net.Conn) *connection {
 	c := connection{
-		con:       con,
 		reqs:      make(chan slip.Object, 100),
 		sendQueue: make(chan slip.Object, 100),
 	}
+	c.con = con
 	if addr := c.con.RemoteAddr(); addr != nil {
 		c.id = addr.String()
 	} else {
@@ -73,33 +66,6 @@ func (c *connection) listen() {
 	c.shutdown()
 }
 
-func (c *connection) readExpr() (obj slip.Object) {
-	defer func() {
-		if rec := recover(); rec != nil {
-			if _, ok := rec.(*slip.PartialPanic); !ok {
-				if serr, ok := rec.(slip.Error); ok {
-					obj = serr
-				} else {
-					obj = slip.NewError("%s", rec)
-				}
-			}
-		}
-	}()
-	code, pos := slip.ReadOne(c.expr)
-	if 0 < len(code) {
-		obj = code[0]
-	}
-	after := len(c.expr) - pos
-	if after <= 0 {
-		c.expr = c.expr[:0]
-		return
-	}
-	copy(c.expr, c.expr[pos:])
-	c.expr = bytes.TrimSpace(c.expr[:after])
-
-	return
-}
-
 func (c *connection) shutdown() {
 	if c.active.Load() {
 		c.active.Store(false)
@@ -130,26 +96,14 @@ func (c *connection) methodLoop() {
 }
 
 func (c *connection) sendLoop() {
-	p := slip.Printer{
-		Base:        10,
-		Case:        slip.Symbol(":downcase"),
-		Escape:      true,
-		Length:      math.MaxInt,
-		Level:       math.MaxInt,
-		Lines:       math.MaxInt,
-		Prec:        -1,
-		Pretty:      true,
-		Readably:    true,
-		RightMargin: 120,
-	}
 	for {
 		obj := <-c.sendQueue
 		if obj == nil {
 			break
 		}
-		_, err := c.con.Write(p.Append(nil, obj, 0))
+		_, err := c.con.Write(watchPrinter.Append(nil, obj, 0))
 		if err != nil {
-			fmt.Printf("*** write error: %s\n", err)
+			displayError("write error: %s", err)
 			c.shutdown()
 			break
 		}
@@ -173,5 +127,5 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 	case slip.Symbol("close"):
 		// TBD
 	}
-	c.sendQueue <- slip.List{req[1], reply}
+	c.sendQueue <- slip.List{slip.Symbol("result"), req[1], reply}
 }

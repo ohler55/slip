@@ -1,0 +1,259 @@
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
+
+package watch
+
+import (
+	"errors"
+	"fmt"
+	"io"
+	"net"
+	"sync/atomic"
+	"time"
+
+	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
+)
+
+var (
+	clientFlavor *flavors.Flavor
+)
+
+func init() {
+	Pkg.Initialize(nil)
+	clientFlavor = flavors.DefFlavor("watch-client", map[string]slip.Object{}, nil,
+		slip.List{
+			slip.List{
+				slip.Symbol(":init-keywords"),
+				slip.Symbol(":host"),
+				slip.Symbol(":port"),
+			},
+			slip.List{
+				slip.Symbol(":documentation"),
+				slip.String(`A client that... TBD.`),
+			},
+		},
+		&Pkg,
+	)
+	clientFlavor.Final = true
+	clientFlavor.DefMethod(":init", "", clientInitCaller{})
+	clientFlavor.DefMethod(":shutdown", "", clientShutdownCaller{})
+	clientFlavor.DefMethod(":eval", "", clientEvalCaller{})
+	// TBD
+}
+
+type client struct {
+	wcon
+	self    slip.Instance
+	host    string
+	port    int
+	cnt     atomic.Int64
+	results chan slip.Object
+	changes chan slip.Object
+	evalMap map[int]chan slip.Object
+}
+
+type clientInitCaller struct{}
+
+func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		args = args[0].(slip.List)
+	}
+	c := &client{
+		self:    self,
+		results: make(chan slip.Object, 100),
+		changes: make(chan slip.Object, 100),
+		evalMap: map[int]chan slip.Object{},
+	}
+	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":host")); has {
+		if ss, ok := v.(slip.String); ok {
+			c.host = string(ss)
+		} else {
+			slip.PanicType(":host", v, "string")
+		}
+	}
+	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":port")); has {
+		if num, ok := v.(slip.Fixnum); ok {
+			c.port = int(num)
+		} else {
+			slip.PanicType(":port", v, "fixnum")
+		}
+	}
+	self.Any = c
+	var err error
+	if c.con, err = net.Dial("tcp", fmt.Sprintf("%s:%d", c.host, c.port)); err != nil {
+		panic(err)
+	}
+	go c.resultLoop()
+	go c.changeLoop()
+	go c.listen(s)
+
+	return nil
+}
+
+func (caller clientInitCaller) Docs() string {
+	return `__:init__ &key _host_ _port_
+   _:host_ [string] the host to connect to.
+   _:port_ [fixnum] the port to connect to.
+
+
+Sets the initial values when _make-instance_ is called.
+`
+}
+
+type clientShutdownCaller struct{}
+
+func (caller clientShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		flavors.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
+	}
+	c := self.Any.(*client)
+	c.shutdown()
+
+	return nil
+}
+
+func (caller clientShutdownCaller) Docs() string {
+	return `__:shutdown__ => _nil_
+
+
+Shuts down the client.
+`
+}
+
+type clientEvalCaller struct{}
+
+func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	self := s.Get("self").(*flavors.Instance)
+	if 3 < len(args) {
+		flavors.PanicMethodArgChoice(self, ":eval", len(args), "1 to 3")
+	}
+	c := self.Any.(*client)
+	timeout := time.Second * 2
+	if v, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":timeout")); has {
+		if num, ok := v.(slip.Real); ok {
+			timeout = time.Duration(num.RealValue() * float64(time.Second))
+		} else {
+			slip.PanicType(":timeout", v, "real")
+		}
+	}
+	id := c.cnt.Add(1)
+	req := slip.List{slip.Symbol("eval"), slip.Fixnum(id), args[0]}
+	msg := watchPrinter.Append(nil, req, 0)
+	msg = append(msg, '\n')
+	rc := make(chan slip.Object)
+	c.mu.Lock()
+	c.evalMap[int(id)] = rc
+	c.mu.Unlock()
+	if _, err := c.con.Write(msg); err != nil {
+		c.shutdown()
+		return slip.NewError("%s", err)
+	}
+	timer := time.NewTimer(timeout)
+	select {
+	case result = <-rc:
+		_ = timer.Stop()
+	case <-timer.C:
+		result = slip.NewError(":eval request timed out")
+	}
+	return
+}
+
+func (caller clientEvalCaller) Docs() string {
+	return `__:eval__ _expr_ &key timeout => _object_
+   _:expr_ [object] an expression to evaluate.
+   _:timeout_ [real] the number of seconds to wait for a response before timing out.
+
+
+Send an expression to the remote server and wait for a response or a timeout.
+`
+}
+
+func (c *client) listen(s *slip.Scope) {
+	c.active.Store(true)
+	buf := make([]byte, 4096)
+	for {
+		cnt, err := c.con.Read(buf)
+		if err != nil {
+			if !errors.Is(err, io.EOF) && c.active.Load() {
+				displayError("read error on %s: %s\n", c.self, err)
+				c.shutdown()
+			}
+			break
+		}
+		c.expr = append(c.expr, buf[:cnt]...)
+		for {
+			obj := c.readExpr()
+			if obj != nil {
+				if serr, ok := obj.(slip.Error); ok {
+					c.expr = c.expr[:0]
+					c.results <- slip.List{nil, serr}
+					continue
+				}
+				if list, ok := obj.(slip.List); ok && 2 <= len(list) {
+					switch list[0] {
+					case slip.Symbol("result"):
+						c.results <- list[1:]
+					case slip.Symbol("error"):
+						c.results <- slip.List{nil, slip.NewError("%s", list[1])}
+					case slip.Symbol("change"):
+						c.changes <- list[1:]
+					}
+				}
+			}
+			if obj == nil || len(c.expr) == 0 {
+				break
+			}
+		}
+	}
+	c.active.Store(false)
+}
+
+func (c *client) shutdown() {
+	if c.active.Load() {
+		c.active.Store(false)
+		close(c.results)
+		close(c.changes)
+		_ = c.con.Close()
+	}
+}
+
+func (c *client) resultLoop() {
+	for {
+		obj := <-c.results
+		if obj == nil {
+			break
+		}
+		if result, ok := obj.(slip.List); ok && 2 <= len(result) {
+			var id slip.Fixnum
+			if id, ok = result[0].(slip.Fixnum); ok {
+				var (
+					rc  chan slip.Object
+					has bool
+				)
+				c.mu.Lock()
+				if rc, has = c.evalMap[int(id)]; has {
+					delete(c.evalMap, int(id))
+				}
+				c.mu.Unlock()
+				if has {
+					rc <- result[1]
+				}
+			}
+		}
+	}
+}
+
+func (c *client) changeLoop() {
+	scope := slip.NewScope()
+	for {
+		obj := <-c.changes
+		if obj == nil {
+			break
+		}
+		if change, ok := obj.(slip.List); ok && 2 <= len(change) {
+			_ = c.self.Receive(scope, ":changed", change, 0)
+		}
+	}
+}
