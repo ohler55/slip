@@ -5,6 +5,7 @@ package watch
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -73,6 +74,7 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	if serv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", serv.port)); err != nil {
 		panic(err)
 	}
+	slip.AddSetHook(strconv.Itoa(serv.port), serv.setHook)
 	go serv.listen()
 
 	return nil
@@ -95,6 +97,7 @@ func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 		flavors.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
 	}
 	serv := self.Any.(*server)
+	slip.RemoveSetHook(strconv.Itoa(serv.port))
 	_ = serv.listener.Close()
 
 	serv.mu.Lock()
@@ -141,8 +144,7 @@ func (serv *server) listen() {
 		con, err := serv.listener.Accept()
 		if err != nil {
 			if !strings.Contains(err.Error(), "closed") {
-				fmt.Printf("*** accept failed with %T %s\n", err, err)
-				// TBD log error?
+				displayError("accept on port %d failed: %s\n", serv.port, err)
 			}
 			break
 		}
@@ -155,4 +157,21 @@ func (serv *server) listen() {
 		go c.listen()
 	}
 	serv.active.Store(false)
+}
+
+func (serv *server) setHook(p *slip.Package, key string) {
+	var cons []*connection
+	serv.mu.Lock()
+	for _, c := range serv.cons {
+		if c.watching[key] {
+			cons = append(cons, c)
+		}
+	}
+	serv.mu.Unlock()
+	if 0 < len(cons) {
+		msg := slip.List{slip.Symbol("changed"), slip.Symbol(key), p.JustGet(key)}
+		for _, c := range cons {
+			c.sendMsg(msg)
+		}
+	}
 }

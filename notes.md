@@ -3,26 +3,18 @@
 - **multipass** or utm for linux
 
 - next
- - watch-client
-  - init with :host and :port
-   - connect
-   - set up listen loop
-   - set up call channel and sender loop
-  - methods
-   - eval (id code &key timeout)
-    - send and wait for result
-     - match response on either id or nil
-   - close - close connection
 
-   - watch (symbol &key all)
+ - watch-client
+  - methods
    - forget (symbol)
    - periodic (id code period)
+  - subclasses
+   - watch-printer
+   - watch-channeler
+   - watch-framer
 
  - watch-server
-  - install hooks
-
   - methods
-   - shutdown
    - connections
     - port
     - watching

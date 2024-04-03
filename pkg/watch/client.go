@@ -38,6 +38,8 @@ func init() {
 	clientFlavor.DefMethod(":init", "", clientInitCaller{})
 	clientFlavor.DefMethod(":shutdown", "", clientShutdownCaller{})
 	clientFlavor.DefMethod(":eval", "", clientEvalCaller{})
+	clientFlavor.DefMethod(":watch", "", clientWatchCaller{})
+	clientFlavor.DefMethod(":changed", "", clientChangedCaller{})
 	// TBD
 }
 
@@ -170,6 +172,56 @@ Send an expression to the remote server and wait for a response or a timeout.
 `
 }
 
+type clientWatchCaller struct{}
+
+func (caller clientWatchCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if len(args) != 1 {
+		flavors.PanicMethodArgChoice(self, ":watch", len(args), "1")
+	}
+	c := self.Any.(*client)
+	req := slip.List{slip.Symbol("watch"), args[0]}
+	msg := watchPrinter.Append(nil, req, 0)
+	msg = append(msg, '\n')
+	if _, err := c.con.Write(msg); err != nil {
+		c.shutdown()
+		return slip.NewError("%s", err)
+	}
+	return nil
+}
+
+func (caller clientWatchCaller) Docs() string {
+	return `__:watch__ _symbol_ _value_
+   _:symbol_ [symbol] the symbol that watchd.
+   _:value_ [object] the new value for the symbol.
+
+
+Responds to a watch event received from the watch-server.
+`
+}
+
+type clientChangedCaller struct{}
+
+func (caller clientChangedCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	self := s.Get("self").(*flavors.Instance)
+	if len(args) != 2 {
+		flavors.PanicMethodArgChoice(self, ":changed", len(args), "2")
+	}
+	// Does nothing. Subclasses are expected to provide a :changed method or an
+	// :changed daemon.
+	return
+}
+
+func (caller clientChangedCaller) Docs() string {
+	return `__:changed__ _symbol_ _value_
+   _:symbol_ [symbol] the symbol that changed.
+   _:value_ [object] the new value for the symbol.
+
+
+Responds to a change event received from the watch-server.
+`
+}
+
 func (c *client) listen(s *slip.Scope) {
 	c.active.Store(true)
 	buf := make([]byte, 4096)
@@ -197,7 +249,7 @@ func (c *client) listen(s *slip.Scope) {
 						c.results <- list[1:]
 					case slip.Symbol("error"):
 						c.results <- slip.List{nil, slip.NewError("%s", list[1])}
-					case slip.Symbol("change"):
+					case slip.Symbol("changed"):
 						c.changes <- list[1:]
 					}
 				}

@@ -4,7 +4,6 @@ package watch
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net"
 
@@ -18,12 +17,14 @@ type connection struct {
 	serv      *server
 	reqs      chan slip.Object
 	sendQueue chan slip.Object
+	watching  map[string]bool
 }
 
 func newConnection(con net.Conn) *connection {
 	c := connection{
 		reqs:      make(chan slip.Object, 100),
 		sendQueue: make(chan slip.Object, 100),
+		watching:  map[string]bool{},
 	}
 	c.con = con
 	if addr := c.con.RemoteAddr(); addr != nil {
@@ -42,8 +43,8 @@ func (c *connection) listen() {
 	for {
 		cnt, err := c.con.Read(buf)
 		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				fmt.Printf("*** read err: %s\n", err)
+			if !errors.Is(err, io.EOF) && c.active.Load() {
+				displayError("read error, closing connection to %s: %s", c.id, err)
 			}
 			break
 		}
@@ -111,21 +112,34 @@ func (c *connection) sendLoop() {
 }
 
 func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
-	var reply slip.Object
-
 	switch req[0] {
 	case slip.Symbol("eval"):
 		if 2 < len(req) {
-			reply = req[2].Eval(scope, 0)
+			reply := req[2].Eval(scope, 0)
+			c.sendQueue <- slip.List{slip.Symbol("result"), req[1], reply}
 		}
-	case slip.Symbol("match"):
-		// TBD
+	case slip.Symbol("watch"):
+		if sym, ok := req[1].(slip.Symbol); ok {
+			c.mu.Lock()
+			c.watching[string(sym)] = true
+			c.mu.Unlock()
+		}
 	case slip.Symbol("periodic"):
 		// TBD
 	case slip.Symbol("forget"):
-		// TBD
+		if sym, ok := req[1].(slip.Symbol); ok {
+			c.mu.Lock()
+			delete(c.watching, string(sym))
+			c.mu.Unlock()
+		}
 	case slip.Symbol("close"):
-		// TBD
+		c.shutdown()
 	}
-	c.sendQueue <- slip.List{slip.Symbol("result"), req[1], reply}
+}
+
+func (c *connection) sendMsg(msg slip.List) {
+	defer func() {
+		_ = recover() // ignore panics
+	}()
+	c.sendQueue <- msg
 }
