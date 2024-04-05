@@ -20,27 +20,7 @@ var (
 
 func init() {
 	Pkg.Initialize(nil)
-	clientFlavor = flavors.DefFlavor("watch-client", map[string]slip.Object{}, nil,
-		slip.List{
-			slip.List{
-				slip.Symbol(":init-keywords"),
-				slip.Symbol(":host"),
-				slip.Symbol(":port"),
-			},
-			slip.List{
-				slip.Symbol(":documentation"),
-				slip.String(`A client that... TBD.`),
-			},
-		},
-		&Pkg,
-	)
-	clientFlavor.Final = true
-	clientFlavor.DefMethod(":init", "", clientInitCaller{})
-	clientFlavor.DefMethod(":shutdown", "", clientShutdownCaller{})
-	clientFlavor.DefMethod(":eval", "", clientEvalCaller{})
-	clientFlavor.DefMethod(":watch", "", clientWatchCaller{})
-	clientFlavor.DefMethod(":changed", "", clientChangedCaller{})
-	// TBD
+	_ = ClientFlavor()
 }
 
 type client struct {
@@ -52,6 +32,34 @@ type client struct {
 	results chan slip.Object
 	changes chan slip.Object
 	evalMap map[int]chan slip.Object
+}
+
+// ClientFlavor returns the watch-client flavor.
+func ClientFlavor() *flavors.Flavor {
+	if clientFlavor == nil {
+		clientFlavor = flavors.DefFlavor("watch-client", map[string]slip.Object{}, nil,
+			slip.List{
+				slip.List{
+					slip.Symbol(":init-keywords"),
+					slip.Symbol(":host"),
+					slip.Symbol(":port"),
+				},
+				slip.List{
+					slip.Symbol(":documentation"),
+					slip.String(`A client that... TBD.`),
+				},
+			},
+			&Pkg,
+		)
+		clientFlavor.DefMethod(":init", "", clientInitCaller{})
+		clientFlavor.DefMethod(":shutdown", "", clientShutdownCaller{})
+		clientFlavor.DefMethod(":eval", "", clientEvalCaller{})
+		clientFlavor.DefMethod(":watch", "", clientWatchCaller{})
+		clientFlavor.DefMethod(":forget", "", clientForgetCaller{})
+		clientFlavor.DefMethod(":changed", "", clientChangedCaller{})
+		// TBD
+	}
+	return clientFlavor
 }
 
 type clientInitCaller struct{}
@@ -192,11 +200,37 @@ func (caller clientWatchCaller) Call(s *slip.Scope, args slip.List, depth int) s
 
 func (caller clientWatchCaller) Docs() string {
 	return `__:watch__ _symbol_ _value_
-   _:symbol_ [symbol] the symbol that watchd.
-   _:value_ [object] the new value for the symbol.
+   _:symbol_ [symbol] the symbol to watch.
 
 
-Responds to a watch event received from the watch-server.
+Sends a request to watch a global variable to the watch-server.
+`
+}
+
+type clientForgetCaller struct{}
+
+func (caller clientForgetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if len(args) != 1 {
+		flavors.PanicMethodArgChoice(self, ":forget", len(args), "1")
+	}
+	c := self.Any.(*client)
+	req := slip.List{slip.Symbol("forget"), args[0]}
+	msg := watchPrinter.Append(nil, req, 0)
+	msg = append(msg, '\n')
+	if _, err := c.con.Write(msg); err != nil {
+		c.shutdown()
+		return slip.NewError("%s", err)
+	}
+	return nil
+}
+
+func (caller clientForgetCaller) Docs() string {
+	return `__:forget__ _symbol_
+   _:symbol_ [symbol] the symbol to forget.
+
+
+Sends a request to the watch-server to forget or stop watching a global variable.
 `
 }
 

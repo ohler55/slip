@@ -5,13 +5,15 @@
 - next
 
  - watch-client
-  - methods
-   - forget (symbol)
-   - periodic (id code period)
   - subclasses
-   - watch-printer
-   - watch-channeler
+   + watch-printer
+   + watch-channeler
    - watch-framer
+    - option for a frame (top, left, bottom)
+     - space (or char) or line
+    - need a place to store values
+     - vars maybe (just gettable)
+  - periodic (id code period)
 
  - watch-server
   - methods
@@ -20,6 +22,8 @@
     - watching
     - periodics
 
+ - docs
+  - server, client, sub-flavors
 
  - watch package
   - flavors
