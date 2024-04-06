@@ -51,9 +51,14 @@ func (caller framerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	if num, ok := self.Get("left").(slip.Fixnum); ok {
 		left = int(num)
 	}
-	for i := 0; i < len(c.vars); i++ {
+	for i, v := range c.vars {
 		setCursor(top+i, left)
-		fmt.Print("\x1b[0K")
+		if v.val == slip.Unbound {
+			fmt.Printf("\x1b[0K%s: <unbound>", v.sym)
+		} else {
+			fmt.Printf("\x1b[0K%s: %s", v.sym, slip.ObjectString(v.val))
+		}
+		setCursor(top+i+1, left)
 	}
 	return nil
 }
@@ -77,12 +82,19 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 	if num, ok := self.Get("left").(slip.Fixnum); ok {
 		left = int(num)
 	}
-	// TBD just update the one that changed
+
 	for i, v := range c.vars {
-		setCursor(top+i, left)
-		fmt.Printf("\x1b[0K%s: %s", v.sym, slip.ObjectString(v.val))
-		setCursor(top+i+1, left)
+		if v.sym == args[0] {
+			setCursor(top+i, left)
+			if v.val == slip.Unbound {
+				fmt.Printf("\x1b[0K%s: <unbound>", v.sym)
+			} else {
+				fmt.Printf("\x1b[0K%s: %s", v.sym, slip.ObjectString(v.val))
+			}
+			break
+		}
 	}
+	setCursor(top+len(c.vars), left)
 	return nil
 }
 

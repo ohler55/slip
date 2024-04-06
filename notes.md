@@ -4,19 +4,14 @@
 
 - next
 
- - support unbound
- - test with -e
-
  - watch-client
   - subclasses
    + watch-printer
    + watch-channeler
    - watch-framer
-    - option for a frame (top, left, bottom)
+    - option for a frame (top, left, bottom) (left and top if > 1)
      - space (or char) or line
-    - need a place to store values
-     - vars maybe (just gettable)
-      - only needed for complete refresh, is that needed?
+     :border [character|:line|nil]
   - periodic (id code period)
 
  - watch-server

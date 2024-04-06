@@ -100,7 +100,7 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		if list, ok := v.(slip.List); ok {
 			for _, v2 := range list {
 				if sym, ok := v2.(slip.Symbol); ok {
-					c.vars = append(c.vars, &symVal{sym: sym})
+					c.vars = append(c.vars, &symVal{sym: sym, val: slip.Unbound})
 				} else {
 					slip.PanicType(":vars", v2, "list of symbols")
 				}
