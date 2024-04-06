@@ -23,11 +23,17 @@ func init() {
 	_ = ClientFlavor()
 }
 
+type symVal struct {
+	sym slip.Symbol
+	val slip.Object
+}
+
 type client struct {
 	wcon
 	self    slip.Instance
 	host    string
 	port    int
+	vars    []*symVal
 	cnt     atomic.Int64
 	results chan slip.Object
 	changes chan slip.Object
@@ -43,6 +49,7 @@ func ClientFlavor() *flavors.Flavor {
 					slip.Symbol(":init-keywords"),
 					slip.Symbol(":host"),
 					slip.Symbol(":port"),
+					slip.Symbol(":vars"),
 				},
 				slip.List{
 					slip.Symbol(":documentation"),
@@ -89,6 +96,19 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 			slip.PanicType(":port", v, "fixnum")
 		}
 	}
+	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":vars")); has {
+		if list, ok := v.(slip.List); ok {
+			for _, v2 := range list {
+				if sym, ok := v2.(slip.Symbol); ok {
+					c.vars = append(c.vars, &symVal{sym: sym})
+				} else {
+					slip.PanicType(":vars", v2, "list of symbols")
+				}
+			}
+		} else {
+			slip.PanicType(":vars", v, "list of symbols")
+		}
+	}
 	self.Any = c
 	var err error
 	if c.con, err = net.Dial("tcp", fmt.Sprintf("%s:%d", c.host, c.port)); err != nil {
@@ -97,7 +117,15 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	go c.resultLoop()
 	go c.changeLoop()
 	go c.listen(s)
-
+	for _, v := range c.vars {
+		req := slip.List{slip.Symbol("watch"), v.sym}
+		msg := watchPrinter.Append(nil, req, 0)
+		msg = append(msg, '\n')
+		if _, err := c.con.Write(msg); err != nil {
+			c.shutdown()
+			return slip.NewError("%s", err)
+		}
+	}
 	return nil
 }
 
@@ -105,6 +133,7 @@ func (caller clientInitCaller) Docs() string {
 	return `__:init__ &key _host_ _port_
    _:host_ [string] the host to connect to.
    _:port_ [fixnum] the port to connect to.
+   _:vars_ [list] initial variables to watch.
 
 
 Sets the initial values when _make-instance_ is called.
@@ -222,6 +251,8 @@ func (caller clientForgetCaller) Call(s *slip.Scope, args slip.List, depth int) 
 		c.shutdown()
 		return slip.NewError("%s", err)
 	}
+	// TBD remove from c.vars
+
 	return nil
 }
 
@@ -241,8 +272,16 @@ func (caller clientChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 	if len(args) != 2 {
 		flavors.PanicMethodArgChoice(self, ":changed", len(args), "2")
 	}
-	// Does nothing. Subclasses are expected to provide a :changed method or an
-	// :changed daemon.
+	c := self.Any.(*client)
+	for _, v := range c.vars {
+		if args[0] == v.sym {
+			v.val = args[1]
+			return
+		}
+	}
+	if sym, ok := args[0].(slip.Symbol); ok {
+		c.vars = append(c.vars, &symVal{sym: sym, val: args[1]})
+	}
 	return
 }
 

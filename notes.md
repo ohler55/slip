@@ -4,6 +4,9 @@
 
 - next
 
+ - support unbound
+ - test with -e
+
  - watch-client
   - subclasses
    + watch-printer
@@ -13,6 +16,7 @@
      - space (or char) or line
     - need a place to store values
      - vars maybe (just gettable)
+      - only needed for complete refresh, is that needed?
   - periodic (id code period)
 
  - watch-server
@@ -23,7 +27,7 @@
     - periodics
 
  - docs
-  - server, client, sub-flavors
+  - server, client, sub-flavors, readme with examples of use of each client
 
  - watch package
   - flavors

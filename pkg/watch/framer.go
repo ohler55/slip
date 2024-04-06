@@ -33,12 +33,14 @@ func init() {
 		&Pkg,
 	)
 	framerFlavor.DefMethod(":changed", ":after", framerChangedCaller{})
+	framerFlavor.DefMethod(":init", ":after", framerInitCaller{})
 }
 
-type framerChangedCaller struct{}
+type framerInitCaller struct{}
 
-func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (caller framerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
+	c := self.Any.(*client)
 	var (
 		top  int
 		left int
@@ -49,27 +51,43 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 	if num, ok := self.Get("left").(slip.Fixnum); ok {
 		left = int(num)
 	}
-	vars := slip.List{
-		slip.List{slip.Symbol("Key-1"), slip.Fixnum(5)},
-		slip.List{slip.Symbol("Key-2"), slip.Fixnum(8)},
-	}
-	for i, v := range vars {
-		lv, _ := v.(slip.List)
+	for i := 0; i < len(c.vars); i++ {
 		setCursor(top+i, left)
-		fmt.Printf("\x1b[0K%s: %s", lv[0], lv[1])
+		fmt.Print("\x1b[0K")
+	}
+	return nil
+}
+
+func (caller framerInitCaller) Docs() string {
+	return clientInitCaller{}.Docs()
+}
+
+type framerChangedCaller struct{}
+
+func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	c := self.Any.(*client)
+	var (
+		top  int
+		left int
+	)
+	if num, ok := self.Get("top").(slip.Fixnum); ok {
+		top = int(num)
+	}
+	if num, ok := self.Get("left").(slip.Fixnum); ok {
+		left = int(num)
+	}
+	// TBD just update the one that changed
+	for i, v := range c.vars {
+		setCursor(top+i, left)
+		fmt.Printf("\x1b[0K%s: %s", v.sym, slip.ObjectString(v.val))
 		setCursor(top+i+1, left)
 	}
 	return nil
 }
 
 func (caller framerChangedCaller) Docs() string {
-	return `__:changed__ _symbol_ _value_
-   _:symbol_ [symbol] the symbol that changed.
-   _:value_ [object] the new value for the symbol.
-
-
-Responds to a change event received from the watch-server.
-`
+	return clientChangedCaller{}.Docs()
 }
 
 func setCursor(v, h int) {

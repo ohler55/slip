@@ -123,6 +123,8 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 			c.mu.Lock()
 			c.watching[string(sym)] = true
 			c.mu.Unlock()
+			msg := slip.List{slip.Symbol("changed"), sym, slip.CurrentPackage.JustGet(string(sym))}
+			c.sendMsg(msg)
 		}
 	case slip.Symbol("periodic"):
 		// TBD
