@@ -8,18 +8,15 @@
   - subclasses
    + watch-printer
    + watch-channeler
-   - watch-framer
-    - option for a frame (top, left, bottom) (left and top if > 1)
-     - space (or char) or line
-     :border [character|:line|nil]
+   + watch-framer
   - periodic (id code period)
 
  - watch-server
   - methods
    - connections
-    - port
-    - watching
-    - periodics
+    - port (client port)
+    - watching (var symbols)
+    - periodics (key, period, and lambda)
 
  - docs
   - server, client, sub-flavors, readme with examples of use of each client
