@@ -10,6 +10,13 @@
    + watch-channeler
    + watch-framer
   - periodic (id code period)
+   - one timer loop with check every 100msec
+   - if expired timer on periodic then place on chan for call and send
+   - periodic
+    - id
+    - period time.Duration
+    - next time
+    - lambda or symbol for var lookup
 
  - watch-server
   - methods
