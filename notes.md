@@ -4,19 +4,11 @@
 
 - next
 
- - watch-client
-  - subclasses
-   + watch-printer
-   + watch-channeler
-   + watch-framer
-  - periodic (id code period)
-   - one timer loop with check every 100msec
-   - if expired timer on periodic then place on chan for call and send
-   - periodic
-    - id
-    - period time.Duration
-    - next time
-    - lambda or symbol for var lookup
+ - how to send an error object to client
+  - (eval-error id type msg)
+  - (periodic-error id type msg)
+  - keep a table of error types and make functions
+   - if none found then plain error
 
  - watch-server
   - methods
@@ -24,6 +16,10 @@
     - port (client port)
     - watching (var symbols)
     - periodics (key, period, and lambda)
+
+ - watch-client
+  - forget must remove from c.vars
+
 
  - docs
   - server, client, sub-flavors, readme with examples of use of each client

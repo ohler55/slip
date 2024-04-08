@@ -64,7 +64,7 @@ func ClientFlavor() *flavors.Flavor {
 		clientFlavor.DefMethod(":watch", "", clientWatchCaller{})
 		clientFlavor.DefMethod(":forget", "", clientForgetCaller{})
 		clientFlavor.DefMethod(":changed", "", clientChangedCaller{})
-		// TBD
+		clientFlavor.DefMethod(":periodic", "", clientPeriodicCaller{})
 	}
 	return clientFlavor
 }
@@ -292,6 +292,39 @@ func (caller clientChangedCaller) Docs() string {
 
 
 Responds to a change event received from the watch-server.
+`
+}
+
+type clientPeriodicCaller struct{}
+
+func (caller clientPeriodicCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	self := s.Get("self").(*flavors.Instance)
+	if len(args) != 3 {
+		flavors.PanicMethodArgChoice(self, ":periodic", len(args), "3")
+	}
+	c := self.Any.(*client)
+	op := args[1]
+	if lam, ok := op.(*slip.Lambda); ok {
+		op = append(slip.List{slip.Symbol("lambda"), slip.List{}}, lam.Forms...)
+	}
+	req := slip.List{slip.Symbol("periodic"), args[0], op, args[2]}
+	msg := watchPrinter.Append(nil, req, 0)
+	msg = append(msg, '\n')
+	if _, err := c.con.Write(msg); err != nil {
+		c.shutdown()
+		return slip.NewError("%s", err)
+	}
+	return
+}
+
+func (caller clientPeriodicCaller) Docs() string {
+	return `__:periodic__ _id_ _op_ _period_
+   _:id_ [symbol] the periodic evaluation identifier.
+   _:op_ [symbol|lambda] the symbol of a variable or a lambda to evaluate on the server.
+   _:period_ [real] the number of seconds to wait between evaluations.
+
+
+Adds a periodic evaluator to teh watch server.
 `
 }
 
