@@ -33,45 +33,23 @@ func init() {
 			slip.Symbol(":settable-instance-variables"),
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A framer that... TBD.`),
+				slip.String(`A framer is a client that displays change notifications in a frame.
+The frame upper left corner will be at the _top_ and _left_ variable values. If the _border_ is
+non-nil then a border will be drawn around the contents. The _border_ can be _:line_ to draw an
+ANSI line border or a character to use as the border.`),
 			},
 		},
 		&Pkg,
 	)
 	framerFlavor.DefMethod(":changed", ":after", framerChangedCaller{})
 	framerFlavor.DefMethod(":init", ":after", framerInitCaller{})
+	framerFlavor.DefMethod(":forget", ":after", framerForgetCaller{})
 }
 
 type framerInitCaller struct{}
 
 func (caller framerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*flavors.Instance)
-	c := self.Any.(*client)
-	var (
-		top  int
-		left int
-	)
-	if num, ok := self.Get("top").(slip.Fixnum); ok {
-		top = int(num)
-	}
-	if num, ok := self.Get("left").(slip.Fixnum); ok {
-		left = int(num)
-	}
-	w, _, _ := xterm.GetSize(0)
-	for i, v := range c.vars {
-		setCursor(top+i, left)
-		if v.val == slip.Unbound {
-			fmt.Printf("\x1b[0K%s: <unbound>", v.sym)
-		} else {
-			vs := slip.ObjectString(v.val)
-			if 0 < w && w < left+len(v.sym)+len(vs)+2 && 0 < w-left-len(v.sym)-5 {
-				vs = vs[:w-left-len(v.sym)-5] + "..."
-			}
-			fmt.Printf("\x1b[0K%s: %s", v.sym, vs)
-		}
-		setCursor(top+i+1, left)
-	}
-	drawBorder(top-1, left-2, len(c.vars)+1, self.Get("border"))
+	drawFrame(s.Get("self").(*flavors.Instance))
 
 	return nil
 }
@@ -102,7 +80,12 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 			if v.val == slip.Unbound {
 				fmt.Printf("\x1b[0K%s: <unbound>", v.sym)
 			} else {
-				vs := slip.ObjectString(v.val)
+				var vs string
+				if serr, _ := v.val.(slip.Error); serr != nil {
+					vs = fmt.Sprintf("#<%s: %s>", serr.Hierarchy()[0], serr.Error())
+				} else {
+					vs = slip.ObjectString(v.val)
+				}
 				if 0 < w && w < left+len(v.sym)+len(vs)+2 && 0 < w-left-len(v.sym)-5 {
 					vs = vs[:w-left-len(v.sym)-5] + "..."
 				}
@@ -121,6 +104,18 @@ func (caller framerChangedCaller) Docs() string {
 	return clientChangedCaller{}.Docs()
 }
 
+type framerForgetCaller struct{}
+
+func (caller framerForgetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	drawFrame(s.Get("self").(*flavors.Instance))
+
+	return nil
+}
+
+func (caller framerForgetCaller) Docs() string {
+	return clientForgetCaller{}.Docs()
+}
+
 func setCursor(v, h int) {
 	if v < 0 {
 		v = 0
@@ -129,6 +124,35 @@ func setCursor(v, h int) {
 		h = 0
 	}
 	_, _ = fmt.Printf("\x1b[%d;%dH", v, h)
+}
+
+func drawFrame(self *flavors.Instance) {
+	c := self.Any.(*client)
+	var (
+		top  int
+		left int
+	)
+	if num, ok := self.Get("top").(slip.Fixnum); ok {
+		top = int(num)
+	}
+	if num, ok := self.Get("left").(slip.Fixnum); ok {
+		left = int(num)
+	}
+	w, _, _ := xterm.GetSize(0)
+	for i, v := range c.vars {
+		setCursor(top+i, left)
+		if v.val == slip.Unbound {
+			fmt.Printf("\x1b[0K%s: <unbound>", v.sym)
+		} else {
+			vs := slip.ObjectString(v.val)
+			if 0 < w && w < left+len(v.sym)+len(vs)+2 && 0 < w-left-len(v.sym)-5 {
+				vs = vs[:w-left-len(v.sym)-5] + "..."
+			}
+			fmt.Printf("\x1b[0K%s: %s", v.sym, vs)
+		}
+		setCursor(top+i+1, left)
+	}
+	drawBorder(top-1, left-2, len(c.vars)+1, self.Get("border"))
 }
 
 func drawBorder(top, left, height int, border slip.Object) {

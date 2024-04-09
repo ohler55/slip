@@ -21,7 +21,7 @@ func init() {
 		slip.List{
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A printer that... TBD.`),
+				slip.String(`A printer is a watch client that prints change notifications to _*standard-output*.`),
 			},
 		},
 		&Pkg,

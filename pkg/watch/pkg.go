@@ -14,8 +14,31 @@ var (
 	Pkg = slip.Package{
 		Name:      "watch",
 		Nicknames: []string{},
-		Doc:       "Home of symbols defined for the watch package.",
-		PreSet:    slip.DefaultPreSet,
+		Doc: `
+
+The _watch_ package facilitates inspection and evaluation on a remote SLIP
+process. A _watch-server_ is set up in the server process and one or more
+clients can then connect with the server and make a request to evaluate an
+expression, watch glbal variables, or periodically evaluate and expression and
+return the results.
+
+__Protocol__
+
+
+__Use__
+
+
+__Examples__
+
+
+
+_Clients_
+
+
+_Methods_
+
+`,
+		PreSet: slip.DefaultPreSet,
 	}
 )
 

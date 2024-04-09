@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -53,7 +54,9 @@ func ClientFlavor() *flavors.Flavor {
 				},
 				slip.List{
 					slip.Symbol(":documentation"),
-					slip.String(`A client that... TBD.`),
+					slip.String(`A basic watch client that can be used to request evaluations on a _watch-server_.
+Requests can be made to evaluate an s-expression on the remote server, watch a variable, or set up periodic
+evaluations that will return the results to the client.`),
 				},
 			},
 			&Pkg,
@@ -251,8 +254,12 @@ func (caller clientForgetCaller) Call(s *slip.Scope, args slip.List, depth int) 
 		c.shutdown()
 		return slip.NewError("%s", err)
 	}
-	// TBD remove from c.vars
-
+	for i, sv := range c.vars {
+		if sv.sym == args[0] {
+			c.vars = append(c.vars[:i], c.vars[i+1:]...)
+			break
+		}
+	}
 	return nil
 }
 
@@ -324,7 +331,7 @@ func (caller clientPeriodicCaller) Docs() string {
    _:period_ [real] the number of seconds to wait between evaluations.
 
 
-Adds a periodic evaluator to teh watch server.
+Adds a periodic evaluator to the watch server.
 `
 }
 
@@ -354,7 +361,13 @@ func (c *client) listen(s *slip.Scope) {
 					case slip.Symbol("result"):
 						c.results <- list[1:]
 					case slip.Symbol("error"):
-						c.results <- slip.List{nil, slip.NewError("%s", list[1])}
+						serr := formError(list)
+						switch tid := list[1].(type) {
+						case nil, slip.Fixnum:
+							c.results <- slip.List{tid, serr}
+						case slip.Symbol, slip.String:
+							c.changes <- slip.List{tid, serr}
+						}
 					case slip.Symbol("changed"):
 						c.changes <- list[1:]
 					}
@@ -366,6 +379,61 @@ func (c *client) listen(s *slip.Scope) {
 		}
 	}
 	c.active.Store(false)
+}
+
+var errNewFunc = map[slip.Symbol]func(msg string) slip.Object{
+	slip.ErrorSymbol:           func(msg string) slip.Object { return slip.NewError("%s", msg) },
+	slip.ArithmeticErrorSymbol: func(msg string) slip.Object { return slip.NewArithmeticError(nil, nil, "%s", msg) },
+	slip.CellErrorSymbol:       func(msg string) slip.Object { return slip.NewCellError(nil, "%s", msg) },
+	slip.ControlErrorSymbol:    func(msg string) slip.Object { return slip.NewControlError("%s", msg) },
+	slip.FileErrorSymbol:       func(msg string) slip.Object { return slip.NewFileError(nil, "%s", msg) },
+	slip.MethodErrorSymbol:     func(msg string) slip.Object { return slip.NewMethodError(nil, nil, nil, "%s", msg) },
+	slip.PackageErrorSymbol:    func(msg string) slip.Object { return slip.NewPackageError(nil, "%s", msg) },
+	slip.ParseErrorSymbol:      func(msg string) slip.Object { return slip.NewParseError("%s", msg) },
+	cl.SimpleErrorSymbol: func(msg string) slip.Object {
+		return cl.NewSimpleError(slip.NewScope(), "%s", slip.String(msg))
+	},
+	cl.SimpleTypeErrorSymbol: func(msg string) slip.Object {
+		return cl.NewSimpleTypeError(slip.NewScope(), "%s", slip.String(msg))
+	},
+	slip.ProgramErrorSymbol: func(msg string) slip.Object { return slip.NewProgramError("%s", msg) },
+	slip.ReaderErrorSymbol:  func(msg string) slip.Object { return slip.NewReaderError(nil, "%s", msg) },
+	slip.TypeErrorSymbol:    func(msg string) slip.Object { return &slip.TypePanic{Panic: slip.Panic{Message: msg}} },
+}
+
+func formError(list slip.List) (serr slip.Object) {
+	msg := string(list[3].(slip.String))
+	switch list[2] {
+	case slip.ErrorSymbol:
+		serr = slip.NewError("%s", msg)
+	case slip.ArithmeticErrorSymbol:
+		serr = slip.NewArithmeticError(nil, nil, "%s", msg)
+	case slip.CellErrorSymbol:
+		serr = slip.NewCellError(nil, "%s", msg)
+	case slip.ControlErrorSymbol:
+		serr = slip.NewControlError("%s", msg)
+	case slip.FileErrorSymbol:
+		serr = slip.NewFileError(nil, "%s", msg)
+	case slip.MethodErrorSymbol:
+		serr = slip.NewMethodError(nil, nil, nil, "%s", msg)
+	case slip.PackageErrorSymbol:
+		serr = slip.NewPackageError(nil, "%s", msg)
+	case slip.ParseErrorSymbol:
+		serr = slip.NewParseError("%s", msg)
+	case cl.SimpleErrorSymbol:
+		serr = cl.NewSimpleError(slip.NewScope(), "%s", slip.String(msg))
+	case cl.SimpleTypeErrorSymbol:
+		serr = cl.NewSimpleTypeError(slip.NewScope(), "%s", slip.String(msg))
+	case slip.ProgramErrorSymbol:
+		serr = slip.NewProgramError("%s", msg)
+	case slip.ReaderErrorSymbol:
+		serr = slip.NewReaderError(nil, "%s", msg)
+	case slip.TypeErrorSymbol:
+		serr = &slip.TypePanic{Panic: slip.Panic{Message: msg}}
+	default:
+		serr = slip.NewError("%s", msg)
+	}
+	return
 }
 
 func (c *client) shutdown() {

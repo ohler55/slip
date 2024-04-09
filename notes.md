@@ -4,73 +4,21 @@
 
 - next
 
- - how to send an error object to client
-  - (eval-error id type msg)
-  - (periodic-error id type msg)
-  - keep a table of error types and make functions
-   - if none found then plain error
-
- - watch-server
-  - methods
-   - connections
-    - port (client port)
-    - watching (var symbols)
-    - periodics (key, period, and lambda)
-
- - watch-client
-  - forget must remove from c.vars
-
+ - buf in package describe nicknames when empty
 
  - docs
-  - server, client, sub-flavors, readme with examples of use of each client
+  - package
+   - protocol
+   - general use
+   - examples
+    - clients
+     - channeler
+     - printer
+     - framer
+    - :eval
+    - :watch
+    - :periodic
 
- - watch package
-  - flavors
-   - watch-server
-   - watch-client
-    - watch-tailing (watch-client)
-     - prints out changes
-    - watch-frame (watch-client)
-     - displays vars and values in a frame or window using ansi codes to move around
-  - server listens on a port for connections
-   - a connection receives lisp, switch on car for method
-    - reused part of that for client unless just a simple read-one loop
-   - keeps map of var and values along with dirty flag
-    - dirty flag is use when watching for just the latest and not :all
-   - verbs/methods for connections
-    - watch (symbol &key all)
-    - forget (symbol)
-    - eval (id code)
-    - periodic (id code period)
-    - close - close connection
-   - channel on each connection for outgoing lisp
-
-  - start-watcher
-   - add hooks
-    - update each server with separate id, maybe port
-   - listen on port for connections
-    - lisp with markers for start and end (STX 0x02 and ETX 0x03)
-  - stop-watcher
-   - shutdown watch server
-  - watch (url)
-   - connects to watcher
-   - then sends requests for values or to start listening for changes
-  - protocol
-   - send lisp but as data
-   - if acceptable function then eval
-    - on server side
-     - watch (var-name)
-      - on change send (changed name value)
-     - value-of
-     - variable-names
-     - forget (var-name)
-     - on-change (name function period)
-      - call function and send result as (changed name value)
-       - remember result value and only send on change
-    - on client
-     - changed (name value)
-  - set-hook should drop onto queue for watcher
-  - client should drop onto a channel then call in separate routine
 
  - return and return-from should work in functions (defun)
 

@@ -23,7 +23,8 @@ func init() {
 			slip.Symbol(":settable-instance-variables"),
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A channeler that... TBD.`),
+				slip.String(`A channeler is a client that places change notification to a channel.
+A list of the symbol change and the new value is placed on the channel.`),
 			},
 		},
 		&Pkg,

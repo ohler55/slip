@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"sort"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -63,7 +64,12 @@ func (c *connection) listen() {
 			if obj != nil {
 				if serr, ok := obj.(slip.Error); ok {
 					c.expr = c.expr[:0]
-					c.sendQueue <- slip.List{slip.Symbol("error"), slip.String(serr.Error() + "\n")}
+					c.sendQueue <- slip.List{
+						slip.Symbol("error"),
+						nil,
+						serr.Hierarchy()[0],
+						slip.String(serr.Error() + "\n"),
+					}
 					continue
 				}
 				c.reqs <- obj
@@ -145,7 +151,16 @@ func (c *connection) evalLoop() {
 			break
 		}
 		val := p.eval(scope)
-		c.sendQueue <- slip.List{slip.Symbol("changed"), slip.Symbol(p.id), val}
+		if serr, ok := val.(slip.Error); ok {
+			c.sendQueue <- slip.List{
+				slip.Symbol("error"),
+				slip.Symbol(p.id),
+				serr.Hierarchy()[0],
+				slip.String(serr.Error()),
+			}
+		} else {
+			c.sendQueue <- slip.List{slip.Symbol("changed"), slip.Symbol(p.id), val}
+		}
 	}
 }
 
@@ -153,9 +168,7 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 	switch req[0] {
 	case slip.Symbol("eval"):
 		if 2 < len(req) {
-			// TBD should be a safe eval
-			reply := req[2].Eval(scope, 0)
-			c.sendQueue <- slip.List{slip.Symbol("result"), req[1], reply}
+			c.sendQueue <- slip.List{slip.Symbol("result"), req[1], safeEval(req[2])}
 		}
 	case slip.Symbol("watch"):
 		if sym, ok := req[1].(slip.Symbol); ok {
@@ -198,4 +211,39 @@ func (c *connection) sendMsg(msg slip.List) {
 		_ = recover() // ignore panics
 	}()
 	c.sendQueue <- msg
+}
+
+func (c *connection) details() slip.List {
+	watching := slip.List{slip.Symbol("watching")}
+	periodics := slip.List{slip.Symbol("periodics")}
+	c.mu.Lock()
+	keys := make([]string, 0, len(c.watching))
+	ps := make([]*periodic, 0, len(c.periodics))
+	for k := range c.watching {
+		keys = append(keys, k)
+	}
+	for _, p := range c.periodics {
+		ps = append(ps, p)
+	}
+	c.mu.Unlock()
+	sort.Strings(keys)
+	for _, k := range keys {
+		watching = append(watching, slip.Symbol(k))
+	}
+	for _, p := range ps {
+		periodics = append(periodics, p.details())
+	}
+	return slip.List{slip.String(c.id), watching, periodics}
+}
+
+func safeEval(val slip.Object) (result slip.Object) {
+	scope := slip.NewScope()
+	defer func() {
+		if rec := recover(); rec != nil {
+			if result, _ = rec.(slip.Error); result == nil {
+				result = slip.NewError("%s", rec)
+			}
+		}
+	}()
+	return val.Eval(scope, 0)
 }

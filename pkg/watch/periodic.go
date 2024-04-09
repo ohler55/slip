@@ -3,7 +3,6 @@
 package watch
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -20,8 +19,9 @@ type periodic struct {
 func (p *periodic) eval(s *slip.Scope) (result slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
-			fmt.Printf("*** periodic fail - %s\n", rec)
-			result = nil // TBD create something that will travel
+			if result, _ = rec.(slip.Error); result == nil {
+				result = slip.NewError("%s", rec)
+			}
 		}
 	}()
 top:
@@ -34,7 +34,15 @@ top:
 	case *slip.Lambda:
 		result = to.Call(s, slip.List{}, 0)
 	default:
-		// TBD
+		result = slip.NewError("%s is not a valid operation for a periodic.", to)
 	}
 	return
+}
+
+func (p *periodic) details() slip.List {
+	return slip.List{
+		slip.List{slip.Symbol("id"), slip.Tail{Value: slip.Symbol(p.id)}},
+		slip.List{slip.Symbol("period"), slip.Tail{Value: slip.DoubleFloat(float64(p.period) / float64(time.Second))}},
+		slip.List{slip.Symbol("op"), slip.Tail{Value: p.op}},
+	}
 }

@@ -81,7 +81,11 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int, ansi bool) []byte {
 	sym, ok := obj.(slip.Symbol)
 	if !ok {
-		b, _ = describeHead(b, nil, obj, indent, right, ansi)
+		if d, ok2 := obj.(slip.Describer); ok2 {
+			b = d.Describe(b, indent, right, ansi)
+		} else {
+			b, _ = describeHead(b, nil, obj, indent, right, ansi)
+		}
 		return b
 	}
 	pkg := slip.CurrentPackage

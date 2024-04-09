@@ -28,7 +28,10 @@ func init() {
 			},
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A server that listens on a port for LISP expressions. TBD.`),
+				slip.String(`A server that listens on a port for LISP expressions.
+The s-expressions must be a list with the first element a symbol. Depending on the
+request type results are passed back immediately or changes are send back on change
+or periodically. Additional details are included in the _*watch*_ package description.`),
 			},
 		},
 		&Pkg,
@@ -37,9 +40,7 @@ func init() {
 	serverFlavor.DefMethod(":init", "", serverInitCaller{})
 	serverFlavor.DefMethod(":shutdown", "", serverShutdownCaller{})
 	serverFlavor.DefMethod(":connections", "", serverConnectionsCaller{})
-
-	// TBD serverFlavor.DefMethod(":listening", "", serverListeningCaller{})
-	// or serverFlavor.DefMethod(":activep", "", serverActivepCaller{})
+	serverFlavor.DefMethod(":activep", "", serverActivepCaller{})
 }
 
 type server struct {
@@ -118,6 +119,28 @@ Shuts down the server.
 `
 }
 
+type serverActivepCaller struct{}
+
+func (caller serverActivepCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		flavors.PanicMethodArgChoice(self, ":activep", len(args), "0")
+	}
+	serv := self.Any.(*server)
+	if serv.active.Load() {
+		return slip.True
+	}
+	return nil
+}
+
+func (caller serverActivepCaller) Docs() string {
+	return `__:activep__ => _boolean_
+
+
+Returns _t_ if the server is active.
+`
+}
+
 type serverConnectionsCaller struct{}
 
 func (caller serverConnectionsCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
@@ -125,8 +148,15 @@ func (caller serverConnectionsCaller) Call(s *slip.Scope, args slip.List, depth 
 	if 0 < len(args) {
 		flavors.PanicMethodArgChoice(self, ":connections", len(args), "0")
 	}
-	// TBD
-	return nil
+	serv := self.Any.(*server)
+	var cons slip.List
+	serv.mu.Lock()
+	for _, c := range serv.cons {
+		cons = append(cons, c.details())
+	}
+	serv.mu.Unlock()
+
+	return cons
 }
 
 func (caller serverConnectionsCaller) Docs() string {
