@@ -50,7 +50,8 @@ func ClientFlavor() *flavors.Flavor {
 					slip.Symbol(":init-keywords"),
 					slip.Symbol(":host"),
 					slip.Symbol(":port"),
-					slip.Symbol(":vars"),
+					slip.Symbol(":watch"),
+					slip.Symbol(":periodics"),
 				},
 				slip.List{
 					slip.Symbol(":documentation"),
@@ -99,17 +100,17 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 			slip.PanicType(":port", v, "fixnum")
 		}
 	}
-	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":vars")); has {
+	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":watch")); has {
 		if list, ok := v.(slip.List); ok {
 			for _, v2 := range list {
 				if sym, ok := v2.(slip.Symbol); ok {
 					c.vars = append(c.vars, &symVal{sym: sym, val: slip.Unbound})
 				} else {
-					slip.PanicType(":vars", v2, "list of symbols")
+					slip.PanicType(":watch", v2, "list of symbols")
 				}
 			}
 		} else {
-			slip.PanicType(":vars", v, "list of symbols")
+			slip.PanicType(":watch", v, "list of symbols")
 		}
 	}
 	self.Any = c
@@ -126,7 +127,21 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		msg = append(msg, '\n')
 		if _, err := c.con.Write(msg); err != nil {
 			c.shutdown()
-			return slip.NewError("%s", err)
+			slip.NewPanic("%s", err)
+		}
+	}
+	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":periodics")); has {
+		if list, ok := v.(slip.List); ok {
+			for _, v2 := range list {
+				if pargs, ok2 := v2.(slip.List); ok2 {
+					id := c.addPeriodic(self, pargs)
+					c.vars = append(c.vars, &symVal{sym: id, val: slip.Unbound})
+				} else {
+					slip.PanicType(":periodics", v, "list of lists")
+				}
+			}
+		} else {
+			slip.PanicType(":periodics", v, "list of lists")
 		}
 	}
 	return nil
@@ -306,29 +321,17 @@ type clientPeriodicCaller struct{}
 
 func (caller clientPeriodicCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	if len(args) != 3 {
-		flavors.PanicMethodArgChoice(self, ":periodic", len(args), "3")
-	}
 	c := self.Any.(*client)
-	op := args[1]
-	if lam, ok := op.(*slip.Lambda); ok {
-		op = append(slip.List{slip.Symbol("lambda"), slip.List{}}, lam.Forms...)
-	}
-	req := slip.List{slip.Symbol("periodic"), args[0], op, args[2]}
-	msg := watchPrinter.Append(nil, req, 0)
-	msg = append(msg, '\n')
-	if _, err := c.con.Write(msg); err != nil {
-		c.shutdown()
-		return slip.NewError("%s", err)
-	}
+	_ = c.addPeriodic(self, args)
+
 	return
 }
 
 func (caller clientPeriodicCaller) Docs() string {
-	return `__:periodic__ _id_ _op_ _period_
+	return `__:periodic__ _id_ _period_ _op_
    _:id_ [symbol] the periodic evaluation identifier.
-   _:op_ [symbol|lambda] the symbol of a variable or a lambda to evaluate on the server.
    _:period_ [real] the number of seconds to wait between evaluations.
+   _:op_ [symbol|lambda] the symbol of a variable or a lambda to evaluate on the server.
 
 
 Adds a periodic evaluator to the watch server.
@@ -482,4 +485,27 @@ func (c *client) changeLoop() {
 			_ = c.self.Receive(scope, ":changed", change, 0)
 		}
 	}
+}
+
+func (c *client) addPeriodic(self *flavors.Instance, args slip.List) (id slip.Symbol) {
+	if len(args) != 3 {
+		flavors.PanicMethodArgChoice(self, ":periodic", len(args), "3")
+	}
+	if sym, ok := args[0].(slip.Symbol); ok {
+		id = sym
+	} else {
+		slip.PanicType(":id", args[0], "symbol")
+	}
+	op := args[2]
+	if lam, ok := op.(*slip.Lambda); ok {
+		op = append(slip.List{slip.Symbol("lambda"), slip.List{}}, lam.Forms...)
+	}
+	req := slip.List{slip.Symbol("periodic"), id, args[1], op}
+	msg := watchPrinter.Append(nil, req, 0)
+	msg = append(msg, '\n')
+	if _, err := c.con.Write(msg); err != nil {
+		c.shutdown()
+		slip.NewPanic("%s", err)
+	}
+	return
 }

@@ -180,13 +180,13 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 				c.sendMsg(msg)
 			}
 		}
-	case slip.Symbol("periodic"): // (periodic id op secs)
+	case slip.Symbol("periodic"): // (periodic id period op)
 		if sym, ok := req[1].(slip.Symbol); ok && 3 < len(req) {
-			if r, ok2 := req[3].(slip.Real); ok2 {
+			if r, ok2 := req[2].(slip.Real); ok2 {
 				p := periodic{
 					id:     string(sym),
 					period: time.Duration(r.RealValue() * float64(time.Second)),
-					op:     req[2],
+					op:     req[3],
 					next:   time.Now(),
 				}
 				c.mu.Lock()

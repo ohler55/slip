@@ -397,12 +397,13 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 
 	b = append(b, indentSpaces[:indent]...)
 	b = append(b, "Nicknames: ("...)
-	for _, name := range obj.Nicknames {
+	for i, name := range obj.Nicknames {
+		if 0 < i {
+			b = append(b, ' ')
+		}
 		b = Append(b, Symbol(name))
-		b = append(b, ' ')
 	}
-	b[len(b)-1] = ')'
-	b = append(b, '\n')
+	b = append(b, ')', '\n')
 
 	b = append(b, indentSpaces[:indent]...)
 	b = append(b, "Documentation:\n"...)

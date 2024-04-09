@@ -44,6 +44,7 @@ ANSI line border or a character to use as the border.`),
 	framerFlavor.DefMethod(":changed", ":after", framerChangedCaller{})
 	framerFlavor.DefMethod(":init", ":after", framerInitCaller{})
 	framerFlavor.DefMethod(":forget", ":after", framerForgetCaller{})
+	framerFlavor.DefMethod(":refresh", "", framerRefreshCaller{})
 }
 
 type framerInitCaller struct{}
@@ -114,6 +115,22 @@ func (caller framerForgetCaller) Call(s *slip.Scope, args slip.List, depth int) 
 
 func (caller framerForgetCaller) Docs() string {
 	return clientForgetCaller{}.Docs()
+}
+
+type framerRefreshCaller struct{}
+
+func (caller framerRefreshCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	drawFrame(s.Get("self").(*flavors.Instance))
+
+	return nil
+}
+
+func (caller framerRefreshCaller) Docs() string {
+	return `__:refresh__ => _nil_
+
+
+Redraws the frame.
+`
 }
 
 func setCursor(v, h int) {

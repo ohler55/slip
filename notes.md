@@ -3,22 +3,7 @@
 - **multipass** or utm for linux
 
 - next
-
- - buf in package describe nicknames when empty
-
- - docs
-  - package
-   - protocol
-   - general use
-   - examples
-    - clients
-     - channeler
-     - printer
-     - framer
-    - :eval
-    - :watch
-    - :periodic
-
+ - watch tests
 
  - return and return-from should work in functions (defun)
 
