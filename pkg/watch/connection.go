@@ -189,6 +189,9 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 					op:     req[3],
 					next:   time.Now(),
 				}
+				if p.period < time.Millisecond*100 {
+					p.period = time.Millisecond * 100
+				}
 				c.mu.Lock()
 				c.periodics[string(sym)] = &p
 				c.mu.Unlock()

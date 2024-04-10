@@ -76,7 +76,9 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		panic(err)
 	}
 	slip.AddSetHook(strconv.Itoa(serv.port), serv.setHook)
-	go serv.listen()
+	started := make(chan bool, 1)
+	go serv.listen(started)
+	<-started
 
 	return nil
 }
@@ -106,6 +108,7 @@ func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 		c.serv = nil
 		c.shutdown()
 	}
+	serv.cons = nil
 	serv.mu.Unlock()
 
 	return nil
@@ -168,8 +171,9 @@ is an association list.
 `
 }
 
-func (serv *server) listen() {
+func (serv *server) listen(started chan bool) {
 	serv.active.Store(true)
+	started <- true
 	for {
 		con, err := serv.listener.Accept()
 		if err != nil {
