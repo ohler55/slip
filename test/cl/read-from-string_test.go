@@ -22,9 +22,16 @@ func TestReadFromStringPreserve(t *testing.T) {
 	}).Test(t)
 }
 
+func TestReadFromStringList(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(read-from-string " (1 2) ")`,
+		Expect: `(1 2), 7`,
+	}).Test(t)
+}
+
 func TestReadFromStringStartEnd(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(read-from-string "x 123 y" :start 2 :end 5)`,
+		Source: `(read-from-string "x 123 y" :start 2 :end 6)`,
 		Expect: `123, 5`,
 	}).Test(t)
 	(&sliptest.Function{

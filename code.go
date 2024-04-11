@@ -107,8 +107,8 @@ const (
 	numberMode = "" +
 		".........NN..N.................." + // 0x00
 		"N.......NNRa.aaRaaaaaaaaaaR...RR" + // 0x20
-		"RRRRRaRRRRRRRRRRRRRRRRRRRRR...RR" + // 0x40
-		"RRRRRaRRRRRRRRRRRRRRRRRRRRR...R." + // 0x60
+		"RRRRaaRRRRRRaRRRRRRaRRRRRRR...RR" + // 0x40
+		"RRRRaaRRRRRRaRRRRRRaRRRRRRR...R." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -194,7 +194,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	charMode = "" +
 		".........CC..C.................." + // 0x00
-		"C..a....CCaa.aaaaaaaaaaaaaa.aaa." + // 0x20
+		"C..a....CCaaaaaaaaaaaaaaaaa.aaa." + // 0x20
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaa...aa" + // 0x40
 		".aaaaaaaaaaaaaaaaaaaaaaaaaa.a.a." + // 0x60
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0x80
@@ -538,6 +538,9 @@ func (r *reader) read(src []byte) Code {
 			}
 		}
 		if r.one && 0 < len(r.code) {
+			if b == ')' {
+				r.pos++
+			}
 			return r.code
 		}
 	}
@@ -874,6 +877,34 @@ func (r *reader) pushNumber(src []byte) {
 	if _, ok := bi.SetString(s, 10); ok {
 		obj = (*Bignum)(bi)
 		goto Push
+	}
+	for i, b := range token {
+		switch b {
+		case 'd', 'D':
+			t2 := make([]byte, len(token))
+			copy(t2, token)
+			t2[i] = 'e'
+			if f, err := strconv.ParseFloat(string(t2), 64); err == nil {
+				obj = DoubleFloat(f)
+				goto Push
+			}
+		case 's', 'S':
+			t2 := make([]byte, len(token))
+			copy(t2, token)
+			t2[i] = 'e'
+			if f, err := strconv.ParseFloat(string(t2), 64); err == nil {
+				obj = SingleFloat(f)
+				goto Push
+			}
+		case 'l', 'L':
+			t2 := make([]byte, len(token))
+			copy(t2, token)
+			t2[i] = 'e'
+			if bf, _, err := big.ParseFloat(string(t2), 10, uint(len(t2)*3), big.ToNearestAway); err == nil {
+				obj = (*LongFloat)(bf)
+				goto Push
+			}
+		}
 	}
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
 		obj = DoubleFloat(f)

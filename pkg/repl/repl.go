@@ -88,9 +88,9 @@ func init() {
 	scope.Let(slip.Symbol(value2Key), nil)
 	scope.Let(slip.Symbol(value3Key), nil)
 
-	slip.SetHook = setHook
-	slip.UnsetHook = unsetHook
-	slip.DefunHook = defunHook
+	slip.AddSetHook("repl", setHook)
+	slip.AddUnsetHook("repl", unsetHook)
+	slip.AddDefunHook("repl", defunHook)
 }
 
 // Die is used with panic to print an error and then exit.

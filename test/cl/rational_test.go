@@ -48,7 +48,7 @@ func TestRationalLongFloat(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(rational 0.1L+0)`,
-		Expect: "205/2048",
+		Expect: "209715/2097152",
 	}).Test(t)
 }
 
