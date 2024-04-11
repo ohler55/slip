@@ -185,6 +185,10 @@ func (serv *server) listen(started chan bool) {
 		c := newConnection(con)
 		c.serv = serv
 		serv.mu.Lock()
+		if serv.cons == nil {
+			serv.mu.Unlock()
+			break
+		}
 		serv.cons[c.id] = c
 		serv.mu.Unlock()
 

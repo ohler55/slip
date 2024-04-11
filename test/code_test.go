@@ -69,6 +69,7 @@ func TestCodeNumber(t *testing.T) {
 		{src: "1.23s-1", expect: "[0.123]", kind: "single-float"},
 		{src: "1.23f-1", expect: "[0.123]", kind: "single-float"},
 		{src: "1.23d-1", expect: "[0.123]", kind: "double-float"},
+		{src: "5d-1", expect: "[0.5]", kind: "double-float"},
 		{src: "1.23l-1", expect: "[0.123]", kind: "long-float"},
 		{src: "123456789012345678901234567890", expect: "[123456789012345678901234567890]", kind: "bignum"},
 		{src: "123456789012345678901234567890.", expect: "[123456789012345678901234567890]", kind: "bignum"},

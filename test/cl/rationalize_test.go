@@ -60,7 +60,7 @@ func TestRationalizeLongFloat(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(rationalize 0.1L+0)`,
-		Expect: "205/2048",
+		Expect: "209715/2097152",
 	}).Test(t)
 }
 

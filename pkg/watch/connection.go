@@ -85,10 +85,10 @@ func (c *connection) listen() {
 func (c *connection) shutdown() {
 	if c.active.Load() {
 		c.active.Store(false)
+		_ = c.con.Close()
 		close(c.reqs)
 		close(c.sendQueue)
 		close(c.evalQueue)
-		_ = c.con.Close()
 		if c.serv != nil {
 			c.serv.mu.Lock()
 			delete(c.serv.cons, c.id)
@@ -168,7 +168,17 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 	switch req[0] {
 	case slip.Symbol("eval"):
 		if 2 < len(req) {
-			c.sendQueue <- slip.List{slip.Symbol("result"), req[1], safeEval(req[2])}
+			val := safeEval(req[2])
+			if serr, ok := val.(slip.Error); ok {
+				c.sendQueue <- slip.List{
+					slip.Symbol("error"),
+					req[1],
+					serr.Hierarchy()[0],
+					slip.String(serr.Error()),
+				}
+			} else {
+				c.sendQueue <- slip.List{slip.Symbol("result"), req[1], val}
+			}
 		}
 	case slip.Symbol("watch"):
 		if sym, ok := req[1].(slip.Symbol); ok {

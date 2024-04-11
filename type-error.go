@@ -117,6 +117,7 @@ func makeTypeError(args List) Condition {
 		context Object
 		value   Object
 		wants   []string
+		msg     String
 	)
 	for k, v := range ParseInitList(args) {
 		switch k {
@@ -142,10 +143,14 @@ func makeTypeError(args List) Condition {
 		case ":context":
 			use, _ = v.(String)
 			context = v
+		case ":message":
+			msg, _ = v.(String)
 		}
 	}
 	tp := NewTypeError(string(use), value, wants...)
 	tp.context = context
-
+	if 0 < len(msg) {
+		tp.Message = string(msg)
+	}
 	return tp
 }

@@ -5,6 +5,7 @@ package watch
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"strings"
 	"unicode/utf8"
 
@@ -50,7 +51,7 @@ ANSI line border or a character to use as the border.`),
 type framerInitCaller struct{}
 
 func (caller framerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	drawFrame(s.Get("self").(*flavors.Instance))
+	drawFrame(s)
 
 	return nil
 }
@@ -74,29 +75,29 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 	if num, ok := self.Get("left").(slip.Fixnum); ok {
 		left = int(num)
 	}
-	w, _, _ := xterm.GetSize(0)
+	w := s.Get("*standard-output*").(io.Writer)
+	width, _, err := xterm.GetSize(0)
+	if err != nil {
+		width = 80
+	}
 	for i, v := range c.vars {
 		if v.sym == args[0] {
-			setCursor(top+i, left)
-			if v.val == slip.Unbound {
-				fmt.Printf("\x1b[0K%s: <unbound>", v.sym)
+			setCursor(w, top+i, left)
+			var vs string
+			if serr, _ := v.val.(slip.Error); serr != nil {
+				vs = fmt.Sprintf("#<%s: %s>", serr.Hierarchy()[0], serr.Error())
 			} else {
-				var vs string
-				if serr, _ := v.val.(slip.Error); serr != nil {
-					vs = fmt.Sprintf("#<%s: %s>", serr.Hierarchy()[0], serr.Error())
-				} else {
-					vs = slip.ObjectString(v.val)
-				}
-				if 0 < w && w < left+len(v.sym)+len(vs)+2 && 0 < w-left-len(v.sym)-5 {
-					vs = vs[:w-left-len(v.sym)-5] + "..."
-				}
-				fmt.Printf("\x1b[0K%s: %s", v.sym, vs)
+				vs = slip.ObjectString(v.val)
 			}
+			if 0 < width && width < left+len(v.sym)+len(vs)+2 && 0 < width-left-len(v.sym)-5 {
+				vs = vs[:width-left-len(v.sym)-5] + "..."
+			}
+			fmt.Fprintf(w, "\x1b[0K%s: %s", v.sym, vs)
 			break
 		}
 	}
-	setCursor(top+len(c.vars), left)
-	drawBorder(top-1, left-2, len(c.vars)+1, self.Get("border"))
+	setCursor(w, top+len(c.vars), left)
+	drawBorder(w, top-1, left-2, len(c.vars)+1, self.Get("border"))
 
 	return nil
 }
@@ -108,7 +109,7 @@ func (caller framerChangedCaller) Docs() string {
 type framerForgetCaller struct{}
 
 func (caller framerForgetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	drawFrame(s.Get("self").(*flavors.Instance))
+	drawFrame(s)
 
 	return nil
 }
@@ -120,7 +121,7 @@ func (caller framerForgetCaller) Docs() string {
 type framerRefreshCaller struct{}
 
 func (caller framerRefreshCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	drawFrame(s.Get("self").(*flavors.Instance))
+	drawFrame(s)
 
 	return nil
 }
@@ -133,17 +134,19 @@ Redraws the frame.
 `
 }
 
-func setCursor(v, h int) {
+func setCursor(w io.Writer, v, h int) {
 	if v < 0 {
 		v = 0
 	}
 	if h < 0 {
 		h = 0
 	}
-	_, _ = fmt.Printf("\x1b[%d;%dH", v, h)
+	_, _ = fmt.Fprintf(w, "\x1b[%d;%dH", v, h)
 }
 
-func drawFrame(self *flavors.Instance) {
+func drawFrame(s *slip.Scope) {
+	self := s.Get("self").(*flavors.Instance)
+	w := s.Get("*standard-output*").(io.Writer)
 	c := self.Any.(*client)
 	var (
 		top  int
@@ -155,66 +158,69 @@ func drawFrame(self *flavors.Instance) {
 	if num, ok := self.Get("left").(slip.Fixnum); ok {
 		left = int(num)
 	}
-	w, _, _ := xterm.GetSize(0)
+	width, _, err := xterm.GetSize(0)
+	if err != nil {
+		width = 80
+	}
 	for i, v := range c.vars {
-		setCursor(top+i, left)
+		setCursor(w, top+i, left)
 		if v.val == slip.Unbound {
-			fmt.Printf("\x1b[0K%s: <unbound>", v.sym)
+			fmt.Fprintf(w, "\x1b[0K%s: <unbound>", v.sym)
 		} else {
 			vs := slip.ObjectString(v.val)
-			if 0 < w && w < left+len(v.sym)+len(vs)+2 && 0 < w-left-len(v.sym)-5 {
-				vs = vs[:w-left-len(v.sym)-5] + "..."
+			if 0 < width && width < left+len(v.sym)+len(vs)+2 && 0 < width-left-len(v.sym)-5 {
+				vs = vs[:width-left-len(v.sym)-5] + "..."
 			}
-			fmt.Printf("\x1b[0K%s: %s", v.sym, vs)
+			fmt.Fprintf(w, "\x1b[0K%s: %s", v.sym, vs)
 		}
-		setCursor(top+i+1, left)
+		setCursor(w, top+i+1, left)
 	}
-	drawBorder(top-1, left-2, len(c.vars)+1, self.Get("border"))
+	drawBorder(w, top-1, left-2, len(c.vars)+1, self.Get("border"))
 }
 
-func drawBorder(top, left, height int, border slip.Object) {
+func drawBorder(w io.Writer, top, left, height int, border slip.Object) {
 	if border == nil {
 		return
 	}
-	w, _, err := xterm.GetSize(0)
+	width, _, err := xterm.GetSize(0)
 	if err != nil {
-		w = 80
+		width = 80
 	}
 	if border == slip.Symbol(":line") {
 		if 1 <= top {
-			setCursor(top, left)
+			setCursor(w, top, left)
 			line := utf8.AppendRune(nil, '┌')
-			line = append(line, bytes.Repeat(utf8.AppendRune(nil, '─'), w-left-1)...)
-			fmt.Print(string(line))
+			line = append(line, bytes.Repeat(utf8.AppendRune(nil, '─'), width-left-1)...)
+			_, _ = w.Write(line)
 		}
 		if 1 <= left {
 			leftEdge := utf8.AppendRune(nil, '│')
 			leftEdge = append(leftEdge, ' ')
 			for i := 1; i < height; i++ {
-				setCursor(top+i, left)
-				fmt.Print(string(leftEdge))
+				setCursor(w, top+i, left)
+				_, _ = w.Write(leftEdge)
 			}
 		}
-		setCursor(top+height, left)
+		setCursor(w, top+height, left)
 		line := utf8.AppendRune(nil, '┕')
-		line = append(line, bytes.Repeat(utf8.AppendRune(nil, '─'), w-left-1)...)
-		fmt.Print(string(line))
+		line = append(line, bytes.Repeat(utf8.AppendRune(nil, '─'), width-left-1)...)
+		_, _ = w.Write(line)
 	} else if c, ok := border.(slip.Character); ok {
-		tline := strings.Repeat(string([]rune{rune(c)}), w-left)
+		tline := strings.Repeat(string([]rune{rune(c)}), width-left)
 		if 1 <= top {
-			setCursor(top, left)
-			fmt.Print(tline)
+			setCursor(w, top, left)
+			_, _ = w.Write([]byte(tline))
 		}
 		if 1 <= left {
 			leftEdge := utf8.AppendRune(nil, rune(c))
 			leftEdge = append(leftEdge, ' ')
 			for i := 1; i < height; i++ {
-				setCursor(top+i, left)
-				fmt.Print(string(leftEdge))
+				setCursor(w, top+i, left)
+				_, _ = w.Write(leftEdge)
 			}
 		}
-		setCursor(top+height, left)
-		fmt.Print(tline)
+		setCursor(w, top+height, left)
+		_, _ = w.Write([]byte(tline))
 	}
-	setCursor(top+height+1, 1)
+	setCursor(w, top+height+1, 1)
 }

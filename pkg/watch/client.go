@@ -64,6 +64,7 @@ evaluations that will return the results to the client.`),
 		)
 		clientFlavor.DefMethod(":init", "", clientInitCaller{})
 		clientFlavor.DefMethod(":shutdown", "", clientShutdownCaller{})
+		clientFlavor.DefMethod(":activep", "", clientActivepCaller{})
 		clientFlavor.DefMethod(":eval", "", clientEvalCaller{})
 		clientFlavor.DefMethod(":watch", "", clientWatchCaller{})
 		clientFlavor.DefMethod(":forget", "", clientForgetCaller{})
@@ -123,11 +124,8 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	go c.listen(s)
 	for _, v := range c.vars {
 		req := slip.List{slip.Symbol("watch"), v.sym}
-		msg := watchPrinter.Append(nil, req, 0)
-		msg = append(msg, '\n')
-		if _, err := c.con.Write(msg); err != nil {
-			c.shutdown()
-			slip.NewPanic("%s", err)
+		if se := c.writeMsg(req); se != nil {
+			panic(se)
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":periodics")); has {
@@ -179,11 +177,33 @@ Shuts down the client.
 `
 }
 
+type clientActivepCaller struct{}
+
+func (caller clientActivepCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		flavors.PanicMethodArgChoice(self, ":activep", len(args), "0")
+	}
+	c := self.Any.(*client)
+	if c.active.Load() {
+		return slip.True
+	}
+	return nil
+}
+
+func (caller clientActivepCaller) Docs() string {
+	return `__:activep__ => _boolean_
+
+
+Returns true if the client is active.
+`
+}
+
 type clientEvalCaller struct{}
 
 func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	if 3 < len(args) {
+	if len(args) < 1 || 3 < len(args) {
 		flavors.PanicMethodArgChoice(self, ":eval", len(args), "1 to 3")
 	}
 	c := self.Any.(*client)
@@ -197,22 +217,19 @@ func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (r
 	}
 	id := c.cnt.Add(1)
 	req := slip.List{slip.Symbol("eval"), slip.Fixnum(id), args[0]}
-	msg := watchPrinter.Append(nil, req, 0)
-	msg = append(msg, '\n')
 	rc := make(chan slip.Object)
 	c.mu.Lock()
 	c.evalMap[int(id)] = rc
 	c.mu.Unlock()
-	if _, err := c.con.Write(msg); err != nil {
-		c.shutdown()
-		return slip.NewError("%s", err)
-	}
-	timer := time.NewTimer(timeout)
-	select {
-	case result = <-rc:
-		_ = timer.Stop()
-	case <-timer.C:
-		result = slip.NewError(":eval request timed out")
+
+	if result = c.writeMsg(req); result == nil {
+		timer := time.NewTimer(timeout)
+		select {
+		case result = <-rc:
+			_ = timer.Stop()
+		case <-timer.C:
+			result = slip.NewError(":eval request timed out")
+		}
 	}
 	return
 }
@@ -236,13 +253,7 @@ func (caller clientWatchCaller) Call(s *slip.Scope, args slip.List, depth int) s
 	}
 	c := self.Any.(*client)
 	req := slip.List{slip.Symbol("watch"), args[0]}
-	msg := watchPrinter.Append(nil, req, 0)
-	msg = append(msg, '\n')
-	if _, err := c.con.Write(msg); err != nil {
-		c.shutdown()
-		return slip.NewError("%s", err)
-	}
-	return nil
+	return c.writeMsg(req)
 }
 
 func (caller clientWatchCaller) Docs() string {
@@ -262,20 +273,15 @@ func (caller clientForgetCaller) Call(s *slip.Scope, args slip.List, depth int) 
 		flavors.PanicMethodArgChoice(self, ":forget", len(args), "1")
 	}
 	c := self.Any.(*client)
-	req := slip.List{slip.Symbol("forget"), args[0]}
-	msg := watchPrinter.Append(nil, req, 0)
-	msg = append(msg, '\n')
-	if _, err := c.con.Write(msg); err != nil {
-		c.shutdown()
-		return slip.NewError("%s", err)
-	}
 	for i, sv := range c.vars {
 		if sv.sym == args[0] {
 			c.vars = append(c.vars[:i], c.vars[i+1:]...)
 			break
 		}
 	}
-	return nil
+	req := slip.List{slip.Symbol("forget"), args[0]}
+
+	return c.writeMsg(req)
 }
 
 func (caller clientForgetCaller) Docs() string {
@@ -384,26 +390,6 @@ func (c *client) listen(s *slip.Scope) {
 	c.active.Store(false)
 }
 
-var errNewFunc = map[slip.Symbol]func(msg string) slip.Object{
-	slip.ErrorSymbol:           func(msg string) slip.Object { return slip.NewError("%s", msg) },
-	slip.ArithmeticErrorSymbol: func(msg string) slip.Object { return slip.NewArithmeticError(nil, nil, "%s", msg) },
-	slip.CellErrorSymbol:       func(msg string) slip.Object { return slip.NewCellError(nil, "%s", msg) },
-	slip.ControlErrorSymbol:    func(msg string) slip.Object { return slip.NewControlError("%s", msg) },
-	slip.FileErrorSymbol:       func(msg string) slip.Object { return slip.NewFileError(nil, "%s", msg) },
-	slip.MethodErrorSymbol:     func(msg string) slip.Object { return slip.NewMethodError(nil, nil, nil, "%s", msg) },
-	slip.PackageErrorSymbol:    func(msg string) slip.Object { return slip.NewPackageError(nil, "%s", msg) },
-	slip.ParseErrorSymbol:      func(msg string) slip.Object { return slip.NewParseError("%s", msg) },
-	cl.SimpleErrorSymbol: func(msg string) slip.Object {
-		return cl.NewSimpleError(slip.NewScope(), "%s", slip.String(msg))
-	},
-	cl.SimpleTypeErrorSymbol: func(msg string) slip.Object {
-		return cl.NewSimpleTypeError(slip.NewScope(), "%s", slip.String(msg))
-	},
-	slip.ProgramErrorSymbol: func(msg string) slip.Object { return slip.NewProgramError("%s", msg) },
-	slip.ReaderErrorSymbol:  func(msg string) slip.Object { return slip.NewReaderError(nil, "%s", msg) },
-	slip.TypeErrorSymbol:    func(msg string) slip.Object { return &slip.TypePanic{Panic: slip.Panic{Message: msg}} },
-}
-
 func formError(list slip.List) (serr slip.Object) {
 	msg := string(list[3].(slip.String))
 	switch list[2] {
@@ -432,7 +418,9 @@ func formError(list slip.List) (serr slip.Object) {
 	case slip.ReaderErrorSymbol:
 		serr = slip.NewReaderError(nil, "%s", msg)
 	case slip.TypeErrorSymbol:
-		serr = &slip.TypePanic{Panic: slip.Panic{Message: msg}}
+		tp := slip.NewTypeError("", nil)
+		tp.Message = msg
+		serr = tp
 	default:
 		serr = slip.NewError("%s", msg)
 	}
@@ -442,9 +430,9 @@ func formError(list slip.List) (serr slip.Object) {
 func (c *client) shutdown() {
 	if c.active.Load() {
 		c.active.Store(false)
+		_ = c.con.Close()
 		close(c.results)
 		close(c.changes)
-		_ = c.con.Close()
 	}
 }
 
@@ -501,11 +489,18 @@ func (c *client) addPeriodic(self *flavors.Instance, args slip.List) (id slip.Sy
 		op = append(slip.List{slip.Symbol("lambda"), slip.List{}}, lam.Forms...)
 	}
 	req := slip.List{slip.Symbol("periodic"), id, args[1], op}
-	msg := watchPrinter.Append(nil, req, 0)
-	msg = append(msg, '\n')
-	if _, err := c.con.Write(msg); err != nil {
-		c.shutdown()
-		slip.NewPanic("%s", err)
+	if se := c.writeMsg(req); se != nil {
+		panic(se)
 	}
 	return
+}
+
+func (c *client) writeMsg(x slip.List) slip.Object {
+	msg := watchPrinter.Append(nil, x, 0)
+	msg = append(msg, '\n')
+	if cnt, err := c.con.Write(msg); err != nil || cnt == 0 {
+		c.shutdown()
+		return slip.NewError("%s", err)
+	}
+	return nil
 }

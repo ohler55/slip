@@ -107,8 +107,8 @@ const (
 	numberMode = "" +
 		".........NN..N.................." + // 0x00
 		"N.......NNRa.aaRaaaaaaaaaaR...RR" + // 0x20
-		"RRRRRaRRRRRRRRRRRRRRRRRRRRR...RR" + // 0x40
-		"RRRRRaRRRRRRRRRRRRRRRRRRRRR...R." + // 0x60
+		"RRRRaaRRRRRRaRRRRRRaRRRRRRR...RR" + // 0x40
+		"RRRRaaRRRRRRaRRRRRRaRRRRRRR...R." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -877,6 +877,34 @@ func (r *reader) pushNumber(src []byte) {
 	if _, ok := bi.SetString(s, 10); ok {
 		obj = (*Bignum)(bi)
 		goto Push
+	}
+	for i, b := range token {
+		switch b {
+		case 'd', 'D':
+			t2 := make([]byte, len(token))
+			copy(t2, token)
+			t2[i] = 'e'
+			if f, err := strconv.ParseFloat(string(t2), 64); err == nil {
+				obj = DoubleFloat(f)
+				goto Push
+			}
+		case 's', 'S':
+			t2 := make([]byte, len(token))
+			copy(t2, token)
+			t2[i] = 'e'
+			if f, err := strconv.ParseFloat(string(t2), 64); err == nil {
+				obj = SingleFloat(f)
+				goto Push
+			}
+		case 'l', 'L':
+			t2 := make([]byte, len(token))
+			copy(t2, token)
+			t2[i] = 'e'
+			if bf, _, err := big.ParseFloat(string(t2), 10, uint(len(t2)*3), big.ToNearestAway); err == nil {
+				obj = (*LongFloat)(bf)
+				goto Push
+			}
+		}
 	}
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
 		obj = DoubleFloat(f)

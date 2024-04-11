@@ -42,6 +42,8 @@ func TestServerShutdown(t *testing.T) {
 (let* ((ws (make-instance 'watch-server :port %d))
        (wc (make-instance 'watch-client :host "127.0.0.1" :port %d)))
  (send ws :shutdown)
+ (do ((x (send ws :activep) (send ws :activep)))
+     ((not x) x))
  (list (send ws :activep) (send ws :connections)))
 `, port, port),
 		Expect: "(nil ())",

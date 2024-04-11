@@ -4,9 +4,16 @@
 
 - next
 
- - number parse fails on 5d-01
-
  - watch tests
+    pkg/watch/printer.go  57.14%
+    pkg/watch/client.go  62.07%
+    pkg/watch/periodic.go  66.67%
+    pkg/watch/pkg.go  66.67%
+    pkg/watch/wcon.go  75.00%
+    pkg/watch/connection.go  86.51%
+    pkg/watch/server.go  96.55%
+    pkg/watch/channeler.go  100.00%
+    pkg/watch/framer.go  100.00%
 
  - return and return-from should work in functions (defun)
 
