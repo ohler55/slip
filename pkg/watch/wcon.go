@@ -38,8 +38,6 @@ func (c *wcon) readExpr() (obj slip.Object) {
 			if _, ok := rec.(*slip.PartialPanic); !ok {
 				if serr, ok := rec.(slip.Error); ok {
 					obj = serr
-				} else {
-					obj = slip.NewError("%s", rec)
 				}
 			}
 		}

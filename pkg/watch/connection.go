@@ -68,7 +68,7 @@ func (c *connection) listen() {
 						slip.Symbol("error"),
 						nil,
 						serr.Hierarchy()[0],
-						slip.String(serr.Error() + "\n"),
+						slip.String(serr.Error()),
 					}
 					continue
 				}

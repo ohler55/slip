@@ -35,7 +35,7 @@ func TestClientPeriodics(t *testing.T) {
 	}).Test(t)
 }
 
-func TestClientPeriodic(t *testing.T) {
+func TestClientPeriodicLambda(t *testing.T) {
 	port := availablePort()
 	(&sliptest.Function{
 		Source: fmt.Sprintf(`
@@ -55,6 +55,45 @@ func TestClientPeriodic(t *testing.T) {
  result)
 `, port, port),
 		Expect: `(puux 3)`,
+	}).Test(t)
+}
+
+func TestClientPeriodicSymbol(t *testing.T) {
+	port := availablePort()
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`
+(defvar puv 3)
+(let* ((ws (make-instance 'watch-server :port %d))
+       (chan (make-channel 3))
+       (wc (make-instance 'watch-channeler
+                          :host "127.0.0.1"
+                          :port %d
+                          :channel chan)))
+ (send wc :periodic 'puuv 0.05 'pux)
+ (do ((x (send ws :connections) (send ws :connections)))
+     ((not (null x)) x))
+ (channel-pop chan))
+`, port, port),
+		Expect: `(puuv 3)`,
+	}).Test(t)
+}
+
+func TestClientPeriodicBadOp(t *testing.T) {
+	port := availablePort()
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`
+(let* ((ws (make-instance 'watch-server :port %d))
+       (chan (make-channel 3))
+       (wc (make-instance 'watch-channeler
+                          :host "127.0.0.1"
+                          :port %d
+                          :channel chan)))
+ (send wc :periodic 'pub 0.05 7)
+ (do ((x (send ws :connections) (send ws :connections)))
+     ((not (null x)) x))
+ (channel-pop chan))
+`, port, port),
+		Expect: `/\(pub #<ERROR [0-9a-f]+>\)/`,
 	}).Test(t)
 }
 

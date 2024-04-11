@@ -4,11 +4,14 @@ package watch_test
 
 import (
 	"fmt"
+	"net"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -157,4 +160,40 @@ func TestServerDocs(t *testing.T) {
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
+}
+
+func TestServerProtocolOk(t *testing.T) {
+	scope := slip.NewScope()
+	port := availablePort()
+	ws := slip.ReadString(
+		fmt.Sprintf(`(make-instance 'watch-server :port %d)`, port)).Eval(scope, nil).(*flavors.Instance)
+	defer func() { _ = ws.Receive(scope, ":shutdown", slip.List{}, 0) }()
+
+	con, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
+	tt.Nil(t, err)
+	defer func() { _ = con.Close() }()
+
+	reply := make([]byte, 1024)
+	var cnt int
+
+	// Make sure partial reads work.
+	_, err = con.Write([]byte("(eval 3 (+ 2"))
+	tt.Nil(t, err)
+	// Need a little sleep to force a read completion on the server.
+	time.Sleep(time.Millisecond * 10)
+	_, err = con.Write([]byte(" 3))"))
+	tt.Nil(t, err)
+
+	cnt, err = con.Read(reply)
+	tt.Nil(t, err)
+	tt.Equal(t, "(result 3 5)", string(reply[:cnt]))
+
+	cnt, err = con.Write([]byte("bad)"))
+	tt.Nil(t, err)
+
+	cnt, err = con.Read(reply)
+	tt.Nil(t, err)
+	tt.Equal(t, `(error nil parse-error "unmatched close parenthesis at 0:3")`, string(reply[:cnt]))
+
+	fmt.Printf("*** %q\n", reply[:cnt])
 }

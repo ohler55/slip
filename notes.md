@@ -4,8 +4,6 @@
 
 - next
 
- - watch tests
-
  - return and return-from should work in functions (defun)
 
  - package
