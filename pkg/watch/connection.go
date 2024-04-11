@@ -105,10 +105,9 @@ func (c *connection) methodLoop() {
 			break
 		}
 		req, ok := obj.(slip.List)
-		if !ok || len(req) < 2 { // need verb and id of request
-			continue
+		if ok && 2 <= len(req) { // need verb and id of request
+			c.evalReq(scope, req)
 		}
-		c.evalReq(scope, req)
 	}
 }
 
@@ -214,8 +213,6 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 			delete(c.periodics, string(sym))
 			c.mu.Unlock()
 		}
-	case slip.Symbol("close"):
-		c.shutdown()
 	}
 }
 

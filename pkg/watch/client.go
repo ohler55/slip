@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -391,39 +390,10 @@ func (c *client) listen(s *slip.Scope) {
 }
 
 func formError(list slip.List) (serr slip.Object) {
-	msg := string(list[3].(slip.String))
-	switch list[2] {
-	case slip.ErrorSymbol:
-		serr = slip.NewError("%s", msg)
-	case slip.ArithmeticErrorSymbol:
-		serr = slip.NewArithmeticError(nil, nil, "%s", msg)
-	case slip.CellErrorSymbol:
-		serr = slip.NewCellError(nil, "%s", msg)
-	case slip.ControlErrorSymbol:
-		serr = slip.NewControlError("%s", msg)
-	case slip.FileErrorSymbol:
-		serr = slip.NewFileError(nil, "%s", msg)
-	case slip.MethodErrorSymbol:
-		serr = slip.NewMethodError(nil, nil, nil, "%s", msg)
-	case slip.PackageErrorSymbol:
-		serr = slip.NewPackageError(nil, "%s", msg)
-	case slip.ParseErrorSymbol:
-		serr = slip.NewParseError("%s", msg)
-	case cl.SimpleErrorSymbol:
-		serr = cl.NewSimpleError(slip.NewScope(), "%s", slip.String(msg))
-	case cl.SimpleTypeErrorSymbol:
-		serr = cl.NewSimpleTypeError(slip.NewScope(), "%s", slip.String(msg))
-	case slip.ProgramErrorSymbol:
-		serr = slip.NewProgramError("%s", msg)
-	case slip.ReaderErrorSymbol:
-		serr = slip.NewReaderError(nil, "%s", msg)
-	case slip.TypeErrorSymbol:
-		tp := slip.NewTypeError("", nil)
-		tp.Message = msg
-		serr = tp
-	default:
-		serr = slip.NewError("%s", msg)
-	}
+	msg := list[3].(slip.String)
+	class := string(list[2].(slip.Symbol))
+	serr = slip.MakeCondition(string(class), slip.List{slip.Symbol(":message"), msg})
+
 	return
 }
 

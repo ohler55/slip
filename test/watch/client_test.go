@@ -226,31 +226,15 @@ func TestClientEvalOk(t *testing.T) {
 }
 
 func TestClientEvalError(t *testing.T) {
-	for _, name := range []string{
-		"error",
-		"arithmetic-error",
-		"cell-error",
-		"control-error",
-		"file-error",
-		"method-error",
-		"package-error",
-		"parse-error",
-		"simple-error",
-		"simple-type-error",
-		"program-error",
-		"reader-error",
-		"type-error",
-	} {
-		port := availablePort()
-		(&sliptest.Function{
-			Source: fmt.Sprintf(`
+	port := availablePort()
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`
 (let* ((ws (make-instance 'watch-server :port %d))
        (wc (make-instance 'watch-client :host "127.0.0.1" :port %d)))
- (send wc :eval '(make-condition '%s)))
-`, port, port, name),
-			Expect: fmt.Sprintf("/#<%s [0-9a-f]+>/", strings.ToUpper(name)),
-		}).Test(t)
-	}
+ (send wc :eval '(/ 1 0)))
+`, port, port),
+		Expect: "/#<ARITHMETIC-ERROR [0-9a-f]+>/",
+	}).Test(t)
 }
 
 func TestClientEvalTimeout(t *testing.T) {

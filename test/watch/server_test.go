@@ -55,12 +55,29 @@ func TestServerConnections(t *testing.T) {
 	(&sliptest.Function{
 		Source: fmt.Sprintf(`
 (let* ((ws (make-instance 'watch-server :port %d))
-       (wc (make-instance 'watch-client :host "127.0.0.1" :port %d)))
+       (wc (make-instance 'watch-client
+                          :host "127.0.0.1"
+                          :port %d
+                          :watch '(quux)
+                          :periodics '((p5 3 qq)(p6 3 (lambda () (now)))))))
  (do ((x (send ws :connections) (send ws :connections)))
-     ((not (null x)) x))
+     ((< 1 (length (nth 2 (car  x)))) x))
  (send ws :connections))
 `, port, port),
-		Expect: `/\(\("127.0.0.1:[0-9]+" \(watching\) \(periodics\)\)\)/`,
+		Validate: func(t *testing.T, v slip.Object) {
+			list := v.(slip.List)
+			list = list[0].(slip.List)
+			tt.Equal(t, "(watching quux)", slip.ObjectString(list[1]))
+			list = list[2].(slip.List)
+			for _, a := range list[1:] {
+				switch a.(slip.List)[0].(slip.List).Cdr() {
+				case slip.Symbol("p5"):
+					tt.Equal(t, "((id . p5) (period . 3) (op . qq))", slip.ObjectString(a))
+				case slip.Symbol("p6"):
+					tt.Equal(t, "((id . p6) (period . 3) (op . (lambda () (now))))", slip.ObjectString(a))
+				}
+			}
+		},
 	}).Test(t)
 }
 

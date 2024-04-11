@@ -52,9 +52,6 @@ _lambda_ expression.
  __(forget id)__
  A request to forget or stop watching a variable or to cancel a periodic evaluation.
 
- __(close)__
- A request to close a connection.
-
 
 Responses types to the client are:
 
