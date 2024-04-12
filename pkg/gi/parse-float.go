@@ -53,7 +53,7 @@ _double-float_, or _long-float_. The default is _double-float_.`,
 			Examples: []string{
 				`(parse-float "1.23 ") => 1.23`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // ParseFloat represents the parse-float function.

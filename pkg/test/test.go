@@ -21,10 +21,6 @@ const (
 
 var testFlavor *flavors.Flavor
 
-func init() {
-	_ = TestFlavor()
-}
-
 // TestFlavor returns the test-flavor.
 func TestFlavor() *flavors.Flavor {
 	_ = TestableFlavor()

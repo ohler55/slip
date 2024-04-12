@@ -40,7 +40,7 @@ func init() {
 			Examples: []string{
 				`(assert-match "^[0-9a-f]+$" "abc123") => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // AssertMatch represents the assert-match function.

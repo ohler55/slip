@@ -30,7 +30,7 @@ func init() {
 			Examples: []string{
 				`(filepath-join "one" "two" "three.lisp") => "one/two/three.lisp"`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // FilepathJoin represents the filepath-join function.

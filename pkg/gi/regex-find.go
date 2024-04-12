@@ -36,7 +36,7 @@ and returns that substring. If not found then _nil_ is returned.`,
 				`(regex-find "a.c" "xabcx") => "abc"`,
 				`(regex-find "a.c" "abbc") => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // RegexFind represents the regex-find function.

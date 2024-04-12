@@ -16,10 +16,6 @@ import (
 
 var suiteFlavor *flavors.Flavor
 
-func init() {
-	_ = SuiteFlavor()
-}
-
 // SuiteFlavor returns the suite-flavor.
 func SuiteFlavor() *flavors.Flavor {
 	_ = TestableFlavor()

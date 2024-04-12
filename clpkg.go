@@ -19,6 +19,7 @@ var (
 		Name:      "common-lisp",
 		Nicknames: []string{"cl"},
 		Doc:       "Home of symbols defined by the ANSI language spcification.",
+		path:      "github.com/ohler55/slip/pkg/cl",
 		vars: map[string]*VarVal{
 			"*common-lisp*":   &pkgVarVal,
 			"*package*":       {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},

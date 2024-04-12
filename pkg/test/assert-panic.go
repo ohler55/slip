@@ -35,7 +35,7 @@ func init() {
 			Examples: []string{
 				`(assert-panic (lambda () (panic 'done))) => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // AssertPanic represents the assert-panic function.

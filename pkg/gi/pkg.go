@@ -17,11 +17,15 @@ var (
 )
 
 func init() {
-	Pkg.Initialize(nil)
+	Pkg.Initialize(
+		map[string]*slip.VarVal{
+			"*gi*":             {Val: &Pkg, Doc: Pkg.Doc},
+			"*go-integration*": {Val: &Pkg, Doc: Pkg.Doc},
+		},
+		&Env{},
+	)
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*gi*", &Pkg)
-	Pkg.Set("*go-integration*", &Pkg)
 
 	slip.DefConstant(slip.Symbol("sighup"), slip.Fixnum(1), "terminate process, terminal line hangup")
 	slip.DefConstant(slip.Symbol("sigint"), slip.Fixnum(2), "terminate process, interrupt program")

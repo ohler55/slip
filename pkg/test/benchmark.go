@@ -43,7 +43,7 @@ The timer per iteration is returned.`,
 			Examples: []string{
 				`(benchmark (lambda () (* 1 2 3 4 5 6))) => 0.000001`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Benchmark represents the benchmark function.

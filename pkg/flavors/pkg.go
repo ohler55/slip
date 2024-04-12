@@ -26,10 +26,10 @@ func init() {
 			Set: setPanic,
 			Doc: "the names of all the defined Flavors.",
 		},
+		"*flavors*": {Val: &Pkg, Doc: Pkg.Doc},
 	})
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*flavors*", &Pkg)
 }
 
 func getAllFlavorNames() slip.Object {

@@ -40,7 +40,7 @@ func init() {
 			Examples: []string{
 				`(assert-equal 3 (+ 1 2)) => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // AssertEqual represents the assert-equal function.

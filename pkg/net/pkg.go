@@ -17,8 +17,18 @@ var (
 )
 
 func init() {
-	Pkg.Initialize(nil)
+	Pkg.Initialize(
+		map[string]*slip.VarVal{
+			"*net*": {Val: &Pkg, Doc: Pkg.Doc},
+		},
+	)
+	defClient()
+	defRequest()
+	defResponse()
+	defResponseWriter()
+	defServer()
+
+	Pkg.Initialize(nil, &bodyWrap{}) // lock
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*net*", &Pkg)
 }

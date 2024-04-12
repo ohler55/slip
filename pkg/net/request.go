@@ -28,8 +28,7 @@ var (
 	}
 )
 
-func init() {
-	Pkg.Initialize(nil)
+func defRequest() {
 	requestFlavor = flavors.DefFlavor("http-request-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{

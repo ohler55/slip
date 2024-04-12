@@ -13,7 +13,7 @@ import (
 
 var flavor *flavors.Flavor
 
-func init() {
+func defBag() {
 	Pkg.Initialize(nil)
 	flavor = flavors.DefFlavor("bag-flavor", map[string]slip.Object{}, nil,
 		slip.List{

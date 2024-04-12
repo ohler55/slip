@@ -11,7 +11,7 @@ import (
 
 var responseWriterFlavor *flavors.Flavor
 
-func init() {
+func defResponseWriter() {
 	responseWriterFlavor = flavors.DefFlavor("http-response-writer-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{

@@ -44,7 +44,7 @@ func init() {
 			Examples: []string{
 				`(defsuite "sweet" nil) => #<suite-flavor 12345>`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Defsuite represents the defsuite function.

@@ -41,7 +41,7 @@ func init() {
 				`(regex-find-all "a.c" "xabcxazc") => ("abc" "azc")`,
 				`(regex-find-all "a.c" "abbc") => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // RegexFindAll represents the regex-find-all function.

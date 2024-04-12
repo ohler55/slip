@@ -59,7 +59,7 @@ func init() {
  ("top" (("id" . "123")) ("child" () "Some text.") (:comment "a comment")
         ("blank" ())))`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Read represents the xml-read function.

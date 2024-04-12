@@ -28,7 +28,7 @@ which must be of method _method-error_ or inherit from _method-error_.`,
 			Examples: []string{
 				`(method-error-class (make-condition 'method-error :class 'test)) => test)`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // MethodErrorClass represents the method-error-class function.

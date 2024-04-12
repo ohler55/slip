@@ -44,7 +44,7 @@ match the format of what would be produced by __xml-read__.`,
 			Examples: []string{
 				`(xml-write '( nil) => "TBD"`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Write represents the xml-write function.

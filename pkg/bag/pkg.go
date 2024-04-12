@@ -35,10 +35,13 @@ func init() {
 			Doc: `if non-nil then the writing and parsing of time is as a hash-map with a key of
 the _*bag-time_wrap*_ value and the time encoded according to the _*bag-time-format*_.`,
 		},
+		"*bag*": {Val: &Pkg, Doc: Pkg.Doc},
 	})
+	defBag()
+
+	Pkg.Initialize(nil, &Get{}) // lock it down
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*bag*", &Pkg)
 	slip.DefConstant(slip.Symbol("*rfc3339nano*"), slip.String(time.RFC3339Nano), "")
 }
 

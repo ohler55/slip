@@ -4,6 +4,10 @@
 
 - next
 
+ - package-name
+ - package-nicknames
+ - package-use-list
+
  - package
   - support export list
    - ListToFunc should be f.ListToFunc

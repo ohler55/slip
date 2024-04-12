@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -40,6 +41,7 @@ type Package struct {
 	vars    map[string]*VarVal
 	PreSet  func(p *Package, name string, value Object) (string, Object)
 	mu      sync.Mutex
+	path    string
 	Locked  bool
 }
 
@@ -74,7 +76,7 @@ func AddPackage(pkg *Package) {
 }
 
 // Initialize the package.
-func (obj *Package) Initialize(vars map[string]*VarVal) {
+func (obj *Package) Initialize(vars map[string]*VarVal, local ...any) {
 	if obj.funcs == nil {
 		obj.funcs = map[string]*FuncInfo{}
 	}
@@ -87,6 +89,10 @@ func (obj *Package) Initialize(vars map[string]*VarVal) {
 	for k, vv := range vars {
 		vv.Pkg = obj
 		obj.vars[k] = vv
+	}
+	if len(obj.path) == 0 && 0 < len(local) {
+		obj.path = reflect.TypeOf(local[0]).Elem().PkgPath()
+		obj.Locked = true
 	}
 }
 
@@ -252,6 +258,15 @@ func (obj *Package) String() string {
 // Define a new golang function.
 func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	name := strings.ToLower(doc.Name)
+	if obj.Locked {
+		f := creator(nil)
+		pp := reflect.TypeOf(f).Elem().PkgPath()
+		if pp != obj.path {
+			// fmt.Printf("*** %s different %s vs %s\n", creator(nil), pp, obj.path)
+			PanicPackage(obj, "Can not define %s in package %s. Package %s is locked.",
+				f, obj.Name, obj.Name)
+		}
+	}
 	fi := FuncInfo{
 		Name:   name,
 		Create: creator,
@@ -262,6 +277,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	if len(fi.Kind) == 0 {
 		fi.Kind = BuiltInSymbol
 	}
+
 	obj.mu.Lock()
 	if obj.funcs == nil {
 		obj.funcs = map[string]*FuncInfo{}
@@ -409,7 +425,9 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 	b = append(b, "Documentation:\n"...)
 	b = AppendDoc(b, obj.Doc, indent+2, right, ansi)
 	b = append(b, '\n')
-
+	if obj.Locked {
+		b = append(b, "Locked\n"...)
+	}
 	if 0 < len(obj.Imports) {
 		b = append(b, indentSpaces[:indent]...)
 		b = append(b, "Imports:\n"...)
@@ -482,7 +500,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 			}
 			col++
 			b = append(b, k...)
-			if cols < col {
+			if cols <= col {
 				b = append(b, '\n')
 				col = 0
 			} else {

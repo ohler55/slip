@@ -36,7 +36,7 @@ __add__ is an addition to common LISP.`,
 				"(add '(a b) 'c 'd) => (a b c d)",
 				"(add nil) => nil",
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Add represents the add function.

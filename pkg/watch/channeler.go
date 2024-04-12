@@ -12,8 +12,8 @@ var (
 	channelerFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+// ChannelerFlavor returns the channeler flavor.
+func ChannelerFlavor() *flavors.Flavor {
 	channelerFlavor = flavors.DefFlavor("watch-channeler",
 		map[string]slip.Object{"channel": nil},
 		[]string{ClientFlavor().Name()},
@@ -30,6 +30,8 @@ A list of the symbol change and the new value is placed on the channel.`),
 		&Pkg,
 	)
 	channelerFlavor.DefMethod(":changed", ":after", channelerChangedCaller{})
+
+	return channelerFlavor
 }
 
 type channelerChangedCaller struct{}
