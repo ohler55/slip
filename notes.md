@@ -4,8 +4,6 @@
 
 - next
 
- - return and return-from should work in functions (defun)
-
  - package
   - support export list
    - ListToFunc should be f.ListToFunc

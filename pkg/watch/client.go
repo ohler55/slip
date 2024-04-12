@@ -392,7 +392,7 @@ func (c *client) listen(s *slip.Scope) {
 func formError(list slip.List) (serr slip.Object) {
 	msg := list[3].(slip.String)
 	class := string(list[2].(slip.Symbol))
-	serr = slip.MakeCondition(string(class), slip.List{slip.Symbol(":message"), msg})
+	serr = slip.MakeCondition(class, slip.List{slip.Symbol(":message"), msg})
 
 	return
 }

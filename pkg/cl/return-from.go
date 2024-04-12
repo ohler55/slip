@@ -46,7 +46,7 @@ func (f *ReturnFrom) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	if len(args) < 1 {
 		slip.PanicArgCount(f, 1, -1)
 	}
-	rr := ReturnResult{}
+	rr := slip.ReturnResult{}
 	switch ta := args[0].(type) {
 	case nil:
 		// leave as nil

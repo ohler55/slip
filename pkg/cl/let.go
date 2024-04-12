@@ -55,7 +55,7 @@ func (f *Let) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
 		switch result.(type) {
-		case *ReturnResult, *GoTo:
+		case *slip.ReturnResult, *GoTo:
 			return result
 		}
 	}
