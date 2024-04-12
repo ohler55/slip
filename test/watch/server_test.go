@@ -188,12 +188,10 @@ func TestServerProtocolOk(t *testing.T) {
 	tt.Nil(t, err)
 	tt.Equal(t, "(result 3 5)", string(reply[:cnt]))
 
-	cnt, err = con.Write([]byte("bad)"))
+	_, err = con.Write([]byte("bad)"))
 	tt.Nil(t, err)
 
 	cnt, err = con.Read(reply)
 	tt.Nil(t, err)
 	tt.Equal(t, `(error nil parse-error "unmatched close parenthesis at 0:3")`, string(reply[:cnt]))
-
-	fmt.Printf("*** %q\n", reply[:cnt])
 }

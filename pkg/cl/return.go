@@ -38,7 +38,7 @@ type Return struct {
 
 // Call the function with the arguments provided.
 func (f *Return) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	rr := ReturnResult{}
+	rr := slip.ReturnResult{}
 	if !s.InBlock(nil) {
 		slip.PanicControl("return from unknown block: nil")
 	}

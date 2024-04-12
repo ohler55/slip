@@ -34,6 +34,10 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 		ss.parents = append(ss.parents, s)
 	}
 	ss.Macro = ss.Macro || lam.Macro
+	ss.Block = true
+	if 0 < len(lam.Doc.Name) && lam.Doc.Name != "lambda" {
+		ss.Name = Symbol(lam.Doc.Name)
+	}
 	mode := reqMode
 	ai := 0
 	var rest List
@@ -153,6 +157,12 @@ func (lam *Lambda) BoundCall(s *Scope, depth int) (result Object) {
 	d2 := depth + 1
 	for _, form := range lam.Forms {
 		result = s.Eval(form, d2)
+		if rr, ok := result.(*ReturnResult); ok {
+			if rr.Tag == s.Name {
+				result = rr.Result
+			}
+			break
+		}
 	}
 	return
 }
@@ -182,6 +192,7 @@ func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 	}
 	lam = &Lambda{
 		Doc: &FuncDoc{
+			Name:   defName,
 			Return: "object",
 			Text:   string(docStr),
 			Kind:   LambdaSymbol,

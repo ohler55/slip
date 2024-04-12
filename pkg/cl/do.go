@@ -84,7 +84,7 @@ func (f *Do) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object)
 			switch args[i].(type) {
 			case slip.List, slip.Funky:
 				switch tr := slip.EvalArg(ns, args, i, d2).(type) {
-				case *ReturnResult:
+				case *slip.ReturnResult:
 					if tr.Tag == nil {
 						return tr.Result
 					}

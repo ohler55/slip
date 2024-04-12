@@ -67,7 +67,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		slip.PanicType("name argument to defun", args[0], "symbol")
 	}
 	low := strings.ToLower(string(name))
-	lc := slip.DefLambda("defun", s, args[1:])
+	lc := slip.DefLambda(low, s, args[1:])
 	fc := func(fargs slip.List) slip.Object {
 		return &slip.Dynamic{
 			Function: slip.Function{

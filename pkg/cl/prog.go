@@ -56,7 +56,7 @@ func (f *Prog) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	processBinding(s, ns, args[0], d2)
 	for i := 1; i < len(args); i++ {
 		switch tr := slip.EvalArg(ns, args, i, d2).(type) {
-		case *ReturnResult:
+		case *slip.ReturnResult:
 			if tr.Tag == nil {
 				return tr.Result
 			}

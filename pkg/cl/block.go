@@ -62,7 +62,7 @@ func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	d2 := depth + 1
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
-		if rr, _ := result.(*ReturnResult); rr != nil {
+		if rr, _ := result.(*slip.ReturnResult); rr != nil {
 			if ns.Name == rr.Tag {
 				return rr.Result
 			}
