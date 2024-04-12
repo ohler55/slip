@@ -35,7 +35,7 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	}
 	ss.Macro = ss.Macro || lam.Macro
 	ss.Block = true
-	if 0 < len(lam.Doc.Name) && lam.Doc.Name != "lambda" {
+	if 0 < len(lam.Doc.Name) {
 		ss.Name = Symbol(lam.Doc.Name)
 	}
 	mode := reqMode
@@ -158,7 +158,7 @@ func (lam *Lambda) BoundCall(s *Scope, depth int) (result Object) {
 	for _, form := range lam.Forms {
 		result = s.Eval(form, d2)
 		if rr, ok := result.(*ReturnResult); ok {
-			if rr.Tag == s.Name {
+			if rr.Tag == s.Name && s.Name != Symbol("lambda") {
 				result = rr.Result
 			}
 			break

@@ -29,7 +29,7 @@ func TestReturnResultLambda(t *testing.T) {
 		Source: `(apply (lambda ()
                   (return 7)
                   'end) nil)`,
-		Expect: "7",
+		PanicType: slip.ControlErrorSymbol,
 	}).Test(t)
 }
 
@@ -45,9 +45,17 @@ func TestReturnResultDefun(t *testing.T) {
 
 func TestReturnResultNotFound(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(apply (lambda ()
-                  (return-from nada 7)
-                  'end) nil)`,
+		Source: `(defun rr-fun2 ()
+                  (return-from bad 7)
+                  'end)
+                 (rr-fun2)`,
+		PanicType: slip.ControlErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(defun rr-fun3 ()
+                  (return 7)
+                  'end)
+                 (rr-fun3)`,
 		PanicType: slip.ControlErrorSymbol,
 	}).Test(t)
 }
