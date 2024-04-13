@@ -156,9 +156,8 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		} else {
 			vv.Val = value
 		}
-		for _, h := range setHooks {
-			h.fun(vv.Pkg, name)
-		}
+		callSetHooks(vv.Pkg, name)
+
 		return vv
 	}
 	if obj.Locked {
@@ -173,9 +172,8 @@ func (obj *Package) Set(name string, value Object) *VarVal {
 		}
 	}
 	obj.mu.Unlock()
-	for _, h := range setHooks {
-		h.fun(obj, name)
-	}
+	callSetHooks(obj, name)
+
 	return vv
 }
 

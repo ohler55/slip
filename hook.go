@@ -58,3 +58,9 @@ func RemoveDefunHook(id string) {
 		}
 	}
 }
+
+func callSetHooks(pkg *Package, name string) {
+	for _, h := range setHooks {
+		h.fun(pkg, name)
+	}
+}

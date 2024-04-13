@@ -7,7 +7,13 @@ import "fmt"
 // PackageErrorSymbol is the symbol with a value of "package-error".
 const PackageErrorSymbol = Symbol("package-error")
 
-var packageErrorHierarchy = []Symbol{PackageErrorSymbol, ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
+var packageErrorHierarchy = []Symbol{
+	PackageErrorSymbol,
+	ErrorSymbol,
+	SeriousConditionSymbol,
+	ConditionSymbol,
+	TrueSymbol,
+}
 
 func init() {
 	RegisterCondition("package-error", makePackageError)

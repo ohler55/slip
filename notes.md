@@ -4,9 +4,14 @@
 
 - next
 
- - package-name
- - package-nicknames
- - package-use-list
+ + package-name
+ + package-nicknames
+ + packagep
+ + package-use-list
+ + package-used-by-list
+ - in-package (name) change current package after looking up package also *package*
+  - package error if not found
+  - unit test
 
  - package
   - support export list
@@ -20,9 +25,6 @@
 
   - defpackage
   - use-package
-  - in-package
-  - package-name
-  - package-nicknames
   - rename-package
   - shadow
   - package-shadowing-symbols
@@ -32,7 +34,6 @@
   - package-used-by-list
   - unuse-package
   - use-package
-  - package-use-list
   - require (with lisp code)
   - do-symbols
   - do-all-symbols
