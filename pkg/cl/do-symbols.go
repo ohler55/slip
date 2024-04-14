@@ -3,7 +3,7 @@
 package cl
 
 import (
-	"fmt"
+	"sort"
 
 	"github.com/ohler55/slip"
 )
@@ -72,31 +72,31 @@ func (f *DoSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			rform = sargs[2]
 		}
 	}
-	fmt.Printf("*** %s\n", sargs)
-	fmt.Printf("*** sym: %s\n", sym)
-	fmt.Printf("*** pkg: %s\n", pkg)
-	fmt.Printf("*** caller: %s\n", rform)
+	// While not necessary all names are collected and sorted to make results
+	// more consistent.
+	nm := map[string]struct{}{}
+	pkg.EachVarName(func(name string) { nm[name] = struct{}{} })
+	pkg.EachFuncName(func(name string) { nm[name] = struct{}{} })
 
-	pkg.EachVarName(
-		func(name string) {
-			// TBD
-			fmt.Printf("*** %s\n", name)
-		},
-	)
-	pkg.EachFuncName(
-		func(name string) {
-			// TBD
-			fmt.Printf("*** %s\n", name)
-		},
-	)
+	names := make([]string, 0, len(nm))
+	for name := range nm {
+		names = append(names, name)
+	}
+	sort.Strings(names)
 
-	// for i := range args {
-	// 	if result = slip.EvalArg(s, args, i, d2); result == nil {
-	// 		break
-	// 	}
-	// }
-
-	return nil
+	ss := s.NewScope()
+	ss.Block = true
+	forms := args[1:]
+	for _, name := range names {
+		ss.Let(sym, slip.Symbol(name))
+		for i := range forms {
+			if rr, ok2 := slip.EvalArg(ss, forms, i, d2).(*slip.ReturnResult); ok2 {
+				if rr.Tag == nil {
+					return rr.Result
+				}
+				return rr
+			}
+		}
+	}
+	return ss.Eval(rform, d2)
 }
-
-// (let ((lst ())) (do-external-symbols (s (find-package 'sb-gray) lst) (push s lst)))

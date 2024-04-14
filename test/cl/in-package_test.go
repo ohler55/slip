@@ -46,4 +46,8 @@ func TestInPackageBadName(t *testing.T) {
 		Source:    `(in-package t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(in-package 'quux)`,
+		PanicType: slip.PackageErrorSymbol,
+	}).Test(t)
 }

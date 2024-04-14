@@ -4,15 +4,27 @@
 
 - next
 
+ - fix right margin and term size calls
+
  + package-name
  + package-nicknames
  + packagep
  + package-use-list
  + package-used-by-list
  + in-package
- - do-symbols (sym form) - form is optional
-  - macro
+ + do-symbols
 
+ - do-all-symbols [same as do-symbols but no package specified, collect all names before continuing]
+ - symbol-package
+ - symbol-function
+ - symbol-macrolet
+ - symbol-name
+ - symbol-package
+ - symbol-plist
+ - symbol-value
+
+ - maybe padd or addf ro set and add
+  - addf (place &rest items)
 
  - package
   - support export list
@@ -26,6 +38,7 @@
 
   - defpackage
   - rename-package
+  - do-external-symbols [same as do-symbols for now or until export is implemented]
   - shadow
   - package-shadowing-symbols
   - shadowing-import
@@ -34,9 +47,6 @@
   - unuse-package
   - use-package
   - require (with lisp code)
-  - do-symbols
-  - do-all-symbols
-  - do-external-symbols
   - find-symbol (string|symbol &optional package) => symbol, status
    - status
     - :internal - in package
