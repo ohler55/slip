@@ -80,8 +80,8 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	width, _, err := xterm.GetSize(0)
-	if err != nil {
-		width = 80
+	if err != nil || width <= 0 {
+		width = slip.DefaultRightMargin
 	}
 	for i, v := range c.vars {
 		if v.sym == args[0] {
@@ -162,8 +162,8 @@ func drawFrame(s *slip.Scope) {
 		left = int(num)
 	}
 	width, _, err := xterm.GetSize(0)
-	if err != nil {
-		width = 80
+	if err != nil || width <= 0 {
+		width = slip.DefaultRightMargin
 	}
 	for i, v := range c.vars {
 		setCursor(w, top+i, left)
@@ -186,8 +186,8 @@ func drawBorder(w io.Writer, top, left, height int, border slip.Object) {
 		return
 	}
 	width, _, err := xterm.GetSize(0)
-	if err != nil {
-		width = 80
+	if err != nil || width <= 0 {
+		width = slip.DefaultRightMargin
 	}
 	if border == slip.Symbol(":line") {
 		if 1 <= top {
