@@ -9,9 +9,10 @@
  + packagep
  + package-use-list
  + package-used-by-list
- - in-package (name) change current package after looking up package also *package*
-  - package error if not found
-  - unit test
+ + in-package
+ - do-symbols (sym form) - form is optional
+  - macro
+
 
  - package
   - support export list
@@ -24,14 +25,12 @@
      - flag in FuncDoc or separate? depends on whether it's useful in docs
 
   - defpackage
-  - use-package
   - rename-package
   - shadow
   - package-shadowing-symbols
   - shadowing-import
   - export
   - unexport
-  - package-used-by-list
   - unuse-package
   - use-package
   - require (with lisp code)

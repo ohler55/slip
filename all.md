@@ -189,7 +189,7 @@
  * [ ] IGNORE
  * [ ] IMAGPART
  * [ ] IMPORT
- * [ ] IN-PACKAGE
+ * [x] IN-PACKAGE
  * [ ] INITIALIZE-INSTANCE
  * [ ] INLINE
  * [ ] INSPECT
