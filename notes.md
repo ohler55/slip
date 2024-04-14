@@ -4,15 +4,6 @@
 
 - next
 
- - fix right margin and term size calls
-
- + package-name
- + package-nicknames
- + packagep
- + package-use-list
- + package-used-by-list
- + in-package
- + do-symbols
 
  - do-all-symbols [same as do-symbols but no package specified, collect all names before continuing]
  - symbol-package

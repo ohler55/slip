@@ -53,7 +53,7 @@ usage: %s [<options>] [<filepath>]...
 	flag.Parse()
 	// Leave as the default or what ever the user has in their defaults if
 	// term does give a width.
-	if w, _, err := term.GetSize(0); err == nil && 0 < w {
+	if w, _, err := term.GetSize(0); err == nil && 2 < w {
 		slip.CurrentPackage.Set("*print-right-margin*", slip.Fixnum(w-2))
 	}
 	if showVersion {
