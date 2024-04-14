@@ -17,10 +17,11 @@ import (
 )
 
 const (
-	bold         = "\x1b[1m"
-	underline    = "\x1b[4m"
-	colorOff     = "\x1b[m"
-	indentSpaces = "                                                                                "
+	bold               = "\x1b[1m"
+	underline          = "\x1b[4m"
+	colorOff           = "\x1b[m"
+	indentSpaces       = "                                                                                "
+	DefaultRightMargin = 120
 
 	upcaseKey     = Symbol(":upcase")
 	downcaseKey   = Symbol(":downcase")
@@ -122,7 +123,7 @@ var (
 		Pretty:      true,
 		Radix:       false,
 		Readably:    false,
-		RightMargin: 120,
+		RightMargin: DefaultRightMargin,
 	}
 )
 

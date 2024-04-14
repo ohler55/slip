@@ -482,6 +482,12 @@ func (ed *editor) getSize() (w, h int) {
 		w, h = hs.getSize()
 	} else {
 		w, h = term.GetSize(ed.fd)
+		if w <= 0 {
+			w = slip.DefaultRightMargin
+		}
+		if h <= 0 {
+			h = 100
+		}
 	}
 	atomic.StoreInt32(&ed.height, int32(h))
 	atomic.StoreInt32(&ed.width, int32(w))
