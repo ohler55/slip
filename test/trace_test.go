@@ -100,7 +100,7 @@ func TestTracePanicString(t *testing.T) {
 			Name:   "panic-test",
 			Args:   []*slip.DocArg{},
 			Return: "nil",
-		}, &slip.CLPkg)
+		}, &slip.UserPkg)
 
 	var out bytes.Buffer
 	scope := slip.NewScope()

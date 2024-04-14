@@ -39,7 +39,7 @@ func init() {
 			Examples: []string{
 				`(deftest "tess" nil (assert-nil (car '())) => #<test-flavor 12345>`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Deftest represents the deftest function.

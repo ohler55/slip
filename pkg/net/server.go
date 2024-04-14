@@ -19,7 +19,7 @@ var (
 	serverFlavor *flavors.Flavor
 )
 
-func init() {
+func defServer() {
 	Pkg.Initialize(nil)
 	serverFlavor = flavors.DefFlavor("http-server-flavor", map[string]slip.Object{}, nil,
 		slip.List{

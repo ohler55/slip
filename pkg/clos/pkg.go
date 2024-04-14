@@ -17,8 +17,12 @@ var (
 )
 
 func init() {
-	Pkg.Initialize(nil)
+	Pkg.Initialize(
+		map[string]*slip.VarVal{
+			"*clos*": {Val: &Pkg, Doc: Pkg.Doc},
+		},
+		&ClassName{},
+	)
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*clos*", &Pkg)
 }

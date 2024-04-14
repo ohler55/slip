@@ -18,11 +18,6 @@ var (
 	clientFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
-	_ = ClientFlavor()
-}
-
 type symVal struct {
 	sym slip.Symbol
 	val slip.Object

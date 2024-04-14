@@ -58,7 +58,7 @@ first second
 3,4
 ") => (("first" "second") (1 2) (3 4))`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Read represents the csv-read function.

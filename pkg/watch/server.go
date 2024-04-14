@@ -18,8 +18,8 @@ var (
 	serverFlavor *flavors.Flavor
 )
 
-func init() {
-	Pkg.Initialize(nil)
+// ServerFlavor returns the server flavor.
+func ServerFlavor() *flavors.Flavor {
 	serverFlavor = flavors.DefFlavor("watch-server", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
@@ -41,6 +41,8 @@ or periodically. Additional details are included in the _*watch*_ package descri
 	serverFlavor.DefMethod(":shutdown", "", serverShutdownCaller{})
 	serverFlavor.DefMethod(":connections", "", serverConnectionsCaller{})
 	serverFlavor.DefMethod(":activep", "", serverActivepCaller{})
+
+	return serverFlavor
 }
 
 type server struct {

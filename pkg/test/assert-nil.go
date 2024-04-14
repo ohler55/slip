@@ -33,7 +33,7 @@ func init() {
 			Examples: []string{
 				`(assert-nil (car '())) => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // AssertNil represents the assert-nil function.

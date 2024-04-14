@@ -38,7 +38,7 @@ func init() {
 			Examples: []string{
 				`(refute-equal 3 (+ 1 1)) => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // RefuteEqual represents the refute-equal function.

@@ -13,7 +13,6 @@ var (
 		Nicknames: []string{},
 		Doc:       "A package for REPL related functions.",
 		PreSet:    slip.DefaultPreSet,
-		Locked:    true,
 	}
 	// TheHistory is the single global used by readers (editor and
 	// termReader).
@@ -66,7 +65,8 @@ func init() {
 			Doc: `The stash load paths to search when calling the _use-stash_ function if a full path is not provided.
 The default value is ("." "~/.slip")`,
 		},
-	})
+	}, &Ansi{})
+
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 	pkgVarVal.Get = getREPL

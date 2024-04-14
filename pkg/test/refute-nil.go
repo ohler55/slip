@@ -33,7 +33,7 @@ func init() {
 			Examples: []string{
 				`(refute-nil (car '(1))) => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // RefuteNil represents the refute-nil function.

@@ -14,7 +14,8 @@ var (
 	printerFlavor *flavors.Flavor
 )
 
-func init() {
+// PrinterFlavor returns the printer flavor.
+func PrinterFlavor() *flavors.Flavor {
 	Pkg.Initialize(nil)
 	printerFlavor = flavors.DefFlavor("watch-printer", map[string]slip.Object{},
 		[]string{ClientFlavor().Name()},
@@ -27,6 +28,8 @@ func init() {
 		&Pkg,
 	)
 	printerFlavor.DefMethod(":changed", ":after", printerChangedCaller{})
+
+	return printerFlavor
 }
 
 type printerChangedCaller struct{}

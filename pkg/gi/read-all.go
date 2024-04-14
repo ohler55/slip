@@ -29,7 +29,7 @@ func init() {
 			Examples: []string{
 				`(read-all (make-string-input-stream "abc")) => "abc"`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // ReadAll represents the read-all function.

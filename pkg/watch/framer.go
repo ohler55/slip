@@ -19,7 +19,8 @@ var (
 	framerFlavor *flavors.Flavor
 )
 
-func init() {
+// FramerFlavor returns the framer flavor.
+func FramerFlavor() *flavors.Flavor {
 	Pkg.Initialize(nil)
 	framerFlavor = flavors.DefFlavor("watch-framer",
 		map[string]slip.Object{
@@ -46,6 +47,8 @@ ANSI line border or a character to use as the border.`),
 	framerFlavor.DefMethod(":init", ":after", framerInitCaller{})
 	framerFlavor.DefMethod(":forget", ":after", framerForgetCaller{})
 	framerFlavor.DefMethod(":refresh", "", framerRefreshCaller{})
+
+	return framerFlavor
 }
 
 type framerInitCaller struct{}

@@ -15,12 +15,15 @@ func init() {
 // CLPkg is the COMMON-LISP package.
 var (
 	pkgVarVal = VarVal{Set: setCLPkg, Doc: "the common lisp package"}
-	CLPkg     = Package{
+	clPkg     *Package // set in init
+	CLPkg              = Package{
 		Name:      "common-lisp",
 		Nicknames: []string{"cl"},
 		Doc:       "Home of symbols defined by the ANSI language spcification.",
+		path:      "github.com/ohler55/slip/pkg/cl",
 		vars: map[string]*VarVal{
 			"*common-lisp*":   &pkgVarVal,
+			"*cl*":            &pkgVarVal,
 			"*package*":       {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
 			"*core-pathname*": {Val: nil, Doc: "The absolute pathname of the running SLIP application."},
 			"*default-pathname-defaults*": {
@@ -190,6 +193,7 @@ and raises an error if not possible to print readably.`,
 )
 
 func init() {
+	clPkg = &CLPkg
 	for _, vv := range CLPkg.vars {
 		vv.Pkg = &CLPkg
 	}
@@ -206,6 +210,7 @@ func getCurrentPackage() Object {
 func setCurrentPackage(value Object) {
 	if pkg, ok := value.(*Package); ok {
 		CurrentPackage = pkg
+		callSetHooks(clPkg, "*package*")
 	} else {
 		PanicType("*package*", value, "package")
 	}
@@ -218,6 +223,7 @@ func getWorkingDir() Object {
 func setWorkingDir(value Object) {
 	if dir, ok := value.(String); ok {
 		WorkingDir = string(dir)
+		callSetHooks(clPkg, "*default-pathname-defaults*")
 	} else {
 		PanicType("*default-pathname-defaults*", value, "string")
 	}
@@ -230,6 +236,7 @@ func getErrorOutput() Object {
 func setErrorOutput(value Object) {
 	if _, ok := value.(io.Writer); ok {
 		ErrorOutput = value
+		callSetHooks(clPkg, "*error-output*")
 	} else {
 		PanicType("*error-output*", value, "stream")
 	}
@@ -242,6 +249,7 @@ func getGensymCounter() Object {
 func setGensymCounter(value Object) {
 	if counter, ok := value.(Fixnum); ok {
 		gensymCounter = counter
+		callSetHooks(clPkg, "*gensym-counter*")
 	} else {
 		PanicType("*gensym-counter*", value, "fixnum")
 	}
@@ -254,6 +262,7 @@ func getStandardOutput() Object {
 func setStandardOutput(value Object) {
 	if _, ok := value.(io.Writer); ok {
 		StandardOutput = value
+		callSetHooks(clPkg, "*standard-output*")
 	} else {
 		PanicType("*standard-output*", value, "stream")
 	}
@@ -266,6 +275,7 @@ func getTraceOutput() Object {
 func setTraceOutput(value Object) {
 	if _, ok := value.(io.Writer); ok {
 		TraceOutput = value
+		callSetHooks(clPkg, "*trace-output*")
 	} else {
 		PanicType("*trace-output*", value, "stream")
 	}
@@ -278,6 +288,7 @@ func getStandardInput() Object {
 func setStandardInput(value Object) {
 	if _, ok := value.(io.Reader); ok {
 		StandardInput = value
+		callSetHooks(clPkg, "*standard-input*")
 	} else {
 		PanicType("*standard-input*", value, "stream")
 	}

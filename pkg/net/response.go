@@ -12,7 +12,7 @@ import (
 
 var responseFlavor *flavors.Flavor
 
-func init() {
+func defResponse() {
 	Pkg.Initialize(nil)
 	responseFlavor = flavors.DefFlavor("http-response-flavor", map[string]slip.Object{}, nil,
 		slip.List{

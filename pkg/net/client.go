@@ -20,8 +20,7 @@ const defaultClientTimeout = time.Second * 10
 
 var clientFlavor *flavors.Flavor
 
-func init() {
-	Pkg.Initialize(nil)
+func defClient() {
 	clientFlavor = flavors.DefFlavor("http-client-flavor",
 		map[string]slip.Object{
 			"timeout": slip.Fixnum(defaultClientTimeout),

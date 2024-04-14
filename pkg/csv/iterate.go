@@ -72,7 +72,7 @@ of the header column name and the value in the row. A header is expected.`,
 3,4
 " (lambda (row) (format t "*~A" row)) => nil ;; prints *(1 2)*(3 4)`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Iterate represents the csv-iterate function.

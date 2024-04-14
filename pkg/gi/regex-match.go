@@ -35,7 +35,7 @@ func init() {
 				`(regex-match "^ab" "abc") => t`,
 				`(regex-match "^ab" "_abc") => nil`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // RegexMatch represents the regex-match function.

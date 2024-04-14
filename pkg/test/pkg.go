@@ -22,8 +22,12 @@ func init() {
 			Val: nil,
 			Doc: "is bound to the current test if there is a test running.",
 		},
+		"*test*": {Val: &Pkg, Doc: Pkg.Doc},
 	})
+	_ = SuiteFlavor()
+	_ = TestFlavor()
+
+	Pkg.Initialize(nil, &AssertEqual{})
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*test*", &Pkg)
 }

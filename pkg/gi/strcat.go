@@ -28,7 +28,7 @@ func init() {
 			Examples: []string{
 				`(strcat 'string "abc" #\d '(#\e #\f)) => "abcdef"`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Strcat represents the strcat function.

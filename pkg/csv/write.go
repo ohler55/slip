@@ -48,7 +48,7 @@ func init() {
 			Examples: []string{
 				`(csv-write '((A B) (1 2) (3 4)) nil) => "A,B\n1,2\n3,4\n"`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // Write represents the csv-write function.

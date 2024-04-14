@@ -195,10 +195,21 @@ changes in a fixed location and values are updated in place.
 )
 
 func init() {
-	Pkg.Initialize(map[string]*slip.VarVal{})
+	Pkg.Initialize(
+		map[string]*slip.VarVal{
+			"*watch*": {Val: &Pkg, Doc: Pkg.Doc},
+		},
+	)
+	_ = ServerFlavor()
+	_ = ClientFlavor()
+	_ = ChannelerFlavor()
+	_ = FramerFlavor()
+	_ = PrinterFlavor()
+
+	Pkg.Initialize(nil, &periodic{})
+
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*watch*", &Pkg)
 }
 
 func displayError(format string, args ...any) {

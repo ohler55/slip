@@ -28,7 +28,7 @@ which must be of method _method-error_ or inherit from _method-error_.`,
 			Examples: []string{
 				`(method-error-qualifier (make-condition 'method-error :qualifier 'test)) => test)`,
 			},
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // MethodErrorQualifier represents the method-error-qualifier function.
