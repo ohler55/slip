@@ -77,7 +77,7 @@ func TestDoSymbolsResultForm(t *testing.T) {
 	}).Test(t)
 }
 
-func TestDoSymbolsJustSymbal(t *testing.T) {
+func TestDoSymbolsJustSymbol(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((lst ())) (do-symbols (s) (setq lst (add lst s))) lst)`,
 		Validate: func(t *testing.T, v slip.Object) {

@@ -126,9 +126,7 @@
  * [ ] DESTRUCTURING-BIND
  * [ ] DISASSEMBLE
  * [ ] DIVISION-BY-ZERO
- * [ ] DO-ALL-SYMBOLS
  * [ ] DO-EXTERNAL-SYMBOLS
- * [ ] DO-SYMBOLS
  * [ ] DOCUMENTATION
  * [ ] DPB
  * [ ] DRIBBLE
@@ -189,7 +187,6 @@
  * [ ] IGNORE
  * [ ] IMAGPART
  * [ ] IMPORT
- * [x] IN-PACKAGE
  * [ ] INITIALIZE-INSTANCE
  * [ ] INLINE
  * [ ] INSPECT
@@ -391,12 +388,8 @@
  * [ ] SUBSTITUTE-IF-NOT
  * [ ] SUBTYPEP
  * [ ] SVREF
- * [ ] SYMBOL-FUNCTION
  * [ ] SYMBOL-MACROLET
- * [ ] SYMBOL-NAME
- * [ ] SYMBOL-PACKAGE
  * [ ] SYMBOL-PLIST
- * [ ] SYMBOL-VALUE
  * [ ] SYNONYM-STREAM
  * [ ] SYNONYM-STREAM-SYMBOL
  * [ ] TAGBODY
@@ -601,6 +594,8 @@
  * [x] DIRECTORY-NAMESTRING
  * [x] DO
  * [x] DO*
+ * [x] DO-ALL-SYMBOLS
+ * [x] DO-SYMBOLS
  * [x] DOLIST
  * [x] DOTIMES
  * [x] DOUBLE-FLOAT
@@ -664,6 +659,7 @@
  * [x] IDENTITY
  * [x] IF
  * [x] IGNORE-ERRORS
+ * [x] IN-PACKAGE
  * [x] INCF
  * [x] INPUT-STREAM-P
  * [x] INTEGER
@@ -880,6 +876,10 @@
  * [x] SUBSEQ
  * [x] SXHASH
  * [x] SYMBOL
+ * [x] SYMBOL-FUNCTION
+ * [x] SYMBOL-NAME
+ * [x] SYMBOL-PACKAGE
+ * [x] SYMBOL-VALUE
  * [x] SYMBOLP
  * [x] T
  * [x] TAN

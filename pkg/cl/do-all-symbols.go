@@ -11,18 +11,18 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := DoSymbols{Function: slip.Function{Name: "do-symbols", Args: args, SkipEval: []bool{true}}}
+			f := DoAllSymbols{Function: slip.Function{Name: "do-all-symbols", Args: args, SkipEval: []bool{true}}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
 			Kind: slip.MacroSymbol,
-			Name: "do-symbols",
+			Name: "do-all-symbols",
 			Args: []*slip.DocArg{
 				{
 					Name: "args",
 					Type: "list",
-					Text: "A list of a symbol and optional package and return form.",
+					Text: "A list of a symbol and optional return form.",
 				},
 				{Name: "&rest"},
 				{
@@ -32,23 +32,23 @@ func init() {
 				},
 			},
 			Return: "list",
-			Text: `__do-symbols__ expects the _args_ to be a list of a symbol which is not evaluated
-and an optional package which is evaluated. An optional form can also be included in the _args_ that
-is evaluated and the result returned. For each symbol in the package the _forms_ are called.`,
+			Text: `__do-all-symbols__ expects the _args_ to be a list of a symbol which is not evaluated.
+An optional form can also be included in the _args_ that is evaluated and the result returned. For
+each symbol in all the packages the _forms_ are called.`,
 			Examples: []string{
 				"(let ((lst ()))",
-				" (do-symbols (s *watch* lst) (add lst s))) => (watch-server watch-client ...)",
+				" (do-all-symbols (s lst) (add lst s))) => (car cdr ...)",
 			},
 		}, &slip.CLPkg)
 }
 
-// DoSymbols represents the do-symbols function.
-type DoSymbols struct {
+// DoAllSymbols represents the do-all-symbols function.
+type DoAllSymbols struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *DoSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *DoAllSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, -1)
 	d2 := depth + 1
 
@@ -56,7 +56,6 @@ func (f *DoSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if !ok {
 		slip.PanicType("args", args[0], "list")
 	}
-	pkg := s.Get("*package*").(*slip.Package)
 	var (
 		sym   slip.Symbol
 		rform slip.Object
@@ -65,18 +64,15 @@ func (f *DoSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicType("args symbol", sargs[0], "symbol")
 	}
 	if 1 < len(sargs) {
-		if pkg, ok = slip.EvalArg(s, sargs, 1, d2).(*slip.Package); !ok {
-			slip.PanicType("args package", sargs[1], "package")
-		}
-		if 2 < len(sargs) {
-			rform = sargs[2]
-		}
+		rform = sargs[1]
 	}
 	// While not necessary all names are collected and sorted to make results
 	// more consistent.
 	nm := map[string]struct{}{}
-	pkg.EachVarName(func(name string) { nm[name] = struct{}{} })
-	pkg.EachFuncName(func(name string) { nm[name] = struct{}{} })
+	for _, pkg := range slip.AllPackages() {
+		pkg.EachVarName(func(name string) { nm[name] = struct{}{} })
+		pkg.EachFuncName(func(name string) { nm[name] = struct{}{} })
+	}
 
 	names := make([]string, 0, len(nm))
 	for name := range nm {

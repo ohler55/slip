@@ -380,6 +380,15 @@ func PackageNames() (names List) {
 	return
 }
 
+// AllPackages returns a list of all packages.
+func AllPackages() []*Package {
+	pkgs := make([]*Package, 0, len(packages))
+	for _, pkg := range packages {
+		pkgs = append(pkgs, pkg)
+	}
+	return pkgs
+}
+
 // FindPackage returns the package matching the provided name.
 func FindPackage(name string) *Package {
 	// Try the direct way first.
