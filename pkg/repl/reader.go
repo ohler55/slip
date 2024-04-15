@@ -8,8 +8,6 @@ type reader interface {
 	reset()
 	setDepth(d int)
 	read() []byte
-	addWord(word string)
-	removeWord(word string)
 	addToHistory()
 	afterEval()
 }

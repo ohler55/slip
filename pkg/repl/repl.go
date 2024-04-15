@@ -349,25 +349,6 @@ func updateConfigFile() {
 	}
 }
 
-func setHook(p *slip.Package, key string) {
-	if p == &Pkg ||
-		strings.HasPrefix(key, "*print-") ||
-		key == "*bag-time-format*" ||
-		key == "*bag-time-wrap*" {
-		modifiedVars[key] = true
-		updateConfigFile()
-	}
-	replReader.addWord(key)
-}
-
-func unsetHook(p *slip.Package, key string) {
-	replReader.removeWord(key)
-}
-
-func defunHook(p *slip.Package, key string) {
-	replReader.addWord(key)
-}
-
 func getPrompt() slip.Object {
 	return slip.String(prompt)
 }

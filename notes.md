@@ -3,16 +3,12 @@
 - **multipass** or utm for linux
 
 - next
-
-
- + do-all-symbols
- + symbol-name
- + symbol-value
- + symbol-function
- + symbol-package
-
- - maybe padd or addf ro set and add
-  - addf (place &rest items)
+  - defpackage
+  - make-package (name &key nicnames use)
+  - use-package
+  - require (with lisp code)
+   - check for <name>.lisp and then load
+  - rename-package
 
  - package
   - support export list
@@ -24,10 +20,6 @@
      - maybe default to export
      - flag in FuncDoc or separate? depends on whether it's useful in docs
 
-  - defpackage
-  - create-package
-  - require (with lisp code)
-  - rename-package
   - do-external-symbols [same as do-symbols for now or until export is implemented]
   - shadow
   - package-shadowing-symbols
@@ -35,7 +27,6 @@
   - export
   - unexport
   - unuse-package
-  - use-package
   - find-symbol (string|symbol &optional package) => symbol, status
    - status
     - :internal - in package

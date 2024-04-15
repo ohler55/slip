@@ -73,10 +73,6 @@ func (ed *editor) initialize() {
 		ed.origState = term.MakeRaw(ed.fd)
 	}
 	ed.completer.Init()
-	slip.CurrentPackage.EachFuncName(ed.completer.Insert)
-	slip.CurrentPackage.EachVarName(ed.completer.Insert)
-	ed.completer.Sort()
-
 	go ed.chanRead()
 
 	ed.write([]byte("Entering the SLIP REPL editor. Type ctrl-h for help and key bindings.\n"))
@@ -156,14 +152,6 @@ func (ed *editor) reset() {
 	ed.pos = 0
 	ed.shift = 0
 	ed.mode = topMode
-}
-
-func (ed *editor) addWord(word string) {
-	ed.completer.Add(word)
-}
-
-func (ed *editor) removeWord(word string) {
-	ed.completer.Remove(word)
 }
 
 func (ed *editor) display() {
@@ -701,7 +689,7 @@ func (ed *editor) displayHelp(doc []byte, w, h int) {
 }
 
 func (ed *editor) displayCompletions() {
-	words := ed.completer.words[ed.completer.lo : ed.completer.hi+1]
+	words := completerWords[ed.completer.lo : ed.completer.hi+1]
 	w := int(atomic.LoadInt32(&ed.width))
 	leftPad := []byte{' ', ' ', ' '}
 	colWidth := 0

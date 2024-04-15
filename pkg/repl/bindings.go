@@ -616,7 +616,7 @@ func tab(ed *editor, b byte) bool {
 	pos++
 	if pos < ed.pos {
 		word := string(line[pos:ed.pos])
-		wa, lo, hi := ed.completer.Match(word)
+		wa, lo, hi := WordMatch(word)
 		if 0 < len(wa) {
 			if added := expandWord(word, wa, lo, hi); 0 < len(added) {
 				if ed.pos == len(ed.lines[ed.line]) {
@@ -683,7 +683,7 @@ func completeOverride(ed *editor) bool {
 		}
 	case "\n", "\r":
 		if 0 <= ed.completer.index {
-			word := ed.completer.words[ed.completer.lo+ed.completer.index]
+			word := completerWords[ed.completer.lo+ed.completer.index]
 			added := []rune(word)[len(ed.completer.target):]
 			if ed.pos == len(ed.lines[ed.line]) {
 				ed.lines[ed.line] = append(ed.lines[ed.line], added...)
