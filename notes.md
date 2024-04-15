@@ -5,14 +5,11 @@
 - next
 
 
- - do-all-symbols [same as do-symbols but no package specified, collect all names before continuing]
- - symbol-package
- - symbol-function
- - symbol-macrolet
- - symbol-name
- - symbol-package
- - symbol-plist
- - symbol-value
+ + do-all-symbols
+ + symbol-name
+ + symbol-value
+ + symbol-function
+ + symbol-package
 
  - maybe padd or addf ro set and add
   - addf (place &rest items)
@@ -28,6 +25,8 @@
      - flag in FuncDoc or separate? depends on whether it's useful in docs
 
   - defpackage
+  - create-package
+  - require (with lisp code)
   - rename-package
   - do-external-symbols [same as do-symbols for now or until export is implemented]
   - shadow
@@ -37,7 +36,6 @@
   - unexport
   - unuse-package
   - use-package
-  - require (with lisp code)
   - find-symbol (string|symbol &optional package) => symbol, status
    - status
     - :internal - in package
