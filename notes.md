@@ -3,12 +3,12 @@
 - **multipass** or utm for linux
 
 - next
-  - defpackage
-  - make-package (name &key nicnames use)
+  + make-package
+  + rename-package
   - use-package
   - require (with lisp code)
    - check for <name>.lisp and then load
-  - rename-package
+  - defpackage
 
  - package
   - support export list
