@@ -12,6 +12,10 @@ import (
 )
 
 func TestRenamePackagePackage(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+		slip.RemovePackage(slip.FindPackage("rename-test-2"))
+	}()
 	(&sliptest.Function{
 		Source: `(rename-package (make-package 'rename-test-1) 'rename-test-2 '(rt2))`,
 		Validate: func(t *testing.T, v slip.Object) {
@@ -23,20 +27,28 @@ func TestRenamePackagePackage(t *testing.T) {
 }
 
 func TestRenamePackageSymbol(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+		slip.RemovePackage(slip.FindPackage("rename-test-2"))
+	}()
 	(&sliptest.Function{
 		Source: `(progn
-                  (make-package 'rename-test-3)
-                  (rename-package 'rename-test-3 'rename-test-4))`,
-		Expect: "#<package rename-test-4>",
+                  (make-package 'rename-test-1)
+                  (rename-package 'rename-test-1 'rename-test-2))`,
+		Expect: "#<package rename-test-2>",
 	}).Test(t)
 }
 
 func TestRenamePackageString(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+		slip.RemovePackage(slip.FindPackage("rename-test-2"))
+	}()
 	(&sliptest.Function{
 		Source: `(progn
-                  (make-package 'rename-test-5)
-                  (rename-package "rename-test-5" "rename-test-6"))`,
-		Expect: "#<package rename-test-6>",
+                  (make-package 'rename-test-1)
+                  (rename-package "rename-test-1" "rename-test-2"))`,
+		Expect: "#<package rename-test-2>",
 	}).Test(t)
 }
 
@@ -50,30 +62,44 @@ func TestRenamePackageNotPackage(t *testing.T) {
 func TestRenamePackageNotFound(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(rename-package 'not-found "rename-test-7")`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.PackageErrorSymbol,
 	}).Test(t)
 }
 
 func TestRenamePackageExists(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+	}()
 	(&sliptest.Function{
 		Source: `(progn
-                  (make-package 'rename-test-8)
-                  (rename-package "rename-test-8" "bag"))`,
+                  (make-package 'rename-test-1)
+                  (rename-package "rename-test-1" "bag"))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 
 func TestRenamePackageBadNicknames(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+		slip.RemovePackage(slip.FindPackage("rename-test-2"))
+	}()
 	(&sliptest.Function{
 		Source: `(progn
-                  (make-package 'rename-test-9)
-                  (rename-package "rename-test-9" "rename-test-10" t))`,
+                  (make-package 'rename-test-1)
+                  (rename-package "rename-test-1" "rename-test-2" t))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
+}
+
+func TestRenamePackageBadNickname(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+		slip.RemovePackage(slip.FindPackage("rename-test-2"))
+	}()
 	(&sliptest.Function{
 		Source: `(progn
-                  (make-package 'rename-test-11)
-                  (rename-package "rename-test-11" "rename-test-12" '(bag)))`,
+                  (make-package 'rename-test-1)
+                  (rename-package "rename-test-1" "rename-test-2" '(bag)))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

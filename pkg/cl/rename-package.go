@@ -34,7 +34,7 @@ func init() {
 				},
 			},
 			Return: "package",
-			Text: `__rename-package__ Renames a _package_ with the _new-name_ and sets the package
+			Text: `__rename-package__ renames a _package_ with the _new-name_ and sets the package
 nicknames to _new-nicknames_.`,
 			Examples: []string{
 				`(setq pkg (make-package 'new-pack-1))`,
@@ -51,19 +51,9 @@ type RenamePackage struct {
 // Call the function with the arguments provided.
 func (f *RenamePackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 3)
-	var pkg *slip.Package
-	switch tv := args[0].(type) {
-	case slip.Symbol:
-		pkg = slip.FindPackage(string(tv))
-	case slip.String:
-		pkg = slip.FindPackage(string(tv))
-	case *slip.Package:
-		pkg = tv
-	default:
-		slip.PanicType("use", tv, "symbol", "string", "package")
-	}
+	pkg := packageFromArg(args[0], "package")
 	if pkg == nil {
-		slip.NewPanic("Package %s does not exist.", args[0])
+		slip.PanicPackage(nil, "Package %s does not exist.", args[0])
 	}
 	name := slip.MustBeString(args[1], "new-name")
 	if slip.FindPackage(name) != nil {

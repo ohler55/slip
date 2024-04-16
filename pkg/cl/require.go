@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"plugin"
+	"strings"
 
 	"github.com/ohler55/slip"
 )
@@ -104,6 +105,15 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 			return slip.Novalue
 		}
+		if strings.HasSuffix(strings.ToLower(name), ".lisp") {
+			filepath = fmt.Sprintf("%s/%s", path, name)
+		} else {
+			filepath = fmt.Sprintf("%s/%s.lisp", path, name)
+		}
+		if _, err := os.Stat(filepath); err == nil {
+			loadLispFile(s, filepath)
+			return slip.Novalue
+		}
 	}
 	panic(slip.NewError("Failed to find %s in any of the load paths.", name))
 }
@@ -114,4 +124,20 @@ func expandPath(path string) string {
 		path = home + path[1:]
 	}
 	return path
+}
+
+func loadLispFile(s *slip.Scope, path string) {
+	buf, err := os.ReadFile(path)
+	if err != nil {
+		slip.NewPanic("loading %s: %s", path, err)
+	}
+	defer func() {
+		s.Set(slip.Symbol("*load-pathname*"), nil)
+		s.Set(slip.Symbol("*load-truename*"), nil)
+	}()
+	s.Set(slip.Symbol("*load-pathname*"), slip.String(path))
+	s.Set(slip.Symbol("*load-truename*"), slip.String(path))
+	code := slip.Read(buf)
+	code.Compile()
+	code.Eval(s, nil)
 }

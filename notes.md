@@ -5,10 +5,22 @@
 - next
   + make-package
   + rename-package
-  - use-package
-  - require (with lisp code)
-   - check for <name>.lisp and then load
-  - defpackage
+  + delete-package
+  + use-package
+  + unuse-package
+  + require (with lisp code)
+  - defpackage defined-package-name [[option]] => package
+   - (defpackage "MY-PACKAGE"
+       (:nicknames "MYPKG" "MY-PKG")
+       (:use "COMMON-LISP")
+       (:shadow "CAR" "CDR")
+       (:shadowing-import-from "VENDOR-COMMON-LISP"  "CONS")
+       (:import-from "VENDOR-COMMON-LISP"  "GC")
+       (:export "EQ" "CONS" "FROBOLA"))
+   - for now just check types on all but use and nicknames
+    - function to read option readDefOption(name slip.Symbol, args slip.List)
+     - check keyword then strings (or symbol)
+
 
  - package
   - support export list
@@ -26,7 +38,6 @@
   - shadowing-import
   - export
   - unexport
-  - unuse-package
   - find-symbol (string|symbol &optional package) => symbol, status
    - status
     - :internal - in package

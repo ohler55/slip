@@ -12,9 +12,9 @@ import (
 // PackageSymbol is the symbol with a value of "package".
 const PackageSymbol = Symbol("package")
 
-var packages = map[string]*Package{
-	CLPkg.Name:   &CLPkg,
-	UserPkg.Name: &UserPkg,
+var packages = []*Package{
+	&CLPkg,
+	&UserPkg,
 }
 
 func init() {
@@ -58,7 +58,7 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		funcs:     map[string]*FuncInfo{},
 		PreSet:    DefaultPreSet,
 	}
-	packages[pkg.Name] = &pkg
+	packages = append(packages, &pkg)
 	addFeature(pkg.Name)
 
 	return &pkg
@@ -71,8 +71,24 @@ func DefaultPreSet(p *Package, name string, value Object) (string, Object) {
 
 // AddPackage adds a package.
 func AddPackage(pkg *Package) {
-	packages[pkg.Name] = pkg
+	packages = append(packages, pkg)
 	addFeature(pkg.Name)
+}
+
+// RemovePackage deletes a package.
+func RemovePackage(pkg *Package) {
+	if pkg != nil {
+		for i, p := range packages {
+			if pkg == p {
+				packages = append(packages[:i], packages[i+1:]...)
+				break
+			}
+		}
+		for _, u := range pkg.Uses {
+			pkg.Unuse(u)
+		}
+		pkg.Name = ""
+	}
 }
 
 // Initialize the package.
@@ -98,27 +114,73 @@ func (obj *Package) Initialize(vars map[string]*VarVal, local ...any) {
 
 // Use another package
 func (obj *Package) Use(pkg *Package) {
-	obj.mu.Lock()
-	pkg.mu.Lock()
-	defer func() {
-		obj.mu.Unlock()
-		pkg.mu.Unlock()
-	}()
-	for _, p := range obj.Uses {
-		if pkg.Name == p.Name {
-			return
+	if obj.Locked {
+		PanicPackage(obj, "Package %s is locked and can not be modified.", obj)
+	}
+	if obj != pkg {
+		obj.mu.Lock()
+		pkg.mu.Lock()
+		defer func() {
+			obj.mu.Unlock()
+			pkg.mu.Unlock()
+		}()
+		for _, p := range obj.Uses {
+			if pkg.Name == p.Name {
+				return
+			}
+		}
+		obj.Uses = append(obj.Uses, pkg)
+		pkg.Users = append(pkg.Users, obj)
+		if obj.vars == nil {
+			obj.vars = map[string]*VarVal{}
+		}
+		for name, vv := range pkg.vars {
+			obj.vars[name] = vv
+		}
+		if obj.funcs == nil {
+			obj.funcs = map[string]*FuncInfo{}
+		}
+		for name, fi := range pkg.funcs {
+			obj.funcs[name] = fi
 		}
 	}
-	obj.Uses = append(obj.Uses, pkg)
-	pkg.Users = append(pkg.Users, obj)
-	if obj.vars == nil {
+}
+
+// Unuse a package
+func (obj *Package) Unuse(pkg *Package) {
+	if obj.Locked {
+		PanicPackage(obj, "Package %s is locked and can not be modified.", obj)
+	}
+	if obj != pkg {
+		obj.mu.Lock()
+		pkg.mu.Lock()
+		defer func() {
+			obj.mu.Unlock()
+			pkg.mu.Unlock()
+		}()
+		for i, p := range obj.Uses {
+			if pkg.Name == p.Name {
+				obj.Uses = append(obj.Uses[:i], obj.Uses[i+1:]...)
+				break
+			}
+		}
+		for i, p := range pkg.Users {
+			if obj.Name == p.Name {
+				pkg.Users = append(pkg.Users[:i], pkg.Users[i+1:]...)
+				break
+			}
+		}
+		// Rebuild to make sure use tree branches are removed as well.
 		obj.vars = map[string]*VarVal{}
-	}
-	for name, vv := range pkg.vars {
-		obj.vars[name] = vv
-	}
-	for name, fi := range pkg.funcs {
-		obj.funcs[name] = fi
+		obj.funcs = map[string]*FuncInfo{}
+		for _, p := range obj.Uses {
+			for name, vv := range p.vars {
+				obj.vars[name] = vv
+			}
+			for name, fi := range p.funcs {
+				obj.funcs[name] = fi
+			}
+		}
 	}
 }
 
@@ -368,8 +430,8 @@ func (obj *Package) Eval(s *Scope, depth int) Object {
 
 // PackageNames returns a sorted list of package names.
 func PackageNames() (names List) {
-	for name := range packages {
-		names = append(names, String(name))
+	for _, pkg := range packages {
+		names = append(names, String(pkg.Name))
 	}
 	sort.Slice(names,
 		func(i, j int) bool {
@@ -382,26 +444,21 @@ func PackageNames() (names List) {
 
 // AllPackages returns a list of all packages.
 func AllPackages() []*Package {
-	pkgs := make([]*Package, 0, len(packages))
-	for _, pkg := range packages {
-		pkgs = append(pkgs, pkg)
-	}
+	pkgs := make([]*Package, len(packages))
+	copy(pkgs, packages)
 	return pkgs
 }
 
 // FindPackage returns the package matching the provided name.
 func FindPackage(name string) *Package {
-	// Try the direct way first.
-	if pkg := packages[name]; pkg != nil {
-		return pkg
-	}
-	name = strings.ToLower(name)
-	if pkg := packages[name]; pkg != nil {
-		return pkg
+	for _, pkg := range packages {
+		if strings.EqualFold(name, pkg.Name) {
+			return pkg
+		}
 	}
 	for _, pkg := range packages {
 		for _, nn := range pkg.Nicknames {
-			if nn == name {
+			if strings.EqualFold(name, nn) {
 				return pkg
 			}
 		}

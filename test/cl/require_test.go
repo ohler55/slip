@@ -73,3 +73,25 @@ func TestRequireBadPkg(t *testing.T) {
 		Panics: true,
 	}).Test(t)
 }
+
+func TestRequireLoadPathLisp(t *testing.T) {
+	slip.CurrentPackage.Set("*package-load-path*", slip.String("testdata"))
+	tf := sliptest.Function{
+		Source: `(require 'load-me)`,
+		Expect: "",
+	}
+	tf.Test(t)
+	result := slip.CompileString("load-test-me-too").Eval(slip.NewScope(), 0)
+	tt.Equal(t, "5", slip.ObjectString(result))
+}
+
+func TestRequireLisp(t *testing.T) {
+	slip.CurrentPackage.Set("*package-load-path*", nil)
+	tf := sliptest.Function{
+		Source: `(require 'load-me "testdata")`,
+		Expect: "",
+	}
+	tf.Test(t)
+	result := slip.CompileString("load-test-me-too").Eval(slip.NewScope(), 0)
+	tt.Equal(t, "5", slip.ObjectString(result))
+}
