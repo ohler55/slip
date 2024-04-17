@@ -3,24 +3,10 @@
 - **multipass** or utm for linux
 
 - next
-  + make-package
-  + rename-package
-  + delete-package
-  + use-package
-  + unuse-package
-  + require (with lisp code)
-  - defpackage defined-package-name [[option]] => package
-   - (defpackage "MY-PACKAGE"
-       (:nicknames "MYPKG" "MY-PKG")
-       (:use "COMMON-LISP")
-       (:shadow "CAR" "CDR")
-       (:shadowing-import-from "VENDOR-COMMON-LISP"  "CONS")
-       (:import-from "VENDOR-COMMON-LISP"  "GC")
-       (:export "EQ" "CONS" "FROBOLA"))
-   - for now just check types on all but use and nicknames
-    - function to read option readDefOption(name slip.Symbol, args slip.List)
-     - check keyword then strings (or symbol)
 
+ * [ ] SOFTWARE-TYPE
+ * [ ] SOFTWARE-VERSION
+ * [ ] REALP
 
  - package
   - support export list

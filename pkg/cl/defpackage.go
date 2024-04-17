@@ -9,11 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Defpackage{Function: slip.Function{Name: "defpackage", Args: args, SkipEval: []bool{false, true}}}
+			f := Defpackage{Function: slip.Function{Name: "defpackage", Args: args, SkipEval: []bool{true}}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "defpackage",
 			Args: []*slip.DocArg{
 				{
@@ -32,10 +33,10 @@ func init() {
 			Text: `__defpackage__ Defines a new _package_ with the _name_ and options. Options are:
   :nicknames
   :use
-  :shadow
-  :shadowing-import-from
-  :import-from
-  :export
+  :shadow _(not yet supported)_
+  :shadowing-import-from _(not yet supported)_
+  :import-from _(not yet supported)_
+  :export _(not yet supported)_
 `,
 			Examples: []string{
 				`(defpackage 'quux`,
@@ -53,13 +54,18 @@ type Defpackage struct {
 // Call the function with the arguments provided.
 func (f *Defpackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 7)
-	name := slip.MustBeString(args[0], "name")
+	a0 := slip.EvalArg(s, args, 0, depth)
+	name := slip.MustBeString(a0, "name")
 	if slip.FindPackage(name) != nil {
 		slip.NewPanic("Package %s already exists.", name)
 	}
 	rest := args[1:]
 	nicknames := readDefOption(":nicknames", rest)
-
+	for _, nn := range nicknames {
+		if slip.FindPackage(nn) != nil {
+			slip.NewPanic("Package %s already exists.", nn)
+		}
+	}
 	var use []*slip.Package
 	for _, name := range readDefOption(":use", rest) {
 		if p := slip.FindPackage(name); p == nil {

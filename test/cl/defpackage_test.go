@@ -16,7 +16,7 @@ func TestDefpackageSimple(t *testing.T) {
 		slip.RemovePackage(slip.FindPackage("defpack-test-1"))
 	}()
 	(&sliptest.Function{
-		Source: `(defpackage 'defpack-test-1 (:nicknames 'pt1 "pt-1"))`,
+		Source: `(defpackage 'defpack-test-1 (:nicknames pt1 "pt-1"))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			tt.Equal(t, "#<package defpack-test-1>", slip.ObjectString(v))
 			p := v.(*slip.Package)
@@ -37,7 +37,7 @@ func TestDefpackageUse(t *testing.T) {
                   (defpackage 'defpack-test-2 (:nicknames pt2))
                   (defpackage 'defpack-test-3 (:nicknames pt3))
                   (defpackage 'defpack-test-4 (:nicknames pt4))
-                  (defpackage 'defpack-test-5 (:use pt2 "pt3" (find-package 'pt4))))`,
+                  (defpackage 'defpack-test-5 (:use pt2 "pt3" pt4)))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			tt.Equal(t, "#<package defpack-test-5>", slip.ObjectString(v))
 			p5 := v.(*slip.Package)
@@ -75,6 +75,13 @@ func TestDefpackageBadNicknames(t *testing.T) {
 func TestDefpackageUseNotFound(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(defpackage 'test-defpack-6 (:use quux))`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.PackageErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefpackageBadOption(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(defpackage 'test-defpack-6 t)`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

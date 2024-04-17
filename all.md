@@ -76,13 +76,11 @@
  * [ ] CALL-METHOD
  * [ ] CALL-NEXT-METHOD
  * [ ] CASE
- * [ ] CATCH
  * [ ] CCASE
  * [ ] CHANGE-CLASS
  * [ ] CHECK-TYPE
  * [ ] CIS
  * [ ] CLEAR-OUTPUT
- * [ ] COERCE
  * [ ] COMPLEMENT
  * [ ] COMPLEX
  * [ ] COMPLEXP
@@ -115,7 +113,6 @@
  * [ ] DEFINE-MODIFY-MACRO
  * [ ] DEFINE-SETF-EXPANDER
  * [ ] DEFINE-SYMBOL-MACRO
- * [ ] DEFPACKAGE
  * [ ] DEFSETF
  * [ ] DEFSTRUCT
  * [ ] DEFTYPE
@@ -141,7 +138,7 @@
  * [ ] ENDP
  * [ ] ENOUGH-NAMESTRING
  * [ ] ENSURE-GENERIC-FUNCTION
- * [ ] ERROR
+ * [ ] ERROR (function)
  * [ ] ETYPECASE
  * [ ] EVAL-WHEN
  * [ ] EVERY
@@ -187,12 +184,10 @@
  * [ ] IMAGPART
  * [ ] IMPORT
  * [ ] INITIALIZE-INSTANCE
- * [ ] INLINE
  * [ ] INSPECT
  * [ ] INTEGER-DECODE-FLOAT
  * [ ] INTEGER-LENGTH
  * [ ] INTERACTIVE-STREAM-P
- * [ ] INVOKE-DEBUGGER
  * [ ] ISQRT
  * [ ] LABELS
  * [ ] LAMBDA-LIST-KEYWORDS
@@ -393,8 +388,6 @@
  * [ ] TAILP
  * [ ] TANH
  * [ ] THE
- * [ ] THROW
- * [ ] TRACE
  * [ ] TRANSLATE-LOGICAL-PATHNAME
  * [ ] TRANSLATE-PATHNAME
  * [ ] TRUENAME
@@ -404,14 +397,11 @@
  * [ ] TYPECASE
  * [ ] UNEXPORT
  * [ ] UNSIGNED-BYTE
- * [ ] UNTRACE
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
  * [ ] USE-VALUE
  * [ ] USER-HOMEDIR-PATHNAME
- * [ ] VALUES-LIST
- * [ ] VARIABLE
  * [ ] VECTOR-POP
  * [ ] VECTOR-PUSH
  * [ ] VECTOR-PUSH-EXTEND
@@ -563,6 +553,7 @@
  * [x] CLOSE
  * [x] CLRHASH
  * [x] CODE-CHAR
+ * [x] COERCE
  * [x] COND
  * [x] CONDITION
  * [x] CONS
@@ -575,6 +566,7 @@
  * [x] DEFCONSTANT
  * [x] DEFMACRO
  * [x] DEFMETHOD
+ * [x] DEFPACKAGE
  * [x] DEFPARAMETER
  * [x] DEFUN
  * [x] DEFVAR
@@ -885,6 +877,7 @@
  * [x] TERPRI
  * [x] THIRD
  * [x] TIME
+ * [x] TRACE
  * [x] TREE-EQUAL
  * [x] TRUNCATE
  * [x] TYPE
@@ -905,6 +898,8 @@
  * [x] UPPER-CASE-P
  * [x] USE-PACKAGE
  * [x] VALUES
+ * [x] VALUES-LIST
+ * [x] VARIABLE
  * [x] VECTOR
  * [x] VECTORP
  * [x] WARN
@@ -928,6 +923,7 @@
  - [-] *READ-EVAL*
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
+ - [-] CATCH (use recover instead)
  - [-] CERROR
  - [-] CLASS
  - [-] CLEAR-INPUT
@@ -947,6 +943,8 @@
  - [-] DELETE-IF-NOT
  - [-] FIND-IF-NOT
  - [-] FIND-RESTART
+ - [-] INLINE
+ - [-] INVOKE-DEBUGGER
  - [-] INVOKE-RESTART
  - [-] INVOKE-RESTART-INTERACTIVELY
  - [-] LISTEN
@@ -971,5 +969,7 @@
  - [-] STANDARD-METHOD
  - [-] STANDARD-OBJECT
  - [-] STYLE-WARNING
+ - [-] THROW (use panic instead)
+ - [-] UNTRACE
  - [-] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
  - [-] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
