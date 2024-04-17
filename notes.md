@@ -4,10 +4,6 @@
 
 - next
 
- * [ ] SOFTWARE-TYPE
- * [ ] SOFTWARE-VERSION
- * [ ] REALP
-
  - package
   - support export list
    - ListToFunc should be f.ListToFunc

@@ -310,7 +310,6 @@
  * [ ] READTABLE
  * [ ] READTABLE-CASE
  * [ ] READTABLEP
- * [ ] REALP
  * [ ] REALPART
  * [ ] REDUCE
  * [ ] REMF
@@ -354,8 +353,6 @@
  * [ ] SLOT-MISSING
  * [ ] SLOT-UNBOUND
  * [ ] SLOT-VALUE
- * [ ] SOFTWARE-TYPE
- * [ ] SOFTWARE-VERSION
  * [ ] SOME
  * [ ] SPACE
  * [ ] SPECIAL
@@ -796,6 +793,7 @@
  * [x] READ-LINE
  * [x] READER-ERROR
  * [x] REAL
+ * [x] REALP
  * [x] REM
  * [x] REMHASH
  * [x] REMOVE
@@ -835,6 +833,8 @@
  * [x] SINGLE-FLOAT-NEGATIVE-EPSILON
  * [x] SIXTH
  * [x] SLEEP
+ * [x] SOFTWARE-TYPE
+ * [x] SOFTWARE-VERSION
  * [x] SORT
  * [x] SQRT
  * [x] STABLE-SORT
