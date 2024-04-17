@@ -63,7 +63,7 @@ func init() {
 			Get: getStashLoadPath,
 			Set: setStashLoadPath,
 			Doc: `The stash load paths to search when calling the _use-stash_ function if a full path is not provided.
-The default value is ("." "~/.slip")`,
+The default value is ("." "~/.config/slip" "~/.slip")`,
 		},
 	}, &Ansi{})
 

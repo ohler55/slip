@@ -25,6 +25,7 @@ func DefConstant(sym Symbol, value Object, doc string) {
 	}
 	ConstantValues[name] = value
 	ConstantDocs[name] = doc
+	callSetHooks(CurrentPackage, name)
 }
 
 // GetConstant gets the value and documentation of the constant bound to the

@@ -3,6 +3,32 @@
 - **multipass** or utm for linux
 
 - next
+ + issue #68 (and added *config-directory*
+ + room (runtime.ReadMemStats)
+ + base64 (encode and decode in gi package)
+ - boole ops (bit-wise ops on integers, limit to fixnum)
+ - logand
+ - logior
+ - lognot
+ - logxor
+ - ash
+ * [ ] BOOLE
+ * [ ] BOOLE-1
+ * [ ] BOOLE-2
+ * [ ] BOOLE-AND
+ * [ ] BOOLE-ANDC1
+ * [ ] BOOLE-ANDC2
+ * [ ] BOOLE-C1
+ * [ ] BOOLE-C2
+ * [ ] BOOLE-CLR
+ * [ ] BOOLE-EQV
+ * [ ] BOOLE-IOR
+ * [ ] BOOLE-NAND
+ * [ ] BOOLE-NOR
+ * [ ] BOOLE-ORC1
+ * [ ] BOOLE-ORC2
+ * [ ] BOOLE-SET
+ * [ ] BOOLE-XOR
 
  - package
   - support export list
@@ -97,7 +123,6 @@
  - vector-push-extend - ...
 
  - merge (starts with result-type)
- - room
 
  - property lists
   - can modify but not add to or remove as list changes
@@ -126,8 +151,6 @@
   - also support integers unlike CL
   - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
 
-
-- base64 (encode and decode in gi package)
 
  - other method combinations?
   - :method-combination option for defflavor

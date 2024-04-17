@@ -64,11 +64,11 @@
  * [ ] BOOLE-ORC2
  * [ ] BOOLE-SET
  * [ ] BOOLE-XOR
- * [ ] BOOLEAN
+ * [x] BOOLEAN
  * [ ] BREAK
  * [ ] BROADCAST-STREAM
  * [ ] BROADCAST-STREAM-STREAMS
- * [ ] BUILT-IN-CLASS
+ * [x] BUILT-IN-CLASS
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
@@ -318,7 +318,7 @@
  * [ ] REPLACE
  * [ ] REST
  * [ ] REVAPPEND
- * [ ] ROOM
+ * [x] ROOM
  * [ ] ROTATEF
  * [ ] ROW-MAJOR-AREF
  * [ ] SAFETY
