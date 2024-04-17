@@ -12,6 +12,9 @@ import (
 )
 
 func TestMakePackageSimple(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("pack-test-1"))
+	}()
 	(&sliptest.Function{
 		Source: `(make-package 'pack-test-1 :nicknames '(pt1))`,
 		Validate: func(t *testing.T, v slip.Object) {
@@ -23,6 +26,12 @@ func TestMakePackageSimple(t *testing.T) {
 }
 
 func TestMakePackageUse(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("pack-test-5"))
+		slip.RemovePackage(slip.FindPackage("pack-test-4"))
+		slip.RemovePackage(slip.FindPackage("pack-test-3"))
+		slip.RemovePackage(slip.FindPackage("pack-test-2"))
+	}()
 	(&sliptest.Function{
 		Source: `(progn
                   (make-package 'pack-test-2 :nicknames '(pt2))

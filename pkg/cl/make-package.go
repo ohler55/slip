@@ -34,14 +34,14 @@ func init() {
 				},
 			},
 			Return: "package",
-			Text:   `__make-package__ Makes a new _package_ with the _name_, _nicknames_, and _use_.`,
+			Text:   `__make-package__ makes a new _package_ with the _name_, _nicknames_, and _use_.`,
 			Examples: []string{
 				`(make-package 'quux) => #<package quux>`,
 			},
 		}, &slip.CLPkg)
 }
 
-// MakePackage represents the makePackage function.
+// MakePackage represents the make-package function.
 type MakePackage struct {
 	slip.Function
 }

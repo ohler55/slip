@@ -76,13 +76,11 @@
  * [ ] CALL-METHOD
  * [ ] CALL-NEXT-METHOD
  * [ ] CASE
- * [ ] CATCH
  * [ ] CCASE
  * [ ] CHANGE-CLASS
  * [ ] CHECK-TYPE
  * [ ] CIS
  * [ ] CLEAR-OUTPUT
- * [ ] COERCE
  * [ ] COMPLEMENT
  * [ ] COMPLEX
  * [ ] COMPLEXP
@@ -115,11 +113,9 @@
  * [ ] DEFINE-MODIFY-MACRO
  * [ ] DEFINE-SETF-EXPANDER
  * [ ] DEFINE-SYMBOL-MACRO
- * [ ] DEFPACKAGE
  * [ ] DEFSETF
  * [ ] DEFSTRUCT
  * [ ] DEFTYPE
- * [ ] DELETE-PACKAGE
  * [ ] DENOMINATOR
  * [ ] DEPOSIT-FIELD
  * [ ] DESCRIBE-OBJECT
@@ -142,7 +138,7 @@
  * [ ] ENDP
  * [ ] ENOUGH-NAMESTRING
  * [ ] ENSURE-GENERIC-FUNCTION
- * [ ] ERROR
+ * [ ] ERROR (function)
  * [ ] ETYPECASE
  * [ ] EVAL-WHEN
  * [ ] EVERY
@@ -188,12 +184,10 @@
  * [ ] IMAGPART
  * [ ] IMPORT
  * [ ] INITIALIZE-INSTANCE
- * [ ] INLINE
  * [ ] INSPECT
  * [ ] INTEGER-DECODE-FLOAT
  * [ ] INTEGER-LENGTH
  * [ ] INTERACTIVE-STREAM-P
- * [ ] INVOKE-DEBUGGER
  * [ ] ISQRT
  * [ ] LABELS
  * [ ] LAMBDA-LIST-KEYWORDS
@@ -238,7 +232,6 @@
  * [ ] MAKE-LOAD-FORM
  * [ ] MAKE-LOAD-FORM-SAVING-SLOTS
  * [ ] MAKE-METHOD
- * [x] MAKE-PACKAGE
  * [ ] MAKE-PATHNAME
  * [ ] MAKE-SEQUENCE
  * [ ] MAKE-SYNONYM-STREAM
@@ -323,7 +316,6 @@
  * [ ] REMF
  * [ ] REMOVE-METHOD
  * [ ] REMPROP
- * [x] RENAME-PACKAGE
  * [ ] REPLACE
  * [ ] REST
  * [ ] REVAPPEND
@@ -396,8 +388,6 @@
  * [ ] TAILP
  * [ ] TANH
  * [ ] THE
- * [ ] THROW
- * [ ] TRACE
  * [ ] TRANSLATE-LOGICAL-PATHNAME
  * [ ] TRANSLATE-PATHNAME
  * [ ] TRUENAME
@@ -407,16 +397,11 @@
  * [ ] TYPECASE
  * [ ] UNEXPORT
  * [ ] UNSIGNED-BYTE
- * [ ] UNTRACE
- * [ ] UNUSE-PACKAGE
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
- * [ ] USE-PACKAGE
  * [ ] USE-VALUE
  * [ ] USER-HOMEDIR-PATHNAME
- * [ ] VALUES-LIST
- * [ ] VARIABLE
  * [ ] VECTOR-POP
  * [ ] VECTOR-PUSH
  * [ ] VECTOR-PUSH-EXTEND
@@ -568,6 +553,7 @@
  * [x] CLOSE
  * [x] CLRHASH
  * [x] CODE-CHAR
+ * [x] COERCE
  * [x] COND
  * [x] CONDITION
  * [x] CONS
@@ -580,6 +566,7 @@
  * [x] DEFCONSTANT
  * [x] DEFMACRO
  * [x] DEFMETHOD
+ * [x] DEFPACKAGE
  * [x] DEFPARAMETER
  * [x] DEFUN
  * [x] DEFVAR
@@ -587,6 +574,7 @@
  * [x] DELETE-DUPLICATES
  * [x] DELETE-FILE
  * [x] DELETE-IF
+ * [x] DELETE-PACKAGE
  * [x] DESCRIBE
  * [x] DIGIT-CHAR
  * [x] DIGIT-CHAR-P
@@ -709,6 +697,7 @@
  * [x] MAKE-CONDITION
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
+ * [x] MAKE-PACKAGE
  * [x] MAKE-RANDOM-STATE
  * [x] MAKE-STRING
  * [x] MAKE-STRING-INPUT-STREAM
@@ -813,6 +802,7 @@
  * [x] REMOVE-DUPLICATES
  * [x] REMOVE-IF
  * [x] RENAME-FILE
+ * [x] RENAME-PACKAGE
  * [x] REQUIRE
  * [x] RETURN
  * [x] RETURN-FROM
@@ -887,6 +877,7 @@
  * [x] TERPRI
  * [x] THIRD
  * [x] TIME
+ * [x] TRACE
  * [x] TREE-EQUAL
  * [x] TRUNCATE
  * [x] TYPE
@@ -903,8 +894,12 @@
  * [x] UNION
  * [x] UNLESS
  * [x] UNREAD-CHAR
+ * [x] UNUSE-PACKAGE
  * [x] UPPER-CASE-P
+ * [x] USE-PACKAGE
  * [x] VALUES
+ * [x] VALUES-LIST
+ * [x] VARIABLE
  * [x] VECTOR
  * [x] VECTORP
  * [x] WARN
@@ -928,6 +923,7 @@
  - [-] *READ-EVAL*
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
+ - [-] CATCH (use recover instead)
  - [-] CERROR
  - [-] CLASS
  - [-] CLEAR-INPUT
@@ -947,6 +943,8 @@
  - [-] DELETE-IF-NOT
  - [-] FIND-IF-NOT
  - [-] FIND-RESTART
+ - [-] INLINE
+ - [-] INVOKE-DEBUGGER
  - [-] INVOKE-RESTART
  - [-] INVOKE-RESTART-INTERACTIVELY
  - [-] LISTEN
@@ -971,5 +969,7 @@
  - [-] STANDARD-METHOD
  - [-] STANDARD-OBJECT
  - [-] STYLE-WARNING
+ - [-] THROW (use panic instead)
+ - [-] UNTRACE
  - [-] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
  - [-] UPDATE-INSTANCE-FOR-REDEFINED-CLASS

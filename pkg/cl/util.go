@@ -158,3 +158,17 @@ func placeN(f slip.Object, args slip.List, n int, value slip.Object) {
 	}
 	slip.PanicType("list", args[0], "cons", "list")
 }
+
+func packageFromArg(arg slip.Object, name string) (pkg *slip.Package) {
+	switch tv := arg.(type) {
+	case slip.Symbol:
+		pkg = slip.FindPackage(string(tv))
+	case slip.String:
+		pkg = slip.FindPackage(string(tv))
+	case *slip.Package:
+		pkg = tv
+	default:
+		slip.PanicType(name, tv, "symbol", "string", "package")
+	}
+	return
+}

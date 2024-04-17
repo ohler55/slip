@@ -16,6 +16,13 @@ func TestPackageName(t *testing.T) {
 	}).Test(t)
 }
 
+func TestPackageNameNotFound(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(package-name 'quux)`,
+		PanicType: slip.PackageErrorSymbol,
+	}).Test(t)
+}
+
 func TestPackageNameNotPackage(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(package-name t)`,

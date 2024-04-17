@@ -38,9 +38,12 @@ type PackageName struct {
 // Call the function with the arguments provided.
 func (f *PackageName) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	pkg, ok := args[0].(*slip.Package)
-	if !ok {
-		slip.PanicType("package", args[0], "package")
+	pkg := packageFromArg(args[0], "package-to-use")
+	if pkg == nil {
+		slip.PanicPackage(nil, "Package %s does not exist.", args[0])
 	}
-	return slip.String(pkg.Name)
+	if 0 < len(pkg.Name) {
+		return slip.String(pkg.Name)
+	}
+	return nil
 }

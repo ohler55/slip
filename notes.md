@@ -3,12 +3,10 @@
 - **multipass** or utm for linux
 
 - next
-  + make-package
-  + rename-package
-  - use-package
-  - require (with lisp code)
-   - check for <name>.lisp and then load
-  - defpackage
+
+ * [ ] SOFTWARE-TYPE
+ * [ ] SOFTWARE-VERSION
+ * [ ] REALP
 
  - package
   - support export list
@@ -26,7 +24,6 @@
   - shadowing-import
   - export
   - unexport
-  - unuse-package
   - find-symbol (string|symbol &optional package) => symbol, status
    - status
     - :internal - in package

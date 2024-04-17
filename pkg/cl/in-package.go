@@ -17,13 +17,13 @@ func init() {
 			Name: "in-package",
 			Args: []*slip.DocArg{
 				{
-					Name: "name",
-					Type: "string|symbol",
+					Name: "package",
+					Type: "package designator",
 					Text: "The _string_ to be searched for.",
 				},
 			},
 			Return: "package",
-			Text:   `__in-package__ finds a _package_ matching _name_ and sets _*package*_ to the found package.`,
+			Text:   `__in-package__ finds a _package_ matching _package_ and sets _*package*_ to the found package.`,
 			Examples: []string{
 				`(in-package "Cl") => #<package "common-lisp">`,
 			},
@@ -36,24 +36,13 @@ type InPackage struct {
 }
 
 // Call the function with the arguments provided.
-func (f *InPackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
+func (f *InPackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.ArgCountCheck(f, args, 1, 1)
+	pkg := packageFromArg(args[0], "package")
+	if pkg == nil {
+		slip.PanicPackage(nil, "The name %q does not designate any package.", pkg)
 	}
-	var name string
-	switch ta := args[0].(type) {
-	case slip.Symbol:
-		name = string(ta)
-	case slip.String:
-		name = string(ta)
-	default:
-		slip.PanicType("name", args[0], "string", "symbol")
-	}
-	p := slip.FindPackage(name)
-	if p == nil {
-		slip.PanicPackage(nil, "The name %q does not designate any package.", name)
-	}
-	slip.CLPkg.Set("*package*", p)
+	slip.CLPkg.Set("*package*", pkg)
 
-	return p
+	return pkg
 }

@@ -32,7 +32,7 @@ func TestPackage(t *testing.T) {
 				break
 			}
 		}
-		tt.Equal(t, true, has)
+		tt.Equal(t, true, has, "looking for %s", want)
 	}
 }
 
