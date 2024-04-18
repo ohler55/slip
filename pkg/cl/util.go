@@ -172,3 +172,26 @@ func packageFromArg(arg slip.Object, name string) (pkg *slip.Package) {
 	}
 	return
 }
+
+func reverseBytes(buf []byte) {
+	i, j := 0, len(buf)-1
+	for i < j {
+		buf[i], buf[j] = buf[j], buf[i]
+		i++
+		j--
+	}
+}
+
+func fixnumRevBytes(fn slip.Fixnum) []byte {
+	u := uint64(fn)
+	return []byte{
+		byte(u & 0xff),
+		byte((u >> 8) & 0xff),
+		byte((u >> 16) & 0xff),
+		byte((u >> 24) & 0xff),
+		byte((u >> 32) & 0xff),
+		byte((u >> 40) & 0xff),
+		byte((u >> 48) & 0xff),
+		byte((u >> 56) & 0xff),
+	}
+}

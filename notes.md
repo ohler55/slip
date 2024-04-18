@@ -6,29 +6,41 @@
  + issue #68 (and added *config-directory*
  + room (runtime.ReadMemStats)
  + base64 (encode and decode in gi package)
- - boole ops (bit-wise ops on integers, limit to fixnum)
- - logand
- - logior
- - lognot
- - logxor
- - ash
+ * [x] LOGAND
+ * [x] LOGIOR
+ * [ ] LOGXOR
+
+ * [ ] LOGEQV - even number of 1 is 1 else 0
+ * [ ] LOGANDC1
+ * [ ] LOGANDC2
+ * [ ] LOGBITP
+ * [ ] LOGCOUNT
+ * [ ] LOGICAL-PATHNAME
+ * [ ] LOGICAL-PATHNAME-TRANSLATIONS
+ * [ ] LOGNAND
+ * [ ] LOGNOR
+ * [ ] LOGNOT
+ * [ ] LOGORC1
+ * [ ] LOGORC2
+ * [ ] LOGTEST
+ * [ ] ASH
  * [ ] BOOLE
- * [ ] BOOLE-1
- * [ ] BOOLE-2
- * [ ] BOOLE-AND
- * [ ] BOOLE-ANDC1
- * [ ] BOOLE-ANDC2
- * [ ] BOOLE-C1
- * [ ] BOOLE-C2
- * [ ] BOOLE-CLR
- * [ ] BOOLE-EQV
- * [ ] BOOLE-IOR
- * [ ] BOOLE-NAND
- * [ ] BOOLE-NOR
- * [ ] BOOLE-ORC1
- * [ ] BOOLE-ORC2
- * [ ] BOOLE-SET
- * [ ] BOOLE-XOR
+   * [ ] BOOLE-1
+   * [ ] BOOLE-2
+   * [ ] BOOLE-AND
+   * [ ] BOOLE-ANDC1
+   * [ ] BOOLE-ANDC2
+   * [ ] BOOLE-C1
+   * [ ] BOOLE-C2
+   * [ ] BOOLE-CLR
+   * [ ] BOOLE-EQV
+   * [ ] BOOLE-IOR
+   * [ ] BOOLE-NAND
+   * [ ] BOOLE-NOR
+   * [ ] BOOLE-ORC1
+   * [ ] BOOLE-ORC2
+   * [ ] BOOLE-SET
+   * [ ] BOOLE-XOR
 
  - package
   - support export list
