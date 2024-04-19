@@ -201,21 +201,21 @@
  * [ ] LOAD-TIME-VALUE
  * [ ] LOCALLY
  * [x] LOGAND
- * [ ] LOGANDC1
- * [ ] LOGANDC2
+ * [x] LOGANDC1
+ * [x] LOGANDC2
  * [ ] LOGBITP
  * [ ] LOGCOUNT
- * [ ] LOGEQV
+ * [x] LOGEQV
  * [ ] LOGICAL-PATHNAME
  * [ ] LOGICAL-PATHNAME-TRANSLATIONS
  * [x] LOGIOR
- * [ ] LOGNAND
- * [ ] LOGNOR
- * [ ] LOGNOT
- * [ ] LOGORC1
- * [ ] LOGORC2
+ * [x] LOGNAND
+ * [x] LOGNOR
+ * [x] LOGNOT
+ * [x] LOGORC1
+ * [x] LOGORC2
  * [ ] LOGTEST
- * [ ] LOGXOR
+ * [x] LOGXOR
  * [ ] LONG-SITE-NAME
  * [ ] LOOP
  * [ ] LOOP-FINISH

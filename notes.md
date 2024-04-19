@@ -8,22 +8,22 @@
  + base64 (encode and decode in gi package)
  * [x] LOGAND
  * [x] LOGIOR
- * [ ] LOGXOR
+ * [x] LOGXOR
+ * [x] LOGEQV
+ * [x] LOGNOT
+ * [x] LOGANDC1
+ * [x] LOGANDC2
+ * [x] LOGNAND
+ * [x] LOGNOR
+ * [x] LOGORC1
+ * [x] LOGORC2
 
- * [ ] LOGEQV - even number of 1 is 1 else 0
- * [ ] LOGANDC1
- * [ ] LOGANDC2
  * [ ] LOGBITP
  * [ ] LOGCOUNT
- * [ ] LOGICAL-PATHNAME
- * [ ] LOGICAL-PATHNAME-TRANSLATIONS
- * [ ] LOGNAND
- * [ ] LOGNOR
- * [ ] LOGNOT
- * [ ] LOGORC1
- * [ ] LOGORC2
  * [ ] LOGTEST
+
  * [ ] ASH
+
  * [ ] BOOLE
    * [ ] BOOLE-1
    * [ ] BOOLE-2

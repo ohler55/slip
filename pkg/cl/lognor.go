@@ -1,0 +1,101 @@
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
+
+package cl
+
+import (
+	"math/big"
+
+	"github.com/ohler55/slip"
+)
+
+func init() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := Lognor{Function: slip.Function{Name: "lognor", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "lognor",
+			Args: []*slip.DocArg{
+				{
+					Name: "integer-1",
+					Type: "integer",
+					Text: "An integer.",
+				},
+				{
+					Name: "integer-2",
+					Type: "integer",
+					Text: "An integer.",
+				},
+			},
+			Return: "integer",
+			Text:   `__lognor__ returns a bit-wise OR of the complement of _integer-1_ and _integer-2_.`,
+			Examples: []string{
+				"(lognor 7 3) => -8",
+			},
+		}, &slip.CLPkg)
+}
+
+// Lognor represents the lognor function.
+type Lognor struct {
+	slip.Function
+}
+
+// Call the function with the arguments provided.
+func (f *Lognor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.ArgCountCheck(f, args, 2, 2)
+	return lognor(args[0], args[1])
+}
+
+func lognor(a1, a2 slip.Object) (result slip.Object) {
+	switch t1 := a1.(type) {
+	case slip.Fixnum:
+		switch t2 := a2.(type) {
+		case slip.Fixnum:
+			result = slip.Fixnum(^(uint64(t1) | uint64(t2)))
+		case *slip.Bignum:
+			result = bigLognor(big.NewInt(int64(t1)), (*big.Int)(t2))
+		default:
+			slip.PanicType("integer-2", t2, "integer")
+		}
+	case *slip.Bignum:
+		switch t2 := a2.(type) {
+		case slip.Fixnum:
+			result = bigLognor((*big.Int)(t1), big.NewInt(int64(t2)))
+		case *slip.Bignum:
+			result = bigLognor((*big.Int)(t1), (*big.Int)(t2))
+		default:
+			slip.PanicType("integer-2", t2, "integer")
+		}
+	default:
+		slip.PanicType("integer-1", t1, "integer")
+	}
+	return
+}
+
+func bigLognor(b1, b2 *big.Int) slip.Object {
+	bb1 := b1.Bytes()
+	reverseBytes(bb1)
+	bb2 := b2.Bytes()
+	reverseBytes(bb2)
+
+	if len(bb1) <= len(bb2) {
+		for i, b := range bb1 {
+			bb2[i] |= b
+		}
+	} else {
+		for i, b := range bb2 {
+			bb1[i] |= b
+		}
+		bb2 = bb1
+	}
+	for i, b := range bb2 {
+		bb2[i] = ^b
+	}
+	reverseBytes(bb2)
+	var bi big.Int
+	bi.SetBytes(bb2)
+
+	return (*slip.Bignum)(&bi)
+}

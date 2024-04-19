@@ -46,4 +46,8 @@ func TestLogandNotInteger(t *testing.T) {
 		Source:    `(logand #x77777777777777777777 t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(logand #x1234567890abcdef0 t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }
