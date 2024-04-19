@@ -26,7 +26,6 @@
  * [ ] ARRAY-TOTAL-SIZE
  * [ ] ARRAY-TOTAL-SIZE-LIMIT
  * [ ] ARRAYP
- * [ ] ASH
  * [ ] ASINH
  * [ ] ASSERT
  * [ ] ATANH
@@ -198,10 +197,8 @@
  * [ ] LOAD-LOGICAL-PATHNAME-TRANSLATIONS
  * [ ] LOAD-TIME-VALUE
  * [ ] LOCALLY
- * [ ] LOGCOUNT
  * [ ] LOGICAL-PATHNAME
  * [ ] LOGICAL-PATHNAME-TRANSLATIONS
- * [ ] LOGTEST
  * [ ] LONG-SITE-NAME
  * [ ] LOOP
  * [ ] LOOP-FINISH
@@ -348,7 +345,6 @@
  * [ ] STREAM-ELEMENT-TYPE
  * [ ] STREAM-EXTERNAL-FORMAT
  * [ ] STRING-STREAM
- * [ ] STRING-TRIM
  * [ ] STRUCTURE
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
@@ -466,6 +462,7 @@
  * [x] APPLY
  * [x] APROPOS
  * [x] APROPOS-LIST
+ * [x] ASH
  * [x] ASIN
  * [x] ASSOC
  * [x] ASSOC-IF
@@ -675,6 +672,7 @@
  * [x] LOGANDC1
  * [x] LOGANDC2
  * [x] LOGBITP
+ * [x] LOGCOUNT
  * [x] LOGEQV
  * [x] LOGIOR
  * [x] LOGNAND
@@ -682,6 +680,7 @@
  * [x] LOGNOT
  * [x] LOGORC1
  * [x] LOGORC2
+ * [x] LOGTEST
  * [x] LOGXOR
  * [x] LONG-FLOAT
  * [x] LONG-FLOAT-EPSILON
@@ -855,6 +854,7 @@
  * [x] STRING-NOT-GREATERP
  * [x] STRING-NOT-LESSP
  * [x] STRING-RIGHT-TRIM
+ * [x] STRING-TRIM
  * [x] STRING-UPCASE
  * [x] STRING/=
  * [x] STRING<

@@ -2,6 +2,9 @@
 
 - **multipass** or utm for linux
 
+- use complement is logxxCx functions
+ - negative for others should also handle negative
+
 - next
  + issue #68 (and added *config-directory*
  + room (runtime.ReadMemStats)
@@ -17,12 +20,10 @@
  * [x] LOGNOR
  * [x] LOGORC1
  * [x] LOGORC2
-
  * [x] LOGBITP
- * [ ] LOGCOUNT
- * [ ] LOGTEST
-
- * [ ] ASH
+ * [x] LOGCOUNT
+ * [x] LOGTEST
+ * [x] ASH
 
  * [ ] BOOLE
    * [ ] BOOLE-1
@@ -41,6 +42,8 @@
    * [ ] BOOLE-ORC2
    * [ ] BOOLE-SET
    * [ ] BOOLE-XOR
+
+ - add CI?
 
  - package
   - support export list

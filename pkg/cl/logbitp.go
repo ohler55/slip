@@ -30,7 +30,7 @@ func init() {
 				},
 			},
 			Return: "boolean",
-			Text:   `__logbitp__ returns true if the _index_ bit of _integer_ is .`,
+			Text:   `__logbitp__ returns true if the _index_ bit of _integer_ is set.`,
 			Examples: []string{
 				"(logbitp 2 5) => t",
 				"(logbitp 1 5) => nil",
@@ -62,8 +62,14 @@ func (f *Logbitp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		reverseBytes(ba)
 		bo := int(index) / 8
 		if bo < len(ba) {
-			if (ba[bo]>>(index%8))&0x01 == 1 {
-				return slip.True
+			if 0 < (*big.Int)(ti).Sign() {
+				if (ba[bo]>>(index%8))&0x01 == 1 {
+					return slip.True
+				}
+			} else {
+				if (ba[bo]>>(index%8))&0x01 != 1 {
+					return slip.True
+				}
 			}
 		}
 	default:

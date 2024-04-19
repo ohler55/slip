@@ -3,6 +3,8 @@
 package cl
 
 import (
+	"fmt"
+	"math/big"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -194,4 +196,34 @@ func fixnumRevBytes(fn slip.Fixnum) []byte {
 		byte((u >> 48) & 0xff),
 		byte((u >> 56) & 0xff),
 	}
+}
+
+func complement(v slip.Object) (result slip.Object) {
+	switch tv := v.(type) {
+	case slip.Fixnum:
+		result = slip.Fixnum(^uint64(tv))
+	case *slip.Bignum:
+		// TBD invert all bytes
+		//   add 1
+		//  .Bytes() does not consider sign so use original and add 1 then set sign
+		fmt.Printf("*** %x\n", (*big.Int)(tv))
+		buf := (*big.Int)(tv).Bytes()
+		fmt.Printf("*** before: %v\n", buf)
+		for i, b := range buf {
+			buf[i] = ^b
+		}
+		fmt.Printf("*** after: %v\n", buf)
+		var bi big.Int
+		bi.SetBytes(buf)
+		fmt.Printf("*** result: %x\n", &bi)
+		if (*big.Int)(tv).Sign() < 0 {
+			bi.Neg(&bi)
+		}
+		fmt.Printf("*** result: %x\n", &bi)
+		// TBD set sign?
+		result = (*slip.Bignum)(&bi)
+	default:
+		slip.PanicType("integer", tv, "integer")
+	}
+	return
 }

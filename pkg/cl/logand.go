@@ -40,10 +40,10 @@ type Logand struct {
 
 // Call the function with the arguments provided.
 func (f *Logand) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	return logAnd(args)
+	return logand(args)
 }
 
-func logAnd(args slip.List) slip.Object {
+func logand(args slip.List) slip.Object {
 	var result uint64 = 0xffffffffffffffff
 	for _, v := range args {
 		switch tv := v.(type) {

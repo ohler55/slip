@@ -18,6 +18,10 @@ func TestLogbitpFixnum(t *testing.T) {
 		Source: `(logbitp 2 5)`,
 		Expect: "t",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(logbitp 2 -5)`,
+		Expect: "nil",
+	}).Test(t)
 }
 
 func TestLogbitpBignum(t *testing.T) {
@@ -26,8 +30,16 @@ func TestLogbitpBignum(t *testing.T) {
 		Expect: "t",
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(logbitp 64 (- 0 #x010203040506070809))`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(logbitp 63 #x010203040506070809)`,
 		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(logbitp 63 (- 0 #x010203040506070809))`,
+		Expect: "t",
 	}).Test(t)
 }
 
