@@ -64,11 +64,9 @@
  * [ ] BOOLE-ORC2
  * [ ] BOOLE-SET
  * [ ] BOOLE-XOR
- * [x] BOOLEAN
  * [ ] BREAK
  * [ ] BROADCAST-STREAM
  * [ ] BROADCAST-STREAM-STREAMS
- * [x] BUILT-IN-CLASS
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
@@ -200,22 +198,10 @@
  * [ ] LOAD-LOGICAL-PATHNAME-TRANSLATIONS
  * [ ] LOAD-TIME-VALUE
  * [ ] LOCALLY
- * [x] LOGAND
- * [x] LOGANDC1
- * [x] LOGANDC2
- * [ ] LOGBITP
  * [ ] LOGCOUNT
- * [x] LOGEQV
  * [ ] LOGICAL-PATHNAME
  * [ ] LOGICAL-PATHNAME-TRANSLATIONS
- * [x] LOGIOR
- * [x] LOGNAND
- * [x] LOGNOR
- * [x] LOGNOT
- * [x] LOGORC1
- * [x] LOGORC2
  * [ ] LOGTEST
- * [x] LOGXOR
  * [ ] LONG-SITE-NAME
  * [ ] LOOP
  * [ ] LOOP-FINISH
@@ -318,7 +304,6 @@
  * [ ] REPLACE
  * [ ] REST
  * [ ] REVAPPEND
- * [x] ROOM
  * [ ] ROTATEF
  * [ ] ROW-MAJOR-AREF
  * [ ] SAFETY
@@ -488,8 +473,10 @@
  * [x] ATAN
  * [x] ATOM
  * [x] BLOCK
+ * [x] BOOLEAN
  * [x] BOTH-CASE-P
  * [x] BOUNDP
+ * [x] BUILT-IN-CLASS
  * [x] BUTLAST
  * [x] CAAAAR
  * [x] CAAADR
@@ -684,6 +671,18 @@
  * [x] LISTP
  * [x] LOAD
  * [x] LOG
+ * [x] LOGAND
+ * [x] LOGANDC1
+ * [x] LOGANDC2
+ * [x] LOGBITP
+ * [x] LOGEQV
+ * [x] LOGIOR
+ * [x] LOGNAND
+ * [x] LOGNOR
+ * [x] LOGNOT
+ * [x] LOGORC1
+ * [x] LOGORC2
+ * [x] LOGXOR
  * [x] LONG-FLOAT
  * [x] LONG-FLOAT-EPSILON
  * [x] LONG-FLOAT-NEGATIVE-EPSILON
@@ -805,6 +804,7 @@
  * [x] RETURN
  * [x] RETURN-FROM
  * [x] REVERSE
+ * [x] ROOM
  * [x] ROUND
  * [x] RPLACA
  * [x] RPLACD

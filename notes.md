@@ -18,7 +18,7 @@
  * [x] LOGORC1
  * [x] LOGORC2
 
- * [ ] LOGBITP
+ * [x] LOGBITP
  * [ ] LOGCOUNT
  * [ ] LOGTEST
 
