@@ -23,7 +23,7 @@ var (
 	version = ""
 
 	showVersion bool
-	cfgDir      = "~/.slip"
+	cfgDir      string
 	evalCode    string
 	interactive bool
 	trace       bool
@@ -31,6 +31,7 @@ var (
 )
 
 func init() {
+	cfgDir = repl.FindConfigDir()
 	flag.BoolVar(&showVersion, "v", showVersion, "version")
 	flag.BoolVar(&trace, "t", trace, "trace")
 	flag.BoolVar(&repl.DebugEditor, "debug", repl.DebugEditor, "log each keypress to editor.log")
@@ -65,6 +66,8 @@ usage: %s [<options>] [<filepath>]...
 		fmt.Printf("slip version: %s\n", version)
 		return
 	}
+	slip.DefConstant(slip.Symbol("*config-directory*"), slip.String(cfgDir), "Config directory")
+
 	run()
 }
 

@@ -3,6 +3,7 @@
 package cl
 
 import (
+	"math/big"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -169,6 +170,47 @@ func packageFromArg(arg slip.Object, name string) (pkg *slip.Package) {
 		pkg = tv
 	default:
 		slip.PanicType(name, tv, "symbol", "string", "package")
+	}
+	return
+}
+
+func reverseBytes(buf []byte) {
+	i, j := 0, len(buf)-1
+	for i < j {
+		buf[i], buf[j] = buf[j], buf[i]
+		i++
+		j--
+	}
+}
+
+func fixnumRevBytes(fn slip.Fixnum) []byte {
+	u := uint64(fn)
+	return []byte{
+		byte(u & 0xff),
+		byte((u >> 8) & 0xff),
+		byte((u >> 16) & 0xff),
+		byte((u >> 24) & 0xff),
+		byte((u >> 32) & 0xff),
+		byte((u >> 40) & 0xff),
+		byte((u >> 48) & 0xff),
+		byte((u >> 56) & 0xff),
+	}
+}
+
+func complement(v slip.Object) (result slip.Object) {
+	switch tv := v.(type) {
+	case slip.Fixnum:
+		result = slip.Fixnum(^uint64(tv))
+	case *slip.Bignum:
+		var bi big.Int
+		if 0 <= (*big.Int)(tv).Sign() {
+			bi.Add((*big.Int)(tv), big.NewInt(1))
+			bi.Neg(&bi)
+		} else {
+			bi.Add((*big.Int)(tv), big.NewInt(1))
+			bi.Neg(&bi)
+		}
+		result = (*slip.Bignum)(&bi)
 	}
 	return
 }

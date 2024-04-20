@@ -26,7 +26,6 @@
  * [ ] ARRAY-TOTAL-SIZE
  * [ ] ARRAY-TOTAL-SIZE-LIMIT
  * [ ] ARRAYP
- * [ ] ASH
  * [ ] ASINH
  * [ ] ASSERT
  * [ ] ATANH
@@ -47,28 +46,9 @@
  * [ ] BIT-VECTOR
  * [ ] BIT-VECTOR-P
  * [ ] BIT-XOR
- * [ ] BOOLE
- * [ ] BOOLE-1
- * [ ] BOOLE-2
- * [ ] BOOLE-AND
- * [ ] BOOLE-ANDC1
- * [ ] BOOLE-ANDC2
- * [ ] BOOLE-C1
- * [ ] BOOLE-C2
- * [ ] BOOLE-CLR
- * [ ] BOOLE-EQV
- * [ ] BOOLE-IOR
- * [ ] BOOLE-NAND
- * [ ] BOOLE-NOR
- * [ ] BOOLE-ORC1
- * [ ] BOOLE-ORC2
- * [ ] BOOLE-SET
- * [ ] BOOLE-XOR
- * [ ] BOOLEAN
  * [ ] BREAK
  * [ ] BROADCAST-STREAM
  * [ ] BROADCAST-STREAM-STREAMS
- * [ ] BUILT-IN-CLASS
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
@@ -200,22 +180,8 @@
  * [ ] LOAD-LOGICAL-PATHNAME-TRANSLATIONS
  * [ ] LOAD-TIME-VALUE
  * [ ] LOCALLY
- * [ ] LOGAND
- * [ ] LOGANDC1
- * [ ] LOGANDC2
- * [ ] LOGBITP
- * [ ] LOGCOUNT
- * [ ] LOGEQV
  * [ ] LOGICAL-PATHNAME
  * [ ] LOGICAL-PATHNAME-TRANSLATIONS
- * [ ] LOGIOR
- * [ ] LOGNAND
- * [ ] LOGNOR
- * [ ] LOGNOT
- * [ ] LOGORC1
- * [ ] LOGORC2
- * [ ] LOGTEST
- * [ ] LOGXOR
  * [ ] LONG-SITE-NAME
  * [ ] LOOP
  * [ ] LOOP-FINISH
@@ -318,7 +284,6 @@
  * [ ] REPLACE
  * [ ] REST
  * [ ] REVAPPEND
- * [ ] ROOM
  * [ ] ROTATEF
  * [ ] ROW-MAJOR-AREF
  * [ ] SAFETY
@@ -363,7 +328,6 @@
  * [ ] STREAM-ELEMENT-TYPE
  * [ ] STREAM-EXTERNAL-FORMAT
  * [ ] STRING-STREAM
- * [ ] STRING-TRIM
  * [ ] STRUCTURE
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
@@ -481,6 +445,7 @@
  * [x] APPLY
  * [x] APROPOS
  * [x] APROPOS-LIST
+ * [x] ASH
  * [x] ASIN
  * [x] ASSOC
  * [x] ASSOC-IF
@@ -488,8 +453,27 @@
  * [x] ATAN
  * [x] ATOM
  * [x] BLOCK
+ * [x] BOOLE
+ * [x] BOOLE-1
+ * [x] BOOLE-2
+ * [x] BOOLE-AND
+ * [x] BOOLE-ANDC1
+ * [x] BOOLE-ANDC2
+ * [x] BOOLE-C1
+ * [x] BOOLE-C2
+ * [x] BOOLE-CLR
+ * [x] BOOLE-EQV
+ * [x] BOOLE-IOR
+ * [x] BOOLE-NAND
+ * [x] BOOLE-NOR
+ * [x] BOOLE-ORC1
+ * [x] BOOLE-ORC2
+ * [x] BOOLE-SET
+ * [x] BOOLE-XOR
+ * [x] BOOLEAN
  * [x] BOTH-CASE-P
  * [x] BOUNDP
+ * [x] BUILT-IN-CLASS
  * [x] BUTLAST
  * [x] CAAAAR
  * [x] CAAADR
@@ -684,6 +668,20 @@
  * [x] LISTP
  * [x] LOAD
  * [x] LOG
+ * [x] LOGAND
+ * [x] LOGANDC1
+ * [x] LOGANDC2
+ * [x] LOGBITP
+ * [x] LOGCOUNT
+ * [x] LOGEQV
+ * [x] LOGIOR
+ * [x] LOGNAND
+ * [x] LOGNOR
+ * [x] LOGNOT
+ * [x] LOGORC1
+ * [x] LOGORC2
+ * [x] LOGTEST
+ * [x] LOGXOR
  * [x] LONG-FLOAT
  * [x] LONG-FLOAT-EPSILON
  * [x] LONG-FLOAT-NEGATIVE-EPSILON
@@ -805,6 +803,7 @@
  * [x] RETURN
  * [x] RETURN-FROM
  * [x] REVERSE
+ * [x] ROOM
  * [x] ROUND
  * [x] RPLACA
  * [x] RPLACD
@@ -855,6 +854,7 @@
  * [x] STRING-NOT-GREATERP
  * [x] STRING-NOT-LESSP
  * [x] STRING-RIGHT-TRIM
+ * [x] STRING-TRIM
  * [x] STRING-UPCASE
  * [x] STRING/=
  * [x] STRING<

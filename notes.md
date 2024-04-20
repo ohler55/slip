@@ -4,6 +4,8 @@
 
 - next
 
+ - add CI?
+
  - package
   - support export list
    - ListToFunc should be f.ListToFunc
@@ -97,7 +99,6 @@
  - vector-push-extend - ...
 
  - merge (starts with result-type)
- - room
 
  - property lists
   - can modify but not add to or remove as list changes
@@ -126,8 +127,6 @@
   - also support integers unlike CL
   - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
 
-
-- base64 (encode and decode in gi package)
 
  - other method combinations?
   - :method-combination option for defflavor

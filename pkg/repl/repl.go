@@ -63,6 +63,7 @@ var (
 
 	stashLoadPath = slip.List{
 		slip.String("."),
+		slip.String("~/.config/slip"),
 		slip.String("~/.slip"),
 	}
 	defaultStashName = "stash.lisp"
@@ -72,6 +73,9 @@ var (
 )
 
 func init() {
+	if ev := os.Getenv("XDG_CONFIG_HOME"); 0 < len(ev) {
+		stashLoadPath = append(slip.List{slip.String(ev)}, stashLoadPath...)
+	}
 	if scope.Get(slip.Symbol(printANSI)) != nil {
 		warnPrefix = "\x1b[31m"
 		setPrompt(slip.String("\x1b[1;94m▶ \x1b[m"))
@@ -189,6 +193,29 @@ func Stop() {
 // ZeroMods resets the modified variables list.
 func ZeroMods() {
 	modifiedVars = map[string]bool{}
+}
+
+// FindConfigDir finds the preferred config directory.
+func FindConfigDir() (dir string) {
+	home, _ := os.UserHomeDir()
+	if path := os.Getenv("XDG_CONFIG_HOME"); 0 < len(path) {
+		dir = strings.Replace(path, "~", home, 1)
+	} else {
+		for _, path := range []string{"~/.config/slip", "~/.slip"} {
+			fp := strings.Replace(path, "~", home, 1)
+			if fi, err := os.Stat(fp); err == nil && fi.IsDir() {
+				dir = fp
+				break
+			}
+		}
+		if len(dir) == 0 {
+			dir = "~/.config/slip"
+		}
+	}
+	if fp, err := filepath.Abs(filepath.Clean(dir)); err == nil {
+		dir = fp
+	}
+	return
 }
 
 func initStash() {
