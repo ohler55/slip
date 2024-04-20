@@ -19,22 +19,22 @@ func TestLognorFixnum(t *testing.T) {
 func TestLognorBignum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognor #x33333333333333333333 #x383838383838383838))`,
-		Expect: `"ccc4c4c4c4c4c4c4c4c4"`, // same as -333B3B3B3B3B3B3B3B3C
+		Expect: `"-333b3b3b3b3b3b3b3b3c"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognor #x333333333333333333 #x38383838383838383838))`,
-		Expect: `"c7c4c4c4c4c4c4c4c4c4"`, // same as -383B3B3B3B3B3B3B3B3C
+		Expect: `"-383b3b3b3b3b3b3b3b3c"`,
 	}).Test(t)
 }
 
 func TestLognorMixed(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognor #x333333333333333333 #x3838383838383838))`,
-		Expect: `"ccc4c4c4c4c4c4c4c4"`, // same as -333B3B3B3B3B3B3B3C
+		Expect: `"-333b3b3b3b3b3b3b3c"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognor #x3333333333333333 #x383838383838383838))`,
-		Expect: `"c7c4c4c4c4c4c4c4c4"`, // same as -383B3B3B3B3B3B3B3C
+		Expect: `"-383b3b3b3b3b3b3b3c"`,
 	}).Test(t)
 }
 

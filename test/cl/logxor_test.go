@@ -28,6 +28,10 @@ func TestLogxorMixed(t *testing.T) {
 		Source: `(format nil "~X" (logxor #x12345678 #x33333333333333333333 #x383838383838383838))`,
 		Expect: `"330b0b0b0b0b193f5d73"`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(format nil "~X" (logxor #x12345678 #x33333333333333 #x383838383838383838))`,
+		Expect: `"38380b0b0b193f5d73"`,
+	}).Test(t)
 }
 
 func TestLogxorNoArgs(t *testing.T) {

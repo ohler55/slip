@@ -75,33 +75,9 @@ func logorc1(a1, a2 slip.Object) (result slip.Object) {
 }
 
 func bigLogorc1(b1, b2 *big.Int) slip.Object {
-	bb1 := b1.Bytes()
-	reverseBytes(bb1)
-	bb2 := b2.Bytes()
-	reverseBytes(bb2)
-
-	var (
-		i int
-		b byte
-	)
-	if len(bb1) <= len(bb2) {
-		for i, b = range bb1 {
-			bb2[i] |= ^b
-		}
-		for i++; i < len(bb2); i++ {
-			bb2[i] = 0xff
-		}
-	} else {
-		for i, _ = range bb2 {
-			bb2[i] |= ^bb1[i]
-		}
-		for i++; i < len(bb1); i++ {
-			bb2 = append(bb2, ^bb1[i])
-		}
-	}
-	reverseBytes(bb2)
 	var bi big.Int
-	bi.SetBytes(bb2)
+	c1 := complement((*slip.Bignum)(b1)).(*slip.Bignum)
+	bi.Or((*big.Int)(c1), b2)
 
 	return (*slip.Bignum)(&bi)
 }

@@ -46,23 +46,6 @@
  * [ ] BIT-VECTOR
  * [ ] BIT-VECTOR-P
  * [ ] BIT-XOR
- * [ ] BOOLE
- * [ ] BOOLE-1
- * [ ] BOOLE-2
- * [ ] BOOLE-AND
- * [ ] BOOLE-ANDC1
- * [ ] BOOLE-ANDC2
- * [ ] BOOLE-C1
- * [ ] BOOLE-C2
- * [ ] BOOLE-CLR
- * [ ] BOOLE-EQV
- * [ ] BOOLE-IOR
- * [ ] BOOLE-NAND
- * [ ] BOOLE-NOR
- * [ ] BOOLE-ORC1
- * [ ] BOOLE-ORC2
- * [ ] BOOLE-SET
- * [ ] BOOLE-XOR
  * [ ] BREAK
  * [ ] BROADCAST-STREAM
  * [ ] BROADCAST-STREAM-STREAMS
@@ -470,6 +453,23 @@
  * [x] ATAN
  * [x] ATOM
  * [x] BLOCK
+ * [x] BOOLE
+ * [x] BOOLE-1
+ * [x] BOOLE-2
+ * [x] BOOLE-AND
+ * [x] BOOLE-ANDC1
+ * [x] BOOLE-ANDC2
+ * [x] BOOLE-C1
+ * [x] BOOLE-C2
+ * [x] BOOLE-CLR
+ * [x] BOOLE-EQV
+ * [x] BOOLE-IOR
+ * [x] BOOLE-NAND
+ * [x] BOOLE-NOR
+ * [x] BOOLE-ORC1
+ * [x] BOOLE-ORC2
+ * [x] BOOLE-SET
+ * [x] BOOLE-XOR
  * [x] BOOLEAN
  * [x] BOTH-CASE-P
  * [x] BOUNDP

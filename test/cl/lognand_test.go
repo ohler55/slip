@@ -19,22 +19,22 @@ func TestLognandFixnum(t *testing.T) {
 func TestLognandBignum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognand #x33333333333333333333 #x383838383838383838))`,
-		Expect: `"ffcfcfcfcfcfcfcfcfcf"`, // same as -303030303030303031
+		Expect: `"-303030303030303031"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognand #x333333333333333333 #x38383838383838383838))`,
-		Expect: `"ffcfcfcfcfcfcfcfcfcf"`, // same as -303030303030303031
+		Expect: `"-303030303030303031"`,
 	}).Test(t)
 }
 
 func TestLognandMixed(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognand #x333333333333333333 #x3838383838383838))`,
-		Expect: `"ffcfcfcfcfcfcfcfcf"`, // same as -3030303030303031
+		Expect: `"-3030303030303031"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognand #x3333333333333333 #x383838383838383838))`,
-		Expect: `"ffcfcfcfcfcfcfcfcf"`, // same as -3030303030303031
+		Expect: `"-3030303030303031"`,
 	}).Test(t)
 }
 

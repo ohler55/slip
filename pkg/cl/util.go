@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"math/big"
 	"strings"
 
@@ -203,27 +202,15 @@ func complement(v slip.Object) (result slip.Object) {
 	case slip.Fixnum:
 		result = slip.Fixnum(^uint64(tv))
 	case *slip.Bignum:
-		// TBD invert all bytes
-		//   add 1
-		//  .Bytes() does not consider sign so use original and add 1 then set sign
-		fmt.Printf("*** %x\n", (*big.Int)(tv))
-		buf := (*big.Int)(tv).Bytes()
-		fmt.Printf("*** before: %v\n", buf)
-		for i, b := range buf {
-			buf[i] = ^b
-		}
-		fmt.Printf("*** after: %v\n", buf)
 		var bi big.Int
-		bi.SetBytes(buf)
-		fmt.Printf("*** result: %x\n", &bi)
-		if (*big.Int)(tv).Sign() < 0 {
+		if 0 <= (*big.Int)(tv).Sign() {
+			bi.Add((*big.Int)(tv), big.NewInt(1))
+			bi.Neg(&bi)
+		} else {
+			bi.Add((*big.Int)(tv), big.NewInt(1))
 			bi.Neg(&bi)
 		}
-		fmt.Printf("*** result: %x\n", &bi)
-		// TBD set sign?
 		result = (*slip.Bignum)(&bi)
-	default:
-		slip.PanicType("integer", tv, "integer")
 	}
 	return
 }

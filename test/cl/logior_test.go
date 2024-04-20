@@ -28,6 +28,10 @@ func TestLogiorMixed(t *testing.T) {
 		Source: `(format nil "~X" (logior #x12345678 #x11111111111111111111 #x282828282828282828))`,
 		Expect: `"1139393939393b3d7f79"`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(format nil "~X" (logior #x12345678 #x11111111111111 #x282828282828282828))`,
+		Expect: `"28283939393b3d7f79"`,
+	}).Test(t)
 }
 
 func TestLogiorNoArgs(t *testing.T) {

@@ -19,7 +19,7 @@ func TestLognotFixnum(t *testing.T) {
 func TestLognotBignum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(format nil "~X" (lognot #x333333333333333333))`,
-		Expect: `"cccccccccccccccccc"`, // same as -333333333333333334
+		Expect: `"-333333333333333334"`,
 	}).Test(t)
 }
 

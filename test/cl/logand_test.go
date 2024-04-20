@@ -28,6 +28,10 @@ func TestLogandMixed(t *testing.T) {
 		Source: `(format nil "~X" (logand #x12345678 #x77777777777777777777 #x383838383838383838))`,
 		Expect: `"10301030"`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(format nil "~X" (logand #x12345678 #x77777777777777 #x383838383838383838))`,
+		Expect: `"10301030"`,
+	}).Test(t)
 }
 
 func TestLogandNoArgs(t *testing.T) {

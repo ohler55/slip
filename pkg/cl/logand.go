@@ -59,32 +59,27 @@ func logand(args slip.List) slip.Object {
 }
 
 func bigLogAnd(args slip.List) slip.Object {
-	var buf []byte // bytes in reverse
+	var bi big.Int
+	first := true
 	for _, v := range args {
-		var bb []byte
 		switch tv := v.(type) {
 		case slip.Fixnum:
-			bb = fixnumRevBytes(tv)
+			if first {
+				_ = bi.SetInt64(int64(tv))
+				first = false
+			} else {
+				_ = bi.And(&bi, big.NewInt(int64(tv)))
+			}
 		case *slip.Bignum:
-			bb = (*big.Int)(tv).Bytes()
-			reverseBytes(bb)
+			if first {
+				bi.Set((*big.Int)(tv))
+				first = false
+			} else {
+				_ = bi.And(&bi, (*big.Int)(tv))
+			}
 		default:
 			slip.PanicType("integer", tv, "integer")
 		}
-		if len(buf) == 0 {
-			buf = bb
-		} else {
-			if len(bb) < len(buf) {
-				buf = buf[:len(bb)]
-			}
-			for i := len(buf) - 1; 0 <= i; i-- {
-				buf[i] &= bb[i]
-			}
-		}
 	}
-	reverseBytes(buf)
-	var bi big.Int
-	bi.SetBytes(buf)
-
 	return (*slip.Bignum)(&bi)
 }

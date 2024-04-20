@@ -48,12 +48,8 @@ func lognot(arg slip.Object) (result slip.Object) {
 	case slip.Fixnum:
 		result = slip.Fixnum(^uint64(ta))
 	case *slip.Bignum:
-		bb := (*big.Int)(ta).Bytes()
-		for i, b := range bb {
-			bb[i] = ^b
-		}
 		var bi big.Int
-		bi.SetBytes(bb)
+		_ = bi.Not((*big.Int)(ta))
 		result = (*slip.Bignum)(&bi)
 	default:
 		slip.PanicType("integer", ta, "integer")

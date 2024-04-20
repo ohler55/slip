@@ -75,27 +75,7 @@ func lognor(a1, a2 slip.Object) (result slip.Object) {
 }
 
 func bigLognor(b1, b2 *big.Int) slip.Object {
-	bb1 := b1.Bytes()
-	reverseBytes(bb1)
-	bb2 := b2.Bytes()
-	reverseBytes(bb2)
-
-	if len(bb1) <= len(bb2) {
-		for i, b := range bb1 {
-			bb2[i] |= b
-		}
-	} else {
-		for i, b := range bb2 {
-			bb1[i] |= b
-		}
-		bb2 = bb1
-	}
-	for i, b := range bb2 {
-		bb2[i] = ^b
-	}
-	reverseBytes(bb2)
 	var bi big.Int
-	bi.SetBytes(bb2)
-
-	return (*slip.Bignum)(&bi)
+	bi.Or(b1, b2)
+	return (*slip.Bignum)(complement((*slip.Bignum)(&bi)).(*slip.Bignum))
 }

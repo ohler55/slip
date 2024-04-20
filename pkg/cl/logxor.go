@@ -59,36 +59,27 @@ func logxor(args slip.List) slip.Object {
 }
 
 func bigLogxor(args slip.List) slip.Object {
-	var buf []byte // bytes in reverse
+	var bi big.Int
+	first := true
 	for _, v := range args {
-		var bb []byte
 		switch tv := v.(type) {
 		case slip.Fixnum:
-			bb = fixnumRevBytes(tv)
+			if first {
+				_ = bi.SetInt64(int64(tv))
+				first = false
+			} else {
+				_ = bi.Xor(&bi, big.NewInt(int64(tv)))
+			}
 		case *slip.Bignum:
-			bb = (*big.Int)(tv).Bytes()
-			reverseBytes(bb)
+			if first {
+				bi.Set((*big.Int)(tv))
+				first = false
+			} else {
+				_ = bi.Xor(&bi, (*big.Int)(tv))
+			}
 		default:
 			slip.PanicType("integer", tv, "integer")
 		}
-		if len(buf) == 0 {
-			buf = bb
-		} else {
-			if len(bb) <= len(buf) {
-				for i, b := range bb {
-					buf[i] ^= b
-				}
-			} else {
-				for i, b := range buf {
-					bb[i] ^= b
-				}
-				buf = bb
-			}
-		}
 	}
-	reverseBytes(buf)
-	var bi big.Int
-	bi.SetBytes(buf)
-
 	return (*slip.Bignum)(&bi)
 }
