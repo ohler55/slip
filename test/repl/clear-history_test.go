@@ -14,8 +14,10 @@ import (
 
 func TestClearHistoryAll(t *testing.T) {
 	repl.TheHistory.SetLimit(100)
-	filename := "./config/history"
-	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
+	filename := "config/history"
+	err := os.MkdirAll("config", 0755)
+	tt.Nil(t, err)
+	err = os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
 	tt.Nil(t, err)
 	repl.TheHistory.LoadExpanded(filename)
 	(&sliptest.Function{
@@ -27,8 +29,10 @@ func TestClearHistoryAll(t *testing.T) {
 
 func TestClearHistoryStartEnd(t *testing.T) {
 	repl.TheHistory.SetLimit(100)
-	filename := "./config/history"
-	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
+	filename := "config/history"
+	err := os.MkdirAll("config", 0755)
+	tt.Nil(t, err)
+	err = os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
 	tt.Nil(t, err)
 	repl.TheHistory.LoadExpanded(filename)
 	(&sliptest.Function{

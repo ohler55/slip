@@ -12,7 +12,9 @@ import (
 
 func TestStashLoadExpanded(t *testing.T) {
 	filename := "config/history"
-	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
+	err := os.MkdirAll("config", 0755)
+	tt.Nil(t, err)
+	err = os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
 	tt.Nil(t, err)
 
 	var s repl.Stash
@@ -72,7 +74,9 @@ func TestStashLoadNoFile(t *testing.T) {
 
 func TestStashUseCase(t *testing.T) {
 	filename := "config/history"
-	err := os.WriteFile(filename, []byte("\n"), 0666)
+	err := os.MkdirAll("config", 0755)
+	tt.Nil(t, err)
+	err = os.WriteFile(filename, []byte("\n"), 0666)
 	tt.Nil(t, err)
 
 	var s repl.Stash
@@ -132,8 +136,10 @@ four
 func TestStashAdd(t *testing.T) {
 	var s repl.Stash
 	filename := "config/quux"
+	err := os.MkdirAll("config", 0755)
+	tt.Nil(t, err)
 	_ = os.RemoveAll(filename)
-	err := os.WriteFile(filename, []byte{}, 0666)
+	err = os.WriteFile(filename, []byte{}, 0666)
 	tt.Nil(t, err)
 
 	s.LoadExpanded(filename)
@@ -150,7 +156,9 @@ func TestStashAdd(t *testing.T) {
 func TestStashClear(t *testing.T) {
 	var s repl.Stash
 	filename := "config/history"
-	err := os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
+	err := os.MkdirAll("config", 0755)
+	tt.Nil(t, err)
+	err = os.WriteFile(filename, []byte("one\n(+ 1\t   2\t   3)\n\n(* 2\n   four)\n"), 0666)
 	tt.Nil(t, err)
 
 	s.LoadExpanded(filename)
@@ -167,7 +175,9 @@ func TestStashClear(t *testing.T) {
 func TestStashLoadExpandedBadForm(t *testing.T) {
 	var s repl.Stash
 	filename := "config/history"
-	err := os.WriteFile(filename, []byte(")\n"), 0666)
+	err := os.MkdirAll("config", 0755)
+	tt.Nil(t, err)
+	err = os.WriteFile(filename, []byte(")\n"), 0666)
 	tt.Nil(t, err)
 
 	tt.Panic(t, func() { s.LoadExpanded(filename) })
