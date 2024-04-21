@@ -563,5 +563,5 @@ func (f *Coerce) notPossible(arg slip.Object, rtype string) {
 	if arg == nil {
 		slip.NewPanic("Can not coerce a nil into a %s", rtype)
 	}
-	slip.NewPanic("Can not coerce a %s into a %s", arg.Hierarchy()[0], rtype)
+	slip.NewPanic("Can not coerce %s a %s into a %s", arg, arg.Hierarchy()[0], rtype)
 }
