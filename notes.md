@@ -4,11 +4,13 @@
 
 - next
 
+ - coerce
+  - also support numbers
+  - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
+
  - add CI?
- - trace (move from gi to cl)
-  - change to be like CL but if arg is :all then match all
-  - keep map of traced functions and lookup is tracing is on
-  - (trace) => list of names being traced
+ - plist?
+ - vector?
 
  - package
   - support export list
@@ -83,18 +85,6 @@
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
 
- - trace
-  - should trace by function be supported instead of overall trace?
-   - maybe (trace t) to turn on all as currently implemented and nil to turn off
-    - (untrace) turns off all
-   - move trace to pkg/cl
-   - function names (specs) can be symbol, string, (METHOD name qualifiers) - qualifiers could be flavor and daemon?
-    - for methods
-     - special case for :send and look at sendMap
-      - method then flavor sub-map
-      - or submap for daemon before that?
-      - or maybe method includes daemon (:before:foo as key)
-
 
  - array
   - add fill-pointer for one dimensional arrays
@@ -127,9 +117,6 @@
    - M-y for next
    - need hookup with system copy and paste
 
- - coerce
-  - also support integers unlike CL
-  - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
 
 
  - other method combinations?
