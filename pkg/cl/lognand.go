@@ -77,5 +77,5 @@ func lognand(a1, a2 slip.Object) (result slip.Object) {
 func bigLognand(b1, b2 *big.Int) slip.Object {
 	var bi big.Int
 	bi.And(b1, b2)
-	return (*slip.Bignum)(complement((*slip.Bignum)(&bi)).(*slip.Bignum))
+	return complement((*slip.Bignum)(&bi)).(*slip.Bignum)
 }

@@ -58,14 +58,14 @@ type testRunCaller bool
 func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	_, verbose, trace := getRunKeys(args)
 	if trace {
-		slip.Trace(true)
+		slip.Trace(slip.List{slip.True})
 	}
 	self := s.Get("self").(*flavors.Instance)
 	name, _ := s.Get("name").(slip.String)
 	defer func() {
 		s.Set("*current-test*", nil)
 		w, _ := s.Get("*standard-output*").(io.Writer)
-		slip.Trace(false)
+		slip.Untrace(nil)
 		var (
 			indent []byte
 			bold   = ""

@@ -5,6 +5,10 @@
 - next
 
  - add CI?
+ - trace (move from gi to cl)
+  - change to be like CL but if arg is :all then match all
+  - keep map of traced functions and lookup is tracing is on
+  - (trace) => list of names being traced
 
  - package
   - support export list

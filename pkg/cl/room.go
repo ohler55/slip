@@ -80,7 +80,9 @@ func (f *Room) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	fmt.Fprintf(w, "GC reserved:           %10d bytes\n", ms.GCSys)
 	fmt.Fprintf(w, "Pointer references:    %10d\n", ms.Lookups)
 	fmt.Fprintf(w, "Allocation by size:\n")
-	for _, bs := range ms.BySize {
+	for i := 0; i < len(ms.BySize); i++ {
+		bs := ms.BySize[i]
+		// for _, bs := range ms.BySize {
 		fmt.Fprintf(w, "  %10d mallocs, %10d frees for size <= %d bytes\n", bs.Mallocs, bs.Frees, bs.Size)
 	}
 	return slip.Novalue

@@ -63,7 +63,7 @@ func (f *Ash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		if sh < 0 {
 			sh = -sh
 			bs := sh / 8
-			sh = sh % 8
+			sh %= 8
 			mask := byte(^(0xff << sh))
 			var rem byte
 			for i, b := range ba {
@@ -75,7 +75,7 @@ func (f *Ash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 			bs := sh / 8
 			bn := make([]byte, len(ba)+bs+1)
 			copy(bn[1:], ba)
-			sh = sh % 8
+			sh %= 8
 			mask := byte(^(0xff >> sh))
 			// fmt.Printf("*** before %v - %d\n", bn, sh)
 			for i, b := range bn {

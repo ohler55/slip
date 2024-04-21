@@ -203,13 +203,8 @@ func complement(v slip.Object) (result slip.Object) {
 		result = slip.Fixnum(^uint64(tv))
 	case *slip.Bignum:
 		var bi big.Int
-		if 0 <= (*big.Int)(tv).Sign() {
-			bi.Add((*big.Int)(tv), big.NewInt(1))
-			bi.Neg(&bi)
-		} else {
-			bi.Add((*big.Int)(tv), big.NewInt(1))
-			bi.Neg(&bi)
-		}
+		bi.Add((*big.Int)(tv), big.NewInt(1))
+		bi.Neg(&bi)
 		result = (*slip.Bignum)(&bi)
 	}
 	return
