@@ -4,8 +4,6 @@
 
 - next
 
- - add CI?
-
  - vector and array
   - maybe limit to adjustable with no fill pointer
   -
