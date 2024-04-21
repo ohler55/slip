@@ -4,6 +4,7 @@ package slip
 
 import (
 	"io"
+	"sort"
 	"strconv"
 )
 
@@ -12,13 +13,52 @@ const warnANSIKey = "*repl-warning-ansi*"
 var (
 	beforeEval = noopBefore
 	afterEval  = normalAfter
+	traceFuncs map[string]bool
 )
 
 // Trace turns tracing on or off for the scope and any future sub-scopes.
-func Trace(on bool) {
-	if on {
+func Trace(args List) (names List) {
+	switch {
+	case len(args) == 0:
+		if traceFuncs != nil {
+			keys := make([]string, 0, len(traceFuncs))
+			for k := range traceFuncs {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			names = make(List, len(keys))
+			for i, k := range keys {
+				names[i] = Symbol(k)
+			}
+		} else {
+			names = List{True}
+		}
+	case len(args) == 1 && args[0] == True:
 		beforeEval = traceBefore
 		afterEval = traceAfter
+	default:
+		if traceFuncs == nil {
+			traceFuncs = map[string]bool{}
+		}
+		for _, a := range args {
+			traceFuncs[MustBeString(a, "trace")] = true
+		}
+		beforeEval = traceSelectedBefore
+		afterEval = traceSelectedAfter
+	}
+	return
+}
+
+// Untrace turns tracing off for the scope and any future sub-scopes. If no
+// arguments then tracing is turned off for all else just for the specified
+// functions.
+func Untrace(args List) {
+	if 0 < len(args) {
+		if traceFuncs != nil {
+			for _, a := range args {
+				delete(traceFuncs, MustBeString(a, "untrace"))
+			}
+		}
 	} else {
 		beforeEval = noopBefore
 		afterEval = normalAfter
@@ -88,6 +128,18 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 		p.stack = []string{ObjectString(append(List{Symbol(name)}, args...))}
 		traceWriterPanic(s, b, p)
 		panic(p)
+	}
+}
+
+func traceSelectedBefore(s *Scope, name string, args List, depth int) {
+	if traceFuncs[name] {
+		traceBefore(s, name, args, depth)
+	}
+}
+
+func traceSelectedAfter(s *Scope, name string, args List, depth int, result *Object) {
+	if traceFuncs[name] {
+		traceAfter(s, name, args, depth, result)
 	}
 }
 

@@ -93,7 +93,7 @@ func run() {
 		repl.Stop()
 	}()
 	if trace {
-		slip.Trace(true)
+		slip.Trace(slip.List{slip.True})
 	}
 	var scope *slip.Scope
 	if 0 < len(evalCode) && !interactive {

@@ -77,5 +77,5 @@ func lognor(a1, a2 slip.Object) (result slip.Object) {
 func bigLognor(b1, b2 *big.Int) slip.Object {
 	var bi big.Int
 	bi.Or(b1, b2)
-	return (*slip.Bignum)(complement((*slip.Bignum)(&bi)).(*slip.Bignum))
+	return complement((*slip.Bignum)(&bi)).(*slip.Bignum)
 }
