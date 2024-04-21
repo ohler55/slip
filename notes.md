@@ -4,13 +4,9 @@
 
 - next
 
- - coerce
-  - also support numbers
-  - only support symbols (later lists like '(integer 3 5) or '(and list (not null)) )
-
- - add CI?
- - plist?
- - vector?
+ - vector and array
+  - maybe limit to adjustable with no fill pointer
+  -
 
  - package
   - support export list
@@ -94,12 +90,20 @@
 
  - merge (starts with result-type)
 
- - property lists
-  - can modify but not add to or remove as list changes
-  - getf for existing only
-  - setf for existing only
-  - remf replace key and value with nil
-
+ - plist (property lists) - tied to a symbol which makes it global, less useful as such
+  - get (also a placer)
+  - getf (same as get?)
+  - get-properties
+  - remprop
+  - remf
+  - symbol-plist
+  - in gi package
+   - put (non-standard)
+   - plistp
+   - plist-value
+   - plist-values
+   - plist-keys
+   - doplist
 
  - future repl options
   - color for words
@@ -116,8 +120,6 @@
    - ^y for yank
    - M-y for next
    - need hookup with system copy and paste
-
-
 
  - other method combinations?
   - :method-combination option for defflavor
