@@ -10,7 +10,10 @@ clean:
 lint:
 	golangci-lint run
 
-test: lint
+testlint: lint
 	make -C test
 
-.PHONY: all lint clean build test
+test:
+	make -C test
+
+.PHONY: all lint clean build test test
