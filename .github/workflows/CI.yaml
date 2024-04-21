@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+      - name: get dependencies
+        run: go mod download
+      - name: Test
+        run: make test
+
+  macos:
+    strategy:
+      fail-fast: true
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup  Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+      - name: get dependencies
+        run: go mod download
+      - name: Test
+        run: make test
