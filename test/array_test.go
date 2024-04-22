@@ -69,7 +69,65 @@ func TestArrayMisc(t *testing.T) {
 	a := testArray()
 	tt.Equal(t, 24, a.Size())
 	tt.Equal(t, []int{2, 3, 4}, a.Dimensions())
+	tt.Equal(t, 3, a.Rank())
+	tt.Equal(t, true, a.Adjustable())
+	tt.Equal(t, slip.TrueSymbol, a.ElementType())
 	tt.Equal(t, []interface{}{nil}, slip.NewArray([]int{1}, slip.TrueSymbol, nil, nil, true).Simplify())
+}
+
+func TestArrayAdjustShrink(t *testing.T) {
+	a := testArray()
+	a.Adjust([]int{1, 2, 3}, slip.TrueSymbol, nil, nil)
+	tt.Equal(t, "(((0 1 2) (4 5 6)))",
+		a.AsList().String())
+}
+
+func TestArrayAdjustExpand(t *testing.T) {
+	a := testArray()
+	_ = a.Adjust([]int{1, 2, 3}, slip.TrueSymbol, nil, nil) // shrink first
+
+	a.Adjust([]int{2, 3, 4}, slip.TrueSymbol, slip.Fixnum(99), nil)
+	tt.Equal(t, "(((0 1 2 99) (4 5 6 99) (99 99 99 99)) ((99 99 99 99) (99 99 99 99) (99 99 99 99)))",
+		a.AsList().String())
+}
+
+func TestArrayAdjustNotAdjustable(t *testing.T) {
+	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{nil, nil}}, false)
+	a2 := a.Adjust([]int{1, 2}, slip.FixnumSymbol, nil, nil)
+	tt.Equal(t, slip.TrueSymbol, a.ElementType())
+	tt.Equal(t, slip.FixnumSymbol, a2.ElementType())
+}
+
+func TestArrayAdjustTypeCheck(t *testing.T) {
+	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{slip.Fixnum(1), slip.Fixnum(2)}}, true)
+	a2 := a.Adjust([]int{1, 2}, slip.FixnumSymbol, nil, nil)
+	tt.Equal(t, slip.FixnumSymbol, a.ElementType())
+	tt.Equal(t, slip.FixnumSymbol, a2.ElementType())
+}
+
+func TestArrayAdjustInitContents(t *testing.T) {
+	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{slip.Fixnum(1), slip.Fixnum(2)}}, true)
+	_ = a.Adjust([]int{1, 2}, slip.FixnumSymbol, nil, slip.List{slip.List{slip.Fixnum(3), slip.Fixnum(4)}})
+	tt.Equal(t, "((3 4))", a.AsList().String())
+
+	tt.Panic(t, func() {
+		_ = a.Adjust([]int{1, 2}, slip.FixnumSymbol, nil, slip.True)
+	})
+}
+
+func TestArrayAdjustBadDims(t *testing.T) {
+	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{nil, nil}}, true)
+	tt.Panic(t, func() { _ = a.Adjust([]int{1, 2, 3}, slip.TrueSymbol, nil, nil) })
+}
+
+func TestArrayContent(t *testing.T) {
+	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{nil, nil}}, true)
+	tt.Equal(t, "((nil nil))", a.AsList().String())
+
+	tt.Panic(t, func() { _ = slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.TrueSymbol, true) })
+	tt.Panic(t, func() {
+		_ = slip.NewArray([]int{1, 2}, slip.FixnumSymbol, nil, slip.List{slip.List{slip.Symbol("x"), nil}}, true)
+	})
 }
 
 func testArray() *slip.Array {

@@ -27,7 +27,7 @@ type Array struct {
 	sizes       []int
 	elements    []Object
 	elementType Symbol // defaults to TrueSymbol which is empty string
-	exAdjust    bool   // expressly adjustable
+	adjustable  bool
 }
 
 // NewArray creates a new array with the specified dimensions and initial
@@ -43,7 +43,7 @@ func NewArray(
 		dims:        dimensions,
 		sizes:       make([]int, len(dimensions)),
 		elementType: elementType,
-		exAdjust:    adjustable,
+		adjustable:  adjustable,
 	}
 	size := 1
 	for i := len(dimensions) - 1; 0 <= i; i-- {
@@ -52,9 +52,11 @@ func NewArray(
 	}
 	a.elements = make([]Object, size)
 	if initContent != nil {
-
-		// TBD checked dimensions
-
+		if list, ok := initContent.(List); ok {
+			a.SetAll(list)
+		} else {
+			PanicType("initial-contents", initContent, "list")
+		}
 	} else if initElement != nil {
 		for i := len(a.elements) - 1; 0 <= i; i-- {
 			a.elements[i] = initElement
@@ -74,7 +76,7 @@ func (obj *Array) calcAndSet(list List) {
 			obj.sizes[i] = size
 			size *= len(list)
 			if i < len(obj.dims)-1 {
-				if list, ok = list[0].(List); !ok { // TBD last?
+				if list, ok = list[0].(List); !ok {
 					NewPanic("Invalid data for a %d dimension array. %s", len(obj.dims), list)
 				}
 			}
@@ -203,6 +205,7 @@ func (obj *Array) Set(value Object, indexes ...int) {
 		}
 		pos += index * obj.sizes[i]
 	}
+	checkArrayElementType(value, obj.elementType)
 	obj.elements[pos] = value
 }
 
@@ -247,6 +250,7 @@ func (obj *Array) setDim(list List, di, ei int) int {
 	}
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
+			checkArrayElementType(list[i], obj.elementType)
 			obj.elements[ei] = list[i]
 			ei++
 		}
@@ -263,7 +267,85 @@ func (obj *Array) setDim(list List, di, ei int) int {
 	return ei
 }
 
-// Resize the array using the initVal as the value for new elements.
-func (obj *Array) Resize(initVal Object, dimensions ...int) {
-	// TBD
+func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Object, initContent Object) *Array {
+	if len(dimensions) != len(obj.dims) {
+		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dimensions))
+	}
+	if !obj.adjustable {
+		return NewArray(dimensions, elementType, initElement, initContent, false)
+	}
+	if initContent != nil { // start over
+		obj.dims = dimensions
+		obj.sizes = make([]int, len(dimensions))
+		obj.elementType = elementType
+		size := 1
+		for i := len(dimensions) - 1; 0 <= i; i-- {
+			obj.sizes[i] = size
+			size *= dimensions[i]
+		}
+		obj.elements = make([]Object, size)
+		if list, ok := initContent.(List); ok {
+			obj.SetAll(list)
+		} else {
+			PanicType("initial-contents", initContent, "list")
+		}
+		return obj
+	}
+	if TrueSymbol != elementType {
+		for _, v := range obj.elements {
+			checkArrayElementType(v, elementType)
+		}
+	}
+	tmp := NewArray(dimensions, elementType, initElement, nil, true)
+	index := make([]int, len(obj.dims))
+top:
+	for pos := len(tmp.elements) - 1; 0 <= pos; pos-- {
+		off := pos
+		for i, sz := range tmp.sizes {
+			index[i] = off / sz
+			off %= sz
+		}
+		opos := 0
+		for i, idx := range index {
+			d := obj.dims[i]
+			if d <= idx {
+				tmp.elements[pos] = initElement
+				continue top
+			}
+			opos += idx * obj.sizes[i]
+		}
+		tmp.elements[pos] = obj.elements[opos]
+	}
+	obj.dims = tmp.dims
+	obj.sizes = tmp.sizes
+	obj.elements = tmp.elements
+	obj.elementType = elementType
+
+	return obj
+}
+
+func checkArrayElementType(v Object, et Symbol) {
+	if v != nil && 0 < len(et) {
+		for _, sym := range v.Hierarchy() {
+			if sym == et {
+				return
+			}
+		}
+		PanicType("array element", v, string(et))
+	}
+}
+
+// Rank of the array is returned,
+func (obj *Array) Rank() int {
+	return len(obj.dims)
+}
+
+// Adjustable returns true if the array is adjustable.
+func (obj *Array) Adjustable() bool {
+	return obj.adjustable
+}
+
+// ElementType returns the element-type of the array.
+func (obj *Array) ElementType() Symbol {
+	return obj.elementType
 }

@@ -5,8 +5,6 @@
 - next
 
  - vector and array
-  - Array
-
   - Vector
    - change to embed Array
    - add fill pointer (fillPtr)
@@ -37,7 +35,7 @@
  * [ ] VECTOR-POP - only for vector with a fill pointer
  * [ ] VECTOR-PUSH - only for vector with a fill pointer
  * [ ] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
- * [ ] ADJUST-ARRAY
+ * [ ] ADJUST-ARRAY - can modify all fields of array
  * [ ] ADJUSTABLE-ARRAY-P
  * [ ] AREF
  * [ ] ARRAY
@@ -58,6 +56,8 @@
  * [ ] SIMPLE-VECTOR - fill pointer is nil
  * [ ] SIMPLE-VECTOR-P - t if no fill pointer (how about expressly adjustable?)
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
+ * [ ] SVREF
+ * [ ] ROW-MAJOR-AREF
 
  - package
   - support export list
