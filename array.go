@@ -24,7 +24,7 @@ func init() {
 // Array is an n dimensional collection of Objects.
 type Array struct {
 	dims     []int
-	sizes    []int
+	sizes    []int // TBD remove?
 	elements []Object
 }
 

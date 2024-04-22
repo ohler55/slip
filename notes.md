@@ -5,8 +5,60 @@
 - next
 
  - vector and array
-  - maybe limit to adjustable with no fill pointer
-  -
+  - Array
+   - remove sizes (check code.go first)
+   - add element type
+  - Vector
+   - change to embed Array
+   - add fill pointer (fillPtr)
+   -
+  - make-array (dimensions &key element-type initial-element initial-contents adjustable fill-pointer displaced-to displaced-index-offset)
+   - element-type
+   - initial-element
+   - initial-contents
+   - adjustable - always t but track for expressly adjustable
+   - fill-pointer
+   - displaced-to - not supported
+   - displaced-index-offset - not supported
+  - adjustable-array-p - always t unless explicitly not
+  - aref (supports setf)
+  - arrayp
+  - array-element-type - always t
+  - array-rank-limit - implementation dependent
+  - array-dimension-limit - max int divided by number dims
+  - fill-pointer - always at the end (check that)
+   - vector only
+   - work with setf to change size of vector
+    - if less than size shrinking may/will forget later elements
+   - ?? should vector be expanded to include other options ??
+    - fill pointer - vector only
+    - element type
+  - upgraded-array-element-type
+ * [ ] MAKE-ARRAY
+ * [ ] VECTOR-POP - only for vector with a fill pointer
+ * [ ] VECTOR-PUSH - only for vector with a fill pointer
+ * [ ] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
+ * [ ] ADJUST-ARRAY
+ * [ ] ADJUSTABLE-ARRAY-P
+ * [ ] AREF
+ * [ ] ARRAY
+ * [ ] ARRAY-DIMENSION
+ * [ ] ARRAY-DIMENSION-LIMIT
+ * [ ] ARRAY-DIMENSIONS
+ * [ ] ARRAY-DISPLACEMENT
+ * [ ] ARRAY-ELEMENT-TYPE
+ * [ ] ARRAY-HAS-FILL-POINTER-P
+ * [ ] ARRAY-IN-BOUNDS-P
+ * [ ] ARRAY-RANK
+ * [ ] ARRAY-RANK-LIMIT
+ * [ ] ARRAY-ROW-MAJOR-INDEX
+ * [ ] ARRAY-TOTAL-SIZE
+ * [ ] ARRAY-TOTAL-SIZE-LIMIT
+ * [ ] ARRAYP
+ * [ ] SIMPLE-ARRAY - all slip arrays are currently simple
+ * [ ] SIMPLE-VECTOR - fill pointer is nil
+ * [ ] SIMPLE-VECTOR-P - t if no fill pointer (how about expressly adjustable?)
+ * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
 
  - package
   - support export list
