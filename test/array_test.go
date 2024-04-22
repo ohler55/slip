@@ -23,9 +23,9 @@ func TestArray(t *testing.T) {
 		Hierarchy: "array.t",
 		Equals: []*sliptest.EqTest{
 			{Other: testArray(), Expect: true},
-			{Other: slip.NewArray(nil, 1, 2), Expect: false},
-			{Other: slip.NewArray(nil, 3, 2, 4), Expect: false},
-			{Other: slip.NewArray(nil, 2, 3, 4), Expect: false},
+			{Other: slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, nil, true), Expect: false},
+			{Other: slip.NewArray([]int{3, 2, 4}, slip.TrueSymbol, nil, nil, true), Expect: false},
+			{Other: slip.NewArray([]int{2, 3, 4}, slip.TrueSymbol, nil, nil, true), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
 		Eval: testArray(),
@@ -51,12 +51,12 @@ func TestArraySet(t *testing.T) {
 
 func TestArraySetAll(t *testing.T) {
 	content := testArray().AsList()
-	a := slip.NewArray(nil, 2, 3, 4)
+	a := slip.NewArray([]int{2, 3, 4}, slip.TrueSymbol, nil, nil, true)
 	a.SetAll(content)
 	tt.Equal(t, "(((0 1 2 3) (4 5 6 7) (8 9 10 11)) ((12 13 14 15) (16 17 18 19) (20 21 22 23)))",
 		a.AsList().String())
 
-	a = slip.NewArray(nil, 2, 2)
+	a = slip.NewArray([]int{2, 2}, slip.TrueSymbol, nil, nil, true)
 	tt.Panic(t, func() { a.SetAll(slip.List{slip.List{nil}, slip.List{nil}}) })
 	tt.Panic(t, func() { a.SetAll(slip.List{nil, nil}) })
 }
@@ -69,11 +69,11 @@ func TestArrayMisc(t *testing.T) {
 	a := testArray()
 	tt.Equal(t, 24, a.Size())
 	tt.Equal(t, []int{2, 3, 4}, a.Dimensions())
-	tt.Equal(t, []interface{}{nil}, slip.NewArray(nil, 1).Simplify())
+	tt.Equal(t, []interface{}{nil}, slip.NewArray([]int{1}, slip.TrueSymbol, nil, nil, true).Simplify())
 }
 
 func testArray() *slip.Array {
-	a := slip.NewArray(nil, 2, 3, 4)
+	a := slip.NewArray([]int{2, 3, 4}, slip.TrueSymbol, nil, nil, true)
 	v := 0
 	for i := 0; i < 2; i++ {
 		for j := 0; j < 3; j++ {

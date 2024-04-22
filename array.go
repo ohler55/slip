@@ -23,17 +23,27 @@ func init() {
 
 // Array is an n dimensional collection of Objects.
 type Array struct {
-	dims     []int
-	sizes    []int // TBD remove?
-	elements []Object
+	dims        []int
+	sizes       []int
+	elements    []Object
+	elementType Symbol // defaults to TrueSymbol which is empty string
+	exAdjust    bool   // expressly adjustable
 }
 
 // NewArray creates a new array with the specified dimensions and initial
 // value.
-func NewArray(initVal Object, dimensions ...int) *Array {
+func NewArray(
+	dimensions []int,
+	elementType Symbol,
+	initElement Object,
+	initContent Object,
+	adjustable bool) *Array {
+
 	a := Array{
-		dims:  dimensions,
-		sizes: make([]int, len(dimensions)),
+		dims:        dimensions,
+		sizes:       make([]int, len(dimensions)),
+		elementType: elementType,
+		exAdjust:    adjustable,
 	}
 	size := 1
 	for i := len(dimensions) - 1; 0 <= i; i-- {
@@ -41,9 +51,13 @@ func NewArray(initVal Object, dimensions ...int) *Array {
 		size *= dimensions[i]
 	}
 	a.elements = make([]Object, size)
-	if initVal != nil {
+	if initContent != nil {
+
+		// TBD checked dimensions
+
+	} else if initElement != nil {
 		for i := len(a.elements) - 1; 0 <= i; i-- {
-			a.elements[i] = initVal
+			a.elements[i] = initElement
 		}
 	}
 	return &a

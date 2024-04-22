@@ -6,8 +6,7 @@
 
  - vector and array
   - Array
-   - remove sizes (check code.go first)
-   - add element type
+
   - Vector
    - change to embed Array
    - add fill pointer (fillPtr)
@@ -49,7 +48,7 @@
  * [ ] ARRAY-ELEMENT-TYPE
  * [ ] ARRAY-HAS-FILL-POINTER-P
  * [ ] ARRAY-IN-BOUNDS-P
- * [ ] ARRAY-RANK
+ * [ ] ARRAY-RANK - number of dims
  * [ ] ARRAY-RANK-LIMIT
  * [ ] ARRAY-ROW-MAJOR-INDEX
  * [ ] ARRAY-TOTAL-SIZE
