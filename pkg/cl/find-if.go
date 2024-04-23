@@ -76,8 +76,8 @@ func (f *FindIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Obje
 		found = f.inList(s, ta, depth, &sfv)
 	case slip.String:
 		found = f.inString(s, ta, depth, &sfv)
-	case slip.Vector:
-		found = f.inList(s, slip.List(ta), depth, &sfv)
+	case *slip.Vector:
+		found = f.inList(s, ta.AsList(), depth, &sfv)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}

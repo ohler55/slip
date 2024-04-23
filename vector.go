@@ -2,6 +2,8 @@
 
 package slip
 
+import "fmt"
+
 // VectorSymbol is the symbol with a value of "vector".
 const VectorSymbol = Symbol("vector")
 
@@ -10,17 +12,33 @@ func init() {
 }
 
 // Vector is a vector Object.
-type Vector []Object
+type Vector struct {
+	Array
+	fillPtr int
+}
+
+// NewVector creates a new Vector.
+func NewVector(elements List, elementType Symbol, adjustable bool) *Vector {
+	return &Vector{
+		Array: Array{
+			dims:        []int{len(elements)},
+			sizes:       []int{1},
+			elements:    elements,
+			elementType: elementType,
+			adjustable:  adjustable,
+		},
+	}
+}
 
 // String representation of the Object.
-func (obj Vector) String() string {
+func (obj *Vector) String() string {
 	return string(obj.Append([]byte{}))
 }
 
 // Append a buffer with a representation of the Object.
-func (obj Vector) Append(b []byte) []byte {
+func (obj *Vector) Append(b []byte) []byte {
 	b = append(b, "#("...)
-	for i, v := range obj {
+	for i, v := range obj.elements {
 		if 0 < i {
 			b = append(b, ' ')
 		}
@@ -34,9 +52,9 @@ func (obj Vector) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a []interface{}.
-func (obj Vector) Simplify() interface{} {
-	out := make([]interface{}, len(obj))
-	for i, o := range obj {
+func (obj *Vector) Simplify() interface{} {
+	out := make([]interface{}, len(obj.elements))
+	for i, o := range obj.elements {
 		if o == nil {
 			out[i] = nil
 		} else {
@@ -47,12 +65,14 @@ func (obj Vector) Simplify() interface{} {
 }
 
 // Equal returns true if this Object and the other are equal in value.
-func (obj Vector) Equal(other Object) (eq bool) {
-	if to, ok := other.(Vector); ok {
-		if len(obj) == len(to) {
+func (obj *Vector) Equal(other Object) (eq bool) {
+	if to, ok := other.(*Vector); ok {
+		if len(obj.elements) == len(to.elements) &&
+			to.elementType == obj.elementType &&
+			to.adjustable == obj.adjustable {
 			eq = true
-			for i, co := range obj {
-				if !ObjectEqual(co, to[i]) {
+			for i, co := range obj.elements {
+				if !ObjectEqual(co, to.elements[i]) {
 					eq = false
 					break
 				}
@@ -63,26 +83,40 @@ func (obj Vector) Equal(other Object) (eq bool) {
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
-func (obj Vector) Hierarchy() []Symbol {
+func (obj *Vector) Hierarchy() []Symbol {
 	return []Symbol{VectorSymbol, ArraySymbol, SequenceSymbol, TrueSymbol}
 }
 
 // SequenceType returns 'vector.
-func (obj Vector) SequenceType() Symbol {
+func (obj *Vector) SequenceType() Symbol {
 	return VectorSymbol
 }
 
 // Length returns the length of the object.
-func (obj Vector) Length() int {
-	return len(obj)
+func (obj *Vector) Length() int {
+	return len(obj.elements)
 }
 
 // ArrayType returns 'vector.
-func (obj Vector) ArrayType() Symbol {
+func (obj *Vector) ArrayType() Symbol {
 	return VectorSymbol
 }
 
 // Eval returns self.
-func (obj Vector) Eval(s *Scope, depth int) Object {
+func (obj *Vector) Eval(s *Scope, depth int) Object {
 	return obj
+}
+
+func (obj *Vector) Push(values ...Object) {
+	for _, v := range values {
+		// TBD check type
+		// use fill pointer if not negative
+		// if at end, append if adjustable else nothing
+		fmt.Printf("*** v: %s\n", v)
+	}
+}
+
+// AsList the Object into set of nested lists.
+func (obj *Vector) AsList() List {
+	return obj.elements
 }

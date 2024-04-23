@@ -77,8 +77,8 @@ func (f *PositionIf) Call(s *slip.Scope, args slip.List, depth int) (index slip.
 		index = f.inList(s, ta, depth, &sfv)
 	case slip.String:
 		index = f.inString(s, ta, depth, &sfv)
-	case slip.Vector:
-		index = f.inList(s, slip.List(ta), depth, &sfv)
+	case *slip.Vector:
+		index = f.inList(s, ta.AsList(), depth, &sfv)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}

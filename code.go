@@ -244,7 +244,7 @@ const (
 
 var (
 	// marker on stack indicating a vector and not a list.
-	vectorMarker = Vector{}
+	vectorMarker = &Vector{}
 
 	// marker on stack indicating a vector and not a list.
 	complexMarker = Complex(complex(0, 0))
@@ -606,8 +606,8 @@ func (r *reader) closeList() {
 	r.stack = r.stack[:start+1]
 	var obj Object
 	switch to := r.stack[start].(type) {
-	case Vector:
-		obj = Vector(list)
+	case *Vector:
+		obj = NewVector(list, TrueSymbol, true)
 	case *Array:
 		to.calcAndSet(list)
 		obj = to

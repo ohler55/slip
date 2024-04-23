@@ -99,9 +99,10 @@ func (f *StableSort) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		if 1 < len(ta) {
 			stableSortObjects(s, []slip.Object(ta), keyFunc, predicate, depth)
 		}
-	case slip.Vector:
-		if 1 < len(ta) {
-			stableSortObjects(s, []slip.Object(ta), keyFunc, predicate, depth)
+	case *slip.Vector:
+		elements := ta.AsList()
+		if 1 < len(elements) {
+			stableSortObjects(s, elements, keyFunc, predicate, depth)
 		}
 	default:
 		slip.PanicType("sequence", ta, "sequence")

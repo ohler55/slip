@@ -100,9 +100,10 @@ func (f *Sort) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		if 1 < len(ta) {
 			sortObjects(s, []slip.Object(ta), keyFunc, predicate, depth)
 		}
-	case slip.Vector:
-		if 1 < len(ta) {
-			sortObjects(s, []slip.Object(ta), keyFunc, predicate, depth)
+	case *slip.Vector:
+		elements := ta.AsList()
+		if 1 < len(elements) {
+			sortObjects(s, elements, keyFunc, predicate, depth)
 		}
 	default:
 		slip.PanicType("sequence", ta, "sequence")

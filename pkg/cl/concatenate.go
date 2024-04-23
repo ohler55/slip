@@ -52,7 +52,7 @@ func (f *Concatenate) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	case slip.Symbol("string"):
 		result = f.stringConc(args[1:])
 	case slip.Symbol("vector"):
-		result = slip.Vector(f.listConc(args[1:]))
+		result = slip.NewVector(f.listConc(args[1:]), slip.TrueSymbol, true)
 	default:
 		slip.PanicType("result-type", args[0], "symbol (list, string, or vector)")
 	}
@@ -70,8 +70,8 @@ func (f *Concatenate) listConc(args slip.List) (result slip.List) {
 			for _, r := range []rune(ta) {
 				result = append(result, slip.Character(r))
 			}
-		case slip.Vector:
-			result = append(result, ta...)
+		case *slip.Vector:
+			result = append(result, ta.AsList()...)
 		default:
 			slip.PanicType("&rest", ta, "list", "string", "vector")
 		}
@@ -96,8 +96,8 @@ func (f *Concatenate) stringConc(args slip.List) slip.String {
 			}
 		case slip.String:
 			ra = append(ra, []rune(ta)...)
-		case slip.Vector:
-			arg = slip.List(ta)
+		case *slip.Vector:
+			arg = ta.AsList()
 			goto each
 		default:
 			slip.PanicType("&rest", ta, "list", "string", "vector")

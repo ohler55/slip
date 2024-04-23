@@ -64,15 +64,16 @@ func (f *Reverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			}
 			result = nl
 		}
-	case slip.Vector:
-		if 0 < len(ta) {
-			nl := make(slip.Vector, len(ta))
-			copy(nl, ta)
-			max := len(ta) - 1
+	case *slip.Vector:
+		elements := ta.AsList()
+		if 1 < len(elements) {
+			nl := make(slip.List, len(elements))
+			copy(nl, elements)
+			max := len(elements) - 1
 			for i := max / 2; 0 <= i; i-- {
 				nl[i], nl[max-i] = nl[max-i], nl[i]
 			}
-			result = nl
+			result = slip.NewVector(nl, ta.ElementType(), ta.Adjustable())
 		}
 	default:
 		slip.PanicType("sequence", ta, "sequence")
