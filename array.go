@@ -324,17 +324,6 @@ top:
 	return obj
 }
 
-func checkArrayElementType(v Object, et Symbol) {
-	if v != nil && 0 < len(et) {
-		for _, sym := range v.Hierarchy() {
-			if sym == et {
-				return
-			}
-		}
-		PanicType("array element", v, string(et))
-	}
-}
-
 // Rank of the array is returned,
 func (obj *Array) Rank() int {
 	return len(obj.dims)
@@ -348,4 +337,31 @@ func (obj *Array) Adjustable() bool {
 // ElementType returns the element-type of the array.
 func (obj *Array) ElementType() Symbol {
 	return obj.elementType
+}
+
+// MaxUpgradedType returns the maximum upgraded type or the type with the longest hierarchy.
+func (obj *Array) MaxUpgradedType() (mut Symbol) {
+	mut = obj.elementType
+	var mh int
+	for _, e := range obj.elements {
+		if e != nil {
+			h := e.Hierarchy()
+			if mh < len(h) {
+				mh = len(h)
+				mut = h[0]
+			}
+		}
+	}
+	return
+}
+
+func checkArrayElementType(v Object, et Symbol) {
+	if v != nil && 0 < len(et) {
+		for _, sym := range v.Hierarchy() {
+			if sym == et {
+				return
+			}
+		}
+		PanicType("array element", v, string(et))
+	}
 }

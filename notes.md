@@ -5,7 +5,6 @@
 - next
 
  - vector and array
-
   - make-array (dimensions &key element-type initial-element initial-contents adjustable fill-pointer displaced-to displaced-index-offset)
    - element-type
    - initial-element
@@ -49,12 +48,15 @@
  * [ ] ARRAY-TOTAL-SIZE
  * [ ] ARRAY-TOTAL-SIZE-LIMIT
  * [ ] ARRAYP
+ * [ ] FILL-POINTER - works with setf
  * [ ] SIMPLE-ARRAY - all slip arrays are currently simple
  * [ ] SIMPLE-VECTOR - fill pointer is nil
  * [ ] SIMPLE-VECTOR-P - t if no fill pointer (how about expressly adjustable?)
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] SVREF
  * [ ] ROW-MAJOR-AREF
+  - vpush - always push, like entend but works without a fill pointer
+  - vpop - return nil if none remain instead of panic
 
  - package
   - support export list

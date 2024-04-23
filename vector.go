@@ -37,7 +37,11 @@ func (obj *Vector) String() string {
 // Append a buffer with a representation of the Object.
 func (obj *Vector) Append(b []byte) []byte {
 	b = append(b, "#("...)
-	for i, v := range obj.elements {
+	elements := obj.elements
+	if 0 <= obj.FillPtr && obj.FillPtr < len(elements) {
+		elements = elements[:obj.FillPtr]
+	}
+	for i, v := range elements {
 		if 0 < i {
 			b = append(b, ' ')
 		}
@@ -52,6 +56,7 @@ func (obj *Vector) Append(b []byte) []byte {
 
 // Simplify the Object into a []interface{}.
 func (obj *Vector) Simplify() interface{} {
+	// TBD include element type, fill pointer if set
 	out := make([]interface{}, len(obj.elements))
 	for i, o := range obj.elements {
 		if o == nil {
@@ -106,34 +111,47 @@ func (obj *Vector) Eval(s *Scope, depth int) Object {
 	return obj
 }
 
-func (obj *Vector) Push(ex int, values ...Object) (index int) {
+// Push a value onto the vector.
+func (obj *Vector) Push(values ...Object) (index int) {
 	for _, v := range values {
 		checkArrayElementType(v, obj.elementType)
 		if 0 <= obj.FillPtr {
+			if len(obj.elements) <= obj.FillPtr {
+				obj.elements = append(obj.elements, v)
+				obj.FillPtr = len(obj.elements)
+			} else {
+				obj.elements[obj.FillPtr] = v
+				obj.FillPtr++
+			}
 			index = obj.FillPtr
 		} else {
+			obj.elements = append(obj.elements, v)
 			index = len(obj.elements)
 		}
-		if len(obj.elements) <= index {
-			if ex <= 0 {
-				return 0 // indicates not added
-			}
+	}
+	return
+}
 
-			// TBD expand slice, try cap first
-
+// Pop a value from the vector. The vector elements are not changed if there
+// is a fill-pointer. If there is no fill pointer ther length of the vector is
+// shortened by one.
+func (obj *Vector) Pop() (element Object) {
+	if 0 <= obj.FillPtr {
+		if 0 < obj.FillPtr {
+			obj.FillPtr--
+			element = obj.elements[obj.FillPtr]
 		}
-
-		// TBD set the element at index
-		// increment index
-
-		// use fill pointer if not negative
-		// if at end, append if adjustable else nothing
-
+	} else if 0 < len(obj.elements) {
+		element = obj.elements[len(obj.elements)-1]
+		obj.elements = obj.elements[:len(obj.elements)-1]
 	}
 	return
 }
 
 // AsList the Object into set of nested lists.
 func (obj *Vector) AsList() List {
+	if 0 <= obj.FillPtr && obj.FillPtr < len(obj.elements) {
+		return obj.elements[:obj.FillPtr]
+	}
 	return obj.elements
 }
