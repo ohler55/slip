@@ -2,8 +2,6 @@
 
 package slip
 
-import "fmt"
-
 // VectorSymbol is the symbol with a value of "vector".
 const VectorSymbol = Symbol("vector")
 
@@ -14,10 +12,10 @@ func init() {
 // Vector is a vector Object.
 type Vector struct {
 	Array
-	fillPtr int
+	FillPtr int
 }
 
-// NewVector creates a new Vector.
+// NewVector creates a new Vector. If fillPtr is not used then it should be -1.
 func NewVector(elements List, elementType Symbol, adjustable bool) *Vector {
 	return &Vector{
 		Array: Array{
@@ -27,6 +25,7 @@ func NewVector(elements List, elementType Symbol, adjustable bool) *Vector {
 			elementType: elementType,
 			adjustable:  adjustable,
 		},
+		FillPtr: -1,
 	}
 }
 
@@ -107,13 +106,31 @@ func (obj *Vector) Eval(s *Scope, depth int) Object {
 	return obj
 }
 
-func (obj *Vector) Push(values ...Object) {
+func (obj *Vector) Push(ex int, values ...Object) (index int) {
 	for _, v := range values {
-		// TBD check type
+		checkArrayElementType(v, obj.elementType)
+		if 0 <= obj.FillPtr {
+			index = obj.FillPtr
+		} else {
+			index = len(obj.elements)
+		}
+		if len(obj.elements) <= index {
+			if ex <= 0 {
+				return 0 // indicates not added
+			}
+
+			// TBD expand slice, try cap first
+
+		}
+
+		// TBD set the element at index
+		// increment index
+
 		// use fill pointer if not negative
 		// if at end, append if adjustable else nothing
-		fmt.Printf("*** v: %s\n", v)
+
 	}
+	return
 }
 
 // AsList the Object into set of nested lists.
