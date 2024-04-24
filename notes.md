@@ -4,13 +4,15 @@
 
 - next
 
+ - allow (make-array 3) // dims as fixnum to make a vector
+
  * [x] MAKE-ARRAY
+ * [ ] AREF (also placer with setf)
  * [ ] VECTOR-POP - only for vector with a fill pointer
  * [ ] VECTOR-PUSH - only for vector with a fill pointer
  * [ ] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
  * [ ] ADJUST-ARRAY - can modify all fields of array
  * [ ] ADJUSTABLE-ARRAY-P
- * [ ] AREF
  * [ ] ARRAY
  * [ ] ARRAY-DIMENSION
  * [ ] ARRAY-DIMENSION-LIMIT
@@ -32,8 +34,6 @@
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] SVREF
  * [ ] ROW-MAJOR-AREF
-  - vpush - always push, like entend but works without a fill pointer
-  - vpop - return nil if none remain instead of panic
 
  - package
   - support export list
