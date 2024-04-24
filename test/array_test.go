@@ -109,10 +109,6 @@ func TestArrayAdjustInitContents(t *testing.T) {
 	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{slip.Fixnum(1), slip.Fixnum(2)}}, true)
 	_ = a.Adjust([]int{1, 2}, slip.FixnumSymbol, nil, slip.List{slip.List{slip.Fixnum(3), slip.Fixnum(4)}})
 	tt.Equal(t, "((3 4))", a.AsList().String())
-
-	tt.Panic(t, func() {
-		_ = a.Adjust([]int{1, 2}, slip.FixnumSymbol, nil, slip.True)
-	})
 }
 
 func TestArrayAdjustBadDims(t *testing.T) {
@@ -124,7 +120,6 @@ func TestArrayContent(t *testing.T) {
 	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{nil, nil}}, true)
 	tt.Equal(t, "((nil nil))", a.AsList().String())
 
-	tt.Panic(t, func() { _ = slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.TrueSymbol, true) })
 	tt.Panic(t, func() {
 		_ = slip.NewArray([]int{1, 2}, slip.FixnumSymbol, nil, slip.List{slip.List{slip.Symbol("x"), nil}}, true)
 	})

@@ -73,7 +73,7 @@ func (f *Reverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			for i := max / 2; 0 <= i; i-- {
 				nl[i], nl[max-i] = nl[max-i], nl[i]
 			}
-			result = slip.NewVector(nl, ta.ElementType(), ta.Adjustable())
+			result = slip.NewVector(len(nl), ta.ElementType(), nil, nl, ta.Adjustable())
 		}
 	default:
 		slip.PanicType("sequence", ta, "sequence")

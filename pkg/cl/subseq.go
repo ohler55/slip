@@ -56,7 +56,8 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		ra := []rune(ta)
 		result = slip.String(ra[start:end])
 	case *slip.Vector:
-		result = slip.NewVector(ta.AsList()[start:end], ta.ElementType(), ta.Adjustable())
+		elements := ta.AsList()[start:end]
+		result = slip.NewVector(len(elements), ta.ElementType(), nil, elements, ta.Adjustable())
 	}
 	return
 }

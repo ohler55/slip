@@ -4,30 +4,7 @@
 
 - next
 
- - vector and array
-  - make-array (dimensions &key element-type initial-element initial-contents adjustable fill-pointer displaced-to displaced-index-offset)
-   - element-type
-   - initial-element
-   - initial-contents
-   - adjustable - always t but track for expressly adjustable
-   - fill-pointer
-   - displaced-to - not supported
-   - displaced-index-offset - not supported
-  - adjustable-array-p - always t unless explicitly not
-  - aref (supports setf)
-  - arrayp
-  - array-element-type - always t
-  - array-rank-limit - implementation dependent
-  - array-dimension-limit - max int divided by number dims
-  - fill-pointer - always at the end (check that)
-   - vector only
-   - work with setf to change size of vector
-    - if less than size shrinking may/will forget later elements
-   - ?? should vector be expanded to include other options ??
-    - fill pointer - vector only
-    - element type
-  - upgraded-array-element-type
- * [ ] MAKE-ARRAY
+ * [x] MAKE-ARRAY
  * [ ] VECTOR-POP - only for vector with a fill pointer
  * [ ] VECTOR-PUSH - only for vector with a fill pointer
  * [ ] VECTOR-PUSH-EXTEND - only for vector with a fill pointer

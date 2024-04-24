@@ -159,16 +159,16 @@ func (f *Coerce) toVector(arg slip.Object) (result slip.Object) {
 		for i, r := range ra {
 			elements[i] = slip.Character(r)
 		}
-		result = slip.NewVector(elements, slip.CharacterSymbol, false)
+		result = slip.NewVector(len(elements), slip.CharacterSymbol, nil, elements, false)
 	case slip.Symbol:
 		ra := []rune(ta)
 		elements := make(slip.List, len(ra))
 		for i, r := range ra {
 			elements[i] = slip.Character(r)
 		}
-		result = slip.NewVector(elements, slip.CharacterSymbol, false)
+		result = slip.NewVector(len(elements), slip.CharacterSymbol, nil, elements, false)
 	case slip.List:
-		result = slip.NewVector(ta, slip.TrueSymbol, true)
+		result = slip.NewVector(len(ta), slip.TrueSymbol, nil, ta, true)
 	default:
 		f.notPossible(ta, "vector")
 	}

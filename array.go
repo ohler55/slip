@@ -36,7 +36,7 @@ func NewArray(
 	dimensions []int,
 	elementType Symbol,
 	initElement Object,
-	initContent Object,
+	initContent List,
 	adjustable bool) *Array {
 
 	a := Array{
@@ -52,11 +52,7 @@ func NewArray(
 	}
 	a.elements = make([]Object, size)
 	if initContent != nil {
-		if list, ok := initContent.(List); ok {
-			a.SetAll(list)
-		} else {
-			PanicType("initial-contents", initContent, "list")
-		}
+		a.SetAll(initContent)
 	} else if initElement != nil {
 		for i := len(a.elements) - 1; 0 <= i; i-- {
 			a.elements[i] = initElement
@@ -245,8 +241,7 @@ func (obj *Array) SetAll(all List) {
 func (obj *Array) setDim(list List, di, ei int) int {
 	d := obj.dims[di]
 	if d != len(list) {
-		NewPanic("Malformed :initial-contents: Dimension of axis %d is %d but received %d long.",
-			di, d, len(list))
+		NewPanic("Malformed :initial-contents: Dimension of axis %d is %d but received %d.", di, d, len(list))
 	}
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
@@ -267,7 +262,7 @@ func (obj *Array) setDim(list List, di, ei int) int {
 	return ei
 }
 
-func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Object, initContent Object) *Array {
+func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Object, initContent List) *Array {
 	if len(dimensions) != len(obj.dims) {
 		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dimensions))
 	}
@@ -284,11 +279,7 @@ func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Objec
 			size *= dimensions[i]
 		}
 		obj.elements = make([]Object, size)
-		if list, ok := initContent.(List); ok {
-			obj.SetAll(list)
-		} else {
-			PanicType("initial-contents", initContent, "list")
-		}
+		obj.SetAll(initContent)
 		return obj
 	}
 	if TrueSymbol != elementType {

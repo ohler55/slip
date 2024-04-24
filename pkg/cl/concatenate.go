@@ -52,7 +52,8 @@ func (f *Concatenate) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	case slip.Symbol("string"):
 		result = f.stringConc(args[1:])
 	case slip.Symbol("vector"):
-		result = slip.NewVector(f.listConc(args[1:]), slip.TrueSymbol, true)
+		elements := f.listConc(args[1:])
+		result = slip.NewVector(len(elements), slip.TrueSymbol, nil, elements, true)
 	default:
 		slip.PanicType("result-type", args[0], "symbol (list, string, or vector)")
 	}

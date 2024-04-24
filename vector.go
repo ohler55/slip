@@ -16,10 +16,16 @@ type Vector struct {
 }
 
 // NewVector creates a new Vector. If fillPtr is not used then it should be -1.
-func NewVector(elements List, elementType Symbol, adjustable bool) *Vector {
+func NewVector(dim int, elementType Symbol, initElement Object, elements List, adjustable bool) *Vector {
+	if elements == nil {
+		elements = make(List, dim)
+		for i := dim - 1; 0 <= i; i-- {
+			elements[i] = initElement
+		}
+	}
 	return &Vector{
 		Array: Array{
-			dims:        []int{len(elements)},
+			dims:        []int{dim},
 			sizes:       []int{1},
 			elements:    elements,
 			elementType: elementType,
@@ -56,7 +62,6 @@ func (obj *Vector) Append(b []byte) []byte {
 
 // Simplify the Object into a []interface{}.
 func (obj *Vector) Simplify() interface{} {
-	// TBD include element type, fill pointer if set
 	out := make([]interface{}, len(obj.elements))
 	for i, o := range obj.elements {
 		if o == nil {
@@ -133,8 +138,8 @@ func (obj *Vector) Push(values ...Object) (index int) {
 }
 
 // Pop a value from the vector. The vector elements are not changed if there
-// is a fill-pointer. If there is no fill pointer ther length of the vector is
-// shortened by one.
+// is a fill-pointer. If there is no fill pointer then the length of the
+// vector is shortened by one.
 func (obj *Vector) Pop() (element Object) {
 	if 0 <= obj.FillPtr {
 		if 0 < obj.FillPtr {

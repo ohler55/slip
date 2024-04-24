@@ -607,7 +607,7 @@ func (r *reader) closeList() {
 	var obj Object
 	switch to := r.stack[start].(type) {
 	case *Vector:
-		obj = NewVector(list, TrueSymbol, true)
+		obj = NewVector(len(list), TrueSymbol, nil, list, true)
 	case *Array:
 		to.calcAndSet(list)
 		obj = to
