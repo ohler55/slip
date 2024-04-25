@@ -3,13 +3,15 @@
 package slip
 
 import (
+	"fmt"
 	"math"
 )
 
 // ArraySymbol is the symbol with a value of "array".
 const (
-	ArraySymbol  = Symbol("array")
-	ArrayMaxRank = 1024
+	ArraySymbol       = Symbol("array")
+	ArrayMaxRank      = 1024
+	ArrayMaxDimension = 0x10000000
 )
 
 func init() {
@@ -18,6 +20,8 @@ func init() {
 
 	// Somewhat arbitrary. Could be anything.
 	DefConstant(Symbol("array-rank-limit"), Fixnum(ArrayMaxRank), `The upper bound on the rank of an _array_.`)
+	DefConstant(Symbol("array-dimension-limit"), Fixnum(ArrayMaxDimension),
+		`The upper exclusive bound on each dimension of an _array_.`)
 	DefConstant(Symbol("array-total-size-limit"), Fixnum(math.MaxInt), `The upper bound on the size of an _array_.`)
 }
 
@@ -48,6 +52,10 @@ func NewArray(
 	size := 1
 	for i := len(dimensions) - 1; 0 <= i; i-- {
 		a.sizes[i] = size
+		if ArrayMaxDimension < dimensions[i] {
+			PanicType("dimension", Fixnum(dimensions[i]),
+				fmt.Sprintf("positive fixnum less than %d", ArrayMaxDimension))
+		}
 		size *= dimensions[i]
 	}
 	a.elements = make([]Object, size)

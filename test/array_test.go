@@ -114,6 +114,7 @@ func TestArrayAdjustInitContents(t *testing.T) {
 func TestArrayAdjustBadDims(t *testing.T) {
 	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{nil, nil}}, true)
 	tt.Panic(t, func() { _ = a.Adjust([]int{1, 2, 3}, slip.TrueSymbol, nil, nil) })
+	tt.Panic(t, func() { _ = a.Adjust([]int{1, 2, slip.ArrayMaxDimension + 1}, slip.TrueSymbol, nil, nil) })
 }
 
 func TestArrayContent(t *testing.T) {

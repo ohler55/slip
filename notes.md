@@ -7,29 +7,23 @@
  - allow (make-array 3) // dims as fixnum to make a vector
 
  * [x] MAKE-ARRAY
- * [ ] AREF (also placer with setf)
+ * [x] AREF
  * [ ] VECTOR-POP - only for vector with a fill pointer
  * [ ] VECTOR-PUSH - only for vector with a fill pointer
  * [ ] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
  * [ ] ADJUST-ARRAY - can modify all fields of array
  * [ ] ADJUSTABLE-ARRAY-P
- * [ ] ARRAY
  * [ ] ARRAY-DIMENSION
- * [ ] ARRAY-DIMENSION-LIMIT
- * [ ] ARRAY-DIMENSIONS
+ * [x] ARRAY-DIMENSIONS
  * [ ] ARRAY-DISPLACEMENT
- * [ ] ARRAY-ELEMENT-TYPE
- * [ ] ARRAY-HAS-FILL-POINTER-P
+ * [x] ARRAY-ELEMENT-TYPE
+ * [x] ARRAY-HAS-FILL-POINTER-P
  * [ ] ARRAY-IN-BOUNDS-P
- * [ ] ARRAY-RANK - number of dims
- * [ ] ARRAY-RANK-LIMIT
+ * [x] ARRAY-RANK
  * [ ] ARRAY-ROW-MAJOR-INDEX
- * [ ] ARRAY-TOTAL-SIZE
- * [ ] ARRAY-TOTAL-SIZE-LIMIT
- * [ ] ARRAYP
+ * [x] ARRAY-TOTAL-SIZE
+ * [x] ARRAYP
  * [ ] FILL-POINTER - works with setf
- * [ ] SIMPLE-ARRAY - all slip arrays are currently simple
- * [ ] SIMPLE-VECTOR - fill pointer is nil
  * [ ] SIMPLE-VECTOR-P - t if no fill pointer (how about expressly adjustable?)
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] SVREF

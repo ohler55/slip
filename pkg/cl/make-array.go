@@ -84,16 +84,19 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	adjustable := true
 	fillPtr := -1
 	elementType := slip.TrueSymbol
-	if list, ok := args[0].(slip.List); ok {
-		for _, v := range list {
+	switch ta := args[0].(type) {
+	case slip.Fixnum:
+		dims = []int{int(ta)}
+	case slip.List:
+		for _, v := range ta {
 			if num, _ := v.(slip.Fixnum); 0 < num {
 				dims = append(dims, int(num))
 			} else {
 				slip.PanicType("dimensions", args[0], "list of positive fixnums")
 			}
 		}
-	} else {
-		slip.PanicType("dimensions", args[0], "list of positive fixnums")
+	default:
+		slip.PanicType("dimensions", ta, "fixnum", "list of positive fixnums")
 	}
 	rest := args[1:]
 	if option, has := slip.GetArgsKeyValue(rest, slip.Symbol(":element-type")); has {

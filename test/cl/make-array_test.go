@@ -76,7 +76,7 @@ func TestMakeArrayElementType(t *testing.T) {
 
 func TestMakeArrayBadDims(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-array 7)`,
+		Source:    `(make-array t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{

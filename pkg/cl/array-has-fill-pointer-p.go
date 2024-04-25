@@ -1,0 +1,51 @@
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
+
+package cl
+
+import (
+	"github.com/ohler55/slip"
+)
+
+func init() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := ArrayHasFillPointerP{Function: slip.Function{Name: "array-has-fill-pointer-p", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "array-has-fill-pointer-p",
+			Args: []*slip.DocArg{
+				{
+					Name: "array",
+					Type: "array",
+					Text: "The array to check for a fill pointer.",
+				},
+			},
+			Return: "boolean",
+			Text:   `__array-has-fill-pointer-p__ returns true if _array_ has a fill pointer.`,
+			Examples: []string{
+				"(array-has-fill-pointer-p (make-array 3 :fill-pointer t)) => t",
+			},
+		}, &slip.CLPkg)
+}
+
+// ArrayHasFillPointerP represents the array-has-fill-pointer-p function.
+type ArrayHasFillPointerP struct {
+	slip.Function
+}
+
+// Call the function with the arguments provided.
+func (f *ArrayHasFillPointerP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	slip.ArgCountCheck(f, args, 1, 1)
+	switch ta := args[0].(type) {
+	case *slip.Array:
+	case *slip.Vector:
+		if 0 <= ta.FillPtr {
+			result = slip.True
+		}
+	default:
+		slip.PanicType("array", ta, "array")
+	}
+	return
+}
