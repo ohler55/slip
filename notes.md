@@ -12,7 +12,7 @@
  * [ ] VECTOR-PUSH - only for vector with a fill pointer
  * [ ] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
  * [ ] ADJUST-ARRAY - can modify all fields of array
- * [ ] ADJUSTABLE-ARRAY-P
+ * [x] ADJUSTABLE-ARRAY-P
  * [ ] ARRAY-DIMENSION
  * [x] ARRAY-DIMENSIONS
  * [ ] ARRAY-DISPLACEMENT
@@ -24,7 +24,7 @@
  * [x] ARRAY-TOTAL-SIZE
  * [x] ARRAYP
  * [ ] FILL-POINTER - works with setf
- * [ ] SIMPLE-VECTOR-P - t if no fill pointer (how about expressly adjustable?)
+ * [x] SIMPLE-VECTOR-P
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] SVREF
  * [ ] ROW-MAJOR-AREF

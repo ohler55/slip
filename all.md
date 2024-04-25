@@ -10,7 +10,7 @@
  * [ ] ACOSH
  * [ ] ADD-METHOD
  * [ ] ADJUST-ARRAY
- * [ ] ADJUSTABLE-ARRAY-P
+ * [x] ADJUSTABLE-ARRAY-P
  * [x] AREF
  * [x] ARRAY
  * [ ] ARRAY-DIMENSION
@@ -310,7 +310,7 @@
  * [ ] SIMPLE-STRING
  * [ ] SIMPLE-STRING-P
  * [x] SIMPLE-VECTOR
- * [ ] SIMPLE-VECTOR-P
+ * [x] SIMPLE-VECTOR-P
  * [ ] SINH
  * [ ] SLOT-BOUNDP
  * [ ] SLOT-EXISTS-P
