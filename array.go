@@ -172,27 +172,18 @@ func (obj *Array) Size() int {
 
 // Get the value at the location identified by the indexes.
 func (obj *Array) Get(indexes ...int) Object {
-	if len(indexes) != len(obj.dims) {
-		NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims))
-	}
-	pos := 0
-	for i, index := range indexes {
-		d := obj.dims[i]
-		if index < 0 || d <= index {
-			dims := make(List, len(obj.dims))
-			for j, d2 := range obj.dims {
-				dims[j] = Fixnum(d2)
-			}
-			NewPanic("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
-				index, i, dims, d)
-		}
-		pos += index * obj.sizes[i]
-	}
-	return obj.elements[pos]
+	return obj.elements[obj.MajorIndex(indexes...)]
 }
 
 // Set a value at the location identified by the indexes.
 func (obj *Array) Set(value Object, indexes ...int) {
+	pos := obj.MajorIndex(indexes...)
+	checkArrayElementType(value, obj.elementType)
+	obj.elements[pos] = value
+}
+
+// MajorIndex for the indexes provided.
+func (obj *Array) MajorIndex(indexes ...int) int {
 	if len(indexes) != len(obj.dims) {
 		NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims))
 	}
@@ -209,8 +200,7 @@ func (obj *Array) Set(value Object, indexes ...int) {
 		}
 		pos += index * obj.sizes[i]
 	}
-	checkArrayElementType(value, obj.elementType)
-	obj.elements[pos] = value
+	return pos
 }
 
 // AsList the Object into set of nested lists.

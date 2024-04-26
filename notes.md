@@ -6,28 +6,28 @@
 
  - allow (make-array 3) // dims as fixnum to make a vector
 
- * [x] MAKE-ARRAY
- * [x] AREF
+ * [ ] ADJUST-ARRAY - can modify all fields of array
+ * [ ] FILL-POINTER - works with setf
+ * [ ] ROW-MAJOR-AREF
+ * [ ] SVREF
+ * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] VECTOR-POP - only for vector with a fill pointer
  * [ ] VECTOR-PUSH - only for vector with a fill pointer
  * [ ] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
- * [ ] ADJUST-ARRAY - can modify all fields of array
  * [x] ADJUSTABLE-ARRAY-P
- * [ ] ARRAY-DIMENSION
+ * [x] AREF
+ * [x] ARRAY-DIMENSION
  * [x] ARRAY-DIMENSIONS
- * [ ] ARRAY-DISPLACEMENT
+ * [x] ARRAY-DISPLACEMENT
  * [x] ARRAY-ELEMENT-TYPE
  * [x] ARRAY-HAS-FILL-POINTER-P
  * [x] ARRAY-IN-BOUNDS-P
  * [x] ARRAY-RANK
- * [ ] ARRAY-ROW-MAJOR-INDEX
+ * [x] ARRAY-ROW-MAJOR-INDEX
  * [x] ARRAY-TOTAL-SIZE
  * [x] ARRAYP
- * [ ] FILL-POINTER - works with setf
+ * [x] MAKE-ARRAY
  * [x] SIMPLE-VECTOR-P
- * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
- * [ ] SVREF
- * [ ] ROW-MAJOR-AREF
 
  - package
   - support export list
