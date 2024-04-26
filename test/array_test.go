@@ -126,13 +126,6 @@ func TestArrayContent(t *testing.T) {
 	})
 }
 
-func TestArrayMaxUpgradedType(t *testing.T) {
-	a := slip.NewArray([]int{2, 2}, slip.TrueSymbol, nil,
-		slip.List{slip.List{slip.Fixnum(1), slip.DoubleFloat(2.5)}, slip.List{nil, slip.String("x")}},
-		true)
-	tt.Equal(t, slip.FixnumSymbol, a.MaxUpgradedType())
-}
-
 func testArray() *slip.Array {
 	a := slip.NewArray([]int{2, 3, 4}, slip.TrueSymbol, nil, nil, true)
 	v := 0

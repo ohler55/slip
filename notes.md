@@ -4,12 +4,10 @@
 
 - next
 
- - allow (make-array 3) // dims as fixnum to make a vector
-
  * [ ] ADJUST-ARRAY - can modify all fields of array
- * [ ] VECTOR-POP - only for vector with a fill pointer
- * [ ] VECTOR-PUSH - only for vector with a fill pointer
- * [ ] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
+ * [x] VECTOR-POP - only for vector with a fill pointer
+ * [x] VECTOR-PUSH - only for vector with a fill pointer
+ * [x] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
  * [x] ADJUSTABLE-ARRAY-P
  * [x] AREF
  * [x] ARRAY-DIMENSION
