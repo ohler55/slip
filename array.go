@@ -203,6 +203,22 @@ func (obj *Array) MajorIndex(indexes ...int) int {
 	return pos
 }
 
+// MajorGet for the index provided.
+func (obj *Array) MajorGet(index int) Object {
+	if index < 0 || len(obj.elements) <= index {
+		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj.elements))
+	}
+	return obj.elements[index]
+}
+
+// MajorSet for the index provided.
+func (obj *Array) MajorSet(index int, value Object) {
+	if index < 0 || len(obj.elements) <= index {
+		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj.elements))
+	}
+	obj.elements[index] = value
+}
+
 // AsList the Object into set of nested lists.
 func (obj *Array) AsList() (list List) {
 	if 0 < len(obj.dims) {

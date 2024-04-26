@@ -38,7 +38,7 @@ type SimpleVectorP struct {
 // Call the function with the arguments provided.
 func (f *SimpleVectorP) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if v, ok := args[0].(*slip.Vector); ok && v.FillPtr == -1 {
+	if v, ok := args[0].(*slip.Vector); ok && v.FillPtr == -1 && v.ElementType() == slip.TrueSymbol {
 		return slip.True
 	}
 	return nil
