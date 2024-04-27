@@ -281,18 +281,17 @@ func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Objec
 	if len(dimensions) != len(obj.dims) {
 		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dimensions))
 	}
-	if !obj.adjustable {
-		if initContent == nil {
-			// content := make(List, dims[0])
-			// copy(content, obj.elements)
-			// for i := len(obj.elements); i < len(content); i++ {
-			// 	content[i] = initElement
-			// }
-			// initContent = content
-
-			// TBD form new contents from old but add new element types as needed
-		}
-		return NewArray(dimensions, elementType, initElement, initContent, false)
+	adjustable := obj.adjustable
+	if !adjustable {
+		dup := *obj
+		dup.adjustable = true
+		dup.elements = make(List, len(obj.elements))
+		copy(dup.elements, obj.elements)
+		dup.dims = make([]int, len(obj.dims))
+		copy(dup.dims, obj.dims)
+		dup.sizes = make([]int, len(obj.sizes))
+		copy(dup.sizes, obj.sizes)
+		obj = &dup
 	}
 	if initContent != nil { // start over
 		obj.dims = dimensions
@@ -336,6 +335,7 @@ top:
 	obj.sizes = tmp.sizes
 	obj.elements = tmp.elements
 	obj.elementType = elementType
+	obj.adjustable = adjustable
 
 	return obj
 }

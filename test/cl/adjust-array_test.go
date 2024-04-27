@@ -80,14 +80,14 @@ func TestAdjustArrayElementType(t *testing.T) {
 			tt.Equal(t, false, vv.Adjustable())
 		},
 	}).Test(t)
-	// (&sliptest.Function{
-	// 	Source: `(adjust-array (make-array '(1 2) :adjustable nil) '(2 3) :element-type 'fixnum :initial-element 1)`,
-	// 	Validate: func(t *testing.T, v slip.Object) {
-	// 		a := v.(*slip.Array)
-	// 		tt.Equal(t, "((nil nil 1) (1 1 1))", slip.ObjectString(a.AsList()))
-	// 		tt.Equal(t, false, a.Adjustable())
-	// 	},
-	// }).Test(t)
+	(&sliptest.Function{
+		Source: `(adjust-array (make-array '(1 2) :adjustable nil) '(2 3) :element-type 'fixnum :initial-element 1)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			a := v.(*slip.Array)
+			tt.Equal(t, "((nil nil 1) (1 1 1))", slip.ObjectString(a.AsList()))
+			tt.Equal(t, false, a.Adjustable())
+		},
+	}).Test(t)
 }
 
 func TestAdjustArrayNotArray(t *testing.T) {

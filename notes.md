@@ -4,28 +4,6 @@
 
 - next
 
- * [ ] ADJUST-ARRAY - can modify all fields of array
- * [x] VECTOR-POP - only for vector with a fill pointer
- * [x] VECTOR-PUSH - only for vector with a fill pointer
- * [x] VECTOR-PUSH-EXTEND - only for vector with a fill pointer
- * [x] ADJUSTABLE-ARRAY-P
- * [x] AREF
- * [x] ARRAY-DIMENSION
- * [x] ARRAY-DIMENSIONS
- * [x] ARRAY-DISPLACEMENT
- * [x] ARRAY-ELEMENT-TYPE
- * [x] ARRAY-HAS-FILL-POINTER-P
- * [x] ARRAY-IN-BOUNDS-P
- * [x] ARRAY-RANK
- * [x] ARRAY-ROW-MAJOR-INDEX
- * [x] ARRAY-TOTAL-SIZE
- * [x] ARRAYP
- * [x] FILL-POINTER - works with setf
- * [x] MAKE-ARRAY
- * [x] ROW-MAJOR-AREF
- * [x] SIMPLE-VECTOR-P
- * [x] SVREF
-
  - package
   - support export list
    - ListToFunc should be f.ListToFunc

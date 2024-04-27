@@ -9,7 +9,6 @@
  * [ ] ACONS
  * [ ] ACOSH
  * [ ] ADD-METHOD
- * [ ] ADJUST-ARRAY
  * [ ] ASINH
  * [ ] ASSERT
  * [ ] ATANH
@@ -411,6 +410,7 @@
  * [x] ABS
  * [x] ACOS
  * [x] ADJOIN
+ * [x] ADJUST-ARRAY
  * [x] ADJUSTABLE-ARRAY-P
  * [x] ALLOCATE-INSTANCE
  * [x] ALPHA-CHAR-P
