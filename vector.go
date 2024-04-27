@@ -160,3 +160,27 @@ func (obj *Vector) AsList() List {
 	}
 	return obj.elements
 }
+
+// Adjust array with new parameters.
+func (obj *Vector) Adjust(dims []int, elementType Symbol, initElement Object, initContent List, fillPtr int) *Vector {
+	if len(dims) != len(obj.dims) {
+		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dims))
+	}
+	if !obj.adjustable {
+		if initContent == nil {
+			content := make(List, dims[0])
+			copy(content, obj.elements)
+			for i := len(obj.elements); i < len(content); i++ {
+				content[i] = initElement
+			}
+			initContent = content
+		}
+		vv := NewVector(dims[0], elementType, initElement, initContent, false)
+		vv.FillPtr = fillPtr
+		return vv
+	}
+	obj.Array.Adjust(dims, elementType, initElement, initContent)
+	obj.FillPtr = fillPtr
+
+	return obj
+}

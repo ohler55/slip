@@ -276,11 +276,22 @@ func (obj *Array) setDim(list List, di, ei int) int {
 	return ei
 }
 
+// Adjust array with new parameters.
 func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Object, initContent List) *Array {
 	if len(dimensions) != len(obj.dims) {
 		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dimensions))
 	}
 	if !obj.adjustable {
+		if initContent == nil {
+			// content := make(List, dims[0])
+			// copy(content, obj.elements)
+			// for i := len(obj.elements); i < len(content); i++ {
+			// 	content[i] = initElement
+			// }
+			// initContent = content
+
+			// TBD form new contents from old but add new element types as needed
+		}
 		return NewArray(dimensions, elementType, initElement, initContent, false)
 	}
 	if initContent != nil { // start over
