@@ -63,12 +63,18 @@ func TestSubseqListSetf(t *testing.T) {
 func TestSubseqVectorSetf(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("seq"),
-		slip.Vector{
-			slip.Symbol("a"),
-			slip.Symbol("b"),
-			slip.Symbol("c"),
-			slip.Symbol("d"),
-		})
+		slip.NewVector(
+			4,
+			slip.TrueSymbol,
+			nil,
+			slip.List{
+				slip.Symbol("a"),
+				slip.Symbol("b"),
+				slip.Symbol("c"),
+				slip.Symbol("d"),
+			},
+			true,
+		))
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(setf (subseq seq 2) #(x y z))`,

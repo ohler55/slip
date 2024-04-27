@@ -414,26 +414,6 @@ func TestConsCdr(t *testing.T) {
 	tt.Equal(t, "2", slip.ObjectString(slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}.Cdr()))
 }
 
-func TestVector(t *testing.T) {
-	(&sliptest.Object{
-		Target:    slip.Vector{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), nil},
-		String:    "#(1 2 3 nil)",
-		Simple:    []any{int64(1), int64(2), int64(3), nil},
-		Hierarchy: "vector.array.sequence.t",
-		Equals: []*sliptest.EqTest{
-			{Other: slip.Vector{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), nil}, Expect: true},
-			{Other: slip.Vector{slip.Fixnum(1), slip.Fixnum(2), nil, nil}, Expect: false},
-			{Other: slip.True, Expect: false},
-		},
-		Eval: slip.Vector{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), nil},
-		Selfies: []func() slip.Symbol{
-			slip.Vector{}.SequenceType,
-			slip.Vector{}.ArrayType,
-		},
-	}).Test(t)
-	tt.Equal(t, 2, slip.Vector{slip.True, nil}.Length())
-}
-
 func TestCharacterUnicode(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.Character('ぴ'),

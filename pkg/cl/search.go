@@ -105,8 +105,8 @@ func (f *Search) Call(s *slip.Scope, args slip.List, depth int) (index slip.Obje
 		index = sv.inList(s, ta, depth)
 	case slip.String:
 		index = sv.inString(s, ta, depth)
-	case slip.Vector:
-		index = sv.inList(s, slip.List(ta), depth)
+	case *slip.Vector:
+		index = sv.inList(s, ta.AsList(), depth)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
@@ -176,8 +176,8 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 		seq1 = slip.List{}
 	case slip.List:
 		seq1 = s1
-	case slip.Vector:
-		seq1 = slip.List(s1)
+	case *slip.Vector:
+		seq1 = s1.AsList()
 	case slip.String:
 		if 0 < len(s1) {
 			return nil
@@ -298,8 +298,8 @@ func (sv *searchVars) inString(s *slip.Scope, seq2 slip.String, depth int) slip.
 			return nil
 		}
 		return slip.Fixnum(0)
-	case slip.Vector:
-		if 0 < len(s1) {
+	case *slip.Vector:
+		if 0 < s1.Length() {
 			return nil
 		}
 		return slip.Fixnum(0)

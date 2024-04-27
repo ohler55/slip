@@ -3,13 +3,15 @@
 package slip
 
 import (
+	"fmt"
 	"math"
 )
 
 // ArraySymbol is the symbol with a value of "array".
 const (
-	ArraySymbol  = Symbol("array")
-	ArrayMaxRank = 1024
+	ArraySymbol       = Symbol("array")
+	ArrayMaxRank      = 1024
+	ArrayMaxDimension = 0x10000000
 )
 
 func init() {
@@ -18,32 +20,50 @@ func init() {
 
 	// Somewhat arbitrary. Could be anything.
 	DefConstant(Symbol("array-rank-limit"), Fixnum(ArrayMaxRank), `The upper bound on the rank of an _array_.`)
+	DefConstant(Symbol("array-dimension-limit"), Fixnum(ArrayMaxDimension),
+		`The upper exclusive bound on each dimension of an _array_.`)
 	DefConstant(Symbol("array-total-size-limit"), Fixnum(math.MaxInt), `The upper bound on the size of an _array_.`)
 }
 
 // Array is an n dimensional collection of Objects.
 type Array struct {
-	dims     []int
-	sizes    []int
-	elements []Object
+	dims        []int
+	sizes       []int
+	elements    []Object
+	elementType Symbol // defaults to TrueSymbol which is empty string
+	adjustable  bool
 }
 
 // NewArray creates a new array with the specified dimensions and initial
 // value.
-func NewArray(initVal Object, dimensions ...int) *Array {
+func NewArray(
+	dimensions []int,
+	elementType Symbol,
+	initElement Object,
+	initContent List,
+	adjustable bool) *Array {
+
 	a := Array{
-		dims:  dimensions,
-		sizes: make([]int, len(dimensions)),
+		dims:        dimensions,
+		sizes:       make([]int, len(dimensions)),
+		elementType: elementType,
+		adjustable:  adjustable,
 	}
 	size := 1
 	for i := len(dimensions) - 1; 0 <= i; i-- {
 		a.sizes[i] = size
+		if ArrayMaxDimension < dimensions[i] {
+			PanicType("dimension", Fixnum(dimensions[i]),
+				fmt.Sprintf("positive fixnum less than %d", ArrayMaxDimension))
+		}
 		size *= dimensions[i]
 	}
 	a.elements = make([]Object, size)
-	if initVal != nil {
+	if initContent != nil {
+		a.SetAll(initContent)
+	} else if initElement != nil {
 		for i := len(a.elements) - 1; 0 <= i; i-- {
-			a.elements[i] = initVal
+			a.elements[i] = initElement
 		}
 	}
 	return &a
@@ -60,7 +80,7 @@ func (obj *Array) calcAndSet(list List) {
 			obj.sizes[i] = size
 			size *= len(list)
 			if i < len(obj.dims)-1 {
-				if list, ok = list[0].(List); !ok { // TBD last?
+				if list, ok = list[0].(List); !ok {
 					NewPanic("Invalid data for a %d dimension array. %s", len(obj.dims), list)
 				}
 			}
@@ -152,27 +172,18 @@ func (obj *Array) Size() int {
 
 // Get the value at the location identified by the indexes.
 func (obj *Array) Get(indexes ...int) Object {
-	if len(indexes) != len(obj.dims) {
-		NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims))
-	}
-	pos := 0
-	for i, index := range indexes {
-		d := obj.dims[i]
-		if index < 0 || d <= index {
-			dims := make(List, len(obj.dims))
-			for j, d2 := range obj.dims {
-				dims[j] = Fixnum(d2)
-			}
-			NewPanic("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
-				index, i, dims, d)
-		}
-		pos += index * obj.sizes[i]
-	}
-	return obj.elements[pos]
+	return obj.elements[obj.MajorIndex(indexes...)]
 }
 
 // Set a value at the location identified by the indexes.
 func (obj *Array) Set(value Object, indexes ...int) {
+	pos := obj.MajorIndex(indexes...)
+	checkArrayElementType(value, obj.elementType)
+	obj.elements[pos] = value
+}
+
+// MajorIndex for the indexes provided.
+func (obj *Array) MajorIndex(indexes ...int) int {
 	if len(indexes) != len(obj.dims) {
 		NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims))
 	}
@@ -189,7 +200,23 @@ func (obj *Array) Set(value Object, indexes ...int) {
 		}
 		pos += index * obj.sizes[i]
 	}
-	obj.elements[pos] = value
+	return pos
+}
+
+// MajorGet for the index provided.
+func (obj *Array) MajorGet(index int) Object {
+	if index < 0 || len(obj.elements) <= index {
+		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj.elements))
+	}
+	return obj.elements[index]
+}
+
+// MajorSet for the index provided.
+func (obj *Array) MajorSet(index int, value Object) {
+	if index < 0 || len(obj.elements) <= index {
+		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj.elements))
+	}
+	obj.elements[index] = value
 }
 
 // AsList the Object into set of nested lists.
@@ -228,11 +255,11 @@ func (obj *Array) SetAll(all List) {
 func (obj *Array) setDim(list List, di, ei int) int {
 	d := obj.dims[di]
 	if d != len(list) {
-		NewPanic("Malformed :initial-contents: Dimension of axis %d is %d but received %d long.",
-			di, d, len(list))
+		NewPanic("Malformed :initial-contents: Dimension of axis %d is %d but received %d.", di, d, len(list))
 	}
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
+			checkArrayElementType(list[i], obj.elementType)
 			obj.elements[ei] = list[i]
 			ei++
 		}
@@ -249,7 +276,92 @@ func (obj *Array) setDim(list List, di, ei int) int {
 	return ei
 }
 
-// Resize the array using the initVal as the value for new elements.
-func (obj *Array) Resize(initVal Object, dimensions ...int) {
-	// TBD
+// Adjust array with new parameters.
+func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Object, initContent List) *Array {
+	if len(dimensions) != len(obj.dims) {
+		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dimensions))
+	}
+	adjustable := obj.adjustable
+	if !adjustable {
+		dup := *obj
+		dup.adjustable = true
+		dup.elements = make(List, len(obj.elements))
+		copy(dup.elements, obj.elements)
+		dup.dims = make([]int, len(obj.dims))
+		copy(dup.dims, obj.dims)
+		dup.sizes = make([]int, len(obj.sizes))
+		copy(dup.sizes, obj.sizes)
+		obj = &dup
+	}
+	if initContent != nil { // start over
+		obj.dims = dimensions
+		obj.sizes = make([]int, len(dimensions))
+		obj.elementType = elementType
+		size := 1
+		for i := len(dimensions) - 1; 0 <= i; i-- {
+			obj.sizes[i] = size
+			size *= dimensions[i]
+		}
+		obj.elements = make([]Object, size)
+		obj.SetAll(initContent)
+		return obj
+	}
+	if TrueSymbol != elementType {
+		for _, v := range obj.elements {
+			checkArrayElementType(v, elementType)
+		}
+	}
+	tmp := NewArray(dimensions, elementType, initElement, nil, true)
+	index := make([]int, len(obj.dims))
+top:
+	for pos := len(tmp.elements) - 1; 0 <= pos; pos-- {
+		off := pos
+		for i, sz := range tmp.sizes {
+			index[i] = off / sz
+			off %= sz
+		}
+		opos := 0
+		for i, idx := range index {
+			d := obj.dims[i]
+			if d <= idx {
+				tmp.elements[pos] = initElement
+				continue top
+			}
+			opos += idx * obj.sizes[i]
+		}
+		tmp.elements[pos] = obj.elements[opos]
+	}
+	obj.dims = tmp.dims
+	obj.sizes = tmp.sizes
+	obj.elements = tmp.elements
+	obj.elementType = elementType
+	obj.adjustable = adjustable
+
+	return obj
+}
+
+// Rank of the array is returned,
+func (obj *Array) Rank() int {
+	return len(obj.dims)
+}
+
+// Adjustable returns true if the array is adjustable.
+func (obj *Array) Adjustable() bool {
+	return obj.adjustable
+}
+
+// ElementType returns the element-type of the array.
+func (obj *Array) ElementType() Symbol {
+	return obj.elementType
+}
+
+func checkArrayElementType(v Object, et Symbol) {
+	if v != nil && 0 < len(et) {
+		for _, sym := range v.Hierarchy() {
+			if sym == et {
+				return
+			}
+		}
+		PanicType("array element", v, string(et))
+	}
 }

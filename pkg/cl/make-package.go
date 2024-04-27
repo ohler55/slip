@@ -47,7 +47,7 @@ type MakePackage struct {
 }
 
 // Call the function with the arguments provided.
-func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 5)
 	name := slip.MustBeString(args[0], "name")
 	if slip.FindPackage(name) != nil {

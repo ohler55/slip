@@ -141,8 +141,8 @@ func (f *Coerce) toList(arg slip.Object) (result slip.Object) {
 			list[i] = slip.Character(r)
 		}
 		result = list
-	case slip.Vector:
-		result = slip.List(ta)
+	case *slip.Vector:
+		result = ta.AsList()
 	default:
 		f.notPossible(ta, "list")
 	}
@@ -151,24 +151,24 @@ func (f *Coerce) toList(arg slip.Object) (result slip.Object) {
 
 func (f *Coerce) toVector(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
-	case nil, slip.Vector:
+	case nil, *slip.Vector:
 		result = ta
 	case slip.String:
 		ra := []rune(ta)
-		vector := make(slip.Vector, len(ra))
+		elements := make(slip.List, len(ra))
 		for i, r := range ra {
-			vector[i] = slip.Character(r)
+			elements[i] = slip.Character(r)
 		}
-		result = vector
+		result = slip.NewVector(len(elements), slip.CharacterSymbol, nil, elements, false)
 	case slip.Symbol:
 		ra := []rune(ta)
-		vector := make(slip.Vector, len(ra))
+		elements := make(slip.List, len(ra))
 		for i, r := range ra {
-			vector[i] = slip.Character(r)
+			elements[i] = slip.Character(r)
 		}
-		result = vector
+		result = slip.NewVector(len(elements), slip.CharacterSymbol, nil, elements, false)
 	case slip.List:
-		result = slip.Vector(ta)
+		result = slip.NewVector(len(ta), slip.TrueSymbol, nil, ta, true)
 	default:
 		f.notPossible(ta, "vector")
 	}
@@ -185,8 +185,8 @@ func (f *Coerce) toString(arg slip.Object) (result slip.Object) {
 		result = ta
 	case slip.Symbol:
 		result = slip.String(ta)
-	case slip.Vector:
-		result = f.listToString(slip.List(ta))
+	case *slip.Vector:
+		result = f.listToString(ta.AsList())
 	default:
 		f.notPossible(ta, "string")
 	}

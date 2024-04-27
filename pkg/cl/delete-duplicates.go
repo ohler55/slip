@@ -83,8 +83,9 @@ func (f *DeleteDuplicates) Call(s *slip.Scope, args slip.List, depth int) (resul
 		result = di.inList(s, ta, depth)
 	case slip.String:
 		result = di.inString(s, ta, depth)
-	case slip.Vector:
-		result = slip.Vector(di.inList(s, slip.List(ta), depth))
+	case *slip.Vector:
+		elements := di.inList(s, ta.AsList(), depth)
+		result = slip.NewVector(len(elements), ta.ElementType(), nil, elements, ta.Adjustable())
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}

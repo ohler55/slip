@@ -90,15 +90,8 @@ func equal(x, y slip.Object) bool {
 			}
 			return true
 		}
-	case slip.Vector:
-		if ty, ok := y.(slip.Vector); ok && len(tx) == len(ty) {
-			for i, xv := range tx {
-				if !equal(xv, ty[i]) {
-					return false
-				}
-			}
-			return true
-		}
+	case *slip.Vector:
+		return tx.Equal(y)
 	case slip.Tail:
 		if ty, ok := y.(slip.Tail); ok {
 			return equal(tx.Value, ty.Value)

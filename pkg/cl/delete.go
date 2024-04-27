@@ -85,8 +85,9 @@ func (f *Delete) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		result = f.inList(s, ta, depth, &sfv)
 	case slip.String:
 		result = f.inString(s, ta, depth, &sfv)
-	case slip.Vector:
-		result = slip.Vector(f.inList(s, slip.List(ta), depth, &sfv))
+	case *slip.Vector:
+		elements := f.inList(s, ta.AsList(), depth, &sfv)
+		result = slip.NewVector(len(elements), ta.ElementType(), nil, elements, ta.Adjustable())
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}

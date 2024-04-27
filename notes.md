@@ -4,10 +4,6 @@
 
 - next
 
- - vector and array
-  - maybe limit to adjustable with no fill pointer
-  -
-
  - package
   - support export list
    - ListToFunc should be f.ListToFunc

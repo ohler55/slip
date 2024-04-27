@@ -55,8 +55,9 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case slip.String:
 		ra := []rune(ta)
 		result = slip.String(ra[start:end])
-	case slip.Vector:
-		result = ta[start:end]
+	case *slip.Vector:
+		elements := ta.AsList()[start:end]
+		result = slip.NewVector(len(elements), ta.ElementType(), nil, elements, ta.Adjustable())
 	}
 	return
 }
@@ -76,11 +77,11 @@ func (f *Subseq) Place(args slip.List, value slip.Object) {
 		}
 	case slip.String:
 		slip.NewPanic("setf called on constant value %s", ta)
-	case slip.Vector:
-		if rep, ok := value.(slip.Vector); ok {
+	case *slip.Vector:
+		if rep, ok := value.(*slip.Vector); ok {
 			cnt := end - start
-			for i := 0; i < cnt && i < len(rep); i++ {
-				ta[start+i] = rep[i]
+			for i := 0; i < cnt && i < rep.Length(); i++ {
+				ta.Set(rep.Get(i), start+i)
 			}
 		} else {
 			slip.PanicType("newvalue", value, "list")
@@ -127,12 +128,13 @@ func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 			slip.NewPanic("indices %d and %d are out of bounds for string of length %d", start, end, len(ra))
 		}
 		seq = ta
-	case slip.Vector:
+	case *slip.Vector:
+		size := ta.Length()
 		if end < 0 {
-			end = len(ta)
+			end = size
 		}
-		if start < 0 || len(ta) < start || len(ta) < end {
-			slip.NewPanic("indices %d and %d are out of bounds for vector of length %d", start, end, len(ta))
+		if start < 0 || size < start || size < end {
+			slip.NewPanic("indices %d and %d are out of bounds for vector of length %d", start, end, size)
 		}
 		seq = ta
 	default:

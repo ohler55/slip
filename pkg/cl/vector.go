@@ -33,7 +33,5 @@ type Vector struct {
 
 // Call the function with the arguments provided.
 func (f *Vector) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	vector := make(slip.Vector, len(args))
-	copy(vector, args)
-	return vector
+	return slip.NewVector(len(args), slip.TrueSymbol, nil, args, true)
 }
