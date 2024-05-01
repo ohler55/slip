@@ -68,6 +68,18 @@ func TestLambdaCallWithScope(t *testing.T) {
 	}).Test(t)
 }
 
+func TestLambdaCallInFunc(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`
+(defun quux (x)
+  (apply (lambda (y) (+ x y)) '(5)))`).Eval(scope, nil)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(quux 7)`,
+		Expect: "12",
+	}).Test(t)
+}
+
 func TestLambdaCallBadKeyword(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `((lambda (&key :test) test) :test)`,
