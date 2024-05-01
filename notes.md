@@ -77,13 +77,6 @@
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
 
-
- - array
-  - add fill-pointer for one dimensional arrays
- - vector-pop - takes 1 dimensional arrays, fails on simple vector or array
- - vector-push - ...
- - vector-push-extend - ...
-
  - merge (starts with result-type)
 
  - plist (property lists) - tied to a symbol which makes it global, less useful as such
