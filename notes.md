@@ -20,19 +20,6 @@
   - shadowing-import
   - export
   - unexport
-  - find-symbol (string|symbol &optional package) => symbol, status
-   - status
-    - :internal - in package
-    - :external - what does this mean? maybe when package provide it is external?
-     - if exported to another package
-    - :inherited - through use-package
-   - return nil, nil if not present
-   - find func or var
-   - sbcl is case sensitive, maybe don't be
-  - find-all-symbols  (string|symbol)
-   - all packages search and return list of symbols
-    - symbols not in current package should be printed with package
-     - create the symbol with the package
 
  - net package
   - implement sbcl networking or something closer to golang?
@@ -68,10 +55,7 @@
  - clos methods/generics (flavors and clos mix as flos)
   - flos
    - defgeneric is only used to check defmethod
-   + flosfun to create a wrapper around send :xxx
-   - maybe a a key in function doc string to link method to function
    - inherit flos-flavor to generate functions for all method with a designated prefix
-  - possibly add a flag indicating the flavor is a class vs flavor or flos
   - is a standard-class needed instead of vanilla or maybe just expand vanilla?
 
   - change-class (for flavors instances only for now)
