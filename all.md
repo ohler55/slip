@@ -63,9 +63,6 @@
  * [ ] COPY-TREE
  * [ ] COSH
  * [ ] CTYPECASE
- * [ ] DECLAIM
- * [ ] DECLARATION
- * [ ] DECLARE
  * [ ] DECODE-FLOAT
  * [ ] DECODE-UNIVERSAL-TIME
  * [ ] DEFINE-CONDITION
@@ -86,7 +83,6 @@
  * [ ] DOCUMENTATION
  * [ ] DPB
  * [ ] DRIBBLE
- * [ ] DYNAMIC-EXTENT
  * [ ] ECASE
  * [ ] ECHO-STREAM
  * [ ] ECHO-STREAM-INPUT-STREAM
@@ -119,7 +115,6 @@
  * [ ] FLOATING-POINT-UNDERFLOW
  * [ ] FORMATTER
  * [ ] FRESH-LINE
- * [ ] FTYPE
  * [ ] FUNCTION-KEYWORDS
  * [ ] FUNCTION-LAMBDA-EXPRESSION
  * [ ] GCD
@@ -136,8 +131,6 @@
  * [ ] HANDLER-BIND
  * [ ] HANDLER-CASE
  * [ ] HOST-NAMESTRING
- * [ ] IGNORABLE
- * [ ] IGNORE
  * [ ] IMAGPART
  * [ ] IMPORT
  * [ ] INITIALIZE-INSTANCE
@@ -198,7 +191,6 @@
  * [ ] NO-APPLICABLE-METHOD
  * [ ] NOTANY
  * [ ] NOTEVERY
- * [ ] NOTINLINE
  * [ ] NRECONC
  * [ ] NSET-DIFFERENCE
  * [ ] NSET-EXCLUSIVE-OR
@@ -239,7 +231,6 @@
  * [ ] PRINT-NOT-READABLE-OBJECT
  * [ ] PRINT-OBJECT
  * [ ] PRINT-UNREADABLE-OBJECT
- * [ ] PROCLAIM
  * [ ] PROGV
  * [ ] PSETF
  * [ ] PUSH
@@ -292,7 +283,6 @@
  * [ ] SLOT-VALUE
  * [ ] SOME
  * [ ] SPACE
- * [ ] SPECIAL
  * [ ] SPECIAL-OPERATOR-P
  * [ ] STEP
  * [ ] STORAGE-CONDITION
@@ -353,6 +343,7 @@
  * [ ] WRITE-STRING
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
+ * [x] INLINE
  * [x] &BODY
  * [x] &KEY
  * [x] &OPTIONAL
@@ -531,6 +522,9 @@
  * [x] COUNT
  * [x] COUNT-IF
  * [x] DECF
+ * [x] DECLAIM
+ * [x] DECLARATION
+ * [x] DECLARE
  * [x] DEFCONSTANT
  * [x] DEFMACRO
  * [x] DEFMETHOD
@@ -557,6 +551,7 @@
  * [x] DOUBLE-FLOAT
  * [x] DOUBLE-FLOAT-EPSILON
  * [x] DOUBLE-FLOAT-NEGATIVE-EPSILON
+ * [x] DYNAMIC-EXTENT
  * [x] EIGHTH
  * [x] ENSURE-DIRECTORIES-EXIST
  * [x] EQ
@@ -596,6 +591,7 @@
  * [x] FOURTH
  * [x] FROUND
  * [x] FTRUNCATE
+ * [x] FTYPE
  * [x] FUNCALL
  * [x] FUNCTION
  * [x] FUNCTIONP
@@ -615,6 +611,8 @@
  * [x] HASH-TABLE-TEST
  * [x] IDENTITY
  * [x] IF
+ * [x] IGNORABLE
+ * [x] IGNORE
  * [x] IGNORE-ERRORS
  * [x] IN-PACKAGE
  * [x] INCF
@@ -720,6 +718,7 @@
  * [x] NINTERSECTION
  * [x] NINTH
  * [x] NOT
+ * [x] NOTINLINE
  * [x] NREVERSE
  * [x] NSTRING-CAPITALIZE
  * [x] NSTRING-DOWNCASE
@@ -732,6 +731,7 @@
  * [x] NUNION
  * [x] ODDP
  * [x] OPEN
+ * [x] OPTIMIZE
  * [x] OR
  * [x] OUTPUT-STREAM-P
  * [x] PACKAGE-ERROR
@@ -758,6 +758,7 @@
  * [x] PRINC-TO-STRING
  * [x] PRINT
  * [x] PROBE-FILE
+ * [x] PROCLAIM
  * [x] PROG
  * [x] PROG*
  * [x] PROG1
@@ -828,6 +829,7 @@
  * [x] SOFTWARE-TYPE
  * [x] SOFTWARE-VERSION
  * [x] SORT
+ * [x] SPECIAL
  * [x] SQRT
  * [x] STABLE-SORT
  * [x] STANDARD-CHAR
@@ -943,7 +945,6 @@
  - [-] FIND-RESTART
  - [-] FINISH-OUTPUT
  - [-] FORCE-OUTPUT
- - [-] INLINE
  - [-] INVOKE-DEBUGGER
  - [-] INVOKE-RESTART
  - [-] INVOKE-RESTART-INTERACTIVELY
@@ -951,7 +952,6 @@
  - [-] MAKE-INSTANCES-OBSOLETE
  - [-] MEMBER-IF-NOT
  - [-] NO-NEXT-METHOD
- - [-] OPTIMIZE
  - [-] POSITION-IF-NOT
  - [-] PROVIDE
  - [-] RASSOC-IF-NOT
