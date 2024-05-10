@@ -55,12 +55,14 @@ func NewFunc(name string, args List, pkgs ...*Package) Object {
 // FindFunc finds the FuncInfo for a provided name or panics if none exists.
 func FindFunc(name string, pkgs ...*Package) *FuncInfo {
 	pkg := CurrentPackage
+	var private bool // indicates non-exported okay, referrenced with ::
 	if i := strings.IndexByte(name, ':'); 0 < i {
 		if pkg = FindPackage(name[:i]); pkg == nil {
 			panic(fmt.Sprintf("package %s is not defined.", printer.caseName(name[:i])))
 		}
 		i++
 		if i < len(name) && name[i] == ':' {
+			private = true
 			i++
 		}
 		name = name[i:]
@@ -73,6 +75,13 @@ func FindFunc(name string, pkgs ...*Package) *FuncInfo {
 		fi = pkg.funcs[name]
 	}
 	if fi != nil {
+		if private || fi.export || pkg == CurrentPackage {
+			return fi
+		}
+		// TBD handle function called by another function is a package
+		//  maybe add evalPkg to scope? if nil then current package or don't check
+		// test in test/cl/defun_test
+		fmt.Printf("*** find func %s was private in %s, current is %s\n", name, pkg.Name, CurrentPackage.Name)
 		return fi
 	}
 	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined.", printer.caseName(name)))
@@ -272,7 +281,7 @@ func CompileList(list List) (f Object) {
 						},
 					}
 				}
-				CurrentPackage.funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage}
+				CurrentPackage.funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage, export: true}
 				f = fc(list[1:])
 			}
 			if funk, ok := f.(Funky); ok {

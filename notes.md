@@ -3,26 +3,21 @@
 - **multipass** or utm for linux
 
 - next
- - better-keyword
-  - for pkg, change *pkg* to :pkg
-  - for resolving symbol, :foo is the same as foo
-  - :cl-user is the same as user, no need for *cl-user*
-   - should there be a Keyword type that is a string without the : ?
-   - or just take [1:] of word for lookups
-   - (equal :foo ':foo) => t
-   - (equal :foo 'foo) => nil
-  - for def-package, :quux is like 'quux
-   - MustBeString in function, remove :? (best to resolve to string without :)
-    - use more often
 
- - package
-  - double :: gives access to non-exported functions/symbols
-  - single : for export but not used
-  - just function name for used package
+ - package-export
+  - export
+  - implement defpackage export list
+   - keep list of exported and set func to be exported on defun or no if not on list
+    - see what issues arise when user package since default will be not-exported
+  - unexport
+  - do-external-symbols
+
+  - package
+   - double :: gives access to non-exported functions/symbols
+   - single : for export but not used
+   - just function name for used package
 
   - support export list and export function
-   - maybe add flag to FuncInfo for exported
-   - add flag to FuncDoc that is copied on package.Define
    - ListToFunc should be f.ListToFunc
     - lookup of func should consider the package of f
      - if lookup is in f.pkg or lookup is exported (new flag) then ok
