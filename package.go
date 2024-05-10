@@ -357,6 +357,30 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	}
 }
 
+// Export a function.
+func (obj *Package) Export(name string) {
+	name = strings.ToLower(name)
+	obj.mu.Lock()
+	if obj.funcs != nil {
+		if fi := obj.funcs[name]; fi != nil {
+			fi.export = true
+		}
+	}
+	obj.mu.Unlock()
+}
+
+// Unexport a function.
+func (obj *Package) Unexport(name string) {
+	name = strings.ToLower(name)
+	obj.mu.Lock()
+	if obj.funcs != nil {
+		if fi := obj.funcs[name]; fi != nil {
+			fi.export = false
+		}
+	}
+	obj.mu.Unlock()
+}
+
 // Undefine a function.
 func (obj *Package) Undefine(name string) {
 	name = strings.ToLower(name)

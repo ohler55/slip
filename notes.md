@@ -6,16 +6,12 @@
 
  - package-export
   - export
+   - update function_test.go with nested non-exported sub
   - implement defpackage export list
    - keep list of exported and set func to be exported on defun or no if not on list
     - see what issues arise when user package since default will be not-exported
   - unexport
   - do-external-symbols
-
-  - package
-   - double :: gives access to non-exported functions/symbols
-   - single : for export but not used
-   - just function name for used package
 
   - support export list and export function
    - ListToFunc should be f.ListToFunc

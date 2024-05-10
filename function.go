@@ -80,9 +80,8 @@ func FindFunc(name string, pkgs ...*Package) *FuncInfo {
 		}
 		// TBD handle function called by another function is a package
 		//  maybe add evalPkg to scope? if nil then current package or don't check
-		// test in test/cl/defun_test
+		// test
 		fmt.Printf("*** find func %s was private in %s, current is %s\n", name, pkg.Name, CurrentPackage.Name)
-		return fi
 	}
 	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined.", printer.caseName(name)))
 }
