@@ -11,7 +11,7 @@ import (
 
 func TestPackageNicknames(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(package-nicknames *cl*)`,
+		Source: `(package-nicknames :cl)`,
 		Expect: `("cl")`,
 	}).Test(t)
 }

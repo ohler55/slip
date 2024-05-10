@@ -333,11 +333,11 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 		Doc:    doc,
 		Pkg:    obj,
 		Kind:   doc.Kind,
+		export: !doc.NoExport,
 	}
 	if len(fi.Kind) == 0 {
 		fi.Kind = BuiltInSymbol
 	}
-
 	obj.mu.Lock()
 	if obj.funcs == nil {
 		obj.funcs = map[string]*FuncInfo{}
@@ -355,6 +355,30 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	for _, h := range defunHooks {
 		h.fun(obj, name)
 	}
+}
+
+// Export a function.
+func (obj *Package) Export(name string) {
+	name = strings.ToLower(name)
+	obj.mu.Lock()
+	if obj.funcs != nil {
+		if fi := obj.funcs[name]; fi != nil {
+			fi.export = true
+		}
+	}
+	obj.mu.Unlock()
+}
+
+// Unexport a function.
+func (obj *Package) Unexport(name string) {
+	name = strings.ToLower(name)
+	obj.mu.Lock()
+	if obj.funcs != nil {
+		if fi := obj.funcs[name]; fi != nil {
+			fi.export = false
+		}
+	}
+	obj.mu.Unlock()
 }
 
 // Undefine a function.
@@ -630,6 +654,7 @@ func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Objec
 		Create: fc,
 		Pkg:    obj,
 		Kind:   kind,
+		// export: true, // TBD should be false
 	}
 	obj.mu.Unlock()
 	if 0 < len(name) && !strings.EqualFold(name, "lambda") {

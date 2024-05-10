@@ -61,3 +61,23 @@ func TestFunctionEvalArg(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, slip.Fixnum(7), scope.Get(slip.Symbol("x")))
 }
+
+func TestFunctionExport(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	xpkg := slip.DefPackage("exported-test", []string{}, "testing")
+	slip.CurrentPackage = xpkg
+	slip.CurrentPackage.Use(&slip.CLPkg)
+	_ = slip.ReadString(`(defun private-func () 'private)`).Eval(scope, nil)
+	slip.CurrentPackage = &slip.UserPkg
+	result := slip.ReadString(`(exported-test::private-func)`).Eval(scope, nil)
+	tt.Equal(t, "private", slip.ObjectString(result))
+
+	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
+	xpkg.Export("private-func")
+	result = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil)
+	tt.Equal(t, "private", slip.ObjectString(result))
+
+	xpkg.Unexport("private-func")
+	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
+}

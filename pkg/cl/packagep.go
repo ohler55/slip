@@ -25,7 +25,7 @@ func init() {
 			Return: "boolean",
 			Text:   `__packagep__ returns true if _object_ is a _package_.`,
 			Examples: []string{
-				`(packagep *cl*) => t`,
+				`(packagep :cl) => t`,
 				`(packagep t) => nil`,
 			},
 		}, &slip.CLPkg)

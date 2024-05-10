@@ -38,20 +38,22 @@ type FindPackage struct {
 
 // Call the function with the arguments provided.
 func (f *FindPackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.ArgCountCheck(f, args, 1, 1)
+	var p *slip.Package
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		if p := slip.FindPackage(string(ta)); p != nil {
-			return p
+		if 0 < len(ta) && ta[0] == ':' {
+			p = slip.FindPackage(string(ta[1:]))
+		} else {
+			p = slip.FindPackage(string(ta))
 		}
 	case slip.String:
-		if p := slip.FindPackage(string(ta)); p != nil {
-			return p
-		}
+		p = slip.FindPackage(string(ta))
 	default:
 		slip.PanicType("name", args[0], "string", "symbol")
+	}
+	if p != nil {
+		result = p
 	}
 	return
 }

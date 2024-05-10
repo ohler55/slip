@@ -515,18 +515,8 @@ func (c *control) dirCall(colon, at bool, params []any) {
 		slip.NewPanic("call directive not terminated at %d of %q", c.pos, c.str)
 	}
 	c.pos++
-	p := &slip.UserPkg
 	name := c.str[start : c.pos-1]
-	if i := bytes.Index(name, []byte{':'}); 0 < i {
-		if p = slip.FindPackage(string(name[:i])); p == nil {
-			slip.NewPanic("package %s not found at %d of %q", name[:i], c.pos, c.str)
-		}
-		name = name[i+1:]
-		if 0 < len(name) && name[0] == ':' {
-			name = name[1:]
-		}
-	}
-	fi := slip.FindFunc(string(name), p) // panics if not found
+	fi := slip.FindFunc(string(name)) // panics if not found
 	args := make(slip.List, 4)
 	args[0] = &slip.OutputStream{Writer: c}
 	if 0 <= c.argPos {

@@ -22,7 +22,7 @@ func init() {
 					Text: "The name of the class or flavor.",
 				},
 			},
-			Text: `__class-name__ returns the name of a class od flavor.`,
+			Text: `__class-name__ returns the name of a class or flavor.`,
 			Examples: []string{
 				"(class-name 'vanilla-flavor) => vanilla-flavor",
 			},

@@ -29,4 +29,5 @@ type FuncDoc struct {
 	Text     string
 	Examples []string
 	Kind     Symbol
+	NoExport bool
 }

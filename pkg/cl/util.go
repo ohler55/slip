@@ -163,7 +163,11 @@ func placeN(f slip.Object, args slip.List, n int, value slip.Object) {
 func packageFromArg(arg slip.Object, name string) (pkg *slip.Package) {
 	switch tv := arg.(type) {
 	case slip.Symbol:
-		pkg = slip.FindPackage(string(tv))
+		if 0 < len(tv) && tv[0] == ':' {
+			pkg = slip.FindPackage(string(tv[1:]))
+		} else {
+			pkg = slip.FindPackage(string(tv))
+		}
 	case slip.String:
 		pkg = slip.FindPackage(string(tv))
 	case *slip.Package:

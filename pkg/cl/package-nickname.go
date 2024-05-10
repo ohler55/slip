@@ -25,7 +25,7 @@ func init() {
 			Return: "list of string",
 			Text:   `__package-nicknames__ returns the nicknames of the _package_.`,
 			Examples: []string{
-				`(package-nicknames *cl*) => ("cl")`,
+				`(package-nicknames :cl) => ("cl")`,
 			},
 		}, &slip.CLPkg)
 }
@@ -38,10 +38,7 @@ type PackageNicknames struct {
 // Call the function with the arguments provided.
 func (f *PackageNicknames) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	pkg, ok := args[0].(*slip.Package)
-	if !ok {
-		slip.PanicType("package", args[0], "package")
-	}
+	pkg := packageFromArg(args[0], "package")
 	nn := make(slip.List, len(pkg.Nicknames))
 	for i, str := range pkg.Nicknames {
 		nn[i] = slip.String(str)
