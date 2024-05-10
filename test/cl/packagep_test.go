@@ -10,7 +10,7 @@ import (
 
 func TestPackagep(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(packagep *cl*)`,
+		Source: `(packagep (find-package :cl))`,
 		Expect: "t",
 	}).Test(t)
 }

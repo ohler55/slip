@@ -11,7 +11,7 @@ import (
 
 func TestPackageName(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(package-name *cl*)`,
+		Source: `(package-name :cl)`,
 		Expect: `"common-lisp"`,
 	}).Test(t)
 }

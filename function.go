@@ -351,7 +351,11 @@ func MustBeString(arg Object, name string) (str string) {
 	case String:
 		str = string(ta)
 	case Symbol:
-		str = string(ta)
+		if 0 < len(name) && name[0] == ':' {
+			str = string(ta[1:])
+		} else {
+			str = string(ta)
+		}
 	default:
 		PanicType(name, arg, "string", "symbol")
 	}

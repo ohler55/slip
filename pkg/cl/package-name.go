@@ -25,7 +25,7 @@ func init() {
 			Return: "string",
 			Text:   `__package-name__ returns the name of the _package_.`,
 			Examples: []string{
-				`(package-name *cl*) => "common-lisp"`,
+				`(package-name :cl) => "common-lisp"`,
 			},
 		}, &slip.CLPkg)
 }
