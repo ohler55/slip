@@ -80,6 +80,7 @@ func (f *FindSymbol) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	}
 	var status slip.Object
 	vv := p.GetVarVal(string(so))
+	// TBD if no var then check functions
 	switch {
 	case vv == nil:
 		return slip.Values{nil, nil}

@@ -5,6 +5,10 @@
 - next
 
  - package-export
+  - add export flag to varval (private, noexport, internal, or export)
+   - public Export bool
+   - update export and unexport functions to handle variables as well
+
   - export
    - use find-symbol
     - update to return the correct values
@@ -15,6 +19,7 @@
     - see what issues arise when user package since default will be not-exported
   - unexport
   - do-external-symbols
+  - import
 
 
 

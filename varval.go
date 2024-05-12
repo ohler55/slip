@@ -4,11 +4,12 @@ package slip
 
 // VarVal hold the information about a variable value.
 type VarVal struct {
-	Val Object
-	Get func() Object
-	Set func(Object)
-	Doc string
-	Pkg *Package // package interned in
+	Val    Object
+	Get    func() Object
+	Set    func(Object)
+	Doc    string
+	Pkg    *Package // package interned in
+	Export bool
 }
 
 // Simplify the Object into an int64.
