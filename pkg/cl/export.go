@@ -9,7 +9,7 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Export{Function: slip.Function{Name: "export", Args: args, SkipEval: []bool{true}}}
+			f := Export{Function: slip.Function{Name: "export", Args: args}}
 			f.Self = &f
 			return &f
 		},

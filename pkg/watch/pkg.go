@@ -197,7 +197,7 @@ changes in a fixed location and values are updated in place.
 func init() {
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*watch*": {Val: &Pkg, Doc: Pkg.Doc},
+			"*watch*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
 		},
 	)
 	_ = ServerFlavor()

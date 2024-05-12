@@ -119,6 +119,9 @@ func (s *Scope) get(name string) Object {
 	if v, has := ConstantValues[name]; has {
 		return v
 	}
+	// TBD get package from var if has : or ::
+	// if has package then just check the package and not vars
+
 	s.moo.Lock()
 	if s.Vars != nil {
 		if value, has := s.Vars[name]; has {
@@ -133,6 +136,8 @@ func (s *Scope) get(name string) Object {
 		}
 	}
 	value, has := CurrentPackage.Get(name)
+
+	// TBD check package of current function somehow
 
 	if !has || Unbound == value {
 		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
@@ -170,7 +175,16 @@ func (s *Scope) Set(sym Symbol, value Object) {
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
 	}
+	// TBD get package from var if has : or ::
+	// if has package then just check the package and not vars
+
 	if !s.set(strings.ToLower(string(sym)), value) {
+		// TBD verify var present and if not then check scope package
+		//  maybe need a pkg.setIf() that sets if present and return bool
+		// maybe get vv first with getVarVal, lock
+
+		// need to call callSetHooks(vv.Pkg, name) if vv != nil
+
 		CurrentPackage.Set(string(sym), value)
 	}
 }

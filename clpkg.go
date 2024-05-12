@@ -196,6 +196,7 @@ func init() {
 	clPkg = &CLPkg
 	for _, vv := range CLPkg.vars {
 		vv.Pkg = &CLPkg
+		vv.Export = true
 	}
 	xpath, _ := os.Executable()
 	xpath, _ = filepath.EvalSymlinks(xpath)

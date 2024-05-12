@@ -137,8 +137,8 @@ func TestPackageDef(t *testing.T) {
 	pb := slip.DefPackage("b", []string{"bee"}, "Buzzing around.")
 	pc := slip.DefPackage("c", []string{"sea", "see"}, "Sailing.")
 
-	pa.Set("aaa", slip.Fixnum(7))
-	pb.Set("bb", slip.Fixnum(3))
+	pa.Set("aaa", slip.Fixnum(7)).Export = true
+	pb.Set("bb", slip.Fixnum(3)).Export = true
 	pc.Use(pa)
 	pc.Use(pa)
 	pc.Import(pb, "bb")

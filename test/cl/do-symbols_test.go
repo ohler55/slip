@@ -92,7 +92,7 @@ func TestDoSymbolsJustSymbol(t *testing.T) {
 				"vanilla-flavor",
 				"*print-pretty*",
 			} {
-				tt.Equal(t, true, strings.Contains(str, name))
+				tt.Equal(t, true, strings.Contains(str, name), "checking %s", name)
 			}
 		},
 	}).Test(t)

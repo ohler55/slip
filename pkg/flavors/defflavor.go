@@ -176,7 +176,8 @@ func DefFlavor(
 		validateFlavor(nf)
 	}
 	allFlavors[nf.name] = nf
-	p.Set(nf.name, nf)
+	_ = p.Set(nf.name, nf)
+	p.Export(nf.name)
 
 	return nf
 }

@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -135,13 +136,17 @@ func (obj *Package) Use(pkg *Package) {
 			obj.vars = map[string]*VarVal{}
 		}
 		for name, vv := range pkg.vars {
-			obj.vars[name] = vv
+			if vv.Export {
+				obj.vars[name] = vv
+			}
 		}
 		if obj.funcs == nil {
 			obj.funcs = map[string]*FuncInfo{}
 		}
 		for name, fi := range pkg.funcs {
-			obj.funcs[name] = fi
+			if fi.export {
+				obj.funcs[name] = fi
+			}
 		}
 	}
 }
@@ -205,38 +210,96 @@ func (obj *Package) Import(pkg *Package, varName string) {
 }
 
 // Set a variable.
-func (obj *Package) Set(name string, value Object) *VarVal {
+func (obj *Package) Set(name string, value Object) (vv *VarVal) {
 	name, value = obj.PreSet(obj, name, value)
 	if _, has := ConstantValues[name]; has {
 		PanicPackage(obj, "%s is a constant and thus can't be set", name)
 	}
-	obj.mu.Lock()
-	if vv, has := obj.vars[name]; has {
+	if vv = obj.SetIfHas(name, value); vv == nil {
+		if obj.Locked {
+			PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
+		}
+		vv = &VarVal{Val: value, Pkg: obj}
+		obj.mu.Lock()
+		obj.vars[name] = vv
+		// TBD just do the follwing if exported
+		//  that means an export flag is needed or else *Export needs to copy to user*
+		//  also add arg to set for export or not for efficiency (or separate func? and rename Set)
+		for _, u := range obj.Users {
+			// TBD u must be locked
+			if _, has := u.vars[name]; !has {
+				u.vars[name] = vv
+			}
+		}
 		obj.mu.Unlock()
+	}
+	callSetHooks(vv.Pkg, name)
+
+	// obj.mu.Lock()
+	// if vv, has := obj.vars[name]; has {
+	// 	if !vv.Export && CurrentPackage != obj {
+	// 		// TBD panic
+	// 		fmt.Printf("*** %s::%s is not exported\n", obj.Name, name)
+	// 	}
+	// 	// defer
+	// 	obj.mu.Unlock()
+
+	// 	// TBD if calling scope package is same then okay to continue
+	// 	//  needs to be caught in scope.Set
+
+	// 	if vv.Set != nil {
+	// 		vv.Set(value)
+	// 	} else {
+	// 		vv.Val = value
+	// 	}
+	// 	callSetHooks(vv.Pkg, name)
+
+	// 	return vv
+	// }
+	// if obj.Locked {
+	// 	obj.mu.Unlock()
+	// 	PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
+	// }
+	// vv := &VarVal{Val: value, Pkg: obj}
+	// obj.vars[name] = vv
+	// for _, u := range obj.Users {
+	// 	if _, has := u.vars[name]; !has {
+	// 		u.vars[name] = vv
+	// 	}
+	// }
+	// obj.mu.Unlock()
+	// callSetHooks(obj, name)
+
+	return vv
+}
+
+// SetIfHas sets a variable if the package has that variable.
+func (obj *Package) SetIfHas(name string, value Object) (vv *VarVal) {
+	obj.mu.Lock()
+	unlock := true
+	defer func() {
+		if unlock {
+			obj.mu.Unlock()
+		}
+	}()
+	if vv = obj.vars[name]; vv != nil {
+		if !vv.Export && CurrentPackage != obj {
+			// TBD panic
+			fmt.Printf("*** %s::%s is not exported\n", obj.Name, name)
+		}
+
+		// TBD if calling scope package is same then okay to continue
+		//  needs to be caught in scope.Set
+
 		if vv.Set != nil {
+			unlock = false
+			obj.mu.Unlock()
 			vv.Set(value)
 		} else {
 			vv.Val = value
 		}
-		callSetHooks(vv.Pkg, name)
-
-		return vv
 	}
-	if obj.Locked {
-		obj.mu.Unlock()
-		PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
-	}
-	vv := &VarVal{Val: value, Pkg: obj}
-	obj.vars[name] = vv
-	for _, u := range obj.Users {
-		if _, has := u.vars[name]; !has {
-			u.vars[name] = vv
-		}
-	}
-	obj.mu.Unlock()
-	callSetHooks(obj, name)
-
-	return vv
+	return
 }
 
 // Get a variable.
@@ -244,6 +307,9 @@ func (obj *Package) Get(name string) (value Object, has bool) {
 	obj.mu.Lock()
 	defer obj.mu.Unlock()
 	if vv := obj.getVarVal(name); vv != nil {
+		if !vv.Export && CurrentPackage != obj {
+			fmt.Printf("*** %s::%s is not exported\n", obj.Name, name)
+		}
 		if vv.Get != nil {
 			value = vv.Get()
 		} else {
@@ -359,6 +425,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 
 // Export a function.
 func (obj *Package) Export(name string) {
+	// TBD copy funcs and vars to users unless shadowed (already there)
 	name = strings.ToLower(name)
 	obj.mu.Lock()
 	if obj.funcs != nil {
@@ -366,16 +433,27 @@ func (obj *Package) Export(name string) {
 			fi.export = true
 		}
 	}
+	if obj.vars != nil {
+		if vv := obj.vars[name]; vv != nil {
+			vv.Export = true
+		}
+	}
 	obj.mu.Unlock()
 }
 
 // Unexport a function.
 func (obj *Package) Unexport(name string) {
+	// TBD remove funcs and vars to users if this package
 	name = strings.ToLower(name)
 	obj.mu.Lock()
 	if obj.funcs != nil {
 		if fi := obj.funcs[name]; fi != nil {
 			fi.export = false
+		}
+	}
+	if obj.vars != nil {
+		if vv := obj.vars[name]; vv != nil {
+			vv.Export = false
 		}
 	}
 	obj.mu.Unlock()

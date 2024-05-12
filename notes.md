@@ -5,8 +5,14 @@
 - next
 
  - package-export
+  - don't inherit (use) non-exported vars
+   - then vars and funcs not exported are not available with the pkg and ::
+   - if not found still need to check package of call/scope
+
   - add export flag to varval (private, noexport, internal, or export)
-   - public Export bool
+   - get var access working
+    - maybe add func package to scope
+   - figure out how to track package of current call
    - update export and unexport functions to handle variables as well
 
   - export

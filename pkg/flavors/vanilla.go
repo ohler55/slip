@@ -33,7 +33,6 @@ func init() {
 	for _, ma := range vanilla.methods {
 		ma[0].from = &vanilla
 	}
-	Pkg.Set(vanilla.name, &vanilla)
 }
 
 type initCaller bool
