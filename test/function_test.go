@@ -21,10 +21,10 @@ func TestFunctionNew(t *testing.T) {
 
 func TestFunctionFind(t *testing.T) {
 	cl := slip.FindPackage("common-lisp")
-	f := slip.FindFunc("car", cl)
+	f := slip.MustFindFunc("car", cl)
 	tt.NotNil(t, f)
 
-	tt.Panic(t, func() { _ = slip.FindFunc("nothing") })
+	tt.Panic(t, func() { _ = slip.MustFindFunc("nothing") })
 }
 
 func TestFunctionApply(t *testing.T) {
@@ -74,6 +74,7 @@ func TestFunctionExport(t *testing.T) {
 	tt.Equal(t, "private", slip.ObjectString(result))
 
 	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
+
 	xpkg.Export("private-func")
 	result = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil)
 	tt.Equal(t, "private", slip.ObjectString(result))

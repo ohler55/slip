@@ -5,6 +5,10 @@
 - next
 
  - package-export
+  - add Pkg to scope
+  - in Function eval and call set and revert scope Pkg setting
+
+
   - don't inherit (use) non-exported vars
    - then vars and funcs not exported are not available with the pkg and ::
    - if not found still need to check package of call/scope

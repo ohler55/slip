@@ -11,7 +11,7 @@ type FuncInfo struct {
 	Doc    *FuncDoc
 	Pkg    *Package // package interned in
 	Kind   Symbol
-	export bool
+	Export bool
 }
 
 // String representation of the Object.

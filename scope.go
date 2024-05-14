@@ -14,6 +14,7 @@ type Scope struct {
 	parents []*Scope
 	Name    Object // can be nil so type can't be Symbol
 	Vars    map[string]Object
+	Pkg     *Package
 	moo     sync.Mutex
 	Block   bool
 	TagBody bool
@@ -25,6 +26,7 @@ type Scope struct {
 func NewScope() *Scope {
 	return &Scope{
 		Vars: map[string]Object{},
+		Pkg:  CurrentPackage,
 	}
 }
 
@@ -33,6 +35,7 @@ func (s *Scope) NewScope() *Scope {
 	return &Scope{
 		parents: []*Scope{s},
 		Vars:    map[string]Object{},
+		Pkg:     s.Pkg,
 		Block:   false,
 		TagBody: s.TagBody,
 		Macro:   s.Macro,

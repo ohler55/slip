@@ -516,7 +516,7 @@ func (c *control) dirCall(colon, at bool, params []any) {
 	}
 	c.pos++
 	name := c.str[start : c.pos-1]
-	fi := slip.FindFunc(string(name)) // panics if not found
+	fi := slip.MustFindFunc(string(name)) // panics if not found
 	args := make(slip.List, 4)
 	args[0] = &slip.OutputStream{Writer: c}
 	if 0 <= c.argPos {

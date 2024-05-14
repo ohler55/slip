@@ -5,6 +5,7 @@ package slip
 import (
 	"fmt"
 	"reflect"
+	"runtime/debug"
 	"sort"
 	"strings"
 	"sync"
@@ -144,7 +145,7 @@ func (obj *Package) Use(pkg *Package) {
 			obj.funcs = map[string]*FuncInfo{}
 		}
 		for name, fi := range pkg.funcs {
-			if fi.export {
+			if fi.Export {
 				obj.funcs[name] = fi
 			}
 		}
@@ -225,52 +226,21 @@ func (obj *Package) Set(name string, value Object) (vv *VarVal) {
 		// TBD just do the follwing if exported
 		//  that means an export flag is needed or else *Export needs to copy to user*
 		//  also add arg to set for export or not for efficiency (or separate func? and rename Set)
-		for _, u := range obj.Users {
-			// TBD u must be locked
-			if _, has := u.vars[name]; !has {
-				u.vars[name] = vv
+
+		if vv.Export {
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if _, has := u.vars[name]; !has {
+					u.vars[name] = vv
+				}
+				u.mu.Unlock()
 			}
 		}
 		obj.mu.Unlock()
 	}
 	callSetHooks(vv.Pkg, name)
 
-	// obj.mu.Lock()
-	// if vv, has := obj.vars[name]; has {
-	// 	if !vv.Export && CurrentPackage != obj {
-	// 		// TBD panic
-	// 		fmt.Printf("*** %s::%s is not exported\n", obj.Name, name)
-	// 	}
-	// 	// defer
-	// 	obj.mu.Unlock()
-
-	// 	// TBD if calling scope package is same then okay to continue
-	// 	//  needs to be caught in scope.Set
-
-	// 	if vv.Set != nil {
-	// 		vv.Set(value)
-	// 	} else {
-	// 		vv.Val = value
-	// 	}
-	// 	callSetHooks(vv.Pkg, name)
-
-	// 	return vv
-	// }
-	// if obj.Locked {
-	// 	obj.mu.Unlock()
-	// 	PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
-	// }
-	// vv := &VarVal{Val: value, Pkg: obj}
-	// obj.vars[name] = vv
-	// for _, u := range obj.Users {
-	// 	if _, has := u.vars[name]; !has {
-	// 		u.vars[name] = vv
-	// 	}
-	// }
-	// obj.mu.Unlock()
-	// callSetHooks(obj, name)
-
-	return vv
+	return
 }
 
 // SetIfHas sets a variable if the package has that variable.
@@ -286,11 +256,8 @@ func (obj *Package) SetIfHas(name string, value Object) (vv *VarVal) {
 		if !vv.Export && CurrentPackage != obj {
 			// TBD panic
 			fmt.Printf("*** %s::%s is not exported\n", obj.Name, name)
+			debug.PrintStack()
 		}
-
-		// TBD if calling scope package is same then okay to continue
-		//  needs to be caught in scope.Set
-
 		if vv.Set != nil {
 			unlock = false
 			obj.mu.Unlock()
@@ -399,7 +366,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 		Doc:    doc,
 		Pkg:    obj,
 		Kind:   doc.Kind,
-		export: !doc.NoExport,
+		Export: !doc.NoExport,
 	}
 	if len(fi.Kind) == 0 {
 		fi.Kind = BuiltInSymbol
@@ -425,17 +392,30 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 
 // Export a function.
 func (obj *Package) Export(name string) {
-	// TBD copy funcs and vars to users unless shadowed (already there)
 	name = strings.ToLower(name)
 	obj.mu.Lock()
 	if obj.funcs != nil {
 		if fi := obj.funcs[name]; fi != nil {
-			fi.export = true
+			fi.Export = true
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if xf := u.funcs[name]; xf == nil {
+					u.funcs[name] = fi
+				}
+				u.mu.Unlock()
+			}
 		}
 	}
 	if obj.vars != nil {
 		if vv := obj.vars[name]; vv != nil {
 			vv.Export = true
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if xv := u.vars[name]; xv == nil {
+					u.vars[name] = vv
+				}
+				u.mu.Unlock()
+			}
 		}
 	}
 	obj.mu.Unlock()
@@ -443,17 +423,30 @@ func (obj *Package) Export(name string) {
 
 // Unexport a function.
 func (obj *Package) Unexport(name string) {
-	// TBD remove funcs and vars to users if this package
 	name = strings.ToLower(name)
 	obj.mu.Lock()
 	if obj.funcs != nil {
 		if fi := obj.funcs[name]; fi != nil {
-			fi.export = false
+			fi.Export = false
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if xf := u.funcs[name]; xf != nil && obj == xf.Pkg {
+					delete(u.funcs, name)
+				}
+				u.mu.Unlock()
+			}
 		}
 	}
 	if obj.vars != nil {
 		if vv := obj.vars[name]; vv != nil {
 			vv.Export = false
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if xv := u.vars[name]; xv != nil && obj == xv.Pkg {
+					delete(u.vars, name)
+				}
+				u.mu.Unlock()
+			}
 		}
 	}
 	obj.mu.Unlock()
@@ -732,7 +725,6 @@ func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Objec
 		Create: fc,
 		Pkg:    obj,
 		Kind:   kind,
-		// export: true, // TBD should be false
 	}
 	obj.mu.Unlock()
 	if 0 < len(name) && !strings.EqualFold(name, "lambda") {

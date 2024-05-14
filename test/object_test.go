@@ -578,7 +578,7 @@ func TestOutputStream(t *testing.T) {
 }
 
 func TestFuncInfo(t *testing.T) {
-	fi := slip.FindFunc("car")
+	fi := slip.MustFindFunc("car")
 	(&sliptest.Object{
 		Target: fi,
 		String: "#<function car>",
@@ -597,7 +597,7 @@ func TestFuncInfo(t *testing.T) {
 }
 
 func TestFuncInfoDescribeBasic(t *testing.T) {
-	fi := slip.FindFunc("car")
+	fi := slip.MustFindFunc("car")
 	out := fi.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `Lambda-List: (arg)
 Return: object
@@ -618,7 +618,7 @@ Examples:
 
 func TestFuncInfoDescribeOptions(t *testing.T) {
 	_ = slip.CompileString(`(defun func-info-test ((x 3) &options y) (list x y))`)
-	fi := slip.FindFunc("func-info-test")
+	fi := slip.MustFindFunc("func-info-test")
 	out := fi.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `Lambda-List: ((x 3) &options y)
 Return: object

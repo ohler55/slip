@@ -29,7 +29,7 @@ func TestFindSymbolInherited(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(find-symbol "*package*" *common-lisp*)`,
-		Expect: "*package*, :internal",
+		Expect: "*package*, :external",
 	}).Test(t)
 }
 

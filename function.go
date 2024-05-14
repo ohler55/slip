@@ -34,6 +34,8 @@ type Function struct {
 	// evaluated before calling Self.Call(). The last bool is the value used
 	// for &rest arguments if present.
 	SkipEval []bool
+
+	Pkg *Package
 }
 
 // Define a new golang function. If the package is provided the function is
@@ -48,12 +50,24 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 
 // NewFunc creates a new instance of the named function with the arguments
 // provided.
-func NewFunc(name string, args List, pkgs ...*Package) Object {
-	return FindFunc(name, pkgs...).Create(args)
+func NewFunc(name string, args List, pkgs ...*Package) Funky {
+	fi := MustFindFunc(name, pkgs...)
+	f, _ := fi.Create(args).(Funky)
+	f.setPkg(fi.Pkg)
+
+	return f
 }
 
-// FindFunc finds the FuncInfo for a provided name or panics if none exists.
-func FindFunc(name string, pkgs ...*Package) *FuncInfo {
+// MustFindFunc finds the FuncInfo for a provided name or panics if none exists.
+func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
+	if fi := FindFunc(name, pkgs...); fi != nil {
+		return fi
+	}
+	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined.", printer.caseName(name)))
+}
+
+// FindFunc finds the FuncInfo for a provided name or return nil if none exists.
+func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 	pkg := CurrentPackage
 	var private bool // indicates non-exported okay, referrenced with ::
 	if i := strings.IndexByte(name, ':'); 0 < i {
@@ -69,21 +83,22 @@ func FindFunc(name string, pkgs ...*Package) *FuncInfo {
 	} else if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	fi := pkg.funcs[name]
-	if fi == nil {
+	if fi = pkg.funcs[name]; fi == nil {
 		name = strings.ToLower(name)
 		fi = pkg.funcs[name]
 	}
 	if fi != nil {
-		if private || fi.export || pkg == CurrentPackage {
+		if private || fi.Export || pkg == CurrentPackage {
 			return fi
 		}
+		fi = nil
+
 		// TBD handle function called by another function is a package
 		//  maybe add evalPkg to scope? if nil then current package or don't check
 		// test
 		fmt.Printf("*** find func %s was private in %s, current is %s\n", name, pkg.Name, CurrentPackage.Name)
 	}
-	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined.", printer.caseName(name)))
+	return
 }
 
 // Eval the object.
@@ -280,7 +295,7 @@ func CompileList(list List) (f Object) {
 						},
 					}
 				}
-				CurrentPackage.funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage, export: true}
+				CurrentPackage.funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage, Export: true}
 				f = fc(list[1:])
 			}
 			if funk, ok := f.(Funky); ok {
@@ -368,4 +383,13 @@ func MustBeString(arg Object, name string) (str string) {
 		PanicType(name, arg, "string", "symbol")
 	}
 	return
+}
+
+func (f *Function) setPkg(p *Package) {
+	f.Pkg = p
+}
+
+// GetPkg returns the package the function was defined in.
+func (f *Function) GetPkg() *Package {
+	return f.Pkg
 }

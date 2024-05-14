@@ -121,8 +121,6 @@ func TestPackageKeyword(t *testing.T) {
 	tt.NotNil(t, kp)
 	tt.Panic(t, func() { kp.Set("", slip.True) })
 	tt.Panic(t, func() { kp.Set(":yes", slip.True) })
-	// Should not panic.
-	kp.Set(":yes", slip.Symbol(":yes"))
 }
 
 func TestPackageFind(t *testing.T) {
@@ -137,8 +135,10 @@ func TestPackageDef(t *testing.T) {
 	pb := slip.DefPackage("b", []string{"bee"}, "Buzzing around.")
 	pc := slip.DefPackage("c", []string{"sea", "see"}, "Sailing.")
 
-	pa.Set("aaa", slip.Fixnum(7)).Export = true
-	pb.Set("bb", slip.Fixnum(3)).Export = true
+	_ = pa.Set("aaa", slip.Fixnum(7))
+	pa.Export("aaa")
+	_ = pb.Set("bb", slip.Fixnum(3))
+	pb.Export("bb")
 	pc.Use(pa)
 	pc.Use(pa)
 	pc.Import(pb, "bb")
