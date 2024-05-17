@@ -5,8 +5,24 @@
 - next
 
  - package-export
+  - on defvar and defun (defxxx)
+   - set pkg
+   - defun compiles forms (does that work okay?)
+
+
+  - maybe for funcs in DefLambda
+
   - add Pkg to scope
   - in Function eval and call set and revert scope Pkg setting
+
+  - when evaluating, start with current package
+   - for each eval add pkg to stack
+    - pop off when returning
+   - look in all packages for symbols
+    - stack is not ideal unless can walk back up
+    - need to avoid duplicates, map is a lot of overhead
+   - maybe check on compile or is that just the ListToFunc call anyway
+   - just ignore the export flag on eval? Assume lookup are done earlier (can they be?)
 
 
   - don't inherit (use) non-exported vars

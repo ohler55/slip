@@ -68,10 +68,16 @@ func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
 
 // FindFunc finds the FuncInfo for a provided name or return nil if none exists.
 func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
+	if "private-child" == name {
+		fmt.Printf("*** FindFunc %s in %s\n", name, pkgs)
+	}
+	// TBD alway use pkg from scope unless : or ::
+	// back to previous, mostly
 	pkg := CurrentPackage
-	var private bool // indicates non-exported okay, referrenced with ::
+	var private bool // indicates non-exported okay, referenced with ::
 	if i := strings.IndexByte(name, ':'); 0 < i {
-		if pkg = FindPackage(name[:i]); pkg == nil {
+		pkg = FindPackage(name[:i])
+		if pkg == nil {
 			panic(fmt.Sprintf("package %s is not defined.", printer.caseName(name[:i])))
 		}
 		i++
@@ -88,7 +94,7 @@ func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 		fi = pkg.funcs[name]
 	}
 	if fi != nil {
-		if private || fi.Export || pkg == CurrentPackage {
+		if private || fi.Export || pkg == fi.Pkg {
 			return fi
 		}
 		fi = nil
@@ -221,6 +227,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 	}
 	switch ta := list[0].(type) {
 	case Symbol:
+		// TBD
 		return NewFunc(string(ta), list[1:])
 	case List:
 		if 1 < len(ta) {
