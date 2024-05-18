@@ -221,6 +221,13 @@ func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 			PanicType("lambda list element", ta, "symbol", "list")
 		}
 	}
+	// Compile forms while in the current package instead of waiting until
+	// invoked.
+	for i, f := range lam.Forms {
+		if list, ok := f.(List); ok {
+			lam.Forms[i] = CompileList(list)
+		}
+	}
 	return
 }
 

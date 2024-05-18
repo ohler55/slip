@@ -718,13 +718,27 @@ func (obj *Package) GetFunc(name string) (fi *FuncInfo) {
 // DefLambda registers a named lambda function. This is called by defun.
 func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Object, kind Symbol) (fi *FuncInfo) {
 	obj.mu.Lock()
-	obj.lambdas[name] = lam
-	obj.funcs[name] = &FuncInfo{
-		Name:   name,
-		Doc:    lam.Doc,
-		Create: fc,
-		Pkg:    obj,
-		Kind:   kind,
+	if xlam := obj.lambdas[name]; xlam != nil {
+		xlam.Doc = lam.Doc
+		xlam.Forms = lam.Forms
+		xlam.Closure = lam.Closure
+		xlam.Macro = lam.Macro
+	} else {
+		obj.lambdas[name] = lam
+	}
+	if fi := obj.funcs[name]; fi != nil {
+		fi.Doc = lam.Doc
+		fi.Create = fc
+		fi.Pkg = obj
+		fi.Kind = kind
+	} else {
+		obj.funcs[name] = &FuncInfo{
+			Name:   name,
+			Doc:    lam.Doc,
+			Create: fc,
+			Pkg:    obj,
+			Kind:   kind,
+		}
 	}
 	obj.mu.Unlock()
 	if 0 < len(name) && !strings.EqualFold(name, "lambda") {

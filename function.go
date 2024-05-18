@@ -63,14 +63,13 @@ func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
 	if fi := FindFunc(name, pkgs...); fi != nil {
 		return fi
 	}
+	// TBD maybe always succeed but create func that returns undefined until or unless replaced
+	//  deflambda should look for exist fi that is undefined
 	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined.", printer.caseName(name)))
 }
 
 // FindFunc finds the FuncInfo for a provided name or return nil if none exists.
 func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
-	if "private-child" == name {
-		fmt.Printf("*** FindFunc %s in %s\n", name, pkgs)
-	}
 	// TBD alway use pkg from scope unless : or ::
 	// back to previous, mostly
 	pkg := CurrentPackage
