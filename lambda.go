@@ -26,7 +26,7 @@ type Lambda struct {
 
 // Call the the function with the arguments provided.
 func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
-	ss := s.NewScope() // TBD set package somehow?
+	ss := s.NewScope()
 	if lam.Closure != nil {
 		ss.parents = append(ss.parents, lam.Closure)
 		ss.Macro = lam.Closure.Macro

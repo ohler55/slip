@@ -5,14 +5,11 @@
 - next
 
  - package-export
-  - on defvar and defun (defxxx)
-   - set pkg
-   - defun compiles forms (does that work okay?)
+  - Scope - TBDs
+   - can this be set up in compile?
+    - var lookup might need a func?
 
-
-  - maybe for funcs in DefLambda
-
-  - add Pkg to scope
+  - add Pkg to scope?
   - in Function eval and call set and revert scope Pkg setting
 
   - when evaluating, start with current package

@@ -44,7 +44,7 @@ func init() {
 				},
 			},
 			Return: "nil|string",
-			Text:   `__csv-write__ writes a CSV to _output_. TBD`,
+			Text:   `__csv-write__ writes a CSV to _output_.`,
 			Examples: []string{
 				`(csv-write '((A B) (1 2) (3 4)) nil) => "A,B\n1,2\n3,4\n"`,
 			},

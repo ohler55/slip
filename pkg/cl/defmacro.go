@@ -84,8 +84,10 @@ func (f *Defmacro) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 			slip.PanicPackage(slip.CurrentPackage, "Redefining %s:%s in defmacro. Package %s is locked.",
 				slip.CurrentPackage.Name, low, slip.CurrentPackage.Name)
 		}
-		w := s.Get("*error-output*").(io.Writer)
-		_, _ = fmt.Fprintf(w, "WARNING: redefining %s:%s in defmacro\n", slip.CurrentPackage.Name, low)
+		if 0 < len(fi.Kind) {
+			w := s.Get("*error-output*").(io.Writer)
+			_, _ = fmt.Fprintf(w, "WARNING: redefining %s:%s in defmacro\n", slip.CurrentPackage.Name, low)
+		}
 	}
 	slip.CurrentPackage.DefLambda(low, lc, fc, slip.MacroSymbol)
 	if 0 < len(s.Parents()) {

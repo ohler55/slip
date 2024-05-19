@@ -63,15 +63,11 @@ func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
 	if fi := FindFunc(name, pkgs...); fi != nil {
 		return fi
 	}
-	// TBD maybe always succeed but create func that returns undefined until or unless replaced
-	//  deflambda should look for exist fi that is undefined
 	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined.", printer.caseName(name)))
 }
 
 // FindFunc finds the FuncInfo for a provided name or return nil if none exists.
 func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
-	// TBD alway use pkg from scope unless : or ::
-	// back to previous, mostly
 	pkg := CurrentPackage
 	var private bool // indicates non-exported okay, referenced with ::
 	if i := strings.IndexByte(name, ':'); 0 < i {
@@ -97,11 +93,6 @@ func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 			return fi
 		}
 		fi = nil
-
-		// TBD handle function called by another function is a package
-		//  maybe add evalPkg to scope? if nil then current package or don't check
-		// test
-		fmt.Printf("*** find func %s was private in %s, current is %s\n", name, pkg.Name, CurrentPackage.Name)
 	}
 	return
 }
@@ -226,7 +217,6 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 	}
 	switch ta := list[0].(type) {
 	case Symbol:
-		// TBD
 		return NewFunc(string(ta), list[1:])
 	case List:
 		if 1 < len(ta) {

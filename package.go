@@ -3,9 +3,7 @@
 package slip
 
 import (
-	"fmt"
 	"reflect"
-	"runtime/debug"
 	"sort"
 	"strings"
 	"sync"
@@ -223,10 +221,6 @@ func (obj *Package) Set(name string, value Object) (vv *VarVal) {
 		vv = &VarVal{Val: value, Pkg: obj}
 		obj.mu.Lock()
 		obj.vars[name] = vv
-		// TBD just do the follwing if exported
-		//  that means an export flag is needed or else *Export needs to copy to user*
-		//  also add arg to set for export or not for efficiency (or separate func? and rename Set)
-
 		if vv.Export {
 			for _, u := range obj.Users {
 				u.mu.Lock()
@@ -253,17 +247,14 @@ func (obj *Package) SetIfHas(name string, value Object) (vv *VarVal) {
 		}
 	}()
 	if vv = obj.vars[name]; vv != nil {
-		if !vv.Export && CurrentPackage != obj {
-			// TBD panic
-			fmt.Printf("*** %s::%s is not exported\n", obj.Name, name)
-			debug.PrintStack()
-		}
-		if vv.Set != nil {
-			unlock = false
-			obj.mu.Unlock()
-			vv.Set(value)
-		} else {
-			vv.Val = value
+		if vv.Export || CurrentPackage == obj {
+			if vv.Set != nil {
+				unlock = false
+				obj.mu.Unlock()
+				vv.Set(value)
+			} else {
+				vv.Val = value
+			}
 		}
 	}
 	return
@@ -274,15 +265,14 @@ func (obj *Package) Get(name string) (value Object, has bool) {
 	obj.mu.Lock()
 	defer obj.mu.Unlock()
 	if vv := obj.getVarVal(name); vv != nil {
-		if !vv.Export && CurrentPackage != obj {
-			fmt.Printf("*** %s::%s is not exported\n", obj.Name, name)
+		if vv.Export || CurrentPackage == obj {
+			if vv.Get != nil {
+				value = vv.Get()
+			} else {
+				value = vv.Val
+			}
+			has = true
 		}
-		if vv.Get != nil {
-			value = vv.Get()
-		} else {
-			value = vv.Val
-		}
-		has = true
 	}
 	return
 }
@@ -493,7 +483,6 @@ func (obj *Package) Simplify() interface{} {
 	funcs := make([]string, 0, len(obj.funcs))
 	for name := range obj.funcs {
 		funcs = append(funcs, name)
-		// TBD maybe show package defined in?
 	}
 	sort.Strings(funcs)
 
