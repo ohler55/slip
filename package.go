@@ -104,6 +104,7 @@ func (obj *Package) Initialize(vars map[string]*VarVal, local ...any) {
 	}
 	for k, vv := range vars {
 		vv.Pkg = obj
+		vv.name = k
 		obj.vars[k] = vv
 	}
 	if len(obj.path) == 0 && 0 < len(local) {
@@ -218,7 +219,7 @@ func (obj *Package) Set(name string, value Object) (vv *VarVal) {
 		if obj.Locked {
 			PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
 		}
-		vv = &VarVal{Val: value, Pkg: obj}
+		vv = &VarVal{Val: value, Pkg: obj, name: name}
 		obj.mu.Lock()
 		obj.vars[name] = vv
 		if vv.Export {
