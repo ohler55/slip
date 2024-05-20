@@ -167,10 +167,12 @@ func (lam *Lambda) BoundCall(s *Scope, depth int) (result Object) {
 	return
 }
 
-// DefLambda parses arguments into a Lambda. Arguments should be a
-// lambda-list followed by an optional documentation strings and then the
-// forms to evaluate when the Lambda is called.
-func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
+// DefLambda parses arguments into a Lambda. Arguments should be a lambda-list
+// followed by an optional documentation strings and then the forms to
+// evaluate when the Lambda is called. The extraVars is a list of variables
+// that will be defined when the lambda is called. This ise used for methods
+// where the scope will be and instance of a flavor/class.
+func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *Lambda) {
 	var ll List
 	switch tl := args[0].(type) {
 	case List:
@@ -224,8 +226,31 @@ func DefLambda(defName string, s *Scope, args List) (lam *Lambda) {
 	// Compile forms while in the current package instead of waiting until
 	// invoked.
 	for i, f := range lam.Forms {
-		if list, ok := f.(List); ok {
-			lam.Forms[i] = CompileList(list)
+	expand:
+		switch tf := f.(type) {
+		case Symbol:
+			if s.has(string(tf)) || lam.Doc.getArg(string(tf)) != nil {
+				break
+			}
+			for _, vn := range extraVars {
+				if vn == string(tf) {
+					break expand
+				}
+			}
+			// TBD if in scope or in the lambda list then leave as symbol
+
+			vv := CurrentPackage.GetVarVal(string(tf))
+			if vv == nil {
+				CurrentPackage.mu.Lock()
+				if vv = CurrentPackage.vars[string(tf)]; vv == nil {
+					vv = newUnboundVar(string(tf))
+					CurrentPackage.vars[string(tf)] = vv
+				}
+				CurrentPackage.mu.Unlock()
+			}
+			lam.Forms[i] = vv
+		case List:
+			lam.Forms[i] = CompileList(tf)
 		}
 	}
 	return

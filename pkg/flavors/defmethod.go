@@ -107,7 +107,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			return
 		}
 	}
-	flavor.DefMethod(method, daemon, slip.DefLambda(method, s, args[1:]))
+	flavor.DefMethod(method, daemon, slip.DefLambda(method, s, args[1:], flavor.varNames...))
 
 	return nil
 }

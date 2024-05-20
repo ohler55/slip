@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package slip
 
@@ -75,4 +75,11 @@ func (vv *VarVal) Hierarchy() []Symbol {
 // Eval the object.
 func (vv *VarVal) Eval(s *Scope, depth int) Object {
 	return vv.Value()
+}
+
+func newUnboundVar(name string) *VarVal {
+	return &VarVal{
+		name: name,
+		Val:  Unbound,
+	}
 }

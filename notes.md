@@ -5,26 +5,7 @@
 - next
 
  - package-export
-  - maybe use VarVal as an Object
-   - verify var needs to exist at defun time
-   - add name/symbol to VarVal
-
-  - Scope - TBDs
-   - can this be set up in compile?
-    - var lookup might need a func?
-
-  - add Pkg to scope?
-  - in Function eval and call set and revert scope Pkg setting
-
-  - when evaluating, start with current package
-   - for each eval add pkg to stack
-    - pop off when returning
-   - look in all packages for symbols
-    - stack is not ideal unless can walk back up
-    - need to avoid duplicates, map is a lot of overhead
-   - maybe check on compile or is that just the ListToFunc call anyway
-   - just ignore the export flag on eval? Assume lookup are done earlier (can they be?)
-
+  - Scope get and set should honor : and ::
 
   - don't inherit (use) non-exported vars
    - then vars and funcs not exported are not available with the pkg and ::

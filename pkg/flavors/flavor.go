@@ -34,6 +34,7 @@ type Flavor struct {
 	requiredMethods  []string
 	requiredVars     []string
 	requiredKeywords []string
+	varNames         []string // for DefMethod, requiredVars and defaultVars combined
 	initable         map[string]bool
 	defaultHandler   slip.Caller
 	abstract         bool
