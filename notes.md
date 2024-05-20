@@ -5,40 +5,13 @@
 - next
 
  - package-export
-  - Scope get and set should honor : and ::
-
-  - don't inherit (use) non-exported vars
-   - then vars and funcs not exported are not available with the pkg and ::
-   - if not found still need to check package of call/scope
-
-  - add export flag to varval (private, noexport, internal, or export)
-   - get var access working
-    - maybe add func package to scope
-   - figure out how to track package of current call
-   - update export and unexport functions to handle variables as well
-
-  - export
-   - use find-symbol
-    - update to return the correct values
-   - support vars also
 
   - implement defpackage export list
-   - keep list of exported and set func to be exported on defun or no if not on list
+   - keep list of exported and set func to be exported on defun or not if not on list
     - see what issues arise when user package since default will be not-exported
   - unexport
   - do-external-symbols
   - import
-
-
-
-  - support export list and export function
-   - ListToFunc should be f.ListToFunc
-    - lookup of func should consider the package of f
-     - if lookup is in f.pkg or lookup is exported (new flag) then ok
-    - add export flag to FuncInfo
-    - Define() and package.Define() need extra arg for export or not
-     - maybe default to export
-     - flag in FuncDoc or separate? depends on whether it's useful in docs
 
   - do-external-symbols [same as do-symbols for now or until export is implemented]
   - shadow

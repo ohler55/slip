@@ -68,25 +68,17 @@ func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
 
 // FindFunc finds the FuncInfo for a provided name or return nil if none exists.
 func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
-	pkg := CurrentPackage
-	var private bool // indicates non-exported okay, referenced with ::
-	if i := strings.IndexByte(name, ':'); 0 < i {
-		pkg = FindPackage(name[:i])
-		if pkg == nil {
-			panic(fmt.Sprintf("package %s is not defined.", printer.caseName(name[:i])))
+	// private indicates non-exported okay, referenced with ::
+	pkg, vname, private := unpackName(name)
+	if pkg == nil {
+		pkg = CurrentPackage
+		if 0 < len(pkgs) {
+			pkg = pkgs[0]
 		}
-		i++
-		if i < len(name) && name[i] == ':' {
-			private = true
-			i++
-		}
-		name = name[i:]
-	} else if 0 < len(pkgs) {
-		pkg = pkgs[0]
 	}
-	if fi = pkg.funcs[name]; fi == nil {
-		name = strings.ToLower(name)
-		fi = pkg.funcs[name]
+	if fi = pkg.funcs[vname]; fi == nil {
+		vname = strings.ToLower(vname)
+		fi = pkg.funcs[vname]
 	}
 	if fi != nil {
 		if private || fi.Export || pkg == fi.Pkg {

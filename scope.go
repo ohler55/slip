@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -119,9 +120,12 @@ func (s *Scope) get(name string) Object {
 	if v, has := ConstantValues[name]; has {
 		return v
 	}
-	// TBD get package from var if has : or ::
-	// if has package then just check the package and not vars
-
+	if pkg, vname, private := unpackName(name); pkg != nil {
+		if vv := pkg.GetVarVal(vname); vv != nil && (vv.Export || private) {
+			return vv.Value()
+		}
+		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
+	}
 	s.moo.Lock()
 	if s.Vars != nil {
 		if value, has := s.Vars[name]; has {
@@ -136,13 +140,28 @@ func (s *Scope) get(name string) Object {
 		}
 	}
 	value, has := CurrentPackage.Get(name)
-
-	// TBD check package of current function somehow
-
 	if !has || Unbound == value {
 		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
 	}
 	return value
+}
+
+func unpackName(str string) (pkg *Package, name string, private bool) {
+	if i := strings.IndexByte(str, ':'); 0 < i {
+		pkg = FindPackage(str[:i])
+		if pkg == nil {
+			panic(fmt.Sprintf("package %s is not defined.", printer.caseName(str[:i])))
+		}
+		i++
+		if i < len(str) && str[i] == ':' {
+			private = true
+			i++
+		}
+		name = str[i:]
+	} else {
+		name = str
+	}
+	return
 }
 
 // LocalGet a named variable value.
@@ -175,16 +194,13 @@ func (s *Scope) Set(sym Symbol, value Object) {
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
 	}
-	// TBD get package from var if has : or ::
-	// if has package then just check the package and not vars
-
+	if pkg, name, private := unpackName(string(sym)); pkg != nil {
+		if vv := pkg.GetVarVal(name); vv != nil && (vv.Export || private) {
+			pkg.Set(name, value)
+		}
+		return
+	}
 	if !s.set(strings.ToLower(string(sym)), value) {
-		// TBD verify var present and if not then check scope package
-		//  maybe need a pkg.setIf() that sets if present and return bool
-		// maybe get vv first with getVarVal, lock
-
-		// need to call callSetHooks(vv.Pkg, name) if vv != nil
-
 		CurrentPackage.Set(string(sym), value)
 	}
 }
