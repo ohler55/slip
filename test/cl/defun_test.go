@@ -140,13 +140,13 @@ func TestDefunInternal(t *testing.T) {
 	_ = slip.ReadString(`(defpackage 'internal-test (:use "cl"))`).Eval(scope, nil)
 	_ = slip.ReadString(`(in-package 'internal-test)`).Eval(scope, nil)
 	_ = slip.ReadString(`(defun child-fun () 7)`).Eval(scope, nil)
-	_ = slip.ReadString(`(defun parent-fun () (child-fun))`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun parent-fun () (1+ (child-fun)))`).Eval(scope, nil)
 	_ = slip.ReadString(`(export 'parent-fun)`).Eval(scope, nil)
 
 	result := slip.ReadString(`(parent-fun)`).Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(7), result)
+	tt.Equal(t, slip.Fixnum(8), result)
 
 	_ = slip.ReadString(`(in-package 'cl)`).Eval(scope, nil)
 	result = slip.ReadString(`(internal-test:parent-fun)`).Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(7), result)
+	tt.Equal(t, slip.Fixnum(8), result)
 }

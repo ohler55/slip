@@ -5,6 +5,10 @@
 - next
 
  - package-export
+  - maybe use VarVal as an Object
+   - verify var needs to exist at defun time
+   - add name/symbol to VarVal
+
   - Scope - TBDs
    - can this be set up in compile?
     - var lookup might need a func?
