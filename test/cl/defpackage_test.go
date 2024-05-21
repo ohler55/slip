@@ -3,7 +3,6 @@
 package cl_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
@@ -62,10 +61,29 @@ func TestDefpackageExport(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(defpackage 'defpack-test-6 (:export "fun1" "v2"))`,
 		Validate: func(t *testing.T, v slip.Object) {
+			scope := slip.NewScope()
 			tt.Equal(t, "#<package defpack-test-6>", slip.ObjectString(v))
 			p := v.(*slip.Package)
-			fmt.Printf("*** check exported funcs and vars for %s\n", p)
-			// TBD
+			vv := p.GetVarVal("v2")
+			tt.NotNil(t, vv)
+			tt.Equal(t, slip.Unbound, vv.Val)
+			vv = p.GetVarVal("fun1")
+			tt.NotNil(t, vv)
+			tt.Equal(t, slip.Unbound, vv.Val)
+			fi := slip.FindFunc("fun1", p)
+			tt.Nil(t, fi)
+
+			_ = slip.ReadString("(defvar defpack-test-6::v2 3)").Eval(scope, nil)
+			vv = p.GetVarVal("v2")
+			tt.NotNil(t, vv)
+			tt.Equal(t, slip.Fixnum(3), vv.Val)
+
+			_ = slip.ReadString("(defun defpack-test-6::fun1 () 7)").Eval(scope, nil)
+			vv = p.GetVarVal("fun1")
+			tt.Nil(t, vv)
+			fi = slip.FindFunc("fun1", p)
+			tt.NotNil(t, fi)
+			tt.Equal(t, true, fi.Export)
 		},
 	}).Test(t)
 }

@@ -120,7 +120,7 @@ func (s *Scope) get(name string) Object {
 	if v, has := ConstantValues[name]; has {
 		return v
 	}
-	if pkg, vname, private := unpackName(name); pkg != nil {
+	if pkg, vname, private := UnpackName(name); pkg != nil {
 		if vv := pkg.GetVarVal(vname); vv != nil && (vv.Export || private) {
 			return vv.Value()
 		}
@@ -146,7 +146,10 @@ func (s *Scope) get(name string) Object {
 	return value
 }
 
-func unpackName(str string) (pkg *Package, name string, private bool) {
+// UnpackName separates the package from the name of a string and returns the
+// package if one was specified, the name, and an indicator that private
+// access is okay which was indicated by the use of a "::" separator.
+func UnpackName(str string) (pkg *Package, name string, private bool) {
 	if i := strings.IndexByte(str, ':'); 0 < i {
 		pkg = FindPackage(str[:i])
 		if pkg == nil {
@@ -194,7 +197,7 @@ func (s *Scope) Set(sym Symbol, value Object) {
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
 	}
-	if pkg, name, private := unpackName(string(sym)); pkg != nil {
+	if pkg, name, private := UnpackName(string(sym)); pkg != nil {
 		if vv := pkg.GetVarVal(name); vv != nil && (vv.Export || private) {
 			pkg.Set(name, value)
 		}

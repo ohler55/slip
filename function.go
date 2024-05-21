@@ -69,7 +69,7 @@ func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
 // FindFunc finds the FuncInfo for a provided name or return nil if none exists.
 func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 	// private indicates non-exported okay, referenced with ::
-	pkg, vname, private := unpackName(name)
+	pkg, vname, private := UnpackName(name)
 	if pkg == nil {
 		pkg = CurrentPackage
 		if 0 < len(pkgs) {

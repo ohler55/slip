@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -35,10 +33,10 @@ func init() {
 			Text: `__defpackage__ Defines a new _package_ with the _name_ and options. Options are:
   :nicknames
   :use
+  :export
   :shadow _(not yet supported)_
   :shadowing-import-from _(not yet supported)_
   :import-from _(not yet supported)_
-  :export
 `,
 			Examples: []string{
 				`(defpackage 'quux`,
@@ -86,7 +84,6 @@ func (f *Defpackage) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		pkg.Use(p)
 	}
 	for _, str := range readDefOption(":export", rest) {
-		fmt.Printf("*** export %s\n", str) // TBD
 		pkg.Export(str)
 	}
 	return pkg

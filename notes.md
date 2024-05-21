@@ -5,11 +5,6 @@
 - next
 
  - package-export
-  - export
-   - if not found then put on unbount list
-   - is there a better way?
-   - should an unbound list be used for unbound vars and funcs?
-    - maybe better to differentiate when possible
 
   - implement defpackage export list
    - keep list of exported and set func to be exported on defun or not if not on list
