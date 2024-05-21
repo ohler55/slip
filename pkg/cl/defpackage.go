@@ -3,6 +3,8 @@
 package cl
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
 )
 
@@ -36,7 +38,7 @@ func init() {
   :shadow _(not yet supported)_
   :shadowing-import-from _(not yet supported)_
   :import-from _(not yet supported)_
-  :export _(not yet supported)_
+  :export
 `,
 			Examples: []string{
 				`(defpackage 'quux`,
@@ -78,11 +80,14 @@ func (f *Defpackage) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	_ = readDefOption(":shadow", rest)
 	_ = readDefOption(":shadowing-import-from", rest)
 	_ = readDefOption(":import-from", rest)
-	_ = readDefOption(":export", rest)
 
 	pkg := slip.DefPackage(name, nicknames, "")
 	for _, p := range use {
 		pkg.Use(p)
+	}
+	for _, str := range readDefOption(":export", rest) {
+		fmt.Printf("*** export %s\n", str) // TBD
+		pkg.Export(str)
 	}
 	return pkg
 }

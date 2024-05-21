@@ -3,6 +3,7 @@
 package cl_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
@@ -50,6 +51,21 @@ func TestDefpackageUse(t *testing.T) {
 			tt.Equal(t, "#<package defpack-test-4>", slip.ObjectString(p5.Uses[2]))
 			tt.Equal(t, 1, len(p2.Users))
 			tt.Equal(t, "#<package defpack-test-5>", slip.ObjectString(p2.Users[0]))
+		},
+	}).Test(t)
+}
+
+func TestDefpackageExport(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("defpack-test-6"))
+	}()
+	(&sliptest.Function{
+		Source: `(defpackage 'defpack-test-6 (:export "fun1" "v2"))`,
+		Validate: func(t *testing.T, v slip.Object) {
+			tt.Equal(t, "#<package defpack-test-6>", slip.ObjectString(v))
+			p := v.(*slip.Package)
+			fmt.Printf("*** check exported funcs and vars for %s\n", p)
+			// TBD
 		},
 	}).Test(t)
 }
