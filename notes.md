@@ -5,21 +5,11 @@
 - next
 
  - package-export
-
-  - implement defpackage export list
-   - keep list of exported and set func to be exported on defun or not if not on list
-    - see what issues arise when user package since default will be not-exported
-
-  - unexport
-  - do-external-symbols
+  - test coverage
   - import
-
-  - do-external-symbols [same as do-symbols for now or until export is implemented]
   - shadow
   - package-shadowing-symbols
   - shadowing-import
-  - export
-  - unexport
 
  - net package
   - implement sbcl networking or something closer to golang?
