@@ -6,7 +6,6 @@
 
  - package-export
   - test coverage
-   - hook.go
    - varval.go
    - clos/pkg.go
    - funcdoc.go
