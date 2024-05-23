@@ -6,10 +6,45 @@
 
  - package-export
   - test coverage
+   - hook.go
+   - varval.go
+   - clos/pkg.go
+   - funcdoc.go
+   - vector.go
+   - package.go
+   - function.go
+   - code.go
+   - scope.go
+   - warning.go
+   - array.go
+   - type-error.go
+   - error.go
+   - lambda.go
+   - condition.go
+   - funcinfo.go
+
   - import
   - shadow
   - package-shadowing-symbols
   - shadowing-import
+
+ - block comments #|  |#
+
+ - add system package (like ASDF)
+  - defsystem
+   - https://lisp-lang.org/learn/writing-libraries
+   - https://asdf.common-lisp.dev/
+  - types/flavors
+   - system
+    - :load
+    - :install or :cache or :prepare
+    - in gi package?
+   - source (maybe not needed if source spec is clear)
+    - file
+    - git (tag or branch)
+
+  - support a config file with a source or source-registry path
+  - how about allowing .asdf files?
 
  - net package
   - implement sbcl networking or something closer to golang?
