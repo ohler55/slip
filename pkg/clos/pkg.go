@@ -44,10 +44,10 @@ func MethodDocFromFunc(method, funcName, flavor, obj string) string {
 			}
 		}
 		if 0 < len(fd.Return) {
-			b = fmt.Appendf(b, "=> _%s_\n", fd.Return)
-		} else {
-			b = append(b, '\n')
+			b = fmt.Appendf(b, "=> _%s_", fd.Return)
 		}
+		b = append(b, '\n')
+
 		for _, da := range fd.Args[1:] {
 			if da.Name[0] != '&' {
 				b = fmt.Appendf(b, "   _%s_ [%s] %s\n", da.Name, da.Type, da.Text)
