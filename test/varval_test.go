@@ -16,7 +16,8 @@ func TestVarVal(t *testing.T) {
 	tt.Equal(t, slip.Fixnum(7), vv.Value())
 	tt.Equal(t, "vv", vv.String())
 	tt.Equal(t, "vv", string(vv.Append(nil)))
-	tt.Equal(t, true, vv.Equal(vv))
+	vv2 := vv
+	tt.Equal(t, true, vv.Equal(vv2))
 	tt.Equal(t, true, vv.Equal(slip.Symbol("vv")))
 	tt.Equal(t, false, vv.Equal(slip.Symbol("zz")))
 	tt.Equal(t, false, vv.Equal(slip.Fixnum(7)))
