@@ -6,7 +6,6 @@
 
  - package-export
   - test coverage
-   - varval.go
    - clos/pkg.go
    - funcdoc.go
    - vector.go
@@ -28,6 +27,8 @@
   - shadowing-import
 
  - block comments #|  |#
+ - lock-package
+ - unlock-package
 
  - add system package (like ASDF)
   - defsystem
