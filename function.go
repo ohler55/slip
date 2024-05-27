@@ -86,7 +86,7 @@ func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 		fi = pkg.funcs[vname]
 	}
 	if fi != nil {
-		if private || fi.Export || pkg == fi.Pkg {
+		if private || fi.Export || CurrentPackage == fi.Pkg {
 			return fi
 		}
 		fi = nil

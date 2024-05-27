@@ -25,7 +25,7 @@ func TestFunctionFind(t *testing.T) {
 	f := slip.MustFindFunc("car", cl)
 	tt.NotNil(t, f)
 
-	tt.Panic(t, func() { _ = slip.MustFindFunc("nothing") })
+	tt.Panic(t, func() { _ = slip.MustFindFunc("nothing", &slip.CLPkg) })
 }
 
 func TestFunctionApply(t *testing.T) {
@@ -74,14 +74,14 @@ func TestFunctionExport(t *testing.T) {
 	result := slip.ReadString(`(exported-test::private-func)`).Eval(scope, nil)
 	tt.Equal(t, "private", slip.ObjectString(result))
 
-	// TBD tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
 
 	xpkg.Export("private-func")
 	result = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil)
 	tt.Equal(t, "private", slip.ObjectString(result))
 
 	xpkg.Unexport("private-func")
-	// TBD tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
 }
 
 func TestFunctionExportNested(t *testing.T) {

@@ -6,7 +6,6 @@
 
  - package-export
   - test coverage
-   - vector.go
    - package.go
    - function.go
    - code.go
