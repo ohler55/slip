@@ -237,8 +237,6 @@ func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *L
 					break expand
 				}
 			}
-			// TBD if in scope or in the lambda list then leave as symbol
-
 			vv := CurrentPackage.GetVarVal(string(tf))
 			if vv == nil {
 				CurrentPackage.mu.Lock()

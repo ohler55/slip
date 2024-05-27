@@ -14,6 +14,7 @@ func TestFunctionNew(t *testing.T) {
 	cl := slip.FindPackage("common-lisp")
 	f := slip.NewFunc("car", slip.List{nil}, cl)
 	tt.Equal(t, "(car nil)", slip.ObjectString(f))
+	tt.Equal(t, "common-lisp", f.GetPkg().Name)
 
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing", slip.List{}) })
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing:at-all", slip.List{}) })
@@ -83,23 +84,21 @@ func TestFunctionExport(t *testing.T) {
 	// TBD tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
 }
 
-// func TestFunctionExportNested(t *testing.T) {
-// 	scope := slip.NewScope()
-// 	defer func() { slip.CurrentPackage = &slip.UserPkg }()
-// 	xpkg := slip.DefPackage("xpack-test", []string{}, "testing")
-// 	slip.CurrentPackage = xpkg
-// 	slip.CurrentPackage.Use(&slip.CLPkg)
-// 	_ = slip.ReadString(`(defun private-child () 3)`).Eval(scope, nil)
-// 	_ = slip.ReadString(`(defun private-parent () (+ (private-child) 4))`).Eval(scope, nil)
+func TestFunctionExportNested(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	xpkg := slip.DefPackage("xpack-test", []string{}, "testing")
+	slip.CurrentPackage = xpkg
+	slip.CurrentPackage.Use(&slip.CLPkg)
+	_ = slip.ReadString(`(defun private-child () 3)`).Eval(scope, nil)
+	// _ = slip.ReadString(`(defun private-parent () (private-child))`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun private-parent () (+ (private-child) 4))`).Eval(scope, nil)
 
-// 	slip.CurrentPackage = &slip.UserPkg
-// 	result := slip.ReadString(`(xpack-test::private-parent)`).Eval(scope, nil)
-// 	tt.Equal(t, slip.Fixnum(7), result)
+	slip.CurrentPackage = &slip.UserPkg
+	result := slip.ReadString(`(xpack-test::private-parent)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(7), result)
 
-// 	xpkg.Export("private-parent")
-// 	result = slip.ReadString(`(xpack-test:private-parent)`).Eval(scope, nil)
-// 	tt.Equal(t, slip.Fixnum(7), result)
-
-// 	result = slip.ReadString(`(private-parent)`).Eval(scope, nil)
-// 	tt.Equal(t, slip.Fixnum(7), result)
-// }
+	xpkg.Export("private-parent")
+	result = slip.ReadString(`(xpack-test:private-parent)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(7), result)
+}

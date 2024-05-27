@@ -63,7 +63,12 @@ func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
 	if fi := FindFunc(name, pkgs...); fi != nil {
 		return fi
 	}
-	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined.", printer.caseName(name)))
+	pkg := CurrentPackage
+	if 0 < len(pkgs) {
+		pkg = pkgs[0]
+	}
+	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined in %s.",
+		printer.caseName(name), pkg.Name))
 }
 
 // FindFunc finds the FuncInfo for a provided name or return nil if none exists.
@@ -249,6 +254,8 @@ func (f *Function) CompileArgs() {
 					f.Args[i] = CompileList(alist)
 				}
 			}
+		} else if alist, ok := arg.(List); ok {
+			f.Args[i] = CompileList(alist)
 		}
 	}
 }
