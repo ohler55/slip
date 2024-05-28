@@ -102,3 +102,64 @@ func TestFunctionExportNested(t *testing.T) {
 	result = slip.ReadString(`(xpack-test:private-parent)`).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(7), result)
 }
+
+func TestListToFunc(t *testing.T) {
+	obj := slip.ListToFunc(
+		slip.NewScope(),
+		slip.List{
+			slip.List{slip.Symbol("lambda"), slip.List{},
+				slip.List{slip.Symbol("+"), slip.Fixnum(1), slip.Fixnum(2)},
+			},
+		},
+		0)
+	tt.SameType(t, &slip.Dynamic{}, obj)
+
+	obj = slip.ListToFunc(slip.NewScope(), slip.List{}, 0)
+	tt.Nil(t, obj)
+}
+
+func TestFunctionCaller(t *testing.T) {
+	f := slip.NewFunc("car", slip.List{nil})
+	tt.NotNil(t, f)
+	tt.Equal(t, f, f.Caller())
+}
+
+func TestMustBeString(t *testing.T) {
+	str := slip.MustBeString(slip.String("one"), "test")
+	tt.Equal(t, "one", str)
+
+	str = slip.MustBeString(slip.Symbol("two"), "test")
+	tt.Equal(t, "two", str)
+
+	str = slip.MustBeString(slip.Symbol(":three"), "test")
+	tt.Equal(t, "three", str)
+
+	tt.Panic(t, func() { _ = slip.MustBeString(slip.True, "test") })
+}
+
+func TestGetArgsKeyValue(t *testing.T) {
+	scope := slip.NewScope()
+	args := slip.ReadString("(list :one 1 :two 2)").Eval(scope, nil).(slip.List)
+
+	val, has := slip.GetArgsKeyValue(args, slip.Symbol(":one"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Fixnum(1), val)
+
+	_, has = slip.GetArgsKeyValue(args, slip.Symbol(":three"))
+	tt.Equal(t, false, has)
+
+	tt.Panic(t, func() {
+		slip.GetArgsKeyValue(slip.ReadString("(list t 1)").Eval(scope, nil).(slip.List), slip.Symbol(":x"))
+	})
+
+	tt.Panic(t, func() {
+		slip.GetArgsKeyValue(slip.ReadString("(list :x 1 :y)").Eval(scope, nil).(slip.List), slip.Symbol(":y"))
+	})
+}
+
+func TestCompileList(t *testing.T) {
+	f := slip.CompileList(slip.List{slip.Symbol("no-fun")})
+	tt.Equal(t, "(no-fun)", slip.ObjectString(f))
+	// Should be unbound since it was not defun-ed yet.
+	tt.Panic(t, func() { _ = f.Eval(slip.NewScope(), 0) })
+}

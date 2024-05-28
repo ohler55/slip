@@ -7,7 +7,6 @@
  - package-export
   - test coverage
    - package.go
-   - function.go
    - code.go
    - scope.go
    - warning.go

@@ -369,7 +369,7 @@ func MustBeString(arg Object, name string) (str string) {
 	case String:
 		str = string(ta)
 	case Symbol:
-		if 0 < len(name) && name[0] == ':' {
+		if 0 < len(ta) && ta[0] == ':' {
 			str = string(ta[1:])
 		} else {
 			str = string(ta)

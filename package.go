@@ -345,7 +345,6 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 		f := creator(nil)
 		pp := reflect.TypeOf(f).Elem().PkgPath()
 		if pp != obj.path {
-			// fmt.Printf("*** %s different %s vs %s\n", creator(nil), pp, obj.path)
 			PanicPackage(obj, "Can not define %s in package %s. Package %s is locked.",
 				f, obj.Name, obj.Name)
 		}

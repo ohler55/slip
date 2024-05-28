@@ -134,7 +134,11 @@ func TestPackageDef(t *testing.T) {
 	pa := slip.DefPackage("a", []string{"aye"}, "Lots of ayes.")
 	pb := slip.DefPackage("b", []string{"bee"}, "Buzzing around.")
 	pc := slip.DefPackage("c", []string{"sea", "see"}, "Sailing.")
-
+	defer func() {
+		slip.RemovePackage(pa)
+		slip.RemovePackage(pb)
+		slip.RemovePackage(pc)
+	}()
 	_ = pa.Set("aaa", slip.Fixnum(7))
 	pa.Export("aaa")
 	_ = pb.Set("bb", slip.Fixnum(3))
@@ -242,4 +246,54 @@ func TestPackageDefine(t *testing.T) {
 	slip.CurrentPackage.Define(cf, &doc)
 	slip.CurrentPackage.Define(cf, &doc)
 	tt.Equal(t, "Warning: redefining dummy\n", out.String())
+}
+
+func TestPackageEachFuncName(t *testing.T) {
+	var found bool
+	slip.UserPkg.EachFuncName(func(name string) {
+		if name == "cadr" {
+			found = true
+		}
+	})
+	tt.Equal(t, true, found)
+}
+
+func TestPackageEachFuncInfo(t *testing.T) {
+	var found bool
+	slip.UserPkg.EachFuncInfo(func(fi *slip.FuncInfo) {
+		if fi.Name == "cadr" {
+			found = true
+		}
+	})
+	tt.Equal(t, true, found)
+}
+
+func TestPackageEachVarName(t *testing.T) {
+	var found bool
+	slip.UserPkg.EachVarName(func(name string) {
+		if name == "*package*" {
+			found = true
+		}
+	})
+	tt.Equal(t, true, found)
+}
+
+func TestPackageEachVarVal(t *testing.T) {
+	var found bool
+	slip.UserPkg.EachVarVal(func(name string, vv *slip.VarVal) {
+		if name == "*package*" {
+			found = true
+		}
+	})
+	tt.Equal(t, true, found)
+}
+
+func TestAllPackages(t *testing.T) {
+	var found bool
+	for _, p := range slip.AllPackages() {
+		if p.Name == "bag" {
+			found = true
+		}
+	}
+	tt.Equal(t, true, found)
 }
