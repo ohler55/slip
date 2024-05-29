@@ -9,22 +9,23 @@
    - package.go
    - code.go
    - scope.go
-   - warning.go
    - array.go
-   - type-error.go
-   - error.go
    - lambda.go
-   - condition.go
-   - funcinfo.go
 
   - import
   - shadow
   - package-shadowing-symbols
   - shadowing-import
 
- - block comments #|  |#
- - lock-package
- - unlock-package
+ - ext package [or slip-ext or gi]
+  - lock-package
+  - unlock-package
+  - system
+  - source
+  - move addf and add to this pkg (maybe)
+
+ -
+  - block comments #|  |#
 
  - add system package (like ASDF)
   - defsystem

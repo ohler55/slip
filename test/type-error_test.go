@@ -61,6 +61,15 @@ func TestTypeErrorMake(t *testing.T) {
 	tt.Equal(t, slip.Fixnum(3), te.Datum())
 	tt.Equal(t, `"testing"`, slip.ObjectString(te.Context()))
 	tt.Equal(t, "(symbol string)", slip.ObjectString(te.ExpectedTypes()))
+
+	tf = sliptest.Function{
+		Source: `(make-condition 'Type-Error :message "a message")`,
+		Expect: "/^#<TYPE-ERROR [0-9a-f]+>$/",
+	}
+	tf.Test(t)
+	te, ok = tf.Result.(slip.TypeError)
+	tt.Equal(t, ok, true)
+	tt.Equal(t, "a message", te.Error())
 }
 
 func TestTypeErrorPanic(t *testing.T) {

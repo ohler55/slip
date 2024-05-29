@@ -20,10 +20,20 @@ func TestFunctionNew(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing:at-all", slip.List{}) })
 }
 
+func TestFunctionHierarchy(t *testing.T) {
+	fi := &slip.FuncInfo{
+		Name:   "dummy",
+		Create: func(args slip.List) slip.Object { return nil },
+		Pkg:    &slip.UserPkg,
+	}
+	tt.Equal(t, []slip.Symbol{slip.FunctionSymbol, slip.TrueSymbol}, fi.Hierarchy())
+}
+
 func TestFunctionFind(t *testing.T) {
 	cl := slip.FindPackage("common-lisp")
 	f := slip.MustFindFunc("car", cl)
 	tt.NotNil(t, f)
+	tt.Equal(t, []slip.Symbol{slip.BuiltInSymbol, slip.TrueSymbol}, f.Hierarchy())
 
 	tt.Panic(t, func() { _ = slip.MustFindFunc("nothing", &slip.CLPkg) })
 }
@@ -159,6 +169,8 @@ func TestGetArgsKeyValue(t *testing.T) {
 
 func TestCompileList(t *testing.T) {
 	f := slip.CompileList(slip.List{slip.Symbol("no-fun")})
+	tt.Equal(t, []slip.Symbol{slip.FunctionSymbol, slip.TrueSymbol}, f.Hierarchy())
+
 	tt.Equal(t, "(no-fun)", slip.ObjectString(f))
 	// Should be unbound since it was not defun-ed yet.
 	tt.Panic(t, func() { _ = f.Eval(slip.NewScope(), 0) })

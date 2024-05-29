@@ -34,4 +34,5 @@ func TestWarningMake(t *testing.T) {
 	warning, ok := tf.Result.(slip.Warning)
 	tt.Equal(t, ok, true)
 	tt.Equal(t, "a warning", warning.Message())
+	tt.Equal(t, "a warning", warning.Error())
 }

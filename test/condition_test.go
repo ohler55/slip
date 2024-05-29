@@ -31,8 +31,12 @@ func TestConditionMake(t *testing.T) {
 		Expect: "/^#<CONDITION [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	_, ok := tf.Result.(slip.Condition)
+	cond, ok := tf.Result.(slip.Condition)
 	tt.Equal(t, ok, true)
+	co := cond.(*slip.ConditionObj)
+	hier := []slip.Symbol{slip.ErrorSymbol, slip.ConditionSymbol, slip.TrueSymbol}
+	co.SetHierarchy(hier)
+	tt.Equal(t, hier, cond.Hierarchy())
 }
 
 func TestConditionMakeNotFound(t *testing.T) {

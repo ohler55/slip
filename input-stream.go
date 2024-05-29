@@ -158,12 +158,6 @@ func (obj *InputStream) UnreadRune() (err error) {
 
 // PushRune makes the rune argument the next rune to be read.
 func (obj *InputStream) PushRune(r rune) {
-	// The go RuneScanners require a previous ReadRune before an
-	// UnreadRune. Since we would like to allow UnreadRune for regular reads
-	// as well the direct approach is used instead.
-	if obj.useLast || obj.lastRune == 0 {
-		PanicStream(obj, "cannot unread a character more than once before a read")
-	}
 	obj.useLast = true
 	obj.lastRune = r
 }
