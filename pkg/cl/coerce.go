@@ -538,7 +538,7 @@ func (f *Coerce) toHashTable(arg slip.Object) (result slip.Object) {
 func (f *Coerce) toFunction(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Symbol:
-		result = slip.FindFunc(string(ta))
+		result = slip.MustFindFunc(string(ta))
 	case *slip.Lambda:
 		result = ta
 	default:

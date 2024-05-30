@@ -31,7 +31,6 @@ func TestVar(t *testing.T) {
 
 	has = slip.HasVar(slip.Symbol("*print-base*"))
 	tt.Equal(t, true, has)
-
 }
 
 func TestSetConstant(t *testing.T) {
@@ -57,7 +56,6 @@ func TestSetConstant(t *testing.T) {
 
 	doc = slip.DescribeVar(slip.Symbol("not-found"))
 	tt.Equal(t, "", doc)
-
 }
 
 func TestDefaultPathnameDefaults(t *testing.T) {

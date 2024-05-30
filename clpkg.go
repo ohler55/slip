@@ -22,8 +22,8 @@ var (
 		Doc:       "Home of symbols defined by the ANSI language spcification.",
 		path:      "github.com/ohler55/slip/pkg/cl",
 		vars: map[string]*VarVal{
-			"*common-lisp*":   &pkgVarVal, // TBD remove
-			"*cl*":            &pkgVarVal, // TBD remove
+			"*common-lisp*":   &pkgVarVal,
+			"*cl*":            &pkgVarVal,
 			"*package*":       {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
 			"*core-pathname*": {Val: nil, Doc: "The absolute pathname of the running SLIP application."},
 			"*default-pathname-defaults*": {
@@ -196,6 +196,7 @@ func init() {
 	clPkg = &CLPkg
 	for _, vv := range CLPkg.vars {
 		vv.Pkg = &CLPkg
+		vv.Export = true
 	}
 	xpath, _ := os.Executable()
 	xpath, _ = filepath.EvalSymlinks(xpath)

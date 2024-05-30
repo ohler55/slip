@@ -115,7 +115,7 @@ func (ed *editor) write(buf []byte) {
 
 func (ed *editor) logf(format string, args ...any) {
 	if ed.log != nil {
-		fmt.Fprintf(ed.log, format, args...)
+		_, _ = fmt.Fprintf(ed.log, format, args...)
 	}
 }
 

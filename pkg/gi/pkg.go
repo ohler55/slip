@@ -19,8 +19,8 @@ var (
 func init() {
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*gi*":             {Val: &Pkg, Doc: Pkg.Doc},
-			"*go-integration*": {Val: &Pkg, Doc: Pkg.Doc},
+			"*gi*":             {Val: &Pkg, Doc: Pkg.Doc, Export: true},
+			"*go-integration*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
 		},
 		&Env{},
 	)

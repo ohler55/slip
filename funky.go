@@ -20,4 +20,9 @@ type Funky interface {
 
 	// Caller returns the function's Caller (Self).
 	Caller() Caller
+
+	setPkg(p *Package)
+
+	// GetPkg returns the package the function was defined in.
+	GetPkg() *Package
 }

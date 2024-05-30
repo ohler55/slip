@@ -175,8 +175,16 @@ func DefFlavor(
 	if !nf.abstract {
 		validateFlavor(nf)
 	}
+	nf.varNames = make([]string, 0, len(nf.defaultVars)+len(nf.requiredVars))
+	for vn := range nf.defaultVars {
+		nf.varNames = append(nf.varNames, vn)
+	}
+	for _, vn := range nf.requiredVars {
+		nf.varNames = append(nf.varNames, vn)
+	}
 	allFlavors[nf.name] = nf
-	p.Set(nf.name, nf)
+	_ = p.Set(nf.name, nf)
+	p.Export(nf.name)
 
 	return nf
 }

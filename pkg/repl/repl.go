@@ -289,19 +289,19 @@ func process() {
 				panic("")
 			}
 		case die:
-			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%s%s\n", warnPrefix, tr, suffix)
+			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%s%s\n", warnPrefix, tr, suffix)
 			panic("")
 		case error:
 			if errors.Is(tr, io.EOF) {
 				panic(nil) // exits the REPL loop
 			}
-			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
 			if scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
 			}
 			reset()
 		default:
-			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
+			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
 			if scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
 			}
@@ -342,7 +342,7 @@ func process() {
 		scope.Set(slip.Symbol(value3Key), value3)
 
 		if !skipWrite {
-			fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s\n", slip.ObjectString(value1))
+			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s\n", slip.ObjectString(value1))
 		}
 	}
 }

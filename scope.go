@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -119,6 +120,12 @@ func (s *Scope) get(name string) Object {
 	if v, has := ConstantValues[name]; has {
 		return v
 	}
+	if pkg, vname, private := UnpackName(name); pkg != nil {
+		if vv := pkg.GetVarVal(vname); vv != nil && (vv.Export || private) {
+			return vv.Value()
+		}
+		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
+	}
 	s.moo.Lock()
 	if s.Vars != nil {
 		if value, has := s.Vars[name]; has {
@@ -133,11 +140,31 @@ func (s *Scope) get(name string) Object {
 		}
 	}
 	value, has := CurrentPackage.Get(name)
-
 	if !has || Unbound == value {
 		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
 	}
 	return value
+}
+
+// UnpackName separates the package from the name of a string and returns the
+// package if one was specified, the name, and an indicator that private
+// access is okay which was indicated by the use of a "::" separator.
+func UnpackName(str string) (pkg *Package, name string, private bool) {
+	if i := strings.IndexByte(str, ':'); 0 < i {
+		pkg = FindPackage(str[:i])
+		if pkg == nil {
+			panic(fmt.Sprintf("package %s is not defined.", printer.caseName(str[:i])))
+		}
+		i++
+		if i < len(str) && str[i] == ':' {
+			private = true
+			i++
+		}
+		name = str[i:]
+	} else {
+		name = str
+	}
+	return
 }
 
 // LocalGet a named variable value.
@@ -169,6 +196,12 @@ func (s *Scope) localGet(name string) (Object, bool) {
 func (s *Scope) Set(sym Symbol, value Object) {
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
+	}
+	if pkg, name, private := UnpackName(string(sym)); pkg != nil {
+		if vv := pkg.GetVarVal(name); vv != nil && (vv.Export || private) {
+			pkg.Set(name, value)
+		}
+		return
 	}
 	if !s.set(strings.ToLower(string(sym)), value) {
 		CurrentPackage.Set(string(sym), value)

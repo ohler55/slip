@@ -47,7 +47,7 @@ func (f *Function) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		return slip.FindFunc(string(ta))
+		return slip.MustFindFunc(string(ta))
 	case slip.List:
 		if 1 < len(ta) {
 			if sym, ok := ta[0].(slip.Symbol); ok {

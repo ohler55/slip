@@ -28,8 +28,12 @@ func TestFindSymbolInherited(t *testing.T) {
 		Expect: "*package*, :inherited",
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(find-symbol "car")`,
+		Expect: "car, :inherited",
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(find-symbol "*package*" *common-lisp*)`,
-		Expect: "*package*, :internal",
+		Expect: "*package*, :external",
 	}).Test(t)
 }
 
@@ -43,6 +47,19 @@ func TestFindSymbolExternal(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(find-symbol "find-symbol-test-external" "keyword")`,
 		Expect: ":find-symbol-test-external, :external",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find-symbol "car" "common-lisp")`,
+		Expect: "car, :external",
+	}).Test(t)
+}
+
+func TestFindSymbolInternal(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`(defun find-symbol-test-internal () 5)`).Eval(scope, nil)
+	(&sliptest.Function{
+		Source: `(find-symbol "find-symbol-test-internal")`,
+		Expect: "find-symbol-test-internal, :internal",
 	}).Test(t)
 }
 

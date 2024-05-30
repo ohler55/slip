@@ -43,4 +43,6 @@ func TestErrorMake(t *testing.T) {
 	e, ok = tf.Result.(slip.Error)
 	tt.Equal(t, ok, true)
 	tt.Equal(t, "raise", e.Error())
+	// Created outside a function so stack should be empty.
+	tt.Equal(t, 0, len(e.Stack()))
 }

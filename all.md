@@ -98,7 +98,7 @@
  * [ ] ETYPECASE
  * [ ] EVAL-WHEN
  * [ ] EVERY
- * [ ] EXPORT
+ * [x] EXPORT
  * [ ] EXTENDED-CHAR
  * [ ] FDEFINITION
  * [ ] FILL
@@ -252,7 +252,7 @@
  * [ ] REST
  * [ ] REVAPPEND
  * [ ] ROTATEF
- * [ ] SAFETY
+ - [-] SAFETY
  * [ ] SATISFIES
  * [ ] SBIT
  * [ ] SCALE-FLOAT
@@ -282,7 +282,7 @@
  * [ ] SLOT-UNBOUND
  * [ ] SLOT-VALUE
  * [ ] SOME
- * [ ] SPACE
+ - [-] SPACE
  * [ ] SPECIAL-OPERATOR-P
  * [ ] STEP
  * [ ] STORAGE-CONDITION
@@ -317,7 +317,7 @@
  * [ ] TWO-WAY-STREAM-INPUT-STREAM
  * [ ] TWO-WAY-STREAM-OUTPUT-STREAM
  * [ ] TYPECASE
- * [ ] UNEXPORT
+ * [x] UNEXPORT
  * [ ] UNSIGNED-BYTE
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE

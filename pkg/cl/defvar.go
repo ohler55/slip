@@ -74,7 +74,11 @@ func (f *Defvar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 			}
 		}
 	}
-	vv := slip.CurrentPackage.Set(string(name), iv)
+	pkg, vname, private := slip.UnpackName(string(name))
+	if pkg == nil {
+		pkg = slip.CurrentPackage
+	}
+	vv := pkg.Set(vname, iv, private)
 	vv.Doc = string(doc)
 
 	return name

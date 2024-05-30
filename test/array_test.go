@@ -49,6 +49,21 @@ func TestArraySet(t *testing.T) {
 	tt.Panic(t, func() { a.Set(nil, 1, -1, 1) })
 }
 
+func TestArrayMajorGet(t *testing.T) {
+	a := testArray()
+	val := a.MajorGet(17)
+	tt.Equal(t, slip.Fixnum(17), val)
+	tt.Panic(t, func() { a.MajorSet(-1, nil) })
+}
+
+func TestArrayMajorSet(t *testing.T) {
+	a := testArray()
+	a.MajorSet(17, slip.Fixnum(70))
+	val := a.Get(1, 1, 1)
+	tt.Equal(t, slip.Fixnum(70), val)
+	tt.Panic(t, func() { _ = a.MajorGet(-1) })
+}
+
 func TestArraySetAll(t *testing.T) {
 	content := testArray().AsList()
 	a := slip.NewArray([]int{2, 3, 4}, slip.TrueSymbol, nil, nil, true)
@@ -124,6 +139,10 @@ func TestArrayContent(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = slip.NewArray([]int{1, 2}, slip.FixnumSymbol, nil, slip.List{slip.List{slip.Symbol("x"), nil}}, true)
 	})
+}
+
+func TestArrayOverMaxDim(t *testing.T) {
+	tt.Panic(t, func() { _ = slip.NewArray([]int{2, slip.ArrayMaxDimension + 1}, slip.TrueSymbol, nil, nil, true) })
 }
 
 func testArray() *slip.Array {

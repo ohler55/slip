@@ -43,7 +43,7 @@ func init() {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stdout, `
+		_, _ = fmt.Fprintf(os.Stdout, `
 
 usage: %s [<options>] [<filepath>]...
 

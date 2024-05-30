@@ -19,10 +19,11 @@ var (
 func init() {
 	Pkg.Initialize(map[string]*slip.VarVal{
 		"*current-test*": {
-			Val: nil,
-			Doc: "is bound to the current test if there is a test running.",
+			Val:    nil,
+			Doc:    "is bound to the current test if there is a test running.",
+			Export: true,
 		},
-		"*test*": {Val: &Pkg, Doc: Pkg.Doc},
+		"*test*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
 	})
 	_ = SuiteFlavor()
 	_ = TestFlavor()

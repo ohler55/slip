@@ -121,8 +121,6 @@ func TestPackageKeyword(t *testing.T) {
 	tt.NotNil(t, kp)
 	tt.Panic(t, func() { kp.Set("", slip.True) })
 	tt.Panic(t, func() { kp.Set(":yes", slip.True) })
-	// Should not panic.
-	kp.Set(":yes", slip.Symbol(":yes"))
 }
 
 func TestPackageFind(t *testing.T) {
@@ -136,9 +134,15 @@ func TestPackageDef(t *testing.T) {
 	pa := slip.DefPackage("a", []string{"aye"}, "Lots of ayes.")
 	pb := slip.DefPackage("b", []string{"bee"}, "Buzzing around.")
 	pc := slip.DefPackage("c", []string{"sea", "see"}, "Sailing.")
-
-	pa.Set("aaa", slip.Fixnum(7))
-	pb.Set("bb", slip.Fixnum(3))
+	defer func() {
+		slip.RemovePackage(pa)
+		slip.RemovePackage(pb)
+		slip.RemovePackage(pc)
+	}()
+	_ = pa.Set("aaa", slip.Fixnum(7))
+	pa.Export("aaa")
+	_ = pb.Set("bb", slip.Fixnum(3))
+	pb.Export("bb")
 	pc.Use(pa)
 	pc.Use(pa)
 	pc.Import(pb, "bb")
@@ -192,6 +196,9 @@ func TestPackageVars(t *testing.T) {
 	val, has = cl.Get(key)
 	tt.Equal(t, false, has)
 	tt.Nil(t, val)
+
+	val = cl.JustGet("*package*")
+	tt.NotNil(t, val)
 }
 
 func TestPackageDescribe(t *testing.T) {
@@ -242,4 +249,65 @@ func TestPackageDefine(t *testing.T) {
 	slip.CurrentPackage.Define(cf, &doc)
 	slip.CurrentPackage.Define(cf, &doc)
 	tt.Equal(t, "Warning: redefining dummy\n", out.String())
+	slip.CurrentPackage.Undefine("dummy")
+
+	tt.Panic(t, func() { slip.CLPkg.Define(cf, &doc) })
+}
+
+func TestPackageEachFuncName(t *testing.T) {
+	var found bool
+	slip.UserPkg.EachFuncName(func(name string) {
+		if name == "cadr" {
+			found = true
+		}
+	})
+	tt.Equal(t, true, found)
+}
+
+func TestPackageEachFuncInfo(t *testing.T) {
+	var found bool
+	slip.UserPkg.EachFuncInfo(func(fi *slip.FuncInfo) {
+		if fi.Name == "cadr" {
+			found = true
+		}
+	})
+	tt.Equal(t, true, found)
+}
+
+func TestPackageEachVarName(t *testing.T) {
+	var found bool
+	slip.UserPkg.EachVarName(func(name string) {
+		if name == "*package*" {
+			found = true
+		}
+	})
+	tt.Equal(t, true, found)
+}
+
+func TestPackageEachVarVal(t *testing.T) {
+	var found bool
+	slip.UserPkg.EachVarVal(func(name string, vv *slip.VarVal) {
+		if name == "*package*" {
+			found = true
+		}
+	})
+	tt.Equal(t, true, found)
+}
+
+func TestAllPackages(t *testing.T) {
+	var found bool
+	for _, p := range slip.AllPackages() {
+		if p.Name == "bag" {
+			found = true
+		}
+	}
+	tt.Equal(t, true, found)
+}
+
+func TestPackageUseLocked(t *testing.T) {
+	tt.Panic(t, func() { slip.CLPkg.Use(&slip.UserPkg) })
+}
+
+func TestPackageUnuseLocked(t *testing.T) {
+	tt.Panic(t, func() { slip.CLPkg.Unuse(&slip.UserPkg) })
 }

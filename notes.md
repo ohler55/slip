@@ -5,29 +5,36 @@
 - next
 
  - package-export
-  - export
-   - update function_test.go with nested non-exported sub
-  - implement defpackage export list
-   - keep list of exported and set func to be exported on defun or no if not on list
-    - see what issues arise when user package since default will be not-exported
-  - unexport
-  - do-external-symbols
-
-  - support export list and export function
-   - ListToFunc should be f.ListToFunc
-    - lookup of func should consider the package of f
-     - if lookup is in f.pkg or lookup is exported (new flag) then ok
-    - add export flag to FuncInfo
-    - Define() and package.Define() need extra arg for export or not
-     - maybe default to export
-     - flag in FuncDoc or separate? depends on whether it's useful in docs
-
-  - do-external-symbols [same as do-symbols for now or until export is implemented]
+  - import
   - shadow
   - package-shadowing-symbols
   - shadowing-import
-  - export
-  - unexport
+
+ - gi package
+  - lock-package
+  - unlock-package
+  - system
+  - source
+
+ - block-comment branch
+  - block comments #|  |#
+
+- system branch
+ - system (like ASDF)
+  - defsystem
+   - https://lisp-lang.org/learn/writing-libraries
+   - https://asdf.common-lisp.dev/
+  - types/flavors
+   - system
+    - :load
+    - :install or :cache or :prepare
+    - in gi package?
+   - source (maybe not needed if source spec is clear)
+    - file
+    - git (tag or branch)
+
+  - support a config file with a source or source-registry path
+  - how about allowing .asdf files?
 
  - net package
   - implement sbcl networking or something closer to golang?

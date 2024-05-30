@@ -25,17 +25,19 @@ var (
 func init() {
 	Pkg.Initialize(map[string]*slip.VarVal{
 		"*bag-time-format*": {
-			Get: getTimeFormat,
-			Set: setTimeFormat,
-			Doc: "is the format for writing time as a string in bag-format and the format for parsing time.",
+			Get:    getTimeFormat,
+			Set:    setTimeFormat,
+			Doc:    "is the format for writing time as a string in bag-format and the format for parsing time.",
+			Export: true,
 		},
 		"*bag-time-wrap*": {
 			Get: getTimeWrap,
 			Set: setTimeWrap,
 			Doc: `if non-nil then the writing and parsing of time is as a hash-map with a key of
 the _*bag-time_wrap*_ value and the time encoded according to the _*bag-time-format*_.`,
+			Export: true,
 		},
-		"*bag*": {Val: &Pkg, Doc: Pkg.Doc},
+		"*bag*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
 	})
 	defBag()
 

@@ -103,3 +103,36 @@ func TestVectorPushNoFillPtr(t *testing.T) {
 	tt.Equal(t, 4, val)
 	tt.Equal(t, "#(1 2 3 4)", slip.ObjectString(v))
 }
+
+func TestVectorNew(t *testing.T) {
+	v := slip.NewVector(3, slip.TrueSymbol, slip.Fixnum(0), nil, true)
+	tt.Equal(t, "#(0 0 0)", slip.ObjectString(v))
+}
+
+func TestVectorAdjust(t *testing.T) {
+	v := slip.NewVector(3, slip.TrueSymbol, slip.Fixnum(0), nil, true)
+	tt.Equal(t, "#(0 0 0)", slip.ObjectString(v))
+
+	v2 := v.Adjust([]int{5}, slip.TrueSymbol, slip.Fixnum(1),
+		slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), slip.Fixnum(4), slip.Fixnum(5)},
+		5)
+	tt.Equal(t, "#(1 2 3 4 5)", slip.ObjectString(v))
+	tt.Equal(t, v, v2)
+
+	tt.Panic(t, func() { v.Adjust([]int{5, 6}, slip.TrueSymbol, slip.Fixnum(1), nil, 4) })
+}
+
+func TestVectorAdjustDup(t *testing.T) {
+	v := slip.NewVector(3, slip.TrueSymbol, slip.Fixnum(0), nil, false)
+	tt.Equal(t, "#(0 0 0)", slip.ObjectString(v))
+
+	v2 := v.Adjust([]int{5}, slip.TrueSymbol, slip.Fixnum(1),
+		slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3), slip.Fixnum(4), slip.Fixnum(5)},
+		5)
+	tt.Equal(t, "#(0 0 0)", slip.ObjectString(v))
+	tt.Equal(t, "#(1 2 3 4 5)", slip.ObjectString(v2))
+
+	v3 := v.Adjust([]int{5}, slip.TrueSymbol, slip.Fixnum(1), nil, 5)
+	tt.Equal(t, "#(0 0 0)", slip.ObjectString(v))
+	tt.Equal(t, "#(0 0 0 1 1)", slip.ObjectString(v3))
+}

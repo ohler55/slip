@@ -22,11 +22,13 @@ var (
 func init() {
 	Pkg.Initialize(map[string]*slip.VarVal{
 		"*all-flavor-names*": {
-			Get: getAllFlavorNames,
-			Set: setPanic,
-			Doc: "the names of all the defined Flavors.",
+			Get:    getAllFlavorNames,
+			Set:    setPanic,
+			Doc:    "the names of all the defined Flavors.",
+			Export: true,
 		},
-		"*flavors*": {Val: &Pkg, Doc: Pkg.Doc},
+		"*flavors*":  {Val: &Pkg, Doc: Pkg.Doc, Export: true},
+		vanilla.name: {Val: &vanilla, Doc: vanilla.docs, Export: true},
 	})
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)

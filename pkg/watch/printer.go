@@ -36,7 +36,7 @@ type printerChangedCaller struct{}
 
 func (caller printerChangedCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	w := s.Get("*standard-output*").(io.Writer)
-	fmt.Fprintf(w, "%s: %s\n", args[0], args[1])
+	_, _ = fmt.Fprintf(w, "%s: %s\n", args[0], args[1])
 	return nil
 }
 

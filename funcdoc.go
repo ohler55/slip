@@ -31,3 +31,12 @@ type FuncDoc struct {
 	Kind     Symbol
 	NoExport bool
 }
+
+func (fd *FuncDoc) getArg(name string) *DocArg {
+	for _, a := range fd.Args {
+		if a.Name == name {
+			return a
+		}
+	}
+	return nil
+}

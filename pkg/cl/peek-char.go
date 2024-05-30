@@ -23,7 +23,7 @@ func init() {
 				{
 					Name: "peek-type",
 					Type: "character|t|nil",
-					Text: "The TBD",
+					Text: "The type of next character to read.",
 				},
 				{
 					Name: "stream",
@@ -48,7 +48,7 @@ the end of the stream. The default is _t_.`,
 				},
 			},
 			Return: "character",
-			Text:   `__peek-char__ peeks at the next character in _stream_ without removing it. TBD`,
+			Text:   `__peek-char__ peeks at the next character in _stream_ without removing it.`,
 			Examples: []string{
 				`(peek-char (make-string-input-stream "abc")) => #\a`,
 			},

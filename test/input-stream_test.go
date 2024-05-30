@@ -244,3 +244,13 @@ func TestInputStreamReadByteHard(t *testing.T) {
 	tt.Nil(t, err)
 	tt.Equal(t, 'a', b)
 }
+
+func TestInputStreamPushRune(t *testing.T) {
+	stream := slip.InputStream{Reader: strings.NewReader("abc")}
+
+	stream.PushRune('x')
+
+	r, _, err := stream.ReadRune()
+	tt.Nil(t, err)
+	tt.Equal(t, 'x', r)
+}

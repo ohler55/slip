@@ -42,7 +42,7 @@ of a comment. The default is _*load-verbose*_.`,
 				{
 					Name: "if-does-not-exist",
 					Type: "boolean",
-					Text: `TBD`,
+					Text: `If true, the default, signal and error if the file does not exist.`,
 				},
 				{
 					Name: "external-format",
@@ -50,10 +50,10 @@ of a comment. The default is _*load-verbose*_.`,
 					Text: `Ignored.`,
 				},
 			},
-			Return: "list",
-			Text:   `__load__ TBD.`,
+			Return: "boolean",
+			Text:   `__load__ a file named by _filespec_.`,
 			Examples: []string{
-				`(load ???`,
+				`(load "my-file.lisp") => t`,
 			},
 		}, &slip.CLPkg)
 }

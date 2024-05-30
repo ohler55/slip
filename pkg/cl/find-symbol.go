@@ -82,11 +82,27 @@ func (f *FindSymbol) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	vv := p.GetVarVal(string(so))
 	switch {
 	case vv == nil:
-		return slip.Values{nil, nil}
+		fi := slip.FindFunc(string(so))
+		switch {
+		case fi == nil:
+			return slip.Values{nil, nil}
+		case fi.Pkg == p:
+			if fi.Export {
+				status = slip.Symbol(":external")
+			} else {
+				status = slip.Symbol(":internal")
+			}
+		default:
+			status = slip.Symbol(":inherited")
+		}
 	case vv.Pkg == &slip.KeywordPkg:
 		status = slip.Symbol(":external")
 	case vv.Pkg == p:
-		status = slip.Symbol(":internal")
+		if vv.Export {
+			status = slip.Symbol(":external")
+		} else {
+			status = slip.Symbol(":internal")
+		}
 	default:
 		status = slip.Symbol(":inherited")
 	}

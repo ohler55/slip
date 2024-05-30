@@ -94,11 +94,9 @@ func TestLambdaCallTooManyArgs(t *testing.T) {
 	}).Test(t)
 }
 
-/*
-func TestLambdaCallReturnNoTag(t *testing.T) {
-	(&sliptest.Function{
-		Source: `((lambda (x) (return 3) x) 5)`,
-		Expect: "3",
-	}).Test(t)
-}
-*/
+// func TestLambdaCallReturnNoTag(t *testing.T) {
+// 	(&sliptest.Function{
+// 		Source: `((lambda (x) (return 3) x) 5)`,
+// 		Expect: "3",
+// 	}).Test(t)
+// }

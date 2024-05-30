@@ -159,7 +159,7 @@ func (f *Help) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case "useful":
 			text = helpUseful
 		default:
-			fmt.Fprintf(w, "%s is not a supported topic.\n\n", topic)
+			_, _ = fmt.Fprintf(w, "%s is not a supported topic.\n\n", topic)
 			text = helpIndex
 		}
 	}

@@ -24,6 +24,7 @@ func TestUsePackageWithVars(t *testing.T) {
                        result)
                   (in-package p1)
                   (defvar quux1 1)
+                  (export 'quux1)
                   (in-package p2)
                   (addf result (boundp 'quux1))
                   (use-package p1 p2)

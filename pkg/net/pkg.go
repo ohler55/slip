@@ -19,7 +19,7 @@ var (
 func init() {
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*net*": {Val: &Pkg, Doc: Pkg.Doc},
+			"*net*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
 		},
 	)
 	defClient()

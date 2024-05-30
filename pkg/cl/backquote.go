@@ -25,7 +25,7 @@ func init() {
 			},
 			Return: "object",
 			Text: `__backquote__ returns _value_ without evaluating it except in the case where an
-element of a backquoted list includes a __,__. TBD explain use of , ,@ and ',`,
+element of a backquoted list includes a __,__.`,
 			Examples: []string{
 				"(backquote nil) => nil",
 				"(backquote (a . b)) => (a . b)",

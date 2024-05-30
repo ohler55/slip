@@ -197,7 +197,7 @@ changes in a fixed location and values are updated in place.
 func init() {
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*watch*": {Val: &Pkg, Doc: Pkg.Doc},
+			"*watch*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
 		},
 	)
 	_ = ServerFlavor()
@@ -214,5 +214,5 @@ func init() {
 
 func displayError(format string, args ...any) {
 	eo := slip.NewScope().Get("*error-output*").(io.Writer)
-	fmt.Fprintf(eo, "\n*-*-* %s\n", fmt.Sprintf(format, args...))
+	_, _ = fmt.Fprintf(eo, "\n*-*-* %s\n", fmt.Sprintf(format, args...))
 }

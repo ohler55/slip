@@ -129,3 +129,24 @@ func TestDefunLocked(t *testing.T) {
 	scope := slip.NewScope()
 	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
 }
+
+func TestDefunInternal(t *testing.T) {
+	scope := slip.NewScope()
+	orig := slip.CurrentPackage
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("internal-test"))
+		scope.Set("*package*", orig)
+	}()
+	_ = slip.ReadString(`(defpackage 'internal-test (:use "cl"))`).Eval(scope, nil)
+	_ = slip.ReadString(`(in-package 'internal-test)`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun child-fun () 7)`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun parent-fun () (1+ (child-fun)))`).Eval(scope, nil)
+	_ = slip.ReadString(`(export 'parent-fun)`).Eval(scope, nil)
+
+	result := slip.ReadString(`(parent-fun)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(8), result)
+
+	_ = slip.ReadString(`(in-package 'cl)`).Eval(scope, nil)
+	result = slip.ReadString(`(internal-test:parent-fun)`).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(8), result)
+}

@@ -104,6 +104,7 @@ func (obj *Package) Initialize(vars map[string]*VarVal, local ...any) {
 	}
 	for k, vv := range vars {
 		vv.Pkg = obj
+		vv.name = k
 		obj.vars[k] = vv
 	}
 	if len(obj.path) == 0 && 0 < len(local) {
@@ -135,13 +136,17 @@ func (obj *Package) Use(pkg *Package) {
 			obj.vars = map[string]*VarVal{}
 		}
 		for name, vv := range pkg.vars {
-			obj.vars[name] = vv
+			if vv.Export {
+				obj.vars[name] = vv
+			}
 		}
 		if obj.funcs == nil {
 			obj.funcs = map[string]*FuncInfo{}
 		}
 		for name, fi := range pkg.funcs {
-			obj.funcs[name] = fi
+			if fi.Export {
+				obj.funcs[name] = fi
+			}
 		}
 	}
 }
@@ -205,38 +210,54 @@ func (obj *Package) Import(pkg *Package, varName string) {
 }
 
 // Set a variable.
-func (obj *Package) Set(name string, value Object) *VarVal {
+func (obj *Package) Set(name string, value Object, privates ...bool) (vv *VarVal) {
 	name, value = obj.PreSet(obj, name, value)
 	if _, has := ConstantValues[name]; has {
 		PanicPackage(obj, "%s is a constant and thus can't be set", name)
 	}
+	private := 0 < len(privates) && privates[0]
+	if vv = obj.SetIfHas(name, value, private); vv == nil {
+		if obj.Locked {
+			PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
+		}
+		vv = &VarVal{Val: value, Pkg: obj, name: name}
+		obj.mu.Lock()
+		obj.vars[name] = vv
+		obj.mu.Unlock()
+	}
+	callSetHooks(vv.Pkg, name)
+
+	return
+}
+
+// SetIfHas sets a variable if the package has that variable.
+func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVal) {
 	obj.mu.Lock()
-	if vv, has := obj.vars[name]; has {
-		obj.mu.Unlock()
-		if vv.Set != nil {
-			vv.Set(value)
-		} else {
-			vv.Val = value
+	unlock := true
+	defer func() {
+		if unlock {
+			obj.mu.Unlock()
 		}
-		callSetHooks(vv.Pkg, name)
-
-		return vv
-	}
-	if obj.Locked {
-		obj.mu.Unlock()
-		PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
-	}
-	vv := &VarVal{Val: value, Pkg: obj}
-	obj.vars[name] = vv
-	for _, u := range obj.Users {
-		if _, has := u.vars[name]; !has {
-			u.vars[name] = vv
+	}()
+	if vv = obj.vars[name]; vv != nil {
+		if vv.Export || CurrentPackage == obj || private {
+			if vv.Set != nil {
+				unlock = false
+				obj.mu.Unlock()
+				vv.Set(value)
+			} else {
+				vv.Val = value
+			}
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if _, has := u.vars[name]; !has {
+					u.vars[name] = vv
+				}
+				u.mu.Unlock()
+			}
 		}
 	}
-	obj.mu.Unlock()
-	callSetHooks(obj, name)
-
-	return vv
+	return
 }
 
 // Get a variable.
@@ -244,12 +265,14 @@ func (obj *Package) Get(name string) (value Object, has bool) {
 	obj.mu.Lock()
 	defer obj.mu.Unlock()
 	if vv := obj.getVarVal(name); vv != nil {
-		if vv.Get != nil {
-			value = vv.Get()
-		} else {
-			value = vv.Val
+		if vv.Export || CurrentPackage == obj {
+			if vv.Get != nil {
+				value = vv.Get()
+			} else {
+				value = vv.Val
+			}
+			has = true
 		}
-		has = true
 	}
 	return
 }
@@ -322,7 +345,6 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 		f := creator(nil)
 		pp := reflect.TypeOf(f).Elem().PkgPath()
 		if pp != obj.path {
-			// fmt.Printf("*** %s different %s vs %s\n", creator(nil), pp, obj.path)
 			PanicPackage(obj, "Can not define %s in package %s. Package %s is locked.",
 				f, obj.Name, obj.Name)
 		}
@@ -333,7 +355,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 		Doc:    doc,
 		Pkg:    obj,
 		Kind:   doc.Kind,
-		export: !doc.NoExport,
+		Export: !doc.NoExport,
 	}
 	if len(fi.Kind) == 0 {
 		fi.Kind = BuiltInSymbol
@@ -363,7 +385,30 @@ func (obj *Package) Export(name string) {
 	obj.mu.Lock()
 	if obj.funcs != nil {
 		if fi := obj.funcs[name]; fi != nil {
-			fi.export = true
+			fi.Export = true
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if xf := u.funcs[name]; xf == nil {
+					u.funcs[name] = fi
+				}
+				u.mu.Unlock()
+			}
+		}
+	}
+	if obj.vars != nil {
+		if vv := obj.vars[name]; vv != nil {
+			vv.Export = true
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if xv := u.vars[name]; xv == nil {
+					u.vars[name] = vv
+				}
+				u.mu.Unlock()
+			}
+		} else {
+			vv := newUnboundVar(name)
+			vv.Export = true
+			obj.vars[name] = vv
 		}
 	}
 	obj.mu.Unlock()
@@ -375,7 +420,26 @@ func (obj *Package) Unexport(name string) {
 	obj.mu.Lock()
 	if obj.funcs != nil {
 		if fi := obj.funcs[name]; fi != nil {
-			fi.export = false
+			fi.Export = false
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if xf := u.funcs[name]; xf != nil && obj == xf.Pkg {
+					delete(u.funcs, name)
+				}
+				u.mu.Unlock()
+			}
+		}
+	}
+	if obj.vars != nil {
+		if vv := obj.vars[name]; vv != nil {
+			vv.Export = false
+			for _, u := range obj.Users {
+				u.mu.Lock()
+				if xv := u.vars[name]; xv != nil && obj == xv.Pkg {
+					delete(u.vars, name)
+				}
+				u.mu.Unlock()
+			}
 		}
 	}
 	obj.mu.Unlock()
@@ -422,7 +486,6 @@ func (obj *Package) Simplify() interface{} {
 	funcs := make([]string, 0, len(obj.funcs))
 	for name := range obj.funcs {
 		funcs = append(funcs, name)
-		// TBD maybe show package defined in?
 	}
 	sort.Strings(funcs)
 
@@ -647,14 +710,32 @@ func (obj *Package) GetFunc(name string) (fi *FuncInfo) {
 // DefLambda registers a named lambda function. This is called by defun.
 func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Object, kind Symbol) (fi *FuncInfo) {
 	obj.mu.Lock()
-	obj.lambdas[name] = lam
-	obj.funcs[name] = &FuncInfo{
-		Name:   name,
-		Doc:    lam.Doc,
-		Create: fc,
-		Pkg:    obj,
-		Kind:   kind,
-		// export: true, // TBD should be false
+	if xlam := obj.lambdas[name]; xlam != nil {
+		xlam.Doc = lam.Doc
+		xlam.Forms = lam.Forms
+		xlam.Closure = lam.Closure
+		xlam.Macro = lam.Macro
+	} else {
+		obj.lambdas[name] = lam
+	}
+	if fi := obj.funcs[name]; fi != nil {
+		fi.Doc = lam.Doc
+		fi.Create = fc
+		fi.Pkg = obj
+		fi.Kind = kind
+	} else {
+		fi := FuncInfo{
+			Name:   name,
+			Doc:    lam.Doc,
+			Create: fc,
+			Pkg:    obj,
+			Kind:   kind,
+		}
+		obj.funcs[name] = &fi
+		if vv := obj.vars[name]; vv != nil && Unbound == vv.Val && vv.Export {
+			fi.Export = true
+			delete(obj.vars, name)
+		}
 	}
 	obj.mu.Unlock()
 	if 0 < len(name) && !strings.EqualFold(name, "lambda") {
