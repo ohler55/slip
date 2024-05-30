@@ -50,6 +50,12 @@ func TestCodeToken(t *testing.T) {
 	}
 }
 
+func TestCodeReadOne(t *testing.T) {
+	code, pos := slip.ReadOne([]byte("abc def"))
+	tt.Equal(t, slip.Symbol("abc"), code[0])
+	tt.Equal(t, 3, pos)
+}
+
 func TestCodeComment(t *testing.T) {
 	for i, ct := range []*codeTest{
 		{src: "t ; comment", expect: "[t]"},

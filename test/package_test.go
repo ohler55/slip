@@ -196,6 +196,9 @@ func TestPackageVars(t *testing.T) {
 	val, has = cl.Get(key)
 	tt.Equal(t, false, has)
 	tt.Nil(t, val)
+
+	val = cl.JustGet("*package*")
+	tt.NotNil(t, val)
 }
 
 func TestPackageDescribe(t *testing.T) {
@@ -246,6 +249,9 @@ func TestPackageDefine(t *testing.T) {
 	slip.CurrentPackage.Define(cf, &doc)
 	slip.CurrentPackage.Define(cf, &doc)
 	tt.Equal(t, "Warning: redefining dummy\n", out.String())
+	slip.CurrentPackage.Undefine("dummy")
+
+	tt.Panic(t, func() { slip.CLPkg.Define(cf, &doc) })
 }
 
 func TestPackageEachFuncName(t *testing.T) {
@@ -296,4 +302,12 @@ func TestAllPackages(t *testing.T) {
 		}
 	}
 	tt.Equal(t, true, found)
+}
+
+func TestPackageUseLocked(t *testing.T) {
+	tt.Panic(t, func() { slip.CLPkg.Use(&slip.UserPkg) })
+}
+
+func TestPackageUnuseLocked(t *testing.T) {
+	tt.Panic(t, func() { slip.CLPkg.Unuse(&slip.UserPkg) })
 }

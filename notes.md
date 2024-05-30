@@ -5,29 +5,22 @@
 - next
 
  - package-export
-  - test coverage
-   - package.go
-   - code.go
-   - scope.go
-   - array.go
-   - lambda.go
-
   - import
   - shadow
   - package-shadowing-symbols
   - shadowing-import
 
- - ext package [or slip-ext or gi]
+ - gi package
   - lock-package
   - unlock-package
   - system
   - source
-  - move addf and add to this pkg (maybe)
 
- -
+ - block-comment branch
   - block comments #|  |#
 
- - add system package (like ASDF)
+- system branch
+ - system (like ASDF)
   - defsystem
    - https://lisp-lang.org/learn/writing-libraries
    - https://asdf.common-lisp.dev/
