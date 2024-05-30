@@ -85,7 +85,7 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	w, _ := s.Get("*standard-output*").(io.Writer)
 	filter, verbose, _ := getRunKeys(args)
 	if verbose {
-		fmt.Fprintf(w, "%s%s:\n", indent, string(name))
+		_, _ = fmt.Fprintf(w, "%s%s:\n", indent, string(name))
 	}
 	cargs := make(slip.List, len(args))
 	copy(cargs, args)
@@ -113,10 +113,10 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	}
 	if verbose {
 		r := getResults(self)
-		fmt.Fprintf(w, "%s-------------- %s:\n", indent, string(name))
-		fmt.Fprintf(w, "%s  passed:  %d\n", indent, alt.Int(jp.C("pass").First(r)))
-		fmt.Fprintf(w, "%s  failed:  %d\n", indent, alt.Int(jp.C("fail").First(r)))
-		fmt.Fprintf(w, "%s  skipped: %d\n", indent, alt.Int(jp.C("skip").First(r)))
+		_, _ = fmt.Fprintf(w, "%s-------------- %s:\n", indent, string(name))
+		_, _ = fmt.Fprintf(w, "%s  passed:  %d\n", indent, alt.Int(jp.C("pass").First(r)))
+		_, _ = fmt.Fprintf(w, "%s  failed:  %d\n", indent, alt.Int(jp.C("fail").First(r)))
+		_, _ = fmt.Fprintf(w, "%s  skipped: %d\n", indent, alt.Int(jp.C("skip").First(r)))
 	}
 	return nil
 }
@@ -169,17 +169,17 @@ func (caller suiteReportCaller) Call(s *slip.Scope, args slip.List, depth int) s
 			panic(fmt.Sprintf("stream argument to :report must be an output-stream, not %s", args[0]))
 		}
 	}
-	fmt.Fprintf(w, "%s%s:\n", indent, string(name))
+	_, _ = fmt.Fprintf(w, "%s%s:\n", indent, string(name))
 	for _, child := range children {
 		if ci, _ := child.(*flavors.Instance); ci != nil {
 			_ = ci.Receive(s, ":report", args, depth+1)
 		}
 	}
 	r := getResults(self)
-	fmt.Fprintf(w, "%s-------------- %s:\n", indent, string(name))
-	fmt.Fprintf(w, "%s  passed:  %d\n", indent, alt.Int(jp.C("pass").First(r)))
-	fmt.Fprintf(w, "%s  failed:  %d\n", indent, alt.Int(jp.C("fail").First(r)))
-	fmt.Fprintf(w, "%s  skipped: %d\n", indent, alt.Int(jp.C("skip").First(r)))
+	_, _ = fmt.Fprintf(w, "%s-------------- %s:\n", indent, string(name))
+	_, _ = fmt.Fprintf(w, "%s  passed:  %d\n", indent, alt.Int(jp.C("pass").First(r)))
+	_, _ = fmt.Fprintf(w, "%s  failed:  %d\n", indent, alt.Int(jp.C("fail").First(r)))
+	_, _ = fmt.Fprintf(w, "%s  skipped: %d\n", indent, alt.Int(jp.C("skip").First(r)))
 
 	return nil
 }

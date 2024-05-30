@@ -48,10 +48,10 @@ func (f *Room) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	runtime.ReadMemStats(&ms)
 	w := s.Get("*standard-output*").(io.Writer)
 	// Start with the minimum.
-	fmt.Fprintf(w, "Allocated heap:        %10d bytes\n", ms.Alloc)
-	fmt.Fprintf(w, "Total mallocs:         %10d\n", ms.Mallocs)
-	fmt.Fprintf(w, "Total frees:           %10d\n", ms.Frees)
-	fmt.Fprintf(w, "Stack inuse:           %10d bytes\n", ms.StackInuse)
+	_, _ = fmt.Fprintf(w, "Allocated heap:        %10d bytes\n", ms.Alloc)
+	_, _ = fmt.Fprintf(w, "Total mallocs:         %10d\n", ms.Mallocs)
+	_, _ = fmt.Fprintf(w, "Total frees:           %10d\n", ms.Frees)
+	_, _ = fmt.Fprintf(w, "Stack inuse:           %10d bytes\n", ms.StackInuse)
 
 	var verbosity slip.Object = defaultSymbol
 	if 0 < len(args) {
@@ -61,29 +61,29 @@ func (f *Room) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		return slip.Novalue
 	}
 	// Add intermediate details.
-	fmt.Fprintf(w, "Heap reserved:         %10d bytes\n", ms.HeapSys)
-	fmt.Fprintf(w, "Heap inuse:            %10d bytes\n", ms.HeapInuse)
-	fmt.Fprintf(w, "Heap:                  %10d objects\n", ms.HeapObjects)
-	fmt.Fprintf(w, "GC count:              %10d\n", ms.NumGC)
-	fmt.Fprintf(w, "GC target:             %10d bytes\n", ms.NextGC)
-	fmt.Fprintf(w, "Last GC at:            %s\n", time.Unix(0, int64(ms.LastGC)).UTC().Format(time.RFC3339Nano))
+	_, _ = fmt.Fprintf(w, "Heap reserved:         %10d bytes\n", ms.HeapSys)
+	_, _ = fmt.Fprintf(w, "Heap inuse:            %10d bytes\n", ms.HeapInuse)
+	_, _ = fmt.Fprintf(w, "Heap:                  %10d objects\n", ms.HeapObjects)
+	_, _ = fmt.Fprintf(w, "GC count:              %10d\n", ms.NumGC)
+	_, _ = fmt.Fprintf(w, "GC target:             %10d bytes\n", ms.NextGC)
+	_, _ = fmt.Fprintf(w, "Last GC at:            %s\n", time.Unix(0, int64(ms.LastGC)).UTC().Format(time.RFC3339Nano))
 	if verbosity == defaultSymbol {
 		return slip.Novalue
 	}
 	// Add lots of detail.
-	fmt.Fprintf(w, "System reserved:       %10d bytes\n", ms.Sys)
-	fmt.Fprintf(w, "Heap idle:             %10d bytes\n", ms.HeapIdle)
-	fmt.Fprintf(w, "Heap released:         %10d bytes\n", ms.HeapReleased)
-	fmt.Fprintf(w, "System stack:          %10d bytes\n", ms.StackSys)
-	fmt.Fprintf(w, "Cache reserved:        %10d bytes\n", ms.MCacheSys)
-	fmt.Fprintf(w, "Cache inuse:           %10d bytes\n", ms.MCacheInuse)
-	fmt.Fprintf(w, "GC reserved:           %10d bytes\n", ms.GCSys)
-	fmt.Fprintf(w, "Pointer references:    %10d\n", ms.Lookups)
-	fmt.Fprintf(w, "Allocation by size:\n")
+	_, _ = fmt.Fprintf(w, "System reserved:       %10d bytes\n", ms.Sys)
+	_, _ = fmt.Fprintf(w, "Heap idle:             %10d bytes\n", ms.HeapIdle)
+	_, _ = fmt.Fprintf(w, "Heap released:         %10d bytes\n", ms.HeapReleased)
+	_, _ = fmt.Fprintf(w, "System stack:          %10d bytes\n", ms.StackSys)
+	_, _ = fmt.Fprintf(w, "Cache reserved:        %10d bytes\n", ms.MCacheSys)
+	_, _ = fmt.Fprintf(w, "Cache inuse:           %10d bytes\n", ms.MCacheInuse)
+	_, _ = fmt.Fprintf(w, "GC reserved:           %10d bytes\n", ms.GCSys)
+	_, _ = fmt.Fprintf(w, "Pointer references:    %10d\n", ms.Lookups)
+	_, _ = fmt.Fprintf(w, "Allocation by size:\n")
 	for i := 0; i < len(ms.BySize); i++ {
 		bs := ms.BySize[i]
 		// for _, bs := range ms.BySize {
-		fmt.Fprintf(w, "  %10d mallocs, %10d frees for size <= %d bytes\n", bs.Mallocs, bs.Frees, bs.Size)
+		_, _ = fmt.Fprintf(w, "  %10d mallocs, %10d frees for size <= %d bytes\n", bs.Mallocs, bs.Frees, bs.Size)
 	}
 	return slip.Novalue
 }

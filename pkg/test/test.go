@@ -85,15 +85,15 @@ func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 			msg := fmt.Sprintf("%s", rec)
 			i2 := append([]byte{'\n', ' ', ' '}, indent...)
 			msg = strings.TrimRight(strings.ReplaceAll(msg, "\n", string(i2)), " ")
-			fmt.Fprintf(w, "%s%s: %sFAIL%s\n%s  %s%s%s\n",
+			_, _ = fmt.Fprintf(w, "%s%s: %sFAIL%s\n%s  %s%s%s\n",
 				indent, string(name), bold, normal, indent, red, msg, normal)
 			if p, ok := rec.(slip.Error); ok && verbose {
 				for _, frame := range p.Stack() {
-					fmt.Fprintf(w, "%s  %s%s%s\n", indent, red, frame, normal)
+					_, _ = fmt.Fprintf(w, "%s  %s%s%s\n", indent, red, frame, normal)
 				}
 			}
 		} else if verbose || trace {
-			fmt.Fprintf(w, "%s%s: %sPASS%s\n", indent, string(name), bold, normal)
+			_, _ = fmt.Fprintf(w, "%s%s: %sPASS%s\n", indent, string(name), bold, normal)
 		}
 	}()
 	if forms, ok := s.Get("forms").(slip.List); ok {
@@ -171,7 +171,7 @@ func (caller testReportCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	default:
 		result = "SKIP"
 	}
-	fmt.Fprintf(w, "%s%s: %s%s%s\n", indent, string(name), pre, result, normal)
+	_, _ = fmt.Fprintf(w, "%s%s: %s%s%s\n", indent, string(name), pre, result, normal)
 
 	return nil
 }

@@ -49,6 +49,6 @@ func (f *Time) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	result = slip.EvalArg(s, args, 0, depth+1)
 	dur := time.Since(t0)
 	w := s.Get("*trace-output*").(io.Writer)
-	fmt.Fprintf(w, "Evaluation took:\n  %d.%09d seconds of real time\n", dur/time.Second, dur%time.Second)
+	_, _ = fmt.Fprintf(w, "Evaluation took:\n  %d.%09d seconds of real time\n", dur/time.Second, dur%time.Second)
 	return
 }

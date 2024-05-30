@@ -95,7 +95,7 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 			if 0 < width && width < left+len(v.sym)+len(vs)+2 && 0 < width-left-len(v.sym)-5 {
 				vs = vs[:width-left-len(v.sym)-5] + "..."
 			}
-			fmt.Fprintf(w, "\x1b[0K%s: %s", v.sym, vs)
+			_, _ = fmt.Fprintf(w, "\x1b[0K%s: %s", v.sym, vs)
 			break
 		}
 	}
@@ -168,13 +168,13 @@ func drawFrame(s *slip.Scope) {
 	for i, v := range c.vars {
 		setCursor(w, top+i, left)
 		if v.val == slip.Unbound {
-			fmt.Fprintf(w, "\x1b[0K%s: <unbound>", v.sym)
+			_, _ = fmt.Fprintf(w, "\x1b[0K%s: <unbound>", v.sym)
 		} else {
 			vs := slip.ObjectString(v.val)
 			if 0 < width && width < left+len(v.sym)+len(vs)+2 && 0 < width-left-len(v.sym)-5 {
 				vs = vs[:width-left-len(v.sym)-5] + "..."
 			}
-			fmt.Fprintf(w, "\x1b[0K%s: %s", v.sym, vs)
+			_, _ = fmt.Fprintf(w, "\x1b[0K%s: %s", v.sym, vs)
 		}
 		setCursor(w, top+i+1, left)
 	}
