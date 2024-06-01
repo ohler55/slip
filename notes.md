@@ -10,48 +10,17 @@
   - package-shadowing-symbols
   - shadowing-import
 
- - flavor
-  - add non-standard doc for var or method
-   - method on flavor :document name description
-   - also a function
  - gi package
   - defsystem returns a system instance, can also use make-instance
   - system - flavor
-    - note differences to ASDF
-     - not all source in one place, avoids version conflicts
-     - relies on an import cache where depends-on systems and files are placed
-     - simplified components as just file names, no module support, use another system
-     - depends-on identifies sources of code
-      - directory or file list ;; (:file a b c d)
-      - git branch ;; (:git url
-      - git tag
-      - git commit
-      - another system
     - :in-order-to has the same purpose but is slightly different
     - has pre-defined operations
      - :fetch to fetch depends-on and place them in the cache
-   - vars - inittable and gettable but not settable
-    - :author
-    - :maintainer
-    - :license "MIT"
-    - :version
-    - :homepage "https://github.com/CommonDoc/common-doc"
-    - :bug-tracker "https://github.com/CommonDoc/common-doc/issues"
-    - :source-control (:git "git@github.com:CommonDoc/common-doc.git")
-    - :description "A framework for representing and manipulating documents as CLOS objects."
-    - :depends-on ;;
-    - :components  ;; just list of files with or without .lisp
-    - :in-order-to '((:test (run-my-tests 1 2))
-                     (:run (run-stuff)))
-    - :scratch ;; not asdf
-    - :cache ;; not asdf
-
-  - source
-   - (source-name source &key cache-dir)
-    - source - (:git url &key branch commit tag sub-dir)
-    -          (:file filepath*)
-    -          (:system path)
-    -          (:call (some-lisp-function and args))
+     - :load
+     - :run &key * - maybe or just default handler
+      - use this instead of :test or others, easier
+      - if a default-handler then scope is system which is probably what we want if adding key-values
+      - if :run then scope does not include system which is probably okay
 
  - block-comment branch
   - block comments #|  |#

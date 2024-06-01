@@ -35,6 +35,7 @@ type Flavor struct {
 	requiredVars     []string
 	requiredKeywords []string
 	varNames         []string // for DefMethod, requiredVars and defaultVars combined
+	varDocs          map[string]string
 	initable         map[string]bool
 	defaultHandler   slip.Caller
 	abstract         bool
@@ -243,6 +244,7 @@ func (obj *Flavor) Describe(b []byte, indent, right int, ansi bool) []byte {
 	}
 	i2 := indent + 2
 	i3 := indent + 4
+	i4 := indent + 6
 	if 0 < len(obj.docs) {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "Documentation:\n"...)
@@ -278,6 +280,10 @@ func (obj *Flavor) Describe(b []byte, indent, right int, ansi bool) []byte {
 				b = append(b, " (initable)"...)
 			}
 			b = append(b, '\n')
+			if desc := obj.varDocs[k]; 0 < len(desc) {
+				b = slip.AppendDoc(b, desc, i4, right, ansi)
+				b = append(b, '\n')
+			}
 		}
 	}
 	if 0 < len(obj.keywords) {
@@ -361,6 +367,7 @@ top:
 	case ":which-operations":
 		result = slip.List{
 			slip.Symbol(":describe"),
+			slip.Symbol(":document"),
 			slip.Symbol(":inspect"),
 			slip.Symbol(":name"),
 			slip.Symbol(":which-operations"),
@@ -370,6 +377,13 @@ top:
 		inst := cf.MakeInstance().(*Instance)
 		inst.Any = obj.Simplify()
 		result = inst
+	case ":document":
+		if len(args) != 2 {
+			slip.NewPanic(":document expects two arguments.")
+		}
+		name := slip.MustBeString(args[0], "name")
+		desc := slip.MustBeString(args[1], "description")
+		obj.varDocs[name] = desc
 	default:
 		if lo {
 			slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a valid method for a Flavor.", message)
@@ -395,4 +409,9 @@ func (obj *Flavor) Documentation() string {
 // with make-instance which should signal an error.
 func (obj *Flavor) NoMake() bool {
 	return obj.abstract || obj.GoMakeOnly
+}
+
+// Document a variable or method.
+func (obj *Flavor) Document(name, desc string) {
+	obj.varDocs[name] = desc
 }
