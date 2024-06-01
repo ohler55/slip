@@ -388,3 +388,22 @@ func (f *Function) setPkg(p *Package) {
 func (f *Function) GetPkg() *Package {
 	return f.Pkg
 }
+
+// PackageFromArg returns a package from an argument or panics.
+func PackageFromArg(arg Object) (pkg *Package) {
+	switch tv := arg.(type) {
+	case Symbol:
+		if 0 < len(tv) && tv[0] == ':' {
+			pkg = FindPackage(string(tv[1:]))
+		} else {
+			pkg = FindPackage(string(tv))
+		}
+	case String:
+		pkg = FindPackage(string(tv))
+	case *Package:
+		pkg = tv
+	default:
+		PanicType("package", tv, "symbol", "string", "package")
+	}
+	return
+}

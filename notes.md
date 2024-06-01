@@ -13,6 +13,7 @@
  - gi package
   - lock-package
   - unlock-package
+  - package-locked-p
   - system
   - source
 

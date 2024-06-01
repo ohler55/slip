@@ -47,12 +47,12 @@ type UnusePackage struct {
 func (f *UnusePackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 2)
 	pkg := slip.CurrentPackage
-	pto := packageFromArg(args[0], "package-to-unuse")
+	pto := slip.PackageFromArg(args[0])
 	if pto == nil {
 		slip.PanicPackage(nil, "Package %s does not exist.", args[0])
 	}
 	if 1 < len(args) {
-		if pkg = packageFromArg(args[1], "package"); pkg == nil {
+		if pkg = slip.PackageFromArg(args[1]); pkg == nil {
 			slip.PanicPackage(nil, "Package %s does not exist.", args[0])
 		}
 	}
