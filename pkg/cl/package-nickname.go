@@ -38,7 +38,7 @@ type PackageNicknames struct {
 // Call the function with the arguments provided.
 func (f *PackageNicknames) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	pkg := packageFromArg(args[0], "package")
+	pkg := slip.PackageFromArg(args[0])
 	nn := make(slip.List, len(pkg.Nicknames))
 	for i, str := range pkg.Nicknames {
 		nn[i] = slip.String(str)

@@ -42,7 +42,7 @@ func (f *Unexport) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 2)
 	p := slip.CurrentPackage
 	if 1 < len(args) {
-		p = packageFromArg(args[1], "unexport")
+		p = slip.PackageFromArg(args[1])
 	}
 	switch ta := args[0].(type) {
 	case slip.Symbol:

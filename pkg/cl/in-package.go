@@ -38,7 +38,7 @@ type InPackage struct {
 // Call the function with the arguments provided.
 func (f *InPackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	pkg := packageFromArg(args[0], "package")
+	pkg := slip.PackageFromArg(args[0])
 	if pkg == nil {
 		slip.PanicPackage(nil, "The name %q does not designate any package.", pkg)
 	}

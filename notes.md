@@ -11,8 +11,6 @@
   - shadowing-import
 
  - gi package
-  - lock-package
-  - unlock-package
   - system
   - source
 

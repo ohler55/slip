@@ -41,7 +41,7 @@ type DeletePackage struct {
 // Call the function with the arguments provided.
 func (f *DeletePackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	pkg := packageFromArg(args[0], "package")
+	pkg := slip.PackageFromArg(args[0])
 	if pkg == nil {
 		slip.PanicPackage(nil, "Package %s does not exist.", args[0])
 	}
