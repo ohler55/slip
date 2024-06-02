@@ -190,7 +190,7 @@ func TestFlavorReceive(t *testing.T) {
 }`, pretty.SEN((result.(*flavors.Instance)).Any))
 
 	result = slip.ReadString("(send blueberry :WHICH-OPERATIONS)").Eval(scope, nil)
-	tt.Equal(t, "(:describe :inspect :name :which-operations)", slip.ObjectString(result))
+	tt.Equal(t, "(:describe :document :inspect :name :which-operations)", slip.ObjectString(result))
 
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
