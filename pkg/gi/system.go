@@ -133,7 +133,7 @@ func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 func (caller systemRunCaller) Docs() string {
 	return `__:run__ _op_ &key _*_
    _op_ [symbol] names the operation of one of the :in-order-to elements.
-   _:*_ [symbol&value] keys to bind to the values and made availble to the operation.
+   _:*_ [symbol&value] keys to bind to the values and made available to the operation.
 
 
 Run an operation from the :in-order-to variable with the provided keys bound to the values.
