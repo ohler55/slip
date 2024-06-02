@@ -3,6 +3,11 @@
 package gi
 
 import (
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -78,9 +83,9 @@ method to cache sources and then invoke one of the operations defined in the
 	system.Document("cache", "Filepath to the import cache.")
 	system.Document("depends-on", `The sources this system depends on. The entries listed are
 imported into the system cache. The elements of the :depends-on are lists that start with a
-source keyword and are followed by a lambda list. The supported source keywords with lambda
-list descriptions are:
-   __:file__ filepath*
+source name then a type keyword and are followed by a lambda list. The supported source
+keywords with lambda list descriptions are:
+   __:file__ root filepath*
    __:git__ url &key branch tag commit sub-dir
    __:system__ filepath
    __:require__ package-name load-path
@@ -97,7 +102,41 @@ are bound to the values and are available to the function being called.
 type systemFetchCaller struct{}
 
 func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	// TBD
+	self := s.Get("self").(*flavors.Instance)
+	sources, ok := self.Get("depends-on").(slip.List)
+	if !ok {
+		slip.PanicType("depends-on", self.Get("depends-on"), "list")
+	}
+	if 0 < len(sources) {
+		cache := getStringVar(self, "cache", "cache")
+		if err := os.MkdirAll(cache, 0755); err != nil {
+			panic(err)
+		}
+		for _, src := range sources {
+			var ll slip.List
+			if ll, ok = src.(slip.List); !ok || len(ll) < 3 {
+				slip.PanicType("source", src, "list")
+			}
+			dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				panic(err)
+			}
+			switch ll[1] {
+			case slip.Symbol(":file"):
+				fetchFiles(self, dir, ll[2:], cache)
+			case slip.Symbol(":git"):
+				fetchGit(self, dir, ll[2:], cache)
+			case slip.Symbol(":system"):
+				fetchSystem(self, dir, ll[2:], cache)
+			case slip.Symbol(":require"):
+				fetchRequire(self, dir, ll[2:], cache)
+			case slip.Symbol(":call"):
+				fetchCall(self, dir, ll[2:], cache)
+			default:
+				slip.NewPanic("%s is not a valid source type.", ll[0])
+			}
+		}
+	}
 	return nil
 }
 
@@ -138,4 +177,57 @@ func (caller systemRunCaller) Docs() string {
 
 Run an operation from the :in-order-to variable with the provided keys bound to the values.
 `
+}
+
+func getStringVar(self *flavors.Instance, key, defVal string) (sval string) {
+	val := self.Get(slip.Symbol(key))
+	switch tv := val.(type) {
+	case slip.String:
+		sval = string(tv)
+	case nil:
+		sval = defVal
+	default:
+		slip.PanicType(key, tv, "string")
+	}
+	return
+}
+
+func fetchFiles(self *flavors.Instance, dir string, args slip.List, cache string) {
+	root := slip.MustBeString(args[0], "root")
+	for _, arg := range args[1:] {
+		path := slip.MustBeString(arg, "filepath")
+		src := filepath.Join(root, path)
+		dest := filepath.Join(dir, path)
+		_, err := os.Stat(src)
+		if err != nil {
+			path += ".lisp"
+			src = filepath.Join(root, path)
+			dest = filepath.Join(dir, path)
+			if _, err = os.Stat(src); err != nil {
+				slip.NewPanic("%s not found.", src)
+			}
+		}
+		_ = os.RemoveAll(dest)
+		if err := exec.Command("cp", "-r", src, dest).Run(); err != nil {
+			slip.NewPanic("Failed to copy %s to %s. %s\n", src, dest, err)
+		}
+	}
+}
+
+func fetchGit(self *flavors.Instance, dir string, args slip.List, cache string) {
+	scratch := getStringVar(self, "scratch", ".scratch")
+	fmt.Printf("*** scratch: %s\n", scratch)
+
+}
+
+func fetchSystem(self *flavors.Instance, dir string, args slip.List, cache string) {
+
+}
+
+func fetchRequire(self *flavors.Instance, dir string, args slip.List, cache string) {
+
+}
+
+func fetchCall(self *flavors.Instance, dir string, args slip.List, cache string) {
+
 }

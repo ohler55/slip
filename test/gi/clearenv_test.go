@@ -4,6 +4,7 @@ package gi_test
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -11,6 +12,13 @@ import (
 )
 
 func TestClearenv(t *testing.T) {
+	orig := os.Environ()
+	defer func() {
+		for _, ev := range orig {
+			parts := strings.Split(ev, "=")
+			os.Setenv(parts[0], parts[1])
+		}
+	}()
 	os.Setenv("TEST_VAR", "something")
 	(&sliptest.Function{
 		Source: `(clearenv)`,
