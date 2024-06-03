@@ -3,7 +3,6 @@
 package gi
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -215,8 +214,42 @@ func fetchFiles(self *flavors.Instance, dir string, args slip.List, cache string
 }
 
 func fetchGit(self *flavors.Instance, dir string, args slip.List, cache string) {
+	gu := slip.MustBeString(args[0], "url")
+	rest := args[1:]
 	scratch := getStringVar(self, "scratch", ".scratch")
-	fmt.Printf("*** scratch: %s\n", scratch)
+	var subdir string
+	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":sub-dir")); has {
+		subdir = slip.MustBeString(val, "sub-dir")
+	}
+	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":tag")); has {
+		tag := slip.MustBeString(val, "tag")
+		fetchGitTag(self, dir, gu, tag, subdir, scratch, cache)
+		return
+	}
+	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":branch")); has {
+		branch := slip.MustBeString(val, "branch")
+		fetchGitBranch(self, dir, gu, branch, subdir, scratch, cache)
+		return
+	}
+	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":commit")); has {
+		commit := slip.MustBeString(val, "commit")
+		fetchGitCommit(self, dir, gu, commit, subdir, scratch, cache)
+		return
+	}
+	slip.NewPanic("A git source must specify a tag, branch, or commit.")
+	// TBD
+	//  test with separate repo, set up a tag, branch, and commit
+}
+
+func fetchGitTag(self *flavors.Instance, dir, gitURL, tag, subdir, scratch, cache string) {
+
+}
+
+func fetchGitBranch(self *flavors.Instance, dir, gitURL, branch, subdir, scratch, cache string) {
+
+}
+
+func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch, cache string) {
 
 }
 
