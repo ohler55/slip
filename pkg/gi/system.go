@@ -237,23 +237,36 @@ func fetchGit(self *flavors.Instance, dir string, args slip.List, cache string) 
 		return
 	}
 	slip.NewPanic("A git source must specify a tag, branch, or commit.")
-	// TBD
-	// https://github.com/ohler55/slip-system-test
-	// tag v1.0.0
-	// branch develop
-	// commit 33e624d04465499b5f19980501bc5fef7e205ba1
 }
 
 func fetchGitTag(self *flavors.Instance, dir, gitURL, tag, subdir, scratch, cache string) {
-
+	_ = os.RemoveAll(scratch)
+	if err := exec.Command("git", "clone", "--depth=1", gitURL, scratch).Run(); err != nil {
+		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
+	}
+	if err := exec.Command("git", "-C", scratch, "checkout", "tags/"+tag).Run(); err != nil {
+		slip.NewPanic("Failed to git checkout tag %s. %s\n", tag, err)
+	}
+	mvGitScratchToCache(dir, scratch, subdir, cache)
 }
 
 func fetchGitBranch(self *flavors.Instance, dir, gitURL, branch, subdir, scratch, cache string) {
-
+	_ = os.RemoveAll(scratch)
+	if err := exec.Command("git", "clone", "-b", branch, "--depth=1", gitURL, scratch).Run(); err != nil {
+		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
+	}
+	mvGitScratchToCache(dir, scratch, subdir, cache)
 }
 
 func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch, cache string) {
-
+	_ = os.RemoveAll(scratch)
+	if err := exec.Command("git", "clone", "--depth=1", gitURL, scratch).Run(); err != nil {
+		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
+	}
+	if err := exec.Command("git", "-C", scratch, "checkout", commit).Run(); err != nil {
+		slip.NewPanic("Failed to git checkout commit %s. %s\n", commit, err)
+	}
+	mvGitScratchToCache(dir, scratch, subdir, cache)
 }
 
 func fetchSystem(self *flavors.Instance, dir string, args slip.List, cache string) {
@@ -266,4 +279,17 @@ func fetchRequire(self *flavors.Instance, dir string, args slip.List, cache stri
 
 func fetchCall(self *flavors.Instance, dir string, args slip.List, cache string) {
 
+}
+
+func mvGitScratchToCache(dir, scratch, subdir, cache string) {
+	// Remove any files at the destination.
+	_ = os.RemoveAll(dir)
+	src := scratch
+	if 0 < len(subdir) {
+		src = filepath.Join(src, subdir)
+	}
+	if err := exec.Command("mv", src, dir).Run(); err != nil {
+		slip.NewPanic("Failed to move %s to %s. %s\n", src, dir, err)
+	}
+	_ = os.RemoveAll(scratch) // cleanup
 }
