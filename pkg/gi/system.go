@@ -238,7 +238,10 @@ func fetchGit(self *flavors.Instance, dir string, args slip.List, cache string) 
 	}
 	slip.NewPanic("A git source must specify a tag, branch, or commit.")
 	// TBD
-	//  test with separate repo, set up a tag, branch, and commit
+	// https://github.com/ohler55/slip-system-test
+	// tag v1.0.0
+	// branch develop
+	// commit 33e624d04465499b5f19980501bc5fef7e205ba1
 }
 
 func fetchGitTag(self *flavors.Instance, dir, gitURL, tag, subdir, scratch, cache string) {
