@@ -13,21 +13,24 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-// TBD test all init vars and gets mostly as an example
-
 func TestSystemFetchFile(t *testing.T) {
+	scope := slip.NewScope()
 	(&sliptest.Function{
 		Source: `
 (let ((sys
        (make-instance 'system
                       :cache "testout"
+                      :components '("testdata/comp.lisp")
                       :depends-on '((quux :file "testdata" "sys-test")))))
-  (send sys :fetch))
+  (send sys :fetch)
+  (send sys :load))
 `,
 		Expect: `nil`,
 	}).Test(t)
 	_, err := os.Stat("testout/quux/sys-test.lisp")
 	tt.Nil(t, err)
+	result := slip.ReadString("(sys-test-comp)").Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(3), result)
 
 	(&sliptest.Function{
 		Source: `
@@ -209,6 +212,58 @@ func TestSystemFetchGitCommit(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSystemFetchGitUnknown(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((sst :git
+                                         "https://github.com/ohler55/slip-system-test")))))
+  (send sys :fetch))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemFetchCall(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :author "peter@ohler.com"
+                      :cache "testout"
+                      :depends-on '((quux :call
+                                          (with-open-file
+                                           (f (join "/" cache-dir "author.lisp")
+                                            :direction :output
+                                            :if-does-not-exist :create
+                                            :if-exists :supersede)
+                                           (format f "(setq author ~S)~%" author)))))))
+  (send sys :fetch))
+`,
+		Expect: `nil`,
+	}).Test(t)
+	_, err := os.Stat("testout/quux/author.lisp")
+	tt.Nil(t, err)
+	var content []byte
+	content, err = os.ReadFile("testout/quux/author.lisp")
+	tt.Nil(t, err)
+	tt.Equal(t, `(setq author "peter@ohler.com")
+`, string(content))
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :call t)))))
+  (send sys :fetch))
+`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestSystemDescribe(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()
@@ -260,5 +315,64 @@ func TestSystemFetchBadCache(t *testing.T) {
   (send sys :fetch))
 `,
 		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemFetchMkdirFail(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "Makefile"
+                      :depends-on '((quux :file "testdata" "sys-test")))))
+  (send sys :fetch))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemFetchMkdirFail2(t *testing.T) {
+	_ = os.MkdirAll("testout", 0755)
+	_ = os.WriteFile("testout/blocker", []byte("test"), 0666)
+	defer func() { _ = os.RemoveAll("testout/blocker") }()
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((blocker :file "testdata" "sys-test")))))
+  (send sys :fetch))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemFetchCpFail(t *testing.T) {
+	_ = os.WriteFile("testdata/no-read.lisp", []byte("test"), 0333)
+	defer func() { _ = os.RemoveAll("testdata/no-read.lisp") }()
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :file "testdata" "no-read")))))
+  (send sys :fetch))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemFetchUnknown(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :bad t)))))
+  (send sys :fetch))
+`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

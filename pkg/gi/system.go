@@ -62,13 +62,6 @@ method to cache sources and then invoke one of the operations defined in the
 
 `),
 			},
-			slip.List{
-				slip.Symbol(":default-handler"),
-				// TBD a function to parse and run the target in :in-order-to
-				// define a function that given a :in-order-to spec invokes the specified code
-				//  additional argument are assigned somehow, maybe with keys?
-				slip.Symbol("car"),
-			},
 		},
 		&Pkg,
 	)
@@ -83,10 +76,10 @@ imported into the system cache. The elements of the :depends-on are lists that s
 source name then a type keyword and are followed by a lambda list. The supported source
 keywords with lambda list descriptions are:
    __:file__ root filepath*
-   __:git__ url &key branch tag commit sub-dir scratch
+   __:git__ url &key branch tag commit sub-dir scratch files system
    __:system__ filepath
    __:require__ package-name load-path
-   __:call__ function
+   __:call__ fetch-function load-function
 `)
 	system.Document("in-order-to", `The system can perform operations once the code has been
 loaded. Those operations are described in the :in-order-to variable which is a list of lists.
@@ -120,17 +113,17 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 			}
 			switch ll[1] {
 			case slip.Symbol(":file"):
-				fetchFiles(self, dir, ll[2:], cache)
+				fetchFiles(self, dir, ll[2:])
 			case slip.Symbol(":git"):
-				fetchGit(self, dir, ll[2:], cache)
+				fetchGit(self, dir, ll[2:])
 			case slip.Symbol(":system"):
-				fetchSystem(self, dir, ll[2:], cache)
+				fetchSystem(self, dir, ll[2:])
 			case slip.Symbol(":require"):
-				fetchRequire(self, dir, ll[2:], cache)
+				fetchRequire(self, dir, ll[2:])
 			case slip.Symbol(":call"):
-				fetchCall(self, dir, ll[2:], cache)
+				fetchCall(self, dir, ll[2:])
 			default:
-				slip.NewPanic("%s is not a valid source type.", ll[0])
+				slip.NewPanic("%s is not a valid source type.", ll[1])
 			}
 		}
 	}
@@ -148,7 +141,63 @@ in the cache.
 type systemLoadCaller struct{}
 
 func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	// TBD
+	self := s.Get("self").(*flavors.Instance)
+	sources, ok := self.Get("depends-on").(slip.List)
+	if !ok {
+		slip.PanicType("depends-on", self.Get("depends-on"), "list")
+	}
+	cache := getStringVar(self, "cache", "cache")
+	for _, src := range sources {
+		var ll slip.List
+		if ll, ok = src.(slip.List); !ok || len(ll) < 3 {
+			slip.PanicType("source", src, "list")
+		}
+		dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
+		switch ll[1] {
+		case slip.Symbol(":file"):
+			loadFiles(self, dir, ll[2:])
+		case slip.Symbol(":git"):
+			loadGit(self, dir, ll[2:])
+		case slip.Symbol(":system"):
+			loadSystem(self, dir, ll[2:])
+		case slip.Symbol(":require"):
+			loadRequire(self, dir, ll[2:])
+		case slip.Symbol(":call"):
+			loadCall(self, dir, ll[2:])
+		default:
+			slip.NewPanic("%s is not a valid source type.", ll[1])
+		}
+	}
+	gc := self.Get("components")
+	if gc != nil {
+		var components slip.List
+		if components, ok = gc.(slip.List); !ok {
+			slip.PanicType("components", gc, "list")
+		}
+		defer func() {
+			self.Set(slip.Symbol("*load-pathname*"), nil)
+			self.Set(slip.Symbol("*load-truename*"), nil)
+		}()
+		for _, comp := range components {
+			var path slip.String
+			if path, ok = comp.(slip.String); !ok {
+				slip.PanicType("component", comp, "string")
+			}
+			matches, _ := filepath.Glob(string(path))
+			// TBD if matches is empty then error
+			for _, m := range matches {
+				self.Set(slip.Symbol("*load-pathname*"), slip.String(m))
+				self.Set(slip.Symbol("*load-truename*"), slip.String(m))
+				if buf, err := os.ReadFile(m); err == nil {
+					code := slip.Read(buf)
+					code.Compile()
+					code.Eval(&self.Scope, nil)
+				} else {
+					panic(err)
+				}
+			}
+		}
+	}
 	return nil
 }
 
@@ -162,7 +211,9 @@ Loads all sources specified in the the :depends-on variable.
 type systemRunCaller struct{}
 
 func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	// TBD
+	// TBD get op
+	// setup like :call
+	// eval op with self
 	return nil
 }
 
@@ -189,7 +240,7 @@ func getStringVar(self *flavors.Instance, key, defVal string) (sval string) {
 	return
 }
 
-func fetchFiles(self *flavors.Instance, dir string, args slip.List, cache string) {
+func fetchFiles(self *flavors.Instance, dir string, args slip.List) {
 	root := slip.MustBeString(args[0], "root")
 	for _, arg := range args[1:] {
 		path := slip.MustBeString(arg, "filepath")
@@ -211,7 +262,7 @@ func fetchFiles(self *flavors.Instance, dir string, args slip.List, cache string
 	}
 }
 
-func fetchGit(self *flavors.Instance, dir string, args slip.List, cache string) {
+func fetchGit(self *flavors.Instance, dir string, args slip.List) {
 	gu := slip.MustBeString(args[0], "url")
 	rest := args[1:]
 	scratch := ".scratch"
@@ -224,23 +275,23 @@ func fetchGit(self *flavors.Instance, dir string, args slip.List, cache string) 
 	}
 	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":tag")); has {
 		tag := slip.MustBeString(val, "tag")
-		fetchGitTag(self, dir, gu, tag, subdir, scratch, cache)
+		fetchGitTag(self, dir, gu, tag, subdir, scratch)
 		return
 	}
 	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":branch")); has {
 		branch := slip.MustBeString(val, "branch")
-		fetchGitBranch(self, dir, gu, branch, subdir, scratch, cache)
+		fetchGitBranch(self, dir, gu, branch, subdir, scratch)
 		return
 	}
 	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":commit")); has {
 		commit := slip.MustBeString(val, "commit")
-		fetchGitCommit(self, dir, gu, commit, subdir, scratch, cache)
+		fetchGitCommit(self, dir, gu, commit, subdir, scratch)
 		return
 	}
 	slip.NewPanic("A git source must specify a tag, branch, or commit.")
 }
 
-func fetchGitTag(self *flavors.Instance, dir, gitURL, tag, subdir, scratch, cache string) {
+func fetchGitTag(self *flavors.Instance, dir, gitURL, tag, subdir, scratch string) {
 	_ = os.RemoveAll(scratch)
 	if err := exec.Command("git", "clone", "--depth=1", gitURL, scratch).Run(); err != nil {
 		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
@@ -248,43 +299,80 @@ func fetchGitTag(self *flavors.Instance, dir, gitURL, tag, subdir, scratch, cach
 	if err := exec.Command("git", "-C", scratch, "checkout", "tags/"+tag).Run(); err != nil {
 		slip.NewPanic("Failed to git checkout tag %s. %s\n", tag, err)
 	}
-	mvGitScratchToCache(dir, scratch, subdir, cache)
+	mvGitScratchToCache(dir, scratch, subdir)
 }
 
-func fetchGitBranch(self *flavors.Instance, dir, gitURL, branch, subdir, scratch, cache string) {
+func fetchGitBranch(self *flavors.Instance, dir, gitURL, branch, subdir, scratch string) {
 	_ = os.RemoveAll(scratch)
 	if err := exec.Command("git", "clone", "-b", branch, "--depth=1", gitURL, scratch).Run(); err != nil {
 		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
 	}
-	mvGitScratchToCache(dir, scratch, subdir, cache)
+	mvGitScratchToCache(dir, scratch, subdir)
 }
 
-func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch, cache string) {
+func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch string) {
 	_ = os.RemoveAll(scratch)
-	// if err := exec.Command("git", "clone", "--depth=1", gitURL, scratch).Run(); err != nil {
 	if err := exec.Command("git", "clone", gitURL, scratch).Run(); err != nil {
 		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
 	}
 	if err := exec.Command("git", "-C", scratch, "checkout", commit).Run(); err != nil {
 		slip.NewPanic("Failed to git checkout commit %s. %s\n", commit, err)
 	}
-	mvGitScratchToCache(dir, scratch, subdir, cache)
+	mvGitScratchToCache(dir, scratch, subdir)
 }
 
-func fetchSystem(self *flavors.Instance, dir string, args slip.List, cache string) {
+func fetchSystem(self *flavors.Instance, dir string, args slip.List) {
 	// TBD path to system and copy
+	// tell sub-sys to fetch
+	// on load tell system to load
 }
 
-func fetchRequire(self *flavors.Instance, dir string, args slip.List, cache string) {
+func fetchRequire(self *flavors.Instance, dir string, args slip.List) {
 	// TBD maybe a package directory in the cache or just put in cache/source-name
 	// same as file copy otherwise
+	// use common package load path - packages
+	// test with copy of cl testplugin
 }
 
-func fetchCall(self *flavors.Instance, dir string, args slip.List, cache string) {
-	// TBD just call function
+func fetchCall(self *flavors.Instance, dir string, args slip.List) {
+	switch ta := args[0].(type) {
+	case nil:
+		// nothing to do
+	case slip.List:
+		scope := self.NewScope()
+		scope.Set("cache-dir", slip.String(dir))
+		_ = slip.CompileList(ta).Eval(scope, 0)
+	default:
+		slip.PanicType("fetch-function", args, "list")
+	}
 }
 
-func mvGitScratchToCache(dir, scratch, subdir, cache string) {
+func loadFiles(self *flavors.Instance, dir string, args slip.List) {
+	// TBD
+	//  :file loads listed files in order, if a dir then any order
+}
+
+func loadGit(self *flavors.Instance, dir string, args slip.List) {
+	// TBD
+	//  :git, if :system then load that else if :files use that, else any order glob
+}
+
+func loadSystem(self *flavors.Instance, dir string, args slip.List) {
+	// TBD
+	//  :system - load system from cache
+}
+
+func loadRequire(self *flavors.Instance, dir string, args slip.List) {
+	// TBD
+	//  :require - look in cache/packages and then require from there
+}
+
+func loadCall(self *flavors.Instance, dir string, args slip.List) {
+	// TBD
+	//  :call - call load-function
+}
+
+func mvGitScratchToCache(dir, scratch, subdir string) {
 	// Remove any files at the destination.
 	_ = os.RemoveAll(dir)
 	src := scratch
