@@ -30,7 +30,6 @@ func defSystem() {
 			"depends-on":     nil,
 			"components":     nil,
 			"in-order-to":    nil,
-			"scratch":        nil,
 			"cache":          nil,
 		},
 		nil, // inherit
@@ -54,7 +53,7 @@ Some of the differences when compared to ASDF are:
  - The :depends-on variable differs to support git and other system sources.
  - The :in-order-to variable differs although it serves the same purpose.
  - The __system__ is a Flavor that also supports a :fetch method.
- - A :scratch and :cache variable are included.
+ - A :cache variable is included.
 
 
 The usual use of a __system__ instance is to first send the instance a :fetch
@@ -78,14 +77,13 @@ method to cache sources and then invoke one of the operations defined in the
 	system.DefMethod(":run", "", systemRunCaller{})
 
 	system.Document("components", "An ordered list of the files to load for the system.")
-	system.Document("scratch", "Filepath to a scratch area.")
 	system.Document("cache", "Filepath to the import cache.")
 	system.Document("depends-on", `The sources this system depends on. The entries listed are
 imported into the system cache. The elements of the :depends-on are lists that start with a
 source name then a type keyword and are followed by a lambda list. The supported source
 keywords with lambda list descriptions are:
    __:file__ root filepath*
-   __:git__ url &key branch tag commit sub-dir
+   __:git__ url &key branch tag commit sub-dir scratch
    __:system__ filepath
    __:require__ package-name load-path
    __:call__ function
@@ -216,7 +214,10 @@ func fetchFiles(self *flavors.Instance, dir string, args slip.List, cache string
 func fetchGit(self *flavors.Instance, dir string, args slip.List, cache string) {
 	gu := slip.MustBeString(args[0], "url")
 	rest := args[1:]
-	scratch := getStringVar(self, "scratch", ".scratch")
+	scratch := ".scratch"
+	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":scratch")); has {
+		scratch = slip.MustBeString(val, "scratch")
+	}
 	var subdir string
 	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":sub-dir")); has {
 		subdir = slip.MustBeString(val, "sub-dir")
@@ -260,7 +261,8 @@ func fetchGitBranch(self *flavors.Instance, dir, gitURL, branch, subdir, scratch
 
 func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch, cache string) {
 	_ = os.RemoveAll(scratch)
-	if err := exec.Command("git", "clone", "--depth=1", gitURL, scratch).Run(); err != nil {
+	// if err := exec.Command("git", "clone", "--depth=1", gitURL, scratch).Run(); err != nil {
+	if err := exec.Command("git", "clone", gitURL, scratch).Run(); err != nil {
 		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
 	}
 	if err := exec.Command("git", "-C", scratch, "checkout", commit).Run(); err != nil {
@@ -270,15 +272,16 @@ func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch
 }
 
 func fetchSystem(self *flavors.Instance, dir string, args slip.List, cache string) {
-
+	// TBD path to system and copy
 }
 
 func fetchRequire(self *flavors.Instance, dir string, args slip.List, cache string) {
-
+	// TBD maybe a package directory in the cache or just put in cache/source-name
+	// same as file copy otherwise
 }
 
 func fetchCall(self *flavors.Instance, dir string, args slip.List, cache string) {
-
+	// TBD just call function
 }
 
 func mvGitScratchToCache(dir, scratch, subdir, cache string) {
