@@ -350,7 +350,11 @@ func fetchCall(self *flavors.Instance, dir string, args slip.List) {
 }
 
 func loadFiles(self *flavors.Instance, dir string, args slip.List) {
-	for _, arg := range args[1:] {
+	loadFileList(self, dir, args[1:])
+}
+
+func loadFileList(self *flavors.Instance, dir string, files slip.List) {
+	for _, arg := range files {
 		path := slip.MustBeString(arg, "filepath")
 		src := filepath.Join(dir, path)
 		if fi, err := os.Stat(src); err != nil {
@@ -371,13 +375,34 @@ func loadFiles(self *flavors.Instance, dir string, args slip.List) {
 }
 
 func loadGit(self *flavors.Instance, dir string, args slip.List) {
-	// TBD
-	//  :git, if :system then load that else if :files use that, else any order glob
+	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":system")); has {
+		subsys := slip.MustBeString(val, ":system")
+		loadSystemFile(self, filepath.Join(dir, subsys))
+		return
+	}
+	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":files")); has {
+		files, ok := val.(slip.List)
+		if !ok {
+			slip.PanicType(":files", val, "list")
+		}
+		loadFileList(self, dir, files)
+		return
+	}
+	matches, _ := filepath.Glob(dir + "/*.lisp")
+	for _, m := range matches {
+		loadFile(self, m)
+	}
 }
 
 func loadSystem(self *flavors.Instance, dir string, args slip.List) {
+	path := slip.MustBeString(args[0], "filepath")
+	loadSystemFile(self, filepath.Join(dir, path))
+}
+
+func loadSystemFile(self *flavors.Instance, path string) {
 	// TBD
-	//  :system - load system from cache
+	// load file then send result :load
+	//  must return an instance
 }
 
 func loadRequire(self *flavors.Instance, dir string, args slip.List) {

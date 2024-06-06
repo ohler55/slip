@@ -111,7 +111,7 @@ func TestSystemLoadBadComp(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSystemFetchGitTag(t *testing.T) {
+func TestSystemGitTag(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -122,7 +122,8 @@ func TestSystemFetchGitTag(t *testing.T) {
                                          :tag "v1.0.0"
                                          :scratch ".scratch"
                                          :sub-dir "lisp")))))
-  (send sys :fetch))
+  (send sys :fetch)
+  (send sys :load))
 `,
 		Expect: `nil`,
 	}).Test(t)
@@ -135,6 +136,9 @@ func TestSystemFetchGitTag(t *testing.T) {
 (defun sample (x)
   (+ x 5))
 `, string(content))
+
+	result := slip.ReadString("(sample 3)").Eval(slip.NewScope(), nil)
+	tt.Equal(t, slip.Fixnum(8), result)
 
 	(&sliptest.Function{
 		Source: `
@@ -165,7 +169,7 @@ func TestSystemFetchGitTag(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSystemFetchGitBranch(t *testing.T) {
+func TestSystemGitBranch(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -175,8 +179,10 @@ func TestSystemFetchGitBranch(t *testing.T) {
                                          "https://github.com/ohler55/slip-system-test"
                                          :branch "develop"
                                          :scratch ".scratch"
+                                         :files ("sample.lisp")
                                          :sub-dir "lisp")))))
-  (send sys :fetch))
+  (send sys :fetch)
+  (send sys :load))
 `,
 		Expect: `nil`,
 	}).Test(t)
@@ -192,6 +198,9 @@ func TestSystemFetchGitBranch(t *testing.T) {
 (defun quux ()
   'foobar)
 `, string(content))
+
+	result := slip.ReadString("(sample 3)").Eval(slip.NewScope(), nil)
+	tt.Equal(t, slip.Fixnum(11), result)
 
 	(&sliptest.Function{
 		Source: `
