@@ -13,15 +13,15 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestSystemFetchFile(t *testing.T) {
+func TestSystemFile(t *testing.T) {
 	scope := slip.NewScope()
 	(&sliptest.Function{
 		Source: `
 (let ((sys
        (make-instance 'system
                       :cache "testout"
-                      :components '("testdata/comp.lisp")
-                      :depends-on '((quux :file "testdata" "sys-test")))))
+                      :components '("testdata/comp")
+                      :depends-on '((quux :file "testdata" "sys-test" "sub")))))
   (send sys :fetch)
   (send sys :load))
 `,
@@ -32,6 +32,12 @@ func TestSystemFetchFile(t *testing.T) {
 	result := slip.ReadString("(sys-test-comp)").Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(3), result)
 
+	result = slip.ReadString("(sys-test)").Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(7), result)
+
+	result = slip.ReadString("(sub)").Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(9), result)
+
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -41,6 +47,67 @@ func TestSystemFetchFile(t *testing.T) {
   (send sys :fetch))
 `,
 		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemCompLoadNotFound(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :components '("testdata/nothing"))))
+  (send sys :load))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemLoadBadDependsOn(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on t
+                      :components '("testdata/nothing"))))
+  (send sys :load))
+`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '(t)
+                      :components '("testdata/nothing"))))
+  (send sys :load))
+`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemLoadBadComp(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :components '(t))))
+  (send sys :load))
+`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :components t)))
+  (send sys :load))
+`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 

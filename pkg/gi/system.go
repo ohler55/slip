@@ -93,8 +93,12 @@ type systemFetchCaller struct{}
 
 func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	sources, ok := self.Get("depends-on").(slip.List)
-	if !ok {
+	var sources slip.List
+	switch tdo := self.Get("depends-on").(type) {
+	case nil:
+	case slip.List:
+		sources = tdo
+	default:
 		slip.PanicType("depends-on", self.Get("depends-on"), "list")
 	}
 	if 0 < len(sources) {
@@ -103,8 +107,8 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 			panic(err)
 		}
 		for _, src := range sources {
-			var ll slip.List
-			if ll, ok = src.(slip.List); !ok || len(ll) < 3 {
+			ll, ok := src.(slip.List)
+			if !ok || len(ll) < 3 {
 				slip.PanicType("source", src, "list")
 			}
 			dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
@@ -142,14 +146,18 @@ type systemLoadCaller struct{}
 
 func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	sources, ok := self.Get("depends-on").(slip.List)
-	if !ok {
+	var sources slip.List
+	switch tdo := self.Get("depends-on").(type) {
+	case nil:
+	case slip.List:
+		sources = tdo
+	default:
 		slip.PanicType("depends-on", self.Get("depends-on"), "list")
 	}
 	cache := getStringVar(self, "cache", "cache")
 	for _, src := range sources {
-		var ll slip.List
-		if ll, ok = src.(slip.List); !ok || len(ll) < 3 {
+		ll, ok := src.(slip.List)
+		if !ok || len(ll) < 3 {
 			slip.PanicType("source", src, "list")
 		}
 		dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
@@ -171,30 +179,24 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	gc := self.Get("components")
 	if gc != nil {
 		var components slip.List
-		if components, ok = gc.(slip.List); !ok {
+		components, ok := gc.(slip.List)
+		if !ok {
 			slip.PanicType("components", gc, "list")
 		}
-		defer func() {
-			self.Set(slip.Symbol("*load-pathname*"), nil)
-			self.Set(slip.Symbol("*load-truename*"), nil)
-		}()
 		for _, comp := range components {
 			var path slip.String
 			if path, ok = comp.(slip.String); !ok {
 				slip.PanicType("component", comp, "string")
 			}
 			matches, _ := filepath.Glob(string(path))
-			// TBD if matches is empty then error
-			for _, m := range matches {
-				self.Set(slip.Symbol("*load-pathname*"), slip.String(m))
-				self.Set(slip.Symbol("*load-truename*"), slip.String(m))
-				if buf, err := os.ReadFile(m); err == nil {
-					code := slip.Read(buf)
-					code.Compile()
-					code.Eval(&self.Scope, nil)
-				} else {
-					panic(err)
+			if len(matches) == 0 {
+				matches, _ = filepath.Glob(string(path) + ".lisp")
+				if len(matches) == 0 {
+					slip.NewPanic("%s not found.", path)
 				}
+			}
+			for _, m := range matches {
+				loadFile(self, m)
 			}
 		}
 	}
@@ -348,8 +350,24 @@ func fetchCall(self *flavors.Instance, dir string, args slip.List) {
 }
 
 func loadFiles(self *flavors.Instance, dir string, args slip.List) {
-	// TBD
-	//  :file loads listed files in order, if a dir then any order
+	for _, arg := range args[1:] {
+		path := slip.MustBeString(arg, "filepath")
+		src := filepath.Join(dir, path)
+		if fi, err := os.Stat(src); err != nil {
+			path += ".lisp"
+			src = filepath.Join(dir, path)
+			if _, err = os.Stat(src); err != nil {
+				slip.NewPanic("%s not found.", src)
+			}
+		} else if fi.IsDir() {
+			matches, _ := filepath.Glob(src + "/*.lisp")
+			for _, m := range matches {
+				loadFile(self, m)
+			}
+			continue
+		}
+		loadFile(self, src)
+	}
 }
 
 func loadGit(self *flavors.Instance, dir string, args slip.List) {
@@ -370,6 +388,22 @@ func loadRequire(self *flavors.Instance, dir string, args slip.List) {
 func loadCall(self *flavors.Instance, dir string, args slip.List) {
 	// TBD
 	//  :call - call load-function
+}
+
+func loadFile(self *flavors.Instance, path string) {
+	defer func() {
+		self.Set(slip.Symbol("*load-pathname*"), nil)
+		self.Set(slip.Symbol("*load-truename*"), nil)
+	}()
+	self.Set(slip.Symbol("*load-pathname*"), slip.String(path))
+	self.Set(slip.Symbol("*load-truename*"), slip.String(path))
+	if buf, err := os.ReadFile(path); err == nil {
+		code := slip.Read(buf)
+		code.Compile()
+		code.Eval(&self.Scope, nil)
+	} else {
+		panic(err)
+	}
 }
 
 func mvGitScratchToCache(dir, scratch, subdir string) {
