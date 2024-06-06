@@ -411,8 +411,16 @@ func loadRequire(self *flavors.Instance, dir string, args slip.List) {
 }
 
 func loadCall(self *flavors.Instance, dir string, args slip.List) {
-	// TBD
-	//  :call - call load-function
+	switch ta := args[1].(type) {
+	case nil:
+		// nothing to do
+	case slip.List:
+		scope := self.NewScope()
+		scope.Set("cache-dir", slip.String(dir))
+		_ = slip.CompileList(ta).Eval(scope, 0)
+	default:
+		slip.PanicType("load-function", args, "list")
+	}
 }
 
 func loadFile(self *flavors.Instance, path string) {

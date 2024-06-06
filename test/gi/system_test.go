@@ -302,7 +302,7 @@ func TestSystemFetchGitUnknown(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSystemFetchCall(t *testing.T) {
+func TestSystemCall(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -315,8 +315,10 @@ func TestSystemFetchCall(t *testing.T) {
                                             :direction :output
                                             :if-does-not-exist :create
                                             :if-exists :supersede)
-                                           (format f "(setq author ~S)~%" author)))))))
-  (send sys :fetch))
+                                           (format f "(setq aaa ~S)~%" author))
+                                          (load (join "/" cache-dir "author.lisp")))))))
+  (send sys :fetch)
+  (send sys :load))
 `,
 		Expect: `nil`,
 	}).Test(t)
@@ -325,8 +327,11 @@ func TestSystemFetchCall(t *testing.T) {
 	var content []byte
 	content, err = os.ReadFile("testout/quux/author.lisp")
 	tt.Nil(t, err)
-	tt.Equal(t, `(setq author "peter@ohler.com")
+	tt.Equal(t, `(setq aaa "peter@ohler.com")
 `, string(content))
+
+	result := slip.ReadString("aaa").Eval(slip.NewScope(), nil)
+	tt.Equal(t, slip.String("peter@ohler.com"), result)
 
 	(&sliptest.Function{
 		Source: `
