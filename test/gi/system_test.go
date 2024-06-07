@@ -48,6 +48,17 @@ func TestSystemFile(t *testing.T) {
 `,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :file "testdata" "nothing")))))
+  (send sys :load))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
 }
 
 func TestSystemCompLoadNotFound(t *testing.T) {
@@ -209,6 +220,22 @@ func TestSystemGitBranch(t *testing.T) {
                       :cache "testout"
                       :depends-on '((sst :git
                                          "https://github.com/ohler55/slip-system-test"
+                                         :branch "develop"
+                                         :scratch ".scratch"
+                                         :files t
+                                         :sub-dir "lisp")))))
+  (send sys :load))
+`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((sst :git
+                                         "https://github.com/ohler55/slip-system-test"
                                          :branch "xxxx"
                                          :scratch ".scratch")))))
   (send sys :fetch))
@@ -343,6 +370,17 @@ func TestSystemCall(t *testing.T) {
 `,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :call nil t)))))
+  (send sys :load))
+`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }
 
 func TestSystemDescribe(t *testing.T) {
@@ -445,7 +483,7 @@ func TestSystemFetchCpFail(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSystemFetchUnknown(t *testing.T) {
+func TestSystemUnknown(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -453,6 +491,17 @@ func TestSystemFetchUnknown(t *testing.T) {
                       :cache "testout"
                       :depends-on '((quux :bad t)))))
   (send sys :fetch))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :bad t)))))
+  (send sys :load))
 `,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
