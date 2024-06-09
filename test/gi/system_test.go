@@ -506,3 +506,20 @@ func TestSystemUnknown(t *testing.T) {
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
+
+func TestSystemRun(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :components '("testdata/comp")
+                      :depends-on '((quux :file "testdata" "sys-test" "sub"))
+                      :in-order-to '((:sample (+ (sys-test) six)) (:just-eval 3)))))
+  (send sys :fetch)
+  (send sys :load)
+  (list (send sys :run :just-eval) (send sys :run :sample :six 6)))
+`,
+		Expect: `(3 13)`,
+	}).Test(t)
+}

@@ -212,11 +212,42 @@ Loads all sources specified in the the :depends-on variable.
 
 type systemRunCaller struct{}
 
-func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	// TBD get op
-	// setup like :call
-	// eval op with self
-	return nil
+func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	self := s.Get("self").(*flavors.Instance)
+	slip.ArgCountCheck(self, args, 1, -1)
+	iot, ok := self.Get("in-order-to").(slip.List)
+	if !ok {
+		slip.PanicType("in-order-to", self.Get("in-order-to"), "list")
+	}
+	var op slip.Object
+	for _, v := range iot {
+		var list slip.List
+		if list, ok = v.(slip.List); ok && 1 < len(list) && list[0] == args[0] {
+			op = list[1]
+			break
+		}
+	}
+	scope := self.NewScope()
+	for i := 1; i < len(args); i += 2 {
+		var key slip.Symbol
+		if key, ok = args[i].(slip.Symbol); !ok || len(key) < 2 || key[0] != ':' {
+			slip.PanicType("in-order-to key/values", args[i], "keyword")
+		}
+		if i+1 < len(args) {
+			scope.Set(key[1:], args[i+1])
+		} else {
+			scope.Set(key[1:], nil)
+		}
+	}
+	switch to := op.(type) {
+	case nil:
+		// nothing to do
+	case slip.List:
+		result = slip.CompileList(to).Eval(scope, 0)
+	default:
+		result = to.Eval(scope, 0)
+	}
+	return
 }
 
 func (caller systemRunCaller) Docs() string {
