@@ -507,7 +507,7 @@ func TestSystemUnknown(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSystemRun(t *testing.T) {
+func TestSystemRunOk(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -518,8 +518,25 @@ func TestSystemRun(t *testing.T) {
                       :in-order-to '((:sample (+ (sys-test) six)) (:just-eval 3)))))
   (send sys :fetch)
   (send sys :load)
-  (list (send sys :run :just-eval) (send sys :run :sample :six 6)))
+  (list (send sys :run :just-eval) (send sys :run :sample :six 6 :nothing)))
 `,
 		Expect: `(3 13)`,
+	}).Test(t)
+}
+
+func TestSystemRunBadInOrderTo(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys (make-instance 'system :in-order-to t)))
+  (send sys :run :sample))
+`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `
+	(let ((sys (make-instance 'system :in-order-to '((:quux 31)))))
+	  (send sys :run :quux 'x 3))
+	`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
