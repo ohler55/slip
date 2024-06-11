@@ -21,7 +21,7 @@ func TestSystemFile(t *testing.T) {
        (make-instance 'system
                       :cache "testout"
                       :components '("testdata/comp")
-                      :depends-on '((quux :file "testdata" "sys-test" "sub")))))
+                      :depends-on '((quux :file "testdata" :files ("sys-test" "sub"))))))
   (send sys :fetch)
   (send sys :load))
 `,
@@ -43,7 +43,7 @@ func TestSystemFile(t *testing.T) {
 (let ((sys
        (make-instance 'system
                       :cache "testout"
-                      :depends-on '((quux :file "testdata" "nothing")))))
+                      :depends-on '((quux :file "testdata" :files ("nothing"))))))
   (send sys :fetch))
 `,
 		PanicType: slip.ErrorSymbol,
@@ -54,7 +54,7 @@ func TestSystemFile(t *testing.T) {
 (let ((sys
        (make-instance 'system
                       :cache "testout"
-                      :depends-on '((quux :file "testdata" "nothing")))))
+                      :depends-on '((quux :file "testdata" :files ("nothing"))))))
   (send sys :load))
 `,
 		PanicType: slip.ErrorSymbol,
@@ -430,7 +430,7 @@ func TestSystemFetchBadCache(t *testing.T) {
 (let ((sys
        (make-instance 'system
                       :cache t
-                      :depends-on '((quux :file "testdata" "sys-test")))))
+                      :depends-on '((quux :file "testdata" :files ("sys-test"))))))
   (send sys :fetch))
 `,
 		PanicType: slip.TypeErrorSymbol,
@@ -443,24 +443,7 @@ func TestSystemFetchMkdirFail(t *testing.T) {
 (let ((sys
        (make-instance 'system
                       :cache "Makefile"
-                      :depends-on '((quux :file "testdata" "sys-test")))))
-  (send sys :fetch))
-`,
-		PanicType: slip.ErrorSymbol,
-	}).Test(t)
-}
-
-func TestSystemFetchMkdirFail2(t *testing.T) {
-	_ = os.MkdirAll("testout", 0755)
-	_ = os.WriteFile("testout/blocker", []byte("test"), 0666)
-	defer func() { _ = os.RemoveAll("testout/blocker") }()
-
-	(&sliptest.Function{
-		Source: `
-(let ((sys
-       (make-instance 'system
-                      :cache "testout"
-                      :depends-on '((blocker :file "testdata" "sys-test")))))
+                      :depends-on '((quux :file "testdata" :files ("sys-test"))))))
   (send sys :fetch))
 `,
 		PanicType: slip.ErrorSymbol,
@@ -476,7 +459,7 @@ func TestSystemFetchCpFail(t *testing.T) {
 (let ((sys
        (make-instance 'system
                       :cache "testout"
-                      :depends-on '((quux :file "testdata" "no-read")))))
+                      :depends-on '((quux :file "testdata" :files ("no-read"))))))
   (send sys :fetch))
 `,
 		PanicType: slip.ErrorSymbol,
@@ -514,7 +497,7 @@ func TestSystemRunOk(t *testing.T) {
        (make-instance 'system
                       :cache "testout"
                       :components '("testdata/comp")
-                      :depends-on '((quux :file "testdata" "sys-test" "sub"))
+                      :depends-on '((quux :file "testdata" :files ("sys-test" "sub")))
                       :in-order-to '((:sample (+ (sys-test) six)) (:just-eval 3)))))
   (send sys :fetch)
   (send sys :load)

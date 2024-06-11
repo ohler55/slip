@@ -75,7 +75,7 @@ method to cache sources and then invoke one of the operations defined in the
 imported into the system cache. The elements of the :depends-on are lists that start with a
 source name then a type keyword and are followed by a lambda list. The supported source
 keywords with lambda list descriptions are:
-   __:file__ root filepath*
+   __:file__ root &key files system
    __:git__ url &key branch tag commit sub-dir scratch files system
    __:system__ filepath
    __:require__ package-name load-path
@@ -112,6 +112,7 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 				slip.PanicType("source", src, "list")
 			}
 			dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
+			_ = os.RemoveAll(dir)
 			if err := os.MkdirAll(dir, 0755); err != nil {
 				panic(err)
 			}
@@ -275,24 +276,31 @@ func getStringVar(self *flavors.Instance, key, defVal string) (sval string) {
 
 func fetchFiles(self *flavors.Instance, dir string, args slip.List) {
 	root := slip.MustBeString(args[0], "root")
-	for _, arg := range args[1:] {
-		path := slip.MustBeString(arg, "filepath")
-		src := filepath.Join(root, path)
-		dest := filepath.Join(dir, path)
-		_, err := os.Stat(src)
-		if err != nil {
-			path += ".lisp"
-			src = filepath.Join(root, path)
-			dest = filepath.Join(dir, path)
-			if _, err = os.Stat(src); err != nil {
-				slip.NewPanic("%s not found.", src)
+	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":files")); has {
+		files, ok := val.(slip.List)
+		if !ok {
+			slip.PanicType(":files", val, "list")
+		}
+		for _, v := range files {
+			path := slip.MustBeString(v, "file")
+			src := filepath.Join(root, path)
+			dest := filepath.Join(dir, path)
+			_, err := os.Stat(src)
+			if err != nil {
+				path += ".lisp"
+				src = filepath.Join(root, path)
+				dest = filepath.Join(dir, path)
+				if _, err = os.Stat(src); err != nil {
+					slip.NewPanic("%s not found.", src)
+				}
+			}
+			if err := exec.Command("cp", "-r", src, dest).Run(); err != nil {
+				slip.NewPanic("Failed to copy %s to %s. %s\n", src, dest, err)
 			}
 		}
-		_ = os.RemoveAll(dest)
-		if err := exec.Command("cp", "-r", src, dest).Run(); err != nil {
-			slip.NewPanic("Failed to copy %s to %s. %s\n", src, dest, err)
-		}
+		return
 	}
+	// TBD copy whole dir
 }
 
 func fetchGit(self *flavors.Instance, dir string, args slip.List) {
@@ -381,7 +389,15 @@ func fetchCall(self *flavors.Instance, dir string, args slip.List) {
 }
 
 func loadFiles(self *flavors.Instance, dir string, args slip.List) {
-	loadFileList(self, dir, args[1:])
+	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":files")); has {
+		files, ok := val.(slip.List)
+		if !ok {
+			slip.PanicType(":files", val, "list")
+		}
+		loadFileList(self, dir, files)
+	} else {
+		loadFileList(self, dir, slip.List{slip.String(".")})
+	}
 }
 
 func loadFileList(self *flavors.Instance, dir string, files slip.List) {
