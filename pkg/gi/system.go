@@ -3,9 +3,11 @@
 package gi
 
 import (
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -113,9 +115,7 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 			}
 			dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
 			_ = os.RemoveAll(dir)
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				panic(err)
-			}
+			_ = os.MkdirAll(dir, 0755) // ignore error and let later failures catch it
 			switch ll[1] {
 			case slip.Symbol(":file"):
 				fetchFiles(self, dir, ll[2:])
@@ -163,10 +163,8 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		}
 		dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
 		switch ll[1] {
-		case slip.Symbol(":file"):
+		case slip.Symbol(":file"), slip.Symbol(":git"):
 			loadFiles(self, dir, ll[2:])
-		case slip.Symbol(":git"):
-			loadGit(self, dir, ll[2:])
 		case slip.Symbol(":system"):
 			loadSystem(self, dir, ll[2:])
 		case slip.Symbol(":require"):
@@ -389,39 +387,6 @@ func fetchCall(self *flavors.Instance, dir string, args slip.List) {
 }
 
 func loadFiles(self *flavors.Instance, dir string, args slip.List) {
-	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":files")); has {
-		files, ok := val.(slip.List)
-		if !ok {
-			slip.PanicType(":files", val, "list")
-		}
-		loadFileList(self, dir, files)
-	} else {
-		loadFileList(self, dir, slip.List{slip.String(".")})
-	}
-}
-
-func loadFileList(self *flavors.Instance, dir string, files slip.List) {
-	for _, arg := range files {
-		path := slip.MustBeString(arg, "filepath")
-		src := filepath.Join(dir, path)
-		if fi, err := os.Stat(src); err != nil {
-			path += ".lisp"
-			src = filepath.Join(dir, path)
-			if _, err = os.Stat(src); err != nil {
-				slip.NewPanic("%s not found.", src)
-			}
-		} else if fi.IsDir() {
-			matches, _ := filepath.Glob(src + "/*.lisp")
-			for _, m := range matches {
-				loadFile(self, m)
-			}
-			continue
-		}
-		loadFile(self, src)
-	}
-}
-
-func loadGit(self *flavors.Instance, dir string, args slip.List) {
 	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":system")); has {
 		subsys := slip.MustBeString(val, ":system")
 		loadSystemFile(self, filepath.Join(dir, subsys))
@@ -432,13 +397,34 @@ func loadGit(self *flavors.Instance, dir string, args slip.List) {
 		if !ok {
 			slip.PanicType(":files", val, "list")
 		}
-		loadFileList(self, dir, files)
+		for _, arg := range files {
+			path := slip.MustBeString(arg, "filepath")
+			src := filepath.Join(dir, path)
+
+			if fi, err := os.Stat(src); err != nil {
+				path += ".lisp"
+				src = filepath.Join(dir, path)
+				if _, err = os.Stat(src); err != nil {
+					slip.NewPanic("%s not found.", src)
+				}
+			} else if fi.IsDir() {
+				loadDir(self, src)
+				continue
+			}
+			loadFile(self, src)
+		}
 		return
 	}
-	matches, _ := filepath.Glob(dir + "/*.lisp")
-	for _, m := range matches {
-		loadFile(self, m)
-	}
+	loadDir(self, dir)
+}
+
+func loadDir(self *flavors.Instance, dir string) {
+	_ = filepath.Walk(dir, func(path string, fi fs.FileInfo, err error) error {
+		if fi != nil && fi.Mode().IsRegular() && strings.HasSuffix(path, ".lisp") {
+			loadFile(self, path)
+		}
+		return nil
+	})
 }
 
 func loadSystem(self *flavors.Instance, dir string, args slip.List) {

@@ -54,10 +54,10 @@ func TestSystemFile(t *testing.T) {
 (let ((sys
        (make-instance 'system
                       :cache "testout"
-                      :depends-on '((quux :file "testdata" :files ("nothing"))))))
-  (send sys :load))
+                      :depends-on '((quux :file "testdata" :files t)))))
+  (send sys :fetch))
 `,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
@@ -68,6 +68,19 @@ func TestSystemCompLoadNotFound(t *testing.T) {
        (make-instance 'system
                       :cache "testout"
                       :components '("testdata/nothing"))))
+  (send sys :load))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemLoadNotFound(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :file "testdata" :files ("nothing"))))))
   (send sys :load))
 `,
 		PanicType: slip.ErrorSymbol,
@@ -438,11 +451,13 @@ func TestSystemFetchBadCache(t *testing.T) {
 }
 
 func TestSystemFetchMkdirFail(t *testing.T) {
+	_ = os.MkdirAll("testout", 0755)
+	_ = os.WriteFile("testout/not-dir", []byte("test"), 0333)
 	(&sliptest.Function{
 		Source: `
 (let ((sys
        (make-instance 'system
-                      :cache "Makefile"
+                      :cache "testout/not-dir"
                       :depends-on '((quux :file "testdata" :files ("sys-test"))))))
   (send sys :fetch))
 `,
