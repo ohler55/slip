@@ -538,3 +538,52 @@ func TestSystemRunBadInOrderTo(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestSystemRequire(t *testing.T) {
+	scope := slip.NewScope()
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :require "testplugin.so" "../cl/testplugin")))))
+  (send sys :fetch)
+  (send sys :load)
+)
+`,
+		Expect: `nil`,
+	}).Test(t)
+	_, err := os.Stat("testout/quux/testplugin.so")
+	tt.Nil(t, err)
+
+	result := slip.ReadString("(plug)").Eval(scope, nil)
+	tt.Equal(t, slip.String("Plugged it"), result)
+}
+
+func TestSystemRequireBadFetch(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :require "nothing" "testdata")))))
+  (send sys :fetch)
+)
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSystemRequireBadLoad(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :require "nothing" "testdata")))))
+  (send sys :load)
+)
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"plugin"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -367,10 +368,11 @@ func fetchSystem(self *flavors.Instance, dir string, args slip.List) {
 }
 
 func fetchRequire(self *flavors.Instance, dir string, args slip.List) {
-	// TBD maybe a package directory in the cache or just put in cache/source-name
-	// same as file copy otherwise
-	// use common package load path - packages
-	// test with copy of cl testplugin
+	slip.ArgCountCheck(self, args, 2, 2)
+	path := filepath.Join(slip.MustBeString(args[1], "load-path"), slip.MustBeString(args[0], "package-name"))
+	if err := exec.Command("cp", path, dir).Run(); err != nil {
+		slip.NewPanic("Failed to copy %s to %s. %s\n", path, dir, err)
+	}
 }
 
 func fetchCall(self *flavors.Instance, dir string, args slip.List) {
@@ -439,8 +441,11 @@ func loadSystemFile(self *flavors.Instance, path string) {
 }
 
 func loadRequire(self *flavors.Instance, dir string, args slip.List) {
-	// TBD
-	//  :require - look in cache/packages and then require from there
+	slip.ArgCountCheck(self, args, 2, 2)
+	path := filepath.Join(dir, slip.MustBeString(args[0], "package-name"))
+	if _, err := plugin.Open(path); err != nil {
+		slip.NewPanic("plugin %s open failed. %s", path, err)
+	}
 }
 
 func loadCall(self *flavors.Instance, dir string, args slip.List) {
