@@ -59,18 +59,6 @@ func TestSystemFile(t *testing.T) {
 `,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
-
-	(&sliptest.Function{
-		Source: `
-(let ((sys
-       (make-instance 'system
-                      :cache "testout"
-                      :depends-on '((quux :file "testdata/nothing")))))
-  (send sys :fetch))
-`,
-		PanicType: slip.ErrorSymbol,
-	}).Test(t)
-
 }
 
 func TestSystemCompLoadNotFound(t *testing.T) {
@@ -487,6 +475,17 @@ func TestSystemFetchCpFail(t *testing.T) {
        (make-instance 'system
                       :cache "testout"
                       :depends-on '((quux :file "testdata" :files ("no-read"))))))
+  (send sys :fetch))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :file "testdata")))))
   (send sys :fetch))
 `,
 		PanicType: slip.ErrorSymbol,
