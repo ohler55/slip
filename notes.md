@@ -12,6 +12,7 @@
 
  - gi package
   - defsystem returns a system instance, can also use make-instance
+   - args - name &key ...
 
  - block-comment branch
   - block comments #|  |#
@@ -43,23 +44,6 @@
     - is a byte size needed?
      - maybe not since no memory is allocated explicitly
     - instances?
-
-- system branch
- - system (like ASDF)
-  - defsystem
-   - https://lisp-lang.org/learn/writing-libraries
-   - https://asdf.common-lisp.dev/
-  - types/flavors
-   - system
-    - :load
-    - :install or :cache or :prepare
-    - in gi package?
-   - source (maybe not needed if source spec is clear)
-    - file
-    - git (tag or branch)
-
-  - support a config file with a source or source-registry path
-  - how about allowing .asdf files?
 
  - net package
   - implement sbcl networking or something closer to golang?

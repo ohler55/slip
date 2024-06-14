@@ -294,11 +294,11 @@ func fetchFiles(self *flavors.Instance, dir string, args slip.List) {
 		}
 		return
 	}
-	if 1 < len(root) && root[len(root)-1] != '/' {
-		root += "/"
-	}
-	if err := exec.Command("cp", "-r", root, dir).Run(); err != nil {
-		slip.NewPanic("Failed to copy %s to %s. %s\n", root, dir, err)
+	matches, _ := filepath.Glob(root + "/*")
+	for _, m := range matches {
+		if err := exec.Command("cp", "-r", m, dir).Run(); err != nil {
+			slip.NewPanic("Failed to copy %s to %s. %s\n", m, dir, err)
+		}
 	}
 }
 
