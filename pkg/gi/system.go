@@ -80,7 +80,6 @@ source name then a type keyword and are followed by a lambda list. The supported
 keywords with lambda list descriptions are:
    __:file__ root &key files system
    __:git__ url &key branch tag commit sub-dir scratch files system
-   __:system__ filepath
    __:require__ package-name load-path
    __:call__ fetch-function load-function
 `)
@@ -122,8 +121,6 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 				fetchFiles(self, dir, ll[2:])
 			case slip.Symbol(":git"):
 				fetchGit(self, dir, ll[2:])
-			case slip.Symbol(":system"):
-				fetchSystem(self, dir, ll[2:])
 			case slip.Symbol(":require"):
 				fetchRequire(self, dir, ll[2:])
 			case slip.Symbol(":call"):
@@ -166,8 +163,6 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		switch ll[1] {
 		case slip.Symbol(":file"), slip.Symbol(":git"):
 			loadFiles(self, dir, ll[2:])
-		case slip.Symbol(":system"):
-			loadSystem(self, dir, ll[2:])
 		case slip.Symbol(":require"):
 			loadRequire(self, dir, ll[2:])
 		case slip.Symbol(":call"):
@@ -299,7 +294,12 @@ func fetchFiles(self *flavors.Instance, dir string, args slip.List) {
 		}
 		return
 	}
-	// TBD copy whole dir
+	if 1 < len(root) && root[len(root)-1] != '/' {
+		root = root + "/"
+	}
+	if err := exec.Command("cp", "-r", root, dir).Run(); err != nil {
+		slip.NewPanic("Failed to copy %s to %s. %s\n", root, dir, err)
+	}
 }
 
 func fetchGit(self *flavors.Instance, dir string, args slip.List) {
@@ -361,12 +361,6 @@ func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch
 	mvGitScratchToCache(dir, scratch, subdir)
 }
 
-func fetchSystem(self *flavors.Instance, dir string, args slip.List) {
-	// TBD path to system and copy
-	// tell sub-sys to fetch
-	// on load tell system to load
-}
-
 func fetchRequire(self *flavors.Instance, dir string, args slip.List) {
 	slip.ArgCountCheck(self, args, 2, 2)
 	path := filepath.Join(slip.MustBeString(args[1], "load-path"), slip.MustBeString(args[0], "package-name"))
@@ -391,7 +385,7 @@ func fetchCall(self *flavors.Instance, dir string, args slip.List) {
 func loadFiles(self *flavors.Instance, dir string, args slip.List) {
 	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":system")); has {
 		subsys := slip.MustBeString(val, ":system")
-		loadSystemFile(self, filepath.Join(dir, subsys))
+		loadSystemFile(self, dir, filepath.Join(dir, subsys))
 		return
 	}
 	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":files")); has {
@@ -429,15 +423,17 @@ func loadDir(self *flavors.Instance, dir string) {
 	})
 }
 
-func loadSystem(self *flavors.Instance, dir string, args slip.List) {
-	path := slip.MustBeString(args[0], "filepath")
-	loadSystemFile(self, filepath.Join(dir, path))
-}
-
-func loadSystemFile(self *flavors.Instance, path string) {
-	// TBD
-	// load file then send result :load
-	//  must return an instance
+func loadSystemFile(self *flavors.Instance, dir, path string) {
+	sys, ok := loadFile(self, path).(slip.Instance)
+	if !ok {
+		slip.PanicType("system", sys, "instance")
+	}
+	wd, _ := os.Getwd()
+	defer func() { _ = os.Chdir(wd) }()
+	_ = os.Chdir(dir)
+	scope := self.NewScope()
+	sys.Receive(scope, ":fetch", nil, 0)
+	sys.Receive(scope, ":load", nil, 0)
 }
 
 func loadRequire(self *flavors.Instance, dir string, args slip.List) {
@@ -461,7 +457,7 @@ func loadCall(self *flavors.Instance, dir string, args slip.List) {
 	}
 }
 
-func loadFile(self *flavors.Instance, path string) {
+func loadFile(self *flavors.Instance, path string) (result slip.Object) {
 	defer func() {
 		self.Set(slip.Symbol("*load-pathname*"), nil)
 		self.Set(slip.Symbol("*load-truename*"), nil)
@@ -471,10 +467,11 @@ func loadFile(self *flavors.Instance, path string) {
 	if buf, err := os.ReadFile(path); err == nil {
 		code := slip.Read(buf)
 		code.Compile()
-		code.Eval(&self.Scope, nil)
+		result = code.Eval(&self.Scope, nil)
 	} else {
 		panic(err)
 	}
+	return
 }
 
 func mvGitScratchToCache(dir, scratch, subdir string) {

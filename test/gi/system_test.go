@@ -587,3 +587,21 @@ func TestSystemRequireBadLoad(t *testing.T) {
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
+
+func TestSystemSystem(t *testing.T) {
+	scope := slip.NewScope()
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :file "testdata/sister" :system "system.lisp")))))
+  (send sys :fetch)
+  (send sys :load)
+)
+`,
+		Expect: `nil`,
+	}).Test(t)
+	result := slip.ReadString("(sister)").Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(2), result)
+}
