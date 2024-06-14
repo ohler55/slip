@@ -481,8 +481,6 @@ func mvGitScratchToCache(dir, scratch, subdir string) {
 	if 0 < len(subdir) {
 		src = filepath.Join(src, subdir)
 	}
-	if err := exec.Command("mv", src, dir).Run(); err != nil {
-		slip.NewPanic("Failed to move %s to %s. %s\n", src, dir, err)
-	}
+	_ = exec.Command("mv", src, dir).Run()
 	_ = os.RemoveAll(scratch) // cleanup
 }

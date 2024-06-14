@@ -12,18 +12,37 @@
 
  - gi package
   - defsystem returns a system instance, can also use make-instance
-  - system - flavor
-    - :in-order-to has the same purpose but is slightly different
-    - has pre-defined operations
-     - :fetch to fetch depends-on and place them in the cache
-     - :load
-     - :run &key * - maybe or just default handler
-      - use this instead of :test or others, easier
-      - if a default-handler then scope is system which is probably what we want if adding key-values
-      - if :run then scope does not include system which is probably okay
 
  - block-comment branch
   - block comments #|  |#
+
+ - fast save and load
+  - as lisp with fastest print options (save (object &optional stream))
+   -  Printer{
+		ANSI:        false,
+		Array:       false,
+		Base:        10,
+		Case:        downcaseKey,
+		Circle:      false,
+		Escape:      true,
+		Gensym:      true,
+		Lambda:      true,
+		Length:      math.MaxInt,
+		Level:       math.MaxInt,
+		Lines:       math.MaxInt,
+		Prec:        -1,
+		MiserWidth:  0,
+		Pretty:      false,
+		Radix:       false,
+		Readably:    false,
+		RightMargin: 0,
+	}
+
+  - as binary
+   - encode all types as type, length, data
+    - is a byte size needed?
+     - maybe not since no memory is allocated explicitly
+    - instances?
 
 - system branch
  - system (like ASDF)

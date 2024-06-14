@@ -59,6 +59,18 @@ func TestSystemFile(t *testing.T) {
 `,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :file "testdata/nothing")))))
+  (send sys :fetch))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+
 }
 
 func TestSystemCompLoadNotFound(t *testing.T) {
@@ -481,6 +493,22 @@ func TestSystemFetchCpFail(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSystemLoadFileFail(t *testing.T) {
+	_ = os.WriteFile("testdata/no-read.lisp", []byte("test"), 0333)
+	defer func() { _ = os.RemoveAll("testdata/no-read.lisp") }()
+
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :components '("testdata/no-read"))))
+  (send sys :load))
+`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
 func TestSystemUnknown(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
@@ -604,4 +632,19 @@ func TestSystemSystem(t *testing.T) {
 	}).Test(t)
 	result := slip.ReadString("(sister)").Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(2), result)
+}
+
+func TestSystemSystemNotInstance(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((sys
+       (make-instance 'system
+                      :cache "testout"
+                      :depends-on '((quux :file "testdata/sister" :system "sister.lisp")))))
+  (send sys :fetch)
+  (send sys :load)
+)
+`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }
