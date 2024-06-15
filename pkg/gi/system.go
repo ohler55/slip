@@ -14,6 +14,26 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
+const (
+	systemCacheDoc      = "Filepath to the import cache."
+	systemComponentsDoc = "An ordered list of the files to load for the system."
+	systemDependsOnDoc  = `The sources this system depends on. The entries listed are
+imported into the system cache. The elements of the :depends-on are lists that start with a
+source name then a type keyword and are followed by a lambda list. The supported source
+keywords with lambda list descriptions are:
+   __:file__ root &key files system
+   __:git__ url &key branch tag commit sub-dir scratch files system
+   __:require__ package-name load-path
+   __:call__ fetch-function load-function
+`
+	systemInOrderToDoc = `The system can perform operations once the code has been
+loaded. Those operations are described in the :in-order-to variable which is a list of lists.
+Each list element starts with an operation name such as :test and is followed by the function
+to invoke to implement that operation. When system :run is called with key values those keys
+are bound to the values and are available to the function being called.
+`
+)
+
 var system *flavors.Flavor
 
 func defSystem() {
@@ -72,23 +92,10 @@ method to cache sources and then invoke one of the operations defined in the
 	system.DefMethod(":load", "", systemLoadCaller{})
 	system.DefMethod(":run", "", systemRunCaller{})
 
-	system.Document("components", "An ordered list of the files to load for the system.")
-	system.Document("cache", "Filepath to the import cache.")
-	system.Document("depends-on", `The sources this system depends on. The entries listed are
-imported into the system cache. The elements of the :depends-on are lists that start with a
-source name then a type keyword and are followed by a lambda list. The supported source
-keywords with lambda list descriptions are:
-   __:file__ root &key files system
-   __:git__ url &key branch tag commit sub-dir scratch files system
-   __:require__ package-name load-path
-   __:call__ fetch-function load-function
-`)
-	system.Document("in-order-to", `The system can perform operations once the code has been
-loaded. Those operations are described in the :in-order-to variable which is a list of lists.
-Each list element starts with an operation name such as :test and is followed by the function
-to invoke to implement that operation. When system :run is called with key values those keys
-are bound to the values and are available to the function being called.
-`)
+	system.Document("components", systemComponentsDoc)
+	system.Document("cache", systemCacheDoc)
+	system.Document("depends-on", systemDependsOnDoc)
+	system.Document("in-order-to", systemInOrderToDoc)
 }
 
 type systemFetchCaller struct{}

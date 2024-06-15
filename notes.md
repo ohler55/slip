@@ -10,10 +10,6 @@
   - package-shadowing-symbols
   - shadowing-import
 
- - gi package
-  - defsystem returns a system instance, can also use make-instance
-   - args - name &key ...
-
  - block-comment branch
   - block comments #|  |#
 
@@ -38,7 +34,6 @@
 		Readably:    false,
 		RightMargin: 0,
 	}
-
   - as binary
    - encode all types as type, length, data
     - is a byte size needed?
