@@ -10,10 +10,26 @@
   - package-shadowing-symbols
   - shadowing-import
 
- - block-comment branch
-  - block comments #|  |#
+ - reader-speed
+  - block-comment branch
+   - block comments #|  |#
+  - gi:memstat () => assoc list of stats
+  - gi:gc - force a gc and wait with runtime.GC()
+  - cl:read
+   - change to use code read from stream
+    - add code func to read from stream Code.ReadInput or ReadStream or Load?
+     - load has different meaning in list so better to use ReadStream
 
  - fast save and load
+  - save (object filepath)
+   - try with stripped down Printer copy else just printer with options set
+  - make read or code.read support streams
+   - leave basically the same but for stream have a thread that fetchs a channel with next
+    - need a flag indicating not yet eof
+    - need to handle mid-object read, maybe with a temp buffer
+    - give the read buffer back to file reader for the next read (channel)
+    - use (room) to check memory
+
   - as lisp with fastest print options (save (object &optional stream))
    -  Printer{
 		ANSI:        false,
