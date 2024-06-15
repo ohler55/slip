@@ -10,29 +10,35 @@
   - package-shadowing-symbols
   - shadowing-import
 
- - gi package
-  - system
-  - source
-
  - block-comment branch
   - block comments #|  |#
 
-- system branch
- - system (like ASDF)
-  - defsystem
-   - https://lisp-lang.org/learn/writing-libraries
-   - https://asdf.common-lisp.dev/
-  - types/flavors
-   - system
-    - :load
-    - :install or :cache or :prepare
-    - in gi package?
-   - source (maybe not needed if source spec is clear)
-    - file
-    - git (tag or branch)
-
-  - support a config file with a source or source-registry path
-  - how about allowing .asdf files?
+ - fast save and load
+  - as lisp with fastest print options (save (object &optional stream))
+   -  Printer{
+		ANSI:        false,
+		Array:       false,
+		Base:        10,
+		Case:        downcaseKey,
+		Circle:      false,
+		Escape:      true,
+		Gensym:      true,
+		Lambda:      true,
+		Length:      math.MaxInt,
+		Level:       math.MaxInt,
+		Lines:       math.MaxInt,
+		Prec:        -1,
+		MiserWidth:  0,
+		Pretty:      false,
+		Radix:       false,
+		Readably:    false,
+		RightMargin: 0,
+	}
+  - as binary
+   - encode all types as type, length, data
+    - is a byte size needed?
+     - maybe not since no memory is allocated explicitly
+    - instances?
 
  - net package
   - implement sbcl networking or something closer to golang?

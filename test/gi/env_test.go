@@ -4,12 +4,20 @@ package gi_test
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/ohler55/slip/sliptest"
 )
 
 func TestEnv(t *testing.T) {
+	orig := os.Environ()
+	defer func() {
+		for _, ev := range orig {
+			parts := strings.Split(ev, "=")
+			os.Setenv(parts[0], parts[1])
+		}
+	}()
 	os.Clearenv()
 	os.Setenv("TEST_VAR", "something")
 	(&sliptest.Function{

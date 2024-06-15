@@ -17,6 +17,8 @@ var (
 )
 
 func init() {
+	defLogger()
+	defSystem()
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
 			"*gi*":             {Val: &Pkg, Doc: Pkg.Doc, Export: true},

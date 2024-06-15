@@ -124,6 +124,7 @@ func TestFlavorDescribeOptions(t *testing.T) {
 `)
 	scope := slip.NewScope()
 	_ = code.Eval(scope, nil)
+	_ = slip.ReadString(`(send (find-flavor 'abbey) :document 'x "x-axis")`).Eval(scope, nil)
 	f := slip.ReadString("abbey").Eval(scope, nil)
 
 	out := f.(*flavors.Flavor).Describe([]byte{}, 0, 80, false)
@@ -132,6 +133,7 @@ func TestFlavorDescribeOptions(t *testing.T) {
     an abstract
   Variables:
     x = 3 (initable)
+      x-axis
   Keywords with default values:
     :a = nil
     :b = nil
@@ -190,7 +192,7 @@ func TestFlavorReceive(t *testing.T) {
 }`, pretty.SEN((result.(*flavors.Instance)).Any))
 
 	result = slip.ReadString("(send blueberry :WHICH-OPERATIONS)").Eval(scope, nil)
-	tt.Equal(t, "(:describe :inspect :name :which-operations)", slip.ObjectString(result))
+	tt.Equal(t, "(:describe :document :inspect :name :which-operations)", slip.ObjectString(result))
 
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
@@ -220,4 +222,6 @@ func TestFlavorReceive(t *testing.T) {
 
 	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :describe t)").Eval(scope, nil) })
 	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :not-a-method)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(send blueberry :document 'x)`).Eval(scope, nil) })
+
 }

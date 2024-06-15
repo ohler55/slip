@@ -27,7 +27,7 @@ var colorCodes = []string{
 	"\x1b[35m",
 }
 
-func init() {
+func defLogger() {
 	Pkg.Initialize(nil)
 	logger = flavors.DefFlavor(
 		"logger-flavor",

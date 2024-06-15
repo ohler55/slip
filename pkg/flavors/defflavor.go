@@ -150,6 +150,7 @@ func DefFlavor(
 		defaultVars: vars,
 		keywords:    map[string]slip.Object{},
 		methods:     map[string][]*method{},
+		varDocs:     map[string]string{},
 		initable:    map[string]bool{},
 	}
 	for _, fname := range inherit {

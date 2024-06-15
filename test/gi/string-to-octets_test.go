@@ -20,8 +20,4 @@ func TestStringToOctetsBadArg(t *testing.T) {
 		Source: `(string-to-octets 2 )`,
 		Panics: true,
 	}).Test(t)
-	(&sliptest.Function{
-		Source: `(setenv)`,
-		Panics: true,
-	}).Test(t)
 }
