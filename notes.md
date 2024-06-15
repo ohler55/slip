@@ -11,10 +11,12 @@
   - shadowing-import
 
  - reader-speed
-  - block-comment branch
-   - block comments #|  |#
   - gi:memstat () => assoc list of stats
   - gi:gc - force a gc and wait with runtime.GC()
+  - Code.ReadStream(r io.Reader) (code Code)
+  - Code.ReadOneStream(r io.Reader) (code Code)
+  - block-comment branch
+   - block comments #|  |#
   - cl:read
    - change to use code read from stream
     - add code func to read from stream Code.ReadInput or ReadStream or Load?
