@@ -11,8 +11,6 @@
   - shadowing-import
 
  - reader-speed
-  - gi:memstat () => assoc list of stats
-  - gi:gc - force a gc and wait with runtime.GC()
   - Code.ReadStream(r io.Reader) (code Code)
   - Code.ReadOneStream(r io.Reader) (code Code)
   - block-comment branch
