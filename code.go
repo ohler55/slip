@@ -292,6 +292,37 @@ func ReadOne(src []byte) (code Code, pos int) {
 	return r.read(src), r.pos
 }
 
+// ReadStream reads LISP source code from a stream and return a Code instance.
+func ReadStream(r io.Reader) (code Code) {
+
+	// TBD first make reader re-entrant
+	//  if token in progress copy to pending a carry-over buf
+	//  pass in flag to read indicating more pending so don't panic if incomplete
+	//  or could handle panics after return if needed
+	//
+	// start with calls that pass in src, maybe also need carry-over buffer
+
+	// TBD temporary
+	buf, err := io.ReadAll(r)
+	if err != nil {
+		panic(err)
+	}
+	return (&reader{}).read(buf)
+}
+
+// ReadOneStream reads LISP source code from a stream and return a Code instance.
+func ReadOneStream(r io.Reader) (code Code, pos int) {
+	var cr reader
+	cr.one = true
+
+	// TBD temporary
+	buf, err := io.ReadAll(r)
+	if err != nil {
+		panic(err)
+	}
+	return cr.read(buf), cr.pos
+}
+
 // CompileString LISP string source code and return an Object.
 func CompileString(src string) Object {
 	return Compile([]byte(src))
@@ -544,6 +575,7 @@ func (r *reader) read(src []byte) Code {
 			return r.code
 		}
 	}
+	// TBD maybe move to separate function and call from .read called
 	r.pos++
 	switch mode {
 	case tokenMode:

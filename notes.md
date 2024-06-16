@@ -4,21 +4,17 @@
 
 - next
 
- - package-export
-  - import
-  - shadow
-  - package-shadowing-symbols
-  - shadowing-import
-
  - reader-speed
   - Code.ReadStream(r io.Reader) (code Code)
   - Code.ReadOneStream(r io.Reader) (code Code)
   - block-comment branch
    - block comments #|  |#
-  - cl:read
-   - change to use code read from stream
-    - add code func to read from stream Code.ReadInput or ReadStream or Load?
-     - load has different meaning in list so better to use ReadStream
+
+ - package-export
+  - import
+  - shadow
+  - package-shadowing-symbols
+  - shadowing-import
 
  - fast save and load
   - save (object filepath)
