@@ -267,12 +267,13 @@ type reader struct {
 	tokenStart int
 	stack      []Object
 	starts     []int
+	carry      []byte // carry over from previous stream read
 	line       int
 	lineStart  int
 	pos        int
+	code       Code
 	one        bool
-
-	code Code
+	more       bool // more to read
 }
 
 // ReadString reads LISP source code and return a Code instance.
@@ -731,6 +732,7 @@ func (r *reader) pushToken(src []byte) {
 		obj = True
 		goto Push
 	}
+	// TBD create token from r.carry and src
 	token = src[r.tokenStart:r.pos]
 	if size == 3 && bytes.EqualFold([]byte("nil"), token) {
 		obj = nil
