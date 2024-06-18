@@ -265,13 +265,21 @@ type Code []Object
 
 type reader struct {
 	tokenStart int
+	mode       string
+	nextMode   string
 	stack      []Object
 	starts     []int
 	carry      []byte // carry over from previous stream read
+	buf        []byte
 	line       int
 	lineStart  int
 	pos        int
+	base       int
+	sharpNum   int
 	code       Code
+	rb         []byte
+	rn         rune
+	rcnt       int
 	one        bool
 	more       bool // more to read
 }
@@ -339,42 +347,38 @@ func Compile(src []byte) (result Object) {
 	return
 }
 
-func (r *reader) read(src []byte) Code {
-	mode := valueMode
-	nextMode := valueMode
-	var (
-		b        byte
-		buf      []byte
-		rb       []byte
-		rn       rune
-		rcnt     int
-		base     int
-		sharpNum int
-	)
-	runeAppendByte := func(r byte) {
-		rn = rn<<4 | rune(r)
-		rcnt--
-		if rcnt == 0 {
-			if len(rb) < 8 {
-				rb = make([]byte, 8)
-			}
-			n := utf8.EncodeRune(rb, rn)
-			buf = append(buf, rb[:n]...)
-			mode = nextMode
+func (r *reader) runeAppendByte(b byte) {
+	r.rn = r.rn<<4 | rune(b)
+	r.rcnt--
+	if r.rcnt == 0 {
+		if len(r.rb) < 8 {
+			r.rb = make([]byte, 8)
 		}
+		n := utf8.EncodeRune(r.rb, r.rn)
+		r.buf = append(r.buf, r.rb[:n]...)
+		r.mode = r.nextMode
 	}
+}
+
+func (r *reader) read(src []byte) Code {
+	r.mode = valueMode
+	r.nextMode = valueMode
+	var (
+		b byte
+		// TBD move to reader
+	)
 	for r.pos, b = range src {
 	Retry:
-		switch mode[b] {
+		switch r.mode[b] {
 		case skipNewline:
 			r.line++
 			r.lineStart = r.pos
 		case skipByte:
 			// skip
 		case commentByte:
-			mode = commentMode
+			r.mode = commentMode
 		case commentDone:
-			mode = valueMode
+			r.mode = valueMode
 
 		case openParen:
 			r.starts = append(r.starts, len(r.stack))
@@ -383,51 +387,51 @@ func (r *reader) read(src []byte) Code {
 			r.closeList()
 
 		case tokenStart:
-			if mode != tokenMode {
+			if r.mode != tokenMode {
 				r.tokenStart = r.pos
-				mode = tokenMode
+				r.mode = tokenMode
 			}
 		case tokenDone:
 			r.pushToken(src)
-			mode = valueMode
+			r.mode = valueMode
 			goto Retry
 
 		case signByte:
 			r.tokenStart = r.pos
-			mode = signMode
+			r.mode = signMode
 		case signNumber:
-			mode = numberMode
+			r.mode = numberMode
 		case signToken:
-			mode = tokenMode
+			r.mode = tokenMode
 
 		case digitByte:
 			r.tokenStart = r.pos
-			mode = numberMode
+			r.mode = numberMode
 		case numberDone:
 			r.pushNumber(src)
-			mode = valueMode
+			r.mode = valueMode
 			goto Retry
 		case revertToToken:
-			mode = tokenMode
+			r.mode = tokenMode
 
 		case doubleQuote:
 			r.tokenStart = r.pos + 1
-			buf = buf[:0]
-			mode = stringMode
-			nextMode = stringMode
+			r.buf = r.buf[:0]
+			r.mode = stringMode
+			r.nextMode = stringMode
 		case pipeByte:
 			r.tokenStart = r.pos + 1
-			buf = buf[:0]
-			mode = symbolMode
-			nextMode = symbolMode
+			r.buf = r.buf[:0]
+			r.mode = symbolMode
+			r.nextMode = symbolMode
 		case stringByte:
-			if 0 < len(buf) {
-				buf = append(buf, b)
+			if 0 < len(r.buf) {
+				r.buf = append(r.buf, b)
 			}
 		case stringDone:
 			var obj Object
-			if 0 < len(buf) {
-				obj = String(buf)
+			if 0 < len(r.buf) {
+				obj = String(r.buf)
 			} else {
 				obj = String(src[r.tokenStart:r.pos])
 			}
@@ -436,11 +440,11 @@ func (r *reader) read(src []byte) Code {
 			} else {
 				r.code = append(r.code, obj)
 			}
-			mode = valueMode
+			r.mode = valueMode
 		case pipeDone:
 			var obj Object
-			if 0 < len(buf) {
-				obj = Symbol(buf)
+			if 0 < len(r.buf) {
+				obj = Symbol(r.buf)
 			} else {
 				obj = Symbol(src[r.tokenStart:r.pos])
 			}
@@ -449,100 +453,100 @@ func (r *reader) read(src []byte) Code {
 			} else {
 				r.code = append(r.code, obj)
 			}
-			mode = valueMode
+			r.mode = valueMode
 
 		case escByte:
-			if len(buf) == 0 && r.tokenStart < r.pos {
-				buf = append(buf, src[r.tokenStart:r.pos]...)
+			if len(r.buf) == 0 && r.tokenStart < r.pos {
+				r.buf = append(r.buf, src[r.tokenStart:r.pos]...)
 			}
-			mode = escMode
+			r.mode = escMode
 		case escOne:
-			buf = append(buf, escByteMap[b])
-			mode = nextMode
+			r.buf = append(r.buf, escByteMap[b])
+			r.mode = r.nextMode
 		case escUnicode4:
-			rn = 0
-			rcnt = 4
-			mode = runeMode
+			r.rn = 0
+			r.rcnt = 4
+			r.mode = runeMode
 		case escUnicode8:
-			rn = 0
-			rcnt = 8
-			mode = runeMode
+			r.rn = 0
+			r.rcnt = 8
+			r.mode = runeMode
 		case runeDigit:
-			runeAppendByte(b - '0')
+			r.runeAppendByte(b - '0')
 		case runeHexA:
-			runeAppendByte(b - 'A' + 10)
+			r.runeAppendByte(b - 'A' + 10)
 		case runeHexa:
-			runeAppendByte(b - 'a' + 10)
+			r.runeAppendByte(b - 'a' + 10)
 
 		case sharpByte:
-			mode = sharpMode
+			r.mode = sharpMode
 		case charSlash:
 			r.tokenStart = r.pos + 1
-			mode = charMode
+			r.mode = charMode
 		case charDone:
 			r.pushChar(src)
-			mode = valueMode
+			r.mode = valueMode
 			goto Retry
 
 		case vectorByte:
 			r.starts = append(r.starts, len(r.stack))
 			r.stack = append(r.stack, vectorMarker)
-			mode = valueMode
+			r.mode = valueMode
 
 		case binaryByte:
 			r.tokenStart = r.pos + 1
-			mode = intMode
-			base = 2
+			r.mode = intMode
+			r.base = 2
 		case octByte:
 			r.tokenStart = r.pos + 1
-			mode = intMode
-			base = 8
+			r.mode = intMode
+			r.base = 8
 		case hexByte:
 			r.tokenStart = r.pos + 1
-			mode = intMode
-			base = 16
+			r.mode = intMode
+			r.base = 16
 		case intDone:
-			r.pushInteger(src, base)
-			mode = valueMode
+			r.pushInteger(src)
+			r.mode = valueMode
 			goto Retry
 
 		case sharpIntByte:
-			mode = sharpNumMode
-			sharpNum = int(b - '0')
+			r.mode = sharpNumMode
+			r.sharpNum = int(b - '0')
 		case sharpNumByte:
-			sharpNum = sharpNum*10 + int(b-'0')
+			r.sharpNum = r.sharpNum*10 + int(b-'0')
 		case radixByte:
 			r.tokenStart = r.pos + 1
-			mode = intMode
-			base = sharpNum
+			r.mode = intMode
+			r.base = r.sharpNum
 
 		case sharpComplex:
 			r.starts = append(r.starts, len(r.stack))
 			r.stack = append(r.stack, complexMarker)
-			mode = mustArrayMode
+			r.mode = mustArrayMode
 
 		case arrayByte:
 			r.starts = append(r.starts, len(r.stack))
-			switch sharpNum {
+			switch r.sharpNum {
 			case 0:
 				r.stack = append(r.stack, &Array{})
 			case 1:
 				r.stack = append(r.stack, vectorMarker)
 			default:
-				if ArrayMaxRank < sharpNum {
-					r.raise("%d exceeds the maximum Array rank of %d dimensions.", sharpNum, ArrayMaxRank)
+				if ArrayMaxRank < r.sharpNum {
+					r.raise("%d exceeds the maximum Array rank of %d dimensions.", r.sharpNum, ArrayMaxRank)
 				}
-				r.stack = append(r.stack, &Array{dims: make([]int, sharpNum), sizes: make([]int, sharpNum)})
+				r.stack = append(r.stack, &Array{dims: make([]int, r.sharpNum), sizes: make([]int, r.sharpNum)})
 			}
-			mode = mustArrayMode
+			r.mode = mustArrayMode
 		case swallowOpen:
-			mode = valueMode
+			r.mode = valueMode
 
 		case singleQuote:
 			r.stack = append(r.stack, quoteMarker)
 		case sharpQuote:
 			r.stack = append(r.stack, sharpQuoteMarker)
-			mode = valueMode
+			r.mode = valueMode
 
 		case backquote:
 			r.stack = append(r.stack, backquoteMarker)
@@ -554,17 +558,17 @@ func (r *reader) read(src []byte) Code {
 		case commaAt:
 			if 0 < len(r.stack) && r.stack[len(r.stack)-1] == commaMarker {
 				r.stack[len(r.stack)-1] = commaAtMarker
-			} else if mode != tokenMode {
+			} else if r.mode != tokenMode {
 				r.tokenStart = r.pos
-				mode = tokenMode
+				r.mode = tokenMode
 			}
 
 		default:
-			switch mode {
+			switch r.mode {
 			case sharpMode:
 				r.raise("illegal sharp macro character: #%c", b)
 			case intMode:
-				r.raise("illegal base %d digit: #%c", base, b)
+				r.raise("illegal base %d digit: #%c", r.base, b)
 			default:
 				r.raise("unexpected character: '%c' (0x%02x)", b, b)
 			}
@@ -576,28 +580,29 @@ func (r *reader) read(src []byte) Code {
 			return r.code
 		}
 	}
-	// TBD maybe move to separate function and call from .read called
 	r.pos++
-	switch mode {
-	case tokenMode:
-		r.pushToken(src)
-	case numberMode:
-		r.pushNumber(src)
-	case stringMode:
-		r.partial("string not terminated")
-	case runeMode:
-		r.raise("rune not terminated")
-	case escMode:
-		r.raise("escaped character not terminated")
-	case symbolMode:
-		r.raise("|symbol| not terminated")
-	case charMode:
-		r.pushChar(src)
-	case intMode:
-		r.pushInteger(src, base)
-	}
-	if 0 < len(r.stack) {
-		r.partial("list not terminated")
+	if !r.more {
+		switch r.mode {
+		case tokenMode:
+			r.pushToken(src)
+		case numberMode:
+			r.pushNumber(src)
+		case stringMode:
+			r.partial("string not terminated")
+		case runeMode:
+			r.raise("rune not terminated")
+		case escMode:
+			r.raise("escaped character not terminated")
+		case symbolMode:
+			r.raise("|symbol| not terminated")
+		case charMode:
+			r.pushChar(src)
+		case intMode:
+			r.pushInteger(src)
+		}
+		if 0 < len(r.stack) {
+			r.partial("list not terminated")
+		}
 	}
 	return r.code
 }
@@ -732,8 +737,7 @@ func (r *reader) pushToken(src []byte) {
 		obj = True
 		goto Push
 	}
-	// TBD create token from r.carry and src
-	token = src[r.tokenStart:r.pos]
+	token = r.makeToken(src)
 	if size == 3 && bytes.EqualFold([]byte("nil"), token) {
 		obj = nil
 		goto Push
@@ -884,7 +888,7 @@ Push:
 
 func (r *reader) pushNumber(src []byte) {
 	// Numbers the easy way.
-	token := src[r.tokenStart:r.pos]
+	token := r.makeToken(src)
 	var (
 		obj Object
 		bi  *big.Int
@@ -1005,14 +1009,14 @@ func (r *reader) pushChar(src []byte) {
 	}
 }
 
-func (r *reader) pushInteger(src []byte, base int) {
-	token := string(src[r.tokenStart:r.pos])
+func (r *reader) pushInteger(src []byte) {
+	token := string(r.makeToken(src))
 	var obj Object
-	if i, err := strconv.ParseInt(token, base, 64); err == nil {
+	if i, err := strconv.ParseInt(token, r.base, 64); err == nil {
 		obj = Fixnum(i)
 	} else {
 		bi := big.NewInt(0)
-		if _, ok := bi.SetString(token, base); ok {
+		if _, ok := bi.SetString(token, r.base); ok {
 			obj = (*Bignum)(bi)
 		} else {
 			r.raise("%s is not a valid base 2 integer", token)
@@ -1113,4 +1117,12 @@ func (c Code) Eval(scope *Scope, w io.Writer) (result Object) {
 		}
 	}
 	return
+}
+
+func (r *reader) makeToken(src []byte) []byte {
+	token := make([]byte, len(r.carry)+(r.pos-r.tokenStart))
+	copy(token, r.carry)
+	copy(token[len(r.carry):], src[r.tokenStart:r.pos])
+
+	return token
 }
