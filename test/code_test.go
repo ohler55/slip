@@ -3,6 +3,8 @@
 package test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -342,4 +344,11 @@ func TestCodeStringer(t *testing.T) {
  nil
  nil
 ]`, code.String())
+}
+
+func TestCodeReadStream(t *testing.T) {
+	sr := strings.NewReader("(+ 1 2 3)")
+	code := slip.ReadStream(sr)
+
+	fmt.Printf("*** read code: %s\n", code)
 }
