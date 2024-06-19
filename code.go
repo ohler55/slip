@@ -415,7 +415,11 @@ func CompileString(src string) Object {
 
 // Compile LISP source code and return an Object.
 func Compile(src []byte) (result Object) {
-	code := (&reader{}).read(src)
+	cr := reader{
+		mode:     valueMode,
+		nextMode: valueMode,
+	}
+	code := cr.read(src)
 	code.Compile()
 	if 0 < len(code) {
 		result = code[len(code)-1]
