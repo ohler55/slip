@@ -23,7 +23,7 @@ func init() {
 				{
 					Name: "input-stream",
 					Type: "input-stream",
-					Text: "The string to read from.",
+					Text: "The stream to read from.",
 				},
 				{
 					Name: "eof-error-p",
@@ -84,7 +84,7 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 			result = eofv
 		}
 	}()
-	code, _ := slip.ReadOneStream(r)
+	code, _ := slip.ReadStream(r, true)
 	if 0 < len(code) {
 		return code[0]
 	}

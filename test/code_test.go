@@ -9,6 +9,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/sliptest"
 )
 
 type codeTest struct {
@@ -346,9 +347,44 @@ func TestCodeStringer(t *testing.T) {
 ]`, code.String())
 }
 
-func TestCodeReadStream(t *testing.T) {
+func TestCodeReadStreamOk(t *testing.T) {
 	sr := strings.NewReader("(+ 1 2 3)")
-	code := slip.ReadStream(sr)
+	code, _ := slip.ReadStream(sr)
+	tt.Equal(t, 1, len(code))
+	tt.Equal(t, "(+ 1 2 3)", slip.ObjectString(code[0]))
+}
 
-	fmt.Printf("*** read code: %s\n", code)
+func TestCodeReadStreamOne(t *testing.T) {
+	sr := strings.NewReader("(+ 1 2 3) (- 3 2 1)")
+	code, _ := slip.ReadStream(sr, true)
+	tt.Equal(t, 1, len(code))
+	tt.Equal(t, "(+ 1 2 3)", slip.ObjectString(code[0]))
+}
+
+type badReader int
+
+func (w badReader) Read([]byte) (int, error) {
+	return 0, fmt.Errorf("oops")
+}
+
+func TestCodeReadStreamFail(t *testing.T) {
+	tt.Panic(t, func() { _, _ = slip.ReadStream(badReader(0)) })
+}
+
+func TestCodeReadStreamEachOk(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let (quux)
+                  (read-each (make-string-input-stream "(1 2 3)") (lambda (x) (setq quux x)))
+                  quux)`,
+		Expect: "(1 2 3)",
+	}).Test(t)
+}
+
+func TestCodeReadStreamPushOk(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((chan (make-channel 2)))
+                  (read-push (make-string-input-stream "(1 2 3)") chan)
+                  (channel-pop chan))`,
+		Expect: "(1 2 3)",
+	}).Test(t)
 }

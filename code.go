@@ -291,7 +291,8 @@ func ReadString(src string) (code Code) {
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
-	return cr.read([]byte(src))
+	cr.read([]byte(src))
+	return cr.code
 }
 
 // Read LISP source code and return a Code instance.
@@ -300,7 +301,8 @@ func Read(src []byte) (code Code) {
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
-	return cr.read(src)
+	cr.read(src)
+	return cr.code
 }
 
 // ReadOne LISP source code and return a Code instance.
@@ -310,102 +312,113 @@ func ReadOne(src []byte) (code Code, pos int) {
 		nextMode: valueMode,
 		one:      true,
 	}
-	return cr.read(src), cr.pos
+	cr.read(src)
+	return cr.code, cr.pos
 }
 
-const readBlockSize = 4096
+const readBlockSize = 65536
 
 // ReadStream reads LISP source code from a stream and return a Code instance.
-func ReadStream(r io.Reader) Code {
+func ReadStream(r io.Reader, one ...bool) (Code, int) {
+	// Note: Using a separate chan for reading from disk was tried but since a
+	// new buffer had to be created each time the overall performance was
+	// slightly worse. That would be different with slower disks but that is
+	// more a issue left behind years ago.
+	cr := reader{
+		more:     true,
+		mode:     valueMode,
+		nextMode: valueMode,
+		one:      (0 < len(one) && one[0]),
+	}
+	var pos int
+	buf := make([]byte, readBlockSize)
+	for {
+		cnt, err := r.Read(buf)
+		src := buf[:cnt]
+		cr.tokenStart = 0
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				cr.more = false
+			} else {
+				panic(err)
+			}
+		}
+		cr.read(src)
+		pos += cr.pos
+		if cr.one && 0 < len(cr.code) {
+			break
+		}
+		if !cr.more {
+			break
+		}
+	}
+	return cr.code, pos
+}
+
+// ReadStreamPush reads LISP source code from a stream and pushes
+// s-expressions read onto a channel.
+func ReadStreamPush(r io.Reader, channel chan Object) {
 	cr := reader{
 		more:     true,
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
 	buf := make([]byte, readBlockSize)
-	// Try a read and see if it comes up short. If it does then process in the
-	// same thread otherwise create a channel for reading.
-	cnt, err := r.Read(buf)
-	if cnt < readBlockSize {
-		for {
-			src := buf[:cnt]
-			cr.tokenStart = 0
-			cr.pos = 0 // not really needed
-			if err != nil {
-				if errors.Is(err, io.EOF) {
-					cr.more = false
-				} else {
-					panic(err)
-				}
-			}
-			_ = cr.read(src)
-			if !cr.more {
-				return cr.code
-			}
-			cnt, err = r.Read(buf)
-		}
-	}
-	queue := make(chan []byte, 4)
-	go chanReadLoop(&cr, r, queue)
-
-	_ = cr.read(buf[:cnt])
 	for {
-		cr.tokenStart = 0
-		cr.pos = 0 // not really needed
-		src := <-queue
-		_ = cr.read(src)
-		if len(src) == 0 {
-			break
-		}
-	}
-
-	return cr.code
-}
-
-func chanReadLoop(cr *reader, r io.Reader, queue chan []byte) {
-	blen := cap(queue) + 1
-	bufs := make([][]byte, blen)
-	for i := len(bufs) - 1; 0 <= i; i-- {
-		bufs[i] = make([]byte, readBlockSize)
-	}
-	var (
-		i    int
-		done bool
-	)
-	for {
-		buf := bufs[i]
-		i++
-		if len(bufs) <= i {
-			i = 0
-		}
 		cnt, err := r.Read(buf)
 		src := buf[:cnt]
+		cr.tokenStart = 0
 		if err != nil {
-			// Usually an EOF but even if not let an error show up in parsing.
-			done = true
+			if errors.Is(err, io.EOF) {
+				cr.more = false
+			} else {
+				panic(err)
+			}
 		}
-		queue <- src
-		if done {
-			queue <- nil
+		cr.read(src)
+		if 0 < len(cr.code) {
+			for _, obj := range cr.code {
+				channel <- obj
+			}
+			cr.code = cr.code[:0]
+		}
+		if !cr.more {
 			break
 		}
 	}
 }
 
-// ReadOneStream reads LISP source code from a stream and return a Code instance.
-func ReadOneStream(r io.Reader) (code Code, pos int) {
+// ReadStreamEach reads LISP source code from a stream and calls the callback
+// for each s-expressions read.
+func ReadStreamEach(r io.Reader, s *Scope, caller Caller) {
 	cr := reader{
+		more:     true,
 		mode:     valueMode,
 		nextMode: valueMode,
-		one:      true,
 	}
-
-	// TBD temporary
-	buf, err := io.ReadAll(r)
-	if err != nil {
-		panic(err)
+	buf := make([]byte, readBlockSize)
+	for {
+		cnt, err := r.Read(buf)
+		src := buf[:cnt]
+		cr.tokenStart = 0
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				cr.more = false
+			} else {
+				panic(err)
+			}
+		}
+		cr.read(src)
+		if 0 < len(cr.code) {
+			for _, obj := range cr.code {
+				_ = caller.Call(s, List{obj}, 0)
+			}
+			cr.code = cr.code[:0]
+		}
+		if !cr.more {
+			break
+		}
 	}
-	return cr.read(buf), cr.pos
 }
 
 // CompileString LISP string source code and return an Object.
@@ -419,10 +432,11 @@ func Compile(src []byte) (result Object) {
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
-	code := cr.read(src)
-	code.Compile()
-	if 0 < len(code) {
-		result = code[len(code)-1]
+	cr.read(src)
+
+	cr.code.Compile()
+	if 0 < len(cr.code) {
+		result = cr.code[len(cr.code)-1]
 	}
 	return
 }
@@ -440,7 +454,7 @@ func (r *reader) runeAppendByte(b byte) {
 	}
 }
 
-func (r *reader) read(src []byte) Code {
+func (r *reader) read(src []byte) {
 	var b byte
 	for r.pos, b = range src {
 	Retry:
@@ -652,7 +666,7 @@ func (r *reader) read(src []byte) Code {
 			if b == ')' {
 				r.pos++
 			}
-			return r.code
+			return
 		}
 	}
 	r.pos++
@@ -681,7 +695,7 @@ func (r *reader) read(src []byte) Code {
 			r.partial("list not terminated")
 		}
 	}
-	return r.code
+	return
 }
 
 func (r *reader) inBackquote() bool {
