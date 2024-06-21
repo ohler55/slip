@@ -3,7 +3,6 @@
 package gi
 
 import (
-	"bufio"
 	"bytes"
 	"io"
 	"math/big"
@@ -24,29 +23,9 @@ const (
 		"................................" + // 0xa0
 		"................................" + // 0xc0
 		"................................" //   0xe0
+
+	defaultSaveBufLimit = 65536
 )
-
-type bufWriter struct {
-	w *bufio.Writer
-}
-
-func (bw *bufWriter) Write(b []byte) {
-	if _, err := bw.w.Write(b); err != nil {
-		panic(err)
-	}
-}
-
-func (bw *bufWriter) WriteByte(b byte) {
-	if err := bw.w.WriteByte(b); err != nil {
-		panic(err)
-	}
-}
-
-func (bw *bufWriter) Flush() {
-	if err := bw.w.Flush(); err != nil {
-		panic(err)
-	}
-}
 
 func init() {
 	slip.Define(
@@ -68,10 +47,19 @@ func init() {
 					Type: "output-stream",
 					Text: "The stream to write to.",
 				},
+				{Name: "&key"},
+				{
+					Name: "buffer-size",
+					Type: "fixnum",
+					Text: "The size of the incremental write buffer.",
+				},
 			},
 			Return: "nil",
-			Text: `__save__ _object_ to the _output-stream_. This writes as readable. If the object
-can not be written as readable then a panic is raised.`,
+			Text: `__save__ _object_ to the _output-stream_. This writes as readable. If
+the object can not be written as readable then a panic is raised. The advantage of this
+function over a __write__ is that a __write__ build the entire output in memory before
+writing while __save__ uses buffered output to write incrementally. __save__ does not
+have the breadth of options that __write__ does though.`,
 			Examples: []string{
 				`(let ((out (make-string-output-stream)))`,
 				` (save '(1 2 3) out)`,
@@ -87,97 +75,110 @@ type Save struct {
 
 // Call the function with the arguments provided.
 func (f *Save) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.ArgCountCheck(f, args, 2, 4)
 	w, ok := args[1].(io.Writer)
 	if !ok {
 		slip.PanicType("output-stream", args[1], "output-stream")
 	}
-	bw := &bufWriter{
-		w: bufio.NewWriter(w),
+	bsize := defaultSaveBufLimit
+	if val, has := slip.GetArgsKeyValue(args[2:], slip.Symbol(":buffer-size")); has {
+		if num, ok2 := val.(slip.Fixnum); ok2 && 0 < num {
+			bsize = int(num)
+		} else {
+			slip.PanicType("buffer-size", val, "fixnum")
+		}
 	}
-	saveToWriter(bw, args[0])
-	bw.Flush()
-
+	b := saveObj(nil, args[0], w, bsize)
+	if 0 < len(b) {
+		if _, err := w.Write(b); err != nil {
+			panic(err)
+		}
+	}
 	return nil
 }
 
-func saveToWriter(bw *bufWriter, obj slip.Object) {
-	var err error
+func saveObj(b []byte, obj slip.Object, w io.Writer, bsize int) []byte {
 Top:
 	switch to := obj.(type) {
 	case nil:
-		bw.Write([]byte("nil"))
-	case slip.Character:
-		bw.Write(to.Append(nil))
+		b = append(b, "nil"...)
+	case slip.List:
+		if len(to) == 0 {
+			b = append(b, "nil"...)
+			return b
+		}
+		b = append(b, '(')
+		for i, element := range to {
+			if 0 < i {
+				b = append(b, ' ')
+			}
+			b = saveObj(b, element, w, bsize)
+		}
+		b = append(b, ')')
+	case slip.Symbol:
+		if len(to) == 0 {
+			b = append(b, "||"...)
+			break
+		}
+		if to[0] == ':' {
+			b = append(b, []byte(to)...)
+			break
+		}
+		for _, c := range []byte(to) {
+			if needPipeMap[c] == 'x' {
+				b = append(b, '|')
+				b = append(b, []byte(to)...)
+				b = append(b, '|')
+				break Top
+			}
+		}
+		b = append(b, []byte(to)...)
+	case slip.String:
+		b = ojg.AppendJSONString(b, string(to), false)
 	case slip.Fixnum:
-		bw.Write(strconv.AppendInt(nil, int64(to), 10))
+		b = strconv.AppendInt(b, int64(to), 10)
+	case slip.DoubleFloat:
+		tmp := strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 64)
+		b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
+	case slip.Tail:
+		b = append(b, '.', ' ')
+		obj = to.Value
+		goto Top
+	case slip.Time:
+		b = to.Append(b)
+	case slip.SingleFloat:
+		tmp := strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 32)
+		b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
+	case slip.Character:
+		b = to.Append(b)
 	case *slip.Bignum:
-		bw.Write((*big.Int)(to).Append(nil, 10))
+		b = (*big.Int)(to).Append(b, 10)
 	case *slip.Ratio:
 		if (*big.Rat)(to).IsInt() {
 			obj = (*slip.Bignum)((*big.Rat)(to).Num())
 			goto Top
 		}
-		bw.Write((*big.Rat)(to).Num().Append(nil, 10))
-		bw.WriteByte('/')
-		bw.Write((*big.Rat)(to).Denom().Append(nil, 10))
-	case slip.SingleFloat:
-		tmp := strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 32)
-		bw.Write(bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'}))
-
-	case slip.DoubleFloat:
-		tmp := strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 64)
-		bw.Write(bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'}))
-	case *slip.LongFloat:
-		tmp := (*big.Float)(to).Append([]byte{}, 'e', -1)
-		bw.Write(bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'L'}))
-	case slip.Symbol:
-		if len(to) == 0 {
-			bw.Write([]byte("||"))
-			break
-		}
-		if to[0] == ':' {
-			bw.Write([]byte(to))
-			break
-		}
-		for _, c := range []byte(to) {
-			if needPipeMap[c] == 'x' {
-				bw.WriteByte('|')
-				bw.Write([]byte(to))
-				bw.WriteByte('|')
-				break Top
-			}
-		}
-		bw.Write([]byte(to))
-	case slip.String:
-		bw.Write(ojg.AppendJSONString(nil, string(to), false))
-	case slip.List:
-		if len(to) == 0 {
-			bw.Write([]byte("nil"))
-			return
-		}
-		bw.WriteByte('(')
-		for i, element := range to {
-			// TBD handle Tail
-			if 0 < i {
-				bw.WriteByte(' ')
-			}
-			saveToWriter(bw, element)
-		}
-		bw.WriteByte(')')
+		b = (*big.Rat)(to).Num().Append(b, 10)
+		b = append(b, '/')
+		b = (*big.Rat)(to).Denom().Append(b, 10)
 	case *slip.Array:
 		obj = to.AsList()
 		switch len(to.Dimensions()) {
 		case 0:
-			bw.Write([]byte("#0A"))
-		case 1:
-			bw.WriteByte('#')
+			b = append(b, "#0A"...)
 		default:
-			bw.WriteByte('#')
-			saveToWriter(bw, slip.Fixnum(len(to.Dimensions())))
-			bw.WriteByte('A')
+			b = append(b, '#')
+			b = saveObj(b, slip.Fixnum(len(to.Dimensions())), w, bsize)
+			b = append(b, 'A')
 		}
 		goto Top
+	case *slip.Vector:
+		obj = to.AsList()
+		b = append(b, '#')
+		goto Top
+	case *slip.LongFloat:
+		tmp := (*big.Float)(to).Append([]byte{}, 'e', -1)
+		b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)
 	case *slip.Lambda:
 		list := make(slip.List, 0, len(to.Forms)+2)
 		list = append(list, slip.Symbol("lambda"))
@@ -189,22 +190,18 @@ Top:
 		list = append(list, to.Forms...)
 		obj = list
 		goto Top
-	case slip.SpecialSyntax:
-		bw.Write([]byte(to.SpecialPrefix()))
-		obj = to.GetArgs()[0]
-		goto Top
-	case slip.Funky:
-		name := to.GetName()
-		obj = append(slip.List{slip.Symbol(name)}, to.GetArgs()...)
-		goto Top
 	default:
-		b := to.Append(nil)
-		if bytes.HasPrefix(b, []byte("#<")) {
+		end := len(b)
+		b = to.Append(b)
+		if end+2 < len(b) && b[end] == '#' && b[end+1] == '<' {
 			slip.NewPanic("%s can not be written readably", to)
 		}
-		bw.Write(b)
 	}
-	if err != nil {
-		panic(err)
+	if bsize < len(b) {
+		if _, err := w.Write(b); err != nil {
+			panic(err)
+		}
+		b = b[:0]
 	}
+	return b
 }

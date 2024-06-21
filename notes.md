@@ -8,15 +8,11 @@
   + Code.ReadStream
   + Code.ReadStreamEach
   + Code.ReadStreamPush
-  - save (object output-stream)
-   - use bufio.NewWriter
-    - not at all efficient
-     - try a straight write
-     - try custom buffered
-
+  + save
 
   - block-comment branch
    - block comments #|  |#
+    - 0x7c - |
 
  - package-export
   - import
