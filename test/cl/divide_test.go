@@ -43,12 +43,14 @@ func TestDivideSingleFloat(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(/ 2.0s+0)`,
-		Expect: "5s-01",
+		Source:   `(/ 2.0s+0)`,
+		Readably: true,
+		Expect:   "5s-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 9 3.0s+0 1.5s+0 1)`,
-		Expect: "2s+00",
+		Source:   `(/ 9 3.0s+0 1.5s+0 1)`,
+		Readably: true,
+		Expect:   "2s+00",
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(/ 0.0s+0)`,
@@ -67,16 +69,19 @@ func TestDivideDoubleFloat(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(/ 2.0d+0)`,
-		Expect: "5d-01",
+		Source:   `(/ 2.0d+0)`,
+		Readably: true,
+		Expect:   "5d-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 9 3.0d+0 1.5s+0 1)`,
-		Expect: "2d+00",
+		Source:   `(/ 9 3.0d+0 1.5s+0 1)`,
+		Readably: true,
+		Expect:   "2d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 3.0s+0 1.5d+0 1.0d+0)`,
-		Expect: "2d+00",
+		Source:   `(/ 3.0s+0 1.5d+0 1.0d+0)`,
+		Readably: true,
+		Expect:   "2d+00",
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(/ 0.0d+0)`,
@@ -95,20 +100,24 @@ func TestDivideLongFloat(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(/ 2.0L+0)`,
-		Expect: "5L-01",
+		Source:   `(/ 2.0L+0)`,
+		Readably: true,
+		Expect:   "5L-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 9 3.0L+0 1.5s+0 1)`,
-		Expect: "2L+00",
+		Source:   `(/ 9 3.0L+0 1.5s+0 1)`,
+		Readably: true,
+		Expect:   "2L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 3.0s+0 1.5L+0 1.0L+0)`,
-		Expect: "2L+00",
+		Source:   `(/ 3.0s+0 1.5L+0 1.0L+0)`,
+		Readably: true,
+		Expect:   "2L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 3.0d+0 1.5L+0 1.0d+0)`,
-		Expect: "2L+00",
+		Source:   `(/ 3.0d+0 1.5L+0 1.0d+0)`,
+		Readably: true,
+		Expect:   "2L+00",
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(/ 0.0L+0)`,
@@ -150,19 +159,23 @@ func TestDivideBignum(t *testing.T) {
 		Source: `(/ (- 30000000000000001000 30000000000000000000)
                     2.0s+02
                     (- 10000000000000000100 10000000000000000000))`,
-		Expect: "5s-02",
+		Readably: true,
+		Expect:   "5s-02",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 30000000000000000000 2.0d+00 10000000000000000000)`,
-		Expect: "1.5d+00",
+		Source:   `(/ 30000000000000000000 2.0d+00 10000000000000000000)`,
+		Readably: true,
+		Expect:   "1.5d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 30000000000000000000 2.0L+00 10000000000000000000)`,
-		Expect: "1.5L+00",
+		Source:   `(/ 30000000000000000000 2.0L+00 10000000000000000000)`,
+		Readably: true,
+		Expect:   "1.5L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 4.0L+0 2.0000000000000000L+0)`,
-		Expect: "2L+00",
+		Source:   `(/ 4.0L+0 2.0000000000000000L+0)`,
+		Readably: true,
+		Expect:   "2L+00",
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(/ (- 20000000000000000000 20000000000000000000))`,
@@ -193,36 +206,44 @@ func TestDivideRatio(t *testing.T) {
 		Expect: "2/3",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 1.5s+0 3/4)`,
-		Expect: "2s+00",
+		Source:   `(/ 1.5s+0 3/4)`,
+		Readably: true,
+		Expect:   "2s+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 3/4 1.5s+0)`,
-		Expect: "5s-01",
+		Source:   `(/ 3/4 1.5s+0)`,
+		Readably: true,
+		Expect:   "5s-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 1.5d+0 3/4)`,
-		Expect: "2d+00",
+		Source:   `(/ 1.5d+0 3/4)`,
+		Readably: true,
+		Expect:   "2d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 3/4 1.5d+0)`,
-		Expect: "5d-01",
+		Source:   `(/ 3/4 1.5d+0)`,
+		Readably: true,
+		Expect:   "5d-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 1.5L+0 3/4)`,
-		Expect: "2L+00",
+		Source:   `(/ 1.5L+0 3/4)`,
+		Readably: true,
+		Expect:   "2L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 3/4 1.5L+0)`,
-		Expect: "5L-01",
+		Source:   `(/ 3/4 1.5L+0)`,
+		Readably: true,
+		Expect:   "5L-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/ 20000000000000000000 1000/3)`,
-		Expect: "6L+16",
+		Source:   `(/ 20000000000000000000 1000/3)`,
+		Readably: true,
+		Expect:   "6L+16",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(/  3/1000 20000000000000000000)`,
-		Expect: "1.5L-22",
+		Source:   `(/  3/1000 20000000000000000000)`,
+		Readably: true,
+		Expect:   "1.5L-22",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(/  (/ 20000000000000001000 20000000000000000000)

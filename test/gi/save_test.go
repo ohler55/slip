@@ -85,9 +85,9 @@ func TestSaveCharacter(t *testing.T) {
 func TestSaveArray(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((out (make-string-output-stream)))
-                  (save '(#0A() #(1 2 3) #2A((a b)(c d))) out)
+                  (save '(#0A() #() #(1 2 3) #2A((a b)(c d))) out)
                   (get-output-stream-string out))`,
-		Expect: `"(#0Anil #(1 2 3) #2A((a b) (c d)))"`,
+		Expect: `"(#0Anil #() #(1 2 3) #2A((a b) (c d)))"`,
 	}).Test(t)
 }
 

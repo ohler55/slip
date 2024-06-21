@@ -173,9 +173,12 @@ Top:
 		}
 		goto Top
 	case *slip.Vector:
-		obj = to.AsList()
-		b = append(b, '#')
-		goto Top
+		if 0 < to.Length() {
+			obj = to.AsList()
+			b = append(b, '#')
+			goto Top
+		}
+		b = append(b, '#', '(', ')')
 	case *slip.LongFloat:
 		tmp := (*big.Float)(to).Append([]byte{}, 'e', -1)
 		b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)

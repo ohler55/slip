@@ -61,6 +61,7 @@ func TestDeleteDuplicatesListTest(t *testing.T) {
 func TestDeleteDuplicatesVectorPlain(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(delete-duplicates #(1 2 3 2 1))",
+		Array:  true,
 		Expect: "#(3 2 1)",
 	}).Test(t)
 }

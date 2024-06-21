@@ -35,8 +35,9 @@ func TestMaxSingleFloat(t *testing.T) {
 		Expect: "4",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(max 3.0s+0 2)`,
-		Expect: "3s+00",
+		Source:   `(max 3.0s+0 2)`,
+		Readably: true,
+		Expect:   "3s+00",
 	}).Test(t)
 }
 
@@ -51,8 +52,9 @@ func TestMaxDoubleFloat(t *testing.T) {
 		Expect: "4",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(max 3.5s+0 4.5d+0 4)`,
-		Expect: "4.5d+00",
+		Source:   `(max 3.5s+0 4.5d+0 4)`,
+		Readably: true,
+		Expect:   "4.5d+00",
 	}).Test(t)
 }
 
@@ -63,12 +65,14 @@ func TestMaxLongFloat(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(max 2 3.0L+0)`,
-		Expect: "3L+00",
+		Source:   `(max 2 3.0L+0)`,
+		Readably: true,
+		Expect:   "3L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(max 3.5s+0 3.5L+0)`,
-		Expect: "3.5s+00",
+		Source:   `(max 3.5s+0 3.5L+0)`,
+		Readably: true,
+		Expect:   "3.5s+00",
 	}).Test(t)
 }
 

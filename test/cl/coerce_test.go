@@ -49,18 +49,22 @@ func TestCoerceToVector(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(coerce '(a b c) 'vector)`,
+		Array:  true,
 		Expect: "#(a b c)",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(coerce #(a b c) 'vector)`,
+		Array:  true,
 		Expect: "#(a b c)",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(coerce "abc" 'vector)`,
+		Array:  true,
 		Expect: `#(#\a #\b #\c)`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(coerce 'abc 'vector)`,
+		Array:  true,
 		Expect: `#(#\a #\b #\c)`,
 	}).Test(t)
 	(&sliptest.Function{

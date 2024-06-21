@@ -16,20 +16,24 @@ func TestFloatBasic(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(float 3)`,
-		Expect: "3d+00",
+		Source:   `(float 3)`,
+		Readably: true,
+		Expect:   "3d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(float 2.5s0)`,
-		Expect: "2.5d+00",
+		Source:   `(float 2.5s0)`,
+		Readably: true,
+		Expect:   "2.5d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(float 2.5d0)`,
-		Expect: "2.5d+00",
+		Source:   `(float 2.5d0)`,
+		Readably: true,
+		Expect:   "2.5d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(float 2.5l0)`,
-		Expect: "2.5d+00",
+		Source:   `(float 2.5l0)`,
+		Readably: true,
+		Expect:   "2.5d+00",
 	}).Test(t)
 }
 
@@ -40,20 +44,24 @@ func TestFloatPrototype(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(float 3 0.0s0)`,
-		Expect: "3s+00",
+		Source:   `(float 3 0.0s0)`,
+		Readably: true,
+		Expect:   "3s+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(float 2.5 0.0d0)`,
-		Expect: "2.5d+00",
+		Source:   `(float 2.5 0.0d0)`,
+		Readably: true,
+		Expect:   "2.5d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(float 2.5 0.0L0)`,
-		Expect: "2.5L+00",
+		Source:   `(float 2.5 0.0L0)`,
+		Readably: true,
+		Expect:   "2.5L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(float 2.5L0 0.0l0)`,
-		Expect: "2.5L+00",
+		Source:   `(float 2.5L0 0.0l0)`,
+		Readably: true,
+		Expect:   "2.5L+00",
 	}).Test(t)
 }
 

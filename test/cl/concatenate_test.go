@@ -25,6 +25,7 @@ func TestConcatenateString(t *testing.T) {
 func TestConcatenateVector(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(concatenate 'vector "abc" '(d e f) #(1 2 3))`,
+		Array:  true,
 		Expect: `#(#\a #\b #\c d e f 1 2 3)`,
 	}).Test(t)
 }

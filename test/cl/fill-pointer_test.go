@@ -21,6 +21,7 @@ func TestFillPointerSetf(t *testing.T) {
 		Source: `(let ((v (make-array 4 :fill-pointer t :initial-contents '(a b c d))))
                    (setf (fill-pointer v) 2)
                    v)`,
+		Array:  true,
 		Expect: "#(a b)",
 	}).Test(t)
 }

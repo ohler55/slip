@@ -368,9 +368,12 @@ Top:
 		}
 	case *Vector:
 		if p.Array {
-			obj = to.AsList()
-			b = append(b, '#')
-			goto Top
+			if 0 < to.Length() {
+				obj = to.AsList()
+				b = append(b, '#')
+				goto Top
+			}
+			b = append(b, '#', '(', ')')
 		} else {
 			b = append(b, "#<(VECTOR "...)
 			b = p.Append(b, Fixnum(to.dims[0]), 0)

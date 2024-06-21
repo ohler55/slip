@@ -41,14 +41,17 @@ func TestNreverseList(t *testing.T) {
 func TestNreverseVector(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(nreverse #(a b c d))`,
+		Array:  true,
 		Expect: "#(d c b a)",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(nreverse #(a))`,
+		Array:  true,
 		Expect: "#(a)",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(nreverse #())`,
+		Array:  true,
 		Expect: "#()",
 	}).Test(t)
 }

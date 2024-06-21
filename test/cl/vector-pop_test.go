@@ -13,6 +13,7 @@ func TestVectorPopOk(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((v (make-array 4 :fill-pointer 3 :initial-contents '(a b c d))))
                   (list (vector-pop v) v))`,
+		Array:  true,
 		Expect: "(c #(a b))",
 	}).Test(t)
 }

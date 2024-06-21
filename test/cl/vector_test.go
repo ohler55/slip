@@ -11,6 +11,7 @@ import (
 func TestVectorEmpty(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(vector)",
+		Array:  true,
 		Expect: "#()",
 	}).Test(t)
 }
@@ -18,6 +19,7 @@ func TestVectorEmpty(t *testing.T) {
 func TestVectorBasic(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(vector 'a 'b 'c)",
+		Array:  true,
 		Expect: "#(a b c)",
 	}).Test(t)
 }

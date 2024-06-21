@@ -53,7 +53,7 @@ func TestPrintArray(t *testing.T) {
 	tt.Equal(t, slip.True, val)
 
 	a0 := slip.NewArray([]int{}, slip.TrueSymbol, slip.Fixnum(0), nil, true)
-	a1 := slip.NewArray([]int{3}, slip.TrueSymbol, slip.Fixnum(1), nil, true)
+	a1 := slip.NewVector(3, slip.TrueSymbol, slip.Fixnum(1), nil, true)
 	a := testArray()
 	out := slip.Append([]byte{}, a0)
 	tt.Equal(t, "#0Anil", string(out))

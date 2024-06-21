@@ -21,6 +21,7 @@ func TestRowMajorArefVectorSetf(t *testing.T) {
 		Source: `(let ((v (make-array 4 :initial-contents '(a b c d))))
                    (setf (row-major-aref v 2) 'x)
                    v)`,
+		Array:  true,
 		Expect: "#(a b x d)",
 	}).Test(t)
 }
