@@ -27,12 +27,14 @@ func TestSubtractSingleFloat(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(- 3.0s+0)`,
-		Expect: "-3s+00",
+		Source:   `(- 3.0s+0)`,
+		Readably: true,
+		Expect:   "-3s+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 9 3.0s+0 1.5s+0 1)`,
-		Expect: "3.5s+00",
+		Source:   `(- 9 3.0s+0 1.5s+0 1)`,
+		Readably: true,
+		Expect:   "3.5s+00",
 	}).Test(t)
 }
 
@@ -43,16 +45,19 @@ func TestSubtractDoubleFloat(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(- 3.0d+0)`,
-		Expect: "-3d+00",
+		Source:   `(- 3.0d+0)`,
+		Readably: true,
+		Expect:   "-3d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 9 3.5d+0 1.5s+0 1)`,
-		Expect: "3d+00",
+		Source:   `(- 9 3.5d+0 1.5s+0 1)`,
+		Readably: true,
+		Expect:   "3d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 3.5s+0 4.5d+0 1.0d+0)`,
-		Expect: "-2d+00",
+		Source:   `(- 3.5s+0 4.5d+0 1.0d+0)`,
+		Readably: true,
+		Expect:   "-2d+00",
 	}).Test(t)
 }
 
@@ -63,20 +68,24 @@ func TestSubtractLongFloat(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(- 3.0L+0)`,
-		Expect: "-3L+00",
+		Source:   `(- 3.0L+0)`,
+		Readably: true,
+		Expect:   "-3L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 9 3.5L+0 1.5s+0 1)`,
-		Expect: "3L+00",
+		Source:   `(- 9 3.5L+0 1.5s+0 1)`,
+		Readably: true,
+		Expect:   "3L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 3.5s+0 1.5L+0 1.0L+0)`,
-		Expect: "1L+00",
+		Source:   `(- 3.5s+0 1.5L+0 1.0L+0)`,
+		Readably: true,
+		Expect:   "1L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 3.5d+0 4.5L+0 1.0d+0)`,
-		Expect: "-2L+00",
+		Source:   `(- 3.5d+0 4.5L+0 1.0d+0)`,
+		Readably: true,
+		Expect:   "-2L+00",
 	}).Test(t)
 }
 
@@ -102,19 +111,23 @@ func TestSubtractBignum(t *testing.T) {
 		Source: `(- (- 30000000000000001000 30000000000000000000)
                     2.0s+02
                     (- 10000000000000000100 10000000000000000000))`,
-		Expect: "7s+02",
+		Readably: true,
+		Expect:   "7s+02",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 30000000000000000000 2.0d+19 10000000000000000000)`,
-		Expect: "0d+00",
+		Source:   `(- 30000000000000000000 2.0d+19 10000000000000000000)`,
+		Readably: true,
+		Expect:   "0d+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 30000000000000000000 2.0L+19 10000000000000000000)`,
-		Expect: "0L+00",
+		Source:   `(- 30000000000000000000 2.0L+19 10000000000000000000)`,
+		Readably: true,
+		Expect:   "0L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 2.0L+0 0.9999999999999999999L+0)`,
-		Expect: "1.0000000000000000001L+00",
+		Source:   `(- 2.0L+0 0.9999999999999999999L+0)`,
+		Readably: true,
+		Expect:   "1.0000000000000000001L+00",
 	}).Test(t)
 }
 
@@ -137,36 +150,44 @@ func TestSubtractRatio(t *testing.T) {
 		Expect: "-3/4",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 1.5s+0 3/4)`,
-		Expect: "7.5s-01",
+		Source:   `(- 1.5s+0 3/4)`,
+		Readably: true,
+		Expect:   "7.5s-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 3/4 1.5s+0)`,
-		Expect: "-7.5s-01",
+		Source:   `(- 3/4 1.5s+0)`,
+		Readably: true,
+		Expect:   "-7.5s-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 1.5d+0 3/4)`,
-		Expect: "7.5d-01",
+		Source:   `(- 1.5d+0 3/4)`,
+		Readably: true,
+		Expect:   "7.5d-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 3/4 1.5d+0)`,
-		Expect: "-7.5d-01",
+		Source:   `(- 3/4 1.5d+0)`,
+		Readably: true,
+		Expect:   "-7.5d-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 1.5L+0 3/4)`,
-		Expect: "7.5L-01",
+		Source:   `(- 1.5L+0 3/4)`,
+		Readably: true,
+		Expect:   "7.5L-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 3/4 1.5L+0)`,
-		Expect: "-7.5L-01",
+		Source:   `(- 3/4 1.5L+0)`,
+		Readably: true,
+		Expect:   "-7.5L-01",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(- 20000000000000000000 1000/3)`,
-		Expect: "1.9999999999999999667L+19",
+		Source:   `(- 20000000000000000000 1000/3)`,
+		Readably: true,
+		Expect:   "1.9999999999999999667L+19",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(-  1000/3 20000000000000000000)`,
-		Expect: "-1.9999999999999999667L+19",
+		Source:   `(-  1000/3 20000000000000000000)`,
+		Readably: true,
+		Expect:   "-1.9999999999999999667L+19",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(-  (- 20000000000000001000 20000000000000000000)

@@ -4,36 +4,18 @@
 
 - next
 
+ - reader-speed
+  + Code.ReadStream
+  + Code.ReadStreamEach
+  + Code.ReadStreamPush
+  + save
+
  - package-export
   - import
   - shadow
   - package-shadowing-symbols
   - shadowing-import
 
- - block-comment branch
-  - block comments #|  |#
-
- - fast save and load
-  - as lisp with fastest print options (save (object &optional stream))
-   -  Printer{
-		ANSI:        false,
-		Array:       false,
-		Base:        10,
-		Case:        downcaseKey,
-		Circle:      false,
-		Escape:      true,
-		Gensym:      true,
-		Lambda:      true,
-		Length:      math.MaxInt,
-		Level:       math.MaxInt,
-		Lines:       math.MaxInt,
-		Prec:        -1,
-		MiserWidth:  0,
-		Pretty:      false,
-		Radix:       false,
-		Readably:    false,
-		RightMargin: 0,
-	}
   - as binary
    - encode all types as type, length, data
     - is a byte size needed?

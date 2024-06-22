@@ -32,6 +32,7 @@ func TestSortStringList(t *testing.T) {
 func TestSortVector(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(sort #(b a d c))`,
+		Array:  true,
 		Expect: "#(a b c d)",
 	}).Test(t)
 }
@@ -122,6 +123,7 @@ func TestSortMixedList(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(sort '((x) 1 (x y) @2023-04-01T20:24:53Z (y z) #(1 2) 2))`,
+		Array:  true,
 		Expect: `(1 2 @2023-04-01T20:24:53Z (x) (x y) (y z) #(1 2))`,
 	}).Test(t)
 	(&sliptest.Function{
@@ -130,6 +132,7 @@ func TestSortMixedList(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(sort '(#(2) (x) (x y)))`,
+		Array:  true,
 		Expect: `((x) (x y) #(2))`,
 	}).Test(t)
 }

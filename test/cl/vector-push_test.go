@@ -13,6 +13,7 @@ func TestVectorPushOk(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((v (make-array 4 :fill-pointer 2 :initial-contents '(a b c d))))
                   (list (vector-push 'x v) v))`,
+		Array:  true,
 		Expect: "(2 #(a b x))",
 	}).Test(t)
 }
@@ -21,6 +22,7 @@ func TestVectorPushFull(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((v (make-array 4 :fill-pointer t :initial-contents '(a b c d))))
                   (list (vector-push 'x v) v))`,
+		Array:  true,
 		Expect: "(nil #(a b c d))",
 	}).Test(t)
 }

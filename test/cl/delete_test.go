@@ -76,10 +76,12 @@ func TestDeleteListTest(t *testing.T) {
 func TestDeleteVectorPlain(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(delete 'b #(a b c b d))",
+		Array:  true,
 		Expect: "#(a c d)",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: "(delete 'x #(a b c))",
+		Array:  true,
 		Expect: "#(a b c)",
 	}).Test(t)
 }

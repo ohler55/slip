@@ -326,7 +326,6 @@ Top:
 			l2 := level + 1
 			b = append(b, '(')
 			for i, element := range to {
-				// TBD handle Tail
 				if 0 < i {
 					b = append(b, ' ')
 				}
@@ -356,10 +355,6 @@ Top:
 			switch len(to.dims) {
 			case 0:
 				b = append(b, "#<(ARRAY T NIL)>"...)
-			case 1:
-				b = append(b, "#<(VECTOR "...)
-				b = p.Append(b, Fixnum(to.dims[0]), 0)
-				b = append(b, ")>"...)
 			default:
 				b = append(b, "#<(ARRAY T ("...)
 				for i, d := range to.dims {
@@ -371,6 +366,23 @@ Top:
 				b = append(b, "))>"...)
 			}
 		}
+	case *Vector:
+		if p.Array {
+			if 0 < to.Length() {
+				obj = to.AsList()
+				b = append(b, '#')
+				goto Top
+			}
+			b = append(b, '#', '(', ')')
+		} else {
+			b = append(b, "#<(VECTOR "...)
+			b = p.Append(b, Fixnum(to.dims[0]), 0)
+			b = append(b, ")>"...)
+		}
+	case Tail:
+		b = append(b, '.', ' ')
+		obj = to.Value
+		goto Top
 	case *Lambda:
 		if p.Lambda {
 			list := make(List, 0, len(to.Forms)+2)

@@ -28,8 +28,11 @@ type Function struct {
 	// Validate is an optional function to use for validating the result.
 	Validate func(t *testing.T, v slip.Object)
 
-	// Readaby if true print readably.
+	// Readably if true print readably.
 	Readably bool
+
+	// Array if true print arrays.
+	Array bool
 
 	// Panics if true indicated the call to .Eval() should panic.
 	Panics bool
@@ -64,17 +67,12 @@ func (tf *Function) Test(t *testing.T) {
 	default:
 		obj := slip.CompileString(tf.Source)
 		tf.Result = scope.Eval(obj, 0)
-		switch {
-		case tf.Validate != nil:
+		if tf.Validate != nil {
 			tf.Validate(t, tf.Result)
-		case tf.Readably:
+		} else {
 			p := *slip.DefaultPrinter()
-			p.Readably = true
-			p.RightMargin = 80
-			p.Pretty = true
-			tt.Equal(t, tf.Expect, string(p.Append(nil, tf.Result, 0)), tf.Source)
-		default:
-			p := *slip.DefaultPrinter()
+			p.Readably = tf.Readably
+			p.Array = tf.Array
 			p.RightMargin = 80
 			p.Pretty = true
 			tt.Equal(t, tf.Expect, string(p.Append(nil, tf.Result, 0)), tf.Source)

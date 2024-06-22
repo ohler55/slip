@@ -61,6 +61,7 @@ func TestDeleteIfListKey(t *testing.T) {
 func TestDeleteIfVectorPlain(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(delete-if 'evenp #(1 2 3 4 5))",
+		Array:  true,
 		Expect: "#(1 3 5)",
 	}).Test(t)
 }

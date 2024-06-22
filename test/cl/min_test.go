@@ -35,8 +35,9 @@ func TestMinSingleFloat(t *testing.T) {
 		Expect: "2",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(min 3.0s+0 4)`,
-		Expect: "3s+00",
+		Source:   `(min 3.0s+0 4)`,
+		Readably: true,
+		Expect:   "3s+00",
 	}).Test(t)
 }
 
@@ -51,8 +52,9 @@ func TestMinDoubleFloat(t *testing.T) {
 		Expect: "2",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(min 3.5s+0 2.5d+0)`,
-		Expect: "2.5d+00",
+		Source:   `(min 3.5s+0 2.5d+0)`,
+		Readably: true,
+		Expect:   "2.5d+00",
 	}).Test(t)
 }
 
@@ -63,12 +65,14 @@ func TestMinLongFloat(t *testing.T) {
 	defer slip.SetVar(key, orig)
 
 	(&sliptest.Function{
-		Source: `(min 2 1.0L+0)`,
-		Expect: "1L+00",
+		Source:   `(min 2 1.0L+0)`,
+		Readably: true,
+		Expect:   "1L+00",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(min 3.5s+0 3.5L+0)`,
-		Expect: "3.5s+00",
+		Source:   `(min 3.5s+0 3.5L+0)`,
+		Readably: true,
+		Expect:   "3.5s+00",
 	}).Test(t)
 }
 

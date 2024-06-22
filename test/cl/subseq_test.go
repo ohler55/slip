@@ -35,10 +35,12 @@ func TestSubseqList(t *testing.T) {
 func TestSubseqVector(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(subseq #(a b c d) 2)`,
+		Array:  true,
 		Expect: "#(c d)",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(subseq #(a b c d) 1 3)`,
+		Array:  true,
 		Expect: "#(b c)",
 	}).Test(t)
 }
@@ -78,6 +80,7 @@ func TestSubseqVectorSetf(t *testing.T) {
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(setf (subseq seq 2) #(x y z))`,
+		Array:  true,
 		Expect: "#(x y z)",
 	}).Test(t)
 	tt.Equal(t, "#(a b x y)", slip.ObjectString(scope.Get(slip.Symbol("seq"))))

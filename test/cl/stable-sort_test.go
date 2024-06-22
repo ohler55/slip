@@ -32,6 +32,7 @@ func TestStableSortStringList(t *testing.T) {
 func TestStableSortVector(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(stable-sort #(b a d c))`,
+		Array:  true,
 		Expect: "#(a b c d)",
 	}).Test(t)
 }

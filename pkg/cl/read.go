@@ -23,7 +23,7 @@ func init() {
 				{
 					Name: "input-stream",
 					Type: "input-stream",
-					Text: "The string to read from.",
+					Text: "The stream to read from.",
 				},
 				{
 					Name: "eof-error-p",
@@ -72,14 +72,10 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	}
-	buf, err := io.ReadAll(r)
-	if err != nil {
-		panic(err)
-	}
-	return f.wrapRead(buf, eofp, eofv)
+	return f.wrapRead(r, eofp, eofv)
 }
 
-func (f *Read) wrapRead(buf []byte, eofp bool, eofv slip.Object) (result slip.Object) {
+func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			if eofp {
@@ -88,12 +84,12 @@ func (f *Read) wrapRead(buf []byte, eofp bool, eofv slip.Object) (result slip.Ob
 			result = eofv
 		}
 	}()
-	code, _ := slip.ReadOne(buf)
+	code, _ := slip.ReadStream(r, true)
 	if 0 < len(code) {
 		return code[0]
 	}
 	if eofp {
-		panic(fmt.Sprintf("end of file or stream %q", buf))
+		panic(fmt.Sprintf("end of file or stream %s", r))
 	}
 	return eofv
 }
