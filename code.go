@@ -71,6 +71,9 @@ const (
 	comma       = ','
 	commaAt     = '@'
 
+	blockStart = '|'
+	blockEnd0  = '}'
+
 	//   0123456789abcdef0123456789abcdef
 	valueMode = "" +
 		".........ak..a.................." + // 0x00
@@ -186,7 +189,7 @@ const (
 		"................................" + // 0x00
 		".......GV.......9999999999......" + // 0x20
 		"..bi...........o........x.../..." + // 0x40
-		"..bi...........o........x......." + // 0x60
+		"..bi...........o........x...|..." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -235,6 +238,28 @@ const (
 		"................................" + // 0xa0
 		"................................" + // 0xc0
 		"................................(" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	blockCommentMode = "" +
+		"aaaaaaaaaakaaaaaaaaaaaaaaaaaaaaa" + // 0x00
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0x20
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0x40
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaa}aaa" + // 0x60
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0x80
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0xa0
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0xc0
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa|" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	blockEndMode = "" +
+		"||||||||||k|||||||||||||||||||||" + // 0x00
+		"|||c||||||||||||||||||||||||||||" + // 0x20
+		"||||||||||||||||||||||||||||||||" + // 0x40
+		"||||||||||||||||||||||||||||||||" + // 0x60
+		"||||||||||||||||||||||||||||||||" + // 0x80
+		"||||||||||||||||||||||||||||||||" + // 0xa0
+		"||||||||||||||||||||||||||||||||" + // 0xc0
+		"||||||||||||||||||||||||||||||||;" //  0xe0
 
 	quoteMarker      = marker('q')
 	sharpQuoteMarker = marker('#')
@@ -651,6 +676,11 @@ func (r *reader) read(src []byte) {
 				r.tokenStart = r.pos
 				r.mode = tokenMode
 			}
+
+		case blockStart:
+			r.mode = blockCommentMode
+		case blockEnd0:
+			r.mode = blockEndMode
 
 		default:
 			switch r.mode {

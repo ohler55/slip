@@ -69,6 +69,18 @@ t ; comment`, expect: "[t]"},
 	}
 }
 
+func TestCodeBlockComment(t *testing.T) {
+	for i, ct := range []*codeTest{
+		{src: "(a #| b |# c)", expect: "[(a c)]"},
+		{src: `t
+#|
+"abc"
+|# nil`, expect: "[t nil]"},
+	} {
+		ct.test(t, i)
+	}
+}
+
 func TestCodeNumber(t *testing.T) {
 	for i, ct := range []*codeTest{
 		{src: "123", expect: "[123]", kind: "fixnum"},

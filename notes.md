@@ -10,10 +10,6 @@
   + Code.ReadStreamPush
   + save
 
-  - block-comment branch
-   - block comments #|  |#
-    - 0x7c - |
-
  - package-export
   - import
   - shadow
