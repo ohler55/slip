@@ -4,23 +4,35 @@
 
 - next
 
- - reader-speed
-  + Code.ReadStream
-  + Code.ReadStreamEach
-  + Code.ReadStreamPush
-  + save
+ * [ ] EVERY
+ * [ ] NBUTLAST
+ * [ ] NOTANY
+ * [ ] NOTEVERY
+ * [ ] SOME
+ * [ ] POP
+ * [ ] PUSH
+ * [ ] PUSHNEW
+ * [ ] PSETF
+ * [ ] RANDOM-STATE-P
+ * [ ] RATIONALP
+ * [ ] PRINT-OBJECT
+ * [ ] PRINT-UNREADABLE-OBJECT
+ * [ ] PAIRLIS
+ * [ ] SUBLIS
+ * [ ] SUBSETP
+ * [ ] SUBST
+ * [ ] SUBST-IF
+ * [ ] SUBST-IF-NOT
+ * [ ] SUBSTITUTE
+ * [ ] SUBSTITUTE-IF
+ * [ ] SUBSTITUTE-IF-NOT
+
 
  - package-export
   - import
   - shadow
   - package-shadowing-symbols
   - shadowing-import
-
-  - as binary
-   - encode all types as type, length, data
-    - is a byte size needed?
-     - maybe not since no memory is allocated explicitly
-    - instances?
 
  - net package
   - implement sbcl networking or something closer to golang?
