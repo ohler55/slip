@@ -13,8 +13,8 @@
  * [ ] PUSH
  * [ ] PUSHNEW
  * [ ] PSETF
- * [ ] RANDOM-STATE-P
- * [ ] RATIONALP
+ * [x] RANDOM-STATE-P
+ * [x] RATIONALP
  * [ ] PRINT-OBJECT
  * [ ] PRINT-UNREADABLE-OBJECT
  * [ ] PAIRLIS

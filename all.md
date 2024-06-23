@@ -56,7 +56,6 @@
  * [ ] COPY-ALIST
  * [ ] COPY-LIST
  * [ ] COPY-PPRINT-DISPATCH
- - [-] COPY-READTABLE
  * [ ] COPY-SEQ
  * [ ] COPY-STRUCTURE
  * [ ] COPY-SYMBOL
@@ -98,7 +97,6 @@
  * [ ] ETYPECASE
  * [ ] EVAL-WHEN
  * [ ] EVERY
- * [x] EXPORT
  * [ ] EXTENDED-CHAR
  * [ ] FDEFINITION
  * [ ] FILL
@@ -205,7 +203,6 @@
  * [ ] NUMERATOR
  * [ ] OPEN-STREAM-P
  * [ ] OTHERWISE
- * [x] PACKAGE
  * [ ] PACKAGE-SHADOWING-SYMBOLS
  * [ ] PAIRLIS
  * [ ] PARSE-NAMESTRING
@@ -235,14 +232,9 @@
  * [ ] PSETF
  * [ ] PUSH
  * [ ] PUSHNEW
- * [ ] RANDOM-STATE-P
- * [ ] RATIONALP
  * [ ] READ-DELIMITED-LIST
  * [ ] READ-PRESERVING-WHITESPACE
  * [ ] READ-SEQUENCE
- - [-] READTABLE
- - [-] READTABLE-CASE
- - [-] READTABLEP
  * [ ] REALPART
  * [ ] REDUCE
  * [ ] REMF
@@ -252,7 +244,6 @@
  * [ ] REST
  * [ ] REVAPPEND
  * [ ] ROTATEF
- - [-] SAFETY
  * [ ] SATISFIES
  * [ ] SBIT
  * [ ] SCALE-FLOAT
@@ -282,7 +273,6 @@
  * [ ] SLOT-UNBOUND
  * [ ] SLOT-VALUE
  * [ ] SOME
- - [-] SPACE
  * [ ] SPECIAL-OPERATOR-P
  * [ ] STEP
  * [ ] STORAGE-CONDITION
@@ -317,7 +307,6 @@
  * [ ] TWO-WAY-STREAM-INPUT-STREAM
  * [ ] TWO-WAY-STREAM-OUTPUT-STREAM
  * [ ] TYPECASE
- * [x] UNEXPORT
  * [ ] UNSIGNED-BYTE
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
@@ -343,7 +332,6 @@
  * [ ] WRITE-STRING
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
- * [x] INLINE
  * [x] &BODY
  * [x] &KEY
  * [x] &OPTIONAL
@@ -561,6 +549,7 @@
  * [x] EVAL
  * [x] EVENP
  * [x] EXP
+ * [x] EXPORT
  * [x] EXPT
  * [x] FBOUNDP
  * [x] FCEILING
@@ -616,6 +605,7 @@
  * [x] IGNORE-ERRORS
  * [x] IN-PACKAGE
  * [x] INCF
+ * [x] INLINE
  * [x] INPUT-STREAM-P
  * [x] INTEGER
  * [x] INTEGERP
@@ -734,6 +724,7 @@
  * [x] OPTIMIZE
  * [x] OR
  * [x] OUTPUT-STREAM-P
+ * [x] PACKAGE
  * [x] PACKAGE-ERROR
  * [x] PACKAGE-ERROR-PACKAGE
  * [x] PACKAGE-NAME
@@ -769,11 +760,13 @@
  * [x] QUOTE
  * [x] RANDOM
  * [x] RANDOM-STATE
+ * [x] RANDOM-STATE-P
  * [x] RASSOC
  * [x] RASSOC-IF
  * [x] RATIO
  * [x] RATIONAL
  * [x] RATIONALIZE
+ * [x] RATIONALP
  * [x] READ
  * [x] READ-BYTE
  * [x] READ-CHAR
@@ -886,6 +879,7 @@
  * [x] UNBOUND-SLOT-INSTANCE
  * [x] UNBOUND-VARIABLE
  * [x] UNDEFINED-FUNCTION
+ * [x] UNEXPORT
  * [x] UNINTERN
  * [x] UNION
  * [x] UNLESS
@@ -935,6 +929,7 @@
  - [-] COMPILED-FUNCTION-P
  - [-] COMPILER-MACRO
  - [-] COMPILER-MACRO-FUNCTION
+ - [-] COPY-READTABLE
  - [-] COUNT-IF-NOT
  - [-] DEBUG
  - [-] DEFCLASS (defflavor instead)
@@ -956,12 +951,17 @@
  - [-] PROVIDE
  - [-] RASSOC-IF-NOT
  - [-] READ-CHAR-NO-HANG
+ - [-] READTABLE
+ - [-] READTABLE-CASE
+ - [-] READTABLEP
  - [-] REINITIALIZE-INSTANCE
  - [-] REMOVE-IF-NOT
  - [-] RESTART
  - [-] RESTART-BIND
  - [-] RESTART-CASE
  - [-] RESTART-NAME
+ - [-] SAFETY
+ - [-] SPACE
  - [-] SPEED
  - [-] STANDARD
  - [-] STANDARD-CLASS

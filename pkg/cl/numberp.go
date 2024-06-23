@@ -26,7 +26,7 @@ func init() {
 			Text:   `__numberp__ returns _true_ if _object_ is a number.`,
 			Examples: []string{
 				"(numberp 4) => t",
-				"(numberp 5.1) => nil",
+				"(numberp t) => nil",
 			},
 		}, &slip.CLPkg)
 }
@@ -38,9 +38,7 @@ type Numberp struct {
 
 // Call the function with the arguments provided.
 func (f *Numberp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.ArgCountCheck(f, args, 1, 1)
 	if _, ok := args[0].(slip.Number); ok {
 		return slip.True
 	}
