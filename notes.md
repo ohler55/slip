@@ -9,7 +9,7 @@
  * [x] NOTANY
  * [x] NOTEVERY
  * [x] SOME
- * [ ] POP
+ * [x] POP
  * [ ] PUSH
  * [ ] PUSHNEW
  * [ ] PSETF
