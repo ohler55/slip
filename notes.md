@@ -4,11 +4,11 @@
 
 - next
 
- * [ ] EVERY
+ * [x] EVERY
  * [ ] NBUTLAST
- * [ ] NOTANY
- * [ ] NOTEVERY
- * [ ] SOME
+ * [x] NOTANY
+ * [x] NOTEVERY
+ * [x] SOME
  * [ ] POP
  * [ ] PUSH
  * [ ] PUSHNEW

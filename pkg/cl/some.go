@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Every{Function: slip.Function{Name: "every", Args: args}}
+			f := Some{Function: slip.Function{Name: "some", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "every",
+			Name: "some",
 			Args: []*slip.DocArg{
 				{
 					Name: "predicate",
@@ -29,23 +29,22 @@ func init() {
 				},
 			},
 			Return: "boolean",
-			Text: `__every__ returns _true_ if the _predicate_ applied to each element of
-_sequences_ in order returns true.`,
+			Text: `__some__ returns _true_ if the _predicate_ applied to each element of
+_sequences_ in order returns true at least once.`,
 			Examples: []string{
-				`(every #'characterp "abc") => t`,
-				"(every '< '(1 2 3) '(2 3 4) '(4 5 6)) => t",
-				"(every '> '(1 2 3) '(0 1 4)) => nil",
+				`(some #'characterp "abc") => t`,
+				"(some '< '(1 2 3) '(1 1 4) '(1 5 6)) => t",
 			},
 		}, &slip.CLPkg)
 }
 
-// Every represents the every function.
-type Every struct {
+// Some represents the some function.
+type Some struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Every) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Some) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, -1)
 	predicate := ResolveToCaller(s, args[0], depth)
 	args = args[1:]
@@ -76,9 +75,9 @@ iter:
 				slip.PanicType("sequence", args[i], "string", "list", "vector")
 			}
 		}
-		if predicate.Call(s, pargs, d2) == nil {
-			return nil
+		if predicate.Call(s, pargs, d2) != nil {
+			return slip.True
 		}
 	}
-	return slip.True
+	return nil
 }

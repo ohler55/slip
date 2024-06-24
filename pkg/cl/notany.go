@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Every{Function: slip.Function{Name: "every", Args: args}}
+			f := Notany{Function: slip.Function{Name: "notany", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "every",
+			Name: "notany",
 			Args: []*slip.DocArg{
 				{
 					Name: "predicate",
@@ -29,23 +29,23 @@ func init() {
 				},
 			},
 			Return: "boolean",
-			Text: `__every__ returns _true_ if the _predicate_ applied to each element of
-_sequences_ in order returns true.`,
+			Text: `__notany__ returns _true_ if the _predicate_ applied to each element of
+_sequences_ in order returns nil.`,
 			Examples: []string{
-				`(every #'characterp "abc") => t`,
-				"(every '< '(1 2 3) '(2 3 4) '(4 5 6)) => t",
-				"(every '> '(1 2 3) '(0 1 4)) => nil",
+				`(notany #'characterp "abc") => nil`,
+				"(notany '< '(1 2 3) '(2 3 4) '(4 5 6)) => nil",
+				"(notany '> '(1 2 3) '(1 3 4)) => t",
 			},
 		}, &slip.CLPkg)
 }
 
-// Every represents the every function.
-type Every struct {
+// Notany represents the notany function.
+type Notany struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Every) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Notany) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, -1)
 	predicate := ResolveToCaller(s, args[0], depth)
 	args = args[1:]
@@ -76,7 +76,7 @@ iter:
 				slip.PanicType("sequence", args[i], "string", "list", "vector")
 			}
 		}
-		if predicate.Call(s, pargs, d2) == nil {
+		if predicate.Call(s, pargs, d2) != nil {
 			return nil
 		}
 	}

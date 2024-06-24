@@ -96,7 +96,7 @@
  * [ ] ERROR (function)
  * [ ] ETYPECASE
  * [ ] EVAL-WHEN
- * [ ] EVERY
+ * [x] EVERY
  * [ ] EXTENDED-CHAR
  * [ ] FDEFINITION
  * [ ] FILL
@@ -187,8 +187,8 @@
  * [ ] NBUTLAST
  * [ ] NEXT-METHOD-P
  * [ ] NO-APPLICABLE-METHOD
- * [ ] NOTANY
- * [ ] NOTEVERY
+ * [x] NOTANY
+ * [x] NOTEVERY
  * [ ] NRECONC
  * [ ] NSET-DIFFERENCE
  * [ ] NSET-EXCLUSIVE-OR
@@ -272,7 +272,7 @@
  * [ ] SLOT-MISSING
  * [ ] SLOT-UNBOUND
  * [ ] SLOT-VALUE
- * [ ] SOME
+ * [x] SOME
  * [ ] SPECIAL-OPERATOR-P
  * [ ] STEP
  * [ ] STORAGE-CONDITION
