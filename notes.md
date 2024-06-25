@@ -10,9 +10,9 @@
  * [x] NOTEVERY
  * [x] SOME
  * [x] POP
- * [ ] PUSH
+ * [x] PUSH
  * [ ] PUSHNEW
- * [ ] PSETF
+ * [x] PSETF
  * [x] RANDOM-STATE-P
  * [x] RATIONALP
  * [ ] PRINT-OBJECT

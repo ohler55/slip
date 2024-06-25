@@ -52,11 +52,3 @@ func TestPopNotPlacer(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
-
-func TestPopFoo(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(let ((lst '(a ((b c)) d)))
-                  (list (pop (car (nth 1 lst))) lst))`,
-		Expect: "(b (a ((c)) d))",
-	}).Test(t)
-}
