@@ -60,10 +60,7 @@ func (f *Butlast) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 				slip.PanicType("n", args[1], "integer")
 			}
 		}
-		switch len(list) {
-		case 0:
-			// leave result as nil
-		default:
+		if 0 < len(list) {
 			if _, ok := list[len(list)-1].(slip.Tail); ok {
 				n++
 			}

@@ -355,6 +355,11 @@ func (obj *Array) ElementType() Symbol {
 	return obj.elementType
 }
 
+// Elements returns the elements of the array.
+func (obj *Array) Elements() []Object {
+	return obj.elements
+}
+
 func checkArrayElementType(v Object, et Symbol) {
 	if v != nil && 0 < len(et) {
 		for _, sym := range v.Hierarchy() {

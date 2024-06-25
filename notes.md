@@ -5,10 +5,18 @@
 - next
 
  * [x] EVERY
- * [ ] NBUTLAST
+ * [x] NBUTLAST
  * [x] NOTANY
  * [x] NOTEVERY
  * [x] SOME
+ * [x] MAKE-LIST
+ * [x] LIST-LENGTH
+ * [x] COPY-ALIST
+ * [x] COPY-LIST
+ * [x] COPY-SEQ
+ * [ ] COPY-TREE - deep copy
+ * [ ] CONSTANTLY
+ * [ ] CONSTANTP
  * [x] POP
  * [x] PUSH
  * [ ] PUSHNEW
@@ -26,6 +34,7 @@
  * [ ] SUBSTITUTE
  * [ ] SUBSTITUTE-IF
  * [ ] SUBSTITUTE-IF-NOT
+ - gi:addnew - like pushnew but at end
 
 
  - package-export
