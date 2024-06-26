@@ -15,16 +15,14 @@
  * [x] COPY-LIST
  * [x] COPY-SEQ
  * [ ] COPY-TREE - deep copy
- * [ ] CONSTANTLY
- * [ ] CONSTANTP
  * [x] POP
  * [x] PUSH
  * [ ] PUSHNEW
  * [x] PSETF
  * [x] RANDOM-STATE-P
  * [x] RATIONALP
- * [ ] PRINT-OBJECT
- * [ ] PRINT-UNREADABLE-OBJECT
+ * [x] PRINT-OBJECT
+ * [x] PRINT-UNREADABLE-OBJECT - #<type addr>
  * [ ] PAIRLIS
  * [ ] SUBLIS
  * [ ] SUBSETP
