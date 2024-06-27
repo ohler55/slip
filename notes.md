@@ -14,10 +14,10 @@
  * [x] COPY-ALIST
  * [x] COPY-LIST
  * [x] COPY-SEQ
- * [ ] COPY-TREE - deep copy
+ * [x] COPY-TREE
  * [x] POP
  * [x] PUSH
- * [ ] PUSHNEW
+ * [x] PUSHNEW
  * [x] PSETF
  * [x] RANDOM-STATE-P
  * [x] RATIONALP
@@ -25,6 +25,7 @@
  * [x] PRINT-UNREADABLE-OBJECT - #<type addr>
  * [ ] PAIRLIS
  * [ ] SUBLIS
+ * [ ] NSUBLIS
  * [ ] SUBSETP
  * [ ] SUBST
  * [ ] SUBST-IF
@@ -32,7 +33,15 @@
  * [ ] SUBSTITUTE
  * [ ] SUBSTITUTE-IF
  * [ ] SUBSTITUTE-IF-NOT
- - gi:addnew - like pushnew but at end
+ * [ ] GET-PROPERTIES
+ * [ ] GET
+ * [ ] GETF
+ * [ ] REMF
+ * [ ] REMPROP
+ * [ ] SYMBOL-PLIST
+ * [ ] TAILP
+ * [ ] LDIFF
+ + gi:addnew
 
 
  - package-export

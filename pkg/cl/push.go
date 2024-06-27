@@ -30,9 +30,9 @@ func init() {
 			Return: "object",
 			Text:   `__push__ returns the list referenced by _place_ after pushing _item_ to the head of the list.`,
 			Examples: []string{
-				"(setq list '(b c))",
-				"(push list) => (a b c)",
-				"list => (a b c)",
+				"(setq lst '(b c))",
+				"(push 'a lst) => (a b c)",
+				"lst => (a b c)",
 			},
 		}, &slip.CLPkg)
 }

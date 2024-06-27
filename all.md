@@ -59,7 +59,7 @@
  * [x] COPY-SEQ
  * [ ] COPY-STRUCTURE
  * [ ] COPY-SYMBOL
- * [ ] COPY-TREE
+ * [x] COPY-TREE
  * [ ] COSH
  * [ ] CTYPECASE
  * [ ] DECODE-FLOAT
@@ -231,7 +231,7 @@
  * [ ] PROGV
  * [x] PSETF
  * [x] PUSH
- * [ ] PUSHNEW
+ * [x] PUSHNEW
  * [ ] READ-DELIMITED-LIST
  * [ ] READ-PRESERVING-WHITESPACE
  * [ ] READ-SEQUENCE
