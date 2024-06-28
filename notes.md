@@ -23,7 +23,7 @@
  * [x] RATIONALP
  * [x] PRINT-OBJECT
  * [x] PRINT-UNREADABLE-OBJECT - #<type addr>
- * [ ] PAIRLIS
+ * [x] PAIRLIS
  * [ ] SUBLIS
  * [ ] NSUBLIS
  * [ ] SUBSETP
