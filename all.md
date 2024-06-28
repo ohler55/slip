@@ -192,7 +192,7 @@
  * [ ] NRECONC
  * [ ] NSET-DIFFERENCE
  * [ ] NSET-EXCLUSIVE-OR
- * [ ] NSUBLIS
+ * [x] NSUBLIS
  * [ ] NSUBST
  * [ ] NSUBST-IF
  * [ ] NSUBST-IF-NOT
@@ -283,7 +283,7 @@
  * [ ] STRUCTURE
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
- * [ ] SUBLIS
+ * [x] SUBLIS
  * [ ] SUBSETP
  * [ ] SUBST
  * [ ] SUBST-IF

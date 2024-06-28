@@ -24,9 +24,13 @@
  * [x] PRINT-OBJECT
  * [x] PRINT-UNREADABLE-OBJECT - #<type addr>
  * [x] PAIRLIS
- * [ ] SUBLIS
- * [ ] NSUBLIS
- * [ ] SUBSETP
+ * [x] SUBLIS
+ * [x] NSUBLIS
+ * [ ] SUBSETP (list-1 list-2 &key key test)
+  - apply :key to list-2 to for a keys list
+  - for each in list-1, get key then walks keys and call :test on each pair,
+   - if found then move on to next in list-1
+   - if at end and not found then return false
  * [ ] SUBST
  * [ ] SUBST-IF
  * [ ] SUBST-IF-NOT

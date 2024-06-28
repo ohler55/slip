@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
 
 package cl
 
@@ -46,7 +46,7 @@ in the list at _place_. A return of false will cause _item_ to be prepended.`,
 in the list at _place_. A return of true will cause _item_ to be prepended.`,
 				},
 			},
-			Return: "cons|list",
+			Return: "list",
 			Text:   `__pushnew__ returns list referred to by _place_.`,
 			Examples: []string{
 				"(setq lst '(b c))",
