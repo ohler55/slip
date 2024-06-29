@@ -56,7 +56,7 @@ type NsubstIf struct {
 }
 
 // Call the function with the arguments provided.
-func (f *NsubstIf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *NsubstIf) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 3, 7)
 	pc := ResolveToCaller(s, args[1], depth)
 	var kc slip.Caller

@@ -288,7 +288,7 @@
  * [x] SUBST
  * [x] SUBST-IF
  - [-] SUBST-IF-NOT (deprecated)
- * [ ] SUBSTITUTE
+ * [x] SUBSTITUTE
  * [ ] SUBSTITUTE-IF
  - [-] SUBSTITUTE-IF-NOT (deprecated)
  * [ ] SUBTYPEP

@@ -62,7 +62,7 @@ type Nsubst struct {
 }
 
 // Call the function with the arguments provided.
-func (f *Nsubst) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Nsubst) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 3, 7)
 	var (
 		kc slip.Caller

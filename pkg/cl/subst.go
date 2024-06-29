@@ -49,7 +49,7 @@ in the list at _place_. A return of false will cause _item_ to be prepended.`,
 			Text:   `__subst__ returns _tree_ with all occurrences of the _old_ with _new_.`,
 			Examples: []string{
 				"(setq lst '(a (b (c)))",
-				"(subst 'b 2 lst) => (a (2 (c))))",
+				"(subst 2 'b lst) => (a (2 (c))))",
 				"lst => (a (b (c)))",
 			},
 		}, &slip.CLPkg)
@@ -61,7 +61,7 @@ type Subst struct {
 }
 
 // Call the function with the arguments provided.
-func (f *Subst) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Subst) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 3, 7)
 	var (
 		kc slip.Caller

@@ -31,7 +31,7 @@
  * [x] SUBST-IF
  * [x] NSUBST
  * [x] NSUBST-IF
- * [ ] SUBSTITUTE
+ * [x] SUBSTITUTE
  * [ ] SUBSTITUTE-IF
  * [ ] GET-PROPERTIES
  * [ ] GET
