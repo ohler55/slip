@@ -9,12 +9,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Substitute{Function: slip.Function{Name: "substitute", Args: args}}
+			f := SubstituteIf{Function: slip.Function{Name: "substitute-if", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "substitute",
+			Name: "substitute-if",
 			Args: []*slip.DocArg{
 				{
 					Name: "new",
@@ -22,9 +22,9 @@ func init() {
 					Text: "The replacement value.",
 				},
 				{
-					Name: "old",
-					Type: "object",
-					Text: "The value to replace.",
+					Name: "predicate",
+					Type: "symbol|lambda",
+					Text: "The function to call to determine if a value should be replaced.",
 				},
 				{
 					Name: "sequence",
@@ -37,12 +37,6 @@ func init() {
 					Type: "symbol|lambda",
 					Text: `A function that expects one argument to apply to each element
 in the _alist_ to return a key for comparison. The same function is also applied to _item_.`,
-				},
-				{
-					Name: "test",
-					Type: "symbol|lambda",
-					Text: `A function that expects two arguments; the _item_ and each element
-in the list at _place_. A return of false will cause _item_ to be prepended.`,
 				},
 				{
 					Name: "from-end",
@@ -66,26 +60,25 @@ in the list at _place_. A return of false will cause _item_ to be prepended.`,
 				},
 			},
 			Return: "sequence",
-			Text:   `__substitute__ returns a copy _sequence_ with _old_ substituted with _new_.`,
+			Text:   `__substitute-if__ returns a copy _sequence_ with _old_ substitute-ifd with _new_.`,
 			Examples: []string{
 				"(setq lst '(a b c)",
-				"(substitute 2 'b lst) => (a 2 c)",
+				"(substitute-if 2 (lambda (v) (equal v 'b)) lst) => (a 2 c)",
 				"lst => (a b c)",
 			},
 		}, &slip.CLPkg)
 }
 
-// Substitute represents the substitute function.
-type Substitute struct {
+// SubstituteIf represents the substitute-if function.
+type SubstituteIf struct {
 	slip.Function
 }
 
-type subRep struct {
+type subIfRep struct {
 	s     *slip.Scope
-	old   slip.Object
 	rep   slip.Object
+	pc    slip.Caller
 	kc    slip.Caller
-	tc    slip.Caller
 	start int
 	end   int
 	count int
@@ -94,8 +87,8 @@ type subRep struct {
 }
 
 // Call the function with the arguments provided.
-func (f *Substitute) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	sr := parseSubstituteArgs(f, s, args, depth)
+func (f *SubstituteIf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	sr := parseSubstituteIfArgs(f, s, args, depth)
 	switch seq := args[2].(type) {
 	case nil:
 		// nothing to replace
@@ -129,21 +122,18 @@ func (f *Substitute) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	return
 }
 
-func parseSubstituteArgs(f slip.Object, s *slip.Scope, args slip.List, depth int) *subRep {
+func parseSubstituteIfArgs(f slip.Object, s *slip.Scope, args slip.List, depth int) *subIfRep {
 	slip.ArgCountCheck(f, args, 3, 15)
-	sr := subRep{
+	sr := subIfRep{
 		s:     s,
 		rep:   args[0],
-		old:   args[1],
+		pc:    ResolveToCaller(s, args[1], depth),
 		count: -1,
 		end:   -1,
 	}
 	kargs := args[3:]
 	if v, ok := slip.GetArgsKeyValue(kargs, slip.Symbol(":key")); ok {
 		sr.kc = ResolveToCaller(s, v, depth)
-	}
-	if v, ok := slip.GetArgsKeyValue(kargs, slip.Symbol(":test")); ok {
-		sr.tc = ResolveToCaller(s, v, depth)
 	}
 	if v, ok := slip.GetArgsKeyValue(kargs, slip.Symbol(":from-end")); ok {
 		sr.rev = v != nil
@@ -184,7 +174,7 @@ func parseSubstituteArgs(f slip.Object, s *slip.Scope, args slip.List, depth int
 	return &sr
 }
 
-func (sr *subRep) replace(seq slip.List) slip.Object {
+func (sr *subIfRep) replace(seq slip.List) slip.Object {
 	if sr.end < 0 || len(seq) < sr.end {
 		sr.end = len(seq)
 	}
@@ -207,16 +197,12 @@ func (sr *subRep) replace(seq slip.List) slip.Object {
 	return seq
 }
 
-func (sr *subRep) maybe(seq slip.List, i int) bool {
+func (sr *subIfRep) maybe(seq slip.List, i int) bool {
 	v := seq[i]
 	if sr.kc != nil {
 		v = sr.kc.Call(sr.s, slip.List{v}, sr.depth)
 	}
-	if sr.tc != nil {
-		if sr.tc.Call(sr.s, slip.List{sr.old, v}, sr.depth) != nil {
-			seq[i] = sr.rep
-		}
-	} else if slip.ObjectEqual(sr.old, v) {
+	if sr.pc.Call(sr.s, slip.List{v}, sr.depth) != nil {
 		seq[i] = sr.rep
 	}
 	sr.count--

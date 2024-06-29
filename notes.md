@@ -32,7 +32,9 @@
  * [x] NSUBST
  * [x] NSUBST-IF
  * [x] SUBSTITUTE
- * [ ] SUBSTITUTE-IF
+ * [x] NSUBSTITUTE
+ * [x] SUBSTITUTE-IF
+ * [x] NSUBSTITUTE-IF
  * [ ] GET-PROPERTIES
  * [ ] GET
  * [ ] GETF
