@@ -28,14 +28,11 @@
  * [x] NSUBLIS
  * [x] SUBSETP
  * [x] SUBST
- * [ ] SUBST-IF
- * [ ] SUBST-IF-NOT
- * [ ] NSUBST
- * [ ] NSUBST-IF
- * [ ] NSUBST-IF-NOT
+ * [x] SUBST-IF
+ * [x] NSUBST
+ * [x] NSUBST-IF
  * [ ] SUBSTITUTE
  * [ ] SUBSTITUTE-IF
- * [ ] SUBSTITUTE-IF-NOT
  * [ ] GET-PROPERTIES
  * [ ] GET
  * [ ] GETF

@@ -193,13 +193,13 @@
  * [ ] NSET-DIFFERENCE
  * [ ] NSET-EXCLUSIVE-OR
  * [x] NSUBLIS
- * [ ] NSUBST
- * [ ] NSUBST-IF
- * [ ] NSUBST-IF-NOT
+ * [x] NSUBST
+ * [x] NSUBST-IF
+ - [-] NSUBST-IF-NOT (deprecated)
  * [ ] NSUBSTITUTE
  * [ ] NSUBSTITUTE-IF
- * [ ] NSUBSTITUTE-IF-NOT
- * [ ] NTH-VALUE
+ - [-] NSUBSTITUTE-IF-NOT (deprecated)
+ * [x] NTH-VALUE
  * [ ] NUMERATOR
  * [ ] OPEN-STREAM-P
  * [ ] OTHERWISE
@@ -286,11 +286,11 @@
  * [x] SUBLIS
  * [x] SUBSETP
  * [x] SUBST
- * [ ] SUBST-IF
- * [ ] SUBST-IF-NOT
+ * [x] SUBST-IF
+ - [-] SUBST-IF-NOT (deprecated)
  * [ ] SUBSTITUTE
  * [ ] SUBSTITUTE-IF
- * [ ] SUBSTITUTE-IF-NOT
+ - [-] SUBSTITUTE-IF-NOT (deprecated)
  * [ ] SUBTYPEP
  * [ ] SYMBOL-MACROLET
  * [ ] SYMBOL-PLIST
