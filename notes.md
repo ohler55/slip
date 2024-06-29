@@ -27,9 +27,12 @@
  * [x] SUBLIS
  * [x] NSUBLIS
  * [x] SUBSETP
- * [ ] SUBST
+ * [x] SUBST
  * [ ] SUBST-IF
  * [ ] SUBST-IF-NOT
+ * [ ] NSUBST
+ * [ ] NSUBST-IF
+ * [ ] NSUBST-IF-NOT
  * [ ] SUBSTITUTE
  * [ ] SUBSTITUTE-IF
  * [ ] SUBSTITUTE-IF-NOT

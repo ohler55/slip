@@ -285,7 +285,7 @@
  * [ ] STRUCTURE-OBJECT
  * [x] SUBLIS
  * [x] SUBSETP
- * [ ] SUBST
+ * [x] SUBST
  * [ ] SUBST-IF
  * [ ] SUBST-IF-NOT
  * [ ] SUBSTITUTE
