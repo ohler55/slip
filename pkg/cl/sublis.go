@@ -41,7 +41,7 @@ in the list at _place_. A return of false will cause _item_ to be prepended.`,
 				},
 			},
 			Return: "object",
-			Text:   `__sublis__ returns _tree_ with all occurances of the _alist_ cars with _alist_ cdrs.`,
+			Text:   `__sublis__ returns _tree_ with all occurrences of the _alist_ cars with _alist_ cdrs.`,
 			Examples: []string{
 				"(setq lst '(a (b (c)))",
 				"(sublis '((a . 1) (b . 2) (c . 3)) lst) => (1 (2 (3))))",
@@ -59,6 +59,9 @@ type Sublis struct {
 func (f *Sublis) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 6)
 	alist, ok := args[0].(slip.List)
+	if !ok {
+		slip.PanicType("alist", args[0], "association list")
+	}
 	for _, a := range alist {
 		if _, ok = a.(slip.List); !ok {
 			slip.PanicType("alist", args[0], "association list")

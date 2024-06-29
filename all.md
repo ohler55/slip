@@ -284,7 +284,7 @@
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
  * [x] SUBLIS
- * [ ] SUBSETP
+ * [x] SUBSETP
  * [ ] SUBST
  * [ ] SUBST-IF
  * [ ] SUBST-IF-NOT

@@ -31,3 +31,10 @@ func TestSublisNotAssoc(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestSublisNotList(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(sublis t '(a b))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}

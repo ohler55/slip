@@ -41,7 +41,7 @@ in the list at _place_. A return of false will cause _item_ to be prepended.`,
 				},
 			},
 			Return: "object",
-			Text: `__nsublis__ returns _tree_ with all occurances of the _alist_ cars with _alist_ cdrs.
+			Text: `__nsublis__ returns _tree_ with all occurrences of the _alist_ cars with _alist_ cdrs.
 Unlike __sublis__, __nsublis__ modifies the provided _tree_.`,
 			Examples: []string{
 				"(setq lst '(a (b (c)))",
@@ -60,6 +60,9 @@ type Nsublis struct {
 func (f *Nsublis) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 6)
 	alist, ok := args[0].(slip.List)
+	if !ok {
+		slip.PanicType("alist", args[0], "association list")
+	}
 	for _, a := range alist {
 		if _, ok = a.(slip.List); !ok {
 			slip.PanicType("alist", args[0], "association list")
