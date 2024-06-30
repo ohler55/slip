@@ -35,13 +35,9 @@
  * [x] NSUBSTITUTE
  * [x] SUBSTITUTE-IF
  * [x] NSUBSTITUTE-IF
- * [ ] SET-DIFFERENCE - have to do the hard way, is it worth optimizing for list of one type? (symbol, string, fixnum)
-  - start with the hard way, optimize later if needed
-   - objInList
-   - objInListTest
-   - look at union and intersection
+ * [x] SET-DIFFERENCE
  * [ ] SET-EXCLUSIVE-OR
- * [ ] NSET-DIFFERENCE
+ * [x] NSET-DIFFERENCE
  * [ ] NSET-EXCLUSIVE-OR
  * [ ] GET-PROPERTIES (plist indicator-list) => indicator, value, tail
  * [ ] GET (symbol indicator &optional default)

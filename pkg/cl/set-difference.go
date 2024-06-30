@@ -39,11 +39,9 @@ in the list at _place_. A return of true indicates a match.`,
 				},
 			},
 			Return: "sequence",
-			Text:   `__set-difference__ returns a copy _sequence_ with _old_ set-differenced with _new_.`,
+			Text:   `__set-difference__ returns a list of all element from _list-1_ not in _list-2_.`,
 			Examples: []string{
-				"(setq lst '(a b c)",
-				"(set-difference 2 'b lst) => (a 2 c)",
-				"lst => (a b c)",
+				"(set-difference '(a b c) '(b d)) => (a c)",
 			},
 		}, &slip.CLPkg)
 }
@@ -55,8 +53,27 @@ type SetDifference struct {
 
 // Call the function with the arguments provided.
 func (f *SetDifference) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	list1, list2, kc, tc := parseSetDifferenceArgs(f, s, args, depth)
-
+	slip.ArgCountCheck(f, args, 2, 6)
+	var (
+		list1 slip.List
+		list2 slip.List
+		kc    slip.Caller
+		tc    slip.Caller
+		ok    bool
+	)
+	if list1, ok = args[0].(slip.List); !ok && args[0] != nil {
+		slip.PanicType("list-1", args[0], "list")
+	}
+	if list2, ok = args[1].(slip.List); !ok && args[1] != nil {
+		slip.PanicType("list-2", args[1], "list")
+	}
+	args = args[2:]
+	if v, ok := slip.GetArgsKeyValue(args, slip.Symbol(":key")); ok {
+		kc = ResolveToCaller(s, v, depth)
+	}
+	if v, ok := slip.GetArgsKeyValue(args, slip.Symbol(":test")); ok {
+		tc = ResolveToCaller(s, v, depth)
+	}
 	keys := list2
 	if kc != nil {
 		keys = make(slip.List, len(list2))
@@ -87,28 +104,4 @@ func (f *SetDifference) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 		}
 	}
 	return diff
-}
-
-func parseSetDifferenceArgs(
-	f slip.Object,
-	s *slip.Scope,
-	args slip.List,
-	depth int) (list1, list2 slip.List, kc, tc slip.Caller) {
-
-	slip.ArgCountCheck(f, args, 2, 6)
-	var ok bool
-	if list1, ok = args[0].(slip.List); !ok && args[0] != nil {
-		slip.PanicType("list-1", args[0], "list")
-	}
-	if list2, ok = args[1].(slip.List); !ok && args[1] != nil {
-		slip.PanicType("list-2", args[1], "list")
-	}
-	args = args[2:]
-	if v, ok := slip.GetArgsKeyValue(args, slip.Symbol(":key")); ok {
-		kc = ResolveToCaller(s, v, depth)
-	}
-	if v, ok := slip.GetArgsKeyValue(args, slip.Symbol(":test")); ok {
-		tc = ResolveToCaller(s, v, depth)
-	}
-	return
 }
