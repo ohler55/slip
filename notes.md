@@ -35,14 +35,21 @@
  * [x] NSUBSTITUTE
  * [x] SUBSTITUTE-IF
  * [x] NSUBSTITUTE-IF
- * [ ] GET-PROPERTIES
- * [ ] GET
- * [ ] GETF
- * [ ] REMF
- * [ ] REMPROP
- * [ ] SYMBOL-PLIST
- * [ ] TAILP
- * [ ] LDIFF
+ * [ ] SET-DIFFERENCE - have to do the hard way, is it worth optimizing for list of one type? (symbol, string, fixnum)
+  - start with the hard way, optimize later if needed
+   - objInList
+   - objInListTest
+   - look at union and intersection
+ * [ ] SET-EXCLUSIVE-OR
+ * [ ] NSET-DIFFERENCE
+ * [ ] NSET-EXCLUSIVE-OR
+ * [ ] GET-PROPERTIES (plist indicator-list) => indicator, value, tail
+ * [ ] GET (symbol indicator &optional default)
+ * [ ] GETF (plist indicator &optional default)
+ * [ ] REMF (place indicator) => boolean
+ * [ ] REMPROP (symbol indicator)
+ * [ ] TAILP (object list)
+ * [ ] LDIFF (list object)
  + gi:addnew
 
 
