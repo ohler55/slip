@@ -36,9 +36,9 @@
  * [x] SUBSTITUTE-IF
  * [x] NSUBSTITUTE-IF
  * [x] SET-DIFFERENCE
- * [ ] SET-EXCLUSIVE-OR
+ * [x] SET-EXCLUSIVE-OR
  * [x] NSET-DIFFERENCE
- * [ ] NSET-EXCLUSIVE-OR
+ * [x] NSET-EXCLUSIVE-OR
  * [ ] GET-PROPERTIES (plist indicator-list) => indicator, value, tail
  * [ ] GET (symbol indicator &optional default)
  * [ ] GETF (plist indicator &optional default)

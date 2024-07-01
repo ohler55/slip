@@ -18,7 +18,7 @@ func TestSetDifferenceBasic(t *testing.T) {
 
 func TestSetDifferenceKey(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(set-difference '((a . 1) (b . 2) (c . 3)) '((b . 5) (d .3)) :key 'car)`,
+		Source: `(set-difference '((a . 1) (b . 2) (c . 3)) '((b . 5) (d . 3)) :key 'car)`,
 		Expect: "((a . 1) (c . 3))",
 	}).Test(t)
 }
