@@ -29,3 +29,11 @@ func TestGetfNotList(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestGetfSetf(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((plist '(a 1 b 2 c 3)))
+                  (list (setf (getf plist 'b) 4) plist))`,
+		Expect: "(4 (a 1 b 4 c 3))",
+	}).Test(t)
+}
