@@ -43,6 +43,6 @@ func (f *Sixth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 }
 
 // Place a value in the sixth position of a list or cons.
-func (f *Sixth) Place(args slip.List, value slip.Object) {
+func (f *Sixth) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	placeN(f, args, 5, value)
 }

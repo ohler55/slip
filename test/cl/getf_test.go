@@ -30,10 +30,18 @@ func TestGetfNotList(t *testing.T) {
 	}).Test(t)
 }
 
-func TestGetfSetf(t *testing.T) {
+func TestGetfSetfReplace(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((plist '(a 1 b 2 c 3)))
                   (list (setf (getf plist 'b) 4) plist))`,
 		Expect: "(4 (a 1 b 4 c 3))",
+	}).Test(t)
+}
+
+func TestGetfSetfAdd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((plist '(a 1 b 2 c 3)))
+                  (list (setf (getf plist 'd) 4) plist))`,
+		Expect: "(4 (a 1 b 2 c 3 d 4))",
 	}).Test(t)
 }

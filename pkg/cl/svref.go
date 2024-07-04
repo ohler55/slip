@@ -56,7 +56,7 @@ func (f *Svref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 }
 
 // Place a value in the first position of a list or cons.
-func (f *Svref) Place(args slip.List, value slip.Object) {
+func (f *Svref) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	index, ok := args[1].(slip.Fixnum)
 	if !ok {

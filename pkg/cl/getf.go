@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -55,7 +53,7 @@ type Getf struct {
 func (f *Getf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 3)
 	var plist slip.List
-	switch ta := args[0].Eval(s, depth+1).(type) {
+	switch ta := s.Eval(args[0], depth+1).(type) {
 	case nil:
 		// leave as an empty list
 	case slip.List:
@@ -76,14 +74,12 @@ func (f *Getf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 }
 
 // Place a value in the plist.
-func (f *Getf) Place(args slip.List, value slip.Object) {
+func (f *Getf) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 3)
-	fmt.Printf("*** args: %s value: %s\n", args, value)
-
 	var plist slip.List
-	switch ta := args[0].(type) {
+	switch ta := s.Eval(args[0], 0).(type) {
 	case nil:
-		// TBD add later
+		// leave as an empty list
 	case slip.List:
 		plist = ta
 	default:
@@ -96,10 +92,15 @@ func (f *Getf) Place(args slip.List, value slip.Object) {
 			return
 		}
 	}
+	plist = append(plist, args[1], value)
+	switch ta := args[0].(type) {
+	case slip.Symbol:
+		s.Set(ta, plist)
+	case slip.Placer:
 
-	fmt.Printf("*** plist: %s value: %s\n", plist, value)
-	// TBD if not found then add to list
-	//  plist arg can be a place
+		// TBD
+
+	default:
+		slip.PanicType("plist", args[0], "property list")
+	}
 }
-
-// TBD do we need to support nested placers

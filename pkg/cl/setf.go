@@ -71,9 +71,13 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 				if list, ok := v.(slip.List); ok {
 					v = slip.ListToFunc(s, list, d2)
 				}
-				pargs[j] = s.Eval(v, d2)
+				if !ta.SkipArgEval(j) {
+					pargs[j] = s.Eval(v, d2)
+				} else {
+					pargs[j] = v
+				}
 			}
-			ta.Place(pargs, result)
+			ta.Place(s, pargs, result)
 		default:
 			slip.PanicType("placer argument to setf", p, "symbol", "placer")
 		}

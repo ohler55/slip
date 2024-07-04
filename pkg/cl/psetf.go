@@ -77,7 +77,7 @@ func (f *Psetf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 				}
 				pargs[j] = s.Eval(v, d2)
 			}
-			ta.Place(pargs, result)
+			ta.Place(s, pargs, result)
 		default:
 			slip.PanicType("placer argument to psetf", p, "symbol", "placer")
 		}

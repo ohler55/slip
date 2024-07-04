@@ -73,7 +73,7 @@ retry:
 				for i, v := range targs {
 					pargs[i] = s.Eval(v, d2)
 				}
-				ta.Place(pargs, pv[1:])
+				ta.Place(s, pargs, pv[1:])
 			}
 		default:
 			slip.PanicType("place referral", pv, "list")
