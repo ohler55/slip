@@ -65,22 +65,26 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			p = slip.ListToFunc(s, ta, d2)
 			goto Retry
 		case slip.Placer:
-			targs := ta.GetArgs()
-			pargs := make(slip.List, len(targs))
-			for j, v := range targs {
-				if list, ok := v.(slip.List); ok {
-					v = slip.ListToFunc(s, list, d2)
-				}
-				if !ta.SkipArgEval(j) {
-					pargs[j] = s.Eval(v, d2)
-				} else {
-					pargs[j] = v
-				}
-			}
-			ta.Place(s, pargs, result)
+			callPlace(s, ta, result, d2)
 		default:
 			slip.PanicType("placer argument to setf", p, "symbol", "placer")
 		}
 	}
 	return
+}
+
+func callPlace(s *slip.Scope, p slip.Placer, value slip.Object, depth int) {
+	targs := p.GetArgs()
+	pargs := make(slip.List, len(targs))
+	for j, v := range targs {
+		if list, ok := v.(slip.List); ok {
+			v = slip.ListToFunc(s, list, depth)
+		}
+		if !p.SkipArgEval(j) {
+			pargs[j] = s.Eval(v, depth)
+		} else {
+			pargs[j] = v
+		}
+	}
+	p.Place(s, pargs, value)
 }

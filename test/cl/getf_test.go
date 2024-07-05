@@ -45,3 +45,22 @@ func TestGetfSetfAdd(t *testing.T) {
 		Expect: "(4 (a 1 b 2 c 3 d 4))",
 	}).Test(t)
 }
+
+func TestGetfSetfPlace(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((plist '(x (a 1 b 2 c 3))))
+                  (list (setf (getf (cadr plist) 'd) 4) plist))`,
+		Expect: "(4 (x (a 1 b 2 c 3 d 4)))",
+	}).Test(t)
+}
+
+func TestGetfSetfNotPlist(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(setf (getf t 'd) 4)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(setf (getf nil 'd) 4)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}

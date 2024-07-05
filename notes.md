@@ -39,9 +39,8 @@
  * [x] SET-EXCLUSIVE-OR
  * [x] NSET-DIFFERENCE
  * [x] NSET-EXCLUSIVE-OR
- * [ ] GETF (plist indicator &optional default)
-  - also a placer with setf
- * [ ] GET (symbol indicator &optional default)
+ * [x] GETF
+ * [ ] GET (symbol indicator &optional default) - like getf but first arg must be a symbol
  * [ ] GET-PROPERTIES (plist indicator-list) => indicator, value, tail
  * [ ] REMF (place indicator) => boolean
  * [ ] REMPROP (symbol indicator)

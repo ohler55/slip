@@ -97,9 +97,7 @@ func (f *Getf) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	case slip.Symbol:
 		s.Set(ta, plist)
 	case slip.Placer:
-
-		// TBD
-
+		callPlace(s, ta, plist, 0)
 	default:
 		slip.PanicType("plist", args[0], "property list")
 	}
