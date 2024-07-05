@@ -41,7 +41,7 @@
  * [x] NSET-EXCLUSIVE-OR
  * [x] GETF
  * [x] GET
- * [ ] GET-PROPERTIES (plist indicator-list) => indicator, value, tail
+ * [x] GET-PROPERTIES
  * [ ] REMF (place indicator) => boolean
  * [ ] REMPROP (symbol indicator)
  * [ ] TAILP (object list)
