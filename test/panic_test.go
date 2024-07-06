@@ -12,8 +12,8 @@ import (
 func TestPanicBytes(t *testing.T) {
 	f := slip.NewFunc("car", slip.List{slip.NewFunc("cdr", slip.List{slip.True})})
 	msg, stack := recoverPanic(f)
-	tt.Equal(t, "argument to cdr must be a cons or list not t, a t.", msg)
-	tt.Equal(t, `## argument to cdr must be a cons or list not t, a t.
+	tt.Equal(t, "arg must be a cons or list not t, a t.", msg)
+	tt.Equal(t, `## arg must be a cons or list not t, a t.
 ##  (cdr t)
 ##  (car (cdr t))
 ##  (recover)
