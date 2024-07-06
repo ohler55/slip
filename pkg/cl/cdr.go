@@ -40,11 +40,8 @@ type Cdr struct {
 
 // Call the function with the arguments provided.
 func (f *Cdr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	a := args[0]
-	switch list := a.(type) {
+	slip.ArgCountCheck(f, args, 1, 1)
+	switch list := args[0].(type) {
 	case nil:
 		// leave result as nil
 	case slip.List:
@@ -61,7 +58,7 @@ func (f *Cdr) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 			result = list[1:]
 		}
 	default:
-		slip.PanicType("argument to cdr", list, "cons", "list")
+		slip.PanicType("arg", list, "cons", "list")
 	}
 	return
 }
@@ -81,6 +78,6 @@ func (f *Cdr) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		}
 		slip.NewPanic("setf on cdr of a list is not implemented")
 	default:
-		slip.PanicType("argument to cdr", list, "cons", "list")
+		slip.PanicType("arg", list, "cons", "list")
 	}
 }

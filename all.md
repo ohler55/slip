@@ -112,14 +112,11 @@
  * [ ] GCD
  * [ ] GENERIC-FUNCTION
  * [ ] GENTEMP
- * [x] GET
  * [ ] GET-DECODED-TIME
  * [ ] GET-DISPATCH-MACRO-CHARACTER
  * [ ] GET-MACRO-CHARACTER
- * [x] GET-PROPERTIES
  * [ ] GET-SETF-EXPANSION
  * [ ] GET-UNIVERSAL-TIME
- * [x] GETF
  * [ ] HANDLER-BIND
  * [ ] HANDLER-CASE
  * [ ] HOST-NAMESTRING
@@ -137,7 +134,6 @@
  * [ ] LCM
  * [ ] LDB
  * [ ] LDB-TEST
- * [ ] LDIFF
  * [ ] LOAD-LOGICAL-PATHNAME-TRANSLATIONS
  * [ ] LOAD-TIME-VALUE
  * [ ] LOCALLY
@@ -179,8 +175,6 @@
  * [ ] NEXT-METHOD-P
  * [ ] NO-APPLICABLE-METHOD
  * [ ] NRECONC
- * [x] NSET-DIFFERENCE
- * [x] NSET-EXCLUSIVE-OR
  * [ ] NUMERATOR
  * [ ] OPEN-STREAM-P
  * [ ] OTHERWISE
@@ -211,19 +205,14 @@
  * [ ] READ-SEQUENCE
  * [ ] REALPART
  * [ ] REDUCE
- * [x] REMF
  * [ ] REMOVE-METHOD
- * [x] REMPROP
  * [ ] REPLACE
- * [ ] REST
  * [ ] REVAPPEND
  * [ ] ROTATEF
  * [ ] SATISFIES
  * [ ] SBIT
  * [ ] SCALE-FLOAT
- * [x] SET-DIFFERENCE
  * [ ] SET-DISPATCH-MACRO-CHARACTER
- * [x] SET-EXCLUSIVE-OR
  * [ ] SET-MACRO-CHARACTER
  * [ ] SET-PPRINT-DISPATCH
  * [ ] SET-SYNTAX-FROM-CHAR
@@ -262,7 +251,6 @@
  * [ ] SYNONYM-STREAM
  * [ ] SYNONYM-STREAM-SYMBOL
  * [ ] TAGBODY
- * [ ] TAILP
  * [ ] TANH
  * [ ] THE
  * [ ] TRANSLATE-LOGICAL-PATHNAME
@@ -555,9 +543,12 @@
  * [x] FUNCTION
  * [x] FUNCTIONP
  * [x] GENSYM
+ * [x] GET
  * [x] GET-INTERNAL-REAL-TIME
  * [x] GET-INTERNAL-RUN-TIME
  * [x] GET-OUTPUT-STREAM-STRING
+ * [x] GET-PROPERTIES
+ * [x] GETF
  * [x] GETHASH
  * [x] GO
  * [x] GRAPHIC-CHAR-P
@@ -685,6 +676,8 @@
  * [x] NOTEVERY
  * [x] NOTINLINE
  * [x] NREVERSE
+ * [x] NSET-DIFFERENCE
+ * [x] NSET-EXCLUSIVE-OR
  * [x] NSTRING-CAPITALIZE
  * [x] NSTRING-DOWNCASE
  * [x] NSTRING-UPCASE
@@ -764,13 +757,16 @@
  * [x] REAL
  * [x] REALP
  * [x] REM
+ * [x] REMF
  * [x] REMHASH
  * [x] REMOVE
  * [x] REMOVE-DUPLICATES
  * [x] REMOVE-IF
+ * [x] REMPROP
  * [x] RENAME-FILE
  * [x] RENAME-PACKAGE
  * [x] REQUIRE
+ * [x] REST
  * [x] RETURN
  * [x] RETURN-FROM
  * [x] REVERSE
@@ -785,6 +781,8 @@
  * [x] SEQUENCE
  * [x] SERIOUS-CONDITION
  * [x] SET
+ * [x] SET-DIFFERENCE
+ * [x] SET-EXCLUSIVE-OR
  * [x] SETF
  * [x] SETQ
  * [x] SEVENTH
@@ -939,6 +937,7 @@
  - [-] INVOKE-DEBUGGER
  - [-] INVOKE-RESTART
  - [-] INVOKE-RESTART-INTERACTIVELY
+ - [-] LDIFF - requires address of sublist to be equal, doesn't fit with slices
  - [-] LISTEN
  - [-] MAKE-INSTANCES-OBSOLETE
  - [-] MEMBER-IF-NOT
@@ -969,6 +968,7 @@
  - [-] STYLE-WARNING
  - [-] SUBST-IF-NOT (deprecated)
  - [-] SUBSTITUTE-IF-NOT (deprecated)
+ - [-] TAILP - requires address of sublist to be equal, doesn't fit with slices
  - [-] THROW (use panic instead)
  - [-] UNTRACE
  - [-] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
