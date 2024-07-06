@@ -211,9 +211,9 @@
  * [ ] READ-SEQUENCE
  * [ ] REALPART
  * [ ] REDUCE
- * [ ] REMF
+ * [x] REMF
  * [ ] REMOVE-METHOD
- * [ ] REMPROP
+ * [x] REMPROP
  * [ ] REPLACE
  * [ ] REST
  * [ ] REVAPPEND

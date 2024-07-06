@@ -42,9 +42,8 @@
  * [x] GETF
  * [x] GET
  * [x] GET-PROPERTIES
- * [ ] REMF (place indicator) => boolean
-  - like setf
- * [ ] REMPROP (symbol indicator)
+ * [x] REMF
+ * [x] REMPROP
  * [ ] TAILP (object list)
  * [ ] LDIFF (list object)
  + gi:addnew
