@@ -18,9 +18,9 @@ func init() {
 			Name: "setf",
 			Args: []*slip.DocArg{
 				{
-					Name: "placer",
-					Type: "placer",
-					Text: "The symbol to bind to the _value_.",
+					Name: "place",
+					Type: "place",
+					Text: "The symbol or place to bind to the _value_.",
 				},
 				{
 					Name: "value",
@@ -29,8 +29,8 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `__setf__ the value of the _symbol_ to _value_. Note that _symbol_ is not evaluated.
-Repeated pairs of _symbol_ and _value_ are supported`,
+			Text: `__setf__ the value of the _place_ to _value_. Note that _place_ is not evaluated.
+Repeated pairs of _place_ and _value_ are supported`,
 			Examples: []string{
 				"(setf) => nil",
 				"(setf x 7) => 7",

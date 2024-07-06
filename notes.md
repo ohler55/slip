@@ -43,6 +43,7 @@
  * [x] GET
  * [x] GET-PROPERTIES
  * [ ] REMF (place indicator) => boolean
+  - like setf
  * [ ] REMPROP (symbol indicator)
  * [ ] TAILP (object list)
  * [ ] LDIFF (list object)
