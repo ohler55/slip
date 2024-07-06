@@ -70,7 +70,7 @@ Retry:
 			pargs[j] = s.Eval(v, d2)
 		}
 		result = addNumbers(tp.Apply(s, pargs, d2), delta)
-		tp.Place(pargs, result)
+		tp.Place(s, pargs, result)
 	default:
 		slip.PanicType("incf placer", tp, "placer", "symbol")
 	}

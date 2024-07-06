@@ -59,7 +59,7 @@ func (f *Gethash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 }
 
 // Place a value in the first position of a list or cons.
-func (f *Gethash) Place(args slip.List, value slip.Object) {
+func (f *Gethash) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	if len(args) != 2 {
 		slip.PanicArgCount(f, 2, 2)
 	}

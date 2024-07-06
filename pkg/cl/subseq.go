@@ -63,7 +63,7 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 }
 
 // Place a value in the first position of a list or cons.
-func (f *Subseq) Place(args slip.List, value slip.Object) {
+func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	start, end, seq := f.getArgs(args)
 	switch ta := seq.(type) {
 	case slip.List:

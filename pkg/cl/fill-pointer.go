@@ -47,7 +47,7 @@ func (f *FillPointer) Call(s *slip.Scope, args slip.List, depth int) (result sli
 }
 
 // Place a value in the first position of a list or cons.
-func (f *FillPointer) Place(args slip.List, value slip.Object) {
+func (f *FillPointer) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	if v, ok := args[0].(*slip.Vector); ok {
 		if num, ok2 := value.(slip.Fixnum); ok2 && 0 <= num && int(num) < v.Size() {

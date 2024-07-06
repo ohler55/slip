@@ -60,7 +60,7 @@ func (f *RowMajorAref) Call(s *slip.Scope, args slip.List, depth int) (result sl
 }
 
 // Place a value in the first position of a list or cons.
-func (f *RowMajorAref) Place(args slip.List, value slip.Object) {
+func (f *RowMajorAref) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	index, ok := args[1].(slip.Fixnum)
 	if !ok {

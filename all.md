@@ -52,15 +52,9 @@
  * [ ] CONJUGATE
  * [ ] CONSTANTLY
  * [ ] CONSTANTP
- * [ ] CONTINUE
- * [ ] COPY-ALIST
- * [ ] COPY-LIST
  * [ ] COPY-PPRINT-DISPATCH
- * [ ] COPY-READTABLE
- * [ ] COPY-SEQ
  * [ ] COPY-STRUCTURE
  * [ ] COPY-SYMBOL
- * [ ] COPY-TREE
  * [ ] COSH
  * [ ] CTYPECASE
  * [ ] DECODE-FLOAT
@@ -97,8 +91,6 @@
  * [ ] ERROR (function)
  * [ ] ETYPECASE
  * [ ] EVAL-WHEN
- * [ ] EVERY
- * [x] EXPORT
  * [ ] EXTENDED-CHAR
  * [ ] FDEFINITION
  * [ ] FILL
@@ -120,14 +112,11 @@
  * [ ] GCD
  * [ ] GENERIC-FUNCTION
  * [ ] GENTEMP
- * [ ] GET
  * [ ] GET-DECODED-TIME
  * [ ] GET-DISPATCH-MACRO-CHARACTER
  * [ ] GET-MACRO-CHARACTER
- * [ ] GET-PROPERTIES
  * [ ] GET-SETF-EXPANSION
  * [ ] GET-UNIVERSAL-TIME
- * [ ] GETF
  * [ ] HANDLER-BIND
  * [ ] HANDLER-CASE
  * [ ] HOST-NAMESTRING
@@ -145,8 +134,6 @@
  * [ ] LCM
  * [ ] LDB
  * [ ] LDB-TEST
- * [ ] LDIFF
- * [ ] LIST-LENGTH
  * [ ] LOAD-LOGICAL-PATHNAME-TRANSLATIONS
  * [ ] LOAD-TIME-VALUE
  * [ ] LOCALLY
@@ -163,7 +150,6 @@
  * [ ] MAKE-CONCATENATED-STREAM
  * [ ] MAKE-DISPATCH-MACRO-CHARACTER
  * [ ] MAKE-ECHO-STREAM
- * [ ] MAKE-LIST
  * [ ] MAKE-LOAD-FORM
  * [ ] MAKE-LOAD-FORM-SAVING-SLOTS
  * [ ] MAKE-METHOD
@@ -186,28 +172,13 @@
  * [ ] MULTIPLE-VALUE-PROG1
  * [ ] MULTIPLE-VALUE-SETQ
  * [ ] MULTIPLE-VALUES-LIMIT
- * [ ] NBUTLAST
  * [ ] NEXT-METHOD-P
  * [ ] NO-APPLICABLE-METHOD
- * [ ] NOTANY
- * [ ] NOTEVERY
  * [ ] NRECONC
- * [ ] NSET-DIFFERENCE
- * [ ] NSET-EXCLUSIVE-OR
- * [ ] NSUBLIS
- * [ ] NSUBST
- * [ ] NSUBST-IF
- * [ ] NSUBST-IF-NOT
- * [ ] NSUBSTITUTE
- * [ ] NSUBSTITUTE-IF
- * [ ] NSUBSTITUTE-IF-NOT
- * [ ] NTH-VALUE
  * [ ] NUMERATOR
  * [ ] OPEN-STREAM-P
  * [ ] OTHERWISE
- * [ ] PACKAGE
  * [ ] PACKAGE-SHADOWING-SYMBOLS
- * [ ] PAIRLIS
  * [ ] PARSE-NAMESTRING
  * [ ] PATHNAME
  * [ ] PATHNAME-DEVICE
@@ -216,7 +187,6 @@
  * [ ] PATHNAME-VERSION
  * [ ] PATHNAMEP
  * [ ] PHASE
- * [ ] POP
  * [ ] PPRINT-DISPATCH
  * [ ] PPRINT-EXIT-IF-LIST-EXHAUSTED
  * [ ] PPRINT-FILL
@@ -229,36 +199,20 @@
  * [ ] PPRINT-TABULAR
  * [ ] PRINT-NOT-READABLE
  * [ ] PRINT-NOT-READABLE-OBJECT
- * [ ] PRINT-OBJECT
- * [ ] PRINT-UNREADABLE-OBJECT
  * [ ] PROGV
- * [ ] PSETF
- * [ ] PUSH
- * [ ] PUSHNEW
- * [ ] RANDOM-STATE-P
- * [ ] RATIONALP
  * [ ] READ-DELIMITED-LIST
  * [ ] READ-PRESERVING-WHITESPACE
  * [ ] READ-SEQUENCE
- * [ ] READTABLE
- * [ ] READTABLE-CASE
- * [ ] READTABLEP
  * [ ] REALPART
  * [ ] REDUCE
- * [ ] REMF
  * [ ] REMOVE-METHOD
- * [ ] REMPROP
  * [ ] REPLACE
- * [ ] REST
  * [ ] REVAPPEND
  * [ ] ROTATEF
- - [-] SAFETY
  * [ ] SATISFIES
  * [ ] SBIT
  * [ ] SCALE-FLOAT
- * [ ] SET-DIFFERENCE
  * [ ] SET-DISPATCH-MACRO-CHARACTER
- * [ ] SET-EXCLUSIVE-OR
  * [ ] SET-MACRO-CHARACTER
  * [ ] SET-PPRINT-DISPATCH
  * [ ] SET-SYNTAX-FROM-CHAR
@@ -281,8 +235,6 @@
  * [ ] SLOT-MISSING
  * [ ] SLOT-UNBOUND
  * [ ] SLOT-VALUE
- * [ ] SOME
- - [-] SPACE
  * [ ] SPECIAL-OPERATOR-P
  * [ ] STEP
  * [ ] STORAGE-CONDITION
@@ -293,21 +245,12 @@
  * [ ] STRUCTURE
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
- * [ ] SUBLIS
- * [ ] SUBSETP
- * [ ] SUBST
- * [ ] SUBST-IF
- * [ ] SUBST-IF-NOT
- * [ ] SUBSTITUTE
- * [ ] SUBSTITUTE-IF
- * [ ] SUBSTITUTE-IF-NOT
  * [ ] SUBTYPEP
  * [ ] SYMBOL-MACROLET
  * [ ] SYMBOL-PLIST
  * [ ] SYNONYM-STREAM
  * [ ] SYNONYM-STREAM-SYMBOL
  * [ ] TAGBODY
- * [ ] TAILP
  * [ ] TANH
  * [ ] THE
  * [ ] TRANSLATE-LOGICAL-PATHNAME
@@ -317,7 +260,6 @@
  * [ ] TWO-WAY-STREAM-INPUT-STREAM
  * [ ] TWO-WAY-STREAM-OUTPUT-STREAM
  * [ ] TYPECASE
- * [x] UNEXPORT
  * [ ] UNSIGNED-BYTE
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
@@ -343,7 +285,6 @@
  * [ ] WRITE-STRING
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
- * [x] INLINE
  * [x] &BODY
  * [x] &KEY
  * [x] &OPTIONAL
@@ -518,6 +459,10 @@
  * [x] CONS
  * [x] CONSP
  * [x] CONTROL-ERROR
+ * [x] COPY-ALIST
+ * [x] COPY-LIST
+ * [x] COPY-SEQ
+ * [x] COPY-TREE
  * [x] COS
  * [x] COUNT
  * [x] COUNT-IF
@@ -560,7 +505,9 @@
  * [x] EQUALP
  * [x] EVAL
  * [x] EVENP
+ * [x] EVERY
  * [x] EXP
+ * [x] EXPORT
  * [x] EXPT
  * [x] FBOUNDP
  * [x] FCEILING
@@ -596,9 +543,12 @@
  * [x] FUNCTION
  * [x] FUNCTIONP
  * [x] GENSYM
+ * [x] GET
  * [x] GET-INTERNAL-REAL-TIME
  * [x] GET-INTERNAL-RUN-TIME
  * [x] GET-OUTPUT-STREAM-STRING
+ * [x] GET-PROPERTIES
+ * [x] GETF
  * [x] GETHASH
  * [x] GO
  * [x] GRAPHIC-CHAR-P
@@ -616,6 +566,7 @@
  * [x] IGNORE-ERRORS
  * [x] IN-PACKAGE
  * [x] INCF
+ * [x] INLINE
  * [x] INPUT-STREAM-P
  * [x] INTEGER
  * [x] INTEGERP
@@ -651,6 +602,7 @@
  * [x] LIST
  * [x] LIST*
  * [x] LIST-ALL-PACKAGES
+ * [x] LIST-LENGTH
  * [x] LISTP
  * [x] LOAD
  * [x] LOG
@@ -679,6 +631,7 @@
  * [x] MAKE-CONDITION
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
+ * [x] MAKE-LIST
  * [x] MAKE-PACKAGE
  * [x] MAKE-RANDOM-STATE
  * [x] MAKE-STRING
@@ -713,17 +666,28 @@
  * [x] MOST-POSITIVE-SINGLE-FLOAT
  * [x] NAME-CHAR
  * [x] NAMESTRING
+ * [x] NBUTLAST
  * [x] NCONC
  * [x] NIL
  * [x] NINTERSECTION
  * [x] NINTH
  * [x] NOT
+ * [x] NOTANY
+ * [x] NOTEVERY
  * [x] NOTINLINE
  * [x] NREVERSE
+ * [x] NSET-DIFFERENCE
+ * [x] NSET-EXCLUSIVE-OR
  * [x] NSTRING-CAPITALIZE
  * [x] NSTRING-DOWNCASE
  * [x] NSTRING-UPCASE
+ * [x] NSUBLIS
+ * [x] NSUBST
+ * [x] NSUBST-IF
+ * [x] NSUBSTITUTE
+ * [x] NSUBSTITUTE-IF
  * [x] NTH
+ * [x] NTH-VALUE
  * [x] NTHCDR
  * [x] NULL
  * [x] NUMBER
@@ -734,6 +698,7 @@
  * [x] OPTIMIZE
  * [x] OR
  * [x] OUTPUT-STREAM-P
+ * [x] PACKAGE
  * [x] PACKAGE-ERROR
  * [x] PACKAGE-ERROR-PACKAGE
  * [x] PACKAGE-NAME
@@ -741,6 +706,7 @@
  * [x] PACKAGE-USE-LIST
  * [x] PACKAGE-USED-BY-LIST
  * [x] PACKAGEP
+ * [x] PAIRLIS
  * [x] PARSE-ERROR
  * [x] PARSE-INTEGER
  * [x] PATHNAME-DIRECTORY
@@ -749,6 +715,7 @@
  * [x] PEEK-CHAR
  * [x] PI
  * [x] PLUSP
+ * [x] POP
  * [x] POSITION
  * [x] POSITION-IF
  * [x] PPRINT
@@ -757,6 +724,8 @@
  * [x] PRINC
  * [x] PRINC-TO-STRING
  * [x] PRINT
+ * [x] PRINT-OBJECT
+ * [x] PRINT-UNREADABLE-OBJECT
  * [x] PROBE-FILE
  * [x] PROCLAIM
  * [x] PROG
@@ -765,15 +734,20 @@
  * [x] PROG2
  * [x] PROGN
  * [x] PROGRAM-ERROR
+ * [x] PSETF
  * [x] PSETQ
+ * [x] PUSH
+ * [x] PUSHNEW
  * [x] QUOTE
  * [x] RANDOM
  * [x] RANDOM-STATE
+ * [x] RANDOM-STATE-P
  * [x] RASSOC
  * [x] RASSOC-IF
  * [x] RATIO
  * [x] RATIONAL
  * [x] RATIONALIZE
+ * [x] RATIONALP
  * [x] READ
  * [x] READ-BYTE
  * [x] READ-CHAR
@@ -783,13 +757,16 @@
  * [x] REAL
  * [x] REALP
  * [x] REM
+ * [x] REMF
  * [x] REMHASH
  * [x] REMOVE
  * [x] REMOVE-DUPLICATES
  * [x] REMOVE-IF
+ * [x] REMPROP
  * [x] RENAME-FILE
  * [x] RENAME-PACKAGE
  * [x] REQUIRE
+ * [x] REST
  * [x] RETURN
  * [x] RETURN-FROM
  * [x] REVERSE
@@ -804,6 +781,8 @@
  * [x] SEQUENCE
  * [x] SERIOUS-CONDITION
  * [x] SET
+ * [x] SET-DIFFERENCE
+ * [x] SET-EXCLUSIVE-OR
  * [x] SETF
  * [x] SETQ
  * [x] SEVENTH
@@ -828,6 +807,7 @@
  * [x] SLEEP
  * [x] SOFTWARE-TYPE
  * [x] SOFTWARE-VERSION
+ * [x] SOME
  * [x] SORT
  * [x] SPECIAL
  * [x] SQRT
@@ -858,7 +838,13 @@
  * [x] STRING>
  * [x] STRING>=
  * [x] STRINGP
+ * [x] SUBLIS
  * [x] SUBSEQ
+ * [x] SUBSETP
+ * [x] SUBST
+ * [x] SUBST-IF
+ * [x] SUBSTITUTE
+ * [x] SUBSTITUTE-IF
  * [x] SVREF
  * [x] SXHASH
  * [x] SYMBOL
@@ -886,6 +872,7 @@
  * [x] UNBOUND-SLOT-INSTANCE
  * [x] UNBOUND-VARIABLE
  * [x] UNDEFINED-FUNCTION
+ * [x] UNEXPORT
  * [x] UNINTERN
  * [x] UNION
  * [x] UNLESS
@@ -935,6 +922,8 @@
  - [-] COMPILED-FUNCTION-P
  - [-] COMPILER-MACRO
  - [-] COMPILER-MACRO-FUNCTION
+ - [-] CONTINUE
+ - [-] COPY-READTABLE
  - [-] COUNT-IF-NOT
  - [-] DEBUG
  - [-] DEFCLASS (defflavor instead)
@@ -948,20 +937,28 @@
  - [-] INVOKE-DEBUGGER
  - [-] INVOKE-RESTART
  - [-] INVOKE-RESTART-INTERACTIVELY
+ - [-] LDIFF - requires address of sublist to be equal, doesn't fit with slices
  - [-] LISTEN
  - [-] MAKE-INSTANCES-OBSOLETE
  - [-] MEMBER-IF-NOT
  - [-] NO-NEXT-METHOD
+ - [-] NSUBST-IF-NOT (deprecated)
+ - [-] NSUBSTITUTE-IF-NOT (deprecated)
  - [-] POSITION-IF-NOT
  - [-] PROVIDE
  - [-] RASSOC-IF-NOT
  - [-] READ-CHAR-NO-HANG
+ - [-] READTABLE
+ - [-] READTABLE-CASE
+ - [-] READTABLEP
  - [-] REINITIALIZE-INSTANCE
  - [-] REMOVE-IF-NOT
  - [-] RESTART
  - [-] RESTART-BIND
  - [-] RESTART-CASE
  - [-] RESTART-NAME
+ - [-] SAFETY
+ - [-] SPACE
  - [-] SPEED
  - [-] STANDARD
  - [-] STANDARD-CLASS
@@ -969,6 +966,9 @@
  - [-] STANDARD-METHOD
  - [-] STANDARD-OBJECT
  - [-] STYLE-WARNING
+ - [-] SUBST-IF-NOT (deprecated)
+ - [-] SUBSTITUTE-IF-NOT (deprecated)
+ - [-] TAILP - requires address of sublist to be equal, doesn't fit with slices
  - [-] THROW (use panic instead)
  - [-] UNTRACE
  - [-] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS

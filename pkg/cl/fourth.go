@@ -43,6 +43,6 @@ func (f *Fourth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 }
 
 // Place a value in the fourth position of a list or cons.
-func (f *Fourth) Place(args slip.List, value slip.Object) {
+func (f *Fourth) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	placeN(f, args, 3, value)
 }

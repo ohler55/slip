@@ -42,6 +42,6 @@ func (f *Cddar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 }
 
 // Place a value in the first position of a list or cons.
-func (f *Cddar) Place(args slip.List, value slip.Object) {
+func (f *Cddar) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	cadPlace(f, args, []bool{true, false, false}, value)
 }

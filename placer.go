@@ -8,5 +8,8 @@ type Placer interface {
 	Funky
 	// Place the value in the location that the function would normally return
 	// with an Eval with the same arguments.
-	Place(args List, value Object)
+	Place(s *Scope, args List, value Object)
+
+	// SkipArgEval returns true if the argument eval should be skipped.
+	SkipArgEval(i int) (skip bool)
 }

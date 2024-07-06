@@ -56,7 +56,7 @@ func (f *Car) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 }
 
 // Place a value in the first position of a list or cons.
-func (f *Car) Place(args slip.List, value slip.Object) {
+func (f *Car) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}

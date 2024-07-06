@@ -43,6 +43,6 @@ func (f *Second) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 }
 
 // Place a value in the second position of a list or cons.
-func (f *Second) Place(args slip.List, value slip.Object) {
+func (f *Second) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	placeN(f, args, 1, value)
 }

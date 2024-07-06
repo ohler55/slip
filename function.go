@@ -148,6 +148,18 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	return
 }
 
+// SkipArgEval returns true if the argument eval should be skipped.
+func (f *Function) SkipArgEval(i int) (skip bool) {
+	if 0 < len(f.SkipEval) {
+		if i < len(f.SkipEval) {
+			skip = f.SkipEval[i]
+		} else {
+			skip = f.SkipEval[len(f.SkipEval)-1]
+		}
+	}
+	return
+}
+
 // Apply evaluates with the need to evaluate the args.
 func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
 	beforeEval(s, f.Name, args, depth)

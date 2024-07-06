@@ -67,6 +67,7 @@ func TestServerConnections(t *testing.T) {
      ((< 1 (length (nth 2 (car  x)))) x))
  (send ws :connections))
 `, port, port),
+		Readably: true,
 		Validate: func(t *testing.T, v slip.Object) {
 			list := v.(slip.List)
 			list = list[0].(slip.List)

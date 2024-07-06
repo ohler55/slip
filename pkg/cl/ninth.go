@@ -43,6 +43,6 @@ func (f *Ninth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 }
 
 // Place a value in the ninth position of a list or cons.
-func (f *Ninth) Place(args slip.List, value slip.Object) {
+func (f *Ninth) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	placeN(f, args, 8, value)
 }

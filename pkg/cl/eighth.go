@@ -43,6 +43,6 @@ func (f *Eighth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 }
 
 // Place a value in the eighth position of a list or cons.
-func (f *Eighth) Place(args slip.List, value slip.Object) {
+func (f *Eighth) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	placeN(f, args, 7, value)
 }

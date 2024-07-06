@@ -43,6 +43,6 @@ func (f *Fifth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 }
 
 // Place a value in the fifth position of a list or cons.
-func (f *Fifth) Place(args slip.List, value slip.Object) {
+func (f *Fifth) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	placeN(f, args, 4, value)
 }

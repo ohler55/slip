@@ -18,9 +18,9 @@ func init() {
 			Name: "setf",
 			Args: []*slip.DocArg{
 				{
-					Name: "placer",
-					Type: "placer",
-					Text: "The symbol to bind to the _value_.",
+					Name: "place",
+					Type: "place",
+					Text: "The symbol or place to bind to the _value_.",
 				},
 				{
 					Name: "value",
@@ -29,8 +29,8 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text: `__setf__ the value of the _symbol_ to _value_. Note that _symbol_ is not evaluated.
-Repeated pairs of _symbol_ and _value_ are supported`,
+			Text: `__setf__ the value of the _place_ to _value_. Note that _place_ is not evaluated.
+Repeated pairs of _place_ and _value_ are supported`,
 			Examples: []string{
 				"(setf) => nil",
 				"(setf x 7) => 7",
@@ -65,18 +65,26 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			p = slip.ListToFunc(s, ta, d2)
 			goto Retry
 		case slip.Placer:
-			targs := ta.GetArgs()
-			pargs := make(slip.List, len(targs))
-			for j, v := range targs {
-				if list, ok := v.(slip.List); ok {
-					v = slip.ListToFunc(s, list, d2)
-				}
-				pargs[j] = s.Eval(v, d2)
-			}
-			ta.Place(pargs, result)
+			callPlace(s, ta, result, d2)
 		default:
 			slip.PanicType("placer argument to setf", p, "symbol", "placer")
 		}
 	}
 	return
+}
+
+func callPlace(s *slip.Scope, p slip.Placer, value slip.Object, depth int) {
+	targs := p.GetArgs()
+	pargs := make(slip.List, len(targs))
+	for j, v := range targs {
+		if list, ok := v.(slip.List); ok {
+			v = slip.ListToFunc(s, list, depth)
+		}
+		if !p.SkipArgEval(j) {
+			pargs[j] = s.Eval(v, depth)
+		} else {
+			pargs[j] = v
+		}
+	}
+	p.Place(s, pargs, value)
 }

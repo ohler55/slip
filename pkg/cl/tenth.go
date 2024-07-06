@@ -43,6 +43,6 @@ func (f *Tenth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 }
 
 // Place a value in the tenth position of a list or cons.
-func (f *Tenth) Place(args slip.List, value slip.Object) {
+func (f *Tenth) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	placeN(f, args, 9, value)
 }
