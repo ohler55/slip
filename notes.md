@@ -52,21 +52,6 @@
 
  - merge (starts with result-type)
 
- - plist (property lists) - tied to a symbol which makes it global, less useful as such
-  - get (also a placer)
-  - getf (same as get?)
-  - get-properties
-  - remprop
-  - remf
-  - symbol-plist
-  - in gi package
-   - put (non-standard)
-   - plistp
-   - plist-value
-   - plist-values
-   - plist-keys
-   - doplist
-
  - future repl options
   - color for words
    - functions - word after (
