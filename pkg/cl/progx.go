@@ -63,7 +63,6 @@ func (f *Progx) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if s.Block {
 				return tr
 			}
-			slip.NewPanic("return from unknown block: %s", tr.Tag)
 		case *GoTo:
 			for i++; i < len(args); i++ {
 				if args[i] == tr.Tag {
