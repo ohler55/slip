@@ -5,19 +5,29 @@
 - next
 
  - misc
-  - case (not ccase)
-  - ecase
-  - complexp
-  - constantp
+ * [x] COMPLEXP
+ * [x] CONSTANTP
+ * [x] WRITE-BYTE
+ * [x] WRITE-CHAR
+ * [ ] WRITE-LINE (string &optional output-stream &key start end)
+ * [ ] WRITE-SEQUENCE
+ * [ ] WRITE-STRING (string &optional output-stream &key start end)
+ * [ ] CASE (not ccase)
+ * [ ] ECASE
  * [ ] REDUCE
  * [ ] NRECONC
  * [ ] REVAPPEND
- * [ ] WRITE-BYTE
- * [ ] WRITE-CHAR
- * [ ] WRITE-LINE
- * [ ] WRITE-SEQUENCE
- * [ ] WRITE-STRING
   - structs?
+
+- flow state
+ - need a way to identify new or existing
+ - have to identify service and id
+ - if a flow is the remote service then ...
+  - identify flow
+  - attach to monitor
+   - how are flows monitored
+    - add event publishing to tracing
+     - nats ?
 
  - package-export
   - import
