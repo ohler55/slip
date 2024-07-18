@@ -39,7 +39,7 @@
  * [ ] CALL-METHOD
  * [ ] CALL-NEXT-METHOD
  * [ ] CASE
- * [ ] CCASE
+ - [-] CCASE
  * [ ] CHANGE-CLASS
  * [ ] CHECK-TYPE
  * [ ] CIS
@@ -54,7 +54,7 @@
  * [ ] CONSTANTP
  * [ ] COPY-PPRINT-DISPATCH
  * [ ] COPY-STRUCTURE
- * [ ] COPY-SYMBOL
+ - [-] COPY-SYMBOL
  * [ ] COSH
  * [ ] CTYPECASE
  * [ ] DECODE-FLOAT

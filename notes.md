@@ -4,6 +4,21 @@
 
 - next
 
+ - misc
+  - case (not ccase)
+  - ecase
+  - complexp
+  - constantp
+ * [ ] REDUCE
+ * [ ] NRECONC
+ * [ ] REVAPPEND
+ * [ ] WRITE-BYTE
+ * [ ] WRITE-CHAR
+ * [ ] WRITE-LINE
+ * [ ] WRITE-SEQUENCE
+ * [ ] WRITE-STRING
+  - structs?
+
  - package-export
   - import
   - shadow
