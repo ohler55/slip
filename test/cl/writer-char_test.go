@@ -43,6 +43,5 @@ func TestWriteCharWriteFail(t *testing.T) {
 		Scope:     scope,
 		Source:    `(write-char #\A out)`,
 		PanicType: slip.StreamErrorSymbol,
-		Panics:    true,
 	}).Test(t)
 }

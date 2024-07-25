@@ -279,9 +279,9 @@
  * [ ] WITH-STANDARD-IO-SYNTAX
  * [x] WRITE-BYTE
  * [x] WRITE-CHAR
- * [ ] WRITE-LINE
- * [ ] WRITE-SEQUENCE
- * [ ] WRITE-STRING
+ * [x] WRITE-LINE
+ * [x] WRITE-SEQUENCE
+ * [x] WRITE-STRING
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
  * [x] &BODY

@@ -4,41 +4,12 @@
 
 - next
 
- - misc
- * [x] COMPLEXP
- * [x] CONSTANTP
- * [x] WRITE-BYTE
- * [x] WRITE-CHAR
- * [ ] WRITE-LINE (string &optional output-stream &key start end)
- * [ ] WRITE-SEQUENCE
- * [ ] WRITE-STRING (string &optional output-stream &key start end)
- * [ ] CASE (not ccase)
- * [ ] ECASE
- * [ ] REDUCE
- * [ ] NRECONC
- * [ ] REVAPPEND
-  - structs?
-
-- flow state
- - need a way to identify new or existing
- - have to identify service and id
- - if a flow is the remote service then ...
-  - identify flow
-  - attach to monitor
-   - how are flows monitored
-    - add event publishing to tracing
-     - nats ?
-
- - package-export
-  - import
-  - shadow
-  - package-shadowing-symbols
-  - shadowing-import
-
  - net package
   - implement sbcl networking or something closer to golang?
   - http://www.sbcl.org/manual/#Networking
   - https://marketsplash.com/tutorials/lisp/lisp-network-programming/
+  - https://www.quicklisp.org/beta/UNOFFICIAL/docs/usocket/doc/index.html
+  - https://common-lisp-libraries.readthedocs.io/usocket/
   - socket
    - abstract flavor
    - Any
@@ -65,6 +36,30 @@
     - all options
    - make flavor and target for generic functions
     - socket-bind and (send socket :bind &rest address)
+
+ - package-export
+  - import
+  - shadow
+  - package-shadowing-symbols
+  - shadowing-import
+
+- flow state
+ - need a way to identify new or existing
+ - have to identify service and id
+ - if a flow is the remote service then ...
+  - identify flow
+  - attach to monitor
+   - how are flows monitored
+    - add event publishing to tracing
+     - nats ?
+
+ - misc
+ * [ ] CASE (not ccase)
+ * [ ] ECASE
+ * [ ] REDUCE
+ * [ ] NRECONC
+ * [ ] REVAPPEND
+  - structs?
 
  - clos methods/generics (flavors and clos mix as flos)
   - flos

@@ -43,6 +43,5 @@ func TestWriteByteWriteFail(t *testing.T) {
 		Scope:     scope,
 		Source:    `(write-byte 65 out)`,
 		PanicType: slip.StreamErrorSymbol,
-		Panics:    true,
 	}).Test(t)
 }
