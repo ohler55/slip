@@ -157,7 +157,7 @@ Top:
 		b = append(b, p.caseName("nil")...)
 	case Character:
 		if p.Escape {
-			// The Common Lisp docs are a big vague and leave options open for
+			// The Common Lisp docs are a bit vague and leave options open for
 			// when the #\ escape sequences is used.
 			b = to.Append(b)
 		} else {

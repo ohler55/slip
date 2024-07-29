@@ -3,11 +3,54 @@
 - **multipass** or utm for linux
 
 - next
+ - octet
+  - new types at top level
+   - octet - byte or unsigned-byte
+    - a type of integer
+    - no special syntax, use (octet 97)
+    - update coerce
+   - octets - []byte
+    - #(97 98 99) as an example
+   - octet functions (https://edicl.github.io/flexi-streams/#string-to-octets)
+     - simplier versions of functions with only one arg
+    - string-to-octets (string &key external-format start end => vector)
+    - octets-to-string sequence &key external-format start end => string
+    - octet-length string &key external-format start end => length
+    - char-length sequence &key external-format start end => length
+    - char-to-octets
+    - make-octets (length &optional initial-value)
+     - also update make-array to handle octet element type
+ - slot-value
+  - add slot-value to flavors pkg/clos (for get and setf)
+   - always allow
 
- - usocket
+
+ - usocket in pkg/net
   - plan
+   - do we need a byte or octet type
    - create usocket flavor
-    - socket-connect to create
+    - a net.Conn for inst.Any
+    - or use syscall?
+    - how to use setf with instance?
+     - (setf (slot-value inst 'foo) 0)
+     - add slot-value to flavors pkg/clos (for get and setf)
+      - always allow
+   - define what a socket is (fixnum) or **just leave as fixnum**
+   - create stream-usocket flavor
+    - socket-stream (object) => stream-usocket
+    - make-instance
+    -
+
+   - ipaddr (host)
+    - fixnum (32 bit)
+    - 4 elememnt list or vector #(127 0 0 1)
+    - string in dotted format
+    - hostname
+    - add ipv6 support
+     - string
+     - fixnum (64 bit)
+    - socket is an api
+
 
   - classes
    - usocket
