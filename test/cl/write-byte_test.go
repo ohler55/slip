@@ -17,9 +17,12 @@ func TestWriteByteOkay(t *testing.T) {
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	result := slip.ReadString("(write-byte 65 out)").Eval(scope, nil)
+	tt.Equal(t, slip.Octet(65), result)
 
-	tt.Equal(t, slip.Fixnum(65), result)
-	tt.Equal(t, "A", out.String())
+	result = slip.ReadString("(write-byte (coerce 66 'octet) out)").Eval(scope, nil)
+	tt.Equal(t, slip.Octet(66), result)
+
+	tt.Equal(t, "AB", out.String())
 }
 
 func TestWriteByteNotStream(t *testing.T) {
@@ -32,6 +35,10 @@ func TestWriteByteNotStream(t *testing.T) {
 func TestWriteByteNotByte(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(write-byte t *standard-output*)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(write-byte 300 *standard-output*)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

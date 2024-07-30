@@ -57,6 +57,13 @@ func TestOneplusComplex(t *testing.T) {
 	}).Test(t)
 }
 
+func TestOneplusOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(1+ (coerce 3 'octet))`,
+		Expect: "4",
+	}).Test(t)
+}
+
 func TestOneplusBadArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(1+)`,

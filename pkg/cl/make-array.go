@@ -130,6 +130,9 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		}
 	}
 	if len(dims) == 1 {
+
+		// TBD if elementType is octet then ...
+
 		v := slip.NewVector(dims[0], elementType, initElement, initContents, adjustable)
 		v.FillPtr = fillPtr
 		result = v

@@ -48,6 +48,8 @@ func (f *Plusp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if 0 < ta {
 			return slip.True
 		}
+	case slip.Octet:
+		return slip.True
 	case slip.SingleFloat:
 		if 0.0 < ta {
 			return slip.True

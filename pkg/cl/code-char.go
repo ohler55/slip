@@ -36,9 +36,14 @@ type CodeChar struct {
 // Call the function with the arguments provided.
 func (f *CodeChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	num, ok := args[0].(slip.Fixnum)
-	if !ok {
-		slip.PanicType("code", args[0], "fixnum")
+	var num int
+	switch ta := args[0].(type) {
+	case slip.Fixnum:
+		num = int(ta)
+	case slip.Octet:
+		num = int(ta)
+	default:
+		slip.PanicType("code", args[0], "fixnum", "octet")
 	}
 	if 0 <= num && num < utf8.MaxRune && utf8.ValidRune(rune(num)) {
 		return slip.Character(num)

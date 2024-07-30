@@ -94,6 +94,7 @@ func (f *AdjustArray) Call(s *slip.Scope, args slip.List, depth int) (result sli
 		aa = &vv.Array
 		fillPtr = ta.FillPtr
 		elementType = ta.ElementType()
+		// TBD Octets
 	default:
 		slip.PanicType("array", args[0], "array", "vector")
 	}

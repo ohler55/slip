@@ -13,12 +13,16 @@ import (
 func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 	// Precedence (lowest to highest) fixnum, bignum, ratio, single-float,
 	// double-float, long-float, complex.
+top:
 	switch t0 := v0.(type) {
 	case slip.Fixnum:
 		n1 = v1
-		switch v1.(type) {
+		switch t1 := v1.(type) {
 		case slip.Fixnum:
 			n0 = t0
+		case slip.Octet:
+			n0 = t0
+			n1 = slip.Fixnum(t1)
 		case slip.SingleFloat:
 			n0 = slip.SingleFloat(t0)
 		case slip.DoubleFloat:
@@ -32,10 +36,16 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 		case slip.Complex:
 			n0 = slip.Complex(complex(float64(t0), 0.0))
 		}
+	case slip.Octet:
+		v0 = slip.Fixnum(t0)
+		goto top
 	case slip.SingleFloat:
 		switch t1 := v1.(type) {
 		case slip.Fixnum:
 			n0 = t0
+			n1 = slip.SingleFloat(t1)
+		case slip.Octet:
+			n0 = slip.Fixnum(t0)
 			n1 = slip.SingleFloat(t1)
 		case slip.SingleFloat:
 			n0 = t0
@@ -62,6 +72,9 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 		switch t1 := v1.(type) {
 		case slip.Fixnum:
 			n0 = t0
+			n1 = slip.DoubleFloat(t1)
+		case slip.Octet:
+			n0 = slip.Fixnum(t0)
 			n1 = slip.DoubleFloat(t1)
 		case slip.SingleFloat:
 			n0 = t0
@@ -91,6 +104,11 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 			var z big.Float
 			z.SetInt64(int64(t1))
 			n1 = (*slip.LongFloat)(&z)
+		case slip.Octet:
+			n0 = t0
+			var z big.Float
+			z.SetInt64(int64(t1))
+			n1 = (*slip.LongFloat)(&z)
 		case slip.SingleFloat:
 			n0 = t0
 			n1 = (*slip.LongFloat)(big.NewFloat(float64(t1)))
@@ -116,6 +134,9 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 	case *slip.Bignum:
 		switch t1 := v1.(type) {
 		case slip.Fixnum:
+			n0 = t0
+			n1 = (*slip.Bignum)(big.NewInt(int64(t1)))
+		case slip.Octet:
 			n0 = t0
 			n1 = (*slip.Bignum)(big.NewInt(int64(t1)))
 		case slip.SingleFloat:
@@ -156,6 +177,9 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 		case slip.Fixnum:
 			n0 = t0
 			n1 = (*slip.Ratio)(big.NewRat(int64(t1), 1))
+		case slip.Octet:
+			n0 = t0
+			n1 = (*slip.Ratio)(big.NewRat(int64(t1), 1))
 		case slip.SingleFloat:
 			f, _ := (*big.Rat)(t0).Float64()
 			n0 = slip.SingleFloat(f)
@@ -193,6 +217,8 @@ func normalizeNumber(v0, v1 slip.Object) (n0, n1 slip.Object) {
 		n0 = t0
 		switch t1 := v1.(type) {
 		case slip.Fixnum:
+			n1 = slip.Complex(complex(float64(t1), 0.0))
+		case slip.Octet:
 			n1 = slip.Complex(complex(float64(t1), 0.0))
 		case slip.SingleFloat:
 			n1 = slip.Complex(complex(float64(t1), 0.0))

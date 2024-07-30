@@ -58,6 +58,12 @@ func (f *Ash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		} else {
 			result = slip.Fixnum(uint64(ti) << sh)
 		}
+	case slip.Octet:
+		if sh < 0 {
+			result = slip.Octet(uint64(ti) >> -sh)
+		} else {
+			result = slip.Octet(uint64(ti) << sh)
+		}
 	case *slip.Bignum:
 		ba := (*big.Int)(ti).Bytes()
 		if sh < 0 {

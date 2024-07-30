@@ -101,6 +101,21 @@ func TestUniqComplex(t *testing.T) {
 	}).Test(t)
 }
 
+func TestUniqOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(/= (coerce 3 'octet))`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(/= (coerce 3 'octet) (coerce 4 'octet))`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(/= (coerce 3 'octet) (coerce 3 'octet))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestUniqNotNumber(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(/= t)`,

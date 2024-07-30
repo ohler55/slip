@@ -18,6 +18,10 @@ func TestPlustpTrue(t *testing.T) {
 		Expect: "t",
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(plusp (coerce 5 'octet))`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(plusp 5.5s-1)`,
 		Expect: "t",
 	}).Test(t)

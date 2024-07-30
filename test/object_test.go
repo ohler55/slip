@@ -60,6 +60,36 @@ func TestFixnum(t *testing.T) {
 	tt.Equal(t, 7, slip.Fixnum(7).Int64())
 }
 
+func TestOctet(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Octet(7),
+		String:    "7",
+		Simple:    int64(7),
+		Hierarchy: "octet.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Octet(7), Expect: true},
+			{Other: slip.Fixnum(7), Expect: true},
+			{Other: slip.NewRatio(7, 1), Expect: true},
+			{Other: slip.NewBignum(7), Expect: true},
+			{Other: slip.Octet(5), Expect: false},
+			{Other: slip.DoubleFloat(7.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
+			{Other: slip.SingleFloat(7.0), Expect: true},
+			{Other: slip.NewLongFloat(7.0), Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			slip.Octet(0).IntegerType,
+			slip.Octet(0).RationalType,
+			slip.Octet(0).RealType,
+			slip.Octet(0).NumberType,
+		},
+		Eval: slip.Octet(7),
+	}).Test(t)
+	tt.Equal(t, 7.0, slip.Octet(7).RealValue())
+	tt.Equal(t, 7, slip.Octet(7).Int64())
+}
+
 func TestRatio(t *testing.T) {
 	r := slip.NewRatio(1, 1)
 	(&sliptest.Object{

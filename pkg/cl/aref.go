@@ -58,6 +58,7 @@ func (f *Aref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		result = ta.Get(indices...)
 	case *slip.Vector:
 		result = ta.Get(indices...)
+		// TBD Octets
 	default:
 		slip.PanicType("array", ta, "array")
 	}

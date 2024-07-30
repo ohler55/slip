@@ -211,6 +211,9 @@ Top:
 		} else {
 			b = (*big.Int)(to).Append(b, int(p.Base))
 		}
+	case Octet:
+		obj = Fixnum(to)
+		goto Top
 	case *Ratio:
 		if (*big.Rat)(to).IsInt() {
 			obj = (*Bignum)((*big.Rat)(to).Num())
