@@ -39,7 +39,7 @@ type ArrayDisplacement struct {
 func (f *ArrayDisplacement) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	switch ta := args[0].(type) {
-	case *slip.Array, *slip.Vector:
+	case *slip.Array, *slip.Vector, slip.Octets:
 		result = slip.Values{nil, slip.Fixnum(0)}
 	default:
 		slip.PanicType("array", ta, "array")

@@ -43,6 +43,8 @@ func (f *ArrayTotalSize) Call(s *slip.Scope, args slip.List, depth int) (result 
 		result = slip.Fixnum(ta.Size())
 	case *slip.Vector:
 		result = slip.Fixnum(ta.Size())
+	case slip.Octets:
+		result = slip.Fixnum(len(ta))
 	default:
 		slip.PanicType("array", ta, "array")
 	}

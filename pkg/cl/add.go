@@ -50,8 +50,6 @@ func (f *Add) Call(s *slip.Scope, args slip.List, depth int) (sum slip.Object) {
 func addNumbers(n0, n1 slip.Object) slip.Object {
 	n0, n1 = normalizeNumber(n0, n1)
 	switch t0 := n0.(type) {
-	case slip.Octet:
-		n1 = slip.Fixnum(t0) + n1.(slip.Fixnum)
 	case slip.Fixnum:
 		n1 = t0 + n1.(slip.Fixnum)
 	case slip.SingleFloat:

@@ -23,6 +23,13 @@ func TestArrayDimensionsArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestArrayDimensionsOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(array-dimensions (coerce "abc" 'octets))`,
+		Expect: "(3)",
+	}).Test(t)
+}
+
 func TestArrayDimensionsNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(array-dimensions t)`,

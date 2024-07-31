@@ -43,6 +43,8 @@ func (f *ArrayElementType) Call(s *slip.Scope, args slip.List, depth int) (resul
 		result = ta.ElementType()
 	case *slip.Vector:
 		result = ta.ElementType()
+	case slip.Octets:
+		result = slip.OctetSymbol
 	default:
 		slip.PanicType("array", ta, "array")
 	}

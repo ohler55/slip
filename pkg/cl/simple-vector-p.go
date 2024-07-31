@@ -41,5 +41,8 @@ func (f *SimpleVectorP) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	if v, ok := args[0].(*slip.Vector); ok && v.FillPtr == -1 && v.ElementType() == slip.TrueSymbol {
 		return slip.True
 	}
+	if _, ok := args[0].(slip.Octets); ok {
+		return slip.True
+	}
 	return nil
 }

@@ -50,7 +50,8 @@ func (f *ArrayInBoundsP) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 		dims = ta.Dimensions()
 	case *slip.Vector:
 		dims = ta.Dimensions()
-		// TBD Octets
+	case slip.Octets:
+		dims = []int{len(ta)}
 	default:
 		slip.PanicType("array", ta, "array")
 	}

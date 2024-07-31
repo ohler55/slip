@@ -26,6 +26,13 @@ func TestSimpleVectorPArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSimpleVectorPOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(simple-vector-p (coerce "abc" 'octets))`,
+		Expect: "t",
+	}).Test(t)
+}
+
 func TestSimpleVectorPNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(simple-vector-p t)`,

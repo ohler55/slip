@@ -61,6 +61,8 @@ func (f *Strcat) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case *slip.Vector:
 			arg = ta.AsList()
 			goto each
+		case slip.Octets:
+			ra = append(ra, []rune(string(ta))...)
 		default:
 			slip.PanicType("&rest", ta, "string", "character")
 		}

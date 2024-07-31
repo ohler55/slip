@@ -179,6 +179,13 @@ Top:
 			goto Top
 		}
 		b = append(b, '#', '(', ')')
+	case slip.Octets:
+		if 0 < len(to) {
+			obj = to.AsList()
+			b = append(b, '#')
+			goto Top
+		}
+		b = append(b, '#', '(', ')')
 	case *slip.LongFloat:
 		tmp := (*big.Float)(to).Append([]byte{}, 'e', -1)
 		b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)

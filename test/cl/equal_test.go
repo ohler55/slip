@@ -86,6 +86,17 @@ func TestEqualVector(t *testing.T) {
 	}).Test(t)
 }
 
+func TestEqualOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(equal (coerce "abc" 'octets) (coerce "abc" 'octets))`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(equal (coerce "abc" 'octets) (coerce "bc" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestEqualArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(equal 1)`,

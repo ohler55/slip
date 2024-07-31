@@ -44,6 +44,8 @@ func (f *ArrayDimensions) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 		dims = ta.Dimensions()
 	case *slip.Vector:
 		dims = ta.Dimensions()
+	case slip.Octets:
+		dims = []int{len(ta)}
 	default:
 		slip.PanicType("array", ta, "array")
 	}

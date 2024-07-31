@@ -4,27 +4,51 @@
 
 - next
  - octet
-  - new types at top level
-   - octet - byte or unsigned-byte
-    - a type of integer
-    - no special syntax, use (octet 97)
-    - update coerce, vector, make-array, printer, simple-vector-p,
-     - adjust-array
-     - adjustble-array-p
-     - aref
-     - ... serach for Vector
-   - octets - []byte
-    - #(97 98 99) as an example
-   - octet functions (https://edicl.github.io/flexi-streams/#string-to-octets)
-    - string-to-octets (string &key external-format start end => vector)
-    - octets-to-string sequence &key external-format start end => string
-    - octet-length string &key external-format start end => length
-    - char-length sequence &key external-format start end => length
-    - char-to-octets
-    - make-octets (size &optional initial-value)
-     - macro for (make-array size :element-type 'octet :initial-element initial-value)
-     - sbcl is new-octets but private with no docs
-     - also update make-array to handle octet element type
+  - octets - []byte
+   - update funcs that use Vector in cl and others
+   - cl/concatenate.go
+   - cl/copy-seq.go
+   - cl/count-if.go
+   - cl/count.go
+   - cl/delete-duplicates.go
+   - cl/delete-if.go
+   - cl/delete.go
+   - cl/every.go
+   - cl/find-if.go
+   - cl/find.go
+   - cl/make-array.go
+   - cl/notany.go
+   - cl/notevery.go
+   - cl/nreverse.go
+   - cl/nsubstitute-if.go
+   - cl/nsubstitute.go
+   - cl/position-if.go
+   - cl/position.go
+   - cl/reverse.go
+   - cl/row-major-aref.go
+   - cl/search.go
+   - cl/some.go
+   - cl/sort.go
+   - cl/stable-sort.go
+   - cl/subseq.go
+   - cl/substitute-if.go
+   - cl/substitute.go
+   - cl/svref.go
+   - cl/vector-pop.go
+   - cl/vector-push-extend.go
+   - cl/vector-push.go
+
+  - octets functions (https://edicl.github.io/flexi-streams/#string-to-octets)
+   - string-to-octets (string &key external-format start end => vector)
+   - octets-to-string sequence &key external-format start end => string
+   - octet-length string &key external-format start end => length
+   - char-length sequence &key external-format start end => length
+   - char-to-octets
+   - make-octets (size &optional initial-value)
+    - macro for (make-array size :element-type 'octet :initial-element initial-value)
+    - sbcl is new-octets but private with no docs
+    - also update make-array to handle octet element type
+
  - slot-value
   - add slot-value to flavors pkg/clos (for get and setf)
    - always allow

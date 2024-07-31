@@ -23,6 +23,13 @@ func TestArrayTotalSizeArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestArrayTotalSizeOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(array-total-size (coerce "abcd" 'octets))`,
+		Expect: "4",
+	}).Test(t)
+}
+
 func TestArrayTotalSizeNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(array-total-size t)`,

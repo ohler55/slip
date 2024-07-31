@@ -47,6 +47,8 @@ func (f *AdjustableArrayP) Call(s *slip.Scope, args slip.List, depth int) (resul
 		if ta.Adjustable() {
 			result = slip.True
 		}
+	case slip.Octets:
+		// not adjustable
 	default:
 		slip.PanicType("array", ta, "array")
 	}

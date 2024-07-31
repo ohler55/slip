@@ -44,9 +44,6 @@ top:
 		case slip.Fixnum:
 			n0 = t0
 			n1 = slip.SingleFloat(t1)
-		case slip.Octet:
-			n0 = slip.Fixnum(t0)
-			n1 = slip.SingleFloat(t1)
 		case slip.SingleFloat:
 			n0 = t0
 			n1 = t1
@@ -72,9 +69,6 @@ top:
 		switch t1 := v1.(type) {
 		case slip.Fixnum:
 			n0 = t0
-			n1 = slip.DoubleFloat(t1)
-		case slip.Octet:
-			n0 = slip.Fixnum(t0)
 			n1 = slip.DoubleFloat(t1)
 		case slip.SingleFloat:
 			n0 = t0
@@ -104,11 +98,6 @@ top:
 			var z big.Float
 			z.SetInt64(int64(t1))
 			n1 = (*slip.LongFloat)(&z)
-		case slip.Octet:
-			n0 = t0
-			var z big.Float
-			z.SetInt64(int64(t1))
-			n1 = (*slip.LongFloat)(&z)
 		case slip.SingleFloat:
 			n0 = t0
 			n1 = (*slip.LongFloat)(big.NewFloat(float64(t1)))
@@ -134,9 +123,6 @@ top:
 	case *slip.Bignum:
 		switch t1 := v1.(type) {
 		case slip.Fixnum:
-			n0 = t0
-			n1 = (*slip.Bignum)(big.NewInt(int64(t1)))
-		case slip.Octet:
 			n0 = t0
 			n1 = (*slip.Bignum)(big.NewInt(int64(t1)))
 		case slip.SingleFloat:
@@ -177,9 +163,6 @@ top:
 		case slip.Fixnum:
 			n0 = t0
 			n1 = (*slip.Ratio)(big.NewRat(int64(t1), 1))
-		case slip.Octet:
-			n0 = t0
-			n1 = (*slip.Ratio)(big.NewRat(int64(t1), 1))
 		case slip.SingleFloat:
 			f, _ := (*big.Rat)(t0).Float64()
 			n0 = slip.SingleFloat(f)
@@ -217,8 +200,6 @@ top:
 		n0 = t0
 		switch t1 := v1.(type) {
 		case slip.Fixnum:
-			n1 = slip.Complex(complex(float64(t1), 0.0))
-		case slip.Octet:
 			n1 = slip.Complex(complex(float64(t1), 0.0))
 		case slip.SingleFloat:
 			n1 = slip.Complex(complex(float64(t1), 0.0))
