@@ -38,6 +38,14 @@ func TestCopySeqVector(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCopySeqOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(copy-seq (coerce #(1 2 3) 'octets))`,
+		Array:  true,
+		Expect: "#(1 2 3)",
+	}).Test(t)
+}
+
 func TestCopySeqEqual(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((lst '(a b c)))

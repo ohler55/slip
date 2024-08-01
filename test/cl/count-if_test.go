@@ -62,6 +62,13 @@ func TestCountIfVectorPlain(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCountIfOctetsPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(count-if 'evenp (coerce #(1 2 3 4 5) 'octets))",
+		Expect: "2",
+	}).Test(t)
+}
+
 func TestCountIfStringPlain(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(count-if 'evenp "ABCDE" :key 'char-code)`,

@@ -23,7 +23,7 @@ func init() {
 				},
 			},
 			Return: "boolean",
-			Text:   `__reverse__ returns reverse of the _sequence_ in a new _sequence_.`,
+			Text:   `__reverse__ returns the reverse of the _sequence_ in a new _sequence_.`,
 			Examples: []string{
 				`(reverse "abc") => "cba"`,
 				"(reverse '(a b c)) => (c b a)",
@@ -75,6 +75,13 @@ func (f *Reverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			}
 			result = slip.NewVector(len(nl), ta.ElementType(), nil, nl, ta.Adjustable())
 		}
+	case slip.Octets:
+		nl := make(slip.Octets, len(ta))
+		last := len(ta) - 1
+		for i, v := range ta {
+			nl[last-i] = v
+		}
+		result = nl
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}

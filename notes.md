@@ -6,10 +6,6 @@
  - octet
   - octets - []byte
    - update funcs that use Vector in cl and others
-   - cl/concatenate.go
-   - cl/copy-seq.go
-   - cl/count-if.go
-   - cl/count.go
    - cl/delete-duplicates.go
    - cl/delete-if.go
    - cl/delete.go
@@ -19,12 +15,10 @@
    - cl/make-array.go
    - cl/notany.go
    - cl/notevery.go
-   - cl/nreverse.go
    - cl/nsubstitute-if.go
    - cl/nsubstitute.go
    - cl/position-if.go
    - cl/position.go
-   - cl/reverse.go
    - cl/row-major-aref.go
    - cl/search.go
    - cl/some.go
@@ -48,6 +42,8 @@
     - macro for (make-array size :element-type 'octet :initial-element initial-value)
     - sbcl is new-octets but private with no docs
     - also update make-array to handle octet element type
+   - dovector - like dolist, put in pkg/gi
+   - mapv and mapvar for vectors - in pkg/gi
 
  - slot-value
   - add slot-value to flavors pkg/clos (for get and setf)

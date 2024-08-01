@@ -17,8 +17,8 @@ func TestNreverseNil(t *testing.T) {
 
 func TestNreverseList(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(nreverse '(a b c d))`,
-		Expect: "(d c b a)",
+		Source: `(let ((lst '(a b c d))) (list (nreverse lst) lst))`,
+		Expect: "((d c b a) (d c b a))",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(nreverse '(a b c))`,
@@ -68,6 +68,14 @@ func TestNreverseString(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(nreverse "")`,
 		Expect: `""`,
+	}).Test(t)
+}
+
+func TestNreverseOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((lst (coerce '(1 2 3 4) 'octets))) (list (nreverse lst) lst))`,
+		Array:  true,
+		Expect: "(#(4 3 2 1) #(4 3 2 1))",
 	}).Test(t)
 }
 

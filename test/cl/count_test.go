@@ -88,6 +88,13 @@ func TestCountStringPlain(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCountOctetsPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(count (coerce 98 'octet) (coerce "abcb" 'octets))`,
+		Expect: "2",
+	}).Test(t)
+}
+
 func TestCountStringFromEnd(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(count #\B "ABCBD" :from-end t)`,

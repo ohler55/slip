@@ -54,6 +54,8 @@ func (f *Concatenate) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	case slip.Symbol("vector"):
 		elements := f.listConc(args[1:])
 		result = slip.NewVector(len(elements), slip.TrueSymbol, nil, elements, true)
+	case slip.Symbol("octets"):
+		result = f.octetsConc(args[1:])
 	default:
 		slip.PanicType("result-type", args[0], "symbol (list, string, or vector)")
 	}
@@ -73,6 +75,8 @@ func (f *Concatenate) listConc(args slip.List) (result slip.List) {
 			}
 		case *slip.Vector:
 			result = append(result, ta.AsList()...)
+		case slip.Octets:
+			result = append(result, ta.AsList()...)
 		default:
 			slip.PanicType("&rest", ta, "list", "string", "vector")
 		}
@@ -89,10 +93,13 @@ func (f *Concatenate) stringConc(args slip.List) slip.String {
 			// empty list so ignore
 		case slip.List:
 			for _, a := range ta {
-				if r, ok := a.(slip.Character); ok {
-					ra = append(ra, rune(r))
-				} else {
-					slip.PanicType("list element", a, "character")
+				switch te := a.(type) {
+				case slip.Character:
+					ra = append(ra, rune(te))
+				case slip.Octet:
+					ra = append(ra, rune(te))
+				default:
+					slip.PanicType("list element", a, "character", "octet")
 				}
 			}
 		case slip.String:
@@ -100,9 +107,51 @@ func (f *Concatenate) stringConc(args slip.List) slip.String {
 		case *slip.Vector:
 			arg = ta.AsList()
 			goto each
+		case slip.Octets:
+			arg = ta.AsList()
+			goto each
 		default:
 			slip.PanicType("&rest", ta, "list", "string", "vector")
 		}
 	}
 	return slip.String(ra)
+}
+
+func (f *Concatenate) octetsConc(args slip.List) slip.Octets {
+	var b []byte
+	for _, arg := range args {
+	each:
+		switch ta := arg.(type) {
+		case nil:
+			// empty list so ignore
+		case slip.List:
+			for _, a := range ta {
+				switch te := a.(type) {
+				case slip.Character:
+					b = append(b, string([]rune{rune(te)})...)
+				case slip.String:
+					b = append(b, string(te)...)
+				case slip.Octet:
+					b = append(b, byte(te))
+				case slip.Fixnum:
+					if te < 0 || 255 < te {
+						slip.PanicType("list element", a, "character", "octet")
+					}
+					b = append(b, byte(te))
+				default:
+					slip.PanicType("list element", a, "character", "octet")
+				}
+			}
+		case slip.String:
+			b = append(b, string(ta)...)
+		case *slip.Vector:
+			arg = ta.AsList()
+			goto each
+		case slip.Octets:
+			b = append(b, ta...)
+		default:
+			slip.PanicType("&rest", ta, "list", "string", "vector")
+		}
+	}
+	return slip.Octets(b)
 }
