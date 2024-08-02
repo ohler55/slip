@@ -72,8 +72,13 @@ iter:
 					break iter
 				}
 				pargs[i] = ta.Get(n)
+			case slip.Octets:
+				if len(ta) <= n {
+					break iter
+				}
+				pargs[i] = slip.Octet(ta[n])
 			default:
-				slip.PanicType("sequence", args[i], "string", "list", "vector")
+				slip.PanicType("sequence", args[i], "string", "list", "vector", "octets")
 			}
 		}
 		if predicate.Call(s, pargs, d2) == nil {

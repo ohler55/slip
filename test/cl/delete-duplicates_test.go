@@ -109,6 +109,48 @@ func TestDeleteDuplicatesStringTest(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDeleteDuplicatesOctetsPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete-duplicates (coerce "abcba" 'octets))`,
+		Array:  true,
+		Expect: "#(99 98 97)",
+	}).Test(t)
+}
+
+func TestDeleteDuplicatesOctetsFromEnd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete-duplicates (coerce "abcba" 'octets) :from-end t)`,
+		Array:  true,
+		Expect: "#(97 98 99)",
+	}).Test(t)
+}
+
+func TestDeleteDuplicatesOctetsStartEnd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete-duplicates (coerce "abcba" 'octets) :start 1 :end 4)`,
+		Array:  true,
+		Expect: "#(97 99 98 97)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(delete-duplicates (coerce "abcba" 'octets):start 1 :end nil)`,
+		Array:  true,
+		Expect: "#(97 99 98 97)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(delete-duplicates (coerce "abcba" 'octets) :start 1 :end 4 :from-end t)`,
+		Array:  true,
+		Expect: "#(97 98 99 97)",
+	}).Test(t)
+}
+
+func TestDeleteDuplicatesOctetsTest(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete-duplicates (coerce "abcba" 'octets) :test (lambda (x y) (equal x y)))`,
+		Array:  true,
+		Expect: "#(99 98 97)",
+	}).Test(t)
+}
+
 func TestDeleteDuplicatesNotSeq(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(delete-duplicates t)",

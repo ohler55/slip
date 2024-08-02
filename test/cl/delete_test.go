@@ -144,6 +144,62 @@ func TestDeleteStringTest(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDeleteOctetsCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete (coerce #\B 'octet) (coerce "ABCBD" 'octets) :count 1)`,
+		Array:  true,
+		Expect: "#(65 67 66 68)",
+	}).Test(t)
+}
+
+func TestDeleteOctetsFromEndCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete (coerce #\B 'octet) (coerce "ABCBD" 'octets) :count 1 :from-end t)`,
+		Array:  true,
+		Expect: "#(65 66 67 68)",
+	}).Test(t)
+}
+
+func TestDeleteOctetsStartEnd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete (coerce #\B 'octet) (coerce "ABCBD" 'octets) :start 1 :end 3)`,
+		Array:  true,
+		Expect: "#(65 67 66 68)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(delete (coerce #\B 'octet) (coerce "ABCBD" 'octets) :start 1 :end nil)`,
+		Array:  true,
+		Expect: "#(65 67 68)",
+	}).Test(t)
+}
+
+func TestDeleteOctetsKey(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete 66 (coerce "ABCBD" 'octets) :key (lambda (n) (coerce n 'fixnum)))`,
+		Array:  true,
+		Expect: "#(65 67 68)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(delete 66 (coerce "ABCBD" 'octets) :key (lambda (n) (coerce n 'fixnum)) :count 1 :from-end t)`,
+		Array:  true,
+		Expect: "#(65 66 67 68)",
+	}).Test(t)
+}
+
+func TestDeleteOctetsTest(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete 66 (coerce "ABCBD" 'octets) :key (lambda (n) (coerce n 'fixnum)) :test '<)`,
+		Array:  true,
+		Expect: "#(65 66 66)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(delete 66 (coerce "ABCBD" 'octets)
+                        :key (lambda (n) (coerce n 'fixnum)) :test '< :from-end t :count 1)`,
+		Array:  true,
+		Expect: "#(65 66 67 66)",
+	}).Test(t)
+}
+
 func TestDeleteNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(delete 'b t)",
