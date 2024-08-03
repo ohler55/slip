@@ -26,6 +26,45 @@ func TestSvrefVectorSetf(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSvrefOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(svref (coerce "abcd" 'octets) 2)`,
+		Expect: "99",
+	}).Test(t)
+}
+
+func TestSvrefOctetsSetf(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((v (coerce "abcd" 'octets)))
+                   (setf (svref v 2) (coerce #\x 'octet))
+                   v)`,
+		Array:  true,
+		Expect: "#(97 98 120 100)",
+	}).Test(t)
+}
+
+func TestSvrefOctetsOutOfBounds(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(svref (coerce "abcd" 'octets) 5)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((v (coerce "abcd" 'octets)))
+                   (setf (svref v 4) (coerce #\x 'octet))
+                   v)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSvrefOctetsSetfNotOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((v (coerce "abcd" 'octets)))
+                   (setf (svref v 2) #\x)
+                   v)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestSvrefNotVector(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(svref t 2)`,

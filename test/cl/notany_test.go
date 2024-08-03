@@ -26,6 +26,10 @@ func TestNotanyTrue(t *testing.T) {
 		Source: `(notany #'numberp "abc")`,
 		Expect: "t",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(notany #'evenp (coerce "ace" 'octets))`,
+		Expect: "t",
+	}).Test(t)
 }
 
 func TestNotanyFalse(t *testing.T) {

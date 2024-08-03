@@ -26,6 +26,48 @@ func TestRowMajorArefVectorSetf(t *testing.T) {
 	}).Test(t)
 }
 
+func TestRowMajorArefOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(row-major-aref (coerce "abcd" 'octets) 2)`,
+		Expect: "99",
+	}).Test(t)
+}
+
+func TestRowMajorArefOctetsSetf(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((v (coerce "abcd" 'octets)))
+                   (setf (row-major-aref v 2) (coerce #\x 'octet))
+                   v)`,
+		Array:  true,
+		Expect: "#(97 98 120 100)",
+	}).Test(t)
+}
+
+func TestRowMajorArefOctetsOutOfBounds(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(row-major-aref (coerce "abcd" 'octets) 4)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestRowMajorArefOctetsSetfOutOfBounds(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((v (coerce "abcd" 'octets)))
+                   (setf (row-major-aref v 4) (coerce #\x 'octet))
+                   v)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestRowMajorArefOctetsSetfNotOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((v (coerce "abcd" 'octets)))
+                   (setf (row-major-aref v 2) #\x)
+                   v)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestRowMajorArefArray(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(row-major-aref (make-array '(2 3) :initial-contents '((a b c) (d e f))) 4)`,

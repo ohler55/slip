@@ -44,6 +44,17 @@ func TestPositionIfStringPlain(t *testing.T) {
 	}).Test(t)
 }
 
+func TestPositionIfOctetsPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(position-if (lambda (c) (< 66 c)) (coerce "ABCD" 'octets))`,
+		Expect: "2",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position-if (lambda (c) (< 68 c)) (coerce "ABCD" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestPositionIfNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(position-if 'numberp t)",
@@ -92,6 +103,21 @@ func TestPositionIfStringStartEnd(t *testing.T) {
 	}).Test(t)
 }
 
+func TestPositionIfOctetsStartEnd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(position-if (lambda (c) (< 66 c)) (coerce "ABCDE" 'octets) :start 1 :end 3)`,
+		Expect: "2",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position-if (lambda (c) (< 67 c)) (coerce "ABCDE" 'octets) :start 1 :end 3)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position-if (lambda (c) (< 66 c)) (coerce "ABCDE" 'octets) :start 5 :end nil)`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestPositionIfListKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(position-if 'numberp '((a 1) (2 b) (c 3) (4 b)) :key 'car)",
@@ -110,6 +136,17 @@ func TestPositionIfStringKey(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(position-if (lambda (n) (< 65 n)) "ABC" :key 'char-code :from-end t)`,
+		Expect: "2",
+	}).Test(t)
+}
+
+func TestPositionIfOctetsKey(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(position-if (lambda (n) (< 66 n)) (coerce "ABC" 'octets) :key '1+)`,
+		Expect: "1",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position-if (lambda (n) (< 66 n)) (coerce "ABC" 'octets) :key '1+ :from-end t)`,
 		Expect: "2",
 	}).Test(t)
 }
