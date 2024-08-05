@@ -7,11 +7,6 @@
   - octets - []byte
    - update funcs that use Vector in cl and others
    - cl/make-array.go
-   - cl/nsubstitute-if.go
-   - cl/nsubstitute.go
-   - cl/search.go
-   - cl/substitute-if.go
-   - cl/substitute.go
 
   - octets functions (https://edicl.github.io/flexi-streams/#string-to-octets)
    - string-to-octets (string &key external-format start end => vector)

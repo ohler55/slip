@@ -100,6 +100,11 @@ func (f *NsubstituteIf) Call(s *slip.Scope, args slip.List, depth int) (result s
 		elements := seq.AsList()
 		_ = sr.replace(elements)
 		result = seq
+	case slip.Octets:
+		if _, ok := sr.rep.(slip.Octet); !ok {
+			slip.PanicType("new", sr.rep, "Octet")
+		}
+		result = sr.replaceBytes(seq)
 	default:
 		slip.PanicType("sequence", seq, "sequence")
 	}

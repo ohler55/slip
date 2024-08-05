@@ -28,6 +28,18 @@ func TestSubstituteString(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSubstituteOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(substitute (coerce #\Q 'octet) (coerce #\q 'octet) (coerce "quux" 'octets))`,
+		Array:  true,
+		Expect: "#(81 117 117 120)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(substitute t (coerce #\q 'octet) (coerce "quux" 'octets))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestSubstituteVector(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((vec #(a b c)))
@@ -45,11 +57,29 @@ func TestSubstituteListKeyTest(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSubstituteOctetsKeyTest(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((seq (coerce "abcd" 'octets)))
+                  (list (substitute (coerce #\x 'octet) 98 seq :key (lambda (x) (coerce x 'fixnum)) :test '<) seq))`,
+		Array:  true,
+		Expect: "(#(97 98 120 120) #(97 98 99 100))",
+	}).Test(t)
+}
+
 func TestSubstituteListCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((lst '(a b c b)))
                   (list (substitute 2 'b lst :from-end t :count 1) lst))`,
 		Expect: "((a b c 2) (a b c b))",
+	}).Test(t)
+}
+
+func TestSubstituteOctetsCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((seq (coerce "abcb" 'octets)))
+                  (list (substitute (coerce #\x 'octet) (coerce #\b 'octet) seq :from-end t :count 1) seq))`,
+		Array:  true,
+		Expect: "(#(97 98 99 120) #(97 98 99 98))",
 	}).Test(t)
 }
 

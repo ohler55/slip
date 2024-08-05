@@ -28,6 +28,19 @@ func TestNsubstituteIfString(t *testing.T) {
 	}).Test(t)
 }
 
+func TestNsubstituteIfOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(nsubstitute-if (coerce #\Q 'octet)
+                                 (lambda (v) (equal v (coerce #\q 'octet))) (coerce "quux" 'octets))`,
+		Array:  true,
+		Expect: "#(81 117 117 120)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(nsubstitute-if t (lambda (v) nil) (coerce "quux" 'octets))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestNsubstituteIfVector(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((vec #(a b c)))

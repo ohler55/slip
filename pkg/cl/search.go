@@ -107,6 +107,8 @@ func (f *Search) Call(s *slip.Scope, args slip.List, depth int) (index slip.Obje
 		index = sv.inString(s, ta, depth)
 	case *slip.Vector:
 		index = sv.inList(s, ta.AsList(), depth)
+	case slip.Octets:
+		index = sv.inOctets(s, ta, depth)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
@@ -309,6 +311,11 @@ func (sv *searchVars) inString(s *slip.Scope, seq2 slip.String, depth int) slip.
 		for i, r := range ra {
 			seq1[i] = slip.Character(r)
 		}
+	case slip.Octets:
+		if 0 < len(s1) {
+			return nil
+		}
+		return slip.Fixnum(0)
 	default:
 		slip.PanicType("sequence-1", s1, "sequence")
 	}
@@ -316,6 +323,41 @@ func (sv *searchVars) inString(s *slip.Scope, seq2 slip.String, depth int) slip.
 	sq2 := make(slip.List, len(ra))
 	for i, r := range ra {
 		sq2[i] = slip.Character(r)
+	}
+	return sv.searchList(s, seq1, sq2, depth)
+}
+
+func (sv *searchVars) inOctets(s *slip.Scope, seq2 slip.Octets, depth int) slip.Object {
+	var seq1 slip.List
+	switch s1 := sv.seq1.(type) {
+	case nil:
+		seq1 = slip.List{}
+	case slip.List:
+		if 0 < len(s1) {
+			return nil
+		}
+		return slip.Fixnum(0)
+	case *slip.Vector:
+		if 0 < s1.Length() {
+			return nil
+		}
+		return slip.Fixnum(0)
+	case slip.String:
+		if 0 < len(s1) {
+			return nil
+		}
+		return slip.Fixnum(0)
+	case slip.Octets:
+		seq1 = make(slip.List, len(s1))
+		for i, b := range s1 {
+			seq1[i] = slip.Octet(b)
+		}
+	default:
+		slip.PanicType("sequence-1", s1, "sequence")
+	}
+	sq2 := make(slip.List, len(seq2))
+	for i, b := range seq2 {
+		sq2[i] = slip.Octet(b)
 	}
 	return sv.searchList(s, seq1, sq2, depth)
 }

@@ -37,6 +37,18 @@ func TestNsubstituteVector(t *testing.T) {
 	}).Test(t)
 }
 
+func TestNsubstituteOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(nsubstitute (coerce #\Q 'octet) (coerce #\q 'octet) (coerce "quux" 'octets))`,
+		Array:  true,
+		Expect: "#(81 117 117 120)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(nsubstitute t (coerce #\q 'octet) (coerce "quux" 'octets))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestNsubstituteNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(nsubstitute 2 1 t)`,
