@@ -74,6 +74,39 @@ func TestMakeArrayElementType(t *testing.T) {
 	}).Test(t)
 }
 
+func TestMakeArrayOctetsSimple(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-array 4 :element-type 'octet :initial-element (coerce #\x 'octet))`,
+		Array:  true,
+		Expect: "#(120 120 120 120)",
+	}).Test(t)
+}
+
+func TestMakeArrayOctetsContents(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-array 3 :element-type 'octet
+                               :initial-contents (list (coerce #\a 'octet)
+                                                       (coerce #\b 'octet)
+                                                       (coerce #\c 'octet)))`,
+		Array:  true,
+		Expect: "#(97 98 99)",
+	}).Test(t)
+}
+
+func TestMakeArrayOctetsBadContents(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-array 3 :element-type 'octet :initial-contents '(1 2 3))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestMakeArrayOctetsBadInitialElement(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-array 3 :element-type 'octet :initial-element 1)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestMakeArrayBadDims(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(make-array t)`,

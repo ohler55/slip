@@ -130,12 +130,30 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		}
 	}
 	if len(dims) == 1 {
-
-		// TBD if elementType is octet then ...
-
-		v := slip.NewVector(dims[0], elementType, initElement, initContents, adjustable)
-		v.FillPtr = fillPtr
-		result = v
+		if elementType == slip.OctetSymbol && fillPtr < 0 {
+			v := make(slip.Octets, dims[0])
+			if initElement != nil {
+				if o, ok := initElement.(slip.Octet); ok {
+					for i := len(v) - 1; 0 <= i; i-- {
+						v[i] = byte(o)
+					}
+				} else {
+					slip.PanicType(":initial-element", initElement, "octet")
+				}
+			}
+			for i, c := range initContents {
+				if o, ok := c.(slip.Octet); ok {
+					v[i] = byte(o)
+				} else {
+					slip.PanicType(":initial-contents element", c, "octet")
+				}
+			}
+			result = v
+		} else {
+			v := slip.NewVector(dims[0], elementType, initElement, initContents, adjustable)
+			v.FillPtr = fillPtr
+			result = v
+		}
 	} else {
 		result = slip.NewArray(dims, elementType, initElement, initContents, adjustable)
 	}

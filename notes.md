@@ -3,11 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - octet
-  - octets - []byte
-   - update funcs that use Vector in cl and others
-   - cl/make-array.go
-
   - octets functions (https://edicl.github.io/flexi-streams/#string-to-octets)
    - string-to-octets (string &key external-format start end => vector)
    - octets-to-string sequence &key external-format start end => string
@@ -17,7 +12,6 @@
    - make-octets (size &optional initial-value)
     - macro for (make-array size :element-type 'octet :initial-element initial-value)
     - sbcl is new-octets but private with no docs
-    - also update make-array to handle octet element type
    - dovector - like dolist, put in pkg/gi
    - mapv and mapvar for vectors - in pkg/gi
 
