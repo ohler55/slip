@@ -18,6 +18,10 @@ func TestStrcatOk(t *testing.T) {
 		Source: `(strcat "abc" #\d (vector #\e #\f))`,
 		Expect: `"abcdef"`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(strcat "abc" #\d (coerce '(#\e #\f) 'octets))`,
+		Expect: `"abcdef"`,
+	}).Test(t)
 }
 
 func TestStrcatBadString(t *testing.T) {

@@ -62,6 +62,21 @@ func TestBagJSONParseString(t *testing.T) {
 		slip.ObjectString(scope.Get(slip.Symbol("json-parse-test-out"))))
 }
 
+func TestBagJSONParseOctets(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Set(slip.Symbol("json-parse-test-out"), slip.List{})
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(json-parse
+                  (lambda (bag) (setq json-parse-test-out (cons (send bag :native) json-parse-test-out)))
+                  (coerce "{a:1}{b:2}{c:3}" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t,
+		`((("c" . 3)) (("b" . 2)) (("a" . 1)))`,
+		slip.ObjectString(scope.Get(slip.Symbol("json-parse-test-out"))))
+}
+
 func TestBagJSONParseStringStrict(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Set(slip.Symbol("json-parse-test-out"), slip.List{})
@@ -70,6 +85,21 @@ func TestBagJSONParseStringStrict(t *testing.T) {
 		Source: `(json-parse
                   (lambda (bag) (setq json-parse-test-out (cons (send bag :native) json-parse-test-out)))
                   "{\"a\":1}{\"b\":2}{\"c\":3}" t)`,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t,
+		`((("c" . 3)) (("b" . 2)) (("a" . 1)))`,
+		slip.ObjectString(scope.Get(slip.Symbol("json-parse-test-out"))))
+}
+
+func TestBagJSONParseOctetsStrict(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Set(slip.Symbol("json-parse-test-out"), slip.List{})
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(json-parse
+                  (lambda (bag) (setq json-parse-test-out (cons (send bag :native) json-parse-test-out)))
+                  (coerce "{\"a\":1}{\"b\":2}{\"c\":3}" 'octets) t)`,
 		Expect: "nil",
 	}).Test(t)
 	tt.Equal(t,

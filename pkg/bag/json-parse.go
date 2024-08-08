@@ -30,8 +30,8 @@ func init() {
 				},
 				{
 					Name: "input",
-					Type: "input-stream|string",
-					Text: "The _input-stream_ or _string_ to read from.",
+					Type: "input-stream|string|octets",
+					Text: "The _input-stream_, _string_, or _octets_ to read from.",
 				},
 				{
 					Name: "strict",
@@ -84,6 +84,8 @@ func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		switch ta := args[1].(type) {
 		case slip.String:
 			oj.MustParse([]byte(ta), cb)
+		case slip.Octets:
+			oj.MustParse([]byte(ta), cb)
 		case io.Reader:
 			oj.MustLoad(ta, cb)
 		default:
@@ -92,6 +94,8 @@ func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	} else {
 		switch ta := args[1].(type) {
 		case slip.String:
+			sen.MustParse([]byte(ta), cb)
+		case slip.Octets:
 			sen.MustParse([]byte(ta), cb)
 		case io.Reader:
 			sen.MustParseReader(ta, cb)

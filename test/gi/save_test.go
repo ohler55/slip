@@ -37,6 +37,21 @@ func TestSaveString(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSaveOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((out (make-string-output-stream)))
+                  (save (coerce "abc" 'octets) out)
+                  (get-output-stream-string out))`,
+		Expect: `"#(97 98 99)"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((out (make-string-output-stream)))
+                  (save (coerce "" 'octets) out)
+                  (get-output-stream-string out))`,
+		Expect: `"#()"`,
+	}).Test(t)
+}
+
 func TestSaveList(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((out (make-string-output-stream)))

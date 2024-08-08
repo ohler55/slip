@@ -21,11 +21,11 @@ func init() {
 				{
 					Name: "value",
 					Type: "object",
-					Text: "Either a string or other object that can be converted to a bag",
+					Text: "Either a string, octets or other object that can be converted to a bag",
 				},
 			},
 			Return: "bag",
-			Text: `make-__bag__ makes a new _bag_ by either parsing a _string_ as a
+			Text: `__make-bag__ makes a new _bag_ by either parsing a _string_ as a
 JSON or SEN document or converting an assoc to a map, a list to an array, and number
 to an int64 or float64 in go terms.`,
 			Examples: []string{
@@ -34,7 +34,7 @@ to an int64 or float64 in go terms.`,
 		}, &Pkg)
 }
 
-// Make represents the make function.
+// Make represents the make-bag function.
 type Make struct {
 	slip.Function
 }
@@ -45,12 +45,18 @@ func (f *Make) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	self := flavor.MakeInstance().(*flavors.Instance)
 	self.Init(s, slip.List{}, depth)
 
-	if ss, ok := args[0].(slip.String); ok {
-		self.Any = sen.MustParse([]byte(ss))
+	switch ta := args[0].(type) {
+	case slip.Octets:
+		self.Any = sen.MustParse([]byte(ta))
 		if options.Converter != nil {
 			self.Any = options.Converter.Convert(self.Any)
 		}
-	} else {
+	case slip.String:
+		self.Any = sen.MustParse([]byte(ta))
+		if options.Converter != nil {
+			self.Any = options.Converter.Convert(self.Any)
+		}
+	default:
 		self.Any = ObjectToBag(args[0])
 	}
 	return self

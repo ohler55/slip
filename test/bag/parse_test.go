@@ -18,7 +18,7 @@ func TestBagParseWithPath(t *testing.T) {
 	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(bag-parse bag "{b:3}" "a")`,
+		Source: `(bag-parse bag (coerce "{b:3}" 'octets) "a")`,
 		Expect: "/#<bag-flavor [0-9a-f]+>/",
 	}).Test(t)
 	tt.Equal(t, "{a: {b: 3}}", pretty.SEN(obj.Any))
