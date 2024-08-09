@@ -4,8 +4,6 @@
 
 - next
  - octets functions (https://edicl.github.io/flexi-streams/#string-to-octets)
-   - octet-length string &key start end => length
-   - char-length sequence &key start end => length
    - char-to-octets
    - make-octets (size &optional initial-value)
     - macro for (make-array size :element-type 'octet :initial-element initial-value)

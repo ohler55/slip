@@ -51,32 +51,15 @@ type OctetsToString struct {
 // Call the function with the arguments provided.
 func (f *OctetsToString) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 5)
-	start := 0
-	end := -1
-	if v, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":start")); has {
-		if num, ok := v.(slip.Fixnum); ok && 0 <= num {
-			start = int(num)
-		} else {
-			slip.PanicType(":start", v, "fixnum")
-		}
-	}
-	if v, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":end")); has && v != nil {
-		if num, ok := v.(slip.Fixnum); ok && 0 <= num {
-			end = int(num)
-		} else {
-			slip.PanicType(":start", v, "fixnum")
-		}
-	}
+	start, end := seqStarEndArgs(args)
 	a0 := args[0]
 top:
 	switch ta := a0.(type) {
 	case nil:
 		result = slip.String("")
 	case slip.Octets:
-		end = f.checkStartEnd(start, end, len(ta))
 		result = slip.String(ta[start:end])
 	case slip.List:
-		end = f.checkStartEnd(start, end, len(ta))
 		octs := make(slip.Octets, end-start)
 		for i, v := range ta[start:end] {
 			octs[i] = byte(cl.ToOctet(v).(slip.Octet))
@@ -89,20 +72,4 @@ top:
 		slip.PanicType("octets", args[0], "list", "vector", "octets")
 	}
 	return
-}
-
-func (f *OctetsToString) checkStartEnd(start, end, size int) int {
-	if end < 0 {
-		end = size
-	}
-	if size < start {
-		slip.NewPanic("start, %d is greater than length of %d", start, size)
-	}
-	if size < end {
-		slip.NewPanic("end, %d is greater than length of %d", end, size)
-	}
-	if end < start {
-		slip.NewPanic("end, %d is less start %d", end, start)
-	}
-	return end
 }

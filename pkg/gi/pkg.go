@@ -66,3 +66,48 @@ func init() {
 	slip.DefConstant(slip.Symbol("sigwinch"), slip.Fixnum(28), "discard signal, Window size change")
 	slip.DefConstant(slip.Symbol("siginfo"), slip.Fixnum(29), "discard signal, status request from keyboard")
 }
+
+func seqStarEndArgs(args slip.List) (start, end int) {
+	start = 0
+	end = -1
+	if v, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":start")); has {
+		if num, ok := v.(slip.Fixnum); ok && 0 <= num {
+			start = int(num)
+		} else {
+			slip.PanicType(":start", v, "fixnum")
+		}
+	}
+	if v, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":end")); has && v != nil {
+		if num, ok := v.(slip.Fixnum); ok && 0 <= num {
+			end = int(num)
+		} else {
+			slip.PanicType(":start", v, "fixnum")
+		}
+	}
+	var size int
+	switch ta := args[0].(type) {
+	case nil:
+		// size remains as 0
+	case slip.Octets:
+		size = len(ta)
+	case slip.String:
+		size = len([]rune(ta))
+	case slip.List:
+		size = len(ta)
+	case *slip.Vector:
+		size = ta.Length()
+	}
+	if end < 0 {
+		end = size
+	}
+	if size < start {
+		slip.NewPanic("start, %d is greater than length of %d", start, size)
+	}
+	if size < end {
+		slip.NewPanic("end, %d is greater than length of %d", end, size)
+	}
+	if end < start {
+		slip.NewPanic("end, %d is less start %d", end, start)
+	}
+	return
+}
