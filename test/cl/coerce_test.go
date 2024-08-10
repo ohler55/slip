@@ -104,6 +104,11 @@ func TestCoerceToOctets(t *testing.T) {
 		Expect: `#(97 98 99)`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(coerce #\ぴ 'octets)`,
+		Array:  true,
+		Expect: `#(227 129 180)`,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(coerce 3 'octets)`,
 		Panics: true,
 	}).Test(t)

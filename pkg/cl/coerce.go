@@ -201,6 +201,8 @@ func (f *Coerce) toOctets(arg slip.Object) (result slip.Object) {
 		result = slip.Octets(ta)
 	case slip.Symbol:
 		result = slip.Octets(ta)
+	case slip.Character:
+		result = slip.Octets(string([]rune{rune(ta)}))
 	case slip.List:
 		octs := make(slip.Octets, len(ta))
 		for i, v := range ta {

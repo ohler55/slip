@@ -3,13 +3,8 @@
 - **multipass** or utm for linux
 
 - next
- - octets functions (https://edicl.github.io/flexi-streams/#string-to-octets)
-   - char-to-octets
-   - make-octets (size &optional initial-value)
-    - macro for (make-array size :element-type 'octet :initial-element initial-value)
-    - sbcl is new-octets but private with no docs
-   - dovector - like dolist, put in pkg/gi
-   - mapv and mapvar for vectors - in pkg/gi
+ - dovector - like dolist, put in pkg/gi
+ - mapv and mapvar for vectors - in pkg/gi
 
  - slot-value
   - add slot-value to flavors pkg/clos (for get and setf)
