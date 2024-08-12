@@ -3,13 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - dovector - like dolist, put in pkg/gi
- - mapv and mapvar for vectors - in pkg/gi
-
- - slot-value
-  - add slot-value to flavors pkg/clos (for get and setf)
-   - always allow
-
 
  - usocket in pkg/net
   - types
@@ -105,6 +98,11 @@
    - unsupported - a condition
    - socket-error - a condition
    - socket-condition - a condition
+
+
+ - slot-value
+  - add slot-value to flavors pkg/clos (for get and setf)
+   - always allow
 
 
  - net package
