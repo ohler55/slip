@@ -5,13 +5,9 @@
 - next
 
  - usocket in pkg/net
-  - types
-   - socket-stream type
-   - socket, a wrapper around net.Conn, just as a handle
   - plan
-   - do we need a byte or octet type
    - create usocket flavor
-    - a net.Conn for inst.Any
+    - **a net.Conn for inst.Any**
     - or use syscall?
     - how to use setf with instance?
      - (setf (slot-value inst 'foo) 0)
