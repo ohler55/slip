@@ -5,6 +5,9 @@
 - next
 
  - usocket in pkg/net
+
+  - make subclass/flavor for file-usocket (file and fd), stream-usocket, stream-server-usocket
+
   - plan
    - create usocket flavor
     - **a net.Conn for inst.Any**

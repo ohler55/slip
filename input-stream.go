@@ -13,10 +13,10 @@ import (
 const InputStreamSymbol = Symbol("input-stream")
 
 func init() {
-	DefConstant(InputStreamSymbol, InputStreamSymbol, `A _input-stream_ stream backed by a io.Readr.`)
+	DefConstant(InputStreamSymbol, InputStreamSymbol, `A _input-stream_ stream backed by a io.Reader.`)
 }
 
-// InputStream is a *os.Input.
+// InputStream is an *os.Reader wrapped to support .
 type InputStream struct {
 	Reader   io.Reader
 	lastRune rune
@@ -58,7 +58,7 @@ func (obj *InputStream) Eval(s *Scope, depth int) Object {
 	return obj
 }
 
-// Read made visible since os.Input functions are not automatically visible.
+// Read made visible since os.Read functions are not automatically visible.
 func (obj *InputStream) Read(b []byte) (cnt int, err error) {
 	var plus int
 	if obj.useLast && obj.lastRune != 0 {

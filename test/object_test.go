@@ -626,6 +626,24 @@ func TestOutputStream(t *testing.T) {
 	}).Test(t)
 }
 
+func TestIOStream(t *testing.T) {
+	stream := slip.IOStream{}
+	(&sliptest.Object{
+		Target:    &stream,
+		String:    "#<IO-STREAM>",
+		Simple:    "#<IO-STREAM>",
+		Hierarchy: "io-stream.stream.t",
+		Equals: []*sliptest.EqTest{
+			{Other: &stream, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			(&slip.IOStream{}).StreamType,
+		},
+		Eval: &stream,
+	}).Test(t)
+}
+
 func TestFuncInfo(t *testing.T) {
 	fi := slip.MustFindFunc("car")
 	(&sliptest.Object{

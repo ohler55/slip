@@ -78,12 +78,12 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 
 func (caller serverInitCaller) Docs() string {
 	return `__:init__ &key _address_ _tls-config_ _read-timeout_ _write-timeout_ _idle-timeout_ _maximum-header-length_
-   _address_
-   _tls-config_
-   _read-timeout_
-   _write-timeout_
-   _idle-timeout_
-   _maximum-header-length_
+   _address_ [string] server address and port number (e.g, :8080 or 127.0.0.1:8080)
+   _tls-config_ [string] _TBD_
+   _read-timeout_ [real] the read timeout in seconds.
+   _write-timeout_ [real] the write timeout in seconds.
+   _idle-timeout_ [real] the idle timeout in seconds.
+   _maximum-header-length_ [fixnum] the maximum header length
 
 Sets the initial values when _make-instance_ is called.
 `
