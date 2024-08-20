@@ -96,6 +96,47 @@ func TestUsocketConn(t *testing.T) {
 	tt.SameType(t, &net.UnixConn{}, inst.Any)
 }
 
+func TestUsocketNotStream(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let("uconn", &slip.IOStream{})
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(make-instance 'usocket :socket uconn)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestUsocketNotFile(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(with-open-file (f "testdata/sample.txt" :direction :input)
+                     (make-instance 'usocket :socket f))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestUsocketNotFd(t *testing.T) {
+	f, err := os.Open("testdata/sample.txt")
+	tt.Nil(t, err)
+	scope := slip.NewScope()
+	scope.Let("ufd", slip.Fixnum(f.Fd()))
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(make-instance 'usocket :socket ufd)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(make-instance 'usocket :socket -100)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestUsocketBadSocket(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'usocket :socket t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestUsocketDocs(t *testing.T) {
 	scope := slip.NewScope()
 	var out strings.Builder

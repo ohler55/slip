@@ -1,6 +1,6 @@
 module github.com/ohler55/slip
 
-go 1.22
+go 1.23
 
 require (
 	github.com/ohler55/ojg v1.24.0

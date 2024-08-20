@@ -5,18 +5,17 @@
 - next
 
  - usocket in pkg/net
-
-  - make subclass/flavor for file-usocket (file and fd), stream-usocket, stream-server-usocket
+  - classes
+   - usocket
+   - stream-usocket class
+    - methods
+     - stream (can be used with setf)
+   - stream-server-usocket
+    - methods
+     - element-type (byte?)
+   - datagram-usocket (maybe)
 
   - plan
-   - create usocket flavor
-    - **a net.Conn for inst.Any**
-    - or use syscall?
-    - how to use setf with instance?
-     - (setf (slot-value inst 'foo) 0)
-     - add slot-value to flavors pkg/clos (for get and setf)
-      - always allow
-   - define what a socket is (fixnum) or **just leave as fixnum**
    - create stream-usocket flavor
     - socket-stream (object) => stream-usocket
     - make-instance
@@ -32,19 +31,6 @@
      - fixnum (64 bit)
     - socket is an api
 
-
-  - classes
-   - usocket
-    - methods
-     - socket (also with setf)
-     - state (also with setf although that seems odd)
-   - stream-usocket class
-    - methods
-     - stream (can be used with setf)
-   - stream-server-usocket
-    - methods
-     - element-type (byte?)
-   - datagram-usocket (maybe)
 
   - vars
    - *auto-port* (default 0)

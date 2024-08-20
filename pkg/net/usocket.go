@@ -30,50 +30,22 @@ func defUsocket() {
 		},
 		&Pkg,
 	)
-	usocketFlavor.DefMethod(":init", "", usocketInitCaller(true))
-	usocketFlavor.DefMethod(":socket", "", usocketSocketCaller(true))
-	usocketFlavor.DefMethod(":set-socket", "", usocketSetSocketCaller(true))
-	usocketFlavor.DefMethod(":state", "", usocketStateCaller(true))
+	usocketFlavor.DefMethod(":init", "", usocketInitCaller{})
+	usocketFlavor.DefMethod(":socket", "", usocketSocketCaller{})
+	usocketFlavor.DefMethod(":set-socket", "", usocketSetSocketCaller{})
+	usocketFlavor.DefMethod(":state", "", usocketStateCaller{})
 }
 
-type usocketInitCaller bool
+type usocketInitCaller struct{}
 
 func (caller usocketInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
 	for i := 0; i < len(args); i += 2 {
 		key, _ := args[i].(slip.Symbol)
-		k := string(key)
-		if strings.EqualFold(":socket", k) {
-			switch ta := args[i+1].(type) {
-			case *slip.IOStream:
-				if _, ok := ta.RW.(net.Conn); ok {
-					self.Any = ta.RW
-				} else {
-					slip.PanicType("socket", ta, "io-stream", "file-stream")
-				}
-
-			case *slip.FileStream:
-				if c, err := net.FileConn((*os.File)(ta)); err == nil {
-					self.Any = c
-				} else {
-					panic(err)
-				}
-			case slip.Fixnum:
-				if f := os.NewFile(uintptr(ta), fmt.Sprintf("file-%d", ta)); f != nil {
-					defer func() { _ = f.Close() }()
-					var err error
-					if self.Any, err = net.FileConn(f); err != nil {
-						panic(err)
-					}
-				} else {
-					slip.NewPanic("%d is not a valid file descriptor", ta)
-				}
-			default:
-				slip.PanicType("socket", ta, "io-stream", "fixnum")
-			}
+		if strings.EqualFold(":socket", string(key)) {
+			usocketSetSocketCaller{}.Call(s, slip.List{args[i+1]}, 0)
 		}
 	}
 	return nil
@@ -88,7 +60,7 @@ Initializes an instance with the provided _socket_.
 `
 }
 
-type usocketSocketCaller bool
+type usocketSocketCaller struct{}
 
 func (caller usocketSocketCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
@@ -107,7 +79,7 @@ Returns the stream of the instance or nil if not connected.
 `
 }
 
-type usocketSetSocketCaller bool
+type usocketSetSocketCaller struct{}
 
 func (caller usocketSetSocketCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
@@ -151,7 +123,7 @@ Sets the undelying stream of the instance.
 `
 }
 
-type usocketStateCaller bool
+type usocketStateCaller struct{}
 
 func (caller usocketStateCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)

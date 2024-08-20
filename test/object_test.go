@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"os"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -627,7 +628,19 @@ func TestOutputStream(t *testing.T) {
 }
 
 func TestIOStream(t *testing.T) {
-	stream := slip.IOStream{}
+	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
+	f0 := os.NewFile(uintptr(fds[0]), "file-0")
+	f1 := os.NewFile(uintptr(fds[1]), "file-1")
+	stream := slip.IOStream{RW: f0}
+	stream1 := slip.IOStream{RW: f1}
+	defer func() {
+		_ = syscall.Close(fds[0])
+		_ = syscall.Close(fds[1])
+		_ = f0.Close()
+		_ = f1.Close()
+		_ = stream.Close()
+		_ = stream1.Close()
+	}()
 	(&sliptest.Object{
 		Target:    &stream,
 		String:    "#<IO-STREAM>",
@@ -642,6 +655,14 @@ func TestIOStream(t *testing.T) {
 		},
 		Eval: &stream,
 	}).Test(t)
+	cnt, err := stream.Write([]byte("test"))
+	tt.Nil(t, err)
+	tt.Equal(t, 4, cnt)
+	buf := make([]byte, 4)
+	cnt, err = stream1.Read(buf)
+	tt.Nil(t, err)
+	tt.Equal(t, 4, cnt)
+	tt.Equal(t, "test", string(buf))
 }
 
 func TestFuncInfo(t *testing.T) {
