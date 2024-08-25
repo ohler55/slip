@@ -5,8 +5,37 @@
 - next
 
  - usocket in pkg/net
+  - separate files for methods (start with state) (like flow/task-height)
   - classes
    - usocket
+    - :close
+    - :local-name
+    - :local-address
+    - :local-port
+    - :peer-name
+    - :peer-address
+    - :peer-port
+    - :send
+    - :receive
+    - :wait-for-input
+    - :stream
+    - :option
+   - functions
+    - usocket-p (socket)
+    - stream-usocket-p (socket)
+    - socket-state (socket)
+    - get-local-name socket => address, port
+    - get-local-address socket => address
+    - get-local-port socket => port
+    - get-peer-name socket => address, port
+    - get-peer-address socket => address
+    - get-peer-port socket => port
+    - socket-send (usocket buffer length &key host port offset)
+    - socket-receive (usocket buffer length &key element-type)
+    - wait-for-input (socket-or-sockets &key timeout ready-only &aux (single-socket-p (usocket-p socket-or-sockets)))
+    - socket-stream (socket)
+    - socket-option (socket option &key)
+
    - stream-usocket class
     - methods
      - stream (can be used with setf)

@@ -123,25 +123,6 @@ Sets the undelying stream of the instance.
 `
 }
 
-type usocketStateCaller struct{}
-
-func (caller usocketStateCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
-	self := s.Get("self").(*flavors.Instance)
-	slip.ArgCountCheck(self, args, 0, 0)
-	if self.Any != nil {
-		result = slip.Symbol(":read-write")
-	}
-	return
-}
-
-func (caller usocketStateCaller) Docs() string {
-	return `__:state__ => _nil_ | _:read_ | _:write_ | _:read-write_
-
-
-Returns the ready state of the instance.
-`
-}
-
 // type usocketInitCaller bool
 
 // func (caller usocketInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
