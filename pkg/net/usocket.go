@@ -34,6 +34,7 @@ func defUsocket() {
 	usocketFlavor.DefMethod(":socket", "", usocketSocketCaller{})
 	usocketFlavor.DefMethod(":set-socket", "", usocketSetSocketCaller{})
 	usocketFlavor.DefMethod(":state", "", usocketStateCaller{})
+	usocketFlavor.DefMethod(":close", "", usocketCloseCaller{})
 }
 
 type usocketInitCaller struct{}

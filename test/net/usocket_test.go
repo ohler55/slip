@@ -143,9 +143,10 @@ func TestUsocketDocs(t *testing.T) {
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
 	for _, method := range []string{
+		":close",
 		":init",
-		":socket",
 		":set-socket",
+		":socket",
 		":state",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method usocket %s out)`, method)).Eval(scope, nil)
