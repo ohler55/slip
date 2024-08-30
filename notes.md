@@ -4,12 +4,18 @@
 
 - next
 
+ - flavors/send
+  - make a Placer
+  - others like socket-options should also be a placer
+
  - usocket in pkg/net
   - classes
    - usocket
     + :close
     - :local-name
-    - :local-address
+    - :local-address -
+     - conn.LocalAddr() Addr
+     - addr.String() 192.0.1.2:80 or [2001:db8::1]:80
     - :local-port
     - :peer-name
     - :peer-address

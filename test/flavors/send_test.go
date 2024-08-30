@@ -30,8 +30,14 @@ func TestSendGetSet(t *testing.T) {
 	size = slip.ReadString("(send berry :size)").Eval(scope, nil)
 	tt.Equal(t, slip.String("large"), size)
 
+	_ = slip.ReadString(`(setf (send berry :size) "small")`).Eval(scope, nil)
+	size = slip.ReadString("(send berry :size)").Eval(scope, nil)
+	tt.Equal(t, slip.String("small"), size)
+
 	tt.Panic(t, func() { _ = slip.ReadString("(send berry :bad)").Eval(scope, nil) })
 	tt.Panic(t, func() { _ = slip.ReadString("(send berry :set-size)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(setf (send t :bad) 7)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(setf (send berry t) 7)").Eval(scope, nil) })
 }
 
 func TestSendDefHand(t *testing.T) {
