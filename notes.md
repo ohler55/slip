@@ -4,15 +4,11 @@
 
 - next
 
- - flavors/send
-  - make a Placer
-  - others like socket-options should also be a placer
-
  - usocket in pkg/net
   - classes
    - usocket
     + :close
-    - :local-name
+    + :local-name
     - :local-address -
      - conn.LocalAddr() Addr
      - addr.String() 192.0.1.2:80 or [2001:db8::1]:80
@@ -31,7 +27,7 @@
     - usocket-p (socket)
     - stream-usocket-p (socket)
     + socket-state (socket)
-    - get-local-name socket => address, port
+    + get-local-name socket => address, port
     - get-local-address socket => address
     - get-local-port socket => port
     - get-peer-name socket => address, port
