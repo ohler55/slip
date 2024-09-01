@@ -9,10 +9,8 @@
    - usocket
     + :close
     + :local-name
-    - :local-address -
-     - conn.LocalAddr() Addr
-     - addr.String() 192.0.1.2:80 or [2001:db8::1]:80
-    - :local-port
+    + :local-address
+    + :local-port
     - :peer-name
     - :peer-address
     - :peer-port
@@ -28,8 +26,8 @@
     - stream-usocket-p (socket)
     + socket-state (socket)
     + get-local-name socket => address, port
-    - get-local-address socket => address
-    - get-local-port socket => port
+    + get-local-address socket => address
+    + get-local-port socket => port
     - get-peer-name socket => address, port
     - get-peer-address socket => address
     - get-peer-port socket => port

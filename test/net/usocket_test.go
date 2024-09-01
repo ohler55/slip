@@ -145,7 +145,9 @@ func TestUsocketDocs(t *testing.T) {
 	for _, method := range []string{
 		":close",
 		":init",
+		":local-address",
 		":local-name",
+		":local-port",
 		":set-socket",
 		":socket",
 		":state",

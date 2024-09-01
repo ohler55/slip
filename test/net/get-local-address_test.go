@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"syscall"
 	"testing"
 
@@ -17,7 +16,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestGetLocalNameOkay(t *testing.T) {
+func TestGetLocalAddressOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -28,12 +27,12 @@ func TestGetLocalNameOkay(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
-                  (get-local-name sock))`,
-		Expect: `"", 0`,
+                  (get-local-address sock))`,
+		Expect: `""`,
 	}).Test(t)
 }
 
-func TestUsocketLocalNameOkay(t *testing.T) {
+func TestUsocketLocalAddressOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -44,12 +43,12 @@ func TestUsocketLocalNameOkay(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
-                  (send sock :local-name))`,
-		Expect: `"", 0`,
+                  (send sock :local-address))`,
+		Expect: `""`,
 	}).Test(t)
 }
 
-func TestGetLocalNameHTTP(t *testing.T) {
+func TestGetLocalAddressHTTP(t *testing.T) {
 	serv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("okay"))
 	}))
@@ -62,10 +61,8 @@ func TestGetLocalNameHTTP(t *testing.T) {
 			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
 			us.Any = nc
 			scope.Let(slip.Symbol("sock"), us)
-			result := slip.ReadString("(send sock :local-name)").Eval(scope, nil).(slip.Values)
-			port, _ := strconv.Atoi(u.Port())
-			tt.Equal(t, slip.Fixnum(port), result[1])
-			tt.Equal(t, slip.String(u.Hostname()), result[0])
+			result := slip.ReadString("(send sock :local-address)").Eval(scope, nil).(slip.String)
+			tt.Equal(t, slip.String(u.Hostname()), result)
 		}
 	}
 	if resp, err := serv.Client().Get(serv.URL); err == nil {
@@ -73,16 +70,16 @@ func TestGetLocalNameHTTP(t *testing.T) {
 	}
 }
 
-func TestGetLocalNameNotSocket(t *testing.T) {
+func TestGetLocalAddressNotSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(get-local-name t)`,
+		Source:    `(get-local-address t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
-func TestUsocketLocalNameClosed(t *testing.T) {
+func TestUsocketLocalAddressClosed(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(send (make-instance 'usocket) :local-name)`,
-		Expect: "nil, nil",
+		Source: `(send (make-instance 'usocket) :local-address)`,
+		Expect: "nil",
 	}).Test(t)
 }
