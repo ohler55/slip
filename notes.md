@@ -11,12 +11,14 @@
     + :local-name
     + :local-address
     + :local-port
-    - :peer-name
-    - :peer-address
-    - :peer-port
+    + :peer-name
+    + :peer-address
+    + :peer-port
     - :send
     - :receive
     - :wait-for-input
+     - no nice way to do that in go without syscall
+     - return socket and time remaining on timeout
     - :stream
     - :option
     - :set-option
@@ -28,9 +30,9 @@
     + get-local-name socket => address, port
     + get-local-address socket => address
     + get-local-port socket => port
-    - get-peer-name socket => address, port
-    - get-peer-address socket => address
-    - get-peer-port socket => port
+    + get-peer-name socket => address, port
+    + get-peer-address socket => address
+    + get-peer-port socket => port
     - socket-send (usocket buffer length &key host port offset)
     - socket-receive (usocket buffer length &key element-type)
     - wait-for-input (socket-or-sockets &key timeout ready-only &aux (single-socket-p (usocket-p socket-or-sockets)))
