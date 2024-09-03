@@ -34,6 +34,9 @@
     + get-peer-address socket => address
     + get-peer-port socket => port
     - socket-send (usocket buffer length &key host port offset)
+     - change to make length optional
+     - returns number of bytes sent
+     - host and port are for datagram sockets only
     - socket-receive (usocket buffer length &key element-type)
     - wait-for-input (socket-or-sockets &key timeout ready-only &aux (single-socket-p (usocket-p socket-or-sockets)))
     - socket-stream (socket)

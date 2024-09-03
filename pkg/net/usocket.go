@@ -41,6 +41,7 @@ func defUsocket() {
 	usocketFlavor.DefMethod(":peer-address", "", usocketPeerAddressCaller{})
 	usocketFlavor.DefMethod(":peer-name", "", usocketPeerNameCaller{})
 	usocketFlavor.DefMethod(":peer-port", "", usocketPeerPortCaller{})
+	usocketFlavor.DefMethod(":send", "", usocketSendCaller{})
 }
 
 type usocketInitCaller struct{}
