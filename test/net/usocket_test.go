@@ -151,9 +151,12 @@ func TestUsocketDocs(t *testing.T) {
 		":peer-address",
 		":peer-name",
 		":peer-port",
+		":receive",
+		":send",
 		":set-socket",
 		":socket",
 		":state",
+		":stream",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method usocket %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))

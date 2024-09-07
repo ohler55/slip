@@ -5,6 +5,8 @@
 - next
 
  - usocket in pkg/net
+  - stream-usocket-p (socket)
+   - and :stream
   - classes
    - usocket
     + :close
@@ -14,18 +16,19 @@
     + :peer-name
     + :peer-address
     + :peer-port
-    - :send
-    - :receive
+    + :send
+    + :receive
+    + :stream
+    - :option
+    - :set-option
     - :wait-for-input
      - no nice way to do that in go without syscall
      - return socket and time remaining on timeout
-    - :stream
-    - :option
-    - :set-option
    - functions
     + socket-close (usocket)
-    - usocket-p (socket)
+    + usocket-p (socket)
     - stream-usocket-p (socket)
+     - if io-stream and rw is net.Conn then t
     + socket-state (socket)
     + get-local-name socket => address, port
     + get-local-address socket => address
@@ -33,14 +36,13 @@
     + get-peer-name socket => address, port
     + get-peer-address socket => address
     + get-peer-port socket => port
-    - socket-send (usocket buffer length &key host port offset)
-     - change to make length optional
-     - returns number of bytes sent
-     - host and port are for datagram sockets only
-    - socket-receive (usocket buffer length &key element-type)
+    + socket-send (usocket buffer length &key host port offset timeout)
+    + socket-receive (usocket buffer &optional length &key timeout)
     - wait-for-input (socket-or-sockets &key timeout ready-only &aux (single-socket-p (usocket-p socket-or-sockets)))
-    - socket-stream (socket)
+    + socket-stream (socket)
     - socket-option (socket option &key) - also a placer
+
+ce7JLGQbJFbr
 
    - stream-usocket class
     - methods

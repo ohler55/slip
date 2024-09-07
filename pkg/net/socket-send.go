@@ -4,6 +4,7 @@ package net
 
 import (
 	"net"
+	"time"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
@@ -43,6 +44,11 @@ func init() {
 					Text: "the offset in the _buffer_ to start sending.",
 				},
 				{
+					Name: "timeout",
+					Type: "real|nil",
+					Text: "if non-nil then the number of seconds for the timeout.",
+				},
+				{
 					Name: "host",
 					Type: "string|fixnum|list",
 					Text: "the host to send to if a datagram socket.",
@@ -53,10 +59,13 @@ func init() {
 					Text: "the port to send to if a datagram socket.",
 				},
 			},
-			Return: "fixnum",
-			Text:   `__socket-send__ writes to the _socket_ and returns the number of bytes written.`,
+			Return: "octets, fixnum, string, fixnum",
+			Text: `__socket-send__ writes to the _socket_ and returns four values;
+the octets read, the number of bytes read, the sending host, and the sending port. If _buffer_ is _nil_
+then _octets_ or _length_ is created. If both _buffer_ and _length_ are _nil_ then an _octests_ vector
+of length 65507 is created.`,
 			Examples: []string{
-				`(socket-send (make-instance 'usocket :socket 777) "hello" 5) => 5`,
+				`(socket-receive (make-instance 'usocket :socket 777) nil 5) => #(65 66 67), 3, "", nil`,
 			},
 		}, &Pkg)
 }
@@ -68,7 +77,7 @@ type SocketSend struct {
 
 // Call the function with the arguments provided.
 func (f *SocketSend) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 9)
+	slip.ArgCountCheck(f, args, 2, 11)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
 		if nc, ok2 := self.Any.(net.Conn); ok2 {
@@ -104,13 +113,39 @@ func socketSend(nc net.Conn, args slip.List) int {
 		slip.PanicType("buffer", ta, "octets", "string")
 	}
 	length := len(buf)
-
-	// TBD if 1 < len(args)
-	//   if args[1] is a fixnum then length and trim args
-	//
-	// TBD get buffer, length offset,
+	timeout := time.Duration(0)
+	if 1 < len(args) {
+		args = args[1:]
+		if num, ok := args[0].(slip.Fixnum); ok {
+			if num <= 0 {
+				slip.PanicType("length", num, "positive fixnum")
+			}
+			length = int(num)
+			args = args[1:]
+		}
+		if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":offset")); has {
+			if num, ok := value.(slip.Fixnum); ok && 0 <= num && int(num) < len(buf) {
+				buf = buf[int(num):]
+			} else {
+				slip.NewPanic(":offset must be a positive fixnum less than the length of %d", len(buf))
+			}
+		}
+		if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":timeout")); has && value != nil {
+			if r, ok := value.(slip.Real); ok {
+				if sec := r.RealValue() * float64(time.Second); 0.0 < sec {
+					timeout = time.Duration(sec)
+				}
+			}
+		}
+		// TBD host, port for datagrams
+	}
 	if length < len(buf) {
 		buf = buf[:length]
+	}
+	if 0 < timeout {
+		var zero time.Time
+		_ = nc.SetWriteDeadline(time.Now().Add(timeout))
+		defer func() { _ = nc.SetWriteDeadline(zero) }()
 	}
 	cnt, err := nc.Write(buf)
 	if err != nil {
