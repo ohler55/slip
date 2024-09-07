@@ -42,8 +42,6 @@
     + socket-stream (socket)
     - socket-option (socket option &key) - also a placer
 
-ce7JLGQbJFbr
-
    - stream-usocket class
     - methods
      - stream (can be used with setf)
