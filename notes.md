@@ -5,12 +5,18 @@
 - next
 
  - usocket in pkg/net
-  - stream-usocket-p (socket)
-   - and :stream
+  - change to use syscon and fd instead of net.Conn
+   - also allow set and get on socket variable or apparent variable
   - classes
    - usocket
     + :close
     + :local-name
+     - switch on Sockaddr types to get the port and Addr
+     - change addr from string to octets
+      - is a new type needed? or use functions?
+      - address-as-string (addr) => string (either ipv4 or ipv6)
+      - address-as-fixnum (addr) => fixnum
+      - address can also be string if Unix
     + :local-address
     + :local-port
     + :peer-name
@@ -19,6 +25,7 @@
     + :send
     + :receive
     + :stream
+     - maybe a type for fd to add Read and Write (FdRW or fdRW)
     - :option
     - :set-option
     - :wait-for-input
@@ -27,8 +34,6 @@
    - functions
     + socket-close (usocket)
     + usocket-p (socket)
-    - stream-usocket-p (socket)
-     - if io-stream and rw is net.Conn then t
     + socket-state (socket)
     + get-local-name socket => address, port
     + get-local-address socket => address
@@ -45,16 +50,13 @@
    - stream-usocket class
     - methods
      - stream (can be used with setf)
+    - stream-usocket-p (socket)
+     - if io-stream and rw is net.Conn then t
    - stream-server-usocket
     - methods
      - element-type (byte?)
    - datagram-usocket (maybe)
 
-  - plan
-   - create stream-usocket flavor
-    - socket-stream (object) => stream-usocket
-    - make-instance
-    -
 
    - ipaddr (host)
     - fixnum (32 bit)

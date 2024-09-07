@@ -29,7 +29,7 @@ func init() {
 			Return: "nil|",
 			Text:   `__socket-stream__ returns a stream of the _usocket_ instance.`,
 			Examples: []string{
-				`(socket-stream (make-instance 'usocket)) => #<xxx>`,
+				`(socket-stream (make-instance 'usocket)) => #<IO-STREAM>`,
 			},
 		}, &Pkg)
 }
