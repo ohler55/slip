@@ -117,3 +117,12 @@ func TestSocketSendBrokenPipe(t *testing.T) {
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
+
+func TestSocketSendTimeout(t *testing.T) {
+	// Pick some random high port number which should error on select.
+	(&sliptest.Function{
+		Source: `(let ((sock (make-instance 'usocket :socket 777)))
+                  (socket-send sock "hello" :timeout 0.01))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}

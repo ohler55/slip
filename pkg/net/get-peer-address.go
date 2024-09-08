@@ -23,11 +23,11 @@ func init() {
 					Text: "to get the peer address of.",
 				},
 			},
-			Return: "string",
+			Return: "octets|string",
 			Text: `__get-peer-address__ returns the address of the _socket_. If the _socket_
-is closed then _nil_ is returned. A Unix socket has an empty address string.`,
+is closed then _nil_ is returned.`,
 			Examples: []string{
-				`(get-peer-address (make-instance 'usocket)) => "127.0.0.1"`,
+				`(get-peer-address (make-instance 'usocket :socket 5)) => #(127 0 0 1)`,
 			},
 		}, &Pkg)
 }
@@ -46,7 +46,7 @@ func (f *GetPeerAddress) Call(s *slip.Scope, args slip.List, depth int) (result 
 	}
 	if self.Any != nil {
 		addr, _ := usocketPeerName(self)
-		result = slip.String(addr)
+		result = addr
 	}
 	return
 }
@@ -58,7 +58,7 @@ func (caller usocketPeerAddressCaller) Call(s *slip.Scope, args slip.List, _ int
 	slip.SendArgCountCheck(self, ":peer-address", args, 0, 0)
 	if self.Any != nil {
 		addr, _ := usocketPeerName(self)
-		result = slip.String(addr)
+		result = addr
 	}
 	return
 }

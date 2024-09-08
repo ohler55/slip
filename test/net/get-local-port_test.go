@@ -60,7 +60,9 @@ func TestGetLocalPortHTTP(t *testing.T) {
 			u, _ := url.Parse(serv.URL)
 			scope := slip.NewScope()
 			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
-			us.Any = nc
+			tc, _ := nc.(*net.TCPConn)
+			raw, _ := tc.SyscallConn()
+			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
 			result := slip.ReadString("(send sock :local-port)").Eval(scope, nil).(slip.Fixnum)
 			port, _ := strconv.Atoi(u.Port())

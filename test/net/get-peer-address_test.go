@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"syscall"
 	"testing"
 
@@ -56,15 +55,14 @@ func TestGetPeerAddressHTTP(t *testing.T) {
 
 	serv.Config.ConnState = func(nc net.Conn, cs http.ConnState) {
 		if cs == http.StateActive {
-			addr := nc.RemoteAddr().String()
-			pos := strings.LastIndexByte(addr, ':')
-			address := addr[:pos]
 			scope := slip.NewScope()
 			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
-			us.Any = nc
+			tc, _ := nc.(*net.TCPConn)
+			raw, _ := tc.SyscallConn()
+			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
-			result := slip.ReadString("(send sock :peer-address)").Eval(scope, nil).(slip.String)
-			tt.Equal(t, slip.String(address), result)
+			result := slip.ReadString("(send sock :peer-address)").Eval(scope, nil).(slip.Octets)
+			tt.Equal(t, slip.Octets{127, 0, 0, 1}, result)
 		}
 	}
 	if resp, err := serv.Client().Get(serv.URL); err == nil {

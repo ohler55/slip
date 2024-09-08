@@ -3,7 +3,7 @@
 package net
 
 import (
-	"net"
+	"syscall"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -46,7 +46,8 @@ func init() {
 				{
 					Name: "timeout",
 					Type: "real|nil",
-					Text: "if non-nil then the number of seconds for the timeout.",
+					Text: `if non-nil then the number of seconds for the timeout before at least
+one byte can be written.`,
 				},
 				{
 					Name: "host",
@@ -80,8 +81,8 @@ func (f *SocketSend) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	slip.ArgCountCheck(f, args, 2, 11)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
-		if nc, ok2 := self.Any.(net.Conn); ok2 {
-			result = slip.Fixnum(socketSend(nc, args[1:]))
+		if fd, ok2 := self.Any.(int); ok2 {
+			result = slip.Fixnum(socketSend(fd, args[1:]))
 		}
 	}
 	return
@@ -93,7 +94,7 @@ func (caller usocketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (resu
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":send", args, 1, 8)
 	if self.Any != nil {
-		result = slip.Fixnum(socketSend(self.Any.(net.Conn), args))
+		result = slip.Fixnum(socketSend(self.Any.(int), args))
 	}
 	return
 }
@@ -102,7 +103,7 @@ func (caller usocketSendCaller) Docs() string {
 	return clos.MethodDocFromFunc(":send", "socket-send", "usocket", "socket")
 }
 
-func socketSend(nc net.Conn, args slip.List) int {
+func socketSend(fd int, args slip.List) int {
 	var buf []byte
 	switch ta := args[0].(type) {
 	case slip.Octets:
@@ -143,11 +144,21 @@ func socketSend(nc net.Conn, args slip.List) int {
 		buf = buf[:length]
 	}
 	if 0 < timeout {
-		var zero time.Time
-		_ = nc.SetWriteDeadline(time.Now().Add(timeout))
-		defer func() { _ = nc.SetWriteDeadline(zero) }()
+		// Use syscall.Select as it is implemented on more platforms (darwin).
+		var (
+			wset FdSet
+			eset FdSet
+		)
+		wset.Set(fd)
+		eset.Set(fd)
+		if err := Select(nil, &wset, &eset, timeout); err != nil || eset.IsSet(fd) {
+			slip.NewPanic("write error")
+		}
+		if !wset.IsSet(fd) {
+			slip.NewPanic("write timed out")
+		}
 	}
-	cnt, err := nc.Write(buf)
+	cnt, err := syscall.Write(fd, buf)
 	if err != nil {
 		panic(err)
 	}

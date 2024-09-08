@@ -3,8 +3,6 @@
 package net
 
 import (
-	"fmt"
-	"net"
 	"os"
 	"strings"
 
@@ -63,7 +61,7 @@ func (caller usocketInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 
 func (caller usocketInitCaller) Docs() string {
 	return `__:init__ &key _socket_
-   _:socket_ [io-stream|file-stream|fixnum] a bidirectional stream to use for the instance's socket.
+   _:socket_ [socket-stream|file-stream|fixnum] a bidirectional stream to use for the instance's socket.
 
 
 Initializes an instance with the provided _socket_.
@@ -76,7 +74,7 @@ func (caller usocketSocketCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 	self := s.Get("self").(*flavors.Instance)
 	slip.ArgCountCheck(self, args, 0, 0)
 	if self.Any != nil {
-		result = &slip.IOStream{RW: self.Any.(net.Conn)}
+		result = &slip.IOStream{RW: fdRW(self.Any.(int))}
 	}
 	return
 }
@@ -96,36 +94,24 @@ func (caller usocketSetSocketCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	slip.ArgCountCheck(self, args, 1, 1)
 	switch ta := args[0].(type) {
 	case *slip.IOStream:
-		if _, ok := ta.RW.(net.Conn); ok {
-			self.Any = ta.RW
+		if fd, ok := ta.RW.(fdRW); ok {
+			self.Any = int(fd)
 		} else {
-			slip.PanicType("socket", ta, "io-stream", "file-stream")
+			slip.PanicType("socket", ta, "fixnum", "socket-stream", "file-stream")
 		}
 	case *slip.FileStream:
-		if c, err := net.FileConn((*os.File)(ta)); err == nil {
-			self.Any = c
-		} else {
-			panic(err)
-		}
+		self.Any = int((*os.File)(ta).Fd())
 	case slip.Fixnum:
-		if f := os.NewFile(uintptr(ta), fmt.Sprintf("file-%d", ta)); f != nil {
-			defer func() { _ = f.Close() }()
-			var err error
-			if self.Any, err = net.FileConn(f); err != nil {
-				panic(err)
-			}
-		} else {
-			slip.NewPanic("%d is not a valid file descriptor", ta)
-		}
+		self.Any = int(ta)
 	default:
-		slip.PanicType("socket", ta, "io-stream", "file-stream")
+		slip.PanicType("socket", ta, "fixnum", "socket-stream", "file-stream")
 	}
 	return nil
 }
 
 func (caller usocketSetSocketCaller) Docs() string {
 	return `__:set-socket__ _stream_
-   _stream_ [io-stream|file-stream|fixnum] an io-stream returned from a call to :socket, a socket file,
+   _stream_ [socket-stream|file-stream|fixnum] an stream returned from a call to :socket, a socket file,
 or a fixnum file descriptor
 
 

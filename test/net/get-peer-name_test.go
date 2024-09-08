@@ -59,15 +59,18 @@ func TestGetPeerNameHTTP(t *testing.T) {
 		if cs == http.StateActive {
 			addr := nc.RemoteAddr().String()
 			pos := strings.LastIndexByte(addr, ':')
-			address := addr[:pos]
 			port, _ := strconv.Atoi(addr[pos+1:])
+
 			scope := slip.NewScope()
 			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
-			us.Any = nc
+			tc, _ := nc.(*net.TCPConn)
+			raw, _ := tc.SyscallConn()
+			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
 			result := slip.ReadString("(send sock :peer-name)").Eval(scope, nil).(slip.Values)
+
 			tt.Equal(t, slip.Fixnum(port), result[1])
-			tt.Equal(t, slip.String(address), result[0])
+			tt.Equal(t, slip.Octets{127, 0, 0, 1}, result[0])
 		}
 	}
 	if resp, err := serv.Client().Get(serv.URL); err == nil {

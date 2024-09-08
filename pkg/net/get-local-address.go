@@ -23,11 +23,11 @@ func init() {
 					Text: "to get the local address of.",
 				},
 			},
-			Return: "string",
+			Return: "octets|string",
 			Text: `__get-local-address__ returns the address of the _socket_. If the _socket_
-is closed then _nil_ is returned. A Unix socket has an empty address string.`,
+is closed then _nil_ is returned.`,
 			Examples: []string{
-				`(get-local-address (make-instance 'usocket)) => "127.0.0.1"`,
+				`(get-local-address (make-instance 'usocket :socket 5)) => #(127 0 0 1)`,
 			},
 		}, &Pkg)
 }
@@ -46,7 +46,7 @@ func (f *GetLocalAddress) Call(s *slip.Scope, args slip.List, depth int) (result
 	}
 	if self.Any != nil {
 		addr, _ := usocketLocalName(self)
-		result = slip.String(addr)
+		result = addr
 	}
 	return
 }
@@ -58,7 +58,7 @@ func (caller usocketLocalAddressCaller) Call(s *slip.Scope, args slip.List, _ in
 	slip.SendArgCountCheck(self, ":local-address", args, 0, 0)
 	if self.Any != nil {
 		addr, _ := usocketLocalName(self)
-		result = slip.String(addr)
+		result = addr
 	}
 	return
 }

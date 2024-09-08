@@ -3,9 +3,8 @@
 package net
 
 import (
-	"net"
-	"strconv"
-	"strings"
+	"fmt"
+	"syscall"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
@@ -28,11 +27,11 @@ func init() {
 					Text: "to get the local address of.",
 				},
 			},
-			Return: "string,fixnum",
-			Text: `__get-local-name__ returns the address and port of the _socket_. If the _socket_
-is closed then _nil_,_nil_ is returned. A Unix socket has an empty address string and a port of zero.`,
+			Return: "octets|string,fixnum",
+			Text: `__get-local-name__ returns the address as octets and the port of the _socket_.
+If the _socket_ is closed then _nil_,_nil_ is returned.`,
 			Examples: []string{
-				`(get-local-name (make-instance 'usocket)) => "127.0.0.1", 8080`,
+				`(get-local-name (make-instance 'usocket :socket 5)) => #(127 0 0 1), 1234`,
 			},
 		}, &Pkg)
 }
@@ -52,8 +51,8 @@ func (f *GetLocalName) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	result := slip.Values{nil, nil}
 	if self.Any != nil {
 		addr, port := usocketLocalName(self)
-		result[0] = slip.String(addr)
-		result[1] = slip.Fixnum(port)
+		result[0] = addr
+		result[1] = port
 	}
 	return result
 }
@@ -66,8 +65,8 @@ func (caller usocketLocalNameCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	result := slip.Values{nil, nil}
 	if self.Any != nil {
 		addr, port := usocketLocalName(self)
-		result[0] = slip.String(addr)
-		result[1] = slip.Fixnum(port)
+		result[0] = addr
+		result[1] = port
 	}
 	return result
 }
@@ -76,18 +75,36 @@ func (caller usocketLocalNameCaller) Docs() string {
 	return clos.MethodDocFromFunc(":local-name", "get-local-name", "usocket", "socket")
 }
 
-func usocketLocalName(self *flavors.Instance) (address string, port int) {
-	nc, _ := self.Any.(net.Conn)
+func usocketLocalName(self *flavors.Instance) (address slip.Object, port slip.Fixnum) {
+	fd, _ := self.Any.(int)
 
-	return splitAddrString(nc.LocalAddr().String())
+	sa, err := syscall.Getsockname(fd)
+	if err != nil {
+		panic(err)
+	}
+	return usocketName(sa)
 }
 
-func splitAddrString(addr string) (address string, port int) {
-	// "192.0.2.1:25", "[2001:db8::1]:80"
-	pos := strings.LastIndexByte(addr, ':')
-	if 0 <= pos {
-		address = addr[:pos]
-		port, _ = strconv.Atoi(addr[pos+1:])
+func usocketName(sa syscall.Sockaddr) (address slip.Object, port slip.Fixnum) {
+	switch tsa := sa.(type) {
+	case *syscall.SockaddrUnix:
+		address = slip.String(tsa.Name)
+	case *syscall.SockaddrInet4:
+		addr := make(slip.Octets, len(tsa.Addr))
+		for i, b := range tsa.Addr {
+			addr[i] = b
+		}
+		address = addr
+		port = slip.Fixnum(tsa.Port)
+	case *syscall.SockaddrInet6:
+		addr := make(slip.Octets, len(tsa.Addr))
+		for i, b := range tsa.Addr {
+			addr[i] = b
+		}
+		address = addr
+		port = slip.Fixnum(tsa.Port)
+	default:
+		fmt.Printf("*** %T %v\n", sa, sa)
 	}
 	return
 }

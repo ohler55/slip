@@ -3,7 +3,7 @@
 package net
 
 import (
-	"net"
+	"syscall"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -62,8 +62,8 @@ func (f *SocketReceive) Call(s *slip.Scope, args slip.List, depth int) (result s
 	slip.ArgCountCheck(f, args, 1, 5)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
-		if nc, ok2 := self.Any.(net.Conn); ok2 {
-			result = socketReceive(nc, args[1:])
+		if fd, ok2 := self.Any.(int); ok2 {
+			result = socketReceive(fd, args[1:])
 		}
 	}
 	return
@@ -75,7 +75,7 @@ func (caller usocketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (r
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":receive", args, 1, 8)
 	if self.Any != nil {
-		result = socketReceive(self.Any.(net.Conn), args)
+		result = socketReceive(self.Any.(int), args)
 	}
 	return
 }
@@ -84,7 +84,7 @@ func (caller usocketReceiveCaller) Docs() string {
 	return clos.MethodDocFromFunc(":receive", "socket-receive", "usocket", "socket")
 }
 
-func socketReceive(nc net.Conn, args slip.List) slip.Object {
+func socketReceive(fd int, args slip.List) slip.Object {
 	result := slip.Values{nil, nil, nil, nil}
 	var (
 		buf    []byte
@@ -128,19 +128,18 @@ func socketReceive(nc net.Conn, args slip.List) slip.Object {
 		buf = make([]byte, length)
 	}
 	if 0 < timeout {
-		var zero time.Time
-		_ = nc.SetReadDeadline(time.Now().Add(timeout))
-		defer func() { _ = nc.SetReadDeadline(zero) }()
+		// TBD
 	}
-	cnt, err := nc.Read(buf)
-	if err != nil {
-		panic(err)
+	cnt, err := syscall.Read(fd, buf)
+	if err != nil || cnt == 0 {
+		slip.NewPanic("read failed. %s", err)
 	}
 	result[0] = slip.Octets(buf)
 	result[1] = slip.Fixnum(cnt)
-	addr, port := splitAddrString(nc.RemoteAddr().String())
-	result[2] = slip.String(addr)
-	result[3] = slip.Fixnum(port)
-
+	if sa, err := syscall.Getpeername(fd); err == nil {
+		addr, port := usocketName(sa)
+		result[2] = addr
+		result[3] = port
+	}
 	return result
 }

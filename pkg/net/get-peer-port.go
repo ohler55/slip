@@ -23,9 +23,9 @@ func init() {
 					Text: "to get the peer port of.",
 				},
 			},
-			Return: "string",
+			Return: "fixnum",
 			Text: `__get-peer-port__ returns the port of the _socket_. If the _socket_
-is closed then _nil_ is returned. A Unix socket has a port of ero.`,
+is closed then _nil_ is returned.`,
 			Examples: []string{
 				`(get-peer-port (make-instance 'usocket)) => 8080`,
 			},
@@ -46,7 +46,7 @@ func (f *GetPeerPort) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	}
 	if self.Any != nil {
 		_, port := usocketPeerName(self)
-		result = slip.Fixnum(port)
+		result = port
 	}
 	return
 }
@@ -58,7 +58,7 @@ func (caller usocketPeerPortCaller) Call(s *slip.Scope, args slip.List, _ int) (
 	slip.SendArgCountCheck(self, ":peer-port", args, 0, 0)
 	if self.Any != nil {
 		_, port := usocketPeerName(self)
-		result = slip.Fixnum(port)
+		result = port
 	}
 	return
 }

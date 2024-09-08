@@ -3,8 +3,6 @@
 package net
 
 import (
-	"net"
-
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -44,9 +42,7 @@ func (f *SocketState) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
-		if _, ok = self.Any.(net.Conn); ok {
-			result = slip.Symbol(":read-write")
-		}
+		result = slip.Symbol(":read-write")
 	}
 	return
 }

@@ -60,12 +60,14 @@ func TestGetLocalNameHTTP(t *testing.T) {
 			u, _ := url.Parse(serv.URL)
 			scope := slip.NewScope()
 			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
-			us.Any = nc
+			tc, _ := nc.(*net.TCPConn)
+			raw, _ := tc.SyscallConn()
+			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
 			result := slip.ReadString("(send sock :local-name)").Eval(scope, nil).(slip.Values)
 			port, _ := strconv.Atoi(u.Port())
 			tt.Equal(t, slip.Fixnum(port), result[1])
-			tt.Equal(t, slip.String(u.Hostname()), result[0])
+			tt.Equal(t, slip.Octets{127, 0, 0, 1}, result[0])
 		}
 	}
 	if resp, err := serv.Client().Get(serv.URL); err == nil {

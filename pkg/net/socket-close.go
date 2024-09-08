@@ -3,7 +3,7 @@
 package net
 
 import (
-	"net"
+	"syscall"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
@@ -46,8 +46,8 @@ func (f *SocketClose) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if !ok || self.Flavor != usocketFlavor {
 		slip.PanicType("socket", args[0], "usocket")
 	}
-	if nc, ok2 := self.Any.(net.Conn); ok2 {
-		_ = nc.Close()
+	if fd, ok2 := self.Any.(int); ok2 {
+		_ = syscall.Close(fd)
 	}
 	self.Any = nil
 
@@ -59,8 +59,8 @@ type usocketCloseCaller struct{}
 func (caller usocketCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":close", args, 0, 0)
-	if nc, ok2 := self.Any.(net.Conn); ok2 {
-		_ = nc.Close()
+	if fd, ok2 := self.Any.(int); ok2 {
+		_ = syscall.Close(fd)
 	}
 	self.Any = nil
 

@@ -4,7 +4,6 @@ package net_test
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"strings"
 	"syscall"
@@ -44,7 +43,7 @@ func TestUsocketFd(t *testing.T) {
 	tf.Test(t)
 	inst, ok := tf.Result.(*flavors.Instance)
 	tt.Equal(t, true, ok)
-	tt.SameType(t, &net.UnixConn{}, inst.Any)
+	tt.SameType(t, 0, inst.Any) // int
 	socket := slip.ReadString(`(send sock :socket)`).Eval(scope, nil)
 	tt.SameType(t, &slip.IOStream{}, socket)
 	state := slip.ReadString(`(send sock :state)`).Eval(scope, nil)
@@ -69,31 +68,7 @@ func TestUsocketFile(t *testing.T) {
 	tf.Test(t)
 	inst, ok := tf.Result.(*flavors.Instance)
 	tt.Equal(t, true, ok)
-	tt.SameType(t, &net.UnixConn{}, inst.Any)
-}
-
-func TestUsocketConn(t *testing.T) {
-	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
-	f0 := os.NewFile(uintptr(fds[0]), "file-0")
-	fc, err := net.FileConn(f0)
-	tt.Nil(t, err)
-	defer func() {
-		_ = syscall.Close(fds[0])
-		_ = syscall.Close(fds[1])
-		_ = f0.Close()
-		_ = fc.Close()
-	}()
-	scope := slip.NewScope()
-	scope.Let("uconn", &slip.IOStream{RW: fc})
-	tf := sliptest.Function{
-		Scope:  scope,
-		Source: `(make-instance 'usocket :socket uconn)`,
-		Expect: "/#<usocket [0-9a-f]+>/",
-	}
-	tf.Test(t)
-	inst, ok := tf.Result.(*flavors.Instance)
-	tt.Equal(t, true, ok)
-	tt.SameType(t, &net.UnixConn{}, inst.Any)
+	tt.SameType(t, 0, inst.Any) // int
 }
 
 func TestUsocketNotStream(t *testing.T) {
@@ -103,30 +78,6 @@ func TestUsocketNotStream(t *testing.T) {
 		Scope:     scope,
 		Source:    `(make-instance 'usocket :socket uconn)`,
 		PanicType: slip.TypeErrorSymbol,
-	}).Test(t)
-}
-
-func TestUsocketNotFile(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(with-open-file (f "testdata/sample.txt" :direction :input)
-                     (make-instance 'usocket :socket f))`,
-		PanicType: slip.ErrorSymbol,
-	}).Test(t)
-}
-
-func TestUsocketNotFd(t *testing.T) {
-	f, err := os.Open("testdata/sample.txt")
-	tt.Nil(t, err)
-	scope := slip.NewScope()
-	scope.Let("ufd", slip.Fixnum(f.Fd()))
-	(&sliptest.Function{
-		Scope:     scope,
-		Source:    `(make-instance 'usocket :socket ufd)`,
-		PanicType: slip.ErrorSymbol,
-	}).Test(t)
-	(&sliptest.Function{
-		Source:    `(make-instance 'usocket :socket -100)`,
-		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 

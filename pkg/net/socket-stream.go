@@ -3,8 +3,6 @@
 package net
 
 import (
-	"net"
-
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -46,8 +44,8 @@ func (f *SocketStream) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	if !ok || self.Flavor != usocketFlavor {
 		slip.PanicType("socket", args[0], "usocket")
 	}
-	if nc, ok2 := self.Any.(net.Conn); ok2 {
-		return &slip.IOStream{RW: nc}
+	if fd, ok2 := self.Any.(int); ok2 {
+		return &slip.IOStream{RW: fdRW(fd)}
 	}
 	return nil
 }
@@ -57,8 +55,8 @@ type usocketStreamCaller struct{}
 func (caller usocketStreamCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":stream", args, 0, 0)
-	if nc, ok2 := self.Any.(net.Conn); ok2 {
-		return &slip.IOStream{RW: nc}
+	if fd, ok2 := self.Any.(int); ok2 {
+		return &slip.IOStream{RW: fdRW(fd)}
 	}
 	return nil
 }
