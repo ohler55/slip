@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strconv"
+	"strings"
 	"syscall"
 	"testing"
 
@@ -29,7 +30,7 @@ func TestGetLocalNameOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (get-local-name sock))`,
-		Expect: `"", 0`,
+		Expect: `"@", 0`,
 	}).Test(t)
 }
 
@@ -45,8 +46,31 @@ func TestUsocketLocalNameOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (send sock :local-name))`,
-		Expect: `"", 0`,
+		Expect: `"@", 0`,
 	}).Test(t)
+}
+
+func TestUsocketLocalNameIPv6(t *testing.T) {
+	nl, _ := net.Listen("tcp6", "[::]:7779")
+	defer nl.Close()
+	go func() {
+		_, _ = nl.Accept()
+	}()
+	nc, _ := net.Dial("tcp6", "[::]:7779")
+	scope := slip.NewScope()
+	us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
+	tc, _ := nc.(*net.TCPConn)
+	raw, _ := tc.SyscallConn()
+	_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
+	scope.Let(slip.Symbol("sock"), us)
+	result := slip.ReadString("(send sock :local-name)").Eval(scope, nil).(slip.Values)
+
+	addr := nc.LocalAddr().String()
+	// url.Parse does not handle IPv6 host names so do it the hard way.
+	pos := strings.LastIndexByte(addr, ':')
+	port, _ := strconv.Atoi(addr[pos+1:])
+	tt.Equal(t, slip.Fixnum(port), result[1])
+	tt.Equal(t, slip.Octets{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, result[0])
 }
 
 func TestGetLocalNameHTTP(t *testing.T) {
@@ -86,5 +110,12 @@ func TestUsocketLocalNameClosed(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(send (make-instance 'usocket) :local-name)`,
 		Expect: "nil, nil",
+	}).Test(t)
+}
+
+func TestUsocketLocalNameBadFd(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'usocket :socket 777) :local-name)`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

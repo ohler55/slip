@@ -3,7 +3,6 @@
 package net
 
 import (
-	"fmt"
 	"syscall"
 
 	"github.com/ohler55/slip"
@@ -88,6 +87,9 @@ func usocketLocalName(self *flavors.Instance) (address slip.Object, port slip.Fi
 func usocketName(sa syscall.Sockaddr) (address slip.Object, port slip.Fixnum) {
 	switch tsa := sa.(type) {
 	case *syscall.SockaddrUnix:
+		if len(tsa.Name) == 0 {
+			tsa.Name = "@"
+		}
 		address = slip.String(tsa.Name)
 	case *syscall.SockaddrInet4:
 		addr := make(slip.Octets, len(tsa.Addr))
@@ -103,8 +105,6 @@ func usocketName(sa syscall.Sockaddr) (address slip.Object, port slip.Fixnum) {
 		}
 		address = addr
 		port = slip.Fixnum(tsa.Port)
-	default:
-		fmt.Printf("*** %T %v\n", sa, sa)
 	}
 	return
 }

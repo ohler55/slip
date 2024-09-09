@@ -27,7 +27,7 @@ func TestGetLocalAddressOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (get-local-address sock))`,
-		Expect: `""`,
+		Expect: `"@"`,
 	}).Test(t)
 }
 
@@ -43,7 +43,7 @@ func TestUsocketLocalAddressOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (send sock :local-address))`,
-		Expect: `""`,
+		Expect: `"@"`,
 	}).Test(t)
 }
 

@@ -29,7 +29,7 @@ func TestGetPeerNameOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (get-peer-name sock))`,
-		Expect: `"", 0`,
+		Expect: `"@", 0`,
 	}).Test(t)
 }
 
@@ -45,7 +45,7 @@ func TestUsocketPeerNameOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (send sock :peer-name))`,
-		Expect: `"", 0`,
+		Expect: `"@", 0`,
 	}).Test(t)
 }
 
@@ -89,5 +89,12 @@ func TestUsocketPeerNameClosed(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(send (make-instance 'usocket) :peer-name)`,
 		Expect: "nil, nil",
+	}).Test(t)
+}
+
+func TestUsocketPeerNameBadFd(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'usocket :socket 777) :peer-name)`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

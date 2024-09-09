@@ -74,7 +74,7 @@ func (caller usocketSocketCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 	self := s.Get("self").(*flavors.Instance)
 	slip.ArgCountCheck(self, args, 0, 0)
 	if self.Any != nil {
-		result = &slip.IOStream{RW: fdRW(self.Any.(int))}
+		result = slip.Fixnum(self.Any.(int))
 	}
 	return
 }
@@ -93,12 +93,6 @@ func (caller usocketSetSocketCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	self := s.Get("self").(*flavors.Instance)
 	slip.ArgCountCheck(self, args, 1, 1)
 	switch ta := args[0].(type) {
-	case *slip.IOStream:
-		if fd, ok := ta.RW.(fdRW); ok {
-			self.Any = int(fd)
-		} else {
-			slip.PanicType("socket", ta, "fixnum", "socket-stream", "file-stream")
-		}
 	case *slip.FileStream:
 		self.Any = int((*os.File)(ta).Fd())
 	case slip.Fixnum:

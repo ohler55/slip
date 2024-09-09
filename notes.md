@@ -5,11 +5,6 @@
 - next
 
  - usocket in pkg/net
-  - make separate files for select and fdset (select_linux.go and select_darwin.go)
-   - maybe Select and FdSet
-    - FdSet.Set has functions for setting bits
-  - change to use syscoll and fd instead of net.Conn
-   - also allow set and get on socket variable or apparent variable
   - classes
    - usocket
     + :close

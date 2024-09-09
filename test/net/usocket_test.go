@@ -45,7 +45,7 @@ func TestUsocketFd(t *testing.T) {
 	tt.Equal(t, true, ok)
 	tt.SameType(t, 0, inst.Any) // int
 	socket := slip.ReadString(`(send sock :socket)`).Eval(scope, nil)
-	tt.SameType(t, &slip.IOStream{}, socket)
+	tt.SameType(t, slip.Fixnum(0), socket)
 	state := slip.ReadString(`(send sock :state)`).Eval(scope, nil)
 	tt.Equal(t, slip.Symbol(":read-write"), state)
 }

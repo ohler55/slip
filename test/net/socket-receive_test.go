@@ -26,7 +26,7 @@ func TestSocketReceiveBasic(t *testing.T) {
 		Source: `(let ((sock (make-instance 'usocket :socket ufd))
                        (buf (make-array 8 :element-type 'octet)))
                   (socket-receive sock buf 8 :timeout 1.0))`,
-		Expect: `#(104 101 108 108 111 0 0 0), 5, "", 0`,
+		Expect: `#(104 101 108 108 111 0 0 0), 5, "@", 0`,
 	}).Test(t)
 }
 
@@ -44,7 +44,7 @@ func TestSocketReceiveNoBuffer(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (socket-receive sock nil 6))`,
-		Expect: `#(104 101 108 108 111 0), 5, "", 0`,
+		Expect: `#(104 101 108 108 111 0), 5, "@", 0`,
 	}).Test(t)
 }
 
@@ -63,7 +63,7 @@ func TestSocketReceiveNoLength(t *testing.T) {
 		Source: `(let ((sock (make-instance 'usocket :socket ufd))
                        (buf (make-array 8 :element-type 'octet)))
                   (send sock :receive buf))`,
-		Expect: `#(104 101 108 108 111 0 0 0), 5, "", 0`,
+		Expect: `#(104 101 108 108 111 0 0 0), 5, "@", 0`,
 	}).Test(t)
 }
 

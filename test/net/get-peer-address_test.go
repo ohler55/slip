@@ -27,7 +27,7 @@ func TestGetPeerAddressOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (get-peer-address sock))`,
-		Expect: `""`,
+		Expect: `"@"`,
 	}).Test(t)
 }
 
@@ -43,7 +43,7 @@ func TestUsocketPeerAddressOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (send sock :peer-address))`,
-		Expect: `""`,
+		Expect: `"@"`,
 	}).Test(t)
 }
 
