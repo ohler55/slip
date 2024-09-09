@@ -9,12 +9,9 @@
    - usocket
     + :close
     + :local-name
-     - switch on Sockaddr types to get the port and Addr
-     - change addr from string to octets
-      - is a new type needed? or use functions?
-      - address-as-string (addr) => string (either ipv4 or ipv6)
-      - address-as-fixnum (addr) => fixnum
-      - address can also be string if Unix
+    - address-as-string (addr) => string (either ipv4 or ipv6)
+    - address-as-fixnum (addr) => fixnum
+    - fixnum-as-address (num) => octets
     + :local-address
     + :local-port
     + :peer-name
@@ -23,7 +20,6 @@
     + :send
     + :receive
     + :stream
-     - maybe a type for fd to add Read and Write (FdRW or fdRW)
     - :option
     - :set-option
     - :wait-for-input
