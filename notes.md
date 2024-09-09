@@ -9,9 +9,8 @@
    - usocket
     + :close
     + :local-name
-    - address-as-string (addr) => string (either ipv4 or ipv6)
-    - address-as-fixnum (addr) => fixnum
-    - fixnum-as-address (num) => octets
+    + address-to-string
+    + parse-address
     + :local-address
     + :local-port
     + :peer-name
@@ -21,10 +20,10 @@
     + :receive
     + :stream
     - :option
+     - identify options for setsockopt
+     - are there other options?
     - :set-option
     - :wait-for-input
-     - no nice way to do that in go without syscall
-     - return socket and time remaining on timeout
    - functions
     + socket-close (usocket)
     + usocket-p (socket)
