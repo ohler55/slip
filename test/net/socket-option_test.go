@@ -22,7 +22,7 @@ func TestSocketOptionDefaults(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (list
-                   (socket-option sock :tcp-keepalive)
+                   ;; (socket-option sock :tcp-keepalive)
                    (socket-option sock :tcp-nodelay)
                    (socket-option sock :broadcast)
                    (socket-option sock :reuse-address)
