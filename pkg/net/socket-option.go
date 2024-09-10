@@ -36,7 +36,7 @@ func init() {
 			Return: "fixnum|boolean",
 			Text: `__socket-option__ returns the value of the option on the _socket_ instance. The
 supported options are:
-  :tcp-keepaline
+  :tcp-keepalive
   :tcp-nodelay
   :broadcast
   :reuse-address
@@ -92,7 +92,7 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 		err error
 	)
 	switch arg {
-	case slip.Symbol(":tcp-keepaline"): // SO_KEEPALIVE
+	case slip.Symbol(":tcp-keepalive"): // SO_KEEPALIVE
 		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_KEEPALIVE)
 		if val != 0 {
 			result = slip.True
@@ -126,7 +126,7 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 		result = slip.Fixnum(val)
 	default:
 		slip.PanicType("option", arg,
-			":tcp-keepaline",
+			":tcp-keepalive",
 			":tcp-nodelay",
 			":broadcast",
 			":reuse-address",

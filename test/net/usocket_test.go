@@ -99,6 +99,7 @@ func TestUsocketDocs(t *testing.T) {
 		":local-address",
 		":local-name",
 		":local-port",
+		":option",
 		":peer-address",
 		":peer-name",
 		":peer-port",
