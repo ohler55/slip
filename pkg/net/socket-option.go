@@ -3,8 +3,7 @@
 package net
 
 import (
-	"fmt"
-	"net"
+	"syscall"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
@@ -34,13 +33,20 @@ func init() {
 					Text: "the option identifier.",
 				},
 			},
-			Return: "nil|",
+			Return: "fixnum|boolean",
 			Text: `__socket-option__ returns the value of the option on the _socket_ instance. The
 supported options are:
-
+  :tcp-keepaline
+  :tcp-nodelay
+  :broadcast
+  :reuse-address
+  :send-timeout
+  :send-buffer
+  :receive-timeout
+  :receive-buffer
 `,
 			Examples: []string{
-				`(socket-option (make-instance 'usocket)) => #<xxx>`,
+				`(socket-option (make-instance 'usocket :socket 5) :tcp-keepalive) => t`,
 			},
 		}, &Pkg)
 }
@@ -51,36 +57,87 @@ type SocketOption struct {
 }
 
 // Call the function with the arguments provided.
-func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Flavor != usocketFlavor {
 		slip.PanicType("socket", args[0], "usocket")
 	}
-	if nc, ok2 := self.Any.(net.Conn); ok2 {
-		// TBD switch on option, use fcntl or getsockopt, maybe sys/unix/fcntl.go or just syscall
-		//  getting File is a copy so can't set options
-		//  for listener set with listener control config before starting
-		// alternately switch to using syscall
-		fmt.Printf("*** %v\n", nc)
+	if fd, ok2 := self.Any.(int); ok2 {
+		result = getSockopt(fd, args[1])
 	}
-	return nil
+	return
 }
 
 // TBD Placer also
 
 type usocketOptionCaller struct{}
 
-func (caller usocketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller usocketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":option", args, 1, 1)
-	if nc, ok2 := self.Any.(net.Conn); ok2 {
-		// TBD
-		fmt.Printf("*** %v\n", nc)
+	if fd, ok := self.Any.(int); ok {
+		result = getSockopt(fd, args[0])
 	}
-	return nil
+	return
 }
 
 func (caller usocketOptionCaller) Docs() string {
 	return clos.MethodDocFromFunc(":option", "socket-option", "usocket", "socket")
+}
+
+func getSockopt(fd int, arg slip.Object) (result slip.Object) {
+	var (
+		val int
+		err error
+	)
+	switch arg {
+	case slip.Symbol(":tcp-keepaline"): // SO_KEEPALIVE
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_KEEPALIVE)
+		if val != 0 {
+			result = slip.True
+		}
+	case slip.Symbol(":tcp-nodelay"): // TCP_NODELAY
+		val, err = syscall.GetsockoptInt(fd, syscall.IPPROTO_TCP, syscall.TCP_NODELAY)
+		if val != 0 {
+			result = slip.True
+		}
+	case slip.Symbol(":broadcast"): // SO_BROADCAST
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_BROADCAST)
+		if val != 0 {
+			result = slip.True
+		}
+	case slip.Symbol(":reuse-address"): // SO_REUSEADDR
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_REUSEADDR)
+		if val != 0 {
+			result = slip.True
+		}
+	case slip.Symbol(":send-timeout"): // SO_SNDTIMEO
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_SNDTIMEO)
+		result = slip.Fixnum(val)
+	case slip.Symbol(":send-buffer"): // SO_SNDBUF
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_SNDBUF)
+		result = slip.Fixnum(val)
+	case slip.Symbol(":receive-timeout"): // SO_RCVTIMEO
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_RCVTIMEO)
+		result = slip.Fixnum(val)
+	case slip.Symbol(":receive-buffer"): // SO_RCVBUF
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_RCVBUF)
+		result = slip.Fixnum(val)
+	default:
+		slip.PanicType("option", arg,
+			":tcp-keepaline",
+			":tcp-nodelay",
+			":broadcast",
+			":reuse-address",
+			":send-timeout",
+			":send-buffer",
+			":receive-timeout",
+			":receive-buffer",
+		)
+	}
+	if err != nil {
+		panic(err)
+	}
+	return
 }
