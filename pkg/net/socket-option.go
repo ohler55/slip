@@ -137,7 +137,7 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 		)
 	}
 	if err != nil {
-		panic(err)
+		slip.NewPanic("option %s failed. %s", arg, err)
 	}
 	return
 }
