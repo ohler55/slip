@@ -79,7 +79,7 @@ func TestUsocketSetOption(t *testing.T) {
                    (socket-option sock :send-buffer)
                    (socket-option sock :receive-timeout)
                    (socket-option sock :receive-buffer)))`,
-		Expect: "(t t t t 1 4095 2 4096)",
+		Expect: "(t t t 1 4095 2 4096)",
 	}).Test(t)
 }
 
