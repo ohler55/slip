@@ -43,6 +43,7 @@ func defUsocket() {
 	usocketFlavor.DefMethod(":receive", "", usocketReceiveCaller{})
 	usocketFlavor.DefMethod(":stream", "", usocketStreamCaller{})
 	usocketFlavor.DefMethod(":option", "", usocketOptionCaller{})
+	usocketFlavor.DefMethod(":set-option", "", usocketSetOptionCaller{})
 }
 
 type usocketInitCaller struct{}

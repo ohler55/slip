@@ -3,7 +3,9 @@
 package net
 
 import (
+	"fmt"
 	"syscall"
+	"time"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
@@ -86,6 +88,21 @@ func (caller usocketOptionCaller) Docs() string {
 	return clos.MethodDocFromFunc(":option", "socket-option", "usocket", "socket")
 }
 
+type usocketSetOptionCaller struct{}
+
+func (caller usocketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.SendArgCountCheck(self, ":option", args, 2, 2)
+	if fd, ok := self.Any.(int); ok {
+		setSockopt(fd, args[0], args[1])
+	}
+	return nil
+}
+
+func (caller usocketSetOptionCaller) Docs() string {
+	return clos.MethodDocFromFunc(":set-option", "socket-option", "usocket", "socket")
+}
+
 func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 	var (
 		val int
@@ -98,7 +115,7 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 			result = slip.True
 		}
 	case slip.Symbol(":tcp-nodelay"): // TCP_NODELAY
-		val, err = syscall.GetsockoptInt(fd, syscall.IPPROTO_TCP, syscall.TCP_NODELAY)
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.TCP_NODELAY)
 		if val != 0 {
 			result = slip.True
 		}
@@ -140,4 +157,67 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 		slip.NewPanic("option %s failed. %s", arg, err)
 	}
 	return
+}
+
+func setSockopt(fd int, opt, val slip.Object) {
+	var err error
+	switch opt {
+	case slip.Symbol(":tcp-keepalive"): // SO_KEEPALIVE
+		err = setSockoptBool(fd, syscall.SO_KEEPALIVE, val)
+	case slip.Symbol(":tcp-nodelay"): // TCP_NODELAY
+		err = setSockoptBool(fd, syscall.TCP_NODELAY, val)
+	case slip.Symbol(":broadcast"): // SO_BROADCAST
+		err = setSockoptBool(fd, syscall.SO_BROADCAST, val)
+	case slip.Symbol(":reuse-address"): // SO_REUSEADDR
+		err = setSockoptBool(fd, syscall.SO_REUSEADDR, val)
+	case slip.Symbol(":send-timeout"): // SO_SNDTIMEO
+		err = setSockoptTime(fd, syscall.SO_SNDTIMEO, val)
+	case slip.Symbol(":send-buffer"): // SO_SNDBUF
+		err = setSockoptInt(fd, syscall.SO_SNDBUF, val)
+	case slip.Symbol(":receive-timeout"): // SO_RCVTIMEO
+		err = setSockoptTime(fd, syscall.SO_RCVTIMEO, val)
+	case slip.Symbol(":receive-buffer"): // SO_RCVBUF
+		err = setSockoptInt(fd, syscall.SO_RCVBUF, val)
+	default:
+		slip.PanicType("option", opt,
+			":tcp-keepalive",
+			":tcp-nodelay",
+			":broadcast",
+			":reuse-address",
+			":send-timeout",
+			":send-buffer",
+			":receive-timeout",
+			":receive-buffer",
+		)
+	}
+	if err != nil {
+		slip.NewPanic("option %s failed. %s", opt, err)
+	}
+	return
+}
+
+func setSockoptBool(fd int, opt int, val slip.Object) error {
+	var vi int
+	if val == slip.True || val == slip.Fixnum(1) {
+		vi = 1
+	}
+	return syscall.SetsockoptInt(fd, syscall.SOL_SOCKET, opt, vi)
+}
+
+func setSockoptInt(fd int, opt int, val slip.Object) error {
+	num, ok := val.(slip.Fixnum)
+	if !ok {
+		return fmt.Errorf("must be a fixnum not %s", val)
+	}
+	return syscall.SetsockoptInt(fd, syscall.SOL_SOCKET, opt, int(num))
+}
+
+func setSockoptTime(fd int, opt int, val slip.Object) error {
+	r, ok := val.(slip.Real)
+	if !ok {
+		return fmt.Errorf("must be a real not %s", val)
+	}
+	tv := syscall.NsecToTimeval(int64(r.RealValue() * float64(time.Second)))
+
+	return syscall.SetsockoptTimeval(fd, syscall.SOL_SOCKET, opt, &tv)
 }
