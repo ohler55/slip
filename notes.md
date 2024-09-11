@@ -5,6 +5,7 @@
 - next
 
  - usocket in pkg/net
+  - setf for method with multiple arguments (:option :foo)
   - classes
    - usocket
     + :close
@@ -20,9 +21,7 @@
     + :receive
     + :stream
     - :option
-     - identify options for setsockopt
-     - are there other options?
-    - :set-option
+     - :set-option
     - :wait-for-input
    - functions
     + socket-close (usocket)
