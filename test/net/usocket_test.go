@@ -105,6 +105,7 @@ func TestUsocketDocs(t *testing.T) {
 		":peer-port",
 		":receive",
 		":send",
+		":set-option",
 		":set-socket",
 		":socket",
 		":state",

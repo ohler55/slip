@@ -165,13 +165,7 @@ func setSockopt(fd int, opt, val slip.Object) {
 	case slip.Symbol(":tcp-keepalive"): // SO_KEEPALIVE
 		err = setSockoptBool(fd, syscall.SO_KEEPALIVE, val)
 	case slip.Symbol(":tcp-nodelay"): // TCP_NODELAY
-		var vi int
-		if val == slip.True || val == slip.Fixnum(1) {
-			vi = 1
-		}
-		err = syscall.SetsockoptInt(fd, syscall.SOL_TCP, syscall.TCP_NODELAY, vi)
-
-		// err = setSockoptBool(fd, syscall.TCP_NODELAY, val)
+		err = setSockoptBool(fd, syscall.TCP_NODELAY, val)
 	case slip.Symbol(":broadcast"): // SO_BROADCAST
 		err = setSockoptBool(fd, syscall.SO_BROADCAST, val)
 	case slip.Symbol(":reuse-address"): // SO_REUSEADDR
