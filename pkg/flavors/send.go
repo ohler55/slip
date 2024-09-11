@@ -69,7 +69,12 @@ func (f *Send) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		slip.PanicType("object of send", args[0], "instance")
 	}
 	if method, ok2 := args[1].(slip.Symbol); ok2 {
-		_ = self.Receive(s, string(append([]byte(":set-"), string(method)[1:]...)), slip.List{value}, 0)
+		_ = self.Receive(
+			s,
+			string(append([]byte(":set-"), string(method)[1:]...)),
+			append(args[2:], value),
+			0,
+		)
 		return
 	}
 	slip.PanicType("method", args[1], "symbol")

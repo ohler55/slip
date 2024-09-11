@@ -71,7 +71,15 @@ func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	return
 }
 
-// TBD Placer also
+// Place a value in an option using the :set-option method.
+func (f *SocketOption) Place(s *slip.Scope, args slip.List, value slip.Object) {
+	slip.ArgCountCheck(f, args, 2, 2)
+	self, ok := args[0].(*flavors.Instance)
+	if !ok || self.Flavor != usocketFlavor {
+		slip.PanicType("socket", args[0], "usocket")
+	}
+	_ = self.Receive(s, ":set-option", slip.List{args[1], value}, 0)
+}
 
 type usocketOptionCaller struct{}
 

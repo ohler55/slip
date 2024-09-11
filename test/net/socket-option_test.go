@@ -50,6 +50,40 @@ func TestUsocketOptionSend(t *testing.T) {
 	}).Test(t)
 }
 
+func TestUsocketSetfOption(t *testing.T) {
+	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
+	defer func() {
+		_ = syscall.Close(fds[0])
+		_ = syscall.Close(fds[1])
+	}()
+	scope := slip.NewScope()
+	scope.Let("ufd", slip.Fixnum(fds[0]))
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+                  (setf (send sock :option :tcp-keepalive) t)
+                  (send sock :option :tcp-keepalive))`,
+		Expect: "t",
+	}).Test(t)
+}
+
+func TestSocketOptionSetf(t *testing.T) {
+	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
+	defer func() {
+		_ = syscall.Close(fds[0])
+		_ = syscall.Close(fds[1])
+	}()
+	scope := slip.NewScope()
+	scope.Let("ufd", slip.Fixnum(fds[0]))
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+                  (setf (socket-option sock :tcp-keepalive) t)
+                  (socket-option sock :tcp-keepalive))`,
+		Expect: "t",
+	}).Test(t)
+}
+
 func TestSocketOptionBadOption(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
@@ -114,9 +148,16 @@ func TestUsocketSetOptionNotTime(t *testing.T) {
 	}).Test(t)
 }
 
-func TestUsocketOptionSendNotSocket(t *testing.T) {
+func TestSocketOptionNotSocket(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(socket-option (make-instance 'vanilla-flavor) :tcp-keepalive)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestSocketOptionSetfNotSocket(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(setf (socket-option (make-instance 'vanilla-flavor) :tcp-keepalive) t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

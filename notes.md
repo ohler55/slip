@@ -5,7 +5,7 @@
 - next
 
  - usocket in pkg/net
-  - setf for method with multiple arguments (:option :foo)
+ - change socket-state to use select with immediate timeout
   - classes
    - usocket
     + :close
@@ -20,9 +20,8 @@
     + :send
     + :receive
     + :stream
-    - :option
-     - :set-option
-    - :wait-for-input
+    + :option
+    + :set-option
    - functions
     + socket-close (usocket)
     + usocket-p (socket)
@@ -35,9 +34,12 @@
     + get-peer-port socket => port
     + socket-send (usocket buffer length &key host port offset timeout)
     + socket-receive (usocket buffer &optional length &key timeout)
-    - wait-for-input (socket-or-sockets &key timeout ready-only &aux (single-socket-p (usocket-p socket-or-sockets)))
     + socket-stream (socket)
-    - socket-option (socket option &key) - also a placer
+    + socket-option
+    - wait-for-input (socket-or-sockets &key timeout ready-only) => ready-list, remaining-timeout or nil
+     - unlike others the ready-only default is true
+    - socket-select (read write error &key timeout)
+     - read, write, and error are single sockets or a list of sockets
 
    - stream-usocket class
     - methods
