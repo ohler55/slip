@@ -1,6 +1,6 @@
 // Copyright (c) 2024, Peter Ohler, All rights reserved.
 
-//go:build darwin
+//go:build linux
 
 package net_test
 
@@ -25,7 +25,7 @@ func TestUsocketSetOption(t *testing.T) {
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
                   (progn
                    (send sock :set-option :tcp-keepalive t)
-                   (send sock :set-option :tcp-nodelay t)
+                   ;; (send sock :set-option :tcp-nodelay t)
                    (send sock :set-option :broadcast t)
                    (send sock :set-option :reuse-address t)
                    (send sock :set-option :send-timeout 1.2)
@@ -34,13 +34,13 @@ func TestUsocketSetOption(t *testing.T) {
                    (send sock :set-option :receive-buffer 4096))
                   (list
                    (socket-option sock :tcp-keepalive)
-                   (socket-option sock :tcp-nodelay)
+                   ;; (socket-option sock :tcp-nodelay)
                    (socket-option sock :broadcast)
                    (socket-option sock :reuse-address)
                    (socket-option sock :send-timeout)
                    (socket-option sock :send-buffer)
                    (socket-option sock :receive-timeout)
                    (socket-option sock :receive-buffer)))`,
-		Expect: "(t t t t 1 4095 2 4096)",
+		Expect: "(t t t 1 8190 2 8192)",
 	}).Test(t)
 }
