@@ -90,6 +90,32 @@ func TestSocketReceiveJustSocket(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSocketReceiveTimeout(t *testing.T) {
+	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
+	defer func() {
+		_ = syscall.Close(fds[0])
+		_ = syscall.Close(fds[1])
+	}()
+	scope := slip.NewScope()
+	scope.Let("ufd", slip.Fixnum(fds[0]))
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((sock (make-instance 'usocket :socket ufd))
+                       (buf (make-array 8 :element-type 'octet)))
+                  (socket-receive sock buf 8 :timeout 0.001))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSocketReceiveError(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((sock (make-instance 'usocket :socket 777))
+                       (buf (make-array 8 :element-type 'octet)))
+                  (socket-receive sock buf 8 :timeout 0.001))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
 func TestSocketReceiveEOF(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {

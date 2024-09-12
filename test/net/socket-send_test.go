@@ -53,6 +53,25 @@ func TestUsocketSendSend(t *testing.T) {
 	tt.Equal(t, "ell", string(buf[:cnt]))
 }
 
+func TestSocketSendError(t *testing.T) {
+	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
+	defer func() {
+		_ = syscall.Close(fds[0])
+		_ = syscall.Close(fds[1])
+	}()
+	_ = syscall.SetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF, 5)
+	_, err := syscall.Write(fds[0], []byte("hello"))
+	tt.Nil(t, err)
+	scope := slip.NewScope()
+	scope.Let("ufd", slip.Fixnum(fds[0]))
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+                  (socket-send sock "hello" :timeout 0.001))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
 func TestSocketSendBadLength(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {

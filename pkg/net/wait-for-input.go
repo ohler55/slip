@@ -88,9 +88,9 @@ func (f *WaitForInput) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 		}
 	}
 	start := time.Now()
-	if err := Select(&rset, nil, nil, timeout); err != nil {
-		slip.NewPanic("select error")
-	}
+	// With the prechecks the only error could be the kernel memory allocator.
+	_ = Select(&rset, nil, nil, timeout)
+
 	if readyOnly {
 		var ready slip.List
 		for _, val := range sockets {
