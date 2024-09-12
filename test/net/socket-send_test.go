@@ -67,7 +67,7 @@ func TestSocketSendError(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
-                  (socket-send sock "hello" :timeout 0.001))`,
+                  (socket-send sock "hello again" :timeout 0.001))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
