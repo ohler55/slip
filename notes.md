@@ -6,22 +6,6 @@
 
  - usocket in pkg/net
  - change socket-state to use select with immediate timeout
-  - classes
-   - usocket
-    + :close
-    + :local-name
-    + address-to-string
-    + parse-address
-    + :local-address
-    + :local-port
-    + :peer-name
-    + :peer-address
-    + :peer-port
-    + :send
-    + :receive
-    + :stream
-    + :option
-    + :set-option
    - functions
     + socket-close (usocket)
     + usocket-p (socket)

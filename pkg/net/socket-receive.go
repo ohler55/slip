@@ -128,7 +128,18 @@ func socketReceive(fd int, args slip.List) slip.Object {
 		buf = make([]byte, length)
 	}
 	if 0 < timeout {
-		// TBD
+		var (
+			rset FdSet
+			eset FdSet
+		)
+		rset.Set(fd)
+		eset.Set(fd)
+		if err := Select(&rset, nil, &eset, timeout); err != nil || eset.IsSet(fd) {
+			slip.NewPanic("read error")
+		}
+		if !rset.IsSet(fd) {
+			slip.NewPanic("read timed out")
+		}
 	}
 	cnt, err := syscall.Read(fd, buf)
 	if err != nil || cnt == 0 {

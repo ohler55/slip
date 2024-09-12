@@ -12,9 +12,14 @@ import (
 type FdSet syscall.FdSet
 
 func Select(r, w, e *FdSet, timeout time.Duration) error {
-	var high int
-
-	tv := syscall.NsecToTimeval(int64(timeout))
+	var (
+		high int
+		tvp  *syscall.Timeval
+	)
+	if 0 <= timeout {
+		tv := syscall.NsecToTimeval(int64(timeout))
+		tvp = &tv
+	}
 	for _, fs := range []*FdSet{r, w, e} {
 		if fs != nil {
 			hi := fs.Highest()
@@ -23,7 +28,7 @@ func Select(r, w, e *FdSet, timeout time.Duration) error {
 			}
 		}
 	}
-	_, err := syscall.Select(high+1, (*syscall.FdSet)(r), (*syscall.FdSet)(w), (*syscall.FdSet)(e), &tv)
+	_, err := syscall.Select(high+1, (*syscall.FdSet)(r), (*syscall.FdSet)(w), (*syscall.FdSet)(e), tvp)
 
 	return err
 }
