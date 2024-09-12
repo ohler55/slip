@@ -3,6 +3,8 @@
 package net_test
 
 import (
+	"fmt"
+	"runtime"
 	"syscall"
 	"testing"
 
@@ -54,6 +56,12 @@ func TestUsocketSendSend(t *testing.T) {
 }
 
 func TestSocketSendError(t *testing.T) {
+	// Linux seems happy indicate a socket is ready for writing even when the
+	// write buffer is full.
+	// if runtime.GOOS != "darwin" {
+	// 	return
+	// }
+	fmt.Printf("*** goos: %s\n", runtime.GOOS)
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -61,6 +69,8 @@ func TestSocketSendError(t *testing.T) {
 	}()
 	err := syscall.SetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF, 5)
 	tt.Nil(t, err)
+	foo, _ := syscall.GetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF)
+	fmt.Printf("*** size: %d\n", foo)
 	_, err = syscall.Write(fds[0], []byte("hello"))
 	tt.Nil(t, err)
 	scope := slip.NewScope()
