@@ -3,6 +3,7 @@
 package net_test
 
 import (
+	"bytes"
 	"fmt"
 	"runtime"
 	"syscall"
@@ -69,16 +70,16 @@ func TestSocketSendError(t *testing.T) {
 	}()
 	err := syscall.SetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF, 5)
 	tt.Nil(t, err)
-	foo, _ := syscall.GetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF)
-	fmt.Printf("*** size: %d\n", foo)
-	_, err = syscall.Write(fds[0], []byte("hello"))
+	size, _ := syscall.GetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF)
+	fmt.Printf("*** size: %d\n", size)
+	_, err = syscall.Write(fds[0], bytes.Repeat([]byte{'x'}, size-1))
 	tt.Nil(t, err)
 	scope := slip.NewScope()
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
-                  (socket-send sock "hello again" :timeout 0.001))`,
+                  (socket-send sock "hello" :timeout 0.001))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
