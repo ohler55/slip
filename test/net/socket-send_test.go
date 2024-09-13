@@ -72,7 +72,7 @@ func TestSocketSendError(t *testing.T) {
 	tt.Nil(t, err)
 	size, _ := syscall.GetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF)
 	fmt.Printf("*** size: %d\n", size)
-	_, err = syscall.Write(fds[0], bytes.Repeat([]byte{'x'}, size-1))
+	_, err = syscall.Write(fds[0], bytes.Repeat([]byte{'x'}, size/2-1))
 	tt.Nil(t, err)
 	scope := slip.NewScope()
 	scope.Let("ufd", slip.Fixnum(fds[0]))
