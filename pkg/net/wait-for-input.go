@@ -37,7 +37,7 @@ func init() {
 The default is _t_.`,
 				},
 			},
-			Return: "nil|",
+			Return: "sockets, double-float",
 			Text: `__wait-for-input__ waits for input on any of _sockets_ or a timeout.
 A list of the sockets ready for input and the time remaining in the timeout is returned. If
 the call timed out then the second both argument are nil.`,

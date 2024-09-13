@@ -22,7 +22,6 @@
     + socket-option
     - wait-for-input
     - socket-select (read write error &key timeout)
-     - read, write, and error are single sockets or a list of sockets
 
    - stream-usocket class
     - methods

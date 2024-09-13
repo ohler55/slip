@@ -4,8 +4,6 @@ package net_test
 
 import (
 	"bytes"
-	"fmt"
-	"runtime"
 	"syscall"
 	"testing"
 
@@ -57,12 +55,6 @@ func TestUsocketSendSend(t *testing.T) {
 }
 
 func TestSocketSendError(t *testing.T) {
-	// Linux seems happy indicate a socket is ready for writing even when the
-	// write buffer is full.
-	// if runtime.GOOS != "darwin" {
-	// 	return
-	// }
-	fmt.Printf("*** goos: %s\n", runtime.GOOS)
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -70,8 +62,11 @@ func TestSocketSendError(t *testing.T) {
 	}()
 	err := syscall.SetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF, 5)
 	tt.Nil(t, err)
+	// Linux doesn't support setting the buffer size less than 4608 and it can
+	// also double the size specified so to eliminate any oddness the size is
+	// retrieved. It isn't correct for linux but rather double the actual so
+	// use the size to pack the buffer.
 	size, _ := syscall.GetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_SNDBUF)
-	fmt.Printf("*** size: %d\n", size)
 	_, err = syscall.Write(fds[0], bytes.Repeat([]byte{'x'}, size/2-1))
 	tt.Nil(t, err)
 	scope := slip.NewScope()
