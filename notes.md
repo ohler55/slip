@@ -4,8 +4,8 @@
 
 - next
 
- - usocket in pkg/net
- - change socket-state to use select with immediate timeout
+ - usocket
+   - change socket-state to use select with immediate timeout
    - functions
     + socket-close (usocket)
     + usocket-p (socket)
@@ -20,17 +20,110 @@
     + socket-receive (usocket buffer &optional length &key timeout)
     + socket-stream (socket)
     + socket-option
-    - wait-for-input
+    + wait-for-input
     - socket-select (read write error &key timeout)
+    - socket-pair (domain type protocol &key nonblock cloexec)
+     - maybe set up constants for the various values or a map for run time lookup
+     - domain - :local or :unix - AF_UNIX
+              - :inet - AF_INET
+              - :inet6 - AF_INET6
+	          AF_ALG                           = 0x26
+	          AF_APPLETALK                     = 0x5
+	          AF_ASH                           = 0x12
+	          AF_ATMPVC                        = 0x8
+	          AF_ATMSVC                        = 0x14
+	          AF_AX25                          = 0x3
+	          AF_BLUETOOTH                     = 0x1f
+	          AF_BRIDGE                        = 0x7
+	          AF_CAIF                          = 0x25
+	          AF_CAN                           = 0x1d
+	          AF_DECnet                        = 0xc
+	          AF_ECONET                        = 0x13
+	          AF_FILE                          = 0x1
+	          AF_IEEE802154                    = 0x24
+	          AF_INET                          = 0x2
+	          AF_INET6                         = 0xa
+	          AF_IPX                           = 0x4
+	          AF_IRDA                          = 0x17
+	          AF_ISDN                          = 0x22
+	          AF_IUCV                          = 0x20
+	          AF_KEY                           = 0xf
+	          AF_LLC                           = 0x1a
+	          AF_LOCAL                         = 0x1
+	          AF_MAX                           = 0x27
+	          AF_NETBEUI                       = 0xd
+	          AF_NETLINK                       = 0x10
+	          AF_NETROM                        = 0x6
+	          AF_PACKET                        = 0x11
+	          AF_PHONET                        = 0x23
+	          AF_PPPOX                         = 0x18
+	          AF_RDS                           = 0x15
+	          AF_ROSE                          = 0xb
+	          AF_ROUTE                         = 0x10
+	          AF_RXRPC                         = 0x21
+	          AF_SECURITY                      = 0xe
+	          AF_SNA                           = 0x16
+	          AF_TIPC                          = 0x1e
+	          AF_UNIX                          = 0x1
+	          AF_UNSPEC                        = 0x0
+	          AF_WANPIPE                       = 0x19
+	          AF_X25                           = 0x9
+     - type
+              SOCK_CLOEXEC                     = 0x80000 (flag to or with others)
+	          SOCK_DCCP                        = 0x6
+	          SOCK_DGRAM                       = 0x2
+	          SOCK_NONBLOCK                    = 0x800 (flag to or with others)
+	          SOCK_PACKET                      = 0xa
+	          SOCK_RAW                         = 0x3
+	          SOCK_RDM                         = 0x4
+	          SOCK_SEQPACKET                   = 0x5
+	          SOCK_STREAM                      = 0x1
+     - protocol
+              IPPROTO_AH                       = 0x33
+	          IPPROTO_COMP                     = 0x6c
+	          IPPROTO_DCCP                     = 0x21
+	          IPPROTO_DSTOPTS                  = 0x3c
+	          IPPROTO_EGP                      = 0x8
+	          IPPROTO_ENCAP                    = 0x62
+	          IPPROTO_ESP                      = 0x32
+	          IPPROTO_FRAGMENT                 = 0x2c
+	          IPPROTO_GRE                      = 0x2f
+	          IPPROTO_HOPOPTS                  = 0x0
+	          IPPROTO_ICMP                     = 0x1
+	          IPPROTO_ICMPV6                   = 0x3a
+	          IPPROTO_IDP                      = 0x16
+	          IPPROTO_IGMP                     = 0x2
+	          IPPROTO_IP                       = 0x0
+	          IPPROTO_IPIP                     = 0x4
+	          IPPROTO_IPV6                     = 0x29
+	          IPPROTO_MTP                      = 0x5c
+	          IPPROTO_NONE                     = 0x3b
+	          IPPROTO_PIM                      = 0x67
+	          IPPROTO_PUP                      = 0xc
+	          IPPROTO_RAW                      = 0xff
+	          IPPROTO_ROUTING                  = 0x2b
+	          IPPROTO_RSVP                     = 0x2e
+	          IPPROTO_SCTP                     = 0x84
+	          IPPROTO_TCP                      = 0x6
+	          IPPROTO_TP                       = 0x1d
+	          IPPROTO_UDP                      = 0x11
+	          IPPROTO_UDPLITE                  = 0x88
 
-   - stream-usocket class
+ - stream-server branch
+  - stream-server-usocket
+   - methods
+    - element-type (octet)
+  - socket-connect (socket-connect host port &key (protocol :stream)
+           (element-type (quote character)) timeout deadline
+           (nodelay t nodelay-specified) local-host local-port &aux
+           (sockopt-tcp-nodelay-p (fboundp (quote sockopt-tcp-nodelay))))
+
+ -
+   - stream-usocket class ?? what is this really?
     - methods
      - stream (can be used with setf)
     - stream-usocket-p (socket)
      - if io-stream and rw is net.Conn then t
-   - stream-server-usocket
-    - methods
-     - element-type (byte?)
    - datagram-usocket (maybe)
 
 
@@ -45,7 +138,7 @@
     - socket is an api
 
 
-  - vars
+  - Vars
    - *auto-port* (default 0)
    - *remote-host*
    - *remote-port*

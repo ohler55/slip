@@ -100,8 +100,8 @@ func socketListArg(arg slip.Object, name string) (list slip.List) {
 func setSocketSets(list slip.List, name string) *FdSet {
 	var set FdSet
 	for _, val := range list {
-		if sock, ok := val.(*flavors.Instance); ok && sock.Flavor == usocketFlavor {
-			if fd, ok2 := sock.Any.(int); ok2 {
+		if sock, _ := val.(*flavors.Instance); sock.Flavor == usocketFlavor {
+			if fd, ok := sock.Any.(int); ok {
 				set.Set(fd)
 			}
 		} else {
