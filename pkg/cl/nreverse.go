@@ -70,6 +70,14 @@ func (f *Nreverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 			}
 		}
 		result = ta
+	case slip.Octets:
+		if 1 < len(ta) {
+			max := len(ta) - 1
+			for i := max / 2; 0 <= i; i-- {
+				ta[i], ta[max-i] = ta[max-i], ta[i]
+			}
+		}
+		result = ta
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}

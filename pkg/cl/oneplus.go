@@ -47,6 +47,8 @@ func (f *Oneplus) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	switch ta := args[0].(type) {
 	case slip.Fixnum:
 		result = ta + 1
+	case slip.Octet:
+		result = ta + 1
 	case slip.SingleFloat:
 		result = ta + 1.0
 	case slip.DoubleFloat:

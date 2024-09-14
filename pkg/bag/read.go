@@ -28,7 +28,7 @@ func init() {
 				},
 				{
 					Name: "stream",
-					Type: "input-string",
+					Type: "input-stream",
 					Text: "The _stream_ to read, parse, and set in _bag_ according to the path.",
 				},
 				{Name: "&optional"},

@@ -41,8 +41,8 @@ func (f *ArrayRank) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	switch ta := args[0].(type) {
 	case *slip.Array:
 		result = slip.Fixnum(ta.Rank())
-	case *slip.Vector:
-		result = slip.Fixnum(ta.Rank())
+	case *slip.Vector, slip.Octets:
+		result = slip.Fixnum(1)
 	default:
 		slip.PanicType("array", ta, "array")
 	}

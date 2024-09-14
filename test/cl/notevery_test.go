@@ -18,6 +18,10 @@ func TestNoteveryTrue(t *testing.T) {
 		Source: `(notevery '< #(1 2 3) #(2 2 4))`,
 		Expect: "t",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(notevery '< (coerce #(1 2 3) 'octets) (coerce #(2 2 4) 'octets))`,
+		Expect: "t",
+	}).Test(t)
 }
 
 func TestNoteveryFalse(t *testing.T) {
@@ -35,6 +39,10 @@ func TestNoteveryFalse(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(notevery '< #(1 2 3) #(2 3))`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(notevery '< (coerce #(1 2 3) 'octets) (coerce #(2 3) 'octets))`,
 		Expect: "nil",
 	}).Test(t)
 }

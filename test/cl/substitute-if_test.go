@@ -37,6 +37,19 @@ func TestSubstituteIfVector(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSubstituteIfOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(substitute-if (coerce #\Q 'octet)
+                                (lambda (v) (equal v (coerce #\q 'octet))) (coerce "quux" 'octets))`,
+		Array:  true,
+		Expect: "#(81 117 117 120)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(substitute-if t (lambda (v) nil) (coerce "quux" 'octets))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
 func TestSubstituteIfListKeyTest(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((lst '((1) (2) (3) (4))))
@@ -45,11 +58,32 @@ func TestSubstituteIfListKeyTest(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSubstituteIfOctetsKeyTest(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((seq (coerce "abcd" 'octets)))
+                  (list (substitute-if (coerce #\x 'octet)
+                                       (lambda (v) (< 98 v)) seq :key (lambda (x) (coerce x 'fixnum))) seq))`,
+		Array:  true,
+		Expect: "(#(97 98 120 120) #(97 98 99 100))",
+	}).Test(t)
+}
+
 func TestSubstituteIfListCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((lst '(a 1 c 2)))
                   (list (substitute-if 0 'numberp lst :from-end t :count 1) lst))`,
 		Expect: "((a 1 c 0) (a 1 c 2))",
+	}).Test(t)
+}
+
+func TestSubstituteIfOctetsCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((seq (coerce "abcb" 'octets)))
+                  (list (substitute-if (coerce #\x 'octet)
+                                       (lambda (v) (equal v (coerce #\b 'octet)))
+                                       seq :from-end t :count 1) seq))`,
+		Array:  true,
+		Expect: "(#(97 98 99 120) #(97 98 99 98))",
 	}).Test(t)
 }
 

@@ -31,6 +31,17 @@ func TestArrayInBoundsPArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestArrayInBoundsPOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(array-in-bounds-p (coerce "abcd" 'octets) 2)`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(array-in-bounds-p (coerce "abcd" 'octets) 5)`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestArrayInBoundsPNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(array-in-bounds-p t)`,

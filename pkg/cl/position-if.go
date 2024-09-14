@@ -79,6 +79,8 @@ func (f *PositionIf) Call(s *slip.Scope, args slip.List, depth int) (index slip.
 		index = f.inString(s, ta, depth, &sfv)
 	case *slip.Vector:
 		index = f.inList(s, ta.AsList(), depth, &sfv)
+	case slip.Octets:
+		index = f.inOctets(s, ta, depth, &sfv)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
@@ -143,6 +145,41 @@ func (f *PositionIf) inString(s *slip.Scope, seq slip.String, depth int, sfv *se
 	}
 	for i := len(ra) - 1; 0 <= i; i-- {
 		key = slip.Character(ra[i])
+		if sfv.key != nil {
+			key = sfv.key.Call(s, slip.List{key}, d2)
+		}
+		if sfv.test.Call(s, slip.List{key}, d2) != nil {
+			return slip.Fixnum(sfv.start + i)
+		}
+	}
+	return nil
+}
+
+func (f *PositionIf) inOctets(s *slip.Scope, seq slip.Octets, depth int, sfv *seqFunVars) slip.Object {
+	ba := []byte(seq)
+	if len(ba) <= sfv.start {
+		return nil
+	}
+	if 0 <= sfv.end && sfv.end < len(ba) {
+		ba = ba[sfv.start:sfv.end]
+	} else {
+		ba = ba[sfv.start:]
+	}
+	d2 := depth + 1
+	var key slip.Object
+	if !sfv.fromEnd {
+		for i, element := range ba {
+			key = slip.Octet(element)
+			if sfv.key != nil {
+				key = sfv.key.Call(s, slip.List{key}, d2)
+			}
+			if sfv.test.Call(s, slip.List{key}, d2) != nil {
+				return slip.Fixnum(sfv.start + i)
+			}
+		}
+	}
+	for i := len(ba) - 1; 0 <= i; i-- {
+		key = slip.Octet(ba[i])
 		if sfv.key != nil {
 			key = sfv.key.Call(s, slip.List{key}, d2)
 		}

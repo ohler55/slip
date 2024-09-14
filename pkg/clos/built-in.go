@@ -57,6 +57,13 @@ var (
 		inherit:   []*Class{&builtInClass, &integerClass},
 		prototype: slip.Fixnum(42),
 	}
+	octetClass = Class{
+		name:      "octet",
+		final:     true,
+		docs:      "built-in unsigned 8 bit integer class",
+		inherit:   []*Class{&builtInClass, &integerClass},
+		prototype: slip.Octet(42),
+	}
 	bignumClass = Class{
 		name:      "bignum",
 		final:     true,

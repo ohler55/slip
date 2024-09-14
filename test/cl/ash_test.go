@@ -20,6 +20,17 @@ func TestAshFixnum(t *testing.T) {
 	}).Test(t)
 }
 
+func TestAshOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(ash (coerce 1 'octet) 2)`,
+		Expect: "4",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(ash (coerce 4 'octet) -2)`,
+		Expect: "1",
+	}).Test(t)
+}
+
 func TestAshBignum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(format nil "~X" (ash #x808080808080808080 -1))`,

@@ -29,6 +29,13 @@ func TestEvenpBigTrue(t *testing.T) {
 	}).Test(t)
 }
 
+func TestEvenpOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(evenp (coerce 4 'octet))`,
+		Expect: "t",
+	}).Test(t)
+}
+
 func TestEvenpBigFalse(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(evenp 12297829382473034411)`,

@@ -44,6 +44,17 @@ func TestFindIfStringPlain(t *testing.T) {
 	}).Test(t)
 }
 
+func TestFindIfOctetsPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(find-if (lambda (c) (< 66 c)) (coerce "ABCD" 'octets))`,
+		Expect: "67",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find-if (lambda (c) (< 68 c)) (coerce "ABCD" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestFindIfNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(find-if 'numberp t)",
@@ -92,6 +103,21 @@ func TestFindIfStringStartEnd(t *testing.T) {
 	}).Test(t)
 }
 
+func TestFindIfOctetsStartEnd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(find-if (lambda (c) (< 66 c)) (coerce "ABCDE" 'octets) :start 1 :end 3)`,
+		Expect: "67",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find-if (lambda (c) (< 67 c)) (coerce "ABCDE" 'octets) :start 1 :end 3)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find-if (lambda (c) (< 66 c)) (coerce "ABCDE" 'octets) :start 5 :end nil)`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestFindIfListKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(find-if 'numberp '((a 1) (2 b) (c 3) (4 b)) :key 'car)",
@@ -111,6 +137,17 @@ func TestFindIfStringKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(find-if (lambda (n) (< 65 n)) "ABC" :key 'char-code :from-end t)`,
 		Expect: "#\\C",
+	}).Test(t)
+}
+
+func TestFindIfOctetsKey(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(find-if (lambda (n) (< 66 n)) (coerce "ABC" 'octets) :key (lambda (x) (1+ x)))`,
+		Expect: "66",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find-if (lambda (n) (< 65 n)) (coerce "ABC" 'octets) :key (lambda (x) (1+ x)) :from-end t)`,
+		Expect: "67",
 	}).Test(t)
 }
 

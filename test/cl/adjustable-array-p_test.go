@@ -31,6 +31,13 @@ func TestAdjustableArrayPArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestAdjustableArrayPOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(adjustable-array-p (coerce #(1 2 3) 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestAdjustableArrayPNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(adjustable-array-p t)`,

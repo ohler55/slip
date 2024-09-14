@@ -23,6 +23,17 @@ func TestSignumFixnum(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSignumOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(signum (coerce 9 'octet))`,
+		Expect: "1",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(signum (coerce 0 'octet))`,
+		Expect: "0",
+	}).Test(t)
+}
+
 func TestSignumSingleFloat(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(signum 9.0s0)`,

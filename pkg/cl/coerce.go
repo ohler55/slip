@@ -35,33 +35,38 @@ _object_ type and the horizontal axis the the _type_:
              |list
              | |string
              | | |vector
-             | | | |character
-             | | | | |integer
-             | | | | | |fixnum
-             | | | | | | |bignum
-             | | | | | | | |float
-             | | | | | | | | |short-float
-             | | | | | | | | | |single-float
-             | | | | | | | | | | |double-float
-             | | | | | | | | | | | |long-float
-             | | | | | | | | | | | | |rational
-             | | | | | | | | | | | | | |ratio
-             | | | | | | | | | | | | | | |complex
-             | | | | | | | | | | | | | | | |symbol
-             | | | | | | | | | | | | | | | | |assoc
-             | | | | | | | | | | | | | | | | | |hash-table
-             | | | | | | | | | | | | | | | | | | |function
-  list       |x|x|x| | | | | | | | | | | | | | | | |
-  string     |x|x|x| | | | | | | | | | | | |x| | |x|
-  vector     |x|x|x| | | | | | | | | | | | | | | | |
-  character  | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  integer    | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  float      | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  ratio      | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  complex    | | | |x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  symbol     |x|x|x| | | | | | | | | | | | |x| | |x|
-  assoc      |x| | | | | | | | | | | | | | | |x|x| |
-  hash-table | | | | | | | | | | | | | | | | |x|x| |
+             | | | |octets
+             | | | | |character
+             | | | | | |integer
+             | | | | | | |fixnum
+             | | | | | | | |octet
+             | | | | | | | | |bignum
+             | | | | | | | | | |float
+             | | | | | | | | | | |short-float
+             | | | | | | | | | | | |single-float
+             | | | | | | | | | | | | |double-float
+             | | | | | | | | | | | | | |long-float
+             | | | | | | | | | | | | | | |rational
+             | | | | | | | | | | | | | | | |ratio
+             | | | | | | | | | | | | | | | | |complex
+             | | | | | | | | | | | | | | | | | |symbol
+             | | | | | | | | | | | | | | | | | | |assoc
+             | | | | | | | | | | | | | | | | | | | |hash-table
+             | | | | | | | | | | | | | | | | | | | | |function
+  list       |x|x|x|x| | | | | | | | | | | | | | | | | |
+  string     |x|x|x|x| | | | | | | | | | | | | |x| | |x|
+  vector     |x|x|x|x| | | | | | | | | | | | | | | | | |
+  octets     |x|x|x|x| | | | | | | | | | | | | | | | | |
+  character  | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  integer    | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  fixnum     | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  octet      | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  float      | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  ratio      | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  complex    | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
+  symbol     |x|x|x|x| | | | | | | | | | | | | |x| | |x|
+  assoc      |x| | | | | | | | | | | | | | | | | |x|x| |
+  hash-table | | | | | | | | | | | | | | | | | | |x|x| |
 
 `,
 			Examples: []string{
@@ -93,6 +98,10 @@ func (f *Coerce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		result = f.toInteger(args[0])
 	case slip.Symbol("fixnum"):
 		result = f.toFixnum(args[0])
+	case slip.Symbol("octet"):
+		result = ToOctet(args[0])
+	case slip.Symbol("octets"):
+		result = f.toOctets(args[0])
 	case slip.Symbol("bignum"):
 		result = f.toBignum(args[0])
 	case slip.Symbol("float"):
@@ -143,6 +152,8 @@ func (f *Coerce) toList(arg slip.Object) (result slip.Object) {
 		result = list
 	case *slip.Vector:
 		result = ta.AsList()
+	case slip.Octets:
+		result = ta.AsList()
 	default:
 		f.notPossible(ta, "list")
 	}
@@ -151,7 +162,7 @@ func (f *Coerce) toList(arg slip.Object) (result slip.Object) {
 
 func (f *Coerce) toVector(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
-	case nil, *slip.Vector:
+	case nil, *slip.Vector, slip.Octets:
 		result = ta
 	case slip.String:
 		ra := []rune(ta)
@@ -175,6 +186,35 @@ func (f *Coerce) toVector(arg slip.Object) (result slip.Object) {
 	return
 }
 
+func (f *Coerce) toOctets(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case nil, slip.Octets:
+		result = ta
+	case *slip.Vector:
+		list := ta.AsList()
+		octs := make(slip.Octets, len(list))
+		for i, r := range list {
+			octs[i] = byte(ToOctet(r).(slip.Octet))
+		}
+		result = octs
+	case slip.String:
+		result = slip.Octets(ta)
+	case slip.Symbol:
+		result = slip.Octets(ta)
+	case slip.Character:
+		result = slip.Octets(string([]rune{rune(ta)}))
+	case slip.List:
+		octs := make(slip.Octets, len(ta))
+		for i, v := range ta {
+			octs[i] = byte(ToOctet(v).(slip.Octet))
+		}
+		result = octs
+	default:
+		f.notPossible(ta, "octets")
+	}
+	return
+}
+
 func (f *Coerce) toString(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case nil:
@@ -184,6 +224,8 @@ func (f *Coerce) toString(arg slip.Object) (result slip.Object) {
 	case slip.String:
 		result = ta
 	case slip.Symbol:
+		result = slip.String(ta)
+	case slip.Octets:
 		result = slip.String(ta)
 	case *slip.Vector:
 		result = f.listToString(ta.AsList())
@@ -197,6 +239,8 @@ func (f *Coerce) toChar(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = ta
+	case slip.Octet:
+		result = slip.Character(ta)
 	case slip.Integer:
 		code := ta.Int64()
 		if 0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) {
@@ -267,6 +311,8 @@ func (f *Coerce) toFixnum(arg slip.Object) (result slip.Object) {
 		result = slip.Fixnum(ta)
 	case slip.Fixnum:
 		result = ta
+	case slip.Octet:
+		result = slip.Fixnum(ta)
 	case *slip.Bignum:
 		if (*big.Int)(ta).IsInt64() {
 			result = slip.Fixnum((*big.Int)(ta).Int64())
@@ -305,6 +351,8 @@ func (f *Coerce) toBignum(arg slip.Object) (result slip.Object) {
 	case slip.Character:
 		result = (*slip.Bignum)(big.NewInt(int64(ta)))
 	case slip.Fixnum:
+		result = (*slip.Bignum)(big.NewInt(int64(ta)))
+	case slip.Octet:
 		result = (*slip.Bignum)(big.NewInt(int64(ta)))
 	case *slip.Bignum:
 		result = ta

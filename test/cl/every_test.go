@@ -26,6 +26,10 @@ func TestEveryTrue(t *testing.T) {
 		Source: `(every '< #(1 2 3) #(2 3 4))`,
 		Expect: "t",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(every '< (coerce #(1 2 3) 'octets) (coerce #(2 3 4) 'octets))`,
+		Expect: "t",
+	}).Test(t)
 }
 
 func TestEveryFalse(t *testing.T) {

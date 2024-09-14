@@ -42,7 +42,7 @@ type Rational struct {
 func (f *Rational) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	switch ta := args[0].(type) {
-	case slip.Fixnum, *slip.Bignum, *slip.Ratio:
+	case slip.Fixnum, *slip.Bignum, *slip.Ratio, slip.Octet:
 		result = ta
 	case slip.SingleFloat:
 		var z big.Rat

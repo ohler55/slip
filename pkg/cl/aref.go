@@ -58,6 +58,11 @@ func (f *Aref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		result = ta.Get(indices...)
 	case *slip.Vector:
 		result = ta.Get(indices...)
+	case slip.Octets:
+		if len(indices) != 1 || len(ta) <= indices[0] || indices[0] < 0 {
+			slip.NewPanic("Invalid indices %s. Should be between 0 and %d.", args[1:], len(ta))
+		}
+		result = slip.Octet(ta[indices[0]])
 	default:
 		slip.PanicType("array", ta, "array")
 	}
@@ -81,6 +86,15 @@ func (f *Aref) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		ta.Set(value, indices...)
 	case *slip.Vector:
 		ta.Set(value, indices...)
+	case slip.Octets:
+		if len(indices) != 1 || len(ta) <= indices[0] || indices[0] < 0 {
+			slip.NewPanic("Invalid indices %s. Should be between 0 and %d.", args[1:], len(ta))
+		}
+		if ov, ok := value.(slip.Octet); ok {
+			ta[indices[0]] = byte(ov)
+		} else {
+			slip.PanicType("value", value, "octet")
+		}
 	default:
 		slip.PanicType("array", ta, "array")
 	}

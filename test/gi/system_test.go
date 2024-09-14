@@ -13,6 +13,13 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
+func checkConnected(t *testing.T) {
+	// return os.Getenv("TEST_NOT_CONNECTED") != ""
+	if 0 < len(os.Getenv("TEST_NOT_CONNECTED")) {
+		t.SkipNow()
+	}
+}
+
 func TestSystemFile(t *testing.T) {
 	scope := slip.NewScope()
 	(&sliptest.Function{
@@ -136,6 +143,7 @@ func TestSystemLoadBadComp(t *testing.T) {
 }
 
 func TestSystemGitTag(t *testing.T) {
+	checkConnected(t)
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -194,6 +202,7 @@ func TestSystemGitTag(t *testing.T) {
 }
 
 func TestSystemGitBranch(t *testing.T) {
+	checkConnected(t)
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -272,6 +281,7 @@ func TestSystemGitBranch(t *testing.T) {
 }
 
 func TestSystemFetchGitCommit(t *testing.T) {
+	checkConnected(t)
 	(&sliptest.Function{
 		Source: `
 (let ((sys
@@ -329,6 +339,7 @@ func TestSystemFetchGitCommit(t *testing.T) {
 }
 
 func TestSystemFetchGitUnknown(t *testing.T) {
+	checkConnected(t)
 	(&sliptest.Function{
 		Source: `
 (let ((sys

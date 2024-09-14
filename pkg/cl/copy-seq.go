@@ -55,6 +55,10 @@ func (f *CopySeq) Call(s *slip.Scope, args slip.List, depth int) (seq slip.Objec
 		vv := slip.NewVector(ta.Length(), ta.ElementType(), nil, ta.Elements(), ta.Adjustable())
 		vv.FillPtr = ta.FillPtr
 		seq = vv
+	case slip.Octets:
+		dup := make(slip.Octets, len(ta))
+		copy(dup, ta)
+		seq = dup
 	default:
 		slip.PanicType("sequence", args[0], "sequence")
 	}

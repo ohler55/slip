@@ -39,7 +39,7 @@ type Arrayp struct {
 func (f *Arrayp) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	switch args[0].(type) {
-	case *slip.Array, *slip.Vector:
+	case *slip.Array, *slip.Vector, slip.Octets:
 		result = slip.True
 	}
 	return

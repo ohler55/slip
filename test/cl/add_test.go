@@ -27,6 +27,17 @@ func TestAddFixnum(t *testing.T) {
 	}).Test(t)
 }
 
+func TestAddOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(+ (coerce 3 'octet))`,
+		Expect: "3",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(+ (coerce 3 'octet) (coerce 4 'octet) (coerce 5 'octet))`,
+		Expect: "12",
+	}).Test(t)
+}
+
 func TestAddSingleFloat(t *testing.T) {
 	key := slip.Symbol("*print-readably*")
 	orig, _ := slip.GetVar(key)

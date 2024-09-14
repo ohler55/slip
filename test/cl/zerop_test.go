@@ -31,6 +31,10 @@ func TestZerotpTrue(t *testing.T) {
 		Source: `(zerop 0/4)`,
 		Expect: "t",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(zerop (coerce 0 'octet))`,
+		Expect: "t",
+	}).Test(t)
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("big"), (*slip.Bignum)(big.NewInt(0)))
 	(&sliptest.Function{

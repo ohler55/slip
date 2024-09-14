@@ -27,7 +27,7 @@ func init() {
 				{
 					Name: "string",
 					Type: "string",
-					Text: "The _string_ to parse and set in _bag_ according to the path.",
+					Text: "The _string_ or _octets_ to parse and set in _bag_ according to the path.",
 				},
 				{Name: "&optional"},
 				{
@@ -82,11 +82,15 @@ func parseBag(obj *flavors.Instance, value, path slip.Object) {
 	default:
 		slip.PanicType("path", p, "string")
 	}
-	ss, ok := value.(slip.String)
-	if !ok {
-		slip.PanicType("string", value, "string")
+	var v any
+	switch tv := value.(type) {
+	case slip.String:
+		v = sen.MustParse([]byte(tv))
+	case slip.Octets:
+		v = sen.MustParse([]byte(tv))
+	default:
+		slip.PanicType("string", value, "string", "octets")
 	}
-	v := sen.MustParse([]byte(ss))
 	if options.Converter != nil {
 		v = options.Converter.Convert(v)
 	}

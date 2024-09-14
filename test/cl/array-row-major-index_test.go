@@ -23,6 +23,17 @@ func TestArrayRowMajorIndexArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestArrayRowMajorIndexOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(array-row-major-index (coerce "abcd" 'octets) 2)`,
+		Expect: "2",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(array-row-major-index (coerce "abcd" 'octets) 5)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
 func TestArrayRowMajorIndexNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(array-row-major-index t 0 2)`,

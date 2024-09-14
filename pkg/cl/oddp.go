@@ -48,6 +48,10 @@ func (f *Oddp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if ta%2 == 1 {
 			return slip.True
 		}
+	case slip.Octet:
+		if ta%2 == 1 {
+			return slip.True
+		}
 	case *slip.Bignum:
 		var bi big.Int
 		_ = bi.Mod((*big.Int)(ta), big.NewInt(2))

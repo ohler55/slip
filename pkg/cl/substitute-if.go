@@ -116,6 +116,13 @@ func (f *SubstituteIf) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		copy(dup, elements)
 		_ = sr.replace(dup)
 		result = slip.NewVector(len(dup), seq.ElementType(), nil, dup, seq.Adjustable())
+	case slip.Octets:
+		if _, ok := sr.rep.(slip.Octet); !ok {
+			slip.PanicType("new", sr.rep, "Octet")
+		}
+		dup := make([]byte, len(seq))
+		copy(dup, seq)
+		result = sr.replaceBytes(dup)
 	default:
 		slip.PanicType("sequence", seq, "sequence")
 	}
@@ -204,6 +211,41 @@ func (sr *subIfRep) maybe(seq slip.List, i int) bool {
 	}
 	if sr.pc.Call(sr.s, slip.List{v}, sr.depth) != nil {
 		seq[i] = sr.rep
+	}
+	sr.count--
+	return sr.count <= 0
+}
+
+func (sr *subIfRep) replaceBytes(seq []byte) slip.Object {
+	if sr.end < 0 || len(seq) < sr.end {
+		sr.end = len(seq)
+	}
+	if sr.count < 0 {
+		sr.count = len(seq)
+	}
+	if sr.rev {
+		for i := sr.end - 1; sr.start <= i; i-- {
+			if sr.maybeByte(seq, i) {
+				break
+			}
+		}
+	} else {
+		for i := sr.start; i < sr.end; i++ {
+			if sr.maybeByte(seq, i) {
+				break
+			}
+		}
+	}
+	return slip.Octets(seq)
+}
+
+func (sr *subIfRep) maybeByte(seq []byte, i int) bool {
+	var v slip.Object = slip.Octet(seq[i])
+	if sr.kc != nil {
+		v = sr.kc.Call(sr.s, slip.List{v}, sr.depth)
+	}
+	if sr.pc.Call(sr.s, slip.List{v}, sr.depth) != nil {
+		seq[i] = byte(sr.rep.(slip.Octet))
 	}
 	sr.count--
 	return sr.count <= 0

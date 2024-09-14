@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"os"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -58,6 +59,36 @@ func TestFixnum(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.Fixnum(7).RealValue())
 	tt.Equal(t, 7, slip.Fixnum(7).Int64())
+}
+
+func TestOctet(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Octet(7),
+		String:    "7",
+		Simple:    int64(7),
+		Hierarchy: "octet.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Octet(7), Expect: true},
+			{Other: slip.Fixnum(7), Expect: true},
+			{Other: slip.NewRatio(7, 1), Expect: true},
+			{Other: slip.NewBignum(7), Expect: true},
+			{Other: slip.Octet(5), Expect: false},
+			{Other: slip.DoubleFloat(7.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
+			{Other: slip.SingleFloat(7.0), Expect: true},
+			{Other: slip.NewLongFloat(7.0), Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			slip.Octet(0).IntegerType,
+			slip.Octet(0).RationalType,
+			slip.Octet(0).RealType,
+			slip.Octet(0).NumberType,
+		},
+		Eval: slip.Octet(7),
+	}).Test(t)
+	tt.Equal(t, 7.0, slip.Octet(7).RealValue())
+	tt.Equal(t, 7, slip.Octet(7).Int64())
 }
 
 func TestRatio(t *testing.T) {
@@ -299,6 +330,25 @@ func TestString(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, slip.Symbol("string"), slip.String("x").SequenceType())
 	tt.Equal(t, 3, slip.String("abc").Length())
+}
+
+func TestOctets(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Octets("abc"),
+		String:    `#(97 98 99)`,
+		Simple:    []any{97, 98, 99},
+		Hierarchy: "octets.vector.array.sequence.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Octets("abc"), Expect: true},
+			{Other: slip.Octets("ABC"), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: slip.Octets("abc"),
+	}).Test(t)
+	tt.Equal(t, slip.OctetSymbol, slip.Octets("x").SequenceType())
+	tt.Equal(t, slip.OctetsSymbol, slip.Octets("x").ArrayType())
+	tt.Equal(t, 3, slip.Octets("abc").Length())
+	tt.Equal(t, slip.Octets("aaa"), slip.NewOctets(3, slip.Octet(97)))
 }
 
 func TestSymbolKey(t *testing.T) {
@@ -575,6 +625,44 @@ func TestOutputStream(t *testing.T) {
 		},
 		Eval: &stream,
 	}).Test(t)
+}
+
+func TestIOStream(t *testing.T) {
+	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
+	f0 := os.NewFile(uintptr(fds[0]), "file-0")
+	f1 := os.NewFile(uintptr(fds[1]), "file-1")
+	stream := slip.IOStream{RW: f0}
+	stream1 := slip.IOStream{RW: f1}
+	defer func() {
+		_ = syscall.Close(fds[0])
+		_ = syscall.Close(fds[1])
+		_ = f0.Close()
+		_ = f1.Close()
+		_ = stream.Close()
+		_ = stream1.Close()
+	}()
+	(&sliptest.Object{
+		Target:    &stream,
+		String:    "#<IO-STREAM>",
+		Simple:    "#<IO-STREAM>",
+		Hierarchy: "io-stream.stream.t",
+		Equals: []*sliptest.EqTest{
+			{Other: &stream, Expect: true},
+			{Other: slip.True, Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			(&slip.IOStream{}).StreamType,
+		},
+		Eval: &stream,
+	}).Test(t)
+	cnt, err := stream.Write([]byte("test"))
+	tt.Nil(t, err)
+	tt.Equal(t, 4, cnt)
+	buf := make([]byte, 4)
+	cnt, err = stream1.Read(buf)
+	tt.Nil(t, err)
+	tt.Equal(t, 4, cnt)
+	tt.Equal(t, "test", string(buf))
 }
 
 func TestFuncInfo(t *testing.T) {

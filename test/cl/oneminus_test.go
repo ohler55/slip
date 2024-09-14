@@ -57,6 +57,13 @@ func TestOneminusComplex(t *testing.T) {
 	}).Test(t)
 }
 
+func TestOneminusOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(1- (coerce 3 'octet))`,
+		Expect: "2",
+	}).Test(t)
+}
+
 func TestOneminusBadArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(1-)`,

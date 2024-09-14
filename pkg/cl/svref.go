@@ -47,9 +47,19 @@ func (f *Svref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	if !ok {
 		slip.PanicType("index", args[1], "fixnum")
 	}
-	if v, ok2 := args[0].(*slip.Vector); ok2 && v.FillPtr == -1 && v.ElementType() == slip.TrueSymbol {
-		result = v.Get(int(index))
-	} else {
+	switch ta := args[0].(type) {
+	case slip.Octets:
+		if len(ta) <= int(index) || index < 0 {
+			slip.NewPanic("Invalid index %s. Should be between 0 and %d.", index, len(ta))
+		}
+		result = slip.Octet(ta[index])
+	case *slip.Vector:
+		if ta.FillPtr == -1 && ta.ElementType() == slip.TrueSymbol {
+			result = ta.Get(int(index))
+		} else {
+			slip.PanicType("simple-vector", args[0], "simple-vector")
+		}
+	default:
 		slip.PanicType("simple-vector", args[0], "simple-vector")
 	}
 	return
@@ -62,9 +72,24 @@ func (f *Svref) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	if !ok {
 		slip.PanicType("index", args[1], "fixnum")
 	}
-	if v, ok2 := args[0].(*slip.Vector); ok2 && v.FillPtr == -1 && v.ElementType() == slip.TrueSymbol {
-		v.Set(value, int(index))
-	} else {
+	switch ta := args[0].(type) {
+	case slip.Octets:
+		if len(ta) <= int(index) || index < 0 {
+			slip.NewPanic("Invalid index %s. Should be between 0 and %d.", args[1:], len(ta))
+		}
+		var o slip.Octet
+		if o, ok = value.(slip.Octet); ok {
+			ta[index] = byte(o)
+		} else {
+			slip.PanicType("value", value, "octet")
+		}
+	case *slip.Vector:
+		if ta.FillPtr == -1 && ta.ElementType() == slip.TrueSymbol {
+			ta.Set(value, int(index))
+		} else {
+			slip.PanicType("simple-vector", args[0], "simple-vector")
+		}
+	default:
 		slip.PanicType("simple-vector", args[0], "simple-vector")
 	}
 }

@@ -86,6 +86,8 @@ func (f *DeleteDuplicates) Call(s *slip.Scope, args slip.List, depth int) (resul
 	case *slip.Vector:
 		elements := di.inList(s, ta.AsList(), depth)
 		result = slip.NewVector(len(elements), ta.ElementType(), nil, elements, ta.Adjustable())
+	case slip.Octets:
+		result = di.inOctets(s, ta, depth)
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}
@@ -162,6 +164,41 @@ func (di *dupInfo) inString(s *slip.Scope, seq slip.String, depth int) slip.Obje
 		}
 	}
 	return slip.String(nra)
+}
+
+func (di *dupInfo) inOctets(s *slip.Scope, seq slip.Octets, depth int) slip.Object {
+	ba := []byte(seq)
+	if di.end < 0 || len(seq) < di.end {
+		di.end = len(seq)
+	}
+	d2 := depth + 1
+	var nba []byte
+	if di.fromEnd {
+		for i := 0; i < len(ba); i++ {
+			if i < di.start || di.end <= i {
+				nba = append(nba, ba[i])
+				continue
+			}
+			if !di.has(s, slip.Octet(ba[i]), d2) {
+				nba = append(nba, ba[i])
+			}
+		}
+	} else {
+		for i := len(ba) - 1; 0 <= i; i-- {
+			if i < di.start || di.end <= i {
+				nba = append(nba, ba[i])
+				continue
+			}
+			if !di.has(s, slip.Octet(ba[i]), d2) {
+				nba = append(nba, ba[i])
+			}
+		}
+		// reverse nba
+		for i := len(nba)/2 - 1; 0 <= i; i-- {
+			nba[i], nba[len(nba)-i-1] = nba[len(nba)-i-1], nba[i]
+		}
+	}
+	return slip.Octets(nba)
 }
 
 func (di *dupInfo) has(s *slip.Scope, v slip.Object, d2 int) bool {

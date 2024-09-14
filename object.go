@@ -74,7 +74,7 @@ func SimpleObject(val any) (obj Object) {
 	case uint:
 		obj = Fixnum(tv)
 	case uint8:
-		obj = Fixnum(tv)
+		obj = Octet(tv)
 	case uint16:
 		obj = Fixnum(tv)
 	case uint32:

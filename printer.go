@@ -157,7 +157,7 @@ Top:
 		b = append(b, p.caseName("nil")...)
 	case Character:
 		if p.Escape {
-			// The Common Lisp docs are a big vague and leave options open for
+			// The Common Lisp docs are a bit vague and leave options open for
 			// when the #\ escape sequences is used.
 			b = to.Append(b)
 		} else {
@@ -211,6 +211,9 @@ Top:
 		} else {
 			b = (*big.Int)(to).Append(b, int(p.Base))
 		}
+	case Octet:
+		obj = Fixnum(to)
+		goto Top
 	case *Ratio:
 		if (*big.Rat)(to).IsInt() {
 			obj = (*Bignum)((*big.Rat)(to).Num())
@@ -377,6 +380,19 @@ Top:
 		} else {
 			b = append(b, "#<(VECTOR "...)
 			b = p.Append(b, Fixnum(to.dims[0]), 0)
+			b = append(b, ")>"...)
+		}
+	case Octets:
+		if p.Array {
+			if 0 < to.Length() {
+				obj = to.AsList()
+				b = append(b, '#')
+				goto Top
+			}
+			b = append(b, '#', '(', ')')
+		} else {
+			b = append(b, "#<(VECTOR "...)
+			b = p.Append(b, Fixnum(len(to)), 0)
 			b = append(b, ")>"...)
 		}
 	case Tail:

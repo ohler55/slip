@@ -42,6 +42,23 @@ func TestArefArraySetf(t *testing.T) {
 	}).Test(t)
 }
 
+func TestArefOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(aref (coerce "abc" 'octets) 1)`,
+		Expect: "98",
+	}).Test(t)
+}
+
+func TestArefOctetsSetf(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((v (coerce "abc" 'octets)))
+                   (setf (aref v 1) (coerce 66 'octet))
+                   v)`,
+		Array:  true,
+		Expect: "#(97 66 99)",
+	}).Test(t)
+}
+
 func TestArefNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(aref t 0 2)`,
@@ -59,7 +76,22 @@ func TestArefBadSubscript(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
+		Source:    `(aref (coerce "abc" 'octets) 3)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
 		Source:    `(setf (aref (make-array 2) t) 3)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(setf (aref (coerce "abc" 'octets) 3) (coerce 5 'octet))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestArefWrongElementType(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(setf (aref (coerce "abc" 'octets) 0) 3)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

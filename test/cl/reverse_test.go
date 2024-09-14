@@ -71,6 +71,24 @@ func TestReverseString(t *testing.T) {
 	}).Test(t)
 }
 
+func TestReverseOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(reverse (coerce "abcd" 'octets))`,
+		Array:  true,
+		Expect: "#(100 99 98 97)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(reverse (coerce "a" 'octets))`,
+		Array:  true,
+		Expect: "#(97)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(reverse (coerce "" 'octets))`,
+		Array:  true,
+		Expect: "#()",
+	}).Test(t)
+}
+
 func TestReverseNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(reverse 7)`,

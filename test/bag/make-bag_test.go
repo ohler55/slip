@@ -15,6 +15,13 @@ func TestMakeBagParse(t *testing.T) {
 	}).Test(t)
 }
 
+func TestMakeBagParseOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-bag (coerce "{a:7}" 'octets)) :write)`,
+		Expect: `"{a: 7}"`,
+	}).Test(t)
+}
+
 func TestMakeBagSet(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(send (make-bag '((a . 7))) :write)`,

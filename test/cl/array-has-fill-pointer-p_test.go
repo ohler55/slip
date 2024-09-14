@@ -27,6 +27,13 @@ func TestArrayHasFillPointerPArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestArrayHasFillPointerPOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(array-has-fill-pointer-p (coerce "abc" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestArrayHasFillPointerPNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(array-has-fill-pointer-p t)`,

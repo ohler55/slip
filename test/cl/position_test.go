@@ -52,6 +52,21 @@ func TestPositionStringPlain(t *testing.T) {
 	}).Test(t)
 }
 
+func TestPositionOctetsPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(position (coerce #\b 'octet) (coerce "abc" 'octets))`,
+		Expect: "1",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position (coerce #\x 'octet) (coerce "abc" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position 3 (coerce "abc" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestPositionNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(position 'b t)",
@@ -100,6 +115,21 @@ func TestPositionStringStartEnd(t *testing.T) {
 	}).Test(t)
 }
 
+func TestPositionOctetsStartEnd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(position (coerce #\c 'octet) (coerce "abcde" 'octets) :start 1 :end 3)`,
+		Expect: "2",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position (coerce #\d 'octet) (coerce "abcde" 'octets) :start 1 :end 3)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position (coerce #\d 'octet) (coerce "abcde" 'octets) :start 5 :end nil)`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestPositionListKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(position 'b '((a 1) (b 2) (c 3) (b 4)) :key 'car)",
@@ -122,6 +152,17 @@ func TestPositionStringKey(t *testing.T) {
 	}).Test(t)
 }
 
+func TestPositionOctetsKey(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(position 66 (coerce "ABC" 'octets) :key (lambda (x) (coerce x 'fixnum)))`,
+		Expect: "1",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position 66 (coerce "ABC" 'octets) :key (lambda (x) (coerce x 'fixnum)) :from-end t)`,
+		Expect: "1",
+	}).Test(t)
+}
+
 func TestPositionListTest(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(position 2 '(1 2 3 4) :test '<)",
@@ -140,6 +181,17 @@ func TestPositionStringTest(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(position 66 "ABCD" :test '< :key 'char-code :from-end t)`,
+		Expect: "3",
+	}).Test(t)
+}
+
+func TestPositionOctetsTest(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(position 66 (coerce "ABCD" 'octets) :test '<)`,
+		Expect: "2",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(position 66 (coerce "ABCD" 'octets) :test '< :from-end t)`,
 		Expect: "3",
 	}).Test(t)
 }

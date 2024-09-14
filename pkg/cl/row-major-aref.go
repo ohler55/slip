@@ -53,6 +53,11 @@ func (f *RowMajorAref) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		result = ta.MajorGet(int(index))
 	case *slip.Vector:
 		result = ta.MajorGet(int(index))
+	case slip.Octets:
+		if len(ta) <= int(index) || index < 0 {
+			slip.NewPanic("Invalid index %s. Should be between 0 and %d.", index, len(ta))
+		}
+		result = slip.Octet(ta[index])
 	default:
 		slip.PanicType("array", ta, "array")
 	}
@@ -72,6 +77,16 @@ func (f *RowMajorAref) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		ta.MajorSet(int(index), value)
 	case *slip.Vector:
 		ta.MajorSet(int(index), value)
+	case slip.Octets:
+		if len(ta) <= int(index) || index < 0 {
+			slip.NewPanic("Invalid index %s. Should be between 0 and %d.", index, len(ta))
+		}
+		var o slip.Octet
+		if o, ok = value.(slip.Octet); ok {
+			ta[index] = byte(o)
+		} else {
+			slip.PanicType("value", value, "octet")
+		}
 	default:
 		slip.PanicType("array", ta, "array")
 	}

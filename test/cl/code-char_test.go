@@ -13,6 +13,10 @@ func TestCodeCharOk(t *testing.T) {
 		Source: `(code-char 65)`,
 		Expect: `#\A`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(code-char (coerce 65 'octet))`,
+		Expect: `#\A`,
+	}).Test(t)
 }
 
 func TestCodeCharNil(t *testing.T) {

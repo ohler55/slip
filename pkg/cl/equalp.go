@@ -98,7 +98,7 @@ func equalp(x, y slip.Object) bool {
 			}
 			return true
 		}
-	case *slip.Vector:
+	case *slip.Vector, slip.Octets:
 		return tx.Equal(y)
 	case slip.Tail:
 		if ty, ok := y.(slip.Tail); ok {

@@ -37,6 +37,11 @@ func TestCoerceToList(t *testing.T) {
 		Expect: `(#\a #\b #\c)`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(coerce (coerce #(1 2 3) 'octets) 'list)`,
+		Expect: "(1 2 3)",
+	}).Test(t)
+
+	(&sliptest.Function{
 		Source: `(coerce 3 'list)`,
 		Panics: true,
 	}).Test(t)
@@ -73,6 +78,42 @@ func TestCoerceToVector(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCoerceToOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce nil 'octets)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(97 98 99) 'octets)`,
+		Array:  true,
+		Expect: "#(97 98 99)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #(#\a #\b #\c) 'octets)`,
+		Array:  true,
+		Expect: "#(97 98 99)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce "abc" 'octets)`,
+		Array:  true,
+		Expect: `#(97 98 99)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 'abc 'octets)`,
+		Array:  true,
+		Expect: `#(97 98 99)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #\ぴ 'octets)`,
+		Array:  true,
+		Expect: `#(227 129 180)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 3 'octets)`,
+		Panics: true,
+	}).Test(t)
+}
+
 func TestCoerceToString(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce nil 'string)`,
@@ -95,6 +136,10 @@ func TestCoerceToString(t *testing.T) {
 		Expect: `"abc"`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(coerce (coerce "abc" 'octets) 'string)`,
+		Expect: `"abc"`,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(coerce 3 'string)`,
 		Panics: true,
 	}).Test(t)
@@ -111,6 +156,10 @@ func TestCoerceToCharacter(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(coerce 65 'character)`,
+		Expect: `#\A`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 65 'octet) 'character)`,
 		Expect: `#\A`,
 	}).Test(t)
 	(&sliptest.Function{
@@ -148,6 +197,65 @@ func TestCoerceToCharacter(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce '(a) 'character)`,
 		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce #\A 'octet)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 65 'octet)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 65 'octet) 'octet)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce -1 'octet)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 65.0 'octet)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 65.3 'octet)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 5.0L+0 'octet)`,
+		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 130/2 'octet)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 130/3 'octet)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(65 0) 'octet)`,
+		Expect: `65`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #C(65 1) 'octet)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce nil 'octet)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(a) 'octet)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (- 30000000000000000123 30000000000000000000) 'octet)`,
+		Expect: `123`,
 	}).Test(t)
 }
 
@@ -208,6 +316,10 @@ func TestCoerceToFixnum(t *testing.T) {
 		Expect: `123`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(coerce (coerce 123 'octet) 'fixnum)`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(coerce #\A 'fixnum)`,
 		Expect: `65`,
 	}).Test(t)
@@ -264,6 +376,10 @@ func TestCoerceToBignum(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(coerce 123 'bignum)`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 123 'octet) 'bignum)`,
 		Expect: `123`,
 	}).Test(t)
 	(&sliptest.Function{

@@ -22,6 +22,10 @@ func TestSomeTrue(t *testing.T) {
 		Source: `(some '< #(1 2 3) #(1 2 4))`,
 		Expect: "t",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(some '< (coerce #(1 2 3) 'octets) (coerce #(1 2 4) 'octets))`,
+		Expect: "t",
+	}).Test(t)
 }
 
 func TestSomeFalse(t *testing.T) {
@@ -39,6 +43,10 @@ func TestSomeFalse(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(some 'char-lessp "def" "ab")`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(some '< (coerce "def" 'octets) (coerce "ab" 'octets))`,
 		Expect: "nil",
 	}).Test(t)
 }

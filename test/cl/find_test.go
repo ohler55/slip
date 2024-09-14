@@ -52,6 +52,21 @@ func TestFindStringPlain(t *testing.T) {
 	}).Test(t)
 }
 
+func TestFindOctetsPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(find (coerce #\b 'octet) (coerce "abc" 'octets))`,
+		Expect: "98",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find (coerce #\x 'octet) (coerce "abc" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find 3 (coerce "abc" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestFindNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(find 'b t)",
@@ -100,6 +115,21 @@ func TestFindStringStartEnd(t *testing.T) {
 	}).Test(t)
 }
 
+func TestFindOctetsStartEnd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(find (coerce #\c 'octet) (coerce "abcde" 'octets) :start 1 :end 3)`,
+		Expect: "99",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find (coerce #\d 'octet) (coerce "abcde" 'octets) :start 1 :end 3)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find (coerce #\d 'octet) (coerce "abcde" 'octets) :start 5 :end nil)`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestFindListKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(find 'b '((a 1) (b 2) (c 3) (b 4)) :key 'car)",
@@ -122,6 +152,17 @@ func TestFindStringKey(t *testing.T) {
 	}).Test(t)
 }
 
+func TestFindOctetsKey(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(find 66 (coerce "ABC" 'octets) :key (lambda (x) (coerce x 'fixnum)))`,
+		Expect: "66",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find 66 (coerce "ABC" 'octets) :key (lambda (x) (coerce x 'fixnum)) :from-end t)`,
+		Expect: "66",
+	}).Test(t)
+}
+
 func TestFindListTest(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(find 2 '(1 2 3 4) :test '<)",
@@ -141,6 +182,17 @@ func TestFindStringTest(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(find 66 "ABCD" :test '< :key 'char-code :from-end t)`,
 		Expect: "#\\D",
+	}).Test(t)
+}
+
+func TestFindOctetsTest(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(find 66 (coerce "ABCD" 'octets) :test '<)`,
+		Expect: "67",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(find 66 (coerce "ABCD" 'octets) :test '< :from-end t)`,
+		Expect: "68",
 	}).Test(t)
 }
 

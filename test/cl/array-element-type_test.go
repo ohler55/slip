@@ -23,6 +23,13 @@ func TestArrayElementTypeArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestArrayElementTypeOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(array-element-type (coerce "abc" 'octets))`,
+		Expect: "octet",
+	}).Test(t)
+}
+
 func TestArrayElementTypeNotArray(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(array-element-type t)`,

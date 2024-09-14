@@ -52,6 +52,10 @@ func (f *Signum) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case ta < 0:
 			sig = -1
 		}
+	case slip.Octet:
+		if 0 < ta {
+			sig = 1
+		}
 	case slip.SingleFloat:
 		switch {
 		case 0.0 < ta:

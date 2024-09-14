@@ -58,6 +58,9 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case *slip.Vector:
 		elements := ta.AsList()[start:end]
 		result = slip.NewVector(len(elements), ta.ElementType(), nil, elements, ta.Adjustable())
+	case slip.Octets:
+		ba := []byte(ta)
+		result = slip.Octets(ba[start:end])
 	}
 	return
 }
@@ -85,6 +88,15 @@ func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
 			}
 		} else {
 			slip.PanicType("newvalue", value, "list")
+		}
+	case slip.Octets:
+		if rep, ok := value.(slip.Octets); ok {
+			cnt := end - start
+			for i := 0; i < cnt && i < len(rep); i++ {
+				ta[start+i] = rep[i]
+			}
+		} else {
+			slip.PanicType("newvalue", value, "octets")
 		}
 	}
 }
@@ -135,6 +147,15 @@ func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 		}
 		if start < 0 || size < start || size < end {
 			slip.NewPanic("indices %d and %d are out of bounds for vector of length %d", start, end, size)
+		}
+		seq = ta
+	case slip.Octets:
+		ba := []byte(ta)
+		if end < 0 {
+			end = len(ba)
+		}
+		if start < 0 || len(ba) < start || len(ba) < end {
+			slip.NewPanic("indices %d and %d are out of bounds for string of length %d", start, end, len(ba))
 		}
 		seq = ta
 	default:

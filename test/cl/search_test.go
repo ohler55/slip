@@ -144,6 +144,17 @@ func TestSearchListString(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSearchOctetsString(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search (coerce "" 'octets) "abcd")`,
+		Expect: "0",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(search (coerce "q" 'octets) "abcd")`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestSearchVectorString(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(search #() "abcd")`,
@@ -162,6 +173,60 @@ func TestSearchNotString(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(search t "abc")`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestSearchNilOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search nil (coerce "abcd" 'octets))`,
+		Expect: "0",
+	}).Test(t)
+}
+
+func TestSearchOctetsOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search (coerce "bc" 'octets) (coerce "abcd" 'octets))`,
+		Expect: "1",
+	}).Test(t)
+}
+
+func TestSearchListOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search '() (coerce "abcd" 'octets))`,
+		Expect: "0",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(search '(a) (coerce "abcd" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
+func TestSearchStringOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search "" (coerce "abcd" 'octets))`,
+		Expect: "0",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(search "bc" (coerce "abcd" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
+func TestSearchVectorOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search #() (coerce "abcd" 'octets))`,
+		Expect: "0",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(search #(a) (coerce "abcd" 'octets))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
+func TestSearchNotOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(search t (coerce "abc" 'octets))`,
 		Panics: true,
 	}).Test(t)
 }

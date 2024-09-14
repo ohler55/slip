@@ -36,6 +36,13 @@ func TestOddtpBigFalse(t *testing.T) {
 	}).Test(t)
 }
 
+func TestOddtpOctet(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(oddp (coerce 5 'octet))`,
+		Expect: "t",
+	}).Test(t)
+}
+
 func TestOddtpBadArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(oddp)`,

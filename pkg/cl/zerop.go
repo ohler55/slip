@@ -48,6 +48,10 @@ func (f *Zerop) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if ta == 0 {
 			return slip.True
 		}
+	case slip.Octet:
+		if ta == 0 {
+			return slip.True
+		}
 	case slip.SingleFloat:
 		if ta == 0.0 {
 			return slip.True

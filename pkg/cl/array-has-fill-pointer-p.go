@@ -40,6 +40,7 @@ func (f *ArrayHasFillPointerP) Call(s *slip.Scope, args slip.List, depth int) (r
 	slip.ArgCountCheck(f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case *slip.Array:
+	case slip.Octets:
 	case *slip.Vector:
 		if 0 <= ta.FillPtr {
 			result = slip.True

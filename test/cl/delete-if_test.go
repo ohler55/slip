@@ -98,6 +98,43 @@ func TestDeleteIfStringStartEnd(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDeleteIfOctetsPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete-if 'evenp (coerce "ABCBD" 'octets))`,
+		Array:  true,
+		Expect: "#(65 67)",
+	}).Test(t)
+}
+
+func TestDeleteIfOctetsCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete-if 'evenp (coerce "ABCBD" 'octets) :key (lambda (x) (* x x)) :count 1)`,
+		Array:  true,
+		Expect: "#(65 67 66 68)",
+	}).Test(t)
+}
+
+func TestDeleteIfOctetsFromEndCount(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete-if 'evenp (coerce "ABCBDE" 'octets) :key (lambda (x) (* x x)) :count 2 :from-end t)`,
+		Array:  true,
+		Expect: "#(65 66 67 69)",
+	}).Test(t)
+}
+
+func TestDeleteIfOctetsStartEnd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(delete-if 'evenp (coerce "ABCBD" 'octets) :start 1 :end 3)`,
+		Array:  true,
+		Expect: "#(65 67 66 68)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(delete-if 'evenp (coerce "ABCBD" 'octets) :start 1 :end nil)`,
+		Array:  true,
+		Expect: "#(65 67)",
+	}).Test(t)
+}
+
 func TestDeleteIfNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(delete-if 'evenp t)",
