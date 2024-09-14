@@ -23,15 +23,7 @@
     + wait-for-input
     + socket-select
     - socket-pair (domain type protocol &key nonblock cloexec)
-     - maybe set up constants for the various values or a map for run time lookup (map is best)
-     - type
-	          SOCK_DCCP                        = 0x6
-	          SOCK_DGRAM                       = 0x2
-	          SOCK_PACKET                      = 0xa
-	          SOCK_RAW                         = 0x3
-	          SOCK_RDM                         = 0x4
-	          SOCK_SEQPACKET                   = 0x5
-	          SOCK_STREAM                      = 0x1
+
 
  - stream-server branch
   - stream-server-usocket
