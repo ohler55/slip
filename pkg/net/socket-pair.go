@@ -4,8 +4,10 @@ package net
 
 import (
 	"sort"
+	"syscall"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func init() {
@@ -62,9 +64,37 @@ type SocketPair struct {
 func (f *SocketPair) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 3, 7)
 
-	// TBD convert symbols to int, zero mean not found
+	domain := getSockArgValue("domain", args[0], domainMap)
+	typ := getSockArgValue("type", args[1], typeMap)
+	proto := getSockArgValue("protocol", args[2], protocolMap)
 
-	return slip.Values{nil, nil}
+	fds, _ := syscall.Socketpair(domain, typ, proto)
+	sock0 := usocketFlavor.MakeInstance().(*flavors.Instance)
+	sock0.Any = fds[0]
+	sock1 := usocketFlavor.MakeInstance().(*flavors.Instance)
+	sock1.Any = fds[1]
+	if val, has := slip.GetArgsKeyValue(args[3:], slip.Symbol(":nonblock")); has && val != nil {
+		sockSetNonblock(fds[0])
+		sockSetNonblock(fds[1])
+	}
+	if val, has := slip.GetArgsKeyValue(args[3:], slip.Symbol(":cloexec")); has && val != nil {
+		syscall.CloseOnExec(fds[0])
+		syscall.CloseOnExec(fds[1])
+	}
+	return slip.Values{sock0, sock1}
+}
+
+func getSockArgValue(name string, arg slip.Object, argMap map[slip.Symbol]int) int {
+	sym, ok := arg.(slip.Symbol)
+	if !ok {
+		keys := make([]string, 0, len(argMap))
+		for sym := range argMap {
+			keys = append(keys, string(sym))
+		}
+		sort.Strings(keys)
+		slip.PanicType(name, arg, keys...)
+	}
+	return argMap[sym]
 }
 
 func socketArgText(name string, argMap map[slip.Symbol]int) string {
@@ -82,4 +112,10 @@ func socketArgText(name string, argMap map[slip.Symbol]int) string {
 		b = append(b, key...)
 	}
 	return string(b)
+}
+
+func sockSetNonblock(fd int) {
+	if err := syscall.SetNonblock(fd, true); err != nil {
+		panic(err)
+	}
 }
