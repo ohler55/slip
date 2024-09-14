@@ -40,24 +40,43 @@ type SocketState struct {
 // Call the function with the arguments provided.
 func (f *SocketState) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	self, ok := args[0].(*flavors.Instance)
-	if ok && self.Any != nil {
-		result = slip.Symbol(":read-write")
+	if self, ok := args[0].(*flavors.Instance); ok {
+		result = socketState(self)
 	}
 	return
 }
 
 type usocketStateCaller struct{}
 
-func (caller usocketStateCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller usocketStateCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.ArgCountCheck(self, args, 0, 0)
-	if self.Any != nil {
-		result = slip.Symbol(":read-write")
-	}
-	return
+	return socketState(self)
 }
 
 func (caller usocketStateCaller) Docs() string {
 	return clos.MethodDocFromFunc(":state", "socket-state", "usocket", "socket")
+}
+
+func socketState(self *flavors.Instance) (result slip.Object) {
+	if fd, ok := self.Any.(int); ok {
+		var (
+			rset FdSet
+			wset FdSet
+		)
+		rset.Set(fd)
+		wset.Set(fd)
+		if err := Select(&rset, &wset, nil, 0); err == nil {
+			if rset.IsSet(fd) {
+				if wset.IsSet(fd) {
+					result = slip.Symbol(":read-write")
+				} else {
+					result = slip.Symbol(":read")
+				}
+			} else if wset.IsSet(fd) {
+				result = slip.Symbol(":write")
+			}
+		}
+	}
+	return
 }

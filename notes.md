@@ -4,27 +4,6 @@
 
 - next
 
- - usocket
-   - change socket-state to use select with immediate timeout
-   - functions
-    + socket-close (usocket)
-    + usocket-p (socket)
-    + socket-state (socket)
-    + get-local-name socket => address, port
-    + get-local-address socket => address
-    + get-local-port socket => port
-    + get-peer-name socket => address, port
-    + get-peer-address socket => address
-    + get-peer-port socket => port
-    + socket-send (usocket buffer length &key host port offset timeout)
-    + socket-receive (usocket buffer &optional length &key timeout)
-    + socket-stream (socket)
-    + socket-option
-    + wait-for-input
-    + socket-select
-    + socket-pair
-
-
  - stream-server branch
   - stream-server-usocket
    - methods
