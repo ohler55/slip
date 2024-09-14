@@ -22,7 +22,7 @@
     + socket-option
     + wait-for-input
     + socket-select
-    - socket-pair (domain type protocol &key nonblock cloexec)
+    + socket-pair
 
 
  - stream-server branch

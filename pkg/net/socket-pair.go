@@ -66,16 +66,18 @@ func (f *SocketPair) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 
 	domain := getSockArgValue("domain", args[0], domainMap)
 	typ := getSockArgValue("type", args[1], typeMap)
-	proto := getSockArgValue("protocol", args[2], protocolMap)
-
+	var proto int
+	if args[2] != nil {
+		proto = getSockArgValue("protocol", args[2], protocolMap)
+	}
 	fds, _ := syscall.Socketpair(domain, typ, proto)
 	sock0 := usocketFlavor.MakeInstance().(*flavors.Instance)
 	sock0.Any = fds[0]
 	sock1 := usocketFlavor.MakeInstance().(*flavors.Instance)
 	sock1.Any = fds[1]
 	if val, has := slip.GetArgsKeyValue(args[3:], slip.Symbol(":nonblock")); has && val != nil {
-		sockSetNonblock(fds[0])
-		sockSetNonblock(fds[1])
+		_ = syscall.SetNonblock(fds[0], true)
+		_ = syscall.SetNonblock(fds[1], true)
 	}
 	if val, has := slip.GetArgsKeyValue(args[3:], slip.Symbol(":cloexec")); has && val != nil {
 		syscall.CloseOnExec(fds[0])
@@ -86,7 +88,7 @@ func (f *SocketPair) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 
 func getSockArgValue(name string, arg slip.Object, argMap map[slip.Symbol]int) int {
 	sym, ok := arg.(slip.Symbol)
-	if !ok {
+	if !ok || argMap[sym] == 0 {
 		keys := make([]string, 0, len(argMap))
 		for sym := range argMap {
 			keys = append(keys, string(sym))
@@ -112,10 +114,4 @@ func socketArgText(name string, argMap map[slip.Symbol]int) string {
 		b = append(b, key...)
 	}
 	return string(b)
-}
-
-func sockSetNonblock(fd int) {
-	if err := syscall.SetNonblock(fd, true); err != nil {
-		panic(err)
-	}
 }

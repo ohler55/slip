@@ -87,9 +87,6 @@ func (s *Scope) Let(sym Symbol, value Object) {
 	if _, has := ConstantValues[name]; has {
 		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
-	if vs, ok := value.(Values); ok {
-		value = vs.First()
-	}
 	s.moo.Lock()
 	if s.Vars == nil {
 		s.Vars = map[string]Object{name: value}
@@ -194,6 +191,7 @@ func (s *Scope) localGet(name string) (Object, bool) {
 // called. If no bindings are found before reaching the World then a new world
 // level binding is created.
 func (s *Scope) Set(sym Symbol, value Object) {
+	// TBD should Values be converted or not?
 	if vs, ok := value.(Values); ok {
 		value = vs.First()
 	}
