@@ -48,22 +48,12 @@
            (backlog 5)
            (element-type (quote character)))
    - socket-accept (socket &key element-type)
-   - socket-close (usocket)
-   - get-local-name socket => address, port
-   - get-local-address socket => address
-   - get-local-port socket => port
-   - get-peer-name socket => address, port
-   - get-peer-address socket => address
-   - get-peer-port socket => port
-   - socket-send (usocket buffer length &key host port offset)
-   - socket-receive (usocket buffer length &key element-type)
-   - wait-for-input (socket-or-sockets &key timeout ready-only &aux (single-socket-p (usocket-p socket-or-sockets)))
    - socket-server (host port function &optional arguments &key in-new-thread (protocol :stream) (timeout 1)
            (max-buffer-size +max-datagram-packet-size+) element-type
            (reuse-address t) multi-threading name)
    - stream-server-usocket-p (socket)
    - stream-usocket-p (socket)
-   - usocket-p (socket)
+
    - vector-quad-to-dotted-quad (vector)
    - vector-to-ipv6-host (vector)
    - with-client-socket ((socket-var stream-var &rest socket-connect-args) &body body)
@@ -71,9 +61,8 @@
    - with-server-socket ((var server-socket) &body body)
    - with-socket-listener ((socket-var &rest socket-listen-args) &body body)
    - socket-stream (socket)
-   - socket-state (socket)
    - socket-shutdown (usocket direction)
-   - socket-option (socket option &key)
+
   - conditions/errors
    - socket-warning - a condition
    - socket-type-not-supported-error - a condition
