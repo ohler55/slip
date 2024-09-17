@@ -7,11 +7,23 @@
  - stream-server branch
   - stream-server-usocket
    - methods
-    - element-type (octet)
+    - element-type => octet
   - socket-connect (socket-connect host port &key (protocol :stream)
            (element-type (quote character)) timeout deadline
-           (nodelay t nodelay-specified) local-host local-port &aux
-           (sockopt-tcp-nodelay-p (fboundp (quote sockopt-tcp-nodelay))))
+           (nodelay t nodelay-specified) local-host local-port)
+    - host can be name, string, vector, list or octets
+   - socket-listen (host port &key
+           (reuse-address NIL reuse-address-supplied-p)
+           (backlog 5)
+           (element-type (quote character)))
+   - socket-accept (socket &key element-type)
+   - socket-server (host port function &optional arguments &key in-new-thread (protocol :stream) (timeout 1)
+           (max-buffer-size +max-datagram-packet-size+) element-type
+           (reuse-address t) multi-threading name)
+   - socket-shutdown (usocket direction)
+    - ignore direction, can't close only half of a socket
+    - maybe with stream-usocket-server stop listening but allow writes
+   - stream-server-usocket-p (socket)
 
  -
    - stream-usocket class ?? what is this really?
@@ -22,36 +34,12 @@
    - datagram-usocket (maybe)
 
 
-   - ipaddr (host)
-    - fixnum (32 bit)
-    - 4 elememnt list or vector #(127 0 0 1)
-    - string in dotted format
-    - hostname
-    - add ipv6 support
-     - string
-     - fixnum (64 bit)
-    - socket is an api
-
-
   - Vars
-   - *auto-port* (default 0)
+   + *auto-port* (default 0)
+   + *wildcard-host* (default #(0 0 0 0))
    - *remote-host*
    - *remote-port*
-   - *wildcard-host* (default #(0 0 0 0))
   - functions
-   - socket-connect (host port &key
-           (protocol :stream)
-           (element-type (quote character)) timeout deadline
-           (nodelay t nodelay-specified) local-host local-port)
-   - socket-listen (host port &key
-           (reuse-address NIL reuse-address-supplied-p)
-           (backlog 5)
-           (element-type (quote character)))
-   - socket-accept (socket &key element-type)
-   - socket-server (host port function &optional arguments &key in-new-thread (protocol :stream) (timeout 1)
-           (max-buffer-size +max-datagram-packet-size+) element-type
-           (reuse-address t) multi-threading name)
-   - stream-server-usocket-p (socket)
    - stream-usocket-p (socket)
 
    - vector-quad-to-dotted-quad (vector)
@@ -60,8 +48,6 @@
    - with-connected-socket ((var socket) &body body)
    - with-server-socket ((var server-socket) &body body)
    - with-socket-listener ((socket-var &rest socket-listen-args) &body body)
-   - socket-stream (socket)
-   - socket-shutdown (usocket direction)
 
   - conditions/errors
    - socket-warning - a condition
@@ -83,7 +69,6 @@
  - net package
   - implement sbcl networking or something closer to golang?
   - http://www.sbcl.org/manual/#Networking
-  - https://marketsplash.com/tutorials/lisp/lisp-network-programming/
   - https://www.quicklisp.org/beta/UNOFFICIAL/docs/usocket/doc/index.html
   - https://common-lisp-libraries.readthedocs.io/usocket/
   - socket

@@ -19,7 +19,9 @@ var (
 func init() {
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*net*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
+			"*net*":           {Val: &Pkg, Doc: Pkg.Doc, Export: true},
+			"*wildcard-host*": {Val: slip.Octets{0, 0, 0, 0}, Export: true},
+			"*auto-port*":     {Val: slip.Fixnum(0), Export: true},
 		},
 	)
 	defClient()
