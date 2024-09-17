@@ -52,7 +52,7 @@ var domainMap = map[slip.Symbol]int{
 }
 
 var typeMap = map[slip.Symbol]int{
-	slip.Symbol(":dgram"):      syscall.SOCK_DGRAM,
+	slip.Symbol(":datagram"):   syscall.SOCK_DGRAM,
 	slip.Symbol(":maxaddrlen"): syscall.SOCK_MAXADDRLEN,
 	slip.Symbol(":raw"):        syscall.SOCK_RAW,
 	slip.Symbol(":rdm"):        syscall.SOCK_RDM,
