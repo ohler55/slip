@@ -80,7 +80,7 @@ func TestSocketInitCreate(t *testing.T) {
 
 func TestSocketInitBadCreate(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'socket :domain :unix :type :raw)`,
+		Source:    `(make-instance 'socket :domain :unix :type :raw :protocol :udp)`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

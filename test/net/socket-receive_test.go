@@ -116,6 +116,15 @@ func TestSocketReceiveError(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSocketReceiveBadFd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((sock (make-instance 'socket :socket 777))
+                       (buf (make-array 8 :element-type 'octet)))
+                  (socket-receive sock buf 8))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
 func TestSocketReceiveEOF(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
@@ -168,3 +177,12 @@ func TestSocketReceiveBadLength(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+// func TestSocketReceiveTimeout(t *testing.T) {
+// 	// Pick some random high port number which should error on select.
+// 	(&sliptest.Function{
+// 		Source: `(let ((sock (make-instance 'socket :socket 777)))
+//                   (socket-receive sock :timeout 0.001))`,
+// 		PanicType: slip.ErrorSymbol,
+// 	}).Test(t)
+// }

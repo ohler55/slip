@@ -43,11 +43,26 @@ func init() {
 					Type: "real|nil",
 					Text: "if non-nil then the number of seconds for the timeout.",
 				},
-				// TBD oob
-				// TBD peek
-				// TBD waitall
-				// TBD dontwait
-				// TBD x element-type - always octet
+				{
+					Name: "oob",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_OOB flag is set.",
+				},
+				{
+					Name: "peek",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_PEEK flag is set.",
+				},
+				{
+					Name: "waitall",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_WAITALL flag is set.",
+				},
+				{
+					Name: "dontwait",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_DONTWAIT flag is set.",
+				},
 			},
 			Return: "octets,fixnum,list",
 			Text: `__socket-receive__ reads from the _socket_ and returns the three values;
@@ -91,11 +106,6 @@ func (caller socketReceiveCaller) Docs() string {
 }
 
 func socketReceive(fd int, args slip.List) slip.Object {
-	typ, err := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_TYPE)
-	if err != nil {
-		panic(err)
-	}
-
 	result := slip.Values{nil, nil, nil}
 	var (
 		buf    []byte
@@ -151,6 +161,10 @@ func socketReceive(fd int, args slip.List) slip.Object {
 		if !rset.IsSet(fd) {
 			slip.NewPanic("read timed out")
 		}
+	}
+	typ, err := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_TYPE)
+	if err != nil {
+		panic(err)
 	}
 	if typ == syscall.SOCK_DGRAM {
 		out, cnt, addr := datagramReceive(fd, buf, args)

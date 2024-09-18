@@ -6,9 +6,6 @@
 
  - pivot to socket (https://www.sbcl.org/manual/#Networking)
 
-  - add IsA(flavor) function to flavors to verify it inherits from a flavor
-   - could use flavor name instead
-
   - rename the peer and local functions
 
   - options change or leave as is with some additional functions
@@ -17,7 +14,7 @@
    + socket-p - not in sbcl
    + make-socket - not in sbcl
    + socket-pair - not in sbcl
-   - socket-receive
+   - socket-receive (datagram)
    - socket-send
    - socket-accept
    - socket-bind
