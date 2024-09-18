@@ -58,6 +58,11 @@ func TestInstanceMisc(t *testing.T) {
 	tt.Equal(t, true, b2.Equal(berry))
 	tt.Equal(t, slip.ReadString(`blueberry`).Eval(scope, nil), b2.Class())
 
+	tt.Equal(t, true, b2.IsA(flavors.Find("blueberry")))
+	tt.Equal(t, true, b2.IsA(flavors.Find("vanilla-flavor")))
+	_ = slip.ReadString(`(defflavor blackberry () ())`).Eval(scope, nil)
+	tt.Equal(t, false, b2.IsA(flavors.Find("blackberry")))
+
 	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
 	tt.Equal(t, false, b2.Equal(berry))
 

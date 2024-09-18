@@ -4,7 +4,7 @@ package net
 
 import (
 	"os"
-	"strings"
+	"syscall"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -20,6 +20,9 @@ func defSocket() {
 			slip.List{
 				slip.Symbol(":init-keywords"),
 				slip.Symbol(":socket"),
+				slip.Symbol(":domain"),
+				slip.Symbol(":type"),
+				slip.Symbol(":protocol"),
 			},
 			slip.List{
 				slip.Symbol(":documentation"),
@@ -44,6 +47,7 @@ func defSocket() {
 	socketFlavor.DefMethod(":stream", "", socketStreamCaller{})
 	socketFlavor.DefMethod(":option", "", socketOptionCaller{})
 	socketFlavor.DefMethod(":set-option", "", socketSetOptionCaller{})
+	socketFlavor.DefMethod(":type", "", socketTypeCaller{})
 }
 
 type socketInitCaller struct{}
@@ -52,10 +56,30 @@ func (caller socketInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
-	for i := 0; i < len(args); i += 2 {
-		key, _ := args[i].(slip.Symbol)
-		if strings.EqualFold(":socket", string(key)) {
-			socketSetSocketCaller{}.Call(s, slip.List{args[i+1]}, 0)
+	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":socket")); has {
+		socketSetSocketCaller{}.Call(s, slip.List{val}, 0)
+		return nil
+	}
+	var (
+		domain int
+		typ    int
+		pro    int
+	)
+	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":domain")); has {
+		domain = getSockArgValue(":domain", val, domainMap)
+	}
+	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":type")); has {
+		typ = getSockArgValue(":type", val, typeMap)
+	}
+	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":protocol")); has && val != nil {
+		pro = getSockArgValue(":protocol", val, protocolMap)
+	}
+	if domain != 0 && typ != 0 {
+		if fd, err := syscall.Socket(domain, typ, pro); err == nil {
+			self := s.Get("self").(*flavors.Instance)
+			self.Any = fd
+		} else {
+			panic(err)
 		}
 	}
 	return nil
@@ -63,10 +87,14 @@ func (caller socketInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 
 func (caller socketInitCaller) Docs() string {
 	return `__:init__ &key _socket_
-   _:socket_ [socket-stream|file-stream|fixnum] a bidirectional stream to use for the instance's socket.
+   _:socket_ [fixnum] a bidirectional socket file descriptor to use for the instance's socket.
+   _:domain_ [keyword] a domain for a new socket (e.g., :inet)
+   _:type_ [keyword] a socket type (e.g., :stream or :datagram)
+   _:protocol_ [keyword] a protocol for a new socket, defaults to nil or 0
 
 
-Initializes an instance with the provided _socket_.
+Initializes an instance with the provided _socket_ or create a new socket with the
+_domain_, _type_ and optional _protocol_.
 `
 }
 
@@ -85,7 +113,7 @@ func (caller socketSocketCaller) Docs() string {
 	return `__:socket__
 
 
-Returns the stream of the instance or nil if not connected.
+Returns the socket file descriptor of the instance or nil if not open.
 `
 }
 
@@ -111,6 +139,32 @@ func (caller socketSetSocketCaller) Docs() string {
 or a fixnum file descriptor
 
 
-Sets the underlying stream of the instance.
+Sets the underlying socket file descriptor of the instance.
+`
+}
+
+type socketTypeCaller struct{}
+
+func (caller socketTypeCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+	self := s.Get("self").(*flavors.Instance)
+	slip.ArgCountCheck(self, args, 0, 0)
+	if self.Any != nil {
+		if val, err := syscall.GetsockoptInt(self.Any.(int), syscall.SOL_SOCKET, syscall.SO_TYPE); err == nil {
+			for typ, num := range typeMap {
+				if num == val {
+					result = typ
+					break
+				}
+			}
+		}
+	}
+	return
+}
+
+func (caller socketTypeCaller) Docs() string {
+	return `__:type__
+
+
+Returns the socket type or nil if not open.
 `
 }

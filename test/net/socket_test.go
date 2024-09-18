@@ -71,6 +71,20 @@ func TestSocketFile(t *testing.T) {
 	tt.SameType(t, 0, inst.Any) // int
 }
 
+func TestSocketInitCreate(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'socket :domain :inet :type :stream :protocol :ip) :type)`,
+		Expect: ":stream",
+	}).Test(t)
+}
+
+func TestSocketInitBadCreate(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'socket :domain :unix :type :raw)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
 func TestSocketNotStream(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let("uconn", &slip.IOStream{})
@@ -110,6 +124,7 @@ func TestSocketDocs(t *testing.T) {
 		":socket",
 		":state",
 		":stream",
+		":type",
 	} {
 		_ = slip.ReadString(fmt.Sprintf(`(describe-method socket %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))

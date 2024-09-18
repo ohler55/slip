@@ -6,18 +6,24 @@
 
  - pivot to socket (https://www.sbcl.org/manual/#Networking)
 
+  - add IsA(flavor) function to flavors to verify it inherits from a flavor
+   - could use flavor name instead
+
   - rename the peer and local functions
 
   - options change or leave as is with some additional functions
   - FdRW should include flags for active or not for R or W, set in shutdown
   - functions
+   + socket-p - not in sbcl
+   + make-socket - not in sbcl
+   + socket-pair - not in sbcl
+   - socket-receive
+   - socket-send
    - socket-accept
    - socket-bind
    - socket-connect
    - socket-peername
    - socket-name and socket-localname
-   - socket-receive
-   - socket-send
    - socket-listen
    - socket-open-p
    - socket-close
@@ -39,7 +45,6 @@
    - get-host-by-name
    - get-host-by-address
    - socket-select - not in sbcl
-   - socket-pair - not in sbcl
    - wait-for-input - not in sbcl
    - socket-state - not in sbcl
   - classes (all socket flavors add no additional methods)

@@ -49,6 +49,7 @@ func init() {
 					Text: `if non-nil then the number of seconds for the timeout before at least
 one byte can be written.`,
 				},
+				// TBD address which is list of host and port) instead
 				{
 					Name: "host",
 					Type: "string|fixnum|list",
@@ -59,8 +60,16 @@ one byte can be written.`,
 					Type: "fixnum",
 					Text: "the port to send to if a datagram socket.",
 				},
+				// TBD x external-format - if provided must be utf-8
+				// TBD oob - only for datagram
+				// TBD eor
+				// TBD donotroute - maybe
+				// TBD dontwait - same as timeout of 0 or maybe datagram (sendmsg) flag
+				// TBD nosignal
+				// TBD confirm
+				// TBD x more
 			},
-			Return: "octets, fixnum, string, fixnum",
+			Return: "octets, fixnum, string, fixnum", // TBD just number of octets written
 			Text: `__socket-send__ writes to the _socket_ and returns four values;
 the octets read, the number of bytes read, the sending host, and the sending port. If _buffer_ is _nil_
 then _octets_ or _length_ is created. If both _buffer_ and _length_ are _nil_ then an _octests_ vector

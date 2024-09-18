@@ -24,7 +24,7 @@ func init() {
 				},
 			},
 			Return: "boolean",
-			Text:   `__socket-p__ returns _t_ if _socket_ is a _socket_ and _nil_ otherwise.`,
+			Text:   `__socket-p__ returns _t_ if _socket_ is an instance of a _socket_ class and _nil_ otherwise.`,
 			Examples: []string{
 				`(socket-p (make-instance 'socket)) => t`,
 			},
@@ -39,7 +39,7 @@ type SocketP struct {
 // Call the function with the arguments provided.
 func (f *SocketP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if self, ok := args[0].(*flavors.Instance); ok && self.Flavor == socketFlavor {
+	if self, ok := args[0].(*flavors.Instance); ok && self.IsA(socketFlavor) {
 		result = slip.True
 	}
 	return
