@@ -27,13 +27,13 @@ func TestGetPeerPortOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (get-peer-port sock))`,
 		Expect: "0",
 	}).Test(t)
 }
 
-func TestUsocketPeerPortOkay(t *testing.T) {
+func TestSocketPeerPortOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -43,7 +43,7 @@ func TestUsocketPeerPortOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (send sock :peer-port))`,
 		Expect: "0",
 	}).Test(t)
@@ -62,7 +62,7 @@ func TestGetPeerPortHTTP(t *testing.T) {
 			port, _ := strconv.Atoi(addr[pos+1:])
 
 			scope := slip.NewScope()
-			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
+			us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
 			tc, _ := nc.(*net.TCPConn)
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
@@ -83,9 +83,9 @@ func TestGetPeerPortNotSocket(t *testing.T) {
 	}).Test(t)
 }
 
-func TestUsocketPeerPortClosed(t *testing.T) {
+func TestSocketPeerPortClosed(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(send (make-instance 'usocket) :peer-port)`,
+		Source: `(send (make-instance 'socket) :peer-port)`,
 		Expect: "nil",
 	}).Test(t)
 }

@@ -23,7 +23,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to send a data on.",
 				},
 				{
@@ -66,7 +66,7 @@ the octets read, the number of bytes read, the sending host, and the sending por
 then _octets_ or _length_ is created. If both _buffer_ and _length_ are _nil_ then an _octests_ vector
 of length 65507 is created.`,
 			Examples: []string{
-				`(socket-receive (make-instance 'usocket :socket 777) nil 5) => #(65 66 67), 3, "", nil`,
+				`(socket-receive (make-instance 'socket :socket 777) nil 5) => #(65 66 67), 3, "", nil`,
 			},
 		}, &Pkg)
 }
@@ -88,9 +88,9 @@ func (f *SocketSend) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	return
 }
 
-type usocketSendCaller struct{}
+type socketSendCaller struct{}
 
-func (caller usocketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":send", args, 1, 8)
 	if self.Any != nil {
@@ -99,8 +99,8 @@ func (caller usocketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (resu
 	return
 }
 
-func (caller usocketSendCaller) Docs() string {
-	return clos.MethodDocFromFunc(":send", "socket-send", "usocket", "socket")
+func (caller socketSendCaller) Docs() string {
+	return clos.MethodDocFromFunc(":send", "socket-send", "socket", "socket")
 }
 
 func socketSend(fd int, args slip.List) int {

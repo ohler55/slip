@@ -10,12 +10,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := UsocketP{Function: slip.Function{Name: "usocket-p", Args: args}}
+			f := SocketP{Function: slip.Function{Name: "socket-p", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "usocket-p",
+			Name: "socket-p",
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
@@ -24,22 +24,22 @@ func init() {
 				},
 			},
 			Return: "boolean",
-			Text:   `__usocket-p__ returns _t_ if _socket_ is a _usocket_ and _nil_ otherwise.`,
+			Text:   `__socket-p__ returns _t_ if _socket_ is a _socket_ and _nil_ otherwise.`,
 			Examples: []string{
-				`(usocket-p (make-instance 'usocket)) => t`,
+				`(socket-p (make-instance 'socket)) => t`,
 			},
 		}, &Pkg)
 }
 
-// UsocketP represents the usocket-p function.
-type UsocketP struct {
+// SocketP represents the socket-p function.
+type SocketP struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *UsocketP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *SocketP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if self, ok := args[0].(*flavors.Instance); ok && self.Flavor == usocketFlavor {
+	if self, ok := args[0].(*flavors.Instance); ok && self.Flavor == socketFlavor {
 		result = slip.True
 	}
 	return

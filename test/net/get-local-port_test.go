@@ -27,13 +27,13 @@ func TestGetLocalPortOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (get-local-port sock))`,
 		Expect: "0",
 	}).Test(t)
 }
 
-func TestUsocketLocalPortOkay(t *testing.T) {
+func TestSocketLocalPortOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -43,7 +43,7 @@ func TestUsocketLocalPortOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (send sock :local-port))`,
 		Expect: "0",
 	}).Test(t)
@@ -59,7 +59,7 @@ func TestGetLocalPortHTTP(t *testing.T) {
 		if cs == http.StateActive {
 			u, _ := url.Parse(serv.URL)
 			scope := slip.NewScope()
-			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
+			us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
 			tc, _ := nc.(*net.TCPConn)
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
@@ -81,9 +81,9 @@ func TestGetLocalPortNotSocket(t *testing.T) {
 	}).Test(t)
 }
 
-func TestUsocketLocalPortClosed(t *testing.T) {
+func TestSocketLocalPortClosed(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(send (make-instance 'usocket) :local-port)`,
+		Source: `(send (make-instance 'socket) :local-port)`,
 		Expect: "nil",
 	}).Test(t)
 }

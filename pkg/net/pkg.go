@@ -29,7 +29,7 @@ func init() {
 	defResponse()
 	defResponseWriter()
 	defServer()
-	defUsocket()
+	defSocket()
 
 	Pkg.Initialize(nil, &bodyWrap{}) // lock
 	slip.AddPackage(&Pkg)

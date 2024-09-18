@@ -23,7 +23,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to receive a data on.",
 				},
 				{Name: "&optional"},
@@ -47,7 +47,7 @@ func init() {
 			Return: "fixnum",
 			Text:   `__socket-receive__ reads from the _socket_ and returns the number of bytes written.`,
 			Examples: []string{
-				`(socket-receive (make-instance 'usocket :socket 777) "hello" 5) => 5`,
+				`(socket-receive (make-instance 'socket :socket 777) "hello" 5) => 5`,
 			},
 		}, &Pkg)
 }
@@ -69,9 +69,9 @@ func (f *SocketReceive) Call(s *slip.Scope, args slip.List, depth int) (result s
 	return
 }
 
-type usocketReceiveCaller struct{}
+type socketReceiveCaller struct{}
 
-func (caller usocketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":receive", args, 1, 8)
 	if self.Any != nil {
@@ -80,8 +80,8 @@ func (caller usocketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (r
 	return
 }
 
-func (caller usocketReceiveCaller) Docs() string {
-	return clos.MethodDocFromFunc(":receive", "socket-receive", "usocket", "socket")
+func (caller socketReceiveCaller) Docs() string {
+	return clos.MethodDocFromFunc(":receive", "socket-receive", "socket", "socket")
 }
 
 func socketReceive(fd int, args slip.List) slip.Object {
@@ -148,7 +148,7 @@ func socketReceive(fd int, args slip.List) slip.Object {
 	result[0] = slip.Octets(buf)
 	result[1] = slip.Fixnum(cnt)
 	if sa, err := syscall.Getpeername(fd); err == nil {
-		addr, port := usocketName(sa)
+		addr, port := socketName(sa)
 		result[2] = addr
 		result[3] = port
 	}

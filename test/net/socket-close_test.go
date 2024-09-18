@@ -22,7 +22,7 @@ func TestSocketClose(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (list (socket-close sock) (send sock :state)))`,
 		Expect: "(nil nil)",
 	}).Test(t)
@@ -39,7 +39,7 @@ func TestSocketSendClose(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (list (send sock :close) (send sock :state)))`,
 		Expect: "(nil nil)",
 	}).Test(t)

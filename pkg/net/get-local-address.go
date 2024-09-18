@@ -19,7 +19,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to get the local address of.",
 				},
 			},
@@ -27,7 +27,7 @@ func init() {
 			Text: `__get-local-address__ returns the address of the _socket_. If the _socket_
 is closed then _nil_ is returned.`,
 			Examples: []string{
-				`(get-local-address (make-instance 'usocket :socket 5)) => #(127 0 0 1)`,
+				`(get-local-address (make-instance 'socket :socket 5)) => #(127 0 0 1)`,
 			},
 		}, &Pkg)
 }
@@ -41,23 +41,23 @@ type GetLocalAddress struct {
 func (f *GetLocalAddress) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != usocketFlavor {
-		slip.PanicType("socket", args[0], "usocket")
+	if !ok || self.Flavor != socketFlavor {
+		slip.PanicType("socket", args[0], "socket")
 	}
 	if self.Any != nil {
-		addr, _ := usocketLocalName(self)
+		addr, _ := socketLocalName(self)
 		result = addr
 	}
 	return
 }
 
-type usocketLocalAddressCaller struct{}
+type socketLocalAddressCaller struct{}
 
-func (caller usocketLocalAddressCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketLocalAddressCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":local-address", args, 0, 0)
 	if self.Any != nil {
-		addr, _ := usocketLocalName(self)
+		addr, _ := socketLocalName(self)
 		result = addr
 	}
 	return

@@ -23,7 +23,7 @@ func TestSocketReceiveBasic(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd))
+		Source: `(let ((sock (make-instance 'socket :socket ufd))
                        (buf (make-array 8 :element-type 'octet)))
                   (socket-receive sock buf 8 :timeout 1.0))`,
 		Expect: `#(104 101 108 108 111 0 0 0), 5, "@", 0`,
@@ -42,7 +42,7 @@ func TestSocketReceiveNoBuffer(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-receive sock nil 6))`,
 		Expect: `#(104 101 108 108 111 0), 5, "@", 0`,
 	}).Test(t)
@@ -60,7 +60,7 @@ func TestSocketReceiveNoLength(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd))
+		Source: `(let ((sock (make-instance 'socket :socket ufd))
                        (buf (make-array 8 :element-type 'octet)))
                   (send sock :receive buf))`,
 		Expect: `#(104 101 108 108 111 0 0 0), 5, "@", 0`,
@@ -79,7 +79,7 @@ func TestSocketReceiveJustSocket(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-receive sock))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			tt.SameType(t, slip.Values{}, v)
@@ -100,7 +100,7 @@ func TestSocketReceiveTimeout(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd))
+		Source: `(let ((sock (make-instance 'socket :socket ufd))
                        (buf (make-array 8 :element-type 'octet)))
                   (socket-receive sock buf 8 :timeout 0.001))`,
 		PanicType: slip.ErrorSymbol,
@@ -109,7 +109,7 @@ func TestSocketReceiveTimeout(t *testing.T) {
 
 func TestSocketReceiveError(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((sock (make-instance 'usocket :socket 777))
+		Source: `(let ((sock (make-instance 'socket :socket 777))
                        (buf (make-array 8 :element-type 'octet)))
                   (socket-receive sock buf 8 :timeout 0.001))`,
 		PanicType: slip.ErrorSymbol,
@@ -127,7 +127,7 @@ func TestSocketReceiveEOF(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-receive sock))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
@@ -144,7 +144,7 @@ func TestSocketReceiveNotOctets(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-receive sock t))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
@@ -162,7 +162,7 @@ func TestSocketReceiveBadLength(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd))
+		Source: `(let ((sock (make-instance 'socket :socket ufd))
                        (buf (make-array 8 :element-type 'octet)))
                   (send sock :receive buf -1))`,
 		PanicType: slip.TypeErrorSymbol,

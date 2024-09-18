@@ -25,13 +25,13 @@ func TestGetPeerAddressOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (get-peer-address sock))`,
 		Expect: `"@"`,
 	}).Test(t)
 }
 
-func TestUsocketPeerAddressOkay(t *testing.T) {
+func TestSocketPeerAddressOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -41,7 +41,7 @@ func TestUsocketPeerAddressOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (send sock :peer-address))`,
 		Expect: `"@"`,
 	}).Test(t)
@@ -56,7 +56,7 @@ func TestGetPeerAddressHTTP(t *testing.T) {
 	serv.Config.ConnState = func(nc net.Conn, cs http.ConnState) {
 		if cs == http.StateActive {
 			scope := slip.NewScope()
-			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
+			us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
 			tc, _ := nc.(*net.TCPConn)
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
@@ -77,9 +77,9 @@ func TestGetPeerAddressNotSocket(t *testing.T) {
 	}).Test(t)
 }
 
-func TestUsocketPeerAddressClosed(t *testing.T) {
+func TestSocketPeerAddressClosed(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(send (make-instance 'usocket) :peer-address)`,
+		Source: `(send (make-instance 'socket) :peer-address)`,
 		Expect: "nil",
 	}).Test(t)
 }

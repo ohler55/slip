@@ -25,8 +25,8 @@ func TestWaitForInputFound(t *testing.T) {
 	scope.Let("fd1", slip.Fixnum(fds[1]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock0 (make-instance 'usocket :socket fd0))
-                       (sock1 (make-instance 'usocket :socket fd1)))
+		Source: `(let ((sock0 (make-instance 'socket :socket fd0))
+                       (sock1 (make-instance 'socket :socket fd1)))
                   (wait-for-input (list sock0 sock1) :timeout 1))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			values := v.(slip.Values)
@@ -52,7 +52,7 @@ func TestWaitForInputTimeout(t *testing.T) {
 	scope.Let("fd0", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock0 (make-instance 'usocket :socket fd0)))
+		Source: `(let ((sock0 (make-instance 'socket :socket fd0)))
                   (wait-for-input sock0 :timeout 0.01))`,
 		Expect: "nil, nil",
 	}).Test(t)
@@ -68,7 +68,7 @@ func TestWaitForInputNilReadyOnly(t *testing.T) {
 	scope.Let("fd0", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock0 (make-instance 'usocket :socket fd0)))
+		Source: `(let ((sock0 (make-instance 'socket :socket fd0)))
                   (wait-for-input sock0 :timeout 0.01 :ready-only nil))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			values := v.(slip.Values)
@@ -102,7 +102,7 @@ func TestWaitForInputBadTimeout(t *testing.T) {
 	scope.Let("fd0", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock0 (make-instance 'usocket :socket fd0)))
+		Source: `(let ((sock0 (make-instance 'socket :socket fd0)))
                   (wait-for-input sock0 :timeout -0.01))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)

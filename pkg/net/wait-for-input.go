@@ -21,7 +21,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "sockets",
-					Type: "usocket|list-of-usocket",
+					Type: "socket|list-of-socket",
 					Text: "to wait for input from",
 				},
 				{Name: "&key"},
@@ -42,7 +42,7 @@ The default is _t_.`,
 A list of the sockets ready for input and the time remaining in the timeout is returned. If
 the call timed out then the second both argument are nil.`,
 			Examples: []string{
-				`(wait-for-input (make-instance 'usocket :socket 5) :timeout 1) => (#<usocket 1234>), 0.5`,
+				`(wait-for-input (make-instance 'socket :socket 5) :timeout 1) => (#<socket 1234>), 0.5`,
 			},
 		}, &Pkg)
 }
@@ -64,7 +64,7 @@ func (f *WaitForInput) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	case slip.List:
 		sockets = ta
 	default:
-		slip.PanicType("sockets", args[0], "usocket", "list of usocket")
+		slip.PanicType("sockets", args[0], "socket", "list of socket")
 	}
 	args = args[1:]
 	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":timeout")); has && val != nil {
@@ -79,12 +79,12 @@ func (f *WaitForInput) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	}
 	var rset FdSet
 	for _, val := range sockets {
-		if sock, ok := val.(*flavors.Instance); ok && sock.Flavor == usocketFlavor {
+		if sock, ok := val.(*flavors.Instance); ok && sock.Flavor == socketFlavor {
 			if fd, ok2 := sock.Any.(int); ok2 {
 				rset.Set(fd)
 			}
 		} else {
-			slip.PanicType("sockets", val, "usocket", "list of sockets")
+			slip.PanicType("sockets", val, "socket", "list of sockets")
 		}
 	}
 	start := time.Now()

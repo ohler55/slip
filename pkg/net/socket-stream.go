@@ -20,14 +20,14 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to stream.",
 				},
 			},
 			Return: "nil|",
-			Text:   `__socket-stream__ returns a stream of the _usocket_ instance.`,
+			Text:   `__socket-stream__ returns a stream of the _socket_ instance.`,
 			Examples: []string{
-				`(socket-stream (make-instance 'usocket)) => #<IO-STREAM>`,
+				`(socket-stream (make-instance 'socket)) => #<IO-STREAM>`,
 			},
 		}, &Pkg)
 }
@@ -41,8 +41,8 @@ type SocketStream struct {
 func (f *SocketStream) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != usocketFlavor {
-		slip.PanicType("socket", args[0], "usocket")
+	if !ok || self.Flavor != socketFlavor {
+		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
 		return &slip.IOStream{RW: fdRW(fd)}
@@ -50,9 +50,9 @@ func (f *SocketStream) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	return nil
 }
 
-type usocketStreamCaller struct{}
+type socketStreamCaller struct{}
 
-func (caller usocketStreamCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketStreamCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":stream", args, 0, 0)
 	if fd, ok2 := self.Any.(int); ok2 {
@@ -61,6 +61,6 @@ func (caller usocketStreamCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	return nil
 }
 
-func (caller usocketStreamCaller) Docs() string {
-	return clos.MethodDocFromFunc(":stream", "socket-stream", "usocket", "socket")
+func (caller socketStreamCaller) Docs() string {
+	return clos.MethodDocFromFunc(":stream", "socket-stream", "socket", "socket")
 }

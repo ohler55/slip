@@ -47,10 +47,10 @@ func init() {
 					Text: "if true the SOCK CLOEXEC flag is set on the sockets.",
 				},
 			},
-			Return: "usocket, usocket",
-			Text:   `__socket-pair__ returns to connected _usocket_ instances.`,
+			Return: "socket, socket",
+			Text:   `__socket-pair__ returns to connected _socket_ instances.`,
 			Examples: []string{
-				`(socket-pair :unix :stream nil) => #<usocket 1234>, #<usocket 1235>`,
+				`(socket-pair :unix :stream nil) => #<socket 1234>, #<socket 1235>`,
 			},
 		}, &Pkg)
 }
@@ -71,9 +71,9 @@ func (f *SocketPair) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 		proto = getSockArgValue("protocol", args[2], protocolMap)
 	}
 	fds, _ := syscall.Socketpair(domain, typ, proto)
-	sock0 := usocketFlavor.MakeInstance().(*flavors.Instance)
+	sock0 := socketFlavor.MakeInstance().(*flavors.Instance)
 	sock0.Any = fds[0]
-	sock1 := usocketFlavor.MakeInstance().(*flavors.Instance)
+	sock1 := socketFlavor.MakeInstance().(*flavors.Instance)
 	sock1.Any = fds[1]
 	if val, has := slip.GetArgsKeyValue(args[3:], slip.Symbol(":nonblock")); has && val != nil {
 		_ = syscall.SetNonblock(fds[0], true)

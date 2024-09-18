@@ -21,17 +21,17 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "read",
-					Type: "usocket|list-of-usocket",
+					Type: "socket|list-of-socket",
 					Text: "sockets to check ready to read",
 				},
 				{
 					Name: "write",
-					Type: "usocket|list-of-usocket",
+					Type: "socket|list-of-socket",
 					Text: "sockets to check ready to write",
 				},
 				{
 					Name: "error",
-					Type: "usocket|list-of-usocket",
+					Type: "socket|list-of-socket",
 					Text: "sockets to check for errors",
 				},
 				{Name: "&key"},
@@ -45,7 +45,7 @@ func init() {
 			Text: `__socket-select__ waits for read, write, errors, or a timeout.
 Three values, lists of the sockets ready for read, write, or errors is returned.`,
 			Examples: []string{
-				`(socket-select (make-instance 'usocket :socket 5) :timeout 1) => (#<usocket 1234>), nil, nil`,
+				`(socket-select (make-instance 'socket :socket 5) :timeout 1) => (#<socket 1234>), nil, nil`,
 			},
 		}, &Pkg)
 }
@@ -92,7 +92,7 @@ func socketListArg(arg slip.Object, name string) (list slip.List) {
 	case slip.List:
 		list = ta
 	default:
-		slip.PanicType(name, arg, "usocket", "list of usocket")
+		slip.PanicType(name, arg, "socket", "list of socket")
 	}
 	return
 }
@@ -100,12 +100,12 @@ func socketListArg(arg slip.Object, name string) (list slip.List) {
 func setSocketSets(list slip.List, name string) *FdSet {
 	var set FdSet
 	for _, val := range list {
-		if sock, _ := val.(*flavors.Instance); sock.Flavor == usocketFlavor {
+		if sock, _ := val.(*flavors.Instance); sock.Flavor == socketFlavor {
 			if fd, ok := sock.Any.(int); ok {
 				set.Set(fd)
 			}
 		} else {
-			slip.PanicType(name, val, "usocket", "list of sockets")
+			slip.PanicType(name, val, "socket", "list of sockets")
 		}
 	}
 	return &set

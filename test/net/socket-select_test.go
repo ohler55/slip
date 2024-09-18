@@ -25,8 +25,8 @@ func TestSocketSelectBasic(t *testing.T) {
 	scope.Let("fd1", slip.Fixnum(fds[1]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock0 (make-instance 'usocket :socket fd0))
-                       (sock1 (make-instance 'usocket :socket fd1)))
+		Source: `(let ((sock0 (make-instance 'socket :socket fd0))
+                       (sock1 (make-instance 'socket :socket fd1)))
                   (socket-select (list sock0 sock1) (list sock0 sock1) (list sock0 sock1) :timeout 1))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			values := v.(slip.Values)
@@ -59,8 +59,8 @@ func TestSocketSelectOne(t *testing.T) {
 	scope.Let("fd1", slip.Fixnum(fds[1]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock0 (make-instance 'usocket :socket fd0))
-                       (sock1 (make-instance 'usocket :socket fd1)))
+		Source: `(let ((sock0 (make-instance 'socket :socket fd0))
+                       (sock1 (make-instance 'socket :socket fd1)))
                   (socket-select sock0 sock0 sock0 :timeout 1))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			values := v.(slip.Values)
@@ -92,7 +92,7 @@ func TestSocketSelectBadTimeout(t *testing.T) {
 	scope.Let("fd0", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock0 (make-instance 'usocket :socket fd0)))
+		Source: `(let ((sock0 (make-instance 'socket :socket fd0)))
                   (socket-select sock0 sock0 sock0 :timeout t))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)

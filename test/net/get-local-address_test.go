@@ -25,13 +25,13 @@ func TestGetLocalAddressOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (get-local-address sock))`,
 		Expect: `"@"`,
 	}).Test(t)
 }
 
-func TestUsocketLocalAddressOkay(t *testing.T) {
+func TestSocketLocalAddressOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -41,7 +41,7 @@ func TestUsocketLocalAddressOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (send sock :local-address))`,
 		Expect: `"@"`,
 	}).Test(t)
@@ -56,7 +56,7 @@ func TestGetLocalAddressHTTP(t *testing.T) {
 	serv.Config.ConnState = func(nc net.Conn, cs http.ConnState) {
 		if cs == http.StateActive {
 			scope := slip.NewScope()
-			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
+			us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
 			tc, _ := nc.(*net.TCPConn)
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
@@ -77,9 +77,9 @@ func TestGetLocalAddressNotSocket(t *testing.T) {
 	}).Test(t)
 }
 
-func TestUsocketLocalAddressClosed(t *testing.T) {
+func TestSocketLocalAddressClosed(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(send (make-instance 'usocket) :local-address)`,
+		Source: `(send (make-instance 'socket) :local-address)`,
 		Expect: "nil",
 	}).Test(t)
 }

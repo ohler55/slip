@@ -17,7 +17,7 @@ func TestSocketPairBasic(t *testing.T) {
                   (send s0 :close)
                   (send s1 :close)
                   (list s0 s1))`,
-		Expect: `/\(#<usocket [0-9a-f]+> #<usocket [0-9a-f]+>\)/`,
+		Expect: `/\(#<socket [0-9a-f]+> #<socket [0-9a-f]+>\)/`,
 	}).Test(t)
 }
 
@@ -29,7 +29,7 @@ func TestSocketPairNonblock(t *testing.T) {
                   (send s0 :close)
                   (send s1 :close)
                   (list s0 s1))`,
-		Expect: `/\(#<usocket [0-9a-f]+> #<usocket [0-9a-f]+>\)/`,
+		Expect: `/\(#<socket [0-9a-f]+> #<socket [0-9a-f]+>\)/`,
 	}).Test(t)
 }
 

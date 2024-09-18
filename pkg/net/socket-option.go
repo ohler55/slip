@@ -26,7 +26,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to get the option of.",
 				},
 				{
@@ -48,7 +48,7 @@ supported options are:
   :receive-buffer
 `,
 			Examples: []string{
-				`(socket-option (make-instance 'usocket :socket 5) :tcp-keepalive) => t`,
+				`(socket-option (make-instance 'socket :socket 5) :tcp-keepalive) => t`,
 			},
 		}, &Pkg)
 }
@@ -62,8 +62,8 @@ type SocketOption struct {
 func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != usocketFlavor {
-		slip.PanicType("socket", args[0], "usocket")
+	if !ok || self.Flavor != socketFlavor {
+		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
 		result = getSockopt(fd, args[1])
@@ -75,15 +75,15 @@ func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result sl
 func (f *SocketOption) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != usocketFlavor {
-		slip.PanicType("socket", args[0], "usocket")
+	if !ok || self.Flavor != socketFlavor {
+		slip.PanicType("socket", args[0], "socket")
 	}
 	_ = self.Receive(s, ":set-option", slip.List{args[1], value}, 0)
 }
 
-type usocketOptionCaller struct{}
+type socketOptionCaller struct{}
 
-func (caller usocketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":option", args, 1, 1)
 	if fd, ok := self.Any.(int); ok {
@@ -92,13 +92,13 @@ func (caller usocketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 	return
 }
 
-func (caller usocketOptionCaller) Docs() string {
-	return clos.MethodDocFromFunc(":option", "socket-option", "usocket", "socket")
+func (caller socketOptionCaller) Docs() string {
+	return clos.MethodDocFromFunc(":option", "socket-option", "socket", "socket")
 }
 
-type usocketSetOptionCaller struct{}
+type socketSetOptionCaller struct{}
 
-func (caller usocketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":option", args, 2, 2)
 	if fd, ok := self.Any.(int); ok {
@@ -107,8 +107,8 @@ func (caller usocketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return nil
 }
 
-func (caller usocketSetOptionCaller) Docs() string {
-	return clos.MethodDocFromFunc(":set-option", "socket-option", "usocket", "socket")
+func (caller socketSetOptionCaller) Docs() string {
+	return clos.MethodDocFromFunc(":set-option", "socket-option", "socket", "socket")
 }
 
 func getSockopt(fd int, arg slip.Object) (result slip.Object) {

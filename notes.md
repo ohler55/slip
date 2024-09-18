@@ -4,6 +4,55 @@
 
 - next
 
+ - pivot to socket (https://www.sbcl.org/manual/#Networking)
+
+  - rename the peer and local functions
+
+  - options change or leave as is with some additional functions
+  - FdRW should include flags for active or not for R or W, set in shutdown
+  - functions
+   - socket-accept
+   - socket-bind
+   - socket-connect
+   - socket-peername
+   - socket-name and socket-localname
+   - socket-receive
+   - socket-send
+   - socket-listen
+   - socket-open-p
+   - socket-close
+   - socket-shutdown
+   - socket-make-stream
+   - non-blocking-mode
+   - socketopt-reuse-address
+   - socketopt-keep-alive
+   - socketopt-oob-inline
+   - socketopt-bsd-compatible
+   - socketopt-debug - doesn't seem to be a supported option, maybe
+   - socketopt-pass-credentials
+   - socketopt-broadcast
+   - socketopt-tcp-nodelay
+   - make-inet-address (string) => octets
+   - make-inet6-address (string) => octets
+   - parse-address - not in sbcl
+   - get-protocol-by-name (name) => fixnum, name, aliases
+   - get-host-by-name
+   - get-host-by-address
+   - socket-select - not in sbcl
+   - socket-pair - not in sbcl
+   - wait-for-input - not in sbcl
+   - socket-state - not in sbcl
+  - classes (all socket flavors add no additional methods)
+   - inet-socket
+   - inet6-socket
+   - local-socket
+   - local-abstract-socket
+   - host-ent
+  - cl
+   - finish-output
+   - force-output
+   - clear-output
+
  - stream-server branch
   - stream-server-usocket
    - methods

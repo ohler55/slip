@@ -19,7 +19,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to get the peer port of.",
 				},
 			},
@@ -27,7 +27,7 @@ func init() {
 			Text: `__get-peer-port__ returns the port of the _socket_. If the _socket_
 is closed then _nil_ is returned.`,
 			Examples: []string{
-				`(get-peer-port (make-instance 'usocket)) => 8080`,
+				`(get-peer-port (make-instance 'socket)) => 8080`,
 			},
 		}, &Pkg)
 }
@@ -41,23 +41,23 @@ type GetPeerPort struct {
 func (f *GetPeerPort) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != usocketFlavor {
-		slip.PanicType("socket", args[0], "usocket")
+	if !ok || self.Flavor != socketFlavor {
+		slip.PanicType("socket", args[0], "socket")
 	}
 	if self.Any != nil {
-		_, port := usocketPeerName(self)
+		_, port := socketPeerName(self)
 		result = port
 	}
 	return
 }
 
-type usocketPeerPortCaller struct{}
+type socketPeerPortCaller struct{}
 
-func (caller usocketPeerPortCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketPeerPortCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":peer-port", args, 0, 0)
 	if self.Any != nil {
-		_, port := usocketPeerName(self)
+		_, port := socketPeerName(self)
 		result = port
 	}
 	return

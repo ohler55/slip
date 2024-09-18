@@ -20,14 +20,14 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to return the state of.",
 				},
 			},
 			Return: "nil|:read-write|:read|:write",
-			Text:   `__socket-state__ returns the state of a _usocket_ instance.`,
+			Text:   `__socket-state__ returns the state of a _socket_ instance.`,
 			Examples: []string{
-				`(socket-state (make-instance 'usocket)) => nil`,
+				`(socket-state (make-instance 'socket)) => nil`,
 			},
 		}, &Pkg)
 }
@@ -46,16 +46,16 @@ func (f *SocketState) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	return
 }
 
-type usocketStateCaller struct{}
+type socketStateCaller struct{}
 
-func (caller usocketStateCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketStateCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.ArgCountCheck(self, args, 0, 0)
 	return socketState(self)
 }
 
-func (caller usocketStateCaller) Docs() string {
-	return clos.MethodDocFromFunc(":state", "socket-state", "usocket", "socket")
+func (caller socketStateCaller) Docs() string {
+	return clos.MethodDocFromFunc(":state", "socket-state", "socket", "socket")
 }
 
 func socketState(self *flavors.Instance) (result slip.Object) {
