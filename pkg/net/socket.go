@@ -26,7 +26,8 @@ func defSocket() {
 			},
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A socket wrapper.`),
+				slip.String(`A socket wrapper what includes read and write indicators to facilitate
+shutting down read and write on the socket.`),
 			},
 		},
 		&Pkg,
@@ -36,9 +37,10 @@ func defSocket() {
 	socketFlavor.DefMethod(":set-socket", "", socketSetSocketCaller{})
 	socketFlavor.DefMethod(":state", "", socketStateCaller{})
 	socketFlavor.DefMethod(":close", "", socketCloseCaller{})
-	socketFlavor.DefMethod(":local-address", "", socketLocalAddressCaller{})
-	socketFlavor.DefMethod(":local-name", "", socketLocalNameCaller{})
-	socketFlavor.DefMethod(":local-port", "", socketLocalPortCaller{})
+	socketFlavor.DefMethod(":open-p", "", socketOpenpCaller{})
+	socketFlavor.DefMethod(":address", "", socketAddressCaller{})
+	socketFlavor.DefMethod(":name", "", socketNameCaller{})
+	socketFlavor.DefMethod(":port", "", socketPortCaller{})
 	socketFlavor.DefMethod(":peer-address", "", socketPeerAddressCaller{})
 	socketFlavor.DefMethod(":peer-name", "", socketPeerNameCaller{})
 	socketFlavor.DefMethod(":peer-port", "", socketPeerPortCaller{})

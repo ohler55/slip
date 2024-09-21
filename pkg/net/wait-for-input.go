@@ -79,7 +79,7 @@ func (f *WaitForInput) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	}
 	var rset FdSet
 	for _, val := range sockets {
-		if sock, ok := val.(*flavors.Instance); ok && sock.Flavor == socketFlavor {
+		if sock, ok := val.(*flavors.Instance); ok && sock.IsA(socketFlavor) {
 			if fd, ok2 := sock.Any.(int); ok2 {
 				rset.Set(fd)
 			}

@@ -10,12 +10,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := GetLocalAddress{Function: slip.Function{Name: "get-local-address", Args: args}}
+			f := SocketAddress{Function: slip.Function{Name: "socket-address", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "get-local-address",
+			Name: "socket-address",
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
@@ -24,21 +24,21 @@ func init() {
 				},
 			},
 			Return: "octets|string",
-			Text: `__get-local-address__ returns the address of the _socket_. If the _socket_
+			Text: `__socket-address__ returns the address of the _socket_. If the _socket_
 is closed then _nil_ is returned.`,
 			Examples: []string{
-				`(get-local-address (make-instance 'socket :socket 5)) => #(127 0 0 1)`,
+				`(socket-address (make-instance 'socket :socket 5)) => #(127 0 0 1)`,
 			},
 		}, &Pkg)
 }
 
-// GetLocalAddress represents the get-local-address function.
-type GetLocalAddress struct {
+// SocketAddress represents the socket-address function.
+type SocketAddress struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *GetLocalAddress) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *SocketAddress) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Flavor != socketFlavor {
@@ -51,11 +51,11 @@ func (f *GetLocalAddress) Call(s *slip.Scope, args slip.List, depth int) (result
 	return
 }
 
-type socketLocalAddressCaller struct{}
+type socketAddressCaller struct{}
 
-func (caller socketLocalAddressCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketAddressCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":local-address", args, 0, 0)
+	slip.SendArgCountCheck(self, ":address", args, 0, 0)
 	if self.Any != nil {
 		addr, _ := socketLocalName(self)
 		result = addr

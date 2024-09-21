@@ -8,24 +8,33 @@
 
   - rename the peer and local functions
 
-  - options change or leave as is with some additional functions
-  - FdRW should include flags for active or not for R or W, set in shutdown
   - functions
    + socket-p - not in sbcl
    + make-socket - not in sbcl
    + socket-pair - not in sbcl
+   + socket-close
+   + socket-state - not in sbcl
+   + socket-select - not in sbcl
+   + wait-for-input - not in sbcl
+   + parse-address - not in sbcl
+   + socket-stream - not in sbcl
+   + socket-open-p
+   + socket-name
+   + socket-address - not in sbcl
+   + socket-port - not in sbcl
+   + socket-peername
+   + socket-peer-address - not in sbcl
+   + socket-peer-port - not in sbcl
    - socket-receive (datagram)
    - socket-send
+
+   - socket-make-stream
+    - use sockopts for timeouts and others
    - socket-accept
    - socket-bind
    - socket-connect
-   - socket-peername
-   - socket-name and socket-localname
    - socket-listen
-   - socket-open-p
-   - socket-close
-   - socket-shutdown
-   - socket-make-stream
+   - socket-shutdown - use syscall.Shutdown with how of SHUT_RD, SHUT_WR, or SHUT_RDWR
    - non-blocking-mode
    - socketopt-reuse-address
    - socketopt-keep-alive
@@ -37,13 +46,9 @@
    - socketopt-tcp-nodelay
    - make-inet-address (string) => octets
    - make-inet6-address (string) => octets
-   - parse-address - not in sbcl
    - get-protocol-by-name (name) => fixnum, name, aliases
    - get-host-by-name
    - get-host-by-address
-   - socket-select - not in sbcl
-   - wait-for-input - not in sbcl
-   - socket-state - not in sbcl
   - classes (all socket flavors add no additional methods)
    - inet-socket
    - inet6-socket

@@ -17,7 +17,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestGetPeerPortOkay(t *testing.T) {
+func TestSocketPeerPortOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -28,12 +28,12 @@ func TestGetPeerPortOkay(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'socket :socket ufd)))
-                  (get-peer-port sock))`,
+                  (socket-peer-port sock))`,
 		Expect: "0",
 	}).Test(t)
 }
 
-func TestSocketPeerPortOkay(t *testing.T) {
+func TestSocketSendPeerPortOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -49,7 +49,7 @@ func TestSocketPeerPortOkay(t *testing.T) {
 	}).Test(t)
 }
 
-func TestGetPeerPortHTTP(t *testing.T) {
+func TestSocketPeerPortHTTP(t *testing.T) {
 	serv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("okay"))
 	}))
@@ -76,9 +76,9 @@ func TestGetPeerPortHTTP(t *testing.T) {
 	}
 }
 
-func TestGetPeerPortNotSocket(t *testing.T) {
+func TestSocketPeerPortNotSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(get-peer-port t)`,
+		Source:    `(socket-peer-port t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

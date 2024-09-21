@@ -10,12 +10,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := GetPeerAddress{Function: slip.Function{Name: "get-peer-address", Args: args}}
+			f := SocketPeerAddress{Function: slip.Function{Name: "socket-peer-address", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "get-peer-address",
+			Name: "socket-peer-address",
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
@@ -24,21 +24,21 @@ func init() {
 				},
 			},
 			Return: "octets|string",
-			Text: `__get-peer-address__ returns the address of the _socket_. If the _socket_
+			Text: `__socket-peer-address__ returns the address of the _socket_. If the _socket_
 is closed then _nil_ is returned.`,
 			Examples: []string{
-				`(get-peer-address (make-instance 'socket :socket 5)) => #(127 0 0 1)`,
+				`(socket-peer-address (make-instance 'socket :socket 5)) => #(127 0 0 1)`,
 			},
 		}, &Pkg)
 }
 
-// GetPeerAddress represents the get-peer-address function.
-type GetPeerAddress struct {
+// SocketPeerAddress represents the socket-peer-address function.
+type SocketPeerAddress struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *GetPeerAddress) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *SocketPeerAddress) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Flavor != socketFlavor {

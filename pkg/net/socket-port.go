@@ -10,54 +10,54 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := GetPeerPort{Function: slip.Function{Name: "get-peer-port", Args: args}}
+			f := SocketPort{Function: slip.Function{Name: "socket-port", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "get-peer-port",
+			Name: "socket-port",
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
 					Type: "socket",
-					Text: "to get the peer port of.",
+					Text: "to get the local port of.",
 				},
 			},
 			Return: "fixnum",
-			Text: `__get-peer-port__ returns the port of the _socket_. If the _socket_
-is closed then _nil_ is returned.`,
+			Text: `__socket-port__ returns the port of the _socket_. If the _socket_
+is closed then _nil_ is returned..`,
 			Examples: []string{
-				`(get-peer-port (make-instance 'socket)) => 8080`,
+				`(socket-port (make-instance 'socket :socket 5)) => 8080`,
 			},
 		}, &Pkg)
 }
 
-// GetPeerPort represents the get-peer-port function.
-type GetPeerPort struct {
+// SocketPort represents the socket-port function.
+type SocketPort struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *GetPeerPort) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *SocketPort) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Flavor != socketFlavor {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	if self.Any != nil {
-		_, port := socketPeerName(self)
+		_, port := socketLocalName(self)
 		result = port
 	}
 	return
 }
 
-type socketPeerPortCaller struct{}
+type socketPortCaller struct{}
 
-func (caller socketPeerPortCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketPortCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":peer-port", args, 0, 0)
+	slip.SendArgCountCheck(self, ":port", args, 0, 0)
 	if self.Any != nil {
-		_, port := socketPeerName(self)
+		_, port := socketLocalName(self)
 		result = port
 	}
 	return

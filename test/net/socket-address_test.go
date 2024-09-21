@@ -15,7 +15,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestGetPeerAddressOkay(t *testing.T) {
+func TestSocketAddressOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -26,12 +26,12 @@ func TestGetPeerAddressOkay(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'socket :socket ufd)))
-                  (get-peer-address sock))`,
+                  (socket-address sock))`,
 		Expect: `"@"`,
 	}).Test(t)
 }
 
-func TestSocketPeerAddressOkay(t *testing.T) {
+func TestSocketSendAddressOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -42,12 +42,12 @@ func TestSocketPeerAddressOkay(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'socket :socket ufd)))
-                  (send sock :peer-address))`,
+                  (send sock :address))`,
 		Expect: `"@"`,
 	}).Test(t)
 }
 
-func TestGetPeerAddressHTTP(t *testing.T) {
+func TestSocketAddressHTTP(t *testing.T) {
 	serv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("okay"))
 	}))
@@ -61,7 +61,7 @@ func TestGetPeerAddressHTTP(t *testing.T) {
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
-			result := slip.ReadString("(send sock :peer-address)").Eval(scope, nil).(slip.Octets)
+			result := slip.ReadString("(send sock :address)").Eval(scope, nil).(slip.Octets)
 			tt.Equal(t, slip.Octets{127, 0, 0, 1}, result)
 		}
 	}
@@ -70,16 +70,16 @@ func TestGetPeerAddressHTTP(t *testing.T) {
 	}
 }
 
-func TestGetPeerAddressNotSocket(t *testing.T) {
+func TestSocketAddressNotSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(get-peer-address t)`,
+		Source:    `(socket-address t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
-func TestSocketPeerAddressClosed(t *testing.T) {
+func TestSocketLocalAddressClosed(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(send (make-instance 'socket) :peer-address)`,
+		Source: `(send (make-instance 'socket) :address)`,
 		Expect: "nil",
 	}).Test(t)
 }

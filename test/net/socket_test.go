@@ -108,15 +108,16 @@ func TestSocketDocs(t *testing.T) {
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
 	for _, method := range []string{
+		":address",
 		":close",
 		":init",
-		":local-address",
-		":local-name",
-		":local-port",
+		":name",
+		":open-p",
 		":option",
 		":peer-address",
 		":peer-name",
 		":peer-port",
+		":port",
 		":receive",
 		":send",
 		":set-option",

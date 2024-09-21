@@ -13,12 +13,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := GetPeerName{Function: slip.Function{Name: "get-peer-name", Args: args}}
+			f := SocketPeerName{Function: slip.Function{Name: "socket-peername", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "get-peer-name",
+			Name: "socket-peername",
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
@@ -30,18 +30,18 @@ func init() {
 			Text: `__get-local-name__ returns the address as octets and the port of the _socket_.
 If the _socket_ is closed then _nil_,_nil_ is returned.`,
 			Examples: []string{
-				`(get-peer-name (make-instance 'socket :socket 5)) => #(127 0 0 1), 1234`,
+				`(socket-peername (make-instance 'socket :socket 5)) => #(127 0 0 1), 1234`,
 			},
 		}, &Pkg)
 }
 
-// GetPeerName represents the get-peer-name function.
-type GetPeerName struct {
+// SocketName represents the socket-peername function.
+type SocketPeerName struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *GetPeerName) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *SocketPeerName) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || self.Flavor != socketFlavor {
@@ -71,7 +71,7 @@ func (caller socketPeerNameCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 }
 
 func (caller socketPeerNameCaller) Docs() string {
-	return clos.MethodDocFromFunc(":peer-name", "get-peer-name", "socket", "socket")
+	return clos.MethodDocFromFunc(":peer-name", "socket-peername", "socket", "socket")
 }
 
 func socketPeerName(self *flavors.Instance) (address slip.Object, port slip.Fixnum) {
