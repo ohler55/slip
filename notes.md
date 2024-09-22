@@ -31,7 +31,6 @@
    + socketopt-reuse-address
    - socketopt-keep-alive
    - socketopt-oob-inline
-   - socketopt-debug
    - socketopt-broadcast
    - socketopt-tcp-nodelay
 

@@ -37,7 +37,6 @@ func init() {
 			Text: `__socket-option__ returns the value of the option on the _socket_ instance. The
 supported options are:
   :broadcast
-  :debug
   :receive-buffer
   :receive-timeout
   :reuse-address
@@ -148,15 +147,9 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 	case slip.Symbol(":receive-buffer"): // SO_RCVBUF
 		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_RCVBUF)
 		result = slip.Fixnum(val)
-	case slip.Symbol(":debug"): // SO_DEBUG
-		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_DEBUG)
-		if val != 0 {
-			result = slip.True
-		}
 	default:
 		slip.PanicType("option", arg,
 			":broadcast",
-			":debug",
 			":receive-buffer",
 			":receive-timeout",
 			":reuse-address",
@@ -191,12 +184,9 @@ func setSockopt(fd int, opt, val slip.Object) {
 		err = setSockoptTime(fd, syscall.SO_RCVTIMEO, val)
 	case slip.Symbol(":receive-buffer"): // SO_RCVBUF
 		err = setSockoptInt(fd, syscall.SO_RCVBUF, val)
-	case slip.Symbol(":debug"): // SO_DEBUG
-		err = setSockoptBool(fd, syscall.SO_DEBUG, val)
 	default:
 		slip.PanicType("option", opt,
 			":broadcast",
-			":debug",
 			":receive-buffer",
 			":receive-timeout",
 			":reuse-address",
