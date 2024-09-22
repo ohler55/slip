@@ -13,8 +13,6 @@ import (
 )
 
 func init() {
-	// TBD form Text from  options
-	//   keyword, doc, type? (or just use the arg
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketOption{Function: slip.Function{Name: "socket-option", Args: args}}
@@ -38,14 +36,15 @@ func init() {
 			Return: "fixnum|boolean",
 			Text: `__socket-option__ returns the value of the option on the _socket_ instance. The
 supported options are:
+  :broadcast
+  :debug
+  :receive-buffer
+  :receive-timeout
+  :reuse-address
+  :send-buffer
+  :send-timeout
   :tcp-keepalive
   :tcp-nodelay
-  :broadcast
-  :reuse-address
-  :send-timeout
-  :send-buffer
-  :receive-timeout
-  :receive-buffer
 `,
 			Examples: []string{
 				`(socket-option (make-instance 'socket :socket 5) :tcp-keepalive) => t`,
@@ -62,7 +61,7 @@ type SocketOption struct {
 func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != socketFlavor {
+	if !ok || !self.IsA(socketFlavor) {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
@@ -75,7 +74,7 @@ func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result sl
 func (f *SocketOption) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != socketFlavor {
+	if !ok || !self.IsA(socketFlavor) {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	_ = self.Receive(s, ":set-option", slip.List{args[1], value}, 0)
@@ -149,16 +148,22 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 	case slip.Symbol(":receive-buffer"): // SO_RCVBUF
 		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_RCVBUF)
 		result = slip.Fixnum(val)
+	case slip.Symbol(":debug"): // SO_DEBUG
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_DEBUG)
+		if val != 0 {
+			result = slip.True
+		}
 	default:
 		slip.PanicType("option", arg,
+			":broadcast",
+			":debug",
+			":receive-buffer",
+			":receive-timeout",
+			":reuse-address",
+			":send-buffer",
+			":send-timeout",
 			":tcp-keepalive",
 			":tcp-nodelay",
-			":broadcast",
-			":reuse-address",
-			":send-timeout",
-			":send-buffer",
-			":receive-timeout",
-			":receive-buffer",
 		)
 	}
 	if err != nil {
@@ -186,16 +191,19 @@ func setSockopt(fd int, opt, val slip.Object) {
 		err = setSockoptTime(fd, syscall.SO_RCVTIMEO, val)
 	case slip.Symbol(":receive-buffer"): // SO_RCVBUF
 		err = setSockoptInt(fd, syscall.SO_RCVBUF, val)
+	case slip.Symbol(":debug"): // SO_DEBUG
+		err = setSockoptBool(fd, syscall.SO_DEBUG, val)
 	default:
 		slip.PanicType("option", opt,
+			":broadcast",
+			":debug",
+			":receive-buffer",
+			":receive-timeout",
+			":reuse-address",
+			":send-buffer",
+			":send-timeout",
 			":tcp-keepalive",
 			":tcp-nodelay",
-			":broadcast",
-			":reuse-address",
-			":send-timeout",
-			":send-buffer",
-			":receive-timeout",
-			":receive-buffer",
 		)
 	}
 	if err != nil {

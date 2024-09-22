@@ -23,14 +23,15 @@ func TestSocketOptionDefaults(t *testing.T) {
 		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (list
                    (socket-option sock :tcp-keepalive)
-                   ;; (socket-option sock :tcp-nodelay)
+                   (socket-option sock :tcp-nodelay)
                    (socket-option sock :broadcast)
                    (socket-option sock :reuse-address)
+                   (socket-option sock :debug)
                    (socket-option sock :send-timeout)
                    (socket-option sock :send-buffer)
                    (socket-option sock :receive-timeout)
                    (socket-option sock :receive-buffer)))`,
-		Expect: `/^\(nil nil nil 0 [0-9]+ 0 [0-9]+\)$/`,
+		Expect: `/^\(nil nil nil nil nil 0 [0-9]+ 0 [0-9]+\)$/`,
 	}).Test(t)
 }
 
@@ -78,8 +79,8 @@ func TestSocketOptionSetf(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'socket :socket ufd)))
-                  (setf (socket-option sock :tcp-keepalive) t)
-                  (socket-option sock :tcp-keepalive))`,
+                  (setf (socket-option sock :debug) t)
+                  (socket-option sock :debug))`,
 		Expect: "t",
 	}).Test(t)
 }

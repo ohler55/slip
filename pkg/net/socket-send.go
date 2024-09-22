@@ -51,23 +51,40 @@ one byte can be written.`,
 				},
 				// TBD address which is list of host and port) instead
 				{
-					Name: "host",
-					Type: "string|fixnum|list",
-					Text: "the host to send to if a datagram socket.",
+					Name: "address",
+					Type: "list",
+					Text: "the host and port to send to if a datagram socket.",
 				},
 				{
-					Name: "port",
-					Type: "fixnum",
-					Text: "the port to send to if a datagram socket.",
+					Name: "oob",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_OOB flag is set.",
 				},
-				// TBD x external-format - if provided must be utf-8
-				// TBD oob - only for datagram
-				// TBD eor
-				// TBD donotroute - maybe
-				// TBD dontwait - same as timeout of 0 or maybe datagram (sendmsg) flag
-				// TBD nosignal
-				// TBD confirm
-				// TBD x more
+				{
+					Name: "eor",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_EOR flag is set.",
+				},
+				{
+					Name: "dontwait",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_DONTWAIT flag is set.",
+				},
+				{
+					Name: "donotroute",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_DONTROUTE flag is set.",
+				},
+				{
+					Name: "nosignal",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_NOSIGNAL flag is set.",
+				},
+				{
+					Name: "confirm",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_CONFIRM flag is set.",
+				},
 			},
 			Return: "octets, fixnum, string, fixnum", // TBD just number of octets written
 			Text: `__socket-send__ writes to the _socket_ and returns four values;
@@ -147,7 +164,6 @@ func socketSend(fd int, args slip.List) int {
 				}
 			}
 		}
-		// TBD host, port for datagrams
 	}
 	if length < len(buf) {
 		buf = buf[:length]
@@ -167,9 +183,26 @@ func socketSend(fd int, args slip.List) int {
 			slip.NewPanic("write timed out")
 		}
 	}
-	cnt, err := syscall.Write(fd, buf)
+	typ, err := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_TYPE)
 	if err != nil {
 		panic(err)
 	}
+	var cnt int
+	if typ == syscall.SOCK_DGRAM {
+		cnt = datagramSend(fd, buf, args)
+	} else {
+		cnt, err = syscall.Write(fd, buf)
+		if err != nil {
+			panic(err)
+		}
+	}
 	return cnt
+}
+
+func datagramSend(fd int, buf []byte, args slip.List) int {
+
+	// TBD
+	// Sockaddr.Sendmsg()
+
+	return 0
 }

@@ -26,7 +26,14 @@
    + socket-peer-address - not in sbcl
    + socket-peer-port - not in sbcl
    - socket-receive (datagram)
-   - socket-send
+   - socket-send (datagram)
+   + socket-option
+   + socketopt-reuse-address
+   - socketopt-keep-alive
+   - socketopt-oob-inline
+   - socketopt-debug
+   - socketopt-broadcast
+   - socketopt-tcp-nodelay
 
    - socket-make-stream
     - use sockopts for timeouts and others
@@ -36,14 +43,6 @@
    - socket-listen
    - socket-shutdown - use syscall.Shutdown with how of SHUT_RD, SHUT_WR, or SHUT_RDWR
    - non-blocking-mode
-   - socketopt-reuse-address
-   - socketopt-keep-alive
-   - socketopt-oob-inline
-   - socketopt-bsd-compatible
-   - socketopt-debug - doesn't seem to be a supported option, maybe
-   - socketopt-pass-credentials
-   - socketopt-broadcast
-   - socketopt-tcp-nodelay
    - make-inet-address (string) => octets
    - make-inet6-address (string) => octets
    - get-protocol-by-name (name) => fixnum, name, aliases

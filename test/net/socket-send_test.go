@@ -152,3 +152,12 @@ func TestSocketSendTimeout(t *testing.T) {
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
+
+func TestSocketSendBadFd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((sock (make-instance 'socket :socket 777))
+                       (buf (make-array 8 :element-type 'octet)))
+                  (socket-send sock "hello"))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
