@@ -33,6 +33,7 @@
    + sockopt-oob-inline
    + sockopt-broadcast
    + sockopt-tcp-nodelay
+   - sockopt-debug
 
    - socket-make-stream
     - use sockopts for timeouts and others
