@@ -28,11 +28,11 @@
    - socket-receive (datagram)
    - socket-send (datagram)
    + socket-option
-   + socketopt-reuse-address
-   - socketopt-keep-alive
-   - socketopt-oob-inline
-   - socketopt-broadcast
-   - socketopt-tcp-nodelay
+   + sockopt-reuse-address
+   + sockopt-keep-alive
+   + sockopt-oob-inline
+   + sockopt-broadcast
+   + sockopt-tcp-nodelay
 
    - socket-make-stream
     - use sockopts for timeouts and others

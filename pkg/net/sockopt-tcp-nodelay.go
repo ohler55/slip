@@ -12,12 +12,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := SocketReuseAddress{Function: slip.Function{Name: "socket-reuse-address", Args: args}}
+			f := SockoptTcpNodelay{Function: slip.Function{Name: "sockopt-tcp-nodelay", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "socket-reuse-address",
+			Name: "sockopt-tcp-nodelay",
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
@@ -26,27 +26,27 @@ func init() {
 				},
 			},
 			Return: "fixnum|boolean",
-			Text:   `__socket-reuse-address__ returns the :reuse-address on the _socket_ instance.`,
+			Text:   `__sockopt-tcp-nodelay__ returns the :keep-alive on the _socket_ instance.`,
 			Examples: []string{
-				`(socket-reuse-address (make-instance 'socket :socket 5)) => nil`,
+				`(sockopt-tcp-nodelay (make-instance 'socket :socket 5)) => nil`,
 			},
 		}, &Pkg)
 }
 
-// SocketReuseAddress represents the socket-reuse-address function.
-type SocketReuseAddress struct {
+// SockoptTcpNodelay represents the sockopt-tcp-nodelay function.
+type SockoptTcpNodelay struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *SocketReuseAddress) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *SockoptTcpNodelay) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA(socketFlavor) {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
-		if val, _ := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_REUSEADDR); val != 0 {
+		if val, _ := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.TCP_NODELAY); val != 0 {
 			result = slip.True
 		}
 	}
@@ -54,14 +54,14 @@ func (f *SocketReuseAddress) Call(s *slip.Scope, args slip.List, depth int) (res
 }
 
 // Place a value in an option using the :set-option method.
-func (f *SocketReuseAddress) Place(s *slip.Scope, args slip.List, value slip.Object) {
+func (f *SockoptTcpNodelay) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA(socketFlavor) {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
-		if err := setSockoptBool(fd, syscall.SO_REUSEADDR, value); err != nil {
+		if err := setSockoptBool(fd, syscall.TCP_NODELAY, value); err != nil {
 			panic(err)
 		}
 	}

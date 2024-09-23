@@ -10,7 +10,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestSocketReuseAddressGet(t *testing.T) {
+func TestSockoptOobInlineGet(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -21,12 +21,12 @@ func TestSocketReuseAddressGet(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'socket :socket ufd)))
-                   (socket-reuse-address sock))`,
+                   (sockopt-oob-inline sock))`,
 		Expect: "nil",
 	}).Test(t)
 }
 
-func TestSocketReuseAddressSetf(t *testing.T) {
+func TestSockoptOobInlineSetf(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -37,29 +37,29 @@ func TestSocketReuseAddressSetf(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'socket :socket ufd)))
-                   (setf (socket-reuse-address sock) t)
-                   (socket-reuse-address sock))`,
+                   (setf (sockopt-oob-inline sock) t)
+                   (sockopt-oob-inline sock))`,
 		Expect: "t",
 	}).Test(t)
 }
 
-func TestSocketReuseAddressNotSocket(t *testing.T) {
+func TestSockoptOobInlineNotSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(socket-reuse-address (make-instance 'vanilla-flavor))`,
+		Source:    `(sockopt-oob-inline (make-instance 'vanilla-flavor))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
-func TestSocketReuseAddressSetfNotSocket(t *testing.T) {
+func TestSockoptOobInlineSetfNotSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(setf (socket-reuse-address (make-instance 'vanilla-flavor)) t)`,
+		Source:    `(setf (sockopt-oob-inline (make-instance 'vanilla-flavor)) t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
-func TestSocketReuseAddressSetfBadSocket(t *testing.T) {
+func TestSockoptOobInlineSetfBadSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(setf (socket-reuse-address (make-instance 'socket :socket 7777)) t)`,
+		Source:    `(setf (sockopt-oob-inline (make-instance 'socket :socket 7777)) t)`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
