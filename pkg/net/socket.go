@@ -47,6 +47,7 @@ shutting down read and write on the socket.`),
 	socketFlavor.DefMethod(":send", "", socketSendCaller{})
 	socketFlavor.DefMethod(":receive", "", socketReceiveCaller{})
 	socketFlavor.DefMethod(":stream", "", socketStreamCaller{})
+	socketFlavor.DefMethod(":make-stream", "", socketMakeStreamCaller{})
 	socketFlavor.DefMethod(":option", "", socketOptionCaller{})
 	socketFlavor.DefMethod(":set-option", "", socketSetOptionCaller{})
 	socketFlavor.DefMethod(":type", "", socketTypeCaller{})

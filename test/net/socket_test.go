@@ -111,6 +111,7 @@ func TestSocketDocs(t *testing.T) {
 		":address",
 		":close",
 		":init",
+		":make-stream",
 		":name",
 		":open-p",
 		":option",

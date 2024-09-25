@@ -6,8 +6,6 @@
 
  - pivot to socket (https://www.sbcl.org/manual/#Networking)
 
-  - rename the peer and local functions
-
   - functions
    + socket-p - not in sbcl
    + make-socket - not in sbcl
@@ -34,14 +32,15 @@
    + sockopt-broadcast
    + sockopt-tcp-nodelay
    + sockopt-debug
+   + socket-make-stream
 
-   - socket-make-stream
-    - use sockopts for timeouts and others
+   - socket-shutdown - use syscall.Shutdown with how of SHUT_RD, SHUT_WR, or SHUT_RDWR
+    - attempt read or write and show panic
+
    - socket-accept
    - socket-bind
    - socket-connect
    - socket-listen
-   - socket-shutdown - use syscall.Shutdown with how of SHUT_RD, SHUT_WR, or SHUT_RDWR
    - non-blocking-mode
    - make-inet-address (string) => octets
    - make-inet6-address (string) => octets
