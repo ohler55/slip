@@ -109,6 +109,7 @@ func TestSocketDocs(t *testing.T) {
 
 	for _, method := range []string{
 		":address",
+		":bind",
 		":close",
 		":init",
 		":make-stream",
@@ -123,6 +124,7 @@ func TestSocketDocs(t *testing.T) {
 		":send",
 		":set-option",
 		":set-socket",
+		":shutdown",
 		":socket",
 		":state",
 		":stream",

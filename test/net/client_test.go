@@ -5,7 +5,6 @@ package net_test
 import (
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"strings"
 	"testing"
@@ -15,20 +14,6 @@ import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
-
-func availablePort() int {
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
-	if err != nil {
-		panic(err)
-	}
-	var listener *net.TCPListener
-	if listener, err = net.ListenTCP("tcp", addr); err != nil {
-		panic(err)
-	}
-	defer listener.Close()
-
-	return listener.Addr().(*net.TCPAddr).Port
-}
 
 func TestClientGet(t *testing.T) {
 	port := availablePort()

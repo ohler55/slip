@@ -15,6 +15,8 @@
    + socket-select - not in sbcl
    + wait-for-input - not in sbcl
    + parse-address - not in sbcl
+   + make-inet-address
+   + make-inet6-address
    + socket-stream - not in sbcl
    + socket-open-p
    + socket-name
@@ -33,30 +35,42 @@
    + sockopt-tcp-nodelay
    + sockopt-debug
    + socket-make-stream
+   + socket-shutdown
+   + socket-bind
 
-   - socket-shutdown - use syscall.Shutdown with how of SHUT_RD, SHUT_WR, or SHUT_RDWR
-    - attempt read or write and show panic
+   - socket-listen (socket backlog)
+    - backlog is max number of pending connection
+   - socket-accept (socket) => socket
+   - socket-connect (socket &rest address)
+   - socket testing
+    - server
+     - make-socket
+     - bind
+     - listen
+     - accept (loop or just one for testing)
+     - receive/send
+    - client
+     - make-socket
+     - connect
+     - send/receive
 
-   - socket-accept
-   - socket-bind
-   - socket-connect
-   - socket-listen
-   - non-blocking-mode
-   - make-inet-address (string) => octets
-   - make-inet6-address (string) => octets
-   - get-protocol-by-name (name) => fixnum, name, aliases
-   - get-host-by-name
-   - get-host-by-address
-  - classes (all socket flavors add no additional methods)
+  - classes (all socket flavors add no additional methods) (are they really needed?)
    - inet-socket
    - inet6-socket
    - local-socket
    - local-abstract-socket
-   - host-ent
   - cl
    - finish-output
    - force-output
    - clear-output
+
+ - name service branch
+  - host-ent class
+  - get-protocol-by-name (name) => fixnum, name, aliases
+  - get-host-by-name
+  - get-host-by-address
+
+
 
  - stream-server branch
   - stream-server-usocket

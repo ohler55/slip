@@ -25,7 +25,7 @@ func init() {
 				},
 			},
 			Return: "nil|",
-			Text:   `__socket-stream__ returns a stream of the _socket_ instance.`,
+			Text:   `__socket-stream__ returns a bi-directional stream of the _socket_ instance.`,
 			Examples: []string{
 				`(socket-stream (make-instance 'socket)) => #<IO-STREAM>`,
 			},
