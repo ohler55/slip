@@ -3,6 +3,7 @@
 package net_test
 
 import (
+	"runtime"
 	"syscall"
 	"testing"
 
@@ -12,6 +13,9 @@ import (
 )
 
 func TestSocketShutdownInput(t *testing.T) {
+	if runtime.GOOS == "linux" {
+		t.Skip()
+	}
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])

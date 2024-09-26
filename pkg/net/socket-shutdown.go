@@ -34,7 +34,8 @@ func init() {
 			},
 			Return: "nil",
 			Text: `__socket-shutdown__ shuts down the specified direction on the _socket_ instance.
-If no direction is specified then no change is made to the _socket_.`,
+If no direction is specified then no change is made to the _socket_. On some platforms such as linux
+the shutdown will not actually block the reading or writing.`,
 			Examples: []string{
 				`(socket-shutdown (make-instance 'socket :socket 5) :direction :input) => nil`,
 			},
