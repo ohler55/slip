@@ -97,7 +97,7 @@ func TestSocketBindNoInit(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSocketBindBindError(t *testing.T) {
+func TestSocketBindError(t *testing.T) {
 	defer func() { _ = syscall.Unlink("quux") }()
 	(&sliptest.Function{
 		Source: `(let ((sock (make-socket :domain :inet :type :stream)))

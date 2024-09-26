@@ -37,11 +37,13 @@
    + socket-make-stream
    + socket-shutdown
    + socket-bind
+   + socket-listen
 
-   - socket-listen (socket backlog)
-    - backlog is max number of pending connection
    - socket-accept (socket) => socket
+    - connect in go from go routine and make request then read reply before returning
+     - sockopt-reuse-address
    - socket-connect (socket &rest address)
+    - args are like socket-bind
    - socket testing
     - server
      - make-socket

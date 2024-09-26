@@ -33,9 +33,11 @@ shutting down read and write on the socket.`),
 		&Pkg,
 	)
 	socketFlavor.DefMethod(":init", "", socketInitCaller{})
+	socketFlavor.DefMethod(":accept", "", socketAcceptCaller{})
 	socketFlavor.DefMethod(":address", "", socketAddressCaller{})
 	socketFlavor.DefMethod(":bind", "", socketBindCaller{})
 	socketFlavor.DefMethod(":close", "", socketCloseCaller{})
+	socketFlavor.DefMethod(":listen", "", socketListenCaller{})
 	socketFlavor.DefMethod(":make-stream", "", socketMakeStreamCaller{})
 	socketFlavor.DefMethod(":name", "", socketNameCaller{})
 	socketFlavor.DefMethod(":open-p", "", socketOpenpCaller{})

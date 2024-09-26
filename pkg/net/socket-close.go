@@ -26,7 +26,7 @@ func init() {
 					Text: "to close.",
 				},
 			},
-			Return: "nil|",
+			Return: "nil",
 			Text:   `__socket-close__ closes the _socket_ instance.`,
 			Examples: []string{
 				`(socket-close (make-instance 'socket)) => nil`,

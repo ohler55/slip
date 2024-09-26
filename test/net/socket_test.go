@@ -112,6 +112,7 @@ func TestSocketDocs(t *testing.T) {
 		":bind",
 		":close",
 		":init",
+		":listen",
 		":make-stream",
 		":name",
 		":open-p",
