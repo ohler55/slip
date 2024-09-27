@@ -38,23 +38,10 @@
    + socket-shutdown
    + socket-bind
    + socket-listen
+   + socket-accept
 
-   - socket-accept (socket) => socket
-    - connect in go from go routine and make request then read reply before returning
-     - sockopt-reuse-address
    - socket-connect (socket &rest address)
     - args are like socket-bind
-   - socket testing
-    - server
-     - make-socket
-     - bind
-     - listen
-     - accept (loop or just one for testing)
-     - receive/send
-    - client
-     - make-socket
-     - connect
-     - send/receive
 
   - classes (all socket flavors add no additional methods) (are they really needed?)
    - inet-socket

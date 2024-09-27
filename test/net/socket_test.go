@@ -108,6 +108,7 @@ func TestSocketDocs(t *testing.T) {
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
 	for _, method := range []string{
+		":accept",
 		":address",
 		":bind",
 		":close",
