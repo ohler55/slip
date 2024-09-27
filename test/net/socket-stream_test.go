@@ -20,13 +20,13 @@ func TestSocketStream(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-stream sock))`,
 		Expect: "#<IO-STREAM>",
 	}).Test(t)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket)))
+		Source: `(let ((sock (make-instance 'socket)))
                   (socket-stream sock))`,
 		Expect: "nil",
 	}).Test(t)
@@ -42,13 +42,13 @@ func TestSocketSendStream(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (send sock :stream))`,
 		Expect: "#<IO-STREAM>",
 	}).Test(t)
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket)))
+		Source: `(let ((sock (make-instance 'socket)))
                   (send sock :stream))`,
 		Expect: "nil",
 	}).Test(t)
@@ -65,8 +65,8 @@ func TestSocketStreamRW(t *testing.T) {
 	scope.Let("ufd1", slip.Fixnum(fds[1]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock0 (make-instance 'usocket :socket ufd0))
-                       (sock1 (make-instance 'usocket :socket ufd1)))
+		Source: `(let ((sock0 (make-instance 'socket :socket ufd0))
+                       (sock1 (make-instance 'socket :socket ufd1)))
                   (format (socket-stream sock0) "hello~%")
                   (read (socket-stream sock1)))`,
 		Expect: "hello",

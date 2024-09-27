@@ -8,20 +8,20 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestUsocketPTrue(t *testing.T) {
+func TestSocketPTrue(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(usocket-p (make-instance 'usocket))`,
+		Source: `(socket-p (make-instance 'socket))`,
 		Expect: "t",
 	}).Test(t)
 }
 
-func TestUsocketPFalse(t *testing.T) {
+func TestSocketPFalse(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(usocket-p (make-instance 'vanilla-flavor))`,
+		Source: `(socket-p (make-instance 'vanilla-flavor))`,
 		Expect: "nil",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(usocket-p 7)`,
+		Source: `(socket-p 7)`,
 		Expect: "nil",
 	}).Test(t)
 }

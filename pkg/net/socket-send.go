@@ -23,7 +23,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to send a data on.",
 				},
 				{
@@ -49,24 +49,50 @@ func init() {
 					Text: `if non-nil then the number of seconds for the timeout before at least
 one byte can be written.`,
 				},
+				// TBD address which is list of host and port) instead
 				{
-					Name: "host",
-					Type: "string|fixnum|list",
-					Text: "the host to send to if a datagram socket.",
+					Name: "address",
+					Type: "list",
+					Text: "the host and port to send to if a datagram socket.",
 				},
 				{
-					Name: "port",
-					Type: "fixnum",
-					Text: "the port to send to if a datagram socket.",
+					Name: "oob",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_OOB flag is set.",
+				},
+				{
+					Name: "eor",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_EOR flag is set.",
+				},
+				{
+					Name: "dontwait",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_DONTWAIT flag is set.",
+				},
+				{
+					Name: "donotroute",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_DONTROUTE flag is set.",
+				},
+				{
+					Name: "nosignal",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_NOSIGNAL flag is set.",
+				},
+				{
+					Name: "confirm",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_CONFIRM flag is set.",
 				},
 			},
-			Return: "octets, fixnum, string, fixnum",
+			Return: "octets, fixnum, string, fixnum", // TBD just number of octets written
 			Text: `__socket-send__ writes to the _socket_ and returns four values;
 the octets read, the number of bytes read, the sending host, and the sending port. If _buffer_ is _nil_
 then _octets_ or _length_ is created. If both _buffer_ and _length_ are _nil_ then an _octests_ vector
 of length 65507 is created.`,
 			Examples: []string{
-				`(socket-receive (make-instance 'usocket :socket 777) nil 5) => #(65 66 67), 3, "", nil`,
+				`(socket-receive (make-instance 'socket :socket 777) nil 5) => #(65 66 67), 3, "", nil`,
 			},
 		}, &Pkg)
 }
@@ -88,9 +114,9 @@ func (f *SocketSend) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	return
 }
 
-type usocketSendCaller struct{}
+type socketSendCaller struct{}
 
-func (caller usocketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":send", args, 1, 8)
 	if self.Any != nil {
@@ -99,8 +125,8 @@ func (caller usocketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (resu
 	return
 }
 
-func (caller usocketSendCaller) Docs() string {
-	return clos.MethodDocFromFunc(":send", "socket-send", "usocket", "socket")
+func (caller socketSendCaller) Docs() string {
+	return clos.MethodDocFromFunc(":send", "socket-send", "socket", "socket")
 }
 
 func socketSend(fd int, args slip.List) int {
@@ -138,7 +164,6 @@ func socketSend(fd int, args slip.List) int {
 				}
 			}
 		}
-		// TBD host, port for datagrams
 	}
 	if length < len(buf) {
 		buf = buf[:length]
@@ -158,9 +183,26 @@ func socketSend(fd int, args slip.List) int {
 			slip.NewPanic("write timed out")
 		}
 	}
-	cnt, err := syscall.Write(fd, buf)
+	typ, err := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_TYPE)
 	if err != nil {
 		panic(err)
 	}
+	var cnt int
+	if typ == syscall.SOCK_DGRAM {
+		cnt = datagramSend(fd, buf, args)
+	} else {
+		cnt, err = syscall.Write(fd, buf)
+		if err != nil {
+			panic(err)
+		}
+	}
 	return cnt
+}
+
+func datagramSend(fd int, buf []byte, args slip.List) int {
+
+	// TBD
+	// Sockaddr.Sendmsg()
+
+	return 0
 }

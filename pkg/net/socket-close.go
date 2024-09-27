@@ -22,14 +22,14 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to close.",
 				},
 			},
-			Return: "nil|",
-			Text:   `__socket-close__ closes the _usocket_ instance.`,
+			Return: "nil",
+			Text:   `__socket-close__ closes the _socket_ instance.`,
 			Examples: []string{
-				`(socket-close (make-instance 'usocket)) => nil`,
+				`(socket-close (make-instance 'socket)) => nil`,
 			},
 		}, &Pkg)
 }
@@ -43,8 +43,8 @@ type SocketClose struct {
 func (f *SocketClose) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != usocketFlavor {
-		slip.PanicType("socket", args[0], "usocket")
+	if !ok || !self.IsA(socketFlavor) {
+		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
 		_ = syscall.Close(fd)
@@ -54,9 +54,9 @@ func (f *SocketClose) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	return nil
 }
 
-type usocketCloseCaller struct{}
+type socketCloseCaller struct{}
 
-func (caller usocketCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":close", args, 0, 0)
 	if fd, ok2 := self.Any.(int); ok2 {
@@ -67,6 +67,6 @@ func (caller usocketCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return nil
 }
 
-func (caller usocketCloseCaller) Docs() string {
-	return clos.MethodDocFromFunc(":close", "socket-close", "usocket", "socket")
+func (caller socketCloseCaller) Docs() string {
+	return clos.MethodDocFromFunc(":close", "socket-close", "socket", "socket")
 }

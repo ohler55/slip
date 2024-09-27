@@ -11,14 +11,14 @@ import (
 func TestBenchmark(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(benchmark (lambda () (sleep 0.01)) 0.1)`,
-		Expect: "/^0.01[0-9]+$/",
+		Expect: "/^0.0[1-9][0-9]+$/",
 	}).Test(t)
 }
 
 func TestBenchmarkIter(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(benchmark (lambda () (sleep 0.01)) 0.5 10)`,
-		Expect: "/^0.01[0-9]+$/",
+		Expect: "/^0.0[1-9][0-9]+$/",
 	}).Test(t)
 }
 

@@ -22,7 +22,7 @@ func TestSocketStateWrite(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (list (send sock :state) (socket-state sock)))`,
 		Expect: "(:write :write)",
 	}).Test(t)
@@ -40,7 +40,7 @@ func TestSocketStateReadWrite(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (list (send sock :state) (socket-state sock)))`,
 		Expect: "(:read-write :read-write)",
 	}).Test(t)
@@ -68,7 +68,7 @@ func TestSocketStateRead(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (list (send sock :state) (socket-state sock)))`,
 		Expect: "(:read :read)",
 	}).Test(t)

@@ -1,0 +1,83 @@
+// Copyright (c) 2024, Peter Ohler, All rights reserved.
+
+package net
+
+import (
+	"syscall"
+
+	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/clos"
+	"github.com/ohler55/slip/pkg/flavors"
+)
+
+func init() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := SocketAccept{Function: slip.Function{Name: "socket-accept", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "socket-accept",
+			Args: []*slip.DocArg{
+				{
+					Name: "socket",
+					Type: "socket",
+					Text: "to accept a connection on.",
+				},
+			},
+			Return: "socket",
+			Text: `__socket-accept__ accepts a connection on the _socket_ instance and
+returns a new socket.`,
+			Examples: []string{
+				`(let ((sock (make-socket :domain :unix :type :stream)))`,
+				` (socket-bind sock #(127 0 0 1) 1234)`,
+				` (socket-listen sock 1000)`,
+				` (socket-accept sock)) => #<socket 1234>`,
+			},
+		}, &Pkg)
+}
+
+// SocketAccept represents the socket-accept function.
+type SocketAccept struct {
+	slip.Function
+}
+
+// Call the function with the arguments provided.
+func (f *SocketAccept) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.ArgCountCheck(f, args, 1, 1)
+	self, ok := args[0].(*flavors.Instance)
+	if !ok || !self.IsA(socketFlavor) {
+		slip.PanicType("socket", args[0], "socket")
+	}
+	return socketAccept(self)
+}
+
+type socketAcceptCaller struct{}
+
+func (caller socketAcceptCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.SendArgCountCheck(self, ":accept", args, 0, 0)
+
+	return socketAccept(self)
+}
+
+func (caller socketAcceptCaller) Docs() string {
+	return clos.MethodDocFromFunc(":accept", "socket-accept", "socket", "socket")
+}
+
+func socketAccept(self *flavors.Instance) slip.Object {
+	fd, ok := self.Any.(int)
+	if !ok {
+		slip.NewPanic("%s is not connected", self)
+	}
+	nfd, _, err := syscall.Accept(fd)
+	if err != nil {
+		panic(err)
+	}
+	syscall.CloseOnExec(nfd)
+	sock := socketFlavor.MakeInstance().(*flavors.Instance)
+	sock.Any = nfd
+
+	return sock
+}

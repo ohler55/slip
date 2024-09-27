@@ -23,7 +23,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to receive a data on.",
 				},
 				{Name: "&optional"},
@@ -43,11 +43,32 @@ func init() {
 					Type: "real|nil",
 					Text: "if non-nil then the number of seconds for the timeout.",
 				},
+				{
+					Name: "oob",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_OOB flag is set.",
+				},
+				{
+					Name: "peek",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_PEEK flag is set.",
+				},
+				{
+					Name: "waitall",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_WAITALL flag is set.",
+				},
+				{
+					Name: "dontwait",
+					Type: "boolean",
+					Text: "if true then the datagram MSG_DONTWAIT flag is set.",
+				},
 			},
-			Return: "fixnum",
-			Text:   `__socket-receive__ reads from the _socket_ and returns the number of bytes written.`,
+			Return: "octets,fixnum,list",
+			Text: `__socket-receive__ reads from the _socket_ and returns the three values;
+the buffer, the number of bytes received, and the peer address as a list of host and port.`,
 			Examples: []string{
-				`(socket-receive (make-instance 'usocket :socket 777) "hello" 5) => 5`,
+				`(socket-receive (make-instance 'socket :socket 777) => #(65 66 67), 3, #(127 0 0 1)`,
 			},
 		}, &Pkg)
 }
@@ -59,7 +80,7 @@ type SocketReceive struct {
 
 // Call the function with the arguments provided.
 func (f *SocketReceive) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.ArgCountCheck(f, args, 1, 13)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
 		if fd, ok2 := self.Any.(int); ok2 {
@@ -69,9 +90,9 @@ func (f *SocketReceive) Call(s *slip.Scope, args slip.List, depth int) (result s
 	return
 }
 
-type usocketReceiveCaller struct{}
+type socketReceiveCaller struct{}
 
-func (caller usocketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":receive", args, 1, 8)
 	if self.Any != nil {
@@ -80,12 +101,12 @@ func (caller usocketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (r
 	return
 }
 
-func (caller usocketReceiveCaller) Docs() string {
-	return clos.MethodDocFromFunc(":receive", "socket-receive", "usocket", "socket")
+func (caller socketReceiveCaller) Docs() string {
+	return clos.MethodDocFromFunc(":receive", "socket-receive", "socket", "socket")
 }
 
 func socketReceive(fd int, args slip.List) slip.Object {
-	result := slip.Values{nil, nil, nil, nil}
+	result := slip.Values{nil, nil, nil}
 	var (
 		buf    []byte
 		length int
@@ -141,16 +162,37 @@ func socketReceive(fd int, args slip.List) slip.Object {
 			slip.NewPanic("read timed out")
 		}
 	}
-	cnt, err := syscall.Read(fd, buf)
-	if err != nil || cnt == 0 {
-		slip.NewPanic("read failed. %s", err)
+	typ, err := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_TYPE)
+	if err != nil {
+		panic(err)
 	}
-	result[0] = slip.Octets(buf)
-	result[1] = slip.Fixnum(cnt)
-	if sa, err := syscall.Getpeername(fd); err == nil {
-		addr, port := usocketName(sa)
+	if typ == syscall.SOCK_DGRAM {
+		out, cnt, addr := datagramReceive(fd, buf, args)
+		result[0] = slip.Octets(out)
+		result[1] = slip.Fixnum(cnt)
 		result[2] = addr
-		result[3] = port
+	} else {
+		cnt, err := syscall.Read(fd, buf)
+		if err != nil || cnt == 0 {
+			slip.NewPanic("read failed. %s", err)
+		}
+		result[0] = slip.Octets(buf)
+		result[1] = slip.Fixnum(cnt)
+		if sa, err := syscall.Getpeername(fd); err == nil {
+			addr, port := socketName(sa)
+			result[2] = slip.List{addr, port}
+		}
 	}
 	return result
+}
+
+func datagramReceive(fd int, buf []byte, args slip.List) ([]byte, int, slip.List) {
+
+	// TBD
+	// Sockaddr.Recvfrom() for basic
+	// Sockaddr.Recvmsg() in different method/function
+	// returns n, oobn, flags, fromAddr, err
+	// or Recvfrom
+
+	return nil, 0, nil
 }

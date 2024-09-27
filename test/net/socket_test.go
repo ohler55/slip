@@ -15,10 +15,10 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestUsocketInitNil(t *testing.T) {
+func TestSocketInitNil(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-instance 'usocket)`,
-		Expect: "/#<usocket [0-9a-f]+>/",
+		Source: `(make-instance 'socket)`,
+		Expect: "/#<socket [0-9a-f]+>/",
 	}
 	tf.Test(t)
 	inst, ok := tf.Result.(*flavors.Instance)
@@ -26,7 +26,7 @@ func TestUsocketInitNil(t *testing.T) {
 	tt.Nil(t, inst.Any)
 }
 
-func TestUsocketFd(t *testing.T) {
+func TestSocketFd(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -37,8 +37,8 @@ func TestUsocketFd(t *testing.T) {
 	scope.Let("sock", slip.Fixnum(fds[0]))
 	tf := sliptest.Function{
 		Scope:  scope,
-		Source: `(setq sock (make-instance 'usocket :socket ufd))`,
-		Expect: "/#<usocket [0-9a-f]+>/",
+		Source: `(setq sock (make-instance 'socket :socket ufd))`,
+		Expect: "/#<socket [0-9a-f]+>/",
 	}
 	tf.Test(t)
 	inst, ok := tf.Result.(*flavors.Instance)
@@ -50,7 +50,7 @@ func TestUsocketFd(t *testing.T) {
 	tt.Equal(t, slip.Symbol(":write"), state)
 }
 
-func TestUsocketFile(t *testing.T) {
+func TestSocketFile(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	f0 := os.NewFile(uintptr(fds[0]), "file-0")
 	defer func() {
@@ -62,8 +62,8 @@ func TestUsocketFile(t *testing.T) {
 	scope.Let("ufile", (*slip.FileStream)(f0))
 	tf := sliptest.Function{
 		Scope:  scope,
-		Source: `(make-instance 'usocket :socket ufile)`,
-		Expect: "/#<usocket [0-9a-f]+>/",
+		Source: `(make-instance 'socket :socket ufile)`,
+		Expect: "/#<socket [0-9a-f]+>/",
 	}
 	tf.Test(t)
 	inst, ok := tf.Result.(*flavors.Instance)
@@ -71,47 +71,69 @@ func TestUsocketFile(t *testing.T) {
 	tt.SameType(t, 0, inst.Any) // int
 }
 
-func TestUsocketNotStream(t *testing.T) {
+func TestSocketInitCreate(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-instance 'socket :domain :inet :type :stream :protocol :ip) :type)`,
+		Expect: ":stream",
+	}).Test(t)
+}
+
+func TestSocketInitBadCreate(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'socket :domain :unix :type :raw :protocol :udp)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSocketNotStream(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let("uconn", &slip.IOStream{})
 	(&sliptest.Function{
 		Scope:     scope,
-		Source:    `(make-instance 'usocket :socket uconn)`,
+		Source:    `(make-instance 'socket :socket uconn)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
-func TestUsocketBadSocket(t *testing.T) {
+func TestSocketBadSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-instance 'usocket :socket t)`,
+		Source:    `(make-instance 'socket :socket t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
-func TestUsocketDocs(t *testing.T) {
+func TestSocketDocs(t *testing.T) {
 	scope := slip.NewScope()
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
 	for _, method := range []string{
+		":accept",
+		":address",
+		":bind",
 		":close",
+		":connect",
 		":init",
-		":local-address",
-		":local-name",
-		":local-port",
+		":listen",
+		":make-stream",
+		":name",
+		":open-p",
 		":option",
 		":peer-address",
 		":peer-name",
 		":peer-port",
+		":port",
 		":receive",
 		":send",
 		":set-option",
 		":set-socket",
+		":shutdown",
 		":socket",
 		":state",
 		":stream",
+		":type",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method usocket %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method socket %s out)`, method)).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

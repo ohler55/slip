@@ -80,6 +80,20 @@ func (obj *Instance) Equal(other slip.Object) bool {
 	return false
 }
 
+// IsA return true if the instance is of a flavor that inherits from the
+// provided flavor.
+func (obj *Instance) IsA(flavor *Flavor) bool {
+	if obj.Flavor == flavor {
+		return true
+	}
+	for _, f := range obj.Flavor.inherit {
+		if flavor == f {
+			return true
+		}
+	}
+	return false
+}
+
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *Instance) Hierarchy() []slip.Symbol {
 	return []slip.Symbol{slip.Symbol(obj.Flavor.name), InstanceSymbol, slip.TrueSymbol}

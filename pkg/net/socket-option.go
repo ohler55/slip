@@ -13,8 +13,6 @@ import (
 )
 
 func init() {
-	// TBD form Text from  options
-	//   keyword, doc, type? (or just use the arg
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketOption{Function: slip.Function{Name: "socket-option", Args: args}}
@@ -26,7 +24,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
-					Type: "usocket",
+					Type: "socket",
 					Text: "to get the option of.",
 				},
 				{
@@ -38,17 +36,18 @@ func init() {
 			Return: "fixnum|boolean",
 			Text: `__socket-option__ returns the value of the option on the _socket_ instance. The
 supported options are:
+  :broadcast
+  :debug
+  :receive-buffer
+  :receive-timeout
+  :reuse-address
+  :send-buffer
+  :send-timeout
   :tcp-keepalive
   :tcp-nodelay
-  :broadcast
-  :reuse-address
-  :send-timeout
-  :send-buffer
-  :receive-timeout
-  :receive-buffer
 `,
 			Examples: []string{
-				`(socket-option (make-instance 'usocket :socket 5) :tcp-keepalive) => t`,
+				`(socket-option (make-instance 'socket :socket 5) :tcp-keepalive) => t`,
 			},
 		}, &Pkg)
 }
@@ -62,8 +61,8 @@ type SocketOption struct {
 func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != usocketFlavor {
-		slip.PanicType("socket", args[0], "usocket")
+	if !ok || !self.IsA(socketFlavor) {
+		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
 		result = getSockopt(fd, args[1])
@@ -75,15 +74,15 @@ func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result sl
 func (f *SocketOption) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != usocketFlavor {
-		slip.PanicType("socket", args[0], "usocket")
+	if !ok || !self.IsA(socketFlavor) {
+		slip.PanicType("socket", args[0], "socket")
 	}
 	_ = self.Receive(s, ":set-option", slip.List{args[1], value}, 0)
 }
 
-type usocketOptionCaller struct{}
+type socketOptionCaller struct{}
 
-func (caller usocketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":option", args, 1, 1)
 	if fd, ok := self.Any.(int); ok {
@@ -92,13 +91,13 @@ func (caller usocketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 	return
 }
 
-func (caller usocketOptionCaller) Docs() string {
-	return clos.MethodDocFromFunc(":option", "socket-option", "usocket", "socket")
+func (caller socketOptionCaller) Docs() string {
+	return clos.MethodDocFromFunc(":option", "socket-option", "socket", "socket")
 }
 
-type usocketSetOptionCaller struct{}
+type socketSetOptionCaller struct{}
 
-func (caller usocketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":option", args, 2, 2)
 	if fd, ok := self.Any.(int); ok {
@@ -107,8 +106,8 @@ func (caller usocketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return nil
 }
 
-func (caller usocketSetOptionCaller) Docs() string {
-	return clos.MethodDocFromFunc(":set-option", "socket-option", "usocket", "socket")
+func (caller socketSetOptionCaller) Docs() string {
+	return clos.MethodDocFromFunc(":set-option", "socket-option", "socket", "socket")
 }
 
 func getSockopt(fd int, arg slip.Object) (result slip.Object) {
@@ -149,16 +148,22 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 	case slip.Symbol(":receive-buffer"): // SO_RCVBUF
 		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_RCVBUF)
 		result = slip.Fixnum(val)
+	case slip.Symbol(":debug"): // TCP_DEBUG
+		val, err = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_DEBUG)
+		if val != 0 {
+			result = slip.True
+		}
 	default:
 		slip.PanicType("option", arg,
+			":broadcast",
+			":debug",
+			":receive-buffer",
+			":receive-timeout",
+			":reuse-address",
+			":send-buffer",
+			":send-timeout",
 			":tcp-keepalive",
 			":tcp-nodelay",
-			":broadcast",
-			":reuse-address",
-			":send-timeout",
-			":send-buffer",
-			":receive-timeout",
-			":receive-buffer",
 		)
 	}
 	if err != nil {
@@ -186,16 +191,19 @@ func setSockopt(fd int, opt, val slip.Object) {
 		err = setSockoptTime(fd, syscall.SO_RCVTIMEO, val)
 	case slip.Symbol(":receive-buffer"): // SO_RCVBUF
 		err = setSockoptInt(fd, syscall.SO_RCVBUF, val)
+	case slip.Symbol(":debug"): // SO_DEBUG
+		err = setSockoptBool(fd, syscall.SO_DEBUG, val)
 	default:
 		slip.PanicType("option", opt,
+			":broadcast",
+			":debug",
+			":receive-buffer",
+			":receive-timeout",
+			":reuse-address",
+			":send-buffer",
+			":send-timeout",
 			":tcp-keepalive",
 			":tcp-nodelay",
-			":broadcast",
-			":reuse-address",
-			":send-timeout",
-			":send-buffer",
-			":receive-timeout",
-			":receive-buffer",
 		)
 	}
 	if err != nil {

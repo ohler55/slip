@@ -22,7 +22,7 @@ func TestSocketSendOk(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-send sock "hello" :timeout 1.0))`,
 		Expect: "5",
 	}).Test(t)
@@ -33,7 +33,7 @@ func TestSocketSendOk(t *testing.T) {
 	tt.Equal(t, "hello", string(buf[:cnt]))
 }
 
-func TestUsocketSendSend(t *testing.T) {
+func TestSocketSendSend(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -43,7 +43,7 @@ func TestUsocketSendSend(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (send sock :send (coerce "hello" 'octets) 3 :offset 1))`,
 		Expect: "3",
 	}).Test(t)
@@ -73,7 +73,7 @@ func TestSocketSendError(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-send sock "hello" :timeout 0.001))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
@@ -89,7 +89,7 @@ func TestSocketSendBadLength(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-send sock "hello" -1))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
@@ -105,7 +105,7 @@ func TestSocketSendBadOffset(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-send sock "hello" :offset 6))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
@@ -121,7 +121,7 @@ func TestSocketSendNotOctets(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-send sock t))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
@@ -138,7 +138,7 @@ func TestSocketSendBrokenPipe(t *testing.T) {
 	_ = syscall.Close(fds[1])
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
                   (socket-send sock "hello"))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
@@ -147,8 +147,17 @@ func TestSocketSendBrokenPipe(t *testing.T) {
 func TestSocketSendTimeout(t *testing.T) {
 	// Pick some random high port number which should error on select.
 	(&sliptest.Function{
-		Source: `(let ((sock (make-instance 'usocket :socket 777)))
+		Source: `(let ((sock (make-instance 'socket :socket 777)))
                   (socket-send sock "hello" :timeout 0.01))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSocketSendBadFd(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((sock (make-instance 'socket :socket 777))
+                       (buf (make-array 8 :element-type 'octet)))
+                  (socket-send sock "hello"))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

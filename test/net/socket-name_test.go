@@ -18,7 +18,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestGetLocalNameOkay(t *testing.T) {
+func TestSocketNameOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -28,13 +28,13 @@ func TestGetLocalNameOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
-                  (get-local-name sock))`,
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
+                  (socket-name sock))`,
 		Expect: `"@", 0`,
 	}).Test(t)
 }
 
-func TestUsocketLocalNameOkay(t *testing.T) {
+func TestSocketLocalNameOkay(t *testing.T) {
 	fds, _ := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
 	defer func() {
 		_ = syscall.Close(fds[0])
@@ -44,13 +44,13 @@ func TestUsocketLocalNameOkay(t *testing.T) {
 	scope.Let("ufd", slip.Fixnum(fds[0]))
 	(&sliptest.Function{
 		Scope: scope,
-		Source: `(let ((sock (make-instance 'usocket :socket ufd)))
-                  (send sock :local-name))`,
+		Source: `(let ((sock (make-instance 'socket :socket ufd)))
+                  (send sock :name))`,
 		Expect: `"@", 0`,
 	}).Test(t)
 }
 
-func TestUsocketLocalNameIPv6(t *testing.T) {
+func TestSocketLocalNameIPv6(t *testing.T) {
 	nl, _ := net.Listen("tcp6", "[::]:7779")
 	defer nl.Close()
 	go func() {
@@ -58,12 +58,12 @@ func TestUsocketLocalNameIPv6(t *testing.T) {
 	}()
 	nc, _ := net.Dial("tcp6", "[::]:7779")
 	scope := slip.NewScope()
-	us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
+	us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
 	tc, _ := nc.(*net.TCPConn)
 	raw, _ := tc.SyscallConn()
 	_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 	scope.Let(slip.Symbol("sock"), us)
-	result := slip.ReadString("(send sock :local-name)").Eval(scope, nil).(slip.Values)
+	result := slip.ReadString("(send sock :name)").Eval(scope, nil).(slip.Values)
 
 	addr := nc.LocalAddr().String()
 	// url.Parse does not handle IPv6 host names so do it the hard way.
@@ -73,7 +73,7 @@ func TestUsocketLocalNameIPv6(t *testing.T) {
 	tt.Equal(t, slip.Octets{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, result[0])
 }
 
-func TestGetLocalNameHTTP(t *testing.T) {
+func TestSocketNameHTTP(t *testing.T) {
 	serv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("okay"))
 	}))
@@ -83,12 +83,12 @@ func TestGetLocalNameHTTP(t *testing.T) {
 		if cs == http.StateActive {
 			u, _ := url.Parse(serv.URL)
 			scope := slip.NewScope()
-			us := slip.ReadString("(make-instance 'usocket)").Eval(scope, nil).(*flavors.Instance)
+			us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
 			tc, _ := nc.(*net.TCPConn)
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
-			result := slip.ReadString("(send sock :local-name)").Eval(scope, nil).(slip.Values)
+			result := slip.ReadString("(send sock :name)").Eval(scope, nil).(slip.Values)
 			port, _ := strconv.Atoi(u.Port())
 			tt.Equal(t, slip.Fixnum(port), result[1])
 			tt.Equal(t, slip.Octets{127, 0, 0, 1}, result[0])
@@ -99,23 +99,23 @@ func TestGetLocalNameHTTP(t *testing.T) {
 	}
 }
 
-func TestGetLocalNameNotSocket(t *testing.T) {
+func TestSocketNameNotSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(get-local-name t)`,
+		Source:    `(socket-name t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
-func TestUsocketLocalNameClosed(t *testing.T) {
+func TestSocketLocalNameClosed(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(send (make-instance 'usocket) :local-name)`,
+		Source: `(send (make-instance 'socket) :name)`,
 		Expect: "nil, nil",
 	}).Test(t)
 }
 
-func TestUsocketLocalNameBadFd(t *testing.T) {
+func TestSocketLocalNameBadFd(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(send (make-instance 'usocket :socket 777) :local-name)`,
+		Source:    `(send (make-instance 'socket :socket 777) :name)`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

@@ -45,9 +45,5 @@ func (f *ParseAddress) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	if !ok {
 		slip.PanicType("string", args[0], "string")
 	}
-	addr, err := netip.ParseAddr(string(str))
-	if err != nil {
-		panic(err)
-	}
-	return slip.Octets(addr.AsSlice())
+	return slip.Octets(netip.MustParseAddr(string(str)).AsSlice())
 }
