@@ -16,7 +16,8 @@ func TestSocketListenOkay(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-socket :domain :inet :type :stream)))
                   (socket-bind sock #(127 0 0 1) port)
-                  (socket-listen sock 100))`,
+                  (socket-listen sock 100)
+                  (socket-close sock))`,
 		Expect: "nil",
 	}).Test(t)
 }
@@ -28,7 +29,8 @@ func TestSocketSendListen(t *testing.T) {
 		Scope: scope,
 		Source: `(let ((sock (make-socket :domain :inet :type :stream)))
                   (send sock :bind #(127 0 0 1) port)
-                  (send sock :listen 100))`,
+                  (send sock :listen 100)
+                  (send sock :close))`,
 		Expect: "nil",
 	}).Test(t)
 }

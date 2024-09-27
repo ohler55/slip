@@ -112,6 +112,7 @@ func TestSocketDocs(t *testing.T) {
 		":address",
 		":bind",
 		":close",
+		":connect",
 		":init",
 		":listen",
 		":make-stream",

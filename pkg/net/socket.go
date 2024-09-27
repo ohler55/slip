@@ -26,8 +26,8 @@ func defSocket() {
 			},
 			slip.List{
 				slip.Symbol(":documentation"),
-				slip.String(`A socket wrapper what includes read and write indicators to facilitate
-shutting down read and write on the socket.`),
+				slip.String(`A socket wrapper that mostly follows the sbcl socket implementation
+and is based on the unix or BSD socket model.`),
 			},
 		},
 		&Pkg,
@@ -37,6 +37,7 @@ shutting down read and write on the socket.`),
 	socketFlavor.DefMethod(":address", "", socketAddressCaller{})
 	socketFlavor.DefMethod(":bind", "", socketBindCaller{})
 	socketFlavor.DefMethod(":close", "", socketCloseCaller{})
+	socketFlavor.DefMethod(":connect", "", socketConnectCaller{})
 	socketFlavor.DefMethod(":listen", "", socketListenCaller{})
 	socketFlavor.DefMethod(":make-stream", "", socketMakeStreamCaller{})
 	socketFlavor.DefMethod(":name", "", socketNameCaller{})

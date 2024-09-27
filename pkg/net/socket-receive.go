@@ -189,7 +189,8 @@ func socketReceive(fd int, args slip.List) slip.Object {
 func datagramReceive(fd int, buf []byte, args slip.List) ([]byte, int, slip.List) {
 
 	// TBD
-	// Sockaddr.Recvmsg()
+	// Sockaddr.Recvfrom() for basic
+	// Sockaddr.Recvmsg() in different method/function
 	// returns n, oobn, flags, fromAddr, err
 	// or Recvfrom
 
