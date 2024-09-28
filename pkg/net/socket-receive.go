@@ -187,12 +187,40 @@ func socketReceive(fd int, args slip.List) slip.Object {
 }
 
 func datagramReceive(fd int, buf []byte, args slip.List) ([]byte, int, slip.List) {
+	var flags int
 
-	// TBD
-	// Sockaddr.Recvfrom() for basic
-	// Sockaddr.Recvmsg() in different method/function
-	// returns n, oobn, flags, fromAddr, err
-	// or Recvfrom
-
-	return nil, 0, nil
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":peek")); has && value != nil {
+		flags |= syscall.MSG_PEEK
+	}
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":waitall")); has && value != nil {
+		flags |= syscall.MSG_WAITALL
+	}
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":dontwait")); has && value != nil {
+		flags |= syscall.MSG_DONTWAIT
+	}
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":oob")); has && value != nil {
+		flags |= syscall.MSG_OOB
+	}
+	cnt, sa, err := syscall.Recvfrom(fd, buf, flags)
+	if err != nil {
+		panic(err)
+	}
+	var addr slip.List
+	switch tsa := sa.(type) {
+	case *syscall.SockaddrInet4:
+		oct := make(slip.Octets, 4)
+		for i, b := range tsa.Addr {
+			oct[i] = b
+		}
+		addr = slip.List{oct, slip.Fixnum(tsa.Port)}
+	case *syscall.SockaddrInet6:
+		oct := make(slip.Octets, 16)
+		for i, b := range tsa.Addr {
+			oct[i] = b
+		}
+		addr = slip.List{oct, slip.Fixnum(tsa.Port)}
+	case *syscall.SockaddrUnix:
+		addr = slip.List{slip.String(tsa.Name)}
+	}
+	return buf, cnt, addr
 }

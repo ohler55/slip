@@ -11,7 +11,8 @@
   - different functions for send and receive of datagrams with oob
    - socket-receive-message (args same as socket-receive but with oob)
     - oob should be buf or nil, a key value :oob if provided implies oob flag
-   - socket-send-message ()
+	- Sockaddr.Recvmsg() in different method/function
+  - socket-send-message ()
 
   - should different functions be used since there is more info returned?
 
