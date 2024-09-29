@@ -308,7 +308,7 @@ func TestSocketReceiveInetDatagramOob(t *testing.T) {
 	scope.Let("ready", ready)
 	var (
 		x  string
-		pt slip.Symbol
+		pt slip.Object
 	)
 	switch runtime.GOOS {
 	case "linux":
