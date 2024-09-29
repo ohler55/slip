@@ -5,8 +5,7 @@
 - next
 
  - datagram branch (https://www.sbcl.org/manual/#Networking)
-  - socket-receive (datagram)
-   - should oob option be removed?
+  + socket-receive (datagram)
   - socket-send (datagram)
   - different functions for send and receive of datagrams with oob
    - socket-receive-message (args same as socket-receive but with oob)
