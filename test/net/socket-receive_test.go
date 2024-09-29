@@ -3,6 +3,7 @@
 package net_test
 
 import (
+	"runtime"
 	"syscall"
 	"testing"
 
@@ -305,6 +306,16 @@ func TestSocketReceiveInetDatagramOob(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let("port", slip.Fixnum(port))
 	scope.Let("ready", ready)
+	var (
+		x  string
+		pt slip.Symbol
+	)
+	switch runtime.GOOS {
+	case "linux":
+		x = `/#\(104 101 108 108 111 0 0 0\), 5, \(#<\(VECTOR 4\)> [0-9]+\)/`
+	case "darwin":
+		pt = slip.ErrorSymbol
+	}
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'socket :domain :inet :type :datagram))
@@ -312,6 +323,7 @@ func TestSocketReceiveInetDatagramOob(t *testing.T) {
                   (socket-bind sock #(127 0 0 1) port)
                   (channel-push ready t)
                   (socket-receive sock buf 8 :timeout 1.0 :oob t))`,
-		PanicType: slip.ErrorSymbol,
+		Expect:    x,
+		PanicType: pt,
 	}).Test(t)
 }
