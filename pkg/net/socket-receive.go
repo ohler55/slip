@@ -220,7 +220,9 @@ func datagramReceive(fd int, buf []byte, args slip.List) ([]byte, int, slip.List
 		}
 		addr = slip.List{oct, slip.Fixnum(tsa.Port)}
 	case *syscall.SockaddrUnix:
-		addr = slip.List{slip.String(tsa.Name)}
+		if 0 < len(tsa.Name) {
+			addr = slip.List{slip.String(tsa.Name)}
+		}
 	}
 	return buf, cnt, addr
 }

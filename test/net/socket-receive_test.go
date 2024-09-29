@@ -237,7 +237,7 @@ func TestSocketReceiveUnixDatagram(t *testing.T) {
 		Source: `(let ((sock (make-instance 'socket :socket ufd))
                        (buf (make-array 8 :element-type 'octet)))
                   (socket-receive sock buf 8 :timeout 1.0))`,
-		Expect: `#(104 101 108 108 111 0 0 0), 5, ("")`,
+		Expect: `#(104 101 108 108 111 0 0 0), 5, nil`,
 	}).Test(t)
 }
 
