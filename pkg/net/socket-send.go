@@ -3,6 +3,7 @@
 package net
 
 import (
+	"fmt"
 	"syscall"
 	"time"
 
@@ -71,7 +72,7 @@ one byte can be written.`,
 					Text: "if true then the datagram MSG_DONTWAIT flag is set.",
 				},
 				{
-					Name: "donotroute",
+					Name: "dontroute",
 					Type: "boolean",
 					Text: "if true then the datagram MSG_DONTROUTE flag is set.",
 				},
@@ -200,6 +201,32 @@ func socketSend(fd int, args slip.List) int {
 }
 
 func datagramSend(fd int, buf []byte, args slip.List) int {
+	var flags int
+
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":oob")); has && value != nil {
+		flags |= syscall.MSG_OOB
+	}
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":eor")); has && value != nil {
+		flags |= syscall.MSG_EOR
+	}
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":dontwait")); has && value != nil {
+		flags |= syscall.MSG_DONTWAIT
+	}
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":dontroute")); has && value != nil {
+		flags |= syscall.MSG_DONTROUTE
+	}
+	// if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":nosignal")); has && value != nil {
+	// 	flags |= syscall.MSG_NOSIGNAL
+	// }
+	// if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":confirm")); has && value != nil {
+	// 	flags |= syscall.MSG_CONFIRM
+	// }
+
+	// TBD use maps for flags, getSockArgValue() and socketArgText()
+
+	fmt.Printf("*** flags: %0x\n", flags)
+
+	// TBD get address, default is the peer on fd
 
 	// TBD
 	// Sockaddr.Sendmsg()
