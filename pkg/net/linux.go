@@ -101,6 +101,17 @@ var protocolMap = map[slip.Symbol]int{
 	slip.Symbol(":udplite"): syscall.IPPROTO_UDPLITE,
 }
 
+var msgFlagMap = map[slip.Symbol]int{
+	slip.Symbol(":confirm"):   syscall.MSG_CONFIRM,
+	slip.Symbol(":dontroute"): syscall.MSG_DONTROUTE,
+	slip.Symbol(":dontwait"):  syscall.MSG_DONTWAIT,
+	slip.Symbol(":eor"):       syscall.MSG_EOR,
+	slip.Symbol(":nosignal"):  syscall.MSG_NOSIGNAL,
+	slip.Symbol(":oob"):       syscall.MSG_OOB,
+	slip.Symbol(":peek"):      syscall.MSG_PEEK,
+	slip.Symbol(":waitall"):   syscall.MSG_WAITALL,
+}
+
 type FdSet syscall.FdSet
 
 func Select(r, w, e *FdSet, timeout time.Duration) error {

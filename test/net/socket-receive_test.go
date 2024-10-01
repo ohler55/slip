@@ -180,47 +180,6 @@ func TestSocketReceiveBadLength(t *testing.T) {
 	}).Test(t)
 }
 
-// func TestSocketReceiveTimeout(t *testing.T) {
-// 	// Pick some random high port number which should error on select.
-// 	(&sliptest.Function{
-// 		Source: `(let ((sock (make-instance 'socket :socket 777)))
-//                   (socket-receive sock :timeout 0.001))`,
-// 		PanicType: slip.ErrorSymbol,
-// 	}).Test(t)
-// }
-
-// func TestSocketReceiveDatagram(t *testing.T) {
-// 	scope := slip.NewScope()
-// 	port := availablePort()
-// 	scope.Let("port", slip.Fixnum(port))
-// 	go func() {
-// 		fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, 0)
-// 		tt.Nil(t, err)
-// 		fmt.Printf("*** created\n")
-
-// 		sa := &syscall.SockaddrInet4{Port: port, Addr: [4]byte{127, 0, 0, 1}}
-// 		err = syscall.Bind(fd, sa)
-// 		tt.Nil(t, err)
-// 		fmt.Printf("*** bind: %s\n", err)
-
-// 		time.Sleep(time.Second)
-
-// 		err = syscall.Sendmsg(fd, []byte("hello"), nil, sa, 0)
-// 		tt.Nil(t, err)
-// 	}()
-// 	fmt.Printf("*** ready to test\n")
-// 	(&sliptest.Function{
-// 		Scope: scope,
-// 		Source: `(let ((sock (make-socket :domain :inet :type :datagram))
-//                        reply)
-//                   (socket-connect sock #(127 0 0 1) port)
-//                   (setq reply (coerce (socket-receive sock nil 7) 'string))
-//                   (socket-close sock)
-//                   reply)`,
-// 		Expect: `"Goodbye"`,
-// 	}).Test(t)
-// }
-
 func TestSocketReceiveUnixDatagram(t *testing.T) {
 	fds, err0 := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
 	tt.Nil(t, err0)
@@ -240,6 +199,45 @@ func TestSocketReceiveUnixDatagram(t *testing.T) {
                   (socket-receive sock buf 8 :timeout 1.0))`,
 		Expect: `#(104 101 108 108 111 0 0 0), 5, nil`,
 	}).Test(t)
+}
+
+func TestSocketReceiveUnix2Datagram(t *testing.T) {
+	syscall.Unlink("unix2")
+	defer func() { _ = syscall.Unlink("unix2") }()
+	sa := &syscall.SockaddrUnix{Name: "unix2"}
+	started := make(gi.Channel, 1)
+	ready := make(gi.Channel, 1)
+	out := make(chan error, 1)
+	go func() {
+		fd, err := syscall.Socket(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
+		if err == nil {
+			defer func() { _ = syscall.Close(fd) }()
+			started <- slip.True
+			<-ready
+			err = syscall.Sendmsg(fd, []byte("hello"), nil, sa, 0)
+		}
+		out <- err
+	}()
+
+	scope := slip.NewScope()
+	scope.Let("ready", ready)
+	scope.Let("started", started)
+	(&sliptest.Function{
+		Scope: scope,
+		Array: true,
+		Source: `(let ((sock (make-instance 'socket :domain :unix :type :datagram))
+                       (buf (make-array 8 :element-type 'octet))
+                       result)
+                  (channel-pop started)
+                  (socket-bind sock "unix2")
+                  (channel-push ready t)
+                  (setq result (socket-receive sock buf 8 :timeout 1.0))
+                  (socket-close sock)
+                  result)`,
+		Expect: `#(104 101 108 108 111 0 0 0)`,
+	}).Test(t)
+	err := <-out
+	tt.Nil(t, err)
 }
 
 func TestSocketReceiveInetDatagram(t *testing.T) {

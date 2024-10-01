@@ -3,7 +3,7 @@
 package net
 
 import (
-	"fmt"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -50,7 +50,6 @@ func init() {
 					Text: `if non-nil then the number of seconds for the timeout before at least
 one byte can be written.`,
 				},
-				// TBD address which is list of host and port) instead
 				{
 					Name: "address",
 					Type: "list",
@@ -105,7 +104,7 @@ type SocketSend struct {
 
 // Call the function with the arguments provided.
 func (f *SocketSend) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 11)
+	slip.ArgCountCheck(f, args, 2, 22)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
 		if fd, ok2 := self.Any.(int); ok2 {
@@ -119,7 +118,7 @@ type socketSendCaller struct{}
 
 func (caller socketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":send", args, 1, 8)
+	slip.SendArgCountCheck(self, ":send", args, 1, 21)
 	if self.Any != nil {
 		result = slip.Fixnum(socketSend(self.Any.(int), args))
 	}
@@ -142,8 +141,8 @@ func socketSend(fd int, args slip.List) int {
 	}
 	length := len(buf)
 	timeout := time.Duration(0)
-	if 1 < len(args) {
-		args = args[1:]
+	args = args[1:]
+	if 0 < len(args) {
 		if num, ok := args[0].(slip.Fixnum); ok {
 			if num <= 0 {
 				slip.PanicType("length", num, "positive fixnum")
@@ -215,21 +214,36 @@ func datagramSend(fd int, buf []byte, args slip.List) int {
 	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":dontroute")); has && value != nil {
 		flags |= syscall.MSG_DONTROUTE
 	}
-	// if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":nosignal")); has && value != nil {
-	// 	flags |= syscall.MSG_NOSIGNAL
-	// }
-	// if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":confirm")); has && value != nil {
-	// 	flags |= syscall.MSG_CONFIRM
-	// }
-
-	// TBD use maps for flags, getSockArgValue() and socketArgText()
-
-	fmt.Printf("*** flags: %0x\n", flags)
-
-	// TBD get address, default is the peer on fd
-
-	// TBD
-	// Sockaddr.Sendmsg()
-
-	return 0
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":nosignal")); has && value != nil {
+		if flag, has := msgFlagMap[slip.Symbol(":nosignal")]; has {
+			flags |= flag
+		} else {
+			slip.NewPanic(":nosignal flag not support on %s", runtime.GOOS)
+		}
+	}
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":confirm")); has && value != nil {
+		if flag, has := msgFlagMap[slip.Symbol(":confirm")]; has {
+			flags |= flag
+		} else {
+			slip.NewPanic(":confirm flag not support on %s", runtime.GOOS)
+		}
+	}
+	sa, _ := syscall.Getpeername(fd)
+	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":address")); has {
+		switch tv := value.(type) {
+		case slip.String:
+			sa = &syscall.SockaddrUnix{Name: string(tv)}
+		case slip.List:
+			sa = addressFromList(tv)
+		default:
+			slip.PanicType("address", args, "string", "(octets fixnum)")
+		}
+	}
+	if sa == nil {
+		slip.NewPanic("no address provided")
+	}
+	if err := syscall.Sendmsg(fd, buf, nil, sa, flags); err != nil {
+		panic(err)
+	}
+	return len(buf)
 }

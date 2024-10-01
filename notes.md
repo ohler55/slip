@@ -5,15 +5,15 @@
 - next
 
  - datagram branch (https://www.sbcl.org/manual/#Networking)
-  + socket-receive (datagram)
-  - socket-send (datagram)
+  + socket-receive
+  + socket-send
+
   - different functions for send and receive of datagrams with oob
-   - socket-receive-message (args same as socket-receive but with oob)
-    - oob should be buf or nil, a key value :oob if provided implies oob flag
-	- Sockaddr.Recvmsg() in different method/function
+  - socket-receive-message (args same as socket-receive but with oob)
+   - oob should be buf or nil, a key value :oob if provided implies oob flag
+   - Sockaddr.Recvmsg() in different method/function
   - socket-send-message ()
 
-  - should different functions be used since there is more info returned?
 
  - cl-output branch
   - finish-output
@@ -26,13 +26,7 @@
   - get-host-by-name
   - get-host-by-address
 
-
-  - classes (all socket flavors add no additional methods) (are they really needed?)
-   - inet-socket
-   - inet6-socket
-   - local-socket
-   - local-abstract-socket
-
+--------------------
 
  - slot-value
   - add slot-value to flavors pkg/clos (for get and setf)

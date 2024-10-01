@@ -171,6 +171,15 @@ var protocolMap = map[slip.Symbol]int{
 	slip.Symbol(":xtp"):       syscall.IPPROTO_XTP,
 }
 
+var msgFlagMap = map[slip.Symbol]int{
+	slip.Symbol(":dontroute"): syscall.MSG_DONTROUTE,
+	slip.Symbol(":dontwait"):  syscall.MSG_DONTWAIT,
+	slip.Symbol(":eor"):       syscall.MSG_EOR,
+	slip.Symbol(":oob"):       syscall.MSG_OOB,
+	slip.Symbol(":peek"):      syscall.MSG_PEEK,
+	slip.Symbol(":waitall"):   syscall.MSG_WAITALL,
+}
+
 type FdSet syscall.FdSet
 
 func Select(r, w, e *FdSet, timeout time.Duration) error {

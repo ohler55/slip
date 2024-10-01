@@ -4,11 +4,13 @@ package net_test
 
 import (
 	"bytes"
+	"runtime"
 	"syscall"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/gi"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -159,5 +161,152 @@ func TestSocketSendBadFd(t *testing.T) {
                        (buf (make-array 8 :element-type 'octet)))
                   (socket-send sock "hello"))`,
 		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSocketSendInetDatagram(t *testing.T) {
+	port := availablePort()
+	sa := &syscall.SockaddrInet4{Port: port, Addr: [4]byte{127, 0, 0, 1}}
+	ready := make(gi.Channel, 1)
+	out := make(chan error, 1)
+	go func() {
+		fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, 0)
+		if err == nil {
+			defer func() { _ = syscall.Close(fd) }()
+			err = syscall.Bind(fd, sa)
+			if err == nil {
+				ready <- slip.True
+				buf := make([]byte, 20)
+				_, _, err = syscall.Recvfrom(fd, buf, 0)
+			}
+		}
+		out <- err
+	}()
+	scope := slip.NewScope()
+	scope.Let("port", slip.Fixnum(port))
+	scope.Let("ready", ready)
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((sock (make-instance 'socket :domain :inet :type :datagram))
+                       result)
+                  (channel-pop ready)
+                  (setq result (socket-send sock "Hello" :timeout 1.0 :address (list "127.0.0.1" port)))
+                  (socket-close sock)
+                  result)`,
+		Expect: "5",
+	}).Test(t)
+	err := <-out
+	tt.Nil(t, err)
+}
+
+func TestSocketSendDatagramFlags(t *testing.T) {
+	port := availablePort()
+	sa := &syscall.SockaddrInet4{Port: port, Addr: [4]byte{127, 0, 0, 1}}
+	ready := make(gi.Channel, 1)
+	out := make(chan error, 1)
+	go func() {
+		fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, 0)
+		if err == nil {
+			defer func() { _ = syscall.Close(fd) }()
+			err = syscall.Bind(fd, sa)
+			if err == nil {
+				ready <- slip.True
+				buf := make([]byte, 20)
+				_, _, err = syscall.Recvfrom(fd, buf, 0)
+			}
+		}
+		out <- err
+	}()
+	scope := slip.NewScope()
+	scope.Let("port", slip.Fixnum(port))
+	scope.Let("ready", ready)
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((sock (make-instance 'socket :domain :inet :type :datagram))
+                       result)
+                  (channel-pop ready)
+                  (setq result (socket-send sock "Hello"
+                                           :timeout 1.0
+                                           :offset 1
+                                           :address (list "127.0.0.1" port)
+                                           :eor t
+                                           :dontwait t
+                                           :dontroute t))
+                  (socket-close sock)
+                  result)`,
+		Expect: "4",
+	}).Test(t)
+	err := <-out
+	tt.Nil(t, err)
+}
+
+func TestSocketSendUnixDatagram(t *testing.T) {
+	syscall.Unlink("uni")
+	defer func() { _ = syscall.Unlink("uni") }()
+	sa := &syscall.SockaddrUnix{Name: "uni"}
+	ready := make(gi.Channel, 1)
+	out := make(chan error, 1)
+	go func() {
+		fd, err := syscall.Socket(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
+		if err == nil {
+			defer func() { _ = syscall.Close(fd) }()
+			err = syscall.Bind(fd, sa)
+			if err == nil {
+				ready <- slip.True
+				buf := make([]byte, 20)
+				_, _, err = syscall.Recvfrom(fd, buf, 0)
+			}
+		}
+		out <- err
+	}()
+	scope := slip.NewScope()
+	scope.Let("ready", ready)
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((sock (make-instance 'socket :domain :unix :type :datagram))
+                       result)
+                  (channel-pop ready)
+                  (setq result (socket-send sock "Hello" :timeout 1.0 :address "uni"))
+                  (socket-close sock)
+                  result)`,
+		Expect: "5",
+	}).Test(t)
+	err := <-out
+	tt.Nil(t, err)
+}
+
+func TestSocketSendDatagramBadFlags(t *testing.T) {
+	if runtime.GOOS == "darwin" {
+		(&sliptest.Function{
+			Source: `(let ((sock (make-instance 'socket :domain :inet :type :datagram)))
+                  (socket-send sock "Hello" :address '("127.0.0.1" 7777) :oob t))`,
+			PanicType: slip.ErrorSymbol,
+		}).Test(t)
+		(&sliptest.Function{
+			Source: `(let ((sock (make-instance 'socket :domain :inet :type :datagram)))
+                  (socket-send sock "Hello" :address '("127.0.0.1" 7777) :nosignal t))`,
+			PanicType: slip.ErrorSymbol,
+		}).Test(t)
+		(&sliptest.Function{
+			Source: `(let ((sock (make-instance 'socket :domain :inet :type :datagram)))
+                  (socket-send sock "Hello" :address '("127.0.0.1" 7777) :confirm t))`,
+			PanicType: slip.ErrorSymbol,
+		}).Test(t)
+	}
+}
+
+func TestSocketSendDatagramNoAddress(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((sock (make-instance 'socket :domain :inet :type :datagram)))
+                  (socket-send sock "Hello"))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSocketSendDatagramBadAddress(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((sock (make-instance 'socket :domain :inet :type :datagram)))
+                  (socket-send sock "Hello" :address t))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
