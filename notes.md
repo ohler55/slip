@@ -4,11 +4,6 @@
 
 - next
 
- - datagram branch (https://www.sbcl.org/manual/#Networking)
-  + socket-receive
-  + socket-send
-
-
  - cl-output branch
   - finish-output
   - force-output
