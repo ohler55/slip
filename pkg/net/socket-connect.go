@@ -89,44 +89,49 @@ func getAddressArgs(self *flavors.Instance, args slip.List) (fd int, sa syscall.
 			slip.PanicType("address", args, "string", "octets,fixnum")
 		}
 	case 2:
-		var (
-			addr []byte
-			port int
-		)
-		switch ta := args[0].(type) {
-		case slip.String:
-			addr = netip.MustParseAddr(string(ta)).AsSlice()
-		case *slip.Vector:
-			list := ta.AsList()
-			octs := make([]byte, len(list))
-			for i, r := range list {
-				octs[i] = byte(cl.ToOctet(r).(slip.Octet))
-			}
-			addr = octs
-		case slip.Octets:
-			addr = []byte(ta)
-		default:
-			slip.PanicType("address", args, "string", "octets,fixnum")
-		}
-		if num, ok := args[1].(slip.Fixnum); ok {
-			port = int(num)
-		} else {
-			slip.PanicType("address port", args[1], "fixnum")
-		}
-		switch len(addr) {
-		case 4:
-			sa = &syscall.SockaddrInet4{Port: port, Addr: [4]byte(addr)}
-		case 16:
-			sa = &syscall.SockaddrInet6{Port: port, Addr: [16]byte(addr)}
-		default:
-			slip.PanicType("address", args, "string", "octets,fixnum")
-		}
+		sa = addressFromList(args)
 	default:
 		slip.PanicType("address", args, "string", "octets,fixnum")
 	}
 	var ok bool
 	if fd, ok = self.Any.(int); !ok {
 		slip.NewPanic("%s is not initialized", self)
+	}
+	return
+}
+
+func addressFromList(list slip.List) (sa syscall.Sockaddr) {
+	var (
+		addr []byte
+		port int
+	)
+	switch ta := list[0].(type) {
+	case slip.String:
+		addr = netip.MustParseAddr(string(ta)).AsSlice()
+	case *slip.Vector:
+		list := ta.AsList()
+		octs := make([]byte, len(list))
+		for i, r := range list {
+			octs[i] = byte(cl.ToOctet(r).(slip.Octet))
+		}
+		addr = octs
+	case slip.Octets:
+		addr = []byte(ta)
+	default:
+		slip.PanicType("address", list, "string", "octets,fixnum")
+	}
+	if num, ok := list[1].(slip.Fixnum); ok {
+		port = int(num)
+	} else {
+		slip.PanicType("address port", list[1], "fixnum")
+	}
+	switch len(addr) {
+	case 4:
+		sa = &syscall.SockaddrInet4{Port: port, Addr: [4]byte(addr)}
+	case 16:
+		sa = &syscall.SockaddrInet6{Port: port, Addr: [16]byte(addr)}
+	default:
+		slip.PanicType("address", list, "(octets fixnum)")
 	}
 	return
 }
