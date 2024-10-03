@@ -8,12 +8,6 @@
   + socket-receive
   + socket-send
 
-  - different functions for send and receive of datagrams with oob
-  - socket-receive-message (args same as socket-receive but with oob)
-   - oob should be buf or nil, a key value :oob if provided implies oob flag
-   - Sockaddr.Recvmsg() in different method/function
-  - socket-send-message ()
-
 
  - cl-output branch
   - finish-output
