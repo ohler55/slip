@@ -4,16 +4,14 @@
 
 - next
 
- - cl-output branch
-  - finish-output
-  - force-output
-  - clear-output
-
- - name service branch
-  - host-ent class
-  - get-protocol-by-name (name) => fixnum, name, aliases
-  - get-host-by-name
-  - get-host-by-address
+ - name-service branch
+  + host-ent class
+  - get-host-by-name (node) => host-ent
+   - node - string - hostname or ip-address
+  - get-host-by-address (address) => host-ent
+   - address - octets
+  - name-service-error
+   - clos.DefClass
 
 --------------------
 
