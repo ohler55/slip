@@ -28,7 +28,7 @@ type Flavor struct {
 	inherit          []*Flavor
 	defaultVars      map[string]slip.Object
 	keywords         map[string]slip.Object
-	methods          map[string][]*method
+	methods          map[string][]*Method
 	included         []string
 	required         []string
 	requiredMethods  []string
@@ -56,15 +56,15 @@ func Find(name string) (f *Flavor) {
 // DefMethod adds a method to the Flavor.
 func (obj *Flavor) DefMethod(name string, methodType string, caller slip.Caller) {
 	name = strings.ToLower(name)
-	var m *method
+	var m *Method
 	add := false
 	ma := obj.methods[name]
 	if 0 < len(ma) {
 		m = ma[0]
 	} else {
 		add = true
-		m = &method{name: name, from: obj}
-		ma = []*method{m}
+		m = &Method{name: name, from: obj}
+		ma = []*Method{m}
 	}
 	switch strings.ToLower(methodType) {
 	case ":primary", "":
@@ -205,7 +205,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 		if 0 < len(xma) {
 			obj.methods[k] = append(obj.methods[k], ma[0])
 		} else {
-			obj.methods[k] = []*method{{name: k, from: obj}, ma[0]}
+			obj.methods[k] = []*Method{{name: k, from: obj}, ma[0]}
 		}
 	}
 	for _, f2 := range cf.inherit {
@@ -217,7 +217,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (obj *Flavor) MakeInstance() slip.Instance {
-	inst := Instance{Flavor: obj}
+	inst := Instance{Flavor: obj, InstanceBase: InstanceBase{Type: obj, Methods: obj.methods}}
 	inst.Scope.Vars = map[string]slip.Object{}
 	for k, v := range obj.defaultVars {
 		inst.Vars[k] = v

@@ -15,7 +15,7 @@ var vanilla = Flavor{
 	name:        "vanilla-flavor",
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
-	methods: map[string][]*method{
+	methods: map[string][]*Method{
 		":describe":             {{name: ":describe", primary: describeCaller(true)}},
 		":eval-inside-yourself": {{name: ":eval-inside-yourself", primary: insideCaller(true)}},
 		":flavor":               {{name: ":flavor", primary: flavorCaller(true)}},

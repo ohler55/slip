@@ -6,9 +6,9 @@ import (
 	"github.com/ohler55/slip"
 )
 
-// method is the combined methods for a Flavor that includes the inherited
+// Method is the combined methods for a Flavor that includes the inherited
 // methods with the same name.
-type method struct {
+type Method struct {
 	name    string
 	from    *Flavor
 	primary slip.Caller
@@ -17,12 +17,12 @@ type method struct {
 	wrap    slip.Caller
 }
 
-func (m *method) empty() bool {
+func (m *Method) empty() bool {
 	return m.primary == nil && m.wrap == nil && m.before == nil && m.after == nil
 }
 
 // Simplify by returning a representation of the method.
-func (m *method) Simplify() any {
+func (m *Method) Simplify() any {
 	simple := map[string]any{
 		"name": m.name,
 		"from": m.from.name,

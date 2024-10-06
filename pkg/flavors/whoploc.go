@@ -14,7 +14,7 @@ func init() {
 }
 
 type whopLoc struct {
-	methods []*method
+	methods []*Method
 	current int
 }
 

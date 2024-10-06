@@ -4,6 +4,15 @@
 
 - next
 
+ - clos instance
+  - should clos just use flavors instance ??
+   - make a flavor for each class?
+  - or duplicate the code
+   - share method (make public)
+  - maybe instance should have ref to flavor/class methods
+   - scope and methods as common embedded type
+   - InstanceBase
+
  - name-service branch
   + host-ent class
   - get-host-by-name (node) => host-ent
@@ -12,6 +21,7 @@
    - address - octets
   - name-service-error
    - clos.DefClass
+
 
 --------------------
 
