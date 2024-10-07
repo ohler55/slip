@@ -2,9 +2,15 @@
 
 package net_test
 
-// func TestNameServiceError(t *testing.T) {
-// 	(&sliptest.Function{
-// 		Source: `(make-instance 'name-service-error)`,
-// 		Expect: "xx",
-// 	}).Test(t)
-// }
+import (
+	"testing"
+
+	"github.com/ohler55/slip/sliptest"
+)
+
+func TestNameServiceError(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-instance 'name-service-error)`,
+		Expect: "/#<name-service-error [0-9a-h]+>/",
+	}).Test(t)
+}

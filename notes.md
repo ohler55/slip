@@ -4,14 +4,7 @@
 
 - next
 
- - clos instance
-  - should clos just use flavors instance ??
-   - make a flavor for each class?
-  - or duplicate the code
-   - share method (make public)
-  - maybe instance should have ref to flavor/class methods
-   - scope and methods as common embedded type
-   - InstanceBase
+ - should instance be moved to slip and get rid of interface
 
  - name-service branch
   + host-ent class

@@ -97,7 +97,7 @@ type Write struct {
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 16)
 	obj, ok := args[0].(*flavors.Instance)
-	if !ok || obj.Flavor != flavor {
+	if !ok || obj.Type != flavor {
 		slip.PanicType("bag", args[0], "bag")
 	}
 	return writeBag(obj, args[1:])

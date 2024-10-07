@@ -44,7 +44,7 @@ type SocketName struct {
 func (f *SocketName) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != socketFlavor {
+	if !ok || !self.IsA(socketFlavor) {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	result := slip.Values{nil, nil}

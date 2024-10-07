@@ -97,7 +97,7 @@ type flavorCaller bool
 
 func (caller flavorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
-	return obj.Flavor
+	return obj.Type
 }
 
 func (caller flavorCaller) Docs() string {
@@ -169,7 +169,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 		PanicMethodArgCount(obj, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
-		if _, has := obj.Flavor.methods[string(sym)]; has {
+		if _, has := obj.Methods[string(sym)]; has {
 			return obj.Receive(s, string(sym), args[1:], depth+1)
 		}
 	}
@@ -190,8 +190,8 @@ type whichOpsCaller bool
 
 func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
-	names := make([]string, 0, len(obj.Flavor.methods))
-	for k := range obj.Flavor.methods {
+	names := make([]string, 0, len(obj.Methods))
+	for k := range obj.Methods {
 		names = append(names, k)
 	}
 	sort.Slice(names, func(i, j int) bool { return 0 > strings.Compare(names[i], names[j]) })

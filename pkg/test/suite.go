@@ -240,14 +240,14 @@ Finds prints the suite result.
 // {top: {pass: 0 fail: 0 skip: 0 subs: {leaf: pass}}}
 func getResults(obj *flavors.Instance) (result any) {
 	switch {
-	case obj.Flavor == testFlavor:
+	case obj.Type == testFlavor:
 		switch obj.Get("result") {
 		case passSymbol:
 			result = "pass"
 		case failSymbol:
 			result = "fail"
 		}
-	case obj.Flavor == suiteFlavor:
+	case obj.Type == suiteFlavor:
 		var (
 			pass int64
 			fail int64

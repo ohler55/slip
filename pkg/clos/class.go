@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 const (
@@ -32,7 +33,7 @@ type Class struct {
 	final     bool
 	noMake    bool
 	slots     map[string]slip.Object
-	methods   map[string]slip.Object // TBD change once needed
+	methods   map[string][]*flavors.Method
 }
 
 // Find finds the named class.
@@ -54,7 +55,7 @@ func DefClass(name, docs string, slots map[string]slip.Object, supers []*Class, 
 		docs:    docs,
 		slots:   slots,
 		inherit: supers,
-		methods: map[string]slip.Object{},
+		methods: map[string][]*flavors.Method{},
 		final:   final,
 	}
 	allClasses[name] = class
@@ -235,8 +236,14 @@ func (c *Class) NoMake() bool {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *Class) MakeInstance() slip.Instance {
-	// TBD when Class can be used to creat instances change this.
-	panic(slip.NewError("Can not create an instance of %s.", c.Name()))
+	inst := flavors.Instance{Type: c, Methods: c.methods}
+	inst.Scope.Vars = map[string]slip.Object{}
+	for k, v := range c.slots {
+		inst.Vars[k] = v
+	}
+	inst.Vars["self"] = &inst
+
+	return &inst
 }
 
 // DefMethod defines a method for the class. TBD place holder for now.

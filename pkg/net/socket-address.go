@@ -41,7 +41,7 @@ type SocketAddress struct {
 func (f *SocketAddress) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || self.Flavor != socketFlavor {
+	if !ok || !self.IsA(socketFlavor) {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	if self.Any != nil {

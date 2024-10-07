@@ -29,7 +29,7 @@ func TestClassBasic(t *testing.T) {
   prototype: 42
   slots: {}
 }`, pretty.SEN(c.Simplify()))
-	tt.Panic(t, func() { _ = c.(slip.Class).MakeInstance() })
+	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`).Eval(slip.NewScope(), nil) })
 }
 
 func TestClassDescribeBasic(t *testing.T) {

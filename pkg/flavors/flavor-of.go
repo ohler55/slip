@@ -39,7 +39,7 @@ type FlavorOf struct {
 func (f *FlavorOf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	if inst, ok := args[0].(*Instance); ok {
-		return inst.Flavor
+		return inst.Type
 	}
 	return nil
 }
