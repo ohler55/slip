@@ -96,7 +96,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	appendDaemon := func(m *Method, caller slip.Caller, daemon string) {
 		b = append(b, "  "...)
 		b = append(b, emp...)
-		b = append(b, m.from.Name()...)
+		b = append(b, m.From.Name()...)
 		b = append(b, off...)
 		b = append(b, ' ')
 		b = append(b, daemon...)

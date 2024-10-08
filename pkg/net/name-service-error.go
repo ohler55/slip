@@ -21,8 +21,8 @@ var nameServiceErrorHierarchy = []slip.Symbol{
 func defNameServiceError() {
 	_ = clos.DefClass("name-service-error",
 		"A name service error",
-		map[string]slip.Object{"message": nil}, // slots
-		[]*clos.Class{clos.Find("error")},      // supers
+		map[string]slip.Object{"message": nil},               // slots
+		[]*clos.Class{slip.FindClass("error").(*clos.Class)}, // supers
 		true)
 
 	slip.RegisterCondition("name-service-error", makeNameServiceError)

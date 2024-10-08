@@ -184,6 +184,7 @@ func DefFlavor(
 		nf.varNames = append(nf.varNames, vn)
 	}
 	allFlavors[nf.name] = nf
+	slip.RegisterClass(nf.name, nf)
 	_ = p.Set(nf.name, nf)
 	p.Export(nf.name)
 

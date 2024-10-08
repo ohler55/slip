@@ -9,6 +9,7 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestSendGetSet(t *testing.T) {
@@ -150,4 +151,11 @@ berry rot
 blueberry after rot
 berry after rot
 `, b.String())
+}
+
+func TestSendClass(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-condition 'error :message "quux") :message)`,
+		Expect: `"quux"`,
+	}).Test(t)
 }

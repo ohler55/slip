@@ -9,8 +9,8 @@ import (
 // Method is the combined methods for a Flavor that includes the inherited
 // methods with the same name.
 type Method struct {
-	name    string
-	from    slip.Class
+	Name    string
+	From    slip.Class
 	primary slip.Caller
 	before  slip.Caller
 	after   slip.Caller
@@ -24,8 +24,8 @@ func (m *Method) empty() bool {
 // Simplify by returning a representation of the method.
 func (m *Method) Simplify() any {
 	simple := map[string]any{
-		"name": m.name,
-		"from": m.from.Name(),
+		"name": m.Name,
+		"from": m.From.Name(),
 	}
 	if m.wrap != nil {
 		simple["whopper"] = true

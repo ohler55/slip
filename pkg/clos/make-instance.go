@@ -84,7 +84,7 @@ func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, label string) (
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		if cf := flavors.Find(string(ta)); cf == nil {
-			if c := Find(string(ta)); c == nil {
+			if c := slip.FindClass(string(ta)); c == nil {
 				slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
 			} else {
 				class = c

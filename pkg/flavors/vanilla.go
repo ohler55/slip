@@ -16,23 +16,28 @@ var vanilla = Flavor{
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
 	methods: map[string][]*Method{
-		":describe":             {{name: ":describe", primary: describeCaller(true)}},
-		":eval-inside-yourself": {{name: ":eval-inside-yourself", primary: insideCaller(true)}},
-		":flavor":               {{name: ":flavor", primary: flavorCaller(true)}},
-		":init":                 {{name: ":init", primary: initCaller(true)}},
-		":id":                   {{name: ":id", primary: idCaller(true)}},
-		":inspect":              {{name: ":inspect", primary: inspectCaller(true)}},
-		":operation-handled-p":  {{name: ":operation-handled-p", primary: hasOpCaller(true)}},
-		":print-self":           {{name: ":print-self", primary: printCaller(true)}},
-		":send-if-handles":      {{name: ":send-if-handles", primary: sendIfCaller(true)}},
-		":which-operations":     {{name: ":which-operations", primary: whichOpsCaller(true)}},
+		":describe":             {{Name: ":describe", primary: describeCaller(true)}},
+		":eval-inside-yourself": {{Name: ":eval-inside-yourself", primary: insideCaller(true)}},
+		":flavor":               {{Name: ":flavor", primary: flavorCaller(true)}},
+		":init":                 {{Name: ":init", primary: initCaller(true)}},
+		":id":                   {{Name: ":id", primary: idCaller(true)}},
+		":inspect":              {{Name: ":inspect", primary: inspectCaller(true)}},
+		":operation-handled-p":  {{Name: ":operation-handled-p", primary: hasOpCaller(true)}},
+		":print-self":           {{Name: ":print-self", primary: printCaller(true)}},
+		":send-if-handles":      {{Name: ":send-if-handles", primary: sendIfCaller(true)}},
+		":which-operations":     {{Name: ":which-operations", primary: whichOpsCaller(true)}},
 	},
 }
 
 func init() {
 	for _, ma := range vanilla.methods {
-		ma[0].from = &vanilla
+		ma[0].From = &vanilla
 	}
+}
+
+// VanillaMethods returns the vanilla methods. (used for the clos standard methods)
+func VanillaMethods() map[string][]*Method {
+	return vanilla.methods
 }
 
 type initCaller bool

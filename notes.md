@@ -3,6 +3,8 @@
 - **multipass** or utm for linux
 
 - next
+ - clos and flavors
+  - test to 100%
 
  - name-service branch
   + host-ent class

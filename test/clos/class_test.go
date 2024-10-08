@@ -23,8 +23,19 @@ func TestClassBasic(t *testing.T) {
 	tt.Equal(t, `{
   docs: "built-in fixed number class"
   final: true
-  inherit: [built-in-class integer]
-  methods: []
+  inherit: [integer]
+  methods: [
+    ":describe"
+    ":eval-inside-yourself"
+    ":flavor"
+    ":id"
+    ":init"
+    ":inspect"
+    ":operation-handled-p"
+    ":print-self"
+    ":send-if-handles"
+    ":which-operations"
+  ]
   name: fixnum
   prototype: 42
   slots: {}
@@ -38,10 +49,20 @@ func TestClassDescribeBasic(t *testing.T) {
 	tt.Equal(t, `fixnum is a built-in class:
   Documentation:
     built-in fixed number class
-  Direct superclasses: built-in-class integer
-  Class precedence list: built-in-class integer rational real number
+  Direct superclasses: integer
+  Class precedence list: integer rational real number built-in-class
   Slots: None
-  Methods: None
+  Methods:
+    :describe
+    :eval-inside-yourself
+    :flavor
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :which-operations
   Prototype: 42
 `, string(out))
 
@@ -49,10 +70,20 @@ func TestClassDescribeBasic(t *testing.T) {
 	tt.Equal(t, "\x1b[1mfixnum\x1b[m is a built-in class:\n"+
 		"  Documentation:\n"+
 		"    built-in fixed number class\n"+
-		"  Direct superclasses: built-in-class integer\n"+
-		"  Class precedence list: built-in-class integer rational real number\n"+
+		"  Direct superclasses: integer\n"+
+		"  Class precedence list: integer rational real number built-in-class\n"+
 		"  Slots: None\n"+
-		"  Methods: None\n"+
+		"  Methods:\n"+
+		"    :describe\n"+
+		"    :eval-inside-yourself\n"+
+		"    :flavor\n"+
+		"    :id\n"+
+		"    :init\n"+
+		"    :inspect\n"+
+		"    :operation-handled-p\n"+
+		"    :print-self\n"+
+		"    :send-if-handles\n"+
+		"    :which-operations\n"+
 		"  Prototype: 42\n", string(out))
 }
 

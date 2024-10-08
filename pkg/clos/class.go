@@ -22,26 +22,17 @@ const (
 	indentSpaces = "                                                                                "
 )
 
-var allClasses = map[string]*Class{}
-
 // Class is a CLOS class.
 type Class struct {
-	name      string
-	docs      string
-	inherit   []*Class // direct supers
-	prototype slip.Object
-	final     bool
-	noMake    bool
-	slots     map[string]slip.Object
-	methods   map[string][]*flavors.Method
-}
-
-// Find finds the named class.
-func Find(name string) (c *Class) {
-	if c = allClasses[name]; c == nil {
-		c = allClasses[strings.ToLower(name)]
-	}
-	return
+	name         string
+	docs         string
+	inherit      []*Class // direct supers
+	prototype    slip.Object
+	final        bool
+	noMake       bool
+	slots        map[string]slip.Object
+	methods      map[string][]*flavors.Method
+	InstanceInit func(inst slip.Instance, obj slip.Object)
 }
 
 // DefClass creates a Class.
@@ -51,7 +42,7 @@ func DefClass(
 	supers []*Class,
 	final bool) (class *Class) {
 	name = strings.ToLower(name)
-	if _, has := allClasses[name]; has {
+	if slip.FindClass(name) != nil {
 		slip.NewPanic("Class %s already defined.", name)
 	}
 	class = &Class{
@@ -62,7 +53,8 @@ func DefClass(
 		methods: map[string][]*flavors.Method{},
 		final:   final,
 	}
-	allClasses[name] = class
+	class.mergeInherited()
+	slip.RegisterClass(name, class)
 	return
 }
 
@@ -89,8 +81,13 @@ func (c *Class) Simplify() any {
 		slots[k] = slip.Simplify(o)
 	}
 	methods := make([]any, 0, len(c.methods))
-	for m := range c.methods {
-		methods = append(methods, m)
+	var keys []string
+	for k := range c.methods {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		methods = append(methods, k)
 	}
 	return map[string]any{
 		"name":      c.name,
@@ -253,4 +250,44 @@ func (c *Class) MakeInstance() slip.Instance {
 // DefMethod defines a method for the class. TBD place holder for now.
 func (c *Class) DefMethod(name string) {
 	c.methods[name] = nil
+}
+
+// InvokeMethod on an object. A temporary flavors.Instance is created and the
+// method is invoked on that instance.
+func (c *Class) InvokeMethod(obj slip.Object, s *slip.Scope, message string, args slip.List, depth int) slip.Object {
+	inst := c.MakeInstance()
+	if c.InstanceInit != nil {
+		c.InstanceInit(inst, obj)
+	}
+	return inst.Receive(s, message, args, depth)
+}
+
+func (c *Class) mergeInherited() {
+	if c.slots == nil {
+		c.slots = map[string]slip.Object{}
+	}
+	if c.methods == nil {
+		c.methods = map[string][]*flavors.Method{}
+	}
+	var iif func(inst slip.Instance, obj slip.Object)
+	for i := len(c.inherit) - 1; 0 <= i; i-- {
+		ic := c.inherit[i]
+		if ic.InstanceInit != nil {
+			iif = ic.InstanceInit
+		}
+		for k, v := range ic.slots {
+			c.slots[k] = v
+		}
+		for k, ma := range ic.methods {
+			xma := c.methods[k]
+			if 0 < len(xma) {
+				c.methods[k] = append(c.methods[k], ma[0])
+			} else {
+				c.methods[k] = []*flavors.Method{ma[0]}
+			}
+		}
+	}
+	if c.InstanceInit == nil {
+		c.InstanceInit = iif
+	}
 }

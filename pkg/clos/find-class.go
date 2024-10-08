@@ -52,7 +52,7 @@ func (f *FindClass) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	if cf := flavors.Find(string(sym)); cf != nil {
 		return cf
 	}
-	if c := Find(string(sym)); c != nil {
+	if c := slip.FindClass(string(sym)); c != nil {
 		return c
 	}
 	if 1 < len(args) && args[1] != nil {

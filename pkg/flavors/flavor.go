@@ -55,15 +55,20 @@ func Find(name string) (f *Flavor) {
 
 // DefMethod adds a method to the Flavor.
 func (obj *Flavor) DefMethod(name string, methodType string, caller slip.Caller) {
+	DefMethod(obj, obj.methods, name, methodType, caller)
+}
+
+// DefMethod adds a method to the class or flavor.
+func DefMethod(obj slip.Class, mm map[string][]*Method, name string, methodType string, caller slip.Caller) {
 	name = strings.ToLower(name)
 	var m *Method
 	add := false
-	ma := obj.methods[name]
+	ma := mm[name]
 	if 0 < len(ma) {
 		m = ma[0]
 	} else {
 		add = true
-		m = &Method{name: name, from: obj}
+		m = &Method{Name: name, From: obj}
 		ma = []*Method{m}
 	}
 	switch strings.ToLower(methodType) {
@@ -79,7 +84,7 @@ func (obj *Flavor) DefMethod(name string, methodType string, caller slip.Caller)
 		slip.PanicMethod(obj, slip.Symbol(methodType), slip.Symbol(name), "")
 	}
 	if add {
-		obj.methods[name] = ma
+		mm[name] = ma
 	}
 }
 
@@ -205,7 +210,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 		if 0 < len(xma) {
 			obj.methods[k] = append(obj.methods[k], ma[0])
 		} else {
-			obj.methods[k] = []*Method{{name: k, from: obj}, ma[0]}
+			obj.methods[k] = []*Method{{Name: k, From: obj}, ma[0]}
 		}
 	}
 	for _, f2 := range cf.inherit {

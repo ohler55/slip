@@ -2,6 +2,10 @@
 
 package slip
 
+import "strings"
+
+var allClasses = map[string]Class{}
+
 type Class interface {
 	Object
 
@@ -20,4 +24,18 @@ type Class interface {
 
 	// MakeInstance creates a new instance but does not call the :init method.
 	MakeInstance() Instance
+}
+
+// Find finds the named class.
+func FindClass(name string) (c Class) {
+	if c = allClasses[name]; c == nil {
+		c = allClasses[strings.ToLower(name)]
+	}
+	return
+}
+
+// RegisterClass a class.
+func RegisterClass(name string, c Class) {
+	name = strings.ToLower(name)
+	allClasses[name] = c
 }
