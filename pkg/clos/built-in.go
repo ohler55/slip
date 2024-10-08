@@ -251,126 +251,147 @@ var (
 	conditionClass = Class{
 		name:    "condition",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in condition class",
 		inherit: []*Class{&builtInClass},
 	}
 	seriousConditionClass = Class{
 		name:    "serious-condition",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in serious-condition class",
 		inherit: []*Class{&builtInClass, &conditionClass},
 	}
 	errorClass = Class{
 		name:    "error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in error class",
 		inherit: []*Class{&builtInClass, &seriousConditionClass},
 	}
 	warningClass = Class{
 		name:    "warning",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in warning class",
 		inherit: []*Class{&builtInClass, &conditionClass},
 	}
 	arithmeticErrorClass = Class{
 		name:    "arithmetic-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in arithmetic-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	cellErrorClass = Class{
 		name:    "cell-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in cell-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	classNotFoundClass = Class{
 		name:    "class-not-found",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in class-not-found error class",
 		inherit: []*Class{&builtInClass, &cellErrorClass},
 	}
 	controlErrorClass = Class{
 		name:    "control-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in control-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	fileErrorClass = Class{
 		name:    "file-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in file-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	methodErrorClass = Class{
 		name:    "method-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in method-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	packageErrorClass = Class{
 		name:    "package-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in package-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	programErrorClass = Class{
 		name:    "program-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in program-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	typeErrorClass = Class{
 		name:    "type-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in type-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	parseErrorClass = Class{
 		name:    "parse-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in parse-error class",
 		inherit: []*Class{&builtInClass, &errorClass},
 	}
 	readerErrorClass = Class{
 		name:    "reader-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in reader-error class",
 		inherit: []*Class{&builtInClass, &parseErrorClass},
 	}
 	unboundSlotClass = Class{
 		name:    "unbound-slot",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in unbound-slot error class",
 		inherit: []*Class{&builtInClass, &cellErrorClass},
 	}
 	undefinedFunctionClass = Class{
 		name:    "undefined-function",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in undefined-function error class",
 		inherit: []*Class{&builtInClass, &cellErrorClass},
 	}
 	simpleConditionClass = Class{
 		name:    "simple-condition",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in simple-condition class",
 		inherit: []*Class{&builtInClass, &conditionClass},
 	}
 	simpleErrorClass = Class{
 		name:    "simple-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in simple-error class",
 		inherit: []*Class{&builtInClass, &simpleConditionClass, &errorClass},
 	}
 	simpleWarningClass = Class{
 		name:    "simple-warning",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in simple-warning class",
 		inherit: []*Class{&builtInClass, &simpleConditionClass, &warningClass},
 	}
 	simpleTypeErrorClass = Class{
 		name:    "simple-type-error",
 		final:   true,
+		noMake:  true,
 		docs:    "built-in simple-type-error class",
 		inherit: []*Class{&builtInClass, &simpleConditionClass, &typeErrorClass},
 	}

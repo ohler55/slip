@@ -4,16 +4,13 @@
 
 - next
 
- - should instance be moved to slip and get rid of interface
-
  - name-service branch
   + host-ent class
+  + name-service-error
   - get-host-by-name (node) => host-ent
    - node - string - hostname or ip-address
   - get-host-by-address (address) => host-ent
    - address - octets
-  - name-service-error
-   - clos.DefClass
 
 
 --------------------

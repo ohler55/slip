@@ -8,9 +8,9 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestNameServiceError(t *testing.T) {
+func TestNameServiceErrorMake(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(make-instance 'name-service-error)`,
-		Expect: "/#<name-service-error [0-9a-h]+>/",
+		Source: `(make-condition 'name-service-error :message "name not found")`,
+		Expect: "/#<NAME-SERVICE-ERROR [0-9a-h]+>/",
 	}).Test(t)
 }

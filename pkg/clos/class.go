@@ -45,7 +45,11 @@ func Find(name string) (c *Class) {
 }
 
 // DefClass creates a Class.
-func DefClass(name, docs string, slots map[string]slip.Object, supers []*Class, final bool) (class *Class) {
+func DefClass(
+	name, docs string,
+	slots map[string]slip.Object,
+	supers []*Class,
+	final bool) (class *Class) {
 	name = strings.ToLower(name)
 	if _, has := allClasses[name]; has {
 		slip.NewPanic("Class %s already defined.", name)

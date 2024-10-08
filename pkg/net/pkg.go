@@ -6,7 +6,6 @@ import (
 	"sort"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 )
 
 var (
@@ -38,12 +37,7 @@ func init() {
 	defServer()
 	defSocket()
 	defHostent()
-
-	_ = clos.DefClass("name-service-error",
-		"A name service error",
-		map[string]slip.Object{},          // slots
-		[]*clos.Class{clos.Find("error")}, // supers
-		true)
+	defNameServiceError()
 
 	Pkg.Initialize(nil, &bodyWrap{}) // lock
 	slip.AddPackage(&Pkg)

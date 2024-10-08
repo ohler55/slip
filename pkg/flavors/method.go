@@ -10,7 +10,7 @@ import (
 // methods with the same name.
 type Method struct {
 	name    string
-	from    *Flavor
+	from    slip.Class
 	primary slip.Caller
 	before  slip.Caller
 	after   slip.Caller
@@ -25,7 +25,7 @@ func (m *Method) empty() bool {
 func (m *Method) Simplify() any {
 	simple := map[string]any{
 		"name": m.name,
-		"from": m.from.name,
+		"from": m.from.Name(),
 	}
 	if m.wrap != nil {
 		simple["whopper"] = true
