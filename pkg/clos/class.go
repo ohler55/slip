@@ -205,21 +205,17 @@ func (c *Class) Describe(b []byte, indent, right int, ansi bool) []byte {
 	}
 	b = append(b, indentSpaces[:i2]...)
 	b = append(b, "Methods:"...)
-	if 0 < len(c.methods) {
-		b = append(b, '\n')
-		var keys []string
-		for k := range c.methods {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, k := range keys {
-			b = append(b, indentSpaces[:i3]...)
-			b = append(b, k...)
-			b = append(b, '\n')
-		}
-	} else {
-		b = append(b, " None\n"...)
+	var keys []string
+	for k := range c.methods {
+		keys = append(keys, k)
 	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		b = append(b, '\n')
+		b = append(b, indentSpaces[:i3]...)
+		b = append(b, k...)
+	}
+	b = append(b, '\n')
 	if c.prototype != nil {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "Prototype: "...)
@@ -260,6 +256,11 @@ func (c *Class) InvokeMethod(obj slip.Object, s *slip.Scope, message string, arg
 		c.InstanceInit(inst, obj)
 	}
 	return inst.Receive(s, message, args, depth)
+}
+
+// GetMethod returns the method if it exists.
+func (c *Class) GetMethod(name string) []*flavors.Method {
+	return c.methods[name]
 }
 
 func (c *Class) mergeInherited() {

@@ -3,12 +3,14 @@
 package clos_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestClassBasic(t *testing.T) {
@@ -124,4 +126,20 @@ func TestClassDefClass(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = clos.DefClass("dummy", "", map[string]slip.Object{}, nil, false)
 	})
+}
+
+func TestClassInstanceInit(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-condition 'error :message "quux") :message)`,
+		Expect: `"quux"`,
+	}).Test(t)
+}
+
+func TestConditionMessageDocs(t *testing.T) {
+	scope := slip.NewScope()
+	var out strings.Builder
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+
+	_ = slip.ReadString(`(describe-method (find-class 'condition) :message out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":message"))
 }

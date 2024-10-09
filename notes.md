@@ -4,7 +4,10 @@
 
 - next
  - clos and flavors
-  - test to 100%
+  - test
+   - define a class in go
+    - double inherit
+    -
 
  - name-service branch
   + host-ent class

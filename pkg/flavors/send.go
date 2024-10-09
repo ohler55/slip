@@ -63,12 +63,13 @@ func (f *Send) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		if mi, _ := slip.FindClass(string(self.Hierarchy()[0])).(slip.MethodInvoker); mi != nil {
 			if method, ok := args[1].(slip.Symbol); ok {
 				result = mi.InvokeMethod(self, s, string(method), args[2:], depth)
-				goto invoked
+			} else {
+				slip.PanicType("method", args[1], "keyword")
 			}
+		} else {
+			slip.PanicType("object of send", args[0], "instance")
 		}
-		slip.PanicType("object of send", args[0], "instance")
 	}
-invoked:
 	return
 }
 

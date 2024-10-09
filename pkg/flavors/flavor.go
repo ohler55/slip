@@ -420,3 +420,8 @@ func (obj *Flavor) NoMake() bool {
 func (obj *Flavor) Document(name, desc string) {
 	obj.varDocs[name] = desc
 }
+
+// GetMethod returns the method if it exists.
+func (obj *Flavor) GetMethod(name string) []*Method {
+	return obj.methods[name]
+}

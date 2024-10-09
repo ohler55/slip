@@ -51,21 +51,22 @@ type DescribeMethod struct {
 // Call the the function with the arguments provided.
 func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 3)
-	var cf *Flavor
+	var hm HasMethods
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		if cf = allFlavors[string(ta)]; cf == nil {
-			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
+		if hm = slip.FindClass(string(ta)).(HasMethods); hm == nil {
+			slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
 		}
-	case *Flavor:
-		cf = ta
+	case HasMethods:
+		hm = ta
 	default:
 		slip.PanicType("flavor argument to describe-method", ta, "symbol", "flavor")
 	}
+	sc := hm.(slip.Class)
 	meth, _ := args[1].(slip.Symbol)
-	ma := cf.methods[string(meth)]
+	ma := hm.GetMethod(string(meth))
 	if len(ma) == 0 {
-		slip.PanicUnboundSlot(cf, meth, "%s is not a method on %s.", args[1], cf.name)
+		slip.PanicUnboundSlot(args[0], meth, "%s is not a method on %s.", args[1], args[0])
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 2 < len(args) {
@@ -90,7 +91,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	b = append(b, off...)
 	b = append(b, " is a method of "...)
 	b = append(b, emp...)
-	b = append(b, cf.name...)
+	b = append(b, sc.Name()...)
 	b = append(b, off...)
 	b = append(b, '\n')
 	appendDaemon := func(m *Method, caller slip.Caller, daemon string) {
