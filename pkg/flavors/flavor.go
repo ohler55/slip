@@ -19,6 +19,8 @@ func init() {
 	slip.DefConstant(FlavorSymbol, FlavorSymbol,
 		`A _flavor_ encapsulates a class of objects or instances.
 The _flavor_ itself is an instance and can be sent a limited set of methods.`)
+
+	slip.RegisterClass(vanilla.name, &vanilla)
 }
 
 // Flavor of Objects.

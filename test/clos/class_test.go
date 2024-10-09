@@ -97,27 +97,49 @@ func TestClassDefClass(t *testing.T) {
 		nil, // supers
 		false,
 	)
-	c.DefMethod("fun")
+	c.DefMethod(":fun", "", nil)
 	found := slip.ReadString(`(find-class 'dummy)`).Eval(slip.NewScope(), nil).(slip.Class)
 	tt.Equal(t, c, found)
 	out := c.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `dummy is a class:
   Documentation:
     dummy class
-  Direct superclasses:
-  Class precedence list:
+  Direct superclasses: standard-object
+  Class precedence list: standard-object
   Slots:
     x = 3
     y = 5
   Methods:
-    fun
+    :describe
+    :eval-inside-yourself
+    :flavor
+    :fun
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :which-operations
 `, string(out))
 
 	tt.Equal(t, `{
   docs: "dummy class"
   final: false
-  inherit: []
-  methods: [fun]
+  inherit: [standard-object]
+  methods: [
+    ":describe"
+    ":eval-inside-yourself"
+    ":flavor"
+    ":fun"
+    ":id"
+    ":init"
+    ":inspect"
+    ":operation-handled-p"
+    ":print-self"
+    ":send-if-handles"
+    ":which-operations"
+  ]
   name: dummy
   prototype: null
   slots: {x: 3 y: 5}

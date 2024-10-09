@@ -221,7 +221,7 @@ var (
 		final:   true,
 		noMake:  true,
 		docs:    "built-in super class for all classes",
-		inherit: []*Class{&builtInClass},
+		methods: flavors.VanillaMethods(),
 	}
 	classClass = Class{
 		name:    "class",

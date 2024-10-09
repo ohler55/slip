@@ -3,11 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - clos and flavors
-  - test
-   - define a class in go
-    - double inherit
-    -
 
  - name-service branch
   + host-ent class

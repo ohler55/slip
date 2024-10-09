@@ -41,6 +41,7 @@ func DefClass(
 	slots map[string]slip.Object,
 	supers []*Class,
 	final bool) (class *Class) {
+
 	name = strings.ToLower(name)
 	if slip.FindClass(name) != nil {
 		slip.NewPanic("Class %s already defined.", name)
@@ -52,6 +53,16 @@ func DefClass(
 		inherit: supers,
 		methods: map[string][]*flavors.Method{},
 		final:   final,
+	}
+	var hasSO bool
+	for _, c := range class.inherit {
+		if c == &standardObjectClass {
+			hasSO = true
+			break
+		}
+	}
+	if !hasSO {
+		class.inherit = append(class.inherit, &standardObjectClass)
 	}
 	class.mergeInherited()
 	slip.RegisterClass(name, class)
@@ -244,8 +255,8 @@ func (c *Class) MakeInstance() slip.Instance {
 }
 
 // DefMethod defines a method for the class. TBD place holder for now.
-func (c *Class) DefMethod(name string) {
-	c.methods[name] = nil
+func (c *Class) DefMethod(name string, methodType string, caller slip.Caller) {
+	flavors.DefMethod(c, c.methods, name, methodType, caller)
 }
 
 // InvokeMethod on an object. A temporary flavors.Instance is created and the

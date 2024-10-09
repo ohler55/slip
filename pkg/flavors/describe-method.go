@@ -54,7 +54,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	var hm HasMethods
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		if hm = slip.FindClass(string(ta)).(HasMethods); hm == nil {
+		if hm, _ = slip.FindClass(string(ta)).(HasMethods); hm == nil {
 			slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
 		}
 	case HasMethods:
