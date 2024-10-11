@@ -30,3 +30,11 @@ func defHostent() {
 		&Pkg,
 	)
 }
+
+func makeHostEnt(name slip.String, addrs slip.List) (inst *flavors.Instance) {
+	inst = hostentFlavor.MakeInstance().(*flavors.Instance)
+	inst.UnsafeLet(slip.Symbol("name"), name)
+	inst.UnsafeLet(slip.Symbol("addresses"), addrs)
+
+	return
+}
