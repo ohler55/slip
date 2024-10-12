@@ -42,8 +42,12 @@ type AddressToString struct {
 // Call the function with the arguments provided.
 func (f *AddressToString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	var oct slip.Octets
-	switch ta := args[0].(type) {
+	_, str := addressToString(args[0])
+	return slip.String(str)
+}
+
+func addressToString(arg slip.Object) (oct slip.Octets, str string) {
+	switch ta := arg.(type) {
 	case slip.Octets:
 		oct = ta
 	case slip.List:
@@ -58,7 +62,7 @@ func (f *AddressToString) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 			oct[i] = byte(cl.ToOctet(v).(slip.Octet))
 		}
 	default:
-		slip.PanicType("address", args[0], "octets")
+		slip.PanicType("address", arg, "octets")
 	}
 	var addr netip.Addr
 	switch len(oct) {
@@ -69,5 +73,6 @@ func (f *AddressToString) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 	default:
 		slip.NewPanic("%s is neither an IPv4 nor an IPv6 address", oct)
 	}
-	return slip.String(addr.String())
+	str = addr.String()
+	return
 }

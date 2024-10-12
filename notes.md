@@ -4,17 +4,6 @@
 
 - next
 
- - name-service branch
-  + host-ent class
-  + name-service-error
-  - get-host-by-name (node) => host-ent
-   - node - string - hostname or ip-address
-  - get-host-by-address (address) => host-ent
-   - address - octets
-
-
---------------------
-
  - slot-value
   - add slot-value to flavors pkg/clos (for get and setf)
    - always allow
