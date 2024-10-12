@@ -71,25 +71,29 @@ func TestDescribeMethodBadArgCount(t *testing.T) {
 
 func TestDescribeMethodNotFlavor(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(describe-method t :id)`,
-		Panics: true,
+		Source:    `(describe-method t :id)`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(describe-method 'not-a-flavor :id)`,
-		Panics: true,
+		Source:    `(describe-method 'not-a-flavor :id)`,
+		PanicType: slip.ClassNotFoundSymbol,
 	}).Test(t)
 }
 
 func TestDescribeMethodNotMethod(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(describe-method 'vanilla-flavor :not-a-method)`,
-		Panics: true,
+		Source:    `(describe-method 'vanilla-flavor :not-a-method)`,
+		PanicType: slip.UnboundSlotSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(describe-method 'fixnum :not-a-method)`,
+		PanicType: slip.UnboundSlotSymbol,
 	}).Test(t)
 }
 
 func TestDescribeMethodNotStream(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(describe-method 'vanilla-flavor :id t)`,
-		Panics: true,
+		Source:    `(describe-method 'vanilla-flavor :id t)`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 const (
@@ -21,32 +22,28 @@ const (
 	indentSpaces = "                                                                                "
 )
 
-var allClasses = map[string]*Class{}
-
 // Class is a CLOS class.
 type Class struct {
-	name      string
-	docs      string
-	inherit   []*Class // direct supers
-	prototype slip.Object
-	final     bool
-	noMake    bool
-	slots     map[string]slip.Object
-	methods   map[string]slip.Object // TBD change once needed
-}
-
-// Find finds the named class.
-func Find(name string) (c *Class) {
-	if c = allClasses[name]; c == nil {
-		c = allClasses[strings.ToLower(name)]
-	}
-	return
+	name         string
+	docs         string
+	inherit      []*Class // direct supers
+	prototype    slip.Object
+	final        bool
+	noMake       bool
+	slots        map[string]slip.Object
+	methods      map[string][]*flavors.Method
+	InstanceInit func(inst slip.Instance, obj slip.Object)
 }
 
 // DefClass creates a Class.
-func DefClass(name, docs string, slots map[string]slip.Object, supers []*Class, final bool) (class *Class) {
+func DefClass(
+	name, docs string,
+	slots map[string]slip.Object,
+	supers []*Class,
+	final bool) (class *Class) {
+
 	name = strings.ToLower(name)
-	if _, has := allClasses[name]; has {
+	if slip.FindClass(name) != nil {
 		slip.NewPanic("Class %s already defined.", name)
 	}
 	class = &Class{
@@ -54,10 +51,21 @@ func DefClass(name, docs string, slots map[string]slip.Object, supers []*Class, 
 		docs:    docs,
 		slots:   slots,
 		inherit: supers,
-		methods: map[string]slip.Object{},
+		methods: map[string][]*flavors.Method{},
 		final:   final,
 	}
-	allClasses[name] = class
+	var hasSO bool
+	for _, c := range class.inherit {
+		if c == &standardObjectClass {
+			hasSO = true
+			break
+		}
+	}
+	if !hasSO {
+		class.inherit = append(class.inherit, &standardObjectClass)
+	}
+	class.mergeInherited()
+	slip.RegisterClass(name, class)
 	return
 }
 
@@ -84,8 +92,13 @@ func (c *Class) Simplify() any {
 		slots[k] = slip.Simplify(o)
 	}
 	methods := make([]any, 0, len(c.methods))
-	for m := range c.methods {
-		methods = append(methods, m)
+	var keys []string
+	for k := range c.methods {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		methods = append(methods, k)
 	}
 	return map[string]any{
 		"name":      c.name,
@@ -203,21 +216,17 @@ func (c *Class) Describe(b []byte, indent, right int, ansi bool) []byte {
 	}
 	b = append(b, indentSpaces[:i2]...)
 	b = append(b, "Methods:"...)
-	if 0 < len(c.methods) {
-		b = append(b, '\n')
-		var keys []string
-		for k := range c.methods {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, k := range keys {
-			b = append(b, indentSpaces[:i3]...)
-			b = append(b, k...)
-			b = append(b, '\n')
-		}
-	} else {
-		b = append(b, " None\n"...)
+	var keys []string
+	for k := range c.methods {
+		keys = append(keys, k)
 	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		b = append(b, '\n')
+		b = append(b, indentSpaces[:i3]...)
+		b = append(b, k...)
+	}
+	b = append(b, '\n')
 	if c.prototype != nil {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "Prototype: "...)
@@ -235,11 +244,62 @@ func (c *Class) NoMake() bool {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *Class) MakeInstance() slip.Instance {
-	// TBD when Class can be used to creat instances change this.
-	panic(slip.NewError("Can not create an instance of %s.", c.Name()))
+	inst := flavors.Instance{Type: c, Methods: c.methods}
+	inst.Scope.Vars = map[string]slip.Object{}
+	for k, v := range c.slots {
+		inst.Vars[k] = v
+	}
+	inst.Vars["self"] = &inst
+
+	return &inst
 }
 
 // DefMethod defines a method for the class. TBD place holder for now.
-func (c *Class) DefMethod(name string) {
-	c.methods[name] = nil
+func (c *Class) DefMethod(name string, methodType string, caller slip.Caller) {
+	flavors.DefMethod(c, c.methods, name, methodType, caller)
+}
+
+// InvokeMethod on an object. A temporary flavors.Instance is created and the
+// method is invoked on that instance.
+func (c *Class) InvokeMethod(obj slip.Object, s *slip.Scope, message string, args slip.List, depth int) slip.Object {
+	inst := c.MakeInstance()
+	if c.InstanceInit != nil {
+		c.InstanceInit(inst, obj)
+	}
+	return inst.Receive(s, message, args, depth)
+}
+
+// GetMethod returns the method if it exists.
+func (c *Class) GetMethod(name string) []*flavors.Method {
+	return c.methods[name]
+}
+
+func (c *Class) mergeInherited() {
+	if c.slots == nil {
+		c.slots = map[string]slip.Object{}
+	}
+	if c.methods == nil {
+		c.methods = map[string][]*flavors.Method{}
+	}
+	var iif func(inst slip.Instance, obj slip.Object)
+	for i := len(c.inherit) - 1; 0 <= i; i-- {
+		ic := c.inherit[i]
+		if ic.InstanceInit != nil {
+			iif = ic.InstanceInit
+		}
+		for k, v := range ic.slots {
+			c.slots[k] = v
+		}
+		for k, ma := range ic.methods {
+			xma := c.methods[k]
+			if 0 < len(xma) {
+				c.methods[k] = append(c.methods[k], ma[0])
+			} else {
+				c.methods[k] = []*flavors.Method{ma[0]}
+			}
+		}
+	}
+	if c.InstanceInit == nil {
+		c.InstanceInit = iif
+	}
 }

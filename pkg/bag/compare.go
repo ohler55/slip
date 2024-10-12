@@ -62,7 +62,7 @@ type Compare struct {
 func (f *Compare) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 3)
 	obj, ok := args[0].(*flavors.Instance)
-	if !ok || obj.Flavor != flavor {
+	if !ok || obj.Type != flavor {
 		slip.PanicType("bag", args[0], "bag")
 	}
 	return compareBag(s, obj, args[1:])
@@ -70,7 +70,7 @@ func (f *Compare) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 
 func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip.Object) {
 	other, ok := args[0].(*flavors.Instance)
-	if !ok || other.Flavor != flavor {
+	if !ok || other.Type != flavor {
 		return slip.List{nil}
 	}
 	var ignores []alt.Path

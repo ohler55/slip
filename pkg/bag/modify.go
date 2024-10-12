@@ -68,7 +68,7 @@ type Modify struct {
 func (f *Modify) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 5)
 	obj, ok := args[0].(*flavors.Instance)
-	if !ok || obj.Flavor != flavor {
+	if !ok || obj.Type != flavor {
 		slip.PanicType("bag", args[0], "bag")
 	}
 	modifyBag(s, obj, args[1:], depth+1)
@@ -123,14 +123,14 @@ func modifyValue(s *slip.Scope, value any, caller slip.Caller, asBag bool, depth
 		bg := flavor.MakeInstance().(*flavors.Instance)
 		bg.Any = value
 		obj := caller.Call(s, slip.List{bg}, depth)
-		if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Flavor == flavor {
+		if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Type == flavor {
 			return bg.Any
 		}
 		return slip.Simplify(obj)
 	}
 	obj := slip.SimpleObject(value)
 	obj = caller.Call(s, slip.List{obj}, depth)
-	if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Flavor == flavor {
+	if bg, _ := obj.(*flavors.Instance); bg != nil && bg.Type == flavor {
 		return bg.Any
 	}
 	return slip.Simplify(obj)

@@ -48,17 +48,29 @@ type Send struct {
 }
 
 // Call the the function with the arguments provided.
-func (f *Send) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Send) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
-	receiver, ok := args[0].(Receiver)
-	if !ok {
+	switch self := args[0].(type) {
+	case Receiver:
+		if method, ok := args[1].(slip.Symbol); ok {
+			result = self.Receive(s, string(method), args[2:], depth)
+		} else {
+			slip.PanicType("method of send", args[1], "keyword")
+		}
+	case nil:
 		slip.PanicType("object of send", args[0], "instance")
+	default:
+		if mi, _ := slip.FindClass(string(self.Hierarchy()[0])).(slip.MethodInvoker); mi != nil {
+			if method, ok := args[1].(slip.Symbol); ok {
+				result = mi.InvokeMethod(self, s, string(method), args[2:], depth)
+			} else {
+				slip.PanicType("method", args[1], "keyword")
+			}
+		} else {
+			slip.PanicType("object of send", args[0], "instance")
+		}
 	}
-	var method slip.Symbol
-	if method, ok = args[1].(slip.Symbol); !ok {
-		slip.PanicType("method of send", args[1], "keyword")
-	}
-	return receiver.Receive(s, string(method), args[2:], depth)
+	return
 }
 
 // Place a value in the instance variable identified in the send.

@@ -6,26 +6,26 @@ import (
 	"github.com/ohler55/slip"
 )
 
-// method is the combined methods for a Flavor that includes the inherited
+// Method is the combined methods for a Flavor that includes the inherited
 // methods with the same name.
-type method struct {
-	name    string
-	from    *Flavor
+type Method struct {
+	Name    string
+	From    slip.Class
 	primary slip.Caller
 	before  slip.Caller
 	after   slip.Caller
 	wrap    slip.Caller
 }
 
-func (m *method) empty() bool {
+func (m *Method) empty() bool {
 	return m.primary == nil && m.wrap == nil && m.before == nil && m.after == nil
 }
 
 // Simplify by returning a representation of the method.
-func (m *method) Simplify() any {
+func (m *Method) Simplify() any {
 	simple := map[string]any{
-		"name": m.name,
-		"from": m.from.name,
+		"name": m.Name,
+		"from": m.From.Name(),
 	}
 	if m.wrap != nil {
 		simple["whopper"] = true
@@ -47,10 +47,10 @@ func (m *method) Simplify() any {
 func PanicMethodArgCount(inst *Instance, method string, cnt, min, max int) {
 	if cnt < min {
 		slip.NewPanic("Too few arguments to the %s %s method. At least %d expected but got %d.",
-			inst.Flavor.name, method, min, cnt)
+			inst.Type.Name(), method, min, cnt)
 	}
 	panic(slip.NewError("Too many arguments to the %s %s method. At most %d expected but got %d.",
-		inst.Flavor.name, method, min, cnt))
+		inst.Type.Name(), method, min, cnt))
 }
 
 // PanicMethodArgChoice raises a panic describing the wrong number of
@@ -58,5 +58,5 @@ func PanicMethodArgCount(inst *Instance, method string, cnt, min, max int) {
 // values.
 func PanicMethodArgChoice(inst *Instance, method string, cnt int, choices string) {
 	slip.NewPanic("Wrong number of arguments to the %s %s method. Either %s expected but got %d.",
-		inst.Flavor.name, method, choices, cnt)
+		inst.Type.Name(), method, choices, cnt)
 }

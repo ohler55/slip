@@ -63,7 +63,7 @@ type Walk struct {
 func (f *Walk) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 4)
 	obj, ok := args[0].(*flavors.Instance)
-	if !ok || obj.Flavor != flavor {
+	if !ok || obj.Type != flavor {
 		slip.PanicType("bag", args[0], "bag")
 	}
 	walkBag(s, obj, args[1:], depth)

@@ -9,6 +9,7 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestSendGetSet(t *testing.T) {
@@ -107,7 +108,14 @@ func TestSendNoMethod(t *testing.T) {
 }
 
 func TestSendNotInstance(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(send 7 :x)").Eval(slip.NewScope(), nil) })
+	(&sliptest.Function{
+		Source:    `(send 7 :x)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send t :x)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }
 
 func TestSendNotKeyword(t *testing.T) {
@@ -150,4 +158,32 @@ berry rot
 blueberry after rot
 berry after rot
 `, b.String())
+}
+
+func TestSendClass(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-condition 'error :message "quux") :message)`,
+		Expect: `"quux"`,
+	}).Test(t)
+}
+
+func TestSendNil(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(send nil :message)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestSendClassNoMethod(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(send (make-condition 'error :message "quux") :bad)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestSendClassMethodNotKeyword(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(send (make-condition 'error :message "quux") 7)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }

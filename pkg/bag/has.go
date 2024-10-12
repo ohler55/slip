@@ -53,7 +53,7 @@ func (f *Has) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		slip.PanicArgCount(f, 2, 2)
 	}
 	obj, ok := args[0].(*flavors.Instance)
-	if !ok || obj.Flavor != flavor {
+	if !ok || obj.Type != flavor {
 		slip.PanicType("bag", args[0], "bag")
 	}
 	return hasBag(obj, args[1])

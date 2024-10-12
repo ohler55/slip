@@ -62,7 +62,7 @@ func (f *Set) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		slip.PanicArgCount(f, 2, 3)
 	}
 	obj, ok := args[0].(*flavors.Instance)
-	if !ok || obj.Flavor != flavor {
+	if !ok || obj.Type != flavor {
 		slip.PanicType("bag", args[0], "bag")
 	}
 	if 2 < len(args) {
@@ -147,7 +147,7 @@ func ObjectToBag(obj slip.Object) (v any) {
 		}
 		v = list
 	case *flavors.Instance:
-		if val.Flavor != flavor {
+		if val.Type != flavor {
 			slip.PanicType("value", val, "nil", "t", ":false", "integer", "float", "string", "symbol", "gi::time",
 				"list", "hash-table", "bag-instance")
 		}

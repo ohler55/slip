@@ -4,19 +4,6 @@
 
 - next
 
- - cl-output branch
-  - finish-output
-  - force-output
-  - clear-output
-
- - name service branch
-  - host-ent class
-  - get-protocol-by-name (name) => fixnum, name, aliases
-  - get-host-by-name
-  - get-host-by-address
-
---------------------
-
  - slot-value
   - add slot-value to flavors pkg/clos (for get and setf)
    - always allow

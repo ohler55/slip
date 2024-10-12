@@ -150,7 +150,7 @@ func wrapContent(arg slip.Object) (rc io.ReadCloser, ct string) {
 	case slip.String:
 		rc = bodyWrapString(string(ta))
 	case *flavors.Instance:
-		if ta.Flavor != bag.Flavor() {
+		if ta.Type != bag.Flavor() {
 			slip.PanicType("content", arg, "string", "bag", "input-stream")
 		}
 		rc = bodyWrapString(oj.JSON(ta.Any))

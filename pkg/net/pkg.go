@@ -36,6 +36,8 @@ func init() {
 	defResponseWriter()
 	defServer()
 	defSocket()
+	defHostent()
+	defNameServiceError()
 
 	Pkg.Initialize(nil, &bodyWrap{}) // lock
 	slip.AddPackage(&Pkg)

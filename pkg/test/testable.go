@@ -50,7 +50,7 @@ type initCaller bool
 func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if parent, _ := s.Get("parent").(*flavors.Instance); parent != nil {
-		if parent.Flavor != suiteFlavor {
+		if parent.Type != suiteFlavor {
 			panic(fmt.Sprintf("a suite or test parent must be an instance of suite-flavor or nil, not %s", parent))
 		}
 		children, _ := parent.Get("children").(slip.List)

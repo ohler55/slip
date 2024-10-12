@@ -15,24 +15,29 @@ var vanilla = Flavor{
 	name:        "vanilla-flavor",
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
-	methods: map[string][]*method{
-		":describe":             {{name: ":describe", primary: describeCaller(true)}},
-		":eval-inside-yourself": {{name: ":eval-inside-yourself", primary: insideCaller(true)}},
-		":flavor":               {{name: ":flavor", primary: flavorCaller(true)}},
-		":init":                 {{name: ":init", primary: initCaller(true)}},
-		":id":                   {{name: ":id", primary: idCaller(true)}},
-		":inspect":              {{name: ":inspect", primary: inspectCaller(true)}},
-		":operation-handled-p":  {{name: ":operation-handled-p", primary: hasOpCaller(true)}},
-		":print-self":           {{name: ":print-self", primary: printCaller(true)}},
-		":send-if-handles":      {{name: ":send-if-handles", primary: sendIfCaller(true)}},
-		":which-operations":     {{name: ":which-operations", primary: whichOpsCaller(true)}},
+	methods: map[string][]*Method{
+		":describe":             {{Name: ":describe", primary: describeCaller(true)}},
+		":eval-inside-yourself": {{Name: ":eval-inside-yourself", primary: insideCaller(true)}},
+		":flavor":               {{Name: ":flavor", primary: flavorCaller(true)}},
+		":init":                 {{Name: ":init", primary: initCaller(true)}},
+		":id":                   {{Name: ":id", primary: idCaller(true)}},
+		":inspect":              {{Name: ":inspect", primary: inspectCaller(true)}},
+		":operation-handled-p":  {{Name: ":operation-handled-p", primary: hasOpCaller(true)}},
+		":print-self":           {{Name: ":print-self", primary: printCaller(true)}},
+		":send-if-handles":      {{Name: ":send-if-handles", primary: sendIfCaller(true)}},
+		":which-operations":     {{Name: ":which-operations", primary: whichOpsCaller(true)}},
 	},
 }
 
 func init() {
 	for _, ma := range vanilla.methods {
-		ma[0].from = &vanilla
+		ma[0].From = &vanilla
 	}
+}
+
+// VanillaMethods returns the vanilla methods. (used for the clos standard methods)
+func VanillaMethods() map[string][]*Method {
+	return vanilla.methods
 }
 
 type initCaller bool
@@ -97,7 +102,7 @@ type flavorCaller bool
 
 func (caller flavorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
-	return obj.Flavor
+	return obj.Type
 }
 
 func (caller flavorCaller) Docs() string {
@@ -169,7 +174,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 		PanicMethodArgCount(obj, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
-		if _, has := obj.Flavor.methods[string(sym)]; has {
+		if _, has := obj.Methods[string(sym)]; has {
 			return obj.Receive(s, string(sym), args[1:], depth+1)
 		}
 	}
@@ -190,8 +195,8 @@ type whichOpsCaller bool
 
 func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*Instance)
-	names := make([]string, 0, len(obj.Flavor.methods))
-	for k := range obj.Flavor.methods {
+	names := make([]string, 0, len(obj.Methods))
+	for k := range obj.Methods {
 		names = append(names, k)
 	}
 	sort.Slice(names, func(i, j int) bool { return 0 > strings.Compare(names[i], names[j]) })

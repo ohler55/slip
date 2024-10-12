@@ -149,7 +149,7 @@ func DefFlavor(
 		name:        name,
 		defaultVars: vars,
 		keywords:    map[string]slip.Object{},
-		methods:     map[string][]*method{},
+		methods:     map[string][]*Method{},
 		varDocs:     map[string]string{},
 		initable:    map[string]bool{},
 	}
@@ -184,6 +184,7 @@ func DefFlavor(
 		nf.varNames = append(nf.varNames, vn)
 	}
 	allFlavors[nf.name] = nf
+	slip.RegisterClass(nf.name, nf)
 	_ = p.Set(nf.name, nf)
 	p.Export(nf.name)
 
@@ -440,6 +441,6 @@ func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
 	method, _ := args[0].(slip.Symbol)
 	defer slip.PanicUnboundSlot(inst, method,
-		"Flavor %s does not include the %s method.", inst.Flavor.name, args[0])
+		"Flavor %s does not include the %s method.", inst.Type.Name(), args[0])
 	return nil
 }

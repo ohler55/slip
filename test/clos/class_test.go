@@ -3,12 +3,14 @@
 package clos_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestClassBasic(t *testing.T) {
@@ -23,13 +25,24 @@ func TestClassBasic(t *testing.T) {
 	tt.Equal(t, `{
   docs: "built-in fixed number class"
   final: true
-  inherit: [built-in-class integer]
-  methods: []
+  inherit: [integer]
+  methods: [
+    ":describe"
+    ":eval-inside-yourself"
+    ":flavor"
+    ":id"
+    ":init"
+    ":inspect"
+    ":operation-handled-p"
+    ":print-self"
+    ":send-if-handles"
+    ":which-operations"
+  ]
   name: fixnum
   prototype: 42
   slots: {}
 }`, pretty.SEN(c.Simplify()))
-	tt.Panic(t, func() { _ = c.(slip.Class).MakeInstance() })
+	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`).Eval(slip.NewScope(), nil) })
 }
 
 func TestClassDescribeBasic(t *testing.T) {
@@ -38,10 +51,20 @@ func TestClassDescribeBasic(t *testing.T) {
 	tt.Equal(t, `fixnum is a built-in class:
   Documentation:
     built-in fixed number class
-  Direct superclasses: built-in-class integer
-  Class precedence list: built-in-class integer rational real number
+  Direct superclasses: integer
+  Class precedence list: integer rational real number built-in-class
   Slots: None
-  Methods: None
+  Methods:
+    :describe
+    :eval-inside-yourself
+    :flavor
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :which-operations
   Prototype: 42
 `, string(out))
 
@@ -49,10 +72,20 @@ func TestClassDescribeBasic(t *testing.T) {
 	tt.Equal(t, "\x1b[1mfixnum\x1b[m is a built-in class:\n"+
 		"  Documentation:\n"+
 		"    built-in fixed number class\n"+
-		"  Direct superclasses: built-in-class integer\n"+
-		"  Class precedence list: built-in-class integer rational real number\n"+
+		"  Direct superclasses: integer\n"+
+		"  Class precedence list: integer rational real number built-in-class\n"+
 		"  Slots: None\n"+
-		"  Methods: None\n"+
+		"  Methods:\n"+
+		"    :describe\n"+
+		"    :eval-inside-yourself\n"+
+		"    :flavor\n"+
+		"    :id\n"+
+		"    :init\n"+
+		"    :inspect\n"+
+		"    :operation-handled-p\n"+
+		"    :print-self\n"+
+		"    :send-if-handles\n"+
+		"    :which-operations\n"+
 		"  Prototype: 42\n", string(out))
 }
 
@@ -64,27 +97,49 @@ func TestClassDefClass(t *testing.T) {
 		nil, // supers
 		false,
 	)
-	c.DefMethod("fun")
+	c.DefMethod(":fun", "", nil)
 	found := slip.ReadString(`(find-class 'dummy)`).Eval(slip.NewScope(), nil).(slip.Class)
 	tt.Equal(t, c, found)
 	out := c.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `dummy is a class:
   Documentation:
     dummy class
-  Direct superclasses:
-  Class precedence list:
+  Direct superclasses: standard-object
+  Class precedence list: standard-object
   Slots:
     x = 3
     y = 5
   Methods:
-    fun
+    :describe
+    :eval-inside-yourself
+    :flavor
+    :fun
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :which-operations
 `, string(out))
 
 	tt.Equal(t, `{
   docs: "dummy class"
   final: false
-  inherit: []
-  methods: [fun]
+  inherit: [standard-object]
+  methods: [
+    ":describe"
+    ":eval-inside-yourself"
+    ":flavor"
+    ":fun"
+    ":id"
+    ":init"
+    ":inspect"
+    ":operation-handled-p"
+    ":print-self"
+    ":send-if-handles"
+    ":which-operations"
+  ]
   name: dummy
   prototype: null
   slots: {x: 3 y: 5}
@@ -93,4 +148,20 @@ func TestClassDefClass(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = clos.DefClass("dummy", "", map[string]slip.Object{}, nil, false)
 	})
+}
+
+func TestClassInstanceInit(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-condition 'error :message "quux") :message)`,
+		Expect: `"quux"`,
+	}).Test(t)
+}
+
+func TestConditionMessageDocs(t *testing.T) {
+	scope := slip.NewScope()
+	var out strings.Builder
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+
+	_ = slip.ReadString(`(describe-method (find-class 'condition) :message out)`).Eval(scope, nil)
+	tt.Equal(t, true, strings.Contains(out.String(), ":message"))
 }
