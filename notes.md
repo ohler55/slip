@@ -4,10 +4,32 @@
 
 - next
 
- - slot-value
+ - misc
+ * [ ] CASE
+ * [ ] ECASE
+ * [ ] MAP
+ * [ ] MERGE
+ * [ ] NRECONC
+ * [ ] PROGV
+ * [ ] REDUCE
+ * [ ] REVAPPEND
+ * [ ] SLOT-BOUNDP
+ * [ ] SLOT-EXISTS-P
+ * [ ] SLOT-MAKUNBOUND
+ * [ ] SLOT-MISSING
+ * [ ] SLOT-UNBOUND
+ * [ ] SLOT-VALUE
   - add slot-value to flavors pkg/clos (for get and setf)
    - always allow
+ * [ ] THE
+ * [ ] WITH-INPUT-FROM-STRING
+ * [ ] WITH-OPEN-STREAM
+ * [ ] WITH-OUTPUT-TO-STRING
 
+ - jetstream - update with latests model
+  - can that be made to work with nats or apphub?
+
+ - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
  - package-export
   - import
@@ -25,13 +47,6 @@
     - add event publishing to tracing
      - nats ?
 
- - misc
- * [ ] CASE (not ccase)
- * [ ] ECASE
- * [ ] REDUCE
- * [ ] NRECONC
- * [ ] REVAPPEND
-  - structs?
 
  - clos methods/generics (flavors and clos mix as flos)
   - flos
@@ -41,8 +56,6 @@
 
   - change-class (for flavors instances only for now)
    - parts of instance interface? same as class-of
-
- - merge (starts with result-type)
 
  - future repl options
   - color for words

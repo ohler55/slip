@@ -39,22 +39,18 @@
  * [ ] CALL-METHOD
  * [ ] CALL-NEXT-METHOD
  * [ ] CASE
- - [-] CCASE
  * [ ] CHANGE-CLASS
  * [ ] CHECK-TYPE
  * [ ] CIS
  * [ ] COMPLEMENT
- * [x] COMPLEXP
  * [ ] COMPUTE-APPLICABLE-METHODS
  * [ ] COMPUTE-RESTARTS
  * [ ] CONCATENATED-STREAM
  * [ ] CONCATENATED-STREAM-STREAMS
  * [ ] CONJUGATE
  * [ ] CONSTANTLY
- * [x] CONSTANTP
  * [ ] COPY-PPRINT-DISPATCH
  * [ ] COPY-STRUCTURE
- - [-] COPY-SYMBOL
  * [ ] COSH
  * [ ] CTYPECASE
  * [ ] DECODE-FLOAT
@@ -240,7 +236,6 @@
  * [ ] STORE-VALUE
  * [ ] STREAM-ELEMENT-TYPE
  * [ ] STREAM-EXTERNAL-FORMAT
- * [ ] STRING-STREAM
  * [ ] STRUCTURE
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
@@ -259,7 +254,6 @@
  * [ ] TWO-WAY-STREAM-INPUT-STREAM
  * [ ] TWO-WAY-STREAM-OUTPUT-STREAM
  * [ ] TYPECASE
- * [ ] UNSIGNED-BYTE
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
@@ -277,13 +271,9 @@
  * [ ] WITH-SIMPLE-RESTART
  * [ ] WITH-SLOTS
  * [ ] WITH-STANDARD-IO-SYNTAX
- * [x] WRITE-BYTE
- * [x] WRITE-CHAR
- * [x] WRITE-LINE
- * [x] WRITE-SEQUENCE
- * [x] WRITE-STRING
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
+ * [+] CLASS
  * [x] &BODY
  * [x] &KEY
  * [x] &OPTIONAL
@@ -452,11 +442,13 @@
  * [x] CODE-CHAR
  * [x] COERCE
  * [x] COMPLEX
+ * [x] COMPLEXP
  * [x] CONCATENATE
  * [x] COND
  * [x] CONDITION
  * [x] CONS
  * [x] CONSP
+ * [x] CONSTANTP
  * [x] CONTROL-ERROR
  * [x] COPY-ALIST
  * [x] COPY-LIST
@@ -829,6 +821,7 @@
  * [x] STRING-NOT-GREATERP
  * [x] STRING-NOT-LESSP
  * [x] STRING-RIGHT-TRIM
+ * [x] STRING-STREAM
  * [x] STRING-TRIM
  * [x] STRING-UPCASE
  * [x] STRING/=
@@ -877,6 +870,7 @@
  * [x] UNION
  * [x] UNLESS
  * [x] UNREAD-CHAR
+ * [x] UNSIGNED-BYTE
  * [x] UNUSE-PACKAGE
  * [x] UPPER-CASE-P
  * [x] USE-PACKAGE
@@ -893,6 +887,11 @@
  * [x] WHEN
  * [x] WITH-OPEN-FILE
  * [x] WRITE
+ * [x] WRITE-BYTE
+ * [x] WRITE-CHAR
+ * [x] WRITE-LINE
+ * [x] WRITE-SEQUENCE
+ * [x] WRITE-STRING
  * [x] WRITE-TO-STRING
  * [x] ZEROP
  - [-] &ALLOW-OTHER-KEYS
@@ -910,8 +909,8 @@
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
  - [-] CATCH (use recover instead)
+ - [-] CCASE
  - [-] CERROR
- - [-] CLASS
  - [-] CLEAR-INPUT
  - [-] CLEAR-OUTPUT
  - [-] COMPILATION-SPEED
@@ -924,6 +923,7 @@
  - [-] COMPILER-MACRO-FUNCTION
  - [-] CONTINUE
  - [-] COPY-READTABLE
+ - [-] COPY-SYMBOL
  - [-] COUNT-IF-NOT
  - [-] DEBUG
  - [-] DEFCLASS (defflavor instead)
