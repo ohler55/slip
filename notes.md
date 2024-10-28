@@ -5,7 +5,13 @@
 - next
 
  - misc
- * [ ] CASE
+ * [ ] CASE (macro)
+  - case (keyform &rest clause)
+   - keyform is evaluated
+   - clauses are not
+    - car of clause is compared to key if not a list or to list members if a list
+    - if car is otherwise or t then eval that as return value
+     - if otherwise is not last then fail on eval with bad case clause
  * [ ] ECASE
  * [ ] MAP
  * [ ] MERGE
