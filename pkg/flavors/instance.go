@@ -146,7 +146,7 @@ func (obj *Instance) Receive(s *slip.Scope, message string, args slip.List, dept
 		if flavor, ok := obj.Type.(*Flavor); ok {
 			return flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
 		}
-		slip.NewPanic("Method %s not defined for %s.", message, obj.Type.Name())
+		slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.Name())
 	}
 	for i, m := range ma {
 		if m.wrap != nil {

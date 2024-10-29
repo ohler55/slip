@@ -317,6 +317,7 @@ func ReadString(src string) (code Code) {
 		nextMode: valueMode,
 	}
 	cr.read([]byte(src))
+
 	return cr.code
 }
 
@@ -327,6 +328,7 @@ func Read(src []byte) (code Code) {
 		nextMode: valueMode,
 	}
 	cr.read(src)
+
 	return cr.code
 }
 
@@ -338,6 +340,7 @@ func ReadOne(src []byte) (code Code, pos int) {
 		one:      true,
 	}
 	cr.read(src)
+
 	return cr.code, cr.pos
 }
 

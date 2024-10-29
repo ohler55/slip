@@ -5,25 +5,19 @@
 - next
 
  - misc
- * [ ] CASE (macro)
-  - case (keyform &rest clause)
-   - keyform is evaluated
-   - clauses are not
-    - car of clause is compared to key if not a list or to list members if a list
-    - if car is otherwise or t then eval that as return value
-     - if otherwise is not last then fail on eval with bad case clause
- * [ ] ECASE
- * [ ] MAP
+ * [x] CASE
+ * [x] ECASE
+ * [x] MAP
  * [ ] MERGE
  * [ ] NRECONC
  * [ ] PROGV
  * [ ] REDUCE
- * [ ] REVAPPEND
- * [ ] SLOT-BOUNDP
- * [ ] SLOT-EXISTS-P
- * [ ] SLOT-MAKUNBOUND
- * [ ] SLOT-MISSING
- * [ ] SLOT-UNBOUND
+ * [ ] REVAPPEND (list tail) - reverse list then append tail
+ * [ ] SLOT-BOUNDP - check var for unbound, panic on no slot
+ * [ ] SLOT-EXISTS-P - instance.HasMethod()
+ * [ ] SLOT-MAKUNBOUND - set var to slip.Unbound or panic with slot-unbound
+ * [ ] SLOT-MISSING - error to generate by slot-value
+ * [ ] SLOT-UNBOUND - error to generate by slot-value
  * [ ] SLOT-VALUE
   - add slot-value to flavors pkg/clos (for get and setf)
    - always allow

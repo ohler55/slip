@@ -251,7 +251,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 // CompileArgs for the function.
 func (f *Function) CompileArgs() {
 	si := -1
-	for i := len(f.Args) - 1; 0 <= i; i-- {
+	for i := 0; i < len(f.Args); i++ {
 		si++
 		arg := f.Args[i]
 		if 0 < len(f.SkipEval) {

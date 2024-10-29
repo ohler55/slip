@@ -87,52 +87,52 @@ func (f *Coerce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case slip.True:
 		result = args[0]
 	case slip.Symbol("list"):
-		result = f.toList(args[0])
+		result = coerceToList(args[0])
 	case slip.Symbol("string"):
-		result = f.toString(args[0])
+		result = coerceToString(args[0])
 	case slip.Symbol("vector"):
-		result = f.toVector(args[0])
+		result = coerceToVector(args[0])
 	case slip.Symbol("character"):
-		result = f.toChar(args[0])
+		result = coerceToChar(args[0])
 	case slip.Symbol("integer"):
-		result = f.toInteger(args[0])
+		result = coerceToInteger(args[0])
 	case slip.Symbol("fixnum"):
-		result = f.toFixnum(args[0])
+		result = coerceToFixnum(args[0])
 	case slip.Symbol("octet"):
 		result = ToOctet(args[0])
 	case slip.Symbol("octets"):
-		result = f.toOctets(args[0])
+		result = coerceToOctets(args[0])
 	case slip.Symbol("bignum"):
-		result = f.toBignum(args[0])
+		result = coerceToBignum(args[0])
 	case slip.Symbol("float"):
-		result = f.toFloat(args[0])
+		result = coerceToFloat(args[0])
 	case slip.Symbol("short-float"), slip.Symbol("single-float"):
-		result = f.toSingleFloat(args[0])
+		result = coerceToSingleFloat(args[0])
 	case slip.Symbol("double-float"):
-		result = f.toDoubleFloat(args[0])
+		result = coerceToDoubleFloat(args[0])
 	case slip.Symbol("long-float"):
-		result = f.toLongFloat(args[0])
+		result = coerceToLongFloat(args[0])
 	case slip.Symbol("rational"):
-		result = f.toRational(args[0])
+		result = coerceToRational(args[0])
 	case slip.Symbol("ratio"):
-		result = f.toRatio(args[0])
+		result = coerceToRatio(args[0])
 	case slip.Symbol("complex"):
-		result = f.toComplex(args[0])
+		result = coerceToComplex(args[0])
 	case slip.Symbol("symbol"):
-		result = f.toSymbol(args[0])
+		result = coerceToSymbol(args[0])
 	case slip.Symbol("assoc"):
-		result = f.toAssoc(args[0])
+		result = coerceToAssoc(args[0])
 	case slip.Symbol("hash-table"):
-		result = f.toHashTable(args[0])
+		result = coerceToHashTable(args[0])
 	case slip.Symbol("function"):
-		result = f.toFunction(args[0])
+		result = coerceToFunction(args[0])
 	default:
 		slip.NewPanic("%s is not a valid coerce result type", args[1])
 	}
 	return
 }
 
-func (f *Coerce) toList(arg slip.Object) (result slip.Object) {
+func coerceToList(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case nil, slip.List:
 		result = ta
@@ -155,12 +155,12 @@ func (f *Coerce) toList(arg slip.Object) (result slip.Object) {
 	case slip.Octets:
 		result = ta.AsList()
 	default:
-		f.notPossible(ta, "list")
+		coerceNotPossible(ta, "list")
 	}
 	return
 }
 
-func (f *Coerce) toVector(arg slip.Object) (result slip.Object) {
+func coerceToVector(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case nil, *slip.Vector, slip.Octets:
 		result = ta
@@ -181,12 +181,12 @@ func (f *Coerce) toVector(arg slip.Object) (result slip.Object) {
 	case slip.List:
 		result = slip.NewVector(len(ta), slip.TrueSymbol, nil, ta, true)
 	default:
-		f.notPossible(ta, "vector")
+		coerceNotPossible(ta, "vector")
 	}
 	return
 }
 
-func (f *Coerce) toOctets(arg slip.Object) (result slip.Object) {
+func coerceToOctets(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case nil, slip.Octets:
 		result = ta
@@ -210,17 +210,17 @@ func (f *Coerce) toOctets(arg slip.Object) (result slip.Object) {
 		}
 		result = octs
 	default:
-		f.notPossible(ta, "octets")
+		coerceNotPossible(ta, "octets")
 	}
 	return
 }
 
-func (f *Coerce) toString(arg slip.Object) (result slip.Object) {
+func coerceToString(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case nil:
 		result = slip.String("")
 	case slip.List:
-		result = f.listToString(ta)
+		result = coerceListToString(ta)
 	case slip.String:
 		result = ta
 	case slip.Symbol:
@@ -228,14 +228,14 @@ func (f *Coerce) toString(arg slip.Object) (result slip.Object) {
 	case slip.Octets:
 		result = slip.String(ta)
 	case *slip.Vector:
-		result = f.listToString(ta.AsList())
+		result = coerceListToString(ta.AsList())
 	default:
-		f.notPossible(ta, "string")
+		coerceNotPossible(ta, "string")
 	}
 	return
 }
 
-func (f *Coerce) toChar(arg slip.Object) (result slip.Object) {
+func coerceToChar(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = ta
@@ -246,7 +246,7 @@ func (f *Coerce) toChar(arg slip.Object) (result slip.Object) {
 		if 0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) {
 			result = slip.Character(rune(code))
 		} else {
-			f.notPossible(ta, "character")
+			coerceNotPossible(ta, "character")
 		}
 	case slip.Real:
 		num := ta.RealValue()
@@ -254,7 +254,7 @@ func (f *Coerce) toChar(arg slip.Object) (result slip.Object) {
 		if num == float64(code) && 0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) {
 			result = slip.Character(rune(code))
 		} else {
-			f.notPossible(ta, "character")
+			coerceNotPossible(ta, "character")
 		}
 	case slip.Complex:
 		code := real(ta)
@@ -262,15 +262,15 @@ func (f *Coerce) toChar(arg slip.Object) (result slip.Object) {
 			0.0 <= code && code <= utf8.MaxRune && utf8.ValidRune(rune(code)) && code == float64(int64(code)) {
 			result = slip.Character(rune(code))
 		} else {
-			f.notPossible(ta, "character")
+			coerceNotPossible(ta, "character")
 		}
 	default:
-		f.notPossible(ta, "character")
+		coerceNotPossible(ta, "character")
 	}
 	return
 }
 
-func (f *Coerce) toInteger(arg slip.Object) (result slip.Object) {
+func coerceToInteger(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.Fixnum(ta)
@@ -283,29 +283,29 @@ func (f *Coerce) toInteger(arg slip.Object) (result slip.Object) {
 			_, _ = bf.Int(&bi)
 			result = (*slip.Bignum)(&bi)
 		} else {
-			f.notPossible(ta, "integer")
+			coerceNotPossible(ta, "integer")
 		}
 	case slip.Real: // other floats and ratio
 		num := ta.RealValue()
 		if num == float64(int64(num)) {
 			result = slip.Fixnum(num)
 		} else {
-			f.notPossible(ta, "integer")
+			coerceNotPossible(ta, "integer")
 		}
 	case slip.Complex:
 		num := real(ta)
 		if imag(ta) == 0.0 && num == float64(int64(num)) {
 			result = slip.Fixnum(num)
 		} else {
-			f.notPossible(ta, "integer")
+			coerceNotPossible(ta, "integer")
 		}
 	default:
-		f.notPossible(ta, "integer")
+		coerceNotPossible(ta, "integer")
 	}
 	return
 }
 
-func (f *Coerce) toFixnum(arg slip.Object) (result slip.Object) {
+func coerceToFixnum(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.Fixnum(ta)
@@ -317,36 +317,36 @@ func (f *Coerce) toFixnum(arg slip.Object) (result slip.Object) {
 		if (*big.Int)(ta).IsInt64() {
 			result = slip.Fixnum((*big.Int)(ta).Int64())
 		} else {
-			f.notPossible(ta, "fixnum")
+			coerceNotPossible(ta, "fixnum")
 		}
 	case *slip.LongFloat:
 		i64, acc := (*big.Float)(ta).Int64()
 		if acc == 0 {
 			result = slip.Fixnum(i64)
 		} else {
-			f.notPossible(ta, "fixnum")
+			coerceNotPossible(ta, "fixnum")
 		}
 	case slip.Real: // other floats and ratio
 		num := ta.RealValue()
 		if num == float64(int64(num)) {
 			result = slip.Fixnum(num)
 		} else {
-			f.notPossible(ta, "fixnum")
+			coerceNotPossible(ta, "fixnum")
 		}
 	case slip.Complex:
 		num := real(ta)
 		if imag(ta) == 0.0 && num == float64(int64(num)) {
 			result = slip.Fixnum(num)
 		} else {
-			f.notPossible(ta, "fixnum")
+			coerceNotPossible(ta, "fixnum")
 		}
 	default:
-		f.notPossible(ta, "fixnum")
+		coerceNotPossible(ta, "fixnum")
 	}
 	return
 }
 
-func (f *Coerce) toBignum(arg slip.Object) (result slip.Object) {
+func coerceToBignum(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = (*slip.Bignum)(big.NewInt(int64(ta)))
@@ -362,29 +362,29 @@ func (f *Coerce) toBignum(arg slip.Object) (result slip.Object) {
 		if acc == 0 {
 			result = (*slip.Bignum)(&bi)
 		} else {
-			f.notPossible(ta, "bignum")
+			coerceNotPossible(ta, "bignum")
 		}
 	case slip.Real: // other floats and ratio
 		num := ta.RealValue()
 		if num == float64(int64(num)) {
 			result = (*slip.Bignum)(big.NewInt(int64(num)))
 		} else {
-			f.notPossible(ta, "bignum")
+			coerceNotPossible(ta, "bignum")
 		}
 	case slip.Complex:
 		num := real(ta)
 		if imag(ta) == 0.0 && num == float64(int64(num)) {
 			result = (*slip.Bignum)(big.NewInt(int64(num)))
 		} else {
-			f.notPossible(ta, "bignum")
+			coerceNotPossible(ta, "bignum")
 		}
 	default:
-		f.notPossible(ta, "bignum")
+		coerceNotPossible(ta, "bignum")
 	}
 	return
 }
 
-func (f *Coerce) toFloat(arg slip.Object) (result slip.Object) {
+func coerceToFloat(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.DoubleFloat(ta)
@@ -396,15 +396,15 @@ func (f *Coerce) toFloat(arg slip.Object) (result slip.Object) {
 		if imag(ta) == 0.0 {
 			result = slip.DoubleFloat(real(ta))
 		} else {
-			f.notPossible(ta, "float")
+			coerceNotPossible(ta, "float")
 		}
 	default:
-		f.notPossible(ta, "float")
+		coerceNotPossible(ta, "float")
 	}
 	return
 }
 
-func (f *Coerce) toSingleFloat(arg slip.Object) (result slip.Object) {
+func coerceToSingleFloat(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.SingleFloat(ta)
@@ -416,15 +416,15 @@ func (f *Coerce) toSingleFloat(arg slip.Object) (result slip.Object) {
 		if imag(ta) == 0.0 {
 			result = slip.SingleFloat(real(ta))
 		} else {
-			f.notPossible(ta, "single-float")
+			coerceNotPossible(ta, "single-float")
 		}
 	default:
-		f.notPossible(ta, "single-float")
+		coerceNotPossible(ta, "single-float")
 	}
 	return
 }
 
-func (f *Coerce) toDoubleFloat(arg slip.Object) (result slip.Object) {
+func coerceToDoubleFloat(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.DoubleFloat(ta)
@@ -436,15 +436,15 @@ func (f *Coerce) toDoubleFloat(arg slip.Object) (result slip.Object) {
 		if imag(ta) == 0.0 {
 			result = slip.DoubleFloat(real(ta))
 		} else {
-			f.notPossible(ta, "double-float")
+			coerceNotPossible(ta, "double-float")
 		}
 	default:
-		f.notPossible(ta, "double-float")
+		coerceNotPossible(ta, "double-float")
 	}
 	return
 }
 
-func (f *Coerce) toLongFloat(arg slip.Object) (result slip.Object) {
+func coerceToLongFloat(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = (*slip.LongFloat)(big.NewFloat(float64(ta)))
@@ -456,15 +456,15 @@ func (f *Coerce) toLongFloat(arg slip.Object) (result slip.Object) {
 		if imag(ta) == 0.0 {
 			result = (*slip.LongFloat)(big.NewFloat(real(ta)))
 		} else {
-			f.notPossible(ta, "long-float")
+			coerceNotPossible(ta, "long-float")
 		}
 	default:
-		f.notPossible(ta, "long-float")
+		coerceNotPossible(ta, "long-float")
 	}
 	return
 }
 
-func (f *Coerce) toRational(arg slip.Object) (result slip.Object) {
+func coerceToRational(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.Fixnum(ta)
@@ -478,15 +478,15 @@ func (f *Coerce) toRational(arg slip.Object) (result slip.Object) {
 		if imag(ta) == 0 {
 			result = slip.Fixnum(real(ta))
 		} else {
-			f.notPossible(ta, "rational")
+			coerceNotPossible(ta, "rational")
 		}
 	default:
-		f.notPossible(ta, "rational")
+		coerceNotPossible(ta, "rational")
 	}
 	return
 }
 
-func (f *Coerce) toRatio(arg slip.Object) (result slip.Object) {
+func coerceToRatio(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = (*slip.Ratio)(big.NewRat(int64(ta), 1))
@@ -502,15 +502,15 @@ func (f *Coerce) toRatio(arg slip.Object) (result slip.Object) {
 		if imag(ta) == 0 {
 			result = (*slip.Ratio)(big.NewRat(int64(real(ta)), 1))
 		} else {
-			f.notPossible(ta, "ratio")
+			coerceNotPossible(ta, "ratio")
 		}
 	default:
-		f.notPossible(ta, "ratio")
+		coerceNotPossible(ta, "ratio")
 	}
 	return
 }
 
-func (f *Coerce) toComplex(arg slip.Object) (result slip.Object) {
+func coerceToComplex(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.Complex(complex(float64(ta), 0))
@@ -519,24 +519,24 @@ func (f *Coerce) toComplex(arg slip.Object) (result slip.Object) {
 	case slip.Complex:
 		result = ta
 	default:
-		f.notPossible(ta, "complex")
+		coerceNotPossible(ta, "complex")
 	}
 	return
 }
 
-func (f *Coerce) toSymbol(arg slip.Object) (result slip.Object) {
+func coerceToSymbol(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.String:
 		result = slip.Symbol(ta)
 	case slip.Symbol:
 		result = ta
 	default:
-		f.notPossible(ta, "symbol")
+		coerceNotPossible(ta, "symbol")
 	}
 	return
 }
 
-func (f *Coerce) toAssoc(arg slip.Object) (result slip.Object) {
+func coerceToAssoc(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.List:
 		for _, e := range ta {
@@ -544,7 +544,7 @@ func (f *Coerce) toAssoc(arg slip.Object) (result slip.Object) {
 				continue
 			}
 			if c, ok := e.(slip.List); !ok || len(c) < 2 {
-				f.notPossible(ta, "assoc")
+				coerceNotPossible(ta, "assoc")
 			}
 		}
 		result = ta
@@ -555,12 +555,12 @@ func (f *Coerce) toAssoc(arg slip.Object) (result slip.Object) {
 		}
 		result = list
 	default:
-		f.notPossible(ta, "assoc")
+		coerceNotPossible(ta, "assoc")
 	}
 	return
 }
 
-func (f *Coerce) toHashTable(arg slip.Object) (result slip.Object) {
+func coerceToHashTable(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.List:
 		ht := slip.HashTable{}
@@ -569,7 +569,7 @@ func (f *Coerce) toHashTable(arg slip.Object) (result slip.Object) {
 				continue
 			}
 			if c, ok := e.(slip.List); !ok || len(c) < 2 {
-				f.notPossible(ta, "hash-table")
+				coerceNotPossible(ta, "hash-table")
 			} else {
 				ht[c[0]] = c.Cdr()
 			}
@@ -578,36 +578,36 @@ func (f *Coerce) toHashTable(arg slip.Object) (result slip.Object) {
 	case slip.HashTable:
 		result = ta
 	default:
-		f.notPossible(ta, "hash-table")
+		coerceNotPossible(ta, "hash-table")
 	}
 	return
 }
 
-func (f *Coerce) toFunction(arg slip.Object) (result slip.Object) {
+func coerceToFunction(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Symbol:
 		result = slip.MustFindFunc(string(ta))
 	case *slip.Lambda:
 		result = ta
 	default:
-		f.notPossible(ta, "function")
+		coerceNotPossible(ta, "function")
 	}
 	return
 }
 
-func (f *Coerce) listToString(list slip.List) slip.Object {
+func coerceListToString(list slip.List) slip.Object {
 	ra := make([]rune, len(list))
 	for i, v := range list {
 		if r, ok := v.(slip.Character); ok {
 			ra[i] = rune(r)
 		} else {
-			f.notPossible(list, "string")
+			coerceNotPossible(list, "string")
 		}
 	}
 	return slip.String(ra)
 }
 
-func (f *Coerce) notPossible(arg slip.Object, rtype string) {
+func coerceNotPossible(arg slip.Object, rtype string) {
 	if arg == nil {
 		slip.NewPanic("Can not coerce a nil into a %s", rtype)
 	}

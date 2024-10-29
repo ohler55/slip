@@ -70,11 +70,11 @@ func equal(x, y slip.Object) bool {
 	}
 	switch tx := x.(type) {
 	case slip.Character:
-		if y.(slip.Character) == tx {
+		if c, ok := y.(slip.Character); ok && c == tx {
 			return true
 		}
 	case slip.Number:
-		if same(x, y) != nil {
+		if _, ok := y.(slip.Number); ok && same(x, y) != nil {
 			return true
 		}
 	case slip.String:
