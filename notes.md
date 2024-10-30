@@ -8,11 +8,12 @@
  * [x] CASE
  * [x] ECASE
  * [x] MAP
- * [ ] MERGE
- * [ ] NRECONC
- * [ ] PROGV
- * [ ] REDUCE
- * [ ] REVAPPEND (list tail) - reverse list then append tail
+ * [x] MERGE
+ * [x] NRECONC
+ * [x] PROGV
+ * [ ] REDUCE (function sequence &key key from-end start end initial-value)
+  - any sequence input but output alway list
+ * [x] REVAPPEND
  * [ ] SLOT-BOUNDP - check var for unbound, panic on no slot
  * [ ] SLOT-EXISTS-P - instance.HasMethod()
  * [ ] SLOT-MAKUNBOUND - set var to slip.Unbound or panic with slot-unbound
@@ -22,9 +23,9 @@
   - add slot-value to flavors pkg/clos (for get and setf)
    - always allow
  * [ ] THE
- * [ ] WITH-INPUT-FROM-STRING
- * [ ] WITH-OPEN-STREAM
- * [ ] WITH-OUTPUT-TO-STRING
+ * [ ] WITH-INPUT-FROM-STRING ((var string &key index start end) &rest forms)
+ * [ ] WITH-OPEN-STREAM ((var stream) &rest forms)
+ * [ ] WITH-OUTPUT-TO-STRING ((var &optional string-form &key element-type) &rest forms)
 
  - jetstream - update with latests model
   - can that be made to work with nats or apphub?
