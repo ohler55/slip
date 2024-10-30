@@ -13,6 +13,7 @@
  * [x] PROGV
  * [ ] REDUCE (function sequence &key key from-end start end initial-value)
   - any sequence input but output alway list
+  - without initial-value use first two elements
  * [x] REVAPPEND
  * [ ] SLOT-BOUNDP - check var for unbound, panic on no slot
  * [ ] SLOT-EXISTS-P - instance.HasMethod()
