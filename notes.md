@@ -13,11 +13,16 @@
  * [x] PROGV
  * [x] REDUCE
  * [x] REVAPPEND
- * [ ] SLOT-BOUNDP - check var for unbound, panic on no slot
- * [ ] SLOT-EXISTS-P - instance.HasMethod()
- * [ ] SLOT-MAKUNBOUND - set var to slip.Unbound or panic with slot-unbound
+ * [ ] SLOT-BOUNDP (instance slot-name) => boolean
+   - check var for unbound, panic on no slot
+ * [ ] SLOT-EXISTS-P (instance slot-name)
+   - instance.HasMethod()
+ * [ ] SLOT-MAKUNBOUND (instance slot-name)
+   - set var to slip.Unbound or panic with slot-unbound
  * [ ] SLOT-MISSING - error to generate by slot-value
+   - raise a slip.Error
  * [ ] SLOT-UNBOUND - error to generate by slot-value
+   - raise an unbound-slot
  * [ ] SLOT-VALUE
   - add slot-value to flavors pkg/clos (for get and setf)
    - always allow
