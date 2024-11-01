@@ -68,7 +68,7 @@ func NewUnboundSlot(instance Object, name Object, format string, args ...any) *U
 	if 0 < len(format) {
 		cond.Message = fmt.Sprintf(format, args...)
 	} else {
-		cond.Message = fmt.Sprintf("The slot name is unbound in the object %s.", name, instance)
+		cond.Message = fmt.Sprintf("The slot %s is unbound in the object %s.", name, instance)
 	}
 	return &cond
 }

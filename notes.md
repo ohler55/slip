@@ -21,7 +21,12 @@
  * [ ] SLOT-VALUE
   - add slot-value to flavors pkg/clos (for get and setf)
    - always allow
- * [ ] THE
+ * [ ] THE (value-type form)
+   - evaluate form and verify the result is the value-type or a sub-class of it
+   - a placer
+    - (let* ((x (list 'a 'b 'c))
+             (y 5))
+        (setf (the fixnum (car x)) y)
  * [ ] WITH-INPUT-FROM-STRING ((var string &key index start end) &rest forms)
  * [ ] WITH-OPEN-STREAM ((var stream) &rest forms)
  * [ ] WITH-OUTPUT-TO-STRING ((var &optional string-form &key element-type) &rest forms)
