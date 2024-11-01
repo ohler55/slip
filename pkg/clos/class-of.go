@@ -32,13 +32,13 @@ the _object_ is not an _instance_.`,
 		}, &Pkg)
 }
 
-// ClassOf represents the makeInstance function.
+// ClassOf represents the class-of function.
 type ClassOf struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *ClassOf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *ClassOf) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}

@@ -15,8 +15,7 @@
  * [x] REVAPPEND
  * [ ] SLOT-BOUNDP (instance slot-name) => boolean
    - check var for unbound, panic on no slot
- * [ ] SLOT-EXISTS-P (instance slot-name)
-   - instance.HasMethod()
+ * [x] SLOT-EXISTS-P
  * [ ] SLOT-MAKUNBOUND (instance slot-name)
    - set var to slip.Unbound or panic with slot-unbound
  * [ ] SLOT-MISSING - error to generate by slot-value
