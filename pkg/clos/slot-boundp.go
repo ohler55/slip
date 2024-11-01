@@ -10,17 +10,17 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := SlotMakunbound{Function: slip.Function{Name: "slot-makunbound", Args: args}}
+			f := SlotBoundp{Function: slip.Function{Name: "slot-boundp", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "slot-makunbound",
+			Name: "slot-boundp",
 			Args: []*slip.DocArg{
 				{
 					Name: "instance",
 					Type: "instance",
-					Text: "The instance to make a slot unbound for.",
+					Text: "The instance to check whether a slot bound.",
 				},
 				{
 					Name: "slot-name",
@@ -28,32 +28,36 @@ func init() {
 					Text: "The name of a slot.",
 				},
 			},
-			Text: `__slot-makunbound__ makes the variable _slot-name_ unbound in the _instance_.`,
+			Return: "boolean",
+			Text:   `__slot-boundp__ return true if the variable _slot-name_ is bound in the _instance_.`,
 			Examples: []string{
-				"(slot-makunbound (make-instance 'strawberry) 'size)",
+				"(slot-boundp (make-instance 'strawberry :size 'small) 'size) => t",
 			},
 		}, &Pkg)
 }
 
-// SlotMakunbound represents the slot-makunbound function.
-type SlotMakunbound struct {
+// SlotBoundp represents the slot-boundp function.
+type SlotBoundp struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *SlotMakunbound) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *SlotBoundp) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
 		slip.PanicType("slot-name", args[1], "symbol")
 	}
 	if inst, ok := args[0].(*flavors.Instance); ok {
-		if !inst.Has(sym) {
-			slotMissing(inst, sym, "slot-makunbound")
+		if v, has := inst.LocalGet(sym); has {
+			if v != slip.Unbound {
+				result = slip.True
+			}
+		} else {
+			slotMissing(inst, sym, "slot-boundp")
 		}
-		inst.Set(sym, slip.Unbound)
 	} else {
-		slotMissing(args[0], sym, "slot-makunbound")
+		slotMissing(args[0], sym, "slot-boundp")
 	}
-	return nil
+	return
 }

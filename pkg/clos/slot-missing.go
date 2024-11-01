@@ -56,32 +56,22 @@ type SlotMissing struct {
 func (f *SlotMissing) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 4, 5)
 	// Ignore class as it is not used in forming the error message.
-	inst, ok := args[1].(slip.Instance)
+	slotName, ok := args[2].(slip.Symbol)
 	if !ok {
-		slip.PanicType("instance", args[1], "instance")
-	}
-	var (
-		slotName slip.Symbol
-		op       string
-	)
-	if slotName, ok = args[2].(slip.Symbol); !ok {
 		slip.PanicType("slot-name", args[2], "symbol")
 	}
 	if sym, ok2 := args[3].(slip.Symbol); ok2 {
-		op = string(sym)
-	} else {
-		slip.PanicType("operation", args[3], "symbol")
+		slotMissing(args[1], slotName, string(sym))
 	}
-	return slotMissing(inst, slotName, op)
+	panic(slip.NewTypeError("operation", args[3], "symbol"))
 }
 
-func slotMissing(inst slip.Instance, name slip.Symbol, op string) slip.Object {
+func slotMissing(obj slip.Object, name slip.Symbol, op string) {
 	if op == "setf" {
 		slip.NewPanic("When attempting to set the slot's value (%s), the slot %s is missing from the object %s.",
-			op, name, inst)
+			op, name, obj)
 	} else {
 		slip.NewPanic("When attempting to read the slot's value (%s), the slot %s is missing from the object %s.",
-			op, name, inst)
+			op, name, obj)
 	}
-	return nil
 }
