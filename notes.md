@@ -18,9 +18,7 @@
  * [x] SLOT-MAKUNBOUND
  * [x] SLOT-MISSING
  * [x] SLOT-UNBOUND
- * [ ] SLOT-VALUE
-  - add slot-value to flavors pkg/clos (for get and setf)
-   - always allow
+ * [x] SLOT-VALUE
  * [ ] THE (value-type form)
    - evaluate form and verify the result is the value-type or a sub-class of it
    - a placer
