@@ -61,7 +61,7 @@ func (f *SlotValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	return
 }
 
-// Place a value in the first position of a list or cons.
+// Place a value in the slot of an instance.
 func (f *SlotValue) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
