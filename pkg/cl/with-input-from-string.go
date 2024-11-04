@@ -13,9 +13,7 @@ func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := WithInputFromString{
-				Open: Open{
-					Function: slip.Function{Name: "with-input-from-string", Args: args, SkipEval: []bool{true}},
-				},
+				Function: slip.Function{Name: "with-input-from-string", Args: args, SkipEval: []bool{true}},
 			}
 			f.Self = &f
 			return &f
@@ -48,7 +46,7 @@ which is set when the function returns.`,
 
 // WithInputFromString represents the with-input-from-string function.
 type WithInputFromString struct {
-	Open
+	slip.Function
 }
 
 // Call the function with the arguments provided.
