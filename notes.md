@@ -20,7 +20,7 @@
  * [x] SLOT-UNBOUND
  * [x] SLOT-VALUE
  * [x] THE
- * [ ] WITH-INPUT-FROM-STRING ((var string &key index start end) &rest forms)
+ * [x] WITH-INPUT-FROM-STRING
  * [ ] WITH-OPEN-STREAM ((var stream) &rest forms)
  * [ ] WITH-OUTPUT-TO-STRING ((var &optional string-form &key element-type) &rest forms)
 

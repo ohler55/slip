@@ -56,15 +56,7 @@ func (f *The) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 func (f *The) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	valueIsA(value, args[0])
-
-	if placer, ok := args[1].(slip.Placer); ok {
-		pargs := placer.GetArgs()
-		sargs := make(slip.List, len(pargs))
-		for i := range pargs {
-			sargs[i] = slip.EvalArg(s, pargs, i, 0)
-		}
-		placer.Place(s, sargs, value)
-	}
+	placeExprValue(s, args[1], value, 0)
 }
 
 func valueIsA(value, valueType slip.Object) {

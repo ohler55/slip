@@ -57,20 +57,24 @@ func (f *Setf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		if vs, ok := result.(slip.Values); ok {
 			result = vs.First()
 		}
-	Retry:
-		switch ta := p.(type) {
-		case slip.Symbol:
-			s.Set(ta, result)
-		case slip.List:
-			p = slip.ListToFunc(s, ta, d2)
-			goto Retry
-		case slip.Placer:
-			callPlace(s, ta, result, d2)
-		default:
-			slip.PanicType("placer argument to setf", p, "symbol", "placer")
-		}
+		placeExprValue(s, p, result, d2)
 	}
 	return
+}
+
+func placeExprValue(s *slip.Scope, x slip.Object, value slip.Object, depth int) {
+Retry:
+	switch tx := x.(type) {
+	case slip.Symbol:
+		s.Set(tx, value)
+	case slip.List:
+		x = slip.ListToFunc(s, tx, depth)
+		goto Retry
+	case slip.Placer:
+		callPlace(s, tx, value, depth)
+	default:
+		slip.PanicType("placer argument to setf", x, "symbol", "placer")
+	}
 }
 
 func callPlace(s *slip.Scope, p slip.Placer, value slip.Object, depth int) {
