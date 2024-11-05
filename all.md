@@ -38,23 +38,18 @@
  * [ ] CALL-ARGUMENTS-LIMIT
  * [ ] CALL-METHOD
  * [ ] CALL-NEXT-METHOD
- * [ ] CASE
- - [-] CCASE
  * [ ] CHANGE-CLASS
  * [ ] CHECK-TYPE
  * [ ] CIS
  * [ ] COMPLEMENT
- * [x] COMPLEXP
  * [ ] COMPUTE-APPLICABLE-METHODS
  * [ ] COMPUTE-RESTARTS
  * [ ] CONCATENATED-STREAM
  * [ ] CONCATENATED-STREAM-STREAMS
  * [ ] CONJUGATE
  * [ ] CONSTANTLY
- * [x] CONSTANTP
  * [ ] COPY-PPRINT-DISPATCH
  * [ ] COPY-STRUCTURE
- - [-] COPY-SYMBOL
  * [ ] COSH
  * [ ] CTYPECASE
  * [ ] DECODE-FLOAT
@@ -77,7 +72,6 @@
  * [ ] DOCUMENTATION
  * [ ] DPB
  * [ ] DRIBBLE
- * [ ] ECASE
  * [ ] ECHO-STREAM
  * [ ] ECHO-STREAM-INPUT-STREAM
  * [ ] ECHO-STREAM-OUTPUT-STREAM
@@ -156,10 +150,8 @@
  * [ ] MAKE-SEQUENCE
  * [ ] MAKE-SYNONYM-STREAM
  * [ ] MAKE-TWO-WAY-STREAM
- * [ ] MAP
  * [ ] MAP-INTO
  * [ ] MASK-FIELD
- * [ ] MERGE
  * [ ] METHOD-COMBINATION
  * [ ] METHOD-COMBINATION-ERROR
  * [ ] METHOD-QUALIFIERS
@@ -173,7 +165,6 @@
  * [ ] MULTIPLE-VALUES-LIMIT
  * [ ] NEXT-METHOD-P
  * [ ] NO-APPLICABLE-METHOD
- * [ ] NRECONC
  * [ ] NUMERATOR
  * [ ] OPEN-STREAM-P
  * [ ] OTHERWISE
@@ -198,15 +189,12 @@
  * [ ] PPRINT-TABULAR
  * [ ] PRINT-NOT-READABLE
  * [ ] PRINT-NOT-READABLE-OBJECT
- * [ ] PROGV
  * [ ] READ-DELIMITED-LIST
  * [ ] READ-PRESERVING-WHITESPACE
  * [ ] READ-SEQUENCE
  * [ ] REALPART
- * [ ] REDUCE
  * [ ] REMOVE-METHOD
  * [ ] REPLACE
- * [ ] REVAPPEND
  * [ ] ROTATEF
  * [ ] SATISFIES
  * [ ] SBIT
@@ -228,19 +216,12 @@
  * [ ] SIMPLE-STRING
  * [ ] SIMPLE-STRING-P
  * [ ] SINH
- * [ ] SLOT-BOUNDP
- * [ ] SLOT-EXISTS-P
- * [ ] SLOT-MAKUNBOUND
- * [ ] SLOT-MISSING
- * [ ] SLOT-UNBOUND
- * [ ] SLOT-VALUE
  * [ ] SPECIAL-OPERATOR-P
  * [ ] STEP
  * [ ] STORAGE-CONDITION
  * [ ] STORE-VALUE
  * [ ] STREAM-ELEMENT-TYPE
  * [ ] STREAM-EXTERNAL-FORMAT
- * [ ] STRING-STREAM
  * [ ] STRUCTURE
  * [ ] STRUCTURE-CLASS
  * [ ] STRUCTURE-OBJECT
@@ -251,7 +232,6 @@
  * [ ] SYNONYM-STREAM-SYMBOL
  * [ ] TAGBODY
  * [ ] TANH
- * [ ] THE
  * [ ] TRANSLATE-LOGICAL-PATHNAME
  * [ ] TRANSLATE-PATHNAME
  * [ ] TRUENAME
@@ -259,7 +239,6 @@
  * [ ] TWO-WAY-STREAM-INPUT-STREAM
  * [ ] TWO-WAY-STREAM-OUTPUT-STREAM
  * [ ] TYPECASE
- * [ ] UNSIGNED-BYTE
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
@@ -270,20 +249,13 @@
  * [ ] WITH-COMPILATION-UNIT
  * [ ] WITH-CONDITION-RESTARTS
  * [ ] WITH-HASH-TABLE-ITERATOR
- * [ ] WITH-INPUT-FROM-STRING
- * [ ] WITH-OPEN-STREAM
- * [ ] WITH-OUTPUT-TO-STRING
  * [ ] WITH-PACKAGE-ITERATOR
  * [ ] WITH-SIMPLE-RESTART
  * [ ] WITH-SLOTS
  * [ ] WITH-STANDARD-IO-SYNTAX
- * [x] WRITE-BYTE
- * [x] WRITE-CHAR
- * [x] WRITE-LINE
- * [x] WRITE-SEQUENCE
- * [x] WRITE-STRING
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
+ * [+] CLASS
  * [x] &BODY
  * [x] &KEY
  * [x] &OPTIONAL
@@ -406,6 +378,7 @@
  * [x] CADDR
  * [x] CADR
  * [x] CAR
+ * [x] CASE
  * [x] CDAAAR
  * [x] CDAADR
  * [x] CDAAR
@@ -452,11 +425,13 @@
  * [x] CODE-CHAR
  * [x] COERCE
  * [x] COMPLEX
+ * [x] COMPLEXP
  * [x] CONCATENATE
  * [x] COND
  * [x] CONDITION
  * [x] CONS
  * [x] CONSP
+ * [x] CONSTANTP
  * [x] CONTROL-ERROR
  * [x] COPY-ALIST
  * [x] COPY-LIST
@@ -496,6 +471,7 @@
  * [x] DOUBLE-FLOAT-EPSILON
  * [x] DOUBLE-FLOAT-NEGATIVE-EPSILON
  * [x] DYNAMIC-EXTENT
+ * [x] ECASE
  * [x] EIGHTH
  * [x] ENSURE-DIRECTORIES-EXIST
  * [x] EQ
@@ -639,6 +615,7 @@
  * [x] MAKE-STRING-OUTPUT-STREAM
  * [x] MAKE-SYMBOL
  * [x] MAKUNBOUND
+ * [x] MAP
  * [x] MAPC
  * [x] MAPCAN
  * [x] MAPCAR
@@ -649,6 +626,7 @@
  * [x] MAX
  * [x] MEMBER
  * [x] MEMBER-IF
+ * [x] MERGE
  * [x] MERGE-PATHNAMES
  * [x] METHOD
  * [x] MIN
@@ -675,6 +653,7 @@
  * [x] NOTANY
  * [x] NOTEVERY
  * [x] NOTINLINE
+ * [x] NRECONC
  * [x] NREVERSE
  * [x] NSET-DIFFERENCE
  * [x] NSET-EXCLUSIVE-OR
@@ -734,6 +713,7 @@
  * [x] PROG2
  * [x] PROGN
  * [x] PROGRAM-ERROR
+ * [x] PROGV
  * [x] PSETF
  * [x] PSETQ
  * [x] PUSH
@@ -756,6 +736,7 @@
  * [x] READER-ERROR
  * [x] REAL
  * [x] REALP
+ * [x] REDUCE
  * [x] REM
  * [x] REMF
  * [x] REMHASH
@@ -769,6 +750,7 @@
  * [x] REST
  * [x] RETURN
  * [x] RETURN-FROM
+ * [x] REVAPPEND
  * [x] REVERSE
  * [x] ROOM
  * [x] ROUND
@@ -805,6 +787,12 @@
  * [x] SINGLE-FLOAT-NEGATIVE-EPSILON
  * [x] SIXTH
  * [x] SLEEP
+ * [x] SLOT-BOUNDP
+ * [x] SLOT-EXISTS-P
+ * [x] SLOT-MAKUNBOUND
+ * [x] SLOT-MISSING
+ * [x] SLOT-UNBOUND
+ * [x] SLOT-VALUE
  * [x] SOFTWARE-TYPE
  * [x] SOFTWARE-VERSION
  * [x] SOME
@@ -829,6 +817,7 @@
  * [x] STRING-NOT-GREATERP
  * [x] STRING-NOT-LESSP
  * [x] STRING-RIGHT-TRIM
+ * [x] STRING-STREAM
  * [x] STRING-TRIM
  * [x] STRING-UPCASE
  * [x] STRING/=
@@ -857,6 +846,7 @@
  * [x] TAN
  * [x] TENTH
  * [x] TERPRI
+ * [x] THE
  * [x] THIRD
  * [x] TIME
  * [x] TRACE
@@ -877,6 +867,7 @@
  * [x] UNION
  * [x] UNLESS
  * [x] UNREAD-CHAR
+ * [x] UNSIGNED-BYTE
  * [x] UNUSE-PACKAGE
  * [x] UPPER-CASE-P
  * [x] USE-PACKAGE
@@ -891,8 +882,16 @@
  * [x] WARN
  * [x] WARNING
  * [x] WHEN
+ * [x] WITH-INPUT-FROM-STRING
  * [x] WITH-OPEN-FILE
+ * [x] WITH-OPEN-STREAM
+ * [x] WITH-OUTPUT-TO-STRING
  * [x] WRITE
+ * [x] WRITE-BYTE
+ * [x] WRITE-CHAR
+ * [x] WRITE-LINE
+ * [x] WRITE-SEQUENCE
+ * [x] WRITE-STRING
  * [x] WRITE-TO-STRING
  * [x] ZEROP
  - [-] &ALLOW-OTHER-KEYS
@@ -910,8 +909,8 @@
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
  - [-] CATCH (use recover instead)
+ - [-] CCASE
  - [-] CERROR
- - [-] CLASS
  - [-] CLEAR-INPUT
  - [-] CLEAR-OUTPUT
  - [-] COMPILATION-SPEED
@@ -924,6 +923,7 @@
  - [-] COMPILER-MACRO-FUNCTION
  - [-] CONTINUE
  - [-] COPY-READTABLE
+ - [-] COPY-SYMBOL
  - [-] COUNT-IF-NOT
  - [-] DEBUG
  - [-] DEFCLASS (defflavor instead)

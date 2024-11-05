@@ -35,7 +35,7 @@ func TestUnboundSlotMake(t *testing.T) {
 	tt.Equal(t, ok, true)
 	tt.Equal(t, slip.Symbol("vanilla"), us.Instance())
 	tt.Equal(t, slip.Symbol(":slop"), us.Name())
-	tt.Equal(t, ":slop is not a slot in vanilla.", us.Error())
+	tt.Equal(t, "The slot :slop is unbound in the object vanilla.", us.Error())
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Unbound-Slot :instance 'vanilla :name :slop :message "raise")`,

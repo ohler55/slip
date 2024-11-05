@@ -110,7 +110,7 @@ func TestSendNoMethod(t *testing.T) {
 func TestSendNotInstance(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(send 7 :x)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.UnboundSlotSymbol,
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(send t :x)`,
@@ -177,7 +177,7 @@ func TestSendNil(t *testing.T) {
 func TestSendClassNoMethod(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(send (make-condition 'error :message "quux") :bad)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.UnboundSlotSymbol,
 	}).Test(t)
 }
 

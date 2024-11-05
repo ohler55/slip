@@ -263,9 +263,9 @@ func (s *Scope) bound(name string) bool {
 	}
 	s.moo.Lock()
 	if s.Vars != nil {
-		if _, has := s.Vars[name]; has {
+		if v, has := s.Vars[name]; has {
 			s.moo.Unlock()
-			return true
+			return Unbound != v
 		}
 	}
 	s.moo.Unlock()

@@ -43,7 +43,6 @@ type Cond struct {
 
 // Call the function with the arguments provided.
 func (f *Cond) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	result = nil
 	d2 := depth + 1
 	for _, a := range args {
 		clause, ok := a.(slip.List)

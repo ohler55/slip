@@ -20,6 +20,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "with-open-file",
 			Args: []*slip.DocArg{
 				{

@@ -83,14 +83,12 @@ func (f *Ash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 			copy(bn[1:], ba)
 			sh %= 8
 			mask := byte(^(0xff >> sh))
-			// fmt.Printf("*** before %v - %d\n", bn, sh)
 			for i, b := range bn {
 				if 0 < i {
 					bn[i-1] |= (mask & b) >> (8 - sh)
 				}
 				bn[i] = b << sh
 			}
-			// fmt.Printf("*** after %v\n", bn)
 			ba = bn
 		}
 		var bi big.Int

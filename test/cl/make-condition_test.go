@@ -17,7 +17,7 @@ func TestMakeConditionBasic(t *testing.T) {
 	}
 	tf.Test(t)
 	us := tf.Result.(*slip.UnboundSlotPanic)
-	tt.Equal(t, "slop is not a slot in cymbol.", us.Message)
+	tt.Equal(t, "The slot slop is unbound in the object cymbol.", us.Message)
 }
 
 func TestMakeConditionNotCondition(t *testing.T) {

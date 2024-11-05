@@ -59,6 +59,9 @@ func (tf *Function) Test(t *testing.T) {
 		so, ok := r.(slip.Object)
 		tt.Equal(t, true, ok, "expected a panic of %s not a %T", tf.PanicType, r)
 		tt.Equal(t, tf.PanicType, so.Hierarchy()[0], "expected a panic of %s not a %s", tf.PanicType, so.Hierarchy()[0])
+		if tf.Validate != nil {
+			tf.Validate(t, so)
+		}
 	case tf.Panics:
 		tt.Panic(t, func() {
 			obj := slip.CompileString(tf.Source)
