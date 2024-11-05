@@ -32,7 +32,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text:   `__with-open-stream__ evaluates the _forms_ the _stream_ bound to _var_.`,
+			Text:   `__with-open-stream__ evaluates the _forms_ with the _stream_ bound to _var_.`,
 			Examples: []string{
 				`(with-open-stream (s (make-string-input-stream "abc def")) (read s)) => abc`,
 			},

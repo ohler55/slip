@@ -22,9 +22,9 @@
  * [x] THE
  * [x] WITH-INPUT-FROM-STRING
  * [x] WITH-OPEN-STREAM
- * [ ] WITH-OUTPUT-TO-STRING ((var &optional string-form &key element-type) &rest forms)
-   - ignore element-type or leave off signature or could be octet or character?
-   - optional string form could be a vector of character or octet
+ * [x] WITH-OUTPUT-TO-STRING
+
+ - fix race condition bug in watch
 
  - jetstream - update with latests model
   - can that be made to work with nats or apphub?
