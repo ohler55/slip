@@ -4,26 +4,6 @@
 
 - next
 
- - misc
- * [x] CASE
- * [x] ECASE
- * [x] MAP
- * [x] MERGE
- * [x] NRECONC
- * [x] PROGV
- * [x] REDUCE
- * [x] REVAPPEND
- * [x] SLOT-BOUNDP
- * [x] SLOT-EXISTS-P
- * [x] SLOT-MAKUNBOUND
- * [x] SLOT-MISSING
- * [x] SLOT-UNBOUND
- * [x] SLOT-VALUE
- * [x] THE
- * [x] WITH-INPUT-FROM-STRING
- * [x] WITH-OPEN-STREAM
- * [x] WITH-OUTPUT-TO-STRING
-
  - fix race condition bug in watch
 
  - jetstream - update with latests model
