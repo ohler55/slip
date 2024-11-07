@@ -42,6 +42,19 @@ func (m *Method) Simplify() any {
 	return simple
 }
 
+// CheckMethodArgCount raises a panic describing the wrong number of arguments
+// to a method if the argument count is outside the expected bounds.
+func CheckMethodArgCount(inst *Instance, method string, cnt, min, max int) {
+	if cnt < min {
+		slip.NewPanic("Too few arguments to the %s %s method. At least %d expected but got %d.",
+			inst.Type.Name(), method, min, cnt)
+	}
+	if max != -1 && max < cnt {
+		panic(slip.NewError("Too many arguments to the %s %s method. At most %d expected but got %d.",
+			inst.Type.Name(), method, max, cnt))
+	}
+}
+
 // PanicMethodArgCount raises a panic describing the wrong number of arguments
 // to a method.
 func PanicMethodArgCount(inst *Instance, method string, cnt, min, max int) {
@@ -50,7 +63,7 @@ func PanicMethodArgCount(inst *Instance, method string, cnt, min, max int) {
 			inst.Type.Name(), method, min, cnt)
 	}
 	panic(slip.NewError("Too many arguments to the %s %s method. At most %d expected but got %d.",
-		inst.Type.Name(), method, min, cnt))
+		inst.Type.Name(), method, max, cnt))
 }
 
 // PanicMethodArgChoice raises a panic describing the wrong number of
