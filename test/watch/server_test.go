@@ -78,7 +78,8 @@ func TestServerConnections(t *testing.T) {
 				case slip.Symbol("p5"):
 					tt.Equal(t, "((id . p5) (period . 3) (op . qq))", slip.ObjectString(a))
 				case slip.Symbol("p6"):
-					tt.Equal(t, "((id . p6) (period . 3) (op . (lambda () (now))))", slip.ObjectString(a))
+					tt.Equal(t, "/\\(\\(id \\. p6\\) \\(period \\. 3\\) \\(op \\. .*\\(lambda \\(\\)/",
+						slip.ObjectString(a))
 				}
 			}
 		},

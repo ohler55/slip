@@ -16,7 +16,7 @@ import (
 
 func TestFramerBorderLine(t *testing.T) {
 	scope := slip.NewScope()
-	var out strings.Builder
+	var out safeWriter
 	orig := scope.Get("*standard-output*")
 	defer scope.Set("*standard-output*", orig)
 	scope.Set("*standard-output*", &slip.OutputStream{Writer: &out})
@@ -52,7 +52,7 @@ func TestFramerBorderLine(t *testing.T) {
 
 func TestFramerBorderChar(t *testing.T) {
 	scope := slip.NewScope()
-	var out strings.Builder
+	var out safeWriter
 	orig := scope.Get("*standard-output*")
 	defer scope.Set("*standard-output*", orig)
 	scope.Set("*standard-output*", &slip.OutputStream{Writer: &out})
@@ -86,7 +86,7 @@ func TestFramerBorderChar(t *testing.T) {
 
 func TestFramerNoBorder(t *testing.T) {
 	scope := slip.NewScope()
-	var out strings.Builder
+	var out safeWriter
 	orig := scope.Get("*standard-output*")
 	defer scope.Set("*standard-output*", orig)
 	scope.Set("*standard-output*", &slip.OutputStream{Writer: &out})
@@ -130,7 +130,7 @@ func TestFramerNoBorder(t *testing.T) {
 
 func TestFramerErrorValue(t *testing.T) {
 	scope := slip.NewScope()
-	var out strings.Builder
+	var out safeWriter
 	orig := scope.Get("*standard-output*")
 	defer scope.Set("*standard-output*", orig)
 	scope.Set("*standard-output*", &slip.OutputStream{Writer: &out})
@@ -167,7 +167,7 @@ func TestFramerErrorValue(t *testing.T) {
 
 func TestFramerDocs(t *testing.T) {
 	scope := slip.NewScope()
-	var out strings.Builder
+	var out safeWriter
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
 	for _, method := range []string{
