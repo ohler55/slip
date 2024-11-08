@@ -4,11 +4,6 @@
 
 - next
 
- - fix race condition bug in watch
-
- - jetstream - update with latests model
-  - can that be made to work with nats or apphub?
-
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
  - package-export

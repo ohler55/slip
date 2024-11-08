@@ -86,12 +86,14 @@ func (c *connection) shutdown() {
 	if c.active.Load() {
 		c.active.Store(false)
 		_ = c.con.Close()
-		close(c.reqs)
+		// close(c.reqs) // closed in method loop
 		close(c.sendQueue)
 		close(c.evalQueue)
 		if c.serv != nil {
 			c.serv.mu.Lock()
-			delete(c.serv.cons, c.id)
+			if c.serv.cons != nil {
+				delete(c.serv.cons, c.id)
+			}
 			c.serv.mu.Unlock()
 		}
 	}
