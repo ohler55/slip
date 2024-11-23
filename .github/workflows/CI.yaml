@@ -19,7 +19,7 @@ jobs:
       - name: Set Up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.22'
+          go-version: '1.23'
       - name: get dependencies
         run: go mod download
       - name: Test
@@ -34,7 +34,7 @@ jobs:
       - name: Setup  Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.22'
+          go-version: '1.23'
       - name: get dependencies
         run: go mod download
       - name: Test
