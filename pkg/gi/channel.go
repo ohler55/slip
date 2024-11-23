@@ -50,3 +50,8 @@ func (obj Channel) Length() int {
 func (obj Channel) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
 }
+
+// Pop a value from a channel.
+func (obj Channel) Pop() slip.Object {
+	return <-obj
+}
