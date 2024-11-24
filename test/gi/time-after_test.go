@@ -14,9 +14,7 @@ func TestTimeAfterOk(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let* ((tc (time-after 0.01))
                         (t0 (now)))
-                  (coerce (/ (- (time-unix (channel-pop tc))
-                                (time-unix t0))
-                             internal-time-units-per-second) 'double-float))`,
+                  (- (time-unix (channel-pop tc)) (time-unix t0)))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			diff, ok := v.(slip.DoubleFloat)
 			tt.Equal(t, true, ok)

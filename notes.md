@@ -4,13 +4,19 @@
 
 - next
 
- - make time a received or add time related functions
-  - add (duration)
-  - afterp (other)
-  - diff
+ - make time a receiver or add time related functions
+  - also describe
  - select (&rest channels)
- - time-after => channel
- - time-tick => channel
+  - or maybe macro like cond
+  - how to create the select cases?
+   - maybe sub functions for n as 1,2,3,4,etc
+ + time-after
+ - time-ticker => channel
+ + time-unix
+ - time-diff
+ - unix-time (seconds)
+ - time-add (duration)
+ - time-components => list (year month day hour minute second nanosecond weekday)
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 

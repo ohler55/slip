@@ -396,6 +396,15 @@ func TestTime(t *testing.T) {
 		},
 		Eval: slip.Time(tm),
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send @2024-11-12T13:14:15.123456789Z :components)`,
+		Expect: `(2024 11 12 13 14 15 123456789 "Tuesday")`,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(send @2024-11-11T11:11:11Z :unix)`,
+		Expect: "1.731323471e+09",
+	}).Test(t)
 }
 
 func TestListObj(t *testing.T) {

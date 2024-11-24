@@ -21,13 +21,13 @@ func init() {
 				{
 					Name: "time",
 					Type: "time",
-					Text: "Time to return as Unix nanoseconds.",
+					Text: "Time to return as Unix seconds.",
 				},
 			},
-			Return: "time",
-			Text:   `__time-unix__ returns the number of nanoseconds since January 1, 1970 UTC.`,
+			Return: "double-float",
+			Text:   `__time-unix__ returns the number of seconds since January 1, 1970 UTC.`,
 			Examples: []string{
-				`(time-unix @2022-07-10T12:29:21-05:00) => 1657474161000000000`,
+				`(time-unix @2022-07-10T12:29:21-05:00) => 1657474161.0`,
 			},
 		}, &Pkg)
 }
@@ -44,5 +44,5 @@ func (f *TimeUnix) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if !ok {
 		slip.PanicType("time", args[0], "time")
 	}
-	return slip.Fixnum(time.Time(t).UnixNano())
+	return slip.DoubleFloat(float64(time.Time(t).UnixNano()) / float64(time.Second))
 }

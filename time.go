@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"strings"
 	"time"
 )
 
@@ -12,6 +13,16 @@ const TimeSymbol = Symbol("time")
 func init() {
 	DefConstant(TimeSymbol, TimeSymbol,
 		`A _time_ identifies an instant in time backed by a golang time.Time.`)
+}
+
+var timeMethods = map[string]func(s *Scope, obj Time, args List, depth int) Object{
+	":add":        nil, // TBD
+	":components": TimeComponents,
+	":describe":   describeTime,
+	":diff":       nil, // TBD
+	":unix": func(s *Scope, obj Time, args List, depth int) Object {
+		return DoubleFloat(float64(time.Time(obj).UnixNano()) / float64(time.Second))
+	},
 }
 
 // Time is a time.Time Object. It might be better in the pkg/gi package but
@@ -53,4 +64,57 @@ func (obj Time) Hierarchy() []Symbol {
 // Eval returns self.
 func (obj Time) Eval(s *Scope, depth int) Object {
 	return obj
+}
+
+// Class of the instance.
+func (obj Time) Class() Class {
+	return FindClass("time")
+}
+
+// Init does nothing.
+func (obj Time) Init(scope *Scope, args List, depth int) {
+}
+
+// Receive a method invocation from the send function. It is typically
+// called by the send function but can be called directly so effectively
+// send a method to an instance.
+func (obj Time) Receive(s *Scope, message string, args List, depth int) Object {
+	f, _ := timeMethods[strings.ToLower(message)]
+	if f == nil {
+		PanicMethod(Symbol("time"), nil, Symbol(message), "")
+	}
+	return f(s, obj, args, depth)
+}
+
+// HasMethod returns true if the instance handles the named method.
+func (obj Time) HasMethod(method string) bool {
+	_, has := timeMethods[strings.ToLower(method)]
+	return has
+}
+
+// Describe the instance in detail.
+func (obj Time) Describe(b []byte, indent, right int, ansi bool) []byte {
+	// TBD
+	return b
+}
+
+func describeTime(s *Scope, obj Time, args List, depth int) Object {
+	// TBD
+
+	return nil
+}
+
+// TimeComponents returns a list of the time components as (year month day
+// hour minute second nanosecond weekday).
+func TimeComponents(s *Scope, obj Time, args List, depth int) Object {
+	return List{
+		Fixnum(time.Time(obj).Year()),
+		Fixnum(time.Time(obj).Month()),
+		Fixnum(time.Time(obj).Day()),
+		Fixnum(time.Time(obj).Hour()),
+		Fixnum(time.Time(obj).Minute()),
+		Fixnum(time.Time(obj).Second()),
+		Fixnum(time.Time(obj).Nanosecond()),
+		String(time.Time(obj).Weekday().String()),
+	}
 }
