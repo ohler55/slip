@@ -13,10 +13,10 @@
  + time-after
  - time-ticker => channel
  + time-unix
- - time-diff
- - unix-time (seconds)
+ + time-elapsed
  - time-add (duration)
  - time-components => list (year month day hour minute second nanosecond weekday)
+ - unix-time (seconds)
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
