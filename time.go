@@ -16,10 +16,10 @@ func init() {
 }
 
 var timeMethods = map[string]func(s *Scope, obj Time, args List, depth int) Object{
-	":add":        nil, // TBD
+	":add":        addTime,
 	":components": TimeComponents,
 	":describe":   describeTime,
-	":diff":       nil, // TBD
+	":elapsed":    elapsedTime,
 	":unix": func(s *Scope, obj Time, args List, depth int) Object {
 		return DoubleFloat(float64(time.Time(obj).UnixNano()) / float64(time.Second))
 	},
@@ -102,6 +102,22 @@ func describeTime(s *Scope, obj Time, args List, depth int) Object {
 	// TBD
 
 	return nil
+}
+
+func addTime(s *Scope, obj Time, args List, depth int) Object {
+	dur, ok := args[0].(Real)
+	if !ok {
+		PanicType("duration", args[0], "real")
+	}
+	return Time(time.Time(obj).Add(time.Duration(dur.RealValue() * float64(time.Second))))
+}
+
+func elapsedTime(s *Scope, obj Time, args List, depth int) Object {
+	end, ok := args[0].(Time)
+	if !ok {
+		PanicType("end", args[0], "time")
+	}
+	return DoubleFloat(float64(time.Time(end).Sub(time.Time(obj))) / float64(time.Second))
 }
 
 // TimeComponents returns a list of the time components as (year month day

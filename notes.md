@@ -14,10 +14,10 @@
  - time-ticker => channel
  + time-unix
  + time-elapsed
- - time-add (duration)
- - time-components => list (year month day hour minute second nanosecond weekday)
+ + time-add
+ + time-components
+ - time :describe
  - unix-time (seconds)
-
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
  - package-export

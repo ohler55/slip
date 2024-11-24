@@ -29,7 +29,7 @@ func init() {
 					Text: "The end time.",
 				},
 			},
-			Return: "time",
+			Return: "double-float",
 			Text:   `__time-elapsed__ returns the elapsed time in seconds from the _start_ to the _end_ time.`,
 			Examples: []string{
 				`(time-elapsed @2024-11-24T12:00:00Z @2024-11-24T13:14:15Z) => 4455`,

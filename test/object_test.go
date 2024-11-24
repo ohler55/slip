@@ -397,10 +397,25 @@ func TestTime(t *testing.T) {
 		Eval: slip.Time(tm),
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(send @2024-11-24T12:00:00Z :add 4455)`,
+		Expect: "@2024-11-24T13:14:15Z",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send @2024-11-24T12:00:00Z :add t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(send @2024-11-12T13:14:15.123456789Z :components)`,
 		Expect: `(2024 11 12 13 14 15 123456789 "Tuesday")`,
 	}).Test(t)
-
+	(&sliptest.Function{
+		Source: `(send @2024-11-24T12:00:00Z :elapsed @2024-11-24T13:14:15Z)`,
+		Expect: "4455",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send @2024-11-24T12:00:00Z :elapsed t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 	(&sliptest.Function{
 		Source: `(send @2024-11-11T11:11:11Z :unix)`,
 		Expect: "1.731323471e+09",
