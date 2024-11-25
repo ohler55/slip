@@ -23,7 +23,7 @@ func init() {
 				},
 			},
 			Return: "list",
-			Text: `__time-components__ returns the a list of the time components as
+			Text: `__time-components__ returns a list of the time components as
 (year month day hour minute second nanosecond weekday).`,
 			Examples: []string{
 				`(time-components @2024-11-12T13:14:15.123456789Z) =>`,

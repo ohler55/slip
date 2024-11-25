@@ -349,6 +349,8 @@ func TestOctets(t *testing.T) {
 	tt.Equal(t, slip.OctetsSymbol, slip.Octets("x").ArrayType())
 	tt.Equal(t, 3, slip.Octets("abc").Length())
 	tt.Equal(t, slip.Octets("aaa"), slip.NewOctets(3, slip.Octet(97)))
+	tt.Equal(t, slip.List{slip.Octet(97), slip.Octet(97), slip.Octet(97)},
+		slip.NewOctets(3, slip.Octet(97)).AsList())
 }
 
 func TestSymbolKey(t *testing.T) {
@@ -396,6 +398,8 @@ func TestTime(t *testing.T) {
 		},
 		Eval: slip.Time(tm),
 	}).Test(t)
+	tt.Equal(t, true, slip.Time(tm).HasMethod(":describe"))
+	tt.Equal(t, "time", slip.Time(tm).Class().Name())
 	(&sliptest.Function{
 		Source: `(send @2024-11-24T12:00:00Z :add 4455)`,
 		Expect: "@2024-11-24T13:14:15Z",
@@ -419,6 +423,21 @@ func TestTime(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(send @2024-11-11T11:11:11Z :unix)`,
 		Expect: "1.731323471e+09",
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(let ((out (make-string-output-stream)))
+                  (send @2024-11-24T12:00:00Z :describe out)
+                  (get-output-stream-string out))`,
+		Expect: "/Returns a list of the time components/",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send @2024-11-24T12:00:00Z :describe 7)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send @2024-11-24T12:00:00Z :not-a-method)`,
+		PanicType: slip.MethodErrorSymbol,
 	}).Test(t)
 }
 

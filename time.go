@@ -3,6 +3,8 @@
 package slip
 
 import (
+	"io"
+	"sort"
 	"strings"
 	"time"
 )
@@ -13,16 +15,44 @@ const TimeSymbol = Symbol("time")
 func init() {
 	DefConstant(TimeSymbol, TimeSymbol,
 		`A _time_ identifies an instant in time backed by a golang time.Time.`)
+	timeMethods[":add"] = addTime
+	timeMethods[":components"] = TimeComponents
+	timeMethods[":describe"] = describeTime
+	timeMethods[":elapsed"] = elapsedTime
+	timeMethods[":unix"] = func(s *Scope, obj Time, args List, depth int) Object {
+		return DoubleFloat(float64(time.Time(obj).UnixNano()) / float64(time.Second))
+	}
 }
 
-var timeMethods = map[string]func(s *Scope, obj Time, args List, depth int) Object{
-	":add":        addTime,
-	":components": TimeComponents,
-	":describe":   describeTime,
-	":elapsed":    elapsedTime,
-	":unix": func(s *Scope, obj Time, args List, depth int) Object {
-		return DoubleFloat(float64(time.Time(obj).UnixNano()) / float64(time.Second))
+var timeMethods = map[string]func(s *Scope, obj Time, args List, depth int) Object{}
+
+var timeMethodDocs = map[string]*methDoc{
+	":add": {
+		args: " (time) => time",
+		desc: "Returns the a new time that is _duration_ seconds from _time_. [see __time-add__]",
 	},
+	":components": {
+		args: " () => list",
+		desc: `Returns a list of the time components as
+(year month day hour minute second nanosecond weekday).`,
+	},
+	":describe": {
+		args: " (&optional output-stream)",
+		desc: "Describes the instance and the __time__ class.",
+	},
+	":elapsed": {
+		args: " (end) => real",
+		desc: "Returns the elapsed time in seconds from this time to the _end_ time.",
+	},
+	":unix": {
+		args: " () => double-float",
+		desc: "Returns the number of seconds since January 1, 1970 UTC.",
+	},
+}
+
+type methDoc struct {
+	args string
+	desc string
 }
 
 // Time is a time.Time Object. It might be better in the pkg/gi package but
@@ -94,13 +124,61 @@ func (obj Time) HasMethod(method string) bool {
 
 // Describe the instance in detail.
 func (obj Time) Describe(b []byte, indent, right int, ansi bool) []byte {
-	// TBD
+	b = append(b, indentSpaces[:indent]...)
+	if ansi {
+		b = append(b, bold...)
+	}
+	b = obj.Append(b)
+	if ansi {
+		b = append(b, colorOff...)
+	}
+	b = append(b, ", an instance of "...)
+	if ansi {
+		b = append(b, bold...)
+	}
+	b = append(b, "time"...)
+	if ansi {
+		b = append(b, colorOff...)
+	}
+	b = append(b, ",\n"...)
+	i2 := indent + 2
+	i3 := indent + 4
+	i4 := indent + 6
+	b = append(b, indentSpaces[:i2]...)
+	b = append(b, "Methods:\n"...)
+	var keys []string
+	for k := range timeMethods {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		b = append(b, indentSpaces[:i3]...)
+		b = append(b, k...)
+		b = append(b, timeMethodDocs[k].args...)
+		b = append(b, '\n')
+		b = AppendDoc(b, timeMethodDocs[k].desc, i4, right, ansi)
+		b = append(b, '\n')
+
+	}
 	return b
 }
 
 func describeTime(s *Scope, obj Time, args List, depth int) Object {
-	// TBD
+	w, _ := s.Get("*standard-output*").(io.Writer)
+	if 0 < len(args) {
+		var ok bool
+		if w, ok = args[0].(io.Writer); !ok {
+			PanicType("describe output-stream", args[0], "output-stream")
+		}
+	}
+	ansi := s.Get("*print-ansi*") != nil
+	right := int(s.Get("*print-right-margin*").(Fixnum))
 
+	b := obj.Describe(nil, 0, right, ansi)
+	if _, err := w.Write(b); err != nil {
+		ss, _ := w.(Stream)
+		PanicStream(ss, "write failed: %s", err)
+	}
 	return nil
 }
 

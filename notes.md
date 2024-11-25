@@ -4,20 +4,19 @@
 
 - next
 
- - make time a receiver or add time related functions
-  - also describe
- - select (&rest channels)
-  - or maybe macro like cond
-  - how to create the select cases?
-   - maybe sub functions for n as 1,2,3,4,etc
  + time-after
  - time-ticker => channel
  + time-unix
  + time-elapsed
  + time-add
  + time-components
- - time :describe
+ + time :describe
  - unix-time (seconds)
+ - select (&rest channels)
+  - or maybe macro like cond
+  - how to create the select cases?
+   - maybe sub functions for n as 1,2,3,4,etc
+
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
  - package-export
