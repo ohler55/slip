@@ -12,6 +12,7 @@
  + time-components
  + time :describe
  - unix-time (seconds)
+  - option for units :second :nanosecond, :millisecond, :microsecond
  - select (&rest channels)
   - or maybe macro like cond
   - how to create the select cases?

@@ -420,9 +420,30 @@ func TestTime(t *testing.T) {
 		Source:    `(send @2024-11-24T12:00:00Z :elapsed t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
+
 	(&sliptest.Function{
 		Source: `(send @2024-11-11T11:11:11Z :unix)`,
 		Expect: "1.731323471e+09",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send @2024-11-11T11:11:11Z :unix :second)`,
+		Expect: "1.731323471e+09",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send @2024-11-11T11:11:11Z :unix :millisecond)`,
+		Expect: "1.731323471e+12",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send @2024-11-11T11:11:11Z :unix :microsecond)`,
+		Expect: "1.731323471e+15",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send @2024-11-11T11:11:11Z :unix :nanosecond)`,
+		Expect: "1731323471000000000",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send @2024-11-11T11:11:11Z :unix :hour)`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 
 	(&sliptest.Function{

@@ -15,13 +15,12 @@ const TimeSymbol = Symbol("time")
 func init() {
 	DefConstant(TimeSymbol, TimeSymbol,
 		`A _time_ identifies an instant in time backed by a golang time.Time.`)
+
 	timeMethods[":add"] = addTime
 	timeMethods[":components"] = TimeComponents
 	timeMethods[":describe"] = describeTime
 	timeMethods[":elapsed"] = elapsedTime
-	timeMethods[":unix"] = func(s *Scope, obj Time, args List, depth int) Object {
-		return DoubleFloat(float64(time.Time(obj).UnixNano()) / float64(time.Second))
-	}
+	timeMethods[":unix"] = unixTime
 }
 
 var timeMethods = map[string]func(s *Scope, obj Time, args List, depth int) Object{}
@@ -45,8 +44,9 @@ var timeMethodDocs = map[string]*methDoc{
 		desc: "Returns the elapsed time in seconds from this time to the _end_ time.",
 	},
 	":unix": {
-		args: " () => double-float",
-		desc: "Returns the number of seconds since January 1, 1970 UTC.",
+		args: " (&optional units) => real",
+		desc: `Returns the number of seconds or specified units since January 1, 1970 UTC.
+Units can be :second, :millisecond, :microsecond, or :nanosecond.`,
 	},
 }
 
@@ -211,4 +211,25 @@ func TimeComponents(s *Scope, obj Time, args List, depth int) Object {
 		Fixnum(time.Time(obj).Nanosecond()),
 		String(time.Time(obj).Weekday().String()),
 	}
+}
+
+func unixTime(s *Scope, obj Time, args List, depth int) (result Object) {
+	nano := time.Time(obj).UnixNano()
+	if 0 < len(args) {
+		switch args[0] {
+		case Symbol(":second"), Symbol(":seconds"):
+			result = DoubleFloat(float64(nano) / float64(time.Second))
+		case Symbol(":millisecond"), Symbol(":milliseconds"):
+			result = DoubleFloat(float64(nano) / float64(time.Millisecond))
+		case Symbol(":microsecond"), Symbol(":microseconds"):
+			result = DoubleFloat(float64(nano) / float64(time.Microsecond))
+		case Symbol(":nanosecond"), Symbol(":nanoseconds"):
+			result = Fixnum(nano)
+		default:
+			PanicType("units", args[0], ":second", ":millisecond", ":micorsecond", ":nanosecond")
+		}
+	} else { // default to seconds
+		result = DoubleFloat(float64(nano) / float64(time.Second))
+	}
+	return
 }
