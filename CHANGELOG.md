@@ -4,9 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.7] - 2024-11-26
+### Added
+- Added functions:
+  - time-after
+  - time-ticker
+  - time-unix
+  - time-elapsed
+  - time-add
+  - time-components
+  - time :describe
+  - unix-time
+  - select
+- Added methods to the time class which now can be a target of the _send_ function.
+
 ## [0.9.6] - 2024-11-08
 ### Added
-- Added
+- Added functions
   - case
   - ecase
   - map

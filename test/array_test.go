@@ -141,6 +141,11 @@ func TestArrayContent(t *testing.T) {
 	})
 }
 
+func TestArrayElements(t *testing.T) {
+	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{nil, nil}}, true)
+	tt.Equal(t, []slip.Object{nil, nil}, a.Elements())
+}
+
 func TestArrayOverMaxDim(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.NewArray([]int{2, slip.ArrayMaxDimension + 1}, slip.TrueSymbol, nil, nil, true) })
 }

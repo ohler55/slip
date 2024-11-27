@@ -55,3 +55,8 @@ func (obj Channel) Eval(s *slip.Scope, depth int) slip.Object {
 func (obj Channel) Pop() slip.Object {
 	return <-obj
 }
+
+// Close the channel.
+func (obj Channel) Close() {
+	close(obj)
+}

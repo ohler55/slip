@@ -32,7 +32,7 @@ func init() {
 		}, &Pkg)
 }
 
-// TimeUtc represents the timeUtc function.
+// TimeUtc represents the time-utc function.
 type TimeUtc struct {
 	slip.Function
 }

@@ -22,7 +22,7 @@ func init() {
 					Name: "clause*",
 					Type: "list",
 					Text: `Each clause _(test-form form*)_ takes the form of a test-form and
-zero of more forms to be evaluate if the _test-form_ evalues to no-_nil_.`,
+zero of more forms to be evaluated if the _test-form_ evaluates to no-_nil_.`,
 				},
 			},
 			Return: "object",

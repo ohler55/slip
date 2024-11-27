@@ -30,7 +30,7 @@ func init() {
 		}, &Pkg)
 }
 
-// ChannelClose represents the channelClose function.
+// ChannelClose represents the channel-close function.
 type ChannelClose struct {
 	slip.Function
 }
@@ -38,11 +38,11 @@ type ChannelClose struct {
 // Call the function with the arguments provided.
 func (f *ChannelClose) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	ch, ok := args[0].(Channel)
+	ch, ok := args[0].(Closer)
 	if !ok {
 		slip.PanicType("channel", args[0], "channel")
 	}
-	close(ch)
+	ch.Close()
 
 	return slip.Novalue
 }
