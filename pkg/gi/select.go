@@ -30,7 +30,7 @@ zero of more forms to be evaluate if the _channel_ pops a value.`,
 			Return: "object",
 			Text: `__select__ waits for the first channel to pop a value from and then
 evaluates each form in the _clause_ for that channel. Clauses are limited to two or less
-_time-channel_ and 10 _channel_.`,
+_time-channels_ and 10 _channels_.`,
 			Examples: []string{
 				"(let ((c1 (make-channel 10)) (c2 (time.after 0.1)))",
 				" (select (c1 x (+ 1 x)) (c2 x x))) => @2024-11-25T20:36:28Z",
@@ -51,12 +51,40 @@ func (f *Select) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		sc      [10]Channel
 		tc      [2]TimeChannel
 		v       any
+		ti      int
+		ci      int
 	)
-
-	// TBD set up channels and clauses from args
-	// check types
-
 	d2 := depth + 1
+	for _, a := range args {
+		clause, ok := a.(slip.List)
+		if !ok || len(clause) == 0 {
+			slip.PanicType("clause", a, "list")
+		}
+		clause[0] = slip.EvalArg(s, clause, 0, d2)
+		switch c1 := clause[0].(type) {
+		case Channel:
+			if 9 < ci {
+				slip.NewPanic("too many channel clauses. %d is greater than the maximum of 10.", ci)
+			}
+			sc[ci] = c1
+			clauses[ci] = clause
+			ci++
+		case TimeChannel:
+			if 1 < ti {
+				slip.NewPanic("too many time-channel clauses. %d is greater than the maximum of 2.", ti)
+			}
+			tc[ti] = c1
+			clauses[10+ti] = clause
+			ti++
+		default:
+			slip.PanicType("clause[0]", clause[0], "channel", "time-channel")
+		}
+		if 1 < len(clause) {
+			if _, ok = clause[1].(slip.Symbol); !ok {
+				slip.PanicType("clause[1]", clause[1], "symbol")
+			}
+		}
+	}
 	select {
 	case v = <-sc[0]:
 		result = evalClause(s, clauses[0], v, d2)
@@ -83,23 +111,6 @@ func (f *Select) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case v = <-tc[1]:
 		result = evalClause(s, clauses[11], v, d2)
 	}
-
-	// TBD reserve slot for 2 timechannel and 10 slip.channels
-	// use dummy channels for those not used
-
-	// for _, a := range args {
-	// 	clause, ok := a.(slip.List)
-	// 	if !ok || len(clause) == 0 {
-	// 		slip.PanicType("clause", a, "list")
-	// 	}
-	// 	if slip.EvalArg(s, clause, 0, d2) == nil {
-	// 		continue
-	// 	}
-	// 	for i := 1; i < len(clause); i++ {
-	// 		result = slip.EvalArg(s, clause, i, d2)
-	// 	}
-	// 	break
-	// }
 	return
 }
 
@@ -111,7 +122,10 @@ func evalClause(s *slip.Scope, clause slip.List, v any, depth int) (result slip.
 	var obj slip.Object
 
 	switch tv := v.(type) {
-	case nil, slip.Object:
+	case nil:
+		// remains nil
+	case slip.Object:
+		obj = tv
 	case time.Time:
 		obj = slip.Time(tv)
 	}

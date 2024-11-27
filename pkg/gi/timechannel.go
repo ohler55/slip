@@ -3,10 +3,14 @@
 package gi
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/ohler55/slip"
 )
+
+// TimeChannelSymbol is the symbol with a value of "time-channel".
+const TimeChannelSymbol = slip.Symbol("time-channel")
 
 // TimeChannel is a chan of time.Time that pops slip.Time Objects.
 type TimeChannel <-chan time.Time
@@ -18,7 +22,9 @@ func (obj TimeChannel) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj TimeChannel) Append(b []byte) []byte {
-	return append(b, "#<time-channel>"...)
+	b = append(b, "#<time-channel "...)
+	b = strconv.AppendInt(b, int64(cap(obj)), 10)
+	return append(b, '>')
 }
 
 // Simplify by returning the string representation of the flavor.
@@ -33,7 +39,7 @@ func (obj TimeChannel) Equal(other slip.Object) (eq bool) {
 
 // Hierarchy returns the class hierarchy as symbols for the channel.
 func (obj TimeChannel) Hierarchy() []slip.Symbol {
-	return []slip.Symbol{ChannelSymbol, slip.TrueSymbol}
+	return []slip.Symbol{TimeChannelSymbol, ChannelSymbol, slip.TrueSymbol}
 }
 
 // Length returns the length of the object.
