@@ -242,6 +242,11 @@ func (c *Class) NoMake() bool {
 	return c.noMake
 }
 
+// SetNoMake sets the noMake field.
+func (c *Class) SetNoMake(noMake bool) {
+	c.noMake = noMake
+}
+
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *Class) MakeInstance() slip.Instance {
 	inst := flavors.Instance{Type: c, Methods: c.methods}
