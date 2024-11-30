@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.8] - 2024-12-01
+### Added
+- The _select_ function now supports more cases and all channel types.
+
 ## [0.9.7] - 2024-11-26
 ### Added
 - Added functions:

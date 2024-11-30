@@ -3,6 +3,7 @@
 package gi
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -29,8 +30,7 @@ zero of more forms to be evaluate if the _channel_ pops a value.`,
 			},
 			Return: "object",
 			Text: `__select__ waits for the first channel to pop a value from and then
-evaluates each form in the _clause_ for that channel. Clauses are limited to two or less
-_time-channels_ and 10 _channels_.`,
+evaluates each form in the _clause_ for that channel.`,
 			Examples: []string{
 				"(let ((c1 (make-channel 10)) (c2 (time.after 0.1)))",
 				" (select (c1 x (+ 1 x)) (c2 x x))) => @2024-11-25T20:36:28Z",
@@ -43,48 +43,46 @@ type Select struct {
 	slip.Function
 }
 
+const (
+	maxTimeChan = 2
+	maxSlipChan = 8
+)
+
 // Call the function with the arguments provided.
 func (f *Select) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 12)
+	slip.ArgCountCheck(f, args, 1, -1)
 	var (
-		clauses [12]slip.List
-		sc      [10]Channel
-		tc      [2]TimeChannel
+		clauses [maxSlipChan + maxTimeChan]slip.List
+		sc      [maxSlipChan]Channel
+		tc      [maxTimeChan]TimeChannel
 		v       any
 		ti      int
 		ci      int
 	)
 	d2 := depth + 1
+	if f.prepClauses(s, args, d2) {
+		return f.reflectClauses(s, args, d2)
+	}
 	for _, a := range args {
-		clause, ok := a.(slip.List)
-		if !ok || len(clause) == 0 {
-			slip.PanicType("clause", a, "list")
-		}
-		clause[0] = slip.EvalArg(s, clause, 0, d2)
+		clause := a.(slip.List)
 		switch c1 := clause[0].(type) {
 		case Channel:
-			if 9 < ci {
-				slip.NewPanic("too many channel clauses. %d is greater than the maximum of 10.", ci)
-			}
 			sc[ci] = c1
 			clauses[ci] = clause
 			ci++
 		case TimeChannel:
-			if 1 < ti {
-				slip.NewPanic("too many time-channel clauses. %d is greater than the maximum of 2.", ti)
-			}
 			tc[ti] = c1
-			clauses[10+ti] = clause
+			clauses[maxSlipChan+ti] = clause
 			ti++
-		default:
-			slip.PanicType("clause[0]", clause[0], "channel", "time-channel")
 		}
 		if 1 < len(clause) {
-			if _, ok = clause[1].(slip.Symbol); !ok {
+			if _, ok := clause[1].(slip.Symbol); !ok {
 				slip.PanicType("clause[1]", clause[1], "symbol")
 			}
 		}
 	}
+	// Note if the maxSlipChan or maxTimeChan values are changed the select
+	// case must also be changed.
 	select {
 	case v = <-sc[0]:
 		result = evalClause(s, clauses[0], v, d2)
@@ -102,14 +100,54 @@ func (f *Select) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		result = evalClause(s, clauses[6], v, d2)
 	case v = <-sc[7]:
 		result = evalClause(s, clauses[7], v, d2)
-	case v = <-sc[8]:
-		result = evalClause(s, clauses[8], v, d2)
-	case v = <-sc[9]:
-		result = evalClause(s, clauses[9], v, d2)
 	case v = <-tc[0]:
-		result = evalClause(s, clauses[10], v, d2)
+		result = evalClause(s, clauses[8], v, d2)
 	case v = <-tc[1]:
-		result = evalClause(s, clauses[11], v, d2)
+		result = evalClause(s, clauses[9], v, d2)
+	}
+	return
+}
+
+func (f *Select) prepClauses(s *slip.Scope, args slip.List, depth int) bool {
+	var (
+		ccnt int
+		tcnt int
+		refl bool
+	)
+	for _, a := range args {
+		clause, ok := a.(slip.List)
+		if !ok || len(clause) == 0 {
+			slip.PanicType("clause", a, "list")
+		}
+		clause[0] = slip.EvalArg(s, clause, 0, depth)
+		switch clause[0].(type) {
+		case Channel:
+			ccnt++
+		case TimeChannel:
+			tcnt++
+		default:
+			refl = true
+		}
+	}
+	return refl || maxTimeChan < tcnt || maxSlipChan < ccnt
+}
+
+func (f *Select) reflectClauses(s *slip.Scope, clauses slip.List, depth int) (result slip.Object) {
+	cases := make([]reflect.SelectCase, len(clauses))
+	for i, a := range clauses {
+		clause := a.(slip.List)
+		rcv := reflect.ValueOf(clause[0])
+		if rcv.Kind() != reflect.Chan {
+			slip.PanicType("clause[0]", a, "channel")
+		}
+		cases[i] = reflect.SelectCase{
+			Dir:  reflect.SelectRecv,
+			Chan: rcv,
+		}
+	}
+	chosen, recv, ok := reflect.Select(cases)
+	if ok {
+		result = evalClause(s, clauses[chosen].(slip.List), recv.Interface(), depth)
 	}
 	return
 }

@@ -162,47 +162,6 @@ func TestSelectC7(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSelectC8(t *testing.T) {
-	scope := slip.NewScope()
-	ch := make(gi.Channel, 1)
-	ch <- slip.Fixnum(3)
-	scope.Let("ch", ch)
-	(&sliptest.Function{
-		Scope: scope,
-		Source: `(select ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         (ch x (1+ x)))`,
-		Expect: "4",
-	}).Test(t)
-}
-
-func TestSelectC9(t *testing.T) {
-	scope := slip.NewScope()
-	ch := make(gi.Channel, 1)
-	ch <- slip.Fixnum(3)
-	scope.Let("ch", ch)
-	(&sliptest.Function{
-		Scope: scope,
-		Source: `(select ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         (ch x (1+ x)))`,
-		Expect: "4",
-	}).Test(t)
-}
-
 func TestSelectNotList(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(select t)`,
@@ -224,26 +183,9 @@ func TestSelectNotSymbol(t *testing.T) {
 	}).Test(t)
 }
 
-func TestSelectTooManyChannels(t *testing.T) {
+func TestSelectManyTimeChannels(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(select ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1))
-                         ((make-channel 1)))`,
-		PanicType: slip.ErrorSymbol,
-	}).Test(t)
-}
-
-func TestSelectTooManyTimeChannels(t *testing.T) {
-	(&sliptest.Function{
-		Source:    `(select ((time-after 0.1)) ((time-after 0.02)) ((time-after 0.03)))`,
-		PanicType: slip.ErrorSymbol,
+		Source: `(select ((time-after 0.1) x 1) ((time-after 0.02) x 2) ((time-after 0.03) x 3))`,
+		Expect: "2",
 	}).Test(t)
 }
