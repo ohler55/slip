@@ -56,3 +56,10 @@ func (obj TimeChannel) Eval(s *slip.Scope, depth int) slip.Object {
 func (obj TimeChannel) Pop() slip.Object {
 	return slip.Time((<-obj).UTC())
 }
+
+// Range over the values in a channel.
+func (obj TimeChannel) Range(s *slip.Scope, caller slip.Caller, depth int) {
+	for v := range obj {
+		_ = caller.Call(s, slip.List{slip.Time(v)}, depth)
+	}
+}

@@ -60,3 +60,10 @@ func (obj Channel) Pop() slip.Object {
 func (obj Channel) Close() {
 	close(obj)
 }
+
+// Range over the values in a channel.
+func (obj Channel) Range(s *slip.Scope, caller slip.Caller, depth int) {
+	for v := range obj {
+		_ = caller.Call(s, slip.List{v}, depth)
+	}
+}
