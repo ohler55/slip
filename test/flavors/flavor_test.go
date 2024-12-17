@@ -35,6 +35,7 @@ func TestFlavorSimple(t *testing.T) {
   keywords: {}
   methods: [
     [{from: vanilla-flavor name: ":describe" primary: true}]
+    [{from: vanilla-flavor name: ":equal" primary: true}]
     [{from: vanilla-flavor name: ":eval-inside-yourself" primary: true}]
     [{from: vanilla-flavor name: ":flavor" primary: true}]
     [{from: vanilla-flavor name: ":id" primary: true}]
@@ -81,6 +82,7 @@ func TestFlavorDescribeBasic(t *testing.T) {
     size = "medium"
   Methods:
     :describe
+    :equal
     :eval-inside-yourself
     :flavor
     :id
@@ -99,6 +101,7 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"    size = \"medium\"\n"+
 		"  Methods:\n"+
 		"    :describe\n"+
+		"    :equal\n"+
 		"    :eval-inside-yourself\n"+
 		"    :flavor\n"+
 		"    :id\n"+
@@ -174,6 +177,7 @@ func TestFlavorReceive(t *testing.T) {
   keywords: {}
   methods: [
     [{from: vanilla-flavor name: ":describe" primary: true}]
+    [{from: vanilla-flavor name: ":equal" primary: true}]
     [{from: vanilla-flavor name: ":eval-inside-yourself" primary: true}]
     [{from: vanilla-flavor name: ":flavor" primary: true}]
     [{from: vanilla-flavor name: ":id" primary: true}]
@@ -209,6 +213,7 @@ func TestFlavorReceive(t *testing.T) {
     size = "medium"
   Methods:
     :describe
+    :equal
     :eval-inside-yourself
     :flavor
     :id

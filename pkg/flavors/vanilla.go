@@ -17,9 +17,10 @@ var vanilla = Flavor{
 	defaultVars: map[string]slip.Object{"self": nil},
 	methods: map[string][]*Method{
 		":describe":             {{Name: ":describe", primary: describeCaller(true)}},
+		":equal":                {{Name: ":equal", primary: equalCaller{}}},
 		":eval-inside-yourself": {{Name: ":eval-inside-yourself", primary: insideCaller(true)}},
 		":flavor":               {{Name: ":flavor", primary: flavorCaller(true)}},
-		":init":                 {{Name: ":init", primary: initCaller(true)}},
+		":init":                 {{Name: ":init", primary: initCaller{}}},
 		":id":                   {{Name: ":id", primary: idCaller(true)}},
 		":inspect":              {{Name: ":inspect", primary: inspectCaller(true)}},
 		":operation-handled-p":  {{Name: ":operation-handled-p", primary: hasOpCaller(true)}},
@@ -40,7 +41,7 @@ func VanillaMethods() map[string][]*Method {
 	return vanilla.methods
 }
 
-type initCaller bool
+type initCaller struct{}
 
 func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	// Does nothing.
@@ -250,5 +251,25 @@ func (caller inspectCaller) Docs() string {
 
 
 Returns a _bag_ with the details of the instance.
+`
+}
+
+type equalCaller struct{}
+
+func (caller equalCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	obj := s.Get("self").(*Instance)
+	CheckMethodArgCount(obj, ":equal", len(args), 1, 1)
+	if obj.Equal(args[0]) {
+		return slip.True
+	}
+	return nil
+}
+
+func (caller equalCaller) Docs() string {
+	return `__:equal__ _other_ => _boolean_
+   _other_ [object] other object to compare to _self_.
+
+
+Returns _t_ if the instance is of the same flavor as _other_ and has the same content.
 `
 }

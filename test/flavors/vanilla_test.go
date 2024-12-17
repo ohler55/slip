@@ -14,6 +14,7 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestVanillaMethods(t *testing.T) {
@@ -42,8 +43,8 @@ func TestVanillaMethods(t *testing.T) {
 
 	methods := slip.ReadString("(send berry :which-operations)").Eval(scope, nil)
 	tt.Equal(t,
-		"(:describe :eval-inside-yourself :flavor :id :init :inspect :operation-handled-p :print-self "+
-			":send-if-handles :set-size\n           :size :which-operations)",
+		"(:describe :equal :eval-inside-yourself :flavor :id :init :inspect :operation-handled-p :print-self "+
+			":send-if-handles\n           :set-size :size :which-operations)",
 		methods.String())
 
 	pr, pw, err := os.Pipe()
@@ -97,6 +98,25 @@ func TestVanillaMethods(t *testing.T) {
 	inst := bag.(*flavors.Instance)
 	tt.Equal(t, `/{"flavor":"strawberry","id":"[0-9a-fA-F]+","vars":{"size":"medium"}}/`,
 		oj.JSON(inst.Any, &ojg.Options{Sort: true, Indent: 0}))
+}
+
+func TestVanillaEqualAny(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(send (make-bag "{a:1}") :equal (make-bag "{a:1}"))`,
+		Expect: "t",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(send (make-bag "{a:1}") :equal (make-bag "{b:1}"))`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send (make-bag "{a:1}") :equal)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send (make-bag "{a:1}") :equal 1 2)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
 }
 
 func TestVanillaDescribeDocs(t *testing.T) {
@@ -200,6 +220,17 @@ func TestVanillaWhichOpsDocs(t *testing.T) {
     :which-operations => list
 `+"   "+`
     Returns a list of all the methods the instance handles.
+`)
+}
+
+func TestVanillaEqualDocs(t *testing.T) {
+	testVanillaDocs(t, ":equal",
+		`:equal is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :equal other => boolean
+      other [object] other object to compare to self.
+`+"   "+`
+    Returns t if the instance is of the same flavor as other and has the same content.
 `)
 }
 

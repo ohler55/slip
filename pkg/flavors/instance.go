@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unsafe"
 
+	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/slip"
 )
 
@@ -200,6 +201,11 @@ func (obj *Instance) Equal(other slip.Object) bool {
 				continue
 			}
 			if !slip.ObjectEqual(val, o.Vars[k]) {
+				return false
+			}
+		}
+		if obj.Any != nil {
+			if alt.Compare(obj.Any, o.Any) != nil {
 				return false
 			}
 		}

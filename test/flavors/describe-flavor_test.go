@@ -23,6 +23,7 @@ func TestDescribeFlavor(t *testing.T) {
   Variables:
   Methods:
     :describe
+    :equal
     :eval-inside-yourself
     :flavor
     :id
