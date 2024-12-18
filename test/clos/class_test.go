@@ -28,6 +28,7 @@ func TestClassBasic(t *testing.T) {
   inherit: [integer]
   methods: [
     ":describe"
+    ":equal"
     ":eval-inside-yourself"
     ":flavor"
     ":id"
@@ -56,6 +57,7 @@ func TestClassDescribeBasic(t *testing.T) {
   Slots: None
   Methods:
     :describe
+    :equal
     :eval-inside-yourself
     :flavor
     :id
@@ -77,6 +79,7 @@ func TestClassDescribeBasic(t *testing.T) {
 		"  Slots: None\n"+
 		"  Methods:\n"+
 		"    :describe\n"+
+		"    :equal\n"+
 		"    :eval-inside-yourself\n"+
 		"    :flavor\n"+
 		"    :id\n"+
@@ -111,6 +114,7 @@ func TestClassDefClass(t *testing.T) {
     y = 5
   Methods:
     :describe
+    :equal
     :eval-inside-yourself
     :flavor
     :fun
@@ -129,6 +133,7 @@ func TestClassDefClass(t *testing.T) {
   inherit: [standard-object]
   methods: [
     ":describe"
+    ":equal"
     ":eval-inside-yourself"
     ":flavor"
     ":fun"
