@@ -3,6 +3,7 @@ ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 all: build
 
 build:
+	go mod tidy
 	make -C cmd
 
 clean:
@@ -20,4 +21,4 @@ testlint: lint
 test:
 	make -C test
 
-.PHONY: all lint clean build test test plugins 
+.PHONY: all lint clean build test test plugins
