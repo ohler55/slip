@@ -8,7 +8,7 @@ LDFLAG = '-s -w \
 all: build
 
 clean:
-	rm slip
+	rm -f slip
 
 build:
 	go build -ldflags $(LDFLAG) -a -installsuffix nocgo -o slip *go
