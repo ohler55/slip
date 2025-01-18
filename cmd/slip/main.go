@@ -12,6 +12,7 @@ import (
 	"runtime/debug"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/repl"
 	"golang.org/x/term"
 
@@ -107,6 +108,7 @@ func run() {
 			path = ""
 		}
 	}
+	bag.SetCompileScript(scope)
 	var (
 		code slip.Code
 		w    io.Writer

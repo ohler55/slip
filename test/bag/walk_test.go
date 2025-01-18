@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -87,5 +88,21 @@ func TestBagWalkNotFunction(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(bag-walk (make-instance 'bag-flavor) t)`,
 		Panics: true,
+	}).Test(t)
+}
+
+func TestBagWalkProcedure(t *testing.T) {
+	bag.SetCompileScript(nil)
+	(&sliptest.Function{
+		Source: `(let (result)
+                  (bag-walk (make-bag "[1 2 3]") (lambda (v) (addf result v)) "[((lambda (x) (mapcar '1+ x)))]")
+                  result)`,
+		Expect: "(2 3 4)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let (result)
+                  (bag-walk (make-bag "[1 2 3]") (lambda (v) (addf result v)) "[(+)]")
+                  result)`,
+		Expect: "(6)",
 	}).Test(t)
 }
