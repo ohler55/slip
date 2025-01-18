@@ -20,7 +20,7 @@ func (obj marker) Append(b []byte) []byte {
 }
 
 // Simplify the Object into true.
-func (obj marker) Simplify() interface{} {
+func (obj marker) Simplify() any {
 	return string([]byte{byte(obj)})
 }
 

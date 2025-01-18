@@ -25,7 +25,7 @@ func (obj Symbol) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a string.
-func (obj Symbol) Simplify() interface{} {
+func (obj Symbol) Simplify() any {
 	return string(obj)
 }
 

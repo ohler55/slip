@@ -26,7 +26,7 @@ func (obj boolean) Append(b []byte) []byte {
 }
 
 // Simplify the Object into true.
-func (obj boolean) Simplify() interface{} {
+func (obj boolean) Simplify() any {
 	return true
 }
 

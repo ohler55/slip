@@ -18,6 +18,7 @@ func init() {
 		&slip.FuncDoc{
 			Name: "+",
 			Args: []*slip.DocArg{
+				{Name: "&rest"},
 				{
 					Name: "numbers",
 					Type: "number",

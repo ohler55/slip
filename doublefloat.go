@@ -49,7 +49,7 @@ func (obj DoubleFloat) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a float64.
-func (obj DoubleFloat) Simplify() interface{} {
+func (obj DoubleFloat) Simplify() any {
 	return float64(obj)
 }
 

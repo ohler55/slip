@@ -28,7 +28,7 @@ func (obj Octet) Append(b []byte) []byte {
 }
 
 // Simplify the Object into an int64.
-func (obj Octet) Simplify() interface{} {
+func (obj Octet) Simplify() any {
 	return int64(obj)
 }
 

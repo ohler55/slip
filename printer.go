@@ -833,7 +833,7 @@ func setPrintRightMargin(value Object) {
 }
 
 // Warn outputs a warning.
-func Warn(format string, args ...interface{}) {
+func Warn(format string, args ...any) {
 	var b []byte
 	if Interactive {
 		if printer.ANSI {

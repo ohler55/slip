@@ -67,7 +67,7 @@ func (obj *LongFloat) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a float64.
-func (obj *LongFloat) Simplify() interface{} {
+func (obj *LongFloat) Simplify() any {
 	return string(Append([]byte{}, obj))
 }
 

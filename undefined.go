@@ -16,7 +16,7 @@ func (obj Undefined) Append(b []byte) []byte {
 }
 
 // Simplify the Object into true.
-func (obj Undefined) Simplify() interface{} {
+func (obj Undefined) Simplify() any {
 	return nil
 }
 

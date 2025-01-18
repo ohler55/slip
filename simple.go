@@ -13,7 +13,7 @@ const SimpleSymbol = Symbol("simple")
 
 // Simple is a Simple Object.
 type Simple struct {
-	Data interface{}
+	Data any
 }
 
 // String representation of the Object.
@@ -27,7 +27,7 @@ func (obj *Simple) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a simple.Simple.
-func (obj *Simple) Simplify() interface{} {
+func (obj *Simple) Simplify() any {
 	return obj.Data
 }
 

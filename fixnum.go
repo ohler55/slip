@@ -33,7 +33,7 @@ func (obj Fixnum) Append(b []byte) []byte {
 }
 
 // Simplify the Object into an int64.
-func (obj Fixnum) Simplify() interface{} {
+func (obj Fixnum) Simplify() any {
 	return int64(obj)
 }
 

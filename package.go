@@ -464,22 +464,22 @@ func (obj *Package) Append(b []byte) []byte {
 }
 
 // Simplify the Object into an int64.
-func (obj *Package) Simplify() interface{} {
-	nicknames := make([]interface{}, len(obj.Nicknames))
+func (obj *Package) Simplify() any {
+	nicknames := make([]any, len(obj.Nicknames))
 	for i, nn := range obj.Nicknames {
 		nicknames[i] = nn
 	}
-	vars := map[string]interface{}{}
+	vars := map[string]any{}
 	obj.mu.Lock()
 	defer obj.mu.Unlock()
 	for k, vv := range obj.vars {
 		vars[k] = vv.Simplify()
 	}
-	imports := map[string]interface{}{}
+	imports := map[string]any{}
 	for k, imp := range obj.Imports {
 		imports[k] = imp.Simplify()
 	}
-	uses := make([]interface{}, len(obj.Uses))
+	uses := make([]any, len(obj.Uses))
 	for i, p := range obj.Uses {
 		uses[i] = p.Name
 	}
@@ -489,7 +489,7 @@ func (obj *Package) Simplify() interface{} {
 	}
 	sort.Strings(funcs)
 
-	return map[string]interface{}{
+	return map[string]any{
 		"name":      obj.Name,
 		"nicknames": nicknames,
 		"doc":       obj.Doc,

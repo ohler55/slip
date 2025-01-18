@@ -23,7 +23,7 @@ func (obj String) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a string.
-func (obj String) Simplify() interface{} {
+func (obj String) Simplify() any {
 	return string(obj)
 }
 

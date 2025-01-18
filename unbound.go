@@ -21,7 +21,7 @@ func (obj unbound) Append(b []byte) []byte {
 }
 
 // Simplify the Object into true.
-func (obj unbound) Simplify() interface{} {
+func (obj unbound) Simplify() any {
 	return nil
 }
 

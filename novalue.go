@@ -19,7 +19,7 @@ func (obj novalue) Append(b []byte) []byte {
 }
 
 // Simplify the Object into true.
-func (obj novalue) Simplify() interface{} {
+func (obj novalue) Simplify() any {
 	return nil
 }
 

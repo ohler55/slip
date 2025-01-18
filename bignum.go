@@ -31,7 +31,7 @@ func (obj *Bignum) Append(b []byte) []byte {
 }
 
 // Simplify the Object into an int64.
-func (obj *Bignum) Simplify() interface{} {
+func (obj *Bignum) Simplify() any {
 	if (*big.Int)(obj).IsInt64() {
 		return (*big.Int)(obj).Int64()
 	}

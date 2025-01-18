@@ -60,9 +60,9 @@ func (obj *Vector) Append(b []byte) []byte {
 	return append(b, ')')
 }
 
-// Simplify the Object into a []interface{}.
-func (obj *Vector) Simplify() interface{} {
-	out := make([]interface{}, len(obj.elements))
+// Simplify the Object into a []any.
+func (obj *Vector) Simplify() any {
+	out := make([]any, len(obj.elements))
 	for i, o := range obj.elements {
 		if o == nil {
 			out[i] = nil
