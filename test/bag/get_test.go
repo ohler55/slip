@@ -8,6 +8,7 @@ import (
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -95,5 +96,21 @@ func TestBagGetBadPath(t *testing.T) {
 		Scope:  scope,
 		Source: `(bag-get bag t)`,
 		Panics: true,
+	}).Test(t)
+}
+
+func TestBagGetProcedureRest(t *testing.T) {
+	bag.SetCompileScript(nil)
+	(&sliptest.Function{
+		Source: `(bag-get (make-bag "[1 2 3]") "[(+)]")`,
+		Expect: "6",
+	}).Test(t)
+}
+
+func TestBagGetProcedureLambda(t *testing.T) {
+	bag.SetCompileScript(nil)
+	(&sliptest.Function{
+		Source: `(bag-get (make-bag "[1 2 3]") "[((lambda (x) (apply '+ x)))]")`,
+		Expect: "6",
 	}).Test(t)
 }

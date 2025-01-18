@@ -9,8 +9,8 @@ type Import struct {
 }
 
 // Simplify the Object into an int64.
-func (imp *Import) Simplify() interface{} {
-	return map[string]interface{}{
+func (imp *Import) Simplify() any {
+	return map[string]any{
 		"pkg":  imp.Pkg.String(),
 		"name": imp.Name,
 	}

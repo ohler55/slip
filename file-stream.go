@@ -33,7 +33,7 @@ func (obj *FileStream) Append(b []byte) []byte {
 }
 
 // Simplify the Object into an int64.
-func (obj *FileStream) Simplify() interface{} {
+func (obj *FileStream) Simplify() any {
 	return obj.String()
 }
 

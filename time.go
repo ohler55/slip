@@ -74,7 +74,7 @@ func (obj Time) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a time.Time.
-func (obj Time) Simplify() interface{} {
+func (obj Time) Simplify() any {
 	return time.Time(obj)
 }
 

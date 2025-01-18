@@ -5,7 +5,7 @@ package slip
 // Dynamic represents a function defined by a call to defun or lambda.
 type Dynamic struct {
 	Function
-	// Function.Self must point to a LispCaller.
+	// Function.Self must point to a Caller.
 }
 
 // String representation of the Object.
@@ -29,7 +29,7 @@ func (f *Dynamic) Append(b []byte) []byte {
 }
 
 // Simplify the function.
-func (f *Dynamic) Simplify() interface{} {
+func (f *Dynamic) Simplify() any {
 	simple := make([]any, 0, len(f.Args)+1)
 	if 0 < len(f.Name) {
 		simple = append(simple, f.Name)

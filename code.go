@@ -740,7 +740,7 @@ func (r *reader) inBackquote() bool {
 	return false
 }
 
-func (r *reader) raise(format string, args ...interface{}) {
+func (r *reader) raise(format string, args ...any) {
 	f := make([]byte, 0, len(format)+9)
 	f = append(f, format...)
 	f = append(f, " at %d:%d"...)
@@ -748,7 +748,7 @@ func (r *reader) raise(format string, args ...interface{}) {
 	PanicParse(string(f), args...)
 }
 
-func (r *reader) partial(format string, args ...interface{}) {
+func (r *reader) partial(format string, args ...any) {
 	f := make([]byte, 0, len(format)+9)
 	f = append(f, format...)
 	f = append(f, " at %d:%d"...)

@@ -33,7 +33,7 @@ func (obj Complex) Append(b []byte) []byte {
 }
 
 // Simplify the Object into an int64.
-func (obj Complex) Simplify() interface{} {
+func (obj Complex) Simplify() any {
 	var b []byte
 	b = strconv.AppendInt(b, int64(real(obj)), 10)
 	i := int64(imag(obj))

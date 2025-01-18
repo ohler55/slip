@@ -185,8 +185,8 @@ func (f *Function) Append(b []byte) []byte {
 }
 
 // Simplify the function.
-func (f *Function) Simplify() interface{} {
-	simple := make([]interface{}, 0, len(f.Args)+1)
+func (f *Function) Simplify() any {
+	simple := make([]any, 0, len(f.Args)+1)
 	simple = append(simple, f.Name)
 	for _, a := range f.Args {
 		simple = append(simple, Simplify(a))

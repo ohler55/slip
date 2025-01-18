@@ -28,9 +28,9 @@ func (obj Values) Append(b []byte) []byte {
 	return b
 }
 
-// Simplify the Object into a []interface{}.
-func (obj Values) Simplify() interface{} {
-	out := make([]interface{}, 0, len(obj))
+// Simplify the Object into a []any.
+func (obj Values) Simplify() any {
+	out := make([]any, 0, len(obj))
 	for _, o := range obj {
 		if o == nil {
 			out = append(out, nil)

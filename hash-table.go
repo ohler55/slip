@@ -31,9 +31,9 @@ func (obj HashTable) Append(b []byte) []byte {
 	return append(b, "/-->"...)
 }
 
-// Simplify the Object into a []interface{}.
-func (obj HashTable) Simplify() interface{} {
-	out := map[string]interface{}{}
+// Simplify the Object into a []any.
+func (obj HashTable) Simplify() any {
+	out := map[string]any{}
 	for k, v := range obj {
 		switch tk := k.(type) {
 		case String:

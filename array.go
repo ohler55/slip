@@ -101,14 +101,14 @@ func (obj *Array) Append(b []byte) []byte {
 }
 
 // Simplify the Object into set of nested slices.
-func (obj *Array) Simplify() interface{} {
+func (obj *Array) Simplify() any {
 	list, _ := obj.simplifyDim(0, 0)
 	return list
 }
 
-func (obj *Array) simplifyDim(di, ei int) ([]interface{}, int) {
+func (obj *Array) simplifyDim(di, ei int) ([]any, int) {
 	d := obj.dims[di]
-	list := make([]interface{}, d)
+	list := make([]any, d)
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
 			e := obj.elements[ei]

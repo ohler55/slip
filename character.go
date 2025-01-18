@@ -102,7 +102,7 @@ func (obj Character) Append(b []byte) []byte {
 }
 
 // Simplify the Object into a string.
-func (obj Character) Simplify() interface{} {
+func (obj Character) Simplify() any {
 	return string([]rune{rune(obj)})
 }
 

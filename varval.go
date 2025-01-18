@@ -16,10 +16,10 @@ type VarVal struct {
 }
 
 // Simplify the Object into an int64.
-func (vv *VarVal) Simplify() interface{} {
-	simple := map[string]interface{}{"doc": vv.Doc}
+func (vv *VarVal) Simplify() any {
+	simple := map[string]any{"doc": vv.Doc}
 
-	var val interface{}
+	var val any
 	if v := vv.Value(); v != nil {
 		if pkg, ok := v.(*Package); ok {
 			val = pkg.Name

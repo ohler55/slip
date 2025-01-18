@@ -36,7 +36,7 @@ func (obj *Ratio) Append(b []byte) []byte {
 }
 
 // Simplify the Object into an int64.
-func (obj *Ratio) Simplify() interface{} {
+func (obj *Ratio) Simplify() any {
 	if f, exact := (*big.Rat)(obj).Float64(); exact {
 		return f
 	}

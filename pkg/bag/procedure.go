@@ -12,21 +12,44 @@ import (
 type Procedure struct {
 	scope  *slip.Scope
 	caller slip.Caller
+	rest   bool
 }
 
 // SetCompileScript sets the World instance for the jp.CompileScript function.
 func SetCompileScript(s *slip.Scope) {
-	jp.CompileScript = func(code []byte) jp.Procedure {
-		p := CompileScript(code).(*Procedure)
-		p.scope = s
-		return p
+	if s == nil {
+		s = slip.NewScope()
 	}
-}
-
-// CompileScript creates a new Procedure instance.
-func CompileScript(code []byte) jp.Procedure {
-	return &Procedure{
-		// TBD caller
+	jp.CompileScript = func(code []byte) jp.Procedure {
+		obj := slip.Compile(code).(any)
+		var (
+			doc    *slip.FuncDoc
+			caller slip.Caller
+			rest   bool
+		)
+	top:
+		switch to := obj.(type) {
+		case *slip.Dynamic:
+			obj = to.Self
+			goto top
+		case *slip.Lambda:
+			caller = to
+			doc = to.Doc
+		case slip.Funky:
+			caller = to.Caller()
+			doc = slip.CurrentPackage.GetFunc(to.GetName()).Doc
+		}
+		for _, fa := range doc.Args {
+			if fa.Name == "&rest" {
+				rest = true
+				break
+			}
+		}
+		return &Procedure{
+			scope:  s,
+			caller: caller,
+			rest:   rest,
+		}
 	}
 }
 
@@ -52,6 +75,12 @@ func (p *Procedure) First(data any) any {
 
 func (p *Procedure) eval(data any) (result any) {
 	obj := slip.SimpleObject(data)
-
-	return slip.Simplify(p.caller.Call(p.scope, slip.List{obj}, 0))
+	var (
+		args slip.List
+		ok   bool
+	)
+	if args, ok = obj.(slip.List); !ok || !p.rest {
+		args = slip.List{obj}
+	}
+	return slip.Simplify(p.caller.Call(p.scope, args, 0))
 }

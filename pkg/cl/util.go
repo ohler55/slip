@@ -18,6 +18,8 @@ CallFunc:
 		caller = tf
 	case *slip.FuncInfo:
 		caller = tf.Create(nil).(slip.Funky).Caller()
+	case slip.Funky:
+		caller = tf.Caller()
 	case slip.Symbol:
 		fn = slip.MustFindFunc(string(tf))
 		goto CallFunc

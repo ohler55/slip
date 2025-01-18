@@ -275,7 +275,7 @@ func (lam *Lambda) Hierarchy() []Symbol {
 }
 
 // Simplify the function.
-func (lam *Lambda) Simplify() interface{} {
+func (lam *Lambda) Simplify() any {
 	simple := make([]any, 0, len(lam.Forms)+2)
 	simple = append(simple, "lambda")
 	args := make([]any, 0, len(lam.Doc.Args))

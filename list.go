@@ -29,8 +29,8 @@ func (obj List) Append(b []byte) []byte {
 	return printer.Append(b, obj, 0)
 }
 
-// Simplify the Object into a []interface{}.
-func (obj List) Simplify() interface{} {
+// Simplify the Object into a []any.
+func (obj List) Simplify() any {
 	out := make([]any, len(obj))
 	for i, o := range obj {
 		if o == nil {
