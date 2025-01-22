@@ -4,19 +4,8 @@
 
 - next
  - add to gi
-  - directory-exists-p (path)
-  - file-info (path) => assoc
-   - name, size, mode, mod-time, is-dir
-  - glob (pattern) => list
-  - map-glob (function pattern)
-  - walk-directory (function directory)
-   - function (path info err) => bool
-    - if returns t then skip dir
-  - file-kind (path &key follow-symlinks)
-   - :regular-file, :symbolic-link, :directory, :pipe, :socket, :character-device, :block-device or nil if does not exist
-  - file-permissions
-   - :user-read, :user-write, :user-exec, :group-read, :group-write, :group-exec, :other-read, :other-write, :other-exec, :set-user-id, :set-group-id, :sticky.
-
+  + file-info (path)
+  - glob (function pattern)
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
