@@ -3,9 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - add to gi
-  + file-info (path)
-  - glob (function pattern)
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
