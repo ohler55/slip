@@ -3,6 +3,140 @@
 - **multipass** or utm for linux
 
 - next
+ - inspect
+  - [ ] CALL-ARGUMENTS-LIMIT
+  - [ ] DOCUMENTATION
+  - [ ] DESCRIBE-OBJECT
+  - [ ] CHANGE-CLASS
+  - [ ] FUNCTION-LAMBDA-EXPRESSION
+  - [ ] FIND-ALL-SYMBOLS
+  - [ ] LAMBDA-LIST-KEYWORDS
+  - [ ] LAMBDA-PARAMETERS-LIMIT
+
+ - multi-stream
+  - [ ] BROADCAST-STREAM
+  - [ ] MAKE-BROADCAST-STREAM
+  - [ ] BROADCAST-STREAM-STREAMS
+
+  - [ ] CONCATENATED-STREAM
+  - [ ] MAKE-CONCATENATED-STREAM
+  - [ ] CONCATENATED-STREAM-STREAMS
+
+  - [ ] ECHO-STREAM
+  - [ ] MAKE-ECHO-STREAM
+  - [ ] ECHO-STREAM-INPUT-STREAM
+  - [ ] ECHO-STREAM-OUTPUT-STREAM
+
+  - [ ] TWO-WAY-STREAM
+  - [ ] MAKE-TWO-WAY-STREAM
+  - [ ] TWO-WAY-STREAM-INPUT-STREAM
+  - [ ] TWO-WAY-STREAM-OUTPUT-STREAM
+
+  - [ ] OPEN-STREAM-P
+  - [ ] STREAM-ELEMENT-TYPE
+  - [ ] STREAM-EXTERNAL-FORMAT
+  - [ ] INTERACTIVE-STREAM-P
+  - [ ] FRESH-LINE
+  - [ ] WITH-STANDARD-IO-SYNTAX
+
+ - case
+  - [ ] CTYPECASE
+  - [ ] TYPECASE
+  - [ ] ETYPECASE
+  - [ ] OTHERWISE
+
+ - misc
+  - [ ] CONSTANTLY
+  - [ ] DECODE-UNIVERSAL-TIME
+  - [ ] DESTRUCTURING-BIND
+  - [ ] DISASSEMBLE
+  - [ ] DRIBBLE
+  - [ ] ELT
+  - [ ] ENCODE-UNIVERSAL-TIME
+  - [ ] ERROR (function)
+  - [ ] END-OF-FILE
+  - [ ] ENDP
+  - [ ] FILL
+  - [ ] FORMATTER
+  - [ ] GENTEMP
+  - [ ] GET-DECODED-TIME
+  - [ ] GET-UNIVERSAL-TIME
+  - [ ] MAKE-SEQUENCE
+  - [ ] MAP-INTO
+  - [ ] MISMATCH
+  - [ ] MULTIPLE-VALUE-BIND
+  - [ ] MULTIPLE-VALUE-CALL
+  - [ ] MULTIPLE-VALUE-LIST
+  - [ ] MULTIPLE-VALUE-PROG1
+  - [ ] MULTIPLE-VALUE-SETQ
+  - [ ] MULTIPLE-VALUES-LIMIT
+  - [ ] REPLACE
+  - [ ] ROTATEF
+  - [ ] SHIFTF
+  - [ ] SPECIAL-OPERATOR-P
+  - [ ] SUBTYPEP
+  - [ ] TRUENAME
+  - [ ] UNWIND-PROTECT
+  - [ ] USER-HOMEDIR-PATHNAME
+  - [ ] WILD-PATHNAME-P
+  - [ ] Y-OR-N-P
+  - [ ] YES-OR-NO-P
+
+ - math
+  - [ ] ACONS
+  - [ ] ACOSH
+  - [ ] ASINH
+  - [ ] ATANH
+  - [ ] BIGNUM
+  - [ ] CIS
+  - [ ] COSH
+  - [ ] DECODE-FLOAT
+  - [ ] DENOMINATOR
+  - [ ] DIVISION-BY-ZERO
+  - [ ] FLOAT-DIGITS
+  - [ ] FLOAT-PRECISION
+  - [ ] FLOAT-RADIX
+  - [ ] FLOAT-SIGN
+  - [ ] GCD
+  - [ ] IMAGPART
+  - [ ] INTEGER-DECODE-FLOAT
+  - [ ] INTEGER-LENGTH
+  - [ ] ISQRT
+  - [ ] LCM
+  - [ ] LDB
+  - [ ] LDB-TEST
+  - [ ] NUMERATOR
+  - [ ] PHASE
+  - [ ] REALPART
+  - [ ] SCALE-FLOAT
+  - [ ] SINH
+  - [ ] TANH
+
+ - bits-and-bytes
+  - [ ] BIT
+  - [ ] BIT-AND
+  - [ ] BIT-ANDC1
+  - [ ] BIT-ANDC2
+  - [ ] BIT-EQV
+  - [ ] BIT-IOR
+  - [ ] BIT-NAND
+  - [ ] BIT-NOR
+  - [ ] BIT-NOT
+  - [ ] BIT-ORC1
+  - [ ] BIT-ORC2
+  - [ ] BIT-VECTOR
+  - [ ] BIT-VECTOR-P
+  - [ ] BIT-XOR
+  - [ ] BYTE
+  - [ ] BYTE-POSITION
+  - [ ] BYTE-SIZE
+  - [ ] DEPOSIT-FIELD
+  - [ ] DPB
+  - [ ] MASK-FIELD
+  - [ ] SBIT
+  - [ ] SIMPLE-BIT-VECTOR
+  - [ ] SIMPLE-BIT-VECTOR-P
+
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 

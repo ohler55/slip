@@ -62,9 +62,9 @@ var (
 	replReader reader = &termReader{}
 
 	stashLoadPath = slip.List{
-		slip.String("."),
 		slip.String("~/.config/slip"),
 		slip.String("~/.slip"),
+		slip.String("."),
 	}
 	defaultStashName = "stash.lisp"
 
