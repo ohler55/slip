@@ -4,14 +4,17 @@
 
 - next
  - inspect
-  - [ ] CALL-ARGUMENTS-LIMIT
-  - [ ] DOCUMENTATION
-  - [ ] DESCRIBE-OBJECT
-  - [ ] CHANGE-CLASS
-  - [ ] FUNCTION-LAMBDA-EXPRESSION
-  - [ ] FIND-ALL-SYMBOLS
-  - [ ] LAMBDA-LIST-KEYWORDS
-  - [ ] LAMBDA-PARAMETERS-LIMIT
+  - [ ] DOCUMENTATION (x doc-type)
+   - setf documentation new-value x doc-type => new-value
+    - doc-type is one of (VARIABLE, FUNCTION, STRUCTURE, TYPE, SETF, or T)
+  - [ ] DESCRIBE-OBJECT (object stream)
+  - [ ] CHANGE-CLASS (instance new-class &key &allow-other-keys) => instance
+  - [ ] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS (previous current &rest initargs &key &allow-other-keys) => implementation-dependent
+  - [ ] FUNCTION-LAMBDA-EXPRESSION (function) => lambda-expression, closure-p, name
+  - [ ] FIND-ALL-SYMBOLS (string) => symbols
+  - [ ] LAMBDA-LIST-KEYWORDS () => (&allow-other-keys &aux &body &environment &key &optional &rest &whole)
+  - [x] CALL-ARGUMENTS-LIMIT
+  - [x] LAMBDA-PARAMETERS-LIMIT
 
  - multi-stream
   - [ ] BROADCAST-STREAM

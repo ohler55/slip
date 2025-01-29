@@ -10,6 +10,11 @@ import (
 
 func init() {
 	CurrentPackage = &UserPkg
+	// Pick a large number for the limit.
+	DefConstant(Symbol("call-arguments-limit"), Fixnum(0x100000000000),
+		`The maximum number of function call arguments.`)
+	DefConstant(Symbol("lambda-parameters-limit"), Fixnum(0x100000000000),
+		`The maximum number of lambda parameters.`)
 }
 
 // CLPkg is the COMMON-LISP package.
