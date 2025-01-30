@@ -1,7 +1,4 @@
- * [ ] &WHOLE
- * [ ] *MACROEXPAND-HOOK*
- * [ ] *MODULES*
- * [ ] *PRINT-PPRINT-DISPATCH*
+ * [ ] &AUX
  * [ ] *READ-BASE*
  * [ ] *READ-DEFAULT-FLOAT-FORMAT*
  * [ ] *TERMINAL-IO*
@@ -29,7 +26,6 @@
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
- * [ ] CALL-ARGUMENTS-LIMIT
  * [ ] CHANGE-CLASS
  * [ ] CIS
  * [ ] COMPLEMENT
@@ -45,7 +41,6 @@
  * [ ] DEPOSIT-FIELD
  * [ ] DESCRIBE-OBJECT
  * [ ] DESTRUCTURING-BIND
- * [ ] DISASSEMBLE
  * [ ] DIVISION-BY-ZERO
  * [ ] DOCUMENTATION
  * [ ] DPB
@@ -81,7 +76,6 @@
  * [ ] INTERACTIVE-STREAM-P
  * [ ] ISQRT
  * [ ] LAMBDA-LIST-KEYWORDS
- * [ ] LAMBDA-PARAMETERS-LIMIT
  * [ ] LCM
  * [ ] LDB
  * [ ] LDB-TEST
@@ -154,6 +148,7 @@
  * [ ] Y-OR-N-P
  * [ ] YES-OR-NO-P
  * [+] CLASS
+ * [x] &ALLOW-OTHER-KEYS
  * [x] &BODY
  * [x] &KEY
  * [x] &OPTIONAL
@@ -275,6 +270,7 @@
  * [x] CADDDR
  * [x] CADDR
  * [x] CADR
+ * [x] CALL-ARGUMENTS-LIMIT
  * [x] CAR
  * [x] CASE
  * [x] CDAAAR
@@ -359,6 +355,7 @@
  * [x] DIGIT-CHAR-P
  * [x] DIRECTORY
  * [x] DIRECTORY-NAMESTRING
+ * [x] DISASSEMBLE
  * [x] DO
  * [x] DO*
  * [x] DO-ALL-SYMBOLS
@@ -451,6 +448,7 @@
  * [x] KEYWORD
  * [x] KEYWORDP
  * [x] LAMBDA
+ * [x] LAMBDA-PARAMETERS-LIMIT
  * [x] LAST
  * [x] LEAST-NEGATIVE-DOUBLE-FLOAT
  * [x] LEAST-NEGATIVE-LONG-FLOAT
@@ -793,9 +791,8 @@
  * [x] WRITE-STRING
  * [x] WRITE-TO-STRING
  * [x] ZEROP
- - [-] &ALLOW-OTHER-KEYS
- - [-] &AUX
  - [-] &ENVIRONMENT
+ - [-] &WHOLE
  - [-] *BREAK-ON-SIGNALS*
  - [-] *COMPILE-FILE-PATHNAME*
  - [-] *COMPILE-FILE-TRUENAME*
@@ -803,6 +800,9 @@
  - [-] *COMPILE-VERBOSE*
  - [-] *DEBUG-IO*
  - [-] *DEBUGGER-HOOK*
+ - [-] *MACROEXPAND-HOOK*
+ - [-] *MODULES*
+ - [-] *PRINT-PPRINT-DISPATCH*
  - [-] *QUERY-IO*
  - [-] *READ-EVAL*
  - [-] *READ-SUPPRESS*

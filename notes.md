@@ -4,6 +4,11 @@
 
 - next
  - inspect
+  - [x] DISASSEMBLE
+  - [x] LAMBDA-LIST-KEYWORDS
+  - &aux - same as let*
+   - add aux mode to Lambda.go
+
   - [ ] DOCUMENTATION (x doc-type)
    - setf documentation new-value x doc-type => new-value
     - doc-type is one of (VARIABLE, FUNCTION, STRUCTURE, TYPE, SETF, or T)
@@ -12,7 +17,6 @@
   - [ ] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS (previous current &rest initargs &key &allow-other-keys) => implementation-dependent
   - [ ] FUNCTION-LAMBDA-EXPRESSION (function) => lambda-expression, closure-p, name
   - [ ] FIND-ALL-SYMBOLS (string) => symbols
-  - [ ] LAMBDA-LIST-KEYWORDS () => (&allow-other-keys &aux &body &environment &key &optional &rest &whole)
   - [x] CALL-ARGUMENTS-LIMIT
   - [x] LAMBDA-PARAMETERS-LIMIT
 
@@ -52,7 +56,6 @@
   - [ ] CONSTANTLY
   - [ ] DECODE-UNIVERSAL-TIME
   - [ ] DESTRUCTURING-BIND
-  - [ ] DISASSEMBLE
   - [ ] DRIBBLE
   - [ ] ELT
   - [ ] ENCODE-UNIVERSAL-TIME
