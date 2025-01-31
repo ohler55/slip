@@ -94,6 +94,62 @@ func TestLambdaCallTooManyArgs(t *testing.T) {
 	}).Test(t)
 }
 
+func TestLambdaAuxOnly(t *testing.T) {
+	(&sliptest.Function{
+		Source: `((lambda (&aux a (b 2) (c 3) (d (+ b c))) (list a d)))`,
+		Expect: "(nil 5)",
+	}).Test(t)
+}
+
+func TestLambdaAuxAfterVar(t *testing.T) {
+	(&sliptest.Function{
+		Source: `((lambda (x &aux a (b 2) (c 3) (d (+ b c))) (list x a d)) 1)`,
+		Expect: "(1 nil 5)",
+	}).Test(t)
+	// Try too many arguments to panic later.
+	(&sliptest.Function{
+		Source:    `((lambda (x &aux a (b 2) (c 3) (d (+ b c))) (list x a d)) 1 2)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestLambdaAuxAfterOptional(t *testing.T) {
+	(&sliptest.Function{
+		Source: `((lambda (&optional x &aux a (b 2) (c 3) (d (+ b c))) (list x a d)) 1)`,
+		Expect: "(1 nil 5)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `((lambda (&optional x &aux a (b 2) (c 3) (d (+ b c))) (list x a d)))`,
+		Expect: "(nil nil 5)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `((lambda (&optional x &aux a (b 2) (c 3) (d (+ b c))) (list x a d)) 1 2)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestLambdaAuxAfterRest(t *testing.T) {
+	(&sliptest.Function{
+		Source: `((lambda (&rest x &aux a (b 2) (c 3) (d (+ b c))) (list x a d)) 1)`,
+		Expect: "((1) nil 5)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `((lambda (&rest x &aux a (b 2) (c 3) (d (+ b c))) (list x a d)))`,
+		Expect: "(nil nil 5)",
+	}).Test(t)
+}
+
+func TestLambdaAuxAfterKey(t *testing.T) {
+	(&sliptest.Function{
+		Source: `((lambda (&key x &aux a (b 2) (c 3) (d (+ b c))) (list x a d)) :x 1)`,
+		Expect: "(1 nil 5)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `((lambda (&key (x 1) &aux a (b 2) (c 3) (d (+ b c))) (list x a d)))`,
+		Expect: "(1 nil 5)",
+	}).Test(t)
+}
+
 // func TestLambdaCallReturnNoTag(t *testing.T) {
 // 	(&sliptest.Function{
 // 		Source: `((lambda (x) (return 3) x) 5)`,

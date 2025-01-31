@@ -3,12 +3,13 @@
 - **multipass** or utm for linux
 
 - next
+ - watch package test failure
+  - *-*-* read error on #<watch-client 14000412620>: read tcp 127.0.0.1:60185->127.0.0.1:60184: read: connection reset by peer
+
  - inspect
   - [x] DISASSEMBLE
   - [x] LAMBDA-LIST-KEYWORDS
-  - &aux - same as let*
-   - add aux mode to Lambda.go
-
+  - &aux
   - [ ] DOCUMENTATION (x doc-type)
    - setf documentation new-value x doc-type => new-value
     - doc-type is one of (VARIABLE, FUNCTION, STRUCTURE, TYPE, SETF, or T)
