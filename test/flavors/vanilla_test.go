@@ -259,6 +259,8 @@ func TestVanillaChangeClassDocs(t *testing.T) {
     :update-instance-for-different-class is called on the original after the flavor has been changed to the new flavor.
     The previous is a copy of the original instance. The original instance has already been changed and the slots
     adjusted for the new flavor. This validates the keywords and then calls the :shared-initialize method.
+`+"   "+`
+    This method is an extension of the original flavors.
 `)
 }
 
@@ -271,6 +273,8 @@ func TestVanillaSharedInitializeDocs(t *testing.T) {
       initargs [list] additional arguments are ignored by the default method.
 `+"   "+`
     Returns self after processing the key arguments to set the slots in the instance.
+`+"   "+`
+    This method is an extension of the original flavors.
 `)
 }
 
@@ -286,6 +290,8 @@ func TestVanillaUpdateInstanceForDifferentClassDocs(t *testing.T) {
     on the original after the flavor has been changed to the new flavor. The previous is a copy of the original
     instance. The original instance has already been changed and the slots adjusted for the new flavor. This validates
     the keywords and then calls the :shared-initialize method.
+`+"   "+`
+    This method is an extension of the original flavors.
 `)
 }
 

@@ -318,6 +318,9 @@ _flavor_. The _previous_ is a copy of the original instance. The original
 instance has already been changed and the slots adjusted for the new
 flavor. This validates the keywords and then calls the _:shared-initialize_
 method.
+
+
+This method is an extension of the original flavors.
 `
 }
 
@@ -342,6 +345,9 @@ func (caller sharedInitializeCaller) Docs() string {
 
 
 Returns __self__ after processing the key arguments to set the slots in the instance.
+
+
+This method is an extension of the original flavors.
 `
 }
 
@@ -381,5 +387,8 @@ _flavor_ has been changed to the new _flavor_. The _previous_ is a copy of the
 original instance. The original instance has already been changed and the
 slots adjusted for the new flavor. This validates the keywords and then calls
 the _:shared-initialize_ method.
+
+
+This method is an extension of the original flavors.
 `
 }
