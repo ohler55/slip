@@ -32,6 +32,8 @@ func TestDescribeFlavor(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
 `, out.String())
 }

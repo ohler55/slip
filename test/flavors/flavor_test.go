@@ -44,6 +44,14 @@ func TestFlavorSimple(t *testing.T) {
     [{from: vanilla-flavor name: ":operation-handled-p" primary: true}]
     [{from: vanilla-flavor name: ":print-self" primary: true}]
     [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
+    [{from: vanilla-flavor name: ":shared-initialize" primary: true}]
+    [
+      {
+        from: vanilla-flavor
+        name: ":update-instance-for-different-class"
+        primary: true
+      }
+    ]
     [{from: vanilla-flavor name: ":which-operations" primary: true}]
   ]
   name: blueberry
@@ -91,6 +99,8 @@ func TestFlavorDescribeBasic(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
 `, string(out))
 
@@ -110,6 +120,8 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"    :operation-handled-p\n"+
 		"    :print-self\n"+
 		"    :send-if-handles\n"+
+		"    :shared-initialize\n"+
+		"    :update-instance-for-different-class\n"+
 		"    :which-operations\n", string(out))
 }
 
@@ -186,6 +198,14 @@ func TestFlavorReceive(t *testing.T) {
     [{from: vanilla-flavor name: ":operation-handled-p" primary: true}]
     [{from: vanilla-flavor name: ":print-self" primary: true}]
     [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
+    [{from: vanilla-flavor name: ":shared-initialize" primary: true}]
+    [
+      {
+        from: vanilla-flavor
+        name: ":update-instance-for-different-class"
+        primary: true
+      }
+    ]
     [{from: vanilla-flavor name: ":which-operations" primary: true}]
   ]
   name: blueberry
@@ -222,6 +242,8 @@ func TestFlavorReceive(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
 `, out.String())
 

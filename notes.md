@@ -9,13 +9,22 @@
  - inspect
   - [x] DISASSEMBLE
   - [x] LAMBDA-LIST-KEYWORDS
-  - &aux
+  - [x] &aux
+  - [ ] CHANGE-CLASS (instance new-class &key &allow-other-keys) => instance
+   - previous = dup
+   - change flavor
+   - call :update-instance-for-different-class
+    - :update-instance-for-different-class (previous &rest initargs &key &allow-other-keys)
+
+  - [ ] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS (previous current &rest initargs &key &allow-other-keys) => implementation-dependent
+   - method on instances
+   - check for that and call on change-class
+    - ignore previous as that can be gleened from the instance itself
+    -
+   - return nil is fine
   - [ ] DOCUMENTATION (x doc-type)
    - setf documentation new-value x doc-type => new-value
     - doc-type is one of (VARIABLE, FUNCTION, STRUCTURE, TYPE, SETF, or T)
-  - [ ] DESCRIBE-OBJECT (object stream)
-  - [ ] CHANGE-CLASS (instance new-class &key &allow-other-keys) => instance
-  - [ ] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS (previous current &rest initargs &key &allow-other-keys) => implementation-dependent
   - [ ] FUNCTION-LAMBDA-EXPRESSION (function) => lambda-expression, closure-p, name
   - [ ] FIND-ALL-SYMBOLS (string) => symbols
   - [x] CALL-ARGUMENTS-LIMIT
