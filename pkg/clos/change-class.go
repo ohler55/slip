@@ -1,6 +1,6 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package cl
+package clos
 
 import (
 	"github.com/ohler55/slip"
@@ -32,7 +32,7 @@ func init() {
 			},
 			Return: "instance",
 			Text:   `__change-class__ changes the class or flavor of an instance.`,
-		}, &slip.CLPkg)
+		}, &Pkg)
 }
 
 // ChangeClass represents the change-class function.

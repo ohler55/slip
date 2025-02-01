@@ -173,6 +173,8 @@ func TestClassDefClass(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = clos.DefClass("dummy", "", map[string]slip.Object{}, nil, false)
 	})
+	c.SetNoMake(true)
+	tt.Equal(t, true, c.NoMake())
 }
 
 func TestClassInstanceInit(t *testing.T) {

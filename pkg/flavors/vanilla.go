@@ -285,16 +285,23 @@ Returns _t_ if the instance is of the same flavor as _other_ and has the same co
 
 type changeClassCaller struct{}
 
-func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*Instance)
-	CheckMethodArgCount(self, ":change-class", len(args), 1, -11)
-	// TBD get flavor
-	// - previous = dup
-	// - change flavor
-	// - call :update-instance-for-different-class
-	//  - :update-instance-for-different-class (previous &rest initargs &key &allow-other-keys)
-
-	// TBD
+	CheckMethodArgCount(self, ":change-class", len(args), 1, -1)
+	var nf *Flavor
+	switch ta := args[0].(type) {
+	case *Flavor:
+		nf = ta
+	case slip.Symbol:
+		if nf = Find(string(ta)); nf == nil {
+			slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
+		}
+	default:
+		slip.PanicType("new-class", args[0], "flavor")
+	}
+	prev := self.Dup()
+	self.ChangeFlavor(nf)
+	_ = self.Receive(s, ":update-instance-for-different-class", append(slip.List{prev}, args[1:]...), depth)
 
 	return self
 }

@@ -10,18 +10,8 @@
   - [x] DISASSEMBLE
   - [x] LAMBDA-LIST-KEYWORDS
   - [x] &aux
-  - [ ] CHANGE-CLASS (instance new-class &key &allow-other-keys) => instance
-   - previous = dup
-   - change flavor
-   - call :update-instance-for-different-class
-    - :update-instance-for-different-class (previous &rest initargs &key &allow-other-keys)
-
-  - [ ] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS (previous current &rest initargs &key &allow-other-keys) => implementation-dependent
-   - method on instances
-   - check for that and call on change-class
-    - ignore previous as that can be gleened from the instance itself
-    -
-   - return nil is fine
+  - [x] CHANGE-CLASS
+  - [x] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
   - [ ] DOCUMENTATION (x doc-type)
    - setf documentation new-value x doc-type => new-value
     - doc-type is one of (VARIABLE, FUNCTION, STRUCTURE, TYPE, SETF, or T)

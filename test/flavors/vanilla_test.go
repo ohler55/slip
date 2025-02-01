@@ -121,6 +121,18 @@ func TestVanillaMethods(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`(send berry :update-instance-for-different-class dup :quux t)`).Eval(scope, nil)
 	})
+
+	_ = slip.ReadString(`(send berry :change-class 'strawberry :size "small")`).Eval(scope, nil)
+	result = slip.ReadString(`(send (send berry :inspect) :get "vars.size")`).Eval(scope, nil)
+	tt.Equal(t, slip.String("small"), result)
+	result = slip.ReadString(`(send (send berry :inspect) :get "flavor")`).Eval(scope, nil)
+	tt.Equal(t, slip.String("strawberry"), result)
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(change-class berry 'none-berry)`,
+		PanicType: slip.ClassNotFoundSymbol,
+	}).Test(t)
 }
 
 func TestVanillaEqualAny(t *testing.T) {
@@ -316,4 +328,35 @@ func TestVanillaDescribeStream(t *testing.T) {
 	tt.Equal(t, `/#<vanilla-flavor [0-9a-f]+>.*, an instance of .*vanilla-flavor.*/`, out.String())
 
 	tt.Panic(t, func() { _ = slip.ReadString("(send obj :describe t)").Eval(scope, nil) })
+}
+
+func TestChangeClassFlavor(t *testing.T) {
+	code := slip.ReadString(`
+(defflavor strawberry ((size "medium")) ()
+ :gettable-instance-variables
+ :settable-instance-variables
+ (:initable-instance-variables size))
+(defflavor blackberry ((size "medium") (fresh nil)) ()
+ :gettable-instance-variables
+ :settable-instance-variables
+ (:initable-instance-variables size fresh))
+(setq berry (make-instance 'strawberry :size "medium"))
+`)
+	scope := slip.NewScope()
+	_ = code.Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'blackberry)").Eval(scope, nil)
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(change-class berry (find-class 'blackberry))`,
+		Expect: "/#<blackberry [0-9a-f]+>/",
+	}).Test(t)
+}
+
+func TestChangeClassNotInstance(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(change-class (make-instance 'vanilla-flavor) 7)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }
