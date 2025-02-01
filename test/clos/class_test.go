@@ -37,6 +37,8 @@ func TestClassBasic(t *testing.T) {
     ":operation-handled-p"
     ":print-self"
     ":send-if-handles"
+    ":shared-initialize"
+    ":update-instance-for-different-class"
     ":which-operations"
   ]
   name: fixnum
@@ -66,6 +68,8 @@ func TestClassDescribeBasic(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
   Prototype: 42
 `, string(out))
@@ -88,6 +92,8 @@ func TestClassDescribeBasic(t *testing.T) {
 		"    :operation-handled-p\n"+
 		"    :print-self\n"+
 		"    :send-if-handles\n"+
+		"    :shared-initialize\n"+
+		"    :update-instance-for-different-class\n"+
 		"    :which-operations\n"+
 		"  Prototype: 42\n", string(out))
 }
@@ -124,6 +130,8 @@ func TestClassDefClass(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
 `, string(out))
 
@@ -143,6 +151,8 @@ func TestClassDefClass(t *testing.T) {
     ":operation-handled-p"
     ":print-self"
     ":send-if-handles"
+    ":shared-initialize"
+    ":update-instance-for-different-class"
     ":which-operations"
   ]
   name: dummy
