@@ -48,9 +48,9 @@ func TestVanillaMethods(t *testing.T) {
 
 	methods := slip.ReadString("(send berry :which-operations)").Eval(scope, nil)
 	tt.Equal(t,
-		"(:describe :equal :eval-inside-yourself :flavor :id :init :inspect :operation-handled-p :print-self "+
-			":send-if-handles\n           :set-size :shared-initialize :size :update-instance-for-different-class "+
-			":which-operations)",
+		"(:change-class :change-flavor :describe :equal :eval-inside-yourself :flavor :id :init :inspect "+
+			":operation-handled-p\n               :print-self :send-if-handles :set-size :shared-initialize "+
+			":size :update-instance-for-different-class\n               :which-operations)",
 		methods.String())
 
 	pr, pw, err := os.Pipe()
@@ -233,6 +233,20 @@ func TestVanillaSendIfDocs(t *testing.T) {
      arguments* to pass to the method call.
 `+"   "+`
     Sends to the instance if the instance has the method.
+`)
+}
+
+func TestVanillaChangeClassDocs(t *testing.T) {
+	testVanillaDocs(t, ":change-class",
+		`:change-class is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :change-class new-class &key &allow-other-keys) => instance
+      new-class [flavor] the new flavor for the instance.
+`+"   "+`
+    Returns self after changing the flavor of the instance. When called a copy of the instance is created and the
+    :update-instance-for-different-class is called on the original after the flavor has been changed to the new flavor.
+    The previous is a copy of the original instance. The original instance has already been changed and the slots
+    adjusted for the new flavor. This validates the keywords and then calls the :shared-initialize method.
 `)
 }
 

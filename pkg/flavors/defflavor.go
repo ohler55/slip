@@ -164,7 +164,7 @@ func DefFlavor(
 		}
 	}
 	if nf.defaultHandler == nil {
-		nf.defaultHandler = defHand(true)
+		nf.defaultHandler = defHand{}
 	}
 	processFlavorOptions(nf, options)
 	if !nf.abstract {
@@ -434,7 +434,7 @@ func (s setter) BoundCall(scope *slip.Scope, _ int) (value slip.Object) {
 	return nil
 }
 
-type defHand bool
+type defHand struct{}
 
 // Call the default handler.
 func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {

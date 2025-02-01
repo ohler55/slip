@@ -16,7 +16,7 @@ func init() {
 			return &f
 		},
 		&slip.FuncDoc{
-			Kind: slip.MacroSymbol,
+			Kind: slip.FunctionSymbol,
 			Name: "disassemble",
 			Args: []*slip.DocArg{
 				{

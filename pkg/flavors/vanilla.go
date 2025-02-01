@@ -29,11 +29,14 @@ var vanilla = Flavor{
 		":which-operations":     {{Name: ":which-operations", primary: whichOpsCaller{}}},
 		// The next methods are not standard vanilla-flavor methods but added
 		// to support the CLOS change-class function.
+		":change-class":      {{Name: ":change-class", primary: changeClassCaller{}}},
+		":change-flavor":     {{Name: ":change-flavor", primary: changeClassCaller{}}},
 		":shared-initialize": {{Name: ":shared-initialize", primary: sharedInitializeCaller{}}},
 		":update-instance-for-different-class": {{
 			Name:    ":update-instance-for-different-class",
 			primary: updateInstanceForDifferentClassCaller{}}},
 	},
+	defaultHandler: defHand{},
 }
 
 func init() {
@@ -277,6 +280,37 @@ func (caller equalCaller) Docs() string {
 
 
 Returns _t_ if the instance is of the same flavor as _other_ and has the same content.
+`
+}
+
+type changeClassCaller struct{}
+
+func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*Instance)
+	CheckMethodArgCount(self, ":change-class", len(args), 1, -11)
+	// TBD get flavor
+	// - previous = dup
+	// - change flavor
+	// - call :update-instance-for-different-class
+	//  - :update-instance-for-different-class (previous &rest initargs &key &allow-other-keys)
+
+	// TBD
+
+	return self
+}
+
+func (caller changeClassCaller) Docs() string {
+	return `__:change-class__ _new-class_ &key &allow-other-keys) => _instance_
+   _new-class_ [flavor] the new flavor for the instance.
+
+
+Returns __self__ after changing the flavor of the instance. When called a copy
+of the instance is created and the _:update-instance-for-different-class_ is
+called on the original after the _flavor_ has been changed to the new
+_flavor_. The _previous_ is a copy of the original instance. The original
+instance has already been changed and the slots adjusted for the new
+flavor. This validates the keywords and then calls the _:shared-initialize_
+method.
 `
 }
 

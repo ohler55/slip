@@ -153,6 +153,10 @@
   - [ ] SIMPLE-BIT-VECTOR
   - [ ] SIMPLE-BIT-VECTOR-P
 
+ - better-methods
+  - instance method should use flavor so defmethod give existing instances new methods
+  - could create a struct for the methods slice to avoid a lookup on recieve
+
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 

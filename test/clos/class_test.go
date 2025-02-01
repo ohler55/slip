@@ -27,6 +27,8 @@ func TestClassBasic(t *testing.T) {
   final: true
   inherit: [integer]
   methods: [
+    ":change-class"
+    ":change-flavor"
     ":describe"
     ":equal"
     ":eval-inside-yourself"
@@ -58,6 +60,8 @@ func TestClassDescribeBasic(t *testing.T) {
   Class precedence list: integer rational real number built-in-class
   Slots: None
   Methods:
+    :change-class
+    :change-flavor
     :describe
     :equal
     :eval-inside-yourself
@@ -82,6 +86,8 @@ func TestClassDescribeBasic(t *testing.T) {
 		"  Class precedence list: integer rational real number built-in-class\n"+
 		"  Slots: None\n"+
 		"  Methods:\n"+
+		"    :change-class\n"+
+		"    :change-flavor\n"+
 		"    :describe\n"+
 		"    :equal\n"+
 		"    :eval-inside-yourself\n"+
@@ -119,6 +125,8 @@ func TestClassDefClass(t *testing.T) {
     x = 3
     y = 5
   Methods:
+    :change-class
+    :change-flavor
     :describe
     :equal
     :eval-inside-yourself
@@ -140,6 +148,8 @@ func TestClassDefClass(t *testing.T) {
   final: false
   inherit: [standard-object]
   methods: [
+    ":change-class"
+    ":change-flavor"
     ":describe"
     ":equal"
     ":eval-inside-yourself"
