@@ -115,7 +115,8 @@ func TestVanillaMethods(t *testing.T) {
 	berry.ChangeFlavor(flavors.Find("blackberry"))
 	_ = slip.ReadString(`(send berry :update-instance-for-different-class dup :fresh t)`).Eval(scope, nil)
 
-	bag = slip.ReadString("(send (send berry :inspect) :native)").Eval(scope, nil)
+	fresh := slip.ReadString(`(send (send berry :inspect) :get "vars.fresh")`).Eval(scope, nil)
+	tt.Equal(t, slip.True, fresh)
 
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`(send berry :update-instance-for-different-class dup :quux t)`).Eval(scope, nil)
