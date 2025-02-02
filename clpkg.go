@@ -24,7 +24,7 @@ var (
 	CLPkg              = Package{
 		Name:      "common-lisp",
 		Nicknames: []string{"cl"},
-		Doc:       "Home of symbols defined by the ANSI language spcification.",
+		Doc:       "Home of symbols defined by the ANSI LISP language specification.",
 		path:      "github.com/ohler55/slip/pkg/cl",
 		vars: map[string]*VarVal{
 			"*common-lisp*":   &pkgVarVal,

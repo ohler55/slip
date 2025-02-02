@@ -4,7 +4,6 @@ package clos
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func init() {
@@ -48,9 +47,6 @@ func (f *FindClass) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
 		slip.PanicType("name", args[0], "symbol")
-	}
-	if cf := flavors.Find(string(sym)); cf != nil {
-		return cf
 	}
 	if c := slip.FindClass(string(sym)); c != nil {
 		return c

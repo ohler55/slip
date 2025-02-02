@@ -3,9 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - watch package test failure
-  - *-*-* read error on #<watch-client 14000412620>: read tcp 127.0.0.1:60185->127.0.0.1:60184: read: connection reset by peer
-
  - inspect
   - [x] DISASSEMBLE
   - [x] LAMBDA-LIST-KEYWORDS
@@ -14,7 +11,7 @@
   - [x] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
   - [ ] DOCUMENTATION (x doc-type)
    - setf documentation new-value x doc-type => new-value
-    - doc-type is one of (VARIABLE, FUNCTION, STRUCTURE, TYPE, SETF, or T)
+    - doc-type is one of (VARIABLE, FUNCTION, method-combination TYPE, or T, flavor, class)
   - [ ] FUNCTION-LAMBDA-EXPRESSION (function) => lambda-expression, closure-p, name
   - [ ] FIND-ALL-SYMBOLS (string) => symbols
   - [x] CALL-ARGUMENTS-LIMIT
