@@ -61,7 +61,6 @@
  * [ ] FLOAT-SIGN
  * [ ] FORMATTER
  * [ ] FRESH-LINE
- * [ ] FUNCTION-LAMBDA-EXPRESSION
  * [ ] GCD
  * [ ] GENTEMP
  * [ ] GET-DECODED-TIME
@@ -410,6 +409,7 @@
  * [x] FTYPE
  * [x] FUNCALL
  * [x] FUNCTION
+ * [x] FUNCTION-LAMBDA-EXPRESSION
  * [x] FUNCTIONP
  * [x] GENSYM
  * [x] GET

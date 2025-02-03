@@ -29,7 +29,7 @@ func init() {
 			Text:   `__disassemble__ prints details about the functions.`,
 			Examples: []string{
 				"(defun quux (x) (+ x 3))",
-				"(disassemble 'quux",
+				"(disassemble 'quux)",
 				";; prints:",
 				"(defun quux (x)",
 				"  (+ 3 x))",
@@ -49,11 +49,19 @@ func (f *Disassemble) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
 	w := s.Get("*standard-output*").(io.Writer)
 	var buf []byte
-	switch ta := args[0].(type) {
+	a := args[0]
+Top:
+	switch ta := a.(type) {
 	case slip.Symbol:
-		buf = f.disassembleSymbol(string(ta), right, ansi)
+		if fi := slip.FindFunc(string(ta)); fi != nil {
+			a = fi
+			goto Top
+		}
+		slip.PanicType("fn", ta, "function designator")
 	case *slip.Lambda:
 		buf = f.disassembleLambda(ta, right, ansi)
+	case *slip.FuncInfo:
+		buf = f.disassembleFunction(ta, right, ansi)
 	default:
 		slip.PanicType("fn", ta, "function designator")
 	}
@@ -62,11 +70,7 @@ func (f *Disassemble) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	return nil
 }
 
-func (f *Disassemble) disassembleSymbol(name string, right int, ansi bool) (b []byte) {
-	fi := slip.FindFunc(name)
-	if fi == nil {
-		slip.PanicType("fn", slip.Symbol(name), "function designator")
-	}
+func (f *Disassemble) disassembleFunction(fi *slip.FuncInfo, right int, ansi bool) (b []byte) {
 	if fi.Kind == slip.Symbol("macro") {
 		b = append(b, "(defmacro "...)
 	} else {

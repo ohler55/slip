@@ -10,8 +10,10 @@
   - [x] CHANGE-CLASS
   - [x] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
   - [x] DOCUMENTATION
-  - [ ] FUNCTION-LAMBDA-EXPRESSION (function) => lambda-expression, closure-p, name
+  - [x] FUNCTION-LAMBDA-EXPRESSION
   - [ ] FIND-ALL-SYMBOLS (string) => symbols
+   - exact match on string
+   - prefix non-user package with package::foo
   - [x] CALL-ARGUMENTS-LIMIT
   - [x] LAMBDA-PARAMETERS-LIMIT
 

@@ -35,6 +35,7 @@ func TestAproposSymbol(t *testing.T) {
 		Expect: "",
 	}).Test(t)
 	tt.Equal(t, `/.*print-lambda. = nil
+.*function-lambda-expression \(function\)
 .*lambda \(macro\)
 .*/`, out.String())
 }
