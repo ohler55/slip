@@ -412,6 +412,11 @@ func (obj *Flavor) Documentation() string {
 	return obj.docs
 }
 
+// SetDocumentation of the class.
+func (obj *Flavor) SetDocumentation(doc string) {
+	obj.docs = doc
+}
+
 // NoMake returns true if the class does not allows creating a new instance
 // with make-instance which should signal an error.
 func (obj *Flavor) NoMake() bool {

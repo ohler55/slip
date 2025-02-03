@@ -9,9 +9,7 @@
   - [x] &aux
   - [x] CHANGE-CLASS
   - [x] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
-  - [ ] DOCUMENTATION (x doc-type)
-   - setf documentation new-value x doc-type => new-value
-    - doc-type is one of (VARIABLE, FUNCTION, method-combination TYPE, or T, flavor, class)
+  - [x] DOCUMENTATION
   - [ ] FUNCTION-LAMBDA-EXPRESSION (function) => lambda-expression, closure-p, name
   - [ ] FIND-ALL-SYMBOLS (string) => symbols
   - [x] CALL-ARGUMENTS-LIMIT
@@ -139,6 +137,9 @@
   - [ ] SBIT
   - [ ] SIMPLE-BIT-VECTOR
   - [ ] SIMPLE-BIT-VECTOR-P
+
+- autocomplete
+ - for describe and others>
 
  - better-methods
   - instance method should use flavor so defmethod give existing instances new methods

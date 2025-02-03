@@ -29,9 +29,8 @@ func init() {
 				},
 			},
 			Return: "string|nil",
-			Text: `__documentation__ returns the_documentation _x_ or what _x_ refers to.
-TBD describe list option (flavor/class method) or (flavor/class variable)
-TBD doctypes, add 'constant
+			Text: `__documentation__ returns the_documentation _x_ or what _x_ refers to. The supported
+_doc-type_ values supported are _t_, _function_, _variable_, _type_, and _constant_.
 `,
 			Examples: []string{
 				"(documentation '*standard-output* 'variable)",
@@ -55,17 +54,13 @@ func (f *Documentation) Call(s *slip.Scope, args slip.List, depth int) (result s
 	} else if args[1] != slip.True {
 		slip.PanicType("doc-type", args[1], "symbol", "t")
 	}
-	unsup := func(val slip.Object) {
-		slip.NewPanic("Unsupported documentation: doc-type %s for type %T", docType, val)
-	}
-
 	a := args[0]
 Top:
 	switch ta := a.(type) {
 	case slip.Symbol:
 		switch docType {
 		case nil: // t
-			unsup(ta)
+			f.unsup(docType, ta)
 		case slip.Symbol("function"):
 			if fi := slip.CurrentPackage.GetFunc(string(ta)); fi != nil {
 				a = fi
@@ -85,14 +80,12 @@ Top:
 				goto Top
 			}
 		default:
-			unsup(ta)
+			f.unsup(docType, ta)
 		}
 	case *slip.FuncInfo:
 		if docType == nil || docType == slip.Symbol("function") {
 			result = slip.String(ta.Doc.Text)
 		}
-	case slip.List:
-		// TBD (flavor method) or (flavor variable)
 	case *slip.Package:
 		if docType == nil {
 			result = slip.String(ta.Doc)
@@ -102,7 +95,7 @@ Top:
 			result = slip.String(ta.Documentation())
 		}
 	default:
-		unsup(ta)
+		f.unsup(docType, ta)
 	}
 	return
 }
@@ -110,6 +103,61 @@ Top:
 // Place a value in the first position of a list or cons.
 func (f *Documentation) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
+	doc, ok := value.(slip.String)
+	if !ok {
+		slip.PanicType("new-value", value, "string")
+	}
+	var docType slip.Object
+	if dt, ok := args[1].(slip.Symbol); ok {
+		docType = dt
+	} else if args[1] != slip.True {
+		slip.PanicType("doc-type", args[1], "symbol", "t")
+	}
+	a := args[0]
+Top:
+	switch ta := a.(type) {
+	case slip.Symbol:
+		switch docType {
+		case nil: // t
+			f.unsup(docType, ta)
+		case slip.Symbol("function"):
+			if fi := slip.CurrentPackage.GetFunc(string(ta)); fi != nil {
+				a = fi
+				goto Top
+			}
+		case slip.Symbol("variable"):
+			if vv := slip.CurrentPackage.GetVarVal(string(ta)); vv != nil {
+				vv.Doc = string(doc)
+			}
+		case slip.Symbol("constant"):
+			if _, has := slip.ConstantDocs[string(ta)]; has {
+				slip.ConstantDocs[string(ta)] = string(doc)
+			}
+		case slip.Symbol("type"):
+			if c := slip.FindClass(string(ta)); c != nil {
+				a = c
+				goto Top
+			}
+		default:
+			f.unsup(docType, ta)
+		}
+	case *slip.FuncInfo:
+		if docType == nil || docType == slip.Symbol("function") {
+			ta.Doc.Text = string(doc)
+		}
+	case *slip.Package:
+		if docType == nil {
+			ta.Doc = string(doc)
+		}
+	case slip.Class:
+		if docType == slip.Symbol("type") {
+			ta.SetDocumentation(string(doc))
+		}
+	default:
+		f.unsup(docType, ta)
+	}
+}
 
-	// TBD
+func (f *Documentation) unsup(docType, val slip.Object) {
+	slip.NewPanic("Unsupported documentation: doc-type %s for type %T", docType, val)
 }

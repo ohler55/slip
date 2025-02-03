@@ -74,6 +74,9 @@ func TestFlavorSimple(t *testing.T) {
 		},
 		Eval: f,
 	}).Test(t)
+
+	f.(*flavors.Flavor).SetDocumentation("quux")
+	tt.Equal(t, "quux", f.(*flavors.Flavor).Documentation())
 }
 
 func TestFlavorDescribeBasic(t *testing.T) {
