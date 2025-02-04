@@ -3,19 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - inspect
-  - [x] DISASSEMBLE
-  - [x] LAMBDA-LIST-KEYWORDS
-  - [x] &aux
-  - [x] CHANGE-CLASS
-  - [x] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
-  - [x] DOCUMENTATION
-  - [x] FUNCTION-LAMBDA-EXPRESSION
-  - [ ] FIND-ALL-SYMBOLS (string) => symbols
-   - exact match on string
-   - prefix non-user package with package::foo
-  - [x] CALL-ARGUMENTS-LIMIT
-  - [x] LAMBDA-PARAMETERS-LIMIT
 
  - multi-stream
   - [ ] BROADCAST-STREAM

@@ -54,7 +54,6 @@
  * [ ] ETYPECASE
  * [ ] FDEFINITION
  * [ ] FILL
- * [ ] FIND-ALL-SYMBOLS
  * [ ] FLOAT-DIGITS
  * [ ] FLOAT-PRECISION
  * [ ] FLOAT-RADIX
@@ -392,6 +391,7 @@
  * [x] FILE-WRITE-DATE
  * [x] FILL-POINTER
  * [x] FIND
+ * [x] FIND-ALL-SYMBOLS
  * [x] FIND-CLASS
  * [x] FIND-IF
  * [x] FIND-PACKAGE
