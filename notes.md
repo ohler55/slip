@@ -3,15 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - inspect
-  - [ ] CALL-ARGUMENTS-LIMIT
-  - [ ] DOCUMENTATION
-  - [ ] DESCRIBE-OBJECT
-  - [ ] CHANGE-CLASS
-  - [ ] FUNCTION-LAMBDA-EXPRESSION
-  - [ ] FIND-ALL-SYMBOLS
-  - [ ] LAMBDA-LIST-KEYWORDS
-  - [ ] LAMBDA-PARAMETERS-LIMIT
 
  - multi-stream
   - [ ] BROADCAST-STREAM
@@ -49,7 +40,6 @@
   - [ ] CONSTANTLY
   - [ ] DECODE-UNIVERSAL-TIME
   - [ ] DESTRUCTURING-BIND
-  - [ ] DISASSEMBLE
   - [ ] DRIBBLE
   - [ ] ELT
   - [ ] ENCODE-UNIVERSAL-TIME
@@ -136,6 +126,13 @@
   - [ ] SBIT
   - [ ] SIMPLE-BIT-VECTOR
   - [ ] SIMPLE-BIT-VECTOR-P
+
+- autocomplete
+ - for describe and others>
+
+ - better-methods
+  - instance method should use flavor so defmethod give existing instances new methods
+  - could create a struct for the methods slice to avoid a lookup on recieve
 
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots

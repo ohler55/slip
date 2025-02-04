@@ -71,7 +71,7 @@ func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	var pkgs []*slip.Package
 	if value, has := slip.GetArgsKeyValue(rest, slip.Symbol(":use")); has {
 		list, ok := value.(slip.List)
-		if !ok {
+		if !ok && value != nil {
 			slip.PanicType("use", value, "list")
 		}
 		for _, v := range list {

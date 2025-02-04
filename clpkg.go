@@ -10,6 +10,11 @@ import (
 
 func init() {
 	CurrentPackage = &UserPkg
+	// Pick a large number for the limit.
+	DefConstant(Symbol("call-arguments-limit"), Fixnum(0x100000000000),
+		`The maximum number of function call arguments.`)
+	DefConstant(Symbol("lambda-parameters-limit"), Fixnum(0x100000000000),
+		`The maximum number of lambda parameters.`)
 }
 
 // CLPkg is the COMMON-LISP package.
@@ -19,7 +24,7 @@ var (
 	CLPkg              = Package{
 		Name:      "common-lisp",
 		Nicknames: []string{"cl"},
-		Doc:       "Home of symbols defined by the ANSI language spcification.",
+		Doc:       "Home of symbols defined by the ANSI LISP language specification.",
 		path:      "github.com/ohler55/slip/pkg/cl",
 		vars: map[string]*VarVal{
 			"*common-lisp*":   &pkgVarVal,

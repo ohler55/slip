@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -345,7 +346,9 @@ func (c *client) listen(s *slip.Scope) {
 		cnt, err := c.con.Read(buf)
 		if err != nil {
 			if !errors.Is(err, io.EOF) && c.active.Load() {
-				displayError("read error on %s: %s\n", c.self, err)
+				if !strings.Contains(err.Error(), "connection reset by peer") {
+					displayError("read error on %s: %s\n", c.self, err)
+				}
 				c.shutdown()
 			}
 			break

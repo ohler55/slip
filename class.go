@@ -15,6 +15,9 @@ type Class interface {
 	// Documentation of the class.
 	Documentation() string
 
+	// SetDocumentation of the class.
+	SetDocumentation(doc string)
+
 	// Describe the class in detail.
 	Describe(b []byte, indent, right int, ansi bool) []byte
 

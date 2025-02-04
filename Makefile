@@ -19,6 +19,6 @@ testlint: lint
 	make -C test
 
 test:
-	make -C test
+	make -C test cover
 
 .PHONY: all lint clean build test test plugins

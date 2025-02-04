@@ -20,13 +20,20 @@ func TestClassBasic(t *testing.T) {
 	tt.Equal(t, true, c.Equal(c2))
 	tt.Equal(t, false, c.Equal(nil))
 	tt.Equal(t, "[class standard-object t]", pretty.SEN(c.Hierarchy()))
-	tt.Equal(t, "built-in fixed number class", c.(slip.Class).Documentation())
+	doc := c.(slip.Class).Documentation()
+	tt.Equal(t, "built-in fixed number class", doc)
+	c.(slip.Class).SetDocumentation("quux")
+	tt.Equal(t, "quux", c.(slip.Class).Documentation())
+	c.(slip.Class).SetDocumentation(doc)
+
 	tt.Equal(t, "#<class fixnum>", c.String())
 	tt.Equal(t, `{
   docs: "built-in fixed number class"
   final: true
   inherit: [integer]
   methods: [
+    ":change-class"
+    ":change-flavor"
     ":describe"
     ":equal"
     ":eval-inside-yourself"
@@ -37,6 +44,8 @@ func TestClassBasic(t *testing.T) {
     ":operation-handled-p"
     ":print-self"
     ":send-if-handles"
+    ":shared-initialize"
+    ":update-instance-for-different-class"
     ":which-operations"
   ]
   name: fixnum
@@ -56,6 +65,8 @@ func TestClassDescribeBasic(t *testing.T) {
   Class precedence list: integer rational real number built-in-class
   Slots: None
   Methods:
+    :change-class
+    :change-flavor
     :describe
     :equal
     :eval-inside-yourself
@@ -66,6 +77,8 @@ func TestClassDescribeBasic(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
   Prototype: 42
 `, string(out))
@@ -78,6 +91,8 @@ func TestClassDescribeBasic(t *testing.T) {
 		"  Class precedence list: integer rational real number built-in-class\n"+
 		"  Slots: None\n"+
 		"  Methods:\n"+
+		"    :change-class\n"+
+		"    :change-flavor\n"+
 		"    :describe\n"+
 		"    :equal\n"+
 		"    :eval-inside-yourself\n"+
@@ -88,6 +103,8 @@ func TestClassDescribeBasic(t *testing.T) {
 		"    :operation-handled-p\n"+
 		"    :print-self\n"+
 		"    :send-if-handles\n"+
+		"    :shared-initialize\n"+
+		"    :update-instance-for-different-class\n"+
 		"    :which-operations\n"+
 		"  Prototype: 42\n", string(out))
 }
@@ -113,6 +130,8 @@ func TestClassDefClass(t *testing.T) {
     x = 3
     y = 5
   Methods:
+    :change-class
+    :change-flavor
     :describe
     :equal
     :eval-inside-yourself
@@ -124,6 +143,8 @@ func TestClassDefClass(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
 `, string(out))
 
@@ -132,6 +153,8 @@ func TestClassDefClass(t *testing.T) {
   final: false
   inherit: [standard-object]
   methods: [
+    ":change-class"
+    ":change-flavor"
     ":describe"
     ":equal"
     ":eval-inside-yourself"
@@ -143,6 +166,8 @@ func TestClassDefClass(t *testing.T) {
     ":operation-handled-p"
     ":print-self"
     ":send-if-handles"
+    ":shared-initialize"
+    ":update-instance-for-different-class"
     ":which-operations"
   ]
   name: dummy
@@ -153,6 +178,8 @@ func TestClassDefClass(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = clos.DefClass("dummy", "", map[string]slip.Object{}, nil, false)
 	})
+	c.SetNoMake(true)
+	tt.Equal(t, true, c.NoMake())
 }
 
 func TestClassInstanceInit(t *testing.T) {

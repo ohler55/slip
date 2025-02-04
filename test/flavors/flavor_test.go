@@ -34,6 +34,8 @@ func TestFlavorSimple(t *testing.T) {
   initable: {}
   keywords: {}
   methods: [
+    [{from: vanilla-flavor name: ":change-class" primary: true}]
+    [{from: vanilla-flavor name: ":change-flavor" primary: true}]
     [{from: vanilla-flavor name: ":describe" primary: true}]
     [{from: vanilla-flavor name: ":equal" primary: true}]
     [{from: vanilla-flavor name: ":eval-inside-yourself" primary: true}]
@@ -44,6 +46,14 @@ func TestFlavorSimple(t *testing.T) {
     [{from: vanilla-flavor name: ":operation-handled-p" primary: true}]
     [{from: vanilla-flavor name: ":print-self" primary: true}]
     [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
+    [{from: vanilla-flavor name: ":shared-initialize" primary: true}]
+    [
+      {
+        from: vanilla-flavor
+        name: ":update-instance-for-different-class"
+        primary: true
+      }
+    ]
     [{from: vanilla-flavor name: ":which-operations" primary: true}]
   ]
   name: blueberry
@@ -64,6 +74,9 @@ func TestFlavorSimple(t *testing.T) {
 		},
 		Eval: f,
 	}).Test(t)
+
+	f.(*flavors.Flavor).SetDocumentation("quux")
+	tt.Equal(t, "quux", f.(*flavors.Flavor).Documentation())
 }
 
 func TestFlavorDescribeBasic(t *testing.T) {
@@ -81,6 +94,8 @@ func TestFlavorDescribeBasic(t *testing.T) {
   Variables:
     size = "medium"
   Methods:
+    :change-class
+    :change-flavor
     :describe
     :equal
     :eval-inside-yourself
@@ -91,6 +106,8 @@ func TestFlavorDescribeBasic(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
 `, string(out))
 
@@ -100,6 +117,8 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"  Variables:\n"+
 		"    size = \"medium\"\n"+
 		"  Methods:\n"+
+		"    :change-class\n"+
+		"    :change-flavor\n"+
 		"    :describe\n"+
 		"    :equal\n"+
 		"    :eval-inside-yourself\n"+
@@ -110,6 +129,8 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"    :operation-handled-p\n"+
 		"    :print-self\n"+
 		"    :send-if-handles\n"+
+		"    :shared-initialize\n"+
+		"    :update-instance-for-different-class\n"+
 		"    :which-operations\n", string(out))
 }
 
@@ -176,6 +197,8 @@ func TestFlavorReceive(t *testing.T) {
   initable: {}
   keywords: {}
   methods: [
+    [{from: vanilla-flavor name: ":change-class" primary: true}]
+    [{from: vanilla-flavor name: ":change-flavor" primary: true}]
     [{from: vanilla-flavor name: ":describe" primary: true}]
     [{from: vanilla-flavor name: ":equal" primary: true}]
     [{from: vanilla-flavor name: ":eval-inside-yourself" primary: true}]
@@ -186,6 +209,14 @@ func TestFlavorReceive(t *testing.T) {
     [{from: vanilla-flavor name: ":operation-handled-p" primary: true}]
     [{from: vanilla-flavor name: ":print-self" primary: true}]
     [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
+    [{from: vanilla-flavor name: ":shared-initialize" primary: true}]
+    [
+      {
+        from: vanilla-flavor
+        name: ":update-instance-for-different-class"
+        primary: true
+      }
+    ]
     [{from: vanilla-flavor name: ":which-operations" primary: true}]
   ]
   name: blueberry
@@ -212,6 +243,8 @@ func TestFlavorReceive(t *testing.T) {
   Variables:
     size = "medium"
   Methods:
+    :change-class
+    :change-flavor
     :describe
     :equal
     :eval-inside-yourself
@@ -222,6 +255,8 @@ func TestFlavorReceive(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
 `, out.String())
 

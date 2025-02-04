@@ -23,11 +23,16 @@ func TestVanillaMethods(t *testing.T) {
  :gettable-instance-variables
  :settable-instance-variables
  (:initable-instance-variables size))
+(defflavor blackberry ((size "medium") (fresh nil)) ()
+ :gettable-instance-variables
+ :settable-instance-variables
+ (:initable-instance-variables size fresh))
 (setq berry (make-instance 'strawberry :size "medium"))
 `)
 	scope := slip.NewScope()
 	_ = code.Eval(scope, nil)
 	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'blackberry)").Eval(scope, nil)
 
 	id := slip.ReadString("(send berry :id)").Eval(scope, nil)
 	tt.SameType(t, slip.Fixnum(0), id)
@@ -43,8 +48,9 @@ func TestVanillaMethods(t *testing.T) {
 
 	methods := slip.ReadString("(send berry :which-operations)").Eval(scope, nil)
 	tt.Equal(t,
-		"(:describe :equal :eval-inside-yourself :flavor :id :init :inspect :operation-handled-p :print-self "+
-			":send-if-handles\n           :set-size :size :which-operations)",
+		"(:change-class :change-flavor :describe :equal :eval-inside-yourself :flavor :id :init :inspect "+
+			":operation-handled-p\n               :print-self :send-if-handles :set-size :shared-initialize "+
+			":size :update-instance-for-different-class\n               :which-operations)",
 		methods.String())
 
 	pr, pw, err := os.Pipe()
@@ -98,6 +104,35 @@ func TestVanillaMethods(t *testing.T) {
 	inst := bag.(*flavors.Instance)
 	tt.Equal(t, `/{"flavor":"strawberry","id":"[0-9a-fA-F]+","vars":{"size":"medium"}}/`,
 		oj.JSON(inst.Any, &ojg.Options{Sort: true, Indent: 0}))
+
+	_ = slip.ReadString(`(send berry :shared-initialize '(size) :size "large")`).Eval(scope, nil)
+	result = slip.ReadString("(send berry :size)").Eval(scope, nil)
+	tt.Equal(t, slip.String("large"), result)
+
+	berry := slip.ReadString("berry").Eval(scope, nil).(*flavors.Instance)
+	dup := berry.Dup()
+	scope.Let(slip.Symbol("dup"), dup)
+	berry.ChangeFlavor(flavors.Find("blackberry"))
+	_ = slip.ReadString(`(send berry :update-instance-for-different-class dup :fresh t)`).Eval(scope, nil)
+
+	fresh := slip.ReadString(`(send (send berry :inspect) :get "vars.fresh")`).Eval(scope, nil)
+	tt.Equal(t, slip.True, fresh)
+
+	tt.Panic(t, func() {
+		_ = slip.ReadString(`(send berry :update-instance-for-different-class dup :quux t)`).Eval(scope, nil)
+	})
+
+	_ = slip.ReadString(`(send berry :change-class 'strawberry :size "small")`).Eval(scope, nil)
+	result = slip.ReadString(`(send (send berry :inspect) :get "vars.size")`).Eval(scope, nil)
+	tt.Equal(t, slip.String("small"), result)
+	result = slip.ReadString(`(send (send berry :inspect) :get "flavor")`).Eval(scope, nil)
+	tt.Equal(t, slip.String("strawberry"), result)
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(change-class berry 'none-berry)`,
+		PanicType: slip.ClassNotFoundSymbol,
+	}).Test(t)
 }
 
 func TestVanillaEqualAny(t *testing.T) {
@@ -213,6 +248,53 @@ func TestVanillaSendIfDocs(t *testing.T) {
 `)
 }
 
+func TestVanillaChangeClassDocs(t *testing.T) {
+	testVanillaDocs(t, ":change-class",
+		`:change-class is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :change-class new-class &key &allow-other-keys) => instance
+      new-class [flavor] the new flavor for the instance.
+`+"   "+`
+    Returns self after changing the flavor of the instance. When called a copy of the instance is created and the
+    :update-instance-for-different-class is called on the original after the flavor has been changed to the new flavor.
+    The previous is a copy of the original instance. The original instance has already been changed and the slots
+    adjusted for the new flavor. This validates the keywords and then calls the :shared-initialize method.
+`+"   "+`
+    This method is an extension of the original flavors.
+`)
+}
+
+func TestVanillaSharedInitializeDocs(t *testing.T) {
+	testVanillaDocs(t, ":shared-initialize",
+		`:shared-initialize is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :shared-initialize slot-names &rest initargs &key &allow-other-keys) => instance
+      slot-names [list] a list of the slot names in the re-flavored instance.
+      initargs [list] additional arguments are ignored by the default method.
+`+"   "+`
+    Returns self after processing the key arguments to set the slots in the instance.
+`+"   "+`
+    This method is an extension of the original flavors.
+`)
+}
+
+func TestVanillaUpdateInstanceForDifferentClassDocs(t *testing.T) {
+	testVanillaDocs(t, ":update-instance-for-different-class",
+		`:update-instance-for-different-class is a method of vanilla-flavor
+  vanilla-flavor :primary
+    :update-instance-for-different-class previous &rest initargs &key &allow-other-keys)
+      previous [instance] a copy of the original instance.
+      initargs [list] additional arguments are ignored by the default method.
+`+"   "+`
+    When change-class is called a copy of the instance is created and the :update-instance-for-different-class is called
+    on the original after the flavor has been changed to the new flavor. The previous is a copy of the original
+    instance. The original instance has already been changed and the slots adjusted for the new flavor. This validates
+    the keywords and then calls the :shared-initialize method.
+`+"   "+`
+    This method is an extension of the original flavors.
+`)
+}
+
 func TestVanillaWhichOpsDocs(t *testing.T) {
 	testVanillaDocs(t, ":which-operations",
 		`:which-operations is a method of vanilla-flavor
@@ -252,4 +334,35 @@ func TestVanillaDescribeStream(t *testing.T) {
 	tt.Equal(t, `/#<vanilla-flavor [0-9a-f]+>.*, an instance of .*vanilla-flavor.*/`, out.String())
 
 	tt.Panic(t, func() { _ = slip.ReadString("(send obj :describe t)").Eval(scope, nil) })
+}
+
+func TestChangeClassFlavor(t *testing.T) {
+	code := slip.ReadString(`
+(defflavor strawberry ((size "medium")) ()
+ :gettable-instance-variables
+ :settable-instance-variables
+ (:initable-instance-variables size))
+(defflavor blackberry ((size "medium") (fresh nil)) ()
+ :gettable-instance-variables
+ :settable-instance-variables
+ (:initable-instance-variables size fresh))
+(setq berry (make-instance 'strawberry :size "medium"))
+`)
+	scope := slip.NewScope()
+	_ = code.Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'blackberry)").Eval(scope, nil)
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(change-class berry (find-class 'blackberry))`,
+		Expect: "/#<blackberry [0-9a-f]+>/",
+	}).Test(t)
+}
+
+func TestChangeClassNotInstance(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(change-class (make-instance 'vanilla-flavor) 7)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }

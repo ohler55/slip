@@ -351,3 +351,35 @@ func (obj *Instance) Length() (size int) {
 func (obj *Instance) Class() slip.Class {
 	return obj.Type
 }
+
+// Dup returns a duplicate of the instance.
+func (obj *Instance) Dup() *Instance {
+	dup := Instance{
+		Type:    obj.Type,
+		Methods: obj.Methods,
+		Any:     obj.Any,
+	}
+	dup.Scope.Vars = map[string]slip.Object{}
+	for k, v := range obj.Scope.Vars {
+		dup.Scope.Vars[k] = v
+	}
+	dup.Scope.Vars["self"] = &dup
+
+	return &dup
+}
+
+// ChangeFlavor returns a copy of the instance with a new flavor as the
+// type. Instance variables that are in each are kept while others are
+// removed. New variables are added as unbound.
+func (obj *Instance) ChangeFlavor(flavor *Flavor) {
+	obj.Type = flavor
+	obj.Methods = flavor.methods
+	vars := obj.Vars
+	obj.Scope.Vars = map[string]slip.Object{}
+	for k, v := range flavor.defaultVars {
+		if ov, has := vars[k]; has {
+			v = ov
+		}
+		obj.Scope.Vars[k] = v
+	}
+}

@@ -16,18 +16,27 @@ var vanilla = Flavor{
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
 	methods: map[string][]*Method{
-		":describe":             {{Name: ":describe", primary: describeCaller(true)}},
+		":describe":             {{Name: ":describe", primary: describeCaller{}}},
 		":equal":                {{Name: ":equal", primary: equalCaller{}}},
-		":eval-inside-yourself": {{Name: ":eval-inside-yourself", primary: insideCaller(true)}},
-		":flavor":               {{Name: ":flavor", primary: flavorCaller(true)}},
+		":eval-inside-yourself": {{Name: ":eval-inside-yourself", primary: insideCaller{}}},
+		":flavor":               {{Name: ":flavor", primary: flavorCaller{}}},
 		":init":                 {{Name: ":init", primary: initCaller{}}},
-		":id":                   {{Name: ":id", primary: idCaller(true)}},
-		":inspect":              {{Name: ":inspect", primary: inspectCaller(true)}},
-		":operation-handled-p":  {{Name: ":operation-handled-p", primary: hasOpCaller(true)}},
-		":print-self":           {{Name: ":print-self", primary: printCaller(true)}},
-		":send-if-handles":      {{Name: ":send-if-handles", primary: sendIfCaller(true)}},
-		":which-operations":     {{Name: ":which-operations", primary: whichOpsCaller(true)}},
+		":id":                   {{Name: ":id", primary: idCaller{}}},
+		":inspect":              {{Name: ":inspect", primary: inspectCaller{}}},
+		":operation-handled-p":  {{Name: ":operation-handled-p", primary: hasOpCaller{}}},
+		":print-self":           {{Name: ":print-self", primary: printCaller{}}},
+		":send-if-handles":      {{Name: ":send-if-handles", primary: sendIfCaller{}}},
+		":which-operations":     {{Name: ":which-operations", primary: whichOpsCaller{}}},
+		// The next methods are not standard vanilla-flavor methods but added
+		// to support the CLOS change-class function.
+		":change-class":      {{Name: ":change-class", primary: changeClassCaller{}}},
+		":change-flavor":     {{Name: ":change-flavor", primary: changeClassCaller{}}},
+		":shared-initialize": {{Name: ":shared-initialize", primary: sharedInitializeCaller{}}},
+		":update-instance-for-different-class": {{
+			Name:    ":update-instance-for-different-class",
+			primary: updateInstanceForDifferentClassCaller{}}},
 	},
+	defaultHandler: defHand{},
 }
 
 func init() {
@@ -53,17 +62,17 @@ func (caller initCaller) Docs() string {
 `
 }
 
-type describeCaller bool
+type describeCaller struct{}
 
 func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*Instance)
+	self := s.Get("self").(*Instance)
 	ansi := s.Get("*print-ansi*") != nil
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
-	b := obj.Describe([]byte{}, 0, right, ansi)
+	b := self.Describe([]byte{}, 0, right, ansi)
 	w := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
 		if 1 < len(args) {
-			PanicMethodArgCount(obj, ":describe", len(args), 0, 1)
+			PanicMethodArgCount(self, ":describe", len(args), 0, 1)
 		}
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
@@ -84,11 +93,11 @@ Writes a description of the instance to _output-stream_.
 `
 }
 
-type idCaller bool
+type idCaller struct{}
 
 func (caller idCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*Instance)
-	return slip.Fixnum(uintptr(unsafe.Pointer(obj)))
+	self := s.Get("self").(*Instance)
+	return slip.Fixnum(uintptr(unsafe.Pointer(self)))
 }
 
 func (caller idCaller) Docs() string {
@@ -99,11 +108,11 @@ Returns the identifier of the instance.
 `
 }
 
-type flavorCaller bool
+type flavorCaller struct{}
 
 func (caller flavorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*Instance)
-	return obj.Type
+	self := s.Get("self").(*Instance)
+	return self.Type
 }
 
 func (caller flavorCaller) Docs() string {
@@ -114,14 +123,14 @@ Returns the flavor of the instance.
 `
 }
 
-type hasOpCaller bool
+type hasOpCaller struct{}
 
 func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*Instance)
+	self := s.Get("self").(*Instance)
 	if len(args) != 1 {
-		PanicMethodArgChoice(obj, ":has", len(args), "1")
+		PanicMethodArgChoice(self, ":has", len(args), "1")
 	}
-	if sym, ok := args[0].(slip.Symbol); ok && obj.HasMethod(string(sym)) {
+	if sym, ok := args[0].(slip.Symbol); ok && self.HasMethod(string(sym)) {
 		return slip.True
 	}
 	return nil
@@ -136,12 +145,12 @@ Returns _t_ if the instance handles the method and _nil_ otherwise.
 `
 }
 
-type printCaller bool
+type printCaller struct{}
 
 func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	// Args should be stream print-depth escape-p. The second two arguments are
 	// ignored.
-	obj := s.Get("self").(*Instance)
+	self := s.Get("self").(*Instance)
 	so := s.Get("*standard-output*")
 	ss, _ := so.(slip.Stream)
 	w := so.(io.Writer)
@@ -152,7 +161,7 @@ func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 			slip.PanicType(":describe output-stream", args[0], "output-stream")
 		}
 	}
-	if _, err := w.Write(obj.Append(nil)); err != nil {
+	if _, err := w.Write(self.Append(nil)); err != nil {
 		slip.PanicStream(ss, "%s", err)
 	}
 	return nil
@@ -167,16 +176,16 @@ Writes a description of the instance to the _stream_.
 `
 }
 
-type sendIfCaller bool
+type sendIfCaller struct{}
 
 func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	obj := s.Get("self").(*Instance)
+	self := s.Get("self").(*Instance)
 	if len(args) == 0 {
-		PanicMethodArgCount(obj, ":send-if-handles", len(args), 1, -1)
+		PanicMethodArgCount(self, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
-		if _, has := obj.Methods[string(sym)]; has {
-			return obj.Receive(s, string(sym), args[1:], depth+1)
+		if _, has := self.Methods[string(sym)]; has {
+			return self.Receive(s, string(sym), args[1:], depth+1)
 		}
 	}
 	return nil
@@ -192,12 +201,12 @@ Sends to the instance if the instance has the _method_.
 `
 }
 
-type whichOpsCaller bool
+type whichOpsCaller struct{}
 
 func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*Instance)
-	names := make([]string, 0, len(obj.Methods))
-	for k := range obj.Methods {
+	self := s.Get("self").(*Instance)
+	names := make([]string, 0, len(self.Methods))
+	for k := range self.Methods {
 		names = append(names, k)
 	}
 	sort.Slice(names, func(i, j int) bool { return 0 > strings.Compare(names[i], names[j]) })
@@ -216,12 +225,12 @@ Returns a list of all the methods the instance handles.
 `
 }
 
-type insideCaller bool
+type insideCaller struct{}
 
 func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
-		obj := s.Get("self").(*Instance)
-		PanicMethodArgChoice(obj, ":eval-inside-yourself", len(args), "1")
+		self := s.Get("self").(*Instance)
+		PanicMethodArgChoice(self, ":eval-inside-yourself", len(args), "1")
 	}
 	return s.Eval(args[0], depth+1)
 }
@@ -235,13 +244,13 @@ Evaluates the _form_ in the instance's scope.
 `
 }
 
-type inspectCaller bool
+type inspectCaller struct{}
 
 func (caller inspectCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	obj := s.Get("self").(*Instance)
+	self := s.Get("self").(*Instance)
 	cf := allFlavors["bag-flavor"]
 	inst := cf.MakeInstance().(*Instance)
-	inst.Any = obj.Simplify()
+	inst.Any = self.Simplify()
 
 	return inst
 }
@@ -257,9 +266,9 @@ Returns a _bag_ with the details of the instance.
 type equalCaller struct{}
 
 func (caller equalCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	obj := s.Get("self").(*Instance)
-	CheckMethodArgCount(obj, ":equal", len(args), 1, 1)
-	if obj.Equal(args[0]) {
+	self := s.Get("self").(*Instance)
+	CheckMethodArgCount(self, ":equal", len(args), 1, 1)
+	if self.Equal(args[0]) {
 		return slip.True
 	}
 	return nil
@@ -271,5 +280,115 @@ func (caller equalCaller) Docs() string {
 
 
 Returns _t_ if the instance is of the same flavor as _other_ and has the same content.
+`
+}
+
+type changeClassCaller struct{}
+
+func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*Instance)
+	CheckMethodArgCount(self, ":change-class", len(args), 1, -1)
+	var nf *Flavor
+	switch ta := args[0].(type) {
+	case *Flavor:
+		nf = ta
+	case slip.Symbol:
+		if nf = Find(string(ta)); nf == nil {
+			slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
+		}
+	default:
+		slip.PanicType("new-class", args[0], "flavor")
+	}
+	prev := self.Dup()
+	self.ChangeFlavor(nf)
+	_ = self.Receive(s, ":update-instance-for-different-class", append(slip.List{prev}, args[1:]...), depth)
+
+	return self
+}
+
+func (caller changeClassCaller) Docs() string {
+	return `__:change-class__ _new-class_ &key &allow-other-keys) => _instance_
+   _new-class_ [flavor] the new flavor for the instance.
+
+
+Returns __self__ after changing the flavor of the instance. When called a copy
+of the instance is created and the _:update-instance-for-different-class_ is
+called on the original after the _flavor_ has been changed to the new
+_flavor_. The _previous_ is a copy of the original instance. The original
+instance has already been changed and the slots adjusted for the new
+flavor. This validates the keywords and then calls the _:shared-initialize_
+method.
+
+
+This method is an extension of the original flavors.
+`
+}
+
+type sharedInitializeCaller struct{}
+
+func (caller sharedInitializeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*Instance)
+	rest := args[1:]
+	for _, name := range args[0].(slip.List) {
+		sym := name.(slip.Symbol)
+		if val, has := slip.GetArgsKeyValue(rest, ":"+sym); has {
+			self.Let(sym, val)
+		}
+	}
+	return self
+}
+
+func (caller sharedInitializeCaller) Docs() string {
+	return `__:shared-initialize__ _slot-names_ &rest _initargs_ &key &allow-other-keys) => _instance_
+   _slot-names_ [list] a list of the slot names in the re-flavored instance.
+   _initargs_ [list] additional arguments are ignored by the default method.
+
+
+Returns __self__ after processing the key arguments to set the slots in the instance.
+
+
+This method is an extension of the original flavors.
+`
+}
+
+type updateInstanceForDifferentClassCaller struct{}
+
+func (caller updateInstanceForDifferentClassCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	self := s.Get("self").(*Instance)
+	// args[0] is previous
+	rest := args[1:]
+	flavor := self.Type.(*Flavor)
+	for i := 0; i < len(rest)-1; i += 2 {
+		if sym, ok := rest[i].(slip.Symbol); ok && 1 < len(sym) {
+			if _, has := flavor.defaultVars[string(sym[1:])]; has {
+				continue
+			}
+		}
+		slip.NewPanic("%s is not a valid initialize keyword for %s.", rest[i], flavor.Name)
+	}
+	var names slip.List
+	for k := range self.Vars {
+		names = append(names, slip.Symbol(k))
+	}
+	self.Receive(s, ":shared-initialize", append(slip.List{names}, rest...), 0)
+
+	return nil
+}
+
+func (caller updateInstanceForDifferentClassCaller) Docs() string {
+	return `__:update-instance-for-different-class__ _previous_ &rest _initargs_ &key &allow-other-keys)
+   _previous_ [instance] a copy of the original instance.
+   _initargs_ [list] additional arguments are ignored by the default method.
+
+
+When __change-class__ is called a copy of the instance is created and the
+_:update-instance-for-different-class_ is called on the original after the
+_flavor_ has been changed to the new _flavor_. The _previous_ is a copy of the
+original instance. The original instance has already been changed and the
+slots adjusted for the new flavor. This validates the keywords and then calls
+the _:shared-initialize_ method.
+
+
+This method is an extension of the original flavors.
 `
 }

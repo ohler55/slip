@@ -12,6 +12,7 @@ const (
 	optMode  = 1
 	restMode = 2
 	keyMode  = 3
+	auxMode  = 4
 )
 
 // Lambda is a Caller for forms/objects. It provides a level of
@@ -40,8 +41,11 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	}
 	mode := reqMode
 	ai := 0
-	var rest List
-	var restSym Symbol
+	var (
+		rest    List
+		restSym Symbol
+	)
+Aux:
 	for i, ad := range lam.Doc.Args {
 		if len(args) <= ai {
 			break
@@ -52,20 +56,28 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 			switch strings.ToLower(ad.Name) {
 			case AmpOptional:
 				mode = optMode
-			case AmpRest:
+			case AmpRest, AmpBody:
 				mode = restMode
 			case AmpKey:
 				mode = keyMode
+			case AmpAux: // should not be possible to get here without an error later
+				break Aux
+			case AmpAllowOtherKeys:
+				// ignore
 			default:
 				ss.Let(Symbol(ad.Name), args[ai])
 				ai++
 			}
 		case optMode:
 			switch strings.ToLower(ad.Name) {
-			case AmpRest:
+			case AmpRest, AmpBody:
 				mode = restMode
 			case AmpKey:
 				mode = keyMode
+			case AmpAux:
+				break Aux
+			case AmpAllowOtherKeys:
+				// ignore
 			default:
 				ss.Let(Symbol(ad.Name), args[ai])
 				ai++
@@ -111,6 +123,7 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	if 0 < len(rest) {
 		ss.Let(restSym, rest)
 	}
+	// Next bind any unbound &key vars
 	mode = reqMode
 	for _, ad := range lam.Doc.Args {
 		switch mode {
@@ -118,17 +131,25 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 			switch strings.ToLower(ad.Name) {
 			case AmpOptional:
 				mode = optMode
-			case AmpRest:
+			case AmpRest, AmpBody:
 				mode = restMode
 			case AmpKey:
 				mode = keyMode
+			case AmpAux:
+				mode = auxMode
+			case AmpAllowOtherKeys:
+				// ignore
 			}
 		case optMode:
 			switch strings.ToLower(ad.Name) {
-			case AmpRest:
+			case AmpRest, AmpBody:
 				mode = restMode
 			case AmpKey:
 				mode = keyMode
+			case AmpAux:
+				mode = auxMode
+			case AmpAllowOtherKeys:
+				// ignore
 			default:
 				if !ss.Bound(Symbol(ad.Name)) {
 					ss.Let(Symbol(ad.Name), ad.Default)
@@ -138,15 +159,29 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 			switch strings.ToLower(ad.Name) {
 			case AmpKey:
 				mode = keyMode
+			case AmpAux:
+				mode = auxMode
+			case AmpAllowOtherKeys:
+				// ignore
 			default:
 				if !ss.Bound(Symbol(ad.Name)) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
 		case keyMode:
-			if !ss.Bound(Symbol(ad.Name)) {
-				ss.Let(Symbol(ad.Name), ad.Default)
+			asym := Symbol(ad.Name)
+			if AmpAux == asym {
+				mode = auxMode
+			} else if !ss.Bound(asym) {
+				ss.Let(asym, ad.Default)
 			}
+		case auxMode:
+			var val Object = ad.Default
+			if list, ok := val.(List); ok && 1 < len(list) {
+				d2 := depth + 1
+				val = ss.Eval(ListToFunc(ss, list, d2), d2)
+			}
+			ss.Let(Symbol(ad.Name), val)
 		}
 	}
 	return lam.BoundCall(ss, depth)

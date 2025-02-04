@@ -11,6 +11,10 @@ const (
 	AmpOptional = "&optional"
 	// AmpRest is &rest.
 	AmpRest = "&rest"
+	// AmpAux is &aux.
+	AmpAux = "&aux"
+	// AmpAllowOtherKeys is &allow-other-keys
+	AmpAllowOtherKeys = "&allow-other-keys"
 )
 
 // DocArg describes a function argument.

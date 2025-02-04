@@ -22,6 +22,8 @@ func TestDescribeFlavor(t *testing.T) {
     A Flavor that implements the standard methods.
   Variables:
   Methods:
+    :change-class
+    :change-flavor
     :describe
     :equal
     :eval-inside-yourself
@@ -32,6 +34,8 @@ func TestDescribeFlavor(t *testing.T) {
     :operation-handled-p
     :print-self
     :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
     :which-operations
 `, out.String())
 }

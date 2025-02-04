@@ -37,7 +37,7 @@ and an optional package which is evaluated. An optional form can also be include
 is evaluated and the result returned. For each symbol in the package the _forms_ are called.`,
 			Examples: []string{
 				"(let ((lst ()))",
-				" (do-symbols (s *watch* lst) (add lst s))) => (watch-server watch-client ...)",
+				" (do-symbols (s *watch* lst) (add lst s)) lst) => (watch-server watch-client ...)",
 			},
 		}, &slip.CLPkg)
 }

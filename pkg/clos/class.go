@@ -136,6 +136,11 @@ func (c *Class) Documentation() string {
 	return c.docs
 }
 
+// SetDocumentation of the class.
+func (c *Class) SetDocumentation(doc string) {
+	c.docs = doc
+}
+
 func inClassList(c *Class, cpl []*Class) bool {
 	for _, s := range cpl {
 		if c == s {
