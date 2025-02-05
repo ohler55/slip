@@ -7,6 +7,10 @@
  - multi-stream
   - interfaces
    - LastBytePeeker
+    - FileStream
+    - OutputStream
+    - IOStream
+    - io.Seeker and io.ReaderAt
 
   - [ ] OPEN-STREAM-P
   - [ ] STREAM-ELEMENT-TYPE - always return octet
