@@ -16,4 +16,8 @@ type Stream interface {
 
 	// StreamType returns the stream type of the instance which can be one of: file-stream
 	StreamType() Symbol
+
+	// IsOpen return true if the stream is open or false if not or it can not
+	// be determined.
+	IsOpen() bool
 }

@@ -4,6 +4,7 @@ package slip
 
 import (
 	"io"
+	"io/fs"
 )
 
 // OutputStreamSymbol is the symbol with a value of "output-stream".
@@ -55,5 +56,29 @@ func (obj *OutputStream) Eval(s *Scope, depth int) Object {
 
 // Write made visible since os.Output functions are not automatically visible.
 func (obj *OutputStream) Write(b []byte) (int, error) {
+	if obj.Writer == nil {
+		return 0, fs.ErrClosed
+	}
 	return obj.Writer.Write(b)
+}
+
+// Close the write if it is a io.Closer
+func (obj *OutputStream) Close() (err error) {
+	if obj.Writer != nil {
+		if closer, ok := obj.Writer.(io.Closer); ok {
+			err = closer.Close()
+		}
+		obj.Writer = nil
+	}
+	return
+}
+
+// IsOpen return true if the stream is open or false if not.
+func (obj *OutputStream) IsOpen() (open bool) {
+	if obj.Writer != nil {
+		if _, err := obj.Writer.Write([]byte{}); err == nil {
+			open = true
+		}
+	}
+	return
 }

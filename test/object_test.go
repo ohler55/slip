@@ -663,7 +663,10 @@ func TestFileStreamWriteRead(t *testing.T) {
 	lw := (*slip.FileStream)(pw)
 
 	_, _ = lw.Write([]byte("hello"))
+
+	tt.Equal(t, true, lw.IsOpen())
 	lw.Close()
+	tt.Equal(t, false, lw.IsOpen())
 
 	buf := make([]byte, 10)
 	n, err := lr.Read(buf)
@@ -672,8 +675,16 @@ func TestFileStreamWriteRead(t *testing.T) {
 	tt.Equal(t, "hello", string(buf[:n]))
 }
 
+type builderWithClose struct {
+	strings.Builder
+}
+
+func (b *builderWithClose) Close() error {
+	return nil
+}
+
 func TestOutputStream(t *testing.T) {
-	var out strings.Builder
+	var out builderWithClose
 	stream := slip.OutputStream{Writer: &out}
 	(&sliptest.Object{
 		Target:    &stream,
@@ -689,6 +700,12 @@ func TestOutputStream(t *testing.T) {
 		},
 		Eval: &stream,
 	}).Test(t)
+
+	tt.Equal(t, true, stream.IsOpen())
+	stream.Close()
+	_, err := stream.Write([]byte{'x'})
+	tt.NotNil(t, err)
+	tt.Equal(t, false, stream.IsOpen())
 }
 
 func TestIOStream(t *testing.T) {
@@ -727,6 +744,10 @@ func TestIOStream(t *testing.T) {
 	tt.Nil(t, err)
 	tt.Equal(t, 4, cnt)
 	tt.Equal(t, "test", string(buf))
+
+	tt.Equal(t, true, stream.IsOpen())
+	_ = stream.Close()
+	tt.Equal(t, false, stream.IsOpen())
 }
 
 func TestFuncInfo(t *testing.T) {

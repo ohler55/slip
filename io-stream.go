@@ -70,3 +70,9 @@ func (obj *IOStream) Close() (err error) {
 	}
 	return
 }
+
+// IsOpen return true if the stream is open or false if not.
+func (obj *IOStream) IsOpen() bool {
+	_, err := obj.RW.Write([]byte{})
+	return err == nil
+}

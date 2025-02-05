@@ -71,3 +71,9 @@ func (obj *FileStream) Read(b []byte) (int, error) {
 func (obj *FileStream) Close() error {
 	return (*os.File)(obj).Close()
 }
+
+// IsOpen return true if the stream is open or false if not.
+func (obj *FileStream) IsOpen() bool {
+	_, err := (*os.File)(obj).Write([]byte{})
+	return err == nil
+}

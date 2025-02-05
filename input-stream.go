@@ -184,3 +184,10 @@ func (obj *InputStream) ReadByte() (b byte, err error) {
 	}
 	return
 }
+
+// IsOpen return true if the stream is open or false if not. Note that EOF
+// also indicates closed.
+func (obj *InputStream) IsOpen() bool {
+	_, err := obj.Reader.Read([]byte{})
+	return err == nil
+}
