@@ -82,3 +82,16 @@ func (obj *OutputStream) IsOpen() (open bool) {
 	}
 	return
 }
+
+// LastByte returns the last byte written or zero if nothing has been written.
+func (obj *OutputStream) LastByte() byte {
+	b := []byte{0}
+	if seeker, ok := obj.Writer.(io.Seeker); ok {
+		if pos, err := seeker.Seek(0, 1); err == nil && 0 < pos { // relative to current
+			if ra, ok2 := obj.Writer.(io.ReaderAt); ok2 {
+				_, _ = ra.ReadAt(b, pos-1)
+			}
+		}
+	}
+	return b[0]
+}

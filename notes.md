@@ -5,13 +5,6 @@
 - next
 
  - multi-stream
-  - interfaces
-   - LastBytePeeker
-    - FileStream
-    - OutputStream
-    - IOStream
-    - io.Seeker and io.ReaderAt
-
   - [ ] OPEN-STREAM-P
   - [ ] STREAM-ELEMENT-TYPE - always return octet
   - [ ] STREAM-EXTERNAL-FORMAT - :default
@@ -25,7 +18,7 @@
    - file-posiion
     - use HasPosition interface
 
-  - [ ] BROADCAST-STREAM
+  - [ ] BROADCAST-STREAM (in cl)
    - define at top level or cl?
    - slice of output streams that are io.Writers, check on make
    - streamp => t

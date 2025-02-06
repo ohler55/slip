@@ -77,3 +77,12 @@ func (obj *FileStream) IsOpen() bool {
 	_, err := (*os.File)(obj).Write([]byte{})
 	return err == nil
 }
+
+// LastByte returns the last byte written or zero if nothing has been written.
+func (obj *FileStream) LastByte() byte {
+	b := []byte{0}
+	if pos, err := (*os.File)(obj).Seek(0, 1); err == nil && 0 < pos { // relative to current
+		_, _ = (*os.File)(obj).ReadAt(b, pos-1)
+	}
+	return b[0]
+}

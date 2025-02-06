@@ -5,6 +5,6 @@ package slip
 // LastBytePeeker is an interface for checking the last byte written.
 type LastBytePeeker interface {
 
-	// LastByte returns the last byte written or zero if nother has been written.
+	// LastByte returns the last byte written or zero if nothing has been written.
 	LastByte() byte
 }
