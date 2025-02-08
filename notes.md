@@ -3,6 +3,10 @@
 - **multipass** or utm for linux
 
 - next
+ + string-stream
+
+ - update string output stream
+  - maybe update builder to include seek  and readat
 
  - multi-stream
   - [ ] OPEN-STREAM-P
