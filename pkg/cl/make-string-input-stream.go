@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"strings"
-
 	"github.com/ohler55/slip"
 )
 
@@ -86,5 +84,5 @@ func (f *MakeStringInputStream) Call(s *slip.Scope, args slip.List, depth int) s
 		}
 		str = slip.String(ra[start:end])
 	}
-	return &slip.InputStream{Reader: strings.NewReader(string(str))}
+	return slip.NewStringStream([]byte(str))
 }

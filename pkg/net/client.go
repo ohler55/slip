@@ -157,6 +157,8 @@ func wrapContent(arg slip.Object) (rc io.ReadCloser, ct string) {
 		ct = "application/json"
 	case *slip.InputStream:
 		rc = bodyWrapReader(ta)
+	case io.Reader:
+		rc = bodyWrapReader(ta)
 	default:
 		slip.PanicType("content", arg, "string", "bag", "input-stream")
 	}

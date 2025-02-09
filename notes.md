@@ -3,24 +3,7 @@
 - **multipass** or utm for linux
 
 - next
- + string-stream
-
- - update string output stream
-  - maybe update builder to include seek  and readat
-
  - multi-stream
-  - [ ] OPEN-STREAM-P
-  - [ ] STREAM-ELEMENT-TYPE - always return octet
-  - [ ] STREAM-EXTERNAL-FORMAT - :default
-  - [ ] FRESH-LINE
-   - same as terpri unless a file or string then check last byte
-   - use interface for last byte written LastBytePeeker { LastByte() }
-
-  - update (maybe with interfaces)
-   - file-length
-    - use HasLength interface
-   - file-posiion
-    - use HasPosition interface
 
   - [ ] BROADCAST-STREAM (in cl)
    - define at top level or cl?
@@ -56,11 +39,11 @@
   - [ ] TWO-WAY-STREAM-INPUT-STREAM
   - [ ] TWO-WAY-STREAM-OUTPUT-STREAM
 
-  - [ ] OPEN-STREAM-P
-  - [ ] STREAM-ELEMENT-TYPE
-  - [ ] STREAM-EXTERNAL-FORMAT
-  - [ ] INTERACTIVE-STREAM-P
-  - [ ] FRESH-LINE
+  - [x] OPEN-STREAM-P
+  - [x] STREAM-ELEMENT-TYPE
+  - [x] STREAM-EXTERNAL-FORMAT
+  - [ ] INTERACTIVE-STREAM-P - maybe if stream is *standard-input* ??
+  - [x] FRESH-LINE
   - [ ] WITH-STANDARD-IO-SYNTAX
 
  - case

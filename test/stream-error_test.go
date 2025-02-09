@@ -33,7 +33,7 @@ func TestStreamErrorMake(t *testing.T) {
 	tf.Test(t)
 	se, ok := tf.Result.(slip.StreamError)
 	tt.Equal(t, ok, true)
-	tt.Equal(t, "#<OUTPUT-STREAM>", slip.ObjectString(se.Stream()))
+	tt.Equal(t, "#<STRING-STREAM>", slip.ObjectString(se.Stream()))
 	tt.Equal(t, "/^#<STREAM-ERROR [0-9a-f]+>$/", se.Error())
 
 	tf = sliptest.Function{
@@ -43,7 +43,7 @@ func TestStreamErrorMake(t *testing.T) {
 	tf.Test(t)
 	se, ok = tf.Result.(slip.StreamError)
 	tt.Equal(t, ok, true)
-	tt.Equal(t, "#<OUTPUT-STREAM>", slip.ObjectString(se.Stream()))
+	tt.Equal(t, "#<STRING-STREAM>", slip.ObjectString(se.Stream()))
 	tt.Equal(t, "raise", se.Error())
 }
 

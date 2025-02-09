@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"strings"
-
 	"github.com/ohler55/slip"
 )
 
@@ -43,16 +41,9 @@ type GetOutputStreamString struct {
 // Call the function with the arguments provided.
 func (f *GetOutputStreamString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	os, ok := args[0].(*slip.OutputStream)
+	os, ok := args[0].(*slip.StringStream)
 	if !ok {
 		slip.PanicType("stream", args[0], "string-output-stream")
 	}
-	var sb *strings.Builder
-	if sb, ok = os.Writer.(*strings.Builder); !ok {
-		slip.PanicType("stream", args[0], "string-output-stream")
-	}
-	str := sb.String()
-	sb.Reset()
-
-	return slip.String(str)
+	return slip.String(os.Content())
 }

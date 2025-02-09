@@ -59,7 +59,6 @@
  * [ ] FLOAT-RADIX
  * [ ] FLOAT-SIGN
  * [ ] FORMATTER
- * [ ] FRESH-LINE
  * [ ] GCD
  * [ ] GENTEMP
  * [ ] GET-DECODED-TIME
@@ -92,7 +91,6 @@
  * [ ] MULTIPLE-VALUE-SETQ
  * [ ] MULTIPLE-VALUES-LIMIT
  * [ ] NUMERATOR
- * [ ] OPEN-STREAM-P
  * [ ] OTHERWISE
  * [ ] PACKAGE-SHADOWING-SYMBOLS
  * [ ] PHASE
@@ -119,8 +117,6 @@
  * [ ] SIMPLE-BIT-VECTOR-P
  * [ ] SINH
  * [ ] SPECIAL-OPERATOR-P
- * [ ] STREAM-ELEMENT-TYPE
- * [ ] STREAM-EXTERNAL-FORMAT
  * [ ] STRUCTURE
  * [ ] SUBTYPEP
  * [ ] TAGBODY
@@ -404,6 +400,7 @@
  * [x] FMAKUNBOUND
  * [x] FORMAT
  * [x] FOURTH
+ * [x] FRESH-LINE
  * [x] FROUND
  * [x] FTRUNCATE
  * [x] FTYPE
@@ -569,6 +566,7 @@
  * [x] NUNION
  * [x] ODDP
  * [x] OPEN
+ * [x] OPEN-STREAM-P
  * [x] OPTIMIZE
  * [x] OR
  * [x] OUTPUT-STREAM-P
@@ -698,8 +696,10 @@
  * [x] STANDARD-CHAR
  * [x] STANDARD-CHAR-P
  * [x] STREAM
+ * [x] STREAM-ELEMENT-TYPE
  * [x] STREAM-ERROR
  * [x] STREAM-ERROR-STREAM
+ * [x] STREAM-EXTERNAL-FORMAT
  * [x] STREAMP
  * [x] STRING
  * [x] STRING-CAPITALIZE
