@@ -3,7 +3,7 @@
 package cl
 
 import (
-	"os"
+	"io"
 
 	"github.com/ohler55/slip"
 )
@@ -47,9 +47,9 @@ type FilePosition struct {
 // Call the function with the arguments provided.
 func (f *FilePosition) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 2)
-	fs, ok := args[0].(*slip.FileStream)
+	seeker, ok := args[0].(io.Seeker)
 	if !ok {
-		slip.PanicType("stream", args[0], "file-stream")
+		slip.PanicType("stream", args[0], "file-stream", "broadcast-stream", "synonym-stream")
 	}
 	var (
 		offset int64
@@ -63,7 +63,7 @@ func (f *FilePosition) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			slip.PanicType("position", args[1], "fixnum")
 		}
 	}
-	if pos, err := (*os.File)(fs).Seek(offset, whence); err == nil {
+	if pos, err := seeker.Seek(offset, whence); err == nil {
 		result = slip.Fixnum(pos)
 	}
 	return

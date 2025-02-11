@@ -3,10 +3,12 @@
 package cl
 
 import (
-	"os"
-
 	"github.com/ohler55/slip"
 )
+
+type hasFileLength interface {
+	FileLength() slip.Object
+}
 
 func init() {
 	slip.Define(
@@ -39,14 +41,11 @@ type FileLength struct {
 }
 
 // Call the function with the arguments provided.
-func (f *FileLength) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *FileLength) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	fs, ok := args[0].(*slip.FileStream)
+	hfl, ok := args[0].(hasFileLength)
 	if !ok {
-		slip.PanicType("stream", args[0], "file-stream")
+		slip.PanicType("stream", args[0], "file-stream", "broadcast-stream", "synonym-stream")
 	}
-	if fi, err := (*os.File)(fs).Stat(); err == nil {
-		result = slip.Fixnum(fi.Size())
-	}
-	return
+	return hfl.FileLength()
 }

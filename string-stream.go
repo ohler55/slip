@@ -35,7 +35,7 @@ func (obj *StringStream) Append(b []byte) []byte {
 	return append(b, "#<STRING-STREAM>"...)
 }
 
-// Simplify the Object into an combination of the current string and a position.
+// Simplify the Object into string.
 func (obj *StringStream) Simplify() any {
 	return obj.String()
 }

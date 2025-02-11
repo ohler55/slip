@@ -4,16 +4,14 @@
 
 - next
  - multi-stream
-
   - [ ] BROADCAST-STREAM (in cl)
-   - define at top level or cl?
+   - define in cl
    - slice of output streams that are io.Writers, check on make
    - streamp => t
    - output-stream-p => t
    - open-stream-p
     - test for broadcast stream open, not streams
      - maybe open if more than zero streams??
-   - stream-element-type
    - fresh-line
    - input-stream-p => nil
    - close - maybe zero out streams
@@ -38,6 +36,10 @@
   - [ ] MAKE-TWO-WAY-STREAM
   - [ ] TWO-WAY-STREAM-INPUT-STREAM
   - [ ] TWO-WAY-STREAM-OUTPUT-STREAM
+
+  - [ ] MAKE-SYNONYM-STREAM
+  - [ ] SYNONYM-STREAM
+  - [ ] SYNONYM-STREAM-SYMBOL
 
   - [x] OPEN-STREAM-P
   - [x] STREAM-ELEMENT-TYPE

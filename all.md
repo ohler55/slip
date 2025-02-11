@@ -790,6 +790,9 @@
  * [x] WRITE-STRING
  * [x] WRITE-TO-STRING
  * [x] ZEROP
+ - [ ] MAKE-SYNONYM-STREAM
+ - [ ] SYNONYM-STREAM
+ - [ ] SYNONYM-STREAM-SYMBOL
  - [-] &ENVIRONMENT
  - [-] &WHOLE
  - [-] *BREAK-ON-SIGNALS*
@@ -877,7 +880,6 @@
  - [-] MAKE-DISPATCH-MACRO-CHARACTER
  - [-] MAKE-INSTANCES-OBSOLETE
  - [-] MAKE-PATHNAME
- - [-] MAKE-SYNONYM-STREAM
  - [-] MEMBER-IF-NOT
  - [-] MUFFLE-WARNING
  - [-] NO-NEXT-METHOD
@@ -935,8 +937,6 @@
  - [-] SUBSTITUTE-IF-NOT (deprecated)
  - [-] SYMBOL-MACROLET
  - [-] SYMBOL-PLIST
- - [-] SYNONYM-STREAM
- - [-] SYNONYM-STREAM-SYMBOL
  - [-] TAILP - requires address of sublist to be equal, doesn't fit with slices
  - [-] THROW (use panic instead)
  - [-] TRANSLATE-LOGICAL-PATHNAME

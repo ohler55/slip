@@ -86,3 +86,17 @@ func (obj *FileStream) LastByte() byte {
 	}
 	return b[0]
 }
+
+// FileLength return the length of a file.
+func (obj *FileStream) FileLength() (length Object) {
+	if fi, err := (*os.File)(obj).Stat(); err == nil {
+		length = Fixnum(fi.Size())
+	}
+	return
+}
+
+// Seek moves the pos in buf. This is part of the io.Seeker interface.
+func (obj *FileStream) Seek(offset int64, whence int) (n int64, err error) {
+	return (*os.File)(obj).Seek(offset, whence)
+
+}

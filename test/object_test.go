@@ -665,6 +665,9 @@ func TestFileStreamFile(t *testing.T) {
 	_, err = f.WriteString("hello")
 	tt.Nil(t, err)
 	tt.Equal(t, 'o', fs.LastByte())
+	tt.Equal(t, slip.Fixnum(5), fs.FileLength())
+	pos, _ := fs.Seek(0, 1)
+	tt.Equal(t, int64(5), pos)
 }
 
 func TestFileStreamWriteRead(t *testing.T) {
