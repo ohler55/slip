@@ -4,24 +4,9 @@
 
 - next
  - multi-stream
-  - [ ] BROADCAST-STREAM (in cl)
-   - define in cl
-   - slice of output streams that are io.Writers, check on make
-   - streamp => t
-   - output-stream-p => t
-   - open-stream-p
-    - test for broadcast stream open, not streams
-     - maybe open if more than zero streams??
-   - fresh-line
-   - input-stream-p => nil
-   - close - maybe zero out streams
-    - must be io.Closer
-   - file-length
-   - file-posiion
-   - stream-external-format
-
-  - [ ] MAKE-BROADCAST-STREAM
-  - [ ] BROADCAST-STREAM-STREAMS
+  - [x] BROADCAST-STREAM
+  - [x] MAKE-BROADCAST-STREAM
+  - [x] BROADCAST-STREAM-STREAMS
 
   - [ ] CONCATENATED-STREAM
   - [ ] MAKE-CONCATENATED-STREAM

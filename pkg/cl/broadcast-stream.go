@@ -91,8 +91,6 @@ func (obj BroadcastStream) Close() error {
 	if 0 < len(obj) {
 		obj[0] = nil
 	}
-	// TBD what about empty broadcast stream?
-
 	return nil
 }
 
