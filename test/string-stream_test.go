@@ -83,6 +83,29 @@ func TestStringStreamReadRune(t *testing.T) {
 	tt.NotNil(t, err)
 }
 
+func TestStringStreamOpenClose(t *testing.T) {
+	stream := slip.NewStringStream([]byte("a𝄢c"))
+	_ = stream.Close()
+	buf := make([]byte, 4)
+	_, err := stream.Read(buf)
+	tt.NotNil(t, err)
+	_, _, err = stream.ReadRune()
+	tt.NotNil(t, err)
+	_, err = stream.ReadAt(buf, 2)
+	tt.NotNil(t, err)
+
+	_, err = stream.Write(buf)
+	tt.NotNil(t, err)
+	_, err = stream.WriteAt(buf, 2)
+	tt.NotNil(t, err)
+
+	_, err = stream.Seek(1, 2)
+	tt.NotNil(t, err)
+
+	b := stream.LastByte()
+	tt.Equal(t, 0, b)
+}
+
 func TestStringStreamWrite(t *testing.T) {
 	var stream slip.StringStream
 

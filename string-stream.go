@@ -62,6 +62,9 @@ func (obj *StringStream) Eval(s *Scope, depth int) Object {
 
 // Write to the current position in the buf. This is part of the io.Writer interface.
 func (obj *StringStream) Write(b []byte) (int, error) {
+	if obj.pos < 0 {
+		return 0, NewStreamError(obj, "stream closed")
+	}
 	if obj.pos < len(obj.buf) {
 		copy(obj.buf[obj.pos:], b)
 		if len(obj.buf)-obj.pos < len(b) {
@@ -78,6 +81,9 @@ func (obj *StringStream) Write(b []byte) (int, error) {
 // WriteAt to the offset in the buf. The position in the buf is not
 // changed. This is part of the io.WriterAt interface.
 func (obj *StringStream) WriteAt(b []byte, off int64) (int, error) {
+	if obj.pos < 0 {
+		return 0, NewStreamError(obj, "stream closed")
+	}
 	if off < int64(len(obj.buf)) {
 		copy(obj.buf[off:], b)
 		if int64(len(obj.buf))-off < int64(len(b)) {
@@ -89,8 +95,12 @@ func (obj *StringStream) WriteAt(b []byte, off int64) (int, error) {
 	return len(b), nil
 }
 
-// Read from the current position in the buf. This is part of the io.Reader interface.
+// Read from the current position in the buf. This is part of the io.Reader
+// interface.
 func (obj *StringStream) Read(p []byte) (n int, err error) {
+	if obj.pos < 0 {
+		return 0, NewStreamError(obj, "stream closed")
+	}
 	if len(obj.buf) <= obj.pos {
 		if 0 < len(p) {
 			err = io.EOF
@@ -106,6 +116,9 @@ func (obj *StringStream) Read(p []byte) (n int, err error) {
 // ReadAt from the off in the buf and does not advance pos. This is part of
 // the io.ReaderAt interface.
 func (obj *StringStream) ReadAt(p []byte, off int64) (n int, err error) {
+	if obj.pos < 0 {
+		return 0, NewStreamError(obj, "stream closed")
+	}
 	if off <= 0 {
 		off = 0 // maybe non-standard
 	}
@@ -123,6 +136,9 @@ func (obj *StringStream) ReadAt(p []byte, off int64) (n int, err error) {
 // ReadRune resd the next run in buf from the current position. This is part of
 // the io.RuneReader interface.
 func (obj *StringStream) ReadRune() (r rune, size int, err error) {
+	if obj.pos < 0 {
+		return 0, 0, NewStreamError(obj, "stream closed")
+	}
 	if len(obj.buf) <= obj.pos {
 		err = io.EOF
 		return
@@ -135,6 +151,9 @@ func (obj *StringStream) ReadRune() (r rune, size int, err error) {
 
 // Seek moves the pos in buf. This is part of the io.Seeker interface.
 func (obj *StringStream) Seek(offset int64, whence int) (n int64, err error) {
+	if obj.pos < 0 {
+		return 0, NewStreamError(obj, "stream closed")
+	}
 	switch whence {
 	case 0:
 		// leave as it, from start
@@ -153,13 +172,23 @@ func (obj *StringStream) Seek(offset int64, whence int) (n int64, err error) {
 	return
 }
 
+// Close the stream but not the input or output streams.
+func (obj *StringStream) Close() error {
+	obj.pos = -1
+
+	return nil
+}
+
 // IsOpen return true if the stream is open or false if not.
 func (obj *StringStream) IsOpen() bool {
-	return true
+	return 0 <= obj.pos
 }
 
 // LastByte returns the last byte written or zero if nothing has been written.
 func (obj *StringStream) LastByte() (b byte) {
+	if obj.pos < 0 {
+		return 0
+	}
 	if 0 < len(obj.buf) && 0 < obj.pos {
 		b = obj.buf[obj.pos-1]
 	}

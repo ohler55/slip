@@ -3,19 +3,25 @@
 - **multipass** or utm for linux
 
 - next
+ - read abc should return a symbol
+  - don't take trailing 0
+  - don't stutter
+ - string-stream
+  - add Close to string-stream
+
  - multi-stream
   - [x] BROADCAST-STREAM
   - [x] MAKE-BROADCAST-STREAM
   - [x] BROADCAST-STREAM-STREAMS
 
-  - [ ] CONCATENATED-STREAM
-  - [ ] MAKE-CONCATENATED-STREAM
-  - [ ] CONCATENATED-STREAM-STREAMS
-
-  - [ ] ECHO-STREAM
+  - [x] ECHO-STREAM
   - [ ] MAKE-ECHO-STREAM
   - [ ] ECHO-STREAM-INPUT-STREAM
   - [ ] ECHO-STREAM-OUTPUT-STREAM
+
+  - [ ] CONCATENATED-STREAM
+  - [ ] MAKE-CONCATENATED-STREAM
+  - [ ] CONCATENATED-STREAM-STREAMS
 
   - [ ] TWO-WAY-STREAM
   - [ ] MAKE-TWO-WAY-STREAM

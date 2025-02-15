@@ -12,14 +12,15 @@ import (
 const BroadcastStreamSymbol = slip.Symbol("broadcast-stream")
 
 func init() {
-	slip.DefConstant(BroadcastStreamSymbol, BroadcastStreamSymbol, `A _broadcast-stream_ stream backed by character vector.`)
+	slip.DefConstant(BroadcastStreamSymbol, BroadcastStreamSymbol,
+		`A _broadcast-stream_ stream that forward output to component streams.`)
 }
 
 // BroadcastStream is slice of output streams or streams that are also
 // io.Writers.
 type BroadcastStream []slip.Stream
 
-// Broadcast representation of the Object.
+// String representation of the Object.
 func (obj BroadcastStream) String() string {
 	return string(obj.Append([]byte{}))
 }

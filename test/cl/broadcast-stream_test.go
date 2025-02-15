@@ -78,8 +78,6 @@ func TestBroadcastStreamOpenClose(t *testing.T) {
 	tt.Equal(t, false, bs.IsOpen())
 }
 
-// TBD FileLength
-
 func TestBroadcastStreamFileLength(t *testing.T) {
 	filename := "testdata/sample1"
 	defer func() { _ = os.Remove(filename) }()
