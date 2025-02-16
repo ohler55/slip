@@ -19,7 +19,7 @@ func init() {
 				{
 					Name: "broadcast-stream",
 					Type: "broadcast-stream",
-					Text: "The broadcast-stream to return the component strems of.",
+					Text: "The broadcast-stream to return the component streams of.",
 				},
 			},
 			Return: "list",

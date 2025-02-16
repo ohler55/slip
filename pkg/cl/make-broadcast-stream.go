@@ -25,10 +25,10 @@ func init() {
 					Text: "Streams to broadcast to.",
 				},
 			},
-			Return: "broadcvast-stream",
+			Return: "broadcast-stream",
 			Text:   `__make-broadcast-stream__ returns a _broadcast-stream_ with the component _streams_.`,
 			Examples: []string{
-				`(make-broadcast-stream "this is the input") => #<INPUT-STREAM>`,
+				`(make-broadcast-stream (make-string-output-stream)) => #<BROADCAST-STREAM>`,
 			},
 		}, &slip.CLPkg)
 }
