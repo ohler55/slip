@@ -38,7 +38,7 @@ func (obj *EchoStream) Append(b []byte) []byte {
 	return append(b, "#<ECHO-STREAM>"...)
 }
 
-// Simplify the Object into an combination of the current echo and a position.
+// Simplify the Object into a string.
 func (obj *EchoStream) Simplify() any {
 	return obj.String()
 }
