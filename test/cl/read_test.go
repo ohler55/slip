@@ -16,10 +16,34 @@ func (w badReader) Read([]byte) (int, error) {
 	return 0, fmt.Errorf("oops")
 }
 
+type badSeeker struct {
+	slip.StringStream
+	whence int
+}
+
+func (bs badSeeker) Seek(offset int64, whence int) (int64, error) {
+	if whence == bs.whence {
+		return 0, fmt.Errorf("oops")
+	}
+	return 0, nil
+}
+
 func TestReadStream(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(read (make-string-input-stream " 123 "))`,
 		Expect: `123`,
+	}).Test(t)
+}
+
+func TestReadStreamMore(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(read (make-string-input-stream "123"))`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((ss (make-string-input-stream "123 456")))
+                  (list (read ss) (read ss)))`,
+		Expect: `(123 456)`,
 	}).Test(t)
 }
 
@@ -58,9 +82,42 @@ func TestReadEmpty(t *testing.T) {
 	}).Test(t)
 }
 
+func TestReadNotObject(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), &slip.InputStream{Reader: slip.NewStringStream([]byte("###"))})
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(read in)`,
+		PanicType: slip.ParseErrorSymbol,
+	}).Test(t)
+}
+
 func TestReadError(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("in"), &slip.InputStream{Reader: badReader(0)})
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(read in)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestReadSeekError0(t *testing.T) {
+	scope := slip.NewScope()
+	bs := badSeeker{whence: 0}
+	_, _ = bs.Write([]byte{'x'})
+	_, _ = bs.StringStream.Seek(0, 0)
+	scope.Let(slip.Symbol("in"), &bs)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(read in)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestReadSeekError1(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), &badSeeker{whence: 1})
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(read in)`,

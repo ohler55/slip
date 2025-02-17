@@ -3,6 +3,7 @@
 package cl
 
 import (
+	"errors"
 	"io"
 
 	"github.com/ohler55/slip"
@@ -83,12 +84,53 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 			result = eofv
 		}
 	}()
-	code, _ := slip.ReadStream(r, true)
-	if 0 < len(code) {
-		return code[0]
+	if seeker, ok := r.(io.Seeker); ok {
+		start, err := seeker.Seek(0, io.SeekCurrent)
+		if err != nil {
+			panic(err)
+		}
+		code, pos := slip.ReadStream(r, true)
+		if 0 < len(code) {
+			if _, err = seeker.Seek(start+int64(pos), io.SeekStart); err != nil {
+				panic(err)
+			}
+			return code[0]
+		}
+	} else {
+		var (
+			code slip.Code
+			buf  []byte
+		)
+		b := []byte{0}
+		for {
+			if n, err := r.Read(b); err != nil || n != 1 {
+				if err != nil && !errors.Is(err, io.EOF) {
+					panic(err)
+				}
+				break
+			}
+			buf = append(buf, b[0])
+			code = readOne(buf)
+		}
+		if 0 < len(code) {
+			return code[0]
+		}
 	}
 	if eofp {
 		slip.PanicStream(r.(slip.Stream), "end of file or stream")
 	}
 	return eofv
+}
+
+func readOne(buf []byte) (code slip.Code) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			if _, ok := rec.(*slip.PartialPanic); !ok {
+				panic(rec)
+			}
+		}
+	}()
+	code, _ = slip.ReadOne(buf)
+
+	return
 }

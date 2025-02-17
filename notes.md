@@ -3,11 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - (read s) needs to stop after reading one object
-  - how to deal with that in concatenated and in string
-  - maybe put code.go read stream in single byte mode
-  - or if seeker then allow backup
-  - or handle in read by reading a byte at a time and calling code read like repl
 
  - multi-stream
   - [x] BROADCAST-STREAM
