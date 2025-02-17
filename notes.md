@@ -3,9 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - need indicator of closed for broadcast and concatenated streams
-  - add on extra stream or nil at start
-
  - (read s) needs to stop after reading one object
   - how to deal with that in concatenated and in string
   - maybe put code.go read stream in single byte mode

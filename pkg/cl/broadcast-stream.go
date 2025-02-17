@@ -20,6 +20,22 @@ func init() {
 // io.Writers.
 type BroadcastStream []slip.Stream
 
+// NewBroadcastStream creates a new broadcast-stream.
+func NewBroadcastStream(args ...slip.Object) BroadcastStream {
+	bs := make(BroadcastStream, len(args)+1)
+	bs[0] = nil
+	for i, a := range args {
+		if os, ok := a.(slip.Stream); ok {
+			if _, ok = os.(io.Writer); ok {
+				bs[i+1] = os
+				continue
+			}
+		}
+		slip.PanicType("output-stream", a, "output-stream")
+	}
+	return bs
+}
+
 // String representation of the Object.
 func (obj BroadcastStream) String() string {
 	return string(obj.Append([]byte{}))
@@ -68,18 +84,26 @@ func (obj BroadcastStream) Eval(s *slip.Scope, depth int) slip.Object {
 // Write to all the component streams. If any one of the writes fails a panic
 // is called.
 func (obj BroadcastStream) Write(b []byte) (n int, err error) {
+	if obj[0] != nil {
+		return 0, slip.NewStreamError(obj, "closed")
+	}
 	for _, s := range obj {
-		if n, err = s.(io.Writer).Write(b); err != nil {
-			return
+		if s != nil {
+			if n, err = s.(io.Writer).Write(b); err != nil {
+				break
+			}
 		}
 	}
-	return len(b), nil
+	return
 }
 
 // Seek does not move the position in any of the streams. It is used to
 // determine the position of the last component stream only.
 func (obj BroadcastStream) Seek(offset int64, whence int) (n int64, err error) {
-	if 0 < len(obj) {
+	if obj[0] != nil {
+		return 0, slip.NewStreamError(obj, "closed")
+	}
+	if 1 < len(obj) {
 		if seeker, ok := obj[len(obj)-1].(io.Seeker); ok {
 			n, err = seeker.Seek(offset, whence)
 		}
@@ -89,20 +113,21 @@ func (obj BroadcastStream) Seek(offset int64, whence int) (n int64, err error) {
 
 // Close the stream but not the component streams.
 func (obj BroadcastStream) Close() error {
-	if 0 < len(obj) {
-		obj[0] = nil
-	}
+	obj[0] = &slip.StringStream{}
 	return nil
 }
 
 // IsOpen return true if the stream is open or false if not.
 func (obj BroadcastStream) IsOpen() bool {
-	return len(obj) == 0 || obj[0] != nil
+	return obj[0] == nil
 }
 
 // LastByte returns the last byte written or zero if nothing has been written.
 func (obj BroadcastStream) LastByte() (b byte) {
-	if 0 < len(obj) {
+	if obj[0] != nil {
+		return 0
+	}
+	if 1 < len(obj) {
 		if peeker, ok := obj[len(obj)-1].(slip.LastBytePeeker); ok {
 			b = peeker.LastByte()
 		}
@@ -112,7 +137,7 @@ func (obj BroadcastStream) LastByte() (b byte) {
 
 // FileLength return the length of a file.
 func (obj BroadcastStream) FileLength() (length slip.Object) {
-	if 0 < len(obj) {
+	if 1 < len(obj) {
 		if hfl, ok := obj[len(obj)-1].(hasFileLength); ok {
 			length = hfl.FileLength()
 		}

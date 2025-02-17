@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"io"
-
 	"github.com/ohler55/slip"
 )
 
@@ -40,15 +38,5 @@ type MakeBroadcastStream struct {
 
 // Call the function with the arguments provided.
 func (f *MakeBroadcastStream) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	bs := make(BroadcastStream, len(args))
-	for i, a := range args {
-		if stream, ok := a.(slip.Stream); ok {
-			if _, ok = stream.(io.Writer); ok {
-				bs[i] = stream
-				continue
-			}
-		}
-		slip.PanicType("output-stream", a, "stream")
-	}
-	return bs
+	return NewBroadcastStream(args...)
 }

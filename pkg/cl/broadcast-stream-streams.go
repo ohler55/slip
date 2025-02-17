@@ -45,8 +45,8 @@ func (f *BroadcastStreamStreams) Call(s *slip.Scope, args slip.List, depth int) 
 	if !ok {
 		slip.PanicType("broadcast-stream", args[0], "broadcast-stream")
 	}
-	streams := make(slip.List, len(bs))
-	for i, stream := range bs {
+	streams := make(slip.List, len(bs)-1)
+	for i, stream := range bs[1:] {
 		streams[i] = stream
 	}
 	return streams

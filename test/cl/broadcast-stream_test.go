@@ -15,19 +15,19 @@ import (
 func TestBroadcastStreamObject(t *testing.T) {
 	var ss1 slip.StringStream
 	(&sliptest.Object{
-		Target:    cl.BroadcastStream{(*slip.FileStream)(os.Stdout)},
+		Target:    cl.NewBroadcastStream((*slip.FileStream)(os.Stdout)),
 		String:    "#<BROADCAST-STREAM>",
 		Simple:    "#<BROADCAST-STREAM>",
 		Hierarchy: "broadcast-stream.stream.t",
 		Equals: []*sliptest.EqTest{
-			{Other: cl.BroadcastStream{(*slip.FileStream)(os.Stdout)}, Expect: true},
-			{Other: cl.BroadcastStream{&ss1}, Expect: false},
+			{Other: cl.NewBroadcastStream((*slip.FileStream)(os.Stdout)), Expect: true},
+			{Other: cl.NewBroadcastStream(&ss1), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
 		Selfies: []func() slip.Symbol{
-			cl.BroadcastStream{(*slip.FileStream)(os.Stdout)}.StreamType,
+			cl.NewBroadcastStream((*slip.FileStream)(os.Stdout)).StreamType,
 		},
-		Eval: cl.BroadcastStream{(*slip.FileStream)(os.Stdout)},
+		Eval: cl.NewBroadcastStream((*slip.FileStream)(os.Stdout)),
 	}).Test(t)
 }
 
@@ -36,7 +36,7 @@ func TestBroadcastStreamWriteOk(t *testing.T) {
 		ss1 slip.StringStream
 		ss2 slip.StringStream
 	)
-	bs := cl.BroadcastStream{&ss1, &ss2}
+	bs := cl.NewBroadcastStream(&ss1, &ss2)
 	scope := slip.NewScope()
 	scope.Let("bs", bs)
 	(&sliptest.Function{
@@ -55,7 +55,7 @@ func TestBroadcastStreamWriteOk(t *testing.T) {
 func TestBroadcastStreamWriteFail(t *testing.T) {
 	ss1 := slip.OutputStream{Writer: badWriter(1)}
 	var ss2 slip.StringStream
-	bs := cl.BroadcastStream{&ss1, &ss2}
+	bs := cl.NewBroadcastStream(&ss1, &ss2)
 	scope := slip.NewScope()
 	scope.Let("bs", bs)
 	(&sliptest.Function{
@@ -71,11 +71,20 @@ func TestBroadcastStreamOpenClose(t *testing.T) {
 		ss1 slip.StringStream
 		ss2 slip.StringStream
 	)
-	bs := cl.BroadcastStream{&ss1, &ss2}
+	bs := cl.NewBroadcastStream(&ss1, &ss2)
 
 	tt.Equal(t, true, bs.IsOpen())
 	bs.Close()
 	tt.Equal(t, false, bs.IsOpen())
+
+	_, err := bs.Write([]byte("hello"))
+	tt.NotNil(t, err)
+
+	_, err = bs.Seek(0, 0)
+	tt.NotNil(t, err)
+
+	b := bs.LastByte()
+	tt.Equal(t, 0, b)
 }
 
 func TestBroadcastStreamFileLength(t *testing.T) {
@@ -87,7 +96,7 @@ func TestBroadcastStreamFileLength(t *testing.T) {
 	fs := (*slip.FileStream)(f)
 	var ss1 slip.StringStream
 
-	bs := cl.BroadcastStream{&ss1, fs}
+	bs := cl.NewBroadcastStream(&ss1, fs)
 
 	n, err := bs.Write([]byte("hello"))
 	tt.Nil(t, err)
