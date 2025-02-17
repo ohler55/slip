@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestBoradcastStreamStreamsOk(t *testing.T) {
+func TestBroadcastStreamStreamsOk(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let* ((ss1 (make-string-output-stream))
                         (ss2 (make-string-output-stream))

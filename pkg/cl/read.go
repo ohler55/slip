@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/ohler55/slip"
@@ -89,7 +88,7 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 		return code[0]
 	}
 	if eofp {
-		panic(fmt.Sprintf("end of file or stream %s", r))
+		slip.PanicStream(r.(slip.Stream), "end of file or stream")
 	}
 	return eofv
 }

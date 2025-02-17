@@ -54,7 +54,7 @@ func TestReadNotStream(t *testing.T) {
 func TestReadEmpty(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(read (make-string-input-stream "  "))`,
-		PanicType: slip.Symbol("error"),
+		PanicType: slip.StreamErrorSymbol,
 	}).Test(t)
 }
 
@@ -64,6 +64,6 @@ func TestReadError(t *testing.T) {
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(read in)`,
-		PanicType: slip.Symbol("error"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
