@@ -35,7 +35,7 @@ func TestReadStream(t *testing.T) {
 	}).Test(t)
 }
 
-func TestReadStreamMore(t *testing.T) {
+func TestReadStreamMoreSeeker(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(read (make-string-input-stream "123"))`,
 		Expect: `123`,
@@ -43,6 +43,16 @@ func TestReadStreamMore(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((ss (make-string-input-stream "123 456")))
                   (list (read ss) (read ss)))`,
+		Expect: `(123 456)`,
+	}).Test(t)
+}
+
+func TestReadStreamMoreOne(t *testing.T) {
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), &slip.InputStream{Reader: slip.NewStringStream([]byte("123 456"))})
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(list (read in) (read in))`,
 		Expect: `(123 456)`,
 	}).Test(t)
 }

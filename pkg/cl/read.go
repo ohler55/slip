@@ -100,6 +100,8 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 		var (
 			code slip.Code
 			buf  []byte
+			pos  int
+			prev int
 		)
 		b := []byte{0}
 		for {
@@ -110,7 +112,21 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 				break
 			}
 			buf = append(buf, b[0])
-			code = readOne(buf)
+			code, pos = readOne(buf)
+			if 0 < len(code) {
+				if prev == pos {
+					break
+				}
+				// Some types are only complete with a terminating
+				// character. If one of those types has been read then break
+				// out. Other like number ot symbols may or may not be
+				// complete.
+				switch code[0].(type) {
+				case slip.List, slip.String, *slip.Vector, *slip.Array:
+					return code[0]
+				}
+			}
+			prev = pos
 		}
 		if 0 < len(code) {
 			return code[0]
@@ -122,7 +138,7 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 	return eofv
 }
 
-func readOne(buf []byte) (code slip.Code) {
+func readOne(buf []byte) (code slip.Code, pos int) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			if _, ok := rec.(*slip.PartialPanic); !ok {
@@ -130,7 +146,5 @@ func readOne(buf []byte) (code slip.Code) {
 			}
 		}
 	}()
-	code, _ = slip.ReadOne(buf)
-
-	return
+	return slip.ReadOne(buf)
 }
