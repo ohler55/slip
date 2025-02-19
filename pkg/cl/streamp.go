@@ -9,7 +9,7 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := tStreamp{Function: slip.Function{Name: "streamp", Args: args}}
+			f := Streamp{Function: slip.Function{Name: "streamp", Args: args}}
 			f.Self = &f
 			return &f
 		},
@@ -25,20 +25,20 @@ func init() {
 			Return: "nil",
 			Text:   `__streamp__ returns _true_ if _object_ is a stream.`,
 			Examples: []string{
-				`(setq out (make-string-t-stream)`,
-				"(t-stream-p out) => t",
-				"(t-stream-p t) => nil",
+				`(setq out (make-string-inputstream)`,
+				"(streamp out) => t",
+				"(streamp t) => nil",
 			},
 		}, &slip.CLPkg)
 }
 
-// tStreamp represents the t-stream-p function.
-type tStreamp struct {
+// Streamp represents the streamp function.
+type Streamp struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *tStreamp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Streamp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}

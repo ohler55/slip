@@ -23,7 +23,7 @@ func TestBroadcastStreamStreamsOk(t *testing.T) {
 	}).Test(t)
 }
 
-func TestBoradcastStreamStreamsNotBS(t *testing.T) {
+func TestBroadcastStreamStreamsNotBS(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(broadcast-stream-streams t)`,
 		PanicType: slip.TypeErrorSymbol,

@@ -23,26 +23,15 @@
   - [x] MAKE-CONCATENATED-STREAM
   - [x] CONCATENATED-STREAM-STREAMS
 
-  - [ ] MAKE-SYNONYM-STREAM
-  - [ ] SYNONYM-STREAM
-   - maybe restrict to global var symbols (and note the restriction)
-   - or add slip.Reader and slip.Writer
-    - ScopedRead and ScopedWrite
-     - only really used for symbol-stream though so maybe not worth it
-
-   - on read or write, lookup symbol and pass on call to that stream
-   - maybe Close and IsOpen as well
-   - test open-stream-p in sbcl - symbol-stream separate
-   - test close in sbcl - symbol stream is separate from component stream
-   - if sym is t or nil then use standard-output, others panic
-  - [ ] SYNONYM-STREAM-SYMBOL
+  - [x] MAKE-SYNONYM-STREAM
+  - [x] SYNONYM-STREAM
+  - [x] SYNONYM-STREAM-SYMBOL
 
   - [x] OPEN-STREAM-P
   - [x] STREAM-ELEMENT-TYPE
   - [x] STREAM-EXTERNAL-FORMAT
-  - [ ] INTERACTIVE-STREAM-P - maybe if stream is *standard-input* ??
+  - [x] INTERACTIVE-STREAM-P - maybe if stream is *standard-input* ??
   - [x] FRESH-LINE
-  - [ ] WITH-STANDARD-IO-SYNTAX
 
  - case
   - [ ] CTYPECASE
@@ -83,6 +72,7 @@
   - [ ] UNWIND-PROTECT
   - [ ] USER-HOMEDIR-PATHNAME
   - [ ] WILD-PATHNAME-P
+  - [ ] WITH-STANDARD-IO-SYNTAX
   - [ ] Y-OR-N-P
   - [ ] YES-OR-NO-P
 

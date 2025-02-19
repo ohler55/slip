@@ -8,81 +8,81 @@ import (
 	"github.com/ohler55/slip"
 )
 
-// SymbolStreamSymbol is the symbol with a value of "symbol-stream".
-const SymbolStreamSymbol = slip.Symbol("symbol-stream")
+// SynonymStreamSymbol is the symbol with a value of "synonym-stream".
+const SynonymStreamSymbol = slip.Symbol("synonym-stream")
 
 func init() {
-	slip.DefConstant(SymbolStreamSymbol, SymbolStreamSymbol,
-		`A _symbol-stream_ uses the stream bound to a global symbol for reading and writing.`)
+	slip.DefConstant(SynonymStreamSymbol, SynonymStreamSymbol,
+		`A _synonym-stream_ uses the stream bound to a global symbol for reading and writing.`)
 }
 
-// SymbolStream is a stream that looks up the stream bound to a symbol and
+// SynonymStream is a stream that looks up the stream bound to a symbol and
 // uses that for read, write, close, and open state.
-type SymbolStream struct {
+type SynonymStream struct {
 	symbol slip.Symbol
 	closed bool
 }
 
-// NewSymbolStream creates a new SymbolStream.
-func NewSymbolStream(sym slip.Symbol) *SymbolStream {
-	return &SymbolStream{symbol: sym}
+// NewSynonymStream creates a new SynonymStream.
+func NewSynonymStream(sym slip.Symbol) *SynonymStream {
+	return &SynonymStream{symbol: sym}
 }
 
 // String representation of the Object.
-func (obj *SymbolStream) String() string {
+func (obj *SynonymStream) String() string {
 	return string(obj.Append([]byte{}))
 }
 
 // Append a buffer with a representation of the Object.
-func (obj *SymbolStream) Append(b []byte) []byte {
-	b = append(b, "#<SYMBOL-STREAM :symbol "...)
+func (obj *SynonymStream) Append(b []byte) []byte {
+	b = append(b, "#<SYNONYM-STREAM :symbol "...)
 	b = append(b, []byte(obj.symbol)...)
 
 	return append(b, '>')
 }
 
 // Simplify the Object into a string.
-func (obj *SymbolStream) Simplify() any {
+func (obj *SynonymStream) Simplify() any {
 	return obj.String()
 }
 
 // Equal returns true if this Object and the other are equal in value.
-func (obj *SymbolStream) Equal(other slip.Object) (eq bool) {
-	if ss, ok := other.(*SymbolStream); ok && ss.symbol == obj.symbol && ss.closed == obj.closed {
+func (obj *SynonymStream) Equal(other slip.Object) (eq bool) {
+	if ss, ok := other.(*SynonymStream); ok && ss.symbol == obj.symbol && ss.closed == obj.closed {
 		eq = true
 	}
 	return
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
-func (obj *SymbolStream) Hierarchy() []slip.Symbol {
-	return []slip.Symbol{SymbolStreamSymbol, slip.StreamSymbol, slip.TrueSymbol}
+func (obj *SynonymStream) Hierarchy() []slip.Symbol {
+	return []slip.Symbol{SynonymStreamSymbol, slip.StreamSymbol, slip.TrueSymbol}
 }
 
-// StreamType returns 'symbol-stream.
-func (obj *SymbolStream) StreamType() slip.Symbol {
-	return SymbolStreamSymbol
+// StreamType returns 'synonym-stream.
+func (obj *SynonymStream) StreamType() slip.Symbol {
+	return SynonymStreamSymbol
 }
 
 // Eval returns self.
-func (obj *SymbolStream) Eval(s *slip.Scope, depth int) slip.Object {
+func (obj *SynonymStream) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
 }
 
 // Close the stream but not the input or output streams.
-func (obj *SymbolStream) Close() error {
+func (obj *SynonymStream) Close() error {
 	obj.closed = true
 
 	return nil
 }
 
 // IsOpen return true if the stream is open or false if not.
-func (obj *SymbolStream) IsOpen() bool {
+func (obj *SynonymStream) IsOpen() bool {
 	return !obj.closed
 }
 
 // Read from the stream bound to the symbol.
-func (obj *SymbolStream) Read(p []byte) (int, error) {
+func (obj *SynonymStream) Read(p []byte) (int, error) {
 	if obj.closed {
 		slip.PanicStream(obj, "closed")
 	}
@@ -106,7 +106,7 @@ func (obj *SymbolStream) Read(p []byte) (int, error) {
 }
 
 // Write to the stream bound to the symbol.
-func (obj *SymbolStream) Write(b []byte) (n int, err error) {
+func (obj *SynonymStream) Write(b []byte) (n int, err error) {
 	if obj.closed {
 		slip.PanicStream(obj, "closed")
 	}
