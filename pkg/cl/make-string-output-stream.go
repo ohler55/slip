@@ -3,8 +3,6 @@
 package cl
 
 import (
-	"strings"
-
 	"github.com/ohler55/slip"
 )
 
@@ -36,5 +34,5 @@ type MakeStringOutputStream struct {
 func (f *MakeStringOutputStream) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 0, 0)
 
-	return &slip.OutputStream{Writer: &strings.Builder{}}
+	return &slip.StringStream{}
 }

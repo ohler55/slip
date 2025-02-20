@@ -654,6 +654,22 @@ func TestFileStream(t *testing.T) {
 	}).Test(t)
 }
 
+func TestFileStreamFile(t *testing.T) {
+	filename := "testdata/sample"
+	defer func() { _ = os.Remove(filename) }()
+
+	f, err := os.Create(filename)
+	tt.Nil(t, err)
+	fs := (*slip.FileStream)(f)
+	tt.Equal(t, 0, fs.LastByte())
+	_, err = f.WriteString("hello")
+	tt.Nil(t, err)
+	tt.Equal(t, 'o', fs.LastByte())
+	tt.Equal(t, slip.Fixnum(5), fs.FileLength())
+	pos, _ := fs.Seek(0, 1)
+	tt.Equal(t, int64(5), pos)
+}
+
 func TestFileStreamWriteRead(t *testing.T) {
 	pr, pw, err := os.Pipe()
 	tt.Nil(t, err)
@@ -663,7 +679,13 @@ func TestFileStreamWriteRead(t *testing.T) {
 	lw := (*slip.FileStream)(pw)
 
 	_, _ = lw.Write([]byte("hello"))
+
+	// Should not be able to get the last byte.
+	tt.Equal(t, 0, lw.LastByte())
+
+	tt.Equal(t, true, lw.IsOpen())
 	lw.Close()
+	tt.Equal(t, false, lw.IsOpen())
 
 	buf := make([]byte, 10)
 	n, err := lr.Read(buf)
@@ -672,8 +694,50 @@ func TestFileStreamWriteRead(t *testing.T) {
 	tt.Equal(t, "hello", string(buf[:n]))
 }
 
+type rwBuilder struct {
+	strings.Builder
+}
+
+func (b *rwBuilder) Close() error {
+	return nil
+}
+
+func (b *rwBuilder) Seek(offset int64, whence int) (int64, error) {
+	var pos int64
+	switch whence {
+	case 0:
+		pos = offset
+	case 1, 2:
+		pos = int64(len(b.String())) + offset
+	}
+	return pos, nil
+}
+
+func (b *rwBuilder) ReadAt(p []byte, off int64) (n int, err error) {
+	buf := []byte(b.String())
+	if off < 0 || int64(len(buf)) <= off {
+		return -1, fmt.Errorf("out of range")
+	}
+	copy(p, buf[off:])
+	n = len(p)
+	if len(buf[off:]) < n {
+		n = len(buf[off:])
+	}
+	return n, nil
+}
+
+func (b *rwBuilder) Read(p []byte) (n int, err error) {
+	buf := []byte(b.String())
+	copy(p, buf)
+	n = len(p)
+	if len(buf) < n {
+		n = len(buf)
+	}
+	return n, nil
+}
+
 func TestOutputStream(t *testing.T) {
-	var out strings.Builder
+	var out rwBuilder
 	stream := slip.OutputStream{Writer: &out}
 	(&sliptest.Object{
 		Target:    &stream,
@@ -689,6 +753,16 @@ func TestOutputStream(t *testing.T) {
 		},
 		Eval: &stream,
 	}).Test(t)
+
+	tt.Equal(t, 0, stream.LastByte())
+	_, _ = stream.Write([]byte("hello"))
+	tt.Equal(t, 'o', stream.LastByte())
+
+	tt.Equal(t, true, stream.IsOpen())
+	stream.Close()
+	_, err := stream.Write([]byte{'x'})
+	tt.NotNil(t, err)
+	tt.Equal(t, false, stream.IsOpen())
 }
 
 func TestIOStream(t *testing.T) {
@@ -722,11 +796,24 @@ func TestIOStream(t *testing.T) {
 	cnt, err := stream.Write([]byte("test"))
 	tt.Nil(t, err)
 	tt.Equal(t, 4, cnt)
+
 	buf := make([]byte, 4)
 	cnt, err = stream1.Read(buf)
 	tt.Nil(t, err)
 	tt.Equal(t, 4, cnt)
 	tt.Equal(t, "test", string(buf))
+
+	tt.Equal(t, true, stream.IsOpen())
+	_ = stream.Close()
+	tt.Equal(t, false, stream.IsOpen())
+}
+
+func TestIOStream2(t *testing.T) {
+	var out rwBuilder
+	stream := slip.IOStream{RW: &out}
+	_, err := stream.Write([]byte("hello"))
+	tt.Nil(t, err)
+	tt.Equal(t, 'o', stream.LastByte())
 }
 
 func TestFuncInfo(t *testing.T) {

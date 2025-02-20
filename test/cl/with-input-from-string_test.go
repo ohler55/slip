@@ -27,7 +27,7 @@ func TestWithInputFromStringIndex(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let (i)
                   (list (with-input-from-string (s "オーラ \"ピーター\" def" :start 4 :end 13 :index i) (read s)) i))`,
-		Expect: `("ピーター" 4)`,
+		Expect: `("ピーター" 11)`,
 	}).Test(t)
 }
 

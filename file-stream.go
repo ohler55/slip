@@ -71,3 +71,32 @@ func (obj *FileStream) Read(b []byte) (int, error) {
 func (obj *FileStream) Close() error {
 	return (*os.File)(obj).Close()
 }
+
+// IsOpen return true if the stream is open or false if not.
+func (obj *FileStream) IsOpen() bool {
+	_, err := (*os.File)(obj).Write([]byte{})
+	return err == nil
+}
+
+// LastByte returns the last byte written or zero if nothing has been written.
+func (obj *FileStream) LastByte() byte {
+	b := []byte{0}
+	if pos, err := (*os.File)(obj).Seek(0, 1); err == nil && 0 < pos { // relative to current
+		_, _ = (*os.File)(obj).ReadAt(b, pos-1)
+	}
+	return b[0]
+}
+
+// FileLength return the length of a file.
+func (obj *FileStream) FileLength() (length Object) {
+	if fi, err := (*os.File)(obj).Stat(); err == nil {
+		length = Fixnum(fi.Size())
+	}
+	return
+}
+
+// Seek moves the pos in buf. This is part of the io.Seeker interface.
+func (obj *FileStream) Seek(offset int64, whence int) (n int64, err error) {
+	return (*os.File)(obj).Seek(offset, whence)
+
+}

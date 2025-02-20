@@ -3,7 +3,7 @@
 package cl
 
 import (
-	"fmt"
+	"errors"
 	"io"
 
 	"github.com/ohler55/slip"
@@ -84,12 +84,67 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 			result = eofv
 		}
 	}()
-	code, _ := slip.ReadStream(r, true)
-	if 0 < len(code) {
-		return code[0]
+	if seeker, ok := r.(io.Seeker); ok {
+		start, err := seeker.Seek(0, io.SeekCurrent)
+		if err != nil {
+			panic(err)
+		}
+		code, pos := slip.ReadStream(r, true)
+		if 0 < len(code) {
+			if _, err = seeker.Seek(start+int64(pos), io.SeekStart); err != nil {
+				panic(err)
+			}
+			return code[0]
+		}
+	} else {
+		var (
+			code slip.Code
+			buf  []byte
+			pos  int
+			prev int
+		)
+		b := []byte{0}
+		for {
+			if n, err := r.Read(b); err != nil || n != 1 {
+				if err != nil && !errors.Is(err, io.EOF) {
+					panic(err)
+				}
+				break
+			}
+			buf = append(buf, b[0])
+			code, pos = readOne(buf)
+			if 0 < len(code) {
+				if prev == pos {
+					break
+				}
+				// Some types are only complete with a terminating
+				// character. If one of those types has been read then break
+				// out. Other like number ot symbols may or may not be
+				// complete.
+				switch code[0].(type) {
+				case slip.List, slip.String, *slip.Vector, *slip.Array:
+					return code[0]
+				}
+			}
+			prev = pos
+		}
+		if 0 < len(code) {
+			return code[0]
+		}
 	}
 	if eofp {
-		panic(fmt.Sprintf("end of file or stream %s", r))
+		slip.PanicStream(r.(slip.Stream), "end of file or stream")
 	}
 	return eofv
+}
+
+func readOne(buf []byte) (code slip.Code, pos int) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			if _, ok := rec.(*slip.PartialPanic); !ok {
+				panic(rec)
+			}
+		}
+	}()
+	return slip.ReadOne(buf)
 }

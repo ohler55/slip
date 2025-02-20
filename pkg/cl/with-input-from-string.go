@@ -4,7 +4,7 @@ package cl
 
 import (
 	"fmt"
-	"strings"
+	"io"
 
 	"github.com/ohler55/slip"
 )
@@ -92,7 +92,7 @@ func (f *WithInputFromString) Call(s *slip.Scope, args slip.List, depth int) (re
 		place = v
 	}
 
-	reader := strings.NewReader(string(ra[start:end]))
+	reader := slip.NewStringStream([]byte(string(ra[start:end])))
 	s2 := s.NewScope()
 	s2.Let(sym, &slip.InputStream{Reader: reader})
 	args = args[1:]
@@ -100,9 +100,9 @@ func (f *WithInputFromString) Call(s *slip.Scope, args slip.List, depth int) (re
 		result = slip.EvalArg(s2, args, i, d2)
 	}
 	if place != nil {
-		str := string(ra[start:end])
-		used := []rune(str[:reader.Len()])
-		placeExprValue(s, place, slip.Fixnum(start+len(used)), d2)
+		pos, _ := reader.Seek(0, io.SeekCurrent)
+		index := len([]rune(string([]byte(reader.Content())[:pos])))
+		placeExprValue(s, place, slip.Fixnum(start+index+1), d2)
 	}
 	return
 }

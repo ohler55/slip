@@ -118,6 +118,8 @@ func TestInputStreamReadRune(t *testing.T) {
 	tt.Equal(t, 1, size)
 	tt.Nil(t, err)
 
+	tt.Equal(t, true, stream.IsOpen())
+
 	r, size, err = stream.ReadRune()
 	tt.Equal(t, '𝄢', r)
 	tt.Equal(t, 4, size)
@@ -131,7 +133,11 @@ func TestInputStreamReadRune(t *testing.T) {
 	_, _, err = stream.ReadRune()
 	tt.NotNil(t, err)
 
+	// EOF  also means closed.
+	tt.Equal(t, false, stream.IsOpen())
+
 	_ = stream.Close()
+	tt.Equal(t, false, stream.IsOpen())
 }
 
 func TestInputStreamReadRuneHardOk(t *testing.T) {
