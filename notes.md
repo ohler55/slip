@@ -4,40 +4,10 @@
 
 - next
 
- - multi-stream
-  - [x] BROADCAST-STREAM
-  - [x] MAKE-BROADCAST-STREAM
-  - [x] BROADCAST-STREAM-STREAMS
-
-  - [x] ECHO-STREAM
-  - [x] MAKE-ECHO-STREAM
-  - [x] ECHO-STREAM-INPUT-STREAM
-  - [x] ECHO-STREAM-OUTPUT-STREAM
-
-  - [x] TWO-WAY-STREAM
-  - [x] MAKE-TWO-WAY-STREAM
-  - [x] TWO-WAY-STREAM-INPUT-STREAM
-  - [x] TWO-WAY-STREAM-OUTPUT-STREAM
-
-  - [x] CONCATENATED-STREAM
-  - [x] MAKE-CONCATENATED-STREAM
-  - [x] CONCATENATED-STREAM-STREAMS
-
-  - [x] MAKE-SYNONYM-STREAM
-  - [x] SYNONYM-STREAM
-  - [x] SYNONYM-STREAM-SYMBOL
-
-  - [x] OPEN-STREAM-P
-  - [x] STREAM-ELEMENT-TYPE
-  - [x] STREAM-EXTERNAL-FORMAT
-  - [x] INTERACTIVE-STREAM-P - maybe if stream is *standard-input* ??
-  - [x] FRESH-LINE
-
  - case
-  - [ ] CTYPECASE
   - [ ] TYPECASE
   - [ ] ETYPECASE
-  - [ ] OTHERWISE
+  - [ ] OTHERWISE - just a keyword for type t
 
  - misc
   - [ ] CONSTANTLY

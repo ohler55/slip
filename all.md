@@ -28,7 +28,6 @@
  * [ ] CONJUGATE
  * [ ] CONSTANTLY
  * [ ] COSH
- * [ ] CTYPECASE
  * [ ] DECODE-FLOAT
  * [ ] DECODE-UNIVERSAL-TIME
  * [ ] DENOMINATOR
@@ -832,6 +831,7 @@
  - [-] COPY-READTABLE
  - [-] COPY-SYMBOL
  - [-] COUNT-IF-NOT
+ - [-] CTYPECASE
  - [-] DEBUG
  - [-] DEFCLASS (defflavor instead)
  - [-] DEFGENERIC
