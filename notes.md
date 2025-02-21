@@ -4,11 +4,6 @@
 
 - next
 
- - case
-  - [ ] TYPECASE
-  - [ ] ETYPECASE
-  - [ ] OTHERWISE - just a keyword for type t
-
  - misc
   - [ ] CONSTANTLY
   - [ ] DECODE-UNIVERSAL-TIME

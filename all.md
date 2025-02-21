@@ -42,7 +42,6 @@
  * [ ] ENDP
  * [ ] ENOUGH-NAMESTRING
  * [ ] ERROR (function)
- * [ ] ETYPECASE
  * [ ] FDEFINITION
  * [ ] FILL
  * [ ] FLOAT-DIGITS
@@ -78,7 +77,6 @@
  * [ ] MULTIPLE-VALUE-SETQ
  * [ ] MULTIPLE-VALUES-LIMIT
  * [ ] NUMERATOR
- * [ ] OTHERWISE
  * [ ] PACKAGE-SHADOWING-SYMBOLS
  * [ ] PHASE
  * [ ] PPRINT-FILL
@@ -108,7 +106,6 @@
  * [ ] TAGBODY
  * [ ] TANH
  * [ ] TRUENAME
- * [ ] TYPECASE
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
@@ -356,6 +353,7 @@
  * [x] EQL
  * [x] EQUAL
  * [x] EQUALP
+ * [x] ETYPECASE
  * [x] EVAL
  * [x] EVENP
  * [x] EVERY
@@ -564,6 +562,7 @@
  * [x] OPEN-STREAM-P
  * [x] OPTIMIZE
  * [x] OR
+ * [x] OTHERWISE
  * [x] OUTPUT-STREAM-P
  * [x] PACKAGE
  * [x] PACKAGE-ERROR
@@ -752,6 +751,7 @@
  * [x] TYPE-ERROR-DATUM
  * [x] TYPE-ERROR-EXPECTED-TYPE
  * [x] TYPE-OF
+ * [x] TYPECASE
  * [x] TYPEP
  * [x] UNBOUND-SLOT
  * [x] UNBOUND-SLOT-INSTANCE

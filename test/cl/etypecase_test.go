@@ -9,27 +9,27 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestTypecaseSimple(t *testing.T) {
+func TestEtypecaseSimple(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(typecase 3
+		Source: `(etypecase 3
                   (float 'float)
                   (fixnum 'fixnum))`,
 		Expect: "fixnum",
 	}).Test(t)
 }
 
-func TestTypecaseListKey(t *testing.T) {
+func TestEtypecaseListKey(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(typecase '(3 2.5)
+		Source: `(etypecase '(3 2.5)
                   (float 'float)
                   (fixnum 'fixnum))`,
 		Expect: "float",
 	}).Test(t)
 }
 
-func TestTypecaseOtherwise(t *testing.T) {
+func TestEtypecaseOtherwise(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(typecase 'x
+		Source: `(etypecase 'x
                   (float 'float)
                   (fixnum 'fixnum)
                   (otherwise 'other))`,
@@ -37,9 +37,9 @@ func TestTypecaseOtherwise(t *testing.T) {
 	}).Test(t)
 }
 
-func TestTypecaseTrue(t *testing.T) {
+func TestEtypecaseTrue(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(typecase 'x
+		Source: `(etypecase 'x
                   (float 'float)
                   (fixnum 'fixnum)
                   (t 'other))`,
@@ -47,37 +47,37 @@ func TestTypecaseTrue(t *testing.T) {
 	}).Test(t)
 }
 
-func TestTypecaseNull(t *testing.T) {
+func TestEtypecaseNull(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(typecase nil
+		Source: `(etypecase nil
                   (null 'null)
                   (fixnum 'fixnum))`,
 		Expect: "null",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(typecase '(nil)
+		Source: `(etypecase '(nil)
                   (null 'null)
                   (fixnum 'fixnum))`,
 		Expect: "null",
 	}).Test(t)
 }
 
-func TestTypecaseNoMatch(t *testing.T) {
+func TestEtypecaseNoMatch(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(typecase 'x
+		Source: `(etypecase 'x
                   (float 'float)
                   (fixnum 'fixnum))`,
-		Expect: "nil",
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
-func TestTypecaseBadClause(t *testing.T) {
+func TestEtypecaseBadClause(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(typecase 'x t)`,
+		Source:    `(etypecase 'x t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
-		Source:    `(typecase 'x (7 nil))`,
+		Source:    `(etypecase 'x (7 nil))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

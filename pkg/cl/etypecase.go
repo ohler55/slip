@@ -11,13 +11,13 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Typecase{Function: slip.Function{Name: "typecase", Args: args, SkipEval: []bool{false, true}}}
+			f := Etypecase{Function: slip.Function{Name: "etypecase", Args: args, SkipEval: []bool{false, true}}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
 			Kind: slip.MacroSymbol,
-			Name: "typecase",
+			Name: "etypecase",
 			Args: []*slip.DocArg{
 				{
 					Name: "keyform*",
@@ -34,22 +34,22 @@ or a list with a member that is of type-designator.`,
 				},
 			},
 			Return: "object",
-			Text: `__typecase__ evaluates each _keyform_ until a _clause_ _type-designator_
+			Text: `__etypecase__ evaluates each _keyform_ until a _clause_ _type-designator_
 matches one of the _keyform_. A type-designator of __otherwise__ or __t__ matches any key.
 If there are no matches an error is raised.`,
 			Examples: []string{
-				"(typecase 3 (float 'float) (fixnum 'integer)) => integer",
+				"(etypecase 3 (float 'float) (fixnum 'integer)) => integer",
 			},
 		}, &slip.CLPkg)
 }
 
-// Typecase represents the typecase function.
-type Typecase struct {
+// Etypecase represents the etypecase function.
+type Etypecase struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Typecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Etypecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, -1)
 	key := args[0]
 	d2 := depth + 1
@@ -74,26 +74,15 @@ func (f *Typecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		for i := 1; i < len(clause); i++ {
 			result = slip.EvalArg(s, clause, i, d2)
 		}
-		break
+		return
 	}
-	return
-}
-
-func typecaseMatch(sym slip.Symbol, key slip.Object) bool {
-	if strings.EqualFold("null", string(sym)) && key == nil {
-		return true
-	}
-	for _, h := range key.Hierarchy() {
-		if strings.EqualFold(string(h), string(sym)) {
-			return true
+	var wants []string
+	for _, a := range args[1:] {
+		et := a.(slip.List)[0]
+		if sym, ok := et.(slip.Symbol); ok {
+			wants = append(wants, string(sym))
 		}
 	}
-	if list, ok := key.(slip.List); ok {
-		for _, v := range list {
-			if typecaseMatch(sym, v) {
-				return true
-			}
-		}
-	}
-	return false
+	wants = append(wants, "t")
+	panic(slip.NewTypeError("test-key", key, wants...))
 }
