@@ -205,8 +205,8 @@ func (lam *Lambda) BoundCall(s *Scope, depth int) (result Object) {
 // DefLambda parses arguments into a Lambda. Arguments should be a lambda-list
 // followed by an optional documentation strings and then the forms to
 // evaluate when the Lambda is called. The extraVars is a list of variables
-// that will be defined when the lambda is called. This ise used for methods
-// where the scope will be and instance of a flavor/class.
+// that will be defined when the lambda is called. This is used for methods
+// where the scope will be an instance of a flavor/class.
 func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *Lambda) {
 	var ll List
 	switch tl := args[0].(type) {

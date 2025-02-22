@@ -26,7 +26,7 @@
  * [ ] CIS
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
- * [ ] CONSTANTLY
+ * [x] CONSTANTLY
  * [ ] COSH
  * [ ] DECODE-FLOAT
  * [ ] DECODE-UNIVERSAL-TIME

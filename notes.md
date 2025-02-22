@@ -5,7 +5,7 @@
 - next
 
  - misc
-  - [ ] CONSTANTLY
+  - [x] CONSTANTLY
   - [ ] DECODE-UNIVERSAL-TIME
   - [ ] DESTRUCTURING-BIND
   - [ ] DRIBBLE
