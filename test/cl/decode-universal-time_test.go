@@ -30,7 +30,7 @@ func TestDecodeUniversalTimeFixnum(t *testing.T) {
 func TestDecodeUniversalTimeDST(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(decode-universal-time @2024-08-12T13:14:15Z)",
-		Expect: "/15, 14, [0-9]+, 12, 8, 2024, 0, [t|nil], -{0,1}[0-9]+/",
+		Expect: "/15, 14, [0-9]+, 12, 8, 2024, 0, t|nil, -{0,1}[0-9]+/",
 	}).Test(t)
 }
 
