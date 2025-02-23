@@ -6,7 +6,7 @@
 
  - misc
   - [x] CONSTANTLY
-  - [ ] DECODE-UNIVERSAL-TIME
+  - [x] DECODE-UNIVERSAL-TIME
   - [ ] DESTRUCTURING-BIND
   - [ ] DRIBBLE
   - [ ] ELT
@@ -40,6 +40,8 @@
   - [ ] WITH-STANDARD-IO-SYNTAX
   - [ ] Y-OR-N-P
   - [ ] YES-OR-NO-P
+  - gi:time-to-universal-time
+  - gi:universal-time-to-time
 
  - math
   - [ ] ACONS
