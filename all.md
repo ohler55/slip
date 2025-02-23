@@ -26,10 +26,8 @@
  * [ ] CIS
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
- * [x] CONSTANTLY
  * [ ] COSH
  * [ ] DECODE-FLOAT
- * [x] DECODE-UNIVERSAL-TIME
  * [ ] DENOMINATOR
  * [ ] DEPOSIT-FIELD
  * [ ] DIVISION-BY-ZERO
@@ -51,8 +49,6 @@
  * [ ] FORMATTER
  * [ ] GCD
  * [ ] GENTEMP
- * [ ] GET-DECODED-TIME
- * [ ] GET-UNIVERSAL-TIME
  * [ ] IMAGPART
  * [ ] IMPORT
  * [ ] INTEGER-DECODE-FLOAT
@@ -301,6 +297,7 @@
  * [x] CONDITION
  * [x] CONS
  * [x] CONSP
+ * [x] CONSTANTLY
  * [x] CONSTANTP
  * [x] CONTROL-ERROR
  * [x] COPY-ALIST
@@ -314,6 +311,7 @@
  * [x] DECLAIM
  * [x] DECLARATION
  * [x] DECLARE
+ * [x] DECODE-UNIVERSAL-TIME
  * [x] DEFCONSTANT
  * [x] DEFMACRO
  * [x] DEFMETHOD
@@ -398,10 +396,12 @@
  * [x] FUNCTIONP
  * [x] GENSYM
  * [x] GET
+ * [x] GET-DECODED-TIME
  * [x] GET-INTERNAL-REAL-TIME
  * [x] GET-INTERNAL-RUN-TIME
  * [x] GET-OUTPUT-STREAM-STRING
  * [x] GET-PROPERTIES
+ * [x] GET-UNIVERSAL-TIME
  * [x] GETF
  * [x] GETHASH
  * [x] GO

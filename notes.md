@@ -7,8 +7,10 @@
  - misc
   - [x] CONSTANTLY
   - [x] DECODE-UNIVERSAL-TIME
-  - [ ] DESTRUCTURING-BIND
-  - [ ] DRIBBLE
+  - [ ] DRIBBLE (&optional pathname) => nil
+   - wrap standard-input and standard-output with a write to a file
+    - maybe indicate direction like "< " and "> "
+
   - [ ] ELT
   - [ ] ENCODE-UNIVERSAL-TIME
   - [ ] ERROR (function)
@@ -17,8 +19,8 @@
   - [ ] FILL
   - [ ] FORMATTER
   - [ ] GENTEMP
-  - [ ] GET-DECODED-TIME
-  - [ ] GET-UNIVERSAL-TIME
+  - [x] GET-DECODED-TIME
+  - [x] GET-UNIVERSAL-TIME
   - [ ] MAKE-SEQUENCE
   - [ ] MAP-INTO
   - [ ] MISMATCH
@@ -97,6 +99,10 @@
   - [ ] SBIT
   - [ ] SIMPLE-BIT-VECTOR
   - [ ] SIMPLE-BIT-VECTOR-P
+
+ - tough-ones
+  - [ ] DESTRUCTURING-BIND
+
 
 - autocomplete
  - for describe and others>

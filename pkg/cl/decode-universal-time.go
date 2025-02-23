@@ -67,12 +67,16 @@ func (f *DecodeUniversalTime) Call(s *slip.Scope, args slip.List, depth int) sli
 	} else {
 		tm = tm.In(time.Local)
 	}
-	_, zone := tm.Zone()
+	return decodeTime(tm, 1 < len(args))
+}
+
+func decodeTime(tm time.Time, noDST bool) slip.Object {
 	var (
 		dst slip.Object
 		z   slip.Object
 	)
-	if len(args) == 1 && tm.IsDST() {
+	_, zone := tm.Zone()
+	if !noDST && tm.IsDST() {
 		dst = slip.True
 	}
 	if zone%3600 == 0 {
