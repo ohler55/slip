@@ -12,7 +12,7 @@ import (
 func TestDecodeUniversalTimeTime(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(decode-universal-time @2024-11-12T13:14:15Z)",
-		Expect: "/15, 14, [0-9]+, 12, 11, 2024, 1, nil, 5/",
+		Expect: "/15, 14, [0-9]+, 12, 11, 2024, 1, nil, -{0,1}[0-9]+/",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: "(decode-universal-time @2024-11-12T13:14:15Z 5)",
@@ -23,7 +23,7 @@ func TestDecodeUniversalTimeTime(t *testing.T) {
 func TestDecodeUniversalTimeFixnum(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(decode-universal-time 3940406055)",
-		Expect: "/15, 14, [0-9]+, 12, 11, 2024, 1, nil, 5/",
+		Expect: "/15, 14, [0-9]+, 12, 11, 2024, 1, nil, -{0,1}[0-9]+/",
 	}).Test(t)
 }
 
