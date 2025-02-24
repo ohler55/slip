@@ -33,7 +33,7 @@
  * [ ] DIVISION-BY-ZERO
  * [ ] DOCUMENTATION
  * [ ] DPB
- * [ ] DRIBBLE
+ * [x] DRIBBLE
  * [ ] ELT
  * [ ] ENCODE-UNIVERSAL-TIME
  * [ ] END-OF-FILE

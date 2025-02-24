@@ -7,10 +7,7 @@
  - misc
   - [x] CONSTANTLY
   - [x] DECODE-UNIVERSAL-TIME
-  - [ ] DRIBBLE (&optional pathname) => nil
-   - wrap standard-input and standard-output with a write to a file
-    - maybe indicate direction like "< " and "> "
-
+  - [x] DRIBBLE
   - [ ] ELT
   - [ ] ENCODE-UNIVERSAL-TIME
   - [ ] ERROR (function)
