@@ -9,10 +9,14 @@
   - [x] DECODE-UNIVERSAL-TIME
   - [x] DRIBBLE
   - [ ] ELT
-  - [ ] ENCODE-UNIVERSAL-TIME
+   - also a placer
+   - sequences: list, string, vector, octets
+   - setf raises error for strings
+  - [x] ENCODE-UNIVERSAL-TIME
   - [ ] ERROR (function)
-  - [ ] END-OF-FILE
-  - [ ] ENDP
+   - same as format but raise instead
+  - [x] END-OF-FILE
+  - [x] ENDP
   - [ ] FILL
   - [ ] FORMATTER
   - [ ] GENTEMP

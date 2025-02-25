@@ -35,9 +35,9 @@
  * [ ] DPB
  * [x] DRIBBLE
  * [ ] ELT
- * [ ] ENCODE-UNIVERSAL-TIME
- * [ ] END-OF-FILE
- * [ ] ENDP
+ * [x] ENCODE-UNIVERSAL-TIME
+ * [x] END-OF-FILE
+ * [x] ENDP
  * [ ] ENOUGH-NAMESTRING
  * [ ] ERROR (function)
  * [ ] FDEFINITION

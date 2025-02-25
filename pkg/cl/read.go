@@ -133,7 +133,7 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 		}
 	}
 	if eofp {
-		slip.PanicStream(r.(slip.Stream), "end of file or stream")
+		slip.PanicEndOfFile(r.(slip.Stream), "end of file or stream")
 	}
 	return eofv
 }

@@ -88,7 +88,7 @@ func TestReadNotStream(t *testing.T) {
 func TestReadEmpty(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(read (make-string-input-stream "  "))`,
-		PanicType: slip.StreamErrorSymbol,
+		PanicType: slip.EndOfFileSymbol,
 	}).Test(t)
 }
 
