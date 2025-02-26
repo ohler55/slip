@@ -22,6 +22,7 @@
   - [x] GET-DECODED-TIME
   - [x] GET-UNIVERSAL-TIME
   - [ ] MAKE-SEQUENCE
+   - for vector allow (vector type)
   - [ ] MAP-INTO
   - [ ] MISMATCH
   - [ ] MULTIPLE-VALUE-BIND
