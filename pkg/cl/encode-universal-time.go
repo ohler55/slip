@@ -74,8 +74,8 @@ func (f *EncodeUniversalTime) Call(s *slip.Scope, args slip.List, depth int) sli
 
 func getFixnumArg(arg slip.Object, use string) int {
 	num, ok := arg.(slip.Fixnum)
-	if !ok {
-		slip.PanicType(use, arg, "fixnum")
+	if !ok || num < 0 {
+		slip.PanicType(use, arg, "non-negative fixnum")
 	}
 	return int(num)
 }

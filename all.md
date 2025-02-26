@@ -33,15 +33,9 @@
  * [ ] DIVISION-BY-ZERO
  * [ ] DOCUMENTATION
  * [ ] DPB
- * [x] DRIBBLE
  * [ ] ELT
- * [x] ENCODE-UNIVERSAL-TIME
- * [x] END-OF-FILE
- * [x] ENDP
  * [ ] ENOUGH-NAMESTRING
- * [ ] ERROR (function)
  * [ ] FDEFINITION
- * [ ] FILL
  * [ ] FLOAT-DIGITS
  * [ ] FLOAT-PRECISION
  * [ ] FLOAT-RADIX
@@ -340,17 +334,22 @@
  * [x] DOUBLE-FLOAT
  * [x] DOUBLE-FLOAT-EPSILON
  * [x] DOUBLE-FLOAT-NEGATIVE-EPSILON
+ * [x] DRIBBLE
  * [x] DYNAMIC-EXTENT
  * [x] ECASE
  * [x] ECHO-STREAM
  * [x] ECHO-STREAM-INPUT-STREAM
  * [x] ECHO-STREAM-OUTPUT-STREAM
  * [x] EIGHTH
+ * [x] ENCODE-UNIVERSAL-TIME
+ * [x] END-OF-FILE
+ * [x] ENDP
  * [x] ENSURE-DIRECTORIES-EXIST
  * [x] EQ
  * [x] EQL
  * [x] EQUAL
  * [x] EQUALP
+ * [x] ERROR (function)
  * [x] ETYPECASE
  * [x] EVAL
  * [x] EVENP
@@ -371,6 +370,7 @@
  * [x] FILE-STREAM
  * [x] FILE-STRING-LENGTH
  * [x] FILE-WRITE-DATE
+ * [x] FILL
  * [x] FILL-POINTER
  * [x] FIND
  * [x] FIND-ALL-SYMBOLS

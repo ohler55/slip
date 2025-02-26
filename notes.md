@@ -13,12 +13,11 @@
    - sequences: list, string, vector, octets
    - setf raises error for strings
   - [x] ENCODE-UNIVERSAL-TIME
-  - [ ] ERROR (function)
-   - same as format but raise instead
+  - [x] ERROR
   - [x] END-OF-FILE
   - [x] ENDP
-  - [ ] FILL
-  - [ ] FORMATTER
+  - [x] FILL
+  - [ ] FORMATTER - maybe don't implement
   - [ ] GENTEMP
   - [x] GET-DECODED-TIME
   - [x] GET-UNIVERSAL-TIME
