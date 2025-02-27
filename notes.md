@@ -8,10 +8,7 @@
   - [x] CONSTANTLY
   - [x] DECODE-UNIVERSAL-TIME
   - [x] DRIBBLE
-  - [ ] ELT
-   - also a placer
-   - sequences: list, string, vector, octets
-   - setf raises error for strings
+  - [x] ELT
   - [x] ENCODE-UNIVERSAL-TIME
   - [x] ERROR
   - [x] END-OF-FILE
