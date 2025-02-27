@@ -56,7 +56,7 @@
  * [ ] MACRO-FUNCTION
  * [ ] MACROEXPAND
  * [ ] MACROEXPAND-1
- * [ ] MAKE-SEQUENCE
+ * [x] MAKE-SEQUENCE
  * [ ] MAP-INTO
  * [ ] MASK-FIELD
  * [ ] MISMATCH
