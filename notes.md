@@ -14,14 +14,12 @@
   - [x] END-OF-FILE
   - [x] ENDP
   - [x] FILL
-  - [ ] FORMATTER - maybe don't implement
-  - [ ] GENTEMP
   - [x] GET-DECODED-TIME
   - [x] GET-UNIVERSAL-TIME
   - [x] MAKE-SEQUENCE
-  - [ ] MAP-INTO
+  - [x] MAP-INTO
   - [ ] MISMATCH
-  - [ ] MULTIPLE-VALUE-BIND
+  - [x] MULTIPLE-VALUE-BIND
   - [ ] MULTIPLE-VALUE-CALL
   - [ ] MULTIPLE-VALUE-LIST
   - [ ] MULTIPLE-VALUE-PROG1
@@ -41,6 +39,8 @@
   - [ ] YES-OR-NO-P
   - gi:time-to-universal-time
   - gi:universal-time-to-time
+  - [ ] *TERMINAL-IO* (stream that uses *standard-input* and *standard-output* or maybe stdin and stdout always)
+   - use cl.TwoWayStream
 
  - math
   - [ ] ACONS
@@ -99,6 +99,7 @@
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND
+  - [ ] FORMATTER
 
 
 - autocomplete

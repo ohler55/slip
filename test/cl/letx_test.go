@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestLetxEmpty(t *testing.T) {
@@ -50,4 +51,25 @@ func TestLetxBadBindingVar(t *testing.T) {
 func TestLetxBadVar(t *testing.T) {
 	code := slip.ReadString("(let* (t))")
 	tt.Panic(t, func() { _ = code.Eval(slip.NewScope(), nil) })
+}
+
+func TestLetxReturn(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(block nil (let* ((x 1) (y 2)) (return 7) (list x y)))`,
+		Expect: "7",
+	}).Test(t)
+}
+
+func TestLetxGo(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let (z)
+                  (tagbody
+                   (let* ((x 1) (y 2))
+                    (setq z (list x y))
+                    (go skip)
+                    (setq z 0))
+                   skip)
+                  z)`,
+		Expect: "(1 2)",
+	}).Test(t)
 }
