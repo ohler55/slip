@@ -47,7 +47,7 @@ type MultipleValueCall struct {
 }
 
 // Call the function with the arguments provided.
-func (f *MultipleValueCall) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *MultipleValueCall) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, -1)
 	d2 := depth + 1
 	caller := ResolveToCaller(s, args[0], d2)
