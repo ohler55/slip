@@ -4,6 +4,7 @@ package cl
 
 import (
 	"strings"
+	"unicode"
 
 	"github.com/ohler55/slip"
 )
@@ -78,11 +79,11 @@ func equalp(x, y slip.Object) bool {
 	}
 	switch tx := x.(type) {
 	case slip.Character:
-		if y.(slip.Character) == tx {
+		if c, ok := y.(slip.Character); ok && (c == tx || unicode.ToLower(rune(c)) == unicode.ToLower(rune(tx))) {
 			return true
 		}
 	case slip.Number:
-		if same(x, y) != nil {
+		if _, ok := y.(slip.Number); ok && same(x, y) != nil {
 			return true
 		}
 	case slip.String:
