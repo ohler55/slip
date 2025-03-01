@@ -9,7 +9,9 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := MultipleValueBind{Function: slip.Function{Name: "multiple-value-bind", Args: args, SkipEval: []bool{true}}}
+			f := MultipleValueBind{
+				Function: slip.Function{Name: "multiple-value-bind", Args: args, SkipEval: []bool{true}},
+			}
 			f.Self = &f
 			return &f
 		},
