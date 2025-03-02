@@ -30,6 +30,7 @@
   - [ ] SHIFTF
   - [x] SPECIAL-OPERATOR-P
   - [ ] SUBTYPEP
+   - is there a way to used inheritance of flavors/classes ?
   - [ ] TRUENAME
   - [ ] UNWIND-PROTECT
   - [ ] USER-HOMEDIR-PATHNAME
