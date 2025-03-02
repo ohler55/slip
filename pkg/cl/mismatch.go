@@ -101,7 +101,7 @@ type Mismatch struct {
 
 // Call the function with the arguments provided.
 func (f *Mismatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 14)
+	slip.ArgCountCheck(f, args, 2, 16)
 	var (
 		start1  int
 		start2  int
@@ -245,7 +245,7 @@ func seqToList(seq slip.Object, name string, start, end int) (list slip.List) {
 	if end == -1 {
 		end = len(list)
 	} else {
-		if len(list) <= end {
+		if len(list) < end {
 			slip.NewPanic("End of %d is out of bounds for %s with length %d.", end, name, len(list))
 		}
 		if end < start {

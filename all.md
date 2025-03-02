@@ -68,7 +68,7 @@
  * [ ] PPRINT-TABULAR
  * [ ] REALPART
  * [ ] REMOVE-METHOD
- * [ ] REPLACE
+ * [x] REPLACE
  * [ ] ROTATEF
  * [ ] SATISFIES
  * [ ] SBIT
