@@ -80,7 +80,7 @@
  * [ ] SIMPLE-BIT-VECTOR
  * [ ] SIMPLE-BIT-VECTOR-P
  * [ ] SINH
- * [ ] SPECIAL-OPERATOR-P
+ * [x] SPECIAL-OPERATOR-P
  * [ ] SUBTYPEP
  * [ ] TAGBODY
  * [ ] TANH

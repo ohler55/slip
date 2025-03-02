@@ -28,7 +28,7 @@
   - [x] REPLACE
   - [ ] ROTATEF
   - [ ] SHIFTF
-  - [ ] SPECIAL-OPERATOR-P
+  - [x] SPECIAL-OPERATOR-P
   - [ ] SUBTYPEP
   - [ ] TRUENAME
   - [ ] UNWIND-PROTECT

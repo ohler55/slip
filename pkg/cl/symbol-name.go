@@ -24,7 +24,7 @@ func init() {
 					Text: "The symbol to return the name of.",
 				},
 			},
-			Return: "nil",
+			Return: "string|nil",
 			Text:   `__symbol-name__ returns the name of _symbol_.`,
 			Examples: []string{
 				`(symbol-name 'aBc) => "abc"`,
