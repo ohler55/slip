@@ -121,6 +121,16 @@ func (c *Class) Hierarchy() []slip.Symbol {
 	return []slip.Symbol{ClassSymbol, StandardObjectSymbol, slip.TrueSymbol}
 }
 
+// Inherits returns true if this Class inherits from a specified Class.
+func (c *Class) Inherits(sc slip.Class) bool {
+	for _, c2 := range c.inherit {
+		if c2 == sc {
+			return true
+		}
+	}
+	return false
+}
+
 // Eval returns self.
 func (c *Class) Eval(s *slip.Scope, depth int) slip.Object {
 	return c

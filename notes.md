@@ -25,12 +25,11 @@
   - [x] MULTIPLE-VALUE-PROG1
   - [x] MULTIPLE-VALUE-SETQ
   - [x] MULTIPLE-VALUES-LIMIT
-  - [x] REPLACE
+  - [ ] REPLACE
   - [ ] ROTATEF
   - [ ] SHIFTF
   - [x] SPECIAL-OPERATOR-P
-  - [ ] SUBTYPEP
-   - is there a way to used inheritance of flavors/classes ?
+  - [x] SUBTYPEP
   - [ ] TRUENAME
   - [ ] UNWIND-PROTECT
   - [ ] USER-HOMEDIR-PATHNAME

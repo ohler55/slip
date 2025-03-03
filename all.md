@@ -81,7 +81,7 @@
  * [ ] SIMPLE-BIT-VECTOR-P
  * [ ] SINH
  * [x] SPECIAL-OPERATOR-P
- * [ ] SUBTYPEP
+ * [x] SUBTYPEP
  * [ ] TAGBODY
  * [ ] TANH
  * [ ] TRUENAME

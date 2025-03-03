@@ -27,6 +27,9 @@ type Class interface {
 
 	// MakeInstance creates a new instance but does not call the :init method.
 	MakeInstance() Instance
+
+	// Inherits returns true if this Class inherits from a specified Class.
+	Inherits(c Class) bool
 }
 
 // Find finds the named class.

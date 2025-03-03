@@ -197,3 +197,9 @@ func TestConditionMessageDocs(t *testing.T) {
 	_ = slip.ReadString(`(describe-method (find-class 'condition) :message out)`).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":message"))
 }
+
+func TestClassInherits(t *testing.T) {
+	c := slip.FindClass("fixnum")
+	tt.Equal(t, true, c.Inherits(slip.FindClass("integer")))
+	tt.Equal(t, false, c.Inherits(slip.FindClass("float")))
+}

@@ -150,6 +150,14 @@ var (
 		docs:    "built-in symbol class",
 		inherit: []*Class{&vectorClass},
 	}
+	octetsClass = Class{
+		name:      "octets",
+		final:     true,
+		noMake:    true,
+		docs:      "built-in octets class",
+		inherit:   []*Class{&vectorClass},
+		prototype: slip.Octets{'x'},
+	}
 	complexClass = Class{
 		name:      "complex",
 		final:     true,
@@ -429,6 +437,7 @@ func init() {
 		&arrayClass,
 		&vectorClass,
 		&stringClass,
+		&octetsClass,
 		&complexClass,
 		&characterClass,
 		&timeClass,

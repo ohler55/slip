@@ -181,6 +181,11 @@ func TestFlavorReceive(t *testing.T) {
 	scope := slip.NewScope()
 	_ = code.Eval(scope, nil)
 
+	blueberry := scope.Get("blueberry").(slip.Class)
+	vanilla := scope.Get("vanilla-flavor").(slip.Class)
+	tt.Equal(t, true, blueberry.Inherits(vanilla))
+	tt.Equal(t, false, blueberry.Inherits(slip.FindClass("fixnum")))
+
 	result := slip.ReadString("(send blueberry :name)").Eval(scope, nil)
 	tt.Equal(t, slip.String("blueberry"), result)
 
@@ -263,5 +268,4 @@ func TestFlavorReceive(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :describe t)").Eval(scope, nil) })
 	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :not-a-method)").Eval(scope, nil) })
 	tt.Panic(t, func() { _ = slip.ReadString(`(send blueberry :document 'x)`).Eval(scope, nil) })
-
 }
