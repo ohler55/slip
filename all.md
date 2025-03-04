@@ -68,7 +68,6 @@
  * [ ] PPRINT-TABULAR
  * [ ] REALPART
  * [ ] REMOVE-METHOD
- * [x] REPLACE
  * [ ] ROTATEF
  * [ ] SATISFIES
  * [ ] SBIT
@@ -80,17 +79,12 @@
  * [ ] SIMPLE-BIT-VECTOR
  * [ ] SIMPLE-BIT-VECTOR-P
  * [ ] SINH
- * [x] SPECIAL-OPERATOR-P
- * [x] SUBTYPEP
- * [ ] TAGBODY
  * [ ] TANH
  * [ ] TRUENAME
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
  * [ ] USE-VALUE
- * [ ] USER-HOMEDIR-PATHNAME
- * [ ] WILD-PATHNAME-P
  * [ ] WITH-HASH-TABLE-ITERATOR
  * [ ] WITH-PACKAGE-ITERATOR
  * [ ] WITH-STANDARD-IO-SYNTAX
@@ -632,6 +626,7 @@
  * [x] REMPROP
  * [x] RENAME-FILE
  * [x] RENAME-PACKAGE
+ * [x] REPLACE
  * [x] REQUIRE
  * [x] REST
  * [x] RETURN
@@ -684,6 +679,7 @@
  * [x] SOME
  * [x] SORT
  * [x] SPECIAL
+ * [x] SPECIAL-OPERATOR-P
  * [x] SQRT
  * [x] STABLE-SORT
  * [x] STANDARD-CHAR
@@ -722,6 +718,7 @@
  * [x] SUBST-IF
  * [x] SUBSTITUTE
  * [x] SUBSTITUTE-IF
+ * [x] SUBTYPEP
  * [x] SVREF
  * [x] SXHASH
  * [x] SYMBOL
@@ -733,6 +730,7 @@
  * [x] SYNONYM-STREAM
  * [x] SYNONYM-STREAM-SYMBOL
  * [x] T
+ * [x] TAGBODY
  * [x] TAN
  * [x] TENTH
  * [x] TERPRI
@@ -766,6 +764,7 @@
  * [x] UPDATE-INSTANCE-FOR-DIFFERENT-CLASS
  * [x] UPPER-CASE-P
  * [x] USE-PACKAGE
+ * [x] USER-HOMEDIR-PATHNAME
  * [x] VALUES
  * [x] VALUES-LIST
  * [x] VARIABLE
@@ -777,6 +776,7 @@
  * [x] WARN
  * [x] WARNING
  * [x] WHEN
+ * [x] WILD-PATHNAME-P
  * [x] WITH-INPUT-FROM-STRING
  * [x] WITH-OPEN-FILE
  * [x] WITH-OPEN-STREAM
