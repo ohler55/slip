@@ -30,17 +30,23 @@
   - [ ] SHIFTF
   - [x] SPECIAL-OPERATOR-P
   - [x] SUBTYPEP
-  - [ ] TRUENAME
+  - [x] TRUENAME
   - [ ] UNWIND-PROTECT
   - [x] USER-HOMEDIR-PATHNAME
   - [x] WILD-PATHNAME-P
-  - [ ] WITH-STANDARD-IO-SYNTAX
+  - [x] WITH-STANDARD-IO-SYNTAX
   - [ ] Y-OR-N-P
+   - use standard-input
+   - add (Y or N) after format output
   - [ ] YES-OR-NO-P
   - gi:time-to-universal-time
   - gi:universal-time-to-time
   - [ ] *TERMINAL-IO* (stream that uses *standard-input* and *standard-output* or maybe stdin and stdout always)
    - use cl.TwoWayStream
+  - [ ] *READ-BASE*
+  - [ ] *READ-DEFAULT-FLOAT-FORMAT*
+
+ - tab expand words any where (like describe and apropos)
 
  - math
   - [ ] ACONS

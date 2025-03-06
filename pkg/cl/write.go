@@ -98,20 +98,21 @@ type Write struct {
 
 // Call the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	b, w, ss := writeBuf(f, args, true)
+	b, w, ss := writeBuf(f, s, args, true)
 	if _, err := w.Write(b); err != nil {
 		slip.PanicStream(ss, "write failed. %s", err)
 	}
 	return args[0]
 }
 
-func writeBuf(f slip.Object, args slip.List, withStream bool) ([]byte, io.Writer, slip.Stream) {
+func writeBuf(f slip.Object, s *slip.Scope, args slip.List, withStream bool) ([]byte, io.Writer, slip.Stream) {
 	if withStream {
 		slip.ArgCountCheck(f, args, 1, 33)
 	} else {
 		slip.ArgCountCheck(f, args, 1, 31)
 	}
 	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(s)
 
 	obj := args[0]
 	var w io.Writer = slip.StandardOutput.(io.Writer)

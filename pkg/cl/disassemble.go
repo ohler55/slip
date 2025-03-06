@@ -59,9 +59,9 @@ Top:
 		}
 		slip.PanicType("fn", ta, "function designator")
 	case *slip.Lambda:
-		buf = f.disassembleLambda(ta, right, ansi)
+		buf = f.disassembleLambda(s, ta, right, ansi)
 	case *slip.FuncInfo:
-		buf = f.disassembleFunction(ta, right, ansi)
+		buf = f.disassembleFunction(s, ta, right, ansi)
 	default:
 		slip.PanicType("fn", ta, "function designator")
 	}
@@ -70,7 +70,7 @@ Top:
 	return nil
 }
 
-func (f *Disassemble) disassembleFunction(fi *slip.FuncInfo, right int, ansi bool) (b []byte) {
+func (f *Disassemble) disassembleFunction(s *slip.Scope, fi *slip.FuncInfo, right int, ansi bool) (b []byte) {
 	if fi.Kind == slip.Symbol("macro") {
 		b = append(b, "(defmacro "...)
 	} else {
@@ -96,6 +96,7 @@ func (f *Disassemble) disassembleFunction(fi *slip.FuncInfo, right int, ansi boo
 	}
 	fun := fi.Create(nil).(slip.Funky)
 	p := slip.DefaultPrinter()
+	p.ScopedUpdate(s)
 	p.RightMargin = uint(right)
 	p.ANSI = ansi
 	if lam, ok := fun.Caller().(*slip.Lambda); ok {
@@ -112,7 +113,7 @@ func (f *Disassemble) disassembleFunction(fi *slip.FuncInfo, right int, ansi boo
 	return
 }
 
-func (f *Disassemble) disassembleLambda(lam *slip.Lambda, right int, ansi bool) (b []byte) {
+func (f *Disassemble) disassembleLambda(s *slip.Scope, lam *slip.Lambda, right int, ansi bool) (b []byte) {
 	b = append(b, "(lambda ("...)
 	for i, da := range lam.Doc.Args {
 		if 0 < i {
@@ -122,6 +123,7 @@ func (f *Disassemble) disassembleLambda(lam *slip.Lambda, right int, ansi bool) 
 	}
 	b = append(b, ')', '\n')
 	p := slip.DefaultPrinter()
+	p.ScopedUpdate(s)
 	p.RightMargin = uint(right)
 	p.ANSI = ansi
 	for _, form := range lam.Forms {
