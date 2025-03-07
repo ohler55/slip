@@ -35,9 +35,7 @@
   - [x] USER-HOMEDIR-PATHNAME
   - [x] WILD-PATHNAME-P
   - [x] WITH-STANDARD-IO-SYNTAX
-  - [ ] Y-OR-N-P
-   - use standard-input
-   - add (Y or N) after format output
+  - [x] Y-OR-N-P
   - [ ] YES-OR-NO-P
   - gi:time-to-universal-time
   - gi:universal-time-to-time

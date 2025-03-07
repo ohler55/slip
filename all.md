@@ -88,7 +88,7 @@
  * [ ] WITH-HASH-TABLE-ITERATOR
  * [ ] WITH-PACKAGE-ITERATOR
  * [x] WITH-STANDARD-IO-SYNTAX
- * [ ] Y-OR-N-P
+ * [x] Y-OR-N-P
  * [ ] YES-OR-NO-P
  * [+] CLASS
  * [x] &ALLOW-OTHER-KEYS

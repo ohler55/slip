@@ -52,6 +52,7 @@ type editor struct {
 	seqChan    chan *seq
 	log        *os.File
 	pause      atomic.Bool
+	partSeq    *seq
 }
 
 func (ed *editor) initialize() {
@@ -72,6 +73,7 @@ func (ed *editor) initialize() {
 		ed.fd = int(((*os.File)(fs)).Fd())
 		ed.origState = term.MakeRaw(ed.fd)
 	}
+	scope.Set(slip.Symbol("*standard-input*"), &slip.InputStream{Reader: ed})
 	ed.completer.Init()
 	go ed.chanRead()
 
@@ -82,6 +84,28 @@ func (ed *editor) initialize() {
 
 	ed.resizeChan = make(chan os.Signal, 10)
 	signal.Notify(ed.resizeChan, syscall.SIGWINCH)
+}
+
+func (ed *editor) Read(b []byte) (n int, err error) {
+	var sq *seq
+	if ed.partSeq != nil {
+		sq = ed.partSeq
+	} else {
+		sq = <-ed.seqChan
+		_, _ = ed.out.Write(sq.buf[:sq.cnt])
+		if sq.buf[0] == '\r' {
+			ed.setCursor(ed.v0+2, 1)
+		}
+	}
+	n = copy(b, sq.buf[:sq.cnt])
+	if n < sq.cnt {
+		sq.cnt -= n
+		sq.buf = sq.buf[n:]
+		ed.partSeq = sq
+	} else {
+		ed.partSeq = nil
+	}
+	return
 }
 
 func (ed *editor) write(buf []byte) {

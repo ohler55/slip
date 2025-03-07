@@ -42,7 +42,7 @@ type Truename struct {
 }
 
 // Call the function with the arguments provided.
-func (f *Truename) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Truename) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	arg := args[0]
 	var (
