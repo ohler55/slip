@@ -861,10 +861,14 @@ func (r *reader) closeList() {
 }
 
 var (
+	decimalRegex     = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+$`)
 	shortFloatRegex  = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(s[-+]?[0-9]+)?$`)
 	singleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(f[-+]?[0-9]+)?$`)
 	doubleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(d[-+]?[0-9]+)?$`)
 	longFloatRegex   = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(l[-+]?[0-9]+)?$`)
+
+	base10IntegerRegex = regexp.MustCompile(`^[-+]?[0-9]+$`)
+	base10RatioRegex   = regexp.MustCompile(`^[-+]?[0-9]+/[-+]?[0-9]+$`)
 )
 
 // Converts tokens to the correct type and then pushes that value onto the
@@ -948,8 +952,19 @@ func (r *reader) pushToken(src []byte) {
 			return
 		}
 	}
-	switch token[0] {
-	case '@':
+	obj = r.resolveToken(token)
+Push:
+	if 0 < len(r.stack) {
+		r.stack = append(r.stack, obj)
+	} else {
+		r.code = append(r.code, obj)
+	}
+}
+
+func (r *reader) resolveToken(token []byte) Object {
+	buf := bytes.ToLower(token)
+	switch {
+	case buf[0] == '@':
 		// This is an extension to common lisp to make time easier to deal with.
 		s := string(token[1:])
 		for _, layout := range []string{
@@ -959,78 +974,52 @@ func (r *reader) pushToken(src []byte) {
 			"2006-01-02",
 		} {
 			if t, err := time.ParseInLocation(layout, s, time.UTC); err == nil {
-				obj = Time(t)
-
-				goto Push
+				return Time(t)
 			}
 		}
-	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+':
-		/*
-			s := string(token)
-				if i, err := strconv.ParseInt(s, 10, 64); err == nil {
-					obj = Fixnum(i)
-					goto Push
+	case decimalRegex.Match(buf):
+		if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
+			// TBD consider reader default float type
+			return DoubleFloat(f)
+		}
+	case base10IntegerRegex.Match(buf): // TBD change to intRx on reader
+		// TBD allow bignums if parse fails
+		if num, err := strconv.ParseInt(string(buf), 10, 64); err == nil {
+			return Fixnum(num)
+		}
+	case doubleFloatRegex.Match(buf):
+		buf[bytes.IndexByte(buf, 'd')] = 'e'
+		if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
+			return DoubleFloat(f)
+		}
+	case shortFloatRegex.Match(buf):
+		buf[bytes.IndexByte(buf, 's')] = 'e'
+		if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
+			return SingleFloat(f)
+		}
+	case singleFloatRegex.Match(buf):
+		buf[bytes.IndexByte(buf, 'f')] = 'e'
+		if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
+			return SingleFloat(f)
+		}
+	case longFloatRegex.Match(buf):
+		buf[bytes.IndexByte(buf, 'l')] = 'e'
+		cnt := len(buf) - 2 - bytes.Count(buf, []byte{'-'}) - bytes.Count(buf, []byte{'+'})
+		if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.AwayFromZero); err == nil {
+			return (*LongFloat)(f)
+		}
+	case base10RatioRegex.Match(buf): // TBD change to ratioRx on reader
+		i := bytes.IndexByte(buf, '/')
+		if num, err := strconv.ParseInt(string(buf[:i]), 10, 64); err == nil {
+			var den int64
+			if den, err = strconv.ParseInt(string(buf[i+1:]), 10, 64); err == nil {
+				if 0 < den {
+					return NewRatio(num, den)
 				}
-				if f, err := strconv.ParseFloat(s, 64); err == nil {
-					obj = DoubleFloat(f)
-					goto Push
-				}
-		*/
-		// TBD need to include all letters for base 10+
-		// check regex for current base
-		if i := bytes.IndexByte(token, '/'); 0 < i {
-			if num, err := strconv.ParseInt(string(token[:i]), 10, 64); err == nil {
-				var den int64
-				if den, err = strconv.ParseInt(string(token[i+1:]), 10, 64); err == nil {
-					if 0 < den {
-						obj = NewRatio(num, den)
-						goto Push
-					}
-				}
 			}
 		}
-		buf := bytes.ToLower(token)
-		if doubleFloatRegex.Match(buf) {
-			buf[bytes.IndexByte(buf, 'd')] = 'e'
-			if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
-				obj = DoubleFloat(f)
-				goto Push
-			}
-		}
-		if shortFloatRegex.Match(buf) {
-			buf[bytes.IndexByte(buf, 's')] = 'e'
-			if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
-				obj = SingleFloat(f)
-				goto Push
-			}
-		}
-		if singleFloatRegex.Match(buf) {
-			buf[bytes.IndexByte(buf, 'f')] = 'e'
-			if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
-				obj = SingleFloat(f)
-				goto Push
-			}
-		}
-		if longFloatRegex.Match(buf) {
-			buf[bytes.IndexByte(buf, 'l')] = 'e'
-			cnt := len(buf) - 2 - bytes.Count(buf, []byte{'-'}) - bytes.Count(buf, []byte{'+'})
-			if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.AwayFromZero); err == nil {
-
-				obj = (*LongFloat)(f)
-				goto Push
-			}
-		}
-		// TBD default compare baseRegex (change when base changes)
-		//  maybe pick in scoped()
-		// two reegex, one for int and one for ratio
 	}
-	obj = Symbol(token)
-Push:
-	if 0 < len(r.stack) {
-		r.stack = append(r.stack, obj)
-	} else {
-		r.code = append(r.code, obj)
-	}
+	return Symbol(token)
 }
 
 func (r *reader) pushNumber(src []byte) {
