@@ -228,7 +228,7 @@ func fullForm(buf []byte) (full bool) {
 			}
 		}
 	}()
-	_ = slip.Read(buf)
+	_ = slip.Read(buf, &scope)
 
 	return true
 }

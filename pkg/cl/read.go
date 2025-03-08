@@ -72,10 +72,10 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	}
-	return f.wrapRead(r, eofp, eofv)
+	return f.wrapRead(s, r, eofp, eofv)
 }
 
-func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.Object) {
+func (f *Read) wrapRead(s *slip.Scope, r io.Reader, eofp bool, eofv slip.Object) (result slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			if eofp {
@@ -89,7 +89,7 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 		if err != nil {
 			panic(err)
 		}
-		code, pos := slip.ReadStream(r, true)
+		code, pos := slip.ReadStream(r, s, true)
 		if 0 < len(code) {
 			if _, err = seeker.Seek(start+int64(pos), io.SeekStart); err != nil {
 				panic(err)
@@ -112,7 +112,7 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 				break
 			}
 			buf = append(buf, b[0])
-			code, pos = readOne(buf)
+			code, pos = readOne(s, buf)
 			if 0 < len(code) {
 				if prev == pos {
 					break
@@ -138,7 +138,7 @@ func (f *Read) wrapRead(r io.Reader, eofp bool, eofv slip.Object) (result slip.O
 	return eofv
 }
 
-func readOne(buf []byte) (code slip.Code, pos int) {
+func readOne(s *slip.Scope, buf []byte) (code slip.Code, pos int) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			if _, ok := rec.(*slip.PartialPanic); !ok {
@@ -146,5 +146,5 @@ func readOne(buf []byte) (code slip.Code, pos int) {
 			}
 		}
 	}()
-	return slip.ReadOne(buf)
+	return slip.ReadOne(buf, s)
 }

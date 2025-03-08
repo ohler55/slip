@@ -45,5 +45,5 @@ func (f *TwoWayStreamInputStream) Call(s *slip.Scope, args slip.List, depth int)
 	if !ok {
 		slip.PanicType("two-way-stream", args[0], "two-way-stream")
 	}
-	return es.input.(slip.Object)
+	return es.Input.(slip.Object)
 }

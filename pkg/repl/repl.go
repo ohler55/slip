@@ -131,7 +131,7 @@ func SetConfigDir(dir string) {
 	}()
 	if buf, err = os.ReadFile(cfgPath); err == nil {
 		configFilename = "" // Turn off writing while evaluating config file.
-		code := slip.Read(buf)
+		code := slip.Read(buf, &scope)
 		pathname := slip.String(filepath.Join(slip.WorkingDir, cfgPath))
 		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
 		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
@@ -150,7 +150,7 @@ func SetConfigDir(dir string) {
 		pathname := slip.String(filepath.Join(slip.WorkingDir, customPath))
 		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
 		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
-		code := slip.Read(buf)
+		code := slip.Read(buf, &scope)
 		code.Compile()
 		code.Eval(&scope, nil) // TBD look at load-verbose and load-print
 	}
@@ -310,7 +310,7 @@ func process() {
 		replReader.addToHistory()
 	}()
 	buf := replReader.read()
-	code := slip.Read(buf)
+	code := slip.Read(buf, &scope)
 	// Enter was pressed and read was successful so save to history. If a
 	// recoverable panic then that also adds to history in the defer.
 	replReader.addToHistory()

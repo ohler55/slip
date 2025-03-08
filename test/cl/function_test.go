@@ -10,27 +10,32 @@ import (
 )
 
 func TestFunctionSymbol(t *testing.T) {
-	code := slip.ReadString("(function car)")
-	tt.Equal(t, "#<function car>", slip.ObjectString(code.Eval(slip.NewScope(), nil)))
+	scope := slip.NewScope()
+	code := slip.ReadString("(function car)", scope)
+	tt.Equal(t, "#<function car>", slip.ObjectString(code.Eval(scope, nil)))
 }
 
 func TestFunctionLambda(t *testing.T) {
-	code := slip.ReadString("(function (lambda (x) nil))")
-	tt.Equal(t, `/^#<function \(lambda \(x\)\) \{[0-9a-h]+\}>$/`, slip.ObjectString(code.Eval(slip.NewScope(), nil)))
+	scope := slip.NewScope()
+	code := slip.ReadString("(function (lambda (x) nil))", scope)
+	tt.Equal(t, `/^#<function \(lambda \(x\)\) \{[0-9a-h]+\}>$/`, slip.ObjectString(code.Eval(scope, nil)))
 }
 
 func TestFunctionSharpQuote(t *testing.T) {
-	code := slip.ReadString("#'car")
-	tt.Equal(t, "#<function car>", slip.ObjectString(code.Eval(slip.NewScope(), nil)))
+	scope := slip.NewScope()
+	code := slip.ReadString("#'car", scope)
+	tt.Equal(t, "#<function car>", slip.ObjectString(code.Eval(scope, nil)))
 	tt.Equal(t, "#'car", slip.ObjectString(code[0]))
 }
 
 func TestFunctionArgCount(t *testing.T) {
-	code := slip.ReadString("(function)")
-	tt.Panic(t, func() { _ = code.Eval(slip.NewScope(), nil) })
+	scope := slip.NewScope()
+	code := slip.ReadString("(function)", scope)
+	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
 }
 
 func TestFunctionNotFunc(t *testing.T) {
-	code := slip.ReadString("(function t)")
-	tt.Panic(t, func() { _ = code.Eval(slip.NewScope(), nil) })
+	scope := slip.NewScope()
+	code := slip.ReadString("(function t)", scope)
+	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
 }

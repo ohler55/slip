@@ -18,7 +18,7 @@ func TestDefmacroBasic(t *testing.T) {
 		Source: "(defmacro mac (x) `(1+ ,x))",
 		Expect: "mac",
 	}).Test(t)
-	result := slip.ReadString("(mac 3)").Eval(scope, nil)
+	result := slip.ReadString("(mac 3)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(4), result)
 }
 
@@ -26,13 +26,14 @@ func TestDefmacroDup(t *testing.T) {
 	var b bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let("*error-output*", &slip.OutputStream{Writer: &b})
-	_ = slip.ReadString("(defmacro mac2 (x) `(1+ ,x))").Eval(scope, nil)
-	_ = slip.ReadString("(defmacro mac2 (x) `(1+ ,x))").Eval(scope, nil)
+	_ = slip.ReadString("(defmacro mac2 (x) `(1+ ,x))", scope).Eval(scope, nil)
+	_ = slip.ReadString("(defmacro mac2 (x) `(1+ ,x))", scope).Eval(scope, nil)
 	tt.Equal(t, "WARNING: redefining common-lisp-user:mac2 in defmacro\n", b.String())
 }
 
 func TestDefmacroClosure(t *testing.T) {
-	_ = slip.ReadString("(let ((y 3)) (defmacro clom (x) `(+ ,x ,y)))").Eval(slip.NewScope(), nil)
+	scope := slip.NewScope()
+	_ = slip.ReadString("(let ((y 3)) (defmacro clom (x) `(+ ,x ,y)))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: "(clom 2)",
 		Expect: "5",

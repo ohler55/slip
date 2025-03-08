@@ -40,7 +40,7 @@ func TestEighthNotList(t *testing.T) {
 
 func TestEighthSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d e f g h))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d e f g h))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (eighth target) 'x)",
@@ -51,7 +51,7 @@ func TestEighthSetfList(t *testing.T) {
 
 func TestEighthSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d e f g . h))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d e f g . h))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (eighth target) 'x)",

@@ -15,7 +15,8 @@ import (
 
 func TestBagParseWithPath(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-parse bag (coerce "{b:3}" 'octets) "a")`,
@@ -26,8 +27,8 @@ func TestBagParseWithPath(t *testing.T) {
 
 func TestBagParseTimeFormat(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq *bag-time-format* *rfc3339nano*)`).Eval(scope, nil)
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor))`).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadString(`(setq *bag-time-format* *rfc3339nano*)`, scope).Eval(scope, nil)
+	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-parse bag "[\"2022-09-19T01:02:03Z\"]")`,
@@ -38,8 +39,9 @@ func TestBagParseTimeFormat(t *testing.T) {
 
 func TestBagParseSecondPath(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq *bag-time-format* "second")`).Eval(scope, nil)
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadString(`(setq *bag-time-format* "second")`, scope).Eval(scope, nil)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -58,8 +60,9 @@ func TestBagParseSecondPath(t *testing.T) {
 
 func TestBagParseNanoPath(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq *bag-time-format* 'nano)`).Eval(scope, nil)
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadString(`(setq *bag-time-format* 'nano)`, scope).Eval(scope, nil)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -71,8 +74,9 @@ func TestBagParseNanoPath(t *testing.T) {
 
 func TestBagParseDate(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq *bag-time-format* "2006-01-02")`).Eval(scope, nil)
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadString(`(setq *bag-time-format* "2006-01-02")`, scope).Eval(scope, nil)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -91,8 +95,8 @@ func TestBagParseDate(t *testing.T) {
 
 func TestBagParseTimeWrap(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq *bag-time-format* *rfc3339nano* *bag-time-wrap* "tm")`).Eval(scope, nil)
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor))`).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadString(`(setq *bag-time-format* *rfc3339nano* *bag-time-wrap* "tm")`, scope).Eval(scope, nil)
+	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor))`, scope).Eval(scope, nil).(*flavors.Instance)
 
 	(&sliptest.Function{
 		Scope:  scope,

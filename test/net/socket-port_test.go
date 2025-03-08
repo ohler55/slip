@@ -59,12 +59,12 @@ func TestSocketPortHTTP(t *testing.T) {
 		if cs == http.StateActive {
 			u, _ := url.Parse(serv.URL)
 			scope := slip.NewScope()
-			us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
+			us := slip.ReadString("(make-instance 'socket)", scope).Eval(scope, nil).(*flavors.Instance)
 			tc, _ := nc.(*net.TCPConn)
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
-			result := slip.ReadString("(send sock :port)").Eval(scope, nil).(slip.Fixnum)
+			result := slip.ReadString("(send sock :port)", scope).Eval(scope, nil).(slip.Fixnum)
 			port, _ := strconv.Atoi(u.Port())
 			tt.Equal(t, slip.Fixnum(port), result)
 		}

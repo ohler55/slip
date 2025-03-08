@@ -26,7 +26,7 @@ func TestCddaarCons(t *testing.T) {
 
 func TestCddaarSetf(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(((a . (b . c)))))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(((a . (b . c)))))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (cddaar target) 'x)",

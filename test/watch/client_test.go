@@ -327,7 +327,7 @@ func TestClientDocs(t *testing.T) {
 		":changed",
 		":periodic",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method watch-client %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method watch-client %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

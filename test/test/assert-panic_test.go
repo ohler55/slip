@@ -18,8 +18,8 @@ func TestAssertPanicFail(t *testing.T) {
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-panic (lambda () nil) "sample"))
-                                    ))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                    ))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: FAIL
   expect: panic
   actual: did not panic
@@ -37,8 +37,8 @@ func TestAssertPanicMessageFail(t *testing.T) {
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-panic (lambda () nil) 'sample))
-                                    ))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                    ))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: FAIL
   expect: panic
   actual: did not panic
@@ -56,8 +56,8 @@ func TestAssertPanicPass(t *testing.T) {
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-panic '(car 7) 'sample))
-                                    ))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                    ))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: PASS
 `, out.String())
 }
@@ -68,8 +68,8 @@ func TestAssertPanicAnsi(t *testing.T) {
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((assert-panic t))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((assert-panic t))))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 
 	expect := "toot: \x1b[1mFAIL\x1b[m\n" +
 		"  \x1b[0;31m\x1b[mexpect: panic\n" +

@@ -17,8 +17,8 @@ func TestRefuteNilFail(t *testing.T) {
 	scope.Let("*print-ansi*", nil)
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-nil nil "sample"))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((refute-nil nil "sample"))))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: FAIL
   expect: not nil
   actual: nil
@@ -35,8 +35,8 @@ func TestRefuteNilMessageFail(t *testing.T) {
 	scope.Let("*print-ansi*", nil)
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-nil nil 'sample))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((refute-nil nil 'sample))))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: FAIL
   expect: not nil
   actual: nil
@@ -53,8 +53,9 @@ func TestRefuteNilPass(t *testing.T) {
 	scope.Let("*print-ansi*", nil)
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-nil (car '(1)) 'sample))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((refute-nil (car '(1)) 'sample))))`,
+		scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: PASS
 `, out.String())
 }
@@ -65,8 +66,8 @@ func TestRefuteNilAnsi(t *testing.T) {
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-nil nil))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((refute-nil nil))))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 
 	expect := "toot: \x1b[1mFAIL\x1b[m\n" +
 		"  \x1b[0;31m\x1b[mexpect: not nil\n" +

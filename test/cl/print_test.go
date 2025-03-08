@@ -15,7 +15,7 @@ func TestPrintStream(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString("(print 123 out)").Eval(scope, nil)
+	result := slip.ReadString("(print 123 out)", scope).Eval(scope, nil)
 
 	tt.Equal(t, slip.Fixnum(123), result)
 	tt.Equal(t, "\n123 ", out.String())
@@ -26,7 +26,7 @@ func TestPrintStreamString(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString(`(print "abc" out)`).Eval(scope, nil)
+	result := slip.ReadString(`(print "abc" out)`, scope).Eval(scope, nil)
 
 	tt.Equal(t, slip.String("abc"), result)
 	tt.Equal(t, "\n\"abc\" ", out.String())
@@ -39,22 +39,24 @@ func TestPrintStdout(t *testing.T) {
 	orig := slip.StandardOutput
 	defer func() { slip.StandardOutput = orig }()
 	slip.StandardOutput = &slip.OutputStream{Writer: &out}
-	result := slip.ReadString("(print 123)").Eval(scope, nil)
+	result := slip.ReadString("(print 123)", scope).Eval(scope, nil)
 
 	tt.Equal(t, slip.Fixnum(123), result)
 	tt.Equal(t, "\n123 ", out.String())
 }
 
 func TestPrintArgCount(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(print)").Eval(slip.NewScope(), nil) })
+	scope := slip.NewScope()
+	tt.Panic(t, func() { _ = slip.ReadString("(print)", scope).Eval(scope, nil) })
 }
 
 func TestPrintBadStream(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(print 123 t)").Eval(slip.NewScope(), nil) })
+	scope := slip.NewScope()
+	tt.Panic(t, func() { _ = slip.ReadString("(print 123 t)", scope).Eval(scope, nil) })
 }
 
 func TestPrintWriteFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
-	tt.Panic(t, func() { _ = slip.ReadString("(print 123 out)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(print 123 out)", scope).Eval(scope, nil) })
 }

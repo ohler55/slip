@@ -18,7 +18,8 @@ func TestRequireLoadPath(t *testing.T) {
 		Expect: "",
 	}
 	tf.Test(t)
-	result := slip.CompileString("(plug)").Eval(slip.NewScope(), 0)
+	scope := slip.NewScope()
+	result := slip.CompileString("(plug)", scope).Eval(slip.NewScope(), 0)
 	tt.Equal(t, `"Plugged it"`, slip.ObjectString(result))
 }
 
@@ -82,7 +83,8 @@ func TestRequireLoadPathLisp(t *testing.T) {
 		Expect: "",
 	}
 	tf.Test(t)
-	result := slip.CompileString("load-test-me-too").Eval(slip.NewScope(), 0)
+	scope := slip.NewScope()
+	result := slip.CompileString("load-test-me-too", scope).Eval(slip.NewScope(), 0)
 	tt.Equal(t, "5", slip.ObjectString(result))
 }
 
@@ -93,7 +95,8 @@ func TestRequireLisp(t *testing.T) {
 		Expect: "",
 	}
 	tf.Test(t)
-	result := slip.CompileString("load-test-me-too").Eval(slip.NewScope(), 0)
+	scope := slip.NewScope()
+	result := slip.CompileString("load-test-me-too", scope).Eval(slip.NewScope(), 0)
 	tt.Equal(t, "5", slip.ObjectString(result))
 }
 

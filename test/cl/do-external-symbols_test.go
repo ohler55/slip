@@ -16,9 +16,9 @@ func TestDoExternalSymbolsResultSymbol(t *testing.T) {
 	defer func() {
 		slip.RemovePackage(slip.FindPackage("do-x-sym-pack-1"))
 	}()
-	_ = slip.ReadString("(defvar do-x-sym-pack-1 (defpackage 'do-x-sym-pack-1 (:export v1 v2)))").Eval(scope, nil)
-	_ = slip.ReadString("(defvar do-x-sym-pack-1::v2 2)").Eval(scope, nil) // exported
-	_ = slip.ReadString("(defvar do-x-sym-pack-1::v3 3)").Eval(scope, nil) // private
+	_ = slip.ReadString("(defvar do-x-sym-pack-1 (defpackage 'do-x-sym-pack-1 (:export v1 v2)))", scope).Eval(scope, nil)
+	_ = slip.ReadString("(defvar do-x-sym-pack-1::v2 2)", scope).Eval(scope, nil) // exported
+	_ = slip.ReadString("(defvar do-x-sym-pack-1::v3 3)", scope).Eval(scope, nil) // private
 
 	(&sliptest.Function{
 		Source: `(let ((lst ())) (do-external-symbols (s do-x-sym-pack-1 lst) (setq lst (add lst s))))`,
@@ -40,9 +40,9 @@ func TestDoExternalSymbolsResultForm(t *testing.T) {
 	defer func() {
 		slip.RemovePackage(slip.FindPackage("do-x-sym-pack-2"))
 	}()
-	_ = slip.ReadString("(defvar do-x-sym-pack-2 (defpackage 'do-x-sym-pack-2 (:export v1 v2)))").Eval(scope, nil)
-	_ = slip.ReadString("(defvar do-x-sym-pack-2::v2 2)").Eval(scope, nil) // exported
-	_ = slip.ReadString("(defvar do-x-sym-pack-2::v3 3)").Eval(scope, nil) // private
+	_ = slip.ReadString("(defvar do-x-sym-pack-2 (defpackage 'do-x-sym-pack-2 (:export v1 v2)))", scope).Eval(scope, nil)
+	_ = slip.ReadString("(defvar do-x-sym-pack-2::v2 2)", scope).Eval(scope, nil) // exported
+	_ = slip.ReadString("(defvar do-x-sym-pack-2::v3 3)", scope).Eval(scope, nil) // private
 
 	(&sliptest.Function{
 		Source: `(let ((lst ())) (do-external-symbols (s do-x-sym-pack-2 (join " " lst)) (setq lst (add lst s))))`,

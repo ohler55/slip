@@ -54,7 +54,7 @@ func TestCaaarWrongNotList(t *testing.T) {
 
 func TestCaaarSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(((a b) c) d))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(((a b) c) d))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (caaar target) 'x)",
@@ -65,7 +65,7 @@ func TestCaaarSetfList(t *testing.T) {
 
 func TestCaaarSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(((a . b) . c) . d))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(((a . b) . c) . d))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (caaar target) 'x)",
@@ -76,7 +76,7 @@ func TestCaaarSetfCons(t *testing.T) {
 
 func TestCaaarSetfFail(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (caaar target) 'x)",

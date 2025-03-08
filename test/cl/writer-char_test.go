@@ -16,7 +16,7 @@ func TestWriteCharOkay(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString(`(write-char #\A out)`).Eval(scope, nil)
+	result := slip.ReadString(`(write-char #\A out)`, scope).Eval(scope, nil)
 
 	tt.Equal(t, slip.Character('A'), result)
 	tt.Equal(t, "A", out.String())

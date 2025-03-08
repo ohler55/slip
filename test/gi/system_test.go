@@ -36,13 +36,13 @@ func TestSystemFile(t *testing.T) {
 	}).Test(t)
 	_, err := os.Stat("testout/quux/sys-test.lisp")
 	tt.Nil(t, err)
-	result := slip.ReadString("(sys-test-comp)").Eval(scope, nil)
+	result := slip.ReadString("(sys-test-comp)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(3), result)
 
-	result = slip.ReadString("(sys-test)").Eval(scope, nil)
+	result = slip.ReadString("(sys-test)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(7), result)
 
-	result = slip.ReadString("(sub)").Eval(scope, nil)
+	result = slip.ReadString("(sub)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(9), result)
 
 	(&sliptest.Function{
@@ -169,7 +169,8 @@ func TestSystemGitTag(t *testing.T) {
   (+ x 5))
 `, string(content))
 
-	result := slip.ReadString("(sample 3)").Eval(slip.NewScope(), nil)
+	scope := slip.NewScope()
+	result := slip.ReadString("(sample 3)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(8), result)
 
 	(&sliptest.Function{
@@ -232,7 +233,8 @@ func TestSystemGitBranch(t *testing.T) {
   'foobar)
 `, string(content))
 
-	result := slip.ReadString("(sample 3)").Eval(slip.NewScope(), nil)
+	scope := slip.NewScope()
+	result := slip.ReadString("(sample 3)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(11), result)
 
 	(&sliptest.Function{
@@ -381,7 +383,8 @@ func TestSystemCall(t *testing.T) {
 	tt.Equal(t, `(setq aaa "peter@ohler.com")
 `, string(content))
 
-	result := slip.ReadString("aaa").Eval(slip.NewScope(), nil)
+	scope := slip.NewScope()
+	result := slip.ReadString("aaa", scope).Eval(scope, nil)
 	tt.Equal(t, slip.String("peter@ohler.com"), result)
 
 	(&sliptest.Function{
@@ -418,7 +421,7 @@ func TestSystemDescribe(t *testing.T) {
 		":run",
 	} {
 		out.Reset()
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method 'system %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method 'system %s out)`, method), scope).Eval(scope, nil)
 		str := out.String()
 		tt.Equal(t, true, strings.Contains(str, "system"))
 		tt.Equal(t, true, strings.Contains(str, method))
@@ -594,7 +597,7 @@ func TestSystemRequire(t *testing.T) {
 	_, err := os.Stat("testout/quux/testplugin.so")
 	tt.Nil(t, err)
 
-	result := slip.ReadString("(plug)").Eval(scope, nil)
+	result := slip.ReadString("(plug)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.String("Plugged it"), result)
 }
 
@@ -640,7 +643,7 @@ func TestSystemSystem(t *testing.T) {
 `,
 		Expect: `nil`,
 	}).Test(t)
-	result := slip.ReadString("(sister)").Eval(scope, nil)
+	result := slip.ReadString("(sister)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(2), result)
 }
 

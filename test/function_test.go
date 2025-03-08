@@ -79,19 +79,19 @@ func TestFunctionExport(t *testing.T) {
 	xpkg := slip.DefPackage("exported-test", []string{}, "testing")
 	slip.CurrentPackage = xpkg
 	slip.CurrentPackage.Use(&slip.CLPkg)
-	_ = slip.ReadString(`(defun private-func () 'private)`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun private-func () 'private)`, scope).Eval(scope, nil)
 	slip.CurrentPackage = &slip.UserPkg
-	result := slip.ReadString(`(exported-test::private-func)`).Eval(scope, nil)
+	result := slip.ReadString(`(exported-test::private-func)`, scope).Eval(scope, nil)
 	tt.Equal(t, "private", slip.ObjectString(result))
 
-	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`, scope).Eval(scope, nil) })
 
 	xpkg.Export("private-func")
-	result = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil)
+	result = slip.ReadString(`(exported-test:private-func)`, scope).Eval(scope, nil)
 	tt.Equal(t, "private", slip.ObjectString(result))
 
 	xpkg.Unexport("private-func")
-	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`, scope).Eval(scope, nil) })
 }
 
 func TestFunctionExportNested(t *testing.T) {
@@ -100,16 +100,16 @@ func TestFunctionExportNested(t *testing.T) {
 	xpkg := slip.DefPackage("xpack-test", []string{}, "testing")
 	slip.CurrentPackage = xpkg
 	slip.CurrentPackage.Use(&slip.CLPkg)
-	_ = slip.ReadString(`(defun private-child () 3)`).Eval(scope, nil)
-	// _ = slip.ReadString(`(defun private-parent () (private-child))`).Eval(scope, nil)
-	_ = slip.ReadString(`(defun private-parent () (+ (private-child) 4))`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun private-child () 3)`, scope).Eval(scope, nil)
+	// _ = slip.ReadString(`(defun private-parent () (private-child))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(defun private-parent () (+ (private-child) 4))`, scope).Eval(scope, nil)
 
 	slip.CurrentPackage = &slip.UserPkg
-	result := slip.ReadString(`(xpack-test::private-parent)`).Eval(scope, nil)
+	result := slip.ReadString(`(xpack-test::private-parent)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(7), result)
 
 	xpkg.Export("private-parent")
-	result = slip.ReadString(`(xpack-test:private-parent)`).Eval(scope, nil)
+	result = slip.ReadString(`(xpack-test:private-parent)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(7), result)
 }
 
@@ -149,7 +149,7 @@ func TestMustBeString(t *testing.T) {
 
 func TestGetArgsKeyValue(t *testing.T) {
 	scope := slip.NewScope()
-	args := slip.ReadString("(list :one 1 :two 2)").Eval(scope, nil).(slip.List)
+	args := slip.ReadString("(list :one 1 :two 2)", scope).Eval(scope, nil).(slip.List)
 
 	val, has := slip.GetArgsKeyValue(args, slip.Symbol(":one"))
 	tt.Equal(t, true, has)
@@ -159,11 +159,11 @@ func TestGetArgsKeyValue(t *testing.T) {
 	tt.Equal(t, false, has)
 
 	tt.Panic(t, func() {
-		slip.GetArgsKeyValue(slip.ReadString("(list t 1)").Eval(scope, nil).(slip.List), slip.Symbol(":x"))
+		slip.GetArgsKeyValue(slip.ReadString("(list t 1)", scope).Eval(scope, nil).(slip.List), slip.Symbol(":x"))
 	})
 
 	tt.Panic(t, func() {
-		slip.GetArgsKeyValue(slip.ReadString("(list :x 1 :y)").Eval(scope, nil).(slip.List), slip.Symbol(":y"))
+		slip.GetArgsKeyValue(slip.ReadString("(list :x 1 :y)", scope).Eval(scope, nil).(slip.List), slip.Symbol(":y"))
 	})
 }
 

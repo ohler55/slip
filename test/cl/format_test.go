@@ -16,7 +16,7 @@ func TestFormatStream(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString(`(format out "abc")`).Eval(scope, nil)
+	result := slip.ReadString(`(format out "abc")`, scope).Eval(scope, nil)
 
 	tt.Equal(t, nil, result)
 	tt.Equal(t, "abc", out.String())
@@ -293,7 +293,7 @@ func TestFormatMove(t *testing.T) {
 
 func TestFormatCall(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`(defun test-call-dir (s arg colon at) (format s "~A ~A ~A" arg colon at))`)
+	code := slip.ReadString(`(defun test-call-dir (s arg colon at) (format s "~A ~A ~A" arg colon at))`, scope)
 	code.Eval(scope, nil)
 	defer func() { slip.CurrentPackage = &slip.UserPkg }()
 	slip.CurrentPackage.Export("test-call-dir")
@@ -301,7 +301,7 @@ func TestFormatCall(t *testing.T) {
 	slip.CurrentPackage = slip.DefPackage("call-test", []string{}, "testing")
 	slip.CurrentPackage.Use(&slip.UserPkg)
 
-	code = slip.ReadString(`(defun test-pkg-call-dir (s arg colon at) (format s "~A ~A ~A" arg colon at))`)
+	code = slip.ReadString(`(defun test-pkg-call-dir (s arg colon at) (format s "~A ~A ~A" arg colon at))`, scope)
 	code.Eval(scope, nil)
 
 	(&sliptest.Function{
@@ -827,7 +827,7 @@ func TestFormatT(t *testing.T) {
 
 func TestFormatW(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(setq value '(1 2 3 4 5 6 7 8 9 (8 (7 (6 (5 (4 (3 (2 (1))))))))))`).Eval(scope, nil)
+	slip.ReadString(`(setq value '(1 2 3 4 5 6 7 8 9 (8 (7 (6 (5 (4 (3 (2 (1))))))))))`, scope).Eval(scope, nil)
 	origMargin := scope.Get(slip.Symbol("*print-right-margin*"))
 	origPretty := scope.Get(slip.Symbol("*print-pretty*"))
 	origLevel := scope.Get(slip.Symbol("*print-level*"))

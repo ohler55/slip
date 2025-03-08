@@ -10,7 +10,8 @@ import (
 )
 
 func TestSymbolValueNormal(t *testing.T) {
-	_ = slip.ReadString("(defvar symbol-value-test 3)").Eval(slip.NewScope(), nil)
+	scope := slip.NewScope()
+	_ = slip.ReadString("(defvar symbol-value-test 3)", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(symbol-value 'symbol-value-test)`,
 		Expect: "3",

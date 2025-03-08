@@ -51,7 +51,7 @@ func TestCaadrWrongNotList(t *testing.T) {
 
 func TestCaadrSetfOk(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a (b c) d))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a (b c) d))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (caadr target) 'x)",
@@ -62,7 +62,7 @@ func TestCaadrSetfOk(t *testing.T) {
 
 func TestCaadrSetfFail(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (caadr target) 'x)",

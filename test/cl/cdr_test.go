@@ -49,7 +49,7 @@ func TestCdrList(t *testing.T) {
 
 func TestCdrSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a . b))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a . b))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (cdr target) 'x)",
@@ -60,7 +60,7 @@ func TestCdrSetfCons(t *testing.T) {
 
 func TestCdrSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (cdr target) 'x)",
@@ -96,8 +96,8 @@ func TestCdrBadArgCount(t *testing.T) {
 }
 
 func TestCdrValues(t *testing.T) {
-	code := slip.ReadString(`(cdr (values '(a b) 'c))`)
 	scope := slip.NewScope()
+	code := slip.ReadString(`(cdr (values '(a b) 'c))`, scope)
 	tt.Equal(t, slip.List{slip.Symbol("b")}, code.Eval(scope, nil))
 }
 

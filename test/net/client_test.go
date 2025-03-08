@@ -37,7 +37,7 @@ func TestClientGet(t *testing.T) {
 	}
 	scope := slip.NewScope()
 	scope.Let("url", slip.String(su))
-	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`, scope).Eval(scope, nil)
 	tf := &sliptest.Function{
 		Scope:  scope,
 		Source: `(send client :get)`,
@@ -45,15 +45,15 @@ func TestClientGet(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
-	result := slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
+	result := slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
 
 	// Instance.Any should already be set.
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
-	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
+	result = slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
 
 	tf = &sliptest.Function{
@@ -63,14 +63,14 @@ func TestClientGet(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
-	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
+	result = slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
 
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-client-flavor :get out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-client-flavor :get out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":get"))
 
@@ -153,7 +153,7 @@ func TestClientPutString(t *testing.T) {
 	}
 	scope := slip.NewScope()
 	scope.Let("url", slip.String(su))
-	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`, scope).Eval(scope, nil)
 	tf := &sliptest.Function{
 		Scope:  scope,
 		Source: `(send client :put "Putty" "text/plain")`,
@@ -161,10 +161,10 @@ func TestClientPutString(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	result := slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	result := slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
-	result = slip.ReadString(`(read-all (send resp :body))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	result = slip.ReadString(`(read-all (send resp :body))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.String("text/plain-Putty"), result)
 
 	tf = &sliptest.Function{
@@ -174,10 +174,10 @@ func TestClientPutString(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	result = slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
-	result = slip.ReadString(`(read-all (send resp :body))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	result = slip.ReadString(`(read-all (send resp :body))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.String("text/html-Putty"), result)
 
 	(&sliptest.Function{
@@ -217,7 +217,7 @@ func TestClientPutString(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-client-flavor :put out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-client-flavor :put out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":put"))
 }
@@ -255,7 +255,7 @@ func TestClientPostBag(t *testing.T) {
 	}
 	scope := slip.NewScope()
 	scope.Let("url", slip.String(su))
-	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`, scope).Eval(scope, nil)
 	tf := &sliptest.Function{
 		Scope:  scope,
 		Source: `(send client :post (make-instance 'bag-flavor :parse "{x:3}"))`,
@@ -263,10 +263,10 @@ func TestClientPostBag(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	result := slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	result := slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
-	result = slip.ReadString(`(read-all (send resp :body))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	result = slip.ReadString(`(read-all (send resp :body))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.String(`application/json-{"x":3}`), result)
 
 	tf = &sliptest.Function{
@@ -276,8 +276,8 @@ func TestClientPostBag(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	result = slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
 
 	tf = &sliptest.Function{
@@ -287,8 +287,8 @@ func TestClientPostBag(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	result = slip.ReadString(`(send resp :status)`).Eval(scope, nil)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	result = slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
 }
 
@@ -325,7 +325,7 @@ func TestClientPutStream(t *testing.T) {
 	}
 	scope := slip.NewScope()
 	scope.Let("url", slip.String(su))
-	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`, scope).Eval(scope, nil)
 	tf := &sliptest.Function{
 		Scope:  scope,
 		Source: `(send client :put (make-string-input-stream "Posty") nil '(("Content-Type" "text/plain")))`,
@@ -333,9 +333,9 @@ func TestClientPutStream(t *testing.T) {
 	}
 	tf.Test(t)
 	scope.Let("resp", tf.Result)
-	result := slip.ReadString(`(send resp :status)`).Eval(scope, nil)
+	result := slip.ReadString(`(send resp :status)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(200), result)
-	result = slip.ReadString(`(read-all (send resp :body))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send resp :close)`).Eval(scope, nil)
+	result = slip.ReadString(`(read-all (send resp :body))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send resp :close)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.String(`text/plain-Posty`), result)
 }

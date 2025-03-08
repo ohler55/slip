@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/repl/term"
 )
 
@@ -74,6 +75,9 @@ func (ed *editor) initialize() {
 		ed.origState = term.MakeRaw(ed.fd)
 	}
 	scope.Set(slip.Symbol("*standard-input*"), &slip.InputStream{Reader: ed})
+	if termIO, ok := slip.CLPkg.JustGet("*terminal-io*").(*cl.TwoWayStream); ok {
+		termIO.Input = ed
+	}
 	ed.completer.Init()
 	go ed.chanRead()
 

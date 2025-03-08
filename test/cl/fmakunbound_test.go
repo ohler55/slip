@@ -12,13 +12,13 @@ import (
 
 func TestFmakunboundOk(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(defun fmakunbound-test () t)").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(defun fmakunbound-test () t)", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(fmakunbound 'fmakunbound-test)`,
 		Expect: "fmakunbound-test",
 	}).Test(t)
-	result := slip.ReadString("(fboundp 'fmakunbound-test)").Eval(slip.NewScope(), nil)
+	result := slip.ReadString("(fboundp 'fmakunbound-test)", scope).Eval(slip.NewScope(), nil)
 	tt.Equal(t, nil, result)
 }
 

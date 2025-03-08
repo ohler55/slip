@@ -27,15 +27,15 @@ func TestServerBasic(t *testing.T) {
                                      :write-timeout 4.0
                                      :idle-timeout 5.0
                                      :address ":%d")`, port),
-	).Eval(scope, nil)
+		scope).Eval(scope, nil)
 	scope.Let("server", server)
-	defer func() { _ = slip.ReadString(`(send server :shutdown)`).Eval(scope, nil) }()
+	defer func() { _ = slip.ReadString(`(send server :shutdown)`, scope).Eval(scope, nil) }()
 	_ = slip.ReadString(`(send server :add-handler
                                          "/test"
-                                         (lambda (w r) (send w :write "Thank you.")))`).Eval(scope, nil)
+                                         (lambda (w r) (send w :write "Thank you.")))`, scope).Eval(scope, nil)
 	_ = slip.ReadString(`(send server :add-handler
                                          "/sample/"
-                                         "testdata")`).Eval(scope, nil)
+                                         "testdata")`, scope).Eval(scope, nil)
 	sinst := server.(*flavors.Instance)
 	hs := sinst.Any.(*http.Server)
 	tt.Equal(t, time.Second*3, hs.ReadTimeout)
@@ -68,7 +68,7 @@ func TestServerBasic(t *testing.T) {
 	body, _ = io.ReadAll(res.Body)
 	tt.Equal(t, 200, res.StatusCode)
 	tt.Equal(t, "A sample file.\n", string(body))
-	_ = slip.ReadString(`(send server :shutdown t)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send server :shutdown t)`, scope).Eval(scope, nil)
 }
 
 func TestServerInitFail(t *testing.T) {
@@ -87,29 +87,29 @@ func TestServerDocs(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-server-flavor :init out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-server-flavor :init out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":init"))
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method http-server-flavor :start out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-server-flavor :start out)`, scope).Eval(scope, nil)
 	str = out.String()
 	tt.Equal(t, true, strings.Contains(str, ":start"))
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method http-server-flavor :shutdown out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-server-flavor :shutdown out)`, scope).Eval(scope, nil)
 	str = out.String()
 	tt.Equal(t, true, strings.Contains(str, ":shutdown"))
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method http-server-flavor :add-handler out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-server-flavor :add-handler out)`, scope).Eval(scope, nil)
 	str = out.String()
 	tt.Equal(t, true, strings.Contains(str, ":add-handler"))
 }
 
 func TestServerMethodArgFail(t *testing.T) {
 	scope := slip.NewScope()
-	server := slip.ReadString(`(make-instance 'http-server-flavor)`).Eval(scope, nil)
+	server := slip.ReadString(`(make-instance 'http-server-flavor)`, scope).Eval(scope, nil)
 	scope.Let("server", server)
 
 	(&sliptest.Function{

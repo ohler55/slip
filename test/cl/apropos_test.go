@@ -89,7 +89,7 @@ func TestAproposDefun(t *testing.T) {
 	var out strings.Builder
 	slip.StandardOutput = &slip.OutputStream{Writer: &out}
 
-	_ = slip.CompileString("(defun apropos-testy () nil)")
+	_ = slip.CompileString("(defun apropos-testy () nil)", slip.NewScope())
 
 	(&sliptest.Function{
 		Source: `(apropos 'testy 'user)`,

@@ -14,7 +14,8 @@ import (
 
 func TestBagSetStringPath(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-set bag 3 "a")`,
@@ -28,7 +29,7 @@ func TestBagSetPath(t *testing.T) {
 	obj := slip.ReadString(`(setq
                              path (make-bag-path "$.a")
                              bag (make-instance 'bag-flavor :parse "{a:7}"))
-`).Eval(scope, nil).(*flavors.Instance)
+`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-set bag 3 path)`,
@@ -39,7 +40,8 @@ func TestBagSetPath(t *testing.T) {
 
 func TestBagSetNoPath(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-set bag 3)`,
@@ -50,7 +52,8 @@ func TestBagSetNoPath(t *testing.T) {
 
 func TestBagSetSymbol(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "7"))`).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "7"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-set bag 'abc)`,
@@ -68,7 +71,8 @@ func TestBagSetSymbol(t *testing.T) {
 
 func TestBagSetList(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "7"))`).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "7"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-set bag '(a b c))`,
@@ -93,7 +97,8 @@ func TestBagSetList(t *testing.T) {
 
 func TestBagSetMap(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(`(setq bag (make-instance 'bag-flavor :parse "7"))`).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadString(
+		`(setq bag (make-instance 'bag-flavor :parse "7"))`, scope).Eval(scope, nil).(*flavors.Instance)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -126,7 +131,7 @@ func TestBagSetBag(t *testing.T) {
 	scope := slip.NewScope()
 	obj := slip.ReadString(`(setq
                              value (make-instance 'bag-flavor :set 3)
-                             bag (make-instance 'bag-flavor :parse "7"))`).Eval(scope, nil).(*flavors.Instance)
+                             bag (make-instance 'bag-flavor :parse "7"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-set bag value)`,

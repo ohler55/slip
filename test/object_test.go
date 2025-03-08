@@ -837,7 +837,7 @@ func TestFuncInfo(t *testing.T) {
 		},
 		Eval: fi,
 	}).Test(t)
-	result := fi.Apply(slip.NewScope(), slip.Read([]byte("('(1 2))"))[0].(slip.List), 0)
+	result := fi.Apply(slip.NewScope(), slip.Read([]byte("('(1 2))"), slip.NewScope())[0].(slip.List), 0)
 	tt.Equal(t, slip.Fixnum(1), result)
 }
 
@@ -862,7 +862,7 @@ Examples:
 }
 
 func TestFuncInfoDescribeOptions(t *testing.T) {
-	_ = slip.CompileString(`(defun func-info-test ((x 3) &options y) (list x y))`)
+	_ = slip.CompileString(`(defun func-info-test ((x 3) &options y) (list x y))`, slip.NewScope())
 	fi := slip.MustFindFunc("func-info-test")
 	out := fi.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `Lambda-List: ((x 3) &options y)

@@ -60,7 +60,7 @@ func TestDefLambdaBadArgList(t *testing.T) {
 
 func TestLambdaCallWithScope(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(let ((y 3)) (setq call-it (lambda (x) (+ x y))))`).Eval(scope, nil)
+	_ = slip.ReadString(`(let ((y 3)) (setq call-it (lambda (x) (+ x y))))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(apply call-it '(2))`,
@@ -72,7 +72,7 @@ func TestLambdaCallInFunc(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`
 (defun quux (x)
-  (apply (lambda (y) (+ x y)) '(5)))`).Eval(scope, nil)
+  (apply (lambda (y) (+ x y)) '(5)))`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(quux 7)`,

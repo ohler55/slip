@@ -33,7 +33,7 @@ func TestCddrFound(t *testing.T) {
 
 func TestCddrSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a . (b . c)))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a . (b . c)))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (cddr target) 'x)",
@@ -44,7 +44,7 @@ func TestCddrSetfCons(t *testing.T) {
 
 func TestCddrSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a  b  c))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a  b  c))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (cddr target) 'x)",

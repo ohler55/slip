@@ -56,7 +56,7 @@ func TestOpenInput(t *testing.T) {
 		Source: `(setq file (open "testdata/map.sen" :direction :input))`,
 		Expect: "/#<FILE-STREAM testdata/map.sen {.+}>/",
 	}).Test(t)
-	result := slip.ReadString(`(send (make-instance bag-flavor :read file) :write)`).Eval(scope, nil)
+	result := slip.ReadString(`(send (make-instance bag-flavor :read file) :write)`, scope).Eval(scope, nil)
 	tt.Equal(t, `"{a: 1 b: 2}"`, slip.ObjectString(result))
 }
 
@@ -72,8 +72,8 @@ func TestOpenOutputCreate(t *testing.T) {
 		Source: fmt.Sprintf(`(setq file (open %q :direction :output :if-does-not-exist :create))`, filename),
 		Expect: fmt.Sprintf("/#<FILE-STREAM %s {.+}>/", filename),
 	}).Test(t)
-	_ = slip.ReadString(`(format file "something~%")`).Eval(scope, nil)
-	_ = slip.ReadString(`(close file)`).Eval(scope, nil)
+	_ = slip.ReadString(`(format file "something~%")`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(close file)`, scope).Eval(scope, nil)
 	content, err := os.ReadFile(filename)
 	tt.Nil(t, err)
 	tt.Equal(t, "something\n", string(content))
@@ -92,8 +92,8 @@ func TestOpenOutputOverwrite(t *testing.T) {
 		Source: fmt.Sprintf(`(setq file (open %q :direction :output :if-exists :overwrite))`, filename),
 		Expect: fmt.Sprintf("/#<FILE-STREAM %s {.+}>/", filename),
 	}).Test(t)
-	_ = slip.ReadString(`(princ "over" file)`).Eval(scope, nil)
-	_ = slip.ReadString(`(close file)`).Eval(scope, nil)
+	_ = slip.ReadString(`(princ "over" file)`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(close file)`, scope).Eval(scope, nil)
 	content, err := os.ReadFile(filename)
 	tt.Nil(t, err)
 	tt.Equal(t, "over456789", string(content))
@@ -112,8 +112,8 @@ func TestOpenOutputAppend(t *testing.T) {
 		Source: fmt.Sprintf(`(setq file (open %q :direction :output :if-exists :append))`, filename),
 		Expect: fmt.Sprintf("/#<FILE-STREAM %s {.+}>/", filename),
 	}).Test(t)
-	_ = slip.ReadString(`(princ "thing" file)`).Eval(scope, nil)
-	_ = slip.ReadString(`(close file)`).Eval(scope, nil)
+	_ = slip.ReadString(`(princ "thing" file)`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(close file)`, scope).Eval(scope, nil)
 	content, err := os.ReadFile(filename)
 	tt.Nil(t, err)
 	tt.Equal(t, "something", string(content))
@@ -152,8 +152,8 @@ func TestOpenOutputSupersede(t *testing.T) {
 		Source: fmt.Sprintf(`(setq file (open %q :direction :output :if-exists :supersede))`, filename),
 		Expect: fmt.Sprintf("/#<FILE-STREAM %s {.+}>/", filename),
 	}).Test(t)
-	_ = slip.ReadString(`(princ "nothing" file)`).Eval(scope, nil)
-	_ = slip.ReadString(`(close file)`).Eval(scope, nil)
+	_ = slip.ReadString(`(princ "nothing" file)`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(close file)`, scope).Eval(scope, nil)
 	content, err := os.ReadFile(filename)
 	tt.Nil(t, err)
 	tt.Equal(t, "nothing", string(content))
@@ -171,8 +171,8 @@ func TestOpenOutputIOPermissions(t *testing.T) {
 		Source: fmt.Sprintf(`(setq file (open %q :direction :io :if-does-not-exist :create :permission #o644))`, filename),
 		Expect: fmt.Sprintf("/#<FILE-STREAM %s {.+}>/", filename),
 	}).Test(t)
-	_ = slip.ReadString(`(princ "something" file)`).Eval(scope, nil)
-	_ = slip.ReadString(`(close file)`).Eval(scope, nil)
+	_ = slip.ReadString(`(princ "something" file)`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(close file)`, scope).Eval(scope, nil)
 	content, err := os.ReadFile(filename)
 	tt.Nil(t, err)
 	tt.Equal(t, "something", string(content))
@@ -196,8 +196,8 @@ func TestOpenOutputRename(t *testing.T) {
 		Source: fmt.Sprintf(`(setq file (open %q :direction :output :if-exists :rename))`, filename),
 		Expect: fmt.Sprintf("/#<FILE-STREAM %s {.+}>/", filename),
 	}).Test(t)
-	_ = slip.ReadString(`(princ "nothing" file)`).Eval(scope, nil)
-	_ = slip.ReadString(`(close file)`).Eval(scope, nil)
+	_ = slip.ReadString(`(princ "nothing" file)`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(close file)`, scope).Eval(scope, nil)
 	content, err := os.ReadFile(filename)
 	tt.Nil(t, err)
 	tt.Equal(t, "nothing", string(content))

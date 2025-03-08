@@ -16,7 +16,7 @@ func TestMaphashLambda(t *testing.T) {
 (setq table (make-hash-table))
 (setf (gethash 'a table) 1)
 (setq entries '())
-`).Eval(scope, nil)
+`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(maphash (lambda (k v) (setq entries (cons (list k v) entries))) table)`,
@@ -31,7 +31,7 @@ func TestMaphashLambdaList(t *testing.T) {
 (setq table (make-hash-table))
 (setf (gethash 'a table) 1)
 (setq entries '())
-`).Eval(scope, nil)
+`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(maphash '(lambda (k v) (setq entries (cons (list k v) entries))) table)`,
@@ -47,7 +47,7 @@ func TestMaphashSymbol(t *testing.T) {
 (setf (gethash 'a table) 1)
 (setq entries '())
 (defun entry-push (k v) (setq entries (cons (list k v) entries)))
-`).Eval(scope, nil)
+`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(maphash 'entry-push table)`,

@@ -16,10 +16,10 @@ func TestWriteByteOkay(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString("(write-byte 65 out)").Eval(scope, nil)
+	result := slip.ReadString("(write-byte 65 out)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Octet(65), result)
 
-	result = slip.ReadString("(write-byte (coerce 66 'octet) out)").Eval(scope, nil)
+	result = slip.ReadString("(write-byte (coerce 66 'octet) out)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Octet(66), result)
 
 	tt.Equal(t, "AB", out.String())

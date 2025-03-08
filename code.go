@@ -310,35 +310,46 @@ type reader struct {
 	more       bool // more to read
 }
 
+func (cr *reader) scoped(s *Scope) {
+	cr.base = 10
+	if num, ok := s.get("*read-base*").(Fixnum); ok && 1 < num && num <= 36 {
+		cr.base = int(num)
+	}
+	// TBD *read-default-float-format*
+}
+
 // ReadString reads LISP source code and return a Code instance.
-func ReadString(src string) (code Code) {
+func ReadString(src string, s *Scope) (code Code) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	cr.read([]byte(src))
 
 	return cr.code
 }
 
 // Read LISP source code and return a Code instance.
-func Read(src []byte) (code Code) {
+func Read(src []byte, s *Scope) (code Code) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	cr.read(src)
 
 	return cr.code
 }
 
 // ReadOne LISP source code and return a Code instance.
-func ReadOne(src []byte) (code Code, pos int) {
+func ReadOne(src []byte, s *Scope) (code Code, pos int) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
 		one:      true,
 	}
+	cr.scoped(s)
 	cr.read(src)
 
 	return cr.code, cr.pos
@@ -347,7 +358,7 @@ func ReadOne(src []byte) (code Code, pos int) {
 const readBlockSize = 65536
 
 // ReadStream reads LISP source code from a stream and return a Code instance.
-func ReadStream(r io.Reader, one ...bool) (Code, int) {
+func ReadStream(r io.Reader, s *Scope, one ...bool) (Code, int) {
 	// Note: Using a separate chan for reading from disk was tried but since a
 	// new buffer had to be created each time the overall performance was
 	// slightly worse. That would be different with slower disks but that is
@@ -358,6 +369,7 @@ func ReadStream(r io.Reader, one ...bool) (Code, int) {
 		nextMode: valueMode,
 		one:      (0 < len(one) && one[0]),
 	}
+	cr.scoped(s)
 	var pos int
 	buf := make([]byte, readBlockSize)
 	for {
@@ -385,12 +397,13 @@ func ReadStream(r io.Reader, one ...bool) (Code, int) {
 
 // ReadStreamPush reads LISP source code from a stream and pushes
 // s-expressions read onto a channel.
-func ReadStreamPush(r io.Reader, channel chan Object) {
+func ReadStreamPush(r io.Reader, s *Scope, channel chan Object) {
 	cr := reader{
 		more:     true,
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	buf := make([]byte, readBlockSize)
 	for {
 		cnt, err := r.Read(buf)
@@ -424,6 +437,7 @@ func ReadStreamEach(r io.Reader, s *Scope, caller Caller) {
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	buf := make([]byte, readBlockSize)
 	for {
 		cnt, err := r.Read(buf)
@@ -450,16 +464,17 @@ func ReadStreamEach(r io.Reader, s *Scope, caller Caller) {
 }
 
 // CompileString LISP string source code and return an Object.
-func CompileString(src string) Object {
-	return Compile([]byte(src))
+func CompileString(src string, s *Scope) Object {
+	return Compile([]byte(src), s)
 }
 
 // Compile LISP source code and return an Object.
-func Compile(src []byte) (result Object) {
+func Compile(src []byte, s *Scope) (result Object) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	cr.read(src)
 
 	cr.code.Compile()
@@ -961,6 +976,8 @@ func (r *reader) pushToken(src []byte) {
 					goto Push
 				}
 		*/
+		// TBD need to include all letters for base 10+
+		// check regex for current base
 		if i := bytes.IndexByte(token, '/'); 0 < i {
 			if num, err := strconv.ParseInt(string(token[:i]), 10, 64); err == nil {
 				var den int64
@@ -1003,6 +1020,9 @@ func (r *reader) pushToken(src []byte) {
 				goto Push
 			}
 		}
+		// TBD default compare baseRegex (change when base changes)
+		//  maybe pick in scoped()
+		// two reegex, one for int and one for ratio
 	}
 	obj = Symbol(token)
 Push:
@@ -1023,6 +1043,7 @@ func (r *reader) pushNumber(src []byte) {
 	)
 	if token[len(token)-1] == '.' {
 		token = token[:len(token)-1]
+		// TBD use base
 		if i, err := strconv.ParseInt(string(token), 10, 64); err == nil {
 			obj = Fixnum(i)
 			goto Push
@@ -1034,11 +1055,13 @@ func (r *reader) pushNumber(src []byte) {
 		}
 	}
 	s = string(token)
+	// TBD use base
 	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
 		obj = Fixnum(i)
 		goto Push
 	}
 	bi = big.NewInt(0)
+	// TBD use base
 	if _, ok := bi.SetString(s, 10); ok {
 		obj = (*Bignum)(bi)
 		goto Push

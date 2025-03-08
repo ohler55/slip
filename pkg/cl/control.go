@@ -698,7 +698,7 @@ func (c *control) dirEval(colon, at bool, params []any) {
 	if end <= c.pos {
 		slip.NewPanic("eval directive not terminated at %d of %q", c.pos, c.str)
 	}
-	val := slip.Read(c.str[start:c.pos]).Eval(c.scope, nil)
+	val := slip.Read(c.str[start:c.pos], c.scope).Eval(c.scope, nil)
 	if s, ok := val.(slip.String); ok {
 		c.out = append(c.out, s...)
 	} else {

@@ -16,7 +16,7 @@ func TestDescribeFlavor(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString("(describe-flavor vanilla-flavor out)").Eval(scope, nil)
+	_ = slip.ReadString("(describe-flavor vanilla-flavor out)", scope).Eval(scope, nil)
 	tt.Equal(t, `vanilla-flavor is a flavor:
   Documentation:
     A Flavor that implements the standard methods.

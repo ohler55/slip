@@ -12,32 +12,35 @@ import (
 
 func TestUndefflavorBasic(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defflavor f1 ((a 1)) ())`).Eval(scope, nil)
+	slip.ReadString(`(defflavor f1 ((a 1)) ())`, scope).Eval(scope, nil)
 
-	slip.ReadString("(undefflavor 'f1)").Eval(scope, nil)
+	slip.ReadString("(undefflavor 'f1)", scope).Eval(scope, nil)
 
-	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
+	names := slip.ReadString("*all-flavor-names*", scope).Eval(scope, nil)
 	tt.Equal(t, false, strings.Contains(names.String(), "f1"))
 }
 
 func TestUndefflavorByFlavor(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defflavor f1 ((a 1)) ())`).Eval(scope, nil)
+	slip.ReadString(`(defflavor f1 ((a 1)) ())`, scope).Eval(scope, nil)
 
-	slip.ReadString("(undefflavor f1)").Eval(scope, nil)
+	slip.ReadString("(undefflavor f1)", scope).Eval(scope, nil)
 
-	names := slip.ReadString("*all-flavor-names*").Eval(scope, nil)
+	names := slip.ReadString("*all-flavor-names*", scope).Eval(scope, nil)
 	tt.Equal(t, false, strings.Contains(names.String(), "f1"))
 }
 
 func TestUndefflavorBadFlavor(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(undefflavor t)").Eval(slip.NewScope(), nil) })
+	scope := slip.NewScope()
+	tt.Panic(t, func() { _ = slip.ReadString("(undefflavor t)", scope).Eval(scope, nil) })
 }
 
 func TestUndefflavorNotdefined(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(undefflavor 'bad)").Eval(slip.NewScope(), nil) })
+	scope := slip.NewScope()
+	tt.Panic(t, func() { _ = slip.ReadString("(undefflavor 'bad)", scope).Eval(scope, nil) })
 }
 
 func TestUndefflavorBadArgCount(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(undefflavor 'bad 'boy)").Eval(slip.NewScope(), nil) })
+	scope := slip.NewScope()
+	tt.Panic(t, func() { _ = slip.ReadString("(undefflavor 'bad 'boy)", scope).Eval(scope, nil) })
 }

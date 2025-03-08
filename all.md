@@ -1,6 +1,6 @@
  * [ ] *READ-BASE*
  * [ ] *READ-DEFAULT-FLOAT-FORMAT*
- * [ ] *TERMINAL-IO*
+ * [x] *TERMINAL-IO*
  * [ ] ACONS
  * [ ] ACOSH
  * [ ] ASINH
@@ -89,7 +89,7 @@
  * [ ] WITH-PACKAGE-ITERATOR
  * [x] WITH-STANDARD-IO-SYNTAX
  * [x] Y-OR-N-P
- * [ ] YES-OR-NO-P
+ * [x] YES-OR-NO-P
  * [+] CLASS
  * [x] &ALLOW-OTHER-KEYS
  * [x] &AUX

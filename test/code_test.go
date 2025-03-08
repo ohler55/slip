@@ -20,15 +20,16 @@ type codeTest struct {
 }
 
 func (ct *codeTest) test(t *testing.T, i int) {
+	scope := slip.NewScope()
 	if ct.raise {
-		tt.Panic(t, func() { _ = slip.ReadString(ct.src) })
+		tt.Panic(t, func() { _ = slip.ReadString(ct.src, scope) })
 		return
 	}
 	var code slip.Code
 	if i%2 == 0 {
-		code = slip.ReadString(ct.src)
+		code = slip.ReadString(ct.src, scope)
 	} else {
-		code = slip.Read([]byte(ct.src))
+		code = slip.Read([]byte(ct.src), scope)
 	}
 	tt.Equal(t, ct.expect, code.String(), i, ": ", ct.src)
 	if 0 < len(ct.kind) {
@@ -54,7 +55,7 @@ func TestCodeToken(t *testing.T) {
 }
 
 func TestCodeReadOne(t *testing.T) {
-	code, pos := slip.ReadOne([]byte("abc def"))
+	code, pos := slip.ReadOne([]byte("abc def"), slip.NewScope())
 	tt.Equal(t, slip.Symbol("abc"), code[0])
 	tt.Equal(t, 3, pos)
 }
@@ -301,17 +302,18 @@ func TestCodeBackquote(t *testing.T) {
 }
 
 func TestCodeCompile(t *testing.T) {
-	code := slip.ReadString("(5)")
+	scope := slip.NewScope()
+	code := slip.ReadString("(5)", scope)
 	tt.Panic(t, func() { code.Compile() })
 
-	code = slip.ReadString("((x))")
+	code = slip.ReadString("((x))", scope)
 	tt.Panic(t, func() { code.Compile() })
 
-	code = slip.ReadString("((lambda () nil))")
+	code = slip.ReadString("((lambda () nil))", scope)
 	code.Compile()
 	tt.SameType(t, &slip.Dynamic{}, code[0])
 
-	code = slip.ReadString("(defvar code-compile-test 5)")
+	code = slip.ReadString("(defvar code-compile-test 5)", scope)
 	code.Compile()
 	val, has := slip.CurrentPackage.Get("code-compile-test")
 	tt.Equal(t, slip.Fixnum(5), val)
@@ -361,14 +363,14 @@ func TestCodeStringer(t *testing.T) {
 
 func TestCodeReadStreamOk(t *testing.T) {
 	sr := strings.NewReader("(+ 1 2 3)")
-	code, _ := slip.ReadStream(sr)
+	code, _ := slip.ReadStream(sr, slip.NewScope())
 	tt.Equal(t, 1, len(code))
 	tt.Equal(t, "(+ 1 2 3)", slip.ObjectString(code[0]))
 }
 
 func TestCodeReadStreamOne(t *testing.T) {
 	sr := strings.NewReader("(+ 1 2 3) (- 3 2 1)")
-	code, _ := slip.ReadStream(sr, true)
+	code, _ := slip.ReadStream(sr, slip.NewScope(), true)
 	tt.Equal(t, 1, len(code))
 	tt.Equal(t, "(+ 1 2 3)", slip.ObjectString(code[0]))
 }
@@ -380,7 +382,7 @@ func (w badReader) Read([]byte) (int, error) {
 }
 
 func TestCodeReadStreamFail(t *testing.T) {
-	tt.Panic(t, func() { _, _ = slip.ReadStream(badReader(0)) })
+	tt.Panic(t, func() { _, _ = slip.ReadStream(badReader(0), slip.NewScope()) })
 }
 
 func TestCodeReadStreamEachOk(t *testing.T) {

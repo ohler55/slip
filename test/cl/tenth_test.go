@@ -40,7 +40,7 @@ func TestTenthNotList(t *testing.T) {
 
 func TestTenthSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d e f g h i j))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d e f g h i j))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (tenth target) 'x)",
@@ -51,7 +51,7 @@ func TestTenthSetfList(t *testing.T) {
 
 func TestTenthSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d e f g h i . j))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d e f g h i . j))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (tenth target) 'x)",

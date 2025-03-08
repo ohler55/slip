@@ -15,7 +15,7 @@ func TestFindSymbolNew(t *testing.T) {
 		Expect: "nil, nil",
 	}).Test(t)
 	scope := slip.NewScope()
-	_ = slip.ReadString("(defvar find-symbol-test-new 7)").Eval(scope, nil)
+	_ = slip.ReadString("(defvar find-symbol-test-new 7)", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(find-symbol "find-symbol-test-new")`,
 		Expect: "find-symbol-test-new, :internal",
@@ -43,7 +43,7 @@ func TestFindSymbolExternal(t *testing.T) {
 		Expect: "nil, nil",
 	}).Test(t)
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(intern "find-symbol-test-external" 'keyword)`).Eval(scope, nil)
+	_ = slip.ReadString(`(intern "find-symbol-test-external" 'keyword)`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(find-symbol "find-symbol-test-external" "keyword")`,
 		Expect: ":find-symbol-test-external, :external",
@@ -56,7 +56,7 @@ func TestFindSymbolExternal(t *testing.T) {
 
 func TestFindSymbolInternal(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(defun find-symbol-test-internal () 5)`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun find-symbol-test-internal () 5)`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(find-symbol "find-symbol-test-internal")`,
 		Expect: "find-symbol-test-internal, :internal",
