@@ -31,8 +31,7 @@
   - [x] SPECIAL-OPERATOR-P
   - [x] SUBTYPEP
   - [x] TRUENAME
-  - [ ] UNWIND-PROTECT
-   - just a defer recover for a protected-form that calls a cleanup-form
+  - [x] UNWIND-PROTECT
   - [x] USER-HOMEDIR-PATHNAME
   - [x] WILD-PATHNAME-P
   - [x] WITH-STANDARD-IO-SYNTAX
