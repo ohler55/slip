@@ -971,7 +971,7 @@ func (r *reader) resolveToken(token []byte) Object {
 	case longFloatRegex.Match(buf):
 		buf[bytes.IndexByte(buf, 'l')] = 'e'
 		cnt := len(buf) - 2 - bytes.Count(buf, []byte{'-'}) - bytes.Count(buf, []byte{'+'})
-		if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.AwayFromZero); err == nil {
+		if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.ToNearestAway); err == nil {
 			return (*LongFloat)(f)
 		}
 	case base10RatioRegex.Match(buf): // TBD change to ratioRx on reader
