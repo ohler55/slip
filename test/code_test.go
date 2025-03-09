@@ -100,6 +100,37 @@ func TestCodeNumber(t *testing.T) {
 	}
 }
 
+func TestCodeBaseFixnum(t *testing.T) {
+	scope := slip.NewScope()
+	for i, td := range []*struct {
+		base   int
+		src    string
+		expect int
+	}{
+		{base: 2, src: "1010", expect: 10},
+		{base: 3, src: "210", expect: 21},
+		{base: 4, src: "321", expect: 57},
+		{base: 5, src: "401", expect: 101},
+		{base: 6, src: "55", expect: 35},
+		{base: 7, src: "666", expect: 342},
+		{base: 8, src: "073", expect: 59},
+		{base: 9, src: "88", expect: 80},
+		{base: 10, src: "975", expect: 975},
+		{base: 11, src: "a1", expect: 111},
+		{base: 12, src: "ba", expect: 142},
+		{base: 13, src: "cb", expect: 167},
+		{base: 14, src: "dc", expect: 194},
+		{base: 15, src: "ed", expect: 223},
+		{base: 16, src: "fe", expect: 254},
+		{base: 36, src: "zz", expect: 1295},
+	} {
+		scope.Let("*read-base*", slip.Fixnum(td.base))
+		code := slip.ReadString(td.src, scope)
+		tt.Equal(t, slip.FixnumSymbol, code[0].Hierarchy()[0])
+		tt.Equal(t, slip.Fixnum(td.expect), code[0], i, ": ", td.src)
+	}
+}
+
 func TestCodeRatio(t *testing.T) {
 	for i, ct := range []*codeTest{
 		{src: "1/2", expect: "[1/2]", kind: "ratio"},
@@ -107,6 +138,37 @@ func TestCodeRatio(t *testing.T) {
 		{src: "1/-2", expect: "[|1/-2|]", kind: "symbol"},
 	} {
 		ct.test(t, i)
+	}
+}
+
+func TestCodeBaseRatio(t *testing.T) {
+	scope := slip.NewScope()
+	for i, td := range []*struct {
+		base   int
+		src    string
+		expect string
+	}{
+		{base: 2, src: "01/10", expect: "1/2"},
+		{base: 3, src: "21/12", expect: "7/5"},
+		{base: 4, src: "32/23", expect: "14/11"},
+		{base: 5, src: "43/34", expect: "23/19"},
+		{base: 6, src: "54/45", expect: "34/29"},
+		{base: 7, src: "65/56", expect: "47/41"},
+		{base: 8, src: "76/67", expect: "62/55"},
+		{base: 9, src: "87/78", expect: "79/71"},
+		{base: 10, src: "98/89", expect: "98/89"},
+		{base: 11, src: "a9/9a", expect: "119/109"},
+		{base: 12, src: "ba/ab", expect: "142/131"},
+		{base: 13, src: "cb/bc", expect: "167/155"},
+		{base: 14, src: "dc/cd", expect: "194/181"},
+		{base: 15, src: "ed/de", expect: "223/209"},
+		{base: 16, src: "fe/ef", expect: "254/239"},
+		{base: 36, src: "zy/yz", expect: "1294/1259"},
+	} {
+		scope.Let("*read-base*", slip.Fixnum(td.base))
+		code := slip.ReadString(td.src, scope)
+		tt.Equal(t, slip.RatioSymbol, code[0].Hierarchy()[0])
+		tt.Equal(t, td.expect, code[0].String(), i, ": ", td.src)
 	}
 }
 

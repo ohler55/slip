@@ -256,6 +256,90 @@ var (
 	newBackquote  func(args List) Object
 	newComma      func(args List) Object
 	newCommaAt    func(args List) Object
+
+	decimalRegex     = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*$`)
+	eFloatRegex      = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*e[-+]?[0-9]+?$`)
+	shortFloatRegex  = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*s[-+]?[0-9]+?$`)
+	singleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*f[-+]?[0-9]+?$`)
+	doubleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*d[-+]?[0-9]+?$`)
+	longFloatRegex   = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*l[-+]?[0-9]+?$`)
+
+	intRxs = []*regexp.Regexp{
+		nil, nil,
+		regexp.MustCompile(`^[-+]?[0-1]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-2]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-3]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-4]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-5]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-6]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-7]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-8]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-b]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-c]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-d]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-e]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-f]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-g]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-h]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-i]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-j]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-k]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-l]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-m]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-n]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-o]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-p]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-q]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-r]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-s]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-t]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-u]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-v]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-w]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-x]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-y]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-z]+\.?$`),
+	}
+	ratioRxs = []*regexp.Regexp{
+		nil, nil,
+		regexp.MustCompile(`^[-+]?[0-1]+/[-+]?[0-1]+$`),
+		regexp.MustCompile(`^[-+]?[0-2]+/[-+]?[0-2]+$`),
+		regexp.MustCompile(`^[-+]?[0-3]+/[-+]?[0-3]+$`),
+		regexp.MustCompile(`^[-+]?[0-4]+/[-+]?[0-4]+$`),
+		regexp.MustCompile(`^[-+]?[0-5]+/[-+]?[0-5]+$`),
+		regexp.MustCompile(`^[-+]?[0-6]+/[-+]?[0-6]+$`),
+		regexp.MustCompile(`^[-+]?[0-7]+/[-+]?[0-7]+$`),
+		regexp.MustCompile(`^[-+]?[0-8]+/[-+]?[0-8]+$`),
+		regexp.MustCompile(`^[-+]?[0-9]+/[-+]?[0-9]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a]+/[-+]?[0-9a]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-b]+/[-+]?[0-9a-b]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-c]+/[-+]?[0-9a-c]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-d]+/[-+]?[0-9a-d]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-e]+/[-+]?[0-9a-e]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-f]+/[-+]?[0-9a-f]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-g]+/[-+]?[0-9a-g]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-h]+/[-+]?[0-9a-h]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-i]+/[-+]?[0-9a-i]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-j]+/[-+]?[0-9a-j]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-k]+/[-+]?[0-9a-k]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-l]+/[-+]?[0-9a-l]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-m]+/[-+]?[0-9a-m]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-n]+/[-+]?[0-9a-n]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-o]+/[-+]?[0-9a-o]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-p]+/[-+]?[0-9a-p]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-q]+/[-+]?[0-9a-q]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-r]+/[-+]?[0-9a-r]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-s]+/[-+]?[0-9a-s]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-t]+/[-+]?[0-9a-t]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-u]+/[-+]?[0-9a-u]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-v]+/[-+]?[0-9a-v]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-w]+/[-+]?[0-9a-w]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-x]+/[-+]?[0-9a-x]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-y]+/[-+]?[0-9a-y]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-z]+/[-+]?[0-9a-z]+$`),
+	}
 )
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
@@ -280,14 +364,20 @@ type reader struct {
 	rb         []byte
 	rn         rune
 	rcnt       int
+	intRx      *regexp.Regexp
+	ratioRx    *regexp.Regexp
 	one        bool
 	more       bool // more to read
 }
 
 func (cr *reader) scoped(s *Scope) {
 	cr.base = 10
+	cr.intRx = intRxs[10]
+	cr.ratioRx = ratioRxs[10]
 	if num, ok := s.get("*read-base*").(Fixnum); ok && 1 < num && num <= 36 {
 		cr.base = int(num)
+		cr.intRx = intRxs[num]
+		cr.ratioRx = ratioRxs[num]
 	}
 	// TBD *read-default-float-format*
 }
@@ -904,18 +994,6 @@ Push:
 	}
 }
 
-var (
-	decimalRegex     = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*$`)
-	eFloatRegex      = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*e[-+]?[0-9]+?$`)
-	shortFloatRegex  = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*s[-+]?[0-9]+?$`)
-	singleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*f[-+]?[0-9]+?$`)
-	doubleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*d[-+]?[0-9]+?$`)
-	longFloatRegex   = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*l[-+]?[0-9]+?$`)
-
-	base10IntegerRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?$`)
-	base10RatioRegex   = regexp.MustCompile(`^[-+]?[0-9]+/[-+]?[0-9]+$`)
-)
-
 func (r *reader) resolveToken(token []byte) Object {
 	buf := bytes.ToLower(token)
 	switch {
@@ -932,15 +1010,13 @@ func (r *reader) resolveToken(token []byte) Object {
 				return Time(t)
 			}
 		}
-	case base10IntegerRegex.Match(buf): // TBD change to intRx on reader
+	case r.intRx.Match(buf):
 		buf = bytes.TrimRight(buf, ".")
-		// TBD allow bignums if parse fails
-		if num, err := strconv.ParseInt(string(buf), 10, 64); err == nil {
+		if num, err := strconv.ParseInt(string(buf), r.base, 64); err == nil {
 			return Fixnum(num)
 		}
 		bi := big.NewInt(0)
-		// TBD use base
-		if _, ok := bi.SetString(string(buf), 10); ok {
+		if _, ok := bi.SetString(string(buf), r.base); ok {
 			return (*Bignum)(bi)
 		}
 	case decimalRegex.Match(buf):
@@ -974,11 +1050,11 @@ func (r *reader) resolveToken(token []byte) Object {
 		if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.AwayFromZero); err == nil {
 			return (*LongFloat)(f)
 		}
-	case base10RatioRegex.Match(buf): // TBD change to ratioRx on reader
+	case r.ratioRx.Match(buf):
 		i := bytes.IndexByte(buf, '/')
-		if num, err := strconv.ParseInt(string(buf[:i]), 10, 64); err == nil {
+		if num, err := strconv.ParseInt(string(buf[:i]), r.base, 64); err == nil {
 			var den int64
-			if den, err = strconv.ParseInt(string(buf[i+1:]), 10, 64); err == nil {
+			if den, err = strconv.ParseInt(string(buf[i+1:]), r.base, 64); err == nil {
 				if 0 < den {
 					return NewRatio(num, den)
 				}
