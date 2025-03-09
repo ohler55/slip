@@ -40,15 +40,7 @@
   - [x] *TERMINAL-IO*
   - gi:time-to-universal-time
   - gi:universal-time-to-time
-  - [ ] *READ-BASE*
-   - define regex for each base for int and for ratio
-   - update resolveToken to use base
-   - test with different bases
-
-   - add float format
-
-   - need to set base on reader in code.go
-    - also set int regex and ratio rx
+  - [x] *READ-BASE*
   - [ ] *READ-DEFAULT-FLOAT-FORMAT*
    - short-float, single-float, double-float, or long-float
    - used for read and maybe write

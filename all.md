@@ -1,4 +1,4 @@
- * [ ] *READ-BASE*
+ * [x] *READ-BASE*
  * [ ] *READ-DEFAULT-FLOAT-FORMAT*
  * [x] *TERMINAL-IO*
  * [ ] ACONS

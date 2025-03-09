@@ -278,6 +278,7 @@ func TestCodeBinary(t *testing.T) {
 			expect: `[12297829382473034410]`,
 			kind:   "bignum",
 		},
+		{src: `#x100000000000000000`, expect: `[295147905179352825856]`, kind: "bignum"},
 		{src: `#b012`, raise: true},
 		{src: `#b`, raise: true},
 	} {

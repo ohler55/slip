@@ -358,7 +358,8 @@ type reader struct {
 	line       int
 	lineStart  int
 	pos        int
-	base       int
+	base       int // temp base
+	rbase      int // read base
 	sharpNum   int
 	code       Code
 	rb         []byte
@@ -371,11 +372,11 @@ type reader struct {
 }
 
 func (cr *reader) scoped(s *Scope) {
-	cr.base = 10
+	cr.rbase = 10
 	cr.intRx = intRxs[10]
 	cr.ratioRx = ratioRxs[10]
 	if num, ok := s.get("*read-base*").(Fixnum); ok && 1 < num && num <= 36 {
-		cr.base = int(num)
+		cr.rbase = int(num)
 		cr.intRx = intRxs[num]
 		cr.ratioRx = ratioRxs[num]
 	}
@@ -1012,11 +1013,11 @@ func (r *reader) resolveToken(token []byte) Object {
 		}
 	case r.intRx.Match(buf):
 		buf = bytes.TrimRight(buf, ".")
-		if num, err := strconv.ParseInt(string(buf), r.base, 64); err == nil {
+		if num, err := strconv.ParseInt(string(buf), r.rbase, 64); err == nil {
 			return Fixnum(num)
 		}
 		bi := big.NewInt(0)
-		if _, ok := bi.SetString(string(buf), r.base); ok {
+		if _, ok := bi.SetString(string(buf), r.rbase); ok {
 			return (*Bignum)(bi)
 		}
 	case decimalRegex.Match(buf):
@@ -1052,9 +1053,9 @@ func (r *reader) resolveToken(token []byte) Object {
 		}
 	case r.ratioRx.Match(buf):
 		i := bytes.IndexByte(buf, '/')
-		if num, err := strconv.ParseInt(string(buf[:i]), r.base, 64); err == nil {
+		if num, err := strconv.ParseInt(string(buf[:i]), r.rbase, 64); err == nil {
 			var den int64
-			if den, err = strconv.ParseInt(string(buf[i+1:]), r.base, 64); err == nil {
+			if den, err = strconv.ParseInt(string(buf[i+1:]), r.rbase, 64); err == nil {
 				if 0 < den {
 					return NewRatio(num, den)
 				}
