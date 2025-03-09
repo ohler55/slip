@@ -171,6 +171,11 @@ and raises an error if not possible to print readably.`,
 				Val: Fixnum(10),
 				Doc: "Controls the parsing of integers and ratios.",
 			},
+			"*read-default-float-format*": {
+				Val: DoubleFloatSymbol,
+				Doc: "Controls the floating point type when reading a decimal number.",
+			},
+
 			"*terminal-io*": {
 				Val: nil,
 				Doc: "A two-way-stream that accepts input from the keyboard and writes to the display.",

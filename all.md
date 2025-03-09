@@ -1,6 +1,3 @@
- * [x] *READ-BASE*
- * [ ] *READ-DEFAULT-FLOAT-FORMAT*
- * [x] *TERMINAL-IO*
  * [ ] ACONS
  * [ ] ACOSH
  * [ ] ASINH
@@ -80,16 +77,12 @@
  * [ ] SIMPLE-BIT-VECTOR-P
  * [ ] SINH
  * [ ] TANH
- * [x] TRUENAME
  * [ ] UNWIND-PROTECT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
  * [ ] USE-VALUE
  * [ ] WITH-HASH-TABLE-ITERATOR
  * [ ] WITH-PACKAGE-ITERATOR
- * [x] WITH-STANDARD-IO-SYNTAX
- * [x] Y-OR-N-P
- * [x] YES-OR-NO-P
  * [+] CLASS
  * [x] &ALLOW-OTHER-KEYS
  * [x] &AUX
@@ -124,8 +117,11 @@
  * [x] *PRINT-READABLY*
  * [x] *PRINT-RIGHT-MARGIN*
  * [x] *RANDOM-STATE*
+ * [x] *READ-BASE*
+ * [x] *READ-DEFAULT-FLOAT-FORMAT*
  * [x] *STANDARD-INPUT*
  * [x] *STANDARD-OUTPUT*
+ * [x] *TERMINAL-IO*
  * [x] *TRACE-OUTPUT*
  * [x] +
  * [x] ++
@@ -739,6 +735,7 @@
  * [x] TIME
  * [x] TRACE
  * [x] TREE-EQUAL
+ * [x] TRUENAME
  * [x] TRUNCATE
  * [x] TWO-WAY-STREAM
  * [x] TWO-WAY-STREAM-INPUT-STREAM
@@ -781,6 +778,7 @@
  * [x] WITH-OPEN-FILE
  * [x] WITH-OPEN-STREAM
  * [x] WITH-OUTPUT-TO-STRING
+ * [x] WITH-STANDARD-IO-SYNTAX
  * [x] WRITE
  * [x] WRITE-BYTE
  * [x] WRITE-CHAR
@@ -788,6 +786,8 @@
  * [x] WRITE-SEQUENCE
  * [x] WRITE-STRING
  * [x] WRITE-TO-STRING
+ * [x] Y-OR-N-P
+ * [x] YES-OR-NO-P
  * [x] ZEROP
  - [-] &ENVIRONMENT
  - [-] &WHOLE

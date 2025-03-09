@@ -367,20 +367,27 @@ type reader struct {
 	rcnt       int
 	intRx      *regexp.Regexp
 	ratioRx    *regexp.Regexp
+	floatType  Symbol
 	one        bool
 	more       bool // more to read
 }
 
-func (cr *reader) scoped(s *Scope) {
-	cr.rbase = 10
-	cr.intRx = intRxs[10]
-	cr.ratioRx = ratioRxs[10]
+func (r *reader) scoped(s *Scope) {
+	r.rbase = 10
+	r.intRx = intRxs[10]
+	r.ratioRx = ratioRxs[10]
 	if num, ok := s.get("*read-base*").(Fixnum); ok && 1 < num && num <= 36 {
-		cr.rbase = int(num)
-		cr.intRx = intRxs[num]
-		cr.ratioRx = ratioRxs[num]
+		r.rbase = int(num)
+		r.intRx = intRxs[num]
+		r.ratioRx = ratioRxs[num]
 	}
-	// TBD *read-default-float-format*
+	ff, _ := s.get("*read-default-float-format*").(Symbol)
+	switch ff {
+	case SingleFloatSymbol, ShortFloatSymbol, DoubleFloatSymbol, LongFloatSymbol:
+		r.floatType = ff
+	default: // default to double-float
+		r.floatType = DoubleFloatSymbol
+	}
 }
 
 // ReadString reads LISP source code and return a Code instance.
@@ -1020,15 +1027,26 @@ func (r *reader) resolveToken(token []byte) Object {
 		if _, ok := bi.SetString(string(buf), r.rbase); ok {
 			return (*Bignum)(bi)
 		}
-	case decimalRegex.Match(buf):
-		if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
-			// TBD consider reader default float type
-			return DoubleFloat(f)
-		}
-	case eFloatRegex.Match(buf):
-		if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
-			// TBD consider reader default float type
-			return DoubleFloat(f)
+	case decimalRegex.Match(buf) || eFloatRegex.Match(buf):
+		if r.floatType == LongFloatSymbol {
+			cnt := len(buf)
+			epos := bytes.IndexByte(buf, 'e')
+			if 0 < epos {
+				cnt = epos
+			}
+			if buf[0] == '-' || buf[0] == '+' {
+				cnt--
+			}
+			if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.ToNearestAway); err == nil {
+				return (*LongFloat)(f)
+			}
+		} else if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
+			switch r.floatType {
+			case SingleFloatSymbol, ShortFloatSymbol:
+				return SingleFloat(f)
+			default: // double-float
+				return DoubleFloat(f)
+			}
 		}
 	case doubleFloatRegex.Match(buf):
 		buf[bytes.IndexByte(buf, 'd')] = 'e'
@@ -1046,8 +1064,11 @@ func (r *reader) resolveToken(token []byte) Object {
 			return SingleFloat(f)
 		}
 	case longFloatRegex.Match(buf):
-		buf[bytes.IndexByte(buf, 'l')] = 'e'
-		cnt := len(buf) - 2 - bytes.Count(buf, []byte{'-'}) - bytes.Count(buf, []byte{'+'})
+		cnt := bytes.IndexByte(buf, 'l')
+		buf[cnt] = 'e'
+		if buf[0] == '-' || buf[0] == '+' {
+			cnt--
+		}
 		if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.ToNearestAway); err == nil {
 			return (*LongFloat)(f)
 		}

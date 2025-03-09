@@ -38,14 +38,13 @@
   - [x] Y-OR-N-P
   - [x] YES-OR-NO-P
   - [x] *TERMINAL-IO*
-  - gi:time-to-universal-time
-  - gi:universal-time-to-time
+  - [ ] gi:time-to-universal-time
+  - [ ] gi:universal-time-to-time
   - [x] *READ-BASE*
-  - [ ] *READ-DEFAULT-FLOAT-FORMAT*
-   - short-float, single-float, double-float, or long-float
-   - used for read and maybe write
+  - [x] *READ-DEFAULT-FLOAT-FORMAT*
 
- - tab expand words any where (like describe and apropos)
+ - tab-expand
+  - tab expand words any where (like describe and apropos)
 
  - math
   - [ ] ACONS

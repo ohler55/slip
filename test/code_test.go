@@ -173,6 +173,27 @@ func TestCodeBaseRatio(t *testing.T) {
 	}
 }
 
+func TestCodeReadFloatType(t *testing.T) {
+	scope := slip.NewScope()
+	for i, td := range []*struct {
+		ft  slip.Symbol
+		et  slip.Symbol
+		src string
+	}{
+		{ft: slip.DoubleFloatSymbol, et: slip.DoubleFloatSymbol, src: "1.5"},
+		{ft: slip.DoubleFloatSymbol, et: slip.DoubleFloatSymbol, src: "1.5e1"},
+		{ft: slip.SingleFloatSymbol, et: slip.SingleFloatSymbol, src: "1.5"},
+		{ft: slip.SingleFloatSymbol, et: slip.SingleFloatSymbol, src: "1.5e1"},
+		{ft: slip.LongFloatSymbol, et: slip.LongFloatSymbol, src: "1.5"},
+		{ft: slip.LongFloatSymbol, et: slip.LongFloatSymbol, src: "1.5e1"},
+		{ft: slip.Symbol("quux"), et: slip.DoubleFloatSymbol, src: "1.5"},
+	} {
+		scope.Let("*read-default-float-format*", td.ft)
+		code := slip.ReadString(td.src, scope)
+		tt.Equal(t, td.et, code[0].Hierarchy()[0], i, ": ", td.src)
+	}
+}
+
 func TestCodeComplex(t *testing.T) {
 	for i, ct := range []*codeTest{
 		{src: "#c(1 2)", expect: "[#C(1 2)]", kind: "complex"},
