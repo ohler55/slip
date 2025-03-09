@@ -32,14 +32,15 @@
   - [x] SUBTYPEP
   - [x] TRUENAME
   - [ ] UNWIND-PROTECT
+   - just a defer recover for a protected-form that calls a cleanup-form
   - [x] USER-HOMEDIR-PATHNAME
   - [x] WILD-PATHNAME-P
   - [x] WITH-STANDARD-IO-SYNTAX
   - [x] Y-OR-N-P
   - [x] YES-OR-NO-P
   - [x] *TERMINAL-IO*
-  - [ ] gi:time-to-universal-time
-  - [ ] gi:universal-time-to-time
+  - [x] gi:time-to-universal
+  - [x] gi:universal-to-time
   - [x] *READ-BASE*
   - [x] *READ-DEFAULT-FLOAT-FORMAT*
 
