@@ -41,10 +41,8 @@
   - gi:time-to-universal-time
   - gi:universal-time-to-time
   - [ ] *READ-BASE*
-   - maybe drop number mode in code read and just deal with token patterns
    - need to set base on reader in code.go
-   - maybe add a scope to each Read function
-    - handle nil scope if there is any place where it could be nil, or create new scope
+    - also set int regex and ratio rx
   - [ ] *READ-DEFAULT-FLOAT-FORMAT*
    - short-float, single-float, double-float, or long-float
    - used for read and maybe write

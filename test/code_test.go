@@ -31,10 +31,10 @@ func (ct *codeTest) test(t *testing.T, i int) {
 	} else {
 		code = slip.Read([]byte(ct.src), scope)
 	}
-	tt.Equal(t, ct.expect, code.String(), i, ": ", ct.src)
 	if 0 < len(ct.kind) {
 		tt.Equal(t, ct.kind, string(code[0].Hierarchy()[0]))
 	}
+	tt.Equal(t, ct.expect, code.String(), i, ": ", ct.src)
 }
 
 func TestCodeToken(t *testing.T) {

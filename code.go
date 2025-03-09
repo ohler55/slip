@@ -29,10 +29,6 @@ const (
 	numberDone    = 'N'
 	revertToToken = 'R'
 
-	signByte   = '+'
-	signNumber = 'n'
-	signToken  = 'w'
-
 	tokenStart = 't'
 	tokenDone  = 'T'
 
@@ -77,7 +73,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	valueMode = "" +
 		".........ak..a.................." + // 0x00
-		"a.Q#..tq()t+,+ttddddddddddt;ttt." + // 0x20
+		"a.Q#..tq()tt,tttttttttttttt;ttt." + // 0x20
 		"@tttttttttttttttttttttttttt...tt" + // 0x40
 		"Btttttttttttttttttttttttttt.P.t." + // 0x60
 		"................................" + // 0x80
@@ -102,28 +98,6 @@ const (
 		"T.......TTaa.aaaaaaaaaaaaaa.aaa." + // 0x20
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaa...aa" + // 0x40
 		".aaaaaaaaaaaaaaaaaaaaaaaaaa...a." + // 0x60
-		"................................" + // 0x80
-		"................................" + // 0xa0
-		"................................" + // 0xc0
-		"................................t" //  0xe0
-
-	//   0123456789abcdef0123456789abcdef
-	numberMode = "" +
-		".........NN..N.................." + // 0x00
-		"N.......NNRa.aaRaaaaaaaaaaR...RR" + // 0x20
-		"RRRRaaRRRRRRaRRRRRRaRRRRRRR...RR" + // 0x40
-		"RRRRaaRRRRRRaRRRRRRaRRRRRRR...R." + // 0x60
-		"................................" + // 0x80
-		"................................" + // 0xa0
-		"................................" + // 0xc0
-		"................................n" //  0xe0
-
-	//   0123456789abcdef0123456789abcdef
-	signMode = "" +
-		".........TT..T.................." + // 0x00
-		"T.......TTww.wwwnnnnnnnnnnw.www." + // 0x20
-		"wwwwwwwwwwwwwwwwwwwwwwwwwww...ww" + // 0x40
-		".wwwwwwwwwwwwwwwwwwwwwwwwww...w." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -531,24 +505,6 @@ func (r *reader) read(src []byte) {
 			r.mode = valueMode
 			goto Retry
 
-		case signByte:
-			r.tokenStart = r.pos
-			r.mode = signMode
-		case signNumber:
-			r.mode = numberMode
-		case signToken:
-			r.mode = tokenMode
-
-		case digitByte:
-			r.tokenStart = r.pos
-			r.mode = numberMode
-		case numberDone:
-			r.pushNumber(src)
-			r.mode = valueMode
-			goto Retry
-		case revertToToken:
-			r.mode = tokenMode
-
 		case doubleQuote:
 			r.tokenStart = r.pos + 1
 			r.buf = r.buf[:0]
@@ -727,8 +683,6 @@ func (r *reader) read(src []byte) {
 		switch r.mode {
 		case tokenMode:
 			r.pushToken(src)
-		case numberMode:
-			r.pushNumber(src)
 		case stringMode:
 			r.partial("string not terminated")
 		case runeMode:
@@ -860,17 +814,6 @@ func (r *reader) closeList() {
 	}
 }
 
-var (
-	decimalRegex     = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+$`)
-	shortFloatRegex  = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(s[-+]?[0-9]+)?$`)
-	singleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(f[-+]?[0-9]+)?$`)
-	doubleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(d[-+]?[0-9]+)?$`)
-	longFloatRegex   = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(l[-+]?[0-9]+)?$`)
-
-	base10IntegerRegex = regexp.MustCompile(`^[-+]?[0-9]+$`)
-	base10RatioRegex   = regexp.MustCompile(`^[-+]?[0-9]+/[-+]?[0-9]+$`)
-)
-
 // Converts tokens to the correct type and then pushes that value onto the
 // stack.
 func (r *reader) pushToken(src []byte) {
@@ -961,6 +904,18 @@ Push:
 	}
 }
 
+var (
+	decimalRegex     = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*$`)
+	eFloatRegex      = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*e[-+]?[0-9]+?$`)
+	shortFloatRegex  = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*s[-+]?[0-9]+?$`)
+	singleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*f[-+]?[0-9]+?$`)
+	doubleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*d[-+]?[0-9]+?$`)
+	longFloatRegex   = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*l[-+]?[0-9]+?$`)
+
+	base10IntegerRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?$`)
+	base10RatioRegex   = regexp.MustCompile(`^[-+]?[0-9]+/[-+]?[0-9]+$`)
+)
+
 func (r *reader) resolveToken(token []byte) Object {
 	buf := bytes.ToLower(token)
 	switch {
@@ -977,15 +932,26 @@ func (r *reader) resolveToken(token []byte) Object {
 				return Time(t)
 			}
 		}
+	case base10IntegerRegex.Match(buf): // TBD change to intRx on reader
+		buf = bytes.TrimRight(buf, ".")
+		// TBD allow bignums if parse fails
+		if num, err := strconv.ParseInt(string(buf), 10, 64); err == nil {
+			return Fixnum(num)
+		}
+		bi := big.NewInt(0)
+		// TBD use base
+		if _, ok := bi.SetString(string(buf), 10); ok {
+			return (*Bignum)(bi)
+		}
 	case decimalRegex.Match(buf):
 		if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
 			// TBD consider reader default float type
 			return DoubleFloat(f)
 		}
-	case base10IntegerRegex.Match(buf): // TBD change to intRx on reader
-		// TBD allow bignums if parse fails
-		if num, err := strconv.ParseInt(string(buf), 10, 64); err == nil {
-			return Fixnum(num)
+	case eFloatRegex.Match(buf):
+		if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
+			// TBD consider reader default float type
+			return DoubleFloat(f)
 		}
 	case doubleFloatRegex.Match(buf):
 		buf[bytes.IndexByte(buf, 'd')] = 'e'
@@ -1020,82 +986,6 @@ func (r *reader) resolveToken(token []byte) Object {
 		}
 	}
 	return Symbol(token)
-}
-
-func (r *reader) pushNumber(src []byte) {
-	// Numbers the easy way.
-	token := r.makeToken(src)
-	var (
-		obj Object
-		bi  *big.Int
-		s   string
-	)
-	if token[len(token)-1] == '.' {
-		token = token[:len(token)-1]
-		// TBD use base
-		if i, err := strconv.ParseInt(string(token), 10, 64); err == nil {
-			obj = Fixnum(i)
-			goto Push
-		}
-		bi = big.NewInt(0)
-		if err := bi.UnmarshalText(token); err == nil {
-			obj = (*Bignum)(bi)
-			goto Push
-		}
-	}
-	s = string(token)
-	// TBD use base
-	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
-		obj = Fixnum(i)
-		goto Push
-	}
-	bi = big.NewInt(0)
-	// TBD use base
-	if _, ok := bi.SetString(s, 10); ok {
-		obj = (*Bignum)(bi)
-		goto Push
-	}
-	for i, b := range token {
-		switch b {
-		case 'd', 'D':
-			t2 := make([]byte, len(token))
-			copy(t2, token)
-			t2[i] = 'e'
-			if f, err := strconv.ParseFloat(string(t2), 64); err == nil {
-				obj = DoubleFloat(f)
-				goto Push
-			}
-		case 's', 'S':
-			t2 := make([]byte, len(token))
-			copy(t2, token)
-			t2[i] = 'e'
-			if f, err := strconv.ParseFloat(string(t2), 64); err == nil {
-				obj = SingleFloat(f)
-				goto Push
-			}
-		case 'l', 'L':
-			t2 := make([]byte, len(token))
-			copy(t2, token)
-			t2[i] = 'e'
-			if bf, _, err := big.ParseFloat(string(t2), 10, uint(len(t2)*3), big.ToNearestAway); err == nil {
-				obj = (*LongFloat)(bf)
-				goto Push
-			}
-		}
-	}
-	if f, err := strconv.ParseFloat(s, 64); err == nil {
-		obj = DoubleFloat(f)
-		goto Push
-	}
-	r.pushToken(src)
-	return
-
-Push:
-	if 0 < len(r.stack) {
-		r.stack = append(r.stack, obj)
-	} else {
-		r.code = append(r.code, obj)
-	}
 }
 
 const hexByteValues = "" +
