@@ -64,13 +64,11 @@
  * [ ] PPRINT-TAB
  * [ ] PPRINT-TABULAR
  * [ ] REALPART
- * [ ] ROTATEF
  * [ ] SATISFIES
  * [ ] SBIT
  * [ ] SCALE-FLOAT
  * [ ] SHADOW
  * [ ] SHADOWING-IMPORT
- * [ ] SHIFTF
  * [ ] SIGNED-BYTE
  * [ ] SIMPLE-BIT-VECTOR
  * [ ] SIMPLE-BIT-VECTOR-P
@@ -628,6 +626,7 @@
  * [x] REVAPPEND
  * [x] REVERSE
  * [x] ROOM
+ * [x] ROTATEF
  * [x] ROUND
  * [x] ROW-MAJOR-AREF
  * [x] RPLACA
@@ -643,6 +642,7 @@
  * [x] SETF
  * [x] SETQ
  * [x] SEVENTH
+ * [x] SHIFTF
  * [x] SHORT-FLOAT
  * [x] SHORT-FLOAT-EPSILON
  * [x] SHORT-FLOAT-NEGATIVE-EPSILON
