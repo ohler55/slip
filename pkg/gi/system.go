@@ -169,11 +169,11 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
 		switch ll[1] {
 		case slip.Symbol(":file"), slip.Symbol(":git"):
-			loadFiles(self, dir, ll[2:])
+			loadFiles(s, self, dir, ll[2:])
 		case slip.Symbol(":require"):
-			loadRequire(self, dir, ll[2:])
+			loadRequire(s, self, dir, ll[2:])
 		case slip.Symbol(":call"):
-			loadCall(self, dir, ll[2:])
+			loadCall(s, self, dir, ll[2:])
 		default:
 			slip.NewPanic("%s is not a valid source type.", ll[1])
 		}
@@ -198,7 +198,7 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 				}
 			}
 			for _, m := range matches {
-				loadFile(self, m)
+				loadFile(s, self, m)
 			}
 		}
 	}
@@ -389,10 +389,10 @@ func fetchCall(self *flavors.Instance, dir string, args slip.List) {
 	}
 }
 
-func loadFiles(self *flavors.Instance, dir string, args slip.List) {
+func loadFiles(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
 	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":system")); has {
 		subsys := slip.MustBeString(val, ":system")
-		loadSystemFile(self, dir, filepath.Join(dir, subsys))
+		loadSystemFile(s, self, dir, filepath.Join(dir, subsys))
 		return
 	}
 	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":files")); has {
@@ -411,27 +411,27 @@ func loadFiles(self *flavors.Instance, dir string, args slip.List) {
 					slip.NewPanic("%s not found.", src)
 				}
 			} else if fi.IsDir() {
-				loadDir(self, src)
+				loadDir(s, self, src)
 				continue
 			}
-			loadFile(self, src)
+			loadFile(s, self, src)
 		}
 		return
 	}
-	loadDir(self, dir)
+	loadDir(s, self, dir)
 }
 
-func loadDir(self *flavors.Instance, dir string) {
+func loadDir(s *slip.Scope, self *flavors.Instance, dir string) {
 	_ = filepath.Walk(dir, func(path string, fi fs.FileInfo, err error) error {
 		if fi != nil && fi.Mode().IsRegular() && strings.HasSuffix(path, ".lisp") {
-			loadFile(self, path)
+			loadFile(s, self, path)
 		}
 		return nil
 	})
 }
 
-func loadSystemFile(self *flavors.Instance, dir, path string) {
-	sys, ok := loadFile(self, path).(slip.Instance)
+func loadSystemFile(s *slip.Scope, self *flavors.Instance, dir, path string) {
+	sys, ok := loadFile(s, self, path).(slip.Instance)
 	if !ok {
 		slip.PanicType("system", sys, "instance")
 	}
@@ -443,7 +443,7 @@ func loadSystemFile(self *flavors.Instance, dir, path string) {
 	sys.Receive(scope, ":load", nil, 0)
 }
 
-func loadRequire(self *flavors.Instance, dir string, args slip.List) {
+func loadRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
 	slip.ArgCountCheck(self, args, 2, 2)
 	path := filepath.Join(dir, slip.MustBeString(args[0], "package-name"))
 	if _, err := plugin.Open(path); err != nil {
@@ -451,7 +451,7 @@ func loadRequire(self *flavors.Instance, dir string, args slip.List) {
 	}
 }
 
-func loadCall(self *flavors.Instance, dir string, args slip.List) {
+func loadCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
 	switch ta := args[1].(type) {
 	case nil:
 		// nothing to do
@@ -464,7 +464,7 @@ func loadCall(self *flavors.Instance, dir string, args slip.List) {
 	}
 }
 
-func loadFile(self *flavors.Instance, path string) (result slip.Object) {
+func loadFile(s *slip.Scope, self *flavors.Instance, path string) (result slip.Object) {
 	defer func() {
 		self.Set(slip.Symbol("*load-pathname*"), nil)
 		self.Set(slip.Symbol("*load-truename*"), nil)
@@ -472,7 +472,7 @@ func loadFile(self *flavors.Instance, path string) (result slip.Object) {
 	self.Set(slip.Symbol("*load-pathname*"), slip.String(path))
 	self.Set(slip.Symbol("*load-truename*"), slip.String(path))
 	if buf, err := os.ReadFile(path); err == nil {
-		code := slip.Read(buf)
+		code := slip.Read(buf, s)
 		code.Compile()
 		result = code.Eval(&self.Scope, nil)
 	} else {

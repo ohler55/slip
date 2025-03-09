@@ -14,7 +14,7 @@ func TestRemhashOk(t *testing.T) {
 	_ = slip.ReadString(`
 (setq table (make-hash-table))
 (setf (gethash 'a table) 1)
-`).Eval(scope, nil)
+`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(remhash 'a table)`,
@@ -29,7 +29,7 @@ func TestRemhashOk(t *testing.T) {
 
 func TestRemhashArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq table (make-hash-table))").Eval(scope, nil)
+	_ = slip.ReadString("(setq table (make-hash-table))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(remhash 'a table t)`,

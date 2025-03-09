@@ -62,12 +62,12 @@ func TestSocketPeerPortHTTP(t *testing.T) {
 			port, _ := strconv.Atoi(addr[pos+1:])
 
 			scope := slip.NewScope()
-			us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
+			us := slip.ReadString("(make-instance 'socket)", scope).Eval(scope, nil).(*flavors.Instance)
 			tc, _ := nc.(*net.TCPConn)
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
-			result := slip.ReadString("(send sock :peer-port)").Eval(scope, nil).(slip.Fixnum)
+			result := slip.ReadString("(send sock :peer-port)", scope).Eval(scope, nil).(slip.Fixnum)
 			tt.Equal(t, slip.Fixnum(port), result)
 		}
 	}

@@ -74,7 +74,7 @@ func (obj *EchoStream) Close() error {
 	return nil
 }
 
-// IsOpen return true if the stream is open or false if not.
+// IsOpen returns true if the stream is open or false if not.
 func (obj *EchoStream) IsOpen() bool {
 	return obj.input != nil && obj.output != nil
 }

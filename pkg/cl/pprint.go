@@ -52,6 +52,7 @@ func (f *Pprint) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicArgCount(f, 1, 2)
 	}
 	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(s)
 	p.Escape = true
 	p.Pretty = true
 	obj := args[0]

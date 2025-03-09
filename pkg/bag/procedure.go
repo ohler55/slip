@@ -21,7 +21,7 @@ func SetCompileScript(s *slip.Scope) {
 		s = slip.NewScope()
 	}
 	jp.CompileScript = func(code []byte) jp.Procedure {
-		obj := slip.Compile(code).(any)
+		obj := slip.Compile(code, s).(any)
 		var (
 			doc    *slip.FuncDoc
 			caller slip.Caller

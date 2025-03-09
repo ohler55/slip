@@ -176,7 +176,7 @@ func TestFramerDocs(t *testing.T) {
 		":forget",
 		":refresh",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method watch-framer %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method watch-framer %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

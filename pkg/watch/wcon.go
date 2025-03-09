@@ -42,7 +42,7 @@ func (c *wcon) readExpr() (obj slip.Object) {
 			}
 		}
 	}()
-	code, pos := slip.ReadOne(c.expr)
+	code, pos := slip.ReadOne(c.expr, slip.NewScope())
 	if 0 < len(code) {
 		obj = code[0]
 	}

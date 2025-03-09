@@ -17,8 +17,9 @@ func TestRefuteEqualFail(t *testing.T) {
 	scope.Let("*print-ansi*", nil)
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-equal 3 (+ 1 2) "sample"))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((refute-equal 3 (+ 1 2) "sample"))))`,
+		scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: FAIL
   expect: 3
   actual: 3
@@ -35,8 +36,9 @@ func TestRefuteEqualMessageFail(t *testing.T) {
 	scope.Let("*print-ansi*", nil)
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-equal 3 (+ 1 2) 'sample))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((refute-equal 3 (+ 1 2) 'sample))))`,
+		scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: FAIL
   expect: 3
   actual: 3
@@ -53,8 +55,9 @@ func TestRefuteEqualPass(t *testing.T) {
 	scope.Let("*print-ansi*", nil)
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-equal 3 (+ 2 2) 'sample))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((refute-equal 3 (+ 2 2) 'sample))))`,
+		scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 	tt.Equal(t, `toot: PASS
 `, out.String())
 }
@@ -65,8 +68,8 @@ func TestRefuteEqualAnsi(t *testing.T) {
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-equal 3 (+ 1 2)))))`).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`).Eval(scope, nil)
+                                                   :forms '((refute-equal 3 (+ 1 2)))))`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
 
 	expect := "toot: \x1b[1mFAIL\x1b[m\n" +
 		"  \x1b[0;31m\x1b[mexpect: 3\n" +

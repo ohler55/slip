@@ -698,11 +698,12 @@ func (c *control) dirEval(colon, at bool, params []any) {
 	if end <= c.pos {
 		slip.NewPanic("eval directive not terminated at %d of %q", c.pos, c.str)
 	}
-	val := slip.Read(c.str[start:c.pos]).Eval(c.scope, nil)
+	val := slip.Read(c.str[start:c.pos], c.scope).Eval(c.scope, nil)
 	if s, ok := val.(slip.String); ok {
 		c.out = append(c.out, s...)
 	} else {
 		p := *slip.DefaultPrinter()
+		p.ScopedUpdate(c.scope)
 		p.Escape = false
 		p.Readably = false
 		c.out = p.Append(c.out, val, 0)
@@ -762,6 +763,7 @@ func (c *control) dirA(colon, at bool, params []any) {
 			c.out = append(c.out, ta.Error()...)
 		default:
 			p := *slip.DefaultPrinter()
+			p.ScopedUpdate(c.scope)
 			p.Escape = false
 			p.Readably = false
 			c.out = p.Append(c.out, arg, 0)
@@ -769,6 +771,7 @@ func (c *control) dirA(colon, at bool, params []any) {
 		return
 	}
 	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(c.scope)
 	p.Escape = false
 	p.Readably = false
 	c.dirAS(colon, at, params, &p)
@@ -844,6 +847,7 @@ func (c *control) dirInt(colon, at bool, params []any, base int) {
 		neg = true // stops @ addition of a +
 		colon = false
 		p := *slip.DefaultPrinter()
+		p.ScopedUpdate(c.scope)
 		p.Escape = true
 		p.Readably = true
 		p.Base = 10
@@ -910,6 +914,7 @@ func (c *control) getEFGarg(ff *floatFormatter) {
 		ff.exp -= len(ff.digits) - 1
 	default:
 		p := *slip.DefaultPrinter()
+		p.ScopedUpdate(c.scope)
 		p.Escape = false
 		p.Readably = false
 		ff.digits = p.Append(nil, ta, 0)
@@ -1272,6 +1277,7 @@ func (c *control) dirR(colon, at bool, params []any) {
 
 func (c *control) dirS(colon, at bool, params []any) {
 	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(c.scope)
 	p.Escape = true
 	p.Readably = true
 	c.dirAS(colon, at, params, &p)
@@ -1392,6 +1398,7 @@ func (c *control) dirW(colon, at bool, params []any) {
 		c.argPos++
 	}
 	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(c.scope)
 	if colon {
 		p.Pretty = true
 	}

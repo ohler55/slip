@@ -40,7 +40,7 @@ func TestSixthNotList(t *testing.T) {
 
 func TestSixthSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d e f))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d e f))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (sixth target) 'x)",
@@ -51,7 +51,7 @@ func TestSixthSetfList(t *testing.T) {
 
 func TestSixthSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d e . f))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d e . f))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (sixth target) 'x)",

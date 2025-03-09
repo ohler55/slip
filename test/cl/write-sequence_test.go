@@ -16,7 +16,7 @@ func TestWriteSequenceString(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString(`(write-sequence "abcdef" out :start 1 :end 3)`).Eval(scope, nil)
+	result := slip.ReadString(`(write-sequence "abcdef" out :start 1 :end 3)`, scope).Eval(scope, nil)
 
 	tt.Equal(t, slip.String("abcdef"), result)
 	tt.Equal(t, "bc", out.String())
@@ -27,7 +27,7 @@ func TestWriteSequenceList(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(write-sequence '(65 #\B) out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(write-sequence '(65 #\B) out)`, scope).Eval(scope, nil)
 	tt.Equal(t, "AB", out.String())
 }
 
@@ -36,7 +36,7 @@ func TestWriteSequenceNilEnd(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString(`(write-sequence "abcdef" out :end nil)`).Eval(scope, nil)
+	result := slip.ReadString(`(write-sequence "abcdef" out :end nil)`, scope).Eval(scope, nil)
 
 	tt.Equal(t, slip.String("abcdef"), result)
 	tt.Equal(t, "abcdef", out.String())

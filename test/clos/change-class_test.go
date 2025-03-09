@@ -10,6 +10,7 @@ import (
 )
 
 func TestChangeClassSymbol(t *testing.T) {
+	scope := slip.NewScope()
 	code := slip.ReadString(`
 (defflavor strawberry ((size "medium")) ()
  :gettable-instance-variables
@@ -20,11 +21,10 @@ func TestChangeClassSymbol(t *testing.T) {
  :settable-instance-variables
  (:initable-instance-variables size fresh))
 (setq berry (make-instance 'strawberry :size "medium"))
-`)
-	scope := slip.NewScope()
+`, scope)
 	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'blackberry)").Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'strawberry)", scope).Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'blackberry)", scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -39,6 +39,7 @@ func TestChangeClassSymbol(t *testing.T) {
 }
 
 func TestChangeClassFlavor(t *testing.T) {
+	scope := slip.NewScope()
 	code := slip.ReadString(`
 (defflavor strawberry ((size "medium")) ()
  :gettable-instance-variables
@@ -49,11 +50,10 @@ func TestChangeClassFlavor(t *testing.T) {
  :settable-instance-variables
  (:initable-instance-variables size fresh))
 (setq berry (make-instance 'strawberry :size "medium"))
-`)
-	scope := slip.NewScope()
+`, scope)
 	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'strawberry)").Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'blackberry)").Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'strawberry)", scope).Eval(scope, nil)
+	defer slip.ReadString("(undefflavor 'blackberry)", scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope:  scope,

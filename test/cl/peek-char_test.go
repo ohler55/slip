@@ -31,7 +31,7 @@ func TestPeekCharStream(t *testing.T) {
 		Source: `(peek-char nil in)`,
 		Expect: `#\a`,
 	}).Test(t)
-	result := slip.ReadString("(read-char in)").Eval(scope, nil)
+	result := slip.ReadString("(read-char in)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Character('a'), result)
 }
 
@@ -44,14 +44,14 @@ func TestPeekCharSkipWhite(t *testing.T) {
 		Source: `(peek-char t in)`,
 		Expect: `#\a`,
 	}).Test(t)
-	result := slip.ReadString("(read-char in)").Eval(scope, nil)
+	result := slip.ReadString("(read-char in)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Character('a'), result)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char t in)`,
 		Expect: `#\b`,
 	}).Test(t)
-	result = slip.ReadString("(read-char in)").Eval(scope, nil)
+	result = slip.ReadString("(read-char in)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Character('b'), result)
 	(&sliptest.Function{
 		Scope:  scope,
@@ -69,7 +69,7 @@ func TestPeekCharTarget(t *testing.T) {
 		Source: `(peek-char #\b in)`,
 		Expect: `#\b`,
 	}).Test(t)
-	result := slip.ReadString("(read-char in)").Eval(scope, nil)
+	result := slip.ReadString("(read-char in)", scope).Eval(scope, nil)
 	tt.Equal(t, slip.Character('b'), result)
 }
 

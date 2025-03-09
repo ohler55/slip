@@ -50,7 +50,7 @@ func TestRequestMethod(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :method out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :method out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":method"))
 
@@ -73,7 +73,7 @@ func TestRequestURL(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :url out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :url out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":url"))
 
@@ -96,7 +96,7 @@ func TestRequestProtocol(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :protocol out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :protocol out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":protocol"))
 
@@ -119,7 +119,7 @@ func TestRequestContentLength(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :content-length out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :content-length out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":content-length"))
 
@@ -142,7 +142,7 @@ func TestRequestHeader(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :header out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :header out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":header"))
 
@@ -170,7 +170,7 @@ func TestRequestHeaderGet(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :header-get out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :header-get out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":header-get"))
 
@@ -198,7 +198,7 @@ func TestRequestTrailer(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :trailer out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :trailer out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":trailer"))
 
@@ -226,7 +226,7 @@ func TestRequestTrailerGet(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :trailer-get out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :trailer-get out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":trailer-get"))
 
@@ -254,7 +254,7 @@ func TestRequestRemoteAddr(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :remote-addr out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :remote-addr out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":remote-addr"))
 
@@ -277,7 +277,7 @@ func TestRequestBody(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :body out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :body out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":body"))
 
@@ -300,7 +300,7 @@ func TestRequestClose(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :close out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :close out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":close"))
 
@@ -330,7 +330,7 @@ func TestRequestWriteString(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :write out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :write out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":write"))
 
@@ -352,7 +352,7 @@ func TestRequestWriteStream(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(send request :write out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send request :write out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, "PUT / HTTP/1.1\r\n"+
 		"Host: localhost:6969\r\n"+
@@ -370,7 +370,7 @@ func TestRequestWriteStdout(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(send request :write t)`).Eval(scope, nil)
+	_ = slip.ReadString(`(send request :write t)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, "PUT / HTTP/1.1\r\n"+
 		"Host: localhost:6969\r\n"+
@@ -386,14 +386,14 @@ func TestRequestWriteStreamError(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let("request", sampleRequest())
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
-	tt.Panic(t, func() { _ = slip.ReadString(`(send request :write out)`).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(send request :write out)`, scope).Eval(scope, nil) })
 }
 
 func TestRequestWriteStdoutError(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let("request", sampleRequest())
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: badWriter(0)})
-	tt.Panic(t, func() { _ = slip.ReadString(`(send request :write t)`).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(send request :write t)`, scope).Eval(scope, nil) })
 }
 
 func TestRequestInit(t *testing.T) {
@@ -432,7 +432,7 @@ func TestRequestInit(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-request-flavor :init out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-request-flavor :init out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":init"))
 }

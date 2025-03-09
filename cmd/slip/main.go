@@ -129,7 +129,7 @@ func run() {
 				if w != nil {
 					_, _ = fmt.Fprintf(w, ";; Loading contents of %s\n", path)
 				}
-				code = append(code, slip.Read(buf)...)
+				code = append(code, slip.Read(buf, scope)...)
 				paths = append(paths, slip.String(path))
 			} else {
 				panic(err)
@@ -157,7 +157,7 @@ func run() {
 				if w != nil {
 					_, _ = fmt.Fprintf(w, ";; Loading contents of %s\n", pathname)
 				}
-				code = slip.Read(buf)
+				code = slip.Read(buf, scope)
 				code.Compile()
 				if print == nil {
 					code.Eval(scope, nil)
@@ -176,7 +176,7 @@ func run() {
 	scope.Remove(slip.Symbol("*load-truename*"))
 	if 0 < len(evalCode) {
 		path = ""
-		code = slip.ReadString(evalCode)
+		code = slip.ReadString(evalCode, scope)
 		for _, obj := range code {
 			result := obj.Eval(scope, 0)
 			if print != nil {

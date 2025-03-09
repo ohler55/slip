@@ -46,7 +46,7 @@ func TestConcatenatedStreamReadOk(t *testing.T) {
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    "(read cs)",
-		PanicType: slip.StreamErrorSymbol,
+		PanicType: slip.EndOfFileSymbol,
 	}).Test(t)
 }
 

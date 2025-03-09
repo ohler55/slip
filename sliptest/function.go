@@ -53,7 +53,7 @@ func (tf *Function) Test(t *testing.T) {
 	switch {
 	case tf.PanicType != nil:
 		r := tt.Panic(t, func() {
-			obj := slip.CompileString(tf.Source)
+			obj := slip.CompileString(tf.Source, scope)
 			obj.Eval(scope, 0)
 		}, tf.Source)
 		so, ok := r.(slip.Object)
@@ -64,11 +64,11 @@ func (tf *Function) Test(t *testing.T) {
 		}
 	case tf.Panics:
 		tt.Panic(t, func() {
-			obj := slip.CompileString(tf.Source)
+			obj := slip.CompileString(tf.Source, scope)
 			obj.Eval(scope, 0)
 		}, tf.Source)
 	default:
-		obj := slip.CompileString(tf.Source)
+		obj := slip.CompileString(tf.Source, scope)
 		tf.Result = scope.Eval(obj, 0)
 		if tf.Validate != nil {
 			tf.Validate(t, tf.Result)

@@ -55,7 +55,7 @@ func (f *ReadPush) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	if channel, ok = args[1].(Channel); !ok {
 		slip.PanicType("channel", args[1], "channel")
 	}
-	slip.ReadStreamPush(r, channel)
+	slip.ReadStreamPush(r, s, channel)
 
 	return nil
 }

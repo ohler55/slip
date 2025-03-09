@@ -76,6 +76,8 @@ func (obj *LongFloat) Equal(other Object) (eq bool) {
 	switch to := other.(type) {
 	case Fixnum:
 		eq = (*big.Float)(obj).Cmp(big.NewFloat(float64(to))) == 0
+	case Octet:
+		eq = (*big.Float)(obj).Cmp(big.NewFloat(float64(to))) == 0
 	case SingleFloat:
 		eq = (*big.Float)(obj).Cmp(big.NewFloat(float64(to))) == 0
 	case DoubleFloat:

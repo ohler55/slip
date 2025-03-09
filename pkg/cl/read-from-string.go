@@ -133,7 +133,7 @@ func (f *ReadFromString) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	} else {
 		buf = []byte(ss)
 	}
-	code, pos := slip.ReadOne(buf)
+	code, pos := slip.ReadOne(buf, s)
 	pos += start
 	if 0 < len(code) {
 		if !pw {

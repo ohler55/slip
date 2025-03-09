@@ -24,7 +24,7 @@ func init() {
 				},
 			},
 			Return: "object",
-			Text:   `__return-__ the _result_ from a block with a _nil_ name.`,
+			Text:   `__return__ the _result_ from a block with a _nil_ name.`,
 			Examples: []string{
 				"(block nil (return 3)) => 3",
 			},

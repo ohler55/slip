@@ -18,7 +18,7 @@ func TestLoggerDefault(t *testing.T) {
 	var log bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &log})
-	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor :out out))").Eval(scope, nil)
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor :out out))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(progn (send logger :error "error ~A" 1) (send logger :shutdown))`,
@@ -26,7 +26,7 @@ func TestLoggerDefault(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, "E error 1\n", log.String())
 	tt.Equal(t, "#<flavor logger-flavor>", gi.Logger().String())
-	result := slip.ReadString("(send logger :out)").Eval(scope, nil)
+	result := slip.ReadString("(send logger :out)", scope).Eval(scope, nil)
 	tt.Equal(t, "#<OUTPUT-STREAM>", slip.ObjectString(result))
 }
 
@@ -36,7 +36,7 @@ func TestLoggerTimeLevelColor(t *testing.T) {
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &log})
 	_ = slip.ReadString(
 		"(setq logger (make-instance 'logger-flavor :out out :with-time t :with-level t :colorize t))",
-	).Eval(scope, nil)
+		scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope: scope,
@@ -53,9 +53,9 @@ func TestLoggerJSON(t *testing.T) {
 	var log bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("log-out"), &slip.OutputStream{Writer: &log})
-	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor :json t))").Eval(scope, nil)
-	_ = slip.ReadString("(send logger :set-level 5)").Eval(scope, nil)
-	_ = slip.ReadString("(send logger :set-out log-out)").Eval(scope, nil)
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor :json t))", scope).Eval(scope, nil)
+	_ = slip.ReadString("(send logger :set-level 5)", scope).Eval(scope, nil)
+	_ = slip.ReadString("(send logger :set-out log-out)", scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope: scope,
@@ -74,8 +74,8 @@ func TestLoggerLog(t *testing.T) {
 	var log bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("log-out"), &slip.OutputStream{Writer: &log})
-	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))").Eval(scope, nil)
-	_ = slip.ReadString("(send logger :set-out log-out)").Eval(scope, nil)
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))", scope).Eval(scope, nil)
+	_ = slip.ReadString("(send logger :set-out log-out)", scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope: scope,
@@ -118,7 +118,7 @@ func TestLoggerDescribe(t *testing.T) {
 		":shutdown",
 	} {
 		out.Reset()
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method 'logger-flavor %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method 'logger-flavor %s out)`, method), scope).Eval(scope, nil)
 		str := out.String()
 		tt.Equal(t, true, strings.Contains(str, "logger-flavor"))
 		tt.Equal(t, true, strings.Contains(str, method))
@@ -129,7 +129,7 @@ func TestLoggerNilOut(t *testing.T) {
 	var log bytes.Buffer
 	scope := slip.NewScope()
 	scope.Set(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &log})
-	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor :out nil))").Eval(scope, nil)
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor :out nil))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(progn (send logger :error "standard error") (send logger :shutdown))`,
@@ -142,8 +142,8 @@ func TestLoggerSetOutNil(t *testing.T) {
 	var log bytes.Buffer
 	scope := slip.NewScope()
 	scope.Set(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &log})
-	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))").Eval(scope, nil)
-	_ = slip.ReadString("(send logger :set-out nil)").Eval(scope, nil)
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))", scope).Eval(scope, nil)
+	_ = slip.ReadString("(send logger :set-out nil)", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(progn (send logger :error "standard error") (send logger :shutdown))`,
@@ -161,7 +161,7 @@ func TestLoggerBadOut(t *testing.T) {
 
 func TestLoggerSetOutArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))").Eval(scope, nil)
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send logger :set-out)`,
@@ -171,7 +171,7 @@ func TestLoggerSetOutArgCount(t *testing.T) {
 
 func TestLoggerSetOutBad(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))").Eval(scope, nil)
+	_ = slip.ReadString("(setq logger (make-instance 'logger-flavor))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send logger :set-out t)`,

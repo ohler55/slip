@@ -13,15 +13,15 @@ import (
 
 func TestFlosfunDocFlavor(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(flosfun 'foo-foo :flavor vanilla-flavor)`).Eval(scope, nil)
+	_ = slip.ReadString(`(flosfun 'foo-foo :flavor vanilla-flavor)`, scope).Eval(scope, nil)
 
-	result := slip.ReadString("(foo-foo (make-instance 'vanilla-flavor))").Eval(scope, nil)
+	result := slip.ReadString("(foo-foo (make-instance 'vanilla-flavor))", scope).Eval(scope, nil)
 	tt.Equal(t, "#<flavor vanilla-flavor>", slip.ObjectString(result))
 
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString("(describe 'foo-foo out)").Eval(scope, nil)
+	_ = slip.ReadString("(describe 'foo-foo out)", scope).Eval(scope, nil)
 
 	tt.Equal(t, "/foo-foo sends/", out.String())
 	tt.Equal(t, "/Returns the flavor/", out.String()) // pulled in from vanilla-flavor
@@ -29,19 +29,19 @@ func TestFlosfunDocFlavor(t *testing.T) {
 
 func TestFlosfunDocString(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(flosfun "foo-zoo" :flavor ":flavor.")`).Eval(scope, nil)
+	_ = slip.ReadString(`(flosfun "foo-zoo" :flavor ":flavor.")`, scope).Eval(scope, nil)
 
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString("(describe 'foo-zoo out)").Eval(scope, nil)
+	_ = slip.ReadString("(describe 'foo-zoo out)", scope).Eval(scope, nil)
 
 	tt.Equal(t, "/foo-zoo sends/", out.String())
 }
 
 func TestFlosfunNotInstance(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(flosfun "foo-boo" :flavor ":flavor.")`).Eval(scope, nil)
+	_ = slip.ReadString(`(flosfun "foo-boo" :flavor ":flavor.")`, scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Source:    `(foo-boo t)`,

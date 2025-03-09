@@ -44,9 +44,9 @@ func TestSocketFd(t *testing.T) {
 	inst, ok := tf.Result.(*flavors.Instance)
 	tt.Equal(t, true, ok)
 	tt.SameType(t, 0, inst.Any) // int
-	socket := slip.ReadString(`(send sock :socket)`).Eval(scope, nil)
+	socket := slip.ReadString(`(send sock :socket)`, scope).Eval(scope, nil)
 	tt.SameType(t, slip.Fixnum(0), socket)
-	state := slip.ReadString(`(send sock :state)`).Eval(scope, nil)
+	state := slip.ReadString(`(send sock :state)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Symbol(":write"), state)
 }
 
@@ -133,7 +133,7 @@ func TestSocketDocs(t *testing.T) {
 		":stream",
 		":type",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method socket %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method socket %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

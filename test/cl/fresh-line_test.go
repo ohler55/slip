@@ -14,11 +14,11 @@ func TestFreshLineStream(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &out)
-	result := slip.ReadString("(fresh-line out)").Eval(scope, nil)
+	result := slip.ReadString("(fresh-line out)", scope).Eval(scope, nil)
 	tt.NotNil(t, result)
 	tt.Equal(t, "\n", out.Content())
 
-	result = slip.ReadString("(fresh-line out)").Eval(scope, nil)
+	result = slip.ReadString("(fresh-line out)", scope).Eval(scope, nil)
 	tt.Nil(t, result)
 	tt.Equal(t, "\n", out.Content())
 }
@@ -30,21 +30,22 @@ func TestFreshLineStdout(t *testing.T) {
 	orig := slip.StandardOutput
 	defer func() { slip.StandardOutput = orig }()
 	slip.StandardOutput = &slip.OutputStream{Writer: &out}
-	result := slip.ReadString("(fresh-line)").Eval(scope, nil)
+	result := slip.ReadString("(fresh-line)", scope).Eval(scope, nil)
 	tt.NotNil(t, result)
 	tt.Equal(t, "\n", out.Content())
 
-	result = slip.ReadString("(fresh-line)").Eval(scope, nil)
+	result = slip.ReadString("(fresh-line)", scope).Eval(scope, nil)
 	tt.Nil(t, result)
 	tt.Equal(t, "\n", out.Content())
 }
 
 func TestFreshLineBadStream(t *testing.T) {
-	tt.Panic(t, func() { _ = slip.ReadString("(fresh-line t)").Eval(slip.NewScope(), nil) })
+	scope := slip.NewScope()
+	tt.Panic(t, func() { _ = slip.ReadString("(fresh-line t)", scope).Eval(scope, nil) })
 }
 
 func TestFreshLineWriteFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
-	tt.Panic(t, func() { _ = slip.ReadString("(fresh-line out)").Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(fresh-line out)", scope).Eval(scope, nil) })
 }

@@ -4,42 +4,8 @@
 
 - next
 
- - misc
-  - [ ] CONSTANTLY
-  - [ ] DECODE-UNIVERSAL-TIME
-  - [ ] DESTRUCTURING-BIND
-  - [ ] DRIBBLE
-  - [ ] ELT
-  - [ ] ENCODE-UNIVERSAL-TIME
-  - [ ] ERROR (function)
-  - [ ] END-OF-FILE
-  - [ ] ENDP
-  - [ ] FILL
-  - [ ] FORMATTER
-  - [ ] GENTEMP
-  - [ ] GET-DECODED-TIME
-  - [ ] GET-UNIVERSAL-TIME
-  - [ ] MAKE-SEQUENCE
-  - [ ] MAP-INTO
-  - [ ] MISMATCH
-  - [ ] MULTIPLE-VALUE-BIND
-  - [ ] MULTIPLE-VALUE-CALL
-  - [ ] MULTIPLE-VALUE-LIST
-  - [ ] MULTIPLE-VALUE-PROG1
-  - [ ] MULTIPLE-VALUE-SETQ
-  - [ ] MULTIPLE-VALUES-LIMIT
-  - [ ] REPLACE
-  - [ ] ROTATEF
-  - [ ] SHIFTF
-  - [ ] SPECIAL-OPERATOR-P
-  - [ ] SUBTYPEP
-  - [ ] TRUENAME
-  - [ ] UNWIND-PROTECT
-  - [ ] USER-HOMEDIR-PATHNAME
-  - [ ] WILD-PATHNAME-P
-  - [ ] WITH-STANDARD-IO-SYNTAX
-  - [ ] Y-OR-N-P
-  - [ ] YES-OR-NO-P
+ - tab-expand
+  - tab expand words any where (like describe and apropos)
 
  - math
   - [ ] ACONS
@@ -95,6 +61,11 @@
   - [ ] SBIT
   - [ ] SIMPLE-BIT-VECTOR
   - [ ] SIMPLE-BIT-VECTOR-P
+
+ - tough-ones
+  - [ ] DESTRUCTURING-BIND
+  - [ ] FORMATTER
+
 
 - autocomplete
  - for describe and others>

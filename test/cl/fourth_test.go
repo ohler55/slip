@@ -40,7 +40,7 @@ func TestFourthNotList(t *testing.T) {
 
 func TestFourthSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (fourth target) 'x)",
@@ -51,7 +51,7 @@ func TestFourthSetfList(t *testing.T) {
 
 func TestFourthSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c . d))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c . d))", scope).Eval(slip.NewScope(), nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (fourth target) 'x)",

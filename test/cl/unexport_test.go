@@ -11,7 +11,7 @@ import (
 
 func TestUnexportSymbol(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(export 'ux1)").Eval(scope, nil)
+	_ = slip.ReadString("(export 'ux1)", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(unexport 'ux1)`,
 		Expect: "t",
@@ -24,7 +24,7 @@ func TestUnexportSymbol(t *testing.T) {
 
 func TestUnexportString(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(export "ux2")`).Eval(scope, nil)
+	_ = slip.ReadString(`(export "ux2")`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(unexport "ux2")`,
 		Expect: "t",
@@ -33,7 +33,7 @@ func TestUnexportString(t *testing.T) {
 
 func TestUnexportList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(export "ux3")`).Eval(scope, nil)
+	_ = slip.ReadString(`(export "ux3")`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(unexport '(ux3 "ux4"))`,
 		Expect: "t",

@@ -15,7 +15,7 @@ import (
 func TestBagModifyNilPath(t *testing.T) {
 	scope := slip.NewScope()
 	obj := slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`).Eval(scope, nil).(*flavors.Instance)
+		`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-modify bag 'reverse)`,
@@ -27,7 +27,7 @@ func TestBagModifyNilPath(t *testing.T) {
 func TestBagModifyStringPath(t *testing.T) {
 	scope := slip.NewScope()
 	obj := slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`).Eval(scope, nil).(*flavors.Instance)
+		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-modify bag 'reverse "b")`,
@@ -39,7 +39,7 @@ func TestBagModifyStringPath(t *testing.T) {
 func TestBagModifyLambdaBag(t *testing.T) {
 	scope := slip.NewScope()
 	obj := slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`).Eval(scope, nil).(*flavors.Instance)
+		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-modify bag (lambda (b) (send b :set 0 "[1]")) "b" :as-bag t)`,
@@ -51,7 +51,7 @@ func TestBagModifyLambdaBag(t *testing.T) {
 func TestBagModifyLambdaBagObj(t *testing.T) {
 	scope := slip.NewScope()
 	obj := slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`).Eval(scope, nil).(*flavors.Instance)
+		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-modify bag (lambda (b) (send b :get "[1]")) "b" :as-bag t)`,
@@ -63,7 +63,7 @@ func TestBagModifyLambdaBagObj(t *testing.T) {
 func TestBagModifyLambdaObjBag(t *testing.T) {
 	scope := slip.NewScope()
 	obj := slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`).Eval(scope, nil).(*flavors.Instance)
+		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-modify bag (lambda (b) (make-instance 'bag-flavor :set (reverse b))) (make-bag-path "b"))`,
@@ -75,7 +75,7 @@ func TestBagModifyLambdaObjBag(t *testing.T) {
 func TestBagModifyBadPath(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`).Eval(scope, nil).(*flavors.Instance)
+		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-modify bag 'reverse t)`,
@@ -93,7 +93,7 @@ func TestBagModifyNotBag(t *testing.T) {
 func TestBagModifyBadKeyword(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`).Eval(scope, nil).(*flavors.Instance)
+		`(setq bag (make-instance 'bag-flavor :parse "{a:1 b:[1 2 3]}"))`, scope).Eval(scope, nil).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-modify bag 'reverse nil t t)`,

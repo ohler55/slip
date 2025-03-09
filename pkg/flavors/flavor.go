@@ -187,6 +187,16 @@ func (obj *Flavor) inheritsFlavor(name string) bool {
 	return false
 }
 
+// Inherits returns true if this Class inherits from a specified Class.
+func (obj *Flavor) Inherits(sc slip.Class) bool {
+	for _, f2 := range obj.inherit {
+		if f2 == sc {
+			return true
+		}
+	}
+	return false
+}
+
 func (obj *Flavor) inheritFlavor(cf *Flavor) {
 	for _, f2 := range obj.inherit {
 		if f2 == cf {

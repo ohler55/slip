@@ -456,6 +456,70 @@ Top:
 	return b
 }
 
+// ScopedUpdate updates the printer based on values of the values in the
+// provided Scope.
+func (p *Printer) ScopedUpdate(s *Scope) {
+	if s != nil {
+		for k, f := range map[string]func(v Object){
+			"*print-ansi*":  func(v Object) { p.ANSI = v != nil },
+			"*print-array*": func(v Object) { p.Array = v != nil },
+			"*print-base*": func(v Object) {
+				if base, ok := v.(Fixnum); ok && 2 <= base && base <= 36 {
+					p.Base = uint(base)
+				} else {
+					PanicType("*print-base*", v, "fixnum between 2 and 36 inclusive")
+				}
+			},
+			"*print-case*": func(v Object) {
+				if v == nil {
+					p.Case = nil
+				} else {
+					key, _ := v.(Symbol)
+					key = Symbol(strings.ToLower(string(key)))
+					switch key {
+					case downcaseKey, upcaseKey, capitalizeKey:
+						p.Case = key
+					default:
+						PanicType("*print-case*", v, ":downcase", ":upcase", ":capitalize")
+					}
+				}
+			},
+			"*print-circle*": func(v Object) { p.Circle = v != nil },
+			"*print-escape*": func(v Object) { p.Escape = v != nil },
+			"*print-gensym*": func(v Object) { p.Gensym = v != nil },
+			"*print-length*": func(v Object) { p.Length = uintVarValue(v, "*print-length*") },
+			"*print-level*":  func(v Object) { p.Level = uintVarValue(v, "*print-level*") },
+			"*print-lines*":  func(v Object) { p.Lines = uintVarValue(v, "*print-lines*") },
+			"*print-miser-width*": func(v Object) {
+				if miserWidth, ok := v.(Fixnum); ok && 0 <= miserWidth {
+					p.MiserWidth = uint(miserWidth)
+				} else {
+					PanicType("*print-miser-width*", v, "non-negative fixnum")
+				}
+			},
+			"*print-pretty*":       func(v Object) { p.Pretty = v != nil },
+			"*print-radix*":        func(v Object) { p.Radix = v != nil },
+			"*print-readably*":     func(v Object) { p.Readably = v != nil },
+			"*print-right-margin*": func(v Object) { p.RightMargin = uintVarValue(v, "*print-right-margin*") },
+		} {
+			if v, has := s.localGet(k); has {
+				f(v)
+			}
+		}
+	}
+}
+
+func uintVarValue(v Object, varName string) (vv uint) {
+	if v == nil {
+		vv = math.MaxInt
+	} else if num, ok := v.(Fixnum); ok && 0 <= num {
+		vv = uint(num)
+	} else {
+		PanicType(varName, v, "non-negative fixnum")
+	}
+	return
+}
+
 func (p *Printer) createTree(obj Object, level int) *node {
 	n := node{value: obj}
 Top:

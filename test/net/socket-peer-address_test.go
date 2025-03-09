@@ -56,12 +56,12 @@ func TestSocketPeerAddressHTTP(t *testing.T) {
 	serv.Config.ConnState = func(nc net.Conn, cs http.ConnState) {
 		if cs == http.StateActive {
 			scope := slip.NewScope()
-			us := slip.ReadString("(make-instance 'socket)").Eval(scope, nil).(*flavors.Instance)
+			us := slip.ReadString("(make-instance 'socket)", scope).Eval(scope, nil).(*flavors.Instance)
 			tc, _ := nc.(*net.TCPConn)
 			raw, _ := tc.SyscallConn()
 			_ = raw.Control(func(fd uintptr) { us.Any = int(fd) })
 			scope.Let(slip.Symbol("sock"), us)
-			result := slip.ReadString("(send sock :peer-address)").Eval(scope, nil).(slip.Octets)
+			result := slip.ReadString("(send sock :peer-address)", scope).Eval(scope, nil).(slip.Octets)
 			tt.Equal(t, slip.Octets{127, 0, 0, 1}, result)
 		}
 	}

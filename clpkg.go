@@ -15,6 +15,8 @@ func init() {
 		`The maximum number of function call arguments.`)
 	DefConstant(Symbol("lambda-parameters-limit"), Fixnum(0x100000000000),
 		`The maximum number of lambda parameters.`)
+	DefConstant(Symbol("multiple-values-limit"), Fixnum(0x1000000000),
+		`The maximum number of values that can be returned by a function.`)
 }
 
 // CLPkg is the COMMON-LISP package.
@@ -165,6 +167,19 @@ and raises an error if not possible to print readably.`,
 				Doc: "establishes the right margin for pretty printing.",
 			},
 			"*random-state*": {Val: nil},
+			"*read-base*": {
+				Val: Fixnum(10),
+				Doc: "Controls the parsing of integers and ratios.",
+			},
+			"*read-default-float-format*": {
+				Val: DoubleFloatSymbol,
+				Doc: "Controls the floating point type when reading a decimal number.",
+			},
+
+			"*terminal-io*": {
+				Val: nil,
+				Doc: "A two-way-stream that accepts input from the keyboard and writes to the display.",
+			},
 		},
 		lambdas: map[string]*Lambda{},
 		funcs:   map[string]*FuncInfo{},

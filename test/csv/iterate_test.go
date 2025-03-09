@@ -82,10 +82,10 @@ func TestIterateChannel(t *testing.T) {
 		result = append(result, b)
 	}
 	scope.Let("result", result)
-	tt.Equal(t, `"1"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "A" (car result)))`).Eval(scope, nil)))
-	tt.Equal(t, `"2"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "B" (car result)))`).Eval(scope, nil)))
-	tt.Equal(t, `"3"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "A" (cadr result)))`).Eval(scope, nil)))
-	tt.Equal(t, `"4"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "B" (cadr result)))`).Eval(scope, nil)))
+	tt.Equal(t, `"1"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "A" (car result)))`, scope).Eval(scope, nil)))
+	tt.Equal(t, `"2"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "B" (car result)))`, scope).Eval(scope, nil)))
+	tt.Equal(t, `"3"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "A" (cadr result)))`, scope).Eval(scope, nil)))
+	tt.Equal(t, `"4"`, slip.ObjectString(slip.ReadString(`(cdr (assoc "B" (cadr result)))`, scope).Eval(scope, nil)))
 }
 
 func TestIterateBadKeyword(t *testing.T) {

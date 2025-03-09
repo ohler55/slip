@@ -14,7 +14,8 @@ import (
 )
 
 func TestClassBasic(t *testing.T) {
-	c := slip.ReadString(`(find-class 'fixnum)`).Eval(slip.NewScope(), nil)
+	scope := slip.NewScope()
+	c := slip.ReadString(`(find-class 'fixnum)`, scope).Eval(scope, nil)
 	c2 := c
 	tt.Equal(t, c, c.Eval(nil, 0))
 	tt.Equal(t, true, c.Equal(c2))
@@ -52,11 +53,12 @@ func TestClassBasic(t *testing.T) {
   prototype: 42
   slots: {}
 }`, pretty.SEN(c.Simplify()))
-	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`).Eval(slip.NewScope(), nil) })
+	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`, scope).Eval(scope, nil) })
 }
 
 func TestClassDescribeBasic(t *testing.T) {
-	c := slip.ReadString(`(find-class 'fixnum)`).Eval(slip.NewScope(), nil).(slip.Class)
+	scope := slip.NewScope()
+	c := slip.ReadString(`(find-class 'fixnum)`, scope).Eval(scope, nil).(slip.Class)
 	out := c.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `fixnum is a built-in class:
   Documentation:
@@ -118,7 +120,8 @@ func TestClassDefClass(t *testing.T) {
 		false,
 	)
 	c.DefMethod(":fun", "", nil)
-	found := slip.ReadString(`(find-class 'dummy)`).Eval(slip.NewScope(), nil).(slip.Class)
+	scope := slip.NewScope()
+	found := slip.ReadString(`(find-class 'dummy)`, scope).Eval(scope, nil).(slip.Class)
 	tt.Equal(t, c, found)
 	out := c.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `dummy is a class:
@@ -194,6 +197,12 @@ func TestConditionMessageDocs(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method (find-class 'condition) :message out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method (find-class 'condition) :message out)`, scope).Eval(scope, nil)
 	tt.Equal(t, true, strings.Contains(out.String(), ":message"))
+}
+
+func TestClassInherits(t *testing.T) {
+	c := slip.FindClass("fixnum")
+	tt.Equal(t, true, c.Inherits(slip.FindClass("integer")))
+	tt.Equal(t, false, c.Inherits(slip.FindClass("float")))
 }

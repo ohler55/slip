@@ -20,20 +20,21 @@ type codeTest struct {
 }
 
 func (ct *codeTest) test(t *testing.T, i int) {
+	scope := slip.NewScope()
 	if ct.raise {
-		tt.Panic(t, func() { _ = slip.ReadString(ct.src) })
+		tt.Panic(t, func() { _ = slip.ReadString(ct.src, scope) })
 		return
 	}
 	var code slip.Code
 	if i%2 == 0 {
-		code = slip.ReadString(ct.src)
+		code = slip.ReadString(ct.src, scope)
 	} else {
-		code = slip.Read([]byte(ct.src))
+		code = slip.Read([]byte(ct.src), scope)
 	}
-	tt.Equal(t, ct.expect, code.String(), i, ": ", ct.src)
 	if 0 < len(ct.kind) {
 		tt.Equal(t, ct.kind, string(code[0].Hierarchy()[0]))
 	}
+	tt.Equal(t, ct.expect, code.String(), i, ": ", ct.src)
 }
 
 func TestCodeToken(t *testing.T) {
@@ -54,7 +55,7 @@ func TestCodeToken(t *testing.T) {
 }
 
 func TestCodeReadOne(t *testing.T) {
-	code, pos := slip.ReadOne([]byte("abc def"))
+	code, pos := slip.ReadOne([]byte("abc def"), slip.NewScope())
 	tt.Equal(t, slip.Symbol("abc"), code[0])
 	tt.Equal(t, 3, pos)
 }
@@ -92,10 +93,42 @@ func TestCodeNumber(t *testing.T) {
 		{src: "1.23d-1", expect: "[0.123]", kind: "double-float"},
 		{src: "5d-1", expect: "[0.5]", kind: "double-float"},
 		{src: "1.23l-1", expect: "[0.123]", kind: "long-float"},
+		{src: "0.1L+0", expect: "[0.1]", kind: "long-float"},
 		{src: "123456789012345678901234567890", expect: "[123456789012345678901234567890]", kind: "bignum"},
 		{src: "123456789012345678901234567890.", expect: "[123456789012345678901234567890]", kind: "bignum"},
 	} {
 		ct.test(t, i)
+	}
+}
+
+func TestCodeBaseFixnum(t *testing.T) {
+	scope := slip.NewScope()
+	for i, td := range []*struct {
+		base   int
+		src    string
+		expect int
+	}{
+		{base: 2, src: "1010", expect: 10},
+		{base: 3, src: "210", expect: 21},
+		{base: 4, src: "321", expect: 57},
+		{base: 5, src: "401", expect: 101},
+		{base: 6, src: "55", expect: 35},
+		{base: 7, src: "666", expect: 342},
+		{base: 8, src: "073", expect: 59},
+		{base: 9, src: "88", expect: 80},
+		{base: 10, src: "975", expect: 975},
+		{base: 11, src: "a1", expect: 111},
+		{base: 12, src: "ba", expect: 142},
+		{base: 13, src: "cb", expect: 167},
+		{base: 14, src: "dc", expect: 194},
+		{base: 15, src: "ed", expect: 223},
+		{base: 16, src: "fe", expect: 254},
+		{base: 36, src: "zz", expect: 1295},
+	} {
+		scope.Let("*read-base*", slip.Fixnum(td.base))
+		code := slip.ReadString(td.src, scope)
+		tt.Equal(t, slip.FixnumSymbol, code[0].Hierarchy()[0])
+		tt.Equal(t, slip.Fixnum(td.expect), code[0], i, ": ", td.src)
 	}
 }
 
@@ -106,6 +139,58 @@ func TestCodeRatio(t *testing.T) {
 		{src: "1/-2", expect: "[|1/-2|]", kind: "symbol"},
 	} {
 		ct.test(t, i)
+	}
+}
+
+func TestCodeBaseRatio(t *testing.T) {
+	scope := slip.NewScope()
+	for i, td := range []*struct {
+		base   int
+		src    string
+		expect string
+	}{
+		{base: 2, src: "01/10", expect: "1/2"},
+		{base: 3, src: "21/12", expect: "7/5"},
+		{base: 4, src: "32/23", expect: "14/11"},
+		{base: 5, src: "43/34", expect: "23/19"},
+		{base: 6, src: "54/45", expect: "34/29"},
+		{base: 7, src: "65/56", expect: "47/41"},
+		{base: 8, src: "76/67", expect: "62/55"},
+		{base: 9, src: "87/78", expect: "79/71"},
+		{base: 10, src: "98/89", expect: "98/89"},
+		{base: 11, src: "a9/9a", expect: "119/109"},
+		{base: 12, src: "ba/ab", expect: "142/131"},
+		{base: 13, src: "cb/bc", expect: "167/155"},
+		{base: 14, src: "dc/cd", expect: "194/181"},
+		{base: 15, src: "ed/de", expect: "223/209"},
+		{base: 16, src: "fe/ef", expect: "254/239"},
+		{base: 36, src: "zy/yz", expect: "1294/1259"},
+	} {
+		scope.Let("*read-base*", slip.Fixnum(td.base))
+		code := slip.ReadString(td.src, scope)
+		tt.Equal(t, slip.RatioSymbol, code[0].Hierarchy()[0])
+		tt.Equal(t, td.expect, code[0].String(), i, ": ", td.src)
+	}
+}
+
+func TestCodeReadFloatType(t *testing.T) {
+	scope := slip.NewScope()
+	for i, td := range []*struct {
+		ft  slip.Symbol
+		et  slip.Symbol
+		src string
+	}{
+		{ft: slip.DoubleFloatSymbol, et: slip.DoubleFloatSymbol, src: "1.5"},
+		{ft: slip.DoubleFloatSymbol, et: slip.DoubleFloatSymbol, src: "1.5e1"},
+		{ft: slip.SingleFloatSymbol, et: slip.SingleFloatSymbol, src: "1.5"},
+		{ft: slip.SingleFloatSymbol, et: slip.SingleFloatSymbol, src: "1.5e1"},
+		{ft: slip.LongFloatSymbol, et: slip.LongFloatSymbol, src: "1.5"},
+		{ft: slip.LongFloatSymbol, et: slip.LongFloatSymbol, src: "1.5e1"},
+		{ft: slip.Symbol("quux"), et: slip.DoubleFloatSymbol, src: "1.5"},
+	} {
+		scope.Let("*read-default-float-format*", td.ft)
+		code := slip.ReadString(td.src, scope)
+		tt.Equal(t, td.et, code[0].Hierarchy()[0], i, ": ", td.src)
 	}
 }
 
@@ -214,6 +299,7 @@ func TestCodeBinary(t *testing.T) {
 			expect: `[12297829382473034410]`,
 			kind:   "bignum",
 		},
+		{src: `#x100000000000000000`, expect: `[295147905179352825856]`, kind: "bignum"},
 		{src: `#b012`, raise: true},
 		{src: `#b`, raise: true},
 	} {
@@ -301,17 +387,18 @@ func TestCodeBackquote(t *testing.T) {
 }
 
 func TestCodeCompile(t *testing.T) {
-	code := slip.ReadString("(5)")
+	scope := slip.NewScope()
+	code := slip.ReadString("(5)", scope)
 	tt.Panic(t, func() { code.Compile() })
 
-	code = slip.ReadString("((x))")
+	code = slip.ReadString("((x))", scope)
 	tt.Panic(t, func() { code.Compile() })
 
-	code = slip.ReadString("((lambda () nil))")
+	code = slip.ReadString("((lambda () nil))", scope)
 	code.Compile()
 	tt.SameType(t, &slip.Dynamic{}, code[0])
 
-	code = slip.ReadString("(defvar code-compile-test 5)")
+	code = slip.ReadString("(defvar code-compile-test 5)", scope)
 	code.Compile()
 	val, has := slip.CurrentPackage.Get("code-compile-test")
 	tt.Equal(t, slip.Fixnum(5), val)
@@ -361,14 +448,14 @@ func TestCodeStringer(t *testing.T) {
 
 func TestCodeReadStreamOk(t *testing.T) {
 	sr := strings.NewReader("(+ 1 2 3)")
-	code, _ := slip.ReadStream(sr)
+	code, _ := slip.ReadStream(sr, slip.NewScope())
 	tt.Equal(t, 1, len(code))
 	tt.Equal(t, "(+ 1 2 3)", slip.ObjectString(code[0]))
 }
 
 func TestCodeReadStreamOne(t *testing.T) {
 	sr := strings.NewReader("(+ 1 2 3) (- 3 2 1)")
-	code, _ := slip.ReadStream(sr, true)
+	code, _ := slip.ReadStream(sr, slip.NewScope(), true)
 	tt.Equal(t, 1, len(code))
 	tt.Equal(t, "(+ 1 2 3)", slip.ObjectString(code[0]))
 }
@@ -380,7 +467,7 @@ func (w badReader) Read([]byte) (int, error) {
 }
 
 func TestCodeReadStreamFail(t *testing.T) {
-	tt.Panic(t, func() { _, _ = slip.ReadStream(badReader(0)) })
+	tt.Panic(t, func() { _, _ = slip.ReadStream(badReader(0), slip.NewScope()) })
 }
 
 func TestCodeReadStreamEachOk(t *testing.T) {

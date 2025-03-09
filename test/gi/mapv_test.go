@@ -12,7 +12,7 @@ import (
 
 func TestMapvList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq collect '())`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq collect '())`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(mapv (lambda (x) (setq collect (cons x collect))) '(1 2 3))`,
@@ -23,7 +23,7 @@ func TestMapvList(t *testing.T) {
 
 func TestMapvVector(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq collect '())`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq collect '())`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(mapv (lambda (x) (setq collect (cons x collect))) #(1 2 3))`,
@@ -35,7 +35,7 @@ func TestMapvVector(t *testing.T) {
 
 func TestMapvOctets(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq collect '())`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq collect '())`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(mapv (lambda (x) (setq collect (cons x collect))) (coerce #(1 2 3) 'octets))`,
@@ -47,7 +47,7 @@ func TestMapvOctets(t *testing.T) {
 
 func TestMapvFunction(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq collect '())`).Eval(scope, nil)
+	_ = slip.ReadString(`(setq collect '())`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(mapv (lambda (x y) (setq collect (cons (cons x y) collect))) '(a b c d) '(1 2 3))`,

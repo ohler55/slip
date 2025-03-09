@@ -46,7 +46,7 @@ func nthStashCall(f slip.Object, stash *Stash, s *slip.Scope, args slip.List) (r
 		slip.PanicType("index", args[0], "fixnum")
 	}
 	form := stash.Nth(stash.Size() - n)
-	code := slip.Read(form.Append(nil))
+	code := slip.Read(form.Append(nil), s)
 	switch len(code) {
 	case 0:
 		// leave as nil

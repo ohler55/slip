@@ -35,10 +35,10 @@ func TestDefunHook(t *testing.T) {
 	slip.AddDefunHook("hook-fun", func(p *slip.Package, key string) { log = fmt.Appendf(log, "fun %s\n", key) })
 
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(defun hook-func () nil)`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun hook-func () nil)`, scope).Eval(scope, nil)
 
 	slip.RemoveDefunHook("hook-fun")
-	_ = slip.ReadString(`(defun hook-func-2 () nil)`).Eval(scope, nil)
+	_ = slip.ReadString(`(defun hook-func-2 () nil)`, scope).Eval(scope, nil)
 
 	tt.Equal(t, "fun hook-func\n", string(log))
 }

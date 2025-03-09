@@ -11,7 +11,7 @@ import (
 
 func TestUninternNew(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(defvar unintern-test-new 7)").Eval(scope, nil)
+	_ = slip.ReadString("(defvar unintern-test-new 7)", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(unintern 'unintern-test-new)`,
 		Expect: "t",
@@ -35,7 +35,7 @@ func TestUninternInherited(t *testing.T) {
 
 func TestUninternExternal(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(intern "unintern-test-external" 'keyword)`).Eval(scope, nil)
+	_ = slip.ReadString(`(intern "unintern-test-external" 'keyword)`, scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Source: `(unintern 'unintern-test-external 'keyword)`,
 		Expect: "t",

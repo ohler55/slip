@@ -11,7 +11,7 @@ import (
 
 func TestHashTableRehashSize(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq table (make-hash-table))").Eval(scope, nil)
+	_ = slip.ReadString("(setq table (make-hash-table))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(hash-table-rehash-size table)`,

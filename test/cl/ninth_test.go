@@ -40,7 +40,7 @@ func TestNinthNotList(t *testing.T) {
 
 func TestNinthSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d e f g h i))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d e f g h i))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (ninth target) 'x)",
@@ -51,7 +51,7 @@ func TestNinthSetfList(t *testing.T) {
 
 func TestNinthSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c d e f g h . i))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c d e f g h . i))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (ninth target) 'x)",

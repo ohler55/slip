@@ -40,7 +40,7 @@ func TestSecondNotList(t *testing.T) {
 
 func TestSecondSetfList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a b c))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a b c))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (second target) 'x)",
@@ -51,7 +51,7 @@ func TestSecondSetfList(t *testing.T) {
 
 func TestSecondSetfCons(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(a . b))").Eval(slip.NewScope(), nil)
+	_ = slip.ReadString("(setq target '(a . b))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (second target) 'x)",

@@ -38,7 +38,7 @@ func TestEqualpCharacter(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(equalp #\A #\a)`,
-		Expect: "nil",
+		Expect: "t",
 	}).Test(t)
 }
 

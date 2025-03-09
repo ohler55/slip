@@ -11,7 +11,7 @@ import (
 
 func TestGethashOk(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq table (make-hash-table))").Eval(scope, nil)
+	_ = slip.ReadString("(setq table (make-hash-table))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(gethash 'a table)`,
@@ -31,7 +31,7 @@ func TestGethashOk(t *testing.T) {
 
 func TestGethashArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq table (make-hash-table))").Eval(scope, nil)
+	_ = slip.ReadString("(setq table (make-hash-table))", scope).Eval(scope, nil)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(gethash 'a table t)`,

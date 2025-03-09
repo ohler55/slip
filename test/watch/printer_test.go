@@ -57,7 +57,7 @@ func TestPrinterDocs(t *testing.T) {
 	for _, method := range []string{
 		":changed",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method watch-printer %s out)`, method)).Eval(scope, nil)
+		_ = slip.ReadString(fmt.Sprintf(`(describe-method watch-printer %s out)`, method), scope).Eval(scope, nil)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}

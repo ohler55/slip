@@ -16,7 +16,7 @@ func TestSlotBoundpOk(t *testing.T) {
 (defflavor blueberry ((size "medium")) ()
            :initable-instance-variables
            :gettable-instance-variables)
-`).Eval(scope, nil)
+`, scope).Eval(scope, nil)
 
 	(&sliptest.Function{
 		Source: `(slot-boundp (make-instance 'blueberry) 'size)`,

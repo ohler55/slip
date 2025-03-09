@@ -77,7 +77,7 @@ func TestArraySetAll(t *testing.T) {
 }
 
 func TestArraySetBadData(t *testing.T) {
-	tt.Panic(t, func() { slip.ReadString("#2A(nil (1 2 3)(4 5 6))") })
+	tt.Panic(t, func() { slip.ReadString("#2A(nil (1 2 3)(4 5 6))", slip.NewScope()) })
 }
 
 func TestArrayMisc(t *testing.T) {

@@ -42,6 +42,8 @@ func (obj Fixnum) Equal(other Object) (eq bool) {
 	switch to := other.(type) {
 	case Fixnum:
 		eq = obj == to
+	case Octet:
+		eq = obj == Fixnum(to)
 	case SingleFloat:
 		eq = SingleFloat(obj) == to
 	case DoubleFloat:

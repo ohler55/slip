@@ -17,7 +17,8 @@ func TestTraceAll(t *testing.T) {
 }
 
 func TestTraceNames(t *testing.T) {
-	defer func() { _ = slip.ReadString("(untrace)").Eval(slip.NewScope(), nil) }()
+	scope := slip.NewScope()
+	defer func() { _ = slip.ReadString("(untrace)", scope).Eval(scope, nil) }()
 	(&sliptest.Function{
 		Source: `(progn (trace car cdr) (trace))`,
 		Expect: "(car cdr)",

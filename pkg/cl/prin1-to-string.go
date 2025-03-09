@@ -42,6 +42,7 @@ func (f *Prin1ToString) Call(s *slip.Scope, args slip.List, depth int) (result s
 	slip.ArgCountCheck(f, args, 1, 1)
 
 	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(s)
 	p.Escape = true
 	p.Readably = true
 

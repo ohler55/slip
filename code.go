@@ -29,10 +29,6 @@ const (
 	numberDone    = 'N'
 	revertToToken = 'R'
 
-	signByte   = '+'
-	signNumber = 'n'
-	signToken  = 'w'
-
 	tokenStart = 't'
 	tokenDone  = 'T'
 
@@ -77,7 +73,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	valueMode = "" +
 		".........ak..a.................." + // 0x00
-		"a.Q#..tq()t+,+ttddddddddddt;ttt." + // 0x20
+		"a.Q#..tq()tt,tttttttttttttt;ttt." + // 0x20
 		"@tttttttttttttttttttttttttt...tt" + // 0x40
 		"Btttttttttttttttttttttttttt.P.t." + // 0x60
 		"................................" + // 0x80
@@ -102,28 +98,6 @@ const (
 		"T.......TTaa.aaaaaaaaaaaaaa.aaa." + // 0x20
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaa...aa" + // 0x40
 		".aaaaaaaaaaaaaaaaaaaaaaaaaa...a." + // 0x60
-		"................................" + // 0x80
-		"................................" + // 0xa0
-		"................................" + // 0xc0
-		"................................t" //  0xe0
-
-	//   0123456789abcdef0123456789abcdef
-	numberMode = "" +
-		".........NN..N.................." + // 0x00
-		"N.......NNRa.aaRaaaaaaaaaaR...RR" + // 0x20
-		"RRRRaaRRRRRRaRRRRRRaRRRRRRR...RR" + // 0x40
-		"RRRRaaRRRRRRaRRRRRRaRRRRRRR...R." + // 0x60
-		"................................" + // 0x80
-		"................................" + // 0xa0
-		"................................" + // 0xc0
-		"................................n" //  0xe0
-
-	//   0123456789abcdef0123456789abcdef
-	signMode = "" +
-		".........TT..T.................." + // 0x00
-		"T.......TTww.wwwnnnnnnnnnnw.www." + // 0x20
-		"wwwwwwwwwwwwwwwwwwwwwwwwwww...ww" + // 0x40
-		".wwwwwwwwwwwwwwwwwwwwwwwwww...w." + // 0x60
 		"................................" + // 0x80
 		"................................" + // 0xa0
 		"................................" + // 0xc0
@@ -282,6 +256,90 @@ var (
 	newBackquote  func(args List) Object
 	newComma      func(args List) Object
 	newCommaAt    func(args List) Object
+
+	decimalRegex     = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*$`)
+	eFloatRegex      = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*e[-+]?[0-9]+?$`)
+	shortFloatRegex  = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*s[-+]?[0-9]+?$`)
+	singleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*f[-+]?[0-9]+?$`)
+	doubleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*d[-+]?[0-9]+?$`)
+	longFloatRegex   = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]*l[-+]?[0-9]+?$`)
+
+	intRxs = []*regexp.Regexp{
+		nil, nil,
+		regexp.MustCompile(`^[-+]?[0-1]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-2]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-3]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-4]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-5]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-6]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-7]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-8]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-b]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-c]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-d]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-e]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-f]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-g]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-h]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-i]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-j]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-k]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-l]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-m]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-n]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-o]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-p]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-q]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-r]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-s]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-t]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-u]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-v]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-w]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-x]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-y]+\.?$`),
+		regexp.MustCompile(`^[-+]?[0-9a-z]+\.?$`),
+	}
+	ratioRxs = []*regexp.Regexp{
+		nil, nil,
+		regexp.MustCompile(`^[-+]?[0-1]+/[-+]?[0-1]+$`),
+		regexp.MustCompile(`^[-+]?[0-2]+/[-+]?[0-2]+$`),
+		regexp.MustCompile(`^[-+]?[0-3]+/[-+]?[0-3]+$`),
+		regexp.MustCompile(`^[-+]?[0-4]+/[-+]?[0-4]+$`),
+		regexp.MustCompile(`^[-+]?[0-5]+/[-+]?[0-5]+$`),
+		regexp.MustCompile(`^[-+]?[0-6]+/[-+]?[0-6]+$`),
+		regexp.MustCompile(`^[-+]?[0-7]+/[-+]?[0-7]+$`),
+		regexp.MustCompile(`^[-+]?[0-8]+/[-+]?[0-8]+$`),
+		regexp.MustCompile(`^[-+]?[0-9]+/[-+]?[0-9]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a]+/[-+]?[0-9a]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-b]+/[-+]?[0-9a-b]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-c]+/[-+]?[0-9a-c]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-d]+/[-+]?[0-9a-d]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-e]+/[-+]?[0-9a-e]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-f]+/[-+]?[0-9a-f]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-g]+/[-+]?[0-9a-g]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-h]+/[-+]?[0-9a-h]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-i]+/[-+]?[0-9a-i]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-j]+/[-+]?[0-9a-j]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-k]+/[-+]?[0-9a-k]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-l]+/[-+]?[0-9a-l]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-m]+/[-+]?[0-9a-m]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-n]+/[-+]?[0-9a-n]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-o]+/[-+]?[0-9a-o]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-p]+/[-+]?[0-9a-p]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-q]+/[-+]?[0-9a-q]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-r]+/[-+]?[0-9a-r]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-s]+/[-+]?[0-9a-s]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-t]+/[-+]?[0-9a-t]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-u]+/[-+]?[0-9a-u]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-v]+/[-+]?[0-9a-v]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-w]+/[-+]?[0-9a-w]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-x]+/[-+]?[0-9a-x]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-y]+/[-+]?[0-9a-y]+$`),
+		regexp.MustCompile(`^[-+]?[0-9a-z]+/[-+]?[0-9a-z]+$`),
+	}
 )
 
 // Code is a list of S-Expressions read from LISP source code. It is a means
@@ -300,45 +358,70 @@ type reader struct {
 	line       int
 	lineStart  int
 	pos        int
-	base       int
+	base       int // temp base
+	rbase      int // read base
 	sharpNum   int
 	code       Code
 	rb         []byte
 	rn         rune
 	rcnt       int
+	intRx      *regexp.Regexp
+	ratioRx    *regexp.Regexp
+	floatType  Symbol
 	one        bool
 	more       bool // more to read
 }
 
+func (r *reader) scoped(s *Scope) {
+	r.rbase = 10
+	r.intRx = intRxs[10]
+	r.ratioRx = ratioRxs[10]
+	if num, ok := s.get("*read-base*").(Fixnum); ok && 1 < num && num <= 36 {
+		r.rbase = int(num)
+		r.intRx = intRxs[num]
+		r.ratioRx = ratioRxs[num]
+	}
+	ff, _ := s.get("*read-default-float-format*").(Symbol)
+	switch ff {
+	case SingleFloatSymbol, ShortFloatSymbol, DoubleFloatSymbol, LongFloatSymbol:
+		r.floatType = ff
+	default: // default to double-float
+		r.floatType = DoubleFloatSymbol
+	}
+}
+
 // ReadString reads LISP source code and return a Code instance.
-func ReadString(src string) (code Code) {
+func ReadString(src string, s *Scope) (code Code) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	cr.read([]byte(src))
 
 	return cr.code
 }
 
 // Read LISP source code and return a Code instance.
-func Read(src []byte) (code Code) {
+func Read(src []byte, s *Scope) (code Code) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	cr.read(src)
 
 	return cr.code
 }
 
 // ReadOne LISP source code and return a Code instance.
-func ReadOne(src []byte) (code Code, pos int) {
+func ReadOne(src []byte, s *Scope) (code Code, pos int) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
 		one:      true,
 	}
+	cr.scoped(s)
 	cr.read(src)
 
 	return cr.code, cr.pos
@@ -347,7 +430,7 @@ func ReadOne(src []byte) (code Code, pos int) {
 const readBlockSize = 65536
 
 // ReadStream reads LISP source code from a stream and return a Code instance.
-func ReadStream(r io.Reader, one ...bool) (Code, int) {
+func ReadStream(r io.Reader, s *Scope, one ...bool) (Code, int) {
 	// Note: Using a separate chan for reading from disk was tried but since a
 	// new buffer had to be created each time the overall performance was
 	// slightly worse. That would be different with slower disks but that is
@@ -358,6 +441,7 @@ func ReadStream(r io.Reader, one ...bool) (Code, int) {
 		nextMode: valueMode,
 		one:      (0 < len(one) && one[0]),
 	}
+	cr.scoped(s)
 	var pos int
 	buf := make([]byte, readBlockSize)
 	for {
@@ -385,12 +469,13 @@ func ReadStream(r io.Reader, one ...bool) (Code, int) {
 
 // ReadStreamPush reads LISP source code from a stream and pushes
 // s-expressions read onto a channel.
-func ReadStreamPush(r io.Reader, channel chan Object) {
+func ReadStreamPush(r io.Reader, s *Scope, channel chan Object) {
 	cr := reader{
 		more:     true,
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	buf := make([]byte, readBlockSize)
 	for {
 		cnt, err := r.Read(buf)
@@ -424,6 +509,7 @@ func ReadStreamEach(r io.Reader, s *Scope, caller Caller) {
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	buf := make([]byte, readBlockSize)
 	for {
 		cnt, err := r.Read(buf)
@@ -450,16 +536,17 @@ func ReadStreamEach(r io.Reader, s *Scope, caller Caller) {
 }
 
 // CompileString LISP string source code and return an Object.
-func CompileString(src string) Object {
-	return Compile([]byte(src))
+func CompileString(src string, s *Scope) Object {
+	return Compile([]byte(src), s)
 }
 
 // Compile LISP source code and return an Object.
-func Compile(src []byte) (result Object) {
+func Compile(src []byte, s *Scope) (result Object) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
 	}
+	cr.scoped(s)
 	cr.read(src)
 
 	cr.code.Compile()
@@ -515,24 +602,6 @@ func (r *reader) read(src []byte) {
 			r.pushToken(src)
 			r.mode = valueMode
 			goto Retry
-
-		case signByte:
-			r.tokenStart = r.pos
-			r.mode = signMode
-		case signNumber:
-			r.mode = numberMode
-		case signToken:
-			r.mode = tokenMode
-
-		case digitByte:
-			r.tokenStart = r.pos
-			r.mode = numberMode
-		case numberDone:
-			r.pushNumber(src)
-			r.mode = valueMode
-			goto Retry
-		case revertToToken:
-			r.mode = tokenMode
 
 		case doubleQuote:
 			r.tokenStart = r.pos + 1
@@ -712,8 +781,6 @@ func (r *reader) read(src []byte) {
 		switch r.mode {
 		case tokenMode:
 			r.pushToken(src)
-		case numberMode:
-			r.pushNumber(src)
 		case stringMode:
 			r.partial("string not terminated")
 		case runeMode:
@@ -845,13 +912,6 @@ func (r *reader) closeList() {
 	}
 }
 
-var (
-	shortFloatRegex  = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(s[-+]?[0-9]+)?$`)
-	singleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(f[-+]?[0-9]+)?$`)
-	doubleFloatRegex = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(d[-+]?[0-9]+)?$`)
-	longFloatRegex   = regexp.MustCompile(`^[-+]?[0-9]+\.?[0-9]+(l[-+]?[0-9]+)?$`)
-)
-
 // Converts tokens to the correct type and then pushes that value onto the
 // stack.
 func (r *reader) pushToken(src []byte) {
@@ -933,8 +993,19 @@ func (r *reader) pushToken(src []byte) {
 			return
 		}
 	}
-	switch token[0] {
-	case '@':
+	obj = r.resolveToken(token)
+Push:
+	if 0 < len(r.stack) {
+		r.stack = append(r.stack, obj)
+	} else {
+		r.code = append(r.code, obj)
+	}
+}
+
+func (r *reader) resolveToken(token []byte) Object {
+	buf := bytes.ToLower(token)
+	switch {
+	case buf[0] == '@':
 		// This is an extension to common lisp to make time easier to deal with.
 		s := string(token[1:])
 		for _, layout := range []string{
@@ -944,146 +1015,75 @@ func (r *reader) pushToken(src []byte) {
 			"2006-01-02",
 		} {
 			if t, err := time.ParseInLocation(layout, s, time.UTC); err == nil {
-				obj = Time(t)
-
-				goto Push
+				return Time(t)
 			}
 		}
-	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+':
-		/*
-			s := string(token)
-				if i, err := strconv.ParseInt(s, 10, 64); err == nil {
-					obj = Fixnum(i)
-					goto Push
+	case r.intRx.Match(buf):
+		buf = bytes.TrimRight(buf, ".")
+		if num, err := strconv.ParseInt(string(buf), r.rbase, 64); err == nil {
+			return Fixnum(num)
+		}
+		bi := big.NewInt(0)
+		if _, ok := bi.SetString(string(buf), r.rbase); ok {
+			return (*Bignum)(bi)
+		}
+	case decimalRegex.Match(buf) || eFloatRegex.Match(buf):
+		if r.floatType == LongFloatSymbol {
+			cnt := len(buf)
+			epos := bytes.IndexByte(buf, 'e')
+			if 0 < epos {
+				cnt = epos
+			}
+			if buf[0] == '-' || buf[0] == '+' {
+				cnt--
+			}
+			if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.ToNearestAway); err == nil {
+				return (*LongFloat)(f)
+			}
+		} else if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
+			switch r.floatType {
+			case SingleFloatSymbol, ShortFloatSymbol:
+				return SingleFloat(f)
+			default: // double-float
+				return DoubleFloat(f)
+			}
+		}
+	case doubleFloatRegex.Match(buf):
+		buf[bytes.IndexByte(buf, 'd')] = 'e'
+		if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
+			return DoubleFloat(f)
+		}
+	case shortFloatRegex.Match(buf):
+		buf[bytes.IndexByte(buf, 's')] = 'e'
+		if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
+			return SingleFloat(f)
+		}
+	case singleFloatRegex.Match(buf):
+		buf[bytes.IndexByte(buf, 'f')] = 'e'
+		if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
+			return SingleFloat(f)
+		}
+	case longFloatRegex.Match(buf):
+		cnt := bytes.IndexByte(buf, 'l')
+		buf[cnt] = 'e'
+		if buf[0] == '-' || buf[0] == '+' {
+			cnt--
+		}
+		if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.ToNearestAway); err == nil {
+			return (*LongFloat)(f)
+		}
+	case r.ratioRx.Match(buf):
+		i := bytes.IndexByte(buf, '/')
+		if num, err := strconv.ParseInt(string(buf[:i]), r.rbase, 64); err == nil {
+			var den int64
+			if den, err = strconv.ParseInt(string(buf[i+1:]), r.rbase, 64); err == nil {
+				if 0 < den {
+					return NewRatio(num, den)
 				}
-				if f, err := strconv.ParseFloat(s, 64); err == nil {
-					obj = DoubleFloat(f)
-					goto Push
-				}
-		*/
-		if i := bytes.IndexByte(token, '/'); 0 < i {
-			if num, err := strconv.ParseInt(string(token[:i]), 10, 64); err == nil {
-				var den int64
-				if den, err = strconv.ParseInt(string(token[i+1:]), 10, 64); err == nil {
-					if 0 < den {
-						obj = NewRatio(num, den)
-						goto Push
-					}
-				}
-			}
-		}
-		buf := bytes.ToLower(token)
-		if doubleFloatRegex.Match(buf) {
-			buf[bytes.IndexByte(buf, 'd')] = 'e'
-			if f, err := strconv.ParseFloat(string(buf), 64); err == nil {
-				obj = DoubleFloat(f)
-				goto Push
-			}
-		}
-		if shortFloatRegex.Match(buf) {
-			buf[bytes.IndexByte(buf, 's')] = 'e'
-			if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
-				obj = SingleFloat(f)
-				goto Push
-			}
-		}
-		if singleFloatRegex.Match(buf) {
-			buf[bytes.IndexByte(buf, 'f')] = 'e'
-			if f, err := strconv.ParseFloat(string(buf), 32); err == nil {
-				obj = SingleFloat(f)
-				goto Push
-			}
-		}
-		if longFloatRegex.Match(buf) {
-			buf[bytes.IndexByte(buf, 'l')] = 'e'
-			cnt := len(buf) - 2 - bytes.Count(buf, []byte{'-'}) - bytes.Count(buf, []byte{'+'})
-			if f, _, err := big.ParseFloat(string(buf), 10, uint(prec10t2*float64(cnt)), big.AwayFromZero); err == nil {
-
-				obj = (*LongFloat)(f)
-				goto Push
 			}
 		}
 	}
-	obj = Symbol(token)
-Push:
-	if 0 < len(r.stack) {
-		r.stack = append(r.stack, obj)
-	} else {
-		r.code = append(r.code, obj)
-	}
-}
-
-func (r *reader) pushNumber(src []byte) {
-	// Numbers the easy way.
-	token := r.makeToken(src)
-	var (
-		obj Object
-		bi  *big.Int
-		s   string
-	)
-	if token[len(token)-1] == '.' {
-		token = token[:len(token)-1]
-		if i, err := strconv.ParseInt(string(token), 10, 64); err == nil {
-			obj = Fixnum(i)
-			goto Push
-		}
-		bi = big.NewInt(0)
-		if err := bi.UnmarshalText(token); err == nil {
-			obj = (*Bignum)(bi)
-			goto Push
-		}
-	}
-	s = string(token)
-	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
-		obj = Fixnum(i)
-		goto Push
-	}
-	bi = big.NewInt(0)
-	if _, ok := bi.SetString(s, 10); ok {
-		obj = (*Bignum)(bi)
-		goto Push
-	}
-	for i, b := range token {
-		switch b {
-		case 'd', 'D':
-			t2 := make([]byte, len(token))
-			copy(t2, token)
-			t2[i] = 'e'
-			if f, err := strconv.ParseFloat(string(t2), 64); err == nil {
-				obj = DoubleFloat(f)
-				goto Push
-			}
-		case 's', 'S':
-			t2 := make([]byte, len(token))
-			copy(t2, token)
-			t2[i] = 'e'
-			if f, err := strconv.ParseFloat(string(t2), 64); err == nil {
-				obj = SingleFloat(f)
-				goto Push
-			}
-		case 'l', 'L':
-			t2 := make([]byte, len(token))
-			copy(t2, token)
-			t2[i] = 'e'
-			if bf, _, err := big.ParseFloat(string(t2), 10, uint(len(t2)*3), big.ToNearestAway); err == nil {
-				obj = (*LongFloat)(bf)
-				goto Push
-			}
-		}
-	}
-	if f, err := strconv.ParseFloat(s, 64); err == nil {
-		obj = DoubleFloat(f)
-		goto Push
-	}
-	r.pushToken(src)
-	return
-
-Push:
-	if 0 < len(r.stack) {
-		r.stack = append(r.stack, obj)
-	} else {
-		r.code = append(r.code, obj)
-	}
+	return Symbol(token)
 }
 
 const hexByteValues = "" +

@@ -78,22 +78,22 @@ func TestResponseWriterDocs(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 
-	_ = slip.ReadString(`(describe-method http-response-writer-flavor :header out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-writer-flavor :header out)`, scope).Eval(scope, nil)
 	str := out.String()
 	tt.Equal(t, true, strings.Contains(str, ":header"))
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method http-response-writer-flavor :header-get out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-writer-flavor :header-get out)`, scope).Eval(scope, nil)
 	str = out.String()
 	tt.Equal(t, true, strings.Contains(str, ":header-get"))
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method http-response-writer-flavor :write-status out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-writer-flavor :write-status out)`, scope).Eval(scope, nil)
 	str = out.String()
 	tt.Equal(t, true, strings.Contains(str, ":write-status"))
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method http-response-writer-flavor :write out)`).Eval(scope, nil)
+	_ = slip.ReadString(`(describe-method http-response-writer-flavor :write out)`, scope).Eval(scope, nil)
 	str = out.String()
 	tt.Equal(t, true, strings.Contains(str, ":write"))
 }

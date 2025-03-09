@@ -106,6 +106,7 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
 	var out io.Writer
 	dp := slip.DefaultPrinter()
+	dp.ScopedUpdate(&obj.Scope)
 	pw := pretty.Writer{
 		Options:  options,
 		Width:    int(dp.RightMargin),
