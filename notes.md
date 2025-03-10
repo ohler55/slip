@@ -9,9 +9,8 @@
   - [ ] ACOSH
   - [ ] ASINH
   - [ ] ATANH
-  - [ ] BIGNUM
   - [ ] CIS
-  - [ ] COSH
+  - [x] COSH
   - [ ] DECODE-FLOAT
   - [ ] DENOMINATOR
   - [ ] DIVISION-BY-ZERO
@@ -31,8 +30,8 @@
   - [ ] PHASE
   - [ ] REALPART
   - [ ] SCALE-FLOAT
-  - [ ] SINH
-  - [ ] TANH
+  - [x] SINH
+  - [x] TANH
 
  - bits-and-bytes
   - [ ] BIT

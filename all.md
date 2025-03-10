@@ -2,7 +2,7 @@
  * [ ] ACOSH
  * [ ] ASINH
  * [ ] ATANH
- * [ ] BIGNUM
+ * [x] BIGNUM
  * [ ] BIT
  * [ ] BIT-AND
  * [ ] BIT-ANDC1
@@ -23,7 +23,7 @@
  * [ ] CIS
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
- * [ ] COSH
+ * [x] COSH
  * [ ] DECODE-FLOAT
  * [ ] DENOMINATOR
  * [ ] DEPOSIT-FIELD
@@ -72,8 +72,8 @@
  * [ ] SIGNED-BYTE
  * [ ] SIMPLE-BIT-VECTOR
  * [ ] SIMPLE-BIT-VECTOR-P
- * [ ] SINH
- * [ ] TANH
+ * [x] SINH
+ * [x] TANH
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
  * [ ] USE-VALUE
