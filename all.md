@@ -1,4 +1,4 @@
- * [ ] ACONS
+ * [x] ACONS
  * [ ] ACOSH
  * [ ] ASINH
  * [ ] ATANH

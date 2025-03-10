@@ -4,8 +4,8 @@
 
 - next
 
- - math
-  - [ ] ACONS
+ - more-math
+  - [x] ACONS
   - [ ] ACOSH
   - [ ] ASINH
   - [ ] ATANH
