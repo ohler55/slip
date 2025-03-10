@@ -4,9 +4,6 @@
 
 - next
 
- - tab-expand
-  - tab expand words any where (like describe and apropos)
-
  - math
   - [ ] ACONS
   - [ ] ACOSH
