@@ -609,7 +609,7 @@ func tab(ed *editor, b byte) bool {
 	pos := ed.pos - 1
 	for ; 0 <= pos; pos-- {
 		r := line[pos]
-		if r <= ' ' || r == '(' || r == ')' {
+		if r <= ' ' || r == '(' || r == ')' || r == '\'' {
 			break
 		}
 	}
