@@ -6,9 +6,9 @@
 
  - more-math
   - [x] ACONS
-  - [ ] ACOSH
-  - [ ] ASINH
-  - [ ] ATANH
+  - [x] ACOSH
+  - [x] ASINH
+  - [x] ATANH
   - [ ] CIS
   - [x] COSH
   - [ ] DECODE-FLOAT

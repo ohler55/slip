@@ -1,7 +1,7 @@
  * [x] ACONS
- * [ ] ACOSH
- * [ ] ASINH
- * [ ] ATANH
+ * [x] ACOSH
+ * [x] ASINH
+ * [x] ATANH
  * [x] BIGNUM
  * [ ] BIT
  * [ ] BIT-AND
