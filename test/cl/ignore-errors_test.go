@@ -11,7 +11,7 @@ import (
 func TestIgnoreErrorsCatch(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(ignore-errors (/ 1 0))`,
-		Expect: "/^nil, #<ARITHMETIC-ERROR [0-9a-f]+>$/",
+		Expect: "/^nil, #<DIVISION-BY-ZERO [0-9a-f]+>$/",
 	}).Test(t)
 }
 

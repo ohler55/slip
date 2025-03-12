@@ -20,14 +20,14 @@
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
- * [ ] CIS
+ * [x] CIS
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
  * [x] COSH
- * [ ] DECODE-FLOAT
- * [ ] DENOMINATOR
+ * [x] DECODE-FLOAT
+ * [x] DENOMINATOR
  * [ ] DEPOSIT-FIELD
- * [ ] DIVISION-BY-ZERO
+ * [x] DIVISION-BY-ZERO
  * [ ] DOCUMENTATION
  * [ ] DPB
  * [ ] ENOUGH-NAMESTRING

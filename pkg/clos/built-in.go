@@ -301,6 +301,13 @@ var (
 		docs:    "built-in arithmetic-error class",
 		inherit: []*Class{&errorClass},
 	}
+	divisionByZeroClass = Class{
+		name:    "division-by-zero",
+		final:   true,
+		noMake:  true,
+		docs:    "built-in division-by-zero class",
+		inherit: []*Class{&arithmeticErrorClass},
+	}
 	cellErrorClass = Class{
 		name:    "cell-error",
 		final:   true,
@@ -454,6 +461,7 @@ func init() {
 		&errorClass,
 		&warningClass,
 		&arithmeticErrorClass,
+		&divisionByZeroClass,
 		&cellErrorClass,
 		&classNotFoundClass,
 		&controlErrorClass,

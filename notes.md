@@ -9,11 +9,11 @@
   - [x] ACOSH
   - [x] ASINH
   - [x] ATANH
-  - [ ] CIS
+  - [x] CIS
   - [x] COSH
-  - [ ] DECODE-FLOAT
-  - [ ] DENOMINATOR
-  - [ ] DIVISION-BY-ZERO
+  - [x] DECODE-FLOAT
+  - [x] DENOMINATOR
+  - [x] DIVISION-BY-ZERO
   - [ ] FLOAT-DIGITS
   - [ ] FLOAT-PRECISION
   - [ ] FLOAT-RADIX

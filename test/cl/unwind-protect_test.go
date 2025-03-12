@@ -16,7 +16,7 @@ func TestUnwindProtect(t *testing.T) {
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(unwind-protect (setq x (/ 1 0)) (setq x 3))`,
-		PanicType: slip.ArithmeticErrorSymbol,
+		PanicType: slip.DivisionByZeroSymbol,
 	}).Test(t)
 	tt.Equal(t, slip.Fixnum(3), scope.Get("x"))
 }

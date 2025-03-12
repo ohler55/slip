@@ -1082,6 +1082,18 @@ func (r *reader) resolveToken(token []byte) Object {
 				}
 			}
 		}
+		// Didn't pass as fixnum ratio so try bignum.
+		var (
+			num big.Int
+			den big.Int
+		)
+		if _, ok := num.SetString(string(buf[:i]), r.rbase); ok {
+			if _, ok = den.SetString(string(buf[i+1:]), r.rbase); ok {
+				if 0 < den.Sign() {
+					return NewBigRatio(&num, &den)
+				}
+			}
+		}
 	}
 	return Symbol(token)
 }

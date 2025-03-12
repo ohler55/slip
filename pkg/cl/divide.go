@@ -57,23 +57,23 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 					case 1:
 						quot = td
 					case 0:
-						slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+						slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 					default:
 						quot = (*slip.Ratio)(big.NewRat(1, int64(td)))
 					}
 				case slip.SingleFloat:
 					if td == 0.0 {
-						slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+						slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 					}
 					quot = 1.0 / td
 				case slip.DoubleFloat:
 					if td == 0.0 {
-						slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+						slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 					}
 					quot = 1.0 / td
 				case *slip.LongFloat:
 					if (*big.Float)(td).Sign() == 0 {
-						slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+						slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 					}
 					one := big.NewFloat(1.0)
 					one.SetPrec((*big.Float)(td).Prec())
@@ -81,7 +81,7 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 				case *slip.Bignum:
 					bi := (*big.Int)(td)
 					if bi.Sign() == 0 {
-						slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+						slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 					}
 					if bi.IsInt64() && bi.Int64() == 1 {
 						quot = td
@@ -91,7 +91,7 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 					}
 				case *slip.Ratio:
 					if (*big.Rat)(td).Sign() == 0 {
-						slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+						slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 					}
 					quot = (*slip.Ratio)((*big.Rat)(td).Inv((*big.Rat)(td)))
 				case slip.Complex:
@@ -106,7 +106,7 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			if ta == 0 {
-				slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+				slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 			}
 			if quot.(slip.Fixnum)%ta == 0 {
 				quot = quot.(slip.Fixnum) / ta
@@ -115,17 +115,17 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 			}
 		case slip.SingleFloat:
 			if ta == 0.0 {
-				slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+				slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 			}
 			quot = quot.(slip.SingleFloat) / ta
 		case slip.DoubleFloat:
 			if ta == 0.0 {
-				slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+				slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 			}
 			quot = quot.(slip.DoubleFloat) / ta
 		case *slip.LongFloat:
 			if (*big.Float)(ta).Sign() == 0 {
-				slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+				slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 			}
 			syncFloatPrec(ta, quot.(*slip.LongFloat))
 			quot = (*slip.LongFloat)(((*big.Float)(quot.(*slip.LongFloat))).Quo(
@@ -134,7 +134,7 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 			)
 		case *slip.Bignum:
 			if (*big.Int)(ta).Sign() == 0 {
-				slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+				slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 			}
 			var z big.Int
 			var zz big.Int
@@ -147,7 +147,7 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 			}
 		case *slip.Ratio:
 			if (*big.Rat)(ta).Sign() == 0 {
-				slip.PanicArithmetic(slip.Symbol("/"), args, "divide by zero")
+				slip.PanicDivisionByZero(slip.Symbol("/"), args, "divide by zero")
 			}
 			quot = (*slip.Ratio)(((*big.Rat)(quot.(*slip.Ratio))).Quo((*big.Rat)(quot.(*slip.Ratio)), (*big.Rat)(ta)))
 		case slip.Complex:

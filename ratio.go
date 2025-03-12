@@ -25,6 +25,15 @@ func NewRatio(num, denom int64) *Ratio {
 	return (*Ratio)(big.NewRat(num, denom))
 }
 
+// NewBigRatio creates a new Ratio.
+func NewBigRatio(num, denom *big.Int) *Ratio {
+	if denom.Sign() == 0 {
+		PanicArithmetic(Symbol("/"), List{(*Bignum)(num), (*Bignum)(denom)}, "division by zero")
+	}
+	var rat big.Rat
+	return (*Ratio)(rat.SetFrac(num, denom))
+}
+
 // String representation of the Object.
 func (obj *Ratio) String() string {
 	return string(obj.Append([]byte{}))
