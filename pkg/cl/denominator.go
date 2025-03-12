@@ -25,7 +25,7 @@ func init() {
 				},
 			},
 			Return: "integer",
-			Text:   `__denominator__ returns then demoninator of _rational_.`,
+			Text:   `__denominator__ returns then denominator of _rational_.`,
 			Examples: []string{
 				"(denominator 3) => 1",
 				"(denominator 3/4) => 4",
