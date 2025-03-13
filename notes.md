@@ -19,7 +19,7 @@
   - [x] FLOAT-RADIX
   - [x] FLOAT-SIGN
   - [x] GCD
-  - [ ] IMAGPART
+  - [x] IMAGPART
   - [ ] INTEGER-DECODE-FLOAT
   - [ ] INTEGER-LENGTH
   - [ ] ISQRT
@@ -28,7 +28,7 @@
   - [ ] LDB-TEST
   - [ ] NUMERATOR
   - [ ] PHASE
-  - [ ] REALPART
+  - [x] REALPART
   - [ ] SCALE-FLOAT
   - [x] SINH
   - [x] TANH

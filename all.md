@@ -23,8 +23,6 @@
  * [ ] ENOUGH-NAMESTRING
  * [ ] FDEFINITION
  * [ ] FORMATTER
- * [x] GCD
- * [ ] IMAGPART
  * [ ] IMPORT
  * [ ] INTEGER-DECODE-FLOAT
  * [ ] INTEGER-LENGTH
@@ -49,7 +47,6 @@
  * [ ] PPRINT-POP
  * [ ] PPRINT-TAB
  * [ ] PPRINT-TABULAR
- * [ ] REALPART
  * [ ] SATISFIES
  * [ ] SBIT
  * [ ] SCALE-FLOAT
@@ -368,6 +365,7 @@
  * [x] FUNCTION
  * [x] FUNCTION-LAMBDA-EXPRESSION
  * [x] FUNCTIONP
+ * [x] GCD
  * [x] GENSYM
  * [x] GET
  * [x] GET-DECODED-TIME
@@ -392,6 +390,7 @@
  * [x] IGNORABLE
  * [x] IGNORE
  * [x] IGNORE-ERRORS
+ * [x] IMAGPART
  * [x] IN-PACKAGE
  * [x] INCF
  * [x] INLINE
@@ -606,6 +605,7 @@
  * [x] READER-ERROR
  * [x] REAL
  * [x] REALP
+ * [x] REALPART
  * [x] REDUCE
  * [x] REM
  * [x] REMF
