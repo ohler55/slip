@@ -14,11 +14,11 @@
   - [x] DECODE-FLOAT
   - [x] DENOMINATOR
   - [x] DIVISION-BY-ZERO
-  - [ ] FLOAT-DIGITS ??
-  - [ ] FLOAT-PRECISION ??
-  - [ ] FLOAT-RADIX - return 2
-  - [ ] FLOAT-SIGN ??
-  - [ ] GCD
+  - [x] FLOAT-DIGITS
+  - [x] FLOAT-PRECISION
+  - [x] FLOAT-RADIX
+  - [x] FLOAT-SIGN
+  - [x] GCD
   - [ ] IMAGPART
   - [ ] INTEGER-DECODE-FLOAT
   - [ ] INTEGER-LENGTH

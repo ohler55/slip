@@ -1,8 +1,3 @@
- * [x] ACONS
- * [x] ACOSH
- * [x] ASINH
- * [x] ATANH
- * [x] BIGNUM
  * [ ] BIT
  * [ ] BIT-AND
  * [ ] BIT-ANDC1
@@ -20,24 +15,15 @@
  * [ ] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
- * [x] CIS
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
- * [x] COSH
- * [x] DECODE-FLOAT
- * [x] DENOMINATOR
  * [ ] DEPOSIT-FIELD
- * [x] DIVISION-BY-ZERO
  * [ ] DOCUMENTATION
  * [ ] DPB
  * [ ] ENOUGH-NAMESTRING
  * [ ] FDEFINITION
- * [ ] FLOAT-DIGITS
- * [ ] FLOAT-PRECISION
- * [ ] FLOAT-RADIX
- * [ ] FLOAT-SIGN
  * [ ] FORMATTER
- * [ ] GCD
+ * [x] GCD
  * [ ] IMAGPART
  * [ ] IMPORT
  * [ ] INTEGER-DECODE-FLOAT
@@ -72,8 +58,6 @@
  * [ ] SIGNED-BYTE
  * [ ] SIMPLE-BIT-VECTOR
  * [ ] SIMPLE-BIT-VECTOR-P
- * [x] SINH
- * [x] TANH
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
  * [ ] USE-VALUE
@@ -134,7 +118,9 @@
  * [x] >
  * [x] >=
  * [x] ABS
+ * [x] ACONS
  * [x] ACOS
+ * [x] ACOSH
  * [x] ADJOIN
  * [x] ADJUST-ARRAY
  * [x] ADJUSTABLE-ARRAY-P
@@ -163,11 +149,14 @@
  * [x] ARRAYP
  * [x] ASH
  * [x] ASIN
+ * [x] ASINH
  * [x] ASSOC
  * [x] ASSOC-IF
  * [x] ASSOC-IF-NOT
  * [x] ATAN
+ * [x] ATANH
  * [x] ATOM
+ * [x] BIGNUM
  * [x] BLOCK
  * [x] BOOLE
  * [x] BOOLE-1
@@ -250,6 +239,7 @@
  * [x] CHAR>=
  * [x] CHARACTER
  * [x] CHARACTERP
+ * [x] CIS
  * [x] CLASS
  * [x] CLASS-NAME
  * [x] CLASS-OF
@@ -274,12 +264,14 @@
  * [x] COPY-SEQ
  * [x] COPY-TREE
  * [x] COS
+ * [x] COSH
  * [x] COUNT
  * [x] COUNT-IF
  * [x] DECF
  * [x] DECLAIM
  * [x] DECLARATION
  * [x] DECLARE
+ * [x] DECODE-FLOAT
  * [x] DECODE-UNIVERSAL-TIME
  * [x] DEFCONSTANT
  * [x] DEFMACRO
@@ -293,12 +285,14 @@
  * [x] DELETE-FILE
  * [x] DELETE-IF
  * [x] DELETE-PACKAGE
+ * [x] DENOMINATOR
  * [x] DESCRIBE
  * [x] DIGIT-CHAR
  * [x] DIGIT-CHAR-P
  * [x] DIRECTORY
  * [x] DIRECTORY-NAMESTRING
  * [x] DISASSEMBLE
+ * [x] DIVISION-BY-ZERO
  * [x] DO
  * [x] DO*
  * [x] DO-ALL-SYMBOLS
@@ -357,6 +351,10 @@
  * [x] FIRST
  * [x] FIXNUM
  * [x] FLOAT
+ * [x] FLOAT-DIGITS
+ * [x] FLOAT-PRECISION
+ * [x] FLOAT-RADIX
+ * [x] FLOAT-SIGN
  * [x] FLOATP
  * [x] FLOOR
  * [x] FMAKUNBOUND
@@ -660,6 +658,7 @@
  * [x] SINGLE-FLOAT
  * [x] SINGLE-FLOAT-EPSILON
  * [x] SINGLE-FLOAT-NEGATIVE-EPSILON
+ * [x] SINH
  * [x] SIXTH
  * [x] SLEEP
  * [x] SLOT-BOUNDP
@@ -726,6 +725,7 @@
  * [x] T
  * [x] TAGBODY
  * [x] TAN
+ * [x] TANH
  * [x] TENTH
  * [x] TERPRI
  * [x] THE
