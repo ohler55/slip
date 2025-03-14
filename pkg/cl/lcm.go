@@ -9,54 +9,50 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Gcd{Function: slip.Function{Name: "gcd", Args: args}}
+			f := Lcm{Function: slip.Function{Name: "lcm", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "gcd",
+			Name: "lcm",
 			Args: []*slip.DocArg{
 				{Name: "&rest"},
 				{Name: "integers", Type: "fixnum"},
 			},
 			Return: "fixnum",
-			Text:   `__gcd__ returns the greatest common divisor of _integers_.`,
+			Text:   `__lcm__ returns the least common multiple of _integers_.`,
 			Examples: []string{
-				"(gcd) => 0",
-				"(gcd 3) => 3",
-				"(gcd 70 42) => 7",
+				"(lcm) => 1",
+				"(lcm -3) => 3",
+				"(lcm 70 42) => 210",
 			},
 		}, &slip.CLPkg)
 }
 
-// Gcd represents the gcd function.
-type Gcd struct {
+// Lcm represents the lcm function.
+type Lcm struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Gcd) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	z := slip.Fixnum(0)
+func (f *Lcm) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	z := slip.Fixnum(1)
 	for i, a := range args {
 		num, ok := a.(slip.Fixnum)
 		if !ok {
 			slip.PanicType("integers", a, "fixnum")
 		}
-		if num < 0 {
+		switch {
+		case num == 0:
+			return num
+		case num < 0:
 			num = -num
 		}
 		if i == 0 { // first one
 			z = num
 		} else {
-			z = gcd(z, num)
+			z = z * num / gcd(z, num)
 		}
 	}
 	return z
-}
-
-func gcd(x, y slip.Fixnum) slip.Fixnum {
-	for y != 0 {
-		x, y = y, x%y
-	}
-	return x
 }

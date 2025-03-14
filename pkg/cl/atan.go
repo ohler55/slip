@@ -24,7 +24,7 @@ func init() {
 					Text: "The number to take the arc tangent of.",
 				},
 			},
-			Return: "nil",
+			Return: "number",
 			Text:   `__atan__ returns the arc tangent of the _number_.`,
 			Examples: []string{
 				"(atan 1.0) => 0.7853982",

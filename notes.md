@@ -21,19 +21,23 @@
   - [x] GCD
   - [x] IMAGPART
   - [ ] INTEGER-DECODE-FLOAT
-  - [ ] INTEGER-LENGTH
-  - [ ] ISQRT
-  - [ ] LCM
-  - [ ] LDB
-  - [ ] LDB-TEST
-  - [ ] NUMERATOR
-  - [ ] PHASE
+   - 3rd value as fixnum
+  - [x] INTEGER-LENGTH
+  - [x] ISQRT
+  - [x] LCM
+  - [x] NUMERATOR
+  - [x] PHASE
   - [x] REALPART
   - [ ] SCALE-FLOAT
   - [x] SINH
   - [x] TANH
+  - atan
+   - add optional number2 - math.Atan2
+   - support complex
+   - same for acos and asin
 
  - bits-and-bytes
+  - alias byte and octet like short-float
   - [ ] BIT
   - [ ] BIT-AND
   - [ ] BIT-ANDC1
@@ -53,6 +57,8 @@
   - [ ] BYTE-SIZE
   - [ ] DEPOSIT-FIELD
   - [ ] DPB
+  - [ ] LDB
+  - [ ] LDB-TEST
   - [ ] MASK-FIELD
   - [ ] SBIT
   - [ ] SIMPLE-BIT-VECTOR

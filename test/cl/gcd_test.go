@@ -37,6 +37,13 @@ func TestGcdMulti(t *testing.T) {
 	}).Test(t)
 }
 
+func TestGcdNeg(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(gcd -42 70 -8)`,
+		Expect: "2",
+	}).Test(t)
+}
+
 func TestGcdNotFixnum(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(gcd t)`,
