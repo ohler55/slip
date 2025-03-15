@@ -25,7 +25,7 @@ func init() {
 				},
 			},
 			Return: "integer",
-			Text: `__phase__ returns then phase of _numer_ whic is defined as
+			Text: `__phase__ returns then phase of _numer_ which is defined as
  (phase x) = (atan (imagpart x) (realpart x))
 `,
 			Examples: []string{

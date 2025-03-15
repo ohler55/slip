@@ -43,6 +43,13 @@ func TestAtanRatio(t *testing.T) {
 	}).Test(t)
 }
 
+func TestAtanTwo(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(atan 1.0 0.5)`,
+		Expect: "/^1.1071487[0-9]+$/",
+	}).Test(t)
+}
+
 func TestAtanBadArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(atan)`,
@@ -53,6 +60,10 @@ func TestAtanBadArgCount(t *testing.T) {
 func TestAtanNotNumber(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(atan t)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(atan 1.2 t)`,
 		Panics: true,
 	}).Test(t)
 }

@@ -19,13 +19,18 @@ func init() {
 			Name: "atan",
 			Args: []*slip.DocArg{
 				{
-					Name: "number",
+					Name: "number1",
 					Type: "number",
 					Text: "The number to take the arc tangent of.",
 				},
+				{Name: "&optional"},
+				{
+					Name: "number2",
+					Type: "number",
+				},
 			},
 			Return: "number",
-			Text:   `__atan__ returns the arc tangent of the _number_.`,
+			Text:   `__atan__ returns the arc tangent of the _number1_.`,
 			Examples: []string{
 				"(atan 1.0) => 0.7853982",
 			},
@@ -39,13 +44,19 @@ type Atan struct {
 
 // Call the function with the arguments provided.
 func (f *Atan) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
-	if real, ok := args[0].(slip.Real); ok {
-		result = slip.DoubleFloat(math.Atan(real.RealValue()))
+	slip.ArgCountCheck(f, args, 1, 2)
+	if n1, ok := args[0].(slip.Real); ok {
+		if 1 < len(args) {
+			if n2, ok2 := args[1].(slip.Real); ok2 {
+				result = slip.DoubleFloat(math.Atan2(n1.RealValue(), n2.RealValue()))
+			} else {
+				slip.PanicType("number2", args[1], "number")
+			}
+		} else {
+			result = slip.DoubleFloat(math.Atan(n1.RealValue()))
+		}
 	} else {
-		slip.PanicType("number", args[0], "number")
+		slip.PanicType("number1", args[0], "number")
 	}
 	return
 }

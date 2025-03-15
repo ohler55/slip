@@ -12,7 +12,7 @@
  * [ ] BIT-VECTOR
  * [ ] BIT-VECTOR-P
  * [ ] BIT-XOR
- * [ ] BYTE
+ * [x] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
  * [ ] COMPLEMENT
@@ -25,20 +25,14 @@
  * [ ] FORMATTER
  * [ ] IMPORT
  * [ ] INTEGER-DECODE-FLOAT
- * [x] INTEGER-LENGTH
- * [x] INTERACTIVE-STREAM-P
- * [x] ISQRT
  * [ ] LAMBDA-LIST-KEYWORDS
- * [x] LCM
  * [ ] LDB
  * [ ] LDB-TEST
  * [ ] MACRO-FUNCTION
  * [ ] MACROEXPAND
  * [ ] MACROEXPAND-1
  * [ ] MASK-FIELD
- * [x] NUMERATOR
  * [ ] PACKAGE-SHADOWING-SYMBOLS
- * [x] PHASE
  * [ ] PPRINT-FILL
  * [ ] PPRINT-INDENT
  * [ ] PPRINT-LINEAR
@@ -49,7 +43,6 @@
  * [ ] PPRINT-TABULAR
  * [ ] SATISFIES
  * [ ] SBIT
- * [ ] SCALE-FLOAT
  * [ ] SHADOW
  * [ ] SHADOWING-IMPORT
  * [ ] SIGNED-BYTE
@@ -396,16 +389,20 @@
  * [x] INLINE
  * [x] INPUT-STREAM-P
  * [x] INTEGER
+ * [x] INTEGER-LENGTH
  * [x] INTEGERP
+ * [x] INTERACTIVE-STREAM-P
  * [x] INTERN
  * [x] INTERNAL-TIME-UNITS-PER-SECOND
  * [x] INTERSECTION
  * [x] INVALID-METHOD-ERROR
+ * [x] ISQRT
  * [x] KEYWORD
  * [x] KEYWORDP
  * [x] LAMBDA
  * [x] LAMBDA-PARAMETERS-LIMIT
  * [x] LAST
+ * [x] LCM
  * [x] LEAST-NEGATIVE-DOUBLE-FLOAT
  * [x] LEAST-NEGATIVE-LONG-FLOAT
  * [x] LEAST-NEGATIVE-NORMALIZED-DOUBLE-FLOAT
@@ -538,6 +535,7 @@
  * [x] NULL
  * [x] NUMBER
  * [x] NUMBERP
+ * [x] NUMERATOR
  * [x] NUNION
  * [x] ODDP
  * [x] OPEN
@@ -561,6 +559,7 @@
  * [x] PATHNAME-NAME
  * [x] PATHNAME-TYPE
  * [x] PEEK-CHAR
+ * [x] PHASE
  * [x] PI
  * [x] PLUSP
  * [x] POP
@@ -629,6 +628,7 @@
  * [x] ROW-MAJOR-AREF
  * [x] RPLACA
  * [x] RPLACD
+ * [x] SCALE-FLOAT
  * [x] SCHAR
  * [x] SEARCH
  * [x] SECOND

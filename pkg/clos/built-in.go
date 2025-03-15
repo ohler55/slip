@@ -67,6 +67,13 @@ var (
 		inherit:   []*Class{&integerClass},
 		prototype: slip.Octet(42),
 	}
+	byteClass = Class{
+		name:      "byte",
+		final:     true,
+		docs:      "built-in unsigned 8 bit integer class",
+		inherit:   []*Class{&integerClass},
+		prototype: slip.Byte(42),
+	}
 	bignumClass = Class{
 		name:      "bignum",
 		final:     true,
@@ -433,6 +440,7 @@ func init() {
 		&integerClass,
 		&fixnumClass,
 		&octetClass,
+		&byteClass,
 		&bignumClass,
 		&floatClass,
 		&doubleFloatClass,

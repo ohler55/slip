@@ -35,11 +35,11 @@ _object_ type and the horizontal axis the the _type_:
              |list
              | |string
              | | |vector
-             | | | |octets
+             | | | |octets (bytes)
              | | | | |character
              | | | | | |integer
              | | | | | | |fixnum
-             | | | | | | | |octet
+             | | | | | | | |octet (byte)
              | | | | | | | | |bignum
              | | | | | | | | | |float
              | | | | | | | | | | |short-float
@@ -98,9 +98,9 @@ func (f *Coerce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		result = coerceToInteger(args[0])
 	case slip.Symbol("fixnum"):
 		result = coerceToFixnum(args[0])
-	case slip.Symbol("octet"):
+	case slip.Symbol("octet"), slip.Symbol("byte"):
 		result = ToOctet(args[0])
-	case slip.Symbol("octets"):
+	case slip.Symbol("octets"), slip.Symbol("bytes"):
 		result = coerceToOctets(args[0])
 	case slip.Symbol("bignum"):
 		result = coerceToBignum(args[0])

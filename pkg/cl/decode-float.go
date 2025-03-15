@@ -42,8 +42,8 @@ type DecodeFloat struct {
 // Call the function with the arguments provided.
 func (f *DecodeFloat) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if real, ok := args[0].(slip.Float); ok {
-		rv := real.RealValue()
+	if r, ok := args[0].(slip.Float); ok {
+		rv := r.RealValue()
 		neg := slip.DoubleFloat(1.0)
 		if rv < 0 {
 			neg = slip.DoubleFloat(-1.0)

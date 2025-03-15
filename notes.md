@@ -4,41 +4,8 @@
 
 - next
 
- - more-math
-  - [x] ACONS
-  - [x] ACOSH
-  - [x] ASINH
-  - [x] ATANH
-  - [x] CIS
-  - [x] COSH
-  - [x] DECODE-FLOAT
-  - [x] DENOMINATOR
-  - [x] DIVISION-BY-ZERO
-  - [x] FLOAT-DIGITS
-  - [x] FLOAT-PRECISION
-  - [x] FLOAT-RADIX
-  - [x] FLOAT-SIGN
-  - [x] GCD
-  - [x] IMAGPART
-  - [ ] INTEGER-DECODE-FLOAT
-   - 3rd value as fixnum
-  - [x] INTEGER-LENGTH
-  - [x] ISQRT
-  - [x] LCM
-  - [x] NUMERATOR
-  - [x] PHASE
-  - [x] REALPART
-  - [ ] SCALE-FLOAT
-  - [x] SINH
-  - [x] TANH
-  - atan
-   - add optional number2 - math.Atan2
-   - support complex
-   - same for acos and asin
-
  - bits-and-bytes
-  - alias byte and octet like short-float
-  - [ ] BIT
+  - [ ] BIT - new built in type as byte that is 0 or one
   - [ ] BIT-AND
   - [ ] BIT-ANDC1
   - [ ] BIT-ANDC2
@@ -50,9 +17,21 @@
   - [ ] BIT-ORC1
   - [ ] BIT-ORC2
   - [ ] BIT-VECTOR
+   - like octets
+    - encoding/asn1/BitString ?not that helpful? maybe just as a model for impl
+   - operator on a bit-vector
+   - display as 0 and 1 or #*010101
+   - update code to read
+   - coerce to list, maybe other for non-standard like integer, octet, byte
+   - maybe always a simple-bit-vector, not displaced
   - [ ] BIT-VECTOR-P
   - [ ] BIT-XOR
-  - [ ] BYTE
+  - [x] BYTE (function and also type)
+   - type is ok as octet
+   - function return a byte-specifier
+   - need byte-specifier
+   - maybe change to arbitry bits with some size indicator
+
   - [ ] BYTE-POSITION
   - [ ] BYTE-SIZE
   - [ ] DEPOSIT-FIELD
@@ -67,6 +46,7 @@
  - tough-ones
   - [ ] DESTRUCTURING-BIND
   - [ ] FORMATTER
+  - [ ] INTEGER-DECODE-FLOAT
 
 
 - autocomplete
