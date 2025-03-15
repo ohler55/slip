@@ -162,7 +162,7 @@ func TestFramerErrorValue(t *testing.T) {
 		Expect: "nil",
 	}).Test(t)
 	str := strings.ReplaceAll(out.String(), "\x1b", "")
-	tt.Equal(t, `/p5: #<arithmetic-error: divide by zero>/`, str)
+	tt.Equal(t, `/p5: #<division-by-zero: divide by zero>/`, str)
 }
 
 func TestFramerDocs(t *testing.T) {

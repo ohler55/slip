@@ -37,7 +37,7 @@ func TestSliptestFunctionPanics(t *testing.T) {
 func TestSliptestFunctionPanicType(t *testing.T) {
 	(&sliptest.Function{
 		Source:    "(/ 1 0)",
-		PanicType: slip.Symbol("arithmetic-error"),
+		PanicType: slip.DivisionByZeroSymbol,
 	}).Test(t)
 }
 

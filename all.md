@@ -1,8 +1,3 @@
- * [ ] ACONS
- * [ ] ACOSH
- * [ ] ASINH
- * [ ] ATANH
- * [ ] BIGNUM
  * [ ] BIT
  * [ ] BIT-AND
  * [ ] BIT-ANDC1
@@ -17,44 +12,27 @@
  * [ ] BIT-VECTOR
  * [ ] BIT-VECTOR-P
  * [ ] BIT-XOR
- * [ ] BYTE
+ * [x] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
- * [ ] CIS
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
- * [ ] COSH
- * [ ] DECODE-FLOAT
- * [ ] DENOMINATOR
  * [ ] DEPOSIT-FIELD
- * [ ] DIVISION-BY-ZERO
  * [ ] DOCUMENTATION
  * [ ] DPB
  * [ ] ENOUGH-NAMESTRING
  * [ ] FDEFINITION
- * [ ] FLOAT-DIGITS
- * [ ] FLOAT-PRECISION
- * [ ] FLOAT-RADIX
- * [ ] FLOAT-SIGN
  * [ ] FORMATTER
- * [ ] GCD
- * [ ] IMAGPART
  * [ ] IMPORT
  * [ ] INTEGER-DECODE-FLOAT
- * [ ] INTEGER-LENGTH
- * [ ] INTERACTIVE-STREAM-P
- * [ ] ISQRT
  * [ ] LAMBDA-LIST-KEYWORDS
- * [ ] LCM
  * [ ] LDB
  * [ ] LDB-TEST
  * [ ] MACRO-FUNCTION
  * [ ] MACROEXPAND
  * [ ] MACROEXPAND-1
  * [ ] MASK-FIELD
- * [ ] NUMERATOR
  * [ ] PACKAGE-SHADOWING-SYMBOLS
- * [ ] PHASE
  * [ ] PPRINT-FILL
  * [ ] PPRINT-INDENT
  * [ ] PPRINT-LINEAR
@@ -63,17 +41,13 @@
  * [ ] PPRINT-POP
  * [ ] PPRINT-TAB
  * [ ] PPRINT-TABULAR
- * [ ] REALPART
  * [ ] SATISFIES
  * [ ] SBIT
- * [ ] SCALE-FLOAT
  * [ ] SHADOW
  * [ ] SHADOWING-IMPORT
  * [ ] SIGNED-BYTE
  * [ ] SIMPLE-BIT-VECTOR
  * [ ] SIMPLE-BIT-VECTOR-P
- * [ ] SINH
- * [ ] TANH
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
  * [ ] USE-VALUE
@@ -134,7 +108,9 @@
  * [x] >
  * [x] >=
  * [x] ABS
+ * [x] ACONS
  * [x] ACOS
+ * [x] ACOSH
  * [x] ADJOIN
  * [x] ADJUST-ARRAY
  * [x] ADJUSTABLE-ARRAY-P
@@ -163,11 +139,14 @@
  * [x] ARRAYP
  * [x] ASH
  * [x] ASIN
+ * [x] ASINH
  * [x] ASSOC
  * [x] ASSOC-IF
  * [x] ASSOC-IF-NOT
  * [x] ATAN
+ * [x] ATANH
  * [x] ATOM
+ * [x] BIGNUM
  * [x] BLOCK
  * [x] BOOLE
  * [x] BOOLE-1
@@ -250,6 +229,7 @@
  * [x] CHAR>=
  * [x] CHARACTER
  * [x] CHARACTERP
+ * [x] CIS
  * [x] CLASS
  * [x] CLASS-NAME
  * [x] CLASS-OF
@@ -274,12 +254,14 @@
  * [x] COPY-SEQ
  * [x] COPY-TREE
  * [x] COS
+ * [x] COSH
  * [x] COUNT
  * [x] COUNT-IF
  * [x] DECF
  * [x] DECLAIM
  * [x] DECLARATION
  * [x] DECLARE
+ * [x] DECODE-FLOAT
  * [x] DECODE-UNIVERSAL-TIME
  * [x] DEFCONSTANT
  * [x] DEFMACRO
@@ -293,12 +275,14 @@
  * [x] DELETE-FILE
  * [x] DELETE-IF
  * [x] DELETE-PACKAGE
+ * [x] DENOMINATOR
  * [x] DESCRIBE
  * [x] DIGIT-CHAR
  * [x] DIGIT-CHAR-P
  * [x] DIRECTORY
  * [x] DIRECTORY-NAMESTRING
  * [x] DISASSEMBLE
+ * [x] DIVISION-BY-ZERO
  * [x] DO
  * [x] DO*
  * [x] DO-ALL-SYMBOLS
@@ -357,6 +341,10 @@
  * [x] FIRST
  * [x] FIXNUM
  * [x] FLOAT
+ * [x] FLOAT-DIGITS
+ * [x] FLOAT-PRECISION
+ * [x] FLOAT-RADIX
+ * [x] FLOAT-SIGN
  * [x] FLOATP
  * [x] FLOOR
  * [x] FMAKUNBOUND
@@ -370,6 +358,7 @@
  * [x] FUNCTION
  * [x] FUNCTION-LAMBDA-EXPRESSION
  * [x] FUNCTIONP
+ * [x] GCD
  * [x] GENSYM
  * [x] GET
  * [x] GET-DECODED-TIME
@@ -394,21 +383,26 @@
  * [x] IGNORABLE
  * [x] IGNORE
  * [x] IGNORE-ERRORS
+ * [x] IMAGPART
  * [x] IN-PACKAGE
  * [x] INCF
  * [x] INLINE
  * [x] INPUT-STREAM-P
  * [x] INTEGER
+ * [x] INTEGER-LENGTH
  * [x] INTEGERP
+ * [x] INTERACTIVE-STREAM-P
  * [x] INTERN
  * [x] INTERNAL-TIME-UNITS-PER-SECOND
  * [x] INTERSECTION
  * [x] INVALID-METHOD-ERROR
+ * [x] ISQRT
  * [x] KEYWORD
  * [x] KEYWORDP
  * [x] LAMBDA
  * [x] LAMBDA-PARAMETERS-LIMIT
  * [x] LAST
+ * [x] LCM
  * [x] LEAST-NEGATIVE-DOUBLE-FLOAT
  * [x] LEAST-NEGATIVE-LONG-FLOAT
  * [x] LEAST-NEGATIVE-NORMALIZED-DOUBLE-FLOAT
@@ -541,6 +535,7 @@
  * [x] NULL
  * [x] NUMBER
  * [x] NUMBERP
+ * [x] NUMERATOR
  * [x] NUNION
  * [x] ODDP
  * [x] OPEN
@@ -564,6 +559,7 @@
  * [x] PATHNAME-NAME
  * [x] PATHNAME-TYPE
  * [x] PEEK-CHAR
+ * [x] PHASE
  * [x] PI
  * [x] PLUSP
  * [x] POP
@@ -608,6 +604,7 @@
  * [x] READER-ERROR
  * [x] REAL
  * [x] REALP
+ * [x] REALPART
  * [x] REDUCE
  * [x] REM
  * [x] REMF
@@ -631,6 +628,7 @@
  * [x] ROW-MAJOR-AREF
  * [x] RPLACA
  * [x] RPLACD
+ * [x] SCALE-FLOAT
  * [x] SCHAR
  * [x] SEARCH
  * [x] SECOND
@@ -660,6 +658,7 @@
  * [x] SINGLE-FLOAT
  * [x] SINGLE-FLOAT-EPSILON
  * [x] SINGLE-FLOAT-NEGATIVE-EPSILON
+ * [x] SINH
  * [x] SIXTH
  * [x] SLEEP
  * [x] SLOT-BOUNDP
@@ -726,6 +725,7 @@
  * [x] T
  * [x] TAGBODY
  * [x] TAN
+ * [x] TANH
  * [x] TENTH
  * [x] TERPRI
  * [x] THE

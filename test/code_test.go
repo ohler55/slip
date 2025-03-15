@@ -136,6 +136,7 @@ func TestCodeRatio(t *testing.T) {
 	for i, ct := range []*codeTest{
 		{src: "1/2", expect: "[1/2]", kind: "ratio"},
 		{src: "-1/2", expect: "[-1/2]", kind: "ratio"},
+		{src: "5/18446744073709551614", expect: "[5/18446744073709551614]", kind: "ratio"},
 		{src: "1/-2", expect: "[|1/-2|]", kind: "symbol"},
 	} {
 		ct.test(t, i)

@@ -4,38 +4,8 @@
 
 - next
 
- - math
-  - [ ] ACONS
-  - [ ] ACOSH
-  - [ ] ASINH
-  - [ ] ATANH
-  - [ ] BIGNUM
-  - [ ] CIS
-  - [ ] COSH
-  - [ ] DECODE-FLOAT
-  - [ ] DENOMINATOR
-  - [ ] DIVISION-BY-ZERO
-  - [ ] FLOAT-DIGITS
-  - [ ] FLOAT-PRECISION
-  - [ ] FLOAT-RADIX
-  - [ ] FLOAT-SIGN
-  - [ ] GCD
-  - [ ] IMAGPART
-  - [ ] INTEGER-DECODE-FLOAT
-  - [ ] INTEGER-LENGTH
-  - [ ] ISQRT
-  - [ ] LCM
-  - [ ] LDB
-  - [ ] LDB-TEST
-  - [ ] NUMERATOR
-  - [ ] PHASE
-  - [ ] REALPART
-  - [ ] SCALE-FLOAT
-  - [ ] SINH
-  - [ ] TANH
-
  - bits-and-bytes
-  - [ ] BIT
+  - [ ] BIT - new built in type as byte that is 0 or one
   - [ ] BIT-AND
   - [ ] BIT-ANDC1
   - [ ] BIT-ANDC2
@@ -47,13 +17,27 @@
   - [ ] BIT-ORC1
   - [ ] BIT-ORC2
   - [ ] BIT-VECTOR
+   - like octets
+    - encoding/asn1/BitString ?not that helpful? maybe just as a model for impl
+   - operator on a bit-vector
+   - display as 0 and 1 or #*010101
+   - update code to read
+   - coerce to list, maybe other for non-standard like integer, octet, byte
+   - maybe always a simple-bit-vector, not displaced
   - [ ] BIT-VECTOR-P
   - [ ] BIT-XOR
-  - [ ] BYTE
+  - [x] BYTE (function and also type)
+   - type is ok as octet
+   - function return a byte-specifier
+   - need byte-specifier
+   - maybe change to arbitry bits with some size indicator
+
   - [ ] BYTE-POSITION
   - [ ] BYTE-SIZE
   - [ ] DEPOSIT-FIELD
   - [ ] DPB
+  - [ ] LDB
+  - [ ] LDB-TEST
   - [ ] MASK-FIELD
   - [ ] SBIT
   - [ ] SIMPLE-BIT-VECTOR
@@ -62,6 +46,7 @@
  - tough-ones
   - [ ] DESTRUCTURING-BIND
   - [ ] FORMATTER
+  - [ ] INTEGER-DECODE-FLOAT
 
 
 - autocomplete

@@ -24,7 +24,7 @@ func init() {
 					Text: "The number of radians to take the cosine of.",
 				},
 			},
-			Return: "nil",
+			Return: "number",
 			Text:   `__cos__ returns the cosine of the _radians_.`,
 			Examples: []string{
 				"(cos pi) => -1.0",
@@ -39,9 +39,7 @@ type Cos struct {
 
 // Call the function with the arguments provided.
 func (f *Cos) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.ArgCountCheck(f, args, 1, 1)
 	if real, ok := args[0].(slip.Real); ok {
 		result = slip.DoubleFloat(math.Cos(real.RealValue()))
 	} else {
