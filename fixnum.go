@@ -95,6 +95,11 @@ func (obj Fixnum) RealValue() float64 {
 	return float64(obj)
 }
 
+// IsInt64 returns true if the instance can be represented by an int64.
+func (obj Fixnum) IsInt64() bool {
+	return true
+}
+
 // Int64 of the number.
 func (obj Fixnum) Int64() int64 {
 	return int64(obj)

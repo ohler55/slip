@@ -109,6 +109,11 @@ func (obj *Bignum) RealValue() float64 {
 	return f
 }
 
+// IsInt64 returns true if the instance can be represented by an int64.
+func (obj *Bignum) IsInt64() bool {
+	return (*big.Int)(obj).IsInt64()
+}
+
 // Int64 of the number.
 func (obj *Bignum) Int64() int64 {
 	return (*big.Int)(obj).Int64()
