@@ -60,6 +60,7 @@ func TestFixnum(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.Fixnum(7).RealValue())
 	tt.Equal(t, 7, slip.Fixnum(7).Int64())
+	tt.Equal(t, true, slip.Fixnum(7).IsInt64())
 }
 
 func TestOctet(t *testing.T) {
@@ -189,6 +190,7 @@ func TestBignum(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 123.0, slip.NewBignum(123).RealValue())
 	tt.Equal(t, 123, slip.NewBignum(123).Int64())
+	tt.Equal(t, true, slip.NewBignum(123).IsInt64())
 }
 
 func TestShortFloat(t *testing.T) {
@@ -820,6 +822,142 @@ func TestIOStream2(t *testing.T) {
 	_, err := stream.Write([]byte("hello"))
 	tt.Nil(t, err)
 	tt.Equal(t, 'o', stream.LastByte())
+}
+
+func TestSignedByteSmall(t *testing.T) {
+	sb := slip.SignedByte{
+		Bytes: []byte{0x08, 0x02},
+		Size:  12,
+	}
+	(&sliptest.Object{
+		Target:    &sb,
+		String:    "2050",
+		Simple:    int64(2050),
+		Hierarchy: "signed-byte.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Fixnum(2050), Expect: true},
+			{Other: slip.NewRatio(2050, 1), Expect: true},
+			{Other: slip.NewBignum(2050), Expect: true},
+			{Other: slip.Fixnum(5), Expect: false},
+			{Other: slip.DoubleFloat(2050.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			sb.IntegerType,
+			sb.RationalType,
+			sb.RealType,
+			sb.NumberType,
+		},
+		Eval: &sb,
+	}).Test(t)
+	tt.Equal(t, 2050.0, sb.RealValue())
+	tt.Equal(t, 2050, sb.Int64())
+	tt.Equal(t, true, sb.IsInt64())
+
+	sb = slip.SignedByte{
+		Bytes: []byte{0x08, 0x02},
+		Size:  12,
+		Neg:   true,
+	}
+	tt.Equal(t, -2050, sb.Int64())
+}
+
+func TestSignedByteBig(t *testing.T) {
+	sb := slip.SignedByte{
+		Bytes: []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x02},
+		Size:  80,
+	}
+	(&sliptest.Object{
+		Target:    &sb,
+		String:    "2050",
+		Simple:    int64(2050),
+		Hierarchy: "signed-byte.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: &sb, Expect: true},
+			{Other: slip.NewBignum(2050), Expect: true},
+			{Other: slip.Fixnum(5), Expect: false},
+			{Other: slip.DoubleFloat(2050.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			sb.IntegerType,
+			sb.RationalType,
+			sb.RealType,
+			sb.NumberType,
+		},
+		Eval: &sb,
+	}).Test(t)
+	tt.Equal(t, 2050.0, sb.RealValue())
+	tt.Equal(t, 2050, sb.Int64())
+	tt.Equal(t, true, sb.IsInt64())
+
+	sb = slip.SignedByte{
+		Bytes: []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x02},
+		Size:  80,
+		Neg:   true,
+	}
+	tt.Equal(t, -2050, sb.Int64())
+}
+
+func TestUnsignedByteSmall(t *testing.T) {
+	ub := slip.UnsignedByte{
+		Bytes: []byte{0x08, 0x02},
+		Size:  12,
+	}
+	(&sliptest.Object{
+		Target:    &ub,
+		String:    "2050",
+		Simple:    int64(2050),
+		Hierarchy: "unsigned-byte.signed-byte.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Fixnum(2050), Expect: true},
+			{Other: slip.NewRatio(2050, 1), Expect: true},
+			{Other: slip.NewBignum(2050), Expect: true},
+			{Other: slip.Fixnum(5), Expect: false},
+			{Other: slip.DoubleFloat(2050.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			ub.IntegerType,
+			ub.RationalType,
+			ub.RealType,
+			ub.NumberType,
+		},
+		Eval: &ub,
+	}).Test(t)
+	tt.Equal(t, 2050.0, ub.RealValue())
+	tt.Equal(t, 2050, ub.Int64())
+	tt.Equal(t, true, ub.IsInt64())
+}
+
+func TestUnsignedByteBig(t *testing.T) {
+	ub := slip.UnsignedByte{
+		Bytes: []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x02},
+		Size:  80,
+	}
+	(&sliptest.Object{
+		Target:    &ub,
+		String:    "2050",
+		Simple:    int64(2050),
+		Hierarchy: "unsigned-byte.signed-byte.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: &ub, Expect: true},
+			{Other: slip.NewBignum(2050), Expect: true},
+			{Other: slip.Fixnum(5), Expect: false},
+			{Other: slip.DoubleFloat(2050.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			ub.IntegerType,
+			ub.RationalType,
+			ub.RealType,
+			ub.NumberType,
+		},
+		Eval: &ub,
+	}).Test(t)
+	tt.Equal(t, 2050.0, ub.RealValue())
+	tt.Equal(t, 2050, ub.Int64())
+	tt.Equal(t, true, ub.IsInt64())
 }
 
 func TestFuncInfo(t *testing.T) {

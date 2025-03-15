@@ -2,7 +2,10 @@
 
 package slip
 
-import "math/big"
+import (
+	"bytes"
+	"math/big"
+)
 
 // SignedByteSymbol is the symbol with a value of "signed-byte".
 const SignedByteSymbol = Symbol("signed-byte")
@@ -36,6 +39,9 @@ func (obj *SignedByte) Simplify() any {
 
 // Equal returns true if this Object and the other are equal in value.
 func (obj *SignedByte) Equal(other Object) (eq bool) {
+	if sb, ok := other.(*SignedByte); ok {
+		return obj.Size == sb.Size && obj.Neg == sb.Neg && bytes.Equal(obj.Bytes, sb.Bytes)
+	}
 	return obj.AsFixOrBig().Equal(other)
 }
 

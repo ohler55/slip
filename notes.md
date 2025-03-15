@@ -7,17 +7,10 @@
  - bits-and-bytes
   - next
    - types
-    - signed-byte -
-    - unsigned-byte -
     - bit - type Bit byte
     - bit-vector
+
    - byte remains as a slip specific type
-   - signed-byte and unsigned-byte types, (hierarchy: unsigned-byte, signed-byte, integer, rational, real, number, t)
-    -
-    - is this needed or is it just an integer, like sbcl
-    - cleaner if separate types, need to update places where integer is used
-    - []byte and size
-     - bit-vector implemented on top of byte in code but on top of vector for hierarchy
    - bit type
     - hierarchy: bit, unsigned-byte, signed-byte, integer, rational, real, number, t
     - need unsigned-byte and signed-byte just for the hierarchy
