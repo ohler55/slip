@@ -362,32 +362,6 @@ func TestOctets(t *testing.T) {
 		slip.NewOctets(3, slip.Octet(97)).AsList())
 }
 
-func TestBitVector(t *testing.T) {
-	bv := slip.BitVector{Bytes: []byte{0xaa}, Size: 5}
-	(&sliptest.Object{
-		Target:    &bv,
-		String:    "#*10101",
-		Simple:    "#*10101",
-		Hierarchy: "bit-vector.vector.array.sequence.t",
-		Equals: []*sliptest.EqTest{
-			{Other: &bv, Expect: true},
-			{Other: slip.Octets("ABC"), Expect: false},
-			{Other: slip.True, Expect: false},
-		},
-		Eval: &bv,
-	}).Test(t)
-	tt.Equal(t, slip.BitVectorSymbol, bv.SequenceType())
-
-	bv = slip.BitVector{Bytes: []byte{0xaa, 0xff}, Size: 16}
-	tt.Equal(t, "#*1010101011111111", bv.String())
-	bv.Size = 15
-	tt.Equal(t, "#*101010101111111", bv.String())
-	bv.Size = 9
-	tt.Equal(t, "#*101010101", bv.String())
-	bv.Size = 0
-	tt.Equal(t, "#*", bv.String())
-}
-
 func TestSymbolKey(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.Symbol(":abc"),

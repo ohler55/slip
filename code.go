@@ -62,6 +62,9 @@ const (
 	arrayByte    = 'A'
 	swallowOpen  = '{'
 
+	bitVectorByte = 'Z'
+	bitVectorDone = 'z'
+
 	singleQuote = 'q'
 	backquote   = 'B'
 	comma       = ','
@@ -161,7 +164,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	sharpMode = "" +
 		"................................" + // 0x00
-		".......GV.......9999999999......" + // 0x20
+		".......GV.Z.....9999999999......" + // 0x20
 		"..bi...........o........x.../..." + // 0x40
 		"..bi...........o........x...|..." + // 0x60
 		"................................" + // 0x80
@@ -234,6 +237,17 @@ const (
 		"||||||||||||||||||||||||||||||||" + // 0xa0
 		"||||||||||||||||||||||||||||||||" + // 0xc0
 		"||||||||||||||||||||||||||||||||;" //  0xe0
+
+	//   0123456789abcdef0123456789abcdef
+	bitVectorMode = "" +
+		".........zz..z.................." + // 0x00
+		"z.......zz......aa.............." + // 0x20
+		"................................" + // 0x40
+		"................................" + // 0x60
+		"................................" + // 0x80
+		"................................" + // 0xa0
+		"................................" + // 0xc0
+		"................................z" //  0xe0
 
 	quoteMarker      = marker('q')
 	sharpQuoteMarker = marker('#')
@@ -756,6 +770,19 @@ func (r *reader) read(src []byte) {
 			r.mode = blockCommentMode
 		case blockEnd0:
 			r.mode = blockEndMode
+
+		case bitVectorByte:
+			r.tokenStart = r.pos + 1
+			r.mode = bitVectorMode
+		case bitVectorDone:
+			token := r.makeToken(src)
+			if 0 < len(r.stack) {
+				r.stack = append(r.stack, ReadBitVector(token))
+			} else {
+				r.code = append(r.code, ReadBitVector(token))
+			}
+			r.mode = valueMode
+			goto Retry
 
 		default:
 			switch r.mode {
