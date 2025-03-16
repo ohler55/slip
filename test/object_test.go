@@ -151,6 +151,7 @@ func TestRatio(t *testing.T) {
 	tt.Equal(t, 1.5, slip.NewRatio(12, 8).RealValue())
 
 	tt.Panic(t, func() { _ = slip.NewRatio(7, 0) })
+	tt.Panic(t, func() { _ = slip.NewBigRatio(big.NewInt(7), big.NewInt(0)) })
 }
 
 func TestBignum(t *testing.T) {
@@ -359,6 +360,32 @@ func TestOctets(t *testing.T) {
 	tt.Equal(t, slip.Octets("aaa"), slip.NewOctets(3, slip.Octet(97)))
 	tt.Equal(t, slip.List{slip.Octet(97), slip.Octet(97), slip.Octet(97)},
 		slip.NewOctets(3, slip.Octet(97)).AsList())
+}
+
+func TestBitVector(t *testing.T) {
+	bv := slip.BitVector{Bytes: []byte{0xaa}, Size: 5}
+	(&sliptest.Object{
+		Target:    &bv,
+		String:    "#*10101",
+		Simple:    "#*10101",
+		Hierarchy: "bit-vector.vector.array.sequence.t",
+		Equals: []*sliptest.EqTest{
+			{Other: &bv, Expect: true},
+			{Other: slip.Octets("ABC"), Expect: false},
+			{Other: slip.True, Expect: false},
+		},
+		Eval: &bv,
+	}).Test(t)
+	tt.Equal(t, slip.BitVectorSymbol, bv.SequenceType())
+
+	bv = slip.BitVector{Bytes: []byte{0xaa, 0xff}, Size: 16}
+	tt.Equal(t, "#*1010101011111111", bv.String())
+	bv.Size = 15
+	tt.Equal(t, "#*101010101111111", bv.String())
+	bv.Size = 9
+	tt.Equal(t, "#*101010101", bv.String())
+	bv.Size = 0
+	tt.Equal(t, "#*", bv.String())
 }
 
 func TestSymbolKey(t *testing.T) {
@@ -958,6 +985,35 @@ func TestUnsignedByteBig(t *testing.T) {
 	tt.Equal(t, 2050.0, ub.RealValue())
 	tt.Equal(t, 2050, ub.Int64())
 	tt.Equal(t, true, ub.IsInt64())
+}
+
+func TestBit(t *testing.T) {
+	(&sliptest.Object{
+		Target:    slip.Bit(1),
+		String:    "1",
+		Simple:    int64(1),
+		Hierarchy: "bit.unsigned-byte.signed-byte.integer.rational.real.number.t",
+		Equals: []*sliptest.EqTest{
+			{Other: slip.Bit(1), Expect: true},
+			{Other: slip.Bit(0), Expect: false},
+			{Other: slip.NewRatio(1, 1), Expect: true},
+			{Other: slip.NewBignum(1), Expect: true},
+			{Other: slip.Fixnum(1), Expect: true},
+			{Other: slip.DoubleFloat(1.0), Expect: true},
+			{Other: slip.DoubleFloat(7.5), Expect: false},
+		},
+		Selfies: []func() slip.Symbol{
+			slip.Bit(0).IntegerType,
+			slip.Bit(0).RationalType,
+			slip.Bit(0).RealType,
+			slip.Bit(0).NumberType,
+		},
+		Eval: slip.Bit(1),
+	}).Test(t)
+	tt.Equal(t, 0.0, slip.Bit(0).RealValue())
+	tt.Equal(t, 0, slip.Bit(0).Int64())
+	tt.Equal(t, true, slip.Bit(0).IsInt64())
+	tt.Equal(t, "0", slip.Bit(0).String())
 }
 
 func TestFuncInfo(t *testing.T) {

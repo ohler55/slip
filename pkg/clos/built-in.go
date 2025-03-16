@@ -74,6 +74,27 @@ var (
 		inherit:   []*Class{&integerClass},
 		prototype: slip.Byte(42),
 	}
+	signedByteClass = Class{
+		name:      "signed-byte",
+		final:     true,
+		docs:      "built-in signed integer class with a configurable number of bits.",
+		inherit:   []*Class{&integerClass},
+		prototype: &slip.SignedByte{Bytes: []byte{1}, Size: 2, Neg: true},
+	}
+	unsignedByteClass = Class{
+		name:      "unsigned-byte",
+		final:     true,
+		docs:      "built-in unsigned integer class with a configurable number of bits.",
+		inherit:   []*Class{&signedByteClass},
+		prototype: &slip.UnsignedByte{Bytes: []byte{1}, Size: 2},
+	}
+	bitClass = Class{
+		name:      "bit",
+		final:     true,
+		docs:      "built-in one bit unsigned integer class.",
+		inherit:   []*Class{&unsignedByteClass},
+		prototype: slip.Bit(0),
+	}
 	bignumClass = Class{
 		name:      "bignum",
 		final:     true,
@@ -164,6 +185,14 @@ var (
 		docs:      "built-in octets class",
 		inherit:   []*Class{&vectorClass},
 		prototype: slip.Octets{'x'},
+	}
+	bitVectorClass = Class{
+		name:      "bit-vector",
+		final:     true,
+		noMake:    true,
+		docs:      "built-in bit-vector class",
+		inherit:   []*Class{&vectorClass},
+		prototype: &slip.BitVector{Bytes: []byte{3}, Size: 4},
 	}
 	complexClass = Class{
 		name:      "complex",
@@ -441,6 +470,9 @@ func init() {
 		&fixnumClass,
 		&octetClass,
 		&byteClass,
+		&signedByteClass,
+		&unsignedByteClass,
+		&bitClass,
 		&bignumClass,
 		&floatClass,
 		&doubleFloatClass,
@@ -453,6 +485,7 @@ func init() {
 		&vectorClass,
 		&stringClass,
 		&octetsClass,
+		&bitVectorClass,
 		&complexClass,
 		&characterClass,
 		&timeClass,

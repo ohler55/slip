@@ -41,12 +41,10 @@ func (obj *Bignum) Simplify() any {
 // Equal returns true if this Object and the other are equal in value.
 func (obj *Bignum) Equal(other Object) (eq bool) {
 	switch to := other.(type) {
-	case Fixnum:
-		num := (*big.Int)(obj)
-		eq = num.IsInt64() && num.Int64() == int64(to)
-	case Octet:
-		num := (*big.Int)(obj)
-		eq = num.IsInt64() && num.Int64() == int64(to)
+	case *Bignum:
+		eq = (*big.Int)(obj).Cmp((*big.Int)(to)) == 0
+	case Integer:
+		eq = obj.IsInt64() && to.IsInt64() && obj.Int64() == to.Int64()
 	case SingleFloat:
 		f := big.NewFloat(float64(to))
 		if f.IsInt() {
@@ -67,8 +65,6 @@ func (obj *Bignum) Equal(other Object) (eq bool) {
 	case *Ratio:
 		rat := (*big.Rat)(to)
 		eq = rat.IsInt() && (*big.Int)(obj).Cmp(rat.Num()) == 0
-	case *Bignum:
-		eq = (*big.Int)(obj).Cmp((*big.Int)(to)) == 0
 	}
 	return
 }

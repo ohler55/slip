@@ -7,20 +7,17 @@
  - bits-and-bytes
   - next
    - types
-    - bit - type Bit byte
     - bit-vector
+     - update printer
+     - update code
 
-   - byte remains as a slip specific type
-   - bit type
-    - hierarchy: bit, unsigned-byte, signed-byte, integer, rational, real, number, t
-    - need unsigned-byte and signed-byte just for the hierarchy
-   - bit-vector
-   - byte-specifier is a cons (size . pos) like sbcl
-   - byte (size position) => bytespec, a cons of (size . pos)
    - update coerce
-    - maybe signed-byte and unsigned-byte are effectively aliases for integer
-     - or not is unsigned-byte and signed-byte are defined
-
+    - unsigned-byte and signed-byte
+     - (unsigned-byte 4)
+    - bit
+    - bit-vector
+     - (bit-vector 4)
+      - support integer as src which is non-standard
   - [ ] BIT - new built in type as byte that is 0 or one
   - [ ] BIT-AND
   - [ ] BIT-ANDC1
@@ -33,21 +30,14 @@
   - [ ] BIT-ORC1
   - [ ] BIT-ORC2
   - [ ] BIT-VECTOR
-   - like octets but need size to indicate narrower size
-    - encoding/asn1/BitString ?not that helpful? maybe just as a model for impl
-   - operator on a bit-vector
    - display as 0 and 1 or #*010101
    - update code to read
-   - coerce to list, maybe other for non-standard like integer, octet, byte
+   - update make-array
+   - coerce to list, also other for non-standard like integer, octet, byte
    - maybe always a simple-bit-vector, not displaced
   - [ ] BIT-VECTOR-P
   - [ ] BIT-XOR
-  - [x] BYTE (function and also type)
-   - type is ok as octet
-   - function return a byte-specifier
-   - need byte-specifier
-   - maybe change to arbitry bits with some size indicator
-
+  - [ ] BYTE (size position) => (size . position)
   - [ ] BYTE-POSITION
   - [ ] BYTE-SIZE
   - [ ] DEPOSIT-FIELD
@@ -58,6 +48,7 @@
   - [ ] SBIT
   - [ ] SIMPLE-BIT-VECTOR
   - [ ] SIMPLE-BIT-VECTOR-P
+   - update simple-vector-p
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND
