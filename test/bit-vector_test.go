@@ -11,7 +11,7 @@ import (
 )
 
 func TestBitVector(t *testing.T) {
-	bv := slip.BitVector{Bytes: []byte{0xaa}, Size: 5}
+	bv := slip.BitVector{Bytes: []byte{0xaa}, Size: 5, FillPtr: -1}
 	(&sliptest.Object{
 		Target:    &bv,
 		String:    "#*10101",
@@ -27,7 +27,7 @@ func TestBitVector(t *testing.T) {
 	tt.Equal(t, slip.BitVectorSymbol, bv.SequenceType())
 	tt.Equal(t, slip.BitVectorSymbol, bv.ArrayType())
 
-	bv = slip.BitVector{Bytes: []byte{0xaa, 0xff}, Size: 16}
+	bv = slip.BitVector{Bytes: []byte{0xaa, 0xff}, Size: 16, FillPtr: -1}
 	tt.Equal(t, "#*1010101011111111", bv.String())
 	bv.Size = 15
 	tt.Equal(t, "#*101010101111111", bv.String())
@@ -93,4 +93,15 @@ func TestBitVectorPop(t *testing.T) {
 	tt.Equal(t, "#*10", bv.String())
 	bv.FillPtr = int(bv.Size)
 	tt.Equal(t, "#*100101", bv.String())
+}
+
+func TestBitVectorAsList(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	tt.Equal(t, slip.List{slip.Bit(1), slip.Bit(0), slip.Bit(1), slip.Bit(0)}, bv.AsList())
+
+	bv.FillPtr = 2
+	tt.Equal(t, slip.List{slip.Bit(1), slip.Bit(0)}, bv.AsList())
+
+	bv = slip.ReadBitVector([]byte("1010110011"))
+	tt.Equal(t, "(1 0 1 0 1 1 0 0 1 1)", bv.AsList().String())
 }

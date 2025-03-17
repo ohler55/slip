@@ -45,7 +45,7 @@ func (obj *BitVector) String() string {
 func (obj *BitVector) Append(b []byte) []byte {
 	b = append(b, '#', '*')
 	size := int(obj.Size)
-	if 0 < obj.FillPtr {
+	if 0 <= obj.FillPtr && obj.FillPtr < int(obj.Size) {
 		size = obj.FillPtr
 	}
 	last := size / 8
@@ -140,7 +140,7 @@ func (obj *BitVector) Set(pos uint, value bool) {
 func (obj *BitVector) grow(cnt int) {
 	obj.Size += uint(cnt)
 	if len(obj.Bytes)*8 < int(obj.Size) {
-		obj.Bytes = append(obj.Bytes, bytes.Repeat([]byte{0x00}, cnt)...)
+		obj.Bytes = append(obj.Bytes, bytes.Repeat([]byte{0x00}, int(obj.Size)/8+1-len(obj.Bytes))...)
 	}
 }
 
@@ -204,34 +204,95 @@ func (obj *BitVector) Pop() (element Object) {
 	return
 }
 
-// // AsList the Object into set of nested lists.
-// func (obj *Vector) AsList() List {
-// 	if 0 <= obj.FillPtr && obj.FillPtr < len(obj.elements) {
-// 		return obj.elements[:obj.FillPtr]
-// 	}
-// 	return obj.elements
-// }
+// AsList the Object into set of nested lists.
+func (obj *BitVector) AsList() List {
+	size := int(obj.Size)
+	if 0 <= obj.FillPtr && obj.FillPtr < int(obj.Size) {
+		size = obj.FillPtr
+	}
+	last := size / 8
+	list := make(List, 0, size)
+	for i, bb := range obj.Bytes {
+		if i < last {
+			for i := 7; 0 <= i; i-- {
+				if (bb>>i)&0x01 == 0 {
+					list = append(list, Bit(0))
+				} else {
+					list = append(list, Bit(1))
+				}
+			}
+		} else {
+			end := size % 8
+			for i := 0; i < end; i++ {
+				if (bb>>(7-i))&0x01 == 0 {
+					list = append(list, Bit(0))
+				} else {
+					list = append(list, Bit(1))
+				}
+			}
+			break
+		}
+	}
+	return list
+}
 
-// // Adjust array with new parameters.
-// func (obj *Vector) Adjust(dims []int, elementType Symbol, initElement Object, initContent List, fillPtr int) *Vector {
-// 	if len(dims) != len(obj.dims) {
-// 		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dims))
-// 	}
-// 	if !obj.adjustable {
-// 		if initContent == nil {
-// 			content := make(List, dims[0])
-// 			copy(content, obj.elements)
-// 			for i := len(obj.elements); i < len(content); i++ {
-// 				content[i] = initElement
-// 			}
-// 			initContent = content
-// 		}
-// 		vv := NewVector(dims[0], elementType, initElement, initContent, false)
-// 		vv.FillPtr = fillPtr
-// 		return vv
-// 	}
-// 	obj.Array.Adjust(dims, elementType, initElement, initContent)
-// 	obj.FillPtr = fillPtr
-
-// 	return obj
-// }
+// Adjust array with new parameters.
+func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initContent List, fillPtr int) *BitVector {
+	if len(dims) != 1 {
+		NewPanic("Expected 1 new dimensions for a bit-vector %s, but received %d.", obj, len(dims))
+	}
+	if eType != BitSymbol {
+		PanicType(":element-type", eType, "bit")
+	}
+	var iv bool
+	if initVal != nil {
+		if num, ok := initVal.(Integer); ok && num.IsInt64() && (num.Int64() == 0 || num.Int64() == 1) {
+			iv = num.Int64() != 0
+		} else {
+			PanicType(":initial-element", initVal, "nil", "0", "1")
+		}
+	}
+	if initContent != nil {
+		if len(initContent) != dims[0] {
+			NewPanic("Malformed :initial-contents. Dimensions on axis 0 is %d but initial-content length is %d.",
+				dims[0], len(initContent))
+		}
+		for _, v := range initContent {
+			if vi, ok := v.(Integer); ok && vi.IsInt64() {
+				switch vi.Int64() {
+				case 0, 1:
+					continue
+				}
+			}
+			PanicType(":initial-contents", v, "0", "1")
+		}
+	}
+	size := obj.Size
+	if !obj.Adjustable {
+		bv := BitVector{
+			Bytes:   make([]byte, dims[0]),
+			Size:    uint(dims[0]),
+			FillPtr: fillPtr,
+		}
+		copy(bv.Bytes, obj.Bytes)
+		obj = &bv
+	} else {
+		switch {
+		case dims[0] < int(obj.Size):
+			obj.Size = uint(dims[0])
+		case dims[0] > int(obj.Size):
+			obj.grow(dims[0] - int(obj.Size))
+		}
+		obj.FillPtr = fillPtr
+	}
+	if 0 < len(initContent) {
+		for i, v := range initContent {
+			obj.Set(uint(i), v.(Integer).Int64() != 0)
+		}
+	} else if initVal != nil {
+		for ; size < obj.Size; size++ {
+			obj.Set(size, iv)
+		}
+	}
+	return obj
+}

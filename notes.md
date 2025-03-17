@@ -8,8 +8,6 @@
   - next
    - types
     - bit-vector
-     - update printer
-     - update code
 
    - update coerce
     - unsigned-byte and signed-byte
