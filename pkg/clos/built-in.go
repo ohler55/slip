@@ -192,7 +192,7 @@ var (
 		noMake:    true,
 		docs:      "built-in bit-vector class",
 		inherit:   []*Class{&vectorClass},
-		prototype: &slip.BitVector{Bytes: []byte{3}, Size: 4},
+		prototype: &slip.BitVector{Bytes: []byte{3}, Len: 4},
 	}
 	complexClass = Class{
 		name:      "complex",

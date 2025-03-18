@@ -88,6 +88,7 @@ func TestArrayMisc(t *testing.T) {
 	tt.Equal(t, true, a.Adjustable())
 	tt.Equal(t, slip.TrueSymbol, a.ElementType())
 	tt.Equal(t, []interface{}{nil}, slip.NewArray([]int{1}, slip.TrueSymbol, nil, nil, true).Simplify())
+	tt.Equal(t, slip.ArraySymbol, a.ArrayType())
 }
 
 func TestArrayAdjustShrink(t *testing.T) {

@@ -162,7 +162,7 @@ func (obj *Vector) AsList() List {
 }
 
 // Adjust array with new parameters.
-func (obj *Vector) Adjust(dims []int, elementType Symbol, initElement Object, initContent List, fillPtr int) *Vector {
+func (obj *Vector) Adjust(dims []int, elementType Symbol, initElement Object, initContent List, fillPtr int) VectorLike {
 	if len(dims) != len(obj.dims) {
 		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dims))
 	}
@@ -183,4 +183,9 @@ func (obj *Vector) Adjust(dims []int, elementType Symbol, initElement Object, in
 	obj.FillPtr = fillPtr
 
 	return obj
+}
+
+// FillPointer returns the fill-pointer as an int.
+func (obj *Vector) FillPointer() int {
+	return obj.FillPtr
 }

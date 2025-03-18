@@ -38,19 +38,12 @@ type AdjustableArrayP struct {
 // Call the function with the arguments provided.
 func (f *AdjustableArrayP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch ta := args[0].(type) {
-	case *slip.Array:
-		if ta.Adjustable() {
+	if al, ok := args[0].(slip.ArrayLike); ok {
+		if al.Adjustable() {
 			result = slip.True
 		}
-	case *slip.Vector:
-		if ta.Adjustable() {
-			result = slip.True
-		}
-	case slip.Octets:
-		// not adjustable
-	default:
-		slip.PanicType("array", ta, "array")
+	} else {
+		slip.PanicType("array", args[0], "array")
 	}
 	return
 }

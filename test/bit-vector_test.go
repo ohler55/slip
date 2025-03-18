@@ -11,7 +11,7 @@ import (
 )
 
 func TestBitVector(t *testing.T) {
-	bv := slip.BitVector{Bytes: []byte{0xaa}, Size: 5, FillPtr: -1}
+	bv := slip.BitVector{Bytes: []byte{0xaa}, Len: 5, FillPtr: -1}
 	(&sliptest.Object{
 		Target:    &bv,
 		String:    "#*10101",
@@ -27,13 +27,13 @@ func TestBitVector(t *testing.T) {
 	tt.Equal(t, slip.BitVectorSymbol, bv.SequenceType())
 	tt.Equal(t, slip.BitVectorSymbol, bv.ArrayType())
 
-	bv = slip.BitVector{Bytes: []byte{0xaa, 0xff}, Size: 16, FillPtr: -1}
+	bv = slip.BitVector{Bytes: []byte{0xaa, 0xff}, Len: 16, FillPtr: -1}
 	tt.Equal(t, "#*1010101011111111", bv.String())
-	bv.Size = 15
+	bv.Len = 15
 	tt.Equal(t, "#*101010101111111", bv.String())
-	bv.Size = 9
+	bv.Len = 9
 	tt.Equal(t, "#*101010101", bv.String())
-	bv.Size = 0
+	bv.Len = 0
 	tt.Equal(t, "#*", bv.String())
 }
 
@@ -54,9 +54,24 @@ func TestBitVectorSet(t *testing.T) {
 	tt.Panic(t, func() { bv.Set(5, true) })
 }
 
+func TestBitVectorElementType(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	tt.Equal(t, slip.BitSymbol, bv.ElementType())
+}
+
+func TestBitVectorRank(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	tt.Equal(t, 1, bv.Rank())
+}
+
+func TestBitVectorAdjustable(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	tt.Equal(t, false, bv.Adjustable())
+}
+
 func TestBitVectorPush(t *testing.T) {
 	bv := slip.ReadBitVector([]byte("1010"))
-	bv.Adjustable = true
+	bv.CanAdjust = true
 
 	bv.Push(slip.Fixnum(0), slip.Bit(1))
 	tt.Equal(t, "#*101001", bv.String())
@@ -75,7 +90,12 @@ func TestBitVectorPush(t *testing.T) {
 	bv.Push(slip.Bit(0), slip.Bit(1))
 	tt.Equal(t, "#*100100101", bv.String())
 	tt.Equal(t, 9, bv.FillPtr)
+	tt.Equal(t, 9, bv.FillPointer())
 	tt.Equal(t, 9, bv.Length())
+	tt.Equal(t, 9, bv.Size())
+	tt.Equal(t, true, bv.Adjustable())
+	tt.Equal(t, slip.BitSymbol, bv.ElementType())
+	tt.Equal(t, []int{9}, bv.Dimensions())
 
 	tt.Panic(t, func() { bv.Push(slip.Fixnum(2)) })
 }
@@ -91,7 +111,7 @@ func TestBitVectorPop(t *testing.T) {
 	tt.Equal(t, slip.Bit(1), bv.Pop())
 	tt.Equal(t, slip.Bit(0), bv.Pop())
 	tt.Equal(t, "#*10", bv.String())
-	bv.FillPtr = int(bv.Size)
+	bv.FillPtr = int(bv.Len)
 	tt.Equal(t, "#*100101", bv.String())
 }
 
@@ -104,4 +124,50 @@ func TestBitVectorAsList(t *testing.T) {
 
 	bv = slip.ReadBitVector([]byte("1010110011"))
 	tt.Equal(t, "(1 0 1 0 1 1 0 0 1 1)", bv.AsList().String())
+}
+
+func TestBitVectorAdjustInitialElement(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.CanAdjust = true
+
+	v2 := bv.Adjust([]int{6}, slip.BitSymbol, slip.Fixnum(1), nil, 6)
+	tt.Equal(t, "#*101011", slip.ObjectString(bv))
+	tt.Equal(t, bv, v2)
+
+	tt.Panic(t, func() { bv.Adjust([]int{5}, slip.TrueSymbol, slip.Bit(1), nil, 4) })
+	tt.Panic(t, func() { bv.Adjust([]int{5}, slip.BitSymbol, slip.True, nil, 4) })
+}
+
+func TestBitVectorAdjustInitialContent(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.CanAdjust = true
+
+	v2 := bv.Adjust([]int{6}, slip.BitSymbol, slip.Bit(0),
+		slip.List{slip.Bit(0), slip.Fixnum(1), slip.Bit(0), slip.Bit(1), slip.Bit(0), slip.Bit(1)},
+		6)
+	tt.Equal(t, "#*010101", slip.ObjectString(bv))
+	tt.Equal(t, bv, v2)
+
+	tt.Panic(t, func() { bv.Adjust([]int{5}, slip.BitSymbol, slip.Bit(0), slip.List{slip.Bit(0), slip.Bit(0)}, 4) })
+	tt.Panic(t, func() { bv.Adjust([]int{2}, slip.BitSymbol, slip.Bit(0), slip.List{slip.Bit(0), slip.Fixnum(3)}, 2) })
+}
+
+func TestBitVectorAdjustDimensions(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.CanAdjust = true
+
+	bv.Adjust([]int{2}, slip.BitSymbol, slip.Bit(0), nil, 2)
+	tt.Equal(t, "#*10", slip.ObjectString(bv))
+
+	tt.Panic(t, func() { bv.Adjust([]int{5, 6}, slip.BitSymbol, slip.Bit(1), nil, 4) })
+}
+
+func TestBitVectorAdjustDup(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.CanAdjust = false
+
+	v2 := bv.Adjust([]int{6}, slip.BitSymbol, slip.Fixnum(1), nil, 6)
+	tt.Equal(t, "#*1010", slip.ObjectString(bv))
+	tt.Equal(t, "#*101011", slip.ObjectString(v2))
+	tt.NotEqual(t, bv, v2)
 }

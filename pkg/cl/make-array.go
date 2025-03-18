@@ -75,7 +75,7 @@ type MakeArray struct {
 }
 
 // Call the function with the arguments provided.
-func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 15)
 	var (
 		dims         []int
@@ -130,32 +130,36 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		}
 	}
 	if len(dims) == 1 {
-		if elementType == slip.OctetSymbol && fillPtr < 0 {
-			v := make(slip.Octets, dims[0])
-			if initElement != nil {
-				if o, ok := initElement.(slip.Octet); ok {
-					for i := len(v) - 1; 0 <= i; i-- {
-						v[i] = byte(o)
+		switch elementType {
+		case slip.OctetSymbol:
+			if fillPtr < 0 {
+				v := make(slip.Octets, dims[0])
+				if initElement != nil {
+					if o, ok := initElement.(slip.Octet); ok {
+						for i := len(v) - 1; 0 <= i; i-- {
+							v[i] = byte(o)
+						}
+					} else {
+						slip.PanicType(":initial-element", initElement, "octet")
 					}
-				} else {
-					slip.PanicType(":initial-element", initElement, "octet")
 				}
-			}
-			for i, c := range initContents {
-				if o, ok := c.(slip.Octet); ok {
-					v[i] = byte(o)
-				} else {
-					slip.PanicType(":initial-contents element", c, "octet")
+				for i, c := range initContents {
+					if o, ok := c.(slip.Octet); ok {
+						v[i] = byte(o)
+					} else {
+						slip.PanicType(":initial-contents element", c, "octet")
+					}
 				}
+				return v
 			}
-			result = v
-		} else {
-			v := slip.NewVector(dims[0], elementType, initElement, initContents, adjustable)
-			v.FillPtr = fillPtr
-			result = v
+		case slip.BitSymbol:
+			bv := slip.BitVector{CanAdjust: adjustable}
+			return bv.Adjust(dims, slip.BitSymbol, initElement, initContents, fillPtr)
 		}
-	} else {
-		result = slip.NewArray(dims, elementType, initElement, initContents, adjustable)
+		v := slip.NewVector(dims[0], elementType, initElement, initContents, adjustable)
+		v.FillPtr = fillPtr
+
+		return v
 	}
-	return
+	return slip.NewArray(dims, elementType, initElement, initContents, adjustable)
 }

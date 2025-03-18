@@ -91,6 +91,7 @@ func TestVectorPushFillPtr(t *testing.T) {
 	tt.Equal(t, 2, val)
 	tt.Equal(t, "#(1 4)", slip.ObjectString(v))
 	v.FillPtr = 3
+	tt.Equal(t, 3, v.FillPointer())
 	tt.Equal(t, "#(1 4 3)", slip.ObjectString(v))
 	val = v.Push(slip.Fixnum(5))
 	tt.Equal(t, 4, val)

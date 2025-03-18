@@ -17,16 +17,16 @@ func init() {
 type BitVector struct {
 	// Bytes in left to right order, the last byte includes padding on the low
 	// bits if needed.
-	Bytes      []byte
-	Size       uint
-	FillPtr    int
-	Adjustable bool
+	Bytes     []byte
+	Len       uint
+	FillPtr   int
+	CanAdjust bool
 }
 
 // ReadBitVector parses a sequence of 0 and 1 to form a bit-vector.
 func ReadBitVector(b []byte) *BitVector {
 	bv := BitVector{FillPtr: -1}
-	bv.Size = uint(len(b))
+	bv.Len = uint(len(b))
 	if 0 < len(b) {
 		bv.Bytes = make([]byte, len(b)/8+1)
 		for i, v := range b {
@@ -44,8 +44,8 @@ func (obj *BitVector) String() string {
 // Append a buffer with a representation of the Object.
 func (obj *BitVector) Append(b []byte) []byte {
 	b = append(b, '#', '*')
-	size := int(obj.Size)
-	if 0 <= obj.FillPtr && obj.FillPtr < int(obj.Size) {
+	size := int(obj.Len)
+	if 0 <= obj.FillPtr && obj.FillPtr < int(obj.Len) {
 		size = obj.FillPtr
 	}
 	last := size / 8
@@ -81,7 +81,7 @@ func (obj *BitVector) Simplify() any {
 // Equal returns true if this Object and the other are equal in value.
 func (obj *BitVector) Equal(other Object) (eq bool) {
 	if bv, ok := other.(*BitVector); ok {
-		eq = obj.Size == bv.Size && obj.FillPtr == bv.FillPtr && bytes.Equal(obj.Bytes, bv.Bytes)
+		eq = obj.Len == bv.Len && obj.FillPtr == bv.FillPtr && bytes.Equal(obj.Bytes, bv.Bytes)
 	}
 	return
 }
@@ -98,7 +98,12 @@ func (obj *BitVector) SequenceType() Symbol {
 
 // Length returns the length of the object.
 func (obj *BitVector) Length() int {
-	return int(obj.Size)
+	return int(obj.Len)
+}
+
+// Size returns the length of the object.
+func (obj *BitVector) Size() int {
+	return int(obj.Len)
 }
 
 // ArrayType returns 'bit-vector.
@@ -113,7 +118,7 @@ func (obj *BitVector) Eval(s *Scope, depth int) Object {
 
 // At returns true if the bit at pos is set or false if not set.
 func (obj *BitVector) At(pos uint) bool {
-	if pos < obj.Size {
+	if pos < obj.Len {
 		b := obj.Bytes[pos/8]
 		r := pos % 8
 		if (b>>(7-r))&0x01 == 1 {
@@ -125,7 +130,7 @@ func (obj *BitVector) At(pos uint) bool {
 
 // Set the bit at pos to the value.
 func (obj *BitVector) Set(pos uint, value bool) {
-	if pos < obj.Size {
+	if pos < obj.Len {
 		r := pos % 8
 		if value {
 			obj.Bytes[pos/8] |= 0x01 << (7 - r)
@@ -134,13 +139,13 @@ func (obj *BitVector) Set(pos uint, value bool) {
 		}
 		return
 	}
-	NewPanic("Invalid major index %d for (bit-vector %s). Should be between 0 and %d.", pos, obj, obj.Size)
+	NewPanic("Invalid major index %d for (bit-vector %s). Should be between 0 and %d.", pos, obj, obj.Len)
 }
 
 func (obj *BitVector) grow(cnt int) {
-	obj.Size += uint(cnt)
-	if len(obj.Bytes)*8 < int(obj.Size) {
-		obj.Bytes = append(obj.Bytes, bytes.Repeat([]byte{0x00}, int(obj.Size)/8+1-len(obj.Bytes))...)
+	obj.Len += uint(cnt)
+	if len(obj.Bytes)*8 < int(obj.Len) {
+		obj.Bytes = append(obj.Bytes, bytes.Repeat([]byte{0x00}, int(obj.Len)/8+1-len(obj.Bytes))...)
 	}
 }
 
@@ -155,12 +160,12 @@ func (obj *BitVector) Push(values ...Object) (index int) {
 			PanicType("array element", v, "0", "1")
 		}
 	}
-	loc := obj.Size
+	loc := obj.Len
 	if obj.FillPtr < 0 {
 		obj.grow(len(values))
 	} else {
-		if int(obj.Size) <= obj.FillPtr+len(values) {
-			obj.grow(obj.FillPtr + len(values) - int(obj.Size))
+		if int(obj.Len) <= obj.FillPtr+len(values) {
+			obj.grow(obj.FillPtr + len(values) - int(obj.Len))
 		}
 		loc = uint(obj.FillPtr)
 		obj.FillPtr += len(values)
@@ -193,21 +198,21 @@ func (obj *BitVector) Pop() (element Object) {
 				element = Bit(0)
 			}
 		}
-	} else if 0 < obj.Size {
-		if obj.At(obj.Size - 1) {
+	} else if 0 < obj.Len {
+		if obj.At(obj.Len - 1) {
 			element = Bit(1)
 		} else {
 			element = Bit(0)
 		}
-		obj.Size--
+		obj.Len--
 	}
 	return
 }
 
 // AsList the Object into set of nested lists.
 func (obj *BitVector) AsList() List {
-	size := int(obj.Size)
-	if 0 <= obj.FillPtr && obj.FillPtr < int(obj.Size) {
+	size := int(obj.Len)
+	if 0 <= obj.FillPtr && obj.FillPtr < int(obj.Len) {
 		size = obj.FillPtr
 	}
 	last := size / 8
@@ -237,7 +242,7 @@ func (obj *BitVector) AsList() List {
 }
 
 // Adjust array with new parameters.
-func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initContent List, fillPtr int) *BitVector {
+func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initContent List, fillPtr int) VectorLike {
 	if len(dims) != 1 {
 		NewPanic("Expected 1 new dimensions for a bit-vector %s, but received %d.", obj, len(dims))
 	}
@@ -267,21 +272,21 @@ func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initConte
 			PanicType(":initial-contents", v, "0", "1")
 		}
 	}
-	size := obj.Size
-	if !obj.Adjustable {
+	size := obj.Len
+	if !obj.CanAdjust {
 		bv := BitVector{
 			Bytes:   make([]byte, dims[0]),
-			Size:    uint(dims[0]),
+			Len:     uint(dims[0]),
 			FillPtr: fillPtr,
 		}
 		copy(bv.Bytes, obj.Bytes)
 		obj = &bv
 	} else {
 		switch {
-		case dims[0] < int(obj.Size):
-			obj.Size = uint(dims[0])
-		case dims[0] > int(obj.Size):
-			obj.grow(dims[0] - int(obj.Size))
+		case dims[0] < int(obj.Len):
+			obj.Len = uint(dims[0])
+		case dims[0] > int(obj.Len):
+			obj.grow(dims[0] - int(obj.Len))
 		}
 		obj.FillPtr = fillPtr
 	}
@@ -290,9 +295,34 @@ func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initConte
 			obj.Set(uint(i), v.(Integer).Int64() != 0)
 		}
 	} else if initVal != nil {
-		for ; size < obj.Size; size++ {
+		for ; size < obj.Len; size++ {
 			obj.Set(size, iv)
 		}
 	}
 	return obj
+}
+
+// Rank of the array is returned,
+func (obj *BitVector) Rank() int {
+	return 1
+}
+
+// Adjustable returns true if the array is adjustable.
+func (obj *BitVector) Adjustable() bool {
+	return obj.CanAdjust
+}
+
+// ElementType returns the element-type of the array.
+func (obj *BitVector) ElementType() Symbol {
+	return BitSymbol
+}
+
+// Dimensions of the array.
+func (obj *BitVector) Dimensions() []int {
+	return []int{int(obj.Len)}
+}
+
+// FillPointer returns the fill-pointer as an int.
+func (obj *BitVector) FillPointer() int {
+	return obj.FillPtr
 }

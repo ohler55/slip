@@ -8,6 +8,81 @@
   - next
    - types
     - bit-vector
+   - vectors function
+    - aref
+     - add get and set to ArrayLike
+    - array-dimension
+    - array-dimensions
+    - array-displacement
+    - array-element-type
+    - array-has-fill-pointer-p
+    - array-in-bounds-p
+    - array-rank
+    - array-row-major-index
+    - array-total-size
+    - arrayp
+    - coerce
+    - concatenate
+    - copy-seq
+    - count-if
+    - count
+    - delete-duplicates
+    - delete-if
+    - delete
+    - elt
+    - equal
+    - equalp
+    - every
+    - fill-pointer
+    - fill
+    - find-if
+    - find
+    - make-sequence
+    - map
+    - merge
+    - mismatch
+    - notany
+    - notevery
+    - nreverse
+    - nsubstitute-if
+    - nsubstitute
+    - position-if
+    - position
+    - read
+    - replace
+    - reverse
+    - row-major-aref
+    - search
+    - simple-vector-p
+    - some
+    - sort
+    - stable-sort
+    - subseq
+    - substitute-if
+    - substitute
+    - svref
+    - vector-pop
+    - vector-push-extend
+    - vector-push-extend
+    - vector-push
+    - vector
+    - vectorp
+    - built-in
+    - char-length
+    - dovector
+    - mapv
+    - octet-length
+    - octets-to-string
+    - pkg
+    - range
+    - save
+    - strcat
+    - string-to-octets
+    - address-to-string
+    - socket-connect
+
+
+
 
    - update coerce
     - unsigned-byte and signed-byte

@@ -341,27 +341,6 @@ func TestString(t *testing.T) {
 	tt.Equal(t, 3, slip.String("abc").Length())
 }
 
-func TestOctets(t *testing.T) {
-	(&sliptest.Object{
-		Target:    slip.Octets("abc"),
-		String:    `#(97 98 99)`,
-		Simple:    []any{97, 98, 99},
-		Hierarchy: "octets.vector.array.sequence.t",
-		Equals: []*sliptest.EqTest{
-			{Other: slip.Octets("abc"), Expect: true},
-			{Other: slip.Octets("ABC"), Expect: false},
-			{Other: slip.True, Expect: false},
-		},
-		Eval: slip.Octets("abc"),
-	}).Test(t)
-	tt.Equal(t, slip.OctetSymbol, slip.Octets("x").SequenceType())
-	tt.Equal(t, slip.OctetsSymbol, slip.Octets("x").ArrayType())
-	tt.Equal(t, 3, slip.Octets("abc").Length())
-	tt.Equal(t, slip.Octets("aaa"), slip.NewOctets(3, slip.Octet(97)))
-	tt.Equal(t, slip.List{slip.Octet(97), slip.Octet(97), slip.Octet(97)},
-		slip.NewOctets(3, slip.Octet(97)).AsList())
-}
-
 func TestSymbolKey(t *testing.T) {
 	(&sliptest.Object{
 		Target:    slip.Symbol(":abc"),

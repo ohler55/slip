@@ -69,6 +69,11 @@ func NewArray(
 	return &a
 }
 
+// ArrayType returns 'array.
+func (obj *Array) ArrayType() Symbol {
+	return ArraySymbol
+}
+
 // Assumes dims and size arrays already allocated. Used by the reader.
 func (obj *Array) calcAndSet(list List) {
 	if 0 < len(obj.dims) {
