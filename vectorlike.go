@@ -9,6 +9,9 @@ type VectorLike interface {
 	// FillPointer returns the fill-pointer as an int.
 	FillPointer() int
 
+	// SetFillPointer sets the fill-pointer.
+	SetFillPointer(int)
+
 	// Adjust array with new parameters.
 	Adjust(dims []int, eType Symbol, initVal Object, initContent List, fillPtr int) VectorLike
 }

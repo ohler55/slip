@@ -73,7 +73,7 @@ top:
 				slip.PanicType("string element", v, "character")
 			}
 		}
-	case *slip.Vector:
+	case slip.VectorLike:
 		a0 = ta.AsList()
 		goto top
 	default:

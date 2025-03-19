@@ -101,11 +101,6 @@ func (obj *Vector) SequenceType() Symbol {
 	return VectorSymbol
 }
 
-// Length returns the length of the object.
-func (obj *Vector) Length() int {
-	return len(obj.elements)
-}
-
 // ArrayType returns 'vector.
 func (obj *Vector) ArrayType() Symbol {
 	return VectorSymbol
@@ -188,4 +183,12 @@ func (obj *Vector) Adjust(dims []int, elementType Symbol, initElement Object, in
 // FillPointer returns the fill-pointer as an int.
 func (obj *Vector) FillPointer() int {
 	return obj.FillPtr
+}
+
+// SetFillPointer sets the fill-pointer.
+func (obj *Vector) SetFillPointer(fp int) {
+	if fp < 0 || len(obj.elements) <= fp {
+		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", fp, obj, len(obj.elements))
+	}
+	obj.FillPtr = fp
 }

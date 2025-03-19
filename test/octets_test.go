@@ -62,3 +62,21 @@ func TestOctetsAdjustInitialContents(t *testing.T) {
 	tt.Panic(t, func() { _ = octets.Adjust([]int{5}, slip.OctetSymbol, slip.Octet(0), slip.List{slip.Octet(99)}, -1) })
 	tt.Panic(t, func() { _ = octets.Adjust([]int{1}, slip.OctetSymbol, slip.Octet(0), slip.List{slip.Fixnum(-1)}, -1) })
 }
+
+func TestOctetsGet(t *testing.T) {
+	octets := slip.Octets("abc")
+	val := octets.Get(1)
+	tt.Equal(t, slip.Octet(98), val)
+	tt.Panic(t, func() { _ = octets.Get(1, 2) })
+	tt.Panic(t, func() { _ = octets.Get(5) })
+}
+
+func TestOctetsSet(t *testing.T) {
+	octets := slip.Octets("abc")
+	octets.Set(slip.Fixnum(100), 1)
+	val := octets.Get(1)
+	tt.Equal(t, slip.Octet(100), val)
+	tt.Panic(t, func() { octets.Set(slip.Octet(1), 1, 2) })
+	tt.Panic(t, func() { octets.Set(slip.Octet(1), 5) })
+	tt.Panic(t, func() { octets.Set(slip.Fixnum(300), 1) })
+}

@@ -175,6 +175,11 @@ func (obj *Array) Size() int {
 	return len(obj.elements)
 }
 
+// Length returns the length of the object.
+func (obj *Array) Length() int {
+	return len(obj.elements)
+}
+
 // Get the value at the location identified by the indexes.
 func (obj *Array) Get(indexes ...int) Object {
 	return obj.elements[obj.MajorIndex(indexes...)]

@@ -65,7 +65,7 @@ top:
 			octs[i] = byte(cl.ToOctet(v).(slip.Octet))
 		}
 		result = slip.String(octs)
-	case *slip.Vector:
+	case slip.VectorLike:
 		a0 = ta.AsList()
 		goto top
 	default:

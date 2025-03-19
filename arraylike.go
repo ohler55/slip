@@ -12,6 +12,9 @@ type ArrayLike interface {
 	// Dimensions of the array.
 	Dimensions() []int
 
+	// Length returns the length of the object.
+	Length() int
+
 	// Size of the array.
 	Size() int
 
@@ -26,4 +29,16 @@ type ArrayLike interface {
 
 	// ElementType returns the element-type of the array.
 	ElementType() Symbol
+
+	// Get the value at the location identified by the indexes.
+	Get(indexes ...int) Object
+
+	// Set a value at the location identified by the indexes.
+	Set(value Object, indexes ...int)
+
+	// MajorIndex for the indexes provided.
+	MajorIndex(indexes ...int) int
+
+	// MajorSet for the index provided.
+	MajorSet(index int, value Object)
 }

@@ -91,7 +91,7 @@ func TestArefBadSubscript(t *testing.T) {
 
 func TestArefWrongElementType(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(setf (aref (coerce "abc" 'octets) 0) 3)`,
+		Source:    `(setf (aref (coerce "abc" 'octets) 0) 300)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

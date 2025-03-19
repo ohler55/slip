@@ -38,8 +38,7 @@ type Arrayp struct {
 // Call the function with the arguments provided.
 func (f *Arrayp) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch args[0].(type) {
-	case *slip.Array, *slip.Vector, slip.Octets:
+	if _, ok := args[0].(slip.ArrayLike); ok {
 		result = slip.True
 	}
 	return

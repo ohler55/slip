@@ -44,14 +44,14 @@ func TestBitVectorAt(t *testing.T) {
 	tt.Equal(t, false, bv.At(5))
 }
 
-func TestBitVectorSet(t *testing.T) {
+func TestBitVectorPut(t *testing.T) {
 	bv := slip.ReadBitVector([]byte("1010"))
-	bv.Set(0, false)
-	bv.Set(1, true)
+	bv.Put(0, false)
+	bv.Put(1, true)
 	tt.Equal(t, true, bv.At(1))
 	tt.Equal(t, false, bv.At(0))
 
-	tt.Panic(t, func() { bv.Set(5, true) })
+	tt.Panic(t, func() { bv.Put(5, true) })
 }
 
 func TestBitVectorElementType(t *testing.T) {
@@ -170,4 +170,23 @@ func TestBitVectorAdjustDup(t *testing.T) {
 	tt.Equal(t, "#*1010", slip.ObjectString(bv))
 	tt.Equal(t, "#*101011", slip.ObjectString(v2))
 	tt.NotEqual(t, bv, v2)
+}
+
+func TestBitVectorGet(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	tt.Equal(t, slip.Bit(0), bv.Get(1))
+	tt.Equal(t, slip.Bit(1), bv.Get(2))
+	tt.Panic(t, func() { _ = bv.Get(1, 2) })
+	tt.Panic(t, func() { _ = bv.Get(5) })
+}
+
+func TestBitVectorSet(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.Set(slip.Fixnum(1), 1)
+	tt.Equal(t, slip.Bit(1), bv.Get(1))
+	bv.Set(slip.Fixnum(0), 1)
+	tt.Equal(t, slip.Bit(0), bv.Get(1))
+	tt.Panic(t, func() { bv.Set(slip.Octet(1), 1, 2) })
+	tt.Panic(t, func() { bv.Set(slip.Octet(1), 5) })
+	tt.Panic(t, func() { bv.Set(slip.Fixnum(3), 1) })
 }

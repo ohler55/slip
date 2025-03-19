@@ -164,3 +164,56 @@ func (obj Octets) Adjust(dims []int, eType Symbol, initVal Object, initContent L
 	}
 	return obj
 }
+
+// Get the value at the location identified by the indexes.
+func (obj Octets) Get(indexes ...int) Object {
+	if len(indexes) != 1 {
+		NewPanic("Wrong number of subscripts, %d, for octets of rank 1.", len(indexes))
+	}
+	pos := indexes[0]
+	if pos < 0 || len(obj) <= pos {
+		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, len(obj))
+	}
+	return Octet(obj[pos])
+}
+
+// Set a value at the location identified by the indexes.
+func (obj Octets) Set(value Object, indexes ...int) {
+	if len(indexes) != 1 {
+		NewPanic("Wrong number of subscripts, %d, for octets of rank 1.", len(indexes))
+	}
+	pos := indexes[0]
+	if pos < 0 || len(obj) <= pos {
+		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, len(obj))
+	}
+	if num, ok := value.(Integer); ok && num.IsInt64() && 0 <= num.Int64() && num.Int64() < 256 {
+		obj[pos] = byte(num.Int64())
+	} else {
+		PanicType("set value", value, "integer between 0 and 256")
+	}
+}
+
+// MajorIndex for the indexes provided.
+func (obj Octets) MajorIndex(indexes ...int) int {
+	if len(indexes) != 1 {
+		NewPanic("Wrong number of subscripts, %d, for array of rank 1.", len(indexes))
+	}
+	pos := indexes[0]
+	if pos < 0 || len(obj) <= pos {
+		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, len(obj))
+	}
+	return pos
+}
+
+// MajorSet for the index provided.
+func (obj Octets) MajorSet(index int, value Object) {
+	if index < 0 || len(obj) <= index {
+		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj))
+	}
+	obj.Set(value, index)
+}
+
+// SetFillPointer sets the fill-pointer.
+func (obj Octets) SetFillPointer(fp int) {
+	NewPanic("octets does not have a fill-pointer")
+}

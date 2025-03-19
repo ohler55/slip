@@ -38,11 +38,10 @@ type ArrayDisplacement struct {
 // Call the function with the arguments provided.
 func (f *ArrayDisplacement) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch ta := args[0].(type) {
-	case *slip.Array, *slip.Vector, slip.Octets:
+	if _, ok := args[0].(slip.ArrayLike); ok {
 		result = slip.Values{nil, slip.Fixnum(0)}
-	default:
-		slip.PanicType("array", ta, "array")
+	} else {
+		slip.PanicType("array", args[0], "array")
 	}
 	return
 }

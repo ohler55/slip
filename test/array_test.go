@@ -82,6 +82,7 @@ func TestArraySetBadData(t *testing.T) {
 
 func TestArrayMisc(t *testing.T) {
 	a := testArray()
+	tt.Equal(t, 24, a.Length())
 	tt.Equal(t, 24, a.Size())
 	tt.Equal(t, []int{2, 3, 4}, a.Dimensions())
 	tt.Equal(t, 3, a.Rank())

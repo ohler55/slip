@@ -52,21 +52,11 @@ func (f *Aref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			slip.PanicType("subscript", a, "fixnum")
 		}
 	}
-	switch ta := args[0].(type) {
-	case nil:
-	case *slip.Array:
-		result = ta.Get(indices...)
-	case *slip.Vector:
-		result = ta.Get(indices...)
-	case slip.Octets:
-		if len(indices) != 1 || len(ta) <= indices[0] || indices[0] < 0 {
-			slip.NewPanic("Invalid indices %s. Should be between 0 and %d.", args[1:], len(ta))
-		}
-		result = slip.Octet(ta[indices[0]])
-	default:
-		slip.PanicType("array", ta, "array")
+	al, ok := args[0].(slip.ArrayLike)
+	if !ok {
+		slip.PanicType("array", args[0], "array")
 	}
-	return
+	return al.Get(indices...)
 }
 
 // Place a value in the first position of a list or cons.
@@ -80,22 +70,9 @@ func (f *Aref) Place(s *slip.Scope, args slip.List, value slip.Object) {
 			slip.PanicType("subscript", a, "fixnum")
 		}
 	}
-	switch ta := args[0].(type) {
-	case nil:
-	case *slip.Array:
-		ta.Set(value, indices...)
-	case *slip.Vector:
-		ta.Set(value, indices...)
-	case slip.Octets:
-		if len(indices) != 1 || len(ta) <= indices[0] || indices[0] < 0 {
-			slip.NewPanic("Invalid indices %s. Should be between 0 and %d.", args[1:], len(ta))
-		}
-		if ov, ok := value.(slip.Octet); ok {
-			ta[indices[0]] = byte(ov)
-		} else {
-			slip.PanicType("value", value, "octet")
-		}
-	default:
-		slip.PanicType("array", ta, "array")
+	al, ok := args[0].(slip.ArrayLike)
+	if !ok {
+		slip.PanicType("array", args[0], "array")
 	}
+	al.Set(value, indices...)
 }
