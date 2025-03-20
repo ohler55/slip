@@ -101,11 +101,6 @@ func (obj *BitVector) Length() int {
 	return int(obj.Len)
 }
 
-// Size returns the length of the object.
-func (obj *BitVector) Size() int {
-	return int(obj.Len)
-}
-
 // ArrayType returns 'bit-vector.
 func (obj *BitVector) ArrayType() Symbol {
 	return BitVectorSymbol
@@ -390,4 +385,30 @@ func (obj *BitVector) SetFillPointer(fp int) {
 		NewPanic("Invalid fill-pointer %d for (array %s). Should be between 0 and %d.", fp, obj, obj.Len)
 	}
 	obj.FillPtr = fp
+}
+
+// Duplicate the instance.
+func (obj *BitVector) Duplicate() *BitVector {
+	bv := BitVector{
+		Bytes:     make([]byte, len(obj.Bytes)),
+		Len:       obj.Len,
+		FillPtr:   obj.FillPtr,
+		CanAdjust: obj.CanAdjust,
+	}
+	copy(bv.Bytes, obj.Bytes)
+	return &bv
+}
+
+// Reverse the bits.
+func (obj *BitVector) Reverse() {
+	tmp := make([]byte, len(obj.Bytes))
+	last := int(obj.Len) - 1
+	for i := 0; i <= last; i++ {
+		b := obj.Bytes[i/8]
+		r := i % 8
+		j := last - i
+		tr := j % 8
+		tmp[j/8] |= ((b >> (7 - r)) & 0x01) << (7 - tr)
+	}
+	obj.Bytes = tmp
 }

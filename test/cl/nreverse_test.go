@@ -79,6 +79,13 @@ func TestNreverseOctets(t *testing.T) {
 	}).Test(t)
 }
 
+func TestNreverseBitVector(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(nreverse #*1010)`,
+		Expect: "#*0101",
+	}).Test(t)
+}
+
 func TestNreverseNotSequence(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(nreverse 7)`,

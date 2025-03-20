@@ -26,7 +26,6 @@ func TestOctets(t *testing.T) {
 	tt.Equal(t, slip.OctetSymbol, slip.Octets("x").SequenceType())
 	tt.Equal(t, slip.OctetsSymbol, slip.Octets("x").ArrayType())
 	tt.Equal(t, 3, slip.Octets("abc").Length())
-	tt.Equal(t, 3, slip.Octets("abc").Size())
 	tt.Equal(t, -1, slip.Octets("abc").FillPointer())
 	tt.Equal(t, slip.Octets("aaa"), slip.NewOctets(3, slip.Octet(97)))
 	tt.Equal(t, slip.List{slip.Octet(97), slip.Octet(97), slip.Octet(97)},
@@ -79,4 +78,28 @@ func TestOctetsSet(t *testing.T) {
 	tt.Panic(t, func() { octets.Set(slip.Octet(1), 1, 2) })
 	tt.Panic(t, func() { octets.Set(slip.Octet(1), 5) })
 	tt.Panic(t, func() { octets.Set(slip.Fixnum(300), 1) })
+}
+
+func TestOctetsMajorIndex(t *testing.T) {
+	octets := slip.Octets("abc")
+	tt.Equal(t, 1, octets.MajorIndex(1))
+
+	octets.Set(slip.Fixnum(100), 1)
+	val := octets.Get(1)
+	tt.Equal(t, slip.Octet(100), val)
+	tt.Panic(t, func() { _ = octets.MajorIndex(3) })
+	tt.Panic(t, func() { _ = octets.MajorIndex(1, 2) })
+}
+
+func TestOctetsMajorSet(t *testing.T) {
+	octets := slip.Octets("abc")
+	octets.MajorSet(1, slip.Octet('x'))
+	tt.Equal(t, "#(97 120 99)", octets.String())
+
+	tt.Panic(t, func() { octets.MajorSet(3, slip.Octet(1)) })
+}
+
+func TestOctetsSetFillPointer(t *testing.T) {
+	octets := slip.Octets("abc")
+	tt.Panic(t, func() { octets.SetFillPointer(1) })
 }

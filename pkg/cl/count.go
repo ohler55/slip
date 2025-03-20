@@ -82,9 +82,7 @@ func (f *Count) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		result = slip.Fixnum(f.inList(s, ta, depth, &sfv))
 	case slip.String:
 		result = slip.Fixnum(f.inString(s, ta, depth, &sfv))
-	case *slip.Vector:
-		result = slip.Fixnum(f.inList(s, ta.AsList(), depth, &sfv))
-	case slip.Octets:
+	case slip.VectorLike:
 		result = slip.Fixnum(f.inList(s, ta.AsList(), depth, &sfv))
 	default:
 		slip.PanicType("sequence", ta, "sequence")

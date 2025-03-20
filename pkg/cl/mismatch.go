@@ -225,13 +225,8 @@ func seqToList(seq slip.Object, name string, start, end int) (list slip.List) {
 		for i, r := range ra {
 			list[i] = slip.Character(r)
 		}
-	case *slip.Vector:
+	case slip.VectorLike:
 		list = ts.AsList()
-	case slip.Octets:
-		list = make(slip.List, len(ts))
-		for i, b := range ts {
-			list[i] = slip.Octet(b)
-		}
 	default:
 		slip.PanicType(name, ts, "sequence")
 	}

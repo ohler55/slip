@@ -23,7 +23,7 @@ func TestMakeSequenceListInitialElement(t *testing.T) {
 	}).Test(t)
 }
 
-func TestMakeSequenceOctetstBasic(t *testing.T) {
+func TestMakeSequenceOctetsBasic(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(make-sequence 'octets 3)`,
 		Array:  true,
@@ -75,6 +75,24 @@ func TestMakeSequenceVectorInitialElement(t *testing.T) {
 		Source: `(make-sequence '(vector fixnum) 3 :initial-element 7)`,
 		Array:  true,
 		Expect: "#(7 7 7)",
+	}).Test(t)
+}
+
+func TestMakeSequenceBitVectorBasic(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-sequence 'bit-vector 4)`,
+		Expect: "#*0000",
+	}).Test(t)
+}
+
+func TestMakeSequenceBitVectorInitialElement(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-sequence 'bit-vector 4 :initial-element 1)`,
+		Expect: "#*1111",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(make-sequence 'bit-vector 3 :initial-element t)`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 

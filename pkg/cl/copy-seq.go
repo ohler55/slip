@@ -59,6 +59,8 @@ func (f *CopySeq) Call(s *slip.Scope, args slip.List, depth int) (seq slip.Objec
 		dup := make(slip.Octets, len(ta))
 		copy(dup, ta)
 		seq = dup
+	case *slip.BitVector:
+		seq = ta.Duplicate()
 	default:
 		slip.PanicType("sequence", args[0], "sequence")
 	}

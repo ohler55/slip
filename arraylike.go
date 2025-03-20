@@ -15,9 +15,6 @@ type ArrayLike interface {
 	// Length returns the length of the object.
 	Length() int
 
-	// Size of the array.
-	Size() int
-
 	// AsList the Object into set of nested lists.
 	AsList() List
 

@@ -72,11 +72,6 @@ func (obj Octets) Length() int {
 	return len(obj)
 }
 
-// Size returns the size of the object.
-func (obj Octets) Size() int {
-	return len(obj)
-}
-
 // ArrayType returns 'octets.
 func (obj Octets) ArrayType() Symbol {
 	return OctetsSymbol

@@ -150,9 +150,7 @@ func coerceToList(arg slip.Object) (result slip.Object) {
 			list[i] = slip.Character(r)
 		}
 		result = list
-	case *slip.Vector:
-		result = ta.AsList()
-	case slip.Octets:
+	case slip.VectorLike:
 		result = ta.AsList()
 	default:
 		coerceNotPossible(ta, "list")

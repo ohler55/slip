@@ -67,7 +67,7 @@ iter:
 				}
 				pargs[i] = ta[n]
 			case *slip.Vector:
-				if ta.Size() <= n { // Size() for vectors is the same as Dimensions()[0]
+				if ta.Length() <= n { // Length() for vectors is the same as Dimensions()[0]
 					break iter
 				}
 				pargs[i] = ta.Get(n)

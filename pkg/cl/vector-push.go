@@ -50,7 +50,7 @@ func (f *VectorPush) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	if v.FillPtr < 0 {
 		slip.PanicType("vector", v, "vector with a fill-pointer.")
 	}
-	if v.Size() <= v.FillPtr {
+	if v.Length() <= v.FillPtr {
 		return nil
 	}
 	result = slip.Fixnum(v.FillPtr)

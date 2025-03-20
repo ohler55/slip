@@ -92,7 +92,6 @@ func TestBitVectorPush(t *testing.T) {
 	tt.Equal(t, 9, bv.FillPtr)
 	tt.Equal(t, 9, bv.FillPointer())
 	tt.Equal(t, 9, bv.Length())
-	tt.Equal(t, 9, bv.Size())
 	tt.Equal(t, true, bv.Adjustable())
 	tt.Equal(t, slip.BitSymbol, bv.ElementType())
 	tt.Equal(t, []int{9}, bv.Dimensions())
@@ -189,4 +188,53 @@ func TestBitVectorSet(t *testing.T) {
 	tt.Panic(t, func() { bv.Set(slip.Octet(1), 1, 2) })
 	tt.Panic(t, func() { bv.Set(slip.Octet(1), 5) })
 	tt.Panic(t, func() { bv.Set(slip.Fixnum(3), 1) })
+}
+
+func TestBitVectorDuplicate(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.FillPtr = 4
+	bv.CanAdjust = true
+
+	dup := bv.Duplicate()
+
+	tt.Equal(t, bv.FillPointer(), dup.FillPointer())
+	tt.Equal(t, true, dup.CanAdjust)
+	tt.Equal(t, 4, dup.Length())
+	tt.Equal(t, "#*1010", dup.String())
+}
+
+func TestBitVectorReverse(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.Reverse()
+	tt.Equal(t, "#*0101", bv.String())
+
+	bv = slip.ReadBitVector([]byte("101011001010"))
+	bv.Reverse()
+	tt.Equal(t, "#*010100110101", bv.String())
+}
+
+func TestBitVectorMajorIndex(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	tt.Equal(t, 0, bv.MajorIndex(0))
+	tt.Equal(t, 1, bv.MajorIndex(1))
+
+	tt.Panic(t, func() { _ = bv.MajorIndex(1, 2) })
+	tt.Panic(t, func() { _ = bv.MajorIndex(4) })
+}
+
+func TestBitVectorMajorSet(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.MajorSet(0, slip.Bit(0))
+	bv.MajorSet(1, slip.Bit(1))
+	tt.Equal(t, "#*0110", bv.String())
+
+	tt.Panic(t, func() { bv.MajorSet(4, slip.Bit(1)) })
+}
+
+func TestBitVectorSetFillPointer(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	bv.SetFillPointer(2)
+	tt.Equal(t, "#*10", bv.String())
+
+	tt.Panic(t, func() { bv.SetFillPointer(4) })
 }

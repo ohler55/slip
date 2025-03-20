@@ -170,11 +170,6 @@ func (obj *Array) Dimensions() []int {
 	return obj.dims
 }
 
-// Size of the array.
-func (obj *Array) Size() int {
-	return len(obj.elements)
-}
-
 // Length returns the length of the object.
 func (obj *Array) Length() int {
 	return len(obj.elements)
