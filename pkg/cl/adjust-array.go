@@ -85,9 +85,9 @@ func (f *AdjustArray) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	)
 	if al, ok := args[0].(slip.ArrayLike); ok {
 		elementType = al.ElementType()
-		var vl slip.VectorLike
-		if vl, ok = al.(slip.VectorLike); ok {
-			fillPtr = vl.FillPointer()
+		var v slip.FillPtrVector
+		if v, ok = al.(slip.FillPtrVector); ok {
+			fillPtr = v.FillPointer()
 		}
 	} else {
 		slip.PanicType("array", args[0], "array", "vector")

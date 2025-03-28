@@ -82,6 +82,10 @@ func (f *Reverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			nl[last-i] = v
 		}
 		result = nl
+	case *slip.BitVector:
+		bv := ta.Duplicate()
+		bv.Reverse()
+		result = bv
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}

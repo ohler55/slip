@@ -66,16 +66,11 @@ iter:
 					break iter
 				}
 				pargs[i] = ta[n]
-			case *slip.Vector:
+			case slip.VectorLike:
 				if ta.Length() <= n { // Length() for vectors is the same as Dimensions()[0]
 					break iter
 				}
 				pargs[i] = ta.Get(n)
-			case slip.Octets:
-				if len(ta) <= n {
-					break iter
-				}
-				pargs[i] = slip.Octet(ta[n])
 			default:
 				slip.PanicType("sequence", args[i], "string", "list", "vector")
 			}

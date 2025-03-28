@@ -55,7 +55,7 @@ func addressToString(arg slip.Object) (oct slip.Octets, str string) {
 		for i, v := range ta {
 			oct[i] = byte(cl.ToOctet(v).(slip.Octet))
 		}
-	case *slip.Vector:
+	case slip.VectorLike:
 		list := ta.AsList()
 		oct = make(slip.Octets, len(list))
 		for i, v := range list {

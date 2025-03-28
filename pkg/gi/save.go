@@ -186,6 +186,8 @@ Top:
 			goto Top
 		}
 		b = append(b, '#', '(', ')')
+	case *slip.BitVector:
+		b = to.Append(b)
 	case *slip.LongFloat:
 		tmp := (*big.Float)(to).Append([]byte{}, 'e', -1)
 		b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)

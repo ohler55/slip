@@ -111,11 +111,6 @@ func (obj Octets) Dimensions() []int {
 	return []int{len(obj)}
 }
 
-// FillPointer returns the fill-pointer as an int.
-func (obj Octets) FillPointer() int {
-	return -1
-}
-
 // Adjust array with new parameters.
 func (obj Octets) Adjust(dims []int, eType Symbol, initVal Object, initContent List, fillPtr int) VectorLike {
 	if len(dims) != 1 {
@@ -200,15 +195,18 @@ func (obj Octets) MajorIndex(indexes ...int) int {
 	return pos
 }
 
+// MajorGet for the index provided.
+func (obj Octets) MajorGet(index int) Object {
+	if index < 0 || len(obj) <= index {
+		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj))
+	}
+	return obj.Get(index)
+}
+
 // MajorSet for the index provided.
 func (obj Octets) MajorSet(index int, value Object) {
 	if index < 0 || len(obj) <= index {
 		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj))
 	}
 	obj.Set(value, index)
-}
-
-// SetFillPointer sets the fill-pointer.
-func (obj Octets) SetFillPointer(fp int) {
-	NewPanic("octets does not have a fill-pointer")
 }

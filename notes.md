@@ -9,43 +9,12 @@
    - types
     - bit-vector
    - vectors function
-    - nsubstitute-if
-    - nsubstitute
-    - position-if
-    - position
-    - read
-    - replace
-    - reverse
-    - row-major-aref
-    - search
-    - some
-    - sort
-    - stable-sort
-    - subseq
-    - substitute-if
-    - substitute
-    - svref
-    - vector-pop
-    - vector-push-extend
-    - vector-push-extend
-    - vector-push
-    - char-length
-    - dovector
-    - mapv
-    - range
-    - save
-    - strcat
-    - string-to-octets
-    - address-to-string
-    - socket-connect
     - coerce
-
-   - update coerce
-    - unsigned-byte and signed-byte
-     - (unsigned-byte 4)
-    - bit
-    - bit-vector
-     - (bit-vector 4)
+     - unsigned-byte and signed-byte
+      - (unsigned-byte 4)
+     - bit
+     - bit-vector
+      - (bit-vector 4)
       - support integer as src which is non-standard
   - [ ] BIT - new built in type as byte that is 0 or one
   - [ ] BIT-AND

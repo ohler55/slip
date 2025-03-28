@@ -106,6 +106,15 @@ func TestSaveArray(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSaveBitVector(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((out (make-string-output-stream)))
+                  (save #*1010 out)
+                  (get-output-stream-string out))`,
+		Expect: `"#*1010"`,
+	}).Test(t)
+}
+
 func TestSaveBufferSize(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((out (make-string-output-stream)))

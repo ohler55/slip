@@ -68,9 +68,7 @@ func (f *Dovector) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		switch t1 := ns.Eval(input[1], d2).(type) {
 		case nil:
 			// leave list as empty list
-		case *slip.Vector:
-			list = t1.AsList()
-		case slip.Octets:
+		case slip.VectorLike:
 			list = t1.AsList()
 		case slip.List:
 			list = t1

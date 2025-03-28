@@ -127,5 +127,3 @@ func (obj *SignedByte) AsFixOrBig() Object {
 	}
 	return (*Bignum)(&bi)
 }
-
-// TBD operations on the bytes or leave those for the various functions?

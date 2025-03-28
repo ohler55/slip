@@ -74,7 +74,7 @@ top:
 			}
 		}
 		result = slip.Octets(ba)
-	case *slip.Vector:
+	case slip.VectorLike:
 		a0 = ta.AsList()
 		goto top
 	default:

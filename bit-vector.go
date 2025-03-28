@@ -4,6 +4,7 @@ package slip
 
 import (
 	"bytes"
+	"math/big"
 )
 
 // BitVectorSymbol is the symbol with a value of "bit-vector".
@@ -371,6 +372,14 @@ func (obj *BitVector) MajorIndex(indexes ...int) int {
 	return pos
 }
 
+// MajorGet for the index provided.
+func (obj *BitVector) MajorGet(index int) Object {
+	if index < 0 || int(obj.Len) <= index {
+		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, obj.Len)
+	}
+	return obj.Get(index)
+}
+
 // MajorSet for the index provided.
 func (obj *BitVector) MajorSet(index int, value Object) {
 	if index < 0 || int(obj.Len) <= index {
@@ -411,4 +420,30 @@ func (obj *BitVector) Reverse() {
 		tmp[j/8] |= ((b >> (7 - r)) & 0x01) << (7 - tr)
 	}
 	obj.Bytes = tmp
+}
+
+// AsFixnum returns a Fixnum with the same bits as the vector. If more than 64
+// bits are in the vector then the first 64 bits are used to form the Fixnum
+// and the boolean return is false.
+func (obj *BitVector) AsFixnum() (Fixnum, bool) {
+	var num Fixnum
+	for i := uint(0); i < obj.Len; i++ {
+		if obj.At(i) {
+			num |= Fixnum(1) << i
+		}
+	}
+	return num, obj.Len <= 64
+}
+
+// AsBignum returns the vector as a BigNum.
+func (obj *BitVector) AsBignum() *Bignum {
+	bi := big.NewInt(0)
+	for i := uint(0); i < obj.Len; i++ {
+		if obj.At(i) {
+			bi.SetBit(bi, int(i), 1)
+		} else {
+			bi.SetBit(bi, int(i), 0)
+		}
+	}
+	return (*Bignum)(bi)
 }

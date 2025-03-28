@@ -32,41 +32,47 @@ always return _object_. Although not Common LISP standard other conversion are
 supported when possible as indicated in the table where the vertical axis the
 _object_ type and the horizontal axis the the _type_:
 
-             |list
-             | |string
-             | | |vector
-             | | | |octets (bytes)
-             | | | | |character
-             | | | | | |integer
-             | | | | | | |fixnum
-             | | | | | | | |octet (byte)
-             | | | | | | | | |bignum
-             | | | | | | | | | |float
-             | | | | | | | | | | |short-float
-             | | | | | | | | | | | |single-float
-             | | | | | | | | | | | | |double-float
-             | | | | | | | | | | | | | |long-float
-             | | | | | | | | | | | | | | |rational
-             | | | | | | | | | | | | | | | |ratio
-             | | | | | | | | | | | | | | | | |complex
-             | | | | | | | | | | | | | | | | | |symbol
-             | | | | | | | | | | | | | | | | | | |assoc
-             | | | | | | | | | | | | | | | | | | | |hash-table
-             | | | | | | | | | | | | | | | | | | | | |function
-  list       |x|x|x|x| | | | | | | | | | | | | | | | | |
-  string     |x|x|x|x| | | | | | | | | | | | | |x| | |x|
-  vector     |x|x|x|x| | | | | | | | | | | | | | | | | |
-  octets     |x|x|x|x| | | | | | | | | | | | | | | | | |
-  character  | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  integer    | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  fixnum     | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  octet      | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  float      | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  ratio      | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  complex    | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |
-  symbol     |x|x|x|x| | | | | | | | | | | | | |x| | |x|
-  assoc      |x| | | | | | | | | | | | | | | | | |x|x| |
-  hash-table | | | | | | | | | | | | | | | | | | |x|x| |
+                |list
+                | |string
+                | | |vector
+                | | | |octets (bytes)
+                | | | | |bit-vector
+                | | | | | |character
+                | | | | | | |integer
+                | | | | | | | |fixnum
+                | | | | | | | | |octet (byte)
+                | | | | | | | | | |bignum
+                | | | | | | | | | | |float
+                | | | | | | | | | | | |short-float
+                | | | | | | | | | | | | |single-float
+                | | | | | | | | | | | | | |double-float
+                | | | | | | | | | | | | | | |long-float
+                | | | | | | | | | | | | | | | |rational
+                | | | | | | | | | | | | | | | | |ratio
+                | | | | | | | | | | | | | | | | | |complex
+                | | | | | | | | | | | | | | | | | | |symbol
+                | | | | | | | | | | | | | | | | | | | |assoc
+                | | | | | | | | | | | | | | | | | | | | |hash-table
+                | | | | | | | | | | | | | | | | | | | | | |function
+                | | | | | | | | | | | | | | | | | | | | | | |signed-byte
+                | | | | | | | | | | | | | | | | | | | | | | | |unsigned-byte
+  list          |x|x|x|x|x| | | | | | | | | | | | | | | | | | | |
+  string        |x|x|x|x| | | | | | | | | | | | | | |x| | |x| | |
+  vector        |x|x|x|x|x| | | | | | | | | | | | | | | | | | | |
+  octets        |x|x|x|x|x| | | | | | | | | | | | | | | | | | | |
+  bit-vector    |x| |x|x|x| |x|x|x|x| | | | | | | | | | | | |x|x|
+  character     | | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |x|x|
+  integer       | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |x|x|
+  fixnum        | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |x|x|
+  octet         | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x|x| | | | |x|x|
+  float         | | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | | | |
+  ratio         | | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | | | |
+  complex       | | | | | |x|x|x|x|x|x|x|x|x|x|x|x|x| | | | | | |
+  symbol        |x|x|x|x| | | | | | | | | | | | | | |x| | |x| | |
+  assoc         |x| | | | | | | | | | | | | | | | | | |x|x| | | |
+  hash-table    | | | | | | | | | | | | | | | | | | | |x|x| | | |
+  signed-byte   | | | | |x|x|x|x|x|x| | | | | | | | | | | | |x|x|
+  unsigned-byte | | | | |x|x|x|x|x|x| | | | | | | | | | | | |x|x|
 
 `,
 			Examples: []string{
@@ -86,46 +92,52 @@ func (f *Coerce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	switch args[1] {
 	case slip.True:
 		result = args[0]
-	case slip.Symbol("list"):
+	case slip.ListSymbol:
 		result = coerceToList(args[0])
-	case slip.Symbol("string"):
+	case slip.StringSymbol:
 		result = coerceToString(args[0])
-	case slip.Symbol("vector"):
+	case slip.VectorSymbol:
 		result = coerceToVector(args[0])
-	case slip.Symbol("character"):
+	case slip.CharacterSymbol:
 		result = coerceToChar(args[0])
-	case slip.Symbol("integer"):
+	case slip.IntegerSymbol:
 		result = coerceToInteger(args[0])
-	case slip.Symbol("fixnum"):
+	case slip.FixnumSymbol:
 		result = coerceToFixnum(args[0])
-	case slip.Symbol("octet"), slip.Symbol("byte"):
+	case slip.OctetSymbol, slip.ByteSymbol:
 		result = ToOctet(args[0])
-	case slip.Symbol("octets"), slip.Symbol("bytes"):
+	case slip.OctetsSymbol, slip.Symbol("bytes"):
 		result = coerceToOctets(args[0])
-	case slip.Symbol("bignum"):
+	case slip.BignumSymbol:
 		result = coerceToBignum(args[0])
-	case slip.Symbol("float"):
+	case slip.FloatSymbol:
 		result = coerceToFloat(args[0])
-	case slip.Symbol("short-float"), slip.Symbol("single-float"):
+	case slip.ShortFloatSymbol, slip.SingleFloatSymbol:
 		result = coerceToSingleFloat(args[0])
-	case slip.Symbol("double-float"):
+	case slip.DoubleFloatSymbol:
 		result = coerceToDoubleFloat(args[0])
-	case slip.Symbol("long-float"):
+	case slip.LongFloatSymbol:
 		result = coerceToLongFloat(args[0])
-	case slip.Symbol("rational"):
+	case slip.RationalSymbol:
 		result = coerceToRational(args[0])
-	case slip.Symbol("ratio"):
+	case slip.RatioSymbol:
 		result = coerceToRatio(args[0])
-	case slip.Symbol("complex"):
+	case slip.ComplexSymbol:
 		result = coerceToComplex(args[0])
-	case slip.Symbol("symbol"):
+	case slip.SymbolSymbol:
 		result = coerceToSymbol(args[0])
 	case slip.Symbol("assoc"):
 		result = coerceToAssoc(args[0])
-	case slip.Symbol("hash-table"):
+	case slip.HashTableSymbol:
 		result = coerceToHashTable(args[0])
-	case slip.Symbol("function"):
+	case slip.FunctionSymbol:
 		result = coerceToFunction(args[0])
+	case slip.BitVectorSymbol:
+		result = coerceToBitVector(args[0])
+	case slip.SignedByteSymbol:
+		result = coerceToSignedByte(args[0])
+	case slip.UnsignedByteSymbol:
+		result = coerceToUnsignedByte(args[0])
 	default:
 		slip.NewPanic("%s is not a valid coerce result type", args[1])
 	}
@@ -160,7 +172,7 @@ func coerceToList(arg slip.Object) (result slip.Object) {
 
 func coerceToVector(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
-	case nil, *slip.Vector, slip.Octets:
+	case nil, slip.VectorLike:
 		result = ta
 	case slip.String:
 		ra := []rune(ta)
@@ -188,7 +200,7 @@ func coerceToOctets(arg slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case nil, slip.Octets:
 		result = ta
-	case *slip.Vector:
+	case slip.VectorLike:
 		list := ta.AsList()
 		octs := make(slip.Octets, len(list))
 		for i, r := range list {
@@ -297,6 +309,12 @@ func coerceToInteger(arg slip.Object) (result slip.Object) {
 		} else {
 			coerceNotPossible(ta, "integer")
 		}
+	case *slip.BitVector:
+		if num, ok := ta.AsFixnum(); ok {
+			result = num
+		} else {
+			result = ta.AsBignum()
+		}
 	default:
 		coerceNotPossible(ta, "integer")
 	}
@@ -311,9 +329,9 @@ func coerceToFixnum(arg slip.Object) (result slip.Object) {
 		result = ta
 	case slip.Octet:
 		result = slip.Fixnum(ta)
-	case *slip.Bignum:
-		if (*big.Int)(ta).IsInt64() {
-			result = slip.Fixnum((*big.Int)(ta).Int64())
+	case slip.Integer:
+		if ta.IsInt64() {
+			result = slip.Fixnum(ta.Int64())
 		} else {
 			coerceNotPossible(ta, "fixnum")
 		}
@@ -335,6 +353,12 @@ func coerceToFixnum(arg slip.Object) (result slip.Object) {
 		num := real(ta)
 		if imag(ta) == 0.0 && num == float64(int64(num)) {
 			result = slip.Fixnum(num)
+		} else {
+			coerceNotPossible(ta, "fixnum")
+		}
+	case *slip.BitVector:
+		if num, ok := ta.AsFixnum(); ok {
+			result = num
 		} else {
 			coerceNotPossible(ta, "fixnum")
 		}
@@ -376,6 +400,22 @@ func coerceToBignum(arg slip.Object) (result slip.Object) {
 		} else {
 			coerceNotPossible(ta, "bignum")
 		}
+	case *slip.SignedByte:
+		num := ta.AsFixOrBig()
+		if bi, ok := num.(*slip.Bignum); ok {
+			result = bi
+		} else { // must be a fixnum
+			result = (*slip.Bignum)(big.NewInt(int64(num.(slip.Fixnum))))
+		}
+	case *slip.UnsignedByte:
+		num := ta.AsFixOrBig()
+		if bi, ok := num.(*slip.Bignum); ok {
+			result = bi
+		} else { // must be a fixnum
+			result = (*slip.Bignum)(big.NewInt(int64(num.(slip.Fixnum))))
+		}
+	case *slip.BitVector:
+		result = ta.AsBignum()
 	default:
 		coerceNotPossible(ta, "bignum")
 	}
@@ -587,6 +627,72 @@ func coerceToFunction(arg slip.Object) (result slip.Object) {
 		result = slip.MustFindFunc(string(ta))
 	case *slip.Lambda:
 		result = ta
+	default:
+		coerceNotPossible(ta, "function")
+	}
+	return
+}
+
+func coerceToBitVector(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case *slip.BitVector:
+		result = ta
+	case *slip.Bignum:
+		// TBD
+	case slip.Integer:
+		// TBD
+	case slip.List:
+		// TBD
+	case slip.VectorLike:
+		// TBD
+	case *slip.SignedByte:
+		// TBD
+	case *slip.UnsignedByte:
+		// TBD
+	default:
+		coerceNotPossible(ta, "function")
+	}
+	return
+}
+
+func coerceToSignedByte(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case *slip.SignedByte:
+		result = ta
+	case *slip.BitVector:
+		// TBD
+	case *slip.Bignum:
+		// TBD
+	case slip.Integer:
+		// TBD
+	case slip.List:
+		// TBD
+	case slip.VectorLike:
+		// TBD
+	case *slip.UnsignedByte:
+		// TBD
+	default:
+		coerceNotPossible(ta, "function")
+	}
+	return
+}
+
+func coerceToUnsignedByte(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case *slip.UnsignedByte:
+		result = ta
+	case *slip.BitVector:
+		// TBD
+	case *slip.Bignum:
+		// TBD
+	case slip.Integer:
+		// TBD
+	case slip.List:
+		// TBD
+	case slip.VectorLike:
+		// TBD
+	case *slip.SignedByte:
+		// TBD
 	default:
 		coerceNotPossible(ta, "function")
 	}

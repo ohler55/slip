@@ -36,6 +36,9 @@ type ArrayLike interface {
 	// MajorIndex for the indexes provided.
 	MajorIndex(indexes ...int) int
 
+	// MajorGet for the index provided.
+	MajorGet(index int) Object
+
 	// MajorSet for the index provided.
 	MajorSet(index int, value Object)
 }

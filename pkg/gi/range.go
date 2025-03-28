@@ -58,13 +58,13 @@ func (f *Range) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		for _, v := range t1 {
 			_ = caller.Call(s, slip.List{v}, d2)
 		}
-	case *slip.Vector:
-		for _, v := range t1.AsList() {
-			_ = caller.Call(s, slip.List{v}, d2)
-		}
 	case slip.Octets:
 		for _, v := range t1 {
 			_ = caller.Call(s, slip.List{slip.Octet(v)}, d2)
+		}
+	case slip.VectorLike:
+		for _, v := range t1.AsList() {
+			_ = caller.Call(s, slip.List{v}, d2)
 		}
 	case Ranger:
 		t1.Range(s, caller, d2)

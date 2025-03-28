@@ -44,14 +44,15 @@ type VectorPushExtend struct {
 // Call the function with the arguments provided.
 func (f *VectorPushExtend) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
-	v, ok := args[1].(*slip.Vector)
+	v, ok := args[1].(slip.FillPtrVector)
 	if !ok {
-		slip.PanicType("vector", args[1], "vector")
+		slip.PanicType("vector", args[1], "vector with a fill-pointer.")
 	}
-	if v.FillPtr < 0 {
+	fp := v.FillPointer()
+	if fp < 0 {
 		slip.PanicType("vector", v, "vector with a fill-pointer.")
 	}
-	result = slip.Fixnum(v.FillPtr)
+	result = slip.Fixnum(fp)
 	v.Push(args[0])
 
 	return

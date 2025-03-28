@@ -162,6 +162,14 @@ func (f *Replace) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			}
 			seq1[start1+i] = byte(ToOctet(v).(slip.Octet))
 		}
+	case *slip.BitVector:
+		end1 = f.checkStartEnd(start1, end1, int(seq1.Len))
+		for i, v := range seq2 {
+			if end1 <= start1+i {
+				break
+			}
+			seq1.Set(v, start1+i)
+		}
 	default:
 		slip.PanicType("sequence-1", seq1, "sequence")
 	}
