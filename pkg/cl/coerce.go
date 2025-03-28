@@ -386,20 +386,6 @@ func coerceToBignum(arg slip.Object) (result slip.Object) {
 		} else {
 			coerceNotPossible(ta, "bignum")
 		}
-	case slip.Real: // other floats and ratio
-		num := ta.RealValue()
-		if num == float64(int64(num)) {
-			result = (*slip.Bignum)(big.NewInt(int64(num)))
-		} else {
-			coerceNotPossible(ta, "bignum")
-		}
-	case slip.Complex:
-		num := real(ta)
-		if imag(ta) == 0.0 && num == float64(int64(num)) {
-			result = (*slip.Bignum)(big.NewInt(int64(num)))
-		} else {
-			coerceNotPossible(ta, "bignum")
-		}
 	case *slip.SignedByte:
 		num := ta.AsFixOrBig()
 		if bi, ok := num.(*slip.Bignum); ok {
@@ -413,6 +399,20 @@ func coerceToBignum(arg slip.Object) (result slip.Object) {
 			result = bi
 		} else { // must be a fixnum
 			result = (*slip.Bignum)(big.NewInt(int64(num.(slip.Fixnum))))
+		}
+	case slip.Real: // other floats and ratio
+		num := ta.RealValue()
+		if num == float64(int64(num)) {
+			result = (*slip.Bignum)(big.NewInt(int64(num)))
+		} else {
+			coerceNotPossible(ta, "bignum")
+		}
+	case slip.Complex:
+		num := real(ta)
+		if imag(ta) == 0.0 && num == float64(int64(num)) {
+			result = (*slip.Bignum)(big.NewInt(int64(num)))
+		} else {
+			coerceNotPossible(ta, "bignum")
 		}
 	case *slip.BitVector:
 		result = ta.AsBignum()
@@ -639,15 +639,15 @@ func coerceToBitVector(arg slip.Object) (result slip.Object) {
 		result = ta
 	case *slip.Bignum:
 		// TBD
+	case *slip.SignedByte:
+		// TBD
+	case *slip.UnsignedByte:
+		// TBD
 	case slip.Integer:
 		// TBD
 	case slip.List:
 		// TBD
 	case slip.VectorLike:
-		// TBD
-	case *slip.SignedByte:
-		// TBD
-	case *slip.UnsignedByte:
 		// TBD
 	default:
 		coerceNotPossible(ta, "function")
@@ -663,13 +663,13 @@ func coerceToSignedByte(arg slip.Object) (result slip.Object) {
 		// TBD
 	case *slip.Bignum:
 		// TBD
+	case *slip.UnsignedByte:
+		// TBD
 	case slip.Integer:
 		// TBD
 	case slip.List:
 		// TBD
 	case slip.VectorLike:
-		// TBD
-	case *slip.UnsignedByte:
 		// TBD
 	default:
 		coerceNotPossible(ta, "function")
@@ -685,13 +685,13 @@ func coerceToUnsignedByte(arg slip.Object) (result slip.Object) {
 		// TBD
 	case *slip.Bignum:
 		// TBD
+	case *slip.SignedByte:
+		// TBD
 	case slip.Integer:
 		// TBD
 	case slip.List:
 		// TBD
 	case slip.VectorLike:
-		// TBD
-	case *slip.SignedByte:
 		// TBD
 	default:
 		coerceNotPossible(ta, "function")
