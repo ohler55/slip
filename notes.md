@@ -10,6 +10,9 @@
     - bit-vector
    - vectors function
     - coerce
+     - test
+      - implement and test to signed-byte and unsigned-byte first so others can be tested
+
      - unsigned-byte and signed-byte
       - (unsigned-byte 4)
      - bit

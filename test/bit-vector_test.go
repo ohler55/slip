@@ -3,6 +3,7 @@
 package test
 
 import (
+	"math/big"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -222,6 +223,14 @@ func TestBitVectorMajorIndex(t *testing.T) {
 	tt.Panic(t, func() { _ = bv.MajorIndex(4) })
 }
 
+func TestBitVectorMajorGet(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	tt.Equal(t, slip.Bit(1), bv.MajorGet(0))
+	tt.Equal(t, slip.Bit(0), bv.MajorGet(1))
+
+	tt.Panic(t, func() { bv.MajorGet(4) })
+}
+
 func TestBitVectorMajorSet(t *testing.T) {
 	bv := slip.ReadBitVector([]byte("1010"))
 	bv.MajorSet(0, slip.Bit(0))
@@ -237,4 +246,17 @@ func TestBitVectorSetFillPointer(t *testing.T) {
 	tt.Equal(t, "#*10", bv.String())
 
 	tt.Panic(t, func() { bv.SetFillPointer(4) })
+}
+
+func TestBitVectorAsFixnum(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	num, ok := bv.AsFixnum()
+	tt.Equal(t, slip.Fixnum(10), num)
+	tt.Equal(t, true, ok)
+}
+
+func TestBitVectorAsBignum(t *testing.T) {
+	bv := slip.ReadBitVector([]byte("1010"))
+	num := bv.AsBignum()
+	tt.Equal(t, (*slip.Bignum)(big.NewInt(10)), num)
 }

@@ -428,8 +428,9 @@ func (obj *BitVector) Reverse() {
 func (obj *BitVector) AsFixnum() (Fixnum, bool) {
 	var num Fixnum
 	for i := uint(0); i < obj.Len; i++ {
+		num = (num << 1)
 		if obj.At(i) {
-			num |= Fixnum(1) << i
+			num |= 1
 		}
 	}
 	return num, obj.Len <= 64
@@ -438,11 +439,12 @@ func (obj *BitVector) AsFixnum() (Fixnum, bool) {
 // AsBignum returns the vector as a BigNum.
 func (obj *BitVector) AsBignum() *Bignum {
 	bi := big.NewInt(0)
+	last := obj.Len - 1
 	for i := uint(0); i < obj.Len; i++ {
 		if obj.At(i) {
-			bi.SetBit(bi, int(i), 1)
+			bi.SetBit(bi, int(last-i), 1)
 		} else {
-			bi.SetBit(bi, int(i), 0)
+			bi.SetBit(bi, int(last-i), 0)
 		}
 	}
 	return (*Bignum)(bi)

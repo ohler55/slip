@@ -297,6 +297,14 @@ func TestCoerceToInteger(t *testing.T) {
 		Expect: `5`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(coerce #*1010 'integer)`,
+		Expect: `10`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #*101010101010101010101010101010101010101010101010101010101010101011 'integer)`,
+		Expect: `49191317529892137643`,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(coerce #C(5 1) 'integer)`,
 		Panics: true,
 	}).Test(t)
@@ -360,6 +368,14 @@ func TestCoerceToFixnum(t *testing.T) {
 		Expect: `123`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(coerce #*1010 'fixnum)`,
+		Expect: `10`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #*101010101010101010101010101010101010101010101010101010101010101011 'fixnum)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(coerce 30000000000000000123 'fixnum)`,
 		Panics: true,
 	}).Test(t)
@@ -413,6 +429,10 @@ func TestCoerceToBignum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce #C(5 0) 'bignum)`,
 		Expect: `5`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #*1010 'bignum)`,
+		Expect: `10`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(coerce #C(5 1) 'bignum)`,
