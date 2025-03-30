@@ -634,23 +634,74 @@ func coerceToFunction(arg slip.Object) (result slip.Object) {
 }
 
 func coerceToBitVector(arg slip.Object) (result slip.Object) {
+top:
 	switch ta := arg.(type) {
 	case *slip.BitVector:
 		result = ta
 	case *slip.Bignum:
-		// TBD
+		ba := (*big.Int)(ta).Bytes()
+		bv := slip.BitVector{
+			Bytes:     make([]byte, len(ba)+1),
+			Len:       0,
+			FillPtr:   -1,
+			CanAdjust: true,
+		}
+		var pos uint
+		for i, b := range ba {
+			for j := 7; 0 <= j; j-- {
+				pos++
+				if b&(0x01<<j) != 0 {
+					if bv.Len == 0 {
+						bv.Len = uint((len(ba)-i-1)*8 + j + 1)
+						pos = 0
+					}
+					bv.Put(pos, true)
+				}
+			}
+		}
+		result = &bv
 	case *slip.SignedByte:
-		// TBD
+		arg = ta.AsFixOrBig()
+		goto top
 	case *slip.UnsignedByte:
-		// TBD
+		arg = ta.AsFixOrBig()
+		goto top
 	case slip.Integer:
-		// TBD
+		bv := slip.BitVector{
+			Bytes:     make([]byte, 8),
+			Len:       0,
+			FillPtr:   -1,
+			CanAdjust: true,
+		}
+		i64 := ta.Int64()
+		var pos uint
+		for i := 63; 0 <= i; i-- {
+			pos++
+			if i64&(1<<i) != 0 {
+				if bv.Len == 0 {
+					bv.Len = uint(i + 1)
+					pos = 0
+				}
+				bv.Put(pos, true)
+			}
+		}
+		result = &bv
 	case slip.List:
-		// TBD
+		bv := slip.BitVector{
+			Bytes:     make([]byte, len(ta)+1),
+			Len:       uint(len(ta)),
+			FillPtr:   -1,
+			CanAdjust: true,
+		}
+		for i, v := range ta {
+			bv.Set(v, i)
+		}
+		result = &bv
 	case slip.VectorLike:
-		// TBD
+		arg = ta.AsList()
+		goto top
 	default:
-		coerceNotPossible(ta, "function")
+		coerceNotPossible(ta, "bit-vector")
 	}
 	return
 }
@@ -660,19 +711,54 @@ func coerceToSignedByte(arg slip.Object) (result slip.Object) {
 	case *slip.SignedByte:
 		result = ta
 	case *slip.BitVector:
-		// TBD
+		ba := make([]byte, len(ta.Bytes))
+		last := int(ta.Len) - 1
+		for i := 0; i <= last; i++ {
+			if ta.At(uint(i)) {
+				j := last - i
+				ba[j/8] |= 1 << (j % 8)
+			}
+		}
+		result = &slip.SignedByte{
+			Bytes: ba,
+			Size:  ta.Len,
+		}
 	case *slip.Bignum:
-		// TBD
+		result = &slip.SignedByte{
+			Bytes: (*big.Int)(ta).Bytes(),
+			Size:  uint((*big.Int)(ta).BitLen()),
+			Neg:   (*big.Int)(ta).Sign() < 0,
+		}
 	case *slip.UnsignedByte:
-		// TBD
+		b := make([]byte, len(ta.Bytes))
+		copy(b, ta.Bytes)
+		result = &slip.SignedByte{
+			Bytes: b,
+			Size:  ta.Size,
+		}
 	case slip.Integer:
-		// TBD
-	case slip.List:
-		// TBD
-	case slip.VectorLike:
-		// TBD
+		i64 := ta.Int64()
+		var neg bool
+		if i64 < 0 {
+			neg = true
+			i64 = -i64
+		}
+		result = &slip.SignedByte{
+			Bytes: []byte{
+				byte(i64 >> 56),
+				byte((i64 >> 48) & 0x00000000000000ff),
+				byte((i64 >> 40) & 0x00000000000000ff),
+				byte((i64 >> 32) & 0x00000000000000ff),
+				byte((i64 >> 24) & 0x00000000000000ff),
+				byte((i64 >> 16) & 0x00000000000000ff),
+				byte((i64 >> 8) & 0x00000000000000ff),
+				byte(i64 & 0x00000000000000ff),
+			},
+			Size: 64,
+			Neg:  neg,
+		}
 	default:
-		coerceNotPossible(ta, "function")
+		coerceNotPossible(ta, "signed-byte")
 	}
 	return
 }
@@ -682,19 +768,56 @@ func coerceToUnsignedByte(arg slip.Object) (result slip.Object) {
 	case *slip.UnsignedByte:
 		result = ta
 	case *slip.BitVector:
-		// TBD
+		ba := make([]byte, len(ta.Bytes))
+		last := int(ta.Len) - 1
+		for i := 0; i <= last; i++ {
+			if ta.At(uint(i)) {
+				j := last - i
+				ba[j/8] |= 1 << (j % 8)
+			}
+		}
+		result = &slip.UnsignedByte{
+			Bytes: ba,
+			Size:  ta.Len,
+		}
 	case *slip.Bignum:
-		// TBD
+		if (*big.Int)(ta).Sign() < 0 {
+			coerceNotPossible(ta, "unsigned-byte")
+		}
+		result = &slip.UnsignedByte{
+			Bytes: (*big.Int)(ta).Bytes(),
+			Size:  uint((*big.Int)(ta).BitLen()),
+		}
 	case *slip.SignedByte:
-		// TBD
+		if ta.Neg {
+			coerceNotPossible(ta, "unsigned-byte")
+		}
+		b := make([]byte, len(ta.Bytes))
+		copy(b, ta.Bytes)
+		result = &slip.SignedByte{
+			Bytes: b,
+			Size:  ta.Size,
+		}
 	case slip.Integer:
-		// TBD
-	case slip.List:
-		// TBD
-	case slip.VectorLike:
-		// TBD
+		i64 := ta.Int64()
+		if i64 < 0 {
+			coerceNotPossible(ta, "unsigned-byte")
+		}
+		result = &slip.UnsignedByte{
+			Bytes: []byte{
+				byte(i64 >> 56),
+				byte((i64 >> 48) & 0x00000000000000ff),
+				byte((i64 >> 40) & 0x00000000000000ff),
+				byte((i64 >> 32) & 0x00000000000000ff),
+				byte((i64 >> 24) & 0x00000000000000ff),
+				byte((i64 >> 16) & 0x00000000000000ff),
+				byte((i64 >> 8) & 0x00000000000000ff),
+				byte(i64 & 0x00000000000000ff),
+			},
+			Size: 64,
+		}
 	default:
-		coerceNotPossible(ta, "function")
+		coerceNotPossible(ta, "unsigned-byte")
 	}
 	return
 }

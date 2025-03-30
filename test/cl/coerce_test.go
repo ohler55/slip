@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -442,6 +443,22 @@ func TestCoerceToBignum(t *testing.T) {
 		Source: `(coerce '(5 1) 'bignum)`,
 		Panics: true,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce #*1010 'signed-byte) 'bignum)`,
+		Expect: `10`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce #*1010 'unsigned-byte) 'bignum)`,
+		Expect: `10`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 30000000000000000123 'signed-byte) 'bignum)`,
+		Expect: `30000000000000000123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 30000000000000000123 'unsigned-byte) 'bignum)`,
+		Expect: `30000000000000000123`,
+	}).Test(t)
 }
 
 func TestCoerceToFloat(t *testing.T) {
@@ -794,6 +811,115 @@ func TestCoerceToFunction(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce 7 'function)`,
 		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceToSignedByte(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce #xff00 'signed-byte)`,
+		Expect: "65280",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce -65280 'signed-byte)`,
+		Expect: "-65280",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 65280 'unsigned-byte) 'signed-byte)`,
+		Expect: "65280",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 65280 'signed-byte) 'signed-byte)`,
+		Expect: "65280",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 30000000000000000123 'signed-byte)`,
+		Expect: `30000000000000000123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #*1010 'signed-byte)`,
+		Expect: "10",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce 1.5 'signed-byte)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestCoerceToUnsignedByte(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce #xff00 'unsigned-byte)`,
+		Expect: "65280",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce -65280 'unsigned-byte)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 65280 'signed-byte) 'unsigned-byte)`,
+		Expect: "65280",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce (coerce -65280 'signed-byte) 'unsigned-byte)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce 65280 'unsigned-byte) 'unsigned-byte)`,
+		Expect: "65280",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 30000000000000000123 'unsigned-byte)`,
+		Expect: `30000000000000000123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce -30000000000000000123 'unsigned-byte)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #*1010 'unsigned-byte)`,
+		Expect: "10",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce 1.5 'unsigned-byte)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestCoerceToBitVector(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce #*1010 'bit-vector)`,
+		Expect: "#*1010",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #(1 0 1 0) 'bit-vector)`,
+		Expect: "#*1010",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce #*1010 'bignum) 'bit-vector)`,
+		Expect: "#*1010",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 30000000000000000123 'bit-vector)`,
+		Expect: "#*11010000001010101011010010000110110011101101110000000000001111011",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 10 'bit-vector)`,
+		Expect: "#*1010",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #x10101100101 'bit-vector)`,
+		Expect: "#*10000000100000001000100000000000100000001",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce #*1010 'signed-byte) 'bit-vector)`,
+		Expect: "#*1010",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce (coerce #*1010 'unsigned-byte) 'bit-vector)`,
+		Expect: "#*1010",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce 1.5 'bit-vector)`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 
