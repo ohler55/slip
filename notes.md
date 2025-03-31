@@ -10,12 +10,12 @@
     - bit-vector
    - vectors function
     - coerce
-     - test
-     - unsigned-byte and signed-byte
-      - (unsigned-byte 4)
-     - bit
-     - bit-vector
-      - (bit-vector 4)
+     - list
+      - update the converters to take optional arguments like size
+       - signed-byte (size)
+       - unsigned-byte (size)
+       - bit-vector (size)
+       - vector (type size) (&OPTIONAL ELEMENT-TYPE SIZE)
   - [ ] BIT - new built in type as byte that is 0 or one
   - [ ] BIT-AND
   - [ ] BIT-ANDC1

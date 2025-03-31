@@ -3,6 +3,7 @@
 package cl
 
 import (
+	"fmt"
 	"math/big"
 	"unicode/utf8"
 
@@ -89,57 +90,100 @@ type Coerce struct {
 // Call the function with the arguments provided.
 func (f *Coerce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
-	switch args[1] {
-	case slip.True:
-		result = args[0]
-	case slip.ListSymbol:
-		result = coerceToList(args[0])
-	case slip.StringSymbol:
-		result = coerceToString(args[0])
-	case slip.VectorSymbol:
-		result = coerceToVector(args[0])
-	case slip.CharacterSymbol:
-		result = coerceToChar(args[0])
-	case slip.IntegerSymbol:
-		result = coerceToInteger(args[0])
-	case slip.FixnumSymbol:
-		result = coerceToFixnum(args[0])
-	case slip.OctetSymbol, slip.ByteSymbol:
-		result = ToOctet(args[0])
-	case slip.OctetsSymbol, slip.Symbol("bytes"):
-		result = coerceToOctets(args[0])
-	case slip.BignumSymbol:
-		result = coerceToBignum(args[0])
-	case slip.FloatSymbol:
-		result = coerceToFloat(args[0])
-	case slip.ShortFloatSymbol, slip.SingleFloatSymbol:
-		result = coerceToSingleFloat(args[0])
-	case slip.DoubleFloatSymbol:
-		result = coerceToDoubleFloat(args[0])
-	case slip.LongFloatSymbol:
-		result = coerceToLongFloat(args[0])
-	case slip.RationalSymbol:
-		result = coerceToRational(args[0])
-	case slip.RatioSymbol:
-		result = coerceToRatio(args[0])
-	case slip.ComplexSymbol:
-		result = coerceToComplex(args[0])
-	case slip.SymbolSymbol:
-		result = coerceToSymbol(args[0])
-	case slip.Symbol("assoc"):
-		result = coerceToAssoc(args[0])
-	case slip.HashTableSymbol:
-		result = coerceToHashTable(args[0])
-	case slip.FunctionSymbol:
-		result = coerceToFunction(args[0])
-	case slip.BitVectorSymbol:
-		result = coerceToBitVector(args[0])
-	case slip.SignedByteSymbol:
-		result = coerceToSignedByte(args[0])
-	case slip.UnsignedByteSymbol:
-		result = coerceToUnsignedByte(args[0])
+	switch t1 := args[1].(type) {
+	case slip.Symbol:
+		switch t1 {
+		case slip.ListSymbol:
+			result = coerceToList(args[0])
+		case slip.StringSymbol:
+			result = coerceToString(args[0])
+		case slip.VectorSymbol:
+			result = coerceToVector(args[0])
+		case slip.CharacterSymbol:
+			result = coerceToChar(args[0])
+		case slip.IntegerSymbol:
+			result = coerceToInteger(args[0])
+		case slip.FixnumSymbol:
+			result = coerceToFixnum(args[0])
+		case slip.OctetSymbol, slip.ByteSymbol:
+			result = ToOctet(args[0])
+		case slip.OctetsSymbol, slip.Symbol("bytes"):
+			result = coerceToOctets(args[0])
+		case slip.BignumSymbol:
+			result = coerceToBignum(args[0])
+		case slip.FloatSymbol:
+			result = coerceToFloat(args[0])
+		case slip.ShortFloatSymbol, slip.SingleFloatSymbol:
+			result = coerceToSingleFloat(args[0])
+		case slip.DoubleFloatSymbol:
+			result = coerceToDoubleFloat(args[0])
+		case slip.LongFloatSymbol:
+			result = coerceToLongFloat(args[0])
+		case slip.RationalSymbol:
+			result = coerceToRational(args[0])
+		case slip.RatioSymbol:
+			result = coerceToRatio(args[0])
+		case slip.ComplexSymbol:
+			result = coerceToComplex(args[0])
+		case slip.SymbolSymbol:
+			result = coerceToSymbol(args[0])
+		case slip.Symbol("assoc"):
+			result = coerceToAssoc(args[0])
+		case slip.HashTableSymbol:
+			result = coerceToHashTable(args[0])
+		case slip.FunctionSymbol:
+			result = coerceToFunction(args[0])
+		case slip.BitVectorSymbol:
+			result = coerceToBitVector(args[0])
+		case slip.SignedByteSymbol:
+			result = coerceToSignedByte(args[0])
+		case slip.UnsignedByteSymbol:
+			result = coerceToUnsignedByte(args[0])
+		case slip.BitSymbol:
+			result = coerceToBit(args[0])
+		default:
+			slip.NewPanic("%s is not a valid coerce result type", args[1])
+		}
+	case slip.List:
+		if len(t1) < 1 {
+			slip.NewPanic("%s is not a valid coerce result type", t1)
+		}
+		switch t1[0] {
+		case slip.VectorSymbol:
+			result = coerceToVector(args[0], t1[1:]...)
+		case slip.IntegerSymbol:
+			result = coerceToInteger(args[0], t1[1:]...)
+		case slip.FixnumSymbol:
+			result = coerceToFixnum(args[0], t1[1:]...)
+		case slip.BignumSymbol:
+			result = coerceToBignum(args[0], t1[1:]...)
+		case slip.FloatSymbol:
+			result = coerceToFloat(args[0], t1[1:]...)
+		case slip.ShortFloatSymbol, slip.SingleFloatSymbol:
+			result = coerceToSingleFloat(args[0], t1[1:]...)
+		case slip.DoubleFloatSymbol:
+			result = coerceToDoubleFloat(args[0], t1[1:]...)
+		case slip.LongFloatSymbol:
+			result = coerceToLongFloat(args[0], t1[1:]...)
+		case slip.RationalSymbol:
+			result = coerceToRational(args[0], t1[1:]...)
+		case slip.RatioSymbol:
+			result = coerceToRatio(args[0], t1[1:]...)
+		case slip.BitVectorSymbol:
+			result = coerceToBitVector(args[0], t1[1:]...)
+		case slip.SignedByteSymbol:
+			result = coerceToSignedByte(args[0], t1[1:]...)
+		case slip.UnsignedByteSymbol:
+			result = coerceToUnsignedByte(args[0], t1[1:]...)
+		default:
+			slip.NewPanic("%s is not a valid coerce result type", t1)
+		}
 	default:
-		slip.NewPanic("%s is not a valid coerce result type", args[1])
+		if t1 == slip.True {
+			result = args[0]
+		} else {
+			slip.NewPanic("%s is not a valid coerce result type", t1)
+		}
 	}
 	return
 }
@@ -170,7 +214,7 @@ func coerceToList(arg slip.Object) (result slip.Object) {
 	return
 }
 
-func coerceToVector(arg slip.Object) (result slip.Object) {
+func coerceToVector(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case nil, slip.VectorLike:
 		result = ta
@@ -192,6 +236,10 @@ func coerceToVector(arg slip.Object) (result slip.Object) {
 		result = slip.NewVector(len(ta), slip.TrueSymbol, nil, ta, true)
 	default:
 		coerceNotPossible(ta, "vector")
+	}
+	if 0 < len(mods) {
+		// TBD check mods
+		fmt.Printf("*** mods: %s\n", mods)
 	}
 	return
 }
@@ -280,7 +328,7 @@ func coerceToChar(arg slip.Object) (result slip.Object) {
 	return
 }
 
-func coerceToInteger(arg slip.Object) (result slip.Object) {
+func coerceToInteger(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.Fixnum(ta)
@@ -318,10 +366,13 @@ func coerceToInteger(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "integer")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToFixnum(arg slip.Object) (result slip.Object) {
+func coerceToFixnum(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.Fixnum(ta)
@@ -365,10 +416,13 @@ func coerceToFixnum(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "fixnum")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToBignum(arg slip.Object) (result slip.Object) {
+func coerceToBignum(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = (*slip.Bignum)(big.NewInt(int64(ta)))
@@ -419,10 +473,13 @@ func coerceToBignum(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "bignum")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToFloat(arg slip.Object) (result slip.Object) {
+func coerceToFloat(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.DoubleFloat(ta)
@@ -439,10 +496,13 @@ func coerceToFloat(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "float")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToSingleFloat(arg slip.Object) (result slip.Object) {
+func coerceToSingleFloat(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.SingleFloat(ta)
@@ -459,10 +519,13 @@ func coerceToSingleFloat(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "single-float")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToDoubleFloat(arg slip.Object) (result slip.Object) {
+func coerceToDoubleFloat(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.DoubleFloat(ta)
@@ -479,10 +542,13 @@ func coerceToDoubleFloat(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "double-float")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToLongFloat(arg slip.Object) (result slip.Object) {
+func coerceToLongFloat(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = (*slip.LongFloat)(big.NewFloat(float64(ta)))
@@ -499,10 +565,13 @@ func coerceToLongFloat(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "long-float")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToRational(arg slip.Object) (result slip.Object) {
+func coerceToRational(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = slip.Fixnum(ta)
@@ -521,10 +590,13 @@ func coerceToRational(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "rational")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToRatio(arg slip.Object) (result slip.Object) {
+func coerceToRatio(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Character:
 		result = (*slip.Ratio)(big.NewRat(int64(ta), 1))
@@ -544,6 +616,9 @@ func coerceToRatio(arg slip.Object) (result slip.Object) {
 		}
 	default:
 		coerceNotPossible(ta, "ratio")
+	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
 	}
 	return
 }
@@ -633,7 +708,7 @@ func coerceToFunction(arg slip.Object) (result slip.Object) {
 	return
 }
 
-func coerceToBitVector(arg slip.Object) (result slip.Object) {
+func coerceToBitVector(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 top:
 	switch ta := arg.(type) {
 	case *slip.BitVector:
@@ -703,10 +778,14 @@ top:
 	default:
 		coerceNotPossible(ta, "bit-vector")
 	}
+	if 0 < len(mods) {
+		// TBD check mods
+		fmt.Printf("*** mods: %s\n", mods)
+	}
 	return
 }
 
-func coerceToSignedByte(arg slip.Object) (result slip.Object) {
+func coerceToSignedByte(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case *slip.SignedByte:
 		result = ta
@@ -760,10 +839,13 @@ func coerceToSignedByte(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "signed-byte")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
 	return
 }
 
-func coerceToUnsignedByte(arg slip.Object) (result slip.Object) {
+func coerceToUnsignedByte(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 	switch ta := arg.(type) {
 	case *slip.UnsignedByte:
 		result = ta
@@ -819,6 +901,27 @@ func coerceToUnsignedByte(arg slip.Object) (result slip.Object) {
 	default:
 		coerceNotPossible(ta, "unsigned-byte")
 	}
+	if 0 < len(mods) {
+		checkRange(result, mods)
+	}
+	return
+}
+
+func coerceToBit(arg slip.Object) (result slip.Object) {
+	switch ta := arg.(type) {
+	case slip.Integer:
+		i64 := ta.Int64()
+		switch i64 {
+		case 0:
+			result = slip.Bit(byte(0))
+		case 1:
+			result = slip.Bit(byte(1))
+		default:
+			coerceNotPossible(arg, "integer")
+		}
+	default:
+		coerceNotPossible(arg, "integer")
+	}
 	return
 }
 
@@ -839,4 +942,19 @@ func coerceNotPossible(arg slip.Object, rtype string) {
 		slip.NewPanic("Can not coerce a nil into a %s", rtype)
 	}
 	slip.NewPanic("Can not coerce %s a %s into a %s", arg, arg.Hierarchy()[0], rtype)
+}
+
+func checkRange(v slip.Object, mods slip.List) {
+	if mods[0] != slip.Symbol("*") {
+		if lessThan(v, mods[0]) {
+			coerceNotPossible(v, append(slip.List{slip.IntegerSymbol}, mods...).String())
+		}
+	}
+	if 1 < len(mods) {
+		if mods[1] != slip.Symbol("*") {
+			if lessThan(mods[1], v) {
+				coerceNotPossible(v, append(slip.List{slip.IntegerSymbol}, mods...).String())
+			}
+		}
+	}
 }

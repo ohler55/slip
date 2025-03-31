@@ -317,6 +317,65 @@ func TestCoerceToInteger(t *testing.T) {
 		Source: `(coerce '(5 1) 'integer)`,
 		Panics: true,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 123 '(integer))`,
+		Expect: `123`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 0))`,
+		Expect: `12`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 0 15))`,
+		Expect: `12`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer * 15))`,
+		Expect: `12`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 0 *))`,
+		Expect: `12`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer * 10))`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 13.5 *))`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 2.5))`,
+		Expect: `12`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 20/3 200/3))`,
+		Expect: `12`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 121/3))`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 1.5s0 1.1s1))`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer 1.5L0 1.1L1))`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 (list 'integer
+                                  (- 30000000000000000003 30000000000000000000)
+                                  (- 30000000000000000010 30000000000000000000)))`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 12 '(integer x))`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestCoerceToFixnum(t *testing.T) {
@@ -383,6 +442,11 @@ func TestCoerceToFixnum(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce '(5 1) 'fixnum)`,
 		Panics: true,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 12 '(fixnum 0 15))`,
+		Expect: `12`,
 	}).Test(t)
 }
 
@@ -459,6 +523,11 @@ func TestCoerceToBignum(t *testing.T) {
 		Source: `(coerce (coerce 30000000000000000123 'unsigned-byte) 'bignum)`,
 		Expect: `30000000000000000123`,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 12 '(bignum 0 15))`,
+		Expect: `12`,
+	}).Test(t)
 }
 
 func TestCoerceToFloat(t *testing.T) {
@@ -505,6 +574,11 @@ func TestCoerceToFloat(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce '(5 1) 'float)`,
 		Panics: true,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 12 '(float 0 15))`,
+		Expect: `12`,
 	}).Test(t)
 }
 
@@ -557,6 +631,11 @@ func TestCoerceToSingleFloat(t *testing.T) {
 		Source: `(coerce '(5 1) 'single-float)`,
 		Panics: true,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 12 '(single-float 0 15))`,
+		Expect: `12`,
+	}).Test(t)
 }
 
 func TestCoerceToDoubleFloat(t *testing.T) {
@@ -603,6 +682,11 @@ func TestCoerceToDoubleFloat(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce '(5 1) 'double-float)`,
 		Panics: true,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 12 '(double-float 0 15))`,
+		Expect: `12`,
 	}).Test(t)
 }
 
@@ -655,6 +739,11 @@ func TestCoerceToLongFloat(t *testing.T) {
 		Source: `(coerce '(5 1) 'long-float)`,
 		Panics: true,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 12 '(long-float 0 15))`,
+		Expect: `12`,
+	}).Test(t)
 }
 
 func TestCoerceToRational(t *testing.T) {
@@ -681,6 +770,11 @@ func TestCoerceToRational(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce '(5 1) 'rational)`,
 		Panics: true,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 12 '(rational 0 15))`,
+		Expect: `12`,
 	}).Test(t)
 }
 
@@ -712,6 +806,11 @@ func TestCoerceToRatio(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce '(5 1) 'ratio)`,
 		Panics: true,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 12 '(ratio 0 15))`,
+		Expect: `12`,
 	}).Test(t)
 }
 
@@ -923,9 +1022,43 @@ func TestCoerceToBitVector(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCoerceToBit(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 1 'bit)`,
+		Expect: "1",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 0 'bit)`,
+		Expect: "0",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce 2 'bit)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce 1.5 'bit)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
 func TestCoerceBadType(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce 3 5)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 3 'quux)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestCoerceBadList(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(coerce 3 '())`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce 3 '(list))`,
 		Panics: true,
 	}).Test(t)
 }

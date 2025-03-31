@@ -239,3 +239,36 @@ func syncFloatPrec(v0, v1 *slip.LongFloat) {
 		_, _, _ = (*big.Float)(v1).Parse(s, 10)
 	}
 }
+
+func lessThan(v0, v1 slip.Object) bool {
+	v0, v1 = normalizeNumber(v0, v1)
+	switch ta := v0.(type) {
+	case slip.Fixnum:
+		if ta < v1.(slip.Fixnum) {
+			return true
+		}
+	case slip.SingleFloat:
+		if ta < v1.(slip.SingleFloat) {
+			return true
+		}
+	case slip.DoubleFloat:
+		if ta < v1.(slip.DoubleFloat) {
+			return true
+		}
+	case *slip.LongFloat:
+		if (*big.Float)(v1.(*slip.LongFloat)).Cmp((*big.Float)(ta)) >= 0 {
+			return true
+		}
+	case *slip.Bignum:
+		if (*big.Int)(v1.(*slip.Bignum)).Cmp((*big.Int)(ta)) >= 0 {
+			return true
+		}
+	case *slip.Ratio:
+		if (*big.Rat)(v1.(*slip.Ratio)).Cmp((*big.Rat)(ta)) >= 0 {
+			return true
+		}
+	default:
+		slip.PanicType("numbers", v0, "real")
+	}
+	return false
+}
