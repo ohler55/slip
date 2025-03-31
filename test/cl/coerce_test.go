@@ -1020,6 +1020,19 @@ func TestCoerceToBitVector(t *testing.T) {
 		Source:    `(coerce 1.5 'bit-vector)`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce 10 '(bit-vector 4))`,
+		Expect: "#*1010",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce 10 '(bit-vector 3))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce 10 '(bit-vector 2.5))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }
 
 func TestCoerceToBit(t *testing.T) {

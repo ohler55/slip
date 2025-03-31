@@ -779,8 +779,16 @@ top:
 		coerceNotPossible(ta, "bit-vector")
 	}
 	if 0 < len(mods) {
-		// TBD check mods
-		fmt.Printf("*** mods: %s\n", mods)
+		num, ok := mods[0].(slip.Fixnum)
+		if !ok || num < 0 {
+			slip.PanicType("size", mods[0], "non-negative fixnum")
+		}
+		bv := result.(*slip.BitVector)
+		inc := int(num) - int(bv.Len)
+		if inc != 0 {
+			slip.NewPanic("The length requested (%d) does not match the type restriction in %s", bv.Len,
+				append(slip.List{slip.BitVectorSymbol}, mods...).String())
+		}
 	}
 	return
 }

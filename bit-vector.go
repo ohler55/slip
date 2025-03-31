@@ -175,7 +175,8 @@ func (obj *BitVector) Set(value Object, indexes ...int) {
 	PanicType("set value", value, "0", "1")
 }
 
-func (obj *BitVector) grow(cnt int) {
+// Grow expands the bit-vector by the length specified.
+func (obj *BitVector) Grow(cnt int) {
 	obj.Len += uint(cnt)
 	if len(obj.Bytes)*8 < int(obj.Len) {
 		obj.Bytes = append(obj.Bytes, bytes.Repeat([]byte{0x00}, int(obj.Len)/8+1-len(obj.Bytes))...)
@@ -195,10 +196,10 @@ func (obj *BitVector) Push(values ...Object) (index int) {
 	}
 	loc := obj.Len
 	if obj.FillPtr < 0 {
-		obj.grow(len(values))
+		obj.Grow(len(values))
 	} else {
 		if int(obj.Len) <= obj.FillPtr+len(values) {
-			obj.grow(obj.FillPtr + len(values) - int(obj.Len))
+			obj.Grow(obj.FillPtr + len(values) - int(obj.Len))
 		}
 		loc = uint(obj.FillPtr)
 		obj.FillPtr += len(values)
@@ -319,7 +320,7 @@ func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initConte
 		case dims[0] < int(obj.Len):
 			obj.Len = uint(dims[0])
 		case dims[0] > int(obj.Len):
-			obj.grow(dims[0] - int(obj.Len))
+			obj.Grow(dims[0] - int(obj.Len))
 		}
 		obj.FillPtr = fillPtr
 	}

@@ -14,8 +14,8 @@
       - update the converters to take optional arguments like size
        - signed-byte (size)
        - unsigned-byte (size)
-       - bit-vector (size)
        - vector (type size) (&OPTIONAL ELEMENT-TYPE SIZE)
+        - allow (coerce '(1 0 1 0) '(vector (integer 0 1) 4))
   - [ ] BIT - new built in type as byte that is 0 or one
   - [ ] BIT-AND
   - [ ] BIT-ANDC1
