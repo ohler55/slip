@@ -1,4 +1,4 @@
- * [ ] BIT
+ * [x] BIT
  * [ ] BIT-AND
  * [ ] BIT-ANDC1
  * [ ] BIT-ANDC2
@@ -9,7 +9,7 @@
  * [ ] BIT-NOT
  * [ ] BIT-ORC1
  * [ ] BIT-ORC2
- * [ ] BIT-VECTOR
+ * [x] BIT-VECTOR
  * [ ] BIT-VECTOR-P
  * [ ] BIT-XOR
  * [x] BYTE
@@ -46,7 +46,7 @@
  * [ ] SHADOW
  * [ ] SHADOWING-IMPORT
  * [ ] SIGNED-BYTE
- * [ ] SIMPLE-BIT-VECTOR
+ * [x] SIMPLE-BIT-VECTOR
  * [ ] SIMPLE-BIT-VECTOR-P
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE

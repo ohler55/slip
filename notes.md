@@ -5,18 +5,7 @@
 - next
 
  - bits-and-bytes
-  - next
-   - types
-    - bit-vector
-   - vectors function
-    - coerce
-     - list
-      - update the converters to take optional arguments like size
-       - signed-byte (size)
-       - unsigned-byte (size)
-       - vector (type size) (&OPTIONAL ELEMENT-TYPE SIZE)
-        - allow (coerce '(1 0 1 0) '(vector (integer 0 1) 4))
-  - [ ] BIT - new built in type as byte that is 0 or one
+  - [x] BIT
   - [ ] BIT-AND
   - [ ] BIT-ANDC1
   - [ ] BIT-ANDC2
@@ -27,9 +16,7 @@
   - [ ] BIT-NOT
   - [ ] BIT-ORC1
   - [ ] BIT-ORC2
-  - [ ] BIT-VECTOR
-   - coerce to list, also other for non-standard like integer, octet, byte
-   - maybe always a simple-bit-vector, not displaced
+  - [x] BIT-VECTOR
   - [ ] BIT-VECTOR-P
   - [ ] BIT-XOR
   - [ ] BYTE (size position) => (size . position)
@@ -41,7 +28,7 @@
   - [ ] LDB-TEST
   - [ ] MASK-FIELD
   - [ ] SBIT
-  - [ ] SIMPLE-BIT-VECTOR
+  - [x] SIMPLE-BIT-VECTOR
   - [ ] SIMPLE-BIT-VECTOR-P
    - update simple-vector-p
 
@@ -50,9 +37,13 @@
   - [ ] FORMATTER
   - [ ] INTEGER-DECODE-FLOAT
 
-
-- autocomplete
- - for describe and others>
+  - allow (coerce '(1 0 1 0) '(vector (integer 0 1) 4)) - in the future
+   - might need a type-spec type to use
+    - TypeSpec interface
+     - check method that panics on fail
+     - isOk method for true or false
+      - separate for each type like integer, float, etc
+       - IntegerSpec - low, high
 
  - better-methods
   - instance method should use flavor so defmethod give existing instances new methods

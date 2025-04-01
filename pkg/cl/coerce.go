@@ -3,12 +3,13 @@
 package cl
 
 import (
-	"fmt"
 	"math/big"
 	"unicode/utf8"
 
 	"github.com/ohler55/slip"
 )
+
+const starSym = slip.Symbol("*")
 
 func init() {
 	slip.Define(
@@ -238,8 +239,20 @@ func coerceToVector(arg slip.Object, mods ...slip.Object) (result slip.Object) {
 		coerceNotPossible(ta, "vector")
 	}
 	if 0 < len(mods) {
-		// TBD check mods
-		fmt.Printf("*** mods: %s\n", mods)
+		vl := result.(slip.VectorLike)
+		if mods[0] != starSym {
+			vl.SetElementType(mods[0])
+		}
+		if 1 < len(mods) && mods[1] != starSym {
+			num, ok := mods[1].(slip.Fixnum)
+			if !ok || num < 0 {
+				slip.PanicType("size", mods[1], "non-negative fixnum")
+			}
+			if int(num) != vl.Length() {
+				slip.NewPanic("The length requested (%d) does not match the type restriction in %s", vl.Length(),
+					append(slip.List{slip.VectorSymbol}, mods...).String())
+			}
+		}
 	}
 	return
 }
@@ -784,8 +797,7 @@ top:
 			slip.PanicType("size", mods[0], "non-negative fixnum")
 		}
 		bv := result.(*slip.BitVector)
-		inc := int(num) - int(bv.Len)
-		if inc != 0 {
+		if int(num) != int(bv.Len) {
 			slip.NewPanic("The length requested (%d) does not match the type restriction in %s", bv.Len,
 				append(slip.List{slip.BitVectorSymbol}, mods...).String())
 		}
@@ -848,7 +860,17 @@ func coerceToSignedByte(arg slip.Object, mods ...slip.Object) (result slip.Objec
 		coerceNotPossible(ta, "signed-byte")
 	}
 	if 0 < len(mods) {
-		checkRange(result, mods)
+		if mods[0] != starSym {
+			num, ok := mods[0].(slip.Fixnum)
+			if !ok || num < 0 {
+				slip.PanicType("size", mods[0], "non-negative fixnum")
+			}
+			sb := result.(*slip.SignedByte)
+			if int(num) != int(sb.Size) {
+				slip.NewPanic("The length requested (%d) does not match the type restriction in %s", sb.Size,
+					append(slip.List{slip.SignedByteSymbol}, mods...).String())
+			}
+		}
 	}
 	return
 }
@@ -910,7 +932,17 @@ func coerceToUnsignedByte(arg slip.Object, mods ...slip.Object) (result slip.Obj
 		coerceNotPossible(ta, "unsigned-byte")
 	}
 	if 0 < len(mods) {
-		checkRange(result, mods)
+		if mods[0] != starSym {
+			num, ok := mods[0].(slip.Fixnum)
+			if !ok || num < 0 {
+				slip.PanicType("size", mods[0], "non-negative fixnum")
+			}
+			ub := result.(*slip.UnsignedByte)
+			if int(num) != int(ub.Size) {
+				slip.NewPanic("The length requested (%d) does not match the type restriction in %s", ub.Size,
+					append(slip.List{slip.UnsignedByteSymbol}, mods...).String())
+			}
+		}
 	}
 	return
 }
@@ -953,13 +985,13 @@ func coerceNotPossible(arg slip.Object, rtype string) {
 }
 
 func checkRange(v slip.Object, mods slip.List) {
-	if mods[0] != slip.Symbol("*") {
+	if mods[0] != starSym {
 		if lessThan(v, mods[0]) {
 			coerceNotPossible(v, append(slip.List{slip.IntegerSymbol}, mods...).String())
 		}
 	}
 	if 1 < len(mods) {
-		if mods[1] != slip.Symbol("*") {
+		if mods[1] != starSym {
 			if lessThan(mods[1], v) {
 				coerceNotPossible(v, append(slip.List{slip.IntegerSymbol}, mods...).String())
 			}

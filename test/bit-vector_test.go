@@ -58,6 +58,9 @@ func TestBitVectorPut(t *testing.T) {
 func TestBitVectorElementType(t *testing.T) {
 	bv := slip.ReadBitVector([]byte("1010"))
 	tt.Equal(t, slip.BitSymbol, bv.ElementType())
+	bv.SetElementType(slip.BitSymbol)
+	tt.Equal(t, slip.BitSymbol, bv.ElementType())
+	tt.Panic(t, func() { bv.SetElementType(slip.IntegerSymbol) })
 }
 
 func TestBitVectorRank(t *testing.T) {

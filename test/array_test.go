@@ -89,6 +89,9 @@ func TestArrayMisc(t *testing.T) {
 	tt.Equal(t, slip.TrueSymbol, a.ElementType())
 	tt.Equal(t, []interface{}{nil}, slip.NewArray([]int{1}, slip.TrueSymbol, nil, nil, true).Simplify())
 	tt.Equal(t, slip.ArraySymbol, a.ArrayType())
+	a.SetElementType(slip.IntegerSymbol)
+	tt.Equal(t, slip.IntegerSymbol, a.ElementType())
+	tt.Panic(t, func() { a.SetElementType(slip.Fixnum(3)) })
 }
 
 func TestArrayAdjustShrink(t *testing.T) {

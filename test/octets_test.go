@@ -11,28 +11,33 @@ import (
 )
 
 func TestOctets(t *testing.T) {
+	abc := slip.Octets("abc")
 	(&sliptest.Object{
-		Target:    slip.Octets("abc"),
+		Target:    abc,
 		String:    `#(97 98 99)`,
 		Simple:    []any{97, 98, 99},
 		Hierarchy: "octets.vector.array.sequence.t",
 		Equals: []*sliptest.EqTest{
-			{Other: slip.Octets("abc"), Expect: true},
+			{Other: abc, Expect: true},
 			{Other: slip.Octets("ABC"), Expect: false},
 			{Other: slip.True, Expect: false},
 		},
-		Eval: slip.Octets("abc"),
+		Eval: abc,
 	}).Test(t)
 	tt.Equal(t, slip.OctetSymbol, slip.Octets("x").SequenceType())
 	tt.Equal(t, slip.OctetsSymbol, slip.Octets("x").ArrayType())
-	tt.Equal(t, 3, slip.Octets("abc").Length())
+	tt.Equal(t, 3, abc.Length())
 	tt.Equal(t, slip.Octets("aaa"), slip.NewOctets(3, slip.Octet(97)))
 	tt.Equal(t, slip.List{slip.Octet(97), slip.Octet(97), slip.Octet(97)},
 		slip.NewOctets(3, slip.Octet(97)).AsList())
-	tt.Equal(t, false, slip.Octets("abc").Adjustable())
-	tt.Equal(t, slip.OctetSymbol, slip.Octets("abc").ElementType())
-	tt.Equal(t, 1, slip.Octets("abc").Rank())
-	tt.Equal(t, []int{3}, slip.Octets("abc").Dimensions())
+	tt.Equal(t, false, abc.Adjustable())
+	tt.Equal(t, slip.OctetSymbol, abc.ElementType())
+	tt.Equal(t, 1, abc.Rank())
+	tt.Equal(t, []int{3}, abc.Dimensions())
+
+	abc.SetElementType(slip.OctetSymbol)
+	tt.Equal(t, slip.OctetSymbol, abc.ElementType())
+	tt.Panic(t, func() { abc.SetElementType(slip.IntegerSymbol) })
 }
 
 func TestOctetsAdjustInitialElement(t *testing.T) {
@@ -94,6 +99,8 @@ func TestOctetsMajorSet(t *testing.T) {
 	octets := slip.Octets("abc")
 	octets.MajorSet(1, slip.Octet('x'))
 	tt.Equal(t, "#(97 120 99)", octets.String())
+	tt.Equal(t, slip.Octet('x'), octets.MajorGet(1))
 
 	tt.Panic(t, func() { octets.MajorSet(3, slip.Octet(1)) })
+	tt.Panic(t, func() { octets.MajorGet(3) })
 }

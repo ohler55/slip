@@ -27,6 +27,9 @@ type ArrayLike interface {
 	// ElementType returns the element-type of the array.
 	ElementType() Symbol
 
+	// SetElementType sets the element-type of the array.
+	SetElementType(ts Object)
+
 	// Get the value at the location identified by the indexes.
 	Get(indexes ...int) Object
 

@@ -77,6 +77,25 @@ func TestCoerceToVector(t *testing.T) {
 		Source: `(coerce 3 'vector)`,
 		Panics: true,
 	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(coerce '(a b c) '(vector symbol))`,
+		Array:  true,
+		Expect: "#(a b c)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(a b c) '(vector * 3))`,
+		Array:  true,
+		Expect: "#(a b c)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(a b c) '(vector * 4))`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce '(a b c) '(vector * -3))`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestCoerceToOctets(t *testing.T) {
@@ -942,6 +961,18 @@ func TestCoerceToSignedByte(t *testing.T) {
 		Source:    `(coerce 1.5 'signed-byte)`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #*1010 '(signed-byte 4))`,
+		Expect: "10",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce #*1010 '(signed-byte -4))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce #*1010 '(signed-byte 5))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
 }
 
 func TestCoerceToUnsignedByte(t *testing.T) {
@@ -979,6 +1010,18 @@ func TestCoerceToUnsignedByte(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(coerce 1.5 'unsigned-byte)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(coerce #*1010 '(unsigned-byte 4))`,
+		Expect: "10",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce #*1010 '(unsigned-byte -4))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(coerce #*1010 '(unsigned-byte 5))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

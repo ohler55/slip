@@ -106,6 +106,13 @@ func (obj Octets) ElementType() Symbol {
 	return OctetSymbol
 }
 
+// SetElementType sets the element-type of the array.
+func (obj Octets) SetElementType(ts Object) {
+	if ts != OctetSymbol {
+		PanicType("octets element", ts, "octet")
+	}
+}
+
 // Dimensions of the array.
 func (obj Octets) Dimensions() []int {
 	return []int{len(obj)}

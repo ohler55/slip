@@ -351,6 +351,13 @@ func (obj *BitVector) ElementType() Symbol {
 	return BitSymbol
 }
 
+// SetElementType sets the element-type of the bit-vector.
+func (obj *BitVector) SetElementType(ts Object) {
+	if ts != BitSymbol {
+		PanicType("bit-vector element", ts, "bit")
+	}
+}
+
 // Dimensions of the array.
 func (obj *BitVector) Dimensions() []int {
 	return []int{int(obj.Len)}

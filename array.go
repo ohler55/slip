@@ -360,6 +360,18 @@ func (obj *Array) ElementType() Symbol {
 	return obj.elementType
 }
 
+// SetElementType returns the element-type of the array.
+func (obj *Array) SetElementType(ts Object) {
+	sym, ok := ts.(Symbol)
+	if !ok {
+		PanicType("type-specification", ts, "symbol")
+	}
+	for _, v := range obj.elements {
+		checkArrayElementType(v, sym)
+	}
+	obj.elementType = sym
+}
+
 // Elements returns the elements of the array.
 func (obj *Array) Elements() []Object {
 	return obj.elements
