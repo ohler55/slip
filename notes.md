@@ -17,7 +17,7 @@
   - [ ] BIT-ORC1
   - [ ] BIT-ORC2
   - [x] BIT-VECTOR
-  - [ ] BIT-VECTOR-P
+  - [x] BIT-VECTOR-P
   - [ ] BIT-XOR
   - [ ] BYTE (size position) => (size . position)
   - [ ] BYTE-POSITION
@@ -29,7 +29,7 @@
   - [ ] MASK-FIELD
   - [ ] SBIT
   - [x] SIMPLE-BIT-VECTOR
-  - [ ] SIMPLE-BIT-VECTOR-P
+  - [x] SIMPLE-BIT-VECTOR-P
    - update simple-vector-p
 
  - tough-ones
