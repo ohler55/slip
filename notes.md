@@ -7,8 +7,8 @@
  - bits-and-bytes
   - [x] BIT
   - [x] BIT-AND
-  - [ ] BIT-ANDC1
-  - [ ] BIT-ANDC2
+  - [x] BIT-ANDC1
+  - [x] BIT-ANDC2
   - [ ] BIT-EQV
   - [ ] BIT-IOR
   - [ ] BIT-NAND
