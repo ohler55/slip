@@ -22,7 +22,7 @@ func init() {
 					Text: "The vector to pop a value from.",
 				},
 			},
-			Return: "fixnum",
+			Return: "object",
 			Text: `__vector-pop__ returns the element at the current fill-pointer and decreases
 the fill-pointer by one. If the fill-pointer is at zero an error is raised.`,
 			Examples: []string{

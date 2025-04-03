@@ -242,3 +242,79 @@ func ToOctet(arg slip.Object) (result slip.Object) {
 	}
 	return
 }
+
+func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
+	slip.ArgCountCheck(f, args, 2, 3)
+	switch t1 := args[0].(type) {
+	case *slip.Array:
+		t2, ok := args[1].(*slip.Array)
+		if !ok {
+			slip.PanicType("bit-array2", args[1], "bit-array")
+		}
+		if t1.ElementType() != slip.BitSymbol {
+			slip.PanicType("bit-array1", t1, "bit-array")
+		}
+		if t2.ElementType() != slip.BitSymbol {
+			slip.PanicType("bit-array2", t2, "bit-array")
+		}
+		d1 := t1.Dimensions()
+		d2 := t2.Dimensions()
+		if len(d1) != len(d2) {
+			slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
+		}
+		for i, d := range d1 {
+			if d2[i] != d {
+				slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
+			}
+		}
+		if 2 < len(args) {
+			ra, ok := args[2].(*slip.Array)
+			if !ok || ra.ElementType() != slip.BitSymbol {
+				slip.PanicType("opt-arg", args[2], "bit-array")
+			}
+			dr := ra.Dimensions()
+			if len(d1) != len(dr) {
+				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+			}
+			for i, d := range d1 {
+				if dr[i] != d {
+					slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+				}
+			}
+			r = ra
+		} else {
+			r = slip.NewArray(d1, slip.BitSymbol, slip.Bit(0), nil, false)
+		}
+		a1 = t1
+		a2 = t2
+	case *slip.BitVector:
+		t2, ok := args[1].(*slip.BitVector)
+		if !ok {
+			slip.PanicType("bit-array2", args[1], "bit-array")
+		}
+		if t1.Length() != t2.Length() {
+			slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
+		}
+		if 2 < len(args) {
+			ra, ok := args[2].(*slip.BitVector)
+			if !ok {
+				slip.PanicType("opt-arg", args[2], "bit-array")
+			}
+			if t1.Len != ra.Len {
+				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+			}
+			r = ra
+		} else {
+			r = &slip.BitVector{
+				Bytes:   make([]byte, len(t1.Bytes)),
+				Len:     t1.Len,
+				FillPtr: -1,
+			}
+		}
+		a1 = t1
+		a2 = t2
+	default:
+		slip.PanicType("bit-array1", t1, "bit-array")
+	}
+	return
+}

@@ -6,7 +6,7 @@
 
  - bits-and-bytes
   - [x] BIT
-  - [ ] BIT-AND
+  - [x] BIT-AND
   - [ ] BIT-ANDC1
   - [ ] BIT-ANDC2
   - [ ] BIT-EQV

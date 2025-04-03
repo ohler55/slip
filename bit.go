@@ -7,6 +7,8 @@ const BitSymbol = Symbol("bit")
 
 func init() {
 	DefConstant(BitSymbol, BitSymbol, `A _bit_ is a one bit integer.`)
+	DefConstant(Symbol("bit0"), Bit(0), `A _bit_ with a value of 0.`)
+	DefConstant(Symbol("bit1"), Bit(1), `A _bit_ with a value of 1.`)
 }
 
 // Bit represents a one bit integer.
