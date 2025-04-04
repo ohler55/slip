@@ -209,15 +209,11 @@ func datagramReceive(fd int, buf []byte, args slip.List) ([]byte, int, slip.List
 	switch tsa := sa.(type) {
 	case *syscall.SockaddrInet4:
 		oct := make(slip.Octets, 4)
-		for i, b := range tsa.Addr {
-			oct[i] = b
-		}
+		copy(oct, tsa.Addr[:])
 		addr = slip.List{oct, slip.Fixnum(tsa.Port)}
 	case *syscall.SockaddrInet6:
 		oct := make(slip.Octets, 16)
-		for i, b := range tsa.Addr {
-			oct[i] = b
-		}
+		copy(oct, tsa.Addr[:])
 		addr = slip.List{oct, slip.Fixnum(tsa.Port)}
 	case *syscall.SockaddrUnix:
 		if 0 < len(tsa.Name) {

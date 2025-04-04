@@ -543,17 +543,6 @@ func TestEditorNlAfter(t *testing.T) {
 	)
 }
 
-// TBD
-func xTestEditorEnterUnicode(t *testing.T) {
-	testEditorSeq(t, "\x1b\x5530d4\rx",
-		"z",
-		"<inverse>", "/unicode: /", "3", "0", "d", "4",
-		"<clear-to-end 4>",
-		// TBD
-		"<set-cursor 2:4>",
-	)
-}
-
 func testEditorSeq(t *testing.T, seq string, expect ...string) {
 	want := []any{startSteps, provide(seq)}
 	for _, x := range expect {

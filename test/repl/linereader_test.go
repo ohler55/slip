@@ -10,7 +10,6 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip/pkg/repl"
-	_ "github.com/ohler55/slip/pkg/repl"
 )
 
 func TestLineReaderReadLine(t *testing.T) {

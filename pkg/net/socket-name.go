@@ -93,16 +93,12 @@ func socketName(sa syscall.Sockaddr) (address slip.Object, port slip.Fixnum) {
 		address = slip.String(tsa.Name)
 	case *syscall.SockaddrInet4:
 		addr := make(slip.Octets, len(tsa.Addr))
-		for i, b := range tsa.Addr {
-			addr[i] = b
-		}
+		copy(addr, tsa.Addr[:])
 		address = addr
 		port = slip.Fixnum(tsa.Port)
 	case *syscall.SockaddrInet6:
 		addr := make(slip.Octets, len(tsa.Addr))
-		for i, b := range tsa.Addr {
-			addr[i] = b
-		}
+		copy(addr, tsa.Addr[:])
 		address = addr
 		port = slip.Fixnum(tsa.Port)
 	}

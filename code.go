@@ -25,10 +25,6 @@ const (
 	openParen  = '('
 	closeParen = ')'
 
-	digitByte     = 'd'
-	numberDone    = 'N'
-	revertToToken = 'R'
-
 	tokenStart = 't'
 	tokenDone  = 'T'
 

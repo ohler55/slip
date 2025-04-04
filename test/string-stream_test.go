@@ -3,7 +3,7 @@
 package test
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -27,7 +27,7 @@ func TestStringStreamObject(t *testing.T) {
 		},
 		Eval: stream,
 	}).Test(t)
-	data, err := ioutil.ReadAll(stream)
+	data, err := io.ReadAll(stream)
 	tt.Nil(t, err)
 	tt.Equal(t, "hello", string(data))
 

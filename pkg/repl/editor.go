@@ -494,8 +494,8 @@ func (ed *editor) addRune(r rune) {
 }
 
 func (ed *editor) getSize() (w, h int) {
-	if hs, _ := sizer.(hasSize); hs != nil {
-		w, h = hs.getSize()
+	if sizer != nil {
+		w, h = sizer.getSize()
 	} else {
 		w, h = term.GetSize(ed.fd)
 		if w <= 0 {
@@ -592,9 +592,9 @@ func (ed *editor) clearToEnd() {
 	ed.write([]byte(("\x1b[0K")))
 }
 
-func (ed *editor) clearToStart() {
-	ed.write([]byte(("\x1b[1K")))
-}
+// func (ed *editor) clearToStart() {
+// 	ed.write([]byte(("\x1b[1K")))
+// }
 
 func (ed *editor) clearDown() {
 	ed.write([]byte(("\x1b[J")))

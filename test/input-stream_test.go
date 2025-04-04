@@ -4,7 +4,6 @@ package test
 
 import (
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -51,7 +50,7 @@ func TestInputStreamObject(t *testing.T) {
 		},
 		Eval: &stream,
 	}).Test(t)
-	data, err := ioutil.ReadAll(&stream)
+	data, err := io.ReadAll(&stream)
 	tt.Nil(t, err)
 	tt.Equal(t, "abc", string(data))
 }

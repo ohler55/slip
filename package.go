@@ -286,11 +286,11 @@ func (obj *Package) GetVarVal(name string) (vv *VarVal) {
 }
 
 func (obj *Package) getVarVal(name string) (vv *VarVal) {
-	if vv, _ = obj.vars[name]; vv != nil {
+	if vv = obj.vars[name]; vv != nil {
 		return vv
 	}
 	name = strings.ToLower(name)
-	if vv, _ = obj.vars[name]; vv != nil {
+	if vv = obj.vars[name]; vv != nil {
 		return vv
 	}
 	return nil
@@ -313,7 +313,7 @@ func (obj *Package) Remove(name string) (removed bool) {
 		delete(obj.vars, name)
 		removed = true
 		for _, u := range obj.Users {
-			if vv, _ := u.vars[name]; vv != nil && vv.Pkg == obj {
+			if vv := u.vars[name]; vv != nil && vv.Pkg == obj {
 				delete(u.vars, name)
 			}
 		}

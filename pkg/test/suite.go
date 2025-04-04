@@ -239,15 +239,15 @@ Finds prints the suite result.
 // Return a tree of results.
 // {top: {pass: 0 fail: 0 skip: 0 subs: {leaf: pass}}}
 func getResults(obj *flavors.Instance) (result any) {
-	switch {
-	case obj.Type == testFlavor:
+	switch obj.Type {
+	case testFlavor:
 		switch obj.Get("result") {
 		case passSymbol:
 			result = "pass"
 		case failSymbol:
 			result = "fail"
 		}
-	case obj.Type == suiteFlavor:
+	case suiteFlavor:
 		var (
 			pass int64
 			fail int64
@@ -264,9 +264,10 @@ func getResults(obj *flavors.Instance) (result any) {
 				case nil:
 					skip++
 				case string:
-					if tr == "pass" {
+					switch tr {
+					case "pass":
 						pass++
-					} else if tr == "fail" {
+					case "fail":
 						fail++
 					}
 				case map[string]any:

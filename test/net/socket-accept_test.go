@@ -35,7 +35,7 @@ func TestSocketAcceptOkay(t *testing.T) {
 			done <- true
 			return
 		}
-		t.FailNow()
+		done <- false
 	}()
 	(&sliptest.Function{
 		Scope: scope,
@@ -49,7 +49,9 @@ func TestSocketAcceptOkay(t *testing.T) {
                    (socket-send s2 "Goodbye")))`,
 		Expect: `("Hello" 7)`,
 	}).Test(t)
-	<-done
+	if !<-done {
+		t.FailNow()
+	}
 }
 
 func TestSocketSendAccept(t *testing.T) {
@@ -73,7 +75,7 @@ func TestSocketSendAccept(t *testing.T) {
 			done <- true
 			return
 		}
-		t.FailNow()
+		done <- false
 	}()
 	(&sliptest.Function{
 		Scope: scope,
@@ -87,7 +89,9 @@ func TestSocketSendAccept(t *testing.T) {
                    (send s2 :send "Goodbye")))`,
 		Expect: `("Hello" 7)`,
 	}).Test(t)
-	<-done
+	if !<-done {
+		t.FailNow()
+	}
 }
 
 func TestSocketAcceptNotSocket(t *testing.T) {

@@ -31,9 +31,6 @@ import (
 	// Pull in XML functions.
 	_ "github.com/ohler55/slip/pkg/xml"
 
-	// Pull in test functions.
-	_ "github.com/ohler55/slip/pkg/test"
-
 	// Pull in watch functions.
 	_ "github.com/ohler55/slip/pkg/watch"
 )

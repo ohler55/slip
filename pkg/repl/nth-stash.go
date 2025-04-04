@@ -54,9 +54,7 @@ func nthStashCall(f slip.Object, stash *Stash, s *slip.Scope, args slip.List) (r
 		result = code[0]
 	default:
 		list := make(slip.List, len(code))
-		for i, obj := range code {
-			list[i] = obj
-		}
+		copy(list, code)
 		result = list
 	}
 	return
