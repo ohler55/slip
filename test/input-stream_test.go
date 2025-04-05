@@ -172,7 +172,7 @@ func TestInputStreamReadRuneHardOk(t *testing.T) {
 	_, _, err = stream.ReadRune()
 	tt.NotNil(t, err)
 
-	stream.Close()
+	_ = stream.Close()
 }
 
 func TestInputStreamReadRuneHardBad(t *testing.T) {

@@ -16,10 +16,10 @@ func TestClearenv(t *testing.T) {
 	defer func() {
 		for _, ev := range orig {
 			parts := strings.Split(ev, "=")
-			os.Setenv(parts[0], parts[1])
+			_ = os.Setenv(parts[0], parts[1])
 		}
 	}()
-	os.Setenv("TEST_VAR", "something")
+	_ = os.Setenv("TEST_VAR", "something")
 	(&sliptest.Function{
 		Source: `(clearenv)`,
 		Expect: "nil",

@@ -51,7 +51,7 @@ func TestSocketSendPeerPortOkay(t *testing.T) {
 
 func TestSocketPeerPortHTTP(t *testing.T) {
 	serv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("okay"))
+		_, _ = w.Write([]byte("okay"))
 	}))
 	defer serv.Close()
 

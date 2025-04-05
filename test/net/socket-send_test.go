@@ -241,7 +241,7 @@ func TestSocketSendDatagramFlags(t *testing.T) {
 }
 
 func TestSocketSendUnixDatagram(t *testing.T) {
-	syscall.Unlink("uni")
+	_ = syscall.Unlink("uni")
 	defer func() { _ = syscall.Unlink("uni") }()
 	sa := &syscall.SockaddrUnix{Name: "uni"}
 	ready := make(gi.Channel, 1)

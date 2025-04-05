@@ -57,8 +57,8 @@ func (f *Pprint) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	p.Pretty = true
 	obj := args[0]
 	var (
-		w     io.Writer = slip.StandardOutput.(io.Writer)
-		ss, _           = slip.StandardOutput.(slip.Stream)
+		w     = slip.StandardOutput.(io.Writer)
+		ss, _ = slip.StandardOutput.(slip.Stream)
 	)
 	if 1 < len(args) {
 		var ok bool

@@ -115,7 +115,7 @@ func writeBuf(f slip.Object, s *slip.Scope, args slip.List, withStream bool) ([]
 	p.ScopedUpdate(s)
 
 	obj := args[0]
-	var w io.Writer = slip.StandardOutput.(io.Writer)
+	w := slip.StandardOutput.(io.Writer)
 	ss, _ := slip.StandardOutput.(slip.Stream)
 
 	for i := 1; i < len(args)-1; i += 2 {

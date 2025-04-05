@@ -27,7 +27,7 @@ func TestSocketAcceptOkay(t *testing.T) {
 				time.Sleep(time.Millisecond * 50)
 				continue
 			}
-			fmt.Fprintf(c, "Hello")
+			_, _ = fmt.Fprintf(c, "Hello")
 			var resp string
 			resp, err = bufio.NewReader(c).ReadString('e')
 			tt.Nil(t, err)
@@ -67,7 +67,7 @@ func TestSocketSendAccept(t *testing.T) {
 				time.Sleep(time.Millisecond * 50)
 				continue
 			}
-			fmt.Fprintf(c, "Hello")
+			_, _ = fmt.Fprintf(c, "Hello")
 			var resp string
 			resp, err = bufio.NewReader(c).ReadString('e')
 			tt.Nil(t, err)

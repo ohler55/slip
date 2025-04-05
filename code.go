@@ -821,7 +821,6 @@ func (r *reader) read(src []byte) {
 			r.partial("list not terminated")
 		}
 	}
-	return
 }
 
 func (r *reader) inBackquote() bool {

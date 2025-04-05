@@ -364,7 +364,7 @@ func (caller updateInstanceForDifferentClassCaller) Call(s *slip.Scope, args sli
 				continue
 			}
 		}
-		slip.NewPanic("%s is not a valid initialize keyword for %s.", rest[i], flavor.Name)
+		slip.NewPanic("%s is not a valid initialize keyword for %s.", rest[i], flavor.Name())
 	}
 	var names slip.List
 	for k := range self.Vars {

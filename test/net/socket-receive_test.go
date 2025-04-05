@@ -202,7 +202,7 @@ func TestSocketReceiveUnixDatagram(t *testing.T) {
 }
 
 func TestSocketReceiveUnix2Datagram(t *testing.T) {
-	syscall.Unlink("unix2")
+	_ = syscall.Unlink("unix2")
 	defer func() { _ = syscall.Unlink("unix2") }()
 	sa := &syscall.SockaddrUnix{Name: "unix2"}
 	started := make(gi.Channel, 1)

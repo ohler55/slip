@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetenv(t *testing.T) {
-	os.Setenv("TEST_VAR", "something")
+	_ = os.Setenv("TEST_VAR", "something")
 	(&sliptest.Function{
 		Source: `(getenv "TEST_VAR")`,
 		Expect: `"something"`,

@@ -176,7 +176,7 @@ Aux:
 				ss.Let(asym, ad.Default)
 			}
 		case auxMode:
-			var val Object = ad.Default
+			val := ad.Default
 			if list, ok := val.(List); ok && 1 < len(list) {
 				d2 := depth + 1
 				val = ss.Eval(ListToFunc(ss, list, d2), d2)

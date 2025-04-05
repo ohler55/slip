@@ -73,9 +73,7 @@ func (f *Backquote) expand(s *slip.Scope, arg slip.Object, depth int) slip.Objec
 			arg = xl
 		}
 	case slip.Funky:
-		if obj, ok := arg.(slip.Object); ok {
-			arg = obj.Eval(s, depth+1)
-		}
+		arg = arg.Eval(s, depth+1)
 	}
 	return arg
 }

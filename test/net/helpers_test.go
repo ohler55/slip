@@ -15,7 +15,7 @@ func availablePort() int {
 	if listener, err = net.ListenTCP("tcp", addr); err != nil {
 		panic(err)
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 
 	return listener.Addr().(*net.TCPAddr).Port
 }

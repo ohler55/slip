@@ -67,7 +67,7 @@ func TestConcatenatedStreamOpenClose(t *testing.T) {
 	cs := cl.NewConcatenatedStream(ss1, ss2)
 
 	tt.Equal(t, true, cs.IsOpen())
-	cs.Close()
+	_ = cs.Close()
 	tt.Equal(t, false, cs.IsOpen())
 	buf := []byte{'x'}
 	_, err := cs.Read(buf)

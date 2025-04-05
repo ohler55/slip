@@ -64,7 +64,7 @@ func TestVanillaMethods(t *testing.T) {
 
 	_ = slip.ReadString("(send berry :describe)", scope).Eval(scope, nil)
 
-	pw.Close()
+	_ = pw.Close()
 	var out []byte
 	out, err = io.ReadAll(pr)
 	tt.Nil(t, err)
@@ -79,7 +79,7 @@ func TestVanillaMethods(t *testing.T) {
 
 	scope.Let(slip.Symbol("out"), (*slip.FileStream)(pw2))
 	_ = slip.ReadString("(send berry :print-self out 0 t)", scope).Eval(scope, nil)
-	pw2.Close()
+	_ = pw2.Close()
 	out, err = io.ReadAll(pr2)
 	tt.Nil(t, err)
 	tt.Equal(t, "/#<strawberry [0-9a-f]+>/", string(out))

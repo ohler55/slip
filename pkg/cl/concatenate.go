@@ -70,7 +70,7 @@ func (f *Concatenate) listConc(args slip.List) (result slip.List) {
 		case slip.List:
 			result = append(result, ta...)
 		case slip.String:
-			for _, r := range []rune(ta) {
+			for _, r := range ta {
 				result = append(result, slip.Character(r))
 			}
 		case slip.VectorLike:

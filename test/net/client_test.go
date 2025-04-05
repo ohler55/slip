@@ -20,18 +20,18 @@ func TestClientGet(t *testing.T) {
 	hs := http.Server{
 		Addr: fmt.Sprintf(":%d", port),
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintln(w, "Got it!")
+			_, _ = fmt.Fprintln(w, "Got it!")
 		}),
 	}
-	go hs.ListenAndServe()
-	defer hs.Close()
+	go func() { _ = hs.ListenAndServe() }()
+	defer func() { _ = hs.Close() }()
 
 	su := fmt.Sprintf("http://localhost:%d", port)
 	start := time.Now()
 	for time.Since(start) < time.Second*2 {
 		time.Sleep(time.Millisecond * 50)
 		if resp, err := http.Get(su); err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			break
 		}
 	}
@@ -126,28 +126,28 @@ func TestClientPutString(t *testing.T) {
 		Addr: fmt.Sprintf(":%d", port),
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Body == nil { // the GET ping
-				w.Write([]byte("ready"))
+				_, _ = w.Write([]byte("ready"))
 				return
 			}
 			b, err := io.ReadAll(r.Body)
 			if err != nil {
-				fmt.Fprintf(w, "error: %s\n", err)
+				_, _ = fmt.Fprintf(w, "error: %s\n", err)
 			} else {
-				w.Write([]byte(r.Header.Get("Content-Type")))
-				w.Write([]byte{'-'})
-				w.Write(b)
+				_, _ = w.Write([]byte(r.Header.Get("Content-Type")))
+				_, _ = w.Write([]byte{'-'})
+				_, _ = w.Write(b)
 			}
 		}),
 	}
-	go hs.ListenAndServe()
-	defer hs.Close()
+	go func() { _ = hs.ListenAndServe() }()
+	defer func() { _ = hs.Close() }()
 
 	su := fmt.Sprintf("http://localhost:%d", port)
 	start := time.Now()
 	for time.Since(start) < time.Second*2 {
 		time.Sleep(time.Millisecond * 50)
 		if resp, err := http.Get(su); err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			break
 		}
 	}
@@ -228,28 +228,28 @@ func TestClientPostBag(t *testing.T) {
 		Addr: fmt.Sprintf(":%d", port),
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Body == nil { // the GET ping
-				w.Write([]byte("ready"))
+				_, _ = w.Write([]byte("ready"))
 				return
 			}
 			b, err := io.ReadAll(r.Body)
 			if err != nil {
-				fmt.Fprintf(w, "error: %s\n", err)
+				_, _ = fmt.Fprintf(w, "error: %s\n", err)
 			} else {
-				w.Write([]byte(r.Header.Get("Content-Type")))
-				w.Write([]byte{'-'})
-				w.Write(b)
+				_, _ = w.Write([]byte(r.Header.Get("Content-Type")))
+				_, _ = w.Write([]byte{'-'})
+				_, _ = w.Write(b)
 			}
 		}),
 	}
-	go hs.ListenAndServe()
-	defer hs.Close()
+	go func() { _ = hs.ListenAndServe() }()
+	defer func() { _ = hs.Close() }()
 
 	su := fmt.Sprintf("http://localhost:%d", port)
 	start := time.Now()
 	for time.Since(start) < time.Second*2 {
 		time.Sleep(time.Millisecond * 50)
 		if resp, err := http.Get(su); err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			break
 		}
 	}
@@ -298,28 +298,28 @@ func TestClientPutStream(t *testing.T) {
 		Addr: fmt.Sprintf(":%d", port),
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Body == nil { // the GET ping
-				w.Write([]byte("ready"))
+				_, _ = w.Write([]byte("ready"))
 				return
 			}
 			b, err := io.ReadAll(r.Body)
 			if err != nil {
-				fmt.Fprintf(w, "error: %s\n", err)
+				_, _ = fmt.Fprintf(w, "error: %s\n", err)
 			} else {
-				w.Write([]byte(r.Header.Get("Content-Type")))
-				w.Write([]byte{'-'})
-				w.Write(b)
+				_, _ = w.Write([]byte(r.Header.Get("Content-Type")))
+				_, _ = w.Write([]byte{'-'})
+				_, _ = w.Write(b)
 			}
 		}),
 	}
-	go hs.ListenAndServe()
-	defer hs.Close()
+	go func() { _ = hs.ListenAndServe() }()
+	defer func() { _ = hs.Close() }()
 
 	su := fmt.Sprintf("http://localhost:%d", port)
 	start := time.Now()
 	for time.Since(start) < time.Second*2 {
 		time.Sleep(time.Millisecond * 50)
 		if resp, err := http.Get(su); err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			break
 		}
 	}

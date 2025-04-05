@@ -206,7 +206,7 @@ func (ed *editor) displayRune(line, pos int) {
 
 func printSize(s string) (cnt int) {
 	var esc bool
-	for _, r := range []rune(s) {
+	for _, r := range s {
 		switch r {
 		case '\x1b':
 			esc = true

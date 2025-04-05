@@ -672,7 +672,7 @@ func TestFileStreamWriteRead(t *testing.T) {
 	tt.Equal(t, 0, lw.LastByte())
 
 	tt.Equal(t, true, lw.IsOpen())
-	lw.Close()
+	_ = lw.Close()
 	tt.Equal(t, false, lw.IsOpen())
 
 	buf := make([]byte, 10)
@@ -747,7 +747,7 @@ func TestOutputStream(t *testing.T) {
 	tt.Equal(t, 'o', stream.LastByte())
 
 	tt.Equal(t, true, stream.IsOpen())
-	stream.Close()
+	_ = stream.Close()
 	_, err := stream.Write([]byte{'x'})
 	tt.NotNil(t, err)
 	tt.Equal(t, false, stream.IsOpen())

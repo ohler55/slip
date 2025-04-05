@@ -580,7 +580,7 @@ func TestPrinterWrite(t *testing.T) {
 	slip.SetVar(key, (*slip.FileStream)(pw))
 	slip.Write(slip.List{nil, slip.True})
 
-	pw.Close()
+	_ = pw.Close()
 	var out []byte
 	out, err = io.ReadAll(pr)
 	tt.Nil(t, err)
@@ -602,7 +602,7 @@ func TestWarnStandardOutput(t *testing.T) {
 
 	slip.Warn("duck")
 
-	pw.Close()
+	_ = pw.Close()
 	var out []byte
 	out, err = io.ReadAll(pr)
 	tt.Nil(t, err)
@@ -634,7 +634,7 @@ func TestWarnInteractive(t *testing.T) {
 	slip.SetVar(ansiKey, nil)
 	slip.Warn("duck")
 
-	pw.Close()
+	_ = pw.Close()
 	var out []byte
 	out, err = io.ReadAll(pr)
 	tt.Nil(t, err)

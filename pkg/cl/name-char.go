@@ -48,7 +48,7 @@ func (f *NameChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	if strings.HasPrefix(name, `#\`) {
 		ra := []rune(name)
-		if 3 == len(ra) {
+		if len(ra) == 3 {
 			return slip.Character(ra[2])
 		}
 	} else {
