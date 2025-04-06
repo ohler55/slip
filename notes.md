@@ -18,7 +18,7 @@
   - [x] BIT-ORC2
   - [x] BIT-VECTOR
   - [x] BIT-VECTOR-P
-  - [ ] BIT-XOR
+  - [x] BIT-XOR
   - [ ] BYTE (size position) => (size . position)
   - [ ] BYTE-POSITION
   - [ ] BYTE-SIZE

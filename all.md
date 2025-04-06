@@ -1,18 +1,3 @@
- * [x] BIT
- * [x] BIT-AND
- * [x] BIT-ANDC1
- * [x] BIT-ANDC2
- * [x] BIT-EQV
- * [x] BIT-IOR
- * [x] BIT-NAND
- * [x] BIT-NOR
- * [x] BIT-NOT
- * [x] BIT-ORC1
- * [x] BIT-ORC2
- * [x] BIT-VECTOR
- * [x] BIT-VECTOR-P
- * [ ] BIT-XOR
- * [x] BYTE
  * [ ] BYTE-POSITION
  * [ ] BYTE-SIZE
  * [ ] COMPLEMENT
@@ -45,9 +30,6 @@
  * [ ] SBIT
  * [ ] SHADOW
  * [ ] SHADOWING-IMPORT
- * [ ] SIGNED-BYTE
- * [x] SIMPLE-BIT-VECTOR
- * [x] SIMPLE-BIT-VECTOR-P
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
  * [ ] USE-VALUE
@@ -147,6 +129,20 @@
  * [x] ATANH
  * [x] ATOM
  * [x] BIGNUM
+ * [x] BIT
+ * [x] BIT-AND
+ * [x] BIT-ANDC1
+ * [x] BIT-ANDC2
+ * [x] BIT-EQV
+ * [x] BIT-IOR
+ * [x] BIT-NAND
+ * [x] BIT-NOR
+ * [x] BIT-NOT
+ * [x] BIT-ORC1
+ * [x] BIT-ORC2
+ * [x] BIT-VECTOR
+ * [x] BIT-VECTOR-P
+ * [x] BIT-XOR
  * [x] BLOCK
  * [x] BOOLE
  * [x] BOOLE-1
@@ -172,6 +168,7 @@
  * [x] BROADCAST-STREAM-STREAMS
  * [x] BUILT-IN-CLASS
  * [x] BUTLAST
+ * [x] BYTE
  * [x] CAAAAR
  * [x] CAAADR
  * [x] CAAAR
@@ -644,8 +641,11 @@
  * [x] SHORT-FLOAT
  * [x] SHORT-FLOAT-EPSILON
  * [x] SHORT-FLOAT-NEGATIVE-EPSILON
+ * [x] SIGNED-BYTE
  * [x] SIGNUM
  * [x] SIMPLE-ARRAY
+ * [x] SIMPLE-BIT-VECTOR
+ * [x] SIMPLE-BIT-VECTOR-P
  * [x] SIMPLE-CONDITION
  * [x] SIMPLE-CONDITION-FORMAT-ARGUMENTS
  * [x] SIMPLE-CONDITION-FORMAT-CONTROL
