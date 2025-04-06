@@ -3,9 +3,9 @@
  * [x] BIT-ANDC1
  * [x] BIT-ANDC2
  * [x] BIT-EQV
- * [ ] BIT-IOR
- * [ ] BIT-NAND
- * [ ] BIT-NOR
+ * [x] BIT-IOR
+ * [x] BIT-NAND
+ * [x] BIT-NOR
  * [ ] BIT-NOT
  * [ ] BIT-ORC1
  * [ ] BIT-ORC2
