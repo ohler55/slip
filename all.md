@@ -6,7 +6,7 @@
  * [x] BIT-IOR
  * [x] BIT-NAND
  * [x] BIT-NOR
- * [ ] BIT-NOT
+ * [x] BIT-NOT
  * [ ] BIT-ORC1
  * [ ] BIT-ORC2
  * [x] BIT-VECTOR
