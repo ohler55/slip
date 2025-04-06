@@ -10,7 +10,7 @@
   - [x] BIT-ANDC1
   - [x] BIT-ANDC2
   - [x] BIT-EQV
-  - [ ] BIT-IOR
+  - [x] BIT-IOR
   - [ ] BIT-NAND
   - [ ] BIT-NOR
   - [ ] BIT-NOT
