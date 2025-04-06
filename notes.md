@@ -11,7 +11,7 @@
   - [x] BIT-ANDC2
   - [x] BIT-EQV
   - [x] BIT-IOR
-  - [ ] BIT-NAND
+  - [x] BIT-NAND
   - [ ] BIT-NOR
   - [ ] BIT-NOT
   - [ ] BIT-ORC1
