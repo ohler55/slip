@@ -7,8 +7,8 @@
  * [x] BIT-NAND
  * [x] BIT-NOR
  * [x] BIT-NOT
- * [ ] BIT-ORC1
- * [ ] BIT-ORC2
+ * [x] BIT-ORC1
+ * [x] BIT-ORC2
  * [x] BIT-VECTOR
  * [x] BIT-VECTOR-P
  * [ ] BIT-XOR
