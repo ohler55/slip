@@ -19,9 +19,9 @@
   - [x] BIT-VECTOR
   - [x] BIT-VECTOR-P
   - [x] BIT-XOR
-  - [ ] BYTE (size position) => (size . position)
-  - [ ] BYTE-POSITION
-  - [ ] BYTE-SIZE
+  - [x] BYTE
+  - [x] BYTE-POSITION
+  - [x] BYTE-SIZE
   - [ ] DEPOSIT-FIELD
   - [ ] DPB
   - [ ] LDB

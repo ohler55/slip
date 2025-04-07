@@ -1,5 +1,5 @@
- * [ ] BYTE-POSITION
- * [ ] BYTE-SIZE
+ * [x] BYTE-POSITION
+ * [x] BYTE-SIZE
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
  * [ ] DEPOSIT-FIELD
