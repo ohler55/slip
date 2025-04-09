@@ -5,6 +5,10 @@
 - next
 
  - bits-and-bytes
+  - implement SetBit() and GetBit() in unsigned-byte and signed-byte
+  - change signed-byte to not have a size, like unsigned-byte
+   - should bits be complement by default and only converted for numbers?
+    - verify with bignum
   - [x] BIT
   - [x] BIT-AND
   - [x] BIT-ANDC1

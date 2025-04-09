@@ -882,7 +882,6 @@ func TestSignedByteBig(t *testing.T) {
 func TestUnsignedByteSmall(t *testing.T) {
 	ub := slip.UnsignedByte{
 		Bytes: []byte{0x08, 0x02},
-		Size:  12,
 	}
 	(&sliptest.Object{
 		Target:    &ub,
@@ -913,7 +912,6 @@ func TestUnsignedByteSmall(t *testing.T) {
 func TestUnsignedByteBig(t *testing.T) {
 	ub := slip.UnsignedByte{
 		Bytes: []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x02},
-		Size:  80,
 	}
 	(&sliptest.Object{
 		Target:    &ub,

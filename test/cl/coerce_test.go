@@ -1021,7 +1021,7 @@ func TestCoerceToUnsignedByte(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
-		Source:    `(coerce #*1010 '(unsigned-byte 5))`,
+		Source:    `(coerce #*1010 '(unsigned-byte 3))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

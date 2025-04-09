@@ -4,6 +4,7 @@ package slip
 
 import (
 	"bytes"
+	"fmt"
 	"math/big"
 )
 
@@ -15,10 +16,16 @@ func init() {
 		`A _unsigned-byte_ is an integer with a specific range defined by the number of bits in the byte.`)
 }
 
-// UnsignedByte represents an integer with a specific number of bits.
+// UnsignedByte represents an integer with a specific number of bits. The type
+// is a struct so that growing the bytes does not cause a new instance to be
+// created.
 type UnsignedByte struct {
 	Bytes []byte // low bits at the end, big-endian ununsigned
-	Size  uint
+}
+
+// Size of the byte is bits.
+func (obj *UnsignedByte) Size() int {
+	return len(obj.Bytes) * 8
 }
 
 // String representation of the Object.
@@ -39,7 +46,7 @@ func (obj *UnsignedByte) Simplify() any {
 // Equal returns true if this Object and the other are equal in value.
 func (obj *UnsignedByte) Equal(other Object) (eq bool) {
 	if ub, ok := other.(*UnsignedByte); ok {
-		return obj.Size == ub.Size && bytes.Equal(obj.Bytes, ub.Bytes)
+		return bytes.Equal(obj.Bytes, ub.Bytes)
 	}
 	return obj.AsFixOrBig().Equal(other)
 }
@@ -93,6 +100,13 @@ func (obj *UnsignedByte) RealValue() (rv float64) {
 	return
 }
 
+// Dup returns a copy of the instance.
+func (obj *UnsignedByte) Dup() *UnsignedByte {
+	bytes := make([]byte, len(obj.Bytes))
+	copy(bytes, obj.Bytes)
+	return &UnsignedByte{Bytes: bytes}
+}
+
 // IsInt64 returns true if the instance can be represented by an int64.
 func (obj *UnsignedByte) IsInt64() (ii bool) {
 	switch ti := obj.AsFixOrBig().(type) {
@@ -117,7 +131,7 @@ func (obj *UnsignedByte) Int64() (i int64) {
 
 // AsFixOrBig returns the fixnum or bignum equivalent.
 func (obj *UnsignedByte) AsFixOrBig() Object {
-	if obj.Size <= 64 {
+	if len(obj.Bytes) <= 8 {
 		var i64 int64
 		for _, b := range obj.Bytes {
 			i64 = i64<<8 | int64(b)
@@ -128,4 +142,28 @@ func (obj *UnsignedByte) AsFixOrBig() Object {
 	_ = bi.SetBytes(obj.Bytes)
 
 	return (*Bignum)(&bi)
+}
+
+// SetBit sets the bit at index to the value specified.
+func (obj *UnsignedByte) SetBit(index uint, value bool) {
+	if len(obj.Bytes)*8 < int(index) {
+		obj.grow(index - uint(len(obj.Bytes)*8))
+	}
+	fmt.Printf("*** TBD\n")
+	// TBD grow if needed
+}
+
+// GetBit gets the bit at index and returns a boolean value.
+func (obj *UnsignedByte) GetBit(index uint) (value bool) {
+	if index < uint(len(obj.Bytes)*8) {
+		// TBD
+		fmt.Printf("*** TBD\n")
+	}
+	return
+}
+
+func (obj *UnsignedByte) grow(cnt uint) {
+	// Grow on the high side so bits have to be shifted right.
+	cnt = cnt/8 + 1
+	obj.Bytes = append(bytes.Repeat([]byte{0x00}, int(cnt)), obj.Bytes...)
 }
