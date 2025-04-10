@@ -970,7 +970,7 @@ func TestCoerceToSignedByte(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
-		Source:    `(coerce #*1010 '(signed-byte 5))`,
+		Source:    `(coerce #*1010 '(signed-byte 3))`,
 		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

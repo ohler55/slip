@@ -818,14 +818,10 @@ func coerceToSignedByte(arg slip.Object, mods ...slip.Object) (result slip.Objec
 				ba[j/8] |= 1 << (j % 8)
 			}
 		}
-		result = &slip.SignedByte{
-			Bytes: ba,
-			Size:  ta.Len,
-		}
+		result = &slip.SignedByte{Bytes: ba}
 	case *slip.Bignum:
 		result = &slip.SignedByte{
 			Bytes: (*big.Int)(ta).Bytes(),
-			Size:  uint((*big.Int)(ta).BitLen()),
 			Neg:   (*big.Int)(ta).Sign() < 0,
 		}
 	case *slip.UnsignedByte:
@@ -850,8 +846,7 @@ func coerceToSignedByte(arg slip.Object, mods ...slip.Object) (result slip.Objec
 				byte((i64 >> 8) & 0x00000000000000ff),
 				byte(i64 & 0x00000000000000ff),
 			},
-			Size: 64,
-			Neg:  neg,
+			Neg: neg,
 		}
 	default:
 		coerceNotPossible(ta, "signed-byte")
@@ -863,8 +858,9 @@ func coerceToSignedByte(arg slip.Object, mods ...slip.Object) (result slip.Objec
 				slip.PanicType("size", mods[0], "non-negative fixnum")
 			}
 			sb := result.(*slip.SignedByte)
-			if int(num) != int(sb.Size) {
-				slip.NewPanic("The length requested (%d) does not match the type restriction in %s", sb.Size,
+			mx := int64(1) << int(num)
+			if sb.IsInt64() && (mx <= sb.Int64() || sb.Int64() <= -mx) {
+				slip.NewPanic("%s can't be converted to a %s", num,
 					append(slip.List{slip.SignedByteSymbol}, mods...).String())
 			}
 		}
@@ -897,10 +893,7 @@ func coerceToUnsignedByte(arg slip.Object, mods ...slip.Object) (result slip.Obj
 		}
 		b := make([]byte, len(ta.Bytes))
 		copy(b, ta.Bytes)
-		result = &slip.SignedByte{
-			Bytes: b,
-			Size:  ta.Size,
-		}
+		result = &slip.SignedByte{Bytes: b}
 	case slip.Integer:
 		i64 := ta.Int64()
 		if i64 < 0 {

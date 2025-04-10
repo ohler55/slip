@@ -79,7 +79,7 @@ var (
 		final:     true,
 		docs:      "built-in signed integer class with a configurable number of bits.",
 		inherit:   []*Class{&integerClass},
-		prototype: &slip.SignedByte{Bytes: []byte{1}, Size: 2, Neg: true},
+		prototype: &slip.SignedByte{Bytes: []byte{1}, Neg: true},
 	}
 	unsignedByteClass = Class{
 		name:      "unsigned-byte",

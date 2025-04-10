@@ -18,8 +18,12 @@ func init() {
 // SignedByte represents an integer with a specific number of bits.
 type SignedByte struct {
 	Bytes []byte // low bits at the end, big-endian unsigned
-	Size  uint
 	Neg   bool
+}
+
+// Size of the byte is bits.
+func (obj *SignedByte) Size() int {
+	return len(obj.Bytes) * 8
 }
 
 // String representation of the Object.
@@ -40,7 +44,7 @@ func (obj *SignedByte) Simplify() any {
 // Equal returns true if this Object and the other are equal in value.
 func (obj *SignedByte) Equal(other Object) (eq bool) {
 	if sb, ok := other.(*SignedByte); ok {
-		return obj.Size == sb.Size && obj.Neg == sb.Neg && bytes.Equal(obj.Bytes, sb.Bytes)
+		return obj.Neg == sb.Neg && bytes.Equal(obj.Bytes, sb.Bytes)
 	}
 	return obj.AsFixOrBig().Equal(other)
 }
@@ -110,7 +114,7 @@ func (obj *SignedByte) Int64() (i int64) {
 
 // AsFixOrBig returns the fixnum or bignum equivalent.
 func (obj *SignedByte) AsFixOrBig() Object {
-	if obj.Size <= 64 {
+	if len(obj.Bytes) <= 8 {
 		var i64 int64
 		for _, b := range obj.Bytes {
 			i64 = i64<<8 | int64(b)

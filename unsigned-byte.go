@@ -4,7 +4,6 @@ package slip
 
 import (
 	"bytes"
-	"fmt"
 	"math/big"
 )
 
@@ -149,15 +148,21 @@ func (obj *UnsignedByte) SetBit(index uint, value bool) {
 	if len(obj.Bytes)*8 < int(index) {
 		obj.grow(index - uint(len(obj.Bytes)*8))
 	}
-	fmt.Printf("*** TBD\n")
-	// TBD grow if needed
+	bi := len(obj.Bytes) - 1 - int(index)/8
+	r := index % 8
+	if value {
+		obj.Bytes[bi] |= 1 << r
+	} else {
+		obj.Bytes[bi] &= ^(1 << r)
+	}
 }
 
 // GetBit gets the bit at index and returns a boolean value.
 func (obj *UnsignedByte) GetBit(index uint) (value bool) {
 	if index < uint(len(obj.Bytes)*8) {
-		// TBD
-		fmt.Printf("*** TBD\n")
+		bi := len(obj.Bytes) - 1 - int(index)/8
+		r := index % 8
+		value = (obj.Bytes[bi] & (1 << r)) != 0
 	}
 	return
 }

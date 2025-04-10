@@ -807,7 +807,6 @@ func TestIOStream2(t *testing.T) {
 func TestSignedByteSmall(t *testing.T) {
 	sb := slip.SignedByte{
 		Bytes: []byte{0x08, 0x02},
-		Size:  12,
 	}
 	(&sliptest.Object{
 		Target:    &sb,
@@ -833,10 +832,10 @@ func TestSignedByteSmall(t *testing.T) {
 	tt.Equal(t, 2050.0, sb.RealValue())
 	tt.Equal(t, 2050, sb.Int64())
 	tt.Equal(t, true, sb.IsInt64())
+	tt.Equal(t, 16, sb.Size())
 
 	sb = slip.SignedByte{
 		Bytes: []byte{0x08, 0x02},
-		Size:  12,
 		Neg:   true,
 	}
 	tt.Equal(t, -2050, sb.Int64())
@@ -845,7 +844,6 @@ func TestSignedByteSmall(t *testing.T) {
 func TestSignedByteBig(t *testing.T) {
 	sb := slip.SignedByte{
 		Bytes: []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x02},
-		Size:  80,
 	}
 	(&sliptest.Object{
 		Target:    &sb,
@@ -873,7 +871,6 @@ func TestSignedByteBig(t *testing.T) {
 
 	sb = slip.SignedByte{
 		Bytes: []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x02},
-		Size:  80,
 		Neg:   true,
 	}
 	tt.Equal(t, -2050, sb.Int64())
@@ -907,6 +904,22 @@ func TestUnsignedByteSmall(t *testing.T) {
 	tt.Equal(t, 2050.0, ub.RealValue())
 	tt.Equal(t, 2050, ub.Int64())
 	tt.Equal(t, true, ub.IsInt64())
+	tt.Equal(t, 16, ub.Size())
+
+	tt.Equal(t, false, ub.GetBit(0))
+	tt.Equal(t, true, ub.GetBit(1))
+	tt.Equal(t, false, ub.GetBit(10))
+	tt.Equal(t, true, ub.GetBit(11))
+	tt.Equal(t, false, ub.GetBit(16))
+
+	dup := ub.Dup()
+	tt.Equal(t, 2050, dup.Int64())
+	dup.SetBit(17, true)
+	dup.SetBit(16, false)
+	tt.Equal(t, 2050, ub.Int64())
+	tt.Equal(t, false, ub.GetBit(17))
+	tt.Equal(t, true, dup.GetBit(17))
+	tt.Equal(t, 133122, dup.Int64())
 }
 
 func TestUnsignedByteBig(t *testing.T) {

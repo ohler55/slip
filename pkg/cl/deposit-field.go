@@ -78,7 +78,6 @@ func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			copy(bytes, integer.Bytes)
 			result = &slip.SignedByte{
 				Bytes: bytes,
-				Size:  uint(integer.Size()),
 				Neg:   true,
 			}
 		default:
@@ -96,7 +95,6 @@ func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		copy(bytes, integer.Bytes)
 		result = &slip.SignedByte{
 			Bytes: bytes,
-			Size:  uint(integer.Size()),
 			Neg:   neg,
 		}
 	}
