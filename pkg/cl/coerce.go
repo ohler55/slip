@@ -820,34 +820,13 @@ func coerceToSignedByte(arg slip.Object, mods ...slip.Object) (result slip.Objec
 		}
 		result = &slip.SignedByte{Bytes: ba}
 	case *slip.Bignum:
-		result = &slip.SignedByte{
-			Bytes: (*big.Int)(ta).Bytes(),
-			Neg:   (*big.Int)(ta).Sign() < 0,
-		}
+		result = slip.SignedByteFromBigInt((*big.Int)(ta))
 	case *slip.UnsignedByte:
 		b := make([]byte, len(ta.Bytes))
 		copy(b, ta.Bytes)
 		result = &slip.SignedByte{Bytes: b}
 	case slip.Integer:
-		i64 := ta.Int64()
-		var neg bool
-		if i64 < 0 {
-			neg = true
-			i64 = -i64
-		}
-		result = &slip.SignedByte{
-			Bytes: []byte{
-				byte(i64 >> 56),
-				byte((i64 >> 48) & 0x00000000000000ff),
-				byte((i64 >> 40) & 0x00000000000000ff),
-				byte((i64 >> 32) & 0x00000000000000ff),
-				byte((i64 >> 24) & 0x00000000000000ff),
-				byte((i64 >> 16) & 0x00000000000000ff),
-				byte((i64 >> 8) & 0x00000000000000ff),
-				byte(i64 & 0x00000000000000ff),
-			},
-			Neg: neg,
-		}
+		result = slip.SignedByteFromInt64(ta.Int64())
 	default:
 		coerceNotPossible(ta, "signed-byte")
 	}
@@ -888,7 +867,7 @@ func coerceToUnsignedByte(arg slip.Object, mods ...slip.Object) (result slip.Obj
 		}
 		result = &slip.UnsignedByte{Bytes: (*big.Int)(ta).Bytes()}
 	case *slip.SignedByte:
-		if ta.Neg {
+		if ta.IsNeg() {
 			coerceNotPossible(ta, "unsigned-byte")
 		}
 		b := make([]byte, len(ta.Bytes))

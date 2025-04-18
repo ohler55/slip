@@ -3,7 +3,6 @@
 package cl
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/ohler55/slip"
@@ -51,23 +50,25 @@ type DepositField struct {
 // Call the function with the arguments provided.
 func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 3, 3)
-	newbyte, _ := ToUnsignedByte(args[0], "newbyte")
+	newbyte, nneg := ToUnsignedByte(args[0], "newbyte")
 	integer, neg := ToUnsignedByte(args[2], "integer")
 	size, pos := byteSpecArg(args[1])
 
 	integer = integer.Dup()
 	max := uint(newbyte.Size())
+
 	for i := uint(0); i < uint(size); i++ {
 		off := i + uint(pos)
 		if max <= off {
-			break
+			if nneg {
+				integer.SetBit(off, true)
+			} else {
+				integer.SetBit(off, false)
+			}
+		} else {
+			integer.SetBit(off, newbyte.GetBit(off))
 		}
-		integer.SetBit(i, newbyte.GetBit(off))
 	}
-
-	// TBD remove
-	fmt.Printf("*** %s (%d %d) %s (neg %t)\n", newbyte, size, pos, integer, neg)
-
 	switch args[2].(type) {
 	case slip.Fixnum:
 		switch {
@@ -76,27 +77,31 @@ func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		case neg:
 			bytes := make([]byte, len(integer.Bytes))
 			copy(bytes, integer.Bytes)
-			result = &slip.SignedByte{
-				Bytes: bytes,
-				Neg:   true,
-			}
+			result = &slip.SignedByte{Bytes: bytes}
 		default:
+			// Must be positive so make sure the high bit is not set.
+			if (integer.Bytes[0] & 0x80) != 0 {
+				integer.Bytes = append([]byte{0}, integer.Bytes...)
+			}
 			result = integer
 		}
 	case *slip.Bignum:
 		var bi big.Int
-		_ = bi.SetBytes(integer.Bytes)
 		if neg {
+			sb := slip.SignedByte{Bytes: integer.Bytes}
+			sb.Neg()
+			_ = bi.SetBytes(sb.Bytes)
 			_ = bi.Neg(&bi)
+		} else {
+			_ = bi.SetBytes(integer.Bytes)
 		}
 		result = (*slip.Bignum)(&bi)
 	case *slip.SignedByte:
 		bytes := make([]byte, len(integer.Bytes))
 		copy(bytes, integer.Bytes)
-		result = &slip.SignedByte{
-			Bytes: bytes,
-			Neg:   neg,
-		}
+		result = &slip.SignedByte{Bytes: bytes}
+	case *slip.UnsignedByte:
+		result = integer
 	}
 	return
 }
@@ -105,33 +110,22 @@ func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) (result sl
 func ToUnsignedByte(arg slip.Object, name string) (ub *slip.UnsignedByte, neg bool) {
 	switch ta := arg.(type) {
 	case slip.Fixnum:
-		i64 := ta.Int64()
-		if i64 < 0 {
-			neg = true
-			i64 = -i64
-		}
-		ub = &slip.UnsignedByte{
-			Bytes: []byte{
-				byte(i64 >> 56),
-				byte((i64 >> 48) & 0x00000000000000ff),
-				byte((i64 >> 40) & 0x00000000000000ff),
-				byte((i64 >> 32) & 0x00000000000000ff),
-				byte((i64 >> 24) & 0x00000000000000ff),
-				byte((i64 >> 16) & 0x00000000000000ff),
-				byte((i64 >> 8) & 0x00000000000000ff),
-				byte(i64 & 0x00000000000000ff),
-			},
-		}
+		sb := slip.SignedByteFromInt64(ta.Int64())
+		ub = &slip.UnsignedByte{Bytes: sb.Bytes}
+		neg = ta < 0
 	case *slip.Bignum:
 		if (*big.Int)(ta).Sign() < 0 {
 			neg = true
+			sb := slip.SignedByteFromBigInt((*big.Int)(ta))
+			ub = &slip.UnsignedByte{Bytes: sb.Bytes}
+		} else {
+			ub = &slip.UnsignedByte{Bytes: (*big.Int)(ta).Bytes()}
 		}
-		ub = &slip.UnsignedByte{Bytes: (*big.Int)(ta).Bytes()}
 	case *slip.SignedByte:
 		bytes := make([]byte, len(ta.Bytes))
 		copy(bytes, ta.Bytes)
 		ub = &slip.UnsignedByte{Bytes: bytes}
-		neg = ta.Neg
+		neg = ta.IsNeg()
 	case *slip.UnsignedByte:
 		ub = ta
 	default:

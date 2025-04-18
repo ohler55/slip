@@ -5,9 +5,6 @@
 - next
 
  - bits-and-bytes
-  - signed-byte
-   - should bits be complement by default and only converted for numbers?
-    - verify with bignum
   - [x] BIT
   - [x] BIT-AND
   - [x] BIT-ANDC1
@@ -25,7 +22,7 @@
   - [x] BYTE
   - [x] BYTE-POSITION
   - [x] BYTE-SIZE
-  - [ ] DEPOSIT-FIELD
+  - [x] DEPOSIT-FIELD
   - [ ] DPB
   - [ ] LDB
   - [ ] LDB-TEST

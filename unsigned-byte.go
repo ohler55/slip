@@ -130,7 +130,7 @@ func (obj *UnsignedByte) Int64() (i int64) {
 
 // AsFixOrBig returns the fixnum or bignum equivalent.
 func (obj *UnsignedByte) AsFixOrBig() Object {
-	if len(obj.Bytes) <= 8 {
+	if len(obj.Bytes) <= 8 && (obj.Bytes[0]&0x80) == 0 {
 		var i64 int64
 		for _, b := range obj.Bytes {
 			i64 = i64<<8 | int64(b)
@@ -145,7 +145,7 @@ func (obj *UnsignedByte) AsFixOrBig() Object {
 
 // SetBit sets the bit at index to the value specified.
 func (obj *UnsignedByte) SetBit(index uint, value bool) {
-	if len(obj.Bytes)*8 < int(index) {
+	if len(obj.Bytes)*8 <= int(index) {
 		obj.grow(index - uint(len(obj.Bytes)*8))
 	}
 	bi := len(obj.Bytes) - 1 - int(index)/8
@@ -171,4 +171,11 @@ func (obj *UnsignedByte) grow(cnt uint) {
 	// Grow on the high side so bits have to be shifted right.
 	cnt = cnt/8 + 1
 	obj.Bytes = append(bytes.Repeat([]byte{0x00}, int(cnt)), obj.Bytes...)
+}
+
+// Invert the bits or NOT (complement) of each bit.
+func (obj *UnsignedByte) Invert() {
+	for i, b := range obj.Bytes {
+		obj.Bytes[i] = ^b
+	}
 }

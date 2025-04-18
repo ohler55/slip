@@ -2,7 +2,7 @@
  * [x] BYTE-SIZE
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
- * [ ] DEPOSIT-FIELD
+ * [x] DEPOSIT-FIELD
  * [ ] DOCUMENTATION
  * [ ] DPB
  * [ ] ENOUGH-NAMESTRING
