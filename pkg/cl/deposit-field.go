@@ -48,7 +48,7 @@ type DepositField struct {
 }
 
 // Call the function with the arguments provided.
-func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 3, 3)
 	newbyte, nneg := ToUnsignedByte(args[0], "newbyte")
 	integer, neg := ToUnsignedByte(args[2], "integer")
@@ -69,41 +69,7 @@ func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			integer.SetBit(off, newbyte.GetBit(off))
 		}
 	}
-	switch args[2].(type) {
-	case slip.Fixnum:
-		switch {
-		case integer.IsInt64():
-			result = slip.Fixnum(integer.Int64())
-		case neg:
-			bytes := make([]byte, len(integer.Bytes))
-			copy(bytes, integer.Bytes)
-			result = &slip.SignedByte{Bytes: bytes}
-		default:
-			// Must be positive so make sure the high bit is not set.
-			if (integer.Bytes[0] & 0x80) != 0 {
-				integer.Bytes = append([]byte{0}, integer.Bytes...)
-			}
-			result = integer
-		}
-	case *slip.Bignum:
-		var bi big.Int
-		if neg {
-			sb := slip.SignedByte{Bytes: integer.Bytes}
-			sb.Neg()
-			_ = bi.SetBytes(sb.Bytes)
-			_ = bi.Neg(&bi)
-		} else {
-			_ = bi.SetBytes(integer.Bytes)
-		}
-		result = (*slip.Bignum)(&bi)
-	case *slip.SignedByte:
-		bytes := make([]byte, len(integer.Bytes))
-		copy(bytes, integer.Bytes)
-		result = &slip.SignedByte{Bytes: bytes}
-	case *slip.UnsignedByte:
-		result = integer
-	}
-	return
+	return convertUnsignedByte(integer, args[2], neg)
 }
 
 // ToUnsignedByte converts the arg to an UnsignedByte or panics.
@@ -153,6 +119,44 @@ func byteSpecArg(arg slip.Object) (size, pos int) {
 		pos = int(num)
 	} else {
 		slip.PanicType("position", tail.Value, "fixnum")
+	}
+	return
+}
+
+func convertUnsignedByte(integer *slip.UnsignedByte, target slip.Object, neg bool) (result slip.Object) {
+	switch target.(type) {
+	case slip.Fixnum:
+		switch {
+		case integer.IsInt64():
+			result = slip.Fixnum(integer.Int64())
+		case neg:
+			bytes := make([]byte, len(integer.Bytes))
+			copy(bytes, integer.Bytes)
+			result = &slip.SignedByte{Bytes: bytes}
+		default:
+			// Must be positive so make sure the high bit is not set.
+			if (integer.Bytes[0] & 0x80) != 0 {
+				integer.Bytes = append([]byte{0}, integer.Bytes...)
+			}
+			result = integer
+		}
+	case *slip.Bignum:
+		var bi big.Int
+		if neg {
+			sb := slip.SignedByte{Bytes: integer.Bytes}
+			sb.Neg()
+			_ = bi.SetBytes(sb.Bytes)
+			_ = bi.Neg(&bi)
+		} else {
+			_ = bi.SetBytes(integer.Bytes)
+		}
+		result = (*slip.Bignum)(&bi)
+	case *slip.SignedByte:
+		bytes := make([]byte, len(integer.Bytes))
+		copy(bytes, integer.Bytes)
+		result = &slip.SignedByte{Bytes: bytes}
+	case *slip.UnsignedByte:
+		result = integer
 	}
 	return
 }

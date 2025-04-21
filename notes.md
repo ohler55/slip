@@ -23,7 +23,7 @@
   - [x] BYTE-POSITION
   - [x] BYTE-SIZE
   - [x] DEPOSIT-FIELD
-  - [ ] DPB
+  - [x] DPB
   - [ ] LDB
   - [ ] LDB-TEST
   - [ ] MASK-FIELD

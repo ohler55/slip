@@ -4,7 +4,7 @@
  * [ ] CONJUGATE
  * [x] DEPOSIT-FIELD
  * [ ] DOCUMENTATION
- * [ ] DPB
+ * [x] DPB
  * [ ] ENOUGH-NAMESTRING
  * [ ] FDEFINITION
  * [ ] FORMATTER
