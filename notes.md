@@ -5,7 +5,13 @@
 - next
 
  - bits-and-bytes
+  - array and make-array
+   - checkArrayElementType should returned the coerced type if needed
+    - should it be public for make-array?
+    - maybe best to move coerce to top
+  - add checks to coerce
   - [x] BIT
+  - [ ] BIT (function)
   - [x] BIT-AND
   - [x] BIT-ANDC1
   - [x] BIT-ANDC2

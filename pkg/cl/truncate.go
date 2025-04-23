@@ -69,7 +69,7 @@ func truncate(f slip.Object, args slip.List) slip.Values {
 	if 1 < len(args) {
 		div = args[1]
 	}
-	num, div = normalizeNumber(num, div)
+	num, div = slip.NormalizeNumber(num, div)
 	switch tn := num.(type) {
 	case slip.Fixnum:
 		q = tn / div.(slip.Fixnum)

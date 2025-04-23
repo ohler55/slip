@@ -52,7 +52,7 @@ func (f *Mod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if _, ok := args[1].(slip.Real); !ok {
 		slip.PanicType("divisor", args[1], "real")
 	}
-	n, d := normalizeNumber(args[0], args[1])
+	n, d := slip.NormalizeNumber(args[0], args[1])
 	switch num := n.(type) {
 	case slip.Fixnum:
 		div := int64(d.(slip.Fixnum))

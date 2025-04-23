@@ -109,7 +109,7 @@ func (f *MakeSequence) makeString(size int, element slip.Object, elementSet bool
 func (f *MakeSequence) makeOctets(size int, element slip.Object, elementSet bool) slip.Object {
 	var b byte
 	if elementSet {
-		b = byte(ToOctet(element).(slip.Octet))
+		b = byte(slip.ToOctet(element).(slip.Octet))
 	}
 	seq := make(slip.Octets, size)
 	for i := 0; i < size; i++ {

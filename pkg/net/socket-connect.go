@@ -7,7 +7,6 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -114,7 +113,7 @@ func addressFromList(list slip.List) (sa syscall.Sockaddr) {
 		list := ta.AsList()
 		octs := make([]byte, len(list))
 		for i, r := range list {
-			octs[i] = byte(cl.ToOctet(r).(slip.Octet))
+			octs[i] = byte(slip.ToOctet(r).(slip.Octet))
 		}
 		addr = octs
 	default:

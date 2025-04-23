@@ -183,8 +183,7 @@ func (obj *Array) Get(indexes ...int) Object {
 // Set a value at the location identified by the indexes.
 func (obj *Array) Set(value Object, indexes ...int) {
 	pos := obj.MajorIndex(indexes...)
-	checkArrayElementType(value, obj.elementType)
-	obj.elements[pos] = value
+	obj.elements[pos] = Coerce(value, obj.elementType)
 }
 
 // MajorIndex for the indexes provided.
@@ -264,8 +263,7 @@ func (obj *Array) setDim(list List, di, ei int) int {
 	}
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
-			checkArrayElementType(list[i], obj.elementType)
-			obj.elements[ei] = list[i]
+			obj.elements[ei] = Coerce(list[i], obj.elementType)
 			ei++
 		}
 	} else {
@@ -313,7 +311,7 @@ func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Objec
 	}
 	if TrueSymbol != elementType {
 		for _, v := range obj.elements {
-			checkArrayElementType(v, elementType)
+			_ = Coerce(v, elementType)
 		}
 	}
 	tmp := NewArray(dimensions, elementType, initElement, nil, true)
@@ -367,7 +365,7 @@ func (obj *Array) SetElementType(ts Object) {
 		PanicType("type-specification", ts, "symbol")
 	}
 	for _, v := range obj.elements {
-		checkArrayElementType(v, sym)
+		_ = Coerce(v, sym)
 	}
 	obj.elementType = sym
 }
@@ -375,15 +373,4 @@ func (obj *Array) SetElementType(ts Object) {
 // Elements returns the elements of the array.
 func (obj *Array) Elements() []Object {
 	return obj.elements
-}
-
-func checkArrayElementType(v Object, et Symbol) {
-	if v != nil && 0 < len(et) {
-		for _, sym := range v.Hierarchy() {
-			if sym == et {
-				return
-			}
-		}
-		PanicType("array element", v, string(et))
-	}
 }

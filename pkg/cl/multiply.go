@@ -43,7 +43,7 @@ type Multiply struct {
 func (f *Multiply) Call(s *slip.Scope, args slip.List, depth int) (product slip.Object) {
 	product = slip.Fixnum(1)
 	for _, arg := range args {
-		arg, product = normalizeNumber(arg, product)
+		arg, product = slip.NormalizeNumber(arg, product)
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			product = ta * product.(slip.Fixnum)

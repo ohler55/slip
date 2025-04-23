@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2025, Peter Ohler, All rights reserved.
 
 package cl
 
@@ -9,17 +9,17 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Aref{Function: slip.Function{Name: "aref", Args: args}}
+			f := Bit{Function: slip.Function{Name: "bit", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "aref",
+			Name: "bit",
 			Args: []*slip.DocArg{
 				{
-					Name: "array",
-					Type: "array",
-					Text: "The array to get a value from.",
+					Name: "bit-array",
+					Type: "bit-array",
+					Text: "The bit-array to get a value from.",
 				},
 				{Name: "&rest"},
 				{
@@ -28,21 +28,21 @@ func init() {
 					Text: "The indices into the array.",
 				},
 			},
-			Return: "object",
-			Text:   `__aref__ returns the indexed element of _array_.`,
+			Return: "bit",
+			Text:   `__bit__ returns the indexed bit element of _array_.`,
 			Examples: []string{
-				"(aref (make-array '(2 3) :initial-contents '((a b c) (d e f))) 0 2) => c",
+				"(bit (make-array '(2 3) :element-type 'bit :initial-contents '((1 0 1) (0 1 0))) 0 2) => 1",
 			},
 		}, &slip.CLPkg)
 }
 
-// Aref represents the aref function.
-type Aref struct {
+// Bit represents the bit function.
+type Bit struct {
 	slip.Function
 }
 
 // Call the function with the arguments provided.
-func (f *Aref) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Bit) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, -1)
 	indices := make([]int, 0, len(args)-1)
 	for _, a := range args[1:] {
@@ -53,14 +53,14 @@ func (f *Aref) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	}
 	al, ok := args[0].(slip.ArrayLike)
-	if !ok {
-		slip.PanicType("array", args[0], "array")
+	if !ok || al.ElementType() != slip.BitSymbol {
+		slip.PanicType("bit-array", args[0], "bit-array")
 	}
 	return al.Get(indices...)
 }
 
 // Place a value in the first position of a list or cons.
-func (f *Aref) Place(s *slip.Scope, args slip.List, value slip.Object) {
+func (f *Bit) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 1, -1)
 	indices := make([]int, 0, len(args)-1)
 	for _, a := range args[1:] {

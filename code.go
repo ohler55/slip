@@ -728,14 +728,18 @@ func (r *reader) read(src []byte) {
 			r.starts = append(r.starts, len(r.stack))
 			switch r.sharpNum {
 			case 0:
-				r.stack = append(r.stack, &Array{})
+				r.stack = append(r.stack, &Array{elementType: TrueSymbol})
 			case 1:
 				r.stack = append(r.stack, vectorMarker)
 			default:
 				if ArrayMaxRank < r.sharpNum {
 					r.raise("%d exceeds the maximum Array rank of %d dimensions.", r.sharpNum, ArrayMaxRank)
 				}
-				r.stack = append(r.stack, &Array{dims: make([]int, r.sharpNum), sizes: make([]int, r.sharpNum)})
+				r.stack = append(r.stack, &Array{
+					elementType: TrueSymbol,
+					dims:        make([]int, r.sharpNum),
+					sizes:       make([]int, r.sharpNum),
+				})
 			}
 			r.mode = mustArrayMode
 		case swallowOpen:

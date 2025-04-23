@@ -102,7 +102,7 @@ func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Objec
 			continue
 		}
 		var arg slip.Object
-		arg, quot = normalizeNumber(a, quot)
+		arg, quot = slip.NormalizeNumber(a, quot)
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			if ta == 0 {

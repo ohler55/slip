@@ -78,7 +78,7 @@ func (f *Reduce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	slip.ArgCountCheck(f, args, 2, 12)
 	d2 := depth + 1
 	caller := ResolveToCaller(s, args[0], d2)
-	list := coerceToList(args[1]).(slip.List)
+	list := slip.CoerceToList(args[1]).(slip.List)
 	args = args[2:]
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":end")); has && v != nil {
 		if num, ok := v.(slip.Fixnum); ok && 0 <= num && int(num) <= len(list) {

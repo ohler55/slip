@@ -77,7 +77,7 @@ func (f *Elt) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		seq[index] = value
 	case slip.Octets:
 		f.checkIndex(index, len(seq))
-		seq[index] = byte(ToOctet(value).(slip.Octet))
+		seq[index] = byte(slip.ToOctet(value).(slip.Octet))
 	case slip.String:
 		slip.NewPanic("setf on a string character is not possible")
 	case slip.VectorLike:

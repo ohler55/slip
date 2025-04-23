@@ -72,7 +72,7 @@ func (f *Map) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	caller := ResolveToCaller(s, fn, d2)
 	seqs := make([]slip.List, len(args)-2)
 	for i, a := range args[2:] {
-		seqs[i] = coerceToList(a).(slip.List)
+		seqs[i] = slip.CoerceToList(a).(slip.List)
 	}
 	var rlist slip.List
 	if 1 < len(seqs) {
@@ -102,11 +102,11 @@ func (f *Map) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	case "list":
 		result = rlist
 	case "string":
-		result = coerceToString(rlist)
+		result = slip.CoerceToString(rlist)
 	case "vector":
-		result = coerceToVector(rlist)
+		result = slip.CoerceToVector(rlist)
 	case "octets":
-		result = coerceToOctets(rlist)
+		result = slip.CoerceToOctets(rlist)
 	}
 	return
 }

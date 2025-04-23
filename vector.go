@@ -114,7 +114,7 @@ func (obj *Vector) Eval(s *Scope, depth int) Object {
 // Push a value onto the vector.
 func (obj *Vector) Push(values ...Object) (index int) {
 	for _, v := range values {
-		checkArrayElementType(v, obj.elementType)
+		v = Coerce(v, obj.elementType)
 		if 0 <= obj.FillPtr {
 			if len(obj.elements) <= obj.FillPtr {
 				obj.elements = append(obj.elements, v)

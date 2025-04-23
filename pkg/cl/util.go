@@ -198,51 +198,6 @@ func complement(v slip.Object) (result slip.Object) {
 	return
 }
 
-// ToOctet coerces a value into an octet if possible.
-func ToOctet(arg slip.Object) (result slip.Object) {
-	switch ta := arg.(type) {
-	case slip.Character:
-		if ta < 256 {
-			result = slip.Octet(ta)
-		}
-	case slip.Fixnum:
-		if 0 <= ta && ta < 256 {
-			result = slip.Octet(ta)
-		}
-	case slip.Octet:
-		result = ta
-	case *slip.Bignum:
-		if (*big.Int)(ta).IsInt64() {
-			num := (*big.Int)(ta).Int64()
-			if 0 <= num && num < 256 {
-				result = slip.Octet(num)
-			}
-		}
-	case *slip.LongFloat:
-		i64, acc := (*big.Float)(ta).Int64()
-		if acc == 0 && 0 <= i64 && i64 < 256 {
-			result = slip.Octet(i64)
-		}
-	case slip.Real: // other floats and ratio
-		num := ta.RealValue()
-		if num == float64(int64(num)) && 0.0 <= num && num < 256.0 {
-			result = slip.Octet(num)
-		}
-	case slip.Complex:
-		num := real(ta)
-		if imag(ta) == 0.0 && num == float64(int64(num)) && 0 <= num && num < 256 {
-			result = slip.Octet(num)
-		}
-	}
-	if result == nil {
-		if arg == nil {
-			slip.NewPanic("Can not coerce a nil into a octet")
-		}
-		slip.NewPanic("Can not coerce %s a %s into an octet", arg, arg.Hierarchy()[0])
-	}
-	return
-}
-
 func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
 	slip.ArgCountCheck(f, args, 2, 3)
 	switch t1 := args[0].(type) {

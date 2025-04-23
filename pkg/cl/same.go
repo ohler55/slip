@@ -62,7 +62,7 @@ func (f *Same) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 }
 
 func same(x, y slip.Object) slip.Object {
-	x, y = normalizeNumber(x, y)
+	x, y = slip.NormalizeNumber(x, y)
 	switch tx := x.(type) {
 	case slip.Fixnum:
 		if y.(slip.Fixnum) != tx {

@@ -72,7 +72,7 @@ func (f *Subtract) Call(s *slip.Scope, args slip.List, depth int) (dif slip.Obje
 			}
 			continue
 		}
-		arg, dif = normalizeNumber(a, dif)
+		arg, dif = slip.NormalizeNumber(a, dif)
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			dif = dif.(slip.Fixnum) - ta
