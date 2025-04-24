@@ -134,8 +134,8 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case slip.OctetSymbol:
 			if fillPtr < 0 {
 				v := make(slip.Octets, dims[0])
-				// TBD coerce if integer between 0 and 255
 				if initElement != nil {
+					initElement = slip.Coerce(initElement, slip.OctetSymbol)
 					if o, ok := initElement.(slip.Octet); ok {
 						for i := len(v) - 1; 0 <= i; i-- {
 							v[i] = byte(o)
@@ -145,12 +145,8 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 					}
 				}
 				for i, c := range initContents {
-					// TBD coerce if integer between 0 and 255
-					if o, ok := c.(slip.Octet); ok {
-						v[i] = byte(o)
-					} else {
-						slip.PanicType(":initial-contents element", c, "octet")
-					}
+					o, _ := slip.Coerce(c, slip.OctetSymbol).(slip.Octet)
+					v[i] = byte(o)
 				}
 				return v
 			}

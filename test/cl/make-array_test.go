@@ -107,15 +107,15 @@ func TestMakeArrayOctetsContents(t *testing.T) {
 
 func TestMakeArrayOctetsBadContents(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-array 3 :element-type 'octet :initial-contents '(1 2 3))`,
-		PanicType: slip.TypeErrorSymbol,
+		Source:    `(make-array 3 :element-type 'octet :initial-contents '(1 t 3))`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 
 func TestMakeArrayOctetsBadInitialElement(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-array 3 :element-type 'octet :initial-element 1)`,
-		PanicType: slip.TypeErrorSymbol,
+		Source:    `(make-array 3 :element-type 'octet :initial-element t)`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 
