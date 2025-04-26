@@ -71,8 +71,8 @@ func (f *Bit) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		}
 	}
 	al, ok := args[0].(slip.ArrayLike)
-	if !ok {
-		slip.PanicType("array", args[0], "array")
+	if !ok || al.ElementType() != slip.BitSymbol {
+		slip.PanicType("bit-array", args[0], "bit-array")
 	}
 	al.Set(value, indices...)
 }

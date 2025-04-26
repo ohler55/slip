@@ -5,10 +5,8 @@
 - next
 
  - bits-and-bytes
-  - test NormalizeNumber and coerce
-
   - [x] BIT
-  - [ ] BIT (function)
+  - [x] BIT (function)
   - [x] BIT-AND
   - [x] BIT-ANDC1
   - [x] BIT-ANDC2

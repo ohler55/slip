@@ -190,6 +190,7 @@ top:
 		case *UnsignedByte:
 			switch tt1 := t1.AsFixOrBig().(type) {
 			case Fixnum:
+				n1 = (*LongFloat)(big.NewFloat(float64(tt1)))
 			case *Bignum:
 				var z big.Float
 				_ = z.SetInt((*big.Int)(tt1))

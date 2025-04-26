@@ -1,10 +1,6 @@
- * [x] BYTE-POSITION
- * [x] BYTE-SIZE
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
- * [x] DEPOSIT-FIELD
  * [ ] DOCUMENTATION
- * [x] DPB
  * [ ] ENOUGH-NAMESTRING
  * [ ] FDEFINITION
  * [ ] FORMATTER
@@ -169,6 +165,8 @@
  * [x] BUILT-IN-CLASS
  * [x] BUTLAST
  * [x] BYTE
+ * [x] BYTE-POSITION
+ * [x] BYTE-SIZE
  * [x] CAAAAR
  * [x] CAAADR
  * [x] CAAAR
@@ -273,6 +271,7 @@
  * [x] DELETE-IF
  * [x] DELETE-PACKAGE
  * [x] DENOMINATOR
+ * [x] DEPOSIT-FIELD
  * [x] DESCRIBE
  * [x] DIGIT-CHAR
  * [x] DIGIT-CHAR-P
@@ -290,6 +289,7 @@
  * [x] DOUBLE-FLOAT
  * [x] DOUBLE-FLOAT-EPSILON
  * [x] DOUBLE-FLOAT-NEGATIVE-EPSILON
+ * [x] DPB
  * [x] DRIBBLE
  * [x] DYNAMIC-EXTENT
  * [x] ECASE
