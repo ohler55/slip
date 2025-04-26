@@ -5,6 +5,7 @@ package test
 import (
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -1124,4 +1125,8 @@ func TestCoerceBadList(t *testing.T) {
 		Source: `(coerce 3 '(list))`,
 		Panics: true,
 	}).Test(t)
+}
+
+func TestLessThanNotReal(t *testing.T) {
+	tt.Panic(t, func() { _ = slip.LessThan(slip.Complex(1+2i), slip.Fixnum(1)) })
 }
