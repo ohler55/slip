@@ -28,7 +28,7 @@
   - [ ] LDB
   - [ ] LDB-TEST
   - [ ] MASK-FIELD
-  - [ ] SBIT
+  - [x] SBIT
   - [x] SIMPLE-BIT-VECTOR
   - [x] SIMPLE-BIT-VECTOR-P
    - update simple-vector-p

@@ -23,7 +23,7 @@
  * [ ] PPRINT-TAB
  * [ ] PPRINT-TABULAR
  * [ ] SATISFIES
- * [ ] SBIT
+ * [x] SBIT
  * [ ] SHADOW
  * [ ] SHADOWING-IMPORT
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
