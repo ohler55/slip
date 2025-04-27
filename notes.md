@@ -26,7 +26,7 @@
   - [x] DEPOSIT-FIELD
   - [x] DPB
   - [x] LDB
-  - [ ] LDB-TEST
+  - [x] LDB-TEST
   - [ ] MASK-FIELD
   - [x] SBIT
   - [x] SIMPLE-BIT-VECTOR

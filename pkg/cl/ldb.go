@@ -48,7 +48,6 @@ func (f *Ldb) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	integer, _ := ToUnsignedByte(args[1], "integer")
 	size, pos := byteSpecArg(args[0])
 
-	integer = integer.Dup()
 	max := uint(integer.Size())
 	ub := slip.UnsignedByte{Bytes: make([]byte, size/8+1)}
 	for i := uint(0); i < uint(size); i++ {
