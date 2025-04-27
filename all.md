@@ -7,7 +7,7 @@
  * [ ] IMPORT
  * [ ] INTEGER-DECODE-FLOAT
  * [ ] LAMBDA-LIST-KEYWORDS
- * [ ] LDB
+ * [x] LDB
  * [ ] LDB-TEST
  * [ ] MACRO-FUNCTION
  * [ ] MACROEXPAND

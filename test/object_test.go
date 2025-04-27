@@ -842,6 +842,19 @@ func TestSignedByteSmall(t *testing.T) {
 
 	sb = slip.SignedByteFromUint64(2050)
 	tt.Equal(t, 2050, sb.Int64())
+
+	sb = &slip.SignedByte{
+		Bytes: []byte{0x08, 0x02},
+	}
+	sb.SetBit(17, true)
+	sb.SetBit(16, false)
+	tt.Equal(t, 133122, sb.Int64())
+
+	sb = &slip.SignedByte{
+		Bytes: []byte{0x80, 0x02},
+	}
+	sb.SetBit(17, true)
+	tt.Equal(t, -32766, sb.Int64())
 }
 
 func TestSignedByteBig(t *testing.T) {

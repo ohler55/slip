@@ -25,7 +25,7 @@
   - [x] BYTE-SIZE
   - [x] DEPOSIT-FIELD
   - [x] DPB
-  - [ ] LDB
+  - [x] LDB
   - [ ] LDB-TEST
   - [ ] MASK-FIELD
   - [x] SBIT

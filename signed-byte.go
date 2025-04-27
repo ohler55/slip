@@ -221,3 +221,27 @@ func (obj *SignedByte) Neg() {
 		obj.Bytes = append([]byte{0}, obj.Bytes...)
 	}
 }
+
+// SetBit sets the bit at index to the value specified.
+func (obj *SignedByte) SetBit(index uint, value bool) {
+	if len(obj.Bytes)*8 <= int(index) {
+		obj.grow(index - uint(len(obj.Bytes)*8))
+	}
+	bi := len(obj.Bytes) - 1 - int(index)/8
+	r := index % 8
+	if value {
+		obj.Bytes[bi] |= 1 << r
+	} else {
+		obj.Bytes[bi] &= ^(1 << r)
+	}
+}
+
+func (obj *SignedByte) grow(cnt uint) {
+	// Grow on the high side so bits have to be shifted right.
+	cnt = cnt/8 + 1
+	if (obj.Bytes[0] & 0x80) != 0 {
+		obj.Bytes = append(bytes.Repeat([]byte{0xff}, int(cnt)), obj.Bytes...)
+	} else {
+		obj.Bytes = append(bytes.Repeat([]byte{0x00}, int(cnt)), obj.Bytes...)
+	}
+}
