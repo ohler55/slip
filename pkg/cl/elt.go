@@ -58,7 +58,7 @@ func (f *Elt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		ra := []rune(seq)
 		f.checkIndex(index, len(ra))
 		result = slip.Character(ra[index])
-	case *slip.Vector:
+	case slip.VectorLike:
 		f.checkIndex(index, seq.Length())
 		result = seq.Get(index)
 	default:
@@ -77,10 +77,10 @@ func (f *Elt) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		seq[index] = value
 	case slip.Octets:
 		f.checkIndex(index, len(seq))
-		seq[index] = byte(ToOctet(value).(slip.Octet))
+		seq[index] = byte(slip.ToOctet(value).(slip.Octet))
 	case slip.String:
 		slip.NewPanic("setf on a string character is not possible")
-	case *slip.Vector:
+	case slip.VectorLike:
 		f.checkIndex(index, seq.Length())
 		seq.Set(value, index)
 	default:

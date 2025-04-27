@@ -79,22 +79,24 @@ func (c *connection) listen() {
 			}
 		}
 	}
-	c.shutdown()
+	c.shutdown(true)
 }
 
-func (c *connection) shutdown() {
+func (c *connection) shutdown(serverRem bool) {
 	if c.active.Load() {
 		c.active.Store(false)
 		_ = c.con.Close()
 		// close(c.reqs) // closed in method loop
 		close(c.sendQueue)
 		close(c.evalQueue)
-		if c.serv != nil {
-			c.serv.mu.Lock()
-			if c.serv.cons != nil {
-				delete(c.serv.cons, c.id)
+		if serverRem {
+			if c.serv != nil {
+				c.serv.mu.Lock()
+				if c.serv.cons != nil {
+					delete(c.serv.cons, c.id)
+				}
+				c.serv.mu.Unlock()
 			}
-			c.serv.mu.Unlock()
 		}
 	}
 }
@@ -122,7 +124,7 @@ func (c *connection) sendLoop() {
 		_, err := c.con.Write(watchPrinter.Append(nil, obj, 0))
 		if err != nil {
 			displayError("write error: %s", err)
-			c.shutdown()
+			c.shutdown(true)
 			break
 		}
 	}

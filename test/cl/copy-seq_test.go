@@ -46,6 +46,13 @@ func TestCopySeqOctets(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCopySeqBitVector(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(copy-seq #*1010)`,
+		Expect: "#*1010",
+	}).Test(t)
+}
+
 func TestCopySeqEqual(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((lst '(a b c)))

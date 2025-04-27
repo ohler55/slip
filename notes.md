@@ -4,53 +4,18 @@
 
 - next
 
- - bits-and-bytes
-  - [ ] BIT - new built in type as byte that is 0 or one
-  - [ ] BIT-AND
-  - [ ] BIT-ANDC1
-  - [ ] BIT-ANDC2
-  - [ ] BIT-EQV
-  - [ ] BIT-IOR
-  - [ ] BIT-NAND
-  - [ ] BIT-NOR
-  - [ ] BIT-NOT
-  - [ ] BIT-ORC1
-  - [ ] BIT-ORC2
-  - [ ] BIT-VECTOR
-   - like octets
-    - encoding/asn1/BitString ?not that helpful? maybe just as a model for impl
-   - operator on a bit-vector
-   - display as 0 and 1 or #*010101
-   - update code to read
-   - coerce to list, maybe other for non-standard like integer, octet, byte
-   - maybe always a simple-bit-vector, not displaced
-  - [ ] BIT-VECTOR-P
-  - [ ] BIT-XOR
-  - [x] BYTE (function and also type)
-   - type is ok as octet
-   - function return a byte-specifier
-   - need byte-specifier
-   - maybe change to arbitry bits with some size indicator
-
-  - [ ] BYTE-POSITION
-  - [ ] BYTE-SIZE
-  - [ ] DEPOSIT-FIELD
-  - [ ] DPB
-  - [ ] LDB
-  - [ ] LDB-TEST
-  - [ ] MASK-FIELD
-  - [ ] SBIT
-  - [ ] SIMPLE-BIT-VECTOR
-  - [ ] SIMPLE-BIT-VECTOR-P
-
  - tough-ones
   - [ ] DESTRUCTURING-BIND
   - [ ] FORMATTER
   - [ ] INTEGER-DECODE-FLOAT
 
-
-- autocomplete
- - for describe and others>
+  - allow (coerce '(1 0 1 0) '(vector (integer 0 1) 4)) - in the future
+   - might need a type-spec type to use
+    - TypeSpec interface
+     - check method that panics on fail
+     - isOk method for true or false
+      - separate for each type like integer, float, etc
+       - IntegerSpec - low, high
 
  - better-methods
   - instance method should use flavor so defmethod give existing instances new methods

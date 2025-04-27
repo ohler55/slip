@@ -53,19 +53,10 @@ func (f *ArrayRowMajorIndex) Call(s *slip.Scope, args slip.List, depth int) (res
 			slip.PanicType("subscript", a, "fixnum")
 		}
 	}
-	switch ta := args[0].(type) {
-	case nil:
-	case *slip.Array:
-		result = slip.Fixnum(ta.MajorIndex(indices...))
-	case *slip.Vector:
-		result = slip.Fixnum(ta.MajorIndex(indices...))
-	case slip.Octets:
-		if len(indices) != 1 || len(ta) <= indices[0] || indices[0] < 0 {
-			slip.NewPanic("Invalid indices %s. Should be between 0 and %d.", args[1:], len(ta))
-		}
-		result = slip.Fixnum(indices[0])
-	default:
-		slip.PanicType("array", ta, "array")
+	if al, ok := args[0].(slip.ArrayLike); ok {
+		result = slip.Fixnum(al.MajorIndex(indices...))
+	} else {
+		slip.PanicType("array", args[0], "array")
 	}
 	return
 }

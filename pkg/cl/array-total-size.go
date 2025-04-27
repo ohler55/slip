@@ -38,15 +38,10 @@ type ArrayTotalSize struct {
 // Call the function with the arguments provided.
 func (f *ArrayTotalSize) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch ta := args[0].(type) {
-	case *slip.Array:
-		result = slip.Fixnum(ta.Size())
-	case *slip.Vector:
-		result = slip.Fixnum(ta.Size())
-	case slip.Octets:
-		result = slip.Fixnum(len(ta))
-	default:
-		slip.PanicType("array", ta, "array")
+	if al, ok := args[0].(slip.ArrayLike); ok {
+		result = slip.Fixnum(al.Length())
+	} else {
+		slip.PanicType("array", args[0], "array")
 	}
 	return
 }

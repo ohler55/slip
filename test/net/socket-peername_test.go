@@ -51,7 +51,7 @@ func TestSocketSendPeerNameOkay(t *testing.T) {
 
 func TestSocketPeerNameHTTP(t *testing.T) {
 	serv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("okay"))
+		_, _ = w.Write([]byte("okay"))
 	}))
 	defer serv.Close()
 

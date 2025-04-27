@@ -872,8 +872,7 @@ func clearForm(ed *editor, b byte) bool {
 }
 
 func historyOverride(ed *editor) bool {
-	k := string(ed.key.buf[:ed.key.cnt])
-	f := historyBindings[k]
+	f := historyBindings[string(ed.key.buf[:ed.key.cnt])]
 	if f == nil {
 		ed.keepForm()
 		ed.override = nil
@@ -925,8 +924,7 @@ func historyForward(ed *editor, b byte) bool {
 }
 
 func historySearchOverride(ed *editor) bool {
-	k := string(ed.key.buf[:ed.key.cnt])
-	f := historyBindings[k]
+	f := historyBindings[string(ed.key.buf[:ed.key.cnt])]
 	var b byte = 'x'
 	if f == nil {
 		if ed.key.buf[0] < 0x20 {
@@ -949,11 +947,10 @@ func historySearchOverride(ed *editor) bool {
 
 func searchBack(ed *editor, b byte) bool {
 	ed.logf("=> %02x searchBack\n", b)
-	switch {
-	case ed.override == nil:
+	if ed.override == nil {
 		TheHistory.pattern = TheHistory.pattern[:0]
 		TheHistory.cur = len(TheHistory.forms) - 1
-	default:
+	} else {
 		orig := TheHistory.cur
 		if 0 < len(TheHistory.pattern) {
 			TheHistory.cur--
@@ -984,11 +981,10 @@ func searchBack(ed *editor, b byte) bool {
 
 func searchForward(ed *editor, b byte) bool {
 	ed.logf("=> %02x searchForward\n", b)
-	switch {
-	case ed.override == nil:
+	if ed.override == nil {
 		TheHistory.pattern = TheHistory.pattern[:0]
 		TheHistory.cur = 0
-	default:
+	} else {
 		orig := TheHistory.cur
 		if 0 < len(TheHistory.pattern)-1 {
 			TheHistory.cur++
@@ -1240,8 +1236,7 @@ func nthStash(ed *editor, b byte) bool {
 }
 
 func stashOverride(ed *editor) bool {
-	k := string(ed.key.buf[:ed.key.cnt])
-	f := stashBindings[k]
+	f := stashBindings[string(ed.key.buf[:ed.key.cnt])]
 	if f == nil {
 		ed.keepForm()
 		ed.override = nil
@@ -1293,8 +1288,7 @@ func stashForward(ed *editor, b byte) bool {
 }
 
 func stashSearchOverride(ed *editor) bool {
-	k := string(ed.key.buf[:ed.key.cnt])
-	f := stashBindings[k]
+	f := stashBindings[string(ed.key.buf[:ed.key.cnt])]
 	var b byte = 'x'
 	if f == nil {
 		if ed.key.buf[0] < 0x20 {
@@ -1317,11 +1311,10 @@ func stashSearchOverride(ed *editor) bool {
 
 func searchStashBack(ed *editor, b byte) bool {
 	ed.logf("=> %02x searchStashBack\n", b)
-	switch {
-	case ed.override == nil:
+	if ed.override == nil {
 		TheStash.pattern = TheStash.pattern[:0]
 		TheStash.cur = len(TheStash.forms) - 1
-	default:
+	} else {
 		orig := TheStash.cur
 		if 0 < len(TheStash.pattern) {
 			TheStash.cur--
@@ -1352,11 +1345,10 @@ func searchStashBack(ed *editor, b byte) bool {
 
 func searchStashForward(ed *editor, b byte) bool {
 	ed.logf("=> %02x searchStashForward\n", b)
-	switch {
-	case ed.override == nil:
+	if ed.override == nil {
 		TheStash.pattern = TheStash.pattern[:0]
 		TheStash.cur = 0
-	default:
+	} else {
 		orig := TheStash.cur
 		if 0 < len(TheStash.pattern)-1 {
 			TheStash.cur++

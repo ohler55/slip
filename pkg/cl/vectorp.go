@@ -41,7 +41,7 @@ type Vectorp struct {
 func (f *Vectorp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	switch args[0].(type) {
-	case *slip.Vector, slip.String, slip.Octets:
+	case slip.VectorLike, slip.String:
 		return slip.True
 	}
 	return nil

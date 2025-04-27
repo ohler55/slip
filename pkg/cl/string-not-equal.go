@@ -13,7 +13,7 @@ func init() {
 				stringCompare: stringCompare{
 					Function: slip.Function{Name: "string-not-equal", Args: args},
 					compare: func(s1, s2 string) slip.Object {
-						if i, diff := compareStringFold(s1, s2); 0 != diff {
+						if i, diff := compareStringFold(s1, s2); diff != 0 {
 							return slip.Fixnum(i)
 						}
 						return nil

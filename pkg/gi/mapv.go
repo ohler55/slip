@@ -86,12 +86,10 @@ func (f *Mapv) asList(v slip.Object) (list slip.List) {
 		// leave empty
 	case slip.List:
 		list = tv
-	case *slip.Vector:
-		list = tv.AsList()
-	case slip.Octets:
+	case slip.VectorLike:
 		list = tv.AsList()
 	default:
-		slip.PanicType("vector", tv, "vector", "octets", "list")
+		slip.PanicType("vector", tv, "vector", "list")
 	}
 	return
 }

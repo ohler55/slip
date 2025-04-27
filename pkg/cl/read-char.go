@@ -58,7 +58,7 @@ type ReadChar struct {
 // Call the function with the arguments provided.
 func (f *ReadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 0, 4)
-	var is slip.Object = s.Get(slip.Symbol("*standard-input*"))
+	is := s.Get(slip.Symbol("*standard-input*"))
 	if 0 < len(args) {
 		is = args[0]
 	}

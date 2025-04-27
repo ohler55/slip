@@ -839,7 +839,6 @@ func (c *control) dirInt(colon, at bool, params []any, base int) {
 		neg = ta < 0
 	case slip.Octet:
 		out = strconv.AppendInt(nil, int64(ta), base)
-		neg = ta < 0
 	case *slip.Bignum:
 		out = ((*big.Int)(ta)).Append(nil, base)
 		neg = ((*big.Int)(ta)).Sign() < 0

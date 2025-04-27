@@ -82,12 +82,16 @@ func TestArraySetBadData(t *testing.T) {
 
 func TestArrayMisc(t *testing.T) {
 	a := testArray()
-	tt.Equal(t, 24, a.Size())
+	tt.Equal(t, 24, a.Length())
 	tt.Equal(t, []int{2, 3, 4}, a.Dimensions())
 	tt.Equal(t, 3, a.Rank())
 	tt.Equal(t, true, a.Adjustable())
 	tt.Equal(t, slip.TrueSymbol, a.ElementType())
-	tt.Equal(t, []interface{}{nil}, slip.NewArray([]int{1}, slip.TrueSymbol, nil, nil, true).Simplify())
+	tt.Equal(t, []any{nil}, slip.NewArray([]int{1}, slip.TrueSymbol, nil, nil, true).Simplify())
+	tt.Equal(t, slip.ArraySymbol, a.ArrayType())
+	a.SetElementType(slip.IntegerSymbol)
+	tt.Equal(t, slip.IntegerSymbol, a.ElementType())
+	tt.Panic(t, func() { a.SetElementType(slip.Fixnum(3)) })
 }
 
 func TestArrayAdjustShrink(t *testing.T) {
@@ -107,7 +111,7 @@ func TestArrayAdjustExpand(t *testing.T) {
 }
 
 func TestArrayAdjustNotAdjustable(t *testing.T) {
-	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{nil, nil}}, false)
+	a := slip.NewArray([]int{1, 2}, slip.TrueSymbol, nil, slip.List{slip.List{slip.Fixnum(0), slip.Fixnum(0)}}, false)
 	a2 := a.Adjust([]int{1, 2}, slip.FixnumSymbol, nil, nil)
 	tt.Equal(t, slip.TrueSymbol, a.ElementType())
 	tt.Equal(t, slip.FixnumSymbol, a2.ElementType())

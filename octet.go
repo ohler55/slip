@@ -90,6 +90,11 @@ func (obj Octet) RealValue() float64 {
 	return float64(obj)
 }
 
+// IsInt64 returns true if the instance can be represented by an int64.
+func (obj Octet) IsInt64() bool {
+	return true
+}
+
 // Int64 of the number.
 func (obj Octet) Int64() int64 {
 	return int64(obj)

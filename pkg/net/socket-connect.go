@@ -7,7 +7,6 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -108,15 +107,15 @@ func addressFromList(list slip.List) (sa syscall.Sockaddr) {
 	switch ta := list[0].(type) {
 	case slip.String:
 		addr = netip.MustParseAddr(string(ta)).AsSlice()
-	case *slip.Vector:
+	case slip.Octets:
+		addr = []byte(ta)
+	case slip.VectorLike:
 		list := ta.AsList()
 		octs := make([]byte, len(list))
 		for i, r := range list {
-			octs[i] = byte(cl.ToOctet(r).(slip.Octet))
+			octs[i] = byte(slip.ToOctet(r).(slip.Octet))
 		}
 		addr = octs
-	case slip.Octets:
-		addr = []byte(ta)
 	default:
 		slip.PanicType("address", list, "string", "octets,fixnum")
 	}

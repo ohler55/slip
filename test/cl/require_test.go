@@ -101,7 +101,7 @@ func TestRequireLisp(t *testing.T) {
 }
 
 func TestRequireNotReadable(t *testing.T) {
-	os.Chmod("testdata/not-readable.lisp", 0322)
+	_ = os.Chmod("testdata/not-readable.lisp", 0322)
 	defer func() { _ = os.Chmod("testdata/not-readable.lisp", 0644) }()
 	(&sliptest.Function{
 		Source:    `(require "not-readable.lisp" "testdata")`,

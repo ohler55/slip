@@ -51,10 +51,8 @@ func (f *FilePosition) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	if !ok {
 		slip.PanicType("stream", args[0], "file-stream", "broadcast-stream", "synonym-stream")
 	}
-	var (
-		offset int64
-		whence int = 1
-	)
+	var offset int64
+	whence := 1
 	if 1 < len(args) {
 		if pos, ok := args[1].(slip.Fixnum); ok {
 			offset = int64(pos)

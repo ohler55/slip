@@ -87,16 +87,10 @@ func (f *Fill) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			ra[i] = rune(c)
 		}
 		result = slip.String(ra)
-	case *slip.Vector:
+	case slip.VectorLike:
 		end = checkStartEnd(start, end, seq.Length())
 		for i := start; i < end; i++ {
 			seq.Set(item, i)
-		}
-	case slip.Octets:
-		oct := ToOctet(item).(slip.Octet)
-		end = checkStartEnd(start, end, len(seq))
-		for i := start; i < end; i++ {
-			seq[i] = byte(oct)
 		}
 	default:
 		slip.PanicType("sequence", seq, "sequence")

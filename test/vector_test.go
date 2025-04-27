@@ -48,6 +48,14 @@ func TestVectorSet(t *testing.T) {
 	tt.Equal(t, slip.Fixnum(42), val)
 }
 
+func TestVectorSetFillPointer(t *testing.T) {
+	v := slip.NewVector(3, slip.TrueSymbol, nil, slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}, true)
+	v.SetFillPointer(2)
+	tt.Equal(t, 2, v.FillPointer())
+
+	tt.Panic(t, func() { v.SetFillPointer(3) })
+}
+
 func TestVectorEqual(t *testing.T) {
 	v := slip.NewVector(3, slip.TrueSymbol, nil, slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}, true)
 	v2 := slip.NewVector(3, slip.TrueSymbol, nil, slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}, true)
@@ -91,6 +99,7 @@ func TestVectorPushFillPtr(t *testing.T) {
 	tt.Equal(t, 2, val)
 	tt.Equal(t, "#(1 4)", slip.ObjectString(v))
 	v.FillPtr = 3
+	tt.Equal(t, 3, v.FillPointer())
 	tt.Equal(t, "#(1 4 3)", slip.ObjectString(v))
 	val = v.Push(slip.Fixnum(5))
 	tt.Equal(t, 4, val)

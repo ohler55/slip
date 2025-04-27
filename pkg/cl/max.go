@@ -50,7 +50,7 @@ func (f *Max) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	pos++
 	for ; pos < len(args); pos++ {
-		arg, mx := normalizeNumber(args[pos], max)
+		arg, mx := slip.NormalizeNumber(args[pos], max)
 		switch ta := arg.(type) {
 		case slip.Fixnum:
 			if mx.(slip.Fixnum) < ta {

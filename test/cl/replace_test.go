@@ -72,6 +72,17 @@ func TestReplaceOctetsList(t *testing.T) {
 	}).Test(t)
 }
 
+func TestReplaceBitVectorList(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(replace #*10100101 #*0011 :start1 3 :end1 nil :start2 1 :end2 nil)",
+		Expect: "#*10101101",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: "(replace #*10100101 #*001100 :start1 4 :end1 nil :start2 0 :end2 nil)",
+		Expect: "#*10100011",
+	}).Test(t)
+}
+
 func TestReplaceStringList(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(replace "abcde" '(#\w #\x #\y #\z #\X) :start1 2 :end1 nil :start2 1 :end2 nil)`,

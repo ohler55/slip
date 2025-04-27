@@ -38,10 +38,15 @@ type FillPointer struct {
 // Call the function with the arguments provided.
 func (f *FillPointer) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if v, ok := args[0].(*slip.Vector); ok {
-		result = slip.Fixnum(v.FillPtr)
+	if v, ok := args[0].(slip.FillPtrVector); ok {
+		fp := v.FillPointer()
+		if 0 <= fp {
+			result = slip.Fixnum(fp)
+		} else {
+			slip.PanicType("vector", args[0], "vector with a fill-pointer")
+		}
 	} else {
-		slip.PanicType("vector", args[0], "vector")
+		slip.PanicType("vector", args[0], "vector with a fill-pointer")
 	}
 	return
 }
@@ -49,13 +54,18 @@ func (f *FillPointer) Call(s *slip.Scope, args slip.List, depth int) (result sli
 // Place a value in the first position of a list or cons.
 func (f *FillPointer) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if v, ok := args[0].(*slip.Vector); ok {
-		if num, ok2 := value.(slip.Fixnum); ok2 && 0 <= num && int(num) < v.Size() {
-			v.FillPtr = int(num)
+	if v, ok := args[0].(slip.FillPtrVector); ok {
+		fp := v.FillPointer()
+		if 0 <= fp {
+			if num, ok2 := value.(slip.Fixnum); ok2 && 0 <= num && int(num) < v.Length() {
+				v.SetFillPointer(int(num))
+			} else {
+				slip.PanicType("fill-pointer", value, "fixnum")
+			}
 		} else {
-			slip.PanicType("fill-pointer", value, "fixnum")
+			slip.PanicType("vector", args[0], "vector with a fill-pointer")
 		}
 	} else {
-		slip.PanicType("vector", args[0], "vector")
+		slip.PanicType("vector", args[0], "vector with a fill-pointer")
 	}
 }

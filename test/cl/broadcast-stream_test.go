@@ -74,7 +74,7 @@ func TestBroadcastStreamOpenClose(t *testing.T) {
 	bs := cl.NewBroadcastStream(&ss1, &ss2)
 
 	tt.Equal(t, true, bs.IsOpen())
-	bs.Close()
+	_ = bs.Close()
 	tt.Equal(t, false, bs.IsOpen())
 
 	_, err := bs.Write([]byte("hello"))

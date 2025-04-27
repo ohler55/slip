@@ -34,6 +34,18 @@ func TestMakeArrayVector(t *testing.T) {
 	}).Test(t)
 }
 
+func TestMakeArrayBitVector(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-array '(4) :fill-pointer 3 :element-type 'bit)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			bv := v.(*slip.BitVector)
+			tt.Equal(t, "(0 0 0)", slip.ObjectString(bv.AsList()))
+			tt.Equal(t, true, bv.Adjustable())
+			tt.Equal(t, slip.BitSymbol, bv.ElementType())
+		},
+	}).Test(t)
+}
+
 func TestMakeArrayFillPointer(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(make-array '(4) :fill-pointer nil)`,
@@ -95,15 +107,15 @@ func TestMakeArrayOctetsContents(t *testing.T) {
 
 func TestMakeArrayOctetsBadContents(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-array 3 :element-type 'octet :initial-contents '(1 2 3))`,
-		PanicType: slip.TypeErrorSymbol,
+		Source:    `(make-array 3 :element-type 'octet :initial-contents '(1 t 3))`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 
 func TestMakeArrayOctetsBadInitialElement(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-array 3 :element-type 'octet :initial-element 1)`,
-		PanicType: slip.TypeErrorSymbol,
+		Source:    `(make-array 3 :element-type 'octet :initial-element t)`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 

@@ -39,15 +39,10 @@ type ArrayDimensions struct {
 func (f *ArrayDimensions) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	var dims []int
-	switch ta := args[0].(type) {
-	case *slip.Array:
-		dims = ta.Dimensions()
-	case *slip.Vector:
-		dims = ta.Dimensions()
-	case slip.Octets:
-		dims = []int{len(ta)}
-	default:
-		slip.PanicType("array", ta, "array")
+	if al, ok := args[0].(slip.ArrayLike); ok {
+		dims = al.Dimensions()
+	} else {
+		slip.PanicType("array", args[0], "array")
 	}
 	sdims := make(slip.List, len(dims))
 	for i, d := range dims {

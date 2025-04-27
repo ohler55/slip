@@ -58,14 +58,16 @@ func (f *MakeSequence) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	switch rt := args[0].(type) {
 	case slip.Symbol:
 		switch rt {
-		case slip.Symbol("list"):
+		case slip.ListSymbol:
 			result = f.makeList(size, element)
-		case slip.Symbol("string"):
+		case slip.StringSymbol:
 			result = f.makeString(size, element, 2 < len(args))
-		case slip.Symbol("octets"):
+		case slip.OctetsSymbol:
 			result = f.makeOctets(size, element, 2 < len(args))
-		case slip.Symbol("vector"):
+		case slip.VectorSymbol:
 			result = f.makeVector(size, element, slip.TrueSymbol)
+		case slip.BitVectorSymbol:
+			result = f.makeBitVector(size, element, 2 < len(args))
 		default:
 			slip.PanicType("result-type", rt, "list", "string", "vector", "octets")
 		}
@@ -107,7 +109,7 @@ func (f *MakeSequence) makeString(size int, element slip.Object, elementSet bool
 func (f *MakeSequence) makeOctets(size int, element slip.Object, elementSet bool) slip.Object {
 	var b byte
 	if elementSet {
-		b = byte(ToOctet(element).(slip.Octet))
+		b = byte(slip.ToOctet(element).(slip.Octet))
 	}
 	seq := make(slip.Octets, size)
 	for i := 0; i < size; i++ {
@@ -122,4 +124,18 @@ func (f *MakeSequence) makeVector(size int, element slip.Object, elementType sli
 		slip.PanicType("element-type", elementType, "symbol")
 	}
 	return slip.NewVector(size, et, element, nil, false)
+}
+
+func (f *MakeSequence) makeBitVector(size int, element slip.Object, elementSet bool) slip.Object {
+	bv := slip.BitVector{
+		Bytes:   make([]byte, size/8+1),
+		Len:     uint(size),
+		FillPtr: -1,
+	}
+	if elementSet {
+		for i := 0; i < size; i++ {
+			bv.Set(element, i)
+		}
+	}
+	return &bv
 }

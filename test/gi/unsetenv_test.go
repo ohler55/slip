@@ -11,7 +11,7 @@ import (
 )
 
 func TestUnsetenv(t *testing.T) {
-	os.Setenv("TEST_VAR", "something")
+	_ = os.Setenv("TEST_VAR", "something")
 	(&sliptest.Function{
 		Source: `(unsetenv "TEST_VAR")`,
 		Expect: "nil",

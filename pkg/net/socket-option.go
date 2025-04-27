@@ -209,7 +209,6 @@ func setSockopt(fd int, opt, val slip.Object) {
 	if err != nil {
 		slip.NewPanic("option %s failed. %s", opt, err)
 	}
-	return
 }
 
 func setSockoptBool(fd int, opt int, val slip.Object) error {

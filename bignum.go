@@ -41,12 +41,10 @@ func (obj *Bignum) Simplify() any {
 // Equal returns true if this Object and the other are equal in value.
 func (obj *Bignum) Equal(other Object) (eq bool) {
 	switch to := other.(type) {
-	case Fixnum:
-		num := (*big.Int)(obj)
-		eq = num.IsInt64() && num.Int64() == int64(to)
-	case Octet:
-		num := (*big.Int)(obj)
-		eq = num.IsInt64() && num.Int64() == int64(to)
+	case *Bignum:
+		eq = (*big.Int)(obj).Cmp((*big.Int)(to)) == 0
+	case Integer:
+		eq = obj.IsInt64() && to.IsInt64() && obj.Int64() == to.Int64()
 	case SingleFloat:
 		f := big.NewFloat(float64(to))
 		if f.IsInt() {
@@ -67,8 +65,6 @@ func (obj *Bignum) Equal(other Object) (eq bool) {
 	case *Ratio:
 		rat := (*big.Rat)(to)
 		eq = rat.IsInt() && (*big.Int)(obj).Cmp(rat.Num()) == 0
-	case *Bignum:
-		eq = (*big.Int)(obj).Cmp((*big.Int)(to)) == 0
 	}
 	return
 }
@@ -107,6 +103,11 @@ func (obj *Bignum) Eval(s *Scope, depth int) Object {
 func (obj *Bignum) RealValue() float64 {
 	f, _ := big.NewFloat(0.0).SetInt((*big.Int)(obj)).Float64()
 	return f
+}
+
+// IsInt64 returns true if the instance can be represented by an int64.
+func (obj *Bignum) IsInt64() bool {
+	return (*big.Int)(obj).IsInt64()
 }
 
 // Int64 of the number.

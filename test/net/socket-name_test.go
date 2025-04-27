@@ -52,7 +52,7 @@ func TestSocketLocalNameOkay(t *testing.T) {
 
 func TestSocketLocalNameIPv6(t *testing.T) {
 	nl, _ := net.Listen("tcp6", "[::]:7779")
-	defer nl.Close()
+	defer func() { _ = nl.Close() }()
 	go func() {
 		_, _ = nl.Accept()
 	}()
@@ -75,7 +75,7 @@ func TestSocketLocalNameIPv6(t *testing.T) {
 
 func TestSocketNameHTTP(t *testing.T) {
 	serv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("okay"))
+		_, _ = w.Write([]byte("okay"))
 	}))
 	defer serv.Close()
 

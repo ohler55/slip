@@ -69,6 +69,11 @@ func NewArray(
 	return &a
 }
 
+// ArrayType returns 'array.
+func (obj *Array) ArrayType() Symbol {
+	return ArraySymbol
+}
+
 // Assumes dims and size arrays already allocated. Used by the reader.
 func (obj *Array) calcAndSet(list List) {
 	if 0 < len(obj.dims) {
@@ -165,8 +170,8 @@ func (obj *Array) Dimensions() []int {
 	return obj.dims
 }
 
-// Size of the array.
-func (obj *Array) Size() int {
+// Length returns the length of the object.
+func (obj *Array) Length() int {
 	return len(obj.elements)
 }
 
@@ -178,8 +183,7 @@ func (obj *Array) Get(indexes ...int) Object {
 // Set a value at the location identified by the indexes.
 func (obj *Array) Set(value Object, indexes ...int) {
 	pos := obj.MajorIndex(indexes...)
-	checkArrayElementType(value, obj.elementType)
-	obj.elements[pos] = value
+	obj.elements[pos] = Coerce(value, obj.elementType)
 }
 
 // MajorIndex for the indexes provided.
@@ -259,8 +263,7 @@ func (obj *Array) setDim(list List, di, ei int) int {
 	}
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
-			checkArrayElementType(list[i], obj.elementType)
-			obj.elements[ei] = list[i]
+			obj.elements[ei] = Coerce(list[i], obj.elementType)
 			ei++
 		}
 	} else {
@@ -308,7 +311,7 @@ func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Objec
 	}
 	if TrueSymbol != elementType {
 		for _, v := range obj.elements {
-			checkArrayElementType(v, elementType)
+			_ = Coerce(v, elementType)
 		}
 	}
 	tmp := NewArray(dimensions, elementType, initElement, nil, true)
@@ -355,18 +358,19 @@ func (obj *Array) ElementType() Symbol {
 	return obj.elementType
 }
 
+// SetElementType returns the element-type of the array.
+func (obj *Array) SetElementType(ts Object) {
+	sym, ok := ts.(Symbol)
+	if !ok {
+		PanicType("type-specification", ts, "symbol")
+	}
+	for _, v := range obj.elements {
+		_ = Coerce(v, sym)
+	}
+	obj.elementType = sym
+}
+
 // Elements returns the elements of the array.
 func (obj *Array) Elements() []Object {
 	return obj.elements
-}
-
-func checkArrayElementType(v Object, et Symbol) {
-	if v != nil && 0 < len(et) {
-		for _, sym := range v.Hierarchy() {
-			if sym == et {
-				return
-			}
-		}
-		PanicType("array element", v, string(et))
-	}
 }

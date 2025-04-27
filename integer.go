@@ -17,6 +17,9 @@ type Integer interface {
 	// of: fixnum or bignum.
 	IntegerType() Symbol
 
-	// Int64 returns the closes int64 of the integer.
+	// IsInt64 returns true if the instance can be represented by an int64.
+	IsInt64() bool
+
+	// Int64 returns the closest int64 of the integer.
 	Int64() int64
 }

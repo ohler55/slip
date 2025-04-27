@@ -114,7 +114,7 @@ func TestSynonymStreamOpenClose(t *testing.T) {
 	defer func() { _ = slip.CurrentPackage.Remove("zz") }()
 
 	tt.Equal(t, true, ss.IsOpen())
-	ss.Close()
+	_ = ss.Close()
 	tt.Equal(t, false, ss.IsOpen())
 
 	tt.Panic(t, func() { _, _ = ss.Write([]byte{'x'}) })

@@ -6,7 +6,6 @@ import (
 	"net/netip"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 )
 
 func init() {
@@ -53,13 +52,13 @@ func addressToString(arg slip.Object) (oct slip.Octets, str string) {
 	case slip.List:
 		oct = make(slip.Octets, len(ta))
 		for i, v := range ta {
-			oct[i] = byte(cl.ToOctet(v).(slip.Octet))
+			oct[i] = byte(slip.ToOctet(v).(slip.Octet))
 		}
-	case *slip.Vector:
+	case slip.VectorLike:
 		list := ta.AsList()
 		oct = make(slip.Octets, len(list))
 		for i, v := range list {
-			oct[i] = byte(cl.ToOctet(v).(slip.Octet))
+			oct[i] = byte(slip.ToOctet(v).(slip.Octet))
 		}
 	default:
 		slip.PanicType("address", arg, "octets")

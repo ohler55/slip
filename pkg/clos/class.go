@@ -265,7 +265,7 @@ func (c *Class) SetNoMake(noMake bool) {
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *Class) MakeInstance() slip.Instance {
 	inst := flavors.Instance{Type: c, Methods: c.methods}
-	inst.Scope.Vars = map[string]slip.Object{}
+	inst.Vars = map[string]slip.Object{}
 	for k, v := range c.slots {
 		inst.Vars[k] = v
 	}

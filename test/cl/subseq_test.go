@@ -58,6 +58,17 @@ func TestSubseqOctets(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSubseqBitVector(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(subseq #*10100101 2)`,
+		Expect: "#*100101",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(subseq #*10100101 2 6)`,
+		Expect: "#*1001",
+	}).Test(t)
+}
+
 func TestSubseqListSetf(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("seq"),
@@ -111,6 +122,19 @@ func TestSubseqOctetsSetf(t *testing.T) {
 		Source: `(let ((seq (coerce "abcd" 'octets)))
                   (setf (subseq seq 2) "xyz")
                   seq)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestSubseqBitVectorSetf(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((seq #*10100101))
+                  (setf (subseq seq 3 5) #*11)
+                  seq)`,
+		Expect: "#*10111101",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(setf (subseq #*1010 2) "xyz")`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
@@ -176,6 +200,10 @@ func TestSubseqOutOfBounds(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(subseq (coerce "abcd" 'octets) 5)`,
+		Panics: true,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(subseq #*1010 5)`,
 		Panics: true,
 	}).Test(t)
 }

@@ -109,7 +109,7 @@ func (obj Time) Init(scope *Scope, args List, depth int) {
 // called by the send function but can be called directly so effectively
 // send a method to an instance.
 func (obj Time) Receive(s *Scope, message string, args List, depth int) Object {
-	f, _ := timeMethods[strings.ToLower(message)]
+	f := timeMethods[strings.ToLower(message)]
 	if f == nil {
 		PanicMethod(Symbol("time"), nil, Symbol(message), "")
 	}

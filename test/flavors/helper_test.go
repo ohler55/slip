@@ -15,7 +15,7 @@ func undefFlavors(fns ...string) {
 }
 
 func undefFlavor(fn string) {
-	defer func() { recover() }()
+	defer func() { _ = recover() }()
 	scope := slip.NewScope()
 	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn), scope).Eval(scope, nil)
 }

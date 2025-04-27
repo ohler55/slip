@@ -47,14 +47,10 @@ func (f *ArrayDimension) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 		axis int
 		dims []int
 	)
-	switch ta := args[0].(type) {
-	case *slip.Array:
-		dims = ta.Dimensions()
-	case *slip.Vector:
-		dims = ta.Dimensions()
-		// TBD Octets
-	default:
-		slip.PanicType("array", ta, "array")
+	if al, ok := args[0].(slip.ArrayLike); ok {
+		dims = al.Dimensions()
+	} else {
+		slip.PanicType("array", args[0], "array")
 	}
 	if num, ok := args[1].(slip.Fixnum); ok {
 		axis = int(num)

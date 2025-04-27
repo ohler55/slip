@@ -64,7 +64,7 @@ func TestEchoStreamOpenClose(t *testing.T) {
 	es := cl.NewEchoStream(&ss1, &ss2)
 
 	tt.Equal(t, true, es.IsOpen())
-	es.Close()
+	_ = es.Close()
 	tt.Equal(t, false, es.IsOpen())
 
 	tt.Panic(t, func() { _, _ = es.Write([]byte{'x'}) })

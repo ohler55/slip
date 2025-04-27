@@ -51,7 +51,7 @@ func (f *UnreadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	if !ok {
 		slip.PanicType("character", args[0], "character")
 	}
-	var is slip.Object = s.Get(slip.Symbol("*standard-input*"))
+	is := s.Get(slip.Symbol("*standard-input*"))
 	if 1 < len(args) {
 		is = args[1]
 	}

@@ -77,8 +77,8 @@ func (f *Merge) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	default:
 		slip.PanicType("result-type", ta, "nil", "list", "string", "vector", "octets")
 	}
-	seq1 := coerceToList(args[1]).(slip.List)
-	seq2 := coerceToList(args[2]).(slip.List)
+	seq1 := slip.CoerceToList(args[1]).(slip.List)
+	seq2 := slip.CoerceToList(args[2]).(slip.List)
 	d2 := depth + 1
 	var (
 		keyFunc   slip.Caller
@@ -125,11 +125,11 @@ func (f *Merge) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case "", "list":
 		result = rlist
 	case "string":
-		result = coerceToString(rlist)
+		result = slip.CoerceToString(rlist)
 	case "vector":
-		result = coerceToVector(rlist)
+		result = slip.CoerceToVector(rlist)
 	case "octets":
-		result = coerceToOctets(rlist)
+		result = slip.CoerceToOctets(rlist)
 	}
 	return
 }

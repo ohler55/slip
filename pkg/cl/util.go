@@ -198,47 +198,78 @@ func complement(v slip.Object) (result slip.Object) {
 	return
 }
 
-// ToOctet coerces a value into an octet if possible.
-func ToOctet(arg slip.Object) (result slip.Object) {
-	switch ta := arg.(type) {
-	case slip.Character:
-		if ta < 256 {
-			result = slip.Octet(ta)
+func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
+	slip.ArgCountCheck(f, args, 2, 3)
+	switch t1 := args[0].(type) {
+	case *slip.Array:
+		t2, ok := args[1].(*slip.Array)
+		if !ok {
+			slip.PanicType("bit-array2", args[1], "bit-array")
 		}
-	case slip.Fixnum:
-		if 0 <= ta && ta < 256 {
-			result = slip.Octet(ta)
+		if t1.ElementType() != slip.BitSymbol {
+			slip.PanicType("bit-array1", t1, "bit-array")
 		}
-	case slip.Octet:
-		result = ta
-	case *slip.Bignum:
-		if (*big.Int)(ta).IsInt64() {
-			num := (*big.Int)(ta).Int64()
-			if 0 <= num && num < 256 {
-				result = slip.Octet(num)
+		if t2.ElementType() != slip.BitSymbol {
+			slip.PanicType("bit-array2", t2, "bit-array")
+		}
+		d1 := t1.Dimensions()
+		d2 := t2.Dimensions()
+		if len(d1) != len(d2) {
+			slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
+		}
+		for i, d := range d1 {
+			if d2[i] != d {
+				slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
 			}
 		}
-	case *slip.LongFloat:
-		i64, acc := (*big.Float)(ta).Int64()
-		if acc == 0 && 0 <= i64 && i64 < 256 {
-			result = slip.Octet(i64)
+		if 2 < len(args) {
+			ra, ok := args[2].(*slip.Array)
+			if !ok || ra.ElementType() != slip.BitSymbol {
+				slip.PanicType("opt-arg", args[2], "bit-array")
+			}
+			dr := ra.Dimensions()
+			if len(d1) != len(dr) {
+				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+			}
+			for i, d := range d1 {
+				if dr[i] != d {
+					slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+				}
+			}
+			r = ra
+		} else {
+			r = slip.NewArray(d1, slip.BitSymbol, slip.Bit(0), nil, false)
 		}
-	case slip.Real: // other floats and ratio
-		num := ta.RealValue()
-		if num == float64(int64(num)) && 0.0 <= num && num < 256.0 {
-			result = slip.Octet(num)
+		a1 = t1
+		a2 = t2
+	case *slip.BitVector:
+		t2, ok := args[1].(*slip.BitVector)
+		if !ok {
+			slip.PanicType("bit-array2", args[1], "bit-array")
 		}
-	case slip.Complex:
-		num := real(ta)
-		if imag(ta) == 0.0 && num == float64(int64(num)) && 0 <= num && num < 256 {
-			result = slip.Octet(num)
+		if t1.Length() != t2.Length() {
+			slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
 		}
-	}
-	if result == nil {
-		if arg == nil {
-			slip.NewPanic("Can not coerce a nil into a octet")
+		if 2 < len(args) {
+			ra, ok := args[2].(*slip.BitVector)
+			if !ok {
+				slip.PanicType("opt-arg", args[2], "bit-array")
+			}
+			if t1.Len != ra.Len {
+				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+			}
+			r = ra
+		} else {
+			r = &slip.BitVector{
+				Bytes:   make([]byte, len(t1.Bytes)),
+				Len:     t1.Len,
+				FillPtr: -1,
+			}
 		}
-		slip.NewPanic("Can not coerce %s a %s into an octet", arg, arg.Hierarchy()[0])
+		a1 = t1
+		a2 = t2
+	default:
+		slip.PanicType("bit-array1", t1, "bit-array")
 	}
 	return
 }

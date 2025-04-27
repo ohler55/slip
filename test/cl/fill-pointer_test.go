@@ -35,6 +35,11 @@ func TestFillPointerNotVector(t *testing.T) {
 		Source:    `(setf (fill-pointer (make-array '(2 3))) 3)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
+	// vector with no fill-pointer
+	(&sliptest.Function{
+		Source:    `(fill-pointer (make-array 2))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
 }
 
 func TestFillPointerBadFillPointer(t *testing.T) {
@@ -44,6 +49,10 @@ func TestFillPointerBadFillPointer(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(setf (fill-pointer (make-array 2)) 3)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(setf (fill-pointer (make-array 2 :fill-pointer 0)) t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

@@ -38,11 +38,13 @@ type SimpleVectorP struct {
 // Call the function with the arguments provided.
 func (f *SimpleVectorP) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if v, ok := args[0].(*slip.Vector); ok && v.FillPtr == -1 && v.ElementType() == slip.TrueSymbol {
-		return slip.True
-	}
-	if _, ok := args[0].(slip.Octets); ok {
-		return slip.True
+	if vl, ok := args[0].(slip.VectorLike); ok {
+		et := vl.ElementType()
+		if et == slip.TrueSymbol || et == slip.BitSymbol || et == slip.OctetSymbol {
+			if fpv, ok2 := vl.(slip.FillPtrVector); !ok2 || fpv.FillPointer() < 0 {
+				return slip.True
+			}
+		}
 	}
 	return nil
 }

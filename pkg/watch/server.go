@@ -107,8 +107,7 @@ func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 
 	serv.mu.Lock()
 	for _, c := range serv.cons {
-		c.serv = nil
-		c.shutdown()
+		c.shutdown(false)
 	}
 	serv.cons = nil
 	serv.mu.Unlock()

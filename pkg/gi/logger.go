@@ -82,7 +82,7 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 		queue: make(chan []byte, 100),
 		done:  make(chan bool, 1),
 	}
-	var out slip.Object = slip.StandardOutput
+	out := slip.StandardOutput
 	if 0 < len(args) {
 		if list, ok := args[0].(slip.List); ok {
 			for i := 0; i < len(list)-1; i++ {

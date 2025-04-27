@@ -4,7 +4,6 @@ package test
 
 import (
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -51,7 +50,7 @@ func TestInputStreamObject(t *testing.T) {
 		},
 		Eval: &stream,
 	}).Test(t)
-	data, err := ioutil.ReadAll(&stream)
+	data, err := io.ReadAll(&stream)
 	tt.Nil(t, err)
 	tt.Equal(t, "abc", string(data))
 }
@@ -173,7 +172,7 @@ func TestInputStreamReadRuneHardOk(t *testing.T) {
 	_, _, err = stream.ReadRune()
 	tt.NotNil(t, err)
 
-	stream.Close()
+	_ = stream.Close()
 }
 
 func TestInputStreamReadRuneHardBad(t *testing.T) {

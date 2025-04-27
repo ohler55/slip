@@ -206,7 +206,7 @@ func (ed *editor) displayRune(line, pos int) {
 
 func printSize(s string) (cnt int) {
 	var esc bool
-	for _, r := range []rune(s) {
+	for _, r := range s {
 		switch r {
 		case '\x1b':
 			esc = true
@@ -494,8 +494,8 @@ func (ed *editor) addRune(r rune) {
 }
 
 func (ed *editor) getSize() (w, h int) {
-	if hs, _ := sizer.(hasSize); hs != nil {
-		w, h = hs.getSize()
+	if sizer != nil {
+		w, h = sizer.getSize()
 	} else {
 		w, h = term.GetSize(ed.fd)
 		if w <= 0 {
@@ -592,9 +592,9 @@ func (ed *editor) clearToEnd() {
 	ed.write([]byte(("\x1b[0K")))
 }
 
-func (ed *editor) clearToStart() {
-	ed.write([]byte(("\x1b[1K")))
-}
+// func (ed *editor) clearToStart() {
+// 	ed.write([]byte(("\x1b[1K")))
+// }
 
 func (ed *editor) clearDown() {
 	ed.write([]byte(("\x1b[J")))

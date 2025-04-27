@@ -152,7 +152,7 @@ func (obj *Instance) Receive(s *slip.Scope, message string, args slip.List, dept
 	for i, m := range ma {
 		if m.wrap != nil {
 			loc := &whopLoc{methods: ma, current: i}
-			ws := obj.Scope.NewScope()
+			ws := obj.NewScope()
 			if s != nil {
 				ws.AddParent(s)
 			}
@@ -359,11 +359,11 @@ func (obj *Instance) Dup() *Instance {
 		Methods: obj.Methods,
 		Any:     obj.Any,
 	}
-	dup.Scope.Vars = map[string]slip.Object{}
-	for k, v := range obj.Scope.Vars {
-		dup.Scope.Vars[k] = v
+	dup.Vars = map[string]slip.Object{}
+	for k, v := range obj.Vars {
+		dup.Vars[k] = v
 	}
-	dup.Scope.Vars["self"] = &dup
+	dup.Vars["self"] = &dup
 
 	return &dup
 }
@@ -375,11 +375,11 @@ func (obj *Instance) ChangeFlavor(flavor *Flavor) {
 	obj.Type = flavor
 	obj.Methods = flavor.methods
 	vars := obj.Vars
-	obj.Scope.Vars = map[string]slip.Object{}
+	obj.Vars = map[string]slip.Object{}
 	for k, v := range flavor.defaultVars {
 		if ov, has := vars[k]; has {
 			v = ov
 		}
-		obj.Scope.Vars[k] = v
+		obj.Vars[k] = v
 	}
 }

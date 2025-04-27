@@ -114,7 +114,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		lines = append(lines, f.formConstantLine(k, v, &pr))
 	}
 	sort.Strings(lines)
-	var w io.Writer = slip.StandardOutput.(io.Writer)
+	w := slip.StandardOutput.(io.Writer)
 	for _, line := range lines {
 		if _, err := w.Write(append([]byte(line), '\n')); err != nil {
 			slip.PanicStream(slip.StandardOutput.(slip.Stream), "%s", err)

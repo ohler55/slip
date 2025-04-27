@@ -4,7 +4,6 @@ package gi
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 )
 
 func init() {
@@ -62,10 +61,10 @@ top:
 	case slip.List:
 		octs := make(slip.Octets, end-start)
 		for i, v := range ta[start:end] {
-			octs[i] = byte(cl.ToOctet(v).(slip.Octet))
+			octs[i] = byte(slip.ToOctet(v).(slip.Octet))
 		}
 		result = slip.String(octs)
-	case *slip.Vector:
+	case slip.VectorLike:
 		a0 = ta.AsList()
 		goto top
 	default:

@@ -82,19 +82,14 @@ func (f *AdjustArray) Call(s *slip.Scope, args slip.List, depth int) (result sli
 		initContents slip.List
 		fillPtr      int
 		elementType  slip.Symbol
-		vv           *slip.Vector
-		aa           *slip.Array
 	)
-	switch ta := args[0].(type) {
-	case *slip.Array:
-		elementType = ta.ElementType()
-		aa = ta
-	case *slip.Vector:
-		vv = ta
-		aa = &vv.Array
-		fillPtr = ta.FillPtr
-		elementType = ta.ElementType()
-	default:
+	if al, ok := args[0].(slip.ArrayLike); ok {
+		elementType = al.ElementType()
+		var v slip.FillPtrVector
+		if v, ok = al.(slip.FillPtrVector); ok {
+			fillPtr = v.FillPointer()
+		}
+	} else {
 		slip.PanicType("array", args[0], "array", "vector")
 	}
 	switch ta := args[1].(type) {
@@ -139,10 +134,11 @@ func (f *AdjustArray) Call(s *slip.Scope, args slip.List, depth int) (result sli
 			}
 		}
 	}
-	if vv == nil { // array
-		result = aa.Adjust(dims, elementType, initElement, initContents)
-	} else {
-		result = vv.Adjust(dims, elementType, initElement, initContents, fillPtr)
+	switch ta := args[0].(type) {
+	case *slip.Array:
+		result = ta.Adjust(dims, elementType, initElement, initContents)
+	case slip.VectorLike:
+		result = ta.Adjust(dims, elementType, initElement, initContents, fillPtr)
 	}
 	return
 }

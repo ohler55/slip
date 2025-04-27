@@ -77,10 +77,10 @@ func (f *ReadFromString) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 		eofp  bool
 		eofv  slip.Object
 		start int
-		end   int = -1
 		pw    bool
 		buf   []byte
 	)
+	end := -1
 	if 1 < len(args) {
 		ra := []rune(ss)
 		var (

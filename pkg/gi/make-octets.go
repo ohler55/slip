@@ -4,7 +4,6 @@ package gi
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 )
 
 func init() {
@@ -51,7 +50,7 @@ func (f *MakeOctets) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	}
 	ba := make([]byte, size)
 	if 1 < len(args) {
-		b := byte(cl.ToOctet(args[1]).(slip.Octet))
+		b := byte(slip.ToOctet(args[1]).(slip.Octet))
 		for i := len(ba) - 1; 0 <= i; i-- {
 			ba[i] = b
 		}

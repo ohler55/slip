@@ -22,7 +22,7 @@ func init() {
 					Text: "The vector to pop a value from.",
 				},
 			},
-			Return: "fixnum",
+			Return: "object",
 			Text: `__vector-pop__ returns the element at the current fill-pointer and decreases
 the fill-pointer by one. If the fill-pointer is at zero an error is raised.`,
 			Examples: []string{
@@ -39,14 +39,15 @@ type VectorPop struct {
 // Call the function with the arguments provided.
 func (f *VectorPop) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	v, ok := args[0].(*slip.Vector)
+	v, ok := args[0].(slip.FillPtrVector)
 	if !ok {
-		slip.PanicType("vector", args[0], "vector")
+		slip.PanicType("vector", args[0], "vector with a fill-pointer.")
 	}
-	if v.FillPtr < 0 {
+	fp := v.FillPointer()
+	if fp < 0 {
 		slip.PanicType("vector", v, "vector with a fill-pointer.")
 	}
-	if v.FillPtr == 0 || v.Size() <= v.FillPtr {
+	if fp == 0 || v.Length() <= fp {
 		slip.NewPanic("There is nothing left to pop.")
 	}
 	return v.Pop()

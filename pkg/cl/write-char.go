@@ -47,10 +47,8 @@ type WriteChar struct {
 func (f *WriteChar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 2)
 	so := s.Get("*standard-output*")
-	var (
-		w     io.Writer = so.(io.Writer)
-		ss, _           = so.(slip.Stream)
-	)
+	w := so.(io.Writer)
+	ss, _ := so.(slip.Stream)
 	c, ok := args[0].(slip.Character)
 	if !ok {
 		slip.PanicType("char", args[0], "character")

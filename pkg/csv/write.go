@@ -119,5 +119,4 @@ func csvSetWriterOptions(cw *csv.Writer, args slip.List) {
 			slip.PanicType("keyword", sym, ":separator", ":crlf")
 		}
 	}
-	return
 }

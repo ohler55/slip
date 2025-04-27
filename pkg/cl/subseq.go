@@ -61,6 +61,18 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	case slip.Octets:
 		ba := []byte(ta)
 		result = slip.Octets(ba[start:end])
+	case *slip.BitVector:
+		cnt := end - start
+		bv := slip.BitVector{
+			Bytes:     make([]byte, cnt/8+1),
+			Len:       uint(cnt),
+			FillPtr:   ta.FillPtr,
+			CanAdjust: ta.CanAdjust,
+		}
+		for i := 0; i < cnt; i++ {
+			bv.Put(uint(i), ta.At(uint(i+start)))
+		}
+		result = &bv
 	}
 	return
 }
@@ -94,6 +106,15 @@ func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
 			cnt := end - start
 			for i := 0; i < cnt && i < len(rep); i++ {
 				ta[start+i] = rep[i]
+			}
+		} else {
+			slip.PanicType("newvalue", value, "octets")
+		}
+	case *slip.BitVector:
+		if rep, ok := value.(*slip.BitVector); ok {
+			cnt := end - start
+			for i := 0; i < cnt && i < int(rep.Len); i++ {
+				ta.Put(uint(i+start), rep.At(uint(i)))
 			}
 		} else {
 			slip.PanicType("newvalue", value, "octets")
@@ -156,6 +177,14 @@ func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 		}
 		if start < 0 || len(ba) < start || len(ba) < end {
 			slip.NewPanic("indices %d and %d are out of bounds for string of length %d", start, end, len(ba))
+		}
+		seq = ta
+	case *slip.BitVector:
+		if end < 0 {
+			end = int(ta.Len)
+		}
+		if start < 0 || int(ta.Len) < start || int(ta.Len) < end {
+			slip.NewPanic("indices %d and %d are out of bounds for string of length %d", start, end, ta.Len)
 		}
 		seq = ta
 	default:

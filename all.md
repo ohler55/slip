@@ -1,37 +1,14 @@
- * [ ] BIT
- * [ ] BIT-AND
- * [ ] BIT-ANDC1
- * [ ] BIT-ANDC2
- * [ ] BIT-EQV
- * [ ] BIT-IOR
- * [ ] BIT-NAND
- * [ ] BIT-NOR
- * [ ] BIT-NOT
- * [ ] BIT-ORC1
- * [ ] BIT-ORC2
- * [ ] BIT-VECTOR
- * [ ] BIT-VECTOR-P
- * [ ] BIT-XOR
- * [x] BYTE
- * [ ] BYTE-POSITION
- * [ ] BYTE-SIZE
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
- * [ ] DEPOSIT-FIELD
  * [ ] DOCUMENTATION
- * [ ] DPB
  * [ ] ENOUGH-NAMESTRING
  * [ ] FDEFINITION
  * [ ] FORMATTER
  * [ ] IMPORT
  * [ ] INTEGER-DECODE-FLOAT
  * [ ] LAMBDA-LIST-KEYWORDS
- * [ ] LDB
- * [ ] LDB-TEST
  * [ ] MACRO-FUNCTION
- * [ ] MACROEXPAND
  * [ ] MACROEXPAND-1
- * [ ] MASK-FIELD
  * [ ] PACKAGE-SHADOWING-SYMBOLS
  * [ ] PPRINT-FILL
  * [ ] PPRINT-INDENT
@@ -42,12 +19,8 @@
  * [ ] PPRINT-TAB
  * [ ] PPRINT-TABULAR
  * [ ] SATISFIES
- * [ ] SBIT
  * [ ] SHADOW
  * [ ] SHADOWING-IMPORT
- * [ ] SIGNED-BYTE
- * [ ] SIMPLE-BIT-VECTOR
- * [ ] SIMPLE-BIT-VECTOR-P
  * [ ] UPGRADED-ARRAY-ELEMENT-TYPE
  * [ ] UPGRADED-COMPLEX-PART-TYPE
  * [ ] USE-VALUE
@@ -147,6 +120,20 @@
  * [x] ATANH
  * [x] ATOM
  * [x] BIGNUM
+ * [x] BIT
+ * [x] BIT-AND
+ * [x] BIT-ANDC1
+ * [x] BIT-ANDC2
+ * [x] BIT-EQV
+ * [x] BIT-IOR
+ * [x] BIT-NAND
+ * [x] BIT-NOR
+ * [x] BIT-NOT
+ * [x] BIT-ORC1
+ * [x] BIT-ORC2
+ * [x] BIT-VECTOR
+ * [x] BIT-VECTOR-P
+ * [x] BIT-XOR
  * [x] BLOCK
  * [x] BOOLE
  * [x] BOOLE-1
@@ -172,6 +159,9 @@
  * [x] BROADCAST-STREAM-STREAMS
  * [x] BUILT-IN-CLASS
  * [x] BUTLAST
+ * [x] BYTE
+ * [x] BYTE-POSITION
+ * [x] BYTE-SIZE
  * [x] CAAAAR
  * [x] CAAADR
  * [x] CAAAR
@@ -276,6 +266,7 @@
  * [x] DELETE-IF
  * [x] DELETE-PACKAGE
  * [x] DENOMINATOR
+ * [x] DEPOSIT-FIELD
  * [x] DESCRIBE
  * [x] DIGIT-CHAR
  * [x] DIGIT-CHAR-P
@@ -293,6 +284,7 @@
  * [x] DOUBLE-FLOAT
  * [x] DOUBLE-FLOAT-EPSILON
  * [x] DOUBLE-FLOAT-NEGATIVE-EPSILON
+ * [x] DPB
  * [x] DRIBBLE
  * [x] DYNAMIC-EXTENT
  * [x] ECASE
@@ -403,6 +395,8 @@
  * [x] LAMBDA-PARAMETERS-LIMIT
  * [x] LAST
  * [x] LCM
+ * [x] LDB
+ * [x] LDB-TEST
  * [x] LEAST-NEGATIVE-DOUBLE-FLOAT
  * [x] LEAST-NEGATIVE-LONG-FLOAT
  * [x] LEAST-NEGATIVE-NORMALIZED-DOUBLE-FLOAT
@@ -453,6 +447,7 @@
  * [x] MACHINE-INSTANCE
  * [x] MACHINE-TYPE
  * [x] MACHINE-VERSION
+ * [x] MACROEXPAND
  * [x] MAKE-ARRAY
  * [x] MAKE-BROADCAST-STREAM
  * [x] MAKE-CONCATENATED-STREAM
@@ -480,6 +475,7 @@
  * [x] MAPHASH
  * [x] MAPL
  * [x] MAPLIST
+ * [x] MASK-FIELD
  * [x] MAX
  * [x] MEMBER
  * [x] MEMBER-IF
@@ -628,6 +624,7 @@
  * [x] ROW-MAJOR-AREF
  * [x] RPLACA
  * [x] RPLACD
+ * [x] SBIT
  * [x] SCALE-FLOAT
  * [x] SCHAR
  * [x] SEARCH
@@ -644,8 +641,11 @@
  * [x] SHORT-FLOAT
  * [x] SHORT-FLOAT-EPSILON
  * [x] SHORT-FLOAT-NEGATIVE-EPSILON
+ * [x] SIGNED-BYTE
  * [x] SIGNUM
  * [x] SIMPLE-ARRAY
+ * [x] SIMPLE-BIT-VECTOR
+ * [x] SIMPLE-BIT-VECTOR-P
  * [x] SIMPLE-CONDITION
  * [x] SIMPLE-CONDITION-FORMAT-ARGUMENTS
  * [x] SIMPLE-CONDITION-FORMAT-CONTROL

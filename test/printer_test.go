@@ -3,7 +3,7 @@
 package test
 
 import (
-	"io/ioutil"
+	"io"
 	"math/big"
 	"os"
 	"testing"
@@ -580,9 +580,9 @@ func TestPrinterWrite(t *testing.T) {
 	slip.SetVar(key, (*slip.FileStream)(pw))
 	slip.Write(slip.List{nil, slip.True})
 
-	pw.Close()
+	_ = pw.Close()
 	var out []byte
-	out, err = ioutil.ReadAll(pr)
+	out, err = io.ReadAll(pr)
 	tt.Nil(t, err)
 	tt.Equal(t, "(nil t)", string(out))
 
@@ -602,9 +602,9 @@ func TestWarnStandardOutput(t *testing.T) {
 
 	slip.Warn("duck")
 
-	pw.Close()
+	_ = pw.Close()
 	var out []byte
-	out, err = ioutil.ReadAll(pr)
+	out, err = io.ReadAll(pr)
 	tt.Nil(t, err)
 	tt.Equal(t, "Warning: duck\n", string(out))
 }
@@ -634,9 +634,9 @@ func TestWarnInteractive(t *testing.T) {
 	slip.SetVar(ansiKey, nil)
 	slip.Warn("duck")
 
-	pw.Close()
+	_ = pw.Close()
 	var out []byte
-	out, err = ioutil.ReadAll(pr)
+	out, err = io.ReadAll(pr)
 	tt.Nil(t, err)
 	tt.Equal(t, "\x1b[31mWarning: duck\x1b[m\nWarning: duck\n", string(out))
 }

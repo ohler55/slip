@@ -63,8 +63,8 @@ type PeekChar struct {
 // Call the function with the arguments provided.
 func (f *PeekChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 0, 5)
+	is := s.Get(slip.Symbol("*standard-input*"))
 	var (
-		is  slip.Object = s.Get(slip.Symbol("*standard-input*"))
 		pt  slip.Object
 		r   rune
 		err error

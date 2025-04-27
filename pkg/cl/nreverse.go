@@ -78,6 +78,9 @@ func (f *Nreverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 			}
 		}
 		result = ta
+	case *slip.BitVector:
+		ta.Reverse()
+		result = ta
 	default:
 		slip.PanicType("sequence", ta, "sequence")
 	}

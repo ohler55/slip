@@ -66,7 +66,7 @@ func (f *Uniq) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				}
 				continue
 			}
-			arg, target = normalizeNumber(args[pos], target)
+			arg, target = slip.NormalizeNumber(args[pos], target)
 			switch ta := arg.(type) {
 			case slip.Fixnum:
 				if target.(slip.Fixnum) == ta {

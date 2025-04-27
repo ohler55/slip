@@ -180,9 +180,7 @@ func DefFlavor(
 	for vn := range nf.defaultVars {
 		nf.varNames = append(nf.varNames, vn)
 	}
-	for _, vn := range nf.requiredVars {
-		nf.varNames = append(nf.varNames, vn)
-	}
+	nf.varNames = append(nf.varNames, nf.requiredVars...)
 	allFlavors[nf.name] = nf
 	slip.RegisterClass(nf.name, nf)
 	_ = p.Set(nf.name, nf)
@@ -253,9 +251,7 @@ func setDefaultHandler(nf *Flavor, val slip.Object) {
 Top:
 	switch tv := val.(type) {
 	case slip.Symbol:
-		if fun, ok := slip.NewFunc(string(tv), slip.List{}).(slip.Funky); ok {
-			nf.defaultHandler = fun.Caller()
-		}
+		nf.defaultHandler = slip.NewFunc(string(tv), slip.List{}).Caller()
 	case *cl.Quote:
 		val = tv.Args[0]
 		goto Top
