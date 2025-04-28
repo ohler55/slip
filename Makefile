@@ -21,4 +21,7 @@ testlint: lint
 test:
 	make -C test cover
 
+test-plugins: plugins
+	go run cmd/slip/main.go -e '(terpri)' plugins/require-test.lisp
+
 .PHONY: all lint clean build test test plugins
