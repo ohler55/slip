@@ -13,7 +13,7 @@ lint:
 	golangci-lint run
 
 plugins:
-	$(foreach plugin, $(wildcard ./plugins/*), cd $(plugin); go mod edit --replace github.com/ohler55/slip=../..; make ; go mod edit --replace github.com/ohler55/slip=../slip; cd $(ROOT_DIR);)
+	$(foreach plugin, $(wildcard ./plugins/slip-*), cd $(plugin); go mod edit --replace github.com/ohler55/slip=../..; make ; go mod edit --replace github.com/ohler55/slip=../slip; cd $(ROOT_DIR);)
 
 testlint: lint
 	make -C test
