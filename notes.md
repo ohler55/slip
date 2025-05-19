@@ -4,6 +4,16 @@
 
 - next
 
+ - gi
+  - encrypt(data key &key method)
+   - data is string, octets, ??
+   - key is string or octets
+   - method is :aes, :rsa, :sha[1,2,3,256,512], ...
+  - dencrypt(data key &key method)
+  - encrypt-file(input-filename output-filename key &key method)
+  - dencrypt-file(input-filename output-filename key &key method)
+  - crypto-hash(data &key method)
+
  - tough-ones
   - [ ] DESTRUCTURING-BIND
   - [ ] FORMATTER
