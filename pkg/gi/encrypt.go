@@ -54,7 +54,8 @@ func init() {
 			},
 			Return: "octets",
 			Text: `__encrypt__ the _data_ using _key_ providing according to the _method_. Note
-that data that is less than a multiple of the cipher block size will be padded with \00 octets.`,
+that data that is less than a multiple of the cipher block size will be padded with _:pad_ octets.
+If _key_ is not a supported block size it is hashed before being used.`,
 			Examples: []string{
 				`(encrypt "some data" 'quux :cipher :des :nonce "1234567890123456") =>`,
 				`  #(49 50 51 52 53 54 55 56 236 185 245 197 124 90 196 125 71 124 207 160 115 152 186 210)`,
@@ -92,12 +93,13 @@ func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	var (
 		block cipher.Block
 		bsize int
-		err   error
 	)
 	klen := len(key)
 	switch ciph {
 	case slip.Symbol(":aes"):
 		switch {
+		case klen == 16 || klen == 24 || klen == 32:
+			// Leave key as is.
 		case klen <= 16:
 			key = sha3.SumSHAKE256(key, 16)
 		case klen <= 24:
@@ -105,17 +107,17 @@ func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		default:
 			key = sha3.SumSHAKE256(key, 32)
 		}
-		block, err = aes.NewCipher(key)
+		// The error return is
+		block, _ = aes.NewCipher(key)
 		bsize = aes.BlockSize
 	case slip.Symbol(":des"):
-		key = sha3.SumSHAKE256(key, 8)
-		block, err = des.NewCipher(key)
+		if klen != 8 {
+			key = sha3.SumSHAKE256(key, 8)
+		}
+		block, _ = des.NewCipher(key)
 		bsize = des.BlockSize
 	default:
 		slip.PanicType("cipher", ciph, ":aes", ":des")
-	}
-	if err != nil {
-		panic(err)
 	}
 	// Data must be a multiple of the block size so pad with \0.
 	if len(data)%bsize != 0 {
@@ -125,8 +127,8 @@ func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	nonce := buf[:bsize]
 	if 0 < len(non) {
 		copy(nonce, non)
-	} else if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err)
+	} else {
+		_, _ = io.ReadFull(rand.Reader, nonce)
 	}
 	mode := cipher.NewCBCEncrypter(block, nonce)
 	mode.CryptBlocks(buf[bsize:], data)
