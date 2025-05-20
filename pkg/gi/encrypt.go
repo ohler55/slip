@@ -72,28 +72,40 @@ type Encrypt struct {
 func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 8)
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
-	key := []byte(slip.CoerceToOctets(args[1]).(slip.Octets))
-	var (
-		ciph slip.Object = slip.Symbol(":aes")
-		non  []byte
-	)
-	pad := byte(0)
-	if 2 < len(args) {
-		rest := args[2:]
+	non, pad, block, bsize := extractEncryptArgs(args[1:])
+	// Data must be a multiple of the block size so pad as needed.
+	if len(data)%bsize != 0 {
+		data = append(data, bytes.Repeat([]byte{pad}, bsize-len(data)%bsize)...)
+	}
+	buf := make([]byte, bsize+len(data))
+	nonce := buf[:bsize]
+	if 0 < len(non) {
+		copy(nonce, non)
+	} else {
+		_, _ = io.ReadFull(rand.Reader, nonce)
+	}
+	mode := cipher.NewCBCEncrypter(block, nonce)
+	mode.CryptBlocks(buf[bsize:], data)
+
+	return slip.Octets(buf)
+}
+
+func extractEncryptArgs(args slip.List) (nonce []byte, pad byte, block cipher.Block, bsize int) {
+	key := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
+	var ciph slip.Object = slip.Symbol(":aes")
+	pad = byte(0)
+	if 1 < len(args) {
+		rest := args[1:]
 		if obj, has := slip.GetArgsKeyValue(rest, slip.Symbol(":cipher")); has {
 			ciph = obj
 		}
 		if obj, has := slip.GetArgsKeyValue(rest, slip.Symbol(":nonce")); has {
-			non = []byte(slip.CoerceToOctets(obj).(slip.Octets))
+			nonce = []byte(slip.CoerceToOctets(obj).(slip.Octets))
 		}
 		if obj, has := slip.GetArgsKeyValue(rest, slip.Symbol(":pad")); has {
 			pad = byte(slip.ToOctet(obj).(slip.Octet))
 		}
 	}
-	var (
-		block cipher.Block
-		bsize int
-	)
 	klen := len(key)
 	switch ciph {
 	case slip.Symbol(":aes"):
@@ -118,19 +130,5 @@ func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	default:
 		slip.PanicType("cipher", ciph, ":aes", ":des")
 	}
-	// Data must be a multiple of the block size so pad with \0.
-	if len(data)%bsize != 0 {
-		data = append(data, bytes.Repeat([]byte{pad}, bsize-len(data)%bsize)...)
-	}
-	buf := make([]byte, bsize+len(data))
-	nonce := buf[:bsize]
-	if 0 < len(non) {
-		copy(nonce, non)
-	} else {
-		_, _ = io.ReadFull(rand.Reader, nonce)
-	}
-	mode := cipher.NewCBCEncrypter(block, nonce)
-	mode.CryptBlocks(buf[bsize:], data)
-
-	return slip.Octets(buf)
+	return
 }

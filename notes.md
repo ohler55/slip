@@ -7,7 +7,7 @@
  - gi
   [x] encrypt
   [x] dencrypt
-  [ ] encrypt-file(input-filename output-filename key &key method)
+  [x] encrypt-file(input-filename output-filename key &key method)
   [ ] dencrypt-file(input-filename output-filename key &key method)
   [ ] crypto-hash(data &key method)
 
