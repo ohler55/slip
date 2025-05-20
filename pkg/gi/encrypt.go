@@ -107,7 +107,6 @@ func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		default:
 			key = sha3.SumSHAKE256(key, 32)
 		}
-		// The error return is
 		block, _ = aes.NewCipher(key)
 		bsize = aes.BlockSize
 	case slip.Symbol(":des"):
