@@ -2,3 +2,5 @@ testout
 .scratch
 enc-input.txt
 enc-output.enc
+enc-input.enc
+dec-output.txt

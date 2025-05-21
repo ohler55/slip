@@ -30,7 +30,7 @@ func init() {
 				{
 					Name: "key",
 					Type: "string",
-					Text: "The data to decrypt. Must be coercible to _octets_.",
+					Text: "The key to use for decryption. Must be coercible to _octets_.",
 				},
 				{
 					Name: "&key"},
@@ -46,7 +46,7 @@ func init() {
 				},
 			},
 			Return: "octets",
-			Text: `__decrypt__ the _data_ using _key_ providing according to the _method_.
+			Text: `__decrypt__ the _data_ using _key_ providing according to the _cipher_.
 If _key_ is not a supported block size it is hashed before being used just as __encrypt__ does.`,
 			Examples: []string{
 				`(decrypt`,
@@ -65,19 +65,40 @@ type Decrypt struct {
 func (f *Decrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 6)
 	var (
-		ciph slip.Object = slip.Symbol(":aes")
-		non  []byte
-		trim bool
-		dup  bool
+		non []byte
+		dup bool
 	)
 	if _, ok := args[0].(slip.Octets); ok {
 		dup = true
 	}
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
-	key := []byte(slip.CoerceToOctets(args[1]).(slip.Octets))
-	strip := byte(0)
-	if 2 < len(args) {
-		rest := args[2:]
+	strip, block, bsize, trim := extractDencryptArgs(args[1:])
+
+	if len(data) < bsize {
+		slip.NewPanic("decrypt data is too short")
+	}
+	non = data[:bsize]
+	data = data[bsize:]
+	if dup {
+		tmp := make([]byte, len(data))
+		copy(tmp, data)
+		data = tmp
+	}
+	mode := cipher.NewCBCDecrypter(block, non)
+	mode.CryptBlocks(data, data)
+	if trim {
+		data = bytes.TrimRight(data, string([]byte{strip}))
+	}
+	return slip.Octets(data)
+}
+
+func extractDencryptArgs(args slip.List) (strip byte, block cipher.Block, bsize int, trim bool) {
+	var ciph slip.Object = slip.Symbol(":aes")
+
+	key := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
+	strip = byte(0)
+	if 1 < len(args) {
+		rest := args[1:]
 		if obj, has := slip.GetArgsKeyValue(rest, slip.Symbol(":cipher")); has {
 			ciph = obj
 		}
@@ -86,10 +107,6 @@ func (f *Decrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			trim = true
 		}
 	}
-	var (
-		block cipher.Block
-		bsize int
-	)
 	klen := len(key)
 	switch ciph {
 	case slip.Symbol(":aes"):
@@ -114,20 +131,6 @@ func (f *Decrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	default:
 		slip.PanicType("cipher", ciph, ":aes", ":des")
 	}
-	if len(data) < bsize {
-		slip.NewPanic("decrypt data is too short")
-	}
-	non = data[:bsize]
-	data = data[bsize:]
-	if dup {
-		tmp := make([]byte, len(data))
-		copy(tmp, data)
-		data = tmp
-	}
-	mode := cipher.NewCBCDecrypter(block, non)
-	mode.CryptBlocks(data, data)
-	if trim {
-		data = bytes.TrimRight(data, string([]byte{strip}))
-	}
-	return slip.Octets(data)
+
+	return
 }

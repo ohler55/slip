@@ -32,7 +32,7 @@ func init() {
 				{
 					Name: "key",
 					Type: "string",
-					Text: "The data to encrypt. Must be coercible to _octets_.",
+					Text: "The key to use for the encryption. Must be coercible to _octets_.",
 				},
 				{
 					Name: "&key"},
