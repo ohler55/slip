@@ -4,6 +4,32 @@
 
 - next
 
+ - gi
+  [x] encrypt
+  [x] dencrypt
+  [x] encrypt-file
+  [x] dencrypt-file
+  [x] crypto-hash
+
+ - zippy
+  [ ] zip(data level)
+  [ ] unzip(data)
+  [ ] make-zip-writer (level) => zip-writer, an output stream
+  [ ] make-zip-reader () => zip-reader, an input-stream
+
+ - save-state (destination &key order)
+  - set current package
+  - keep track of require imports
+   - pkg/cl/require should store order of call, name, and path of loaded
+  - state file is just lisp
+   - requires
+   - variable setq (use correct package)
+    - check boundp first then defvar or setq
+   - defuns for all lambda function like dissasemble (use correct package)
+  - order (sort) option
+   - require and vars always alphabetical
+   - functions alpha, dependency, reverse-dependency
+
  - tough-ones
   - [ ] DESTRUCTURING-BIND
   - [ ] FORMATTER
@@ -29,6 +55,7 @@
   - shadow
   - package-shadowing-symbols
   - shadowing-import
+
 
 - flow state
  - need a way to identify new or existing

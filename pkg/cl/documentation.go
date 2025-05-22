@@ -23,14 +23,14 @@ func init() {
 					Text: "An object.",
 				},
 				{
-					Name: "doc-type|t",
+					Name: "doc-type",
 					Type: "symbol",
 					Text: "The type to get the documentation for.",
 				},
 			},
 			Return: "string|nil",
-			Text: `__documentation__ returns the_documentation _x_ or what _x_ refers to. The supported
-_doc-type_ values supported are _t_, _function_, _variable_, _type_, and _constant_.
+			Text: `__documentation__ returns the documentation _x_ or what _x_ refers to. The supported
+_doc-type_ values supported are _function_, _variable_, _type_, and _constant_.
 `,
 			Examples: []string{
 				"(documentation '*standard-output* 'variable)",
