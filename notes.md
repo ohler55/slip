@@ -3,14 +3,13 @@
 - **multipass** or utm for linux
 
 - next
- - (list tab hangs
 
  - gi
   [x] encrypt
   [x] dencrypt
   [x] encrypt-file
   [x] dencrypt-file
-  [ ] crypto-hash(data &key method)
+  [x] crypto-hash
 
  - zippy
   [ ] zip(data level)
