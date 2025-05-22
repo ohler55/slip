@@ -4,13 +4,6 @@
 
 - next
 
- - gi
-  [x] encrypt
-  [x] dencrypt
-  [x] encrypt-file
-  [x] dencrypt-file
-  [x] crypto-hash
-
  - zippy
   [ ] zip(data level)
   [ ] unzip(data)
