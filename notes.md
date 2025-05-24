@@ -6,8 +6,9 @@
 
  - zippy
   [x] zip
-  [ ] unzip(data) => data,header as a property list
+  [x] unzip
   [ ] with-zip-writer (args &rest forms)
+   - with-open-?? then pass to with-zip-writer
    - args is a list of (symbol output-stream &optional level)
   [ ] with-zip-reader (args $rest forms)
 

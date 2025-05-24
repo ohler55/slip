@@ -107,7 +107,7 @@ func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		}
 		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":mod-time")); has {
 			if st, ok := val.(slip.Time); ok {
-				w.ModTime = time.Time(st)
+				w.ModTime = time.Time(st).UTC()
 			} else {
 				slip.PanicType(":mod-time", val, "time")
 			}
