@@ -4,18 +4,45 @@
 
 - next
 
- - gi
-  [x] encrypt
-  [x] dencrypt
-  [x] encrypt-file
-  [x] dencrypt-file
-  [x] crypto-hash
-
- - zippy
-  [ ] zip(data level)
-  [ ] unzip(data)
-  [ ] make-zip-writer (level) => zip-writer, an output stream
-  [ ] make-zip-reader () => zip-reader, an input-stream
+ - pretty-print and *print-pretty*
+  - add function to gi
+   - use *print-right-margin*
+   - force *print-base* *print-case* *print-escape* *print-level* *print-lines* *print-readably* *print-radix* *print-array*
+  - better algorithm for specific first words in list (defun let let* cond progn and others)
+   - Printer createTree and appendTree improvement
+   - create tree with values or children set
+    - use print vars to create leaf strings
+    - can each node implement a common interface for ideal, tight, and squeeze?
+     - leaf and branch nodes, different branch node type for defun, let, quote, cond, etc
+    - maybe a tightness args passed down and decremented each time
+     - greater than 0 then tighter
+     - if less than zero then squeeze
+     - when 0 no need to decrement, use ideal
+  - rules
+   - defun and defmacro
+   - let and let*
+   - cond
+   - defvar
+   - loop
+  - build tree with min, max, and preferred width
+   - node
+    - name
+    - left
+    - width
+    - layout - match funcs
+    - children
+    - layout funcs
+     - ideal(left int) (right int) or maybe
+     - tight
+     - squeeze
+   - algorithm
+    - start with preferred
+     - calculate ideal, tight, and squuze widths
+     - parent then decides which layout to use and calls to set left
+      - left of 0 indicates same line
+    - try to fit by adjust at higher levels first
+    - if needed go to more extremes (example is (list
+                                                 one))
 
  - save-state (destination &key order)
   - set current package
@@ -29,6 +56,7 @@
   - order (sort) option
    - require and vars always alphabetical
    - functions alpha, dependency, reverse-dependency
+
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND
