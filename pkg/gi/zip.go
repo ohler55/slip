@@ -74,12 +74,13 @@ type Zip struct {
 }
 
 // Call the function with the arguments provided.
-func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 12)
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
 	level := gzip.DefaultCompression
-	if 1 < len(args) {
-		switch ta := args[1].(type) {
+	args = args[1:]
+	if 0 < len(args) {
+		switch ta := args[0].(type) {
 		case nil:
 			// leave as the default
 			args = args[1:]
@@ -97,28 +98,7 @@ func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if err != nil {
 		panic(err)
 	}
-	if 1 < len(args) {
-		args = args[1:]
-		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":comment")); has {
-			w.Comment = slip.MustBeString(val, ":comment")
-		}
-		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":extra")); has {
-			w.Extra = []byte(slip.CoerceToOctets(val).(slip.Octets))
-		}
-		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":mod-time")); has {
-			if st, ok := val.(slip.Time); ok {
-				w.ModTime = time.Time(st).UTC()
-			} else {
-				slip.PanicType(":mod-time", val, "time")
-			}
-		}
-		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":name")); has {
-			w.Name = slip.MustBeString(val, ":name")
-		}
-		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":os")); has {
-			w.OS = byte(slip.ToOctet(val).(slip.Octet))
-		}
-	}
+	setZipHeader(w, args)
 	if _, err = w.Write(data); err != nil {
 		panic(err)
 	}
@@ -126,4 +106,28 @@ func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	_ = w.Close()
 
 	return slip.Octets(buf.Bytes())
+}
+
+func setZipHeader(z *gzip.Writer, args slip.List) {
+	if 0 < len(args) {
+		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":comment")); has {
+			z.Comment = slip.MustBeString(val, ":comment")
+		}
+		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":extra")); has {
+			z.Extra = []byte(slip.CoerceToOctets(val).(slip.Octets))
+		}
+		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":mod-time")); has {
+			if st, ok := val.(slip.Time); ok {
+				z.ModTime = time.Time(st).UTC()
+			} else {
+				slip.PanicType(":mod-time", val, "time")
+			}
+		}
+		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":name")); has {
+			z.Name = slip.MustBeString(val, ":name")
+		}
+		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":os")); has {
+			z.OS = byte(slip.ToOctet(val).(slip.Octet))
+		}
+	}
 }

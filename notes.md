@@ -7,23 +7,8 @@
  - zippy
   [x] zip
   [x] unzip
-  [ ] with-zip-writer (args &rest forms)
-   - with-open-?? then pass to with-zip-writer
-   - args is a list of (symbol output-stream &optional level)
+  [x] with-zip-writer
   [ ] with-zip-reader (args $rest forms)
-
- - save-state (destination &key order)
-  - set current package
-  - keep track of require imports
-   - pkg/cl/require should store order of call, name, and path of loaded
-  - state file is just lisp
-   - requires
-   - variable setq (use correct package)
-    - check boundp first then defvar or setq
-   - defuns for all lambda function like dissasemble (use correct package)
-  - order (sort) option
-   - require and vars always alphabetical
-   - functions alpha, dependency, reverse-dependency
 
  - pretty-print and *print-pretty*
   - add function to gi
@@ -64,6 +49,20 @@
     - try to fit by adjust at higher levels first
     - if needed go to more extremes (example is (list
                                                  one))
+
+ - save-state (destination &key order)
+  - set current package
+  - keep track of require imports
+   - pkg/cl/require should store order of call, name, and path of loaded
+  - state file is just lisp
+   - requires
+   - variable setq (use correct package)
+    - check boundp first then defvar or setq
+   - defuns for all lambda function like dissasemble (use correct package)
+  - order (sort) option
+   - require and vars always alphabetical
+   - functions alpha, dependency, reverse-dependency
+
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND
