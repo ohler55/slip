@@ -32,7 +32,7 @@ The remaining elements of the args list are the same as for the __zip__ function
 					Text: "The forms to evaluate.",
 				},
 			},
-			Return: "octets",
+			Return: "nil",
 			Text: `__with-zip-writer__ creates a zip writer stream that compresses and writes to the provided
 _output-stream_ which must be the second element of the _args_ list. The first elements of the _args_ list must
 be a symbol which is then bound to the new zip _output-stream_. The remaining elements of the _args_ list are

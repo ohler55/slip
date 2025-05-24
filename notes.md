@@ -4,12 +4,6 @@
 
 - next
 
- - zippy
-  [x] zip
-  [x] unzip
-  [x] with-zip-writer
-  [ ] with-zip-reader (args $rest forms)
-
  - pretty-print and *print-pretty*
   - add function to gi
    - use *print-right-margin*
