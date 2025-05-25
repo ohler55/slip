@@ -5,61 +5,15 @@
 - next
 
  - pretty-print
-  - add function to gi
-   - use *print-right-margin*
-   - use *print-base* *print-case* *print-escape* *print-level* *print-lines* *print-readably* *print-radix* *print-array*
-    - to create the leaves
-   - wrap doc strings
-
-  - pretty nodes type prettyNode insterface or pNode
-   - layout(left, right, tightness int) (ok bool)
-   - append(b []byte, left, right, tightness int) []byte
-    - left is the indent amount for additional lines if needed
-    - right is used for doc strings
-   - buildPTree
-    - build based on names of functions or if list mode do the same for names (can it be the same code)
-   - pLeaf
-   - pList
    - pLet (let and let*)
    - pDefun (defun defmacro)
+    - wrap doc strings
    - pLambda
+   - pCond
+   - pDefvar
+   - pLoop (dotimes?)
    - pWith (with-output-to-string, other with-xxx)
 
-  - better algorithm for specific first words in list (defun let let* cond progn and others)
-   - Printer createTree and appendTree improvement
-   - create tree with values or children set
-    - use print vars to create leaf strings
-    - can each node implement a common interface for ideal, tight, and squeeze?
-     - leaf and branch nodes, different branch node type for defun, let, quote, cond, etc
-    - maybe a tightness args passed down and decremented each time
-     - greater than 0 then tighter
-     - if less than zero then squeeze
-     - when 0 no need to decrement, use ideal
-  - rules
-   - defun and defmacro
-   - let and let*
-   - cond
-   - defvar
-   - loop
-  - build tree with min, max, and preferred width
-   - node
-    - name
-    - left
-    - width
-    - layout - match funcs
-    - children
-    - layout funcs
-     - ideal(left int) (right int) or maybe
-     - tight
-     - squeeze
-   - algorithm
-    - start with preferred
-     - calculate ideal, tight, and squuze widths
-     - parent then decides which layout to use and calls to set left
-      - left of 0 indicates same line
-    - try to fit by adjust at higher levels first
-    - if needed go to more extremes (example is (list
-                                                 one))
 
  - save-state (destination &key order)
   - set current package
