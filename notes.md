@@ -4,10 +4,27 @@
 
 - next
 
- - pretty-print and *print-pretty*
+ - pretty-print
   - add function to gi
    - use *print-right-margin*
-   - force *print-base* *print-case* *print-escape* *print-level* *print-lines* *print-readably* *print-radix* *print-array*
+   - use *print-base* *print-case* *print-escape* *print-level* *print-lines* *print-readably* *print-radix* *print-array*
+    - to create the leaves
+   - wrap doc strings
+
+  - pretty nodes type prettyNode insterface or pNode
+   - layout(left, right, tightness int) (ok bool)
+   - append(b []byte, left, right, tightness int) []byte
+    - left is the indent amount for additional lines if needed
+    - right is used for doc strings
+   - buildPTree
+    - build based on names of functions or if list mode do the same for names (can it be the same code)
+   - pLeaf
+   - pList
+   - pLet (let and let*)
+   - pDefun (defun defmacro)
+   - pLambda
+   - pWith (with-output-to-string, other with-xxx)
+
   - better algorithm for specific first words in list (defun let let* cond progn and others)
    - Printer createTree and appendTree improvement
    - create tree with values or children set
