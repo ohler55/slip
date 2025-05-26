@@ -2,9 +2,19 @@
 
 package gi
 
+import "github.com/ohler55/slip"
+
 type pList struct {
 	children []pNode
 	wide     int
+}
+
+func newPlist(obj slip.List, p *slip.Printer) pNode {
+	list := pList{children: make([]pNode, len(obj))}
+	for i, v := range obj {
+		list.children[i] = buildPnode(v, p)
+	}
+	return &list
 }
 
 func (list *pList) layout(maxWidth, tightness int) (width int) {

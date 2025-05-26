@@ -6,16 +6,18 @@ import (
 	"io"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 )
 
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := PrettyPrint{Function: slip.Function{Name: "pretty-print", Args: args}}
+			f := PrettyPrint{Function: slip.Function{Name: "pretty-print", Args: args, SkipEval: []bool{true, false}}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
+			Kind: slip.MacroSymbol,
 			Name: "pretty-print",
 			Args: []*slip.DocArg{
 				{
@@ -54,7 +56,18 @@ func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	p := *slip.DefaultPrinter()
 	p.ScopedUpdate(s)
 
-	tree := buildPnode(args[0], &p)
+	obj := args[0]
+	// Quoted values are treated as the value quoted. Lists are converted to
+	// functions if possible.
+	switch ta := obj.(type) {
+	case slip.List:
+		obj = slip.ListToFunc(s, ta, depth+1)
+	case *cl.Quote:
+		if 0 < len(ta.Args) {
+			obj = ta.Args[0]
+		}
+	}
+	tree := buildPnode(obj, &p)
 	mx := tree.depth() + 1
 	var (
 		ok        bool

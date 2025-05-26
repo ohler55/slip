@@ -4,6 +4,7 @@ package gi
 
 import (
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 )
 
 const indent = "\n                                                                " +
@@ -21,11 +22,10 @@ type pNode interface {
 func buildPnode(obj slip.Object, p *slip.Printer) (node pNode) {
 	switch to := obj.(type) {
 	case slip.List:
-		list := pList{children: make([]pNode, len(to))}
-		for i, v := range to {
-			list.children[i] = buildPnode(v, p)
-		}
-		node = &list
+		node = newPlist(to, p)
+	case *cl.Let, *cl.Letx:
+		// node = newPlet(to, p)
+		node = pLeaf(p.Append(nil, obj, 0)) // TBD temporary
 	default:
 		node = pLeaf(p.Append(nil, obj, 0))
 	}
