@@ -61,7 +61,11 @@ func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	// functions if possible.
 	switch ta := obj.(type) {
 	case slip.List:
-		obj = slip.ListToFunc(s, ta, depth+1)
+		// obj = slip.ListToFunc(s, ta, depth+1)
+		obj = slip.CompileList(ta)
+
+		// TBD write a function that converts list to func and then args as well or fix CompileList
+
 	case *cl.Quote:
 		if 0 < len(ta.Args) {
 			obj = ta.Args[0]

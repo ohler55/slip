@@ -23,9 +23,10 @@ func buildPnode(obj slip.Object, p *slip.Printer) (node pNode) {
 	switch to := obj.(type) {
 	case slip.List:
 		node = newPlist(to, p)
-	case *cl.Let, *cl.Letx:
-		// node = newPlet(to, p)
-		node = pLeaf(p.Append(nil, obj, 0)) // TBD temporary
+	case *cl.Let:
+		node = newPlet(to, p)
+	case *cl.Letx:
+		node = newPlet(to, p)
 	default:
 		node = pLeaf(p.Append(nil, obj, 0))
 	}

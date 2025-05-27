@@ -13,6 +13,12 @@
    - pDefvar
    - pLoop (dotimes?)
    - pWith (with-output-to-string, other with-xxx)
+   - pFlavor
+   - if symbol lookup what it is bound to
+    - func
+    - flavor
+    - method? how to designate in a word vanilla.describe or something like that
+    - var - (defvar xx ...)
 
 
  - save-state (destination &key order)
