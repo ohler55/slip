@@ -9,11 +9,10 @@ type pLet struct {
 	name string
 }
 
-func newPlet(obj slip.Funky, p *slip.Printer) pNode {
-	args := obj.GetArgs()
+func newPlet(name string, args slip.List, p *slip.Printer) pNode {
 	let := pLet{
 		pList: pList{children: make([]pNode, len(args))},
-		name:  obj.GetName(),
+		name:  name,
 	}
 	bindings := args[0].(slip.List)
 	let.children[0] = newPbindings(bindings, p)
@@ -48,24 +47,24 @@ func (let *pLet) layout(maxWidth, tightness int) (width int) {
 	}
 	if width <= maxWidth {
 		let.wide = width
+		let.mod = pUsual
 	}
 	return
 }
 
-func (let *pLet) adjoin(b []byte, left, right, tightness int) []byte {
+func (let *pLet) adjoin(b []byte, left, right int) []byte {
 	b = append(b, '(')
 	b = append(b, let.name...)
 	b = append(b, ' ')
-	ct := tightness
-	if 0 < tightness {
-		ct--
-	} else if tightness < 0 {
-		ct++
-	}
-	b = let.children[0].adjoin(b, left+len(let.name)+3, right, ct)
-	for _, n := range let.children[1:] {
-		b = append(b, indent[:3]...)
-		b = n.adjoin(b, left+2, right, ct)
-	}
+	// if 0 < tightness {
+	// 	ct--
+	// } else if tightness < 0 {
+	// 	ct++
+	// }
+	// b = let.children[0].adjoin(b, left+len(let.name)+3, right, ct)
+	// for _, n := range let.children[1:] {
+	// 	b = append(b, indent[:3]...)
+	// 	b = n.adjoin(b, left+2, right, ct)
+	// }
 	return append(b, ')')
 }

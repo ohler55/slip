@@ -8,7 +8,7 @@ func (leaf pLeaf) layout(maxWidth, tightness int) (width int) {
 	return len([]rune(string(leaf)))
 }
 
-func (leaf pLeaf) adjoin(b []byte, left, right, tightness int) []byte {
+func (leaf pLeaf) adjoin(b []byte, left, right int) []byte {
 	return append(b, leaf...)
 }
 
@@ -18,4 +18,8 @@ func (leaf pLeaf) depth() int {
 
 func (leaf pLeaf) width() int {
 	return len([]rune(string(leaf)))
+}
+
+func (leaf pLeaf) mode() pMode {
+	return pUsual
 }

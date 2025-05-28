@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 )
 
 func init() {
@@ -56,29 +55,14 @@ func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	p := *slip.DefaultPrinter()
 	p.ScopedUpdate(s)
 
-	obj := args[0]
-	// Quoted values are treated as the value quoted. Lists are converted to
-	// functions if possible.
-	switch ta := obj.(type) {
-	case slip.List:
-		// obj = slip.ListToFunc(s, ta, depth+1)
-		obj = slip.CompileList(ta)
-
-		// TBD write a function that converts list to func and then args as well or fix CompileList
-
-	case *cl.Quote:
-		if 0 < len(ta.Args) {
-			obj = ta.Args[0]
-		}
-	}
-	tree := buildPnode(obj, &p)
+	tree := buildPnode(args[0], &p)
 	mx := tree.depth() + 1
 	var (
 		ok        bool
 		tightness int
 	)
 	rm := int(p.RightMargin)
-	for tightness = 0; tightness < mx; tightness++ {
+	for tightness = 0; tightness <= mx; tightness++ {
 		width := tree.layout(rm, tightness)
 		if width <= rm {
 			ok = true
@@ -86,14 +70,14 @@ func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result sli
 		}
 	}
 	if !ok {
-		for tightness = -1; -mx < tightness; tightness-- {
+		for tightness = -1; -mx <= tightness; tightness-- {
 			width := tree.layout(rm, tightness)
 			if width <= rm {
 				break
 			}
 		}
 	}
-	b := tree.adjoin(nil, 0, rm, tightness)
+	b := tree.adjoin(nil, 0, rm)
 	b = append(b, '\n')
 
 	var (

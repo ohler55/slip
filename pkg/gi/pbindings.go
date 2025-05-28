@@ -11,7 +11,11 @@ type pBindings struct {
 func newPbindings(obj slip.List, p *slip.Printer) pNode {
 	pb := pBindings{pList: pList{children: make([]pNode, len(obj))}}
 	for i, v := range obj {
-		pb.children[i] = buildPnode(v, p)
+		if list, ok := v.(slip.List); ok {
+			pb.children[i] = newPlist(list, p)
+		} else {
+			pb.children[i] = pLeaf(p.Append(nil, obj, 0))
+		}
 	}
 	return &pb
 }
@@ -41,19 +45,13 @@ func (pb *pBindings) layout(maxWidth, tightness int) (width int) {
 	return
 }
 
-func (pb *pBindings) adjoin(b []byte, left, right, tightness int) []byte {
+func (pb *pBindings) adjoin(b []byte, left, right int) []byte {
 	b = append(b, '(')
-	ct := tightness
-	if 0 < tightness {
-		ct--
-	} else if tightness < 0 {
-		ct++
-	}
 	for i, n := range pb.children {
 		if 0 < i {
 			b = append(b, indent[:left+1]...)
 		}
-		b = n.adjoin(b, left+1, right, ct)
+		b = n.adjoin(b, left+1, right)
 	}
 	return append(b, ')')
 }

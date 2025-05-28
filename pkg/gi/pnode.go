@@ -3,34 +3,95 @@
 package gi
 
 import (
+	"strings"
+
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 )
 
-const indent = "\n                                                                " +
-	"                                                                " +
-	"                                                                " +
-	"                                                                " // 256 wide should be enough
+const (
+	pNotSet pMode = iota
+	pUsual
+	pTight
+	pSqueeze
+
+	indent = "\n                                                                " +
+		"                                                                " +
+		"                                                                " +
+		"                                                                " // 256 wide should be enough
+)
+
+// pMode is used for tightness mode.
+type pMode int
+
+func (mode pMode) String() (s string) {
+	switch mode {
+	case pNotSet:
+		s = "pNotSet"
+	case pUsual:
+		s = "pUsual"
+	case pTight:
+		s = "pTight"
+	case pSqueeze:
+		s = "pSqueeze"
+	}
+	return
+}
 
 type pNode interface {
 	layout(maxWidth, tightness int) (width int)
-	adjoin(b []byte, left, right, tightness int) []byte
+	adjoin(b []byte, left, right int) []byte
 	depth() int
 	width() int
+	mode() pMode
 }
 
 func buildPnode(obj slip.Object, p *slip.Printer) (node pNode) {
+	// TBD don't convert to funcs, leave as basics but handle funcs by converting to list
+	// keep mode arg for quoted, usual, macro?
+
+	// Quoted values are treated as the value quoted. Lists are converted to
+	// functions if possible.
+top:
 	switch to := obj.(type) {
 	case slip.List:
-		node = newPlist(to, p)
-	case *cl.Let:
-		node = newPlet(to, p)
-	case *cl.Letx:
-		node = newPlet(to, p)
+		if len(to) == 0 {
+			obj = nil
+			goto top
+		}
+		if sym, ok := to[0].(slip.Symbol); ok {
+			node = buildPcall(sym, to[1:], p)
+		} else {
+			node = newPlist(to, p)
+		}
+	// case slip.Symbol:
+	// 	// TBD lookup and build list/forms
+	// 	if fi := slip.FindFunc(string(to)); fi != nil {
+	// 		obj = fi.Create(nil)
+	// 		goto top
+	// 	}
+	// case *cl.Quote:
+	// 	if 0 < len(to.Args) {
+	// 		obj = to.Args[0]
+	// 	}
+	// case *cl.Let:
+	// 	// node = newPlet(to, p)
+	// case *cl.Letx:
+	// 	// node = newPlet(to, p)
 	default:
 		node = pLeaf(p.Append(nil, obj, 0))
 	}
 	// TBD
 
+	return
+}
+
+func buildPcall(sym slip.Symbol, args slip.List, p *slip.Printer) (node pNode) {
+	name := strings.ToLower(string(sym))
+	switch name {
+	case "let", "let*":
+		node = newPlet(name, args, p)
+	default:
+		node = newPfun(name, args, p)
+	}
 	return
 }
