@@ -25,7 +25,6 @@ func newPlist(obj slip.List, p *slip.Printer) pNode {
 func (list *pList) layout(maxWidth, tightness int) (width int) {
 	mw := maxWidth - 1
 	// A list always starts with an open paren.
-	width = 1
 	if tightness == 0 {
 		width = 0
 		for _, n := range list.children {
