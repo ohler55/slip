@@ -22,37 +22,17 @@ func newPlet(name string, args slip.List, p *slip.Printer) pNode {
 	return &let
 }
 
-func (let *pLet) layout(maxWidth, tightness int) (width int) {
+func (let *pLet) layout(left, line int) (w int) {
 	// A let always starts with '(let ' or '(let* ' for let*. The forms are
 	// always indented by 2 so the layout at this level is not effected by the
 	// tightness other than shift the tighness for the children if needed.
-	ct := tightness
-	if 0 < tightness {
-		ct--
-	} else if tightness < 0 {
-		ct++
-	}
-	width = len(let.name) + 2
-	width += let.children[0].layout(maxWidth-width, ct)
-	var last int
-	for _, n := range let.children[1:] {
-		w := n.layout(maxWidth-2, ct) + 2
-		last = w
-		if width < w {
-			width = w
-		}
-	}
-	if last == width {
-		width++
-	}
-	if width <= maxWidth {
-		let.wide = width
-		let.mod = pUsual
-	}
+
+	// TBD
+
 	return
 }
 
-func (let *pLet) adjoin(b []byte, left, right int) []byte {
+func (let *pLet) adjoin(b []byte) []byte {
 	b = append(b, '(')
 	b = append(b, let.name...)
 	b = append(b, ' ')

@@ -9,40 +9,19 @@ import (
 )
 
 const (
-	pNotSet pMode = iota
-	pUsual
-	pTight
-	pSqueeze
-
 	indent = "\n                                                                " +
 		"                                                                " +
 		"                                                                " +
 		"                                                                " // 256 wide should be enough
 )
 
-// pMode is used for tightness mode.
-type pMode int
-
-func (mode pMode) String() (s string) {
-	switch mode {
-	case pNotSet:
-		s = "pNotSet"
-	case pUsual:
-		s = "pUsual"
-	case pTight:
-		s = "pTight"
-	case pSqueeze:
-		s = "pSqueeze"
-	}
-	return
-}
-
 type pNode interface {
-	layout(maxWidth, tightness int) (width int)
-	adjoin(b []byte, left, right int) []byte
-	depth() int
+	layout(left, line int) (w int)
+	adjoin(b []byte) []byte
 	width() int
-	mode() pMode
+	left() int
+	right() int
+	line() int
 }
 
 func buildPnode(obj slip.Object, p *slip.Printer) (node pNode) {
@@ -78,7 +57,7 @@ top:
 	// case *cl.Letx:
 	// 	// node = newPlet(to, p)
 	default:
-		node = pLeaf(p.Append(nil, obj, 0))
+		node = &pLeaf{text: p.Append(nil, obj, 0)}
 	}
 	// TBD
 

@@ -2,24 +2,35 @@
 
 package gi
 
-type pLeaf []byte
-
-func (leaf pLeaf) layout(maxWidth, tightness int) (width int) {
-	return len([]rune(string(leaf)))
+type pLeaf struct {
+	text []byte
+	x    int
+	y    int
 }
 
-func (leaf pLeaf) adjoin(b []byte, left, right int) []byte {
-	return append(b, leaf...)
+func (leaf *pLeaf) layout(left, line int) (w int) {
+	leaf.x = left
+	leaf.y = line
+
+	return len([]rune(string(leaf.text)))
 }
 
-func (leaf pLeaf) depth() int {
-	return 0
+func (leaf *pLeaf) adjoin(b []byte) []byte {
+	return append(b, leaf.text...)
 }
 
-func (leaf pLeaf) width() int {
-	return len([]rune(string(leaf)))
+func (leaf *pLeaf) left() int {
+	return leaf.x
 }
 
-func (leaf pLeaf) mode() pMode {
-	return pUsual
+func (leaf *pLeaf) line() int {
+	return leaf.y
+}
+
+func (leaf *pLeaf) width() int {
+	return len([]rune(string(leaf.text)))
+}
+
+func (leaf *pLeaf) right() int {
+	return leaf.x + len([]rune(string(leaf.text)))
 }

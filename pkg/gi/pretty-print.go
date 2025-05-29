@@ -3,6 +3,7 @@
 package gi
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/ohler55/slip"
@@ -56,28 +57,11 @@ func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	p.ScopedUpdate(s)
 
 	tree := buildPnode(args[0], &p)
-	mx := tree.depth() + 1
-	var (
-		ok        bool
-		tightness int
-	)
-	rm := int(p.RightMargin)
-	for tightness = 0; tightness <= mx; tightness++ {
-		width := tree.layout(rm, tightness)
-		if width <= rm {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		for tightness = -1; -mx <= tightness; tightness-- {
-			width := tree.layout(rm, tightness)
-			if width <= rm {
-				break
-			}
-		}
-	}
-	b := tree.adjoin(nil, 0, rm)
+	// rm := int(p.RightMargin)
+	width := tree.layout(0, 0)
+	fmt.Printf("*** width: %d\n", width)
+
+	b := tree.adjoin(nil)
 	b = append(b, '\n')
 
 	var (
