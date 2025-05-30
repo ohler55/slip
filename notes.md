@@ -5,6 +5,10 @@
 - next
 
  - pretty-print
+  - move pNode and other to top level
+   - use in cl:disassemble as well as gi:pretty-print
+   - and eventually save-state, write-env, or whatever
+
   - algo fails by not giving more priority to children
    - maybe squeeze then let children be less tight
    - or start with usual and tighten until or

@@ -3,7 +3,6 @@
 package gi
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/ohler55/slip"
@@ -53,16 +52,7 @@ type PrettyPrint struct {
 func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 
-	p := *slip.DefaultPrinter()
-	p.ScopedUpdate(s)
-
-	tree := buildPnode(args[0], &p)
-	_ = tree.layout(0)
-	width := tree.reorg(int(p.RightMargin))
-	fmt.Printf("*** width: %d\n", width)
-
-	b := tree.adjoin(nil)
-	b = append(b, '\n')
+	b := PrettyAppend(nil, s, args[0])
 
 	var (
 		w  io.Writer

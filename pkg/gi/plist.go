@@ -21,42 +21,6 @@ func newPlist(obj slip.List, p *slip.Printer) pNode {
 	return &list
 }
 
-func (list *pList) reorg(edge int) int {
-	if list.right() <= edge {
-		return list.wide
-	}
-	var tight bool
-	last := len(list.children) - 1
-	for i, n := range list.children {
-		r := n.right()
-		if last == i {
-			r++
-		}
-		if edge < r {
-			tight = true
-			break
-		}
-	}
-	if tight {
-		list.wide = 1
-		// TBD could be smarter and allow multiple on a line
-		for i, n := range list.children {
-			if 0 < i {
-				n.setNewline(true)
-			}
-			n.setLeft(list.x + 1)
-			cw := n.reorg(edge)
-			if last == i {
-				cw++
-			}
-			if list.wide < cw+1 {
-				list.wide = cw + 1
-			}
-		}
-	}
-	return list.wide
-}
-
 func (list *pList) layout(left int) (w int) {
 	list.x = left
 	x := left
@@ -69,6 +33,41 @@ func (list *pList) layout(left int) (w int) {
 	}
 	list.wide = x - left + 1
 
+	return list.wide
+}
+
+func (list *pList) reorg(edge int) int {
+	if edge < list.right() {
+		var tight bool
+		last := len(list.children) - 1
+		for i, n := range list.children {
+			r := n.right()
+			if last == i {
+				r++
+			}
+			if edge < r {
+				tight = true
+				break
+			}
+		}
+		if tight {
+			list.wide = 1
+			// TBD could be smarter and allow multiple on a line
+			for i, n := range list.children {
+				if 0 < i {
+					n.setNewline(true)
+				}
+				n.setLeft(list.x + 1)
+				cw := n.reorg(edge)
+				if last == i {
+					cw++
+				}
+				if list.wide < cw+1 {
+					list.wide = cw + 1
+				}
+			}
+		}
+	}
 	return list.wide
 }
 

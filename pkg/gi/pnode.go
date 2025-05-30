@@ -27,6 +27,20 @@ type pNode interface {
 	setNewline(nl bool)
 }
 
+// PrettyAppend appends a pretty formatted object using the default printer
+// setting with print variables overridden by scoped variables.
+func PrettyAppend(b []byte, s *slip.Scope, obj slip.Object) []byte {
+	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(s)
+
+	tree := buildPnode(obj, &p)
+	_ = tree.layout(0)
+	_ = tree.reorg(int(p.RightMargin))
+	b = tree.adjoin(b)
+
+	return append(b, '\n')
+}
+
 func buildPnode(obj slip.Object, p *slip.Printer) (node pNode) {
 	// TBD don't convert to funcs, leave as basics but handle funcs by converting to list
 	// keep mode arg for quoted, usual, macro?
