@@ -73,7 +73,7 @@ func buildPcall(sym slip.Symbol, args slip.List, p *slip.Printer) (node pNode) {
 	case "let", "let*":
 		// node = newPlet(name, args, p)
 	default:
-		// node = newPfun(name, args, p)
+		node = newPfun(name, args, p)
 	}
 	return
 }
