@@ -5,13 +5,16 @@ package gi
 type pLeaf struct {
 	text []byte
 	x    int
-	y    int
+	nl   bool
 }
 
-func (leaf *pLeaf) layout(left, line int) (w int) {
+func (leaf *pLeaf) layout(left int) (w int) {
 	leaf.x = left
-	leaf.y = line
 
+	return len([]rune(string(leaf.text)))
+}
+
+func (leaf *pLeaf) reorg(edge int) (w int) {
 	return len([]rune(string(leaf.text)))
 }
 
@@ -23,8 +26,8 @@ func (leaf *pLeaf) left() int {
 	return leaf.x
 }
 
-func (leaf *pLeaf) line() int {
-	return leaf.y
+func (leaf *pLeaf) setLeft(left int) {
+	leaf.x = left
 }
 
 func (leaf *pLeaf) width() int {
@@ -33,4 +36,12 @@ func (leaf *pLeaf) width() int {
 
 func (leaf *pLeaf) right() int {
 	return leaf.x + len([]rune(string(leaf.text)))
+}
+
+func (leaf *pLeaf) newline() bool {
+	return leaf.nl
+}
+
+func (leaf *pLeaf) setNewline(nl bool) {
+	leaf.nl = nl
 }

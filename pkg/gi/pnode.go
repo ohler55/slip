@@ -16,12 +16,15 @@ const (
 )
 
 type pNode interface {
-	layout(left, line int) (w int)
+	layout(left int) (w int)
+	reorg(edge int) (w int)
 	adjoin(b []byte) []byte
 	width() int
 	left() int
+	setLeft(left int)
 	right() int
-	line() int
+	newline() bool
+	setNewline(nl bool)
 }
 
 func buildPnode(obj slip.Object, p *slip.Printer) (node pNode) {
@@ -68,9 +71,9 @@ func buildPcall(sym slip.Symbol, args slip.List, p *slip.Printer) (node pNode) {
 	name := strings.ToLower(string(sym))
 	switch name {
 	case "let", "let*":
-		node = newPlet(name, args, p)
+		// node = newPlet(name, args, p)
 	default:
-		node = newPfun(name, args, p)
+		// node = newPfun(name, args, p)
 	}
 	return
 }

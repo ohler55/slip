@@ -10,7 +10,7 @@ type pList struct {
 	children []pNode
 	wide     int
 	x        int
-	y        int
+	nl       bool
 }
 
 func newPlist(obj slip.List, p *slip.Printer) pNode {
@@ -21,16 +21,51 @@ func newPlist(obj slip.List, p *slip.Printer) pNode {
 	return &list
 }
 
-func (list *pList) layout(left, line int) (w int) {
+func (list *pList) reorg(edge int) int {
+	if list.right() <= edge {
+		return list.wide
+	}
+	var tight bool
+	last := len(list.children) - 1
+	for i, n := range list.children {
+		r := n.right()
+		if last == i {
+			r++
+		}
+		if edge < r {
+			tight = true
+			break
+		}
+	}
+	if tight {
+		list.wide = 1
+		// TBD could be smarter and allow multiple on a line
+		for i, n := range list.children {
+			if 0 < i {
+				n.setNewline(true)
+			}
+			n.setLeft(list.x + 1)
+			cw := n.reorg(edge)
+			if last == i {
+				cw++
+			}
+			if list.wide < cw+1 {
+				list.wide = cw + 1
+			}
+		}
+	}
+	return list.wide
+}
+
+func (list *pList) layout(left int) (w int) {
 	list.x = left
-	list.y = line
 	x := left
 	if len(list.children) == 0 {
 		x++
 	}
 	for _, n := range list.children {
 		x++
-		x += n.layout(x, line)
+		x += n.layout(x)
 	}
 	list.wide = x - left + 1
 
@@ -39,12 +74,10 @@ func (list *pList) layout(left, line int) (w int) {
 
 func (list *pList) adjoin(b []byte) []byte {
 	b = append(b, '(')
-	y := list.y
 	for i, n := range list.children {
 		if 0 < i {
-			if y != n.line() {
-				b = append(b, indent[n.left()+1:]...)
-				y++
+			if n.newline() {
+				b = append(b, indent[:n.left()+1]...)
 			} else {
 				b = append(b, ' ')
 			}
@@ -58,8 +91,8 @@ func (list *pList) left() int {
 	return list.x
 }
 
-func (list *pList) line() int {
-	return list.y
+func (list *pList) setLeft(left int) {
+	list.x = left
 }
 
 func (list *pList) width() int {
@@ -68,4 +101,12 @@ func (list *pList) width() int {
 
 func (list *pList) right() int {
 	return list.x + list.wide
+}
+
+func (list *pList) newline() bool {
+	return list.nl
+}
+
+func (list *pList) setNewline(nl bool) {
+	list.nl = nl
 }

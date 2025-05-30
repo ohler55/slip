@@ -22,16 +22,15 @@ func newPfun(name string, args slip.List, p *slip.Printer) pNode {
 	return &fun
 }
 
-func (fun *pFun) layout(left, line int) (w int) {
+func (fun *pFun) layout(left int) (w int) {
 	fun.x = left
-	fun.y = line
 	x := left + len(fun.name)
 	if len(fun.children) == 0 {
 		x++
 	}
 	for _, n := range fun.children {
 		x++
-		x += n.layout(x, line)
+		x += n.layout(x)
 	}
 	fun.wide = x - left + 1
 
