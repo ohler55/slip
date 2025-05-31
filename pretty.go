@@ -1,11 +1,10 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package gi
+package slip
 
 import (
+	"fmt"
 	"strings"
-
-	"github.com/ohler55/slip"
 )
 
 const (
@@ -29,8 +28,8 @@ type pNode interface {
 
 // PrettyAppend appends a pretty formatted object using the default printer
 // setting with print variables overridden by scoped variables.
-func PrettyAppend(b []byte, s *slip.Scope, obj slip.Object) []byte {
-	p := *slip.DefaultPrinter()
+func PrettyAppend(b []byte, s *Scope, obj Object) []byte {
+	p := *DefaultPrinter()
 	p.ScopedUpdate(s)
 
 	tree := buildPnode(obj, &p)
@@ -41,7 +40,7 @@ func PrettyAppend(b []byte, s *slip.Scope, obj slip.Object) []byte {
 	return append(b, '\n')
 }
 
-func buildPnode(obj slip.Object, p *slip.Printer) (node pNode) {
+func buildPnode(obj Object, p *Printer) (node pNode) {
 	// TBD don't convert to funcs, leave as basics but handle funcs by converting to list
 	// keep mode arg for quoted, usual, macro?
 
@@ -49,39 +48,52 @@ func buildPnode(obj slip.Object, p *slip.Printer) (node pNode) {
 	// functions if possible.
 top:
 	switch to := obj.(type) {
-	case slip.List:
+	case List:
 		if len(to) == 0 {
 			obj = nil
 			goto top
 		}
-		if sym, ok := to[0].(slip.Symbol); ok {
+		if sym, ok := to[0].(Symbol); ok {
 			node = buildPcall(sym, to[1:], p)
 		} else {
-			node = newPlist(to, p)
+			node = newPlist(to, p, false)
 		}
-	// case slip.Symbol:
-	// 	// TBD lookup and build list/forms
-	// 	if fi := slip.FindFunc(string(to)); fi != nil {
-	// 		obj = fi.Create(nil)
-	// 		goto top
-	// 	}
-	// case *cl.Quote:
-	// 	if 0 < len(to.Args) {
-	// 		obj = to.Args[0]
-	// 	}
-	// case *cl.Let:
-	// 	// node = newPlet(to, p)
-	// case *cl.Letx:
-	// 	// node = newPlet(to, p)
+	case Symbol:
+		// TBD lookup and build list/forms or vars?
+		// if fi := FindFunc(string(to)); fi != nil {
+		// 	obj = fi.Create(nil)
+		// 	goto top
+		// }
+	case Funky:
+		name := to.GetName()
+		args := to.GetArgs()
+		fmt.Printf("*** funky %T %s\n", to, name)
+		switch name {
+		case "quote":
+			if 0 < len(args) {
+				node = buildPQnode(args[0], p)
+			}
+		default:
+			// TBD other types
+			node = &pLeaf{text: p.Append(nil, obj, 0)}
+		}
 	default:
 		node = &pLeaf{text: p.Append(nil, obj, 0)}
 	}
-	// TBD
-
 	return
 }
 
-func buildPcall(sym slip.Symbol, args slip.List, p *slip.Printer) (node pNode) {
+func buildPQnode(obj Object, p *Printer) pNode {
+	if list, ok := obj.(List); ok {
+		if 0 < len(list) {
+			return newPlist(list, p, true)
+		}
+		obj = nil
+	}
+	return &pLeaf{text: p.Append(nil, obj, 0)}
+}
+
+func buildPcall(sym Symbol, args List, p *Printer) (node pNode) {
 	name := strings.ToLower(string(sym))
 	switch name {
 	case "let", "let*":

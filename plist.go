@@ -1,10 +1,6 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package gi
-
-import (
-	"github.com/ohler55/slip"
-)
+package slip
 
 type pList struct {
 	children []pNode
@@ -13,10 +9,16 @@ type pList struct {
 	nl       bool
 }
 
-func newPlist(obj slip.List, p *slip.Printer) pNode {
+func newPlist(obj List, p *Printer, quoted bool) pNode {
 	list := pList{children: make([]pNode, len(obj))}
-	for i, v := range obj {
-		list.children[i] = buildPnode(v, p)
+	if quoted {
+		for i, v := range obj {
+			list.children[i] = buildPQnode(v, p)
+		}
+	} else {
+		for i, v := range obj {
+			list.children[i] = buildPnode(v, p)
+		}
 	}
 	return &list
 }

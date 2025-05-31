@@ -1,10 +1,6 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package gi
-
-import (
-	"github.com/ohler55/slip"
-)
+package slip
 
 type pFun struct {
 	pList
@@ -12,7 +8,7 @@ type pFun struct {
 	loose bool
 }
 
-func newPfun(name string, args slip.List, p *slip.Printer) pNode {
+func newPfun(name string, args List, p *Printer) pNode {
 	fun := pFun{
 		pList: pList{children: make([]pNode, len(args))},
 		name:  name,

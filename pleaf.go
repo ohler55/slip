@@ -1,6 +1,6 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package gi
+package slip
 
 type pLeaf struct {
 	text []byte
