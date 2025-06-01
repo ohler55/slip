@@ -73,6 +73,24 @@ func (list *pList) reorg(edge int) int {
 	return list.wide
 }
 
+func (list *pList) reorgLines(edge, minWidth int) int {
+	if edge < list.right() {
+		w := minWidth
+		last := len(list.children) - 1
+		for i, n := range list.children {
+			cw := n.reorg(edge)
+			if last == i {
+				cw++
+			}
+			if w < cw {
+				w = cw
+			}
+		}
+		list.wide = w
+	}
+	return list.wide
+}
+
 func (list *pList) adjoin(b []byte) []byte {
 	b = append(b, '(')
 	for i, n := range list.children {

@@ -5,54 +5,23 @@
 - next
 
  - pretty-print
-  - move pNode and other to top level
-   - use in cl:disassemble as well as gi:pretty-print
-   - and eventually save-state, write-env, or whatever
-
-  - algo fails by not giving more priority to children
-   - maybe squeeze then let children be less tight
-   - or start with usual and tighten until or
-    - if no success then squueze
-   - for a list
-    - try usual
-    - try tight if all children are usual
-    - squeeze otherwise
-   - maybe calc min and max widths
-   - maybe use min left for children
-    - then parent decides on layout given it's max width
-   - think about how I format code
-    - layout as usual then line breaks, how are those determined
-    - or focus on lines after first layout?
-     - maybe generate with usual then look for long lines
-      - for a long line look for place to break
-      - will need to look up a few lines as well
-      - line would be not only text but also an overlay with references to slip objects
-      - gets a little too complicated
-   - each node
-    - has left and right [and width]
-    - has line number?
-    - isTight, isSqueezed
-    - steps
-     - optimal or usual layout first
-     - refine layout
-      - look for longer than max
-       - if found then back to top most less tight one
-
-
-   - pLet (let and let*)
-   - pDefun (defun defmacro)
-    - wrap doc strings
-   - pLambda
-   - pCond
-   - pDefvar
-   - pLoop (dotimes?)
-   - pWith (with-output-to-string, other with-xxx)
-   - pFlavor
-   - if symbol lookup what it is bound to
-    - func
-    - flavor
-    - method? how to designate in a word vanilla.describe or something like that
-    - var - (defvar xx ...)
+  - use in cl:disassemble
+  + pLet (let and let*)
+  - symbol lookup
+   - if func then defun or defmacro else just symbol
+  - pDefun (defun defmacro)
+   - wrap doc strings
+  - pLambda
+  - pCond
+  - pDefvar
+  - pLoop (dotimes?)
+  - pWith (with-output-to-string, other with-xxx)
+  - pFlavor
+  - if symbol lookup what it is bound to
+   - func
+   - flavor
+   - method? how to designate in a word vanilla.describe or something like that
+   - var - (defvar xx ...)
 
 
  - save-state (destination &key order)

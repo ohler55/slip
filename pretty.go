@@ -32,6 +32,9 @@ func PrettyAppend(b []byte, s *Scope, obj Object) []byte {
 	p := *DefaultPrinter()
 	p.ScopedUpdate(s)
 
+	if sym, ok := obj.(Symbol); ok {
+		obj = resolveSymbol(sym, s)
+	}
 	tree := buildPnode(obj, &p)
 	_ = tree.layout(0)
 	_ = tree.reorg(int(p.RightMargin))
@@ -40,10 +43,21 @@ func PrettyAppend(b []byte, s *Scope, obj Object) []byte {
 	return append(b, '\n')
 }
 
-func buildPnode(obj Object, p *Printer) (node pNode) {
-	// TBD don't convert to funcs, leave as basics but handle funcs by converting to list
-	// keep mode arg for quoted, usual, macro?
+func resolveSymbol(sym Symbol, s *Scope) Object {
+	if fi := FindFunc(string(sym)); fi != nil {
+		return fi
+	}
+	if s.Has(sym) {
+		return s.Get(sym)
+	}
+	// TBD check for flavor (should it be a describe or a **defflavor**?)
+	// TBD instance
+	// TBD check for flavor.method or flavor:method
+	// TBD check package:symbol or package::symbol
+	return sym
+}
 
+func buildPnode(obj Object, p *Printer) (node pNode) {
 	// Quoted values are treated as the value quoted. Lists are converted to
 	// functions if possible.
 top:
@@ -58,12 +72,12 @@ top:
 		} else {
 			node = newPlist(to, p, false)
 		}
-	case Symbol:
-		// TBD lookup and build list/forms or vars?
-		// if fi := FindFunc(string(to)); fi != nil {
-		// 	obj = fi.Create(nil)
-		// 	goto top
-		// }
+	case *Lambda:
+		// buf = f.disassembleLambda(s, ta, right, ansi)
+		node = &pLeaf{text: p.Append(nil, String(obj.String()), 0)}
+		// TBD
+	case *FuncInfo:
+		node = buildPfuncInfo(to, p)
 	case Funky:
 		name := to.GetName()
 		args := to.GetArgs()
@@ -97,9 +111,47 @@ func buildPcall(sym Symbol, args List, p *Printer) (node pNode) {
 	name := strings.ToLower(string(sym))
 	switch name {
 	case "let", "let*":
-		// node = newPlet(name, args, p)
+		node = newPlet(name, args, p)
+	case "defun", "defmacro":
+		node = pDefunFromList(name, args, p)
 	default:
 		node = newPfun(name, args, p)
 	}
 	return
+}
+
+func buildPfuncInfo(fi *FuncInfo, p *Printer) pNode {
+	var defun pDefun
+
+	if fi.Kind == Symbol("macro") {
+		defun.name = "defmacro"
+	} else {
+		defun.name = "defun"
+	}
+	defun.fname = fi.Name
+	args := &pList{children: make([]pNode, len(fi.Doc.Args))}
+	for i, da := range fi.Doc.Args {
+		if da.Default == nil {
+			args.children[i] = &pLeaf{text: []byte(da.Name)}
+		} else {
+			args.children[i] = &pList{
+				children: []pNode{
+					&pLeaf{text: []byte(da.Name)},
+					buildPnode(da.Default, p),
+				}}
+		}
+	}
+	defun.args = args
+	if 0 < len(fi.Doc.Text) {
+		defun.children = append(defun.children, &pDoc{text: fi.Doc.Text})
+	}
+	fun := fi.Create(nil).(Funky)
+	if lam, ok := fun.Caller().(*Lambda); ok {
+		for _, form := range lam.Forms {
+			defun.children = append(defun.children, buildPnode(form, p))
+		}
+	} else {
+		defun.children = append(defun.children, &pLeaf{text: []byte("...")})
+	}
+	return &defun
 }
