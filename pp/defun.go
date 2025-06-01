@@ -13,12 +13,12 @@ type Defun struct {
 }
 
 func defunFromList(name string, args slip.List, p *slip.Printer) Node {
-	defun := Defun{name: name}
+	defun := Defun{
+		name: name,
+		args: argsFromList(args[1], p),
+	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		defun.fname = string(sym)
-	}
-	if list, ok := args[1].(slip.List); ok {
-		defun.args = newPlist(list, p, true)
 	}
 	args = args[2:]
 	defun.children = make([]Node, len(args))

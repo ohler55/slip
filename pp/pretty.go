@@ -40,10 +40,27 @@ func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
 	if s.Has(sym) {
 		return s.Get(sym)
 	}
-	// TBD check for flavor (should it be a describe or a **defflavor**?)
-	// TBD instance
-	// TBD check for flavor.method or flavor:method
-	// TBD check package:symbol or package::symbol
+	if c := slip.FindClass(string(sym)); c != nil {
+		return c
+	}
+	if strings.ContainsRune(string(sym), ':') {
+		parts := strings.Split(string(sym), ":")
+		name := parts[len(parts)-1]
+		if p := slip.FindPackage(parts[0]); p != nil {
+			if fi := p.GetFunc(name); fi != nil {
+				return fi
+			}
+			if obj, has := p.Get(name); has {
+				return obj
+			}
+		} else if c := slip.FindClass(name); c != nil {
+			// if f, ok := c.(*flavors.Flavor); ok {
+			// 	// ma := f.GetMethod(name)
+			// 	return f // TBD maybe build a set of defmethods?
+			// }
+			return c
+		}
+	}
 	return sym
 }
 
@@ -63,13 +80,20 @@ top:
 			node = newPlist(to, p, false)
 		}
 	case *slip.Lambda:
-		// buf = f.disassembleLambda(s, ta, right, ansi)
-		node = &Leaf{text: p.Append(nil, slip.String(obj.String()), 0)}
-		// TBD
+		node = buildLambda(to, p)
 	case *slip.FuncInfo:
 		node = buildFuncInfo(to, p)
 	case slip.Funky:
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
+	// case *flavors.Flavor:
+	// 	// TBD this creates an import loop, maybe add to class interface to have func that returns def as list
+	// 	node = &Leaf{text: p.Append(nil, obj, 0)}
+	// case *flavors.Instance:
+	// 	// TBD
+	// 	node = &Leaf{text: p.Append(nil, obj, 0)}
+	// case *[]flavors.Method:
+	// 	// TBD
+	// 	node = &Leaf{text: p.Append(nil, obj, 0)}
 	default:
 		node = &Leaf{text: p.Append(nil, obj, 0)}
 	}
@@ -90,14 +114,15 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 	name := strings.ToLower(string(sym))
 	switch name {
 	case "quote":
-		// TBD use pQuote with the tick when printing
 		if 0 < len(args) {
-			node = buildQNode(args[0], p)
+			node = newQuote(args[0], p)
 		}
 	case "let", "let*":
 		node = newPlet(name, args, p)
 	case "defun", "defmacro":
 		node = defunFromList(name, args, p)
+	case "lambda":
+		node = lambdaFromList(args, p)
 	default:
 		node = newPfun(name, args, p)
 	}
@@ -105,27 +130,15 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 }
 
 func buildFuncInfo(fi *slip.FuncInfo, p *slip.Printer) Node {
-	var defun Defun
-
+	defun := Defun{
+		fname: fi.Name,
+		args:  buildDocArgs(fi.Doc.Args, p),
+	}
 	if fi.Kind == slip.Symbol("macro") {
 		defun.name = "defmacro"
 	} else {
 		defun.name = "defun"
 	}
-	defun.fname = fi.Name
-	args := &List{children: make([]Node, len(fi.Doc.Args))}
-	for i, da := range fi.Doc.Args {
-		if da.Default == nil {
-			args.children[i] = &Leaf{text: []byte(da.Name)}
-		} else {
-			args.children[i] = &List{
-				children: []Node{
-					&Leaf{text: []byte(da.Name)},
-					buildNode(da.Default, p),
-				}}
-		}
-	}
-	defun.args = args
 	if 0 < len(fi.Doc.Text) {
 		defun.children = append(defun.children, &Doc{text: fi.Doc.Text})
 	}
@@ -138,4 +151,33 @@ func buildFuncInfo(fi *slip.FuncInfo, p *slip.Printer) Node {
 		defun.children = append(defun.children, &Leaf{text: []byte("...")})
 	}
 	return &defun
+}
+
+func buildLambda(lam *slip.Lambda, p *slip.Printer) Node {
+	ln := Lambda{
+		args: buildDocArgs(lam.Doc.Args, p),
+		List: List{
+			children: make([]Node, len(lam.Forms)),
+		},
+	}
+	for i, form := range lam.Forms {
+		ln.children[i] = buildNode(form, p)
+	}
+	return &ln
+}
+
+func buildDocArgs(docArgs []*slip.DocArg, p *slip.Printer) Node {
+	args := &List{children: make([]Node, len(docArgs))}
+	for i, da := range docArgs {
+		if da.Default == nil {
+			args.children[i] = &Leaf{text: []byte(da.Name)}
+		} else {
+			args.children[i] = &List{
+				children: []Node{
+					&Leaf{text: []byte(da.Name)},
+					buildNode(da.Default, p),
+				}}
+		}
+	}
+	return args
 }

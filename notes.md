@@ -5,19 +5,27 @@
 - next
 
  - pretty-print
-  - move to slip/pp ?
-   - rename types, maybe public?
-    - Let, Fun, Defun, Node, Leaf
-    - public for naming ease only or just leave with the p prefix
-  - quote should include the tick
-
   + pLet (let and let*)
-  - symbol lookup
-   - if func then defun or defmacro else just symbol
   + pDefun (defun defmacro)
-  - pLambda
-  - pCond
+  + pLambda
   - pDefvar
+
+  - symbol lookup
+   - flavor - deflavor
+    - creates a 3 way import loop
+    - add func to slip.Class interface
+     - DefAsList() List ???
+   - flavor.method or flavor:method - defmethod or defwhopper
+   - instance
+    - maybe (make-instance 'flavor :x 1 :y 2)
+     - if some vars are not inittable then try set
+     - if not inittable and not settable then maybe a comment?
+     - wrap the make-instance with a let and then the set calls and comments
+
+   - package:symbol or package::symbol
+    - if not func and not var and contains : or . then flavor method or package symbol
+
+  - pCond
   - pLoop (dotimes?)
   - pWith (with-output-to-string, other with-xxx)
   - pFlavor
