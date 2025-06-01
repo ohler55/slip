@@ -87,6 +87,8 @@ top:
 			if 0 < len(args) {
 				node = buildPQnode(args[0], p)
 			}
+		case "let", "let*":
+			node = newPlet(name, args, p)
 		default:
 			// TBD other types
 			node = &pLeaf{text: p.Append(nil, obj, 0)}
