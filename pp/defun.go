@@ -1,37 +1,40 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package slip
+package pp
 
-type pDefun struct {
-	pList
+import "github.com/ohler55/slip"
+
+// Defun represents a defun block.
+type Defun struct {
+	List
 	name  string
 	fname string
-	args  pNode
+	args  Node
 }
 
-func pDefunFromList(name string, args List, p *Printer) pNode {
-	defun := pDefun{name: name}
-	if sym, ok := args[0].(Symbol); ok {
+func defunFromList(name string, args slip.List, p *slip.Printer) Node {
+	defun := Defun{name: name}
+	if sym, ok := args[0].(slip.Symbol); ok {
 		defun.fname = string(sym)
 	}
-	if list, ok := args[1].(List); ok {
+	if list, ok := args[1].(slip.List); ok {
 		defun.args = newPlist(list, p, true)
 	}
 	args = args[2:]
-	defun.children = make([]pNode, len(args))
+	defun.children = make([]Node, len(args))
 	for i, v := range args {
 		if i == 0 {
-			if doc, ok := v.(String); ok {
-				defun.children[i] = &pDoc{text: string(doc)}
+			if doc, ok := v.(slip.String); ok {
+				defun.children[i] = &Doc{text: string(doc)}
 				continue
 			}
 		}
-		defun.children[i] = buildPnode(v, p)
+		defun.children[i] = buildNode(v, p)
 	}
 	return &defun
 }
 
-func (defun *pDefun) layout(left int) (w int) {
+func (defun *Defun) layout(left int) (w int) {
 	defun.x = left
 	w = len(defun.name) + len(defun.fname) + 3
 	w += defun.args.layout(w)
@@ -51,7 +54,7 @@ func (defun *pDefun) layout(left int) (w int) {
 	return
 }
 
-func (defun *pDefun) reorg(edge int) int {
+func (defun *Defun) reorg(edge int) int {
 	if edge < defun.right() {
 		w := defun.args.reorg(edge)
 		if w2 := defun.reorgLines(edge, 2); w < w2 {
@@ -62,7 +65,7 @@ func (defun *pDefun) reorg(edge int) int {
 	return defun.wide
 }
 
-func (defun *pDefun) adjoin(b []byte) []byte {
+func (defun *Defun) adjoin(b []byte) []byte {
 	b = append(b, '(')
 	b = append(b, defun.name...)
 	b = append(b, ' ')

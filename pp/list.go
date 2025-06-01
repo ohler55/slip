@@ -1,29 +1,32 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package slip
+package pp
 
-type pList struct {
-	children []pNode
+import "github.com/ohler55/slip"
+
+// List represents a list.
+type List struct {
+	children []Node
 	wide     int
 	x        int
 	nl       bool
 }
 
-func newPlist(obj List, p *Printer, quoted bool) pNode {
-	list := pList{children: make([]pNode, len(obj))}
+func newPlist(obj slip.List, p *slip.Printer, quoted bool) Node {
+	list := List{children: make([]Node, len(obj))}
 	if quoted {
 		for i, v := range obj {
-			list.children[i] = buildPQnode(v, p)
+			list.children[i] = buildQNode(v, p)
 		}
 	} else {
 		for i, v := range obj {
-			list.children[i] = buildPnode(v, p)
+			list.children[i] = buildNode(v, p)
 		}
 	}
 	return &list
 }
 
-func (list *pList) layout(left int) (w int) {
+func (list *List) layout(left int) (w int) {
 	list.x = left
 	x := left
 	if len(list.children) == 0 {
@@ -38,7 +41,7 @@ func (list *pList) layout(left int) (w int) {
 	return list.wide
 }
 
-func (list *pList) reorg(edge int) int {
+func (list *List) reorg(edge int) int {
 	if edge < list.right() {
 		var tight bool
 		last := len(list.children) - 1
@@ -73,7 +76,7 @@ func (list *pList) reorg(edge int) int {
 	return list.wide
 }
 
-func (list *pList) reorgLines(edge, minWidth int) int {
+func (list *List) reorgLines(edge, minWidth int) int {
 	if edge < list.right() {
 		w := minWidth
 		last := len(list.children) - 1
@@ -91,7 +94,7 @@ func (list *pList) reorgLines(edge, minWidth int) int {
 	return list.wide
 }
 
-func (list *pList) adjoin(b []byte) []byte {
+func (list *List) adjoin(b []byte) []byte {
 	b = append(b, '(')
 	for i, n := range list.children {
 		if 0 < i {
@@ -106,26 +109,26 @@ func (list *pList) adjoin(b []byte) []byte {
 	return append(b, ')')
 }
 
-func (list *pList) left() int {
+func (list *List) left() int {
 	return list.x
 }
 
-func (list *pList) setLeft(left int) {
+func (list *List) setLeft(left int) {
 	list.x = left
 }
 
-func (list *pList) width() int {
+func (list *List) width() int {
 	return list.wide
 }
 
-func (list *pList) right() int {
+func (list *List) right() int {
 	return list.x + list.wide
 }
 
-func (list *pList) newline() bool {
+func (list *List) newline() bool {
 	return list.nl
 }
 
-func (list *pList) setNewline(nl bool) {
+func (list *List) setNewline(nl bool) {
 	list.nl = nl
 }

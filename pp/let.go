@@ -1,26 +1,28 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package slip
+package pp
 
-type pLet struct {
-	pList
+import "github.com/ohler55/slip"
+
+type Let struct {
+	List
 	name string
 }
 
-func newPlet(name string, args List, p *Printer) pNode {
-	let := pLet{
-		pList: pList{children: make([]pNode, len(args))},
-		name:  name,
+func newPlet(name string, args slip.List, p *slip.Printer) Node {
+	let := Let{
+		List: List{children: make([]Node, len(args))},
+		name: name,
 	}
-	bindings := args[0].(List)
+	bindings := args[0].(slip.List)
 	let.children[0] = newPbindings(bindings, p)
 	for i, v := range args[1:] {
-		let.children[i+1] = buildPnode(v, p)
+		let.children[i+1] = buildNode(v, p)
 	}
 	return &let
 }
 
-func (let *pLet) layout(left int) (w int) {
+func (let *Let) layout(left int) (w int) {
 	let.x = left
 	w = len(let.name) + 2
 	last := len(let.children) - 1
@@ -45,11 +47,11 @@ func (let *pLet) layout(left int) (w int) {
 	return
 }
 
-func (let *pLet) reorg(edge int) int {
+func (let *Let) reorg(edge int) int {
 	return let.reorgLines(edge, len(let.name)+2)
 }
 
-func (let *pLet) adjoin(b []byte) []byte {
+func (let *Let) adjoin(b []byte) []byte {
 	b = append(b, '(')
 	b = append(b, let.name...)
 	b = append(b, ' ')

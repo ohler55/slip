@@ -1,9 +1,12 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package slip
+// Package pp implements a LISP pretty printer.
+package pp
 
 import (
 	"strings"
+
+	"github.com/ohler55/slip"
 )
 
 const (
@@ -13,28 +16,16 @@ const (
 		"                                                                " // 256 wide should be enough
 )
 
-type pNode interface {
-	layout(left int) (w int)
-	reorg(edge int) (w int)
-	adjoin(b []byte) []byte
-	width() int
-	left() int
-	setLeft(left int)
-	right() int
-	newline() bool
-	setNewline(nl bool)
-}
-
 // PrettyAppend appends a pretty formatted object using the default printer
 // setting with print variables overridden by scoped variables.
-func PrettyAppend(b []byte, s *Scope, obj Object) []byte {
-	p := *DefaultPrinter()
+func PrettyAppend(b []byte, s *slip.Scope, obj slip.Object) []byte {
+	p := *slip.DefaultPrinter()
 	p.ScopedUpdate(s)
 
-	if sym, ok := obj.(Symbol); ok {
+	if sym, ok := obj.(slip.Symbol); ok {
 		obj = resolveSymbol(sym, s)
 	}
-	tree := buildPnode(obj, &p)
+	tree := buildNode(obj, &p)
 	_ = tree.layout(0)
 	_ = tree.reorg(int(p.RightMargin))
 	b = tree.adjoin(b)
@@ -42,8 +33,8 @@ func PrettyAppend(b []byte, s *Scope, obj Object) []byte {
 	return append(b, '\n')
 }
 
-func resolveSymbol(sym Symbol, s *Scope) Object {
-	if fi := FindFunc(string(sym)); fi != nil {
+func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
+	if fi := slip.FindFunc(string(sym)); fi != nil {
 		return fi
 	}
 	if s.Has(sym) {
@@ -56,95 +47,95 @@ func resolveSymbol(sym Symbol, s *Scope) Object {
 	return sym
 }
 
-func buildPnode(obj Object, p *Printer) (node pNode) {
+func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 	// Quoted values are treated as the value quoted. Lists are converted to
 	// functions if possible.
 top:
 	switch to := obj.(type) {
-	case List:
+	case slip.List:
 		if len(to) == 0 {
 			obj = nil
 			goto top
 		}
-		if sym, ok := to[0].(Symbol); ok {
-			node = buildPcall(sym, to[1:], p)
+		if sym, ok := to[0].(slip.Symbol); ok {
+			node = buildCall(sym, to[1:], p)
 		} else {
 			node = newPlist(to, p, false)
 		}
-	case *Lambda:
+	case *slip.Lambda:
 		// buf = f.disassembleLambda(s, ta, right, ansi)
-		node = &pLeaf{text: p.Append(nil, String(obj.String()), 0)}
+		node = &Leaf{text: p.Append(nil, slip.String(obj.String()), 0)}
 		// TBD
-	case *FuncInfo:
-		node = buildPfuncInfo(to, p)
-	case Funky:
-		node = buildPcall(Symbol(to.GetName()), to.GetArgs(), p)
+	case *slip.FuncInfo:
+		node = buildFuncInfo(to, p)
+	case slip.Funky:
+		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
 	default:
-		node = &pLeaf{text: p.Append(nil, obj, 0)}
+		node = &Leaf{text: p.Append(nil, obj, 0)}
 	}
 	return
 }
 
-func buildPQnode(obj Object, p *Printer) pNode {
-	if list, ok := obj.(List); ok {
+func buildQNode(obj slip.Object, p *slip.Printer) Node {
+	if list, ok := obj.(slip.List); ok {
 		if 0 < len(list) {
 			return newPlist(list, p, true)
 		}
 		obj = nil
 	}
-	return &pLeaf{text: p.Append(nil, obj, 0)}
+	return &Leaf{text: p.Append(nil, obj, 0)}
 }
 
-func buildPcall(sym Symbol, args List, p *Printer) (node pNode) {
+func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 	name := strings.ToLower(string(sym))
 	switch name {
 	case "quote":
 		// TBD use pQuote with the tick when printing
 		if 0 < len(args) {
-			node = buildPQnode(args[0], p)
+			node = buildQNode(args[0], p)
 		}
 	case "let", "let*":
 		node = newPlet(name, args, p)
 	case "defun", "defmacro":
-		node = pDefunFromList(name, args, p)
+		node = defunFromList(name, args, p)
 	default:
 		node = newPfun(name, args, p)
 	}
 	return
 }
 
-func buildPfuncInfo(fi *FuncInfo, p *Printer) pNode {
-	var defun pDefun
+func buildFuncInfo(fi *slip.FuncInfo, p *slip.Printer) Node {
+	var defun Defun
 
-	if fi.Kind == Symbol("macro") {
+	if fi.Kind == slip.Symbol("macro") {
 		defun.name = "defmacro"
 	} else {
 		defun.name = "defun"
 	}
 	defun.fname = fi.Name
-	args := &pList{children: make([]pNode, len(fi.Doc.Args))}
+	args := &List{children: make([]Node, len(fi.Doc.Args))}
 	for i, da := range fi.Doc.Args {
 		if da.Default == nil {
-			args.children[i] = &pLeaf{text: []byte(da.Name)}
+			args.children[i] = &Leaf{text: []byte(da.Name)}
 		} else {
-			args.children[i] = &pList{
-				children: []pNode{
-					&pLeaf{text: []byte(da.Name)},
-					buildPnode(da.Default, p),
+			args.children[i] = &List{
+				children: []Node{
+					&Leaf{text: []byte(da.Name)},
+					buildNode(da.Default, p),
 				}}
 		}
 	}
 	defun.args = args
 	if 0 < len(fi.Doc.Text) {
-		defun.children = append(defun.children, &pDoc{text: fi.Doc.Text})
+		defun.children = append(defun.children, &Doc{text: fi.Doc.Text})
 	}
-	fun := fi.Create(nil).(Funky)
-	if lam, ok := fun.Caller().(*Lambda); ok {
+	fun := fi.Create(nil).(slip.Funky)
+	if lam, ok := fun.Caller().(*slip.Lambda); ok {
 		for _, form := range lam.Forms {
-			defun.children = append(defun.children, buildPnode(form, p))
+			defun.children = append(defun.children, buildNode(form, p))
 		}
 	} else {
-		defun.children = append(defun.children, &pLeaf{text: []byte("...")})
+		defun.children = append(defun.children, &Leaf{text: []byte("...")})
 	}
 	return &defun
 }

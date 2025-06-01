@@ -1,25 +1,28 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package slip
+package pp
 
-type pFun struct {
-	pList
+import "github.com/ohler55/slip"
+
+// Fun represents a named function.
+type Fun struct {
+	List
 	name  string
 	loose bool
 }
 
-func newPfun(name string, args List, p *Printer) pNode {
-	fun := pFun{
-		pList: pList{children: make([]pNode, len(args))},
-		name:  name,
+func newPfun(name string, args slip.List, p *slip.Printer) Node {
+	fun := Fun{
+		List: List{children: make([]Node, len(args))},
+		name: name,
 	}
 	for i, v := range args {
-		fun.children[i] = buildPnode(v, p)
+		fun.children[i] = buildNode(v, p)
 	}
 	return &fun
 }
 
-func (fun *pFun) layout(left int) (w int) {
+func (fun *Fun) layout(left int) (w int) {
 	fun.x = left
 	x := left + 1 + len(fun.name)
 	for _, n := range fun.children {
@@ -31,7 +34,7 @@ func (fun *pFun) layout(left int) (w int) {
 	return fun.wide
 }
 
-func (fun *pFun) reorg(edge int) int {
+func (fun *Fun) reorg(edge int) int {
 	if edge < fun.right() {
 		var (
 			tight bool
@@ -77,7 +80,7 @@ func (fun *pFun) reorg(edge int) int {
 	return fun.wide
 }
 
-func (fun *pFun) adjoin(b []byte) []byte {
+func (fun *Fun) adjoin(b []byte) []byte {
 	b = append(b, '(')
 	b = append(b, fun.name...)
 	offset := fun.x + 1
