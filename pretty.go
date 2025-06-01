@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -79,20 +78,7 @@ top:
 	case *FuncInfo:
 		node = buildPfuncInfo(to, p)
 	case Funky:
-		name := to.GetName()
-		args := to.GetArgs()
-		fmt.Printf("*** funky %T %s\n", to, name)
-		switch name {
-		case "quote":
-			if 0 < len(args) {
-				node = buildPQnode(args[0], p)
-			}
-		case "let", "let*":
-			node = newPlet(name, args, p)
-		default:
-			// TBD other types
-			node = &pLeaf{text: p.Append(nil, obj, 0)}
-		}
+		node = buildPcall(Symbol(to.GetName()), to.GetArgs(), p)
 	default:
 		node = &pLeaf{text: p.Append(nil, obj, 0)}
 	}
@@ -112,6 +98,11 @@ func buildPQnode(obj Object, p *Printer) pNode {
 func buildPcall(sym Symbol, args List, p *Printer) (node pNode) {
 	name := strings.ToLower(string(sym))
 	switch name {
+	case "quote":
+		// TBD use pQuote with the tick when printing
+		if 0 < len(args) {
+			node = buildPQnode(args[0], p)
+		}
 	case "let", "let*":
 		node = newPlet(name, args, p)
 	case "defun", "defmacro":

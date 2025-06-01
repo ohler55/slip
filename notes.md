@@ -5,12 +5,16 @@
 - next
 
  - pretty-print
-  - use in cl:disassemble
+  - move to slip/pp ?
+   - rename types, maybe public?
+    - Let, Fun, Defun, Node, Leaf
+    - public for naming ease only or just leave with the p prefix
+  - quote should include the tick
+
   + pLet (let and let*)
   - symbol lookup
    - if func then defun or defmacro else just symbol
-  - pDefun (defun defmacro)
-   - wrap doc strings
+  + pDefun (defun defmacro)
   - pLambda
   - pCond
   - pDefvar
@@ -22,6 +26,7 @@
    - flavor
    - method? how to designate in a word vanilla.describe or something like that
    - var - (defvar xx ...)
+  - use in cl:disassemble
 
 
  - save-state (destination &key order)
