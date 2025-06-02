@@ -9,7 +9,7 @@ type Let struct {
 	name string
 }
 
-func newPlet(name string, args slip.List, p *slip.Printer) Node {
+func newLet(name string, args slip.List, p *slip.Printer) Node {
 	let := Let{
 		List: List{children: make([]Node, len(args))},
 		name: name,

@@ -5,10 +5,13 @@
 - next
 
  - pretty-print
-  + pLet (let and let*)
-  + pDefun (defun defmacro)
-  + pLambda
-  - pDefvar
+  + Let (let and let*)
+  + Defun (defun defmacro)
+  + Lambda
+  + Defvar
+  - Fun1i2
+   - first one preferred on same line
+   - other children indent 2
 
   - symbol lookup
    - flavor - deflavor
@@ -25,7 +28,6 @@
    - package:symbol or package::symbol
     - if not func and not var and contains : or . then flavor method or package symbol
 
-  - pCond
   - pLoop (dotimes?)
   - pWith (with-output-to-string, other with-xxx)
   - pFlavor

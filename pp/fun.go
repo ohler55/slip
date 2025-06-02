@@ -7,14 +7,16 @@ import "github.com/ohler55/slip"
 // Fun represents a named function.
 type Fun struct {
 	List
-	name  string
-	loose bool
+	name   string
+	indent int
+	loose  bool
 }
 
-func newPfun(name string, args slip.List, p *slip.Printer) Node {
+func newFun(name string, args slip.List, p *slip.Printer, indent int) Node {
 	fun := Fun{
-		List: List{children: make([]Node, len(args))},
-		name: name,
+		List:   List{children: make([]Node, len(args))},
+		name:   name,
+		indent: indent,
 	}
 	for i, v := range args {
 		fun.children[i] = buildNode(v, p)
@@ -57,7 +59,7 @@ func (fun *Fun) reorg(edge int) int {
 		}
 		if tight {
 			fun.wide = 1
-			offset := fun.x + 1
+			offset := fun.x + fun.indent
 			if offset+len(fun.name)+mw < edge {
 				fun.loose = true
 				offset = fun.x + len(fun.name) + 2
@@ -83,7 +85,7 @@ func (fun *Fun) reorg(edge int) int {
 func (fun *Fun) adjoin(b []byte) []byte {
 	b = append(b, '(')
 	b = append(b, fun.name...)
-	offset := fun.x + 1
+	offset := fun.x + fun.indent
 	if fun.loose { // line up under first argument
 		offset = fun.x + len(fun.name) + 2
 	}

@@ -118,13 +118,17 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 			node = newQuote(args[0], p)
 		}
 	case "let", "let*":
-		node = newPlet(name, args, p)
-	case "defun", "defmacro":
-		node = defunFromList(name, args, p)
+		node = newLet(name, args, p)
 	case "lambda":
 		node = lambdaFromList(args, p)
+	case "defun", "defmacro":
+		node = defunFromList(name, args, p)
+	case "defvar":
+		node = defvarFromList(args, p)
+	case "cond":
+		node = newFun(name, args, p, 2)
 	default:
-		node = newPfun(name, args, p)
+		node = newFun(name, args, p, 1)
 	}
 	return
 }
