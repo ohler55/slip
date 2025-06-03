@@ -123,10 +123,36 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		node = lambdaFromList(args, p)
 	case "defun", "defmacro":
 		node = defunFromList(name, args, p)
-	case "defvar":
+	case "defvar", "defconstant", "defparameter", "defpackage":
 		node = defvarFromList(args, p)
 	case "cond":
 		node = newFun(name, args, p, 2)
+	case "block",
+		"dotimes",
+		"dolist",
+		"do",
+		"do*",
+		"do-all-symbols",
+		"do-external-symbols",
+		"do-symbols",
+		"dovector",
+		"with-input-from-octets",
+		"with-zip-reader",
+		"with-zip-writer",
+		"with-input-from-string",
+		"with-open-file",
+		"with-open-stream",
+		"with-output-to-string",
+		"with-standard-io-syntax":
+		node = newFun1i2(name, args, p)
+	case "make-instance":
+		node = newFun1i2(name, args, p)
+	case "defflavor":
+		// TBD
+		node = newFun(name, args, p, 1)
+	case "defmethod":
+		// TBD
+		node = newFun(name, args, p, 1)
 	default:
 		node = newFun(name, args, p, 1)
 	}

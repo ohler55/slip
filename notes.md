@@ -9,28 +9,38 @@
   + Defun (defun defmacro)
   + Lambda
   + Defvar
-  - Fun1i2
-   - first one preferred on same line
-   - other children indent 2
+  + Fun1i2
+  - defflavor
+    defflavor foo (x
+                   y)
+                  (bar)
+                  :inittable-instance-variables)
+   - tighter by keep flavorname on first line
+   - really tight then 4 indent for flavor and vars, other 2
+  - defmethod, defwhopper - first two, method spec and args are indent 4 if newline
 
   - symbol lookup
    - flavor - deflavor
     - creates a 3 way import loop
     - add func to slip.Class interface
-     - DefAsList() List ???
-   - flavor.method or flavor:method - defmethod or defwhopper
+     - DefList() List ???
+     - DefMethodList
+      - of DefMethod => FuncInfo?, pack flavor, daemon, and name into fi.Name
+      - or **list**
+     - AllMethods list of method lists
+     - add gi functions to return the same
+
+   - flavor:method or flavor:daemon:method - defmethod or defwhopper
    - instance
     - maybe (make-instance 'flavor :x 1 :y 2)
-     - if some vars are not inittable then try set
-     - if not inittable and not settable then maybe a comment?
+     - use (setf (slot-value inst x) 1)
+      - for all, make-instance naked
      - wrap the make-instance with a let and then the set calls and comments
 
    - package:symbol or package::symbol
     - if not func and not var and contains : or . then flavor method or package symbol
 
-  - pLoop (dotimes?)
-  - pWith (with-output-to-string, other with-xxx)
-  - pFlavor
+  - Flavor
   - if symbol lookup what it is bound to
    - func
    - flavor
@@ -39,7 +49,7 @@
   - use in cl:disassemble
 
 
- - save-state (destination &key order)
+ - save-state (destination &key order) (snapshot)
   - set current package
   - keep track of require imports
    - pkg/cl/require should store order of call, name, and path of loaded
@@ -47,6 +57,7 @@
    - requires
    - variable setq (use correct package)
     - check boundp first then defvar or setq
+    - to preserve reference to the same object form a temporary map, makunbound after
    - defuns for all lambda function like dissasemble (use correct package)
   - order (sort) option
    - require and vars always alphabetical
