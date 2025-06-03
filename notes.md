@@ -14,7 +14,7 @@
     defflavor foo (x
                    y)
                   (bar)
-                  :inittable-instance-variables)
+      :inittable-instance-variables)
    - tighter by keep flavorname on first line
    - really tight then 4 indent for flavor and vars, other 2
   - defmethod, defwhopper - first two, method spec and args are indent 4 if newline

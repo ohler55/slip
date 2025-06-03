@@ -148,8 +148,7 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 	case "make-instance":
 		node = newFun1i2(name, args, p)
 	case "defflavor":
-		// TBD
-		node = newFun(name, args, p, 1)
+		node = defflavorFromList(args, p)
 	case "defmethod":
 		// TBD
 		node = newFun(name, args, p, 1)
