@@ -328,3 +328,13 @@ func (lam *Lambda) Simplify() any {
 func (lam *Lambda) Eval(s *Scope, depth int) (result Object) {
 	return lam
 }
+
+// DefList returns a definition list such as (lambda (x) (1+ x)).
+func (lam *Lambda) DefList() List {
+	var dl List
+	dl = append(dl, Symbol("lambda"))
+	dl = append(dl, lam.Doc.DefList())
+	dl = append(dl, lam.Forms...)
+
+	return dl
+}

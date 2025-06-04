@@ -18,7 +18,7 @@ func defflavorFromList(args slip.List, p *slip.Printer) Node {
 		},
 	}
 	for i, v := range args {
-		if i == 1 || i == 2 {
+		if i == 1 || i == 2 { // instance variables or inherited flavors
 			switch tv := v.(type) {
 			case nil:
 				df.children[i] = &Leaf{text: []byte{'(', ')'}}
@@ -31,6 +31,9 @@ func defflavorFromList(args slip.List, p *slip.Printer) Node {
 			}
 		}
 		df.children[i] = buildNode(v, p)
+	}
+	for len(df.children) < 3 {
+		df.children = append(df.children, &Leaf{text: []byte{'(', ')'}})
 	}
 	return &df
 }
@@ -65,14 +68,26 @@ func (df *Defflavor) layout(left int) (w int) {
 }
 
 func (df *Defflavor) reorg(edge int) int {
-	//if edge < df.right() {
-	// TBD
-	// w := df.args.reorg(edge)
-	// if w2 := df.reorgLines(edge, 2); w < w2 {
-	// 	w = w2
-	// }
-	// df.wide = w
-	//}
+	if edge < df.right() {
+		w := df.children[0].reorg(edge) + 11 // (defflavor + space + flavor-name
+		if edge < df.children[1].right() {   // instance variable list
+			df.children[1].setNewline(true)
+			df.children[1].setLeft(df.x + 4)
+			df.children[2].setLeft(df.x + 4) // inherited flavors
+		}
+		last := len(df.children) - 1
+		for i, n := range df.children {
+			_ = n.reorg(edge)
+			r := n.right()
+			if i == last {
+				r++
+			}
+			if w < r-df.x {
+				w = r - df.x
+			}
+		}
+		df.wide = w
+	}
 	return df.wide
 }
 

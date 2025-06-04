@@ -16,9 +16,9 @@ const (
 		"                                                                " // 256 wide should be enough
 )
 
-// PrettyAppend appends a pretty formatted object using the default printer
-// setting with print variables overridden by scoped variables.
-func PrettyAppend(b []byte, s *slip.Scope, obj slip.Object) []byte {
+// Append appends a pretty formatted object using the default printer setting
+// with print variables overridden by scoped variables.
+func Append(b []byte, s *slip.Scope, obj slip.Object) []byte {
 	p := *slip.DefaultPrinter()
 	p.ScopedUpdate(s)
 
@@ -53,13 +53,8 @@ func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
 			if obj, has := p.Get(name); has {
 				return obj
 			}
-		} else if c := slip.FindClass(name); c != nil {
-			// if f, ok := c.(*flavors.Flavor); ok {
-			// 	// ma := f.GetMethod(name)
-			// 	return f // TBD maybe build a set of defmethods?
-			// }
-			return c
 		}
+		// TBD flavor:daemon:method or flavor:method or flavor:method:daemon
 	}
 	return sym
 }
@@ -85,9 +80,16 @@ top:
 		node = buildFuncInfo(to, p)
 	case slip.Funky:
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
-	// case *flavors.Flavor:
-	// 	// TBD this creates an import loop, maybe add to class interface to have func that returns def as list
-	// 	node = &Leaf{text: p.Append(nil, obj, 0)}
+	case slip.Class:
+		if dl := to.DefList(); dl != nil && 0 < len(dl) {
+			if sym, ok := dl[0].(slip.Symbol); ok {
+				node = buildCall(sym, dl[1:], p)
+			}
+		}
+		if node == nil {
+			node = &Leaf{text: p.Append(nil, obj, 0)}
+		}
+
 	// case *flavors.Instance:
 	// 	// TBD
 	// 	node = &Leaf{text: p.Append(nil, obj, 0)}

@@ -46,7 +46,7 @@ and a default value.`,
  :initable-instance-variables allows the listed variables to be given initial values. If none are listed then all
 variables can be provided an initial value. (also spelled :inittable-instance-variables)
  :required-instance-variables lists the variables that must be present in any flavor inheriting this flavor.
- :required-method lists the methods that must be included in any flavor inheriting this flavor.
+ :required-methods lists the methods that must be included in any flavor inheriting this flavor.
  :required-flavors lists the flavor names that must be included in any flavor inheriting this flavor.
  :included-flavors lists the flavor names that must be included. If not included they are automatically included.
  :no-vanilla-flavor will not inherit the vanilla-flavor.

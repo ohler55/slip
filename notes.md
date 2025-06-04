@@ -10,14 +10,13 @@
   + Lambda
   + Defvar
   + Fun1i2
-  - defflavor
-    defflavor foo (x
-                   y)
-                  (bar)
-      :inittable-instance-variables)
-   - tighter by keep flavorname on first line
-   - really tight then 4 indent for flavor and vars, other 2
+  + defflavor
   - defmethod, defwhopper - first two, method spec and args are indent 4 if newline
+
+  - slip.Class interface
+   - DefMethodList(method, daemon string) slip.List or nil if not defined for class/flavor
+    - could take symbols instead, which is better?
+   - AllMethods() slip.List
 
   - symbol lookup
    - flavor - deflavor
@@ -27,7 +26,8 @@
      - DefMethodList
       - of DefMethod => FuncInfo?, pack flavor, daemon, and name into fi.Name
       - or **list**
-     - AllMethods list of method lists
+     - AllMethods list of method lists or should it be a list of names only?
+      - AllDefMethods
      - add gi functions to return the same
 
    - flavor:method or flavor:daemon:method - defmethod or defwhopper

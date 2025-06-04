@@ -442,3 +442,125 @@ func (obj *Flavor) Document(name, desc string) {
 func (obj *Flavor) GetMethod(name string) []*Method {
 	return obj.methods[name]
 }
+
+// DefList returns a list that can be evaluated to create the class or nil if
+// the class is a built in class.
+func (obj *Flavor) DefList() slip.List {
+	keys := make([]string, 0, len(obj.defaultVars)-1)
+	for k := range obj.defaultVars {
+		if k != "self" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+	var (
+		gets slip.List
+		sets slip.List
+	)
+	ivs := make(slip.List, len(keys))
+	for i, k := range keys {
+		ksym := slip.Symbol(k)
+		if v := obj.defaultVars[k]; v != nil {
+			ivs[i] = slip.List{ksym, v}
+		} else {
+			ivs[i] = ksym
+		}
+		if _, has := obj.methods[":"+k]; has {
+			gets = append(gets, ksym)
+		}
+		if _, has := obj.methods[":set-"+k]; has {
+			sets = append(sets, ksym)
+		}
+	}
+	var inh slip.List
+	for _, f := range obj.inherit {
+		if f.name == "vanilla-flavor" {
+			continue
+		}
+		inh = append(inh, slip.Symbol(f.name))
+	}
+	df := slip.List{
+		slip.Symbol("defflavor"),
+		slip.Symbol(obj.name),
+		ivs,
+		inh,
+	}
+	if 0 < len(obj.initable) {
+		if len(obj.initable) == len(keys) {
+			df = append(df, slip.Symbol(":inittable-instance-variables"))
+		} else {
+			var iiv slip.List
+			iiv = append(iiv, slip.Symbol(":inittable-instance-variables"))
+			for k, v := range obj.initable {
+				if v {
+					iiv = append(iiv, slip.Symbol(k[1:]))
+				}
+			}
+			df = append(df, iiv)
+		}
+	}
+	if 0 < len(gets) {
+		if len(gets) == len(keys) {
+			df = append(df, slip.Symbol(":gettable-instance-variables"))
+		} else {
+			df = append(df, append(slip.List{slip.Symbol(":gettable-instance-variables")}, gets...))
+		}
+	}
+	if 0 < len(sets) {
+		if len(sets) == len(keys) {
+			df = append(df, slip.Symbol(":settable-instance-variables"))
+		} else {
+			df = append(df, append(slip.List{slip.Symbol(":settable-instance-variables")}, sets...))
+		}
+	}
+	if 0 < len(obj.keywords) {
+		kws := make([]string, 0, len(obj.keywords))
+		for k := range obj.keywords {
+			kws = append(kws, k)
+		}
+		sort.Strings(kws)
+		var ko slip.List
+		ko = append(ko, slip.Symbol(":default-init-plist"))
+		if obj.allowOtherKeys {
+			ko = append(ko, slip.List{slip.Symbol(":allow-other-keys"), slip.True})
+		}
+		for _, k := range kws {
+			ko = append(ko, slip.List{slip.Symbol(k), obj.keywords[k]})
+		}
+		df = append(df, ko)
+	}
+	if obj.abstract {
+		df = append(df, slip.Symbol(":abstract-flavor"))
+	}
+	if obj.noVanilla {
+		df = append(df, slip.Symbol(":no-vanilla-flavor"))
+	}
+	df = appendStringSliceOption(df, ":required-instance-variables", obj.requiredVars)
+	df = appendStringSliceOption(df, ":required-methods", obj.requiredMethods)
+	df = appendStringSliceOption(df, ":required-flavors", obj.required)
+	df = appendStringSliceOption(df, ":included-flavors", obj.included)
+	df = appendStringSliceOption(df, ":required-init-keywords", obj.requiredKeywords)
+	if lam, ok := obj.defaultHandler.(*slip.Lambda); ok {
+		if lam.Doc.Name == "lambda" {
+			df = append(df, slip.List{slip.Symbol(":default-handler"), lam.DefList()})
+		} else {
+			df = append(df, slip.List{slip.Symbol(":default-handler"), slip.Symbol(lam.Doc.Name)})
+		}
+	}
+	if 0 < len(obj.docs) {
+		df = append(df, slip.List{slip.Symbol(":documentation"), slip.String(obj.docs)})
+	}
+	return df
+}
+
+func appendStringSliceOption(df slip.List, name string, ss []string) slip.List {
+	if 0 < len(ss) {
+		opt := make(slip.List, len(ss)+1)
+		opt[0] = slip.Symbol(name)
+		for i, str := range ss {
+			opt[i+1] = slip.Symbol(str)
+		}
+		df = append(df, opt)
+	}
+	return df
+}

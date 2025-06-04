@@ -53,7 +53,7 @@ type PrettyPrint struct {
 func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 
-	b := pp.PrettyAppend(nil, s, args[0])
+	b := pp.Append(nil, s, args[0])
 
 	var (
 		w  io.Writer
