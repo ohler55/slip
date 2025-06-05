@@ -330,3 +330,9 @@ func (c *Class) DefList() slip.List {
 	// There is no defclass currently.
 	return nil
 }
+
+// DefMethodList returns nil.
+func (c *Class) DefMethodList(method, daemon string, inherited bool) slip.List {
+	// There is no defmethods for classes currently.
+	return nil
+}

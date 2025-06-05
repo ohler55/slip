@@ -13,7 +13,7 @@ func newPbindings(obj slip.List, p *slip.Printer) Node {
 	pb := Bindings{List: List{children: make([]Node, len(obj))}}
 	for i, v := range obj {
 		if list, ok := v.(slip.List); ok {
-			pb.children[i] = newPlist(list, p, false)
+			pb.children[i] = newList(list, p, false)
 		} else {
 			pb.children[i] = &Leaf{text: p.Append(nil, obj, 0)}
 		}

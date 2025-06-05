@@ -10,43 +10,27 @@
   + Lambda
   + Defvar
   + Fun1i2
-  + defflavor
-  - defmethod, defwhopper - first two, method spec and args are indent 4 if newline
+  + Defflavor
+  + Defmethod, Defwhopper
+  - Array
+  - Vector
+  - HashTable
 
   - slip.Class interface
-   - DefMethodList(method, daemon string) slip.List or nil if not defined for class/flavor
-    - could take symbols instead, which is better?
    - AllMethods() slip.List
 
   - symbol lookup
-   - flavor - deflavor
-    - creates a 3 way import loop
-    - add func to slip.Class interface
-     - DefList() List ???
-     - DefMethodList
-      - of DefMethod => FuncInfo?, pack flavor, daemon, and name into fi.Name
-      - or **list**
-     - AllMethods list of method lists or should it be a list of names only?
-      - AllDefMethods
-     - add gi functions to return the same
+   - AllMethods list of method lists or should it be a list of names only?
+    - AllDefMethods
+    - add gi functions to return the same
 
-   - flavor:method or flavor:daemon:method - defmethod or defwhopper
    - instance
     - maybe (make-instance 'flavor :x 1 :y 2)
      - use (setf (slot-value inst x) 1)
       - for all, make-instance naked
      - wrap the make-instance with a let and then the set calls and comments
 
-   - package:symbol or package::symbol
-    - if not func and not var and contains : or . then flavor method or package symbol
-
-  - Flavor
-  - if symbol lookup what it is bound to
-   - func
-   - flavor
-   - method? how to designate in a word vanilla.describe or something like that
-   - var - (defvar xx ...)
-  - use in cl:disassemble
+  - use in cl:disassemble for all symbols like pp.Append
 
 
  - save-state (destination &key order) (snapshot)

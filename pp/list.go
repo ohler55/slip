@@ -2,7 +2,9 @@
 
 package pp
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 // List represents a list.
 type List struct {
@@ -12,7 +14,7 @@ type List struct {
 	nl       bool
 }
 
-func newPlist(obj slip.List, p *slip.Printer, quoted bool) Node {
+func newList(obj slip.List, p *slip.Printer, quoted bool) Node {
 	list := List{children: make([]Node, len(obj))}
 	if quoted {
 		for i, v := range obj {
@@ -114,7 +116,11 @@ func (list *List) left() int {
 }
 
 func (list *List) setLeft(left int) {
+	shift := left - list.x
 	list.x = left
+	for _, n := range list.children {
+		n.setLeft(n.left() + shift)
+	}
 }
 
 func (list *List) width() int {

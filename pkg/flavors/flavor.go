@@ -564,3 +564,34 @@ func appendStringSliceOption(df slip.List, name string, ss []string) slip.List {
 	}
 	return df
 }
+
+// DefMethodList returns a list that can be evaluated to define a method on
+// the class or nil if no method is defined by the class.
+func (obj *Flavor) DefMethodList(method, daemon string, inherited bool) (dml slip.List) {
+	method = strings.ToLower(method)
+	daemon = strings.ToLower(daemon)
+	var lam *slip.Lambda
+	for _, m := range obj.GetMethod(method) {
+		if obj == m.From || inherited {
+			switch daemon {
+			case ":primary", "":
+				lam, _ = m.primary.(*slip.Lambda)
+			case ":before":
+				lam, _ = m.before.(*slip.Lambda)
+			case ":after":
+				lam, _ = m.before.(*slip.Lambda)
+			case ":whopper":
+				lam, _ = m.wrap.(*slip.Lambda)
+			}
+		}
+		if lam != nil {
+			dml = slip.List{
+				slip.Symbol("defmethod"),
+				slip.List{slip.Symbol(obj.name), slip.Symbol(daemon), slip.Symbol(method)},
+			}
+			dml = append(dml, lam.DefList()[1:]...)
+			break
+		}
+	}
+	return
+}

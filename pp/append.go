@@ -34,15 +34,6 @@ func Append(b []byte, s *slip.Scope, obj slip.Object) []byte {
 }
 
 func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
-	if fi := slip.FindFunc(string(sym)); fi != nil {
-		return fi
-	}
-	if s.Has(sym) {
-		return s.Get(sym)
-	}
-	if c := slip.FindClass(string(sym)); c != nil {
-		return c
-	}
 	if strings.ContainsRune(string(sym), ':') {
 		parts := strings.Split(string(sym), ":")
 		name := parts[len(parts)-1]
@@ -54,7 +45,22 @@ func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
 				return obj
 			}
 		}
-		// TBD flavor:daemon:method or flavor:method or flavor:method:daemon
+		if c := slip.FindClass(parts[0]); c != nil {
+			daemon := "primary"
+			if len(parts) == 3 && 1 < len(parts[1]) {
+				daemon = parts[1]
+			}
+			return c.DefMethodList(":"+name, ":"+daemon, false)
+		}
+	}
+	if fi := slip.FindFunc(string(sym)); fi != nil {
+		return fi
+	}
+	if s.Has(sym) {
+		return s.Get(sym)
+	}
+	if c := slip.FindClass(string(sym)); c != nil {
+		return c
 	}
 	return sym
 }
@@ -72,7 +78,7 @@ top:
 		if sym, ok := to[0].(slip.Symbol); ok {
 			node = buildCall(sym, to[1:], p)
 		} else {
-			node = newPlist(to, p, false)
+			node = newList(to, p, false)
 		}
 	case *slip.Lambda:
 		node = buildLambda(to, p)
@@ -89,13 +95,6 @@ top:
 		if node == nil {
 			node = &Leaf{text: p.Append(nil, obj, 0)}
 		}
-
-	// case *flavors.Instance:
-	// 	// TBD
-	// 	node = &Leaf{text: p.Append(nil, obj, 0)}
-	// case *[]flavors.Method:
-	// 	// TBD
-	// 	node = &Leaf{text: p.Append(nil, obj, 0)}
 	default:
 		node = &Leaf{text: p.Append(nil, obj, 0)}
 	}
@@ -105,7 +104,7 @@ top:
 func buildQNode(obj slip.Object, p *slip.Printer) Node {
 	if list, ok := obj.(slip.List); ok {
 		if 0 < len(list) {
-			return newPlist(list, p, true)
+			return newList(list, p, true)
 		}
 		obj = nil
 	}
@@ -151,9 +150,8 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		node = newFun1i2(name, args, p)
 	case "defflavor":
 		node = defflavorFromList(args, p)
-	case "defmethod":
-		// TBD
-		node = newFun(name, args, p, 1)
+	case "defmethod", "defwhopper":
+		node = defmethodFromList(name, args, p)
 	default:
 		node = newFun(name, args, p, 1)
 	}

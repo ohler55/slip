@@ -73,6 +73,9 @@ func (lambda *Lambda) adjoin(b []byte) []byte {
 
 func argsFromList(arg slip.Object, p *slip.Printer) Node {
 	if args, ok := arg.(slip.List); ok {
+		if len(args) == 0 {
+			return &Leaf{text: []byte{'(', ')'}}
+		}
 		nargs := &List{children: make([]Node, len(args))}
 		for i, a := range args {
 			switch ta := a.(type) {
