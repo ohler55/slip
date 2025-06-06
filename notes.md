@@ -13,10 +13,13 @@
   + Defflavor
   + Defmethod, Defwhopper
   + Vector
-  - Array
-   - make the base for vector as well
-   - pass in prefix and AsList()
-
+  + Array
+  + Octets
+  - tests
+   - pp
+   - clos
+   - flavors
+   - net?
 
  - encrypted app
   - go app build with with embedded lisp

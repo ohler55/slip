@@ -4,6 +4,7 @@
 package pp
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -85,8 +86,20 @@ top:
 	case *slip.FuncInfo:
 		node = buildFuncInfo(to, p)
 	case *slip.Vector:
-		node = vectorFromVector(to, p)
-
+		node = arrayFromList("#", to.AsList(), p)
+	case slip.Octets:
+		node = arrayFromList("#", to.AsList(), p)
+	case *slip.Array:
+		prefix := "#0A"
+		switch to.Rank() {
+		case 0:
+			// no change
+		case 1:
+			prefix = "#"
+		default:
+			prefix = fmt.Sprintf("#%dA", to.Rank())
+		}
+		node = arrayFromList(prefix, to.AsList(), p)
 	case slip.Funky:
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
 	case slip.Class:
