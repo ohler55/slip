@@ -12,9 +12,28 @@
   + Fun1i2
   + Defflavor
   + Defmethod, Defwhopper
+  + Vector
   - Array
-  - Vector
-  - HashTable
+   - make the base for vector as well
+   - pass in prefix and AsList()
+
+
+ - encrypted app
+  - go app build with with embedded lisp
+  - pass in key or use default location for key
+  - use lisp to write main.go as well as encoding the files
+   - pull in plugins
+  - option for command line or env options that set vars
+  - is embedded readable?
+  - maybe need a plugin or separate binary that includes a first pass of a double enrypted file
+  - **or our own package that creates and can read embedded encrypted**
+  - steps
+   - set up template for app-build
+    - plugins
+    - embeded file (concatenate sources)
+     - double enrypt
+    - minimal main
+
 
   - slip.Class interface
    - AllMethods() slip.List

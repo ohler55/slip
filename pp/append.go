@@ -84,6 +84,9 @@ top:
 		node = buildLambda(to, p)
 	case *slip.FuncInfo:
 		node = buildFuncInfo(to, p)
+	case *slip.Vector:
+		node = vectorFromVector(to, p)
+
 	case slip.Funky:
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
 	case slip.Class:
