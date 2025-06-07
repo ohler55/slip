@@ -17,9 +17,9 @@
   + Octets
   - tests
    - pp
-   - clos
-   - flavors
-   - net?
+
+ - flavor DefMethod
+  - instead of flavors.Daemon just add docs to lambda.Doc
 
  - encrypted app
   - go app build with with embedded lisp

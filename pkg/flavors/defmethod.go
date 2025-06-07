@@ -91,22 +91,6 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	if flavor == nil {
 		slip.PanicType("flavor for defmethod", ml[0], "name of flavor")
 	}
-	if 3 < len(args) { // method, method-args, docs, forms
-		var str slip.String
-		if str, ok = args[2].(slip.String); ok {
-			list := make(slip.List, len(args)-2)
-			list[0] = args[1]
-			copy(list[1:], args[3:])
-			flavor.DefMethod(
-				method,
-				daemon,
-				&Daemon{
-					caller: slip.DefLambda(method, s, list),
-					docs:   string(str),
-				})
-			return
-		}
-	}
 	flavor.DefMethod(method, daemon, slip.DefLambda(method, s, args[1:], flavor.varNames...))
 
 	return nil

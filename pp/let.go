@@ -15,7 +15,7 @@ func newLet(name string, args slip.List, p *slip.Printer) Node {
 		name: name,
 	}
 	bindings := args[0].(slip.List)
-	let.children[0] = newPbindings(bindings, p)
+	let.children[0] = newBindings(bindings, p)
 	for i, v := range args[1:] {
 		let.children[i+1] = buildNode(v, p)
 	}

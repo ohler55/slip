@@ -31,9 +31,6 @@ func newList(obj slip.List, p *slip.Printer, quoted bool) Node {
 func (list *List) layout(left int) (w int) {
 	list.x = left
 	x := left
-	if len(list.children) == 0 {
-		x++
-	}
 	for _, n := range list.children {
 		x++
 		x += n.layout(x)
@@ -43,37 +40,33 @@ func (list *List) layout(left int) (w int) {
 	return list.wide
 }
 
-func (list *List) reorg(edge int) int {
+func (list *List) reorg(edge int) (w int) {
 	if edge < list.right() {
-		var tight bool
 		last := len(list.children) - 1
+		var x int
 		for i, n := range list.children {
-			r := n.right()
+			cw := n.width()
 			if last == i {
-				r++
+				cw++
 			}
-			if edge < r {
-				tight = true
-				break
-			}
-		}
-		if tight {
-			list.wide = 1
-			// TBD could be smarter and allow multiple on a line
-			for i, n := range list.children {
-				if 0 < i {
-					n.setNewline(true)
-				}
+			if edge < list.x+x+cw+1 {
+				n.setNewline(true)
 				n.setLeft(list.x + 1)
-				cw := n.reorg(edge)
-				if last == i {
-					cw++
-				}
-				if list.wide < cw+1 {
-					list.wide = cw + 1
-				}
+				x = 1
+			} else {
+				x++
+				n.setLeft(list.x + x)
+			}
+			cw = n.reorg(edge)
+			if last == i {
+				cw++
+			}
+			x += cw
+			if w < x {
+				w = x
 			}
 		}
+		list.wide = w
 	}
 	return list.wide
 }

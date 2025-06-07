@@ -10,6 +10,7 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func defineBerry(t *testing.T) {
@@ -71,6 +72,41 @@ func TestDefmethodInherit(t *testing.T) {
 
 	result = bb.BoundReceive(nil, ":rot", nil, 0)
 	tt.Equal(t, "brown", slip.ObjectString(result))
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(pretty-print blueberry:before:rot nil)`,
+		Expect: `"(defmethod (blueberry :before :rot) ()
+  "Berries that are blue."
+  (princ "blueberry before rot")
+  (terpri))
+"`,
+	}).Test(t)
+
+	// The primary is on berry and not blueberry so nil should be returned.
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(pretty-print blueberry:primary:rot nil)`,
+		Expect: `"nil
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(pretty-print berry:primary:rot nil)`,
+		Expect: `"(defmethod (berry :primary :rot) ()
+  "When berries rot they turn brown."
+  (setq color 'brown)))
+"`,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(pretty-print blueberry:after:rot nil)`,
+		Expect: `"(defmethod (blueberry :after :rot) ()
+  (princ "blueberry after rot")
+  (terpri))
+"`,
+	}).Test(t)
 }
 
 func TestDefmethodArgCount(t *testing.T) {

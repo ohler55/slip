@@ -579,7 +579,7 @@ func (obj *Flavor) DefMethodList(method, daemon string, inherited bool) (dml sli
 			case ":before":
 				lam, _ = m.before.(*slip.Lambda)
 			case ":after":
-				lam, _ = m.before.(*slip.Lambda)
+				lam, _ = m.after.(*slip.Lambda)
 			case ":whopper":
 				lam, _ = m.wrap.(*slip.Lambda)
 			}

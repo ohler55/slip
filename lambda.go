@@ -329,11 +329,22 @@ func (lam *Lambda) Eval(s *Scope, depth int) (result Object) {
 	return lam
 }
 
+// Docs returns the documentation of the instance.
+func (lam *Lambda) Docs() (docs string) {
+	if lam.Doc != nil {
+		docs = lam.Doc.Text
+	}
+	return
+}
+
 // DefList returns a definition list such as (lambda (x) (1+ x)).
 func (lam *Lambda) DefList() List {
 	var dl List
 	dl = append(dl, Symbol("lambda"))
 	dl = append(dl, lam.Doc.DefList())
+	if 0 < len(lam.Doc.Text) {
+		dl = append(dl, String(lam.Doc.Text))
+	}
 	dl = append(dl, lam.Forms...)
 
 	return dl

@@ -10,6 +10,7 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestDefwhopperBasic(t *testing.T) {
@@ -54,6 +55,19 @@ blueberry whopper rot done
 	f := slip.ReadString("blueberry", scope).Eval(scope, nil)
 	sf := f.Simplify()
 	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].whopper").First(sf))
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(pretty-print berry:whopper:rot nil)`,
+		Expect: `"(defmethod (berry :whopper :rot) ()
+  "What a whopper!"
+  (princ "berry whopper rot start" out)
+  (terpri out)
+  (continue-whopper)
+  (princ "berry whopper rot done" out)
+  (terpri out))
+"`,
+	}).Test(t)
 }
 
 func TestDefwhopperOneWrap(t *testing.T) {

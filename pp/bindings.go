@@ -2,20 +2,22 @@
 
 package pp
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 // Bindings represents the bindings in a let or let* block.
 type Bindings struct {
 	List
 }
 
-func newPbindings(obj slip.List, p *slip.Printer) Node {
+func newBindings(obj slip.List, p *slip.Printer) Node {
 	pb := Bindings{List: List{children: make([]Node, len(obj))}}
 	for i, v := range obj {
 		if list, ok := v.(slip.List); ok {
 			pb.children[i] = newList(list, p, false)
 		} else {
-			pb.children[i] = &Leaf{text: p.Append(nil, obj, 0)}
+			pb.children[i] = &Leaf{text: p.Append(nil, v, 0)}
 		}
 	}
 	return &pb

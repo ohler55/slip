@@ -90,12 +90,12 @@ top:
 	case slip.Octets:
 		node = arrayFromList("#", to.AsList(), p)
 	case *slip.Array:
-		prefix := "#0A"
+		prefix := "#"
 		switch to.Rank() {
 		case 0:
-			// no change
+			prefix = "#0A"
 		case 1:
-			prefix = "#"
+			// no change
 		default:
 			prefix = fmt.Sprintf("#%dA", to.Rank())
 		}
