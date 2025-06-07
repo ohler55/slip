@@ -95,7 +95,7 @@ func TestDefmethodInherit(t *testing.T) {
 		Source: `(pretty-print berry:primary:rot nil)`,
 		Expect: `"(defmethod (berry :primary :rot) ()
   "When berries rot they turn brown."
-  (setq color 'brown)))
+  (setq color 'brown))
 "`,
 	}).Test(t)
 
