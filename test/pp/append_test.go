@@ -111,3 +111,88 @@ func TestAppendDefvar(t *testing.T) {
 "`,
 	}).Test(t)
 }
+
+func TestAppendDefun(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20)) (pretty-print (defun quux (a b) (+ a b)) nil))`,
+		Expect: `"(defun quux (a b)
+  (+ a b))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 14)) (pretty-print (defun quux (a b) (+ a b)) nil))`,
+		Expect: `"(defun quux (a
+             b)
+  (+ a b))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20))
+  (pretty-print (defun quux (a b) "quux is a quacker" (* (+ a b) (- a b))) nil))`,
+		Expect: `"(defun quux (a b)
+  "quux is a quacker"
+  (* (+ a b) (- a b)))
+"`,
+	}).Test(t)
+}
+
+func TestAppendQuote(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20)) (pretty-print '(a 2 b 3) nil))`,
+		Expect: `"'(a 2 b 3)
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 15)) (pretty-print (list x '(a 2 b 3)) nil))`,
+		Expect: `"(list
+ x '(a 2 b 3))
+"`,
+	}).Test(t)
+}
+
+func TestAppendLambda(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 15)) (pretty-print (lambda () (princ 'hi)) nil))`,
+		Expect: `"(lambda ()
+  (princ 'hi))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 30)) (pretty-print (lambda (&optional (a 1) (b)) (list a b)) nil))`,
+		Expect: `"(lambda (&optional (a 1) b)
+  (list a b))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 15)) (pretty-print (lambda (a b) "black sheep" (* (+ a b) (- a b))) nil))`,
+		Expect: `"(lambda (a b)
+  "black sheep"
+  (* (+ a b)
+     (- a b)))
+"`,
+	}).Test(t)
+	// Not a valid lambda but still want to try and print.
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 15)) (pretty-print (lambda nil (princ 'hi)) nil))`,
+		Expect: `"(lambda nil
+  (princ 'hi))
+"`,
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 30)) (pretty-print (lambda (a b) (format t "--- ~A ---~A~%" a b)) nil))`,
+		Expect: `"(lambda (a b)
+  (format t
+          "--- ~A ---~A~%"
+          a
+          b))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 30)) (pretty-print (lambda (a b) "black sheep" (* (+ a b) (- a b))) nil))`,
+		Expect: `"(lambda (a b)
+  "black sheep"
+  (* (+ a b) (- a b)))
+"`,
+	}).Test(t)
+}

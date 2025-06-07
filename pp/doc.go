@@ -2,7 +2,9 @@
 
 package pp
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 // Doc holds a documentation string.
 type Doc struct {
@@ -13,14 +15,14 @@ type Doc struct {
 
 func (doc *Doc) layout(left int) int {
 	doc.x = left
-	doc.wide = len([]rune(doc.text))
+	doc.wide = len([]rune(doc.text)) + 2
 
 	return doc.wide
 }
 
 func (doc *Doc) reorg(edge int) int {
 	if edge < doc.right() {
-		doc.wide = edge - 3 // 2 quotes and at least one place for a character.
+		doc.wide = edge - doc.x
 	}
 	return doc.wide
 }

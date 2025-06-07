@@ -32,9 +32,7 @@ func (q *Quote) reorg(edge int) int {
 
 func (q *Quote) adjoin(b []byte) []byte {
 	b = append(b, '\'')
-	b = q.child.adjoin(b)
-
-	return append(b, ')')
+	return q.child.adjoin(b)
 }
 
 func (q *Quote) left() int {
