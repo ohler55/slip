@@ -19,15 +19,9 @@ func defflavorFromList(args slip.List, p *slip.Printer) Node {
 	}
 	for i, v := range args {
 		if i == 1 || i == 2 { // instance variables or inherited flavors
-			switch tv := v.(type) {
-			case nil:
+			if list, ok := v.(slip.List); ok && len(list) == 0 {
 				df.children[i] = &Leaf{text: []byte{'(', ')'}}
 				continue
-			case slip.List:
-				if len(tv) == 0 {
-					df.children[i] = &Leaf{text: []byte{'(', ')'}}
-					continue
-				}
 			}
 		}
 		df.children[i] = buildNode(v, p)

@@ -36,7 +36,7 @@ func (fun *Fun) layout(left int) (w int) {
 	return fun.wide
 }
 
-func (fun *Fun) reorg(edge int) int {
+func (fun *Fun) reorg(edge int) (w int) {
 	if edge < fun.right() {
 		var (
 			tight bool

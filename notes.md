@@ -15,8 +15,6 @@
   + Vector
   + Array
   + Octets
-  - Format
-   - dest and ctrl on first line if possible then others like a list
   - tests
    - pp
 

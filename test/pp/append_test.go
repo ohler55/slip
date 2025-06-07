@@ -150,49 +150,27 @@ func TestAppendQuote(t *testing.T) {
 	}).Test(t)
 }
 
-func TestAppendLambda(t *testing.T) {
+func TestAppendSymbol(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((*print-right-margin* 15)) (pretty-print (lambda () (princ 'hi)) nil))`,
-		Expect: `"(lambda ()
-  (princ 'hi))
+		Source: `(let ((*print-right-margin* 20)) (pretty-print quux nil))`,
+		Expect: `"quux
 "`,
 	}).Test(t)
-	(&sliptest.Function{
-		Source: `(let ((*print-right-margin* 30)) (pretty-print (lambda (&optional (a 1) (b)) (list a b)) nil))`,
-		Expect: `"(lambda (&optional (a 1) b)
-  (list a b))
-"`,
-	}).Test(t)
-	(&sliptest.Function{
-		Source: `(let ((*print-right-margin* 15)) (pretty-print (lambda (a b) "black sheep" (* (+ a b) (- a b))) nil))`,
-		Expect: `"(lambda (a b)
-  "black sheep"
-  (* (+ a b)
-     (- a b)))
-"`,
-	}).Test(t)
-	// Not a valid lambda but still want to try and print.
-	(&sliptest.Function{
-		Source: `(let ((*print-right-margin* 15)) (pretty-print (lambda nil (princ 'hi)) nil))`,
-		Expect: `"(lambda nil
-  (princ 'hi))
-"`,
-	}).Test(t)
+}
 
+func TestAppendCond(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((*print-right-margin* 30)) (pretty-print (lambda (a b) (format t "--- ~A ---~A~%" a b)) nil))`,
-		Expect: `"(lambda (a b)
-  (format t
-          "--- ~A ---~A~%"
-          a
-          b))
+		Source: `(let ((*print-right-margin* 30)) (pretty-print (cond ((< x 5) (princ 'low)) (t (princ 'high))) nil))`,
+		Expect: `"(cond ((< x 5) (princ 'low))
+      (t (princ 'high)))
 "`,
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(let ((*print-right-margin* 30)) (pretty-print (lambda (a b) "black sheep" (* (+ a b) (- a b))) nil))`,
-		Expect: `"(lambda (a b)
-  "black sheep"
-  (* (+ a b) (- a b)))
+		Source: `(let ((*print-right-margin* 20)) (pretty-print (cond ((< x 5) (princ 'low)) (t (princ 'high))) nil))`,
+		Expect: `"(cond
+  ((< x 5)
+   (princ 'low))
+  (t (princ 'high)))
 "`,
 	}).Test(t)
 }

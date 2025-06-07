@@ -57,11 +57,11 @@ func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
 	if fi := slip.FindFunc(string(sym)); fi != nil {
 		return fi
 	}
-	if s.Has(sym) {
-		return s.Get(sym)
-	}
 	if c := slip.FindClass(string(sym)); c != nil {
 		return c
+	}
+	if s.Has(sym) {
+		return s.Get(sym)
 	}
 	return sym
 }
