@@ -44,3 +44,16 @@ func (fd *FuncDoc) getArg(name string) *DocArg {
 	}
 	return nil
 }
+
+// DefList return a argument list for function or lambda args list.
+func (fd *FuncDoc) DefList() List {
+	dl := make(List, len(fd.Args))
+	for i, da := range fd.Args {
+		if da.Default == nil {
+			dl[i] = Symbol(da.Name)
+		} else {
+			dl[i] = List{Symbol(da.Name), da.Default}
+		}
+	}
+	return dl
+}

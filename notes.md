@@ -4,47 +4,41 @@
 
 - next
 
- - pretty-print and *print-pretty*
-  - add function to gi
-   - use *print-right-margin*
-   - force *print-base* *print-case* *print-escape* *print-level* *print-lines* *print-readably* *print-radix* *print-array*
-  - better algorithm for specific first words in list (defun let let* cond progn and others)
-   - Printer createTree and appendTree improvement
-   - create tree with values or children set
-    - use print vars to create leaf strings
-    - can each node implement a common interface for ideal, tight, and squeeze?
-     - leaf and branch nodes, different branch node type for defun, let, quote, cond, etc
-    - maybe a tightness args passed down and decremented each time
-     - greater than 0 then tighter
-     - if less than zero then squeeze
-     - when 0 no need to decrement, use ideal
-  - rules
-   - defun and defmacro
-   - let and let*
-   - cond
-   - defvar
-   - loop
-  - build tree with min, max, and preferred width
-   - node
-    - name
-    - left
-    - width
-    - layout - match funcs
-    - children
-    - layout funcs
-     - ideal(left int) (right int) or maybe
-     - tight
-     - squeeze
-   - algorithm
-    - start with preferred
-     - calculate ideal, tight, and squuze widths
-     - parent then decides which layout to use and calls to set left
-      - left of 0 indicates same line
-    - try to fit by adjust at higher levels first
-    - if needed go to more extremes (example is (list
-                                                 one))
+ - encrypted app
+  - go app build with with embedded lisp
+  - pass in key or use default location for key
+  - use lisp to write main.go as well as encoding the files
+   - pull in plugins
+  - option for command line or env options that set vars
+  - is embedded readable?
+  - maybe need a plugin or separate binary that includes a first pass of a double enrypted file
+  - **or our own package that creates and can read embedded encrypted**
+  - steps
+   - set up template for app-build
+    - plugins
+    - embeded file (concatenate sources)
+     - double enrypt
+    - minimal main
 
- - save-state (destination &key order)
+
+  - slip.Class interface
+   - AllMethods() slip.List
+
+  - symbol lookup
+   - AllMethods list of method lists or should it be a list of names only?
+    - AllDefMethods
+    - add gi functions to return the same
+
+   - instance
+    - maybe (make-instance 'flavor :x 1 :y 2)
+     - use (setf (slot-value inst x) 1)
+      - for all, make-instance naked
+     - wrap the make-instance with a let and then the set calls and comments
+
+  - use in cl:disassemble for all symbols like pp.Append
+
+
+ - save-state (destination &key order) (snapshot)
   - set current package
   - keep track of require imports
    - pkg/cl/require should store order of call, name, and path of loaded
@@ -52,6 +46,7 @@
    - requires
    - variable setq (use correct package)
     - check boundp first then defvar or setq
+    - to preserve reference to the same object form a temporary map, makunbound after
    - defuns for all lambda function like dissasemble (use correct package)
   - order (sort) option
    - require and vars always alphabetical

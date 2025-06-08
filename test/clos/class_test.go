@@ -206,3 +206,13 @@ func TestClassInherits(t *testing.T) {
 	tt.Equal(t, true, c.Inherits(slip.FindClass("integer")))
 	tt.Equal(t, false, c.Inherits(slip.FindClass("float")))
 }
+
+func TestClassDefList(t *testing.T) {
+	c := slip.FindClass("fixnum")
+	tt.Equal(t, 0, len(c.DefList()))
+}
+
+func TestClassDefMethodList(t *testing.T) {
+	c := slip.FindClass("fixnum")
+	tt.Equal(t, 0, len(c.DefMethodList(":describe", ":before", true)))
+}

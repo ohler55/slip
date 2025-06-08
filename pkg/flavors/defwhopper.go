@@ -78,22 +78,6 @@ func (f *Defwhopper) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	} else {
 		slip.PanicType("method for defwhopper", ml[1], "keyword")
 	}
-	if 3 < len(args) { // method, method-args, docs, forms
-		var str slip.String
-		if str, ok = args[2].(slip.String); ok {
-			list := make(slip.List, len(args)-2)
-			list[0] = args[1]
-			copy(list[1:], args[3:])
-			flavor.DefMethod(
-				method,
-				":whopper",
-				&Daemon{
-					caller: slip.DefLambda(method, s, list),
-					docs:   string(str),
-				})
-			return
-		}
-	}
 	flavor.DefMethod(method, ":whopper", slip.DefLambda(method, s, args[1:]))
 
 	return nil

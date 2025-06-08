@@ -323,3 +323,16 @@ func (c *Class) mergeInherited() {
 		c.InstanceInit = iif
 	}
 }
+
+// DefList returns a list that can be evaluated to create the class or nil if
+// the class is a built in class.
+func (c *Class) DefList() slip.List {
+	// There is no defclass currently.
+	return nil
+}
+
+// DefMethodList returns nil.
+func (c *Class) DefMethodList(method, daemon string, inherited bool) slip.List {
+	// There is no defmethods for classes currently.
+	return nil
+}

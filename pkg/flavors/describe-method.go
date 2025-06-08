@@ -102,7 +102,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 		b = append(b, ' ')
 		b = append(b, daemon...)
 		b = append(b, '\n')
-		if hd, ok := caller.(HasDocs); ok {
+		if hd, ok := caller.(HasDocs); ok && 0 < len(hd.Docs()) {
 			b = slip.AppendDoc(b, hd.Docs(), 4, right, ansi)
 			b = append(b, '\n')
 		}

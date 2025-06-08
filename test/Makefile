@@ -19,6 +19,7 @@ github.com/ohler55/slip/sliptest\
 	make -C xml
 	make -C test
 	make -C watch
+	make -C pp
 	$Q grep github cl/cov.out >> cov.out
 	$Q grep github flavors/cov.out >> cov.out
 	$Q grep github gi/cov.out >> cov.out
@@ -30,6 +31,7 @@ github.com/ohler55/slip/sliptest\
 	$Q grep github xml/cov.out >> cov.out
 	$Q grep github test/cov.out >> cov.out
 	$Q grep github watch/cov.out >> cov.out
+	$Q grep github pp/cov.out >> cov.out
 	$Q go tool cover -func=cov.out | grep "total:"
 
 local:

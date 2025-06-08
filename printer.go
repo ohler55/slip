@@ -921,7 +921,7 @@ func Warn(format string, args ...any) {
 
 // AppendDoc appends text after formatting and converting _ and __ either to
 // ANSI underline and bold or is not ANSI removing them.
-func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
+func AppendDoc(b []byte, text string, indent, right int, ansi bool, firstIndent ...int) []byte {
 	var (
 		lastSpace int
 		spaceCol  int
@@ -930,7 +930,11 @@ func AppendDoc(b []byte, text string, indent, right int, ansi bool) []byte {
 		fs        bool // font style active
 		ret       bool
 	)
-	b = append(b, indentSpaces[:indent]...)
+	if 0 < len(firstIndent) {
+		b = append(b, indentSpaces[:firstIndent[0]]...)
+	} else {
+		b = append(b, indentSpaces[:indent]...)
+	}
 	ba := []byte(text)
 	last := len(ba) - 1
 	for i, c := range ba {
