@@ -174,3 +174,31 @@ func TestAppendCond(t *testing.T) {
 "`,
 	}).Test(t)
 }
+
+func TestAppendPackageVar(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20)) (pretty-print common-lisp:*package* nil))`,
+		Expect: `"#<package common-lisp-user>
+"`,
+	}).Test(t)
+}
+
+func TestAppendBuiltIn(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 60)
+                       (clas (find-class 'fixnum)))
+                   (pretty-print clas nil))`,
+		Expect: `"#<class fixnum>
+"`,
+	}).Test(t)
+}
+
+func TestAppendQuoteReorg(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 15))
+                   (pretty-print '(1 2 3 4 5 6 7 8 9 0) nil))`,
+		Expect: `"'(1 2 3 4 5 6 7
+  8 9 0)
+"`,
+	}).Test(t)
+}

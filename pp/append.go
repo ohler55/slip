@@ -69,18 +69,17 @@ func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
 func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 	// Quoted values are treated as the value quoted. Lists are converted to
 	// functions if possible.
-top:
 	switch to := obj.(type) {
 	case slip.List:
-		if len(to) == 0 {
-			obj = nil
-			goto top
-		}
-		if sym, ok := to[0].(slip.Symbol); ok {
-			node = buildCall(sym, to[1:], p)
-		} else {
+		if 0 < len(to) {
+			if sym, ok := to[0].(slip.Symbol); ok {
+				node = buildCall(sym, to[1:], p)
+				break
+			}
 			node = newList(to, p, false)
+			break
 		}
+		node = &Leaf{text: []byte("nil")}
 	case *slip.Lambda:
 		node = buildLambda(to, p)
 	case *slip.FuncInfo:
@@ -118,11 +117,8 @@ top:
 }
 
 func buildQNode(obj slip.Object, p *slip.Printer) Node {
-	if list, ok := obj.(slip.List); ok {
-		if 0 < len(list) {
-			return newList(list, p, true)
-		}
-		obj = nil
+	if list, ok := obj.(slip.List); ok && 0 < len(list) {
+		return newList(list, p, true)
 	}
 	return &Leaf{text: p.Append(nil, obj, 0)}
 }
@@ -160,9 +156,8 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		"with-open-file",
 		"with-open-stream",
 		"with-output-to-string",
-		"with-standard-io-syntax":
-		node = newFun1i2(name, args, p)
-	case "make-instance":
+		"with-standard-io-syntax",
+		"make-instance":
 		node = newFun1i2(name, args, p)
 	case "defflavor":
 		node = defflavorFromList(args, p)

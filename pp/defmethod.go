@@ -19,13 +19,16 @@ func defmethodFromList(name string, args slip.List, p *slip.Printer) Node {
 		},
 		name: name,
 	}
-	meth, ok := args[0].(slip.List)
-	if !ok {
-		meth = slip.List{args[0]}
-	}
+	meth, _ := args[0].(slip.List)
 	dm.children[0] = newList(meth, p, true)
 	dm.children[1] = argsFromList(args[1], p)
 	for i, v := range args[2:] {
+		if i == 0 { // first form in function
+			if ss, ok := v.(slip.String); ok {
+				dm.children[i+2] = &Doc{text: string(ss)}
+				continue
+			}
+		}
 		dm.children[i+2] = buildNode(v, p)
 	}
 	return &dm

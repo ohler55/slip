@@ -46,7 +46,7 @@ func (fun *Fun1i2) reorg(edge int) int {
 				w = cw + 4
 			}
 		}
-		last := len(fun.children) - 1
+		last := len(fun.children) - 2
 		for i, n := range fun.children[1:] {
 			cw := n.reorg(edge)
 			if last == i {

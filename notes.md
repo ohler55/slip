@@ -4,23 +4,6 @@
 
 - next
 
- - pretty-print
-  + Let (let and let*)
-  + Defun (defun defmacro)
-  + Lambda
-  + Defvar
-  + Fun1i2
-  + Defflavor
-  + Defmethod, Defwhopper
-  + Vector
-  + Array
-  + Octets
-  - tests
-   - pp
-
- - flavor DefMethod
-  - instead of flavors.Daemon just add docs to lambda.Doc
-
  - encrypted app
   - go app build with with embedded lisp
   - pass in key or use default location for key
