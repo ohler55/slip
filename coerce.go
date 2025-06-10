@@ -11,8 +11,8 @@ const starSym = Symbol("*")
 
 // Coerce_ returns object converted to type. A type of t always returns
 // object. Although not Common LISP standard other conversion are supported
-// when possible as indicated in the table where the vertical axis the object
-// type and the horizontal axis the type:
+// when possible as indicated in the table where the vertical axis is the
+// source object type and the horizontal axis the target type:
 //
 //               |list
 //               | |string

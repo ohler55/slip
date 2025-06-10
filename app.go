@@ -39,6 +39,9 @@ type CmdArg struct {
 
 	// Value is the string value from the command line.
 	Value string
+
+	// Bool value is set when the Type is "boolean".
+	Bool bool
 }
 
 // App has multiple roles related to developing, generating, and running an
@@ -119,19 +122,21 @@ func (app *App) Run(args ...string) (exitCode int) {
 	if 0 < len(app.KeyFlag) {
 		fs.StringVar(&key, app.KeyFlag, "", "source code decryption key")
 	}
-	app.setupFlags(fs)
+	for _, opt := range app.Options {
+		if opt.Type == "boolean" {
+			if opt.Default == nil {
+				fs.BoolVar(&opt.Bool, opt.Flag, false, opt.Doc)
+			} else {
+				fs.BoolVar(&opt.Bool, opt.Flag, true, opt.Doc)
+			}
+		} else {
+			fs.StringVar(&opt.Value, opt.Flag, ObjectString(opt.Default), opt.Doc)
+		}
+	}
 	if err := fs.Parse(args); err != nil {
 		panic(err)
 	}
-	fmt.Printf("*** key: %s\n", key)
-
 	app.updateScopeFromFlags(scope)
-	fmt.Printf("*** scope: %v\n", scope.Vars)
-
-	// update scope with flags
-
-	// TBD setup flags and parse
-	// set vars from flag parse
 
 	app.load(scope, key)
 
@@ -140,19 +145,27 @@ func (app *App) Run(args ...string) (exitCode int) {
 	return
 }
 
-func (app *App) setupFlags(fs *flag.FlagSet) {
-	// TBD consider type for setup
-	// bool, int, float, string
-	for _, opt := range app.Options {
-		fs.StringVar(&opt.Value, opt.Flag, ObjectString(opt.Default), opt.Doc)
-	}
-}
-
 func (app *App) updateScopeFromFlags(scope *Scope) {
-	// TBD
 	for _, opt := range app.Options {
-		fmt.Printf("*** %s: %s\n", opt.Var, opt.Value)
-		scope.Let(Symbol(opt.Var), Coerce(String(opt.Value), Symbol(opt.Type)))
+		var val Object
+		switch opt.Type {
+		case "string":
+			val = String(opt.Value)
+		case "symbol":
+			val = String(opt.Value)
+		case "boolean":
+			if opt.Bool {
+				val = True
+			}
+		default:
+			if code := ReadString(opt.Value, scope); 0 < len(code) {
+				val = code[0]
+			}
+		}
+		if 0 < len(opt.Type) && opt.Type != "boolean" {
+			val = Coerce(val, Symbol(opt.Type))
+		}
+		scope.Let(Symbol(opt.Var), val)
 	}
 }
 
