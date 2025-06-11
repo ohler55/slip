@@ -7,42 +7,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"plugin"
+	"strings"
 )
-
-// Plugin specifies a package and optionally the version.
-type Plugin struct {
-	Name    string
-	Version string
-}
-
-// CmdArg are used to specify then variables that will be set from the command
-// line arguments.
-type CmdArg struct {
-	// Flag is the command line flag such as 'v' which matches '-v' on the
-	// command line.
-	Flag string
-
-	// Doc is the documentation or description of the flag as it appears in
-	// the help display that is triggered a '-h' on the command line.
-	Doc string
-
-	// Default is the default SLIP object that will be assigned to the
-	// variable associated with the flag unless over-ridden by a command line
-	// option.
-	Default Object
-
-	// Type is the SLIP type to coerce the command line option value in to.
-	Type string
-
-	// Var is the name of the variable to that is bound to the flag value.
-	Var string
-
-	// Value is the string value from the command line.
-	Value string
-
-	// Bool value is set when the Type is "boolean".
-	Bool bool
-}
 
 // App has multiple roles related to developing, generating, and running an
 // application. During development of a standalone SLIP application the App
@@ -57,11 +25,12 @@ type App struct {
 	// Usage for help documentation.
 	Usage func()
 
-	// Plugins are the plugin packages to be included in the go.mod file.
-	Plugins []*Plugin
+	// Plugins is a list of paths to the plugin packages to be included in the
+	// go.mod file. (e.g., src/message.so)
+	Plugins []string
 
 	// Options identify the command line options for the application.
-	Options []*CmdArg
+	Options []*AppArg
 
 	// LispCode are the filepaths to the LISP source code. This use used
 	// during development and to form an encrypted and embedded file when the
@@ -95,22 +64,19 @@ type App struct {
 // Run the application with the optional arguments. The args provide a means
 // of testing during development.
 func (app *App) Run(args ...string) (exitCode int) {
-	if app.OnPanic == nil {
-		app.OnPanic = func(r any) int {
-			fmt.Printf("*-*-* %s\n", r)
-			return 1
-		}
-	}
 	defer func() {
 		if r := recover(); r != nil {
-			exitCode = app.OnPanic(r)
+			exitCode = 1
+			if app.OnPanic != nil {
+				exitCode = app.OnPanic(r)
+			}
 		}
 	}()
 	fs := flag.CommandLine
 	if 0 < len(args) {
 		fs = flag.NewFlagSet(app.Title, flag.ExitOnError)
 	} else {
-		args = os.Args
+		args = os.Args[1:]
 	}
 	if app.Usage != nil {
 		fs.Usage = app.Usage
@@ -118,57 +84,31 @@ func (app *App) Run(args ...string) (exitCode int) {
 	scope := NewScope()
 
 	var key string
-
 	if 0 < len(app.KeyFlag) {
 		fs.StringVar(&key, app.KeyFlag, "", "source code decryption key")
 	}
 	for _, opt := range app.Options {
-		if opt.Type == "boolean" {
-			if opt.Default == nil {
-				fs.BoolVar(&opt.Bool, opt.Flag, false, opt.Doc)
-			} else {
-				fs.BoolVar(&opt.Bool, opt.Flag, true, opt.Doc)
-			}
-		} else {
-			fs.StringVar(&opt.Value, opt.Flag, ObjectString(opt.Default), opt.Doc)
-		}
+		opt.SetFlag(fs, scope)
 	}
 	if err := fs.Parse(args); err != nil {
 		panic(err)
 	}
-	app.updateScopeFromFlags(scope)
-
+	for _, opt := range app.Options {
+		opt.UpdateScope(scope)
+	}
 	app.load(scope, key)
-
 	_ = ReadString(fmt.Sprintf("(%s)", app.EntryFunction), scope).Eval(scope, nil)
 
 	return
 }
 
-func (app *App) updateScopeFromFlags(scope *Scope) {
-	for _, opt := range app.Options {
-		var val Object
-		switch opt.Type {
-		case "string":
-			val = String(opt.Value)
-		case "symbol":
-			val = String(opt.Value)
-		case "boolean":
-			if opt.Bool {
-				val = True
-			}
-		default:
-			if code := ReadString(opt.Value, scope); 0 < len(code) {
-				val = code[0]
-			}
-		}
-		if 0 < len(opt.Type) && opt.Type != "boolean" {
-			val = Coerce(val, Symbol(opt.Type))
-		}
-		scope.Let(Symbol(opt.Var), val)
-	}
+// BuildEmbed sources and plugin libraries to the specified directory. If a
+// non empty key is provided then lisp sources are encrypted.
+func (app *App) BuildEmbed(dir, key string) {
+	// TBD create dir and encrypt lisp code and place in dir along with required plugin .so files
 }
 
+// Generate project directory with a main.go, go.mod, and lisp code directory.
 func (app *App) Generate(dir, slipVersion string) {
 	// TBD create the dir if needed
 	// generate a app.lisp file, encrypt if a key is provided
@@ -179,8 +119,38 @@ func (app *App) Generate(dir, slipVersion string) {
 
 func (app *App) load(scope *Scope, key string) {
 	if app.Source != nil {
-		// TBD load embedded lisp
+		entries, err := app.Source.ReadDir("src")
+		if err != nil {
+			panic(err)
+		}
+		for _, entry := range entries {
+			path := filepath.Join("src", entry.Name())
+			switch {
+			case strings.HasSuffix(path, ".lisp"):
+				content, err := app.Source.ReadFile(path)
+				if err != nil {
+					panic(err)
+				}
+				_ = Compile(content, scope)
+			case strings.HasSuffix(path, ".so"):
+				// TBD create a temp file and write the .so into the file then open that file
+				// can the file be deleted after that? I hope so
+
+				// For testing leave in place so it picks up the original file
+				if _, err := plugin.Open(path); err != nil {
+					NewPanic("plugin %s open failed. %s", path, err)
+				}
+			case strings.HasSuffix(path, ".enc"):
+				// TBD decrypt with key, panic if no key
+				fmt.Printf("*** %s is encrypted\n", path)
+			}
+		}
 		return
+	}
+	for _, path := range app.Plugins {
+		if _, err := plugin.Open(path); err != nil {
+			NewPanic("plugin %s open failed. %s", path, err)
+		}
 	}
 	for _, path := range app.LispCode {
 		content, err := os.ReadFile(path)

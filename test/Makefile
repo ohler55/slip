@@ -3,7 +3,10 @@ Q = $(if $(filter 1,$V),,@)
 
 all: cover
 
-cover:
+plugin:
+	make -C appplugin build
+
+cover: plugin
 	go test -coverpkg \
 github.com/ohler55/slip,\
 github.com/ohler55/slip/sliptest\
@@ -34,10 +37,10 @@ github.com/ohler55/slip/sliptest\
 	$Q grep github pp/cov.out >> cov.out
 	$Q go tool cover -func=cov.out | grep "total:"
 
-local:
+local: plugin
 	go test -coverpkg \
 github.com/ohler55/slip,\
 github.com/ohler55/slip/sliptest\
  -coverprofile=cov.out
 
-.PHONY: all cover
+.PHONY: all plugin cover

@@ -9,5 +9,3 @@ require (
 )
 
 require golang.org/x/sys v0.21.0
-
-replace github.com/ohler55/slip => ../slip

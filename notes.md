@@ -5,6 +5,11 @@
 - next
 
  - encrypted app
+  - load plugins
+   - add plugin to test/testplugin?
+  - build embed
+   - use same paths as in LispCode or merge and place in src/app.lisp or app.lisp.enc
+
   - go app build with with embedded lisp
   - pass in key or use default location for key
   - use lisp to write main.go as well as encoding the files
@@ -24,6 +29,10 @@
       - command line arguments - what form? prop list, assoc,
     - App should include helpers for parsing command line args
      - wrap flag functions but coerce into desired type
+   - create App class or flavor
+    - maybe a delegate since the only purpose is to generate and build the app
+     - unlike go where you can try it out
+   - allow build from lisp
 
     - need an App for runtime and a thing for generating an project
      - maybe App can generate it's own project which is just main with App setup then a call to App.Run()

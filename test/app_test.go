@@ -3,6 +3,7 @@
 package test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -12,9 +13,9 @@ import (
 
 func TestAppRunSimple(t *testing.T) {
 	app := slip.App{
-		Title:   "quux",
-		Plugins: []*slip.Plugin{},
-		Options: []*slip.CmdArg{
+		Title: "quux",
+		//Plugins: []string{"appplugin/appplugin.so"},
+		Options: []*slip.AppArg{
 			{Flag: "sym", Doc: "a symbol", Default: nil, Type: "symbol", Var: "sym"},
 			{Flag: "num", Doc: "a number", Default: slip.Fixnum(0), Type: "fixnum", Var: "num"},
 			{Flag: "str", Doc: "a string", Default: slip.String(""), Type: "string", Var: "str"},
@@ -25,11 +26,12 @@ func TestAppRunSimple(t *testing.T) {
 		Source:        nil,
 		KeyFlag:       "key",
 		KeyFile:       "testdata/app/key",
-		EntryFunction: "quux",
+		EntryFunction: "app-quux",
+		OnPanic: func(r any) int {
+			fmt.Printf("*-*-* %s\n", r)
+			return 1
+		},
 	}
-
-	// TBD add flagset and then use vars in quux.lisp
-
 	code := app.Run("-key", "secret-key", "-sym", "cymbal", "-num", "3", "-any", "(1 2 3)", "-str", "string", "-boo")
 	tt.Equal(t, 0, code)
 	out, err := os.ReadFile("testdata/app/run-simple.out")
@@ -37,20 +39,3 @@ func TestAppRunSimple(t *testing.T) {
 	tt.Equal(t, "The variables from AppRunSimple are boo: t num: 3 sym: cymbal str: string any: (1 2 3).\n",
 		string(out))
 }
-
-// func TestAppGenerate(t *testing.T) {
-// 	app := slip.App{
-// 		Title:         "quux",
-// 		Plugins:       []*slip.Plugin{},
-// 		Options:       []*slip.CmdArg{},
-// 		LispCode:      []string{},
-// 		Source:        nil,
-// 		KeyFlag:       "key",
-// 		KeyFile:       "testdata/key",
-// 		EntryFunction: "quux",
-// 	}
-
-// 	app.Generate("testdate/quux", "latest")
-
-// 	// TBD verify main.go
-// }

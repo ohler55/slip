@@ -12,7 +12,7 @@ import (
 func TestFunBasic(t *testing.T) {
 	scope := slip.NewScope()
 	defer func() {
-		slip.ReadString("(makunbound 'quux)", scope).Eval(scope, nil)
+		slip.ReadString("(fmakunbound 'quux)", scope).Eval(scope, nil)
 	}()
 	_ = slip.ReadString(`
 (defun quux (a b)
@@ -38,7 +38,7 @@ func TestFunBasic(t *testing.T) {
 func TestFunDotimes(t *testing.T) {
 	scope := slip.NewScope()
 	defer func() {
-		slip.ReadString("(makunbound 'quux)", scope).Eval(scope, nil)
+		slip.ReadString("(fmakunbound 'quux)", scope).Eval(scope, nil)
 	}()
 	_ = slip.ReadString(`
 (defun quux (a b)
