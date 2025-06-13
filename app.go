@@ -3,9 +3,15 @@
 package slip
 
 import (
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"crypto/sha3"
 	"embed"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"plugin"
@@ -83,10 +89,18 @@ func (app *App) Run(args ...string) (exitCode int) {
 	}
 	scope := NewScope()
 
-	var key string
+	var (
+		key     string
+		encrypt bool
+	)
+
+	// TBD if app.KeyFile then read file
+
 	if 0 < len(app.KeyFlag) {
 		fs.StringVar(&key, app.KeyFlag, "", "source code decryption key")
 	}
+	fs.BoolVar(&encrypt, "encrypt", false, "encrypt lisp source")
+
 	for _, opt := range app.Options {
 		opt.SetFlag(fs, scope)
 	}
@@ -96,7 +110,10 @@ func (app *App) Run(args ...string) (exitCode int) {
 	for _, opt := range app.Options {
 		opt.UpdateScope(scope)
 	}
-	app.load(scope, key)
+	if encrypt {
+		app.BuildEmbed("src", []byte(key))
+	}
+	app.load(scope, []byte(key))
 	_ = ReadString(fmt.Sprintf("(%s)", app.EntryFunction), scope).Eval(scope, nil)
 
 	return
@@ -104,12 +121,41 @@ func (app *App) Run(args ...string) (exitCode int) {
 
 // BuildEmbed sources and plugin libraries to the specified directory. If a
 // non empty key is provided then lisp sources are encrypted.
-func (app *App) BuildEmbed(dir, key string) {
-	// TBD create dir and encrypt lisp code and place in dir along with required plugin .so files
+func (app *App) BuildEmbed(dir string, key []byte) {
+	if len(dir) == 0 {
+		dir = "src"
+	}
+	var code []byte
+	for _, path := range app.LispCode {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			panic(err)
+		}
+		code = append(code, content...)
+		code = append(code, '\n')
+	}
+	if len(key) != 32 {
+		key = sha3.SumSHAKE256(key, 32)
+	}
+	block, _ := aes.NewCipher(key)
+	bsize := aes.BlockSize
+
+	if len(code)%bsize != 0 {
+		code = append(code, bytes.Repeat([]byte{'\n'}, bsize-len(code)%bsize)...)
+	}
+	buf := make([]byte, bsize+len(code))
+	nonce := buf[:bsize]
+	_, _ = io.ReadFull(rand.Reader, nonce)
+	mode := cipher.NewCBCEncrypter(block, nonce)
+	mode.CryptBlocks(buf[bsize:], code)
+
+	if err := os.WriteFile(filepath.Join(dir, "app.lisp.enc"), buf, os.FileMode(0666)); err != nil {
+		panic(err)
+	}
 }
 
 // Generate project directory with a main.go, go.mod, and lisp code directory.
-func (app *App) Generate(dir, slipVersion string) {
+func (app *App) Generate(dir, key, slipVersion string) {
 	// TBD create the dir if needed
 	// generate a app.lisp file, encrypt if a key is provided
 	// write a main.go file
@@ -117,8 +163,15 @@ func (app *App) Generate(dir, slipVersion string) {
 	// go build (verify it builds)
 }
 
-func (app *App) load(scope *Scope, key string) {
+func (app *App) load(scope *Scope, key []byte) {
+	var (
+		pluginsFound bool
+		lispFound    bool
+	)
 	if app.Source != nil {
+		if len(key) != 32 {
+			key = sha3.SumSHAKE256(key, 32)
+		}
 		entries, err := app.Source.ReadDir("src")
 		if err != nil {
 			panic(err)
@@ -140,23 +193,42 @@ func (app *App) load(scope *Scope, key string) {
 				if _, err := plugin.Open(path); err != nil {
 					NewPanic("plugin %s open failed. %s", path, err)
 				}
+				pluginsFound = true
 			case strings.HasSuffix(path, ".enc"):
-				// TBD decrypt with key, panic if no key
-				fmt.Printf("*** %s is encrypted\n", path)
+				data, err := os.ReadFile(path)
+				if err != nil {
+					panic(err)
+				}
+				block, _ := aes.NewCipher(key)
+				bsize := aes.BlockSize
+				non := data[:bsize]
+				data = data[bsize:]
+				mode := cipher.NewCBCDecrypter(block, non)
+				mode.CryptBlocks(data, data)
+				if data[len(data)-1] != '\n' {
+					panic("Invalid key")
+				}
+				if result := Compile(data, scope); result == nil {
+					panic("No objects loaded. Possibly an invalid key.")
+				}
+				lispFound = true
 			}
 		}
-		return
 	}
-	for _, path := range app.Plugins {
-		if _, err := plugin.Open(path); err != nil {
-			NewPanic("plugin %s open failed. %s", path, err)
+	if !pluginsFound {
+		for _, path := range app.Plugins {
+			if _, err := plugin.Open(path); err != nil {
+				NewPanic("plugin %s open failed. %s", path, err)
+			}
 		}
 	}
-	for _, path := range app.LispCode {
-		content, err := os.ReadFile(path)
-		if err != nil {
-			panic(err)
+	if !lispFound {
+		for _, path := range app.LispCode {
+			content, err := os.ReadFile(path)
+			if err != nil {
+				panic(err)
+			}
+			_ = Compile(content, scope)
 		}
-		_ = Compile(content, scope)
 	}
 }

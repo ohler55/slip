@@ -5,12 +5,11 @@
 - next
 
  - encrypted app
+  - load key from file
   - load plugins
    - add plugin to test/testplugin?
-  - build embed
-   - use same paths as in LispCode or merge and place in src/app.lisp or app.lisp.enc
 
-  - go app build with with embedded lisp
+  - go app build with embedded lisp
   - pass in key or use default location for key
   - use lisp to write main.go as well as encoding the files
    - pull in plugins
