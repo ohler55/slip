@@ -35,6 +35,7 @@ type AppArg struct {
 	boolValue  bool
 }
 
+// SetFlag sets the command line flag option for the argument.
 func (aa *AppArg) SetFlag(fs *flag.FlagSet, scope *Scope) {
 	switch aa.Type {
 	case "fixnum", "integer":
@@ -77,6 +78,7 @@ func (aa *AppArg) SetFlag(fs *flag.FlagSet, scope *Scope) {
 	}
 }
 
+// UpdateScope updates the scope with the values in the app arg.
 func (aa *AppArg) UpdateScope(scope *Scope) {
 	var (
 		value Object
