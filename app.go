@@ -102,11 +102,13 @@ func (app *App) Run(args ...string) (exitCode int) {
 			"generate an application directory, prepare, and build the application")
 	}
 	if 0 < len(app.KeyFile) {
-		content, err := os.ReadFile(app.KeyFile)
-		if err != nil {
-			panic(err)
+		if _, err := os.Stat(string(app.KeyFile)); err == nil {
+			content, err := os.ReadFile(app.KeyFile)
+			if err != nil {
+				panic(err)
+			}
+			key = strings.TrimSpace(string(content))
 		}
-		key = strings.TrimSpace(string(content))
 	}
 	if 0 < len(app.KeyFlag) {
 		fs.StringVar(&key, app.KeyFlag, "", "source code decryption key")
