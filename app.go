@@ -92,14 +92,25 @@ func (app *App) Run(args ...string) (exitCode int) {
 	var (
 		key     string
 		encrypt bool
+		genDir  string
 	)
-
-	// TBD if app.KeyFile then read file
-
+	if strings.Contains(os.Args[0], "go-build") { // using go run
+		// Could also check suffix for /exe/main.
+		fs.BoolVar(&encrypt, "slipapp.prepare", false,
+			"prepare the build by encrypting lisp sources and copying plugins to the src directory")
+		fs.StringVar(&genDir, "slipapp.generate", "",
+			"generate an application directory, prepare, and build the application")
+	}
+	if 0 < len(app.KeyFile) {
+		content, err := os.ReadFile(app.KeyFile)
+		if err != nil {
+			panic(err)
+		}
+		key = strings.TrimSpace(string(content))
+	}
 	if 0 < len(app.KeyFlag) {
 		fs.StringVar(&key, app.KeyFlag, "", "source code decryption key")
 	}
-	fs.BoolVar(&encrypt, "encrypt", false, "encrypt lisp source")
 
 	for _, opt := range app.Options {
 		opt.SetFlag(fs, scope)
@@ -109,6 +120,11 @@ func (app *App) Run(args ...string) (exitCode int) {
 	}
 	for _, opt := range app.Options {
 		opt.UpdateScope(scope)
+	}
+	if 0 < len(genDir) {
+		app.Generate(genDir, key)
+		fmt.Printf("The go application %q has been created and contains then standalone application name %s.\n",
+			app.Title, app.Title)
 	}
 	if encrypt {
 		app.BuildEmbed("src", []byte(key))
@@ -152,10 +168,24 @@ func (app *App) BuildEmbed(dir string, key []byte) {
 	if err := os.WriteFile(filepath.Join(dir, "app.lisp.enc"), buf, os.FileMode(0666)); err != nil {
 		panic(err)
 	}
+	for _, path := range app.Plugins {
+		src, err := os.Open(path)
+		if err != nil {
+			NewPanic("open %s reading failed. %s", path, err)
+		}
+		var dest *os.File
+		destPath := filepath.Join(dir, filepath.Base(path))
+		if dest, err = os.Create(destPath); err != nil {
+			NewPanic("open %s for writing failed. %s", destPath, err)
+		}
+		if _, err = io.Copy(dest, src); err != nil {
+			NewPanic("failed to copy %s to %s. %s", path, destPath, err)
+		}
+	}
 }
 
 // Generate project directory with a main.go, go.mod, and lisp code directory.
-func (app *App) Generate(dir, key, slipVersion string) {
+func (app *App) Generate(dir, key string) {
 	// TBD create the dir if needed
 	// generate a app.lisp file, encrypt if a key is provided
 	// write a main.go file

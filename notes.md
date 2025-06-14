@@ -5,7 +5,6 @@
 - next
 
  - encrypted app
-  - load key from file
   - load plugins
    - add plugin to test/testplugin?
 
