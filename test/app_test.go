@@ -14,7 +14,7 @@ import (
 func TestAppRunSimple(t *testing.T) {
 	app := slip.App{
 		Title: "quux",
-		//Plugins: []string{"appplugin/appplugin.so"},
+		// Plugins: []string{"appplugin/appplugin.so"},
 		Options: []*slip.AppArg{
 			{Flag: "sym", Doc: "a symbol", Default: nil, Type: "symbol", Var: "sym"},
 			{Flag: "num", Doc: "a number", Default: slip.Fixnum(0), Type: "fixnum", Var: "num"},
