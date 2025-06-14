@@ -5,6 +5,7 @@
 - next
 
  - encrypted app
+  - get cleanup working as well.
   - create make-app
    - options to set fields in a slip.App
    - write and build

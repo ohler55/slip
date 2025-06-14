@@ -103,7 +103,7 @@ func (app *App) Run(args ...string) (exitCode int) {
 			"prepare the build by encrypting lisp sources and copying plugins to the src directory")
 		fs.StringVar(&genDir, "slipapp.generate", "",
 			"generate an application directory, prepare, and build the application")
-		fs.BoolVar(&prepare, "slipapp.cleanup", false,
+		fs.BoolVar(&cleanup, "slipapp.cleanup", false,
 			"if generate is specified and cleanup is true all but the final application are removed")
 		fs.StringVar(&replace, "slipapp.replace", "",
 			"add a replace for the slip package at the end of the go.mod file")
@@ -191,6 +191,12 @@ func (app *App) Generate(dir string, key []byte, replace string, cleanup bool) {
 	cmd = exec.Command("go", "build", "-C", dir, "-o", app.Title)
 	if err := cmd.Run(); err != nil {
 		NewPanic("go build failed: %s", err)
+	}
+	if cleanup {
+		_ = os.RemoveAll(path)
+		_ = os.RemoveAll(filepath.Join(dir, "go.mod"))
+		_ = os.RemoveAll(filepath.Join(dir, "go.sum"))
+		_ = os.RemoveAll(filepath.Join(dir, "main.go"))
 	}
 }
 
