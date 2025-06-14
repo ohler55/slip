@@ -91,15 +91,18 @@ func (app *App) Run(args ...string) (exitCode int) {
 
 	var (
 		key     string
-		encrypt bool
+		prepare bool
 		genDir  string
+		cleanup bool
 	)
 	if strings.Contains(os.Args[0], "go-build") { // using go run
 		// Could also check suffix for /exe/main.
-		fs.BoolVar(&encrypt, "slipapp.prepare", false,
+		fs.BoolVar(&prepare, "slipapp.prepare", false,
 			"prepare the build by encrypting lisp sources and copying plugins to the src directory")
 		fs.StringVar(&genDir, "slipapp.generate", "",
 			"generate an application directory, prepare, and build the application")
+		fs.BoolVar(&prepare, "slipapp.cleanup", false,
+			"if generate is specified and cleanup is true all but the final application are removed")
 	}
 	if 0 < len(app.KeyFile) {
 		if _, err := os.Stat(string(app.KeyFile)); err == nil {
@@ -124,12 +127,19 @@ func (app *App) Run(args ...string) (exitCode int) {
 		opt.UpdateScope(scope)
 	}
 	if 0 < len(genDir) {
-		app.Generate(genDir, key)
+		app.Generate(genDir, key, cleanup)
 		fmt.Printf("The go application %q has been created and contains then standalone application name %s.\n",
 			app.Title, app.Title)
+		return
 	}
-	if encrypt {
+	if prepare {
 		app.BuildEmbed("src", []byte(key))
+		enc := "encrypted"
+		if len(key) == 0 {
+			enc = "not encrypted"
+		}
+		fmt.Printf("LISP files were %s and copied to the src directory. Plugin files also copied to src.\n", enc)
+		return
 	}
 	app.load(scope, []byte(key))
 	_ = ReadString(fmt.Sprintf("(%s)", app.EntryFunction), scope).Eval(scope, nil)
@@ -187,12 +197,17 @@ func (app *App) BuildEmbed(dir string, key []byte) {
 }
 
 // Generate project directory with a main.go, go.mod, and lisp code directory.
-func (app *App) Generate(dir, key string) {
+func (app *App) Generate(dir, key string, cleanup bool) {
 	// TBD create the dir if needed
 	// generate a app.lisp file, encrypt if a key is provided
 	// write a main.go file
+	// mkdir src
 	// go mod init
+	// go mod tidy
+	// copy .so files to src
 	// go build (verify it builds)
+	// if cleanup
+	//   remove main.go, src, go.mod, and go.sum
 }
 
 func (app *App) load(scope *Scope, key []byte) {
@@ -208,23 +223,39 @@ func (app *App) load(scope *Scope, key []byte) {
 		if err != nil {
 			panic(err)
 		}
+		var temp *os.File
+		defer func() {
+			if temp != nil {
+				_ = os.Remove(temp.Name())
+			}
+		}()
 		for _, entry := range entries {
 			path := filepath.Join("src", entry.Name())
 			switch {
 			case strings.HasSuffix(path, ".lisp"):
 				content, err := app.Source.ReadFile(path)
 				if err != nil {
-					panic(err)
+					NewPanic("%s open failed. %s", path, err)
 				}
 				_ = Compile(content, scope)
 			case strings.HasSuffix(path, ".so"):
-				// TBD create a temp file and write the .so into the file then open that file
-				// can the file be deleted after that? I hope so
-
-				// For testing leave in place so it picks up the original file
-				if _, err := plugin.Open(path); err != nil {
-					NewPanic("plugin %s open failed. %s", path, err)
+				if temp, err = os.CreateTemp("/tmp", "*.so"); err != nil {
+					panic(err)
 				}
+				src, err := app.Source.Open(path)
+				if err != nil {
+					NewPanic("open %s reading failed. %s", path, err)
+				}
+				if _, err = io.Copy(temp, src); err != nil {
+					NewPanic("failed to copy %s to %s. %s", path, temp.Name(), err)
+				}
+				if _, err := plugin.Open(temp.Name()); err != nil {
+					NewPanic("plugin %s open failed. %s", temp.Name(), err)
+				}
+				_ = temp.Close()
+				_ = os.Remove(temp.Name())
+				// For development leave in place so it picks up the original
+				// file.
 				pluginsFound = true
 			case strings.HasSuffix(path, ".enc"):
 				data, err := os.ReadFile(path)
