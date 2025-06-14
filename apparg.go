@@ -4,6 +4,7 @@ package slip
 
 import (
 	"flag"
+	"fmt"
 )
 
 // AppArg are used to specify then variables that will be set from the command
@@ -81,7 +82,6 @@ func (aa *AppArg) UpdateScope(scope *Scope) {
 		value Object
 		skip  bool
 	)
-
 	switch aa.Type {
 	case "fixnum", "integer":
 		value = Fixnum(aa.intValue)
@@ -120,4 +120,12 @@ func (aa *AppArg) UpdateScope(scope *Scope) {
 	if 0 < len(aa.Var) {
 		scope.Let(Symbol(aa.Var), value)
 	}
+}
+
+// DefaultReadable returns the readable string that reads into the default value.
+func (aa *AppArg) DefaultReadable() string {
+	if aa.Default == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("%T(%s)", aa.Default, ObjectString(aa.Default))
 }

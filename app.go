@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"plugin"
 	"strings"
@@ -93,6 +94,7 @@ func (app *App) Run(args ...string) (exitCode int) {
 		key     string
 		prepare bool
 		genDir  string
+		replace string
 		cleanup bool
 	)
 	if strings.Contains(os.Args[0], "go-build") { // using go run
@@ -103,6 +105,8 @@ func (app *App) Run(args ...string) (exitCode int) {
 			"generate an application directory, prepare, and build the application")
 		fs.BoolVar(&prepare, "slipapp.cleanup", false,
 			"if generate is specified and cleanup is true all but the final application are removed")
+		fs.StringVar(&replace, "slipapp.replace", "",
+			"add a replace for the slip package at the end of the go.mod file")
 	}
 	if 0 < len(app.KeyFile) {
 		if _, err := os.Stat(string(app.KeyFile)); err == nil {
@@ -116,7 +120,6 @@ func (app *App) Run(args ...string) (exitCode int) {
 	if 0 < len(app.KeyFlag) {
 		fs.StringVar(&key, app.KeyFlag, "", "source code decryption key")
 	}
-
 	for _, opt := range app.Options {
 		opt.SetFlag(fs, scope)
 	}
@@ -127,9 +130,11 @@ func (app *App) Run(args ...string) (exitCode int) {
 		opt.UpdateScope(scope)
 	}
 	if 0 < len(genDir) {
-		app.Generate(genDir, key, cleanup)
-		fmt.Printf("The go application %q has been created and contains then standalone application name %s.\n",
-			app.Title, app.Title)
+		app.Generate(genDir, []byte(key), replace, cleanup)
+		fmt.Printf(
+			"The go application directory %q has been created and contains then standalone application named %s.\n",
+			app.Title, app.Title,
+		)
 		return
 	}
 	if prepare {
@@ -153,61 +158,40 @@ func (app *App) BuildEmbed(dir string, key []byte) {
 	if len(dir) == 0 {
 		dir = "src"
 	}
-	var code []byte
-	for _, path := range app.LispCode {
-		content, err := os.ReadFile(path)
-		if err != nil {
-			panic(err)
-		}
-		code = append(code, content...)
-		code = append(code, '\n')
-	}
-	if len(key) != 32 {
-		key = sha3.SumSHAKE256(key, 32)
-	}
-	block, _ := aes.NewCipher(key)
-	bsize := aes.BlockSize
-
-	if len(code)%bsize != 0 {
-		code = append(code, bytes.Repeat([]byte{'\n'}, bsize-len(code)%bsize)...)
-	}
-	buf := make([]byte, bsize+len(code))
-	nonce := buf[:bsize]
-	_, _ = io.ReadFull(rand.Reader, nonce)
-	mode := cipher.NewCBCEncrypter(block, nonce)
-	mode.CryptBlocks(buf[bsize:], code)
-
-	if err := os.WriteFile(filepath.Join(dir, "app.lisp.enc"), buf, os.FileMode(0666)); err != nil {
-		panic(err)
-	}
-	for _, path := range app.Plugins {
-		src, err := os.Open(path)
-		if err != nil {
-			NewPanic("open %s reading failed. %s", path, err)
-		}
-		var dest *os.File
-		destPath := filepath.Join(dir, filepath.Base(path))
-		if dest, err = os.Create(destPath); err != nil {
-			NewPanic("open %s for writing failed. %s", destPath, err)
-		}
-		if _, err = io.Copy(dest, src); err != nil {
-			NewPanic("failed to copy %s to %s. %s", path, destPath, err)
-		}
-	}
+	app.makeOneLisp(dir, key)
+	app.copyPlugins(dir)
 }
 
 // Generate project directory with a main.go, go.mod, and lisp code directory.
-func (app *App) Generate(dir, key string, cleanup bool) {
-	// TBD create the dir if needed
-	// generate a app.lisp file, encrypt if a key is provided
-	// write a main.go file
-	// mkdir src
-	// go mod init
-	// go mod tidy
-	// copy .so files to src
-	// go build (verify it builds)
-	// if cleanup
-	//   remove main.go, src, go.mod, and go.sum
+func (app *App) Generate(dir string, key []byte, replace string, cleanup bool) {
+	path := filepath.Join(dir, "src")
+	if err := os.MkdirAll(path, 0755); err != nil {
+		NewPanic("failed to created the %s directory", path)
+	}
+	app.makeOneLisp(path, key)
+	app.copyPlugins(path)
+	app.writeMain(dir)
+
+	cmd := exec.Command("go", "mod", "init")
+	cmd.Dir = dir
+	if err := cmd.Run(); err != nil {
+		NewPanic("go mod init failed: %s", err)
+	}
+	cmd = exec.Command("go", "mod", "tidy")
+	cmd.Dir = dir
+	if err := cmd.Run(); err != nil {
+		NewPanic("go mod tidy failed: %s", err)
+	}
+	if 0 < len(replace) {
+		if f, err := os.OpenFile(filepath.Join(dir, "go.mod"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
+			_, _ = fmt.Fprintf(f, "\nreplace github.com/ohler55/slip => %s\n", replace)
+			_ = f.Close()
+		}
+	}
+	cmd = exec.Command("go", "build", "-C", dir, "-o", app.Title)
+	if err := cmd.Run(); err != nil {
+		NewPanic("go build failed: %s", err)
+	}
 }
 
 func (app *App) load(scope *Scope, key []byte) {
@@ -293,5 +277,118 @@ func (app *App) load(scope *Scope, key []byte) {
 			}
 			_ = Compile(content, scope)
 		}
+	}
+}
+
+func (app *App) makeOneLisp(dir string, key []byte) {
+	var code []byte
+	filename := "app.lisp"
+	for _, path := range app.LispCode {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			panic(err)
+		}
+		code = append(code, content...)
+		code = append(code, '\n')
+	}
+	if 0 < len(key) {
+		if len(key) != 32 {
+			key = sha3.SumSHAKE256(key, 32)
+		}
+		block, _ := aes.NewCipher(key)
+		bsize := aes.BlockSize
+		if len(code)%bsize != 0 {
+			code = append(code, bytes.Repeat([]byte{'\n'}, bsize-len(code)%bsize)...)
+		}
+		buf := make([]byte, bsize+len(code))
+		nonce := buf[:bsize]
+		_, _ = io.ReadFull(rand.Reader, nonce)
+		mode := cipher.NewCBCEncrypter(block, nonce)
+		mode.CryptBlocks(buf[bsize:], code)
+		code = buf
+		filename = "app.lisp.enc"
+	}
+	if err := os.WriteFile(filepath.Join(dir, filename), code, os.FileMode(0666)); err != nil {
+		NewPanic("writing %s/%s failed. %s", dir, filename, err)
+	}
+}
+
+func (app *App) copyPlugins(dir string) {
+	for _, path := range app.Plugins {
+		src, err := os.Open(path)
+		if err != nil {
+			NewPanic("open %s reading failed. %s", path, err)
+		}
+		var dest *os.File
+		destPath := filepath.Join(dir, filepath.Base(path))
+		if dest, err = os.Create(destPath); err != nil {
+			NewPanic("open %s for writing failed. %s", destPath, err)
+		}
+		if _, err = io.Copy(dest, src); err != nil {
+			NewPanic("failed to copy %s to %s. %s", path, destPath, err)
+		}
+	}
+}
+
+func (app *App) writeMain(dir string) {
+	b := fmt.Appendf(nil, `package main
+
+import (
+	"embed"
+	"fmt"
+
+	"github.com/ohler55/slip"
+	_ "github.com/ohler55/slip/pkg"
+)
+
+//go:embed src
+var srcFS embed.FS
+
+func main() {
+	app := slip.App{
+		Title: %q,
+`, app.Title)
+	b = append(b, "\t\tLispCode: []string{\n"...)
+	for _, lc := range app.LispCode {
+		b = append(b, "\t\t\t\""...)
+		b = append(b, lc...)
+		b = append(b, '"', ',', '\n')
+	}
+	b = append(b, "\t\t},\n"...)
+	if 0 < len(app.Plugins) {
+		b = append(b, "\t\tPlugins: []string{\n"...)
+		for _, pi := range app.Plugins {
+			b = append(b, "\t\t\t\""...)
+			b = append(b, pi...)
+			b = append(b, '"', ',', '\n')
+		}
+		b = append(b, "\t\t},\n"...)
+	}
+	if 0 < len(app.Options) {
+		b = append(b, "\t\tOptions: []*slip.AppArg{\n"...)
+		for _, aa := range app.Options {
+			b = fmt.Appendf(b, "\t\t\t{Flag: %q, Doc: %q, Type: %q, Var: %q, Default: %s},\n",
+				aa.Flag, aa.Doc, aa.Type, aa.Var, aa.DefaultReadable())
+		}
+		b = append(b, "\t\t},\n"...)
+	}
+	b = append(b, "\t\tSource:        &srcFS,\n"...)
+	if 0 < len(app.KeyFlag) {
+		b = fmt.Appendf(b, "\t\tKeyFlag:       %q,\n", app.KeyFlag)
+	}
+	if 0 < len(app.KeyFile) {
+		b = fmt.Appendf(b, "\t\tKeyFile:       %q,\n", app.KeyFile)
+	}
+	b = fmt.Appendf(b, "\t\tEntryFunction: %q,\n", app.EntryFunction)
+	b = append(b, `		OnPanic: func(r any) int {
+			fmt.Printf("*-*-* %s\n", r)
+			return 1
+		},
+	}
+	app.Run()
+}
+`...)
+	if err := os.WriteFile(filepath.Join(dir, "main.go"), b, os.FileMode(0666)); err != nil {
+		NewPanic("writing %s/main.go failed. %s", dir, err)
 	}
 }

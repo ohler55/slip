@@ -5,42 +5,10 @@
 - next
 
  - encrypted app
-  - load plugins
-   - add plugin to test/testplugin?
-
-  - go app build with embedded lisp
-  - pass in key or use default location for key
-  - use lisp to write main.go as well as encoding the files
-   - pull in plugins
-  - option for command line or env options that set vars
-  - is embedded readable?
-  - maybe need a plugin or separate binary that includes a first pass of a double enrypted file
-  - **or our own package that creates and can read embedded encrypted**
-  - steps
-   - set up template for app-build (slip.App)
-    - args (populate App struct)
-     - slip version
-     - plugins (packages) for go.mod
-     - lisp file paths
-     - name/title
-     - entry point (function to call along with arguments)
-      - command line arguments - what form? prop list, assoc,
-    - App should include helpers for parsing command line args
-     - wrap flag functions but coerce into desired type
-   - create App class or flavor
-    - maybe a delegate since the only purpose is to generate and build the app
-     - unlike go where you can try it out
-   - allow build from lisp
-
-    - need an App for runtime and a thing for generating an project
-     - maybe App can generate it's own project which is just main with App setup then a call to App.Run()
-     - also need flag setup
-      - data driven - flag, doc, default, coerce-type, var-name
-
-    - embeded file (concatenate sources)
-     - double enrypt
-    - minimal main
-
+  - create make-app
+   - options to set fields in a slip.App
+   - write and build
+  - test
 
   - slip.Class interface
    - AllMethods() slip.List
