@@ -9,9 +9,6 @@
    - options to set fields in a slip.App
    - write and build
   - test
-   - AppArg with a flag.FlagSet and then look at with Visit or VisitAll
-   - update scope with new scope
-   - DefaultReadable with nil and other expected types
 
   - slip.Class interface
    - AllMethods() slip.List
