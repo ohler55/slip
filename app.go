@@ -187,7 +187,7 @@ func (app *App) Generate(dir string, key []byte, replace string, cleanup bool) {
 	if err := cmd.Run(); err != nil {
 		NewPanic("go mod init failed: %s", err)
 	}
-	cmd = exec.Command("go", "mod", "tidy", "-x")
+	cmd = exec.Command("go", "mod", "tidy")
 	cmd.Dir = dir
 	if err := cmd.Run(); err != nil {
 		NewPanic("go mod tidy failed: %s", err)
