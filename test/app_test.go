@@ -92,6 +92,7 @@ func TestAppRunGenerate(t *testing.T) {
 	if td := os.Getenv("RUNNER_TEMP"); 0 < len(td) {
 		scratchPath = filepath.Join(td, "scratch")
 	}
+	fmt.Printf("*** scratchPath: %s temp-dir: %s\n", scratchPath, os.Getenv("RUNNER_TEMP"))
 	_ = os.RemoveAll(scratchPath)
 	defer func() { _ = os.RemoveAll(scratchPath) }()
 	app := slip.App{
