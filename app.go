@@ -92,14 +92,15 @@ func (app *App) Run(args ...string) (exitCode int) {
 
 	var (
 		key     string
-		prepare bool
+		prepare string
 		genDir  string
 		replace string
 		cleanup bool
+		verbose bool
 	)
 	if strings.Contains(os.Args[0], "go-build") { // using go run
 		// Could also check suffix for /exe/main.
-		fs.BoolVar(&prepare, "slipapp.prepare", false,
+		fs.StringVar(&prepare, "slipapp.prepare", "",
 			"prepare the build by encrypting lisp sources and copying plugins to the src directory")
 		fs.StringVar(&genDir, "slipapp.generate", "",
 			"generate an application directory, prepare, and build the application")
@@ -108,6 +109,8 @@ func (app *App) Run(args ...string) (exitCode int) {
 		fs.StringVar(&replace, "slipapp.replace", "",
 			"add a replace for the slip package at the end of the go.mod file")
 	}
+	fs.BoolVar(&verbose, "v", false, "verbose")
+
 	if 0 < len(app.KeyFile) {
 		if _, err := os.Stat(string(app.KeyFile)); err == nil {
 			content, err := os.ReadFile(app.KeyFile)
@@ -131,19 +134,23 @@ func (app *App) Run(args ...string) (exitCode int) {
 	}
 	if 0 < len(genDir) {
 		app.Generate(genDir, []byte(key), replace, cleanup)
-		fmt.Printf(
-			"The go application directory %q has been created and contains then standalone application named %s.\n",
-			app.Title, app.Title,
-		)
+		if verbose {
+			fmt.Printf(
+				"The go application directory %q has been created and contains the %s application.\n",
+				app.Title, app.Title,
+			)
+		}
 		return
 	}
-	if prepare {
-		app.BuildEmbed("src", []byte(key))
-		enc := "encrypted"
-		if len(key) == 0 {
-			enc = "not encrypted"
+	if 0 < len(prepare) {
+		app.BuildEmbed(prepare, []byte(key))
+		if verbose {
+			enc := "encrypted"
+			if len(key) == 0 {
+				enc = "not encrypted"
+			}
+			fmt.Printf("LISP files were %s and copied to the src directory. Plugin files were copied to src.\n", enc)
 		}
-		fmt.Printf("LISP files were %s and copied to the src directory. Plugin files also copied to src.\n", enc)
 		return
 	}
 	app.load(scope, []byte(key))
@@ -157,6 +164,9 @@ func (app *App) Run(args ...string) (exitCode int) {
 func (app *App) BuildEmbed(dir string, key []byte) {
 	if len(dir) == 0 {
 		dir = "src"
+	}
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		NewPanic("failed to created the %s directory", dir)
 	}
 	app.makeOneLisp(dir, key)
 	app.copyPlugins(dir)
@@ -172,7 +182,7 @@ func (app *App) Generate(dir string, key []byte, replace string, cleanup bool) {
 	app.copyPlugins(path)
 	app.writeMain(dir)
 
-	cmd := exec.Command("go", "mod", "init")
+	cmd := exec.Command("go", "mod", "init", "main")
 	cmd.Dir = dir
 	if err := cmd.Run(); err != nil {
 		NewPanic("go mod init failed: %s", err)
