@@ -30,7 +30,7 @@ func TestAppArgString(t *testing.T) {
 
 	fs.PrintDefaults()
 	tt.Equal(t, `  -f string
-    	a string (default "\"default\"")
+    	a string (default "default")
 `, sb.String())
 
 	aa.UpdateScope(scope)
@@ -93,4 +93,220 @@ func TestAppArgFloat(t *testing.T) {
 	tt.Equal(t, slip.DoubleFloat(7.5), scope.Get("flag-value"))
 
 	tt.Equal(t, `slip.DoubleFloat(1.5)`, aa.DefaultReadable())
+}
+
+func TestAppArgSymbol(t *testing.T) {
+	aa := slip.AppArg{
+		Flag:    "f",
+		Doc:     "a symbol",
+		Default: slip.Symbol("buux"),
+		Type:    "symbol",
+		Var:     "flag-value",
+	}
+	var sb strings.Builder
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.SetOutput(&sb)
+	scope := slip.NewScope()
+	aa.SetFlag(fs, scope)
+
+	err := fs.Parse([]string{"-f", "quux"})
+	tt.Nil(t, err)
+
+	fs.PrintDefaults()
+	tt.Equal(t, `  -f string
+    	a symbol (default "buux")
+`, sb.String())
+
+	aa.UpdateScope(scope)
+	tt.Equal(t, slip.Symbol("quux"), scope.Get("flag-value"))
+
+	tt.Equal(t, `slip.Symbol("buux")`, aa.DefaultReadable())
+}
+
+func TestAppArgSymbolNil(t *testing.T) {
+	aa := slip.AppArg{
+		Flag:    "f",
+		Doc:     "a symbol",
+		Default: nil,
+		Type:    "symbol",
+		Var:     "flag-value",
+	}
+	var sb strings.Builder
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.SetOutput(&sb)
+	scope := slip.NewScope()
+	aa.SetFlag(fs, scope)
+
+	aa.UpdateScope(scope)
+	tt.Equal(t, nil, scope.Get("flag-value"))
+
+	err := fs.Parse([]string{"-f", "quux"})
+	tt.Nil(t, err)
+
+	fs.PrintDefaults()
+	tt.Equal(t, `  -f string
+    	a symbol
+`, sb.String())
+
+	aa.UpdateScope(scope)
+	tt.Equal(t, slip.Symbol("quux"), scope.Get("flag-value"))
+
+	tt.Equal(t, `nil`, aa.DefaultReadable())
+}
+
+func TestAppArgBooleanTrue(t *testing.T) {
+	aa := slip.AppArg{
+		Flag:    "f",
+		Doc:     "a boolean",
+		Default: nil,
+		Type:    "boolean",
+		Var:     "flag-value",
+	}
+	var sb strings.Builder
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.SetOutput(&sb)
+	scope := slip.NewScope()
+	aa.SetFlag(fs, scope)
+
+	err := fs.Parse([]string{"-f"})
+	tt.Nil(t, err)
+
+	fs.PrintDefaults()
+	tt.Equal(t, "  -f\ta boolean\n", sb.String())
+
+	aa.UpdateScope(scope)
+	tt.Equal(t, slip.True, scope.Get("flag-value"))
+
+	tt.Equal(t, `nil`, aa.DefaultReadable())
+}
+
+func TestAppArgBooleanFalse(t *testing.T) {
+	aa := slip.AppArg{
+		Flag:    "f",
+		Doc:     "a boolean",
+		Default: slip.True,
+		Type:    "boolean",
+		Var:     "flag-value",
+	}
+	var sb strings.Builder
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.SetOutput(&sb)
+	scope := slip.NewScope()
+	aa.SetFlag(fs, scope)
+
+	err := fs.Parse([]string{"-f=false"})
+	tt.Nil(t, err)
+
+	fs.PrintDefaults()
+	tt.Equal(t, "  -f\ta boolean (default true)\n", sb.String())
+
+	aa.UpdateScope(scope)
+	tt.Nil(t, scope.Get("flag-value"))
+
+	tt.Equal(t, `t`, aa.DefaultReadable())
+}
+
+func TestAppArgOctets(t *testing.T) {
+	aa := slip.AppArg{
+		Flag:    "f",
+		Doc:     "an octets",
+		Default: slip.Octets("abc"),
+		Type:    "octets",
+		Var:     "flag-value",
+	}
+	var sb strings.Builder
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.SetOutput(&sb)
+	scope := slip.NewScope()
+	aa.SetFlag(fs, scope)
+
+	err := fs.Parse([]string{"-f", "quux"})
+	tt.Nil(t, err)
+
+	fs.PrintDefaults()
+	tt.Equal(t, `  -f string
+    	an octets (default "abc")
+`, sb.String())
+
+	aa.UpdateScope(scope)
+	tt.Equal(t, slip.Octets("quux"), scope.Get("flag-value"))
+
+	tt.Equal(t, `slip.Octets("abc")`, aa.DefaultReadable())
+}
+
+func TestAppArgEvalBefore(t *testing.T) {
+	aa := slip.AppArg{
+		Flag:    "f",
+		Doc:     "some code",
+		Default: nil,
+		Type:    "eval-before",
+		Var:     "flag-value",
+	}
+	an := slip.AppArg{
+		Flag:    "num",
+		Default: slip.Fixnum(3),
+		Type:    "fixnum",
+		Var:     "num",
+	}
+	var sb strings.Builder
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.SetOutput(&sb)
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("num"), slip.Fixnum(1))
+	aa.SetFlag(fs, scope)
+	an.SetFlag(fs, scope)
+
+	err := fs.Parse([]string{"-f", "(1+ num)", "-num", "5"})
+	tt.Nil(t, err)
+
+	fs.PrintDefaults()
+	tt.Equal(t, `  -f value
+    	some code
+  -num int
+    	 (default 3)
+`, sb.String())
+
+	aa.UpdateScope(scope)
+	tt.Equal(t, slip.Fixnum(2), scope.Get("flag-value"))
+
+	tt.Equal(t, `nil`, aa.DefaultReadable())
+}
+
+func TestAppArgEvalAfter(t *testing.T) {
+	aa := slip.AppArg{
+		Flag:    "f",
+		Doc:     "some code",
+		Default: nil,
+		Type:    "eval-after",
+		Var:     "flag-value",
+	}
+	an := slip.AppArg{
+		Flag:    "num",
+		Default: slip.Fixnum(3),
+		Type:    "fixnum",
+		Var:     "num",
+	}
+	var sb strings.Builder
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.SetOutput(&sb)
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("num"), slip.Fixnum(1))
+	aa.SetFlag(fs, scope)
+	an.SetFlag(fs, scope)
+
+	err := fs.Parse([]string{"-f", "(1+ num)", "-num", "5"})
+	tt.Nil(t, err)
+
+	fs.PrintDefaults()
+	tt.Equal(t, `  -f value
+    	some code
+  -num int
+    	 (default 3)
+`, sb.String())
+
+	an.UpdateScope(scope)
+	aa.UpdateScope(scope)
+	tt.Equal(t, slip.Fixnum(6), scope.Get("flag-value"))
+
+	tt.Equal(t, `nil`, aa.DefaultReadable())
 }

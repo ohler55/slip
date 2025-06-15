@@ -74,7 +74,16 @@ func (aa *AppArg) SetFlag(fs *flag.FlagSet, scope *Scope) {
 			return nil
 		})
 	default: // any or blank
-		fs.StringVar(&aa.strValue, aa.Flag, ObjectString(aa.Default), aa.Doc)
+		switch td := aa.Default.(type) {
+		case nil:
+			fs.StringVar(&aa.strValue, aa.Flag, "", aa.Doc)
+		case String:
+			fs.StringVar(&aa.strValue, aa.Flag, string(td), aa.Doc)
+		case Octets:
+			fs.StringVar(&aa.strValue, aa.Flag, string(td), aa.Doc)
+		default:
+			fs.StringVar(&aa.strValue, aa.Flag, ObjectString(aa.Default), aa.Doc)
+		}
 	}
 }
 
@@ -90,11 +99,17 @@ func (aa *AppArg) UpdateScope(scope *Scope) {
 	case "float", "short-float", "double-float", "single-float":
 		value = DoubleFloat(aa.floatValue)
 	case "string":
-		value = String(aa.strValue)
+		if 0 < len(aa.strValue) {
+			value = String(aa.strValue)
+		}
 	case "symbol":
-		value = Symbol(aa.strValue)
+		if 0 < len(aa.strValue) {
+			value = Symbol(aa.strValue)
+		}
 	case "octets":
-		value = Octets(aa.strValue)
+		if 0 < len(aa.strValue) {
+			value = Octets(aa.strValue)
+		}
 	case "boolean":
 		if aa.boolValue {
 			value = True
@@ -116,7 +131,7 @@ func (aa *AppArg) UpdateScope(scope *Scope) {
 			value = code[0]
 		}
 	}
-	if !skip && 0 < len(aa.Type) {
+	if !skip && 0 < len(aa.Type) && value != nil {
 		value = Coerce(value, Symbol(aa.Type))
 	}
 	if 0 < len(aa.Var) {
@@ -125,9 +140,22 @@ func (aa *AppArg) UpdateScope(scope *Scope) {
 }
 
 // DefaultReadable returns the readable string that reads into the default value.
-func (aa *AppArg) DefaultReadable() string {
-	if aa.Default == nil {
-		return "nil"
+func (aa *AppArg) DefaultReadable() (str string) {
+	switch td := aa.Default.(type) {
+	case nil:
+		str = "nil"
+	case Symbol:
+		str = fmt.Sprintf("slip.Symbol(%q)", string(td))
+	case String:
+		str = fmt.Sprintf("slip.String(%q)", string(td))
+	case Octets:
+		str = fmt.Sprintf("slip.Octets(%q)", string(td))
+	case boolean:
+		if td {
+			str = "t"
+		}
+	default:
+		str = fmt.Sprintf("%T(%s)", aa.Default, ObjectString(aa.Default))
 	}
-	return fmt.Sprintf("%T(%s)", aa.Default, ObjectString(aa.Default))
+	return
 }
