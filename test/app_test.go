@@ -88,8 +88,12 @@ func TestAppRunBadKeyFile(t *testing.T) {
 func TestAppRunGenerate(t *testing.T) {
 	// Use a directory outside the slip repo to avoid the clash of the slip
 	// go.mod and the application go.mod.
-	_ = os.RemoveAll("/tmp/scratch")
-	defer func() { _ = os.RemoveAll("/tmp/scratch") }()
+	scratchPath := filepath.Join(os.TempDir(), "scratch")
+	if td := os.Getenv("RUNNER_TEMP"); 0 < len(td) {
+		scratchPath = filepath.Join(td, "scratch")
+	}
+	_ = os.RemoveAll(scratchPath)
+	defer func() { _ = os.RemoveAll(scratchPath) }()
 	app := slip.App{
 		Title:   "quux",
 		Plugins: []string{"appplugin/appplugin.so"},
@@ -106,35 +110,39 @@ func TestAppRunGenerate(t *testing.T) {
 		},
 	}
 	wd, _ := os.Getwd()
-	code := app.Run("-key", "secret", "-slipapp.generate", "/tmp/scratch", "-slipapp.replace", filepath.Dir(wd))
+	code := app.Run("-key", "secret", "-slipapp.generate", scratchPath, "-slipapp.replace", filepath.Dir(wd))
 	tt.Equal(t, 0, code)
 
-	content, err := os.ReadFile("/tmp/scratch/go.mod")
+	content, err := os.ReadFile(filepath.Join(scratchPath, "go.mod"))
 	tt.Nil(t, err)
 	tt.Equal(t, true, bytes.Contains(content, []byte("replace github.com/ohler55/slip =>")))
 	tt.Equal(t, true, bytes.Contains(content, []byte("require github.com/ohler55/slip")))
 
-	content, err = os.ReadFile("/tmp/scratch/main.go")
+	content, err = os.ReadFile(filepath.Join(scratchPath, "main.go"))
 	tt.Nil(t, err)
 	tt.Equal(t, true, bytes.Contains(content, []byte("func main() {")))
 	tt.Equal(t, true, bytes.Contains(content, []byte("app.Run()")))
 	tt.Equal(t, true, bytes.Contains(content, []byte("var srcFS embed.FS")))
 
-	_, err = os.Stat("/tmp/scratch/go.sum")
+	_, err = os.Stat(filepath.Join(scratchPath, "go.sum"))
 	tt.Nil(t, err)
-	_, err = os.Stat("/tmp/scratch/quux")
+	_, err = os.Stat(filepath.Join(scratchPath, "quux"))
 	tt.Nil(t, err)
-	_, err = os.Stat("/tmp/scratch/src/app.lisp.enc")
+	_, err = os.Stat(filepath.Join(scratchPath, "src", "app.lisp.enc"))
 	tt.Nil(t, err)
-	_, err = os.Stat("/tmp/scratch/src/appplugin.so")
+	_, err = os.Stat(filepath.Join(scratchPath, "src", "appplugin.so"))
 	tt.Nil(t, err)
 }
 
 func TestAppRunGenerateCleanup(t *testing.T) {
 	// Use a directory outside the slip repo to avoid the clash of the slip
 	// go.mod and the application go.mod.
-	_ = os.RemoveAll("/tmp/scratch")
-	defer func() { _ = os.RemoveAll("/tmp/scratch") }()
+	scratchPath := filepath.Join(os.TempDir(), "scratch")
+	if td := os.Getenv("RUNNER_TEMP"); 0 < len(td) {
+		scratchPath = filepath.Join(td, "scratch")
+	}
+	_ = os.RemoveAll(scratchPath)
+	defer func() { _ = os.RemoveAll(scratchPath) }()
 	app := slip.App{
 		Title:   "quux",
 		Plugins: []string{"appplugin/appplugin.so"},
@@ -153,22 +161,22 @@ func TestAppRunGenerateCleanup(t *testing.T) {
 	wd, _ := os.Getwd()
 	code := app.Run(
 		"-key", "secret",
-		"-slipapp.generate", "/tmp/scratch",
+		"-slipapp.generate", scratchPath,
 		"-slipapp.replace", filepath.Dir(wd),
 		"-slipapp.cleanup",
 	)
 	tt.Equal(t, 0, code)
 
-	_, err := os.Stat("/tmp/scratch/quux")
+	_, err := os.Stat(filepath.Join(scratchPath, "quux"))
 	tt.Nil(t, err)
 
-	_, err = os.Stat("/tmp/scratch/main.go")
+	_, err = os.Stat(filepath.Join(scratchPath, "main.go"))
 	tt.NotNil(t, err)
-	_, err = os.Stat("/tmp/scratch/go.mod")
+	_, err = os.Stat(filepath.Join(scratchPath, "go.mod"))
 	tt.NotNil(t, err)
-	_, err = os.Stat("/tmp/scratch/go.sum")
+	_, err = os.Stat(filepath.Join(scratchPath, "go.sum"))
 	tt.NotNil(t, err)
-	_, err = os.Stat("/tmp/scratch/src")
+	_, err = os.Stat(filepath.Join(scratchPath, "src"))
 	tt.NotNil(t, err)
 }
 
