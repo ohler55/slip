@@ -112,7 +112,7 @@ func (app *App) Run(args ...string) (exitCode int) {
 	fs.BoolVar(&verbose, "v", false, "verbose")
 
 	if 0 < len(app.KeyFile) {
-		if _, err := os.Stat(string(app.KeyFile)); err == nil {
+		if _, err := os.Stat(app.KeyFile); err == nil {
 			content, err := os.ReadFile(app.KeyFile)
 			if err != nil {
 				panic(err)
