@@ -6,8 +6,8 @@
 
  - encrypted app
   - create make-app
-   - options to set fields in a slip.App
-   - write and build
+   - test
+    - similar to app_test
 
   - slip.Class interface
    - AllMethods() slip.List

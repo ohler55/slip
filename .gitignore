@@ -17,3 +17,5 @@ stash.lisp
 # vendor/
 
 test/testdata/app/quux
+test/gi/testdata/quux
+test/gi/testdata/make-app.out

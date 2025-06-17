@@ -4,6 +4,9 @@ package gi
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/ohler55/slip"
 )
@@ -11,7 +14,7 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := MakeApp{Function: slip.Function{Name: "make-app", Args: args, SkipEval: []bool{true}}}
+			f := MakeApp{Function: slip.Function{Name: "make-app", Args: args}}
 			f.Self = &f
 			return &f
 		},
@@ -20,14 +23,9 @@ func init() {
 			Name: "make-app",
 			Args: []*slip.DocArg{
 				{
-					Name: "name",
+					Name: "app-filepath",
 					Type: "string",
-					Text: "The name of the application being built.",
-				},
-				{
-					Name: "directory",
-					Type: "string",
-					Text: "The directory to build the application in.",
+					Text: "The filepath including the application name of the application being built.",
 				},
 				{
 					Name: "files",
@@ -56,6 +54,11 @@ func init() {
 					Text: "A command line flag to accepts an encryption key.",
 				},
 				{
+					Name: "scratch",
+					Type: "string",
+					Text: "The directory to build the application in. (default: a temporary directory)",
+				},
+				{
 					Name: "cleanup",
 					Type: "boolean",
 					Text: "If true then the files used to create the application are removed when finished.",
@@ -69,7 +72,7 @@ the go.mod file as a replacement for the slip package.`,
 				{
 					Name: "plugins",
 					Type: "list",
-					Text: "A list of the file paths to the plugin packages files (.so files).",
+					Text: "A list of the plugin names or full filepaths to the files (.so files).",
 				},
 				{
 					Name: "usage",
@@ -89,10 +92,12 @@ option. The properties are:
 `,
 				},
 			},
-			Return: "nil",
-			Text:   `__make-app__ builds a standalone application with optional encrypted source files.`,
+			Return: "string|nil",
+			Text: `__make-app__ builds a standalone application with optional encrypted source files. The scratch
+directory path to the files used to build the application is returned unless _:cleanup_ was true in which case
+__nil__ is returned.`,
 			Examples: []string{
-				`(make-app "quux" "scratch" '("quux.lisp") 'quux)`,
+				`(make-app "quux" '("quux.lisp") 'quux) => /tmp/scratch`,
 			},
 		}, &Pkg)
 }
@@ -104,67 +109,120 @@ type MakeApp struct {
 
 // Call the function with the arguments provided.
 func (f *MakeApp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 4, 20)
+	slip.ArgCountCheck(f, args, 3, 20)
+	appPath := slip.MustBeString(args[0], "app-filepath")
 	app := slip.App{
-		Title: slip.MustBeString(args[0], "name"),
+		Title:         filepath.Base(appPath),
+		EntryFunction: slip.MustBeString(args[2], "entry"),
 	}
-	dir := slip.MustBeString(args[1], "directory")
-	if list, ok := args[2].(slip.List); ok {
+	if list, ok := args[1].(slip.List); ok {
 		app.LispCode = make([]string, len(list))
 		for i, v := range list {
 			app.LispCode[i] = slip.MustBeString(v, "files")
 		}
 	} else {
-		slip.PanicType("directory", args[2], "list")
+		slip.PanicType("app-filepath", args[2], "list")
 	}
 	var (
-		key     []byte
-		replace string
-		cleanup bool
+		key        []byte
+		replace    string
+		cleanup    bool
+		scratchDir string
 	)
-	rest := args[4:]
-	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol("key")); has {
-		key = []byte(slip.MustBeString(v, "key"))
+	rest := args[3:]
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":key")); has {
+		key = []byte(slip.MustBeString(v, ":key"))
 	}
-	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol("key-flag")); has {
-		app.KeyFlag = slip.MustBeString(v, "key-flag")
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":key-flag")); has {
+		app.KeyFlag = slip.MustBeString(v, ":key-flag")
 	}
-	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol("key-file")); has {
-		app.KeyFile = slip.MustBeString(v, "key-file")
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":key-file")); has {
+		app.KeyFile = slip.MustBeString(v, ":key-file")
 	}
-	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol("cleanup")); has {
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":scratch")); has {
+		scratchDir = slip.MustBeString(v, ":scratch")
+	}
+	if len(scratchDir) == 0 {
+		scratchDir = filepath.Join(os.TempDir(), "scratch")
+		_ = os.RemoveAll(scratchDir) // make sure then directory is clean
+	}
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":cleanup")); has {
 		cleanup = v != nil
 	}
-	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol("replace")); has {
-		replace = slip.MustBeString(v, "replace")
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":replace")); has {
+		replace = slip.MustBeString(v, ":replace")
 	}
-	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol("options")); has {
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":plugins")); has {
 		if list, ok := v.(slip.List); ok {
 			app.Plugins = make([]string, len(list))
 			for i, v := range list {
-				app.Plugins[i] = slip.MustBeString(v, "plugins")
+				app.Plugins[i] = f.findPluginPath(s, slip.MustBeString(v, ":plugins"))
 			}
 		} else {
-			slip.PanicType("plugins", v, "list")
+			slip.PanicType(":plugins", v, "list")
 		}
 	}
-	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol("usage")); has {
-		usage := slip.MustBeString(v, "usage")
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":usage")); has {
+		usage := slip.MustBeString(v, ":usage")
 		app.Usage = func() { fmt.Println(usage) }
 	}
-	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol("options")); has {
+	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":options")); has {
 		if list, ok := v.(slip.List); ok {
 			app.Options = make([]*slip.AppArg, len(list))
 			for i, v2 := range list {
 				app.Options[i] = f.appArgFromPlist(v2)
 			}
 		} else {
-			slip.PanicType("options", v, "property-list")
+			slip.PanicType(":options", v, "property-list")
 		}
 	}
-	app.Generate(dir, key, replace, cleanup)
+	app.Generate(scratchDir, key, replace, cleanup)
+	srcApp := filepath.Join(scratchDir, app.Title)
+	if err := os.Rename(srcApp, appPath); err != nil {
+		slip.NewPanic("renaming %s to %s failed. %s", srcApp, appPath, err)
+	}
+	if cleanup {
+		_ = os.RemoveAll(scratchDir)
+		return nil
+	}
+	return slip.String(scratchDir)
+}
 
-	return nil
+func (f *MakeApp) findPluginPath(s *slip.Scope, name string) (path string) {
+	name = expandPath(name)
+	if strings.HasSuffix(name, ".so") {
+		if _, err := os.Stat(name); err == nil {
+			return name
+		}
+	}
+	var paths []string
+	lp := s.Get("*package-load-path*")
+	switch tp := lp.(type) {
+	case nil:
+	case slip.String:
+		paths = append(paths, expandPath(string(tp)))
+	case slip.List:
+		for _, a2 := range tp {
+			if str, ok := a2.(slip.String); ok {
+				paths = append(paths, expandPath(string(str)))
+			} else {
+				slip.PanicType("*package-load-path* members", a2, "string")
+			}
+		}
+	default:
+		slip.PanicType("*package-load-path*", lp, "string", "list of strings")
+	}
+	for _, p := range paths {
+		filepath := fmt.Sprintf("%s/%s.so", p, name)
+		if _, err := os.Stat(filepath); err == nil {
+			path = filepath
+			break
+		}
+	}
+	if len(path) == 0 {
+		slip.NewPanic("could not find plugin %s.", name)
+	}
+	return
 }
 
 func (f *MakeApp) appArgFromPlist(v slip.Object) *slip.AppArg {
@@ -191,4 +249,12 @@ func (f *MakeApp) appArgFromPlist(v slip.Object) *slip.AppArg {
 		}
 	}
 	return &aa
+}
+
+func expandPath(path string) string {
+	if 0 < len(path) && path[0] == '~' {
+		home := os.Getenv("HOME")
+		path = home + path[1:]
+	}
+	return path
 }

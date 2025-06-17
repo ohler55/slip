@@ -258,7 +258,7 @@ func (app *App) load(scope *Scope, key []byte) {
 				// file.
 				pluginsFound = true
 			case strings.HasSuffix(path, ".enc"):
-				data, err := os.ReadFile(path)
+				data, err := app.Source.ReadFile(path)
 				if err != nil {
 					panic(err)
 				}
@@ -331,18 +331,24 @@ func (app *App) makeOneLisp(dir string, key []byte) {
 
 func (app *App) copyPlugins(dir string) {
 	for _, path := range app.Plugins {
-		src, err := os.Open(path)
-		if err != nil {
-			NewPanic("open %s reading failed. %s", path, err)
-		}
-		var dest *os.File
-		destPath := filepath.Join(dir, filepath.Base(path))
-		if dest, err = os.Create(destPath); err != nil {
-			NewPanic("open %s for writing failed. %s", destPath, err)
-		}
-		if _, err = io.Copy(dest, src); err != nil {
-			NewPanic("failed to copy %s to %s. %s", path, destPath, err)
-		}
+		copyFile(path, filepath.Join(dir, filepath.Base(path)))
+	}
+}
+
+func copyFile(srcPath, destPath string) {
+	src, err := os.Open(srcPath)
+	if err != nil {
+		NewPanic("open %s reading failed. %s", srcPath, err)
+	}
+	defer func() { _ = src.Close() }()
+
+	var dest *os.File
+	if dest, err = os.Create(destPath); err != nil {
+		NewPanic("open %s for writing failed. %s", destPath, err)
+	}
+	defer func() { _ = dest.Close() }()
+	if _, err = io.Copy(dest, src); err != nil {
+		NewPanic("failed to copy %s to %s. %s", srcPath, destPath, err)
 	}
 }
 
