@@ -15,3 +15,7 @@ stash.lisp
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+test/testdata/app/quux
+test/gi/testdata/quux
+test/gi/testdata/make-app.out

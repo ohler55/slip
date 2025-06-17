@@ -629,21 +629,21 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 		}
 	}
 	var names []string
-	max := 0
+	mx := 0
 	for k, fi := range obj.funcs {
 		if obj != fi.Pkg {
 			continue
 		}
 		names = append(names, k)
-		if max < len(k) {
-			max = len(k)
+		if mx < len(k) {
+			mx = len(k)
 		}
 	}
 	if 0 < len(names) {
 		b = append(b, indentSpaces[:indent]...)
 		b = append(b, "Functions:\n"...)
 		sort.Strings(names)
-		cols := (right - indent - 2) / (max + 1)
+		cols := (right - indent - 2) / (mx + 1)
 		col := 0
 		for _, k := range names {
 			if col == 0 {
@@ -655,7 +655,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 				b = append(b, '\n')
 				col = 0
 			} else {
-				b = append(b, indentSpaces[:max-len(k)+1]...)
+				b = append(b, indentSpaces[:mx-len(k)+1]...)
 			}
 		}
 	}

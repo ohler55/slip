@@ -186,8 +186,8 @@ func TestAppendPackageVar(t *testing.T) {
 func TestAppendBuiltIn(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((*print-right-margin* 60)
-                       (clas (find-class 'fixnum)))
-                   (pretty-print clas nil))`,
+                       (c (find-class 'fixnum)))
+                   (pretty-print c nil))`,
 		Expect: `"#<class fixnum>
 "`,
 	}).Test(t)

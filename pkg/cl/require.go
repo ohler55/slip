@@ -80,7 +80,7 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	}
 	if len(paths) == 0 {
-		lp := slip.CurrentPackage.JustGet("*package-load-path*")
+		lp := s.Get("*package-load-path*")
 		switch tp := lp.(type) {
 		case nil:
 		case slip.String:

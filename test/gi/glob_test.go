@@ -14,7 +14,7 @@ func TestGlobList(t *testing.T) {
 		Source: `(let (matches)
                   (glob (lambda (x) (addf matches x)) "testdata/*.lisp")
                   matches)`,
-		Expect: `("testdata/comp.lisp" "testdata/sys-test.lisp")`,
+		Expect: `("testdata/comp.lisp" "testdata/quux.lisp" "testdata/sys-test.lisp")`,
 	}).Test(t)
 }
 

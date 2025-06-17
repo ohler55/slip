@@ -43,5 +43,5 @@ func (f *Base64Encode) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	slip.ArgCountCheck(f, args, 1, 1)
 	source := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
 
-	return slip.String(base64.StdEncoding.EncodeToString([]byte(source)))
+	return slip.String(base64.StdEncoding.EncodeToString(source))
 }

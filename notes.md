@@ -4,40 +4,6 @@
 
 - next
 
- - encrypted app
-  - go app build with with embedded lisp
-  - pass in key or use default location for key
-  - use lisp to write main.go as well as encoding the files
-   - pull in plugins
-  - option for command line or env options that set vars
-  - is embedded readable?
-  - maybe need a plugin or separate binary that includes a first pass of a double enrypted file
-  - **or our own package that creates and can read embedded encrypted**
-  - steps
-   - set up template for app-build
-    - plugins
-    - embeded file (concatenate sources)
-     - double enrypt
-    - minimal main
-
-
-  - slip.Class interface
-   - AllMethods() slip.List
-
-  - symbol lookup
-   - AllMethods list of method lists or should it be a list of names only?
-    - AllDefMethods
-    - add gi functions to return the same
-
-   - instance
-    - maybe (make-instance 'flavor :x 1 :y 2)
-     - use (setf (slot-value inst x) 1)
-      - for all, make-instance naked
-     - wrap the make-instance with a let and then the set calls and comments
-
-  - use in cl:disassemble for all symbols like pp.Append
-
-
  - save-state (destination &key order) (snapshot)
   - set current package
   - keep track of require imports
@@ -51,6 +17,12 @@
   - order (sort) option
    - require and vars always alphabetical
    - functions alpha, dependency, reverse-dependency
+  - instance
+   - maybe (make-instance 'flavor :x 1 :y 2)
+    - use (setf (slot-value inst x) 1)
+     - for all, make-instance naked
+    - wrap the make-instance with a let and then the set calls and comments
+
 
 
  - tough-ones
