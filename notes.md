@@ -4,28 +4,6 @@
 
 - next
 
- - encrypted app
-  - create make-app
-   - test
-    - similar to app_test
-
-  - slip.Class interface
-   - AllMethods() slip.List
-
-  - symbol lookup
-   - AllMethods list of method lists or should it be a list of names only?
-    - AllDefMethods
-    - add gi functions to return the same
-
-   - instance
-    - maybe (make-instance 'flavor :x 1 :y 2)
-     - use (setf (slot-value inst x) 1)
-      - for all, make-instance naked
-     - wrap the make-instance with a let and then the set calls and comments
-
-  - use in cl:disassemble for all symbols like pp.Append
-
-
  - save-state (destination &key order) (snapshot)
   - set current package
   - keep track of require imports
@@ -39,6 +17,12 @@
   - order (sort) option
    - require and vars always alphabetical
    - functions alpha, dependency, reverse-dependency
+  - instance
+   - maybe (make-instance 'flavor :x 1 :y 2)
+    - use (setf (slot-value inst x) 1)
+     - for all, make-instance naked
+    - wrap the make-instance with a let and then the set calls and comments
+
 
 
  - tough-ones

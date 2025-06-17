@@ -117,3 +117,75 @@ func TestMakeAppPluginLoadPaths(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestMakeAppPluginOk(t *testing.T) {
+	// Use a directory outside the slip repo to avoid the clash of the slip
+	// go.mod and the application go.mod.
+	scratchPath := filepath.Join(os.TempDir(), "scratch")
+	if td := os.Getenv("RUNNER_TEMP"); 0 < len(td) {
+		scratchPath = filepath.Join(td, "scratch")
+		t.Skip("CI has issues when 'go mod tidy' is called.")
+	}
+	_ = os.RemoveAll(scratchPath)
+	_ = os.RemoveAll("testdata/quux")
+	_ = os.RemoveAll("testdata/make-app.out")
+	defer func() { _ = os.RemoveAll(scratchPath) }()
+
+	wd, _ := os.Getwd()
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`(let ((*package-load-path* "../cl/testplugin"))
+                               (make-app "testdata/quux" '("testdata/quux.lisp") 'quux
+                                         :plugins '(testplugin)
+                                         :replace %q
+                                         :cleanup t
+                                         :scratch %q))`, filepath.Dir(filepath.Dir(wd)), scratchPath),
+		Expect: `nil`,
+	}).Test(t)
+}
+
+func TestMakeAppPluginFullpath(t *testing.T) {
+	// Use a directory outside the slip repo to avoid the clash of the slip
+	// go.mod and the application go.mod.
+	scratchPath := filepath.Join(os.TempDir(), "scratch")
+	if td := os.Getenv("RUNNER_TEMP"); 0 < len(td) {
+		scratchPath = filepath.Join(td, "scratch")
+		t.Skip("CI has issues when 'go mod tidy' is called.")
+	}
+	_ = os.RemoveAll(scratchPath)
+	_ = os.RemoveAll("testdata/quux")
+	_ = os.RemoveAll("testdata/make-app.out")
+	defer func() { _ = os.RemoveAll(scratchPath) }()
+
+	wd, _ := os.Getwd()
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`(make-app "testdata/quux" '("testdata/quux.lisp") 'quux
+                                       :plugins '("../cl/testplugin/testplugin.so")
+                                       :replace %q
+                                       :cleanup t
+                                       :scratch %q)`, filepath.Dir(filepath.Dir(wd)), scratchPath),
+		Expect: `nil`,
+	}).Test(t)
+}
+
+func TestMakeAppPluginRenameFail(t *testing.T) {
+	// Use a directory outside the slip repo to avoid the clash of the slip
+	// go.mod and the application go.mod.
+	scratchPath := filepath.Join(os.TempDir(), "scratch")
+	if td := os.Getenv("RUNNER_TEMP"); 0 < len(td) {
+		scratchPath = filepath.Join(td, "scratch")
+		t.Skip("CI has issues when 'go mod tidy' is called.")
+	}
+	_ = os.RemoveAll(scratchPath)
+	_ = os.RemoveAll("testdata/quux")
+	_ = os.RemoveAll("testdata/make-app.out")
+	defer func() { _ = os.RemoveAll(scratchPath) }()
+
+	wd, _ := os.Getwd()
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`(make-app "testdata/sister" '("testdata/quux.lisp") 'quux
+                                       :replace %q
+                                       :cleanup t
+                                       :scratch %q)`, filepath.Dir(filepath.Dir(wd)), scratchPath),
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}

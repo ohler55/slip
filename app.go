@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"crypto/sha3"
 	"embed"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -182,32 +183,37 @@ func (app *App) Generate(dir string, key []byte, replace string, cleanup bool) {
 	app.copyPlugins(path)
 	app.writeMain(dir)
 
-	cmd := exec.Command("go", "mod", "init", "main")
-	cmd.Dir = dir
-	if err := cmd.Run(); err != nil {
-		NewPanic("go mod init failed: %s", err)
-	}
-	cmd = exec.Command("go", "mod", "tidy")
-	cmd.Dir = dir
-	if err := cmd.Run(); err != nil {
-		NewPanic("go mod tidy failed: %s", err)
-	}
+	app.runCommand(dir, "go", "mod", "init", "main")
+	app.runCommand(dir, "go", "mod", "tidy")
 	if 0 < len(replace) {
 		if f, err := os.OpenFile(filepath.Join(dir, "go.mod"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
 			_, _ = fmt.Fprintf(f, "\nreplace github.com/ohler55/slip => %s\n", replace)
 			_ = f.Close()
 		}
 	}
-	cmd = exec.Command("go", "build", "-C", dir, "-o", app.Title)
-	if err := cmd.Run(); err != nil {
-		NewPanic("go build failed: %s", err)
-	}
+	app.runCommand(dir, "go", "build", "-C", dir, "-o", app.Title)
 	if cleanup {
 		_ = os.RemoveAll(path)
 		_ = os.RemoveAll(filepath.Join(dir, "go.mod"))
 		_ = os.RemoveAll(filepath.Join(dir, "go.sum"))
 		_ = os.RemoveAll(filepath.Join(dir, "main.go"))
 	}
+}
+
+func (app *App) runCommand(dir, name string, args ...string) string {
+	cmd := exec.Command(name, args...)
+	if 0 < len(dir) {
+		cmd.Dir = dir
+	}
+	out, err := cmd.Output()
+	if err != nil {
+		var ee *exec.ExitError
+		if errors.As(err, &ee) {
+			out = append(out, ee.Stderr...)
+		}
+		NewPanic("%s %s failed: %s\n%s", name, args, err, out)
+	}
+	return string(out)
 }
 
 func (app *App) load(scope *Scope, key []byte) {
