@@ -23,7 +23,6 @@ func init() {
 // Instance is an instance of a Flavor.
 type Instance struct {
 	slip.Scope
-	//Methods map[string][]*Method
 	Type slip.Class
 	// Any is available to go methods.
 	Any any
