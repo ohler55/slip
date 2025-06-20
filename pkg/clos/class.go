@@ -264,7 +264,7 @@ func (c *Class) SetNoMake(noMake bool) {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *Class) MakeInstance() slip.Instance {
-	inst := flavors.Instance{Type: c, Methods: c.methods}
+	inst := flavors.Instance{Type: c}
 	inst.Vars = map[string]slip.Object{}
 	for k, v := range c.slots {
 		inst.Vars[k] = v
@@ -322,6 +322,20 @@ func (c *Class) mergeInherited() {
 	if c.InstanceInit == nil {
 		c.InstanceInit = iif
 	}
+}
+
+// MethodNames returns a sorted list of the methods of the class.
+func (obj *Class) MethodNames() slip.List {
+	names := make([]string, 0, len(obj.methods))
+	for k := range obj.methods {
+		names = append(names, k)
+	}
+	sort.Strings(names)
+	methods := make(slip.List, len(names))
+	for i, name := range names {
+		methods[i] = slip.Symbol(name)
+	}
+	return methods
 }
 
 // DefList returns a list that can be evaluated to create the class or nil if

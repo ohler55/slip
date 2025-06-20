@@ -234,7 +234,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (obj *Flavor) MakeInstance() slip.Instance {
-	inst := Instance{Type: obj, Methods: obj.methods}
+	inst := Instance{Type: obj}
 	inst.Vars = map[string]slip.Object{}
 	for k, v := range obj.defaultVars {
 		inst.Vars[k] = v
@@ -441,6 +441,20 @@ func (obj *Flavor) Document(name, desc string) {
 // GetMethod returns the method if it exists.
 func (obj *Flavor) GetMethod(name string) []*Method {
 	return obj.methods[name]
+}
+
+// MethodNames returns a sorted list of the methods of the class.
+func (obj *Flavor) MethodNames() slip.List {
+	names := make([]string, 0, len(obj.methods))
+	for k := range obj.methods {
+		names = append(names, k)
+	}
+	sort.Strings(names)
+	methods := make(slip.List, len(names))
+	for i, name := range names {
+		methods[i] = slip.Symbol(name)
+	}
+	return methods
 }
 
 // DefList returns a list that can be evaluated to create the class or nil if

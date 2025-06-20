@@ -4,8 +4,6 @@ package flavors
 
 import (
 	"io"
-	"sort"
-	"strings"
 	"unsafe"
 
 	"github.com/ohler55/slip"
@@ -184,7 +182,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 		PanicMethodArgCount(self, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
-		if _, has := self.Methods[string(sym)]; has {
+		if hm, ok := self.Type.(HasMethods); ok && 0 < len(hm.GetMethod(string(sym))) {
 			return self.Receive(s, string(sym), args[1:], depth+1)
 		}
 	}
@@ -205,16 +203,8 @@ type whichOpsCaller struct{}
 
 func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*Instance)
-	names := make([]string, 0, len(self.Methods))
-	for k := range self.Methods {
-		names = append(names, k)
-	}
-	sort.Slice(names, func(i, j int) bool { return 0 > strings.Compare(names[i], names[j]) })
-	methods := make(slip.List, 0, len(names))
-	for _, name := range names {
-		methods = append(methods, slip.Symbol(name))
-	}
-	return methods
+
+	return self.Type.MethodNames()
 }
 
 func (caller whichOpsCaller) Docs() string {

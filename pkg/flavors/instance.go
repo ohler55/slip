@@ -23,8 +23,7 @@ func init() {
 // Instance is an instance of a Flavor.
 type Instance struct {
 	slip.Scope
-	Methods map[string][]*Method
-	Type    slip.Class
+	Type slip.Class
 	// Any is available to go methods.
 	Any any
 }
@@ -129,17 +128,21 @@ func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
 }
 
 // HasMethod returns true if the instance handles the named method.
-func (obj *Instance) HasMethod(method string) bool {
-	_, has := obj.Methods[method]
-
-	return has
+func (obj *Instance) HasMethod(method string) (has bool) {
+	if hm, ok := obj.Type.(HasMethods); ok && 0 < len(hm.GetMethod(method)) {
+		has = true
+	}
+	return
 }
 
 // Receive a method invocation from the send function. Not intended to be
 // called by any code other than the send function but is public to allow it
 // to be over-ridden.
 func (obj *Instance) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
-	ma := obj.Methods[message]
+	var ma []*Method
+	if hm, ok := obj.Type.(HasMethods); ok {
+		ma = hm.GetMethod(message)
+	}
 	if len(ma) == 0 {
 		xargs := make(slip.List, 0, len(args)+1)
 		xargs = append(xargs, slip.Symbol(message))
@@ -230,7 +233,10 @@ func (obj *Instance) BoundReceive(ps *slip.Scope, message string, bindings *slip
 			s.Vars[k] = v
 		}
 	}
-	ma := obj.Methods[message]
+	var ma []*Method
+	if hm, ok := obj.Type.(HasMethods); ok {
+		ma = hm.GetMethod(message)
+	}
 	if len(ma) == 0 {
 		if flavor, ok := obj.Type.(*Flavor); ok {
 			if bc, _ := flavor.defaultHandler.(slip.BoundCaller); bc != nil {
@@ -329,7 +335,7 @@ func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
 
 // Length returns the length of the object.
 func (obj *Instance) Length() (size int) {
-	if 0 < len(obj.Methods[":length"]) {
+	if hm, ok := obj.Type.(HasMethods); ok && 0 < len(hm.GetMethod(":length")) {
 		v := obj.Receive(nil, ":length", slip.List{}, 0)
 		if num, ok := v.(slip.Fixnum); ok {
 			size = int(num)
@@ -355,9 +361,8 @@ func (obj *Instance) Class() slip.Class {
 // Dup returns a duplicate of the instance.
 func (obj *Instance) Dup() *Instance {
 	dup := Instance{
-		Type:    obj.Type,
-		Methods: obj.Methods,
-		Any:     obj.Any,
+		Type: obj.Type,
+		Any:  obj.Any,
 	}
 	dup.Vars = map[string]slip.Object{}
 	for k, v := range obj.Vars {
@@ -373,7 +378,6 @@ func (obj *Instance) Dup() *Instance {
 // removed. New variables are added as unbound.
 func (obj *Instance) ChangeFlavor(flavor *Flavor) {
 	obj.Type = flavor
-	obj.Methods = flavor.methods
 	vars := obj.Vars
 	obj.Vars = map[string]slip.Object{}
 	for k, v := range flavor.defaultVars {
