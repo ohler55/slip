@@ -24,6 +24,25 @@
     - wrap the make-instance with a let and then the set calls and comments
 
 
+ - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
+  - defclass
+  - defmethod class daemon bindings/args
+   - find class to determine how to define
+   - maybe separate function/method table for all clos classes
+    - when executing consider based method-qualifier
+    - map of function name and methods
+     - method includes:
+      - functions to call
+       - daemons
+       - most specific type for primary
+      - qualifier
+       - list of var-name and type pairs
+        - match is when all types for the arguments match
+        - nill type matches anything
+       - if no qualifier then it is generic
+      - docs
+  - defgeneric
+  - optimize for binding of one to a class using the class method
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND
@@ -37,10 +56,6 @@
      - isOk method for true or false
       - separate for each type like integer, float, etc
        - IntegerSpec - low, high
-
- - better-methods
-  - instance method should use flavor so defmethod give existing instances new methods
-  - could create a struct for the methods slice to avoid a lookup on recieve
 
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots

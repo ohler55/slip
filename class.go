@@ -39,6 +39,9 @@ type Class interface {
 	// DefMethodList returns a list that can be evaluated to define a method
 	// on the class or nil if no method is defined by the class.
 	DefMethodList(method, daemon string, inherited bool) List
+
+	// MethodNames returns a sorted list of the methods of the class.
+	MethodNames() List
 }
 
 // Find finds the named class.

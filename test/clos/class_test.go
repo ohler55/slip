@@ -54,6 +54,25 @@ func TestClassBasic(t *testing.T) {
   slots: {}
 }`, pretty.SEN(c.Simplify()))
 	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`, scope).Eval(scope, nil) })
+
+	names := c.(slip.Class).MethodNames()
+	tt.Equal(t, `[
+  ":change-class"
+  ":change-flavor"
+  ":describe"
+  ":equal"
+  ":eval-inside-yourself"
+  ":flavor"
+  ":id"
+  ":init"
+  ":inspect"
+  ":operation-handled-p"
+  ":print-self"
+  ":send-if-handles"
+  ":shared-initialize"
+  ":update-instance-for-different-class"
+  ":which-operations"
+]`, pretty.SEN(names))
 }
 
 func TestClassDescribeBasic(t *testing.T) {
