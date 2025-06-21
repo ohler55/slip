@@ -4,19 +4,33 @@
 
 - next
 
- - save-state (destination &key order) (snapshot)
-  - set current package
-  - keep track of require imports
-   - pkg/cl/require should store order of call, name, and path of loaded
+ - snapshot (destination)
+  - sbcl - save-lisp-and-die
+  - intermediate form
+  - go function in slip dir
+
+  - order in file
+   - comment with date saved
+   - requires
+   - defpackage excluding existing
+   - functions for each package, usually user
+   - flavors
+   - constants
+   - vars for each package, just use user if var is in user
+    - defvar then setq
+  - try loading in sbcl without requires
+
+  - for vars, skip ones that can't be set such as streams, channels, etc
+   - is readable based on a map of types?
+
+  - set current package before defxxx
+
   - state file is just lisp
    - requires
    - variable setq (use correct package)
     - check boundp first then defvar or setq
     - to preserve reference to the same object form a temporary map, makunbound after
    - defuns for all lambda function like dissasemble (use correct package)
-  - order (sort) option
-   - require and vars always alphabetical
-   - functions alpha, dependency, reverse-dependency
   - instance
    - maybe (make-instance 'flavor :x 1 :y 2)
     - use (setf (slot-value inst x) 1)
@@ -43,6 +57,8 @@
       - docs
   - defgeneric
   - optimize for binding of one to a class using the class method
+  - register as normal function but handle differently
+  - move defmethod to clos
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND

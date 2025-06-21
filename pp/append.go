@@ -136,11 +136,12 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		node = lambdaFromList(args, p)
 	case "defun", "defmacro":
 		node = defunFromList(name, args, p)
-	case "defvar", "defconstant", "defparameter", "defpackage":
+	case "defvar", "defconstant", "defparameter":
 		node = defvarFromList(args, p)
 	case "cond":
 		node = newFun(name, args, p, 2)
 	case "block",
+		"defpackage",
 		"dotimes",
 		"dolist",
 		"do",

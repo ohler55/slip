@@ -97,9 +97,12 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			slip.PanicType("*package-load-path*", lp, "string", "list of strings")
 		}
 	}
+	defer func() { slip.CurrentPackageLoadPath = "" }()
+
 	for _, path := range paths {
 		filepath := fmt.Sprintf("%s/%s.so", path, name)
 		if _, err := os.Stat(filepath); err == nil {
+			slip.CurrentPackageLoadPath = filepath
 			if _, err = plugin.Open(filepath); err != nil {
 				slip.NewPanic("plugin %s open failed. %s", filepath, err)
 			}
@@ -111,6 +114,7 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			filepath = fmt.Sprintf("%s/%s.lisp", path, name)
 		}
 		if _, err := os.Stat(filepath); err == nil {
+			slip.CurrentPackageLoadPath = filepath
 			loadLispFile(s, filepath)
 			return slip.Novalue
 		}

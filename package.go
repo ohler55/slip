@@ -12,6 +12,11 @@ import (
 // PackageSymbol is the symbol with a value of "package".
 const PackageSymbol = Symbol("package")
 
+// CurrentPackageLoadPath is the current load path and is used to set the
+// LoadPath of a package when it is added. This is set and unset by the
+// cl:require function.
+var CurrentPackageLoadPath = ""
+
 var packages = []*Package{
 	&CLPkg,
 	&UserPkg,
@@ -36,13 +41,14 @@ type Package struct {
 	// implicitly by referencing a function not yet defined. In that case the
 	// caller in the map will have Forms list of length 1 and the single form
 	// will have an Object that evaluates to an undefined function panic.
-	lambdas map[string]*Lambda
-	funcs   map[string]*FuncInfo
-	vars    map[string]*VarVal
-	PreSet  func(p *Package, name string, value Object) (string, Object)
-	mu      sync.Mutex
-	path    string
-	Locked  bool
+	lambdas  map[string]*Lambda
+	funcs    map[string]*FuncInfo
+	vars     map[string]*VarVal
+	PreSet   func(p *Package, name string, value Object) (string, Object)
+	mu       sync.Mutex
+	path     string
+	loadPath string // load path is set by require
+	Locked   bool
 }
 
 // DefPackage creates a new package. Calling Import() and Use() after creation
@@ -71,6 +77,9 @@ func DefaultPreSet(p *Package, name string, value Object) (string, Object) {
 
 // AddPackage adds a package.
 func AddPackage(pkg *Package) {
+	if 0 < len(CurrentPackageLoadPath) {
+		pkg.loadPath = CurrentPackageLoadPath
+	}
 	packages = append(packages, pkg)
 	addFeature(pkg.Name)
 }
@@ -515,6 +524,17 @@ func (obj *Package) Eval(s *Scope, depth int) Object {
 	return obj
 }
 
+// PkgPath returns then go package path.
+func (obj *Package) PkgPath() string {
+	return obj.path
+}
+
+// LoadPath returns then load path if the package was imported by the require
+// function.
+func (obj *Package) LoadPath() string {
+	return obj.loadPath
+}
+
 // PackageNames returns a sorted list of package names.
 func PackageNames() (names List) {
 	for _, pkg := range packages {
@@ -578,6 +598,16 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 	b = append(b, '\n')
 	if obj.Locked {
 		b = append(b, "Locked\n"...)
+	}
+	if 0 < len(obj.path) {
+		b = append(b, "Path: "...)
+		b = append(b, obj.path...)
+		b = append(b, '\n')
+	}
+	if 0 < len(obj.loadPath) {
+		b = append(b, "LoadPath: "...)
+		b = append(b, obj.loadPath...)
+		b = append(b, '\n')
 	}
 	if 0 < len(obj.Imports) {
 		b = append(b, indentSpaces[:indent]...)
