@@ -5,9 +5,6 @@
 - next
 
  - snapshot (destination)
-  - sbcl - save-lisp-and-die
-  - intermediate form
-  - go function in slip dir
 
   - order in file
    - comment with date saved
