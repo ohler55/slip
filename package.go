@@ -23,7 +23,7 @@ var packages = []*Package{
 }
 
 func init() {
-	DefConstant(PackageSymbol, PackageSymbol, `A _package_ represents a namespace.`)
+	DefConstant(&CLPkg, string(PackageSymbol), PackageSymbol, `A _package_ represents a namespace.`)
 
 	CurrentPackage = &UserPkg
 }
@@ -36,6 +36,7 @@ type Package struct {
 	Imports   map[string]*Import
 	Uses      []*Package
 	Users     []*Package
+	Exports   []string
 
 	// Lambdas is a map of all Lambdas defined with either a call to defun or
 	// implicitly by referencing a function not yet defined. In that case the
@@ -221,7 +222,7 @@ func (obj *Package) Import(pkg *Package, varName string) {
 // Set a variable.
 func (obj *Package) Set(name string, value Object, privates ...bool) (vv *VarVal) {
 	name, value = obj.PreSet(obj, name, value)
-	if _, has := ConstantValues[name]; has {
+	if _, has := Constants[name]; has {
 		PanicPackage(obj, "%s is a constant and thus can't be set", name)
 	}
 	private := 0 < len(privates) && privates[0]
@@ -392,6 +393,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 func (obj *Package) Export(name string) {
 	name = strings.ToLower(name)
 	obj.mu.Lock()
+	obj.Exports = append(obj.Exports, name)
 	if obj.funcs != nil {
 		if fi := obj.funcs[name]; fi != nil {
 			fi.Export = true
@@ -427,6 +429,7 @@ func (obj *Package) Export(name string) {
 func (obj *Package) Unexport(name string) {
 	name = strings.ToLower(name)
 	obj.mu.Lock()
+	// TBD remove from Exports list
 	if obj.funcs != nil {
 		if fi := obj.funcs[name]; fi != nil {
 			fi.Export = false
@@ -617,6 +620,15 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 			b = append(b, imp.Name...)
 			b = append(b, " from "...)
 			b = append(b, imp.Pkg.Name...)
+			b = append(b, '\n')
+		}
+	}
+	if 0 < len(obj.Exports) {
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Exports:\n"...)
+		for _, x := range obj.Exports {
+			b = append(b, indentSpaces[:indent+2]...)
+			b = append(b, x...)
 			b = append(b, '\n')
 		}
 	}

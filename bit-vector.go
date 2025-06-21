@@ -11,7 +11,7 @@ import (
 const BitVectorSymbol = Symbol("bit-vector")
 
 func init() {
-	DefConstant(BitVectorSymbol, BitVectorSymbol, `A _bit-vector_ is a vector of bits.`)
+	DefConstant(&CLPkg, string(BitVectorSymbol), BitVectorSymbol, `A _bit-vector_ is a vector of bits.`)
 }
 
 // BitVector represents an integer with a specific number of bits.

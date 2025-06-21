@@ -12,9 +12,9 @@ import (
 const CharacterSymbol = Symbol("character")
 
 func init() {
-	DefConstant(CharacterSymbol, CharacterSymbol,
+	DefConstant(&CLPkg, string(CharacterSymbol), CharacterSymbol,
 		`A _character_ is a Unicode character that can be represented by a golang Rune.`)
-	DefConstant(Symbol("char-code-limit"), Fixnum(unicode.MaxRune+1),
+	DefConstant(&CLPkg, "char-code-limit", Fixnum(unicode.MaxRune+1),
 		`The upper bounds on a _character_ code value.`)
 }
 

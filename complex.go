@@ -10,7 +10,7 @@ import (
 const ComplexSymbol = Symbol("complex")
 
 func init() {
-	DefConstant(ComplexSymbol, ComplexSymbol,
+	DefConstant(&CLPkg, string(ComplexSymbol), ComplexSymbol,
 		`A _complex_ is a _number_ composed of a real and imaginary part.`)
 }
 

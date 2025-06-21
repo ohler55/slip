@@ -11,8 +11,8 @@ const (
 )
 
 func init() {
-	DefConstant(ListSymbol, ListSymbol, `A _cons_ is a sequence of _objects_.`)
-	DefConstant(ConsSymbol, ConsSymbol,
+	DefConstant(&CLPkg, string(ListSymbol), ListSymbol, `A _cons_ is a sequence of _objects_.`)
+	DefConstant(&CLPkg, string(ConsSymbol), ConsSymbol,
 		`A _cons_ is a dotted pair of _objects_ with a _car_ and a _cdr_.`)
 }
 

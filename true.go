@@ -6,7 +6,7 @@ package slip
 const TrueSymbol = Symbol("t")
 
 func init() {
-	DefConstant(TrueSymbol, TrueSymbol, `_t_ represents any non-nil _object_.`)
+	DefConstant(&CLPkg, string(TrueSymbol), TrueSymbol, `_t_ represents any non-nil _object_.`)
 }
 
 // Only has one object/value which is True

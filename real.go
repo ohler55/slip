@@ -6,7 +6,7 @@ package slip
 const RealSymbol = Symbol("real")
 
 func init() {
-	DefConstant(RealSymbol, RealSymbol, `A _real_ is any _number_ that denotes a quantity.`)
+	DefConstant(&CLPkg, string(RealSymbol), RealSymbol, `A _real_ is any _number_ that denotes a quantity.`)
 }
 
 // Real exists to allow assertions to determine if an Object is an real.

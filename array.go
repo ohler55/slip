@@ -15,14 +15,14 @@ const (
 )
 
 func init() {
-	DefConstant(ArraySymbol, ArraySymbol,
+	DefConstant(&CLPkg, string(ArraySymbol), ArraySymbol,
 		`An _array_ is an _n_ dimensional collection of _objects_ identified by a _fixnum_ indices on each dimension.`)
 
 	// Somewhat arbitrary. Could be anything.
-	DefConstant(Symbol("array-rank-limit"), Fixnum(ArrayMaxRank), `The upper bound on the rank of an _array_.`)
-	DefConstant(Symbol("array-dimension-limit"), Fixnum(ArrayMaxDimension),
+	DefConstant(&CLPkg, "array-rank-limit", Fixnum(ArrayMaxRank), `The upper bound on the rank of an _array_.`)
+	DefConstant(&CLPkg, "array-dimension-limit", Fixnum(ArrayMaxDimension),
 		`The upper exclusive bound on each dimension of an _array_.`)
-	DefConstant(Symbol("array-total-size-limit"), Fixnum(math.MaxInt), `The upper bound on the size of an _array_.`)
+	DefConstant(&CLPkg, "array-total-size-limit", Fixnum(math.MaxInt), `The upper bound on the size of an _array_.`)
 }
 
 // Array is an n dimensional collection of Objects.

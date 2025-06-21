@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	slip.DefConstant(slip.Symbol("internal-time-units-per-second"), slip.Fixnum(time.Second),
+	slip.DefConstant(&slip.CLPkg, "internal-time-units-per-second", slip.Fixnum(time.Second),
 		"Number of nanoseconds in a second. Internal time units are nanoseconds.")
 }
 

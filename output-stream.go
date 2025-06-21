@@ -11,7 +11,8 @@ import (
 const OutputStreamSymbol = Symbol("output-stream")
 
 func init() {
-	DefConstant(OutputStreamSymbol, OutputStreamSymbol, `A _output-stream_ stream backed by a io.Writer.`)
+	DefConstant(&CLPkg, string(OutputStreamSymbol), OutputStreamSymbol,
+		`A _output-stream_ stream backed by a io.Writer.`)
 }
 
 // OutputStream is a *os.Output.

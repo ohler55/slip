@@ -16,34 +16,34 @@ const (
 )
 
 func init() {
-	DefConstant(LongFloatSymbol, LongFloatSymbol,
+	DefConstant(&CLPkg, string(LongFloatSymbol), LongFloatSymbol,
 		`A _long-float_ represents a decimal _number_ or _float_. It is implemented
 as a float64 as defined by IEEE 754 as a long precision decimal with 16 significant
 digits and a maximum exponent of 308.`)
 	// big.MaxExp causes a parse failure. The closest that does is 3 less.
 	mostPos, _, _ := big.ParseFloat(fmt.Sprintf("1.0e%d", big.MaxExp-3), 10, 10, big.ToNearestAway)
 	mostNeg, _, _ := big.ParseFloat(fmt.Sprintf("-1.0e%d", big.MaxExp-3), 10, 10, big.ToNearestAway)
-	DefConstant(Symbol("most-positive-long-float"), (*LongFloat)(mostPos),
+	DefConstant(&CLPkg, "most-positive-long-float", (*LongFloat)(mostPos),
 		"The most positive value a _long-float_ can have.")
-	DefConstant(Symbol("most-negative-long-float"), (*LongFloat)(mostNeg),
+	DefConstant(&CLPkg, "most-negative-long-float", (*LongFloat)(mostNeg),
 		"The most negative value a _long-float_ can have.")
 
 	leastPos, _, _ := big.ParseFloat(fmt.Sprintf("1.0e%d", big.MinExp), 10, 10, big.ToNearestAway)
 	leastNeg, _, _ := big.ParseFloat(fmt.Sprintf("-1.0e%d", big.MinExp), 10, 10, big.ToNearestAway)
-	DefConstant(Symbol("least-positive-long-float"), (*LongFloat)(leastPos),
+	DefConstant(&CLPkg, "least-positive-long-float", (*LongFloat)(leastPos),
 		"The smallest non-zero positive value a _long-float_ can have.")
-	DefConstant(Symbol("least-negative-long-float"), (*LongFloat)(leastNeg),
+	DefConstant(&CLPkg, "least-negative-long-float", (*LongFloat)(leastNeg),
 		"The smallest non-zero negative value a _long-float_ can have.")
-	DefConstant(Symbol("least-positive-normalized-long-float"), (*LongFloat)(leastPos),
+	DefConstant(&CLPkg, "least-positive-normalized-long-float", (*LongFloat)(leastPos),
 		"The smallest non-zero positive value a _long-float_ can have.")
-	DefConstant(Symbol("least-negative-normalized-long-float"), (*LongFloat)(leastNeg),
+	DefConstant(&CLPkg, "least-negative-normalized-long-float", (*LongFloat)(leastNeg),
 		"The smallest non-zero negative value a _long-float_ can have.")
 
 	epsilon, _, _ := big.ParseFloat(fmt.Sprintf("1.0e%d", big.MinExp), 10, 10, big.ToNearestAway)
-	DefConstant(Symbol("long-float-epsilon"), (*LongFloat)(epsilon),
+	DefConstant(&CLPkg, "long-float-epsilon", (*LongFloat)(epsilon),
 		`The smallest positive _long-float_ such the addition of the epsilon value to
 1.0L0 returns a value greater than 1.0L0.`)
-	DefConstant(Symbol("long-float-negative-epsilon"), (*LongFloat)(epsilon),
+	DefConstant(&CLPkg, "long-float-negative-epsilon", (*LongFloat)(epsilon),
 		`The smallest positive _long-float_ such the subtraction of the epsilon value from
 1.0L0 returns a value less than 1.0L0.`)
 }

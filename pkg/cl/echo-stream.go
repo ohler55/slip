@@ -12,7 +12,7 @@ import (
 const EchoStreamSymbol = slip.Symbol("echo-stream")
 
 func init() {
-	slip.DefConstant(EchoStreamSymbol, EchoStreamSymbol,
+	slip.DefConstant(&slip.CLPkg, string(EchoStreamSymbol), EchoStreamSymbol,
 		`An _echo-stream_ accepts input from an input stream and echos that input to an output stream.`)
 }
 

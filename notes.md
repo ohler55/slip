@@ -5,14 +5,15 @@
 - next
 
  - snapshot (destination)
+   -func (obj *Package) Unexport(name string) {
+	- TBD remove from Exports list
 
   - order in file
-   - comment with date saved
-   - requires
    - defpackage excluding existing
+   - constants
+    - change constants to be a struct with a package
    - functions for each package, usually user
    - flavors
-   - constants
    - vars for each package, just use user if var is in user
     - defvar then setq
   - try loading in sbcl without requires

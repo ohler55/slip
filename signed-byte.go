@@ -11,7 +11,7 @@ import (
 const SignedByteSymbol = Symbol("signed-byte")
 
 func init() {
-	DefConstant(SignedByteSymbol, SignedByteSymbol,
+	DefConstant(&CLPkg, string(SignedByteSymbol), SignedByteSymbol,
 		`A _signed-byte_ is an integer with a specific range defined by the number of bits in the byte.`)
 }
 

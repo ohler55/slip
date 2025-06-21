@@ -10,8 +10,8 @@ import (
 // unbound.
 func GetVar(sym Symbol) (Object, bool) {
 	name := strings.ToLower(string(sym))
-	if value, has := ConstantValues[name]; has {
-		return value, true
+	if c, has := Constants[name]; has {
+		return c.Value, true
 	}
 	return CurrentPackage.Get(name)
 }
@@ -27,7 +27,7 @@ func HasVar(sym Symbol) bool {
 	if _, has := CurrentPackage.vars[name]; has {
 		return true
 	}
-	if _, has := ConstantValues[name]; has {
+	if _, has := Constants[name]; has {
 		return true
 	}
 	return false
@@ -46,8 +46,8 @@ func DescribeVar(sym Symbol) string {
 	if vv, has := CurrentPackage.vars[name]; has {
 		return vv.Doc
 	}
-	if doc, has := ConstantDocs[name]; has {
-		return doc
+	if c, has := Constants[name]; has {
+		return c.Doc
 	}
 	return ""
 }

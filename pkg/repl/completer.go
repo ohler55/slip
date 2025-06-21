@@ -33,7 +33,7 @@ func initWords() {
 	}
 	slip.CurrentPackage.EachFuncName(insert)
 	slip.CurrentPackage.EachVarName(insert)
-	for name := range slip.ConstantValues {
+	for name := range slip.Constants {
 		insert(name)
 	}
 	sort.Strings(completerWords)

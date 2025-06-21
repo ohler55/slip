@@ -11,7 +11,7 @@ import (
 const UnsignedByteSymbol = Symbol("unsigned-byte")
 
 func init() {
-	DefConstant(UnsignedByteSymbol, UnsignedByteSymbol,
+	DefConstant(&CLPkg, string(UnsignedByteSymbol), UnsignedByteSymbol,
 		`A _unsigned-byte_ is an integer with a specific range defined by the number of bits in the byte.`)
 }
 

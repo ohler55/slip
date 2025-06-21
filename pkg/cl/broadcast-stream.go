@@ -12,7 +12,7 @@ import (
 const BroadcastStreamSymbol = slip.Symbol("broadcast-stream")
 
 func init() {
-	slip.DefConstant(BroadcastStreamSymbol, BroadcastStreamSymbol,
+	slip.DefConstant(&slip.CLPkg, string(BroadcastStreamSymbol), BroadcastStreamSymbol,
 		`A _broadcast-stream_ stream that forward output to component streams.`)
 }
 

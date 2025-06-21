@@ -22,4 +22,5 @@ func init() {
 	slip.UserPkg.Use(&Pkg)
 	Pkg.Set("*xml*", &Pkg)
 	Pkg.Export("*xml*")
+	Pkg.Initialize(nil, &Read{})
 }

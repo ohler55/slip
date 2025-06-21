@@ -6,7 +6,7 @@ package slip
 const VectorSymbol = Symbol("vector")
 
 func init() {
-	DefConstant(VectorSymbol, VectorSymbol, `A _vector_ one dimensional array of _objects_.`)
+	DefConstant(&CLPkg, string(VectorSymbol), VectorSymbol, `A _vector_ one dimensional array of _objects_.`)
 }
 
 // Vector is a vector Object.

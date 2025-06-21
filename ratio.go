@@ -10,7 +10,7 @@ import (
 const RatioSymbol = Symbol("ratio")
 
 func init() {
-	DefConstant(RatioSymbol, RatioSymbol,
+	DefConstant(&CLPkg, string(RatioSymbol), RatioSymbol,
 		`A _ratio_ is a _number_ represented as a ratio of two integers.`)
 }
 

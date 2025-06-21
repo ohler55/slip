@@ -11,7 +11,7 @@ import (
 const PathSymbol = slip.Symbol("bag-path")
 
 func init() {
-	slip.DefConstant(PathSymbol, PathSymbol,
+	slip.DefConstant(&Pkg, string(PathSymbol), PathSymbol,
 		`A _bag-path_ is a JSON path used for accessing elements of a bag (instance of a bag-flavor).`)
 }
 

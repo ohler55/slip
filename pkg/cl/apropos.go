@@ -107,11 +107,11 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			})
 		}
 	}
-	for k, v := range slip.ConstantValues {
+	for k, c := range slip.Constants {
 		if !strings.Contains(k, pat) {
 			continue
 		}
-		lines = append(lines, f.formConstantLine(k, v, &pr))
+		lines = append(lines, f.formConstantLine(k, c.Value, &pr))
 	}
 	sort.Strings(lines)
 	w := slip.StandardOutput.(io.Writer)

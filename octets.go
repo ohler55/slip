@@ -8,7 +8,7 @@ import "bytes"
 const OctetsSymbol = Symbol("octets")
 
 func init() {
-	DefConstant(OctetsSymbol, OctetsSymbol, `A _octets_ one dimensional array of _octet_.`)
+	DefConstant(&CLPkg, string(OctetsSymbol), OctetsSymbol, `A _octets_ one dimensional array of _octet_.`)
 }
 
 // Octets is a octets Object.

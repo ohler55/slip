@@ -6,7 +6,7 @@ package slip
 const FloatSymbol = Symbol("float")
 
 func init() {
-	DefConstant(FloatSymbol, FloatSymbol, `A _float_ represents a decimal _number_.`)
+	DefConstant(&CLPkg, string(FloatSymbol), FloatSymbol, `A _float_ represents a decimal _number_.`)
 }
 
 // Float exists to allow assertions to determine if an Object is an float.

@@ -128,7 +128,7 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 			b = append(b, '\n')
 			b = append(b, pad...)
 		}
-	} else if obj, doc, ok = slip.GetConstant(sym); ok {
+	} else if obj, doc, ok = slip.GetConstant(string(sym)); ok {
 		b, pad = describeHead(b, nil, sym, indent, right, ansi)
 		b = append(b, '\n')
 		b = append(b, pad...)

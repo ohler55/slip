@@ -10,7 +10,7 @@ import (
 const whopLocSymbol = slip.Symbol("whopLoc")
 
 func init() {
-	slip.DefConstant(whopLocSymbol, whopLocSymbol, `A whopper location. Private for continue-whopper.`)
+	slip.DefConstant(&Pkg, string(whopLocSymbol), whopLocSymbol, `A whopper location. Private for continue-whopper.`)
 }
 
 type whopLoc struct {

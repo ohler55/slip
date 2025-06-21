@@ -11,7 +11,7 @@ import (
 const FileStreamSymbol = Symbol("file-stream")
 
 func init() {
-	DefConstant(FileStreamSymbol, FileStreamSymbol, `A _file-stream_ stream backed by a *os.File.`)
+	DefConstant(&CLPkg, string(FileStreamSymbol), FileStreamSymbol, `A _file-stream_ stream backed by a *os.File.`)
 }
 
 // FileStream is a *os.File.

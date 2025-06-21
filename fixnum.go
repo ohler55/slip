@@ -11,11 +11,11 @@ import (
 const FixnumSymbol = Symbol("fixnum")
 
 func init() {
-	DefConstant(FixnumSymbol, FixnumSymbol,
+	DefConstant(&CLPkg, string(FixnumSymbol), FixnumSymbol,
 		`A _fixnum_ is an _integer_ in the range from _most-negative-fixnum_ and _most-positive-fixnum_ inclusive.`)
-	DefConstant(Symbol("most-positive-fixnum"), Fixnum(math.MaxInt64),
+	DefConstant(&CLPkg, "most-positive-fixnum", Fixnum(math.MaxInt64),
 		"The most positive value a _fixnum_ can have.")
-	DefConstant(Symbol("most-negative-fixnum"), Fixnum(math.MinInt64),
+	DefConstant(&CLPkg, "most-negative-fixnum", Fixnum(math.MinInt64),
 		"The most negative value a _fixnum_ can have.")
 }
 

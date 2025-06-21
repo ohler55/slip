@@ -11,11 +11,11 @@ import (
 func init() {
 	CurrentPackage = &UserPkg
 	// Pick a large number for the limit.
-	DefConstant(Symbol("call-arguments-limit"), Fixnum(0x100000000000),
+	DefConstant(&CLPkg, "call-arguments-limit", Fixnum(0x100000000000),
 		`The maximum number of function call arguments.`)
-	DefConstant(Symbol("lambda-parameters-limit"), Fixnum(0x100000000000),
+	DefConstant(&CLPkg, "lambda-parameters-limit", Fixnum(0x100000000000),
 		`The maximum number of lambda parameters.`)
-	DefConstant(Symbol("multiple-values-limit"), Fixnum(0x1000000000),
+	DefConstant(&CLPkg, "multiple-values-limit", Fixnum(0x1000000000),
 		`The maximum number of values that can be returned by a function.`)
 }
 

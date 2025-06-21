@@ -16,8 +16,7 @@ import (
 const InstanceSymbol = slip.Symbol("instance")
 
 func init() {
-	slip.DefConstant(InstanceSymbol, InstanceSymbol,
-		`An _instance_ of a _flavor_.`)
+	slip.DefConstant(&Pkg, string(InstanceSymbol), InstanceSymbol, `An _instance_ of a _flavor_.`)
 }
 
 // Instance is an instance of a Flavor.

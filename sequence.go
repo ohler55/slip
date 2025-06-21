@@ -6,7 +6,7 @@ package slip
 const SequenceSymbol = Symbol("sequence")
 
 func init() {
-	DefConstant(SequenceSymbol, SequenceSymbol, `A _sequence_ is an ordered collection of _objects_.`)
+	DefConstant(&CLPkg, string(SequenceSymbol), SequenceSymbol, `A _sequence_ is an ordered collection of _objects_.`)
 }
 
 // Sequence exists to allow assertions to determine if an Object is a sequence.

@@ -71,8 +71,8 @@ Top:
 				result = slip.String(vv.Doc)
 			}
 		case slip.Symbol("constant"):
-			if doc := slip.ConstantDocs[string(ta)]; 0 < len(doc) {
-				result = slip.String(doc)
+			if c, has := slip.Constants[string(ta)]; has && 0 < len(c.Doc) {
+				result = slip.String(c.Doc)
 			}
 		case slip.Symbol("type"):
 			if c := slip.FindClass(string(ta)); c != nil {
@@ -130,8 +130,8 @@ Top:
 				vv.Doc = string(doc)
 			}
 		case slip.Symbol("constant"):
-			if _, has := slip.ConstantDocs[string(ta)]; has {
-				slip.ConstantDocs[string(ta)] = string(doc)
+			if c, has := slip.Constants[string(ta)]; has {
+				c.Doc = string(doc)
 			}
 		case slip.Symbol("type"):
 			if c := slip.FindClass(string(ta)); c != nil {

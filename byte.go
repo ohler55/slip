@@ -6,7 +6,7 @@ package slip
 const ByteSymbol = Symbol("byte")
 
 func init() {
-	DefConstant(ByteSymbol, ByteSymbol, `A _byte_ represents an 8 bit unsigned integer.`)
+	DefConstant(&CLPkg, string(ByteSymbol), ByteSymbol, `A _byte_ represents an 8 bit unsigned integer.`)
 }
 
 // Byte is a unisgned 8 bit integer..

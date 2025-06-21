@@ -19,7 +19,7 @@ const (
 const RandomStateSymbol = slip.Symbol("random-state")
 
 func init() {
-	slip.DefConstant(RandomStateSymbol, RandomStateSymbol,
+	slip.DefConstant(&slip.CLPkg, string(RandomStateSymbol), RandomStateSymbol,
 		`A _random-state_ stores the state for random number generation.`)
 	slip.CLPkg.Set(randomStateStr, NewRandomState(nil))
 }

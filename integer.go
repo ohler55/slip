@@ -6,7 +6,7 @@ package slip
 const IntegerSymbol = Symbol("integer")
 
 func init() {
-	DefConstant(IntegerSymbol, IntegerSymbol, `An _integer_ is any whole _number_.`)
+	DefConstant(&CLPkg, string(IntegerSymbol), IntegerSymbol, `An _integer_ is any whole _number_.`)
 }
 
 // Integer exists to allow assertions to determine if an Object is an integer.

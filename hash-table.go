@@ -10,7 +10,7 @@ import (
 const HashTableSymbol = Symbol("hash-table")
 
 func init() {
-	DefConstant(HashTableSymbol, HashTableSymbol,
+	DefConstant(&CLPkg, string(HashTableSymbol), HashTableSymbol,
 		`A _hash-table_ provides a mapping between a key and value. Keys can be a _string_, _symbol_, or _fixnum_.
 Only the __eql__ _:test_ is supported.
 `)

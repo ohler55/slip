@@ -12,7 +12,7 @@ import (
 const SynonymStreamSymbol = slip.Symbol("synonym-stream")
 
 func init() {
-	slip.DefConstant(SynonymStreamSymbol, SynonymStreamSymbol,
+	slip.DefConstant(&slip.CLPkg, string(SynonymStreamSymbol), SynonymStreamSymbol,
 		`A _synonym-stream_ uses the stream bound to a global symbol for reading and writing.`)
 }
 

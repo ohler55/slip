@@ -11,26 +11,26 @@ import (
 const DoubleFloatSymbol = Symbol("double-float")
 
 func init() {
-	DefConstant(DoubleFloatSymbol, DoubleFloatSymbol,
+	DefConstant(&CLPkg, string(DoubleFloatSymbol), DoubleFloatSymbol,
 		`A _double-float_ represents a decimal _number_ or _float_. It is implemented
 as a float64 as defined by IEEE 754 as a double precision decimal with 16 significant
 digits and a maximum exponent of 308.`)
-	DefConstant(Symbol("most-positive-double-float"), DoubleFloat(math.MaxFloat64),
+	DefConstant(&CLPkg, "most-positive-double-float", DoubleFloat(math.MaxFloat64),
 		"The most positive value a _double-float_ can have.")
-	DefConstant(Symbol("most-negative-double-float"), DoubleFloat(-math.MaxFloat64),
+	DefConstant(&CLPkg, "most-negative-double-float", DoubleFloat(-math.MaxFloat64),
 		"The most negative value a _double-float_ can have.")
-	DefConstant(Symbol("least-positive-double-float"), DoubleFloat(math.SmallestNonzeroFloat64),
+	DefConstant(&CLPkg, "least-positive-double-float", DoubleFloat(math.SmallestNonzeroFloat64),
 		"The smallest non-zero positive value a _double-float_ can have.")
-	DefConstant(Symbol("least-negative-double-float"), DoubleFloat(-math.SmallestNonzeroFloat64),
+	DefConstant(&CLPkg, "least-negative-double-float", DoubleFloat(-math.SmallestNonzeroFloat64),
 		"The smallest non-zero negative value a _double-float_ can have.")
-	DefConstant(Symbol("least-positive-normalized-double-float"), DoubleFloat(math.SmallestNonzeroFloat64),
+	DefConstant(&CLPkg, "least-positive-normalized-double-float", DoubleFloat(math.SmallestNonzeroFloat64),
 		"The smallest non-zero positive value a _double-float_ can have.")
-	DefConstant(Symbol("least-negative-normalized-double-float"), DoubleFloat(-math.SmallestNonzeroFloat64),
+	DefConstant(&CLPkg, "least-negative-normalized-double-float", DoubleFloat(-math.SmallestNonzeroFloat64),
 		"The smallest non-zero negative value a _double-float_ can have.")
-	DefConstant(Symbol("double-float-epsilon"), DoubleFloat(1.1102230246251568e-16),
+	DefConstant(&CLPkg, "double-float-epsilon", DoubleFloat(1.1102230246251568e-16),
 		`The smallest positive _double-float_ such the addition of the epsilon value to
 1.0d0 returns a value greater than 1.0d0.`)
-	DefConstant(Symbol("double-float-negative-epsilon"), DoubleFloat(1.1102230246251568e-16),
+	DefConstant(&CLPkg, "double-float-negative-epsilon", DoubleFloat(1.1102230246251568e-16),
 		`The smallest positive _double-float_ such the subtraction of the epsilon value from
 1.0d0 returns a value less than 1.0d0.`)
 }

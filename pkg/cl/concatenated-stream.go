@@ -13,7 +13,7 @@ import (
 const ConcatenatedStreamSymbol = slip.Symbol("concatenated-stream")
 
 func init() {
-	slip.DefConstant(ConcatenatedStreamSymbol, ConcatenatedStreamSymbol,
+	slip.DefConstant(&slip.CLPkg, string(ConcatenatedStreamSymbol), ConcatenatedStreamSymbol,
 		`A _concatenated-stream_ stream reads from component streams.`)
 }
 

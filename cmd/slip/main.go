@@ -67,7 +67,7 @@ usage: %s [<options>] [<filepath>]...
 		fmt.Printf("slip version: %s\n", version)
 		return
 	}
-	slip.DefConstant(slip.Symbol("*config-directory*"), slip.String(cfgDir), "Config directory")
+	slip.DefConstant(&slip.CLPkg, "*config-directory*", slip.String(cfgDir), "Config directory")
 
 	run()
 }

@@ -10,7 +10,7 @@ import (
 const IOStreamSymbol = Symbol("io-stream")
 
 func init() {
-	DefConstant(IOStreamSymbol, IOStreamSymbol, `A _io-stream_ stream backed by a io.ReadWriter.`)
+	DefConstant(&CLPkg, string(IOStreamSymbol), IOStreamSymbol, `A _io-stream_ stream backed by a io.ReadWriter.`)
 }
 
 // IOStream is a io.ReadWriter.

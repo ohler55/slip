@@ -31,6 +31,7 @@ func init() {
 			},
 			Return: "package",
 			Text: `__defpackage__ Defines a new _package_ with the _name_ and options. Options are:
+  :documentation
   :nicknames
   :use
   :export
@@ -80,6 +81,9 @@ func (f *Defpackage) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	_ = readDefOption(":import-from", rest)
 
 	pkg := slip.DefPackage(name, nicknames, "")
+	if docs := readDefOption(":documentation", rest); 0 < len(docs) {
+		pkg.Doc = docs[0]
+	}
 	for _, p := range use {
 		pkg.Use(p)
 	}

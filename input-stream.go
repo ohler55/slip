@@ -13,7 +13,8 @@ import (
 const InputStreamSymbol = Symbol("input-stream")
 
 func init() {
-	DefConstant(InputStreamSymbol, InputStreamSymbol, `A _input-stream_ stream backed by a io.Reader.`)
+	DefConstant(&CLPkg, string(InputStreamSymbol), InputStreamSymbol,
+		`A _input-stream_ stream backed by a io.Reader.`)
 }
 
 // InputStream is an *os.Reader wrapped to support .

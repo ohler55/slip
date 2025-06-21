@@ -6,7 +6,7 @@ package slip
 const StreamSymbol = Symbol("stream")
 
 func init() {
-	DefConstant(StreamSymbol, StreamSymbol,
+	DefConstant(&CLPkg, string(StreamSymbol), StreamSymbol,
 		`A _stream_ is an object that can be used with input or output function.`)
 }
 

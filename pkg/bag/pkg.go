@@ -44,7 +44,7 @@ the _*bag-time_wrap*_ value and the time encoded according to the _*bag-time-for
 	Pkg.Initialize(nil, &Get{}) // lock it down
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	slip.DefConstant(slip.Symbol("*rfc3339nano*"), slip.String(time.RFC3339Nano), "")
+	slip.DefConstant(&Pkg, "*rfc3339nano*", slip.String(time.RFC3339Nano), "")
 }
 
 func getTimeFormat() slip.Object {

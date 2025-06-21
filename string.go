@@ -6,7 +6,7 @@ package slip
 const StringSymbol = Symbol("string")
 
 func init() {
-	DefConstant(StringSymbol, StringSymbol, `A _string_ is linear collection of _characters_.`)
+	DefConstant(&CLPkg, string(StringSymbol), StringSymbol, `A _string_ is linear collection of _characters_.`)
 }
 
 // String is a string Object.

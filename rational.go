@@ -6,7 +6,8 @@ package slip
 const RationalSymbol = Symbol("rational")
 
 func init() {
-	DefConstant(RationalSymbol, RationalSymbol, `A _rational_ is any precise real number (integer or ratio).`)
+	DefConstant(&CLPkg, string(RationalSymbol), RationalSymbol,
+		`A _rational_ is any precise real number (integer or ratio).`)
 }
 
 // Rational exists to allow assertions to determine if an Object is an rational.

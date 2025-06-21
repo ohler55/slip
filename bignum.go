@@ -8,7 +8,7 @@ import "math/big"
 const BignumSymbol = Symbol("bignum")
 
 func init() {
-	DefConstant(BignumSymbol, BignumSymbol,
+	DefConstant(&CLPkg, string(BignumSymbol), BignumSymbol,
 		`A _bignum_ is a _number_ represented as a bignum of two integers.`)
 }
 

@@ -10,7 +10,7 @@ import (
 const OctetSymbol = Symbol("octet")
 
 func init() {
-	DefConstant(OctetSymbol, OctetSymbol,
+	DefConstant(&CLPkg, string(OctetSymbol), OctetSymbol,
 		`A _octet_ is an _unsigned 8bit integer_ in the range from 0 and 255 inclusive.`)
 }
 

@@ -12,7 +12,7 @@ import (
 const TwoWayStreamSymbol = slip.Symbol("two-way-stream")
 
 func init() {
-	slip.DefConstant(TwoWayStreamSymbol, TwoWayStreamSymbol,
+	slip.DefConstant(&slip.CLPkg, string(TwoWayStreamSymbol), TwoWayStreamSymbol,
 		`An _two-way-stream_ accepts input and writes output stream.`)
 }
 
