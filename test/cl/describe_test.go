@@ -98,7 +98,7 @@ func TestDescribeConstant(t *testing.T) {
 		Expect: "",
 	}).Test(t)
 
-	tt.Equal(t, `pi
+	tt.Equal(t, `common-lisp:pi
   [symbol]
 
 pi names a double-float:

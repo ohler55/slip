@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"os"
 	"path/filepath"
+	"time"
 	"unicode"
 )
 
@@ -248,7 +249,16 @@ digits and a maximum exponent of 308.`,
 				Doc: `The smallest positive _double-float_ such the subtraction of the epsilon value from
 1.0d0 returns a value less than 1.0d0.`,
 			},
-
+			"pi": {
+				Val:   DoubleFloat(math.Pi),
+				Const: true,
+				Doc:   "The value of PI.",
+			},
+			"e": {
+				Val:   DoubleFloat(math.E),
+				Const: true,
+				Doc:   "The value of e.",
+			},
 			string(SingleFloatSymbol): {
 				Val:   SingleFloatSymbol,
 				Const: true,
@@ -615,6 +625,92 @@ of bits in the byte.`,
 				Const: true,
 				Doc:   `A _vector_ is a one dimensional array of _objects_.`,
 			},
+			"boole-1": {
+				Val:   Symbol("boole-1"),
+				Const: true,
+				Doc:   "boole-1",
+			},
+			"boole-2": {
+				Val:   Symbol("boole-2"),
+				Const: true,
+				Doc:   "boole-2",
+			},
+			"boole-and": {
+				Val:   Symbol("boole-and"),
+				Const: true,
+				Doc:   "boole-and",
+			},
+			"boole-andc1": {
+				Val:   Symbol("boole-andc1"),
+				Const: true,
+				Doc:   "boole-andc1",
+			},
+			"boole-andc2": {
+				Val:   Symbol("boole-andc2"),
+				Const: true,
+				Doc:   "boole-andc2",
+			},
+			"boole-c1": {
+				Val:   Symbol("boole-c1"),
+				Const: true,
+				Doc:   "boole-c1",
+			},
+			"boole-c2": {
+				Val:   Symbol("boole-c2"),
+				Const: true,
+				Doc:   "boole-c2",
+			},
+			"boole-clr": {
+				Val:   Symbol("boole-clr"),
+				Const: true,
+				Doc:   "boole-clr",
+			},
+			"boole-eqv": {
+				Val:   Symbol("boole-eqv"),
+				Const: true,
+				Doc:   "boole-eqv",
+			},
+			"boole-ior": {
+				Val:   Symbol("boole-ior"),
+				Const: true,
+				Doc:   "boole-ior",
+			},
+			"boole-nand": {
+				Val:   Symbol("boole-nand"),
+				Const: true,
+				Doc:   "boole-nand",
+			},
+			"boole-nor": {
+				Val:   Symbol("boole-nor"),
+				Const: true,
+				Doc:   "boole-nor",
+			},
+			"boole-orc1": {
+				Val:   Symbol("boole-orc1"),
+				Const: true,
+				Doc:   "boole-orc1",
+			},
+			"boole-orc2": {
+				Val:   Symbol("boole-orc2"),
+				Const: true,
+				Doc:   "boole-orc2",
+			},
+			"boole-set": {
+				Val:   Symbol("boole-set"),
+				Const: true,
+				Doc:   "boole-set",
+			},
+			"boole-xor": {
+				Val:   Symbol("boole-xor"),
+				Const: true,
+				Doc:   "boole-xor",
+			},
+			"internal-time-units-per-second": {
+				Val:   Fixnum(time.Second),
+				Const: true,
+				Doc:   "Number of nanoseconds in a second. Internal time units are nanoseconds.",
+			},
+			"*features*": &features,
 		},
 		lambdas: map[string]*Lambda{},
 		funcs:   map[string]*FuncInfo{},

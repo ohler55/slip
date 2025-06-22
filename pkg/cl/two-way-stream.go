@@ -12,8 +12,11 @@ import (
 const TwoWayStreamSymbol = slip.Symbol("two-way-stream")
 
 func init() {
-	slip.DefConstant(&slip.CLPkg, string(TwoWayStreamSymbol), TwoWayStreamSymbol,
+	slip.CLPkg.Locked = false // a bit of a cheat
+	slip.CLPkg.DefConst(string(TwoWayStreamSymbol), TwoWayStreamSymbol,
 		`An _two-way-stream_ accepts input and writes output stream.`)
+	slip.CLPkg.Locked = true
+	slip.CLPkg.Export(string(TwoWayStreamSymbol))
 }
 
 // TwoWayStream is a stream that accepts input from an input stream and writes

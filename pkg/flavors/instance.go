@@ -15,10 +15,6 @@ import (
 // InstanceSymbol is the symbol with a value of "instance".
 const InstanceSymbol = slip.Symbol("instance")
 
-func init() {
-	slip.DefConstant(&Pkg, string(InstanceSymbol), InstanceSymbol, `An _instance_ of a _flavor_.`)
-}
-
 // Instance is an instance of a Flavor.
 type Instance struct {
 	slip.Scope

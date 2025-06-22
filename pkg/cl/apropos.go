@@ -84,7 +84,11 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if pkg != nil {
 		pkg.EachVarVal(func(name string, vv *slip.VarVal) {
 			if strings.Contains(name, pat) {
-				lines = append(lines, f.formVarLine(name, vv, &pr))
+				if vv.Const {
+					lines = append(lines, f.formConstLine(name, vv, &pr))
+				} else {
+					lines = append(lines, f.formVarLine(name, vv, &pr))
+				}
 			}
 		})
 		pkg.EachFuncInfo(func(fi *slip.FuncInfo) {
@@ -97,7 +101,11 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			pkg := slip.FindPackage(string(pn.(slip.String)))
 			pkg.EachVarVal(func(name string, vv *slip.VarVal) {
 				if vv.Pkg == pkg && strings.Contains(name, pat) {
-					lines = append(lines, f.formVarLine(name, vv, &pr))
+					if vv.Const {
+						lines = append(lines, f.formConstLine(name, vv, &pr))
+					} else {
+						lines = append(lines, f.formVarLine(name, vv, &pr))
+					}
 				}
 			})
 			pkg.EachFuncInfo(func(fi *slip.FuncInfo) {
@@ -106,12 +114,6 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				}
 			})
 		}
-	}
-	for k, c := range slip.Constants {
-		if (pkg != nil && pkg != c.Pkg) || !strings.Contains(k, pat) {
-			continue
-		}
-		lines = append(lines, f.formConstantLine(k, c, &pr))
 	}
 	sort.Strings(lines)
 	w := slip.StandardOutput.(io.Writer)
@@ -137,16 +139,16 @@ func (f *Apropos) formVarLine(k string, vv *slip.VarVal, pr *slip.Printer) strin
 	return string(line)
 }
 
-func (f *Apropos) formConstantLine(k string, c *slip.Constant, pr *slip.Printer) string {
+func (f *Apropos) formConstLine(k string, vv *slip.VarVal, pr *slip.Printer) string {
 	var line []byte
-	p := c.Pkg
+	p := vv.Pkg
 	if p != &slip.CLPkg {
 		line = slip.Append(line, slip.Symbol(p.Name))
 		line = append(line, ':')
 	}
 	line = slip.Append(line, slip.Symbol(k))
 	line = append(line, " = "...)
-	line = pr.Append(line, c.Value, 0)
+	line = pr.Append(line, vv.Val, 0)
 
 	return string(line)
 }

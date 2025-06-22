@@ -220,9 +220,6 @@ func (obj *Package) Import(pkg *Package, varName string) {
 // Set a variable.
 func (obj *Package) Set(name string, value Object, privates ...bool) (vv *VarVal) {
 	name, value = obj.PreSet(obj, name, value)
-	if _, has := Constants[name]; has {
-		PanicPackage(obj, "%s is a constant and thus can't be set", name)
-	}
 	private := 0 < len(privates) && privates[0]
 	if vv = obj.SetIfHas(name, value, private); vv == nil {
 		if obj.Locked {

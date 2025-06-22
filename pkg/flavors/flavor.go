@@ -16,10 +16,6 @@ const FlavorSymbol = slip.Symbol("flavor")
 var allFlavors = map[string]*Flavor{vanilla.name: &vanilla}
 
 func init() {
-	slip.DefConstant(&Pkg, string(FlavorSymbol), FlavorSymbol,
-		`A _flavor_ encapsulates a class of objects or instances.
-The _flavor_ itself is an instance and can be sent a limited set of methods.`)
-
 	slip.RegisterClass(vanilla.name, &vanilla)
 }
 

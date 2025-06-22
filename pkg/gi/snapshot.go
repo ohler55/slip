@@ -181,29 +181,27 @@ func appendSnapshotPackages(b []byte, s *slip.Scope) []byte {
 
 func appendSnapshotConstants(b []byte, s *slip.Scope) []byte {
 	// Skip locked and imported packages.
-	var ca []*slip.Constant
-	for _, c := range slip.Constants {
-		if c.Pkg != nil &&
-			!c.Pkg.Locked &&
-			len(c.Pkg.LoadPath()) == 0 &&
-			c.Pkg.Name != "keyword" &&
-			c.Pkg.Name != "flavors" {
-			ca = append(ca, c)
-		}
-	}
-	if 0 < len(ca) {
-		b = append(b, '\n')
-		sort.Slice(ca, func(i, j int) bool {
-			if ca[i].Pkg.Name == ca[j].Pkg.Name {
-				return ca[i].Name < ca[j].Name
+	var va []*slip.VarVal
+	for _, p := range slip.AllPackages() {
+		p.EachVarVal(func(name string, vv *slip.VarVal) {
+			if p == vv.Pkg && vv.Const {
+				va = append(va, vv)
 			}
-			return ca[i].Pkg.Name < ca[j].Pkg.Name
 		})
-		for _, c := range ca {
+	}
+	if 0 < len(va) {
+		b = append(b, '\n')
+		sort.Slice(va, func(i, j int) bool {
+			if va[i].Pkg.Name == va[j].Pkg.Name {
+				return va[i].String() < va[j].String()
+			}
+			return va[i].Pkg.Name < va[j].Pkg.Name
+		})
+		for _, c := range va {
 			form := slip.List{
 				slip.Symbol("defconstant"),
-				slip.Symbol(strings.Join([]string{c.Pkg.Name, c.Name}, "::")),
-				c.Value,
+				slip.Symbol(strings.Join([]string{c.Pkg.Name, c.String()}, "::")),
+				c.Val,
 			}
 			if 0 < len(c.Doc) {
 				form = append(form, slip.String(c.Doc))

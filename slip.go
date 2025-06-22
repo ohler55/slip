@@ -2,16 +2,12 @@
 
 package slip
 
-func init() {
-	Constants["*features*"] = &features
-}
-
-var features = Constant{
-	Name:  "*features*",
+var features = VarVal{
+	Val:   List{Symbol(":slip")},
+	Const: true,
 	Doc:   "Features of the implementation.",
-	Value: List{Symbol(":slip")},
 }
 
 func addFeature(name string) {
-	features.Value = append(features.Value.(List), Symbol(":"+name))
+	features.Val = append(features.Val.(List), Symbol(":"+name))
 }

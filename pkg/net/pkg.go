@@ -3,7 +3,6 @@
 package net
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/ohler55/slip"
@@ -27,9 +26,20 @@ most functions are the same.
 func init() {
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*net*":           {Val: &Pkg, Doc: Pkg.Doc, Export: true},
-			"*wildcard-host*": {Val: slip.Octets{0, 0, 0, 0}, Export: true},
-			"*auto-port*":     {Val: slip.Fixnum(0), Export: true},
+			"*net*": {
+				Val:    &Pkg,
+				Doc:    Pkg.Doc,
+				Const:  true,
+				Export: true,
+			},
+			"*wildcard-host*": {
+				Val:    slip.Octets{0, 0, 0, 0},
+				Export: true,
+			},
+			"*auto-port*": {
+				Val:    slip.Fixnum(0),
+				Export: true,
+			},
 		},
 	)
 	defNameServiceError()
@@ -42,10 +52,9 @@ func init() {
 		defSocket(),
 		defHostent(),
 	} {
-		_ = Pkg.Remove(f.Name())
-		slip.DefConstant(&Pkg, f.Name(), f, fmt.Sprintf("The %s flavor.", f.Name()))
+		vv := Pkg.GetVarVal(f.Name())
+		vv.Const = true
 	}
-
 	Pkg.Initialize(nil, &bodyWrap{}) // lock
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)

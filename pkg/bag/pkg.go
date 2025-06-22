@@ -37,14 +37,31 @@ func init() {
 the _*bag-time_wrap*_ value and the time encoded according to the _*bag-time-format*_.`,
 			Export: true,
 		},
-		"*bag*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
+		"*bag*": {
+			Val:    &Pkg,
+			Doc:    Pkg.Doc,
+			Const:  true,
+			Export: true,
+		},
+		string(PathSymbol): {
+			Val:    PathSymbol,
+			Doc:    `A _bag-path_ is a JSON path used for accessing elements of a bag (instance of a bag-flavor).`,
+			Const:  true,
+			Export: true,
+		},
+		"*rfc3339nano*": {
+			Val:    slip.String(time.RFC3339Nano),
+			Const:  true,
+			Export: true,
+		},
 	})
-	defBag()
+	f := defBag()
+	vv := Pkg.GetVarVal(f.Name())
+	vv.Const = true
 
 	Pkg.Initialize(nil, &Get{}) // lock it down
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	slip.DefConstant(&Pkg, "*rfc3339nano*", slip.String(time.RFC3339Nano), "")
 }
 
 func getTimeFormat() slip.Object {

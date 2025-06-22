@@ -87,9 +87,6 @@ func (s *Scope) Let(sym Symbol, value Object) {
 	if vv := CurrentPackage.GetVarVal(name); vv != nil && vv.Const {
 		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
-	if _, has := Constants[name]; has {
-		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
-	}
 	s.moo.Lock()
 	if s.Vars == nil {
 		s.Vars = map[string]Object{name: value}
@@ -117,9 +114,6 @@ func (s *Scope) Get(sym Symbol) Object {
 }
 
 func (s *Scope) get(name string) Object {
-	if c, has := Constants[name]; has {
-		return c.Value
-	}
 	if pkg, vname, private := UnpackName(name); pkg != nil {
 		if vv := pkg.GetVarVal(vname); vv != nil && (vv.Export || private) {
 			return vv.Value()
@@ -213,9 +207,6 @@ func (s *Scope) set(name string, value Object) bool {
 	if vv := CurrentPackage.GetVarVal(name); vv != nil && vv.Const {
 		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
-	if _, has := Constants[name]; has {
-		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
-	}
 	s.moo.Lock()
 	if s.Vars != nil {
 		if _, has := s.Vars[name]; has {
@@ -239,9 +230,6 @@ func (s *Scope) Has(sym Symbol) bool {
 }
 
 func (s *Scope) has(name string) bool {
-	if _, has := Constants[name]; has {
-		return true
-	}
 	s.moo.Lock()
 	if s.Vars != nil {
 		if _, has := s.Vars[name]; has {
@@ -264,9 +252,6 @@ func (s *Scope) Bound(sym Symbol) bool {
 }
 
 func (s *Scope) bound(name string) bool {
-	if _, has := Constants[name]; has {
-		return true
-	}
 	s.moo.Lock()
 	if s.Vars != nil {
 		if v, has := s.Vars[name]; has {

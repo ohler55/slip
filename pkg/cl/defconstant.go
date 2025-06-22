@@ -75,7 +75,7 @@ func (f *Defconstant) Call(s *slip.Scope, args slip.List, depth int) (result sli
 			slip.PanicType("documentation argument to defconstant", args[2], "string")
 		}
 	}
-	slip.DefConstant(pkg, vname, iv, string(doc))
+	pkg.DefConst(vname, iv, string(doc))
 
 	return slip.Symbol(vname)
 }

@@ -13,8 +13,11 @@ import (
 const ConcatenatedStreamSymbol = slip.Symbol("concatenated-stream")
 
 func init() {
-	slip.DefConstant(&slip.CLPkg, string(ConcatenatedStreamSymbol), ConcatenatedStreamSymbol,
+	slip.CLPkg.Locked = false // a bit of a cheat
+	slip.CLPkg.DefConst(string(ConcatenatedStreamSymbol), ConcatenatedStreamSymbol,
 		`A _concatenated-stream_ stream reads from component streams.`)
+	slip.CLPkg.Locked = true
+	slip.CLPkg.Export(string(ConcatenatedStreamSymbol))
 }
 
 // ConcatenatedStream is slice of output streams or streams that are also
