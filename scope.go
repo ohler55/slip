@@ -84,6 +84,9 @@ func (s *Scope) AllVars() map[string]Object {
 // Let a symbol be bound to the value in this Scope.
 func (s *Scope) Let(sym Symbol, value Object) {
 	name := strings.ToLower(string(sym))
+	if vv := CurrentPackage.GetVarVal(name); vv != nil && vv.Const {
+		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
+	}
 	if _, has := Constants[name]; has {
 		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
@@ -207,6 +210,9 @@ func (s *Scope) Set(sym Symbol, value Object) {
 }
 
 func (s *Scope) set(name string, value Object) bool {
+	if vv := CurrentPackage.GetVarVal(name); vv != nil && vv.Const {
+		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
+	}
 	if _, has := Constants[name]; has {
 		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}

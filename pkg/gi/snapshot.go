@@ -237,7 +237,7 @@ func appendSnapshotVars(b []byte, s *slip.Scope) []byte {
 	var va []*slip.VarVal
 	for _, p := range slip.AllPackages() {
 		p.EachVarVal(func(name string, vv *slip.VarVal) {
-			if p == vv.Pkg {
+			if p == vv.Pkg && !vv.Const {
 				va = append(va, vv)
 			}
 		})
@@ -257,6 +257,8 @@ func appendSnapshotVars(b []byte, s *slip.Scope) []byte {
 }
 
 func appendSnapshotFunctions(b []byte, s *slip.Scope) []byte {
+
+	// TBD
 
 	return b
 }

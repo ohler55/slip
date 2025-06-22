@@ -12,11 +12,6 @@ import (
 // InputStreamSymbol is the symbol with a value of "input-stream".
 const InputStreamSymbol = Symbol("input-stream")
 
-func init() {
-	DefConstant(&CLPkg, string(InputStreamSymbol), InputStreamSymbol,
-		`A _input-stream_ stream backed by a io.Reader.`)
-}
-
 // InputStream is an *os.Reader wrapped to support .
 type InputStream struct {
 	Reader   io.Reader

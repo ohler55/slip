@@ -16,6 +16,6 @@ var (
 func init() {
 	UserPkg.Initialize(nil)
 	UserPkg.Use(&CLPkg)
-	_ = UserPkg.Set("*common-lisp-user*", &UserPkg)
+	_ = UserPkg.DefConst("*common-lisp-user*", &UserPkg, "The common-lisp-user package.")
 	UserPkg.Export("*common-lisp-user*")
 }

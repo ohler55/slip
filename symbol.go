@@ -7,10 +7,6 @@ import "strings"
 // SymbolSymbol is the symbol with a value of "symbol".
 const SymbolSymbol = Symbol("symbol")
 
-func init() {
-	DefConstant(&CLPkg, string(SymbolSymbol), SymbolSymbol, `A _symbol_ names an _object_.`)
-}
-
 // Symbol is a symbol Object.
 type Symbol string
 

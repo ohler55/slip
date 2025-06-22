@@ -196,7 +196,9 @@ changes in a fixed location and values are updated in place.
 )
 
 func init() {
-	Pkg.Initialize(nil)
+	Pkg.Initialize(map[string]*slip.VarVal{
+		"*watch*": {Val: &Pkg, Const: true, Export: true, Doc: "The watch package."},
+	})
 	for _, f := range []*flavors.Flavor{
 		ServerFlavor(),
 		ClientFlavor(),
@@ -204,10 +206,9 @@ func init() {
 		FramerFlavor(),
 		PrinterFlavor(),
 	} {
-		_ = Pkg.Remove(f.Name())
-		slip.DefConstant(&Pkg, f.Name(), f, fmt.Sprintf("The %s flavor.", f.Name()))
+		vv := Pkg.GetVarVal(f.Name())
+		vv.Const = true
 	}
-	slip.DefConstant(&Pkg, "*watch*", &Pkg, "The watch package.")
 	Pkg.Initialize(nil, &periodic{})
 
 	slip.AddPackage(&Pkg)

@@ -10,10 +10,6 @@ import (
 // FileStreamSymbol is the symbol with a value of "file-stream".
 const FileStreamSymbol = Symbol("file-stream")
 
-func init() {
-	DefConstant(&CLPkg, string(FileStreamSymbol), FileStreamSymbol, `A _file-stream_ stream backed by a *os.File.`)
-}
-
 // FileStream is a *os.File.
 type FileStream os.File
 

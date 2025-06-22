@@ -9,11 +9,6 @@ import (
 // ComplexSymbol is the symbol with a value of "complex".
 const ComplexSymbol = Symbol("complex")
 
-func init() {
-	DefConstant(&CLPkg, string(ComplexSymbol), ComplexSymbol,
-		`A _complex_ is a _number_ composed of a real and imaginary part.`)
-}
-
 // Complex is a numerator and denominator pair.
 type Complex complex128
 

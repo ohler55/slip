@@ -3,37 +3,11 @@
 package slip
 
 import (
-	"math"
 	"math/big"
 )
 
 // SingleFloatSymbol is the symbol with a value of "singleFloat".
 const SingleFloatSymbol = Symbol("single-float")
-
-func init() {
-	DefConstant(&CLPkg, string(SingleFloatSymbol), SingleFloatSymbol,
-		`A _single-float_ represents a decimal _number_ or _float_. It is implemented
-as a float32 as defined by IEEE 754 as a single precision decimal with 7 significant
-digits and a maximum exponent of 38.`)
-	DefConstant(&CLPkg, "most-positive-single-float", SingleFloat(math.MaxFloat32),
-		"The most positive value a _single-float_ can have.")
-	DefConstant(&CLPkg, "most-negative-single-float", SingleFloat(-math.MaxFloat32),
-		"The most negative value a _single-float_ can have.")
-	DefConstant(&CLPkg, "least-positive-single-float", SingleFloat(math.SmallestNonzeroFloat32),
-		"The smallest non-zero positive value a _single-float_ can have.")
-	DefConstant(&CLPkg, "least-negative-single-float", SingleFloat(-math.SmallestNonzeroFloat32),
-		"The smallest non-zero negative value a _single-float_ can have.")
-	DefConstant(&CLPkg, "least-positive-normalized-single-float", SingleFloat(math.SmallestNonzeroFloat32),
-		"The smallest non-zero positive value a _single-float_ can have.")
-	DefConstant(&CLPkg, "least-negative-normalized-single-float", SingleFloat(-math.SmallestNonzeroFloat32),
-		"The smallest non-zero negative value a _single-float_ can have.")
-	DefConstant(&CLPkg, "single-float-epsilon", SingleFloat(5.960465e-8),
-		`The smallest positive _single-float_ such the addition of the epsilon value to
-1.0s0 returns a value greater than 1.0s0.`)
-	DefConstant(&CLPkg, "single-float-negative-epsilon", SingleFloat(5.960465e-8),
-		`The smallest positive _single-float_ such the subtraction of the epsilon value from
-1.0s0 returns a value less than 1.0s0.`)
-}
 
 // SingleFloat is a float32 Object.
 type SingleFloat float32

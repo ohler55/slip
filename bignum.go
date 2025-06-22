@@ -7,11 +7,6 @@ import "math/big"
 // BignumSymbol is the symbol with a value of "bignum".
 const BignumSymbol = Symbol("bignum")
 
-func init() {
-	DefConstant(&CLPkg, string(BignumSymbol), BignumSymbol,
-		`A _bignum_ is a _number_ represented as a bignum of two integers.`)
-}
-
 // Bignum is a numerator and denominator pair.
 type Bignum big.Int
 

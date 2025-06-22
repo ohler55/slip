@@ -23,8 +23,6 @@ var packages = []*Package{
 }
 
 func init() {
-	DefConstant(&CLPkg, string(PackageSymbol), PackageSymbol, `A _package_ represents a namespace.`)
-
 	CurrentPackage = &UserPkg
 }
 
@@ -251,6 +249,9 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 	}()
 	if vv = obj.vars[name]; vv != nil {
 		if vv.Export || CurrentPackage == obj || private {
+			if vv.Const {
+				PanicPackage(obj, "%s is a constant and thus can't be set", name)
+			}
 			if vv.Set != nil {
 				unlock = false
 				obj.mu.Unlock()
@@ -267,6 +268,34 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 			}
 		}
 	}
+	return
+}
+
+// DefConst a constant.
+func (obj *Package) DefConst(name string, value Object, doc string) (vv *VarVal) {
+	name, value = obj.PreSet(obj, name, value)
+	obj.mu.Lock()
+	unlock := true
+	defer func() {
+		if unlock {
+			obj.mu.Unlock()
+		}
+	}()
+	if vv = obj.vars[name]; vv != nil {
+		if vv.Const && ObjectEqual(vv.Val, value) {
+			return vv
+		}
+		PanicPackage(obj, "%s is a constant and thus can't be changed", name)
+	}
+	if obj.Locked {
+		PanicPackage(obj, "Package %s is locked thus no new constants can be set.", obj.Name)
+	}
+	vv = &VarVal{Val: value, Const: true, Pkg: obj, name: name, Doc: doc}
+	obj.vars[name] = vv
+	obj.mu.Unlock()
+	unlock = false
+	callSetHooks(obj, name)
+
 	return
 }
 

@@ -4,6 +4,7 @@ package gi
 
 import (
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 var (
@@ -17,54 +18,268 @@ var (
 )
 
 func init() {
-	defLogger()
-	defSystem()
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*gi*":             {Val: &Pkg, Doc: Pkg.Doc, Export: true},
-			"*go-integration*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
-		},
-		&Env{},
-	)
+			"*gi*":             {Val: &Pkg, Doc: Pkg.Doc, Const: true, Export: true},
+			"*go-integration*": {Val: &Pkg, Doc: Pkg.Doc, Const: true, Export: true},
+			"sighup": {
+				Val:    slip.Fixnum(1),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, terminal line hangup",
+			},
+			"sigint": {
+				Val:    slip.Fixnum(2),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, interrupt program",
+			},
+			"sigquit": {
+				Val:    slip.Fixnum(3),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, quit program",
+			},
+			"sigill": {
+				Val:    slip.Fixnum(4),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, illegal instruction",
+			},
+			"sigtrap": {
+				Val:    slip.Fixnum(5),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, trace trap",
+			},
+			"sigabrt": {
+				Val:    slip.Fixnum(6),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, abort program (formerly SIGIOT)",
+			},
+			"sigemt": {
+				Val:    slip.Fixnum(7),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, emulate instruction executed",
+			},
+			"sigfpe": {
+				Val:    slip.Fixnum(8),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, floating-point exception",
+			},
+			"sigkill": {
+				Val:    slip.Fixnum(9),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, kill program",
+			},
+			"sigbus": {
+				Val:    slip.Fixnum(10),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, bus error",
+			},
+			"sigsegv": {
+				Val:    slip.Fixnum(11),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, segmentation violation",
+			},
+			"sigsys": {
+				Val:    slip.Fixnum(12),
+				Const:  true,
+				Export: true,
+				Doc:    "create core image, non-existent system call invoked",
+			},
+			"sigpipe": {
+				Val:    slip.Fixnum(13),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, write on a pipe with no reader",
+			},
+			"sigalrm": {
+				Val:    slip.Fixnum(14),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, real-time timer expired",
+			},
+			"sigterm": {
+				Val:    slip.Fixnum(15),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, software termination signal",
+			},
+			"sigurg": {
+				Val:    slip.Fixnum(16),
+				Const:  true,
+				Export: true,
+				Doc:    "discard signal, urgent condition present on socket",
+			},
+			"sigstop": {
+				Val:    slip.Fixnum(17),
+				Const:  true,
+				Export: true,
+				Doc:    "stop process, stop (cannot be caught or ignored)",
+			},
+			"sigtstp": {
+				Val:    slip.Fixnum(18),
+				Const:  true,
+				Export: true,
+				Doc:    "stop process, stop signal generated from keyboard",
+			},
+			"sigcont": {
+				Val:    slip.Fixnum(19),
+				Const:  true,
+				Export: true,
+				Doc:    "discard signal, continue after stop",
+			},
+			"sigchld": {
+				Val:    slip.Fixnum(20),
+				Const:  true,
+				Export: true,
+				Doc:    "discard signal, child status has changed",
+			},
+			"sigttin": {
+				Val:    slip.Fixnum(21),
+				Const:  true,
+				Export: true,
+				Doc:    "stop process, background read attempted from control terminal",
+			},
+			"sigttou": {
+				Val:    slip.Fixnum(22),
+				Const:  true,
+				Export: true,
+				Doc:    "stop process, background write attempted to control terminal",
+			},
+			"sigio": {
+				Val:    slip.Fixnum(23),
+				Const:  true,
+				Export: true,
+				Doc:    "discard signal, I/O is possible on a descriptor (see fcntl(2))",
+			},
+			"sigxcpu": {
+				Val:    slip.Fixnum(24),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, cpu time limit exceeded (see setrlimit(2))",
+			},
+			"sigxfsz": {
+				Val:    slip.Fixnum(25),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, file size limit exceeded (see setrlimit(2))",
+			},
+			"sigvtalrm": {
+				Val:    slip.Fixnum(26),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, virtual time alarm (see setitimer(2))",
+			},
+			"sigprof": {
+				Val:    slip.Fixnum(27),
+				Const:  true,
+				Export: true,
+				Doc:    "terminate process, profiling timer alarm (see setitimer(2))",
+			},
+			"sigwinch": {
+				Val:    slip.Fixnum(28),
+				Const:  true,
+				Export: true,
+				Doc:    "discard signal, Window size change",
+			},
+			"siginfo": {
+				Val:    slip.Fixnum(29),
+				Const:  true,
+				Export: true,
+				Doc:    "discard signal, status request from keyboard",
+			},
+			"january": {
+				Val:    slip.Fixnum(1),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of January as a fixnum.",
+			},
+			"february": {
+				Val:    slip.Fixnum(2),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of February as a fixnum.",
+			},
+			"march": {
+				Val:    slip.Fixnum(3),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of March as a fixnum.",
+			},
+			"april": {
+				Val:    slip.Fixnum(4),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of April as a fixnum.",
+			},
+			"may": {
+				Val:    slip.Fixnum(5),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of May as a fixnum.",
+			},
+			"june": {
+				Val:    slip.Fixnum(6),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of June as a fixnum.",
+			},
+			"july": {
+				Val:    slip.Fixnum(7),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of July as a fixnum.",
+			},
+			"august": {
+				Val:    slip.Fixnum(8),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of August as a fixnum.",
+			},
+			"september": {
+				Val:    slip.Fixnum(9),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of September as a fixnum.",
+			},
+			"october": {
+				Val:    slip.Fixnum(10),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of October as a fixnum.",
+			},
+			"november": {
+				Val:    slip.Fixnum(11),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of November as a fixnum.",
+			},
+			"december": {
+				Val:    slip.Fixnum(12),
+				Const:  true,
+				Export: true,
+				Doc:    "The month of December as a fixnum.",
+			},
+		})
+	for _, f := range []*flavors.Flavor{
+		defLogger(),
+		defSystem(),
+	} {
+		vv := Pkg.GetVarVal(f.Name())
+		vv.Const = true
+	}
+	Pkg.Initialize(nil, &Env{})
+
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-
-	slip.DefConstant(&Pkg, "sighup", slip.Fixnum(1), "terminate process, terminal line hangup")
-	slip.DefConstant(&Pkg, "sigint", slip.Fixnum(2), "terminate process, interrupt program")
-	slip.DefConstant(&Pkg, "sigquit", slip.Fixnum(3), "create core image, quit program")
-	slip.DefConstant(&Pkg, "sigill", slip.Fixnum(4), "create core image, illegal instruction")
-	slip.DefConstant(&Pkg, "sigtrap", slip.Fixnum(5), "create core image, trace trap")
-	slip.DefConstant(&Pkg, "sigabrt", slip.Fixnum(6), "create core image, abort program (formerly SIGIOT)")
-	slip.DefConstant(&Pkg, "sigemt", slip.Fixnum(7), "create core image, emulate instruction executed")
-	slip.DefConstant(&Pkg, "sigfpe", slip.Fixnum(8), "create core image, floating-point exception")
-	slip.DefConstant(&Pkg, "sigkill", slip.Fixnum(9), "terminate process, kill program")
-	slip.DefConstant(&Pkg, "sigbus", slip.Fixnum(10), "create core image, bus error")
-	slip.DefConstant(&Pkg, "sigsegv", slip.Fixnum(11), "create core image, segmentation violation")
-	slip.DefConstant(&Pkg, "sigsys", slip.Fixnum(12), "create core image, non-existent system call invoked")
-	slip.DefConstant(&Pkg, "sigpipe", slip.Fixnum(13), "terminate process, write on a pipe with no reader")
-	slip.DefConstant(&Pkg, "sigalrm", slip.Fixnum(14), "terminate process, real-time timer expired")
-	slip.DefConstant(&Pkg, "sigterm", slip.Fixnum(15), "terminate process, software termination signal")
-	slip.DefConstant(&Pkg, "sigurg", slip.Fixnum(16), "discard signal, urgent condition present on socket")
-	slip.DefConstant(&Pkg, "sigstop", slip.Fixnum(17), "stop process, stop (cannot be caught or ignored)")
-	slip.DefConstant(&Pkg, "sigtstp", slip.Fixnum(18), "stop process, stop signal generated from keyboard")
-	slip.DefConstant(&Pkg, "sigcont", slip.Fixnum(19), "discard signal, continue after stop")
-	slip.DefConstant(&Pkg, "sigchld", slip.Fixnum(20), "discard signal, child status has changed")
-	slip.DefConstant(&Pkg, "sigttin", slip.Fixnum(21),
-		"stop process, background read attempted from control terminal")
-	slip.DefConstant(&Pkg, "sigttou", slip.Fixnum(22),
-		"stop process, background write attempted to control terminal")
-	slip.DefConstant(&Pkg, "sigio", slip.Fixnum(23),
-		"discard signal, I/O is possible on a descriptor (see fcntl(2))")
-	slip.DefConstant(&Pkg, "sigxcpu", slip.Fixnum(24),
-		"terminate process, cpu time limit exceeded (see setrlimit(2))")
-	slip.DefConstant(&Pkg, "sigxfsz", slip.Fixnum(25),
-		"terminate process, file size limit exceeded (see setrlimit(2))")
-	slip.DefConstant(&Pkg, "sigvtalrm", slip.Fixnum(26),
-		"terminate process, virtual time alarm (see setitimer(2))")
-	slip.DefConstant(&Pkg, "sigprof", slip.Fixnum(27),
-		"terminate process, profiling timer alarm (see setitimer(2))")
-	slip.DefConstant(&Pkg, "sigwinch", slip.Fixnum(28), "discard signal, Window size change")
-	slip.DefConstant(&Pkg, "siginfo", slip.Fixnum(29), "discard signal, status request from keyboard")
 }
 
 func seqStarEndArgs(args slip.List) (start, end int) {

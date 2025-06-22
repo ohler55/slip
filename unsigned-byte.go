@@ -10,11 +10,6 @@ import (
 // UnsignedByteSymbol is the symbol with a value of "unsigned-byte".
 const UnsignedByteSymbol = Symbol("unsigned-byte")
 
-func init() {
-	DefConstant(&CLPkg, string(UnsignedByteSymbol), UnsignedByteSymbol,
-		`A _unsigned-byte_ is an integer with a specific range defined by the number of bits in the byte.`)
-}
-
 // UnsignedByte represents an integer with a specific number of bits. The type
 // is a struct so that growing the bytes does not cause a new instance to be
 // created.

@@ -13,9 +13,6 @@ import (
 const TimeSymbol = Symbol("time")
 
 func init() {
-	DefConstant(&CLPkg, string(TimeSymbol), TimeSymbol,
-		`A _time_ identifies an instant in time backed by a golang time.Time.`)
-
 	timeMethods[":add"] = addTime
 	timeMethods[":components"] = TimeComponents
 	timeMethods[":describe"] = describeTime

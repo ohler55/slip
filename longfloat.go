@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"math/big"
 )
 
@@ -14,39 +13,6 @@ const (
 	// big.Float uses base 10 precision for formatting and base 2 for parsing.
 	prec10t2 = 3.32
 )
-
-func init() {
-	DefConstant(&CLPkg, string(LongFloatSymbol), LongFloatSymbol,
-		`A _long-float_ represents a decimal _number_ or _float_. It is implemented
-as a float64 as defined by IEEE 754 as a long precision decimal with 16 significant
-digits and a maximum exponent of 308.`)
-	// big.MaxExp causes a parse failure. The closest that does is 3 less.
-	mostPos, _, _ := big.ParseFloat(fmt.Sprintf("1.0e%d", big.MaxExp-3), 10, 10, big.ToNearestAway)
-	mostNeg, _, _ := big.ParseFloat(fmt.Sprintf("-1.0e%d", big.MaxExp-3), 10, 10, big.ToNearestAway)
-	DefConstant(&CLPkg, "most-positive-long-float", (*LongFloat)(mostPos),
-		"The most positive value a _long-float_ can have.")
-	DefConstant(&CLPkg, "most-negative-long-float", (*LongFloat)(mostNeg),
-		"The most negative value a _long-float_ can have.")
-
-	leastPos, _, _ := big.ParseFloat(fmt.Sprintf("1.0e%d", big.MinExp), 10, 10, big.ToNearestAway)
-	leastNeg, _, _ := big.ParseFloat(fmt.Sprintf("-1.0e%d", big.MinExp), 10, 10, big.ToNearestAway)
-	DefConstant(&CLPkg, "least-positive-long-float", (*LongFloat)(leastPos),
-		"The smallest non-zero positive value a _long-float_ can have.")
-	DefConstant(&CLPkg, "least-negative-long-float", (*LongFloat)(leastNeg),
-		"The smallest non-zero negative value a _long-float_ can have.")
-	DefConstant(&CLPkg, "least-positive-normalized-long-float", (*LongFloat)(leastPos),
-		"The smallest non-zero positive value a _long-float_ can have.")
-	DefConstant(&CLPkg, "least-negative-normalized-long-float", (*LongFloat)(leastNeg),
-		"The smallest non-zero negative value a _long-float_ can have.")
-
-	epsilon, _, _ := big.ParseFloat(fmt.Sprintf("1.0e%d", big.MinExp), 10, 10, big.ToNearestAway)
-	DefConstant(&CLPkg, "long-float-epsilon", (*LongFloat)(epsilon),
-		`The smallest positive _long-float_ such the addition of the epsilon value to
-1.0L0 returns a value greater than 1.0L0.`)
-	DefConstant(&CLPkg, "long-float-negative-epsilon", (*LongFloat)(epsilon),
-		`The smallest positive _long-float_ such the subtraction of the epsilon value from
-1.0L0 returns a value less than 1.0L0.`)
-}
 
 // LongFloat is a big.float Object.
 type LongFloat big.Float

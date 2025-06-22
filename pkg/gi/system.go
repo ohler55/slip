@@ -36,7 +36,7 @@ are bound to the values and are available to the function being called.
 
 var system *flavors.Flavor
 
-func defSystem() {
+func defSystem() *flavors.Flavor {
 	Pkg.Initialize(nil)
 	system = flavors.DefFlavor(
 		"system",
@@ -96,6 +96,8 @@ method to cache sources and then invoke one of the operations defined in the
 	system.Document("cache", systemCacheDoc)
 	system.Document("depends-on", systemDependsOnDoc)
 	system.Document("in-order-to", systemInOrderToDoc)
+
+	return system
 }
 
 type systemFetchCaller struct{}

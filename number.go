@@ -5,10 +5,6 @@ package slip
 // NumberSymbol is the symbol with a value of "number".
 const NumberSymbol = Symbol("number")
 
-func init() {
-	DefConstant(&CLPkg, string(NumberSymbol), NumberSymbol, `A _number_ is a combination of the _real_ and _complex_ numbers.`)
-}
-
 // Number exists to allow assertions to determine if an Object is an number.
 type Number interface {
 	Object

@@ -9,13 +9,6 @@ import (
 // HashTableSymbol is the symbol with a value of "hash-table".
 const HashTableSymbol = Symbol("hash-table")
 
-func init() {
-	DefConstant(&CLPkg, string(HashTableSymbol), HashTableSymbol,
-		`A _hash-table_ provides a mapping between a key and value. Keys can be a _string_, _symbol_, or _fixnum_.
-Only the __eql__ _:test_ is supported.
-`)
-}
-
 // HashTable of Objects.
 type HashTable map[Object]Object
 

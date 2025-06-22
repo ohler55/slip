@@ -21,9 +21,11 @@ var (
 )
 
 func init() {
-	DefConstant(&KeywordPkg, ":yes", Symbol(":yes"), "")
-	DefConstant(&KeywordPkg, ":no", Symbol(":no"), "")
-	DefConstant(&KeywordPkg, "keyword", &KeywordPkg, "The keyword package.")
+	KeywordPkg.Initialize(map[string]*VarVal{
+		":yes":              {Val: Symbol(":yes"), Const: true, Export: true},
+		":no":               {Val: Symbol(":no"), Const: true, Export: true},
+		"*keyword-package*": {Val: &KeywordPkg, Const: true, Export: true},
+	})
 	AddPackage(&KeywordPkg)
 	UserPkg.Use(&KeywordPkg)
 	keywordPkg = &KeywordPkg
