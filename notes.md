@@ -5,8 +5,10 @@
 - next
 
  - snapshot (destination)
-   -func (obj *Package) Unexport(name string) {
+  - fix do-symbols
+  - func (obj *Package) Unexport(name string) {
 	- TBD remove from Exports list
+  - turn flavor vars to constants where appropriate
 
   - order in file
    - defpackage excluding existing

@@ -12,7 +12,7 @@ import (
 
 var responseFlavor *flavors.Flavor
 
-func defResponse() {
+func defResponse() *flavors.Flavor {
 	Pkg.Initialize(nil)
 	responseFlavor = flavors.DefFlavor("http-response-flavor", map[string]slip.Object{}, nil,
 		slip.List{
@@ -35,6 +35,8 @@ the data associated with the HTTP reply.`),
 	responseFlavor.DefMethod(":trailer-get", "", respTrailerGetCaller(true))
 	responseFlavor.DefMethod(":body", "", respBodyCaller(true))
 	responseFlavor.DefMethod(":close", "", respCloseCaller(true))
+
+	return responseFlavor
 }
 
 type respStatusCaller bool

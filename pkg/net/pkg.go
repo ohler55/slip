@@ -3,9 +3,11 @@
 package net
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 var (
@@ -30,14 +32,19 @@ func init() {
 			"*auto-port*":     {Val: slip.Fixnum(0), Export: true},
 		},
 	)
-	defClient()
-	defRequest()
-	defResponse()
-	defResponseWriter()
-	defServer()
-	defSocket()
-	defHostent()
 	defNameServiceError()
+	for _, f := range []*flavors.Flavor{
+		defClient(),
+		defRequest(),
+		defResponse(),
+		defResponseWriter(),
+		defServer(),
+		defSocket(),
+		defHostent(),
+	} {
+		_ = Pkg.Remove(f.Name())
+		slip.DefConstant(&Pkg, f.Name(), f, fmt.Sprintf("The %s flavor.", f.Name()))
+	}
 
 	Pkg.Initialize(nil, &bodyWrap{}) // lock
 	slip.AddPackage(&Pkg)

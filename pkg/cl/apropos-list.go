@@ -100,6 +100,12 @@ func (f *AproposList) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 			})
 		}
 	}
+	for k, c := range slip.Constants {
+		if (pkg != nil && pkg != c.Pkg) || !strings.Contains(k, pat) {
+			continue
+		}
+		list = append(list, slip.Symbol(k))
+	}
 	sort.Slice(list, func(i, j int) bool { return string(list[i].(slip.Symbol)) < string(list[j].(slip.Symbol)) })
 
 	return list

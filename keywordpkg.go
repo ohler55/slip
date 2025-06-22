@@ -13,22 +13,17 @@ var (
 		Name:      "keyword",
 		Nicknames: []string{},
 		Doc:       "Home of keyword symbols.",
-		vars: map[string]*VarVal{
-			// Add a few examples...
-			":yes": {Val: Symbol(":yes")},
-			":no":  {Val: Symbol(":no")},
-		},
-		lambdas: map[string]*Lambda{},
-		funcs:   map[string]*FuncInfo{},
-		PreSet:  keywordPreSet,
+		vars:      map[string]*VarVal{},
+		lambdas:   map[string]*Lambda{},
+		funcs:     map[string]*FuncInfo{},
+		PreSet:    keywordPreSet,
 	}
 )
 
 func init() {
-	for _, vv := range KeywordPkg.vars {
-		vv.Pkg = &KeywordPkg
-	}
-	KeywordPkg.Set("keyword", &KeywordPkg)
+	DefConstant(&KeywordPkg, ":yes", Symbol(":yes"), "")
+	DefConstant(&KeywordPkg, ":no", Symbol(":no"), "")
+	DefConstant(&KeywordPkg, "keyword", &KeywordPkg, "The keyword package.")
 	AddPackage(&KeywordPkg)
 	UserPkg.Use(&KeywordPkg)
 	keywordPkg = &KeywordPkg

@@ -77,7 +77,12 @@ func (f *DoSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	nm := map[string]struct{}{}
 	pkg.EachVarName(func(name string) { nm[name] = struct{}{} })
 	pkg.EachFuncName(func(name string) { nm[name] = struct{}{} })
-
+	for k, c := range slip.Constants {
+		if c.Pkg == pkg { // TBD or uses
+			nm[k] = struct{}{}
+		}
+		nm[k] = struct{}{} // TBD remove
+	}
 	names := make([]string, 0, len(nm))
 	for name := range nm {
 		names = append(names, name)

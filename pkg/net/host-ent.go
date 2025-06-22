@@ -11,7 +11,7 @@ var (
 	hostentFlavor *flavors.Flavor
 )
 
-func defHostent() {
+func defHostent() *flavors.Flavor {
 	hostentFlavor = flavors.DefFlavor("host-ent",
 		map[string]slip.Object{
 			"name":      nil,
@@ -29,6 +29,7 @@ func defHostent() {
 		},
 		&Pkg,
 	)
+	return hostentFlavor
 }
 
 func makeHostEnt(name slip.String, addrs slip.List) (inst *flavors.Instance) {

@@ -21,16 +21,13 @@ func init() {
 
 // CLPkg is the COMMON-LISP package.
 var (
-	pkgVarVal = VarVal{Set: setCLPkg, Doc: "the common lisp package"}
-	clPkg     *Package // set in init
-	CLPkg              = Package{
+	clPkg *Package // set in init
+	CLPkg          = Package{
 		Name:      "common-lisp",
 		Nicknames: []string{"cl"},
 		Doc:       "Home of symbols defined by the ANSI LISP language specification.",
 		path:      "github.com/ohler55/slip/pkg/cl",
 		vars: map[string]*VarVal{
-			"*common-lisp*":   &pkgVarVal,
-			"*cl*":            &pkgVarVal,
 			"*package*":       {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
 			"*core-pathname*": {Val: nil, Doc: "The absolute pathname of the running SLIP application."},
 			"*default-pathname-defaults*": {
@@ -214,14 +211,16 @@ and raises an error if not possible to print readably.`,
 
 func init() {
 	clPkg = &CLPkg
-	for _, vv := range CLPkg.vars {
+	for name, vv := range CLPkg.vars {
 		vv.Pkg = &CLPkg
 		vv.Export = true
+		vv.name = name
 	}
 	xpath, _ := os.Executable()
 	xpath, _ = filepath.EvalSymlinks(xpath)
 	CLPkg.vars["*core-pathname*"].Val = String(xpath)
-	pkgVarVal.Get = getCLPkg
+	DefConstant(&CLPkg, "*cl*", &CLPkg, "The common-lisp package.")
+	DefConstant(&CLPkg, "*common-lisp*", &CLPkg, "The common-lisp package.")
 }
 
 func getCurrentPackage() Object {
@@ -313,10 +312,6 @@ func setStandardInput(value Object) {
 	} else {
 		PanicType("*standard-input*", value, "stream")
 	}
-}
-
-func getCLPkg() Object {
-	return &CLPkg
 }
 
 func setCLPkg(_ Object) {

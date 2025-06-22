@@ -20,7 +20,7 @@ const defaultClientTimeout = time.Second * 10
 
 var clientFlavor *flavors.Flavor
 
-func defClient() {
+func defClient() *flavors.Flavor {
 	clientFlavor = flavors.DefFlavor("http-client-flavor",
 		map[string]slip.Object{
 			"timeout": slip.Fixnum(defaultClientTimeout),
@@ -48,6 +48,8 @@ func defClient() {
 	clientFlavor.DefMethod(":post", "", clientBodyCaller(http.MethodPut))
 	clientFlavor.DefMethod(":put", "", clientBodyCaller(http.MethodPut))
 	clientFlavor.DefMethod(":trace", "", clientBodylessCaller(http.MethodTrace))
+
+	return clientFlavor
 }
 
 func ensureClient(obj *flavors.Instance) (client *http.Client, u string) {

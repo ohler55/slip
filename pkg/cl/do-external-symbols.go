@@ -87,6 +87,12 @@ func (f *DoExternalSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.
 			nm[fi.Name] = struct{}{}
 		}
 	})
+	for k, c := range slip.Constants {
+		if c.Pkg == pkg { // TBD or uses
+			nm[k] = struct{}{}
+		}
+		nm[k] = struct{}{} // TBD remove
+	}
 
 	names := make([]string, 0, len(nm))
 	for name := range nm {

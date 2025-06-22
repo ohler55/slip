@@ -27,9 +27,9 @@ func init() {
 			Doc:    "the names of all the defined Flavors.",
 			Export: true,
 		},
-		"*flavors*":  {Val: &Pkg, Doc: Pkg.Doc, Export: true},
-		vanilla.name: {Val: &vanilla, Doc: vanilla.docs, Export: true},
+		"*flavors*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
 	})
+	slip.DefConstant(&Pkg, vanilla.Name(), &vanilla, "The vanilla flavor.")
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 }

@@ -43,6 +43,7 @@ type Flavor struct {
 	abstract         bool
 	noVanilla        bool
 	allowOtherKeys   bool
+	pkg              *slip.Package
 	Final            bool
 	GoMakeOnly       bool
 }
@@ -53,6 +54,20 @@ func Find(name string) (f *Flavor) {
 		f = allFlavors[strings.ToLower(name)]
 	}
 	return
+}
+
+// All returns a list of all defined flavors.
+func All() (all []*Flavor) {
+	all = make([]*Flavor, 0, len(allFlavors))
+	for _, f := range allFlavors {
+		all = append(all, f)
+	}
+	return
+}
+
+// Pkg returns the package the flavor was defined in
+func (obj *Flavor) Pkg() *slip.Package {
+	return obj.pkg
 }
 
 // DefMethod adds a method to the Flavor.

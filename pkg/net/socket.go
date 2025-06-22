@@ -14,7 +14,7 @@ var (
 	socketFlavor *flavors.Flavor
 )
 
-func defSocket() {
+func defSocket() *flavors.Flavor {
 	socketFlavor = flavors.DefFlavor("socket", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
@@ -56,6 +56,8 @@ and is based on the unix or BSD socket model.`),
 	socketFlavor.DefMethod(":state", "", socketStateCaller{})
 	socketFlavor.DefMethod(":stream", "", socketStreamCaller{})
 	socketFlavor.DefMethod(":type", "", socketTypeCaller{})
+
+	return socketFlavor
 }
 
 type socketInitCaller struct{}

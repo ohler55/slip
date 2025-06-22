@@ -20,7 +20,7 @@ func init() {
 	Pkg.Initialize(nil)
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*xml*", &Pkg)
+	slip.DefConstant(&Pkg, "*xml*", &Pkg, "The XML package.")
 	Pkg.Export("*xml*")
 	Pkg.Initialize(nil, &Read{})
 }

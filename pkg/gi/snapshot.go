@@ -3,6 +3,7 @@
 package gi
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"os/user"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/pp"
 )
 
@@ -96,9 +98,9 @@ func AppendSnapshot(b []byte, s *slip.Scope) []byte {
 	b = appendSnapshotRequires(b, s)
 	b = appendSnapshotPackages(b, s)
 	b = appendSnapshotConstants(b, s)
-	b = appendSnapshotFunctions(b, s)
 	b = appendSnapshotFlavors(b, s)
 	b = appendSnapshotVars(b, s)
+	b = appendSnapshotFunctions(b, s)
 
 	return b
 }
@@ -181,7 +183,11 @@ func appendSnapshotConstants(b []byte, s *slip.Scope) []byte {
 	// Skip locked and imported packages.
 	var ca []*slip.Constant
 	for _, c := range slip.Constants {
-		if c.Pkg != nil && !c.Pkg.Locked && len(c.Pkg.LoadPath()) == 0 && c.Pkg.Name != "flavors" {
+		if c.Pkg != nil &&
+			!c.Pkg.Locked &&
+			len(c.Pkg.LoadPath()) == 0 &&
+			c.Pkg.Name != "keyword" &&
+			c.Pkg.Name != "flavors" {
 			ca = append(ca, c)
 		}
 	}
@@ -208,18 +214,49 @@ func appendSnapshotConstants(b []byte, s *slip.Scope) []byte {
 	return b
 }
 
-func appendSnapshotFunctions(b []byte, s *slip.Scope) []byte {
-
-	return b
-}
-
 func appendSnapshotFlavors(b []byte, s *slip.Scope) []byte {
-
+	var fa []*flavors.Flavor
+	for _, f := range flavors.All() {
+		p := f.Pkg()
+		if p != nil && !p.Locked && len(p.LoadPath()) == 0 && p.Name != "flavors" {
+			fa = append(fa, f)
+		}
+	}
+	sort.Slice(fa, func(i, j int) bool {
+		return fa[j].Inherits(fa[i])
+	})
+	for _, f := range fa {
+		b = append(b, '\n')
+		b = pp.Append(b, s, f.DefList())
+	}
 	return b
 }
 
 func appendSnapshotVars(b []byte, s *slip.Scope) []byte {
+	// Skip locked and imported packages.
+	var va []*slip.VarVal
+	for _, p := range slip.AllPackages() {
+		p.EachVarVal(func(name string, vv *slip.VarVal) {
+			if p == vv.Pkg {
+				va = append(va, vv)
+			}
+		})
+	}
+	sort.Slice(va, func(i, j int) bool {
+		if va[i].Pkg.Name == va[j].Pkg.Name {
+			return va[i].String() < va[j].String()
+		}
+		return va[i].Pkg.Name < va[j].Pkg.Name
+	})
+	for _, vv := range va {
+		fmt.Printf("*** %s: %s\n", vv.String(), vv.Value())
+	}
 	// vars for each package, just use user if var is in user - defvar then setq
+
+	return b
+}
+
+func appendSnapshotFunctions(b []byte, s *slip.Scope) []byte {
 
 	return b
 }
