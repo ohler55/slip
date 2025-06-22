@@ -178,13 +178,6 @@ func appendSnapshotPackages(b []byte, s *slip.Scope) []byte {
 	return b
 }
 
-func isCorePackage(p *slip.Package) bool {
-	return p.Locked ||
-		0 < len(p.LoadPath()) ||
-		p.Name == "flavors" ||
-		p.Name == "keyword"
-}
-
 func appendSnapshotConstants(b []byte, s *slip.Scope) []byte {
 	// Skip locked and imported packages.
 	var va []*slip.VarVal
@@ -276,17 +269,12 @@ func appendSnapshotVars(b []byte, s *slip.Scope) []byte {
 }
 
 func appendDefVar(b []byte, s *slip.Scope, vv *slip.VarVal) (out []byte) {
-	defer func() {
-		if recover() != nil {
-			out = b
-		}
-	}()
 	form := slip.List{
 		slip.Symbol("defvar"),
 		slip.Symbol(strings.Join([]string{vv.Pkg.Name, vv.String()}, "::")),
-		ppValue(vv.Value()),
 	}
 	if 0 < len(vv.Doc) {
+		form = append(form, nil)
 		form = append(form, slip.String(vv.Doc))
 	}
 	return pp.Append(b, s, form)
@@ -328,8 +316,43 @@ func ppValue(v slip.Object) (pv slip.Object) {
 }
 
 func appendSnapshotFunctions(b []byte, s *slip.Scope) []byte {
-
-	// TBD
-
+	// Skip locked and imported packages.
+	for _, p := range slip.AllPackages() {
+		if isCorePackage(p) {
+			continue
+		}
+		var fia []*slip.FuncInfo
+		p.EachFuncInfo(func(fi *slip.FuncInfo) {
+			if fi.Pkg == p {
+				fia = append(fia, fi)
+			}
+		})
+		if 0 < len(fia) {
+			sort.Slice(fia, func(i, j int) bool {
+				return fia[i].Name < fia[j].Name
+			})
+			b = append(b, '\n')
+			b = pp.Append(b, s, slip.List{
+				slip.Symbol("use-package"),
+				slip.String(p.Name),
+			})
+			for _, fi := range fia {
+				b = append(b, '\n')
+				b = pp.Append(b, s, fi)
+			}
+		}
+	}
+	b = append(b, '\n')
+	b = pp.Append(b, s, slip.List{
+		slip.Symbol("use-package"),
+		slip.String(slip.CurrentPackage.Name),
+	})
 	return b
+}
+
+func isCorePackage(p *slip.Package) bool {
+	return p.Locked ||
+		0 < len(p.LoadPath()) ||
+		p.Name == "flavors" ||
+		p.Name == "keyword"
 }
