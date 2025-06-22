@@ -71,6 +71,7 @@ func init() {
 			Get:    getInteractive,
 			Set:    setInteractive,
 			Doc:    "True if the repl is interactive.",
+			Const:  true,
 			Export: true,
 		},
 		"*default-stash-name*": {

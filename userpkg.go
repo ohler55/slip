@@ -14,8 +14,13 @@ var (
 )
 
 func init() {
-	UserPkg.Initialize(nil)
+	UserPkg.Initialize(map[string]*VarVal{
+		"*common-lisp-user*": {
+			Val:    &UserPkg,
+			Const:  true,
+			Export: true,
+			Doc:    "The common-lisp-user package.",
+		},
+	})
 	UserPkg.Use(&CLPkg)
-	_ = UserPkg.DefConst("*common-lisp-user*", &UserPkg, "The common-lisp-user package.")
-	UserPkg.Export("*common-lisp-user*")
 }

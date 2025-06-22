@@ -3,7 +3,6 @@
 package gi
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"os/user"
@@ -179,15 +178,24 @@ func appendSnapshotPackages(b []byte, s *slip.Scope) []byte {
 	return b
 }
 
+func isCorePackage(p *slip.Package) bool {
+	return p.Locked ||
+		0 < len(p.LoadPath()) ||
+		p.Name == "flavors" ||
+		p.Name == "keyword"
+}
+
 func appendSnapshotConstants(b []byte, s *slip.Scope) []byte {
 	// Skip locked and imported packages.
 	var va []*slip.VarVal
 	for _, p := range slip.AllPackages() {
-		p.EachVarVal(func(name string, vv *slip.VarVal) {
-			if p == vv.Pkg && vv.Const {
-				va = append(va, vv)
-			}
-		})
+		if !isCorePackage(p) {
+			p.EachVarVal(func(name string, vv *slip.VarVal) {
+				if p == vv.Pkg && vv.Const && vv.String() != "*common-lisp-user*" {
+					va = append(va, vv)
+				}
+			})
+		}
 	}
 	if 0 < len(va) {
 		b = append(b, '\n')
@@ -201,7 +209,7 @@ func appendSnapshotConstants(b []byte, s *slip.Scope) []byte {
 			form := slip.List{
 				slip.Symbol("defconstant"),
 				slip.Symbol(strings.Join([]string{c.Pkg.Name, c.String()}, "::")),
-				c.Val,
+				c.Value(),
 			}
 			if 0 < len(c.Doc) {
 				form = append(form, slip.String(c.Doc))
@@ -230,12 +238,24 @@ func appendSnapshotFlavors(b []byte, s *slip.Scope) []byte {
 	return b
 }
 
+var excludeVars = map[string]bool{
+	"*all-flavor-names*": true,
+	"*current-test*":     true,
+	"*error-output*":     true,
+	"*load-truename*":    true,
+	"*random-state*":     true,
+	"*standard-input*":   true,
+	"*standard-output*":  true,
+	"*terminal-io*":      true,
+	"*trace-output*":     true,
+}
+
 func appendSnapshotVars(b []byte, s *slip.Scope) []byte {
 	// Skip locked and imported packages.
 	var va []*slip.VarVal
 	for _, p := range slip.AllPackages() {
 		p.EachVarVal(func(name string, vv *slip.VarVal) {
-			if p == vv.Pkg && !vv.Const {
+			if p == vv.Pkg && !vv.Const && !excludeVars[name] {
 				va = append(va, vv)
 			}
 		})
@@ -247,11 +267,64 @@ func appendSnapshotVars(b []byte, s *slip.Scope) []byte {
 		return va[i].Pkg.Name < va[j].Pkg.Name
 	})
 	for _, vv := range va {
-		fmt.Printf("*** %s: %s\n", vv.String(), vv.Value())
+		if !isCorePackage(vv.Pkg) {
+			b = appendDefVar(b, s, vv)
+		}
+		b = appendSetq(b, s, vv)
 	}
-	// vars for each package, just use user if var is in user - defvar then setq
-
 	return b
+}
+
+func appendDefVar(b []byte, s *slip.Scope, vv *slip.VarVal) (out []byte) {
+	defer func() {
+		if recover() != nil {
+			out = b
+		}
+	}()
+	form := slip.List{
+		slip.Symbol("defvar"),
+		slip.Symbol(strings.Join([]string{vv.Pkg.Name, vv.String()}, "::")),
+		ppValue(vv.Value()),
+	}
+	if 0 < len(vv.Doc) {
+		form = append(form, slip.String(vv.Doc))
+	}
+	return pp.Append(b, s, form)
+}
+
+func appendSetq(b []byte, s *slip.Scope, vv *slip.VarVal) (out []byte) {
+	defer func() {
+		if recover() != nil {
+			out = b
+		}
+	}()
+	form := slip.List{
+		slip.Symbol("setq"),
+		slip.Symbol(strings.Join([]string{vv.Pkg.Name, vv.String()}, "::")),
+		ppValue(vv.Value()),
+	}
+	return pp.Append(b, s, form)
+}
+
+func ppValue(v slip.Object) (pv slip.Object) {
+	pv = v
+	switch tv := v.(type) {
+	case slip.List:
+		if 0 < len(tv) {
+			pv = slip.List{slip.Symbol("quote"), tv}
+		}
+	case *slip.Package:
+		pv = slip.List{
+			slip.Symbol("find-package"),
+			slip.String(tv.Name),
+		}
+	case *flavors.Flavor:
+		pv = slip.List{
+			slip.Symbol("find-flavor"),
+			slip.String(tv.Name()),
+		}
+	}
+	return
 }
 
 func appendSnapshotFunctions(b []byte, s *slip.Scope) []byte {

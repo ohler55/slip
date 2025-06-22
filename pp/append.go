@@ -5,6 +5,7 @@ package pp
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -20,7 +21,25 @@ const (
 // Append appends a pretty formatted object using the default printer setting
 // with print variables overridden by scoped variables.
 func Append(b []byte, s *slip.Scope, obj slip.Object) []byte {
-	p := *slip.DefaultPrinter()
+	p := slip.Printer{
+		ANSI:        false,
+		Array:       true,
+		Base:        10,
+		Case:        slip.Symbol(":downcase"),
+		Circle:      false,
+		Escape:      true,
+		Gensym:      true,
+		Lambda:      false,
+		Length:      math.MaxInt,
+		Level:       math.MaxInt,
+		Lines:       math.MaxInt,
+		Prec:        -1,
+		MiserWidth:  0,
+		Pretty:      false,
+		Radix:       false,
+		Readably:    true,
+		RightMargin: 120,
+	}
 	p.ScopedUpdate(s)
 
 	if sym, ok := obj.(slip.Symbol); ok {

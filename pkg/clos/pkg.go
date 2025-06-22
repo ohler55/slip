@@ -22,7 +22,12 @@ var (
 func init() {
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*clos*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
+			"*clos*": {
+				Val:    &Pkg,
+				Doc:    Pkg.Doc,
+				Const:  true,
+				Export: true,
+			},
 		},
 		&ClassName{},
 	)

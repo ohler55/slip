@@ -30,6 +30,7 @@ func init() {
 		"*flavors*": {
 			Val:    &Pkg,
 			Doc:    Pkg.Doc,
+			Const:  true,
 			Export: true,
 		},
 		vanilla.Name(): {

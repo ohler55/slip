@@ -19,7 +19,12 @@ var (
 func init() {
 	Pkg.Initialize(
 		map[string]*slip.VarVal{
-			"*csv*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
+			"*csv*": {
+				Val:    &Pkg,
+				Doc:    Pkg.Doc,
+				Const:  true,
+				Export: true,
+			},
 		},
 		&Read{},
 	)

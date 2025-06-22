@@ -33,8 +33,13 @@ var (
 		Doc:       "Home of symbols defined by the ANSI LISP language specification.",
 		path:      "github.com/ohler55/slip/pkg/cl",
 		vars: map[string]*VarVal{
-			"*package*":       {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
-			"*core-pathname*": {Val: nil, Doc: "The absolute pathname of the running SLIP application."},
+			"*package*": {Get: getCurrentPackage, Set: setCurrentPackage, Doc: "the current package"},
+			"*core-pathname*": {
+				Val:    nil,
+				Const:  true,
+				Export: true,
+				Doc:    "The absolute pathname of the running SLIP application.",
+			},
 			"*default-pathname-defaults*": {
 				Get: getWorkingDir,
 				Set: setWorkingDir,
