@@ -6,6 +6,8 @@
 
  - snapshot (destination)
   - fix do-symbols
+   - do constants need to be exported as well?
+   - or **extend VarVal to have a constant indicator**
   - func (obj *Package) Unexport(name string) {
 	- TBD remove from Exports list
   - turn flavor vars to constants where appropriate
