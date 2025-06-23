@@ -5,12 +5,7 @@
 - next
 
  - snapshot (destination)
-  - instance
-   - maybe (make-instance 'flavor :x 1 :y 2)
-    - use (setf (slot-value inst x) 1)
-     - for all, make-instance naked
-    - wrap the make-instance with a let and then the set calls and comments
-
+  - tests
 
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
   - defclass

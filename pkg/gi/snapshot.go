@@ -259,6 +259,7 @@ func appendSnapshotVars(b []byte, s *slip.Scope) []byte {
 		}
 		return va[i].Pkg.Name < va[j].Pkg.Name
 	})
+	b = append(b, '\n')
 	for _, vv := range va {
 		if !isCorePackage(vv.Pkg) {
 			b = appendDefVar(b, s, vv)
@@ -311,8 +312,56 @@ func ppValue(v slip.Object) (pv slip.Object) {
 			slip.Symbol("find-flavor"),
 			slip.String(tv.Name()),
 		}
+	case *flavors.Instance:
+		pv = ppInstance(tv)
 	}
 	return
+}
+
+func ppInstance(inst *flavors.Instance) slip.Object {
+	vars := inst.AllVars()
+	names := make([]string, 0, len(vars)-1)
+	for name := range vars {
+		if name != "self" {
+			names = append(names, name)
+		}
+	}
+	sort.Strings(names)
+	form := slip.List{
+		slip.Symbol("let"),
+		slip.List{
+			slip.List{
+				slip.Symbol("inst"),
+				slip.List{
+					slip.Symbol("make-instance"),
+					slip.List{
+						slip.Symbol("quote"),
+						slip.Symbol(inst.Type.(*flavors.Flavor).Name()),
+					},
+				},
+			},
+		},
+	}
+	for _, name := range names {
+		iv, _ := inst.LocalGet(slip.Symbol(name))
+		form = append(form,
+			slip.List{
+				slip.Symbol("setf"),
+				slip.List{
+					slip.Symbol("slot-value"),
+					slip.Symbol("inst"),
+					slip.List{
+						slip.Symbol("quote"),
+						slip.Symbol(name),
+					},
+				},
+				ppValue(iv),
+			},
+		)
+	}
+	form = append(form, slip.Symbol("inst"))
+
+	return form
 }
 
 func appendSnapshotFunctions(b []byte, s *slip.Scope) []byte {
