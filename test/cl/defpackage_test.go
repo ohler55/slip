@@ -16,11 +16,12 @@ func TestDefpackageSimple(t *testing.T) {
 		slip.RemovePackage(slip.FindPackage("defpack-test-1"))
 	}()
 	(&sliptest.Function{
-		Source: `(defpackage 'defpack-test-1 (:nicknames pt1 "pt-1"))`,
+		Source: `(defpackage 'defpack-test-1 (:nicknames pt1 "pt-1") (:documentation "pack doc"))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			tt.Equal(t, "#<package defpack-test-1>", slip.ObjectString(v))
 			p := v.(*slip.Package)
 			tt.Equal(t, "[pt1 pt-1]", pretty.SEN(p.Nicknames))
+			tt.Equal(t, "pack doc", p.Doc)
 		},
 	}).Test(t)
 }

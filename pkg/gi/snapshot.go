@@ -59,10 +59,7 @@ top:
 		return slip.String(b)
 	case io.Writer:
 		if _, err := ta.Write(b); err != nil {
-			ss, ok := ta.(slip.Stream)
-			if !ok {
-				ss = &slip.OutputStream{Writer: ta}
-			}
+			ss, _ := ta.(slip.Stream)
 			slip.PanicStream(ss, "writing snapshot: %s", err)
 		}
 	case slip.String:
@@ -71,9 +68,8 @@ top:
 			slip.PanicFile(ta, "failed to create: %s", err)
 		}
 		defer func() { _ = f.Close() }()
-		if _, err = f.Write(b); err != nil {
-			slip.PanicFile(ta, "failed to write: %s", err)
-		}
+		a0 = (*slip.FileStream)(f)
+		goto top
 	default:
 		if ta == slip.True {
 			a0 = s.Get("*standard-output*")
@@ -114,9 +110,6 @@ func appendSnapshotRequires(b []byte, s *slip.Scope) []byte {
 	}
 	if 0 < len(imported) {
 		b = append(b, '\n')
-		sort.Slice(imported, func(i, j int) bool {
-			return imported[i].Name < imported[j].Name
-		})
 		for _, p := range imported {
 			path := p.LoadPath()
 			form := slip.List{

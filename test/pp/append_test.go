@@ -111,6 +111,12 @@ func TestAppendDefvar(t *testing.T) {
    documentation")
 "`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20)) (pretty-print (defvar x 71 "documentation-that-is-very-wide") nil))`,
+		Expect: `"(defvar x 71
+  "documentation-that-is-very-wide")
+"`,
+	}).Test(t)
 }
 
 func TestAppendDefun(t *testing.T) {

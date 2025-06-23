@@ -4,6 +4,7 @@ package cl
 
 import (
 	"math/big"
+	"plugin"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -272,4 +273,15 @@ func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
 		slip.PanicType("bit-array1", t1, "bit-array")
 	}
 	return
+}
+
+// OpenPlugin attempts to open a plugin. If the attempt fails due to already
+// loaded then the panic is ignored.
+func OpenPlugin(filepath string) {
+	if _, err := plugin.Open(filepath); err != nil {
+		// The error is a error string so just check the contents.
+		if !strings.Contains(err.Error(), "plugin already loaded") {
+			slip.NewPanic("plugin %s open failed. %s", filepath, err)
+		}
+	}
 }

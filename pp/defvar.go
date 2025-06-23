@@ -49,13 +49,12 @@ func (defvar *Defvar) layout(left int) (w int) {
 }
 
 func (defvar *Defvar) reorg(edge int) int {
-	if edge < defvar.right() {
-		if 1 < len(defvar.children) {
-			defvar.children[1].setLeft(2)
-			cw := defvar.children[1].reorg(edge) + 1
-			if defvar.wide < cw+2 {
-				defvar.wide = cw + 2
-			}
+	if edge < defvar.right() && 1 < len(defvar.children) {
+		defvar.wide = len(defvar.name) + len(defvar.varName) + 3
+		defvar.children[1].setLeft(2)
+		cw := defvar.children[1].reorg(edge) + 1
+		if defvar.wide < cw+2 {
+			defvar.wide = cw + 2
 		}
 	}
 	return defvar.wide

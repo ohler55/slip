@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"plugin"
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -448,9 +448,7 @@ func loadSystemFile(s *slip.Scope, self *flavors.Instance, dir, path string) {
 func loadRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
 	slip.ArgCountCheck(self, args, 2, 2)
 	path := filepath.Join(dir, slip.MustBeString(args[0], "package-name"))
-	if _, err := plugin.Open(path); err != nil {
-		slip.NewPanic("plugin %s open failed. %s", path, err)
-	}
+	cl.OpenPlugin(path)
 }
 
 func loadCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
