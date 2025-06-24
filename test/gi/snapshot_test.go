@@ -167,8 +167,6 @@ func TestSnapshotFunctions(t *testing.T) {
 	}).Test(t)
 }
 
-// TBD functions
-
 func TestSnapshotBadDestination(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(snapshot 7)`,
