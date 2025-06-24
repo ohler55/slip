@@ -4,10 +4,6 @@
 
 - next
 
- - snapshot (destination)
-  - tests
-   - gi snapshot
-
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
   - defclass
   - defmethod class daemon bindings/args

@@ -127,7 +127,45 @@ func TestSnapshotVar(t *testing.T) {
 	}).Test(t)
 }
 
-// TBD flavors
+func TestSnapshotFlavors(t *testing.T) {
+	defer func() {
+		scope := slip.NewScope()
+		_ = slip.ReadString(`(undefflavor 'snapper)`, scope).Eval(scope, nil)
+		_ = slip.ReadString(`(undefflavor 'snappy)`, scope).Eval(scope, nil)
+	}()
+	(&sliptest.Function{
+		Source: `(progn
+                  (defflavor snappy (x) ())
+                  (defflavor snapper (y) (snappy))
+                  (snapshot nil))`,
+		Validate: func(t *testing.T, v slip.Object) {
+			ss, _ := v.(slip.String)
+			str := string(ss)
+			tt.Equal(t, `/\(defflavor snappy \(x\)/`, str)
+			tt.Equal(t, `/\(defflavor snapper \(y\)/`, str)
+		},
+	}).Test(t)
+}
+
+func TestSnapshotFunctions(t *testing.T) {
+	defer func() {
+		slip.CurrentPackage.Undefine("snap-1")
+		slip.CurrentPackage.Undefine("snap-2")
+	}()
+	(&sliptest.Function{
+		Source: `(defun snap-1 (x) (1+ x))
+                 (defun snap-2 (x) (+ x 2))
+                 (snapshot nil)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			ss, _ := v.(slip.String)
+			str := string(ss)
+			tt.Equal(t, `/\(defun snap-1 \(x\)
+  \(1\+ x\)\)/`, str)
+			tt.Equal(t, `/\(defun snap-2 \(x\)
+  \(\+ x 2\)\)/`, str)
+		},
+	}).Test(t)
+}
 
 // TBD functions
 

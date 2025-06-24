@@ -122,7 +122,7 @@ func TestDefflavorInherit(t *testing.T) {
 
 	f := slip.ReadString("f3", scope).Eval(scope, nil)
 	tt.Equal(t, `
-(defflavor f3 ((a 1) (b 2))
+(defflavor f3 ()
               (f2 f1))
 `, string(pp.Append([]byte{'\n'}, scope, f)))
 
@@ -149,7 +149,7 @@ func TestDefflavorInheritSame(t *testing.T) {
 
 	f := slip.ReadString("f3", scope).Eval(scope, nil)
 	tt.Equal(t, `
-(defflavor f3 ((a 1) (b 2))
+(defflavor f3 ()
               (f1 f2))
 `, string(pp.Append([]byte{'\n'}, scope, f)))
 }
@@ -223,7 +223,7 @@ func TestDefflavorInitPlistInherit(t *testing.T) {
 
 	f := slip.ReadString("f2", scope).Eval(scope, nil)
 	tt.Equal(t, `
-(defflavor f2 ((a 1) (b 2))
+(defflavor f2 ((b 2))
               (f1)
   (:default-init-plist (:allow-other-keys t) (:x 1) (:y 2)))
 `, string(pp.Append([]byte{'\n'}, scope, f)))
@@ -292,7 +292,7 @@ func TestDefflavorInclude(t *testing.T) {
 
 	f := slip.ReadString("f3", scope).Eval(scope, nil)
 	tt.Equal(t, `
-(defflavor f3 ((a 1) (b 2))
+(defflavor f3 ()
               (f2 f1)
   (:included-flavors f2 f1))
 `, string(pp.Append([]byte{'\n'}, scope, f)))
@@ -324,7 +324,7 @@ func TestDefflavorIncludeAbstract(t *testing.T) {
 
 	f = slip.ReadString("f3", scope).Eval(scope, nil)
 	tt.Equal(t, `
-(defflavor f3 ((a 1) (b 2))
+(defflavor f3 ()
               (f2 f1)
   (:included-flavors f2))
 `, string(pp.Append([]byte{'\n'}, scope, f)))
@@ -444,9 +444,8 @@ func TestDefflavorRequired(t *testing.T) {
 
 	f := slip.ReadString("f3", scope).Eval(scope, nil)
 	tt.Equal(t, `
-(defflavor f3 ((a 1) (b 2))
+(defflavor f3 ()
               (f2 f1)
-  (:gettable-instance-variables a)
   (:required-instance-variables b)
   (:required-methods :a)
   (:required-flavors f1))

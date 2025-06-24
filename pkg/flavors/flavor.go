@@ -472,8 +472,8 @@ func (obj *Flavor) MethodNames() slip.List {
 // the class is a built in class.
 func (obj *Flavor) DefList() slip.List {
 	keys := make([]string, 0, len(obj.defaultVars)-1)
-	for k := range obj.defaultVars {
-		if k != "self" {
+	for k, v := range obj.defaultVars {
+		if k != "self" && !obj.inheritedVar(k, v) {
 			keys = append(keys, k)
 		}
 	}
@@ -576,6 +576,15 @@ func (obj *Flavor) DefList() slip.List {
 		df = append(df, slip.List{slip.Symbol(":documentation"), slip.String(obj.docs)})
 	}
 	return df
+}
+
+func (obj *Flavor) inheritedVar(k string, v slip.Object) bool {
+	for _, f := range obj.inherit {
+		if iv, has := f.defaultVars[k]; has {
+			return v == iv
+		}
+	}
+	return false
 }
 
 func appendStringSliceOption(df slip.List, name string, ss []string) slip.List {
