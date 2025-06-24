@@ -184,13 +184,13 @@ func (app *App) Generate(dir string, key []byte, replace string, cleanup bool) {
 	app.writeMain(dir)
 
 	app.runCommand(dir, "go", "mod", "init", "main")
-	app.runCommand(dir, "go", "mod", "tidy")
 	if 0 < len(replace) {
 		if f, err := os.OpenFile(filepath.Join(dir, "go.mod"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
 			_, _ = fmt.Fprintf(f, "\nreplace github.com/ohler55/slip => %s\n", replace)
 			_ = f.Close()
 		}
 	}
+	app.runCommand(dir, "go", "mod", "tidy")
 	app.runCommand(dir, "go", "build", "-C", dir, "-o", app.Title)
 	if cleanup {
 		_ = os.RemoveAll(path)

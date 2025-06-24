@@ -10,12 +10,6 @@ const (
 	ConsSymbol = Symbol("cons")
 )
 
-func init() {
-	DefConstant(ListSymbol, ListSymbol, `A _cons_ is a sequence of _objects_.`)
-	DefConstant(ConsSymbol, ConsSymbol,
-		`A _cons_ is a dotted pair of _objects_ with a _car_ and a _cdr_.`)
-}
-
 // List of Objects.
 type List []Object
 

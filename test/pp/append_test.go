@@ -5,6 +5,7 @@ package pp_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -110,6 +111,12 @@ func TestAppendDefvar(t *testing.T) {
    documentation")
 "`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20)) (pretty-print (defvar x 71 "documentation-that-is-very-wide") nil))`,
+		Expect: `"(defvar x 71
+  "documentation-that-is-very-wide")
+"`,
+	}).Test(t)
 }
 
 func TestAppendDefun(t *testing.T) {
@@ -188,8 +195,7 @@ func TestAppendBuiltIn(t *testing.T) {
 		Source: `(let ((*print-right-margin* 60)
                        (c (find-class 'fixnum)))
                    (pretty-print c nil))`,
-		Expect: `"#<class fixnum>
-"`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 

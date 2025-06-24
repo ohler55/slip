@@ -2,16 +2,19 @@
 
 package pp
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 // Defvar represents a defvar block.
 type Defvar struct {
 	List    // value and doc if present
+	name    string
 	varName string
 }
 
-func defvarFromList(args slip.List, p *slip.Printer) Node {
-	var defvar Defvar
+func defvarFromList(name string, args slip.List, p *slip.Printer) Node {
+	defvar := Defvar{name: name}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		defvar.varName = string(sym)
 	}
@@ -28,10 +31,16 @@ func defvarFromList(args slip.List, p *slip.Printer) Node {
 
 func (defvar *Defvar) layout(left int) (w int) {
 	defvar.x = left
-	w = len(defvar.varName) + 9
-	for _, n := range defvar.children {
-		cw := n.layout(w)
-		w += cw
+	w = len(defvar.name) + len(defvar.varName) + 3
+	if 0 < len(defvar.children) {
+		w += defvar.children[0].layout(w)
+		if 1 < len(defvar.children) {
+			// docs are always on a new line
+			cw := defvar.children[1].layout(2)
+			if w < cw+2 {
+				w = cw + 2
+			}
+		}
 	}
 	w++
 	defvar.wide = w
@@ -40,31 +49,21 @@ func (defvar *Defvar) layout(left int) (w int) {
 }
 
 func (defvar *Defvar) reorg(edge int) int {
-	if edge < defvar.right() {
-		last := len(defvar.children) - 1
-		w := len(defvar.varName) + 9
-		x := w
-		for i, n := range defvar.children {
-			if edge < x+n.width() {
-				n.setNewline(true)
-				x = 2
-			}
-			n.setLeft(x)
-			cw := n.reorg(edge)
-			if last == i {
-				cw++
-			}
-			if w < n.left()+cw {
-				w = n.left() + cw
-			}
+	if edge < defvar.right() && 1 < len(defvar.children) {
+		defvar.wide = len(defvar.name) + len(defvar.varName) + 3
+		defvar.children[1].setLeft(2)
+		cw := defvar.children[1].reorg(edge) + 1
+		if defvar.wide < cw+2 {
+			defvar.wide = cw + 2
 		}
-		defvar.wide = w
 	}
 	return defvar.wide
 }
 
 func (defvar *Defvar) adjoin(b []byte) []byte {
-	b = append(b, "(defvar "...)
+	b = append(b, '(')
+	b = append(b, defvar.name...)
+	b = append(b, ' ')
 	b = append(b, defvar.varName...)
 	for _, n := range defvar.children {
 		if n.newline() {

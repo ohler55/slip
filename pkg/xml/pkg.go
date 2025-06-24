@@ -17,9 +17,10 @@ var (
 )
 
 func init() {
-	Pkg.Initialize(nil)
+	Pkg.Initialize(map[string]*slip.VarVal{
+		"*xml*": {Val: &Pkg, Const: true, Export: true, Doc: "The XML package."},
+	})
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	Pkg.Set("*xml*", &Pkg)
-	Pkg.Export("*xml*")
+	Pkg.Initialize(nil, &Read{}) // lock
 }

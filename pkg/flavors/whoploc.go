@@ -9,10 +9,6 @@ import (
 // whopLocSymbol is the symbol with a value of "whopLoc".
 const whopLocSymbol = slip.Symbol("whopLoc")
 
-func init() {
-	slip.DefConstant(whopLocSymbol, whopLocSymbol, `A whopper location. Private for continue-whopper.`)
-}
-
 type whopLoc struct {
 	methods []*Method
 	current int

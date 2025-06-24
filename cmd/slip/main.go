@@ -67,7 +67,10 @@ usage: %s [<options>] [<filepath>]...
 		fmt.Printf("slip version: %s\n", version)
 		return
 	}
-	slip.DefConstant(slip.Symbol("*config-directory*"), slip.String(cfgDir), "Config directory")
+	slip.CLPkg.Locked = false // a bit of a cheat
+	_ = slip.CLPkg.DefConst("*config-directory*", slip.String(cfgDir), "Config directory")
+	slip.CLPkg.Locked = true
+	slip.CLPkg.Export("*config-directory*")
 
 	run()
 }

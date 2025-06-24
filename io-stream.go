@@ -9,10 +9,6 @@ import (
 // IOStreamSymbol is the symbol with a value of "io-stream".
 const IOStreamSymbol = Symbol("io-stream")
 
-func init() {
-	DefConstant(IOStreamSymbol, IOStreamSymbol, `A _io-stream_ stream backed by a io.ReadWriter.`)
-}
-
 // IOStream is a io.ReadWriter.
 type IOStream struct {
 	RW io.ReadWriter

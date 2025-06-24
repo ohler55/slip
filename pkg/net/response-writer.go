@@ -11,7 +11,7 @@ import (
 
 var responseWriterFlavor *flavors.Flavor
 
-func defResponseWriter() {
+func defResponseWriter() *flavors.Flavor {
 	responseWriterFlavor = flavors.DefFlavor("http-response-writer-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
@@ -26,6 +26,8 @@ func defResponseWriter() {
 	responseWriterFlavor.DefMethod(":write", "", respWriterWriteCaller(true))
 	responseWriterFlavor.DefMethod(":header", "", respWriterHeaderCaller(true))
 	responseWriterFlavor.DefMethod(":header-get", "", respWriterHeaderGetCaller(true))
+
+	return responseWriterFlavor
 }
 
 type respWriterStatusCaller bool

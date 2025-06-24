@@ -19,9 +19,12 @@ const (
 const RandomStateSymbol = slip.Symbol("random-state")
 
 func init() {
-	slip.DefConstant(RandomStateSymbol, RandomStateSymbol,
+	slip.CLPkg.Locked = false // a bit of a cheat
+	slip.CLPkg.DefConst(string(RandomStateSymbol), RandomStateSymbol,
 		`A _random-state_ stores the state for random number generation.`)
 	slip.CLPkg.Set(randomStateStr, NewRandomState(nil))
+	slip.CLPkg.Locked = true
+	slip.CLPkg.Export(string(RandomStateSymbol))
 }
 
 // RandomState is rand.Source64.

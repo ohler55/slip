@@ -5,10 +5,6 @@ package slip
 // FloatSymbol is the symbol with a value of "float".
 const FloatSymbol = Symbol("float")
 
-func init() {
-	DefConstant(FloatSymbol, FloatSymbol, `A _float_ represents a decimal _number_.`)
-}
-
 // Float exists to allow assertions to determine if an Object is an float.
 type Float interface {
 	Real

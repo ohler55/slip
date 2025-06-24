@@ -128,7 +128,7 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
 		}
 	}
-	_ = DefFlavor(string(name), defVars, inherit, args[3:], &Pkg)
+	_ = DefFlavor(string(name), defVars, inherit, args[3:], slip.CurrentPackage)
 
 	return name
 }
@@ -152,6 +152,7 @@ func DefFlavor(
 		methods:     map[string][]*Method{},
 		varDocs:     map[string]string{},
 		initable:    map[string]bool{},
+		pkg:         p,
 	}
 	for _, fname := range inherit {
 		if cf := allFlavors[strings.ToLower(fname)]; cf != nil && !cf.Final {

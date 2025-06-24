@@ -9,11 +9,6 @@ import (
 // RatioSymbol is the symbol with a value of "ratio".
 const RatioSymbol = Symbol("ratio")
 
-func init() {
-	DefConstant(RatioSymbol, RatioSymbol,
-		`A _ratio_ is a _number_ represented as a ratio of two integers.`)
-}
-
 // Ratio is a numerator and denominator pair.
 type Ratio big.Rat
 

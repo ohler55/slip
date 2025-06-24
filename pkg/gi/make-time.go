@@ -67,19 +67,6 @@ func init() {
 				`(make-time 2022 july 17 20 53 24 123456789 "EST") => @2022-07-17T20:53:24.123456789-05:00`,
 			},
 		}, &Pkg)
-
-	slip.DefConstant(slip.Symbol("january"), slip.Fixnum(1), "The month of January as a fixnum.")
-	slip.DefConstant(slip.Symbol("february"), slip.Fixnum(2), "The month of February as a fixnum.")
-	slip.DefConstant(slip.Symbol("march"), slip.Fixnum(3), "The month of March as a fixnum.")
-	slip.DefConstant(slip.Symbol("april"), slip.Fixnum(4), "The month of April as a fixnum.")
-	slip.DefConstant(slip.Symbol("may"), slip.Fixnum(5), "The month of May as a fixnum.")
-	slip.DefConstant(slip.Symbol("june"), slip.Fixnum(6), "The month of June as a fixnum.")
-	slip.DefConstant(slip.Symbol("july"), slip.Fixnum(7), "The month of July as a fixnum.")
-	slip.DefConstant(slip.Symbol("august"), slip.Fixnum(8), "The month of August as a fixnum.")
-	slip.DefConstant(slip.Symbol("september"), slip.Fixnum(9), "The month of September as a fixnum.")
-	slip.DefConstant(slip.Symbol("october"), slip.Fixnum(10), "The month of October as a fixnum.")
-	slip.DefConstant(slip.Symbol("november"), slip.Fixnum(11), "The month of November as a fixnum.")
-	slip.DefConstant(slip.Symbol("december"), slip.Fixnum(12), "The month of December as a fixnum.")
 }
 
 // MakeTime represents the makeTime function.

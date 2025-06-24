@@ -47,7 +47,8 @@ func (f *Constantp) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	case slip.Symbol:
 		if 0 < len(ta) && ta[0] == ':' {
 			return slip.True
-		} else if _, _, ok := slip.GetConstant(ta); ok {
+		}
+		if vv := slip.CurrentPackage.GetVarVal(string(ta)); vv != nil && vv.Const {
 			return slip.True
 		}
 	default:

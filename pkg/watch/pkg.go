@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 var (
@@ -195,17 +196,19 @@ changes in a fixed location and values are updated in place.
 )
 
 func init() {
-	Pkg.Initialize(
-		map[string]*slip.VarVal{
-			"*watch*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
-		},
-	)
-	_ = ServerFlavor()
-	_ = ClientFlavor()
-	_ = ChannelerFlavor()
-	_ = FramerFlavor()
-	_ = PrinterFlavor()
-
+	Pkg.Initialize(map[string]*slip.VarVal{
+		"*watch*": {Val: &Pkg, Const: true, Export: true, Doc: "The watch package."},
+	})
+	for _, f := range []*flavors.Flavor{
+		ServerFlavor(),
+		ClientFlavor(),
+		ChannelerFlavor(),
+		FramerFlavor(),
+		PrinterFlavor(),
+	} {
+		vv := Pkg.GetVarVal(f.Name())
+		vv.Const = true
+	}
 	Pkg.Initialize(nil, &periodic{})
 
 	slip.AddPackage(&Pkg)

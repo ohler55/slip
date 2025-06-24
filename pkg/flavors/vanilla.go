@@ -35,6 +35,7 @@ var vanilla = Flavor{
 			primary: updateInstanceForDifferentClassCaller{}}},
 	},
 	defaultHandler: defHand{},
+	pkg:            &Pkg,
 }
 
 func init() {

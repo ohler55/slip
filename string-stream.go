@@ -10,10 +10,6 @@ import (
 // StringStreamSymbol is the symbol with a value of "string-stream".
 const StringStreamSymbol = Symbol("string-stream")
 
-func init() {
-	DefConstant(StringStreamSymbol, StringStreamSymbol, `A _string-stream_ stream backed by character vector.`)
-}
-
 // StringStream is an input and output stream with seeker support.
 type StringStream struct {
 	buf []byte

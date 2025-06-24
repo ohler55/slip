@@ -4,6 +4,7 @@ package test
 
 import (
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 var (
@@ -23,10 +24,21 @@ func init() {
 			Doc:    "is bound to the current test if there is a test running.",
 			Export: true,
 		},
-		"*test*": {Val: &Pkg, Doc: Pkg.Doc, Export: true},
+		"*test*": {
+			Val:    &Pkg,
+			Doc:    Pkg.Doc,
+			Const:  true,
+			Export: true,
+		},
 	})
-	_ = SuiteFlavor()
-	_ = TestFlavor()
+	for _, f := range []*flavors.Flavor{
+		SuiteFlavor(),
+		TestFlavor(),
+		TestableFlavor(),
+	} {
+		vv := Pkg.GetVarVal(f.Name())
+		vv.Const = true
+	}
 
 	Pkg.Initialize(nil, &AssertEqual{})
 	slip.AddPackage(&Pkg)

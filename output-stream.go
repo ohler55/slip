@@ -10,10 +10,6 @@ import (
 // OutputStreamSymbol is the symbol with a value of "output-stream".
 const OutputStreamSymbol = Symbol("output-stream")
 
-func init() {
-	DefConstant(OutputStreamSymbol, OutputStreamSymbol, `A _output-stream_ stream backed by a io.Writer.`)
-}
-
 // OutputStream is a *os.Output.
 type OutputStream struct {
 	Writer io.Writer

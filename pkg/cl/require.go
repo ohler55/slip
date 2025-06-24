@@ -5,7 +5,6 @@ package cl
 import (
 	"fmt"
 	"os"
-	"plugin"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -103,9 +102,7 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		filepath := fmt.Sprintf("%s/%s.so", path, name)
 		if _, err := os.Stat(filepath); err == nil {
 			slip.CurrentPackageLoadPath = filepath
-			if _, err = plugin.Open(filepath); err != nil {
-				slip.NewPanic("plugin %s open failed. %s", filepath, err)
-			}
+			OpenPlugin(filepath)
 			return slip.Novalue
 		}
 		if strings.HasSuffix(strings.ToLower(name), ".lisp") {

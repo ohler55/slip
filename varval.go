@@ -13,6 +13,7 @@ type VarVal struct {
 	Doc    string
 	Pkg    *Package // package interned in
 	Export bool
+	Const  bool
 }
 
 // Simplify the Object into an int64.

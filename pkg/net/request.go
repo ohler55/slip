@@ -28,7 +28,7 @@ var (
 	}
 )
 
-func defRequest() {
+func defRequest() *flavors.Flavor {
 	requestFlavor = flavors.DefFlavor("http-request-flavor", map[string]slip.Object{}, nil,
 		slip.List{
 			slip.List{
@@ -64,6 +64,8 @@ the data associated with the HTTP reply.`),
 	requestFlavor.DefMethod(":body", "", reqBodyCaller(true))
 	requestFlavor.DefMethod(":close", "", reqCloseCaller(true))
 	requestFlavor.DefMethod(":write", "", reqWriteCaller(true))
+
+	return requestFlavor
 }
 
 type reqInitCaller bool

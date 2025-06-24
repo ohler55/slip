@@ -21,7 +21,7 @@ func init() {
 				{
 					Name: "destination",
 					Type: "output-stream|string|t|nil",
-					Text: `The destination to write to. If _t_ then write to _*standard-output*.
+					Text: `The destination to write to. If _t_ then write to _*standard-output*_.
 If _nil_ then return a string.`,
 				},
 				{

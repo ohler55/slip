@@ -16,10 +16,6 @@ const FlavorSymbol = slip.Symbol("flavor")
 var allFlavors = map[string]*Flavor{vanilla.name: &vanilla}
 
 func init() {
-	slip.DefConstant(FlavorSymbol, FlavorSymbol,
-		`A _flavor_ encapsulates a class of objects or instances.
-The _flavor_ itself is an instance and can be sent a limited set of methods.`)
-
 	slip.RegisterClass(vanilla.name, &vanilla)
 }
 
@@ -43,6 +39,7 @@ type Flavor struct {
 	abstract         bool
 	noVanilla        bool
 	allowOtherKeys   bool
+	pkg              *slip.Package
 	Final            bool
 	GoMakeOnly       bool
 }
@@ -53,6 +50,20 @@ func Find(name string) (f *Flavor) {
 		f = allFlavors[strings.ToLower(name)]
 	}
 	return
+}
+
+// All returns a list of all defined flavors.
+func All() (all []*Flavor) {
+	all = make([]*Flavor, 0, len(allFlavors))
+	for _, f := range allFlavors {
+		all = append(all, f)
+	}
+	return
+}
+
+// Pkg returns the package the flavor was defined in
+func (obj *Flavor) Pkg() *slip.Package {
+	return obj.pkg
 }
 
 // DefMethod adds a method to the Flavor.
@@ -461,8 +472,8 @@ func (obj *Flavor) MethodNames() slip.List {
 // the class is a built in class.
 func (obj *Flavor) DefList() slip.List {
 	keys := make([]string, 0, len(obj.defaultVars)-1)
-	for k := range obj.defaultVars {
-		if k != "self" {
+	for k, v := range obj.defaultVars {
+		if k != "self" && !obj.inheritedVar(k, v) {
 			keys = append(keys, k)
 		}
 	}
@@ -565,6 +576,15 @@ func (obj *Flavor) DefList() slip.List {
 		df = append(df, slip.List{slip.Symbol(":documentation"), slip.String(obj.docs)})
 	}
 	return df
+}
+
+func (obj *Flavor) inheritedVar(k string, v slip.Object) bool {
+	for _, f := range obj.inherit {
+		if iv, has := f.defaultVars[k]; has {
+			return v == iv
+		}
+	}
+	return false
 }
 
 func appendStringSliceOption(df slip.List, name string, ss []string) slip.List {

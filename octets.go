@@ -7,10 +7,6 @@ import "bytes"
 // OctetsSymbol is the symbol with a value of "octets".
 const OctetsSymbol = Symbol("octets")
 
-func init() {
-	DefConstant(OctetsSymbol, OctetsSymbol, `A _octets_ one dimensional array of _octet_.`)
-}
-
 // Octets is a octets Object.
 type Octets []byte
 

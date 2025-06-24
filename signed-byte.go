@@ -10,11 +10,6 @@ import (
 // SignedByteSymbol is the symbol with a value of "signed-byte".
 const SignedByteSymbol = Symbol("signed-byte")
 
-func init() {
-	DefConstant(SignedByteSymbol, SignedByteSymbol,
-		`A _signed-byte_ is an integer with a specific range defined by the number of bits in the byte.`)
-}
-
 // SignedByte represents an integer with a specific number of bits. The Bytes
 // are the absolute value of the integer value of the instance.
 type SignedByte struct {

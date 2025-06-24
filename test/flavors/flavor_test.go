@@ -269,3 +269,16 @@ func TestFlavorReceive(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.ReadString("(send blueberry :not-a-method)", scope).Eval(scope, nil) })
 	tt.Panic(t, func() { _ = slip.ReadString(`(send blueberry :document 'x)`, scope).Eval(scope, nil) })
 }
+
+func TestAll(t *testing.T) {
+	all := flavors.All()
+	tt.Equal(t, true, 0 < len(all))
+	var found bool
+	for _, f := range all {
+		if f.Name() == "bag-flavor" {
+			tt.Equal(t, "bag", f.Pkg().Name)
+			found = true
+		}
+	}
+	tt.Equal(t, true, found)
+}

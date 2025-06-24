@@ -10,10 +10,6 @@ import (
 // BitVectorSymbol is the symbol with a value of "bit-vector".
 const BitVectorSymbol = Symbol("bit-vector")
 
-func init() {
-	DefConstant(BitVectorSymbol, BitVectorSymbol, `A _bit-vector_ is a vector of bits.`)
-}
-
 // BitVector represents an integer with a specific number of bits.
 type BitVector struct {
 	// Bytes in left to right order, the last byte includes padding on the low

@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	pkgVarVal = slip.VarVal{Set: setREPL, Doc: "the REPL package", Export: true}
-	Pkg       = slip.Package{
+	Pkg = slip.Package{
 		Name:      "repl",
 		Nicknames: []string{},
 		Doc:       "A package for REPL related functions.",
@@ -22,7 +21,7 @@ var (
 
 func init() {
 	Pkg.Initialize(map[string]*slip.VarVal{
-		"*repl*":        &pkgVarVal,
+		"*repl*":        {Val: &Pkg, Const: true, Export: true, Doc: "The REPL package."},
 		"*repl-prompt*": {Get: getPrompt, Set: setPrompt, Doc: "the REPL prompt", Export: true},
 		"*repl-external-editor*": {
 			Get:    getExternalEditor,
@@ -72,6 +71,7 @@ func init() {
 			Get:    getInteractive,
 			Set:    setInteractive,
 			Doc:    "True if the repl is interactive.",
+			Const:  true,
 			Export: true,
 		},
 		"*default-stash-name*": {
@@ -87,31 +87,103 @@ func init() {
 The default value is ("." "~/.config/slip" "~/.slip")`,
 			Export: true,
 		},
+		"*bold*": {
+			Val:   slip.String("\x1b[1m"),
+			Const: true,
+			Doc:   "bold ANSI sequence",
+		},
+		"*underline*": {
+			Val:   slip.String("\x1b[4m"),
+			Const: true,
+			Doc:   "underline ANSI sequence",
+		},
+		"*ansi-reset*": {
+			Val:   slip.String("\x1b[m"),
+			Const: true,
+			Doc:   "reset ANSI sequence",
+		},
+		"*ansi-black*": {
+			Val:   slip.String("\x1b[30m"),
+			Const: true,
+			Doc:   "black ANSI sequence",
+		},
+		"*ansi-red*": {
+			Val:   slip.String("\x1b[31m"),
+			Const: true,
+			Doc:   "red ANSI sequence",
+		},
+		"*ansi-green*": {
+			Val:   slip.String("\x1b[32m"),
+			Const: true,
+			Doc:   "green ANSI sequence",
+		},
+		"*ansi-yellow*": {
+			Val:   slip.String("\x1b[33m"),
+			Const: true,
+			Doc:   "yellow ANSI sequence",
+		},
+		"*ansi-blue*": {
+			Val:   slip.String("\x1b[34m"),
+			Const: true,
+			Doc:   "blue ANSI sequence",
+		},
+		"*ansi-magenta*": {
+			Val:   slip.String("\x1b[35m"),
+			Const: true,
+			Doc:   "magenta ANSI sequence",
+		},
+		"*ansi-cyan*": {
+			Val:   slip.String("\x1b[36m"),
+			Const: true,
+			Doc:   "cyan ANSI sequence",
+		},
+		"*ansi-white*": {
+			Val:   slip.String("\x1b[37m"),
+			Const: true,
+			Doc:   "white ANSI sequence",
+		},
+		"*ansi-light-black*": {
+			Val:   slip.String("\x1b[90m"),
+			Const: true,
+			Doc:   "gray ANSI sequence",
+		},
+		"*ansi-light-red*": {
+			Val:   slip.String("\x1b[91m"),
+			Const: true,
+			Doc:   "light-red ANSI sequence",
+		},
+		"*ansi-light-green*": {
+			Val:   slip.String("\x1b[92m"),
+			Const: true,
+			Doc:   "light-green ANSI sequence",
+		},
+		"*ansi-light-yellow*": {
+			Val:   slip.String("\x1b[93m"),
+			Const: true,
+			Doc:   "light-yellow ANSI sequence",
+		},
+		"*ansi-light-blue*": {
+			Val:   slip.String("\x1b[94m"),
+			Const: true,
+			Doc:   "light-blue ANSI sequence",
+		},
+		"*ansi-light-magenta*": {
+			Val:   slip.String("\x1b[95m"),
+			Const: true,
+			Doc:   "light-magenta ANSI sequence",
+		},
+		"*ansi-light-cyan*": {
+			Val:   slip.String("\x1b[96m"),
+			Const: true,
+			Doc:   "light-cyan ANSI sequence",
+		},
+		"*ansi-light-white*": {
+			Val:   slip.String("\x1b[97m"),
+			Const: true,
+			Doc:   "bright-white ANSI sequence",
+		},
 	}, &Ansi{})
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
-	pkgVarVal.Get = getREPL
-
-	slip.DefConstant(slip.Symbol("*bold*"), slip.String("\x1b[1m"), "bold ANSI sequence")
-	slip.DefConstant(slip.Symbol("*underline*"), slip.String("\x1b[4m"), "underline ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-reset*"), slip.String("\x1b[m"), "reset ANSI sequence")
-
-	slip.DefConstant(slip.Symbol("*ansi-black*"), slip.String("\x1b[30m"), "black ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-red*"), slip.String("\x1b[31m"), "red ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-green*"), slip.String("\x1b[32m"), "green ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-yellow*"), slip.String("\x1b[33m"), "yellow ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-blue*"), slip.String("\x1b[34m"), "blue ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-magenta*"), slip.String("\x1b[35m"), "magenta ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-cyan*"), slip.String("\x1b[36m"), "cyan ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-white*"), slip.String("\x1b[37m"), "white ANSI sequence")
-
-	slip.DefConstant(slip.Symbol("*ansi-light-black*"), slip.String("\x1b[90m"), "gray ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-light-red*"), slip.String("\x1b[91m"), "light-red ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-light-green*"), slip.String("\x1b[92m"), "light-green ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-light-yellow*"), slip.String("\x1b[93m"), "light-yellow ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-light-blue*"), slip.String("\x1b[94m"), "light-blue ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-light-magenta*"), slip.String("\x1b[95m"), "light-magenta ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-light-cyan*"), slip.String("\x1b[96m"), "light-cyan ANSI sequence")
-	slip.DefConstant(slip.Symbol("*ansi-light-white*"), slip.String("\x1b[97m"), "bright-white ANSI sequence")
 }

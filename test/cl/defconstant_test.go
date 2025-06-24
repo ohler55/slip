@@ -21,21 +21,28 @@ func TestDefconstantBasic(t *testing.T) {
 		Expect: `*defconstant-test-basic*`,
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(defconstant *defconstant-test-basic* 6)`,
-		Panics: true,
+		Source:    `(defconstant *defconstant-test-basic* 6)`,
+		PanicType: slip.PackageErrorSymbol,
 	}).Test(t)
 }
 
 func TestDefconstantNotSymbol(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(defconstant t 3)`,
-		Panics: true,
+		Source:    `(defconstant t 3)`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
 func TestDefconstantDocNotString(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(defconstant *nothing* 3 t)`,
-		Panics: true,
+		Source:    `(defconstant *nothing* 3 t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefconstantLockedPackage(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(defconstant bag::foo 3)`,
+		PanicType: slip.PackageErrorSymbol,
 	}).Test(t)
 }

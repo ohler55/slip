@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"plugin"
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -36,7 +36,7 @@ are bound to the values and are available to the function being called.
 
 var system *flavors.Flavor
 
-func defSystem() {
+func defSystem() *flavors.Flavor {
 	Pkg.Initialize(nil)
 	system = flavors.DefFlavor(
 		"system",
@@ -96,6 +96,8 @@ method to cache sources and then invoke one of the operations defined in the
 	system.Document("cache", systemCacheDoc)
 	system.Document("depends-on", systemDependsOnDoc)
 	system.Document("in-order-to", systemInOrderToDoc)
+
+	return system
 }
 
 type systemFetchCaller struct{}
@@ -446,9 +448,7 @@ func loadSystemFile(s *slip.Scope, self *flavors.Instance, dir, path string) {
 func loadRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
 	slip.ArgCountCheck(self, args, 2, 2)
 	path := filepath.Join(dir, slip.MustBeString(args[0], "package-name"))
-	if _, err := plugin.Open(path); err != nil {
-		slip.NewPanic("plugin %s open failed. %s", path, err)
-	}
+	cl.OpenPlugin(path)
 }
 
 func loadCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {

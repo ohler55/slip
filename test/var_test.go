@@ -38,8 +38,10 @@ func TestSetConstant(t *testing.T) {
 	_, has := slip.GetVar(key)
 	tt.Equal(t, false, has)
 
-	slip.DefConstant(key, slip.True, "is just for testing.")
-	tt.Panic(t, func() { slip.DefConstant(key, nil, "is just for testing.") })
+	slip.CurrentPackage.DefConst(string(key), slip.True, "is just for testing.")
+	tt.Panic(t, func() {
+		slip.CurrentPackage.DefConst(string(key), nil, "is just for testing.")
+	})
 
 	var v slip.Object
 	v, has = slip.GetVar(key)

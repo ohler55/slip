@@ -27,7 +27,7 @@ var colorCodes = []string{
 	"\x1b[35m",
 }
 
-func defLogger() {
+func defLogger() *flavors.Flavor {
 	Pkg.Initialize(nil)
 	logger = flavors.DefFlavor(
 		"logger-flavor",
@@ -67,6 +67,8 @@ func defLogger() {
 	logger.DefMethod(":set-out", "", setOutCaller(true))
 	logger.DefMethod(":write", "", writeCaller(true))
 	logger.DefMethod(":shutdown", "", shutdownCaller(true))
+
+	return logger
 }
 
 // Logger returns the bag-flavor.

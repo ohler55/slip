@@ -5,10 +5,6 @@ package slip
 // StringSymbol is the symbol with a value of "string".
 const StringSymbol = Symbol("string")
 
-func init() {
-	DefConstant(StringSymbol, StringSymbol, `A _string_ is linear collection of _characters_.`)
-}
-
 // String is a string Object.
 type String string
 

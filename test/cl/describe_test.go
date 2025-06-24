@@ -98,7 +98,7 @@ func TestDescribeConstant(t *testing.T) {
 		Expect: "",
 	}).Test(t)
 
-	tt.Equal(t, `pi
+	tt.Equal(t, `common-lisp:pi
   [symbol]
 
 pi names a double-float:
@@ -156,7 +156,12 @@ func TestDescribeWriteFail(t *testing.T) {
 	}).Test(t)
 }
 
-func TestAppendDescribe(t *testing.T) {
+func TestAppendDescribeDescriber(t *testing.T) {
+	b := cl.AppendDescribe(nil, &slip.CLPkg, slip.NewScope(), 2, 80, false)
+	tt.Equal(t, "/Name: common-lisp/", string(b))
+}
+
+func TestAppendDescribeNotDescriber(t *testing.T) {
 	slip.CurrentPackage.Set("*package-load-path*", nil)
 	b := cl.AppendDescribe(nil, slip.Symbol("*package-load-path*"), slip.NewScope(), 2, 80, false)
 	tt.Equal(t, `  common-lisp:*package-load-path*

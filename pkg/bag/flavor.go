@@ -13,7 +13,7 @@ import (
 
 var flavor *flavors.Flavor
 
-func defBag() {
+func defBag() *flavors.Flavor {
 	Pkg.Initialize(nil)
 	flavor = flavors.DefFlavor("bag-flavor", map[string]slip.Object{}, nil,
 		slip.List{
@@ -47,6 +47,8 @@ nil and boolean false.`),
 	flavor.DefMethod(":native", "", nativeCaller(true))
 	flavor.DefMethod(":write", "", writeCaller(true))
 	flavor.DefMethod(":walk", "", walkCaller(true))
+
+	return flavor
 }
 
 // Flavor returns the bag-flavor.

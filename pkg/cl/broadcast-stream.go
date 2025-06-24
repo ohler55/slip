@@ -12,8 +12,11 @@ import (
 const BroadcastStreamSymbol = slip.Symbol("broadcast-stream")
 
 func init() {
-	slip.DefConstant(BroadcastStreamSymbol, BroadcastStreamSymbol,
+	slip.CLPkg.Locked = false // a bit of a cheat
+	slip.CLPkg.DefConst(string(BroadcastStreamSymbol), BroadcastStreamSymbol,
 		`A _broadcast-stream_ stream that forward output to component streams.`)
+	slip.CLPkg.Locked = true
+	slip.CLPkg.Export(string(BroadcastStreamSymbol))
 }
 
 // BroadcastStream is slice of output streams or streams that are also

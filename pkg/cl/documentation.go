@@ -67,12 +67,12 @@ Top:
 				goto Top
 			}
 		case slip.Symbol("variable"):
-			if vv := slip.CurrentPackage.GetVarVal(string(ta)); vv != nil {
+			if vv := slip.CurrentPackage.GetVarVal(string(ta)); vv != nil && !vv.Const {
 				result = slip.String(vv.Doc)
 			}
 		case slip.Symbol("constant"):
-			if doc := slip.ConstantDocs[string(ta)]; 0 < len(doc) {
-				result = slip.String(doc)
+			if vv := slip.CurrentPackage.GetVarVal(string(ta)); vv != nil && vv.Const {
+				result = slip.String(vv.Doc)
 			}
 		case slip.Symbol("type"):
 			if c := slip.FindClass(string(ta)); c != nil {
@@ -126,12 +126,12 @@ Top:
 				goto Top
 			}
 		case slip.Symbol("variable"):
-			if vv := slip.CurrentPackage.GetVarVal(string(ta)); vv != nil {
+			if vv := slip.CurrentPackage.GetVarVal(string(ta)); vv != nil && !vv.Const {
 				vv.Doc = string(doc)
 			}
 		case slip.Symbol("constant"):
-			if _, has := slip.ConstantDocs[string(ta)]; has {
-				slip.ConstantDocs[string(ta)] = string(doc)
+			if vv := slip.CurrentPackage.GetVarVal(string(ta)); vv != nil && vv.Const {
+				vv.Doc = string(doc)
 			}
 		case slip.Symbol("type"):
 			if c := slip.FindClass(string(ta)); c != nil {

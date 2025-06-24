@@ -25,7 +25,7 @@ func TestAproposListSymbol(t *testing.T) {
 func TestAproposListMultiple(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(apropos-list 'lambda)`,
-		Expect: `/\(.*print-lambda.* lambda.*\)/`,
+		Expect: `/\(.*print-lambda.* lambda.*/`,
 	}).Test(t)
 }
 

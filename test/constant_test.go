@@ -11,18 +11,24 @@ import (
 )
 
 func TestGetConstant(t *testing.T) {
-	value, doc, has := slip.GetConstant(slip.Symbol("internal-time-units-per-second"))
-	tt.Equal(t, true, has)
-	tt.Equal(t, slip.Fixnum(time.Second), value)
-	tt.Equal(t, "Number of nanoseconds in a second. Internal time units are nanoseconds.", doc)
+	vv := slip.CLPkg.GetVarVal("internal-time-units-per-second")
+	tt.NotNil(t, vv)
+	tt.Equal(t, slip.Fixnum(time.Second), vv.Val)
+	tt.Equal(t, "Number of nanoseconds in a second. Internal time units are nanoseconds.", vv.Doc)
 }
 
-func TestDefConstantAgain(t *testing.T) {
+func TestDefConstAgain(t *testing.T) {
 	// No change so it should not panic.
-	slip.DefConstant(
-		slip.Symbol("internal-time-units-per-second"),
+	slip.CurrentPackage.DefConst(
+		"internal-time-units-per-second",
 		slip.Fixnum(time.Second),
 		"Number of nanoseconds in a second. Internal time units are nanoseconds.",
 	)
-	tt.Panic(t, func() { slip.DefConstant(slip.Symbol("internal-time-units-per-second"), slip.Fixnum(300), "") })
+	tt.Panic(t, func() {
+		slip.CurrentPackage.DefConst(
+			"internal-time-units-per-second",
+			slip.Fixnum(300),
+			"Number of nanoseconds in a second. Internal time units are nanoseconds.",
+		)
+	})
 }

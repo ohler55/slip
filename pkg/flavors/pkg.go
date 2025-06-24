@@ -24,11 +24,40 @@ func init() {
 		"*all-flavor-names*": {
 			Get:    getAllFlavorNames,
 			Set:    setPanic,
-			Doc:    "the names of all the defined Flavors.",
+			Export: true,
+			Doc:    "The names of all the defined Flavors.",
+		},
+		"*flavors*": {
+			Val:    &Pkg,
+			Doc:    Pkg.Doc,
+			Const:  true,
 			Export: true,
 		},
-		"*flavors*":  {Val: &Pkg, Doc: Pkg.Doc, Export: true},
-		vanilla.name: {Val: &vanilla, Doc: vanilla.docs, Export: true},
+		vanilla.Name(): {
+			Val:    &vanilla,
+			Const:  true,
+			Export: true,
+			Doc:    "The vanilla flavor.",
+		},
+		string(FlavorSymbol): {
+			Val:    FlavorSymbol,
+			Const:  true,
+			Export: true,
+			Doc: `A _flavor_ encapsulates a class of objects or instances.
+The _flavor_ itself is an instance and can be sent a limited set of methods.`,
+		},
+		string(InstanceSymbol): {
+			Val:    InstanceSymbol,
+			Const:  true,
+			Export: true,
+			Doc:    `An _instance_ of a _flavor_.`,
+		},
+		string(whopLocSymbol): {
+			Val:    whopLocSymbol,
+			Const:  true,
+			Export: true,
+			Doc:    `A whopper location. Private for continue-whopper.`,
+		},
 	})
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)

@@ -55,7 +55,7 @@ flavors:undefflavor (built-in)
 `, out.String())
 }
 
-func TestAproposPkgVars(t *testing.T) {
+func TestAproposPkgVarsFlavor(t *testing.T) {
 	orig := slip.StandardOutput
 	defer func() { slip.StandardOutput = orig }()
 	var out strings.Builder
@@ -66,6 +66,20 @@ func TestAproposPkgVars(t *testing.T) {
 		Expect: "",
 	}).Test(t)
 	tt.Equal(t, `flavors:vanilla-flavor = #<flavor vanilla-flavor>
+`, out.String())
+}
+
+func TestAproposPkgVars(t *testing.T) {
+	orig := slip.StandardOutput
+	defer func() { slip.StandardOutput = orig }()
+	var out strings.Builder
+	slip.StandardOutput = &slip.OutputStream{Writer: &out}
+
+	(&sliptest.Function{
+		Source: `(apropos 'wrap 'bag)`,
+		Expect: "",
+	}).Test(t)
+	tt.Equal(t, `bag:*bag-time-wrap* = nil
 `, out.String())
 }
 

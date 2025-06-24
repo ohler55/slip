@@ -15,11 +15,9 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-var (
-	serverFlavor *flavors.Flavor
-)
+var serverFlavor *flavors.Flavor
 
-func defServer() {
+func defServer() *flavors.Flavor {
 	Pkg.Initialize(nil)
 	serverFlavor = flavors.DefFlavor("http-server-flavor", map[string]slip.Object{}, nil,
 		slip.List{
@@ -44,6 +42,8 @@ func defServer() {
 	serverFlavor.DefMethod(":start", "", serverStartCaller(true))
 	serverFlavor.DefMethod(":shutdown", "", serverShutdownCaller(true))
 	serverFlavor.DefMethod(":add-handler", "", serverAddHandlerCaller(true))
+
+	return serverFlavor
 }
 
 type serverInitCaller bool

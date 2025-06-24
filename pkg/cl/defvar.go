@@ -53,13 +53,17 @@ type Defvar struct {
 // Call the function with the arguments provided.
 func (f *Defvar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 3)
-	name, ok := args[0].(slip.Symbol)
+	sym, ok := args[0].(slip.Symbol)
 	if !ok {
 		slip.PanicType("name argument to defvar", args[0], "symbol")
 	}
-	name = slip.Symbol(strings.ToLower(string(name)))
-	if v, has := slip.CurrentPackage.Get(string(name)); has && v != slip.Unbound {
-		return name
+	name := strings.ToLower(string(sym))
+	pkg, vname, private := slip.UnpackName(name)
+	if pkg == nil {
+		pkg = slip.CurrentPackage
+	}
+	if v, has := pkg.Get(vname); has && v != slip.Unbound {
+		return slip.Symbol(vname)
 	}
 	var (
 		iv  slip.Object = slip.Unbound
@@ -74,12 +78,8 @@ func (f *Defvar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 			}
 		}
 	}
-	pkg, vname, private := slip.UnpackName(string(name))
-	if pkg == nil {
-		pkg = slip.CurrentPackage
-	}
 	vv := pkg.Set(vname, iv, private)
 	vv.Doc = string(doc)
 
-	return name
+	return slip.Symbol(vname)
 }

@@ -9,11 +9,6 @@ import (
 )
 
 func init() {
-	slip.DefConstant(slip.Symbol("internal-time-units-per-second"), slip.Fixnum(time.Second),
-		"Number of nanoseconds in a second. Internal time units are nanoseconds.")
-}
-
-func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := GetInternalRealTime{Function: slip.Function{Name: "get-internal-real-time", Args: args}}

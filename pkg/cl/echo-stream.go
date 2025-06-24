@@ -12,8 +12,11 @@ import (
 const EchoStreamSymbol = slip.Symbol("echo-stream")
 
 func init() {
-	slip.DefConstant(EchoStreamSymbol, EchoStreamSymbol,
+	slip.CLPkg.Locked = false // a bit of a cheat
+	slip.CLPkg.DefConst(string(EchoStreamSymbol), EchoStreamSymbol,
 		`An _echo-stream_ accepts input from an input stream and echos that input to an output stream.`)
+	slip.CLPkg.Locked = true
+	slip.CLPkg.Export(string(EchoStreamSymbol))
 }
 
 // EchoStream is a stream that accepts input from an input stream and echos

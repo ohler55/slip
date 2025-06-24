@@ -87,7 +87,6 @@ func (f *DoExternalSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.
 			nm[fi.Name] = struct{}{}
 		}
 	})
-
 	names := make([]string, 0, len(nm))
 	for name := range nm {
 		names = append(names, name)

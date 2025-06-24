@@ -513,6 +513,10 @@ func TestFormatD(t *testing.T) {
 		Expect: `"-1,234"`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(format nil "~D" (coerce 96 'octet))`,
+		Expect: `"96"`,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(format nil "~5:D" 'abc)`,
 		Expect: `"  abc"`,
 	}).Test(t)
