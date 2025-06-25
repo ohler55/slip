@@ -6,6 +6,10 @@
 
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
   - defclass
+   - implement for vars/slots only
+  - defgeneric
+   - build generic dispatch table on Package
+
   - defmethod class daemon bindings/args
    - find class to determine how to define
    - maybe separate function/method table for all clos classes
@@ -21,7 +25,6 @@
         - nill type matches anything
        - if no qualifier then it is generic
       - docs
-  - defgeneric
   - optimize for binding of one to a class using the class method
   - register as normal function but handle differently
   - move defmethod to clos
