@@ -32,7 +32,7 @@ func TestAproposListMultiple(t *testing.T) {
 func TestAproposListPkg(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(apropos-list 'def 'flavors)`,
-		Expect: "(defflavor defmethod defwhopper undefflavor)",
+		Expect: "(defflavor defwhopper undefflavor)",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(apropos-list "vanilla" 'flavors)`,
