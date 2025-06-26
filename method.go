@@ -1,0 +1,133 @@
+// Copyright (c) 2025, Peter Ohler, All rights reserved.
+
+package slip
+
+import (
+	"strconv"
+	"unsafe"
+)
+
+// methodSymbol is the symbol with a value of "whopLoc".
+const methodSymbol = Symbol("method")
+
+// Method represents a method for flavors and clos classes.
+type Method struct {
+	Name         string
+	Doc          *FuncDoc
+	Combinations []*Combination
+}
+
+// Simplify by returning a representation of the method.
+func (m *Method) Simplify() any {
+	combos := make([]any, len(m.Combinations))
+	for i, c := range m.Combinations {
+		combos[i] = c.Simplify()
+	}
+	simple := map[string]any{
+		"name":         m.Name,
+		"combinations": combos,
+	}
+	return simple
+}
+
+func (m *Method) Call(s *Scope, args List, depth int) Object {
+	for i, c := range m.Combinations {
+		if c.Wrap != nil {
+			loc := &WhopLoc{Combinations: m.Combinations, Current: i}
+			ws := s.NewScope()
+			ws.Let("~whopper-location~", loc)
+			(c.Wrap.(*Lambda)).Closure = ws
+
+			return c.Wrap.Call(ws, args, depth+1)
+		}
+	}
+	return m.InnerCall(s, args, depth)
+}
+
+// InnerCall calls the before, after, and primary method daemons.
+func (m *Method) InnerCall(s *Scope, args List, depth int) (result Object) {
+	for _, c := range m.Combinations {
+		if c.Before != nil {
+			c.Before.Call(s, args, depth)
+		}
+	}
+	for _, c := range m.Combinations {
+		if c.Primary != nil {
+			result = c.Primary.Call(s, args, depth)
+			break
+		}
+	}
+	for _, c := range m.Combinations {
+		if c.After != nil {
+			c.After.Call(s, args, depth)
+		}
+	}
+	return
+}
+
+// String representation of the Object.
+func (m *Method) String() string {
+	return string(m.Append([]byte{}))
+}
+
+// Append a buffer with a representation of the Object.
+func (m *Method) Append(b []byte) []byte {
+	b = append(b, "#<method "...)
+	b = append(b, m.Name...)
+	if m.Doc != nil {
+		b = append(b, ' ')
+		b = printer.Append(b, m.Doc.DefList(), 0)
+	}
+	b = append(b, ' ', '{')
+	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(m))), 16)
+
+	return append(b, '}', '>')
+}
+
+// Simplify by returning the string representation of the flavor.
+// Equal returns true if this Object and the other are equal in value.
+func (m *Method) Equal(other Object) (eq bool) {
+	return m == other
+}
+
+// Hierarchy returns the class hierarchy as symbols for the whopLoc.
+func (m *Method) Hierarchy() []Symbol {
+	return []Symbol{methodSymbol, TrueSymbol}
+}
+
+// Eval returns self.
+func (m *Method) Eval(s *Scope, depth int) Object {
+	return m
+}
+
+// CheckMethodArgCount raises a panic describing the wrong number of arguments
+// to a method if the argument count is outside the expected bounds.
+func CheckMethodArgCount(inst Instance, method string, cnt, mn, mx int) {
+	if cnt < mn {
+		NewPanic("Too few arguments to the %s %s method. At least %d expected but got %d.",
+			inst.Class().Name(), method, mn, cnt)
+	}
+	if mx != -1 && mx < cnt {
+		panic(NewError("Too many arguments to the %s %s method. At most %d expected but got %d.",
+			inst.Class().Name(), method, mx, cnt))
+	}
+}
+
+// PanicMethodArgCount raises a panic describing the wrong number of arguments
+// to a method.
+func PanicMethodArgCount(inst Instance, method string, cnt, mn, mx int) {
+	if cnt < mn {
+		NewPanic("Too few arguments to the %s %s method. At least %d expected but got %d.",
+			inst.Class().Name(), method, mn, cnt)
+	}
+	panic(NewError("Too many arguments to the %s %s method. At most %d expected but got %d.",
+		inst.Class().Name(), method, mx, cnt))
+}
+
+// PanicMethodArgChoice raises a panic describing the wrong number of
+// arguments to a method when the expected argument are a choice of a set of
+// values.
+func PanicMethodArgChoice(inst Instance, method string, cnt int, choices string) {
+	NewPanic("Wrong number of arguments to the %s %s method. Either %s expected but got %d.",
+		inst.Class().Name(), method, choices, cnt)
+}

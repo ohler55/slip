@@ -5,10 +5,67 @@
 - next
 
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
-  - defclass
-   - implement for vars/slots only
-  - defgeneric
+  - redefine flavors.Method
+   - Method -> Combo or **Combination** or MethodCombination
+   - slip.Method
+    - test
+    - change flavors to use Method
+     - defmethod
+     - instance receive
+     - flavor
+     - defwhopper
+
+    - validate parameters on defmethod to make sure the funcdocs are the same
+   - does Method need to be at top level
+    - needed for Generic which will be used by Package
+
+   - clos.Generic
+    - embeds flavors.Method
+    - adds parameters - list of type symbols, later type specifier lists
+    - add specifics []*clos.Generic
+   - want this on package for lookup
+
+  - defgeneric (needed before defclass for slot accessors)
    - build generic dispatch table on Package
+   - as default and flavor instance (send inst function-name args) if it has :function-name
+   - map by name to *Generic
+   - Generic [same as clos Method conceptually]
+    - name
+    - methods (lookup based on arg types)
+     - branch for each specializer (arg types)
+      - nested maps or a list?
+       - if map
+        - need to consider sub-classes so not a direct lookup
+       - if list then walk and check each arg-type until a match
+        - sort order is most specialize
+        - maybe more of a tree with first level as first arg then branches off for 2 and additions arguments
+     - leaf has daemons like flavors - can tht be reused?
+     - as method defined the qualifiers/daemons are propogated to reduce call time lookups
+    - Method or Generic to avoid name confusion
+     - embed flavors.Method
+     - parameters - list of arg types - just types, no forms, or maybe rely on coerce type matching
+     - specifics - []*Method to search
+
+
+  - defclass (class-name superclass-names slot-specifiers &rest class-options*)
+   - update clos/class struct
+   - implement for vars/slots only
+   - class-options
+    - :default-initargs init-arg-list
+    - :documentation string
+    - :metaclass classname - limit to standard-class and ignore otherwise
+   - slot-specifier like (name :initarg :name :accessor name)
+    - :reader reader-function-name * - names of functions to access slot
+    - :writer writer-function-name *
+    - :accessor reader-function-name *
+    - :allocation allocation-type
+    - :initarg initarg-name *
+    - :initform form
+    - :type type-specifier
+    - :documentation string
+   - make sure all validation is handled for name collisions
+  - standard-class
+  - standard-object - like vanilla
 
   - defmethod class daemon bindings/args
    - find class to determine how to define
