@@ -31,7 +31,7 @@ type Class struct {
 	final        bool
 	noMake       bool
 	slots        map[string]slip.Object
-	methods      map[string][]*flavors.Method
+	methods      map[string]*slip.Method
 	InstanceInit func(inst slip.Instance, obj slip.Object)
 }
 
@@ -51,7 +51,7 @@ func DefClass(
 		docs:    docs,
 		slots:   slots,
 		inherit: supers,
-		methods: map[string][]*flavors.Method{},
+		methods: map[string]*slip.Method{},
 		final:   final,
 	}
 	var hasSO bool
@@ -290,7 +290,7 @@ func (c *Class) InvokeMethod(obj slip.Object, s *slip.Scope, message string, arg
 }
 
 // GetMethod returns the method if it exists.
-func (c *Class) GetMethod(name string) []*flavors.Method {
+func (c *Class) GetMethod(name string) *slip.Method {
 	return c.methods[name]
 }
 
@@ -299,7 +299,7 @@ func (c *Class) mergeInherited() {
 		c.slots = map[string]slip.Object{}
 	}
 	if c.methods == nil {
-		c.methods = map[string][]*flavors.Method{}
+		c.methods = map[string]*slip.Method{}
 	}
 	var iif func(inst slip.Instance, obj slip.Object)
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
@@ -310,13 +310,17 @@ func (c *Class) mergeInherited() {
 		for k, v := range ic.slots {
 			c.slots[k] = v
 		}
-		for k, ma := range ic.methods {
-			xma := c.methods[k]
-			if 0 < len(xma) {
-				c.methods[k] = append(c.methods[k], ma[0])
-			} else {
-				c.methods[k] = []*flavors.Method{ma[0]}
+		for k, im := range ic.methods {
+			m := c.methods[k]
+			if m == nil {
+				m = &slip.Method{
+					Name:         k,
+					Doc:          im.Doc,
+					Combinations: []*slip.Combination{{From: c}},
+				}
+				c.methods[k] = m
 			}
+			m.Combinations = append(m.Combinations, im.Combinations[0])
 		}
 	}
 	if c.InstanceInit == nil {

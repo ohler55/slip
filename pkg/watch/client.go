@@ -156,7 +156,7 @@ type clientShutdownCaller struct{}
 func (caller clientShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
 	}
 	c := self.Any.(*client)
 	c.shutdown()
@@ -177,7 +177,7 @@ type clientActivepCaller struct{}
 func (caller clientActivepCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":activep", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":activep", len(args), "0")
 	}
 	c := self.Any.(*client)
 	if c.active.Load() {
@@ -199,7 +199,7 @@ type clientEvalCaller struct{}
 func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	if len(args) < 1 || 3 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":eval", len(args), "1 to 3")
+		slip.PanicMethodArgChoice(self, ":eval", len(args), "1 to 3")
 	}
 	c := self.Any.(*client)
 	timeout := time.Second * 2
@@ -244,7 +244,7 @@ type clientWatchCaller struct{}
 func (caller clientWatchCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(self, ":watch", len(args), "1")
+		slip.PanicMethodArgChoice(self, ":watch", len(args), "1")
 	}
 	c := self.Any.(*client)
 	req := slip.List{slip.Symbol("watch"), args[0]}
@@ -265,7 +265,7 @@ type clientForgetCaller struct{}
 func (caller clientForgetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(self, ":forget", len(args), "1")
+		slip.PanicMethodArgChoice(self, ":forget", len(args), "1")
 	}
 	c := self.Any.(*client)
 	for i, sv := range c.vars {
@@ -293,7 +293,7 @@ type clientChangedCaller struct{}
 func (caller clientChangedCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	if len(args) != 2 {
-		flavors.PanicMethodArgChoice(self, ":changed", len(args), "2")
+		slip.PanicMethodArgChoice(self, ":changed", len(args), "2")
 	}
 	c := self.Any.(*client)
 	for _, v := range c.vars {
@@ -445,7 +445,7 @@ func (c *client) changeLoop() {
 
 func (c *client) addPeriodic(self *flavors.Instance, args slip.List) (id slip.Symbol) {
 	if len(args) != 3 {
-		flavors.PanicMethodArgChoice(self, ":periodic", len(args), "3")
+		slip.PanicMethodArgChoice(self, ":periodic", len(args), "3")
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		id = sym

@@ -13,39 +13,53 @@ var vanilla = Flavor{
 	name:        "vanilla-flavor",
 	docs:        "A Flavor that implements the standard methods.",
 	defaultVars: map[string]slip.Object{"self": nil},
-	methods: map[string][]*Method{
-		":describe":             {{Name: ":describe", primary: describeCaller{}}},
-		":equal":                {{Name: ":equal", primary: equalCaller{}}},
-		":eval-inside-yourself": {{Name: ":eval-inside-yourself", primary: insideCaller{}}},
-		":flavor":               {{Name: ":flavor", primary: flavorCaller{}}},
-		":init":                 {{Name: ":init", primary: initCaller{}}},
-		":id":                   {{Name: ":id", primary: idCaller{}}},
-		":inspect":              {{Name: ":inspect", primary: inspectCaller{}}},
-		":operation-handled-p":  {{Name: ":operation-handled-p", primary: hasOpCaller{}}},
-		":print-self":           {{Name: ":print-self", primary: printCaller{}}},
-		":send-if-handles":      {{Name: ":send-if-handles", primary: sendIfCaller{}}},
-		":which-operations":     {{Name: ":which-operations", primary: whichOpsCaller{}}},
+	methods: map[string]*slip.Method{
+		":describe":             {Combinations: []*slip.Combination{{Primary: describeCaller{}}}},
+		":equal":                {Combinations: []*slip.Combination{{Primary: equalCaller{}}}},
+		":eval-inside-yourself": {Combinations: []*slip.Combination{{Primary: insideCaller{}}}},
+		":flavor":               {Combinations: []*slip.Combination{{Primary: flavorCaller{}}}},
+		":init":                 {Combinations: []*slip.Combination{{Primary: initCaller{}}}},
+		":id":                   {Combinations: []*slip.Combination{{Primary: idCaller{}}}},
+		":inspect":              {Combinations: []*slip.Combination{{Primary: inspectCaller{}}}},
+		":operation-handled-p":  {Combinations: []*slip.Combination{{Primary: hasOpCaller{}}}},
+		":print-self":           {Combinations: []*slip.Combination{{Primary: printCaller{}}}},
+		":send-if-handles":      {Combinations: []*slip.Combination{{Primary: sendIfCaller{}}}},
+		":which-operations":     {Combinations: []*slip.Combination{{Primary: whichOpsCaller{}}}},
 		// The next methods are not standard vanilla-flavor methods but added
 		// to support the CLOS change-class function.
-		":change-class":      {{Name: ":change-class", primary: changeClassCaller{}}},
-		":change-flavor":     {{Name: ":change-flavor", primary: changeClassCaller{}}},
-		":shared-initialize": {{Name: ":shared-initialize", primary: sharedInitializeCaller{}}},
-		":update-instance-for-different-class": {{
-			Name:    ":update-instance-for-different-class",
-			primary: updateInstanceForDifferentClassCaller{}}},
+		":change-class":      {Combinations: []*slip.Combination{{Primary: changeClassCaller{}}}},
+		":change-flavor":     {Combinations: []*slip.Combination{{Primary: changeClassCaller{}}}},
+		":shared-initialize": {Combinations: []*slip.Combination{{Primary: sharedInitializeCaller{}}}},
+		":update-instance-for-different-class": {
+			Combinations: []*slip.Combination{{Primary: updateInstanceForDifferentClassCaller{}}},
+		},
 	},
 	defaultHandler: defHand{},
 	pkg:            &Pkg,
 }
 
 func init() {
-	for _, ma := range vanilla.methods {
-		ma[0].From = &vanilla
+	for name, m := range vanilla.methods {
+		m.Name = name
+		for _, c := range m.Combinations { // only one
+			c.From = &vanilla
+			switch tp := c.Primary.(type) {
+			case slip.HasFuncDocs:
+				m.Doc = tp.FuncDocs()
+			case HasDocs:
+				if m.Doc == nil {
+					m.Doc = &slip.FuncDoc{Name: name, Text: tp.Docs()}
+				} else {
+					m.Doc.Name = name
+					m.Doc.Text = tp.Docs()
+				}
+			}
+		}
 	}
 }
 
 // VanillaMethods returns the vanilla methods. (used for the clos standard methods)
-func VanillaMethods() map[string][]*Method {
+func VanillaMethods() map[string]*slip.Method {
 	return vanilla.methods
 }
 
@@ -54,6 +68,13 @@ type initCaller struct{}
 func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	// Does nothing.
 	return nil
+}
+
+func (caller initCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Does nothing but is a placeholder for daemons in sub-flavors.",
+	}
 }
 
 func (caller initCaller) Docs() string {
@@ -71,7 +92,7 @@ func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	w := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
 		if 1 < len(args) {
-			PanicMethodArgCount(self, ":describe", len(args), 0, 1)
+			slip.PanicMethodArgCount(self, ":describe", len(args), 0, 1)
 		}
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
@@ -127,7 +148,7 @@ type hasOpCaller struct{}
 func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*Instance)
 	if len(args) != 1 {
-		PanicMethodArgChoice(self, ":has", len(args), "1")
+		slip.PanicMethodArgChoice(self, ":has", len(args), "1")
 	}
 	if sym, ok := args[0].(slip.Symbol); ok && self.HasMethod(string(sym)) {
 		return slip.True
@@ -180,10 +201,10 @@ type sendIfCaller struct{}
 func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*Instance)
 	if len(args) == 0 {
-		PanicMethodArgCount(self, ":send-if-handles", len(args), 1, -1)
+		slip.PanicMethodArgCount(self, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
-		if hm, ok := self.Type.(HasMethods); ok && 0 < len(hm.GetMethod(string(sym))) {
+		if hm, ok := self.Type.(HasMethods); ok && hm.GetMethod(string(sym)) != nil {
 			return self.Receive(s, string(sym), args[1:], depth+1)
 		}
 	}
@@ -221,7 +242,7 @@ type insideCaller struct{}
 func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		self := s.Get("self").(*Instance)
-		PanicMethodArgChoice(self, ":eval-inside-yourself", len(args), "1")
+		slip.PanicMethodArgChoice(self, ":eval-inside-yourself", len(args), "1")
 	}
 	return s.Eval(args[0], depth+1)
 }
@@ -258,7 +279,7 @@ type equalCaller struct{}
 
 func (caller equalCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*Instance)
-	CheckMethodArgCount(self, ":equal", len(args), 1, 1)
+	slip.CheckMethodArgCount(self, ":equal", len(args), 1, 1)
 	if self.Equal(args[0]) {
 		return slip.True
 	}
@@ -278,7 +299,7 @@ type changeClassCaller struct{}
 
 func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*Instance)
-	CheckMethodArgCount(self, ":change-class", len(args), 1, -1)
+	slip.CheckMethodArgCount(self, ":change-class", len(args), 1, -1)
 	var nf *Flavor
 	switch ta := args[0].(type) {
 	case *Flavor:

@@ -31,10 +31,10 @@ func TestDefflavorBasic(t *testing.T) {
 	tt.Equal(t, "strawberry", jp.C("name").First(sf))
 	tt.Equal(t, "Strawberry icecream", jp.C("docs").First(sf))
 
-	daemons := jp.MustParseString("methods[*][?(@.name == ':size')]").Get(sf)
+	daemons := jp.MustParseString("methods[?(@.name == ':size')]").Get(sf)
 	tt.Equal(t, 1, len(daemons))
 
-	daemons = jp.MustParseString("methods[*][?(@.name == ':set-size')]").Get(sf)
+	daemons = jp.MustParseString("methods[?(@.name == ':set-size')]").Get(sf)
 	tt.Equal(t, 1, len(daemons))
 
 	tt.Equal(t, `
@@ -83,16 +83,16 @@ func TestDefflavorGettableSettable(t *testing.T) {
 	f := slip.ReadString("strawberry", scope).Eval(scope, nil)
 	sf := f.Simplify()
 
-	daemons := jp.MustParseString("methods[*][?(@.name == ':size')]").Get(sf)
+	daemons := jp.MustParseString("methods[?(@.name == ':size')]").Get(sf)
 	tt.Equal(t, 1, len(daemons))
 
-	daemons = jp.MustParseString("methods[*][?(@.name == ':color')]").Get(sf)
+	daemons = jp.MustParseString("methods[?(@.name == ':color')]").Get(sf)
 	tt.Equal(t, 0, len(daemons))
 
-	daemons = jp.MustParseString("methods[*][?(@.name == ':set-size')]").Get(sf)
+	daemons = jp.MustParseString("methods[?(@.name == ':set-size')]").Get(sf)
 	tt.Equal(t, 1, len(daemons))
 
-	daemons = jp.MustParseString("methods[*][?(@.name == ':set-color')]").Get(sf)
+	daemons = jp.MustParseString("methods[?(@.name == ':set-color')]").Get(sf)
 	tt.Equal(t, 0, len(daemons))
 
 	tt.Equal(t, `

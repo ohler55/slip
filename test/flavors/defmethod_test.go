@@ -3,10 +3,12 @@
 package flavors_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -42,9 +44,10 @@ func TestDefmethodBasic(t *testing.T) {
 	scope := slip.NewScope()
 	f := slip.ReadString("berry", scope).Eval(scope, nil)
 	sf := f.Simplify()
-	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].primary").First(sf))
-	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].after").First(sf))
-	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':color')].before").First(sf))
+	fmt.Printf("*** %s\n", pretty.SEN(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].primary").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].after").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':color')].before").First(sf))
 }
 
 func TestDefmethodInherit(t *testing.T) {
@@ -55,7 +58,7 @@ func TestDefmethodInherit(t *testing.T) {
 	scope := slip.NewScope()
 	f := slip.ReadString("blueberry", scope).Eval(scope, nil)
 	sf := f.Simplify()
-	rot := jp.MustParseString("methods[*][?(@.name == ':rot')]").Get(sf)
+	rot := jp.MustParseString("methods[?(@.name == ':rot')]").Get(sf)
 	tt.Equal(t, 2, len(rot))
 	tt.Equal(t, "blueberry", jp.C("from").First(rot[0]))
 	tt.Equal(t, true, jp.C("before").First(rot[0]))

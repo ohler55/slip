@@ -4,12 +4,20 @@
 
 - next
 
+ - pp should also set *print-escape* to true
+
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
   - redefine flavors.Method
-   - Method -> Combo or **Combination** or MethodCombination
+   - get and set methods
+   - remove flavors.Method
+   - funcdoc to generate docs
+   - vanilla
+    - change docs to funcdoc
+     - remove HasDocs after that
+
    - slip.Method
-    - test
     - change flavors to use Method
+     - maybe start with whoploc
      - defmethod
      - instance receive
      - flavor

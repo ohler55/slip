@@ -70,13 +70,14 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case slip.String:
 			docs = string(ta)
 		case *Flavor:
-			ma := ta.methods[meth]
-			if len(ma) == 0 {
+			m := ta.methods[meth]
+			if m == nil {
 				slip.PanicType("doc-source", args[2], "string", "flavor")
 			}
+			// TBD use FuncDoc instead
 			var b []byte
-			for _, m := range ma {
-				if hd, _ := m.primary.(HasDocs); hd != nil {
+			for _, c := range m.Combinations {
+				if hd, _ := c.Primary.(HasDocs); hd != nil {
 					b = append(b, hd.Docs()...)
 				}
 			}

@@ -99,7 +99,7 @@ type serverShutdownCaller struct{}
 func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
 	}
 	serv := self.Any.(*server)
 	slip.RemoveSetHook(strconv.Itoa(serv.port))
@@ -128,7 +128,7 @@ type serverActivepCaller struct{}
 func (caller serverActivepCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":activep", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":activep", len(args), "0")
 	}
 	serv := self.Any.(*server)
 	if serv.active.Load() {
@@ -150,7 +150,7 @@ type serverConnectionsCaller struct{}
 func (caller serverConnectionsCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":connections", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":connections", len(args), "0")
 	}
 	serv := self.Any.(*server)
 	var cons slip.List

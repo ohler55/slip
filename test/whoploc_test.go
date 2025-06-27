@@ -11,8 +11,8 @@ import (
 
 func TestWhopLoc(t *testing.T) {
 	wl := slip.WhopLoc{
-		Combinations: []*slip.Combination{},
-		Current:      2,
+		Method:  &slip.Method{},
+		Current: 2,
 	}
 	(&sliptest.Object{
 		Target:    &wl,

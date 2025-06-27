@@ -282,7 +282,7 @@ type setOutCaller bool
 func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get(slip.Symbol("self")).(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(self, ":set-out", len(args), "1")
+		slip.PanicMethodArgChoice(self, ":set-out", len(args), "1")
 	}
 	switch args[0].(type) {
 	case nil:

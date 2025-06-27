@@ -38,19 +38,9 @@ type ContinueWhopper struct {
 
 // Call the the function with the arguments provided.
 func (f *ContinueWhopper) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	self, _ := s.Get("self").(*Instance)
-	loc, _ := s.Get("~whopper-location~").(*whopLoc)
-	for loc.current++; loc.current < len(loc.methods); loc.current++ {
-		wrap := loc.methods[loc.current].wrap
-		if wrap == nil {
-			continue
-		}
-		ws := self.NewScope()
-		ws.Let("~whopper-location~", &whopLoc{methods: loc.methods, current: loc.current + 1})
-		if lam, ok := wrap.(*slip.Lambda); ok {
-			lam.Closure = ws
-		}
-		return wrap.Call(ws, args, depth)
+	loc, _ := s.Get("~whopper-location~").(*slip.WhopLoc)
+	if loc == nil {
+		slip.NewPanic("%s called outside an around method daemon.", f.Name)
 	}
-	return self.innerReceive(s, loc.methods, args, depth)
+	return loc.Continue(s, args, depth)
 }

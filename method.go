@@ -19,9 +19,11 @@ type Method struct {
 
 // Simplify by returning a representation of the method.
 func (m *Method) Simplify() any {
-	combos := make([]any, len(m.Combinations))
-	for i, c := range m.Combinations {
-		combos[i] = c.Simplify()
+	var combos []any
+	for _, c := range m.Combinations {
+		if !c.Empty() {
+			combos = append(combos, c.Simplify())
+		}
 	}
 	simple := map[string]any{
 		"name":         m.Name,
@@ -33,7 +35,7 @@ func (m *Method) Simplify() any {
 func (m *Method) Call(s *Scope, args List, depth int) Object {
 	for i, c := range m.Combinations {
 		if c.Wrap != nil {
-			loc := &WhopLoc{Combinations: m.Combinations, Current: i}
+			loc := &WhopLoc{Method: m, Current: i}
 			ws := s.NewScope()
 			ws.Let("~whopper-location~", loc)
 			(c.Wrap.(*Lambda)).Closure = ws
@@ -60,6 +62,41 @@ func (m *Method) InnerCall(s *Scope, args List, depth int) (result Object) {
 	for _, c := range m.Combinations {
 		if c.After != nil {
 			c.After.Call(s, args, depth)
+		}
+	}
+	return
+}
+
+func (m *Method) BoundCall(s *Scope, depth int) Object {
+	for i, c := range m.Combinations {
+		if c.Wrap != nil {
+			loc := &WhopLoc{Method: m, Current: i}
+			ws := s.NewScope()
+			ws.Let("~whopper-location~", loc)
+			(c.Wrap.(*Lambda)).Closure = ws
+			if bc, _ := c.Wrap.(BoundCaller); bc != nil {
+				return bc.BoundCall(ws, depth)
+			}
+		}
+	}
+	return m.BoundInnerCall(s, depth)
+}
+
+func (m *Method) BoundInnerCall(s *Scope, depth int) (result Object) {
+	for _, c := range m.Combinations {
+		if bc, _ := c.Before.(BoundCaller); bc != nil {
+			bc.BoundCall(s, depth)
+		}
+	}
+	for _, c := range m.Combinations {
+		if bc, _ := c.Primary.(BoundCaller); bc != nil {
+			result = bc.BoundCall(s, depth)
+			break
+		}
+	}
+	for _, c := range m.Combinations {
+		if bc, _ := c.After.(BoundCaller); bc != nil {
+			bc.BoundCall(s, depth)
 		}
 	}
 	return

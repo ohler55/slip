@@ -36,6 +36,12 @@ type FuncDoc struct {
 	NoExport bool
 }
 
+// HasFuncDocs is an interface for objects that have FuncDoc documentation.
+type HasFuncDocs interface {
+	// FuncDocs returns the documentation for the object.
+	FuncDocs() *FuncDoc
+}
+
 func (fd *FuncDoc) getArg(name string) *DocArg {
 	for _, a := range fd.Args {
 		if a.Name == name {

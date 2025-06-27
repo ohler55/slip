@@ -26,7 +26,7 @@ type Flavor struct {
 	inherit          []*Flavor
 	defaultVars      map[string]slip.Object
 	keywords         map[string]slip.Object
-	methods          map[string][]*Method
+	methods          map[string]*slip.Method
 	included         []string
 	required         []string
 	requiredMethods  []string
@@ -67,37 +67,49 @@ func (obj *Flavor) Pkg() *slip.Package {
 }
 
 // DefMethod adds a method to the Flavor.
-func (obj *Flavor) DefMethod(name string, methodType string, caller slip.Caller) {
-	DefMethod(obj, obj.methods, name, methodType, caller)
+func (obj *Flavor) DefMethod(name string, daemon string, caller slip.Caller) {
+	DefMethod(obj, obj.methods, name, daemon, caller)
 }
 
 // DefMethod adds a method to the class or flavor.
-func DefMethod(obj slip.Class, mm map[string][]*Method, name string, methodType string, caller slip.Caller) {
+func DefMethod(obj slip.Class, mm map[string]*slip.Method, name string, daemon string, caller slip.Caller) {
 	name = strings.ToLower(name)
-	var m *Method
-	add := false
-	ma := mm[name]
-	if 0 < len(ma) {
-		m = ma[0]
+	var (
+		addMethod bool
+		addCombo  bool
+	)
+	m := mm[name]
+	if m == nil {
+		m = &slip.Method{Name: name}
+		addMethod = true
+		// TBD get funcinfo
+	}
+	// If there is a combination for this flavor it will be the first on the
+	// list.
+	var c *slip.Combination
+	if 0 < len(m.Combinations) {
+		c = m.Combinations[0]
 	} else {
-		add = true
-		m = &Method{Name: name, From: obj}
-		ma = []*Method{m}
+		addCombo = true
+		c = &slip.Combination{From: obj}
 	}
-	switch strings.ToLower(methodType) {
+	switch strings.ToLower(daemon) {
 	case ":primary", "":
-		m.primary = caller
+		c.Primary = caller
 	case ":before":
-		m.before = caller
+		c.Before = caller
 	case ":after":
-		m.after = caller
+		c.After = caller
 	case ":whopper", ":wrapper":
-		m.wrap = caller
+		c.Wrap = caller
 	default:
-		slip.PanicMethod(obj, slip.Symbol(methodType), slip.Symbol(name), "")
+		slip.PanicMethod(obj, slip.Symbol(daemon), slip.Symbol(name), "")
 	}
-	if add {
-		mm[name] = ma
+	if addMethod {
+		mm[name] = m
+	}
+	if addCombo {
+		m.Combinations = []*slip.Combination{c}
 	}
 }
 
@@ -135,13 +147,7 @@ func (obj *Flavor) Simplify() any {
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		var daemons []any
-		for _, m := range obj.methods[name] {
-			if !m.empty() {
-				daemons = append(daemons, m.Simplify())
-			}
-		}
-		methods = append(methods, daemons)
+		methods = append(methods, obj.methods[name].Simplify())
 	}
 	initable := map[string]any{}
 	for k := range obj.initable {
@@ -228,13 +234,17 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 			obj.keywords[k] = v
 		}
 	}
-	for k, ma := range cf.methods {
-		xma := obj.methods[k]
-		if 0 < len(xma) {
-			obj.methods[k] = append(obj.methods[k], ma[0])
-		} else {
-			obj.methods[k] = []*Method{{Name: k, From: obj}, ma[0]}
+	for k, im := range cf.methods {
+		m := obj.methods[k]
+		if m == nil {
+			m = &slip.Method{
+				Name:         k,
+				Doc:          im.Doc,
+				Combinations: []*slip.Combination{{From: obj}},
+			}
+			obj.methods[k] = m
 		}
+		m.Combinations = append(m.Combinations, im.Combinations[0])
 	}
 	for _, f2 := range cf.inherit {
 		if &vanilla != f2 {
@@ -450,7 +460,7 @@ func (obj *Flavor) Document(name, desc string) {
 }
 
 // GetMethod returns the method if it exists.
-func (obj *Flavor) GetMethod(name string) []*Method {
+func (obj *Flavor) GetMethod(name string) *slip.Method {
 	return obj.methods[name]
 }
 
@@ -605,26 +615,28 @@ func (obj *Flavor) DefMethodList(method, daemon string, inherited bool) (dml sli
 	method = strings.ToLower(method)
 	daemon = strings.ToLower(daemon)
 	var lam *slip.Lambda
-	for _, m := range obj.GetMethod(method) {
-		if obj == m.From || inherited {
-			switch daemon {
-			case ":primary", "":
-				lam, _ = m.primary.(*slip.Lambda)
-			case ":before":
-				lam, _ = m.before.(*slip.Lambda)
-			case ":after":
-				lam, _ = m.after.(*slip.Lambda)
-			case ":whopper":
-				lam, _ = m.wrap.(*slip.Lambda)
+	if m := obj.GetMethod(method); m != nil {
+		for _, c := range m.Combinations {
+			if obj == c.From || inherited {
+				switch daemon {
+				case ":primary", "":
+					lam, _ = c.Primary.(*slip.Lambda)
+				case ":before":
+					lam, _ = c.Before.(*slip.Lambda)
+				case ":after":
+					lam, _ = c.After.(*slip.Lambda)
+				case ":whopper":
+					lam, _ = c.Wrap.(*slip.Lambda)
+				}
 			}
-		}
-		if lam != nil {
-			dml = slip.List{
-				slip.Symbol("defmethod"),
-				slip.List{slip.Symbol(obj.name), slip.Symbol(daemon), slip.Symbol(method)},
+			if lam != nil {
+				dml = slip.List{
+					slip.Symbol("defmethod"),
+					slip.List{slip.Symbol(obj.name), slip.Symbol(daemon), slip.Symbol(method)},
+				}
+				dml = append(dml, lam.DefList()[1:]...)
+				break
 			}
-			dml = append(dml, lam.DefList()[1:]...)
-			break
 		}
 	}
 	return

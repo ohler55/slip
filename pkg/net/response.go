@@ -44,7 +44,7 @@ type respStatusCaller bool
 func (caller respStatusCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":status", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":status", len(args), "0")
 	}
 	return slip.Fixnum((obj.Any.(*http.Response)).StatusCode)
 }
@@ -61,7 +61,7 @@ type respProtocolCaller bool
 func (caller respProtocolCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":protocol", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":protocol", len(args), "0")
 	}
 	return slip.String((obj.Any.(*http.Response)).Proto)
 }
@@ -78,7 +78,7 @@ type respContentCaller bool
 func (caller respContentCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":content", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":content", len(args), "0")
 	}
 	content, err := io.ReadAll(obj.Any.(*http.Response).Body)
 	_ = obj.Any.(*http.Response).Body.Close()
@@ -100,7 +100,7 @@ type respContentLengthCaller bool
 func (caller respContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":content-length", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":content-length", len(args), "0")
 	}
 	return slip.Fixnum((obj.Any.(*http.Response)).ContentLength)
 }
@@ -117,7 +117,7 @@ type respHeaderCaller bool
 func (caller respHeaderCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":header", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":header", len(args), "0")
 	}
 	var header slip.List
 	for k, v := range (obj.Any.(*http.Response)).Header {
@@ -143,7 +143,7 @@ type respHeaderGetCaller bool
 func (caller respHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(obj, ":header-get", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":header-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
@@ -169,7 +169,7 @@ type respTrailerCaller bool
 func (caller respTrailerCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":trailer", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":trailer", len(args), "0")
 	}
 	var trailer slip.List
 	for k, v := range (obj.Any.(*http.Response)).Trailer {
@@ -195,7 +195,7 @@ type respTrailerGetCaller bool
 func (caller respTrailerGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(obj, ":trailer-get", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":trailer-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
@@ -221,7 +221,7 @@ type respBodyCaller bool
 func (caller respBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":body", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":body", len(args), "0")
 	}
 	return &slip.InputStream{Reader: (obj.Any.(*http.Response)).Body}
 }
@@ -238,7 +238,7 @@ type respCloseCaller bool
 func (caller respCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":close", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":close", len(args), "0")
 	}
 	_ = (obj.Any.(*http.Response)).Body.Close()
 	return nil
