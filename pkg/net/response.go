@@ -25,21 +25,21 @@ the data associated with the HTTP reply.`),
 		&Pkg,
 	)
 	responseFlavor.Final = true
-	responseFlavor.DefMethod(":status", "", respStatusCaller(true))
-	responseFlavor.DefMethod(":protocol", "", respProtocolCaller(true))
-	responseFlavor.DefMethod(":content", "", respContentCaller(true))
-	responseFlavor.DefMethod(":content-length", "", respContentLengthCaller(true))
-	responseFlavor.DefMethod(":header", "", respHeaderCaller(true))
-	responseFlavor.DefMethod(":header-get", "", respHeaderGetCaller(true))
-	responseFlavor.DefMethod(":trailer", "", respTrailerCaller(true))
-	responseFlavor.DefMethod(":trailer-get", "", respTrailerGetCaller(true))
-	responseFlavor.DefMethod(":body", "", respBodyCaller(true))
-	responseFlavor.DefMethod(":close", "", respCloseCaller(true))
+	responseFlavor.DefMethod(":status", "", respStatusCaller{})
+	responseFlavor.DefMethod(":protocol", "", respProtocolCaller{})
+	responseFlavor.DefMethod(":content", "", respContentCaller{})
+	responseFlavor.DefMethod(":content-length", "", respContentLengthCaller{})
+	responseFlavor.DefMethod(":header", "", respHeaderCaller{})
+	responseFlavor.DefMethod(":header-get", "", respHeaderGetCaller{})
+	responseFlavor.DefMethod(":trailer", "", respTrailerCaller{})
+	responseFlavor.DefMethod(":trailer-get", "", respTrailerGetCaller{})
+	responseFlavor.DefMethod(":body", "", respBodyCaller{})
+	responseFlavor.DefMethod(":close", "", respCloseCaller{})
 
 	return responseFlavor
 }
 
-type respStatusCaller bool
+type respStatusCaller struct{}
 
 func (caller respStatusCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -49,14 +49,15 @@ func (caller respStatusCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return slip.Fixnum((obj.Any.(*http.Response)).StatusCode)
 }
 
-func (caller respStatusCaller) Docs() string {
-	return `__:status__ => _fixnum_
-
-Returns the status code of the response.
-`
+func (caller respStatusCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":protocol",
+		Text:   `Returns the status of the response.`,
+		Return: "fixnum",
+	}
 }
 
-type respProtocolCaller bool
+type respProtocolCaller struct{}
 
 func (caller respProtocolCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -66,14 +67,15 @@ func (caller respProtocolCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return slip.String((obj.Any.(*http.Response)).Proto)
 }
 
-func (caller respProtocolCaller) Docs() string {
-	return `__:protocol__ => _string_
-
-Returns the protocol of the response.
-`
+func (caller respProtocolCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":protocol",
+		Text:   `Returns the protocol of the response.`,
+		Return: "string",
+	}
 }
 
-type respContentCaller bool
+type respContentCaller struct{}
 
 func (caller respContentCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -88,14 +90,15 @@ func (caller respContentCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return slip.String(content)
 }
 
-func (caller respContentCaller) Docs() string {
-	return `__:content__ => _string_
-
-Returns the content of the response as a string.
-`
+func (caller respContentCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":content",
+		Text:   `Returns the content of the response as a string.`,
+		Return: "string",
+	}
 }
 
-type respContentLengthCaller bool
+type respContentLengthCaller struct{}
 
 func (caller respContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -105,14 +108,15 @@ func (caller respContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int)
 	return slip.Fixnum((obj.Any.(*http.Response)).ContentLength)
 }
 
-func (caller respContentLengthCaller) Docs() string {
-	return `__:content-length__ => _fixnum_
-
-Returns the content length of the response.
-`
+func (caller respContentLengthCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":content-length",
+		Text:   `Returns the content length of the response.`,
+		Return: "fixnum",
+	}
 }
 
-type respHeaderCaller bool
+type respHeaderCaller struct{}
 
 func (caller respHeaderCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -131,14 +135,15 @@ func (caller respHeaderCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return header
 }
 
-func (caller respHeaderCaller) Docs() string {
-	return `__:header__ => _assoc-list_
-
-Returns the header of the response as an association list.
-`
+func (caller respHeaderCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":header",
+		Text:   `Returns the header of the response as an association list.`,
+		Return: "association-list",
+	}
 }
 
-type respHeaderGetCaller bool
+type respHeaderGetCaller struct{}
 
 func (caller respHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -156,15 +161,22 @@ func (caller respHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	return nil
 }
 
-func (caller respHeaderGetCaller) Docs() string {
-	return `__:header-get__ _key_ => _string_|_nil_
-   _key_ for the header value to get
-
-Returns the header of the response as an association list.
-`
+func (caller respHeaderGetCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":header-get",
+		Text: `Returns the values for the provided key in the the response header.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "key",
+				Type: "string|symbol",
+				Text: `Key for the values to get from the response header.`,
+			},
+		},
+		Return: "list",
+	}
 }
 
-type respTrailerCaller bool
+type respTrailerCaller struct{}
 
 func (caller respTrailerCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -183,14 +195,15 @@ func (caller respTrailerCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return trailer
 }
 
-func (caller respTrailerCaller) Docs() string {
-	return `__:trailer__ => _assoc-list_
-
-Returns the trailer of the response as an association list.
-`
+func (caller respTrailerCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":trailer",
+		Text:   `Returns the trailer of the response as an association list.`,
+		Return: "association-list",
+	}
 }
 
-type respTrailerGetCaller bool
+type respTrailerGetCaller struct{}
 
 func (caller respTrailerGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -208,15 +221,22 @@ func (caller respTrailerGetCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller respTrailerGetCaller) Docs() string {
-	return `__:trailer__ _key_ => _string_|_nil_
-   _key_ for the trailer value to get
-
-Returns the trailer of the response as an association list.
-`
+func (caller respTrailerGetCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":trailer-get",
+		Text: `Returns the values for the provided key in the the response trailer.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "key",
+				Type: "string|symbol",
+				Text: `Key for the values to get from the response trailer.`,
+			},
+		},
+		Return: "list",
+	}
 }
 
-type respBodyCaller bool
+type respBodyCaller struct{}
 
 func (caller respBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -226,14 +246,15 @@ func (caller respBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return &slip.InputStream{Reader: (obj.Any.(*http.Response)).Body}
 }
 
-func (caller respBodyCaller) Docs() string {
-	return `__:body__ => _input-stream_
-
-Returns the body, an input-stream of the response.
-`
+func (caller respBodyCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":body",
+		Text:   `Returns the body of the response as an input-stream .`,
+		Return: "input-stream",
+	}
 }
 
-type respCloseCaller bool
+type respCloseCaller struct{}
 
 func (caller respCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -244,11 +265,11 @@ func (caller respCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	return nil
 }
 
-func (caller respCloseCaller) Docs() string {
-	return `__:close__ => _nil_
-
-Closes the body of the response.
-`
+func (caller respCloseCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":close",
+		Text: `Closes the body of the response .`,
+	}
 }
 
 // MakeResponse makes a new response.

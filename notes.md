@@ -10,6 +10,13 @@
   - redefine flavors.Method
    - update docs on other flavors
     - net
+     + client
+     + host-ent
+     + request
+     + response
+     + server
+     - socket
+
     - watch
     - test?
    - fix clos test TestMethodDocFromFunc

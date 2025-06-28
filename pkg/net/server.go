@@ -38,15 +38,15 @@ func defServer() *flavors.Flavor {
 		&Pkg,
 	)
 	serverFlavor.Final = true
-	serverFlavor.DefMethod(":init", "", serverInitCaller(true))
-	serverFlavor.DefMethod(":start", "", serverStartCaller(true))
-	serverFlavor.DefMethod(":shutdown", "", serverShutdownCaller(true))
-	serverFlavor.DefMethod(":add-handler", "", serverAddHandlerCaller(true))
+	serverFlavor.DefMethod(":init", "", serverInitCaller{})
+	serverFlavor.DefMethod(":start", "", serverStartCaller{})
+	serverFlavor.DefMethod(":shutdown", "", serverShutdownCaller{})
+	serverFlavor.DefMethod(":add-handler", "", serverAddHandlerCaller{})
 
 	return serverFlavor
 }
 
-type serverInitCaller bool
+type serverInitCaller struct{}
 
 func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -76,20 +76,47 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return nil
 }
 
-func (caller serverInitCaller) Docs() string {
-	return `__:init__ &key _address_ _tls-config_ _read-timeout_ _write-timeout_ _idle-timeout_ _maximum-header-length_
-   _address_ [string] server address and port number (e.g, :8080 or 127.0.0.1:8080)
-   _tls-config_ [string] _TBD_
-   _read-timeout_ [real] the read timeout in seconds.
-   _write-timeout_ [real] the write timeout in seconds.
-   _idle-timeout_ [real] the idle timeout in seconds.
-   _maximum-header-length_ [fixnum] the maximum header length
-
-Sets the initial values when _make-instance_ is called.
-`
+func (caller serverInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Sets the initial value when _make-instance_ is called.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":address",
+				Type: "string",
+				Text: `The server address and port number (e.g, :8080 or 127.0.0.1:8080)`,
+			},
+			{
+				Name: ":read-timeout",
+				Type: "real",
+				Text: `The read timeout in seconds.`,
+			},
+			{
+				Name: ":write-timeout",
+				Type: "real",
+				Text: `The write timeout in seconds.`,
+			},
+			{
+				Name: ":idle-timeout",
+				Type: "real",
+				Text: `The idle timeout in seconds.`,
+			},
+			{
+				Name: ":maximum-header-length",
+				Type: "fixnum",
+				Text: `The maximum header length.`,
+			},
+			{
+				Name: ":tls-config",
+				Type: "string",
+				Text: "Not implemented yet. Ignored.",
+			},
+		},
+	}
 }
 
-type serverStartCaller bool
+type serverStartCaller struct{}
 
 func (caller serverStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -124,15 +151,22 @@ func (caller serverStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return nil
 }
 
-func (caller serverStartCaller) Docs() string {
-	return `__:start__ &optional _wait-ready_ => _nil_
-   _wait-ready_ is the maximum duration in seconds to wait for the server to be ready.
-
-Starts the server.
-`
+func (caller serverStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":start",
+		Text: `Starts the server.`,
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name: "wait-ready",
+				Type: "fixnum",
+				Text: `The maximum duration in seconds to wait for the server to be ready.`,
+			},
+		},
+	}
 }
 
-type serverShutdownCaller bool
+type serverShutdownCaller struct{}
 
 func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -150,15 +184,22 @@ func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller serverShutdownCaller) Docs() string {
-	return `__:shutdown__ &optional _immediate_ => _nil_
-   _immediate_ if true shuts down immediately and not gracefully.
-
-Shuts down the server.
-`
+func (caller serverShutdownCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":shutdown",
+		Text: `Shuts down the server.`,
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name: "immediate",
+				Type: "boolean",
+				Text: `If true shuts down immediately and not gracefully.`,
+			},
+		},
+	}
 }
 
-type serverAddHandlerCaller bool
+type serverAddHandlerCaller struct{}
 
 func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -194,11 +235,21 @@ func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, depth i
 	return nil
 }
 
-func (caller serverAddHandlerCaller) Docs() string {
-	return `__:add-handler__ _path_ _handler_ => _nil_
-   _path_ to be handled by the _handler_.
-   _handler_ function to handle requests on _path_ or a _string_ that is the path to a directory.
-
-Adds a _handler_ function to handle requests on the _path_ server.
-`
+func (caller serverAddHandlerCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":add-handler",
+		Text: `Adds a _handler_ function to handle requests on the _path_ server.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "path",
+				Type: "string",
+				Text: `Path to be handled by _handler_.`,
+			},
+			{
+				Name: "handler",
+				Type: "symbol|function|string",
+				Text: `Function to handle requests on _path_ or a _string_ that is the path to a directory.`,
+			},
+		},
+	}
 }

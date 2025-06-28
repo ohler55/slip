@@ -51,24 +51,24 @@ the data associated with the HTTP reply.`),
 		&Pkg,
 	)
 	requestFlavor.Final = true
-	requestFlavor.DefMethod(":init", "", reqInitCaller(true))
-	requestFlavor.DefMethod(":method", "", reqMethodCaller(true))
-	requestFlavor.DefMethod(":protocol", "", reqProtocolCaller(true))
-	requestFlavor.DefMethod(":url", "", reqURLCaller(true))
-	requestFlavor.DefMethod(":remote-addr", "", reqRemoteAddrCaller(true))
-	requestFlavor.DefMethod(":content-length", "", reqContentLengthCaller(true))
-	requestFlavor.DefMethod(":header", "", reqHeaderCaller(true))
-	requestFlavor.DefMethod(":header-get", "", reqHeaderGetCaller(true))
-	requestFlavor.DefMethod(":trailer", "", reqTrailerCaller(true))
-	requestFlavor.DefMethod(":trailer-get", "", reqTrailerGetCaller(true))
-	requestFlavor.DefMethod(":body", "", reqBodyCaller(true))
+	requestFlavor.DefMethod(":init", "", reqInitCaller{})
+	requestFlavor.DefMethod(":method", "", reqMethodCaller{})
+	requestFlavor.DefMethod(":protocol", "", reqProtocolCaller{})
+	requestFlavor.DefMethod(":url", "", reqURLCaller{})
+	requestFlavor.DefMethod(":remote-addr", "", reqRemoteAddrCaller{})
+	requestFlavor.DefMethod(":content-length", "", reqContentLengthCaller{})
+	requestFlavor.DefMethod(":header", "", reqHeaderCaller{})
+	requestFlavor.DefMethod(":header-get", "", reqHeaderGetCaller{})
+	requestFlavor.DefMethod(":trailer", "", reqTrailerCaller{})
+	requestFlavor.DefMethod(":trailer-get", "", reqTrailerGetCaller{})
+	requestFlavor.DefMethod(":body", "", reqBodyCaller{})
 	requestFlavor.DefMethod(":close", "", reqCloseCaller(true))
-	requestFlavor.DefMethod(":write", "", reqWriteCaller(true))
+	requestFlavor.DefMethod(":write", "", reqWriteCaller{})
 
 	return requestFlavor
 }
 
-type reqInitCaller bool
+type reqInitCaller struct{}
 
 func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -137,22 +137,57 @@ func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 	return nil
 }
 
-func (caller reqInitCaller) Docs() string {
-	return `__:init__ &key _method_ _protocol_ _url_ _remote-addr_ _header_ _trailer_ _content-length_ _body_
-   _:method_ one of "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", or "TRACE"
-   _:protocol_ such as "HTTP/1.0"
-   _:url_ for the request
-   _:remote-addr_ remote address of the request
-   _:header_ an association list with the values as a list such as (("Content-Length" 123))
-   _:trailer_ an association list
-   _:content-length_ is the length of the body
-   _:body_ can be a _string_ or an _input-stream_.
-
-Sets the initial values when _make-instance_ is called.
-`
+func (caller reqInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Sets the initial value when _make-instance_ is called.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":method",
+				Type: "string",
+				Text: `One of "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", or "TRACE`,
+			},
+			{
+				Name: ":url",
+				Type: "string",
+				Text: "URL for the request",
+			},
+			{
+				Name: ":protocol",
+				Type: "string",
+				Text: `Such as "HTTP/1.0"`,
+			},
+			{
+				Name: ":remote-addr",
+				Type: "string",
+				Text: "Remote address for the request",
+			},
+			{
+				Name: ":header",
+				Type: `An association list with the values as a list such as (("Content-Type" "application/json"))`,
+				Text: "Headers for the request",
+			},
+			{
+				Name: ":trailer",
+				Type: `An association list with the values as a list such as (("Content-Type" "application/json"))`,
+				Text: "Trailer for the request",
+			},
+			{
+				Name: ":content-length",
+				Type: "fixnum",
+				Text: `The length of the content.`,
+			},
+			{
+				Name: ":body",
+				Type: "string|input-stream",
+				Text: `Content for the body of the request`,
+			},
+		},
+	}
 }
 
-type reqMethodCaller bool
+type reqMethodCaller struct{}
 
 func (caller reqMethodCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -162,14 +197,15 @@ func (caller reqMethodCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	return slip.String((obj.Any.(*http.Request)).Method)
 }
 
-func (caller reqMethodCaller) Docs() string {
-	return `__:method__ => _string_
-
-Returns the method of the request.
-`
+func (caller reqMethodCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":method",
+		Text:   `Returns the method of the request.`,
+		Return: "string",
+	}
 }
 
-type reqProtocolCaller bool
+type reqProtocolCaller struct{}
 
 func (caller reqProtocolCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -179,14 +215,15 @@ func (caller reqProtocolCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return slip.String((obj.Any.(*http.Request)).Proto)
 }
 
-func (caller reqProtocolCaller) Docs() string {
-	return `__:protocol__ => _string_
-
-Returns the protocol of the request.
-`
+func (caller reqProtocolCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":protocol",
+		Text:   `Returns the protocol of the request.`,
+		Return: "string",
+	}
 }
 
-type reqURLCaller bool
+type reqURLCaller struct{}
 
 func (caller reqURLCaller) Call(s *slip.Scope, args slip.List, _ int) (us slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
@@ -199,14 +236,15 @@ func (caller reqURLCaller) Call(s *slip.Scope, args slip.List, _ int) (us slip.O
 	return
 }
 
-func (caller reqURLCaller) Docs() string {
-	return `__:url__ => _string_
-
-Returns the url of the request.
-`
+func (caller reqURLCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":url",
+		Text:   `Returns the URL of the request.`,
+		Return: "string",
+	}
 }
 
-type reqRemoteAddrCaller bool
+type reqRemoteAddrCaller struct{}
 
 func (caller reqRemoteAddrCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -216,14 +254,15 @@ func (caller reqRemoteAddrCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	return slip.String(obj.Any.(*http.Request).RemoteAddr)
 }
 
-func (caller reqRemoteAddrCaller) Docs() string {
-	return `__:remote-addr__ => _string_
-
-Returns the remote address of the request.
-`
+func (caller reqRemoteAddrCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":remote-addr",
+		Text:   `Returns the remote address of the request.`,
+		Return: "string",
+	}
 }
 
-type reqContentLengthCaller bool
+type reqContentLengthCaller struct{}
 
 func (caller reqContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -233,14 +272,15 @@ func (caller reqContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return slip.Fixnum((obj.Any.(*http.Request)).ContentLength)
 }
 
-func (caller reqContentLengthCaller) Docs() string {
-	return `__:content-length__ => _fixnum_
-
-Returns the content length of the request.
-`
+func (caller reqContentLengthCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":content-length",
+		Text:   `Returns the content length of the request.`,
+		Return: "fixnum",
+	}
 }
 
-type reqHeaderCaller bool
+type reqHeaderCaller struct{}
 
 func (caller reqHeaderCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -259,14 +299,15 @@ func (caller reqHeaderCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Ob
 	return header
 }
 
-func (caller reqHeaderCaller) Docs() string {
-	return `__:header__ => _assoc-list_
-
-Returns the header of the request as an association list.
-`
+func (caller reqHeaderCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":header",
+		Text:   `Returns the header of the request as an association list.`,
+		Return: "association-list",
+	}
 }
 
-type reqHeaderGetCaller bool
+type reqHeaderGetCaller struct{}
 
 func (caller reqHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -284,15 +325,22 @@ func (caller reqHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return nil
 }
 
-func (caller reqHeaderGetCaller) Docs() string {
-	return `__:header-get__ _key_ => _string_|_nil_
-   _key_ for the header value to get
-
-Returns the header of the request as an association list.
-`
+func (caller reqHeaderGetCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":header-get",
+		Text: `Returns the values for the provided key in the the request header.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "key",
+				Type: "string|symbol",
+				Text: `Key for the values to get from the request header.`,
+			},
+		},
+		Return: "list",
+	}
 }
 
-type reqTrailerCaller bool
+type reqTrailerCaller struct{}
 
 func (caller reqTrailerCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -311,14 +359,15 @@ func (caller reqTrailerCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return trailer
 }
 
-func (caller reqTrailerCaller) Docs() string {
-	return `__:trailer__ => _assoc-list_
-
-Returns the trailer of the request as an association list.
-`
+func (caller reqTrailerCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":trailer",
+		Text:   `Returns the trailer of the request as an association list.`,
+		Return: "association-list",
+	}
 }
 
-type reqTrailerGetCaller bool
+type reqTrailerGetCaller struct{}
 
 func (caller reqTrailerGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -336,15 +385,22 @@ func (caller reqTrailerGetCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	return nil
 }
 
-func (caller reqTrailerGetCaller) Docs() string {
-	return `__:trailer__ _key_ => _string_|_nil_
-   _key_ for the trailer value to get
-
-Returns the trailer of the request as an association list.
-`
+func (caller reqTrailerGetCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":trailer-get",
+		Text: `Returns the values for the provided key in the the request trailer.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "key",
+				Type: "string|symbol",
+				Text: `Key for the values to get from the request trailer.`,
+			},
+		},
+		Return: "list",
+	}
 }
 
-type reqBodyCaller bool
+type reqBodyCaller struct{}
 
 func (caller reqBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -354,11 +410,11 @@ func (caller reqBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 	return &slip.InputStream{Reader: (obj.Any.(*http.Request)).Body}
 }
 
-func (caller reqBodyCaller) Docs() string {
-	return `__:body__ => _input-stream_
-
-Returns the body, an input-stream of the request.
-`
+func (caller reqBodyCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":body",
+		Text: `Returns the body input-stream of the request.`,
+	}
 }
 
 type reqCloseCaller bool
@@ -372,14 +428,14 @@ func (caller reqCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller reqCloseCaller) Docs() string {
-	return `__:close__ => _nil_
-
-Closes the body of the request.
-`
+func (caller reqCloseCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":close",
+		Text: `Closes the body of the request.`,
+	}
 }
 
-type reqWriteCaller bool
+type reqWriteCaller struct{}
 
 func (caller reqWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -414,16 +470,23 @@ func (caller reqWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller reqWriteCaller) Docs() string {
-	return `__:write__ &optional _destination_ => _nil_
-   _destination_ to write to
-
-
-Writes the body of the request to the _destination_. If _destination_ is nil then
+func (caller reqWriteCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":write",
+		Text: `Writes the body of the request to the _destination_. If _destination_ is nil then
 output is to a _string_ which is returned. If _destination_ is _t_ then output is
 written to _*standard-output*_. If _destination_ is an _output-stream_ then
-output is written to that _stream_.
-`
+output is written to that _stream_.`,
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name: "destination",
+				Type: "t|nil|output-stream",
+				Text: `Destination for the write.`,
+			},
+		},
+		Return: "nil|string",
+	}
 }
 
 // MakeRequest makes a new request.
