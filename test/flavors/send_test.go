@@ -43,6 +43,8 @@ func TestSendGetSet(t *testing.T) {
 
 func TestSendDefHand(t *testing.T) {
 	scope := slip.NewScope()
+	defer slip.ReadString("(fmakunbound 'anything)", scope).Eval(scope, nil)
+
 	code := slip.ReadString(`
 (defun anything (&rest args) args)
 (defflavor handy () ()

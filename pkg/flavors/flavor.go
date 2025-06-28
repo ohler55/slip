@@ -72,7 +72,7 @@ func (obj *Flavor) DefMethod(name string, daemon string, caller slip.Caller) {
 }
 
 // DefMethod adds a method to the class or flavor.
-func DefMethod(obj slip.Class, mm map[string]*slip.Method, name string, daemon string, caller slip.Caller) {
+func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, caller slip.Caller) {
 	name = strings.ToLower(name)
 	var (
 		addMethod bool
@@ -80,9 +80,19 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name string, daemon s
 	)
 	m := mm[name]
 	if m == nil {
-		m = &slip.Method{Name: name}
+		m = &slip.Method{Name: name, Doc: &slip.FuncDoc{}}
 		addMethod = true
-		// TBD get funcinfo
+	}
+	// Override existing method documentation if provided bu the caller.
+	switch tc := caller.(type) {
+	case slip.HasFuncDocs:
+		if fd := tc.FuncDocs(); fd != nil && 0 < len(fd.Text) {
+			m.Doc = fd
+		}
+	case HasDocs:
+		if text := tc.Docs(); 0 < len(text) {
+			m.Doc = &slip.FuncDoc{Name: name, Text: text}
+		}
 	}
 	// If there is a combination for this flavor it will be the first on the
 	// list.
@@ -244,7 +254,12 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 			}
 			obj.methods[k] = m
 		}
-		m.Combinations = append(m.Combinations, im.Combinations[0])
+		for _, ic := range im.Combinations {
+			// TBD make sure vanilla remains at the end
+			if !m.HasMethodFromClass(ic.From.Name()) {
+				m.Combinations = append(m.Combinations, ic)
+			}
+		}
 	}
 	for _, f2 := range cf.inherit {
 		if &vanilla != f2 {

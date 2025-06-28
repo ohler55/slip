@@ -36,17 +36,17 @@ nil and boolean false.`),
 		},
 		&Pkg,
 	)
-	flavor.DefMethod(":init", "", initCaller(true))
-	flavor.DefMethod(":set", "", setCaller(true))
-	flavor.DefMethod(":parse", "", parseCaller(true))
-	flavor.DefMethod(":read", "", readCaller(true))
-	flavor.DefMethod(":get", "", getCaller(true))
-	flavor.DefMethod(":has", "", hasCaller(true))
-	flavor.DefMethod(":remove", "", removeCaller(true))
-	flavor.DefMethod(":modify", "", modifyCaller(true))
-	flavor.DefMethod(":native", "", nativeCaller(true))
-	flavor.DefMethod(":write", "", writeCaller(true))
-	flavor.DefMethod(":walk", "", walkCaller(true))
+	flavor.DefMethod(":init", "", initCaller{})
+	flavor.DefMethod(":set", "", setCaller{})
+	flavor.DefMethod(":parse", "", parseCaller{})
+	flavor.DefMethod(":read", "", readCaller{})
+	flavor.DefMethod(":get", "", getCaller{})
+	flavor.DefMethod(":has", "", hasCaller{})
+	flavor.DefMethod(":remove", "", removeCaller{})
+	flavor.DefMethod(":modify", "", modifyCaller{})
+	flavor.DefMethod(":native", "", nativeCaller{})
+	flavor.DefMethod(":write", "", writeCaller{})
+	flavor.DefMethod(":walk", "", walkCaller{})
 
 	return flavor
 }
@@ -56,7 +56,7 @@ func Flavor() *flavors.Flavor {
 	return flavor
 }
 
-type initCaller bool
+type initCaller struct{}
 
 func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -96,17 +96,32 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 	return nil
 }
 
-func (caller initCaller) Docs() string {
-	return `__:init__ &key _set_ _parse_
-   _:set_ sets the contents with the LISP construct provided.
-   _:parse_ parses a JSON or SEN string to forms the contents.
-   _:read_ reads from an _input-stream_ and parses read JSON or SEN to forms the contents.
-
-Sets the initial value when _make-instance_ is called.
-`
+func (caller initCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Sets the initial value when _make-instance_ is called.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":set",
+				Type: "object",
+				Text: "Sets the contents with the LISP construct provided.",
+			},
+			{
+				Name: ":parse",
+				Type: "string",
+				Text: "Parses a JSON or SEN string to forms the contents.",
+			},
+			{
+				Name: ":read",
+				Type: "string",
+				Text: "Reads from an _input-stream_ and parses read JSON or SEN to forms the contents.",
+			},
+		},
+	}
 }
 
-type setCaller bool
+type setCaller struct{}
 
 func (caller setCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -121,18 +136,30 @@ func (caller setCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	return obj
 }
 
-func (caller setCaller) Docs() string {
-	return `__:set__ _value_ &optional _path_ => _self_
-  _value_ The value to set in the instance according to the path.
-  _path_ The path to the location in the bag to set the _value_.
-The path must follow the JSONPath format.
-
-Sets a _value_ at the location described by _path_.
-If no _path_ is provided the entire contents of the bag is replaced.
-`
+func (caller setCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set",
+		Text: `Sets a _value_ at the location described by _path_.
+If no _path_ is provided the entire contents of the bag is replaced.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "value",
+				Type: "object",
+				Text: "The _value_ to set in _bag_ according to the path.",
+			},
+			{Name: "&optional"},
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `The path to the location in the bag to set the _value_.
+The path must follow the JSONPath format.`,
+			},
+		},
+		Return: "self",
+	}
 }
 
-type parseCaller bool
+type parseCaller struct{}
 
 func (caller parseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -147,19 +174,30 @@ func (caller parseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	return obj
 }
 
-func (caller parseCaller) Docs() string {
-	return `__:parse__ _string_ &optional _path_ => _self_
-  _string_ The string to parse and set in the instance according to the _path_.
-  _path_ The path to the location in the bag to set the parsed value.
-The path must follow the JSONPath format.
-
-
-Parses _string_ and sets the parsed value at the location described by _path_.
-If no _path_ is provided the entire contents of the bag is replaced.
-`
+func (caller parseCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":parse",
+		Text: `Parses _string_ and sets the parsed value at the location described by _path_.
+If no _path_ is provided the entire contents of the bag is replaced.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "string",
+				Type: "string",
+				Text: "The string to parse and set in the instance according to the _path_.",
+			},
+			{Name: "&optional"},
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `The path to the location in the bag to set the parsed value.
+The path must follow the JSONPath format.`,
+			},
+		},
+		Return: "self",
+	}
 }
 
-type readCaller bool
+type readCaller struct{}
 
 func (caller readCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -174,19 +212,30 @@ func (caller readCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 	return obj
 }
 
-func (caller readCaller) Docs() string {
-	return `__:read__ _string_ &optional _path_ => _self_
-  _stream_ The _input-stream_ to read and set in the instance according to the _path_.
-  _path_ The path to the location in the bag to set the readd value.
-The path must follow the JSONPath format.
-
-
-Read from _stream_ and sets the parsed value at the location described by _path_.
-If no _path_ is provided the entire contents of the bag is replaced.
-`
+func (caller readCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":read",
+		Text: `Reads _stream_ and sets the read and parsed value at the location
+described by _path_. If no _path_ is provided the entire contents of the bag is replaced.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "stream",
+				Type: "input-stream",
+				Text: "The _stream_ to read, parse, and set in _bag_ according to the path.",
+			},
+			{Name: "&optional"},
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `The path to the location in the bag to set the read value.
+The path must follow the JSONPath format.`,
+			},
+		},
+		Return: "self",
+	}
 }
 
-type getCaller bool
+type getCaller struct{}
 
 func (caller getCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
@@ -203,18 +252,30 @@ func (caller getCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.O
 	return
 }
 
-func (caller getCaller) Docs() string {
-	return `__:get__ &optional _path_ _as-bag_ => _object_|_bag_
-  _path_ to the location in the bag to get the _value_ from. The path must follow the JSONPath format.
-  _as-bag_ if not nil then the returned value is a _bag_ otherwise a new LISP value is returned.
-
-
-Gets a _value_ at the location described by _path_.
-If no _path_ is provided the entire contents of the bag is returned.
-.`
+func (caller getCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":get",
+		Text: `Gets a _value_ at the location described by _path_.
+If no _path_ is provided the entire contents of the bag is returned.`,
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `Path to the location in the bag to get the _value_ from. The path must follow
+the JSONPath format.`,
+			},
+			{
+				Name: "as-bag",
+				Type: "boolean",
+				Text: "If not nil then the returned value is a _bag_ otherwise a new LISP value is returned.",
+			},
+		},
+		Return: "object",
+	}
 }
 
-type hasCaller bool
+type hasCaller struct{}
 
 func (caller hasCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
@@ -226,16 +287,23 @@ func (caller hasCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.O
 	return
 }
 
-func (caller hasCaller) Docs() string {
-	return `__:has__ _path_ => _boolean_
-  _path_ to the location in the bag to get the value from. The path must follow the JSONPath format.
-
-
-Returns true if a value at the location described by _path_ exists.
-`
+func (caller hasCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":has",
+		Text: `Returns true if a value at the location described by _path_ exists.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `Path to the location in the bag to get the value from. The path must follow
+the JSONPath format.`,
+			},
+		},
+		Return: "boolean",
+	}
 }
 
-type removeCaller bool
+type removeCaller struct{}
 
 func (caller removeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
@@ -247,16 +315,24 @@ func (caller removeCaller) Call(s *slip.Scope, args slip.List, _ int) (value sli
 	return obj
 }
 
-func (caller removeCaller) Docs() string {
-	return `__:remove__ _path_ => _object_
-  _path_ to the location in the bag to remove. The path must follow the JSONPath format.
-
-
-Returns the object itself.
-`
+func (caller removeCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":remove",
+		Text: `Removes the value at the location described by _path_.
+If no _path_ is provided the entire contents of the bag is removed and the bag value set to _nil_.`,
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `Path to the location in the bag to remove. The path must follow the JSONPath format.`,
+			},
+		},
+		Return: "self",
+	}
 }
 
-type modifyCaller bool
+type modifyCaller struct{}
 
 func (caller modifyCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
@@ -264,18 +340,37 @@ func (caller modifyCaller) Call(s *slip.Scope, args slip.List, depth int) (value
 	return obj
 }
 
-func (caller modifyCaller) Docs() string {
-	return `__:modify__ _function_ &optional _path_ &key _:as-bag_ => _object_
-  _function_ to modify the value at _path_
-  _path_ to the location in the bag to modify. The path must follow the JSONPath format.
-  _:as-bag_ if true the _function_ expects a _bag_ otherwise it expects a lisp object.
-
-
-Returns the object itself.
-`
+func (caller modifyCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":modify",
+		Text: `Modifies the value at the location described by _path_.
+If no _path_ is provided the entire contents of the bag is modified.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "function",
+				Type: "symbol|lambda",
+				Text: `The function to call to modify the value at _path_.`,
+			},
+			{Name: "&optional"},
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `Path to the location in the bag to modify.
+The path must follow the JSONPath format.`,
+			},
+			{Name: "&key"},
+			{
+				Name: ":as-bag",
+				Type: "string|bag-path",
+				Text: `If set to true then the value provided to _function_ will be a bag
+instance otherwise it will be a lisp construct.`,
+			},
+		},
+		Return: "self",
+	}
 }
 
-type nativeCaller bool
+type nativeCaller struct{}
 
 func (caller nativeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
@@ -285,43 +380,84 @@ func (caller nativeCaller) Call(s *slip.Scope, args slip.List, _ int) (value sli
 	return slip.SimpleObject(obj.Any)
 }
 
-func (caller nativeCaller) Docs() string {
-	return `__:native__ => _object_
-
-Returns the bag contents as a native LISP form.
-`
+func (caller nativeCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":native",
+		Text:   `Returns the bag contents as a native LISP form.`,
+		Return: "object",
+	}
 }
 
-type writeCaller bool
+type writeCaller struct{}
 
 func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	return writeBag(obj, args)
 }
 
-func (caller writeCaller) Docs() string {
-	return `__:write__ &optional _stream_ &key _pretty_ _depth_ _right-margin_ _time-format_ _time-wrap_ _json_ _color_
-  _stream_ an output-stream. Default: nil (return a string).
-  _:pretty_ The value to use in place of the _*print-pretty*_ value. If _t_ then the
-JSON or SEN output is indented according to the other keyword options.
-  _:depth_ The maximum number of nested elements on a line in the output. A value
-of zero outputs a tight single line output. Default: 4.
-  _:right-margin_ The value to use in place of the _*print-right-margin*_ value.
-  _:time-format_ The value to use in place of the _*bag-time-format*_ value.
-  _:time-wrap_ The value to use in place of the _*bag-time-wrap*_ value.
-  _:json_ If true the output is JSON formatted otherwise output is SEN format.
-  _:color_ If true the output is colorized.
-
-
-Writes the instance to _*standard-output*_, a provided output _stream_,
+func (caller writeCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":write",
+		Text: `Writes the instance to _*standard-output*_, a provided output _stream_,
 or to a string that is returned. If _stream_ is _t_ then output is to _*standard-output*_. If
 _stream_ is _nil_ then output is a returned string. Any other _stream_ value must be an output
 stream which is where output is written to. Output can be either JSON or SEN format as defined
-in the OjG package.
-`
+in the OjG package.`,
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name: "destination",
+				Type: "t|nil|output-stream",
+				Text: `Output stream. Default: nil (return a string).`,
+			},
+			{Name: "&key"},
+			{
+				Name: ":pretty",
+				Type: "string|bag-path",
+				Text: `The value to use in place of the _*print-pretty*_ value. If _t_ then the
+JSON or SEN output is indented according to the other keyword options.`,
+			},
+			{
+				Name: ":depth",
+				Type: "integer",
+				Text: `The maximum number of nested elements on a line in the output. A value
+of zero outputs a tight single line output.`,
+				Default: slip.Fixnum(4),
+			},
+			{
+				Name:    ":right-margin",
+				Type:    "integer",
+				Text:    `The value to use in place of the _*print-right-margin*_ value.`,
+				Default: slip.Symbol("*print-right-margin*"),
+			},
+			{
+				Name:    ":time-format",
+				Type:    "string",
+				Text:    `The value to use in place of the _*bag-time-format*_ value.`,
+				Default: slip.Symbol("*bag-time-format*"),
+			},
+			{
+				Name:    ":time-wrap",
+				Type:    "string",
+				Text:    `The value to use in place of the _*bag-time-wrap*_ value.`,
+				Default: slip.Symbol("*bag-time-wrap*"),
+			},
+			{
+				Name: ":json",
+				Type: "boolean",
+				Text: `If true the output is JSON formatted otherwise output is SEN format.`,
+			},
+			{
+				Name: ":color",
+				Type: "boolean",
+				Text: `If true the output is colorized.`,
+			},
+		},
+		Return: "nil|string",
+	}
 }
 
-type walkCaller bool
+type walkCaller struct{}
 
 func (caller walkCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
@@ -329,13 +465,29 @@ func (caller walkCaller) Call(s *slip.Scope, args slip.List, depth int) (value s
 	return nil
 }
 
-func (caller walkCaller) Docs() string {
-	return `__:walk__ _function_ &optional _path_ _as-lisp_
-  _function_ The function to apply to each node in the instance matching the _path_.
-  _path_ The path to the location in the bag to walk. The path must follow the JSONPath format. Default: ".."
-  _as-lisp_ If not nil then the value to the _function_ is a LISP value otherwise a new _bag_.
-
-
-Walks the values at the location described by _path_.
-`
+func (caller walkCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":walk",
+		Text: `Walks the values at the location described by _path_.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "function",
+				Type: "symbol|lambda",
+				Text: `The function to apply to each node in the instance matching the _path_.`,
+			},
+			{Name: "&optional"},
+			{
+				Name:    "path",
+				Type:    "string|bag-path",
+				Text:    `The path to the location in the bag to walk. The path must follow the JSONPath format.`,
+				Default: slip.String(".."),
+			},
+			{
+				Name: ":as-lisp",
+				Type: "boolean",
+				Text: `If not nil then the value to the _function_ is a LISP value otherwise a new _bag_.`,
+			},
+		},
+		Return: "nil",
+	}
 }

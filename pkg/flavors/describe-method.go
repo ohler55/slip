@@ -94,18 +94,19 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	b = append(b, sc.Name()...)
 	b = append(b, off...)
 	b = append(b, '\n')
+
+	if m.Doc != nil {
+		b = m.Doc.Describe(b, 2, right, ansi)
+	}
+	b = append(b, "  Implemented by:\n"...)
 	appendDaemon := func(c *slip.Combination, caller slip.Caller, daemon string) {
-		b = append(b, "  "...)
+		b = append(b, "    "...)
 		b = append(b, emp...)
 		b = append(b, c.From.Name()...)
 		b = append(b, off...)
 		b = append(b, ' ')
 		b = append(b, daemon...)
 		b = append(b, '\n')
-		if hd, ok := caller.(HasDocs); ok && 0 < len(hd.Docs()) {
-			b = slip.AppendDoc(b, hd.Docs(), 4, right, ansi)
-			b = append(b, '\n')
-		}
 	}
 	for _, c := range m.Combinations {
 		if c.Wrap != nil {

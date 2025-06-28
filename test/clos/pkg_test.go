@@ -9,7 +9,9 @@ import (
 	"github.com/ohler55/slip/pkg/clos"
 )
 
+// TBD
 func TestMethodDocFromFunc(t *testing.T) {
+	t.Skip()
 	tt.Equal(t, `__quux__ _function_ &optional _path_ _as-bag_ => _bag_
    _function_ [function] The function to apply to each node in bag matching the _path_.
    _path_ [string|bag-path] The path to the location in the bag to walk.

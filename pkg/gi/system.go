@@ -143,11 +143,8 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 }
 
 func (caller systemFetchCaller) Docs() string {
-	return `__:fetch__
-
-Fetches all sources specified in the the :depends-on variable and places them
-in the cache.
-`
+	return `Fetches all sources specified in the the :depends-on variable and places them
+in the cache.`
 }
 
 type systemLoadCaller struct{}
@@ -208,10 +205,7 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 }
 
 func (caller systemLoadCaller) Docs() string {
-	return `__:load__
-
-Loads all sources specified in the the :depends-on variable.
-`
+	return `Loads all sources specified in the the :depends-on variable.`
 }
 
 type systemRunCaller struct{}
@@ -254,14 +248,24 @@ func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, _ int) (result
 	return
 }
 
-func (caller systemRunCaller) Docs() string {
-	return `__:run__ _op_ &key _*_
-   _op_ [symbol] names the operation of one of the :in-order-to elements.
-   _:*_ [symbol&value] keys to bind to the values and made available to the operation.
-
-
-Run an operation from the :in-order-to variable with the provided keys bound to the values.
-`
+func (caller systemRunCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":run",
+		Text: "Run an operation from the :in-order-to variable with the provided keys bound to the values.",
+		Args: []*slip.DocArg{
+			{
+				Name: "op",
+				Type: "symbol",
+				Text: "Names the operation of one of the :in-order-to elements.",
+			},
+			{Name: "&key"},
+			{
+				Name: ":*",
+				Type: "symbol & value",
+				Text: "keys to bind to the values and made available to the operation.",
+			},
+		},
+	}
 }
 
 func getStringVar(self *flavors.Instance, key, defVal string) (sval string) {

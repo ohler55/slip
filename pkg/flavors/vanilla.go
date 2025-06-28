@@ -43,16 +43,8 @@ func init() {
 		m.Name = name
 		for _, c := range m.Combinations { // only one
 			c.From = &vanilla
-			switch tp := c.Primary.(type) {
-			case slip.HasFuncDocs:
-				m.Doc = tp.FuncDocs()
-			case HasDocs:
-				if m.Doc == nil {
-					m.Doc = &slip.FuncDoc{Name: name, Text: tp.Docs()}
-				} else {
-					m.Doc.Name = name
-					m.Doc.Text = tp.Docs()
-				}
+			if prime, ok := c.Primary.(slip.HasFuncDocs); ok {
+				m.Doc = prime.FuncDocs()
 			}
 		}
 	}
@@ -77,11 +69,6 @@ func (caller initCaller) FuncDocs() *slip.FuncDoc {
 	}
 }
 
-func (caller initCaller) Docs() string {
-	return `Does nothing but is a placeholder for daemons in sub-flavors.
-`
-}
-
 type describeCaller struct{}
 
 func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
@@ -104,13 +91,20 @@ func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller describeCaller) Docs() string {
-	return `__:describe__ &optional _output-stream_
-  _output-stream_ [output-stream] to write to. (default: _*standard-output*_)
-
-
-Writes a description of the instance to _output-stream_.
-`
+func (caller describeCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":describe",
+		Text: "Writes a description of the instance to _output-stream_.",
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name:    "output-stream",
+				Type:    "output-stream",
+				Text:    "output-stream to write to.",
+				Default: slip.Symbol("*standard-output*"),
+			},
+		},
+	}
 }
 
 type idCaller struct{}
@@ -120,12 +114,12 @@ func (caller idCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	return slip.Fixnum(uintptr(unsafe.Pointer(self)))
 }
 
-func (caller idCaller) Docs() string {
-	return `__:id__ => _string_
-
-
-Returns the identifier of the instance.
-`
+func (caller idCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":id",
+		Text:   "Returns the identifier of the instance.",
+		Return: "fixnum",
+	}
 }
 
 type flavorCaller struct{}
@@ -135,12 +129,12 @@ func (caller flavorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Objec
 	return self.Type
 }
 
-func (caller flavorCaller) Docs() string {
-	return `__:flavor__ => _flavor_
-
-
-Returns the flavor of the instance.
-`
+func (caller flavorCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":flavor",
+		Text:   "Returns the flavor of the instance.",
+		Return: "flavor",
+	}
 }
 
 type hasOpCaller struct{}
@@ -156,13 +150,19 @@ func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	return nil
 }
 
-func (caller hasOpCaller) Docs() string {
-	return `__:operation-handled-p__ _method_ => _boolean_
-  _method_ [keyword] to check.
-
-
-Returns _t_ if the instance handles the method and _nil_ otherwise.
-`
+func (caller hasOpCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":operation-handled-p",
+		Text: "Returns _t_ if the instance handles the method and _nil_ otherwise.",
+		Args: []*slip.DocArg{
+			{
+				Name: "method",
+				Type: "keyword",
+				Text: "Symbol to check.",
+			},
+		},
+		Return: "boolean",
+	}
 }
 
 type printCaller struct{}
@@ -187,13 +187,22 @@ func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	return nil
 }
 
-func (caller printCaller) Docs() string {
-	return `__:print-self__ &optional _stream_ &rest _ignored_
-  _stream_ [output-stream] to write the description to. The default is _*standard-output*_
-
-
-Writes a description of the instance to the _stream_.
-`
+func (caller printCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":print-self",
+		Text: "Writes a description of the instance to the _stream_.",
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name:    "output-stream",
+				Type:    "output-stream",
+				Text:    "output-stream to write the description to.",
+				Default: slip.Symbol("*standard-output*"),
+			},
+			{Name: "&rest"},
+			{Name: "rest", Text: "_ignored_"},
+		},
+	}
 }
 
 type sendIfCaller struct{}
@@ -211,14 +220,24 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	return nil
 }
 
-func (caller sendIfCaller) Docs() string {
-	return `__:send-if-handles__ _method_ _arguments*_ => _object_
-  _method_ [keyword] to send to the instance if the instance has the _method_.
-  _arguments*_ to pass to the _method_ call.
-
-
-Sends to the instance if the instance has the _method_.
-`
+func (caller sendIfCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":send-if-handles",
+		Text: "Sends to the instance if the instance has the _method_.",
+		Args: []*slip.DocArg{
+			{
+				Name: "method",
+				Type: "keyword",
+				Text: "Method to send to the instance if the instance has the _method_.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "arguments*",
+				Text: "Argument to pass to the _method_ call.",
+			},
+		},
+		Return: "object",
+	}
 }
 
 type whichOpsCaller struct{}
@@ -229,12 +248,12 @@ func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return self.Type.MethodNames()
 }
 
-func (caller whichOpsCaller) Docs() string {
-	return `__:which-operations__ => _list_
-
-
-Returns a list of all the methods the instance handles.
-`
+func (caller whichOpsCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":which-operations",
+		Text:   "Returns a list of all the methods the instance handles.",
+		Return: "list",
+	}
 }
 
 type insideCaller struct{}
@@ -247,13 +266,19 @@ func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	return s.Eval(args[0], depth+1)
 }
 
-func (caller insideCaller) Docs() string {
-	return `__:eval-inside-yourself__ _form_ => _object_
-  _form_ [object] to evaluate in the scope of the instance.
-
-
-Evaluates the _form_ in the instance's scope.
-`
+func (caller insideCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":eval-inside-yourself",
+		Text: "Evaluates the _form_ in the instance's scope.",
+		Args: []*slip.DocArg{
+			{
+				Name: "form",
+				Type: "object",
+				Text: "Form to evaluate in the scope of the instance.",
+			},
+		},
+		Return: "object",
+	}
 }
 
 type inspectCaller struct{}
@@ -267,12 +292,12 @@ func (caller inspectCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	return inst
 }
 
-func (caller inspectCaller) Docs() string {
-	return `__:inspect__ => _bag_
-
-
-Returns a _bag_ with the details of the instance.
-`
+func (caller inspectCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":inspect",
+		Text:   "Returns a _bag_ with the details of the instance.",
+		Return: "bag",
+	}
 }
 
 type equalCaller struct{}
@@ -286,13 +311,19 @@ func (caller equalCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	return nil
 }
 
-func (caller equalCaller) Docs() string {
-	return `__:equal__ _other_ => _boolean_
-   _other_ [object] other object to compare to _self_.
-
-
-Returns _t_ if the instance is of the same flavor as _other_ and has the same content.
-`
+func (caller equalCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":equal",
+		Text: "Returns _t_ if the instance is of the same flavor as _other_ and has the same content.",
+		Args: []*slip.DocArg{
+			{
+				Name: "other",
+				Type: "object",
+				Text: "Other object to compare to _self_.",
+			},
+		},
+		Return: "boolean",
+	}
 }
 
 type changeClassCaller struct{}
@@ -318,12 +349,10 @@ func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, depth int) s
 	return self
 }
 
-func (caller changeClassCaller) Docs() string {
-	return `__:change-class__ _new-class_ &key &allow-other-keys) => _instance_
-   _new-class_ [flavor] the new flavor for the instance.
-
-
-Returns __self__ after changing the flavor of the instance. When called a copy
+func (caller changeClassCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":change-class",
+		Text: `Returns __self__ after changing the flavor of the instance. When called a copy
 of the instance is created and the _:update-instance-for-different-class_ is
 called on the original after the _flavor_ has been changed to the new
 _flavor_. The _previous_ is a copy of the original instance. The original
@@ -333,7 +362,16 @@ method.
 
 
 This method is an extension of the original flavors.
-`
+`,
+		Args: []*slip.DocArg{
+			{
+				Name: "new-class",
+				Type: "flavor",
+				Text: "The new flavor for the instance.",
+			},
+		},
+		Return: "instance",
+	}
 }
 
 type sharedInitializeCaller struct{}
@@ -350,17 +388,31 @@ func (caller sharedInitializeCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return self
 }
 
-func (caller sharedInitializeCaller) Docs() string {
-	return `__:shared-initialize__ _slot-names_ &rest _initargs_ &key &allow-other-keys) => _instance_
-   _slot-names_ [list] a list of the slot names in the re-flavored instance.
-   _initargs_ [list] additional arguments are ignored by the default method.
-
-
-Returns __self__ after processing the key arguments to set the slots in the instance.
+func (caller sharedInitializeCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":shared-initialize",
+		Text: `Returns __self__ after processing the key arguments to set the slots in the instance.
 
 
 This method is an extension of the original flavors.
-`
+`,
+		Args: []*slip.DocArg{
+			{
+				Name: "slot-names",
+				Type: "list",
+				Text: "A list of the slot names in the re-flavored instance.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "initargs",
+				Type: "list",
+				Text: "Additional arguments are ignored by the default method.",
+			},
+			{Name: "&key"},
+			{Name: "&allow-other-keys"},
+		},
+		Return: "instance",
+	}
 }
 
 type updateInstanceForDifferentClassCaller struct{}
@@ -387,13 +439,10 @@ func (caller updateInstanceForDifferentClassCaller) Call(s *slip.Scope, args sli
 	return nil
 }
 
-func (caller updateInstanceForDifferentClassCaller) Docs() string {
-	return `__:update-instance-for-different-class__ _previous_ &rest _initargs_ &key &allow-other-keys)
-   _previous_ [instance] a copy of the original instance.
-   _initargs_ [list] additional arguments are ignored by the default method.
-
-
-When __change-class__ is called a copy of the instance is created and the
+func (caller updateInstanceForDifferentClassCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":update-instance-for-different-class",
+		Text: `When __change-class__ is called a copy of the instance is created and the
 _:update-instance-for-different-class_ is called on the original after the
 _flavor_ has been changed to the new _flavor_. The _previous_ is a copy of the
 original instance. The original instance has already been changed and the
@@ -402,5 +451,22 @@ the _:shared-initialize_ method.
 
 
 This method is an extension of the original flavors.
-`
+`,
+		Args: []*slip.DocArg{
+			{
+				Name: "previous",
+				Type: "instance",
+				Text: "a copy of the original instance.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "initargs",
+				Type: "list",
+				Text: "Additional arguments are ignored by the default method.",
+			},
+			{Name: "&key"},
+			{Name: "&allow-other-keys"},
+		},
+		Return: "instance",
+	}
 }

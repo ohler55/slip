@@ -24,7 +24,7 @@ func TestFlosfunDocFlavor(t *testing.T) {
 	_ = slip.ReadString("(describe 'foo-foo out)", scope).Eval(scope, nil)
 
 	tt.Equal(t, "/foo-foo sends/", out.String())
-	tt.Equal(t, "/Returns the flavor/", out.String()) // pulled in from vanilla-flavor
+	tt.Equal(t, "/Return: Object/", out.String()) // pulled in from vanilla-flavor
 }
 
 func TestFlosfunDocString(t *testing.T) {

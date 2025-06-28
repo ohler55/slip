@@ -54,7 +54,7 @@ blueberry whopper rot done
 
 	f := slip.ReadString("blueberry", scope).Eval(scope, nil)
 	sf := f.Simplify()
-	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].whopper").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].whopper").First(sf))
 
 	(&sliptest.Function{
 		Scope:  scope,

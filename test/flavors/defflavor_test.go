@@ -489,8 +489,9 @@ func TestDefflavorDefaultHandlerLambda(t *testing.T) {
 }
 
 func TestDefflavorDefaultHandlerFunc(t *testing.T) {
-	defer undefFlavors("f3")
 	scope := slip.NewScope()
+	defer undefFlavors("f3")
+	defer slip.ReadString("(fmakunbound 'anything)", scope).Eval(scope, nil)
 	slip.ReadString(`
 (defun anything (&rest args) args)
 (defflavor f3 () () (:default-handler anything))

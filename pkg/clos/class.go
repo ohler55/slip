@@ -320,7 +320,12 @@ func (c *Class) mergeInherited() {
 				}
 				c.methods[k] = m
 			}
-			m.Combinations = append(m.Combinations, im.Combinations[0])
+			for _, ic := range im.Combinations {
+				// TBD make sure vanilla remains at the end
+				if !m.HasMethodFromClass(ic.From.Name()) {
+					m.Combinations = append(m.Combinations, ic)
+				}
+			}
 		}
 	}
 	if c.InstanceInit == nil {

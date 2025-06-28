@@ -32,6 +32,7 @@ func (m *Method) Simplify() any {
 	return simple
 }
 
+// Call the method.
 func (m *Method) Call(s *Scope, args List, depth int) Object {
 	for i, c := range m.Combinations {
 		if c.Wrap != nil {
@@ -121,7 +122,6 @@ func (m *Method) Append(b []byte) []byte {
 	return append(b, '}', '>')
 }
 
-// Simplify by returning the string representation of the flavor.
 // Equal returns true if this Object and the other are equal in value.
 func (m *Method) Equal(other Object) (eq bool) {
 	return m == other
@@ -135,6 +135,16 @@ func (m *Method) Hierarchy() []Symbol {
 // Eval returns self.
 func (m *Method) Eval(s *Scope, depth int) Object {
 	return m
+}
+
+// HasMethodFromClass return true if a combinations from a class is present.
+func (m *Method) HasMethodFromClass(from string) bool {
+	for _, c := range m.Combinations {
+		if c.From != nil && c.From.Name() == from {
+			return true
+		}
+	}
+	return false
 }
 
 // CheckMethodArgCount raises a panic describing the wrong number of arguments

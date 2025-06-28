@@ -57,16 +57,16 @@ func defLogger() *flavors.Flavor {
 		},
 		&Pkg,
 	)
-	logger.DefMethod(":init", "", initCaller(true))
-	logger.DefMethod(":error", "", errorCaller(true))
-	logger.DefMethod(":warn", "", warnCaller(true))
-	logger.DefMethod(":info", "", infoCaller(true))
-	logger.DefMethod(":debug", "", debugCaller(true))
-	logger.DefMethod(":log", "", logCaller(true))
-	logger.DefMethod(":out", "", outCaller(true))
-	logger.DefMethod(":set-out", "", setOutCaller(true))
-	logger.DefMethod(":write", "", writeCaller(true))
-	logger.DefMethod(":shutdown", "", shutdownCaller(true))
+	logger.DefMethod(":init", "", initCaller{})
+	logger.DefMethod(":error", "", errorCaller{})
+	logger.DefMethod(":warn", "", warnCaller{})
+	logger.DefMethod(":info", "", infoCaller{})
+	logger.DefMethod(":debug", "", debugCaller{})
+	logger.DefMethod(":log", "", logCaller{})
+	logger.DefMethod(":out", "", outCaller{})
+	logger.DefMethod(":set-out", "", setOutCaller{})
+	logger.DefMethod(":write", "", writeCaller{})
+	logger.DefMethod(":shutdown", "", shutdownCaller{})
 
 	return logger
 }
@@ -76,7 +76,7 @@ func Logger() *flavors.Flavor {
 	return logger
 }
 
-type initCaller bool
+type initCaller struct{}
 
 func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -118,8 +118,19 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 	return nil
 }
 
-func (caller initCaller) Docs() string {
-	return `__:init__`
+func (caller initCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Sets the output stream.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":out",
+				Type: "output-stream",
+				Text: "Sets the stream logger writes to.",
+			},
+		},
+	}
 }
 
 func logFormat(s *slip.Scope, level int, args slip.List, check bool) {
@@ -161,52 +172,88 @@ func logFormat(s *slip.Scope, level int, args slip.List, check bool) {
 	obj.Any.(*logQueue).queue <- buf
 }
 
-type errorCaller bool
+type errorCaller struct{}
 
 func (caller errorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	logFormat(s, 0, args, true)
 	return nil
 }
 
-func (caller errorCaller) Docs() string {
-	return `__:error__ _format_ &rest _args_
-
-
-Log an error message if the logger _level_ is at or above 0.
-`
+func (caller errorCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":error",
+		Text: "Log an error message if the logger _level_ is at or above 0.",
+		Args: []*slip.DocArg{
+			{
+				Name: "format",
+				Type: "string",
+				Text: "The format string for the message. See __format__.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "args*",
+				Type: "object",
+				Text: "Arguments for the _format_.",
+			},
+		},
+	}
 }
 
-type warnCaller bool
+type warnCaller struct{}
 
 func (caller warnCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	logFormat(s, 1, args, true)
 	return nil
 }
 
-func (caller warnCaller) Docs() string {
-	return `__:warn__ _format_ &rest _args_
-
-
-Log a warn message if the logger _level_ is at or above 1.
-`
+func (caller warnCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":warn",
+		Text: "Log an warning message if the logger _level_ is at or above 1.",
+		Args: []*slip.DocArg{
+			{
+				Name: "format",
+				Type: "string",
+				Text: "The format string for the message. See __format__.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "args*",
+				Type: "object",
+				Text: "Arguments for the _format_.",
+			},
+		},
+	}
 }
 
-type infoCaller bool
+type infoCaller struct{}
 
 func (caller infoCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	logFormat(s, 2, args, true)
 	return nil
 }
 
-func (caller infoCaller) Docs() string {
-	return `__:info__ _format_ &rest _args_
-
-
-Log an info message if the logger _level_ is at or above 2.
-`
+func (caller infoCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":info",
+		Text: "Log an informational message if the logger _level_ is at or above 2.",
+		Args: []*slip.DocArg{
+			{
+				Name: "format",
+				Type: "string",
+				Text: "The format string for the message. See __format__.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "args*",
+				Type: "object",
+				Text: "Arguments for the _format_.",
+			},
+		},
+	}
 }
 
-type debugCaller bool
+type debugCaller struct{}
 
 func (caller debugCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	logFormat(s, 3, args, true)
@@ -214,15 +261,27 @@ func (caller debugCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	return nil
 }
 
-func (caller debugCaller) Docs() string {
-	return `__:debug__ _format_ &rest _args_
-
-
-Log a debug message if the logger _level_ is at or above 3.
-`
+func (caller debugCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":debug",
+		Text: "Log a debug message if the logger _level_ is at or above 3.",
+		Args: []*slip.DocArg{
+			{
+				Name: "format",
+				Type: "string",
+				Text: "The format string for the message. See __format__.",
+			},
+			{Name: "&rest"},
+			{
+				Name: "args*",
+				Type: "object",
+				Text: "Arguments for the _format_.",
+			},
+		},
+	}
 }
 
-type logCaller bool
+type logCaller struct{}
 
 func (caller logCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	level := 0
@@ -251,33 +310,47 @@ func (caller logCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	return nil
 }
 
-func (caller logCaller) Docs() string {
-	return `__:log__ _level_ _control_ &rest _args_
-   _level_ [fixnum|symbol] of the log entry. Can be a fixnum between 0 and 3
-inclusive or :error, :warn, :info, or :debug.
-   _control_ [string] of the the log entry where _control_ is the control string to the __format__ function.
-   _rest_ of the arguments to the _control_ string.
-
-
-Log a message at the specified level ignoring the current logger _level_.
-`
+func (caller logCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":log",
+		Text: "Log a message at the specified level ignoring the current logger _level_.",
+		Args: []*slip.DocArg{
+			{
+				Name: "level",
+				Type: "fixnum|keyword",
+				Text: `Log level of the log entry. Can be a fixnum between 0 and 3
+inclusive or :error, :warn, :info, or :debug.`,
+			},
+			{
+				Name: "control",
+				Type: "string",
+				Text: `Control string for the log entry as in the __format__ function.`,
+			},
+			{Name: "&rest"},
+			{
+				Name: "args*",
+				Type: "object",
+				Text: "Arguments for the _control_ formatting string.",
+			},
+		},
+	}
 }
 
-type outCaller bool
+type outCaller struct{}
 
 func (caller outCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	return s.Get("out")
 }
 
-func (caller outCaller) Docs() string {
-	return `__:out__
-
-
-Returns the output stream.
-`
+func (caller outCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":out",
+		Text:   "Returns the output stream of the logger.",
+		Return: "output-stream",
+	}
 }
 
-type setOutCaller bool
+type setOutCaller struct{}
 
 func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get(slip.Symbol("self")).(*flavors.Instance)
@@ -295,15 +368,21 @@ func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Objec
 	return nil
 }
 
-func (caller setOutCaller) Docs() string {
-	return `__:set-out__
-
-
-Sets the output stream.
-`
+func (caller setOutCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-out",
+		Text: "Sets the logger output stream.",
+		Args: []*slip.DocArg{
+			{
+				Name: "stream",
+				Type: "output-stream",
+				Text: `The output stream for the logger.`,
+			},
+		},
+	}
 }
 
-type writeCaller bool
+type writeCaller struct{}
 
 func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	out := s.Get("out")
@@ -316,16 +395,21 @@ func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 	return nil
 }
 
-func (caller writeCaller) Docs() string {
-	return `__:write__ _message_ => _nil_
-  _message_ The message to write to the stream.
-
-
-Write _message_ to _stream_.
-`
+func (caller writeCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":write",
+		Text: "Write _message_ to _stream_.",
+		Args: []*slip.DocArg{
+			{
+				Name: "message",
+				Type: "string",
+				Text: `The message to write to the stream.`,
+			},
+		},
+	}
 }
 
-type shutdownCaller bool
+type shutdownCaller struct{}
 
 func (caller shutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
@@ -336,10 +420,9 @@ func (caller shutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	return nil
 }
 
-func (caller shutdownCaller) Docs() string {
-	return `__:shutdown__
-
-
-Shutdown the logger.
-`
+func (caller shutdownCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":shutdown",
+		Text: "Shutdown the logger.",
+	}
 }

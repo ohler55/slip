@@ -8,13 +8,16 @@
 
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
   - redefine flavors.Method
-   - get and set methods
-   - remove flavors.Method
-   - funcdoc to generate docs
-   - vanilla
-    - change docs to funcdoc
-     - remove HasDocs after that
+   - update docs on other flavors
+    - net
+    - watch
+    - test?
+   - fix clos test TestMethodDocFromFunc
 
+   - test multiple inheritance
+   - test inherit after defflavor
+    - make sure vanilla is at end
+     - remove and then add back if present?
    - slip.Method
     - change flavors to use Method
      - maybe start with whoploc
