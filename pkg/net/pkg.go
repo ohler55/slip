@@ -43,6 +43,12 @@ func init() {
 		},
 	)
 	defNameServiceError()
+	defSocketAccept()
+	defSocketAddress()
+	defSocketBind()
+	defSocketClose()
+	defSocketConnect()
+	defSocketListen()
 	for _, f := range []*flavors.Flavor{
 		defClient(),
 		defRequest(),

@@ -331,9 +331,13 @@ func CompileList(list List) (f Object) {
 
 // DescribeFunction returns the documentation for the function bound to the
 // sym argument.
-func DescribeFunction(sym Symbol) *FuncDoc {
+func DescribeFunction(sym Symbol, pkg ...*Package) *FuncDoc {
 	name := strings.ToLower(string(sym))
-	if fi, has := CurrentPackage.funcs[name]; has {
+	p := CurrentPackage
+	if 0 < len(pkg) {
+		p = pkg[0]
+	}
+	if fi, has := p.funcs[name]; has {
 		return fi.Doc
 	}
 	return nil

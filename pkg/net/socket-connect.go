@@ -7,11 +7,10 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketConnect() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketConnect{Function: slip.Function{Name: "socket-connect", Args: args}}
@@ -38,7 +37,7 @@ address and port for an inet socket.`,
 			Text:   `__socket-connect__ connects _socket_ to an address.`,
 			Examples: []string{
 				`(let ((sock (make-socket :domain :unix :type :stream)))`,
-				` (socket-connect sock #(127 0 0 1) 1234)) => nil`,
+				`  (socket-connect sock #(127 0 0 1) 1234)) => nil`,
 			},
 		}, &Pkg)
 }
@@ -68,8 +67,10 @@ func (caller socketConnectCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	return nil
 }
 
-func (caller socketConnectCaller) Docs() string {
-	return clos.MethodDocFromFunc(":connect", "socket-connect", "socket", "socket")
+func (caller socketConnectCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":connect", "socket-connect", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :connect #(127 0 0 1) 1234)) => nil`
+	return md
 }
 
 func connectSocket(self *flavors.Instance, args slip.List) {

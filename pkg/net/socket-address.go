@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketAddress() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketAddress{Function: slip.Function{Name: "socket-address", Args: args}}
@@ -61,4 +61,10 @@ func (caller socketAddressCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 		result = addr
 	}
 	return
+}
+
+func (caller socketAddressCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":address", "socket-address", &Pkg)
+	md.Examples[0] = ` (send (make-instance 'socket :socket 5) :address)) => #(127 0 0 1)`
+	return md
 }
