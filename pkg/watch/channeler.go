@@ -43,13 +43,3 @@ func (caller channelerChangedCaller) Call(s *slip.Scope, args slip.List, depth i
 	}
 	return nil
 }
-
-func (caller channelerChangedCaller) Docs() string {
-	return `__:changed__ _symbol_ _value_
-   _:symbol_ [symbol] the symbol that changed.
-   _:value_ [object] the new value for the symbol.
-
-
-Responds to a change event received from the watch-server.
-`
-}

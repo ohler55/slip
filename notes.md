@@ -10,9 +10,6 @@
   - redefine flavors.Method
    - update docs on other flavors
     - watch
-     - client
-     - channeler
-     - printer
      - server
     - test
      - suite

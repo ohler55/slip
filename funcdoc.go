@@ -72,11 +72,15 @@ func (fd *FuncDoc) Describe(b []byte, indent, right int, ansi bool) []byte {
 		if 0 < i {
 			b = append(b, ' ')
 		}
+		name := da.Name
+		if 0 < len(name) && name[0] == ':' {
+			name = name[1:]
+		}
 		if da.Default == nil {
-			b = append(b, da.Name...)
+			b = append(b, name...)
 		} else {
 			b = append(b, '(')
-			b = append(b, da.Name...)
+			b = append(b, name...)
 			b = append(b, ' ')
 			b = Append(b, da.Default)
 			b = append(b, ')')
@@ -99,31 +103,31 @@ func (fd *FuncDoc) Describe(b []byte, indent, right int, ansi bool) []byte {
 	if 0 < len(fd.Args) {
 		b = append(b, indentSpaces[:indent]...)
 		b = append(b, "Arguments:\n"...)
-	}
-	for _, da := range fd.Args {
-		if da.Name[0] == '&' {
-			continue
-		}
-		b = append(b, indentSpaces[:indent+2]...)
-		if ansi {
-			b = append(b, underline...)
-			b = append(b, da.Name...)
-			b = append(b, colorOff...)
-		} else {
-			b = append(b, da.Name...)
-		}
-		b = append(b, ": ["...)
-		b = append(b, da.Type...)
-		b = append(b, ']')
-		if da.Default != nil {
-			b = append(b, " = "...)
-			b = da.Default.Append(b)
-		}
-		if 0 < len(da.Text) {
+		for _, da := range fd.Args {
+			if da.Name[0] == '&' {
+				continue
+			}
+			b = append(b, indentSpaces[:indent+2]...)
+			if ansi {
+				b = append(b, underline...)
+				b = append(b, da.Name...)
+				b = append(b, colorOff...)
+			} else {
+				b = append(b, da.Name...)
+			}
+			b = append(b, ": ["...)
+			b = append(b, da.Type...)
+			b = append(b, ']')
+			if da.Default != nil {
+				b = append(b, " = "...)
+				b = da.Default.Append(b)
+			}
+			if 0 < len(da.Text) {
+				b = append(b, '\n')
+				b = AppendDoc(b, da.Text, indent+4, right, ansi)
+			}
 			b = append(b, '\n')
-			b = AppendDoc(b, da.Text, indent+4, right, ansi)
 		}
-		b = append(b, '\n')
 	}
 	if 0 < len(fd.Examples) {
 		b = append(b, '\n')
