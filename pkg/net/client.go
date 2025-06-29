@@ -165,8 +165,6 @@ func wrapContent(arg slip.Object) (rc io.ReadCloser, ct string) {
 		}
 		rc = bodyWrapString(oj.JSON(ta.Any))
 		ct = "application/json"
-	case *slip.InputStream:
-		rc = bodyWrapReader(ta)
 	case io.Reader:
 		rc = bodyWrapReader(ta)
 	default:

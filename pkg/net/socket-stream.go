@@ -4,11 +4,10 @@ package net
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketStream() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketStream{Function: slip.Function{Name: "socket-stream", Args: args}}
@@ -27,7 +26,8 @@ func init() {
 			Return: "nil|",
 			Text:   `__socket-stream__ returns a bi-directional stream of the _socket_ instance.`,
 			Examples: []string{
-				`(socket-stream (make-instance 'socket)) => #<IO-STREAM>`,
+				`(let ((sock (make-instance 'socket)))`,
+				`  (socket-stream sock)) => #<IO-STREAM>`,
 			},
 		}, &Pkg)
 }
@@ -61,6 +61,8 @@ func (caller socketStreamCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return nil
 }
 
-func (caller socketStreamCaller) Docs() string {
-	return clos.MethodDocFromFunc(":stream", "socket-stream", "socket", "socket")
+func (caller socketStreamCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":stream", "socket-stream", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :stream)) =>  #<IO-STREAM>`
+	return md
 }

@@ -83,7 +83,7 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 		m = &slip.Method{Name: name, Doc: &slip.FuncDoc{}}
 		addMethod = true
 	}
-	// Override existing method documentation if provided bu the caller.
+	// Override existing method documentation if provided by the caller.
 	switch tc := caller.(type) {
 	case slip.HasFuncDocs:
 		if fd := tc.FuncDocs(); fd != nil && 0 < len(fd.Text) {

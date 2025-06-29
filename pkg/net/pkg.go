@@ -49,6 +49,22 @@ func init() {
 	defSocketClose()
 	defSocketConnect()
 	defSocketListen()
+	defSocketMakeStream()
+	defSocketName()
+	defSocketOpenp()
+	defSocketOption()
+	defSocketp()
+	defSocketPair()
+	defSocketPeerAddress()
+	defSocketPeerPort()
+	defSocketPeerName()
+	defSocketPort()
+	defSocketReceive()
+	defSocketSelect()
+	defSocketSend()
+	defSocketShutdown()
+	defSocketState()
+	defSocketStream()
 	for _, f := range []*flavors.Flavor{
 		defClient(),
 		defRequest(),

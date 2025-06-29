@@ -6,19 +6,18 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketPeerName() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := SocketPeerName{Function: slip.Function{Name: "socket-peername", Args: args}}
+			f := SocketPeerName{Function: slip.Function{Name: "socket-peer-name", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "socket-peername",
+			Name: "socket-peer-name",
 			Args: []*slip.DocArg{
 				{
 					Name: "socket",
@@ -27,10 +26,11 @@ func init() {
 				},
 			},
 			Return: "octets|string,fixnum",
-			Text: `__get-local-name__ returns the address as octets and the port of the _socket_.
+			Text: `__socket-peer-name__ returns the address as octets and the port of the _socket_.
 If the _socket_ is closed then _nil_,_nil_ is returned.`,
 			Examples: []string{
-				`(socket-peername (make-instance 'socket :socket 5)) => #(127 0 0 1), 1234`,
+				`(let ((sock (make-instance 'socket :socket 5)))`,
+				`  (socket-peer-name sock)) => #(127 0 0 1), 1234`,
 			},
 		}, &Pkg)
 }
@@ -70,8 +70,10 @@ func (caller socketPeerNameCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return result
 }
 
-func (caller socketPeerNameCaller) Docs() string {
-	return clos.MethodDocFromFunc(":peer-name", "socket-peername", "socket", "socket")
+func (caller socketPeerNameCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":peer-name", "socket-peer-name", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :peer-name)) => #(127 0 0 1), 1234`
+	return md
 }
 
 func socketPeerName(self *flavors.Instance) (address slip.Object, port slip.Fixnum) {

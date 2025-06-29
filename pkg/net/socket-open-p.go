@@ -4,11 +4,10 @@ package net
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketOpenp() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketOpenp{Function: slip.Function{Name: "socket-open-p", Args: args}}
@@ -27,7 +26,8 @@ func init() {
 			Return: "nil|",
 			Text:   `__socket-open-p__ return true if the _socket_ instance is open.`,
 			Examples: []string{
-				`(socket-open-p (make-instance 'socket)) => nil`,
+				`(let ((sock (make-instance 'socket)))`,
+				`  (socket-open-p sock)) => nil`,
 			},
 		}, &Pkg)
 }
@@ -61,6 +61,8 @@ func (caller socketOpenpCaller) Call(s *slip.Scope, args slip.List, _ int) (resu
 	return
 }
 
-func (caller socketOpenpCaller) Docs() string {
-	return clos.MethodDocFromFunc(":open-p", "socket-open-p", "socket", "socket")
+func (caller socketOpenpCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":open-p", "socket-open-p", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :open-p)) => nil`
+	return md
 }

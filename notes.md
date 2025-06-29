@@ -9,16 +9,15 @@
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
   - redefine flavors.Method
    - update docs on other flavors
-    - net
-     + client
-     + host-ent
-     + request
-     + response
-     + server
-     - socket
-
     - watch
-    - test?
+     - client
+     - channeler
+     - printer
+     - server
+    - test
+     - suite
+     - test
+     - testable
    - fix clos test TestMethodDocFromFunc
 
    - test multiple inheritance

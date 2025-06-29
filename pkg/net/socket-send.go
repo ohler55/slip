@@ -8,11 +8,10 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketSend() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketSend{Function: slip.Function{Name: "socket-send", Args: args}}
@@ -86,13 +85,11 @@ one byte can be written.`,
 					Text: "if true then the datagram MSG_CONFIRM flag is set.",
 				},
 			},
-			Return: "octets, fixnum, string, fixnum", // TBD just number of octets written
-			Text: `__socket-send__ writes to the _socket_ and returns four values;
-the octets read, the number of bytes read, the sending host, and the sending port. If _buffer_ is _nil_
-then _octets_ or _length_ is created. If both _buffer_ and _length_ are _nil_ then an _octests_ vector
-of length 65507 is created.`,
+			Return: "fixnum",
+			Text:   `__socket-send__ writes to the _socket_ and returns the number of bytes written.`,
 			Examples: []string{
-				`(socket-receive (make-instance 'socket :socket 777) nil 5) => #(65 66 67), 3, "", nil`,
+				`(let ((sock (make-instance 'socket :socket 777)))`,
+				`  (socket-receive sock "hello")) => 5`,
 			},
 		}, &Pkg)
 }
@@ -125,8 +122,10 @@ func (caller socketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (resul
 	return
 }
 
-func (caller socketSendCaller) Docs() string {
-	return clos.MethodDocFromFunc(":send", "socket-send", "socket", "socket")
+func (caller socketSendCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":send", "socket-send", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :send "hello")) => 5`
+	return md
 }
 
 func socketSend(fd int, args slip.List) int {

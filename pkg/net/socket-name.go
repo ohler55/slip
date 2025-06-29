@@ -6,11 +6,10 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketName() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketName{Function: slip.Function{Name: "socket-name", Args: args}}
@@ -30,7 +29,8 @@ func init() {
 			Text: `__socket-name__ returns the address as octets and the port of the _socket_.
 If the _socket_ is closed then _nil_,_nil_ is returned.`,
 			Examples: []string{
-				`(socket-name (make-instance 'socket :socket 5)) => #(127 0 0 1), 1234`,
+				`(let ((sock (make-instance 'socket :socket 5)))`,
+				`  (socket-name sock)) => #(127 0 0 1), 1234`,
 			},
 		}, &Pkg)
 }
@@ -70,8 +70,10 @@ func (caller socketNameCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return result
 }
 
-func (caller socketNameCaller) Docs() string {
-	return clos.MethodDocFromFunc(":name", "socket-name", "socket", "socket")
+func (caller socketNameCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":name", "socket-name", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :name)) => #(127 0 0 1), 1234`
+	return md
 }
 
 func socketLocalName(self *flavors.Instance) (address slip.Object, port slip.Fixnum) {

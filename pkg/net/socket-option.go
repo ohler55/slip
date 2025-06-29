@@ -8,11 +8,10 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketOption() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketOption{Function: slip.Function{Name: "socket-option", Args: args}}
@@ -47,7 +46,8 @@ supported options are:
   :tcp-nodelay
 `,
 			Examples: []string{
-				`(socket-option (make-instance 'socket :socket 5) :tcp-keepalive) => t`,
+				`(let ((sock (make-instance 'socket :socket 5)))`,
+				`  (socket-option sock :tcp-keepalive)) => t`,
 			},
 		}, &Pkg)
 }
@@ -91,8 +91,10 @@ func (caller socketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (res
 	return
 }
 
-func (caller socketOptionCaller) Docs() string {
-	return clos.MethodDocFromFunc(":option", "socket-option", "socket", "socket")
+func (caller socketOptionCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":option", "socket-option", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :option :tcp-keepalive)) => t`
+	return md
 }
 
 type socketSetOptionCaller struct{}
@@ -104,10 +106,6 @@ func (caller socketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) s
 		setSockopt(fd, args[0], args[1])
 	}
 	return nil
-}
-
-func (caller socketSetOptionCaller) Docs() string {
-	return clos.MethodDocFromFunc(":set-option", "socket-option", "socket", "socket")
 }
 
 func getSockopt(fd int, arg slip.Object) (result slip.Object) {

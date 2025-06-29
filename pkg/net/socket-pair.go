@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketPair() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketPair{Function: slip.Function{Name: "socket-pair", Args: args}}
