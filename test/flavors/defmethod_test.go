@@ -181,3 +181,28 @@ func TestDefmethodNotFlavor(t *testing.T) {
 		_ = slip.ReadString(`(defmethod (nothing :rot) ())`, scope).Eval(scope, nil)
 	})
 }
+
+type rottenCaller struct{}
+
+func (caller rottenCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	return nil
+}
+
+func (caller rottenCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":rotten",
+		Text: "Something is rotten",
+		Args: []*slip.DocArg{
+			{Name: "bad", Type: "fixnum"},
+		},
+	}
+}
+
+func TestDefmethodArgsMismatch(t *testing.T) {
+	defer undefFlavor("berry")
+	defineBerry(t)
+
+	scope := slip.NewScope()
+	f := slip.ReadString("berry", scope).Eval(scope, nil).(*flavors.Flavor)
+	tt.Panic(t, func() { f.DefMethod(":rot", ":after", rottenCaller{}) })
+}

@@ -194,7 +194,7 @@ func buildFuncInfo(fi *slip.FuncInfo, p *slip.Printer) Node {
 		fname: fi.Name,
 		args:  buildDocArgs(fi.Doc.Args, p),
 	}
-	if fi.Kind == slip.Symbol("macro") {
+	if fi.Kind == slip.MacroSymbol {
 		defun.name = "defmacro"
 	} else {
 		defun.name = "defun"

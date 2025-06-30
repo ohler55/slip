@@ -16,6 +16,14 @@ const (
 	MacroSymbol = Symbol("macro")
 	// LambdaSymbol is the symbol with a value of "lambda".
 	LambdaSymbol = Symbol("lambda")
+	// FlosSymbol is the symbol with a value of "flos-function" for FLOS functions.
+	FlosSymbol = Symbol("flos-function")
+	// MethodSymbol is the symbol with a value of "method" for Flavors
+	// methods.
+	MethodSymbol = Symbol("method")
+	// GenericSymbol is the symbol with a value of "generic" for CLOS generics
+	// and methods.
+	GenericSymbol = Symbol("generic")
 )
 
 // Function is the base type for most if not all functions.

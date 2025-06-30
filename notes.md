@@ -7,35 +7,24 @@
  - pp should also set *print-escape* to true
 
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
-  - redefine flavors.Method
-   - update docs on other flavors
-    - test
-     - suite
-     - test
-     - testable
-   - fix clos test TestMethodDocFromFunc
+  - tests
+   - local test
+    - Method
+    - WhopLoc
+    - argcounterror_test
+    - function_test
+    - etc
+  - update plugins - new-method branches on all
 
-   - test multiple inheritance
-   - test inherit after defflavor
-    - make sure vanilla is at end
-     - remove and then add back if present?
-   - slip.Method
-    - change flavors to use Method
-     - maybe start with whoploc
-     - defmethod
-     - instance receive
-     - flavor
-     - defwhopper
-
-    - validate parameters on defmethod to make sure the funcdocs are the same
-   - does Method need to be at top level
-    - needed for Generic which will be used by Package
-
+ - generics branch
    - clos.Generic
     - embeds flavors.Method
     - adds parameters - list of type symbols, later type specifier lists
     - add specifics []*clos.Generic
    - want this on package for lookup
+   - clos instances don't bind slot by default
+    - not a slip.Scope, just map or rather a specific Slots map so cl/slot-value works with it
+     - Getter interface or Getter and Setter interfaces
 
   - defgeneric (needed before defclass for slot accessors)
    - build generic dispatch table on Package

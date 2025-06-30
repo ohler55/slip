@@ -60,11 +60,11 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 	return nil
 }
 
-func (caller initCaller) Docs() string {
-	return `__:init__
-
-Sets the initial values when _make-instance_ is called.
-`
+func (caller initCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Sets the initial value when _make-instance_ is called.",
+	}
 }
 
 func getRunKeys(args slip.List) (filter slip.List, verbose, trace bool) {

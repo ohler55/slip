@@ -80,18 +80,22 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 	)
 	m := mm[name]
 	if m == nil {
-		m = &slip.Method{Name: name, Doc: &slip.FuncDoc{}}
+		m = &slip.Method{Name: name, Doc: &slip.FuncDoc{Name: name, Kind: slip.MethodSymbol}}
 		addMethod = true
 	}
 	// Override existing method documentation if provided by the caller.
 	switch tc := caller.(type) {
 	case slip.HasFuncDocs:
 		if fd := tc.FuncDocs(); fd != nil && 0 < len(fd.Text) {
+			fd.Kind = slip.MethodSymbol
+			if !addMethod && name != ":init" {
+				m.CompareArgs(fd)
+			}
 			m.Doc = fd
 		}
 	case HasDocs:
 		if text := tc.Docs(); 0 < len(text) {
-			m.Doc = &slip.FuncDoc{Name: name, Text: text}
+			m.Doc = &slip.FuncDoc{Name: name, Text: text, Kind: slip.MethodSymbol}
 		}
 	}
 	// If there is a combination for this flavor it will be the first on the
@@ -255,7 +259,6 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 			obj.methods[k] = m
 		}
 		for _, ic := range im.Combinations {
-			// TBD make sure vanilla remains at the end
 			if !m.HasMethodFromClass(ic.From.Name()) {
 				m.Combinations = append(m.Combinations, ic)
 			}

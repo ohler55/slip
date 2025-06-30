@@ -111,3 +111,57 @@ func TestPanicMethodArgChoice(t *testing.T) {
 
 	tt.Panic(t, func() { slip.PanicMethodArgChoice(inst, "method-1", 1, "2 or 3") })
 }
+
+func TestMethodCompareArgs(t *testing.T) {
+	// The type of caller doesn't matter for this test.
+	fi := slip.MustFindFunc("1+", &slip.CLPkg)
+	caller := fi.Create(slip.List{slip.Fixnum(3)}).(slip.Caller)
+
+	m := slip.Method{
+		Name: "sample",
+		Doc: &slip.FuncDoc{
+			Name: "sample",
+			Args: []*slip.DocArg{
+				{Name: "x", Type: "fixnum"},
+				{Name: "y", Type: "fixnum", Default: slip.Fixnum(2)},
+			},
+			Return: "fixnum",
+		},
+		Combinations: []*slip.Combination{
+			{
+				From:    slip.FindClass("fixnum"),
+				Primary: caller,
+			},
+		},
+	}
+	m2 := slip.Method{
+		Name: "sample",
+		Doc: &slip.FuncDoc{
+			Name: "sample",
+			Args: []*slip.DocArg{
+				{Name: "a", Type: "fixnum"},
+				{Name: "b", Type: "fixnum"},
+			},
+			Return: "fixnum",
+		},
+		Combinations: []*slip.Combination{
+			{
+				From:  slip.FindClass("fixnum"),
+				After: caller,
+			},
+		},
+	}
+	// Should not panic.
+	m.CompareArgs(m2.Doc)
+
+	m2.Doc.Args[0].Type = "real"
+	tt.Panic(t, func() { m.CompareArgs(m2.Doc) })
+
+	m2.Doc.Args[0].Type = "fixnum"
+	m2.Doc.Return = "object"
+	tt.Panic(t, func() { m.CompareArgs(m2.Doc) })
+
+	m2.Doc.Return = "fixnum"
+	m2.Doc.Args = m2.Doc.Args[:1]
+	tt.Panic(t, func() { m.CompareArgs(m2.Doc) })
+}

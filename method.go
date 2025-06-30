@@ -7,9 +7,6 @@ import (
 	"unsafe"
 )
 
-// methodSymbol is the symbol with a value of "whopLoc".
-const methodSymbol = Symbol("method")
-
 // Method represents a method for flavors and clos classes.
 type Method struct {
 	Name         string
@@ -129,7 +126,7 @@ func (m *Method) Equal(other Object) (eq bool) {
 
 // Hierarchy returns the class hierarchy as symbols for the whopLoc.
 func (m *Method) Hierarchy() []Symbol {
-	return []Symbol{methodSymbol, TrueSymbol}
+	return []Symbol{MethodSymbol, TrueSymbol}
 }
 
 // Eval returns self.
@@ -145,6 +142,22 @@ func (m *Method) HasMethodFromClass(from string) bool {
 		}
 	}
 	return false
+}
+
+// CompareArgs compares argument types and panics on a mismatch.
+func (m *Method) CompareArgs(fd *FuncDoc) {
+	if len(m.Doc.Args) != len(fd.Args) {
+		NewPanic("Lambda list mismatch. %d versus %d aruments for %s.", len(m.Doc.Args), len(fd.Args), m.Name)
+	}
+	if m.Doc.Return != fd.Return {
+		NewPanic("Return type mismatch. %s versus %s for %s.", m.Doc.Return, fd.Return, m.Name)
+	}
+	for i, da := range fd.Args {
+		if da.Type != m.Doc.Args[i].Type {
+			NewPanic("Lambda list mismatch. %d argument type %s versus %s for %s.",
+				i, m.Doc.Args[i].Type, da.Type, m.Name)
+		}
+	}
 }
 
 // CheckMethodArgCount raises a panic describing the wrong number of arguments

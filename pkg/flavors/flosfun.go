@@ -58,7 +58,7 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	fname := slip.MustBeString(args[0], "function-name")
 	var (
 		meth string
-		docs string
+		docs any
 	)
 	if sym, ok := args[1].(slip.Symbol); ok && 1 < len(sym) && sym[0] == ':' {
 		meth = strings.ToLower(string(sym))
@@ -74,14 +74,7 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if m == nil {
 				slip.PanicType("doc-source", args[2], "string", "flavor")
 			}
-			// TBD use FuncDoc instead
-			var b []byte
-			for _, c := range m.Combinations {
-				if hd, _ := c.Primary.(HasDocs); hd != nil {
-					b = append(b, hd.Docs()...)
-				}
-			}
-			docs = string(b)
+			docs = m.Doc
 		default:
 			slip.PanicType("doc-source", args[2], "string", "flavor")
 		}
@@ -101,30 +94,45 @@ func (f *flosWrap) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 }
 
 // FlosFun creates a function that sends a method to an instance.
-func FlosFun(fname, meth, docs string, p *slip.Package) {
+func FlosFun(fname, meth string, docs any, p *slip.Package) {
+	fd := slip.FuncDoc{
+		Name: fname,
+		Args: []*slip.DocArg{
+			{
+				Name: "instance",
+				Type: "Instance",
+				Text: fmt.Sprintf("The instance to send the %s method to.", meth),
+			},
+		},
+		Return: "Object",
+		Kind:   slip.FlosSymbol,
+	}
+	switch td := docs.(type) {
+	case string:
+		fd.Text = fmt.Sprintf(`__%s__ sends to _instance_ %s`, fname, td)
+		fd.Args = append(fd.Args, &slip.DocArg{Name: "&rest"})
+		fd.Args = append(fd.Args, &slip.DocArg{
+			Name: "args",
+			Type: "Object",
+			Text: fmt.Sprintf("The argument to the %s method.", meth),
+		})
+	case *slip.FuncDoc:
+		fd.Text = td.Text
+		fd.Return = td.Return
+		fd.Args = append(fd.Args, td.Args...)
+	default:
+		fd.Text = fmt.Sprintf(`__%s__ sends to _instance_`, fname)
+		fd.Args = append(fd.Args, &slip.DocArg{Name: "&rest"})
+		fd.Args = append(fd.Args, &slip.DocArg{
+			Name: "args",
+			Type: "Object",
+			Text: fmt.Sprintf("The argument to the %s method.", meth),
+		})
+	}
 	slip.Define(
 		func(wargs slip.List) slip.Object {
 			fw := flosWrap{Function: slip.Function{Name: fname, Args: wargs}, meth: meth}
 			fw.Self = &fw
 			return &fw
-		},
-		&slip.FuncDoc{
-			Name: fname,
-			Args: []*slip.DocArg{
-				{
-					Name: "instance",
-					Type: "Instance",
-					Text: fmt.Sprintf("The instance to send the %s method to.", meth),
-				},
-				{Name: "&rest"},
-				{
-					Name: "args",
-					Type: "Object",
-					Text: fmt.Sprintf("The argument to the %s method.", meth),
-				},
-			},
-			Return: "Object",
-			Text:   fmt.Sprintf(`__%s__ sends to _instance_ %s`, fname, docs),
-			Kind:   slip.Symbol("flos-function"),
-		}, p)
+		}, &fd, p)
 }
