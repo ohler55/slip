@@ -9,8 +9,6 @@
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
   - redefine flavors.Method
    - update docs on other flavors
-    - watch
-     - server
     - test
      - suite
      - test

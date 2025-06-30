@@ -121,15 +121,29 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	return nil
 }
 
-func (caller suiteRunCaller) Docs() string {
-	return `__:run__ &key filter verbose trace
-   _:filter_ if present identifies the tests to run by a path. e.g., (top child leaf)
-   _:verbose_ if true the test results will be printed.
-   _:trace_ if true _(trace t)_ will be called before evaluating the tests.
-
-
-Runs the test suite.
-`
+func (caller suiteRunCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":run",
+		Text: "Runs the test suite.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":filter",
+				Type: "string",
+				Text: `If present identifies the tests to run by a path. e.g., (top child leaf).`,
+			},
+			{
+				Name: ":verbose",
+				Type: "boolean",
+				Text: `If true the test results will be printed.`,
+			},
+			{
+				Name: ":trace",
+				Type: "boolean",
+				Text: `if true _(trace t)_ will be called before evaluating the tests.`,
+			},
+		},
+	}
 }
 
 type suiteResetCaller bool
