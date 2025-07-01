@@ -1047,6 +1047,9 @@ func TestFuncInfo(t *testing.T) {
 	}).Test(t)
 	result := fi.Apply(slip.NewScope(), slip.Read([]byte("('(1 2))"), slip.NewScope())[0].(slip.List), 0)
 	tt.Equal(t, slip.Fixnum(1), result)
+	fd := fi.FuncDocs()
+	tt.NotNil(t, fd)
+	tt.Equal(t, "car", fd.Name)
 }
 
 func TestFuncInfoDescribeBasic(t *testing.T) {

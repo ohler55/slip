@@ -114,6 +114,13 @@ func TestPanicMethodArgChoice(t *testing.T) {
 	tt.Panic(t, func() { slip.PanicMethodArgChoice(inst, "method-1", 1, "2 or 3") })
 }
 
+func TestSendArgCountCheck(t *testing.T) {
+	scope := slip.NewScope()
+	inst := slip.ReadString(`(make-instance 'vanilla-flavor)`, scope).Eval(scope, nil).(slip.Instance)
+
+	tt.Panic(t, func() { slip.SendArgCountCheck(inst, "method-1", slip.List{nil}, 2, 3) })
+}
+
 func TestMethodCompareArgs(t *testing.T) {
 	// The type of caller doesn't matter for this test.
 	fi := slip.MustFindFunc("1+", &slip.CLPkg)
@@ -177,14 +184,14 @@ func TestMethodBoundCall(t *testing.T) {
 	scope.Let(slip.Symbol("out"), &out)
 	code := slip.ReadString(`
 (defflavor berry () ())
-(defwhopper (berry :double) (x) (continue-whopper (1+ x)))
+;;(defwhopper (berry :double) (x) (continue-whopper (1+ x)))
 (defflavor blueberry ((size "medium")) (berry) :gettable-instance-variables :settable-instance-variables)
 (defmethod (blueberry :before :size) (x) (format out "before~%"))
 (defmethod (blueberry :after :size) (x) (format out "after~%"))
 (defmethod (blueberry :length) () 5)
 (defmethod (blueberry :double) (x) (* 2 x))
 (defwhopper (blueberry :double) (x) (continue-whopper (* 2 x)))
-;; (defwhopper (berry :double) (x) (continue-whopper (1+ x)))
+(defwhopper (berry :double) (x) (continue-whopper (1+ x)))
 (setq berry (make-instance 'blueberry))
 `, scope)
 	berry := code.Eval(scope, nil).(*flavors.Instance)

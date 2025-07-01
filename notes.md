@@ -7,17 +7,9 @@
  - pp should also set *print-escape* to true
 
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
-  - fix defmethod propogation in flavor
-   - insertMethod
-  - tests
-   - local test
-    - Method
-    - WhopLoc
-    - argcounterror_test
-    - function_test
-    - etc
   - update plugins - new-method branches on all
 
+--------
  - generics branch
    - clos.Generic
     - embeds flavors.Method
@@ -89,6 +81,58 @@
   - optimize for binding of one to a class using the class method
   - register as normal function but handle differently
   - move defmethod to clos
+
+ - [ ] ADD-METHOD
+ - [ ] CALL-METHOD
+ - [ ] CALL-NEXT-METHOD
+ - [ ] CHANGE-CLASS
+ - [ ] CLASS-NAME
+ - [ ] CLASS-OF
+ - [ ] COMPUTE-APPLICABLE-METHODS
+ - [ ] DEFCLASS
+ - [ ] DEFGENERIC
+ - [ ] DEFINE-CONDITION
+ - [ ] DEFINE-METHOD-COMBINATION
+ - [ ] DEFMETHOD
+ - [ ] DESCRIBE-OBJECT
+ - [ ] DOCUMENTATION
+ - [ ] ENSURE-GENERIC-FUNCTION
+ - [ ] FIND-CLASS
+ - [ ] FIND-METHOD
+ - [ ] FUNCTION-KEYWORDS
+ - [ ] GENERIC-FLET
+ - [ ] GENERIC-FUNCTION
+ - [ ] GENERIC-LABELS
+ - [ ] INITIALIZE-INSTANCE
+ - [ ] INVALID-METHOD-ERROR
+ - [ ] MAKE-INSTANCE
+ - [ ] MAKE-INSTANCES-OBSOLETE
+ - [ ] MAKE-LOAD-FORM
+ - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
+ - [ ] MAKE-METHOD
+ - [ ] METHOD-COMBINATION
+ - [ ] METHOD-COMBINATION-ERROR
+ - [ ] METHOD-QUALIFIERS
+ - [ ] NEXT-METHOD-P
+ - [ ] NO-APPLICABLE-METHOD
+ - [ ] NO-NEXT-METHOD
+ - [ ] PRINT-OBJECT
+ - [ ] REINITIALIZE-INSTANCE
+ - [ ] REMOVE-METHOD
+ - [ ] SHARED-INITIALIZE
+ - [ ] SLOT-BOUNDP
+ - [ ] SLOT-EXISTS-P
+ - [ ] SLOT-MAKUNBOUND
+ - [ ] SLOT-MISSING
+ - [ ] SLOT-UNBOUND
+ - [ ] SLOT-VALUE
+ - [ ] SYMBOL-MACROLET
+ - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
+ - [ ] WITH-ACCESSORS
+ - [ ] WITH-ADDED-METHODS
+ - [ ] WITH-SLOTS
+
+-----------------
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND

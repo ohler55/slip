@@ -3,7 +3,6 @@
 package flavors
 
 import (
-	"fmt"
 	"io"
 	"sort"
 	"strings"
@@ -142,16 +141,32 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 }
 
 func (obj *Flavor) insertMethod(super *Flavor, method *slip.Method, combo *slip.Combination) {
-	fmt.Printf("*** insert %s from %s into %s\n", method.Name, super.name, obj.name)
-
-	// TBD get method, if method does not exist add a new method and this one's combination
-
-	// else if exists, then insert combo into correct position according to inherits
-	//   walk inherited
-	//   track position in combinations
-	//   when inherit hits super break
-	//     insert append(append(x[:pos], c), x[pos:]...)
-
+	m := obj.methods[method.Name]
+	if m == nil {
+		m = &slip.Method{
+			Name: method.Name,
+			Doc:  method.Doc,
+			Combinations: []*slip.Combination{
+				{From: obj},
+				combo,
+			},
+		}
+		obj.methods[method.Name] = m
+		return
+	}
+	var pos int
+	if pos < len(m.Combinations) && m.Combinations[pos].From == obj {
+		pos++
+	}
+	for _, f := range obj.inherit {
+		if len(m.Combinations) <= pos || m.Combinations[pos].From == super {
+			break
+		}
+		if m.Combinations[pos].From == f {
+			pos++
+		}
+	}
+	m.Combinations = append(append(m.Combinations[:pos], combo), m.Combinations[pos:]...)
 }
 
 // String representation of the Object.
