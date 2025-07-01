@@ -6,11 +6,10 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketListen() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketListen{Function: slip.Function{Name: "socket-listen", Args: args}}
@@ -35,8 +34,8 @@ func init() {
 			Text:   `__socket-listen__ listens on _socket_ for connection requests.`,
 			Examples: []string{
 				`(let ((sock (make-socket :domain :unix :type :stream)))`,
-				` (socket-bind sock #(127 0 0 1) 1234)`,
-				` (socket-listen sock 1000))`,
+				`  (socket-bind sock #(127 0 0 1) 1234)`,
+				`  (socket-listen sock 1000))`,
 			},
 		}, &Pkg)
 }
@@ -66,8 +65,10 @@ func (caller socketListenCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return nil
 }
 
-func (caller socketListenCaller) Docs() string {
-	return clos.MethodDocFromFunc(":listen", "socket-listen", "socket", "socket")
+func (caller socketListenCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":listen", "socket-listen", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :listen))`
+	return md
 }
 
 func listenSocket(self *flavors.Instance, args slip.List) {

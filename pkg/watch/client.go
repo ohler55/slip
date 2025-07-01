@@ -140,15 +140,29 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return nil
 }
 
-func (caller clientInitCaller) Docs() string {
-	return `__:init__ &key _host_ _port_
-   _:host_ [string] the host to connect to.
-   _:port_ [fixnum] the port to connect to.
-   _:vars_ [list] initial variables to watch.
-
-
-Sets the initial values when _make-instance_ is called.
-`
+func (caller clientInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Sets the initial value when _make-instance_ is called.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":host",
+				Type: "string",
+				Text: `The watch host to connect to.`,
+			},
+			{
+				Name: ":port",
+				Type: "fixnum",
+				Text: " The watch port to connect to.",
+			},
+			{
+				Name: ":vars",
+				Type: "list",
+				Text: `Initial variables to watch.`,
+			},
+		},
+	}
 }
 
 type clientShutdownCaller struct{}
@@ -156,7 +170,7 @@ type clientShutdownCaller struct{}
 func (caller clientShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
 	}
 	c := self.Any.(*client)
 	c.shutdown()
@@ -164,12 +178,11 @@ func (caller clientShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller clientShutdownCaller) Docs() string {
-	return `__:shutdown__ => _nil_
-
-
-Shuts down the client.
-`
+func (caller clientShutdownCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":shutdown",
+		Text: "Shuts down the client.",
+	}
 }
 
 type clientActivepCaller struct{}
@@ -177,7 +190,7 @@ type clientActivepCaller struct{}
 func (caller clientActivepCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":activep", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":activep", len(args), "0")
 	}
 	c := self.Any.(*client)
 	if c.active.Load() {
@@ -186,12 +199,11 @@ func (caller clientActivepCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	return nil
 }
 
-func (caller clientActivepCaller) Docs() string {
-	return `__:activep__ => _boolean_
-
-
-Returns true if the client is active.
-`
+func (caller clientActivepCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":activep",
+		Text: "Returns true if the client is active.",
+	}
 }
 
 type clientEvalCaller struct{}
@@ -199,7 +211,7 @@ type clientEvalCaller struct{}
 func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	if len(args) < 1 || 3 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":eval", len(args), "1 to 3")
+		slip.PanicMethodArgChoice(self, ":eval", len(args), "1 to 3")
 	}
 	c := self.Any.(*client)
 	timeout := time.Second * 2
@@ -229,14 +241,25 @@ func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (r
 	return
 }
 
-func (caller clientEvalCaller) Docs() string {
-	return `__:eval__ _expr_ &key timeout => _object_
-   _:expr_ [object] an expression to evaluate.
-   _:timeout_ [real] the number of seconds to wait for a response before timing out.
-
-
-Send an expression to the remote server and wait for a response or a timeout.
-`
+func (caller clientEvalCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":eval",
+		Text: "Send an expression to the remote server and wait for a response or a timeout.",
+		Args: []*slip.DocArg{
+			{
+				Name: "expr",
+				Type: "object",
+				Text: `An expression to evaluate.`,
+			},
+			{Name: "&key"},
+			{
+				Name: ":timeout",
+				Type: "real",
+				Text: "The number of seconds to wait for a response before timing out.",
+			},
+		},
+		Return: "object",
+	}
 }
 
 type clientWatchCaller struct{}
@@ -244,20 +267,26 @@ type clientWatchCaller struct{}
 func (caller clientWatchCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(self, ":watch", len(args), "1")
+		slip.PanicMethodArgChoice(self, ":watch", len(args), "1")
 	}
 	c := self.Any.(*client)
 	req := slip.List{slip.Symbol("watch"), args[0]}
 	return c.writeMsg(req)
 }
 
-func (caller clientWatchCaller) Docs() string {
-	return `__:watch__ _symbol_ _value_
-   _:symbol_ [symbol] the symbol to watch.
-
-
-Sends a request to watch a global variable to the watch-server.
-`
+func (caller clientWatchCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":watch",
+		Text: "Sends a request to watch a global variable to the watch-server.",
+		Args: []*slip.DocArg{
+			{
+				Name: "symbol",
+				Type: "symbol",
+				Text: `The symbol to watch.`,
+			},
+		},
+		Return: "object",
+	}
 }
 
 type clientForgetCaller struct{}
@@ -265,7 +294,7 @@ type clientForgetCaller struct{}
 func (caller clientForgetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(self, ":forget", len(args), "1")
+		slip.PanicMethodArgChoice(self, ":forget", len(args), "1")
 	}
 	c := self.Any.(*client)
 	for i, sv := range c.vars {
@@ -279,43 +308,58 @@ func (caller clientForgetCaller) Call(s *slip.Scope, args slip.List, depth int) 
 	return c.writeMsg(req)
 }
 
-func (caller clientForgetCaller) Docs() string {
-	return `__:forget__ _symbol_
-   _:symbol_ [symbol] the symbol to forget.
-
-
-Sends a request to the watch-server to forget or stop watching a global variable.
-`
+func (caller clientForgetCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":forget",
+		Text: "Sends a request to the watch-server to forget or stop watching a global variable.",
+		Args: []*slip.DocArg{
+			{
+				Name: "symbol",
+				Type: "symbol",
+				Text: `The symbol to forget.`,
+			},
+		},
+		Return: "object",
+	}
 }
 
 type clientChangedCaller struct{}
 
-func (caller clientChangedCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (caller clientChangedCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if len(args) != 2 {
-		flavors.PanicMethodArgChoice(self, ":changed", len(args), "2")
+		slip.PanicMethodArgChoice(self, ":changed", len(args), "2")
 	}
 	c := self.Any.(*client)
 	for _, v := range c.vars {
 		if args[0] == v.sym {
 			v.val = args[1]
-			return
+			return nil
 		}
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		c.vars = append(c.vars, &symVal{sym: sym, val: args[1]})
 	}
-	return
+	return nil
 }
 
-func (caller clientChangedCaller) Docs() string {
-	return `__:changed__ _symbol_ _value_
-   _:symbol_ [symbol] the symbol that changed.
-   _:value_ [object] the new value for the symbol.
-
-
-Responds to a change event received from the watch-server.
-`
+func (caller clientChangedCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":changed",
+		Text: "Responds to a change event received from the watch-server.",
+		Args: []*slip.DocArg{
+			{
+				Name: "symbol",
+				Type: "symbol",
+				Text: `The symbol that changed.`,
+			},
+			{
+				Name: "value",
+				Type: "object",
+				Text: `The new value for the symbol.`,
+			},
+		},
+	}
 }
 
 type clientPeriodicCaller struct{}
@@ -328,15 +372,28 @@ func (caller clientPeriodicCaller) Call(s *slip.Scope, args slip.List, depth int
 	return
 }
 
-func (caller clientPeriodicCaller) Docs() string {
-	return `__:periodic__ _id_ _period_ _op_
-   _:id_ [symbol] the periodic evaluation identifier.
-   _:period_ [real] the number of seconds to wait between evaluations.
-   _:op_ [symbol|lambda] the symbol of a variable or a lambda to evaluate on the server.
-
-
-Adds a periodic evaluator to the watch server.
-`
+func (caller clientPeriodicCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":periodic",
+		Text: "Adds a periodic evaluator to the watch server.",
+		Args: []*slip.DocArg{
+			{
+				Name: "id",
+				Type: "symbol",
+				Text: `The periodic evaluation identifier.`,
+			},
+			{
+				Name: "period",
+				Type: "real",
+				Text: `The number of seconds to wait between evaluations.`,
+			},
+			{
+				Name: "op",
+				Type: "symbol|lambda",
+				Text: `The symbol of a variable or a lambda to evaluate on the server.`,
+			},
+		},
+	}
 }
 
 func (c *client) listen(s *slip.Scope) {
@@ -445,7 +502,7 @@ func (c *client) changeLoop() {
 
 func (c *client) addPeriodic(self *flavors.Instance, args slip.List) (id slip.Symbol) {
 	if len(args) != 3 {
-		flavors.PanicMethodArgChoice(self, ":periodic", len(args), "3")
+		slip.PanicMethodArgChoice(self, ":periodic", len(args), "3")
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		id = sym

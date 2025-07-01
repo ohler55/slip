@@ -64,8 +64,8 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	}
 	sc := hm.(slip.Class)
 	meth, _ := args[1].(slip.Symbol)
-	ma := hm.GetMethod(string(meth))
-	if len(ma) == 0 {
+	m := hm.GetMethod(string(meth))
+	if m == nil {
 		slip.PanicUnboundSlot(args[0], meth, "%s is not a method on %s.", args[1], args[0])
 	}
 	w := s.Get("*standard-output*").(io.Writer)
@@ -94,39 +94,40 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	b = append(b, sc.Name()...)
 	b = append(b, off...)
 	b = append(b, '\n')
-	appendDaemon := func(m *Method, caller slip.Caller, daemon string) {
-		b = append(b, "  "...)
+
+	if m.Doc != nil {
+		b = m.Doc.Describe(b, 2, right, ansi)
+	}
+	b = append(b, "  Implemented by:\n"...)
+	appendDaemon := func(c *slip.Combination, caller slip.Caller, daemon string) {
+		b = append(b, "    "...)
 		b = append(b, emp...)
-		b = append(b, m.From.Name()...)
+		b = append(b, c.From.Name()...)
 		b = append(b, off...)
 		b = append(b, ' ')
 		b = append(b, daemon...)
 		b = append(b, '\n')
-		if hd, ok := caller.(HasDocs); ok && 0 < len(hd.Docs()) {
-			b = slip.AppendDoc(b, hd.Docs(), 4, right, ansi)
-			b = append(b, '\n')
+	}
+	for _, c := range m.Combinations {
+		if c.Wrap != nil {
+			appendDaemon(c, c.Wrap, ":whopper")
 		}
 	}
-	for _, m := range ma {
-		if m.wrap != nil {
-			appendDaemon(m, m.wrap, ":whopper")
+	for _, c := range m.Combinations {
+		if c.Before != nil {
+			appendDaemon(c, c.Before, ":before")
 		}
 	}
-	for _, m := range ma {
-		if m.before != nil {
-			appendDaemon(m, m.before, ":before")
-		}
-	}
-	for _, m := range ma {
-		if m.primary != nil {
-			appendDaemon(m, m.primary, ":primary")
+	for _, c := range m.Combinations {
+		if c.Primary != nil {
+			appendDaemon(c, c.Primary, ":primary")
 			break
 		}
 	}
-	for i := len(ma) - 1; 0 <= i; i-- {
-		m := ma[i]
-		if m.after != nil {
-			appendDaemon(m, m.after, ":after")
+	for i := len(m.Combinations) - 1; 0 <= i; i-- {
+		c := m.Combinations[i]
+		if c.After != nil {
+			appendDaemon(c, c.After, ":after")
 		}
 	}
 	_, _ = w.Write(b)

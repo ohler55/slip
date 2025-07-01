@@ -41,7 +41,7 @@ The path must follow the JSONPath format. Default: ".."`,
 					Text: `If not nil then the value to the _function_ is a _bag_ value otherwise a new LISP object.`,
 				},
 			},
-			Return: "bag",
+			Return: "nil",
 			Text: `__bag-walk__ walks the values at the location described by _path_.
 
 This is the same as the _:walk_ method of the _bag-flavor_ except none of the method's

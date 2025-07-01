@@ -44,8 +44,8 @@ func defClient() *flavors.Flavor {
 	clientFlavor.DefMethod(":get", "", clientBodylessCaller(http.MethodGet))
 	clientFlavor.DefMethod(":head", "", clientBodylessCaller(http.MethodHead))
 	clientFlavor.DefMethod(":options", "", clientBodylessCaller(http.MethodOptions))
-	clientFlavor.DefMethod(":patch", "", clientBodyCaller(http.MethodPut))
-	clientFlavor.DefMethod(":post", "", clientBodyCaller(http.MethodPut))
+	clientFlavor.DefMethod(":patch", "", clientBodyCaller(http.MethodPatch))
+	clientFlavor.DefMethod(":post", "", clientBodyCaller(http.MethodPost))
 	clientFlavor.DefMethod(":put", "", clientBodyCaller(http.MethodPut))
 	clientFlavor.DefMethod(":trace", "", clientBodylessCaller(http.MethodTrace))
 
@@ -116,7 +116,7 @@ func (caller clientBodylessCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	case 1:
 		header = headerFromAssoc(args[0])
 	default:
-		flavors.PanicMethodArgChoice(obj, ":"+string(caller), len(args), "0 or 1")
+		slip.PanicMethodArgChoice(obj, ":"+string(caller), len(args), "0 or 1")
 	}
 	client, u := ensureClient(obj)
 	req := http.Request{
@@ -136,13 +136,21 @@ func (caller clientBodylessCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return MakeResponse(resp)
 }
 
-func (caller clientBodylessCaller) Docs() string {
-	return fmt.Sprintf(`__:%s__ &optional _headers_ => _response_
-   _headers_ must be an association list with list values such as (("Content-Type" "application/json")).
-
-Makes an HTTP %s requests and returns the response.
-If an error occurs it is raised with a panic that can be recovered.
-`, strings.ToLower(string(caller)), caller)
+func (caller clientBodylessCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":" + strings.ToLower(string(caller)),
+		Text: fmt.Sprintf(`Makes an HTTP %s requests and returns the response.
+If an error occurs it is raised with a panic.`, caller),
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name: "headers",
+				Type: "association-list",
+				Text: `An association list with list values such as (("Content-Type" "application/json")).`,
+			},
+		},
+		Return: "http-response",
+	}
 }
 
 type clientBodyCaller string
@@ -157,8 +165,6 @@ func wrapContent(arg slip.Object) (rc io.ReadCloser, ct string) {
 		}
 		rc = bodyWrapString(oj.JSON(ta.Any))
 		ct = "application/json"
-	case *slip.InputStream:
-		rc = bodyWrapReader(ta)
 	case io.Reader:
 		rc = bodyWrapReader(ta)
 	default:
@@ -211,7 +217,7 @@ func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		}
 		header = headerFromAssoc(args[2])
 	default:
-		flavors.PanicMethodArgChoice(obj, ":"+string(caller), len(args), "1, 2, or 3")
+		slip.PanicMethodArgChoice(obj, ":"+string(caller), len(args), "1, 2, or 3")
 	}
 	client, u := ensureClient(obj)
 	req := http.Request{
@@ -228,18 +234,35 @@ func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return MakeResponse(resp)
 }
 
-func (caller clientBodyCaller) Docs() string {
-	return fmt.Sprintf(`__:%s__ _content_ &optional _content-type_ _headers_ => _response_
-   _content_ must be a _string_, _bag_, or _input-stream_
-   _content-type_ the content type such as "application/json"
-   _headers_ must be an association list with list values such as (("Content-Type" "application/json")).
+func (caller clientBodyCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":" + strings.ToLower(string(caller)),
+		Text: fmt.Sprintf(`Makes an HTTP %s requests and returns the response. If the _content_ is a
+string then it is used as the body of the request. If the _content_ is an instance of the _bag-flavor_
+then the _content_ is encoded as JSON and used as the body of the request. If the _content-type_ is
+_nil_ then it will be set to "application/json" when the _content_ is a _bag_. If the _content_ is an
+_input-stream_ then the stream will be read to form the body of the request.
 
-Makes an HTTP %s requests and returns the response. If the _content_ is a string then it is used
-as the body of the request. If the _content_ is an instance of the _bag-flavor_ then the _content_
-is encoded as JSON and used as the body of the request. If the _content-type_ is _nil_ then it will
-be set to "application/json" when the _content_ is a _bag_. If the _content_ is an _input-stream_
-then the stream will be read to form the body of the request.
 
-If an error occurs it is raised with a panic that can be recovered.
-`, strings.ToLower(string(caller)), caller)
+If an error occurs it is raised with a panic.`, caller),
+		Args: []*slip.DocArg{
+			{
+				Name: "content",
+				Type: "string|bag|input-stream",
+				Text: `The content for the body of the request.`,
+			},
+			{Name: "&optional"},
+			{
+				Name: "headers",
+				Type: "association-list",
+				Text: `An association list with list values such as (("Content-Type" "application/json")).`,
+			},
+			{
+				Name: "content-type",
+				Type: "string",
+				Text: `the content type such as "application/json".`,
+			},
+		},
+		Return: "http-response",
+	}
 }

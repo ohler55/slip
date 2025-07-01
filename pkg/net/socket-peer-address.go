@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketPeerAddress() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketPeerAddress{Function: slip.Function{Name: "socket-peer-address", Args: args}}
@@ -27,7 +27,8 @@ func init() {
 			Text: `__socket-peer-address__ returns the address of the _socket_. If the _socket_
 is closed then _nil_ is returned.`,
 			Examples: []string{
-				`(socket-peer-address (make-instance 'socket :socket 5)) => #(127 0 0 1)`,
+				`(let ((sock (make-instance 'socket :socket 5)))`,
+				`  (socket-peer-address sock)) => #(127 0 0 1)`,
 			},
 		}, &Pkg)
 }
@@ -61,4 +62,10 @@ func (caller socketPeerAddressCaller) Call(s *slip.Scope, args slip.List, _ int)
 		result = addr
 	}
 	return
+}
+
+func (caller socketPeerAddressCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":peer-address", "socket-peer-address", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :peer-address)) => #(127 0 0 1)`
+	return md
 }

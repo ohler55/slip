@@ -124,7 +124,7 @@ func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
 
 // HasMethod returns true if the instance handles the named method.
 func (obj *Instance) HasMethod(method string) (has bool) {
-	if hm, ok := obj.Type.(HasMethods); ok && 0 < len(hm.GetMethod(method)) {
+	if hm, ok := obj.Type.(HasMethods); ok && hm.GetMethod(method) != nil {
 		has = true
 	}
 	return
@@ -134,11 +134,11 @@ func (obj *Instance) HasMethod(method string) (has bool) {
 // called by any code other than the send function but is public to allow it
 // to be over-ridden.
 func (obj *Instance) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
-	var ma []*Method
+	var m *slip.Method
 	if hm, ok := obj.Type.(HasMethods); ok {
-		ma = hm.GetMethod(message)
+		m = hm.GetMethod(message)
 	}
-	if len(ma) == 0 {
+	if m == nil {
 		xargs := make(slip.List, 0, len(args)+1)
 		xargs = append(xargs, slip.Symbol(message))
 		xargs = append(xargs, args...)
@@ -147,45 +147,11 @@ func (obj *Instance) Receive(s *slip.Scope, message string, args slip.List, dept
 		}
 		slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.Name())
 	}
-	for i, m := range ma {
-		if m.wrap != nil {
-			loc := &whopLoc{methods: ma, current: i}
-			ws := obj.NewScope()
-			if s != nil {
-				ws.AddParent(s)
-			}
-			ws.Let("~whopper-location~", loc)
-			(m.wrap.(*slip.Lambda)).Closure = ws
-
-			return m.wrap.Call(ws, args, depth)
-		}
-	}
-	return obj.innerReceive(s, ma, args, depth)
-}
-
-func (obj *Instance) innerReceive(s *slip.Scope, ma []*Method, args slip.List, depth int) slip.Object {
 	scope := obj.NewScope()
 	if s != nil {
 		scope.AddParent(s)
 	}
-	for _, m := range ma {
-		if m.before != nil {
-			m.before.Call(scope, args, depth)
-		}
-	}
-	var result slip.Object
-	for _, m := range ma {
-		if m.primary != nil {
-			result = m.primary.Call(scope, args, depth)
-			break
-		}
-	}
-	for _, m := range ma {
-		if m.after != nil {
-			m.after.Call(scope, args, depth)
-		}
-	}
-	return result
+	return m.Call(scope, args, depth)
 }
 
 // Equal returns true if this Object and the other are equal in value.
@@ -228,11 +194,11 @@ func (obj *Instance) BoundReceive(ps *slip.Scope, message string, bindings *slip
 			s.Vars[k] = v
 		}
 	}
-	var ma []*Method
+	var m *slip.Method
 	if hm, ok := obj.Type.(HasMethods); ok {
-		ma = hm.GetMethod(message)
+		m = hm.GetMethod(message)
 	}
-	if len(ma) == 0 {
+	if m == nil {
 		if flavor, ok := obj.Type.(*Flavor); ok {
 			if bc, _ := flavor.defaultHandler.(slip.BoundCaller); bc != nil {
 				s.Let(slip.Symbol("method"), slip.Symbol(message))
@@ -246,39 +212,7 @@ func (obj *Instance) BoundReceive(ps *slip.Scope, message string, bindings *slip
 		}
 		slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.Name())
 	}
-	for i, m := range ma {
-		if m.wrap != nil {
-			loc := &whopLoc{methods: ma, current: i}
-			ws := s.NewScope()
-			ws.Let("~whopper-location~", loc)
-			(m.wrap.(*slip.Lambda)).Closure = s
-			if bc, _ := m.wrap.(slip.BoundCaller); bc != nil {
-				return bc.BoundCall(ws, depth)
-			}
-		}
-	}
-	return obj.innerBoundReceive(ma, s, depth)
-}
-
-func (obj *Instance) innerBoundReceive(ma []*Method, s *slip.Scope, depth int) slip.Object {
-	for _, m := range ma {
-		if bc, _ := m.before.(slip.BoundCaller); bc != nil {
-			bc.BoundCall(s, depth)
-		}
-	}
-	var result slip.Object
-	for _, m := range ma {
-		if bc, _ := m.primary.(slip.BoundCaller); bc != nil {
-			result = bc.BoundCall(s, depth)
-			break
-		}
-	}
-	for _, m := range ma {
-		if bc, _ := m.after.(slip.BoundCaller); bc != nil {
-			bc.BoundCall(s, depth)
-		}
-	}
-	return result
+	return m.BoundCall(s, depth)
 }
 
 const (
@@ -330,7 +264,7 @@ func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
 
 // Length returns the length of the object.
 func (obj *Instance) Length() (size int) {
-	if hm, ok := obj.Type.(HasMethods); ok && 0 < len(hm.GetMethod(":length")) {
+	if hm, ok := obj.Type.(HasMethods); ok && hm.GetMethod(":length") != nil {
 		v := obj.Receive(nil, ":length", slip.List{}, 0)
 		if num, ok := v.(slip.Fixnum); ok {
 			size = int(num)

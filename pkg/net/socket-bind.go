@@ -6,11 +6,10 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketBind() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketBind{Function: slip.Function{Name: "socket-bind", Args: args}}
@@ -37,7 +36,7 @@ address and port for an inet socket.`,
 			Text:   `__socket-bind__ binds _socket_ to an address.`,
 			Examples: []string{
 				`(let ((sock (make-socket :domain :unix :type :stream)))`,
-				` (socket-bind sock #(127 0 0 1) 1234)) => nil`,
+				`  (socket-bind sock #(127 0 0 1) 1234)) => nil`,
 			},
 		}, &Pkg)
 }
@@ -67,8 +66,10 @@ func (caller socketBindCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return nil
 }
 
-func (caller socketBindCaller) Docs() string {
-	return clos.MethodDocFromFunc(":bind", "socket-bind", "socket", "socket")
+func (caller socketBindCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":bind", "socket-bind", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :bind #(127 0 0 1) 1234)) => nil`
+	return md
 }
 
 func bindSocket(self *flavors.Instance, args slip.List) {

@@ -52,8 +52,8 @@ The _flavor_ itself is an instance and can be sent a limited set of methods.`,
 			Export: true,
 			Doc:    `An _instance_ of a _flavor_.`,
 		},
-		string(whopLocSymbol): {
-			Val:    whopLocSymbol,
+		string(slip.WhopLocSymbol): {
+			Val:    slip.WhopLocSymbol,
 			Const:  true,
 			Export: true,
 			Doc:    `A whopper location. Private for continue-whopper.`,

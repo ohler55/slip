@@ -6,11 +6,10 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketClose() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketClose{Function: slip.Function{Name: "socket-close", Args: args}}
@@ -67,6 +66,8 @@ func (caller socketCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return nil
 }
 
-func (caller socketCloseCaller) Docs() string {
-	return clos.MethodDocFromFunc(":close", "socket-close", "socket", "socket")
+func (caller socketCloseCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":close", "socket-close", &Pkg)
+	md.Examples[0] = `(send (make-instance 'socket) :close) => nil`
+	return md
 }

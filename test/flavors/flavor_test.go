@@ -34,27 +34,66 @@ func TestFlavorSimple(t *testing.T) {
   initable: {}
   keywords: {}
   methods: [
-    [{from: vanilla-flavor name: ":change-class" primary: true}]
-    [{from: vanilla-flavor name: ":change-flavor" primary: true}]
-    [{from: vanilla-flavor name: ":describe" primary: true}]
-    [{from: vanilla-flavor name: ":equal" primary: true}]
-    [{from: vanilla-flavor name: ":eval-inside-yourself" primary: true}]
-    [{from: vanilla-flavor name: ":flavor" primary: true}]
-    [{from: vanilla-flavor name: ":id" primary: true}]
-    [{from: vanilla-flavor name: ":init" primary: true}]
-    [{from: vanilla-flavor name: ":inspect" primary: true}]
-    [{from: vanilla-flavor name: ":operation-handled-p" primary: true}]
-    [{from: vanilla-flavor name: ":print-self" primary: true}]
-    [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
-    [{from: vanilla-flavor name: ":shared-initialize" primary: true}]
-    [
-      {
-        from: vanilla-flavor
-        name: ":update-instance-for-different-class"
-        primary: true
-      }
-    ]
-    [{from: vanilla-flavor name: ":which-operations" primary: true}]
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":change-class"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":change-flavor"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":describe"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":equal"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":eval-inside-yourself"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":flavor"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":id"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":init"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":inspect"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":operation-handled-p"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":print-self"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":send-if-handles"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":shared-initialize"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":update-instance-for-different-class"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":which-operations"
+    }
   ]
   name: blueberry
   required: []
@@ -202,27 +241,66 @@ func TestFlavorReceive(t *testing.T) {
   initable: {}
   keywords: {}
   methods: [
-    [{from: vanilla-flavor name: ":change-class" primary: true}]
-    [{from: vanilla-flavor name: ":change-flavor" primary: true}]
-    [{from: vanilla-flavor name: ":describe" primary: true}]
-    [{from: vanilla-flavor name: ":equal" primary: true}]
-    [{from: vanilla-flavor name: ":eval-inside-yourself" primary: true}]
-    [{from: vanilla-flavor name: ":flavor" primary: true}]
-    [{from: vanilla-flavor name: ":id" primary: true}]
-    [{from: vanilla-flavor name: ":init" primary: true}]
-    [{from: vanilla-flavor name: ":inspect" primary: true}]
-    [{from: vanilla-flavor name: ":operation-handled-p" primary: true}]
-    [{from: vanilla-flavor name: ":print-self" primary: true}]
-    [{from: vanilla-flavor name: ":send-if-handles" primary: true}]
-    [{from: vanilla-flavor name: ":shared-initialize" primary: true}]
-    [
-      {
-        from: vanilla-flavor
-        name: ":update-instance-for-different-class"
-        primary: true
-      }
-    ]
-    [{from: vanilla-flavor name: ":which-operations" primary: true}]
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":change-class"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":change-flavor"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":describe"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":equal"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":eval-inside-yourself"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":flavor"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":id"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":init"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":inspect"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":operation-handled-p"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":print-self"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":send-if-handles"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":shared-initialize"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":update-instance-for-different-class"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
+      name: ":which-operations"
+    }
   ]
   name: blueberry
   required: []

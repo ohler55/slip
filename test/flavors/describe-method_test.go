@@ -18,11 +18,14 @@ func TestDescribeMethodPlain(t *testing.T) {
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
 	_ = slip.ReadString("(describe-method vanilla-flavor :id out)", scope).Eval(scope, nil)
 	tt.Equal(t, `:id is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :id => string
-`+"   "+`
+  Lambda-List: ()
+  Return: fixnum
+  Documentation:
     Returns the identifier of the instance.
-`, out.String())
+
+  Implemented by:
+    vanilla-flavor :primary
+`, compactEmptyLines(out.String()))
 }
 
 func TestDescribeMethodAnsi(t *testing.T) {
@@ -32,11 +35,14 @@ func TestDescribeMethodAnsi(t *testing.T) {
 	scope.Let(slip.Symbol("*print-ansi*"), slip.True)
 	_ = slip.ReadString("(describe-method vanilla-flavor :id out)", scope).Eval(scope, nil)
 	tt.Equal(t, "\x1b[1m:id\x1b[m is a method of \x1b[1mvanilla-flavor\x1b[m\n"+
-		"  \x1b[1mvanilla-flavor\x1b[m :primary\n"+
-		"    \x1b[1m:id\x1b[m => \x1b[4mstring\x1b[m\n"+
-		"   \n"+
-		"    Returns the identifier of the instance.\n",
-		out.String())
+		"  Lambda-List: ()\n"+
+		"  Return: fixnum\n"+
+		"  Documentation:\n"+
+		"    Returns the identifier of the instance.\n"+
+		"\n"+
+		"  Implemented by:\n"+
+		"    \x1b[1mvanilla-flavor\x1b[m :primary\n",
+		compactEmptyLines(out.String()))
 }
 
 func TestDescribeMethodDaemons(t *testing.T) {
@@ -51,15 +57,17 @@ func TestDescribeMethodDaemons(t *testing.T) {
 	_ = slip.ReadString(`(defwhopper (berry :rot) () "Does nothing." (continue-whopper))`, scope).Eval(scope, nil)
 	_ = slip.ReadString("(describe-method 'blueberry :rot out)", scope).Eval(scope, nil)
 	tt.Equal(t, `:rot is a method of blueberry
-  berry :whopper
-    Does nothing.
-  blueberry :before
-    Berries that are blue.
-  berry :primary
-    When berries rot they turn brown.
-  berry :after
-  blueberry :after
-`, out.String())
+  Lambda-List: ()
+  Documentation:
+    When blueberries rot they turn mushy.
+
+  Implemented by:
+    berry :whopper
+    blueberry :before
+    berry :primary
+    berry :after
+    blueberry :after
+`, compactEmptyLines(out.String()))
 }
 
 func TestDescribeMethodBadArgCount(t *testing.T) {

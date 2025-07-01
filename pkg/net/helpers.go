@@ -3,7 +3,9 @@
 package net
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ohler55/slip"
@@ -61,4 +63,22 @@ func assocToHeader(value slip.Object, field string) http.Header {
 		header[string(key)] = values
 	}
 	return header
+}
+
+func methodDocFromFunc(method, funcName string, p *slip.Package) *slip.FuncDoc {
+	fd := slip.DescribeFunction(slip.Symbol(funcName), p)
+	md := slip.FuncDoc{Name: method}
+	if fd != nil {
+		md.Text = fmt.Sprintf("%s\n\n\nSee also: __%s__\n", strings.Replace(fd.Text, funcName, method, 1), funcName)
+		if 1 < len(fd.Args) {
+			md.Args = fd.Args[1:]
+		}
+		md.Return = fd.Return
+		if 0 < len(fd.Examples) {
+			// Make a copy to be modified later.
+			md.Examples = make([]string, len(fd.Examples))
+			copy(md.Examples, fd.Examples)
+		}
+	}
+	return &md
 }

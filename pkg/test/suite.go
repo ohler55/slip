@@ -121,15 +121,29 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	return nil
 }
 
-func (caller suiteRunCaller) Docs() string {
-	return `__:run__ &key filter verbose trace
-   _:filter_ if present identifies the tests to run by a path. e.g., (top child leaf)
-   _:verbose_ if true the test results will be printed.
-   _:trace_ if true _(trace t)_ will be called before evaluating the tests.
-
-
-Runs the test suite.
-`
+func (caller suiteRunCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":run",
+		Text: "Runs the test suite.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":filter",
+				Type: "string",
+				Text: `If present identifies the tests to run by a path. e.g., (top child leaf).`,
+			},
+			{
+				Name: ":verbose",
+				Type: "boolean",
+				Text: `If true the test results will be printed.`,
+			},
+			{
+				Name: ":trace",
+				Type: "boolean",
+				Text: `if true _(trace t)_ will be called before evaluating the tests.`,
+			},
+		},
+	}
 }
 
 type suiteResetCaller bool
@@ -144,12 +158,11 @@ func (caller suiteResetCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	return nil
 }
 
-func (caller suiteResetCaller) Docs() string {
-	return `__:reset__
-
-
-Resets the suite.
-`
+func (caller suiteResetCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":reset",
+		Text: "Resets the suite.",
+	}
 }
 
 type suiteReportCaller bool
@@ -184,13 +197,20 @@ func (caller suiteReportCaller) Call(s *slip.Scope, args slip.List, depth int) s
 	return nil
 }
 
-func (caller suiteReportCaller) Docs() string {
-	return `__:report__ &optional stream
-   _stream_ stream to print the results on. Default _*standard-output*_
-
-
-Reports prints the suite result.
-`
+func (caller suiteReportCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":report",
+		Text: "Reports prints the suite results.",
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name:    ":stream",
+				Type:    "output-stream",
+				Text:    `Stream to print the results on.`,
+				Default: slip.Symbol("*stadard-output*"),
+			},
+		},
+	}
 }
 
 type suiteResultCaller bool
@@ -203,13 +223,13 @@ func (caller suiteResultCaller) Call(s *slip.Scope, args slip.List, depth int) s
 	return r
 }
 
-func (caller suiteResultCaller) Docs() string {
-	return `__:result__
-
-
-Result returns the suite results as a tree of lists where the car of each list
-is the name of the suite or test.
-`
+func (caller suiteResultCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":result",
+		Text: `Result returns the suite results as a tree of lists where the car of each list
+is the name of the suite or test.`,
+		Return: "bag",
+	}
 }
 
 type suiteFindCaller bool
@@ -226,14 +246,20 @@ func (caller suiteFindCaller) Call(s *slip.Scope, args slip.List, depth int) sli
 	return nil
 }
 
-func (caller suiteFindCaller) Docs() string {
-	return `__:find__ path*
-   _path_ to a suite or test where each element of a list of strings identifies
-a child of the parent suite.
-
-
-Finds prints the suite result.
-`
+func (caller suiteFindCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":find",
+		Text: "Finds and prints the suite results.",
+		Args: []*slip.DocArg{
+			{
+				Name: "path*",
+				Type: "string",
+				Text: `Paths to a suite or test where each element of a list of strings
+identifies a child of the parent suite.`,
+			},
+		},
+		Return: "suite|test",
+	}
 }
 
 // Return a tree of results.

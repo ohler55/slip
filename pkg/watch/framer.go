@@ -59,10 +59,6 @@ func (caller framerInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return nil
 }
 
-func (caller framerInitCaller) Docs() string {
-	return clientInitCaller{}.Docs()
-}
-
 type framerChangedCaller struct{}
 
 func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
@@ -105,20 +101,12 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 	return nil
 }
 
-func (caller framerChangedCaller) Docs() string {
-	return clientChangedCaller{}.Docs()
-}
-
 type framerForgetCaller struct{}
 
 func (caller framerForgetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	drawFrame(s)
 
 	return nil
-}
-
-func (caller framerForgetCaller) Docs() string {
-	return clientForgetCaller{}.Docs()
 }
 
 type framerRefreshCaller struct{}
@@ -129,12 +117,11 @@ func (caller framerRefreshCaller) Call(s *slip.Scope, args slip.List, depth int)
 	return nil
 }
 
-func (caller framerRefreshCaller) Docs() string {
-	return `__:refresh__ => _nil_
-
-
-Redraws the frame.
-`
+func (caller framerRefreshCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":refresh",
+		Text: "Redraws the frame.",
+	}
 }
 
 func setCursor(w io.Writer, v, h int) {

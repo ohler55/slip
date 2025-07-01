@@ -28,7 +28,7 @@ func TestSocketPeerNameOkay(t *testing.T) {
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((sock (make-instance 'socket :socket ufd)))
-                  (socket-peername sock))`,
+                  (socket-peer-name sock))`,
 		Expect: `"@", 0`,
 	}).Test(t)
 }
@@ -80,7 +80,7 @@ func TestSocketPeerNameHTTP(t *testing.T) {
 
 func TestSocketPeerNameNotSocket(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(socket-peername t)`,
+		Source:    `(socket-peer-name t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

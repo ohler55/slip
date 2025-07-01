@@ -54,7 +54,7 @@ blueberry whopper rot done
 
 	f := slip.ReadString("blueberry", scope).Eval(scope, nil)
 	sf := f.Simplify()
-	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].whopper").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].whopper").First(sf))
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -137,8 +137,8 @@ func TestContinueWhopperLocation(t *testing.T) {
 	_ = slip.ReadString("(setq bb (make-instance berry))", scope).Eval(scope, nil).(*flavors.Instance)
 	_ = slip.ReadString("(send bb :rot)", scope).Eval(scope, nil)
 	loc := scope.Get(slip.Symbol("loc"))
-	tt.Equal(t, "#<whopper-location>", slip.ObjectString(loc))
-	tt.Equal(t, "#<whopper-location>", slip.Simplify(loc))
+	tt.Equal(t, "#<whopper-location 0>", slip.ObjectString(loc))
+	tt.Equal(t, "#<whopper-location 0>", slip.Simplify(loc))
 	tt.Equal(t, false, loc.Equal(nil))
 	tt.Equal(t, 2, len(loc.Hierarchy()))
 	tt.Equal(t, loc, loc.Eval(nil, 0))

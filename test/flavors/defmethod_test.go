@@ -30,7 +30,7 @@ func defineBlueberry(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`
 (defflavor blueberry () (berry))
-(defmethod (blueberry :before :rot) () "Berries that are blue." (princ "blueberry before rot") (terpri))
+(defmethod (blueberry :before :rot) () "When blueberries rot they turn mushy." (princ "blueberry before rot") (terpri))
 (defmethod (blueberry :after :rot) () (princ "blueberry after rot") (terpri))
 `, scope).Eval(scope, nil)
 }
@@ -42,9 +42,9 @@ func TestDefmethodBasic(t *testing.T) {
 	scope := slip.NewScope()
 	f := slip.ReadString("berry", scope).Eval(scope, nil)
 	sf := f.Simplify()
-	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].primary").First(sf))
-	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':rot')].after").First(sf))
-	tt.Equal(t, true, jp.MustParseString("methods[*][?(@.name == ':color')].before").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].primary").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].after").First(sf))
+	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':color')].combinations[*].before").First(sf))
 }
 
 func TestDefmethodInherit(t *testing.T) {
@@ -55,7 +55,7 @@ func TestDefmethodInherit(t *testing.T) {
 	scope := slip.NewScope()
 	f := slip.ReadString("blueberry", scope).Eval(scope, nil)
 	sf := f.Simplify()
-	rot := jp.MustParseString("methods[*][?(@.name == ':rot')]").Get(sf)
+	rot := jp.MustParseString("methods[?(@.name == ':rot')].combinations[*]").Get(sf)
 	tt.Equal(t, 2, len(rot))
 	tt.Equal(t, "blueberry", jp.C("from").First(rot[0]))
 	tt.Equal(t, true, jp.C("before").First(rot[0]))
@@ -77,7 +77,7 @@ func TestDefmethodInherit(t *testing.T) {
 		Scope:  scope,
 		Source: `(pretty-print blueberry:before:rot nil)`,
 		Expect: `"(defmethod (blueberry :before :rot) ()
-  "Berries that are blue."
+  "When blueberries rot they turn mushy."
   (princ "blueberry before rot")
   (terpri))
 "`,
@@ -180,4 +180,29 @@ func TestDefmethodNotFlavor(t *testing.T) {
 	tt.Panic(t, func() {
 		_ = slip.ReadString(`(defmethod (nothing :rot) ())`, scope).Eval(scope, nil)
 	})
+}
+
+type rottenCaller struct{}
+
+func (caller rottenCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+	return nil
+}
+
+func (caller rottenCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":rotten",
+		Text: "Something is rotten",
+		Args: []*slip.DocArg{
+			{Name: "bad", Type: "fixnum"},
+		},
+	}
+}
+
+func TestDefmethodArgsMismatch(t *testing.T) {
+	defer undefFlavor("berry")
+	defineBerry(t)
+
+	scope := slip.NewScope()
+	f := slip.ReadString("berry", scope).Eval(scope, nil).(*flavors.Flavor)
+	tt.Panic(t, func() { f.DefMethod(":rot", ":after", rottenCaller{}) })
 }

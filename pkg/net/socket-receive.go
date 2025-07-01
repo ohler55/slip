@@ -7,11 +7,10 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketReceive() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketReceive{Function: slip.Function{Name: "socket-receive", Args: args}}
@@ -68,7 +67,8 @@ func init() {
 			Text: `__socket-receive__ reads from the _socket_ and returns the three values;
 the buffer, the number of bytes received, and the peer address as a list of host and port.`,
 			Examples: []string{
-				`(socket-receive (make-instance 'socket :socket 777) => #(65 66 67), 3, #(127 0 0 1)`,
+				`(let ((sock (make-instance 'socket :socket 777)))`,
+				`  (socket-receive sock)) => #(65 66 67), 3, #(127 0 0 1)`,
 			},
 		}, &Pkg)
 }
@@ -101,8 +101,10 @@ func (caller socketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (re
 	return
 }
 
-func (caller socketReceiveCaller) Docs() string {
-	return clos.MethodDocFromFunc(":receive", "socket-receive", "socket", "socket")
+func (caller socketReceiveCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":receive", "socket-receive", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :receive)) => #(65 66 67), 3, #(127 0 0 1)`
+	return md
 }
 
 func socketReceive(fd int, args slip.List) slip.Object {

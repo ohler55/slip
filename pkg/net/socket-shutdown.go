@@ -6,11 +6,10 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketShutdown() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketShutdown{Function: slip.Function{Name: "socket-shutdown", Args: args}}
@@ -37,7 +36,8 @@ func init() {
 If no direction is specified then no change is made to the _socket_. On some platforms such as linux
 the shutdown will not actually block the reading or writing.`,
 			Examples: []string{
-				`(socket-shutdown (make-instance 'socket :socket 5) :direction :input) => nil`,
+				`(let ((sock (make-instance 'socket :socket 5)))`,
+				`  (socket-shutdown sock :direction :input)) => nil`,
 			},
 		}, &Pkg)
 }
@@ -67,8 +67,10 @@ func (caller socketShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller socketShutdownCaller) Docs() string {
-	return clos.MethodDocFromFunc(":shutdown", "socket-shutdown", "socket", "socket")
+func (caller socketShutdownCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":shutdown", "socket-shutdown", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (socket-shutdown sock :direction :input)) => nil`
+	return md
 }
 
 func shutdownSocket(self *flavors.Instance, args slip.List) {

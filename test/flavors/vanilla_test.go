@@ -157,162 +157,228 @@ func TestVanillaEqualAny(t *testing.T) {
 func TestVanillaDescribeDocs(t *testing.T) {
 	testVanillaDocs(t, ":describe",
 		`:describe is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :describe &optional output-stream
-     output-stream [output-stream] to write to. (default: *standard-output*)
-`+"   "+`
+  Lambda-List: (&optional (output-stream *standard-output*))
+  Documentation:
     Writes a description of the instance to output-stream.
+  Arguments:
+    output-stream: [output-stream] = *standard-output*
+      output-stream to write to.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaEvalSelfDocs(t *testing.T) {
 	testVanillaDocs(t, ":eval-inside-yourself",
 		`:eval-inside-yourself is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :eval-inside-yourself form => object
-     form [object] to evaluate in the scope of the instance.
-`+"   "+`
+  Lambda-List: (form)
+  Return: object
+  Documentation:
     Evaluates the form in the instance's scope.
+  Arguments:
+    form: [object]
+      Form to evaluate in the scope of the instance.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaFlavorDocs(t *testing.T) {
 	testVanillaDocs(t, ":flavor",
 		`:flavor is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :flavor => flavor
-`+"   "+`
+  Lambda-List: ()
+  Return: flavor
+  Documentation:
     Returns the flavor of the instance.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaIDDocs(t *testing.T) {
 	testVanillaDocs(t, ":id",
 		`:id is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :id => string
-`+"   "+`
+  Lambda-List: ()
+  Return: fixnum
+  Documentation:
     Returns the identifier of the instance.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaInitDocs(t *testing.T) {
 	testVanillaDocs(t, ":init",
 		`:init is a method of vanilla-flavor
-  vanilla-flavor :primary
+  Lambda-List: ()
+  Documentation:
     Does nothing but is a placeholder for daemons in sub-flavors.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaInspectDocs(t *testing.T) {
 	testVanillaDocs(t, ":inspect",
 		`:inspect is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :inspect => bag
-`+"   "+`
+  Lambda-List: ()
+  Return: bag
+  Documentation:
     Returns a bag with the details of the instance.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaOpHandledDocs(t *testing.T) {
 	testVanillaDocs(t, ":operation-handled-p",
 		`:operation-handled-p is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :operation-handled-p method => boolean
-     method [keyword] to check.
-`+"   "+`
+  Lambda-List: (method)
+  Return: boolean
+  Documentation:
     Returns t if the instance handles the method and nil otherwise.
+  Arguments:
+    method: [keyword]
+      Symbol to check.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaPrintSelfDocs(t *testing.T) {
 	testVanillaDocs(t, ":print-self",
 		`:print-self is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :print-self &optional stream &rest ignored
-     stream [output-stream] to write the description to. The default is *standard-output*
-`+"   "+`
+  Lambda-List: (&optional (output-stream *standard-output*) &rest rest)
+  Documentation:
     Writes a description of the instance to the stream.
+  Arguments:
+    output-stream: [output-stream] = *standard-output*
+      output-stream to write the description to.
+    rest: []
+      ignored
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaSendIfDocs(t *testing.T) {
 	testVanillaDocs(t, ":send-if-handles",
 		`:send-if-handles is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :send-if-handles method arguments* => object
-     method [keyword] to send to the instance if the instance has the method.
-     arguments* to pass to the method call.
-`+"   "+`
+  Lambda-List: (method &rest arguments*)
+  Return: object
+  Documentation:
     Sends to the instance if the instance has the method.
+  Arguments:
+    method: [keyword]
+      Method to send to the instance if the instance has the method.
+    arguments*: []
+      Argument to pass to the method call.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaChangeClassDocs(t *testing.T) {
 	testVanillaDocs(t, ":change-class",
 		`:change-class is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :change-class new-class &key &allow-other-keys) => instance
-      new-class [flavor] the new flavor for the instance.
-`+"   "+`
-    Returns self after changing the flavor of the instance. When called a copy of the instance is created and the
-    :update-instance-for-different-class is called on the original after the flavor has been changed to the new flavor.
-    The previous is a copy of the original instance. The original instance has already been changed and the slots
-    adjusted for the new flavor. This validates the keywords and then calls the :shared-initialize method.
-`+"   "+`
+  Lambda-List: (new-class)
+  Return: instance
+  Documentation:
+    Returns self after changing the flavor of the instance. When called a copy of the instance is
+    created and the :update-instance-for-different-class is called on the original after the flavor
+    has been changed to the new flavor. The previous is a copy of the original instance. The
+    original instance has already been changed and the slots adjusted for the new flavor. This
+    validates the keywords and then calls the :shared-initialize method.
+
     This method is an extension of the original flavors.
+  Arguments:
+    new-class: [flavor]
+      The new flavor for the instance.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaSharedInitializeDocs(t *testing.T) {
 	testVanillaDocs(t, ":shared-initialize",
 		`:shared-initialize is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :shared-initialize slot-names &rest initargs &key &allow-other-keys) => instance
-      slot-names [list] a list of the slot names in the re-flavored instance.
-      initargs [list] additional arguments are ignored by the default method.
-`+"   "+`
+  Lambda-List: (slot-names &rest initargs &key &allow-other-keys)
+  Return: instance
+  Documentation:
     Returns self after processing the key arguments to set the slots in the instance.
-`+"   "+`
+
     This method is an extension of the original flavors.
+  Arguments:
+    slot-names: [list]
+      A list of the slot names in the re-flavored instance.
+    initargs: [list]
+      Additional arguments are ignored by the default method.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaUpdateInstanceForDifferentClassDocs(t *testing.T) {
 	testVanillaDocs(t, ":update-instance-for-different-class",
 		`:update-instance-for-different-class is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :update-instance-for-different-class previous &rest initargs &key &allow-other-keys)
-      previous [instance] a copy of the original instance.
-      initargs [list] additional arguments are ignored by the default method.
-`+"   "+`
-    When change-class is called a copy of the instance is created and the :update-instance-for-different-class is called
-    on the original after the flavor has been changed to the new flavor. The previous is a copy of the original
-    instance. The original instance has already been changed and the slots adjusted for the new flavor. This validates
-    the keywords and then calls the :shared-initialize method.
-`+"   "+`
+  Lambda-List: (previous &rest initargs &key &allow-other-keys)
+  Return: instance
+  Documentation:
+    When change-class is called a copy of the instance is created and the
+    :update-instance-for-different-class is called on the original after the flavor has been
+    changed to the new flavor. The previous is a copy of the original instance. The original
+    instance has already been changed and the slots adjusted for the new flavor. This validates the
+    keywords and then calls the :shared-initialize method.
+
     This method is an extension of the original flavors.
+  Arguments:
+    previous: [instance]
+      a copy of the original instance.
+    initargs: [list]
+      Additional arguments are ignored by the default method.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaWhichOpsDocs(t *testing.T) {
 	testVanillaDocs(t, ":which-operations",
 		`:which-operations is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :which-operations => list
-`+"   "+`
+  Lambda-List: ()
+  Return: list
+  Documentation:
     Returns a list of all the methods the instance handles.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
 func TestVanillaEqualDocs(t *testing.T) {
 	testVanillaDocs(t, ":equal",
 		`:equal is a method of vanilla-flavor
-  vanilla-flavor :primary
-    :equal other => boolean
-      other [object] other object to compare to self.
-`+"   "+`
+  Lambda-List: (other)
+  Return: boolean
+  Documentation:
     Returns t if the instance is of the same flavor as other and has the same content.
+  Arguments:
+    other: [object]
+      Other object to compare to self.
+
+  Implemented by:
+    vanilla-flavor :primary
 `)
 }
 
@@ -321,8 +387,21 @@ func testVanillaDocs(t *testing.T, method, expect string) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
+	scope.Let(slip.Symbol("*print-right-margin*"), slip.Fixnum(100))
 	_ = slip.ReadString(fmt.Sprintf("(describe-method vanilla-flavor %s out)", method), scope).Eval(scope, nil)
-	tt.Equal(t, expect, out.String())
+	tt.Equal(t, expect, compactEmptyLines(out.String()))
+}
+
+func compactEmptyLines(s string) string {
+	size := len(s)
+	for {
+		s = strings.ReplaceAll(s, " \n", "\n")
+		if size == len(s) {
+			break
+		}
+		size = len(s)
+	}
+	return s
 }
 
 func TestVanillaDescribeStream(t *testing.T) {

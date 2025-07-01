@@ -4,11 +4,10 @@ package net
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketState() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketState{Function: slip.Function{Name: "socket-state", Args: args}}
@@ -27,7 +26,8 @@ func init() {
 			Return: "nil|:read-write|:read|:write",
 			Text:   `__socket-state__ returns the state of a _socket_ instance.`,
 			Examples: []string{
-				`(socket-state (make-instance 'socket)) => nil`,
+				`(let ((sock (make-instance 'socket)))`,
+				`  (socket-state sock)) => nil`,
 			},
 		}, &Pkg)
 }
@@ -54,8 +54,10 @@ func (caller socketStateCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	return socketState(self)
 }
 
-func (caller socketStateCaller) Docs() string {
-	return clos.MethodDocFromFunc(":state", "socket-state", "socket", "socket")
+func (caller socketStateCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":state", "socket-state", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :state)) => nil`
+	return md
 }
 
 func socketState(self *flavors.Instance) (result slip.Object) {

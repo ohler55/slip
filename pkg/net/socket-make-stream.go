@@ -6,11 +6,10 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketMakeStream() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketMakeStream{Function: slip.Function{Name: "socket-make-stream", Args: args}}
@@ -45,7 +44,8 @@ func init() {
 			Return: "nil|",
 			Text:   `__socket-make-stream__ makes a stream from the _socket_ instance.`,
 			Examples: []string{
-				`(socket-make-stream (make-instance 'socket :socket 5) :input t) => #<stream>`,
+				`(let ((sock (make-instance 'socket :socket 5)))`,
+				`  (socket-make-stream sock :input t)) => #<stream>`,
 			},
 		}, &Pkg)
 }
@@ -74,8 +74,10 @@ func (caller socketMakeStreamCaller) Call(s *slip.Scope, args slip.List, _ int) 
 	return makeStream(self, args)
 }
 
-func (caller socketMakeStreamCaller) Docs() string {
-	return clos.MethodDocFromFunc(":make-stream", "socket-make-stream", "socket", "socket")
+func (caller socketMakeStreamCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":make-stream", "socket-make-stream", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :make-stream :input t)) => #<stream>`
+	return md
 }
 
 func makeStream(self *flavors.Instance, args slip.List) (result slip.Object) {

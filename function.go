@@ -16,6 +16,14 @@ const (
 	MacroSymbol = Symbol("macro")
 	// LambdaSymbol is the symbol with a value of "lambda".
 	LambdaSymbol = Symbol("lambda")
+	// FlosSymbol is the symbol with a value of "flos-function" for FLOS functions.
+	FlosSymbol = Symbol("flos-function")
+	// MethodSymbol is the symbol with a value of "method" for Flavors
+	// methods.
+	MethodSymbol = Symbol("method")
+	// GenericSymbol is the symbol with a value of "generic" for CLOS generics
+	// and methods.
+	GenericSymbol = Symbol("generic")
 )
 
 // Function is the base type for most if not all functions.
@@ -331,9 +339,13 @@ func CompileList(list List) (f Object) {
 
 // DescribeFunction returns the documentation for the function bound to the
 // sym argument.
-func DescribeFunction(sym Symbol) *FuncDoc {
+func DescribeFunction(sym Symbol, pkg ...*Package) *FuncDoc {
 	name := strings.ToLower(string(sym))
-	if fi, has := CurrentPackage.funcs[name]; has {
+	p := CurrentPackage
+	if 0 < len(pkg) {
+		p = pkg[0]
+	}
+	if fi, has := p.funcs[name]; has {
 		return fi.Doc
 	}
 	return nil

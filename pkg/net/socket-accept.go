@@ -6,11 +6,10 @@ import (
 	"syscall"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/clos"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketAccept() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketAccept{Function: slip.Function{Name: "socket-accept", Args: args}}
@@ -31,9 +30,9 @@ func init() {
 returns a new socket.`,
 			Examples: []string{
 				`(let ((sock (make-socket :domain :unix :type :stream)))`,
-				` (socket-bind sock #(127 0 0 1) 1234)`,
-				` (socket-listen sock 1000)`,
-				` (socket-accept sock)) => #<socket 1234>`,
+				`  (socket-bind sock #(127 0 0 1) 1234)`,
+				`  (socket-listen sock 1000)`,
+				`  (socket-accept sock)) => #<socket 1234>`,
 			},
 		}, &Pkg)
 }
@@ -62,8 +61,10 @@ func (caller socketAcceptCaller) Call(s *slip.Scope, args slip.List, _ int) slip
 	return socketAccept(self)
 }
 
-func (caller socketAcceptCaller) Docs() string {
-	return clos.MethodDocFromFunc(":accept", "socket-accept", "socket", "socket")
+func (caller socketAcceptCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":accept", "socket-accept", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :accept)) => #<socket 1234>`
+	return md
 }
 
 func socketAccept(self *flavors.Instance) slip.Object {

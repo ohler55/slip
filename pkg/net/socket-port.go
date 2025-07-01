@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketPort() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketPort{Function: slip.Function{Name: "socket-port", Args: args}}
@@ -27,7 +27,8 @@ func init() {
 			Text: `__socket-port__ returns the port of the _socket_. If the _socket_
 is closed then _nil_ is returned..`,
 			Examples: []string{
-				`(socket-port (make-instance 'socket :socket 5)) => 8080`,
+				`(let ((sock (make-instance 'socket :socket 5)))`,
+				`  (socket-port sock)) => 8080`,
 			},
 		}, &Pkg)
 }
@@ -61,4 +62,10 @@ func (caller socketPortCaller) Call(s *slip.Scope, args slip.List, _ int) (resul
 		result = port
 	}
 	return
+}
+
+func (caller socketPortCaller) FuncDocs() *slip.FuncDoc {
+	md := methodDocFromFunc(":port", "socket-port", &Pkg)
+	md.Examples[len(md.Examples)-1] = `  (send sock :port)) => 8080`
+	return md
 }

@@ -35,7 +35,7 @@ type respWriterStatusCaller bool
 func (caller respWriterStatusCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(obj, ":write-status", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":write-status", len(args), "1")
 	}
 	code, ok := args[0].(slip.Fixnum)
 	if !ok {
@@ -58,7 +58,7 @@ type respWriterWriteCaller bool
 func (caller respWriterWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(obj, ":write", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":write", len(args), "1")
 	}
 	content, ok := args[0].(slip.String)
 	if !ok {
@@ -83,7 +83,7 @@ type respWriterHeaderCaller bool
 func (caller respWriterHeaderCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(obj, ":header", len(args), "0")
+		slip.PanicMethodArgChoice(obj, ":header", len(args), "0")
 	}
 	var header slip.List
 	for k, v := range (obj.Any.(http.ResponseWriter)).Header() {
@@ -109,7 +109,7 @@ type respWriterHeaderGetCaller bool
 func (caller respWriterHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		flavors.PanicMethodArgChoice(obj, ":header-get", len(args), "1")
+		slip.PanicMethodArgChoice(obj, ":header-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {

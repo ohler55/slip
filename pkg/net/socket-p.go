@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSocketp() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SocketP{Function: slip.Function{Name: "socket-p", Args: args}}

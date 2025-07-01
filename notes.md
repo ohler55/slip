@@ -4,11 +4,59 @@
 
 - next
 
- - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
-  - defclass
-   - implement for vars/slots only
-  - defgeneric
+ - generics branch
+  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
+   - clos.Generic
+    - embeds flavors.Method
+    - adds parameters - list of type symbols, later type specifier lists
+    - add specifics []*clos.Generic
+   - want this on package for lookup
+   - clos instances don't bind slot by default
+    - not a slip.Scope, just map or rather a specific Slots map so cl/slot-value works with it
+     - Getter interface or Getter and Setter interfaces
+  - call-next-method, alias for continue-whopper
+
+  - defgeneric (needed before defclass for slot accessors)
    - build generic dispatch table on Package
+   - as default and flavor instance (send inst function-name args) if it has :function-name
+   - map by name to *Generic
+   - Generic [same as clos Method conceptually]
+    - name
+    - methods (lookup based on arg types)
+     - branch for each specializer (arg types)
+      - nested maps or a list?
+       - if map
+        - need to consider sub-classes so not a direct lookup
+       - if list then walk and check each arg-type until a match
+        - sort order is most specialize
+        - maybe more of a tree with first level as first arg then branches off for 2 and additions arguments
+     - leaf has daemons like flavors - can tht be reused?
+     - as method defined the qualifiers/daemons are propogated to reduce call time lookups
+    - Method or Generic to avoid name confusion
+     - embed flavors.Method
+     - parameters - list of arg types - just types, no forms, or maybe rely on coerce type matching
+     - specifics - []*Method to search
+
+
+  - defclass (class-name superclass-names slot-specifiers &rest class-options*)
+   - update clos/class struct
+   - implement for vars/slots only
+   - class-options
+    - :default-initargs init-arg-list
+    - :documentation string
+    - :metaclass classname - limit to standard-class and ignore otherwise
+   - slot-specifier like (name :initarg :name :accessor name)
+    - :reader reader-function-name * - names of functions to access slot
+    - :writer writer-function-name *
+    - :accessor reader-function-name *
+    - :allocation allocation-type
+    - :initarg initarg-name *
+    - :initform form
+    - :type type-specifier
+    - :documentation string
+   - make sure all validation is handled for name collisions
+  - standard-class
+  - standard-object - like vanilla
 
   - defmethod class daemon bindings/args
    - find class to determine how to define
@@ -28,6 +76,58 @@
   - optimize for binding of one to a class using the class method
   - register as normal function but handle differently
   - move defmethod to clos
+
+ - [ ] ADD-METHOD
+ - [ ] CALL-METHOD
+ - [ ] CALL-NEXT-METHOD
+ - [ ] CHANGE-CLASS
+ - [ ] CLASS-NAME
+ - [ ] CLASS-OF
+ - [ ] COMPUTE-APPLICABLE-METHODS
+ - [ ] DEFCLASS
+ - [ ] DEFGENERIC
+ - [ ] DEFINE-CONDITION
+ - [ ] DEFINE-METHOD-COMBINATION
+ - [ ] DEFMETHOD
+ - [ ] DESCRIBE-OBJECT
+ - [ ] DOCUMENTATION
+ - [ ] ENSURE-GENERIC-FUNCTION
+ - [ ] FIND-CLASS
+ - [ ] FIND-METHOD
+ - [ ] FUNCTION-KEYWORDS
+ - [ ] GENERIC-FLET
+ - [ ] GENERIC-FUNCTION
+ - [ ] GENERIC-LABELS
+ - [ ] INITIALIZE-INSTANCE
+ - [ ] INVALID-METHOD-ERROR
+ - [ ] MAKE-INSTANCE
+ - [ ] MAKE-INSTANCES-OBSOLETE
+ - [ ] MAKE-LOAD-FORM
+ - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
+ - [ ] MAKE-METHOD
+ - [ ] METHOD-COMBINATION
+ - [ ] METHOD-COMBINATION-ERROR
+ - [ ] METHOD-QUALIFIERS
+ - [ ] NEXT-METHOD-P
+ - [ ] NO-APPLICABLE-METHOD
+ - [ ] NO-NEXT-METHOD
+ - [ ] PRINT-OBJECT
+ - [ ] REINITIALIZE-INSTANCE
+ - [ ] REMOVE-METHOD
+ - [ ] SHARED-INITIALIZE
+ - [ ] SLOT-BOUNDP
+ - [ ] SLOT-EXISTS-P
+ - [ ] SLOT-MAKUNBOUND
+ - [ ] SLOT-MISSING
+ - [ ] SLOT-UNBOUND
+ - [ ] SLOT-VALUE
+ - [ ] SYMBOL-MACROLET
+ - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
+ - [ ] WITH-ACCESSORS
+ - [ ] WITH-ADDED-METHODS
+ - [ ] WITH-SLOTS
+
+-----------------
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND

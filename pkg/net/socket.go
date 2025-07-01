@@ -95,17 +95,35 @@ func (caller socketInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return nil
 }
 
-func (caller socketInitCaller) Docs() string {
-	return `__:init__ &key _socket_
-   _:socket_ [fixnum] a bidirectional socket file descriptor to use for the instance's socket.
-   _:domain_ [keyword] a domain for a new socket (e.g., :inet)
-   _:type_ [keyword] a socket type (e.g., :stream or :datagram)
-   _:protocol_ [keyword] a protocol for a new socket, defaults to nil or 0
-
-
-Initializes an instance with the provided _socket_ or create a new socket with the
-_domain_, _type_ and optional _protocol_.
-`
+func (caller socketInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: `Initializes an instance with the provided _socket_ or create a new socket with the
+_domain_, _type_ and optional _protocol_.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":socket",
+				Type: "fixnum",
+				Text: `A bidirectional socket file descriptor to use for the instance's socket.`,
+			},
+			{
+				Name: ":domain",
+				Type: "keyword",
+				Text: "A domain for a new socket (e.g., :inet)",
+			},
+			{
+				Name: ":type",
+				Type: "keyword",
+				Text: "A socket type (e.g., :stream or :datagram)",
+			},
+			{
+				Name: ":protocol",
+				Type: "keyword",
+				Text: `A protocol for a new socket (e.g., :ipV4)`,
+			},
+		},
+	}
 }
 
 type socketSocketCaller struct{}
@@ -119,12 +137,12 @@ func (caller socketSocketCaller) Call(s *slip.Scope, args slip.List, _ int) (res
 	return
 }
 
-func (caller socketSocketCaller) Docs() string {
-	return `__:socket__
-
-
-Returns the socket file descriptor of the instance or nil if not open.
-`
+func (caller socketSocketCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":socket",
+		Text:   `Returns the socket file descriptor of the instance or nil if not open.`,
+		Return: "nil|fixnum",
+	}
 }
 
 type socketSetSocketCaller struct{}
@@ -143,14 +161,19 @@ func (caller socketSetSocketCaller) Call(s *slip.Scope, args slip.List, _ int) s
 	return nil
 }
 
-func (caller socketSetSocketCaller) Docs() string {
-	return `__:set-socket__ _stream_
-   _stream_ [socket-stream|file-stream|fixnum] an stream returned from a call to :socket, a socket file,
-or a fixnum file descriptor
-
-
-Sets the underlying socket file descriptor of the instance.
-`
+func (caller socketSetSocketCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-socket",
+		Text: `Sets the underlying socket file descriptor of the instance.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "stream",
+				Type: "socket-stream|file-stream|fixnum",
+				Text: `A stream returned from a call to :socket, a socket file,
+or a fixnum file descriptor.`,
+			},
+		},
+	}
 }
 
 type socketTypeCaller struct{}
@@ -171,10 +194,10 @@ func (caller socketTypeCaller) Call(s *slip.Scope, args slip.List, _ int) (resul
 	return
 }
 
-func (caller socketTypeCaller) Docs() string {
-	return `__:type__
-
-
-Returns the socket type or nil if not open.
-`
+func (caller socketTypeCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":type",
+		Text:   `Returns the socket type or nil if not open.`,
+		Return: "nil|symbol",
+	}
 }

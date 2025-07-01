@@ -85,13 +85,19 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	return nil
 }
 
-func (caller serverInitCaller) Docs() string {
-	return `__:init__ &key _port_
-   _:port_ [fixnum] the port to listen for connections on.
-
-
-Sets the initial values when _make-instance_ is called.
-`
+func (caller serverInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Text: "Sets the initial value when _make-instance_ is called.",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":port",
+				Type: "fixnum",
+				Text: `The port to listen for connections on.`,
+			},
+		},
+	}
 }
 
 type serverShutdownCaller struct{}
@@ -99,7 +105,7 @@ type serverShutdownCaller struct{}
 func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":shutdown", len(args), "0")
 	}
 	serv := self.Any.(*server)
 	slip.RemoveSetHook(strconv.Itoa(serv.port))
@@ -115,12 +121,12 @@ func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) sl
 	return nil
 }
 
-func (caller serverShutdownCaller) Docs() string {
-	return `__:shutdown__ => _nil_
-
-
-Shuts down the server.
-`
+func (caller serverShutdownCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":shutdown",
+		Text:   "Shuts down the server.",
+		Return: "boolean",
+	}
 }
 
 type serverActivepCaller struct{}
@@ -128,7 +134,7 @@ type serverActivepCaller struct{}
 func (caller serverActivepCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":activep", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":activep", len(args), "0")
 	}
 	serv := self.Any.(*server)
 	if serv.active.Load() {
@@ -137,12 +143,12 @@ func (caller serverActivepCaller) Call(s *slip.Scope, args slip.List, _ int) sli
 	return nil
 }
 
-func (caller serverActivepCaller) Docs() string {
-	return `__:activep__ => _boolean_
-
-
-Returns _t_ if the server is active.
-`
+func (caller serverActivepCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":activep",
+		Text:   "Returns _t_ if the server is active.",
+		Return: "boolean",
+	}
 }
 
 type serverConnectionsCaller struct{}
@@ -150,7 +156,7 @@ type serverConnectionsCaller struct{}
 func (caller serverConnectionsCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		flavors.PanicMethodArgChoice(self, ":connections", len(args), "0")
+		slip.PanicMethodArgChoice(self, ":connections", len(args), "0")
 	}
 	serv := self.Any.(*server)
 	var cons slip.List
@@ -163,13 +169,13 @@ func (caller serverConnectionsCaller) Call(s *slip.Scope, args slip.List, depth 
 	return cons
 }
 
-func (caller serverConnectionsCaller) Docs() string {
-	return `__:connections__ => _list_
-
-
-Returns a list of information about the current connections. The information
-is an association list.
-`
+func (caller serverConnectionsCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":connections",
+		Text: `Returns a list of information about the current connections. The information
+is an association list.`,
+		Return: "list",
+	}
 }
 
 func (serv *server) listen(started chan bool) {

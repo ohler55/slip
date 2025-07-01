@@ -149,7 +149,7 @@ func DefFlavor(
 		name:        name,
 		defaultVars: vars,
 		keywords:    map[string]slip.Object{},
-		methods:     map[string][]*Method{},
+		methods:     map[string]*slip.Method{},
 		varDocs:     map[string]string{},
 		initable:    map[string]bool{},
 		pkg:         p,

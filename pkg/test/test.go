@@ -107,15 +107,25 @@ func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.
 	return nil
 }
 
-func (caller testRunCaller) Docs() string {
-	return `__:run__ &key verbose trace
-   _:verbose_ if true the test results will be printed.
-   _:trace_ if true _(trace t)_ will be called before evaluating the test _forms_.
-
-
-Runs the test. The _*current-test*_ variable will be set to the test instance
-for the duration of the run.
-`
+func (caller testRunCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":run",
+		Text: `Runs the test. The _*current-test*_ variable will be set to the test instance
+for the duration of the run.`,
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: ":verbose",
+				Type: "boolean",
+				Text: `If true the test results will be printed.`,
+			},
+			{
+				Name: ":trace",
+				Type: "boolean",
+				Text: `if true _(trace t)_ will be called before evaluating the tests.`,
+			},
+		},
+	}
 }
 
 type testResetCaller bool
@@ -125,12 +135,11 @@ func (caller testResetCaller) Call(s *slip.Scope, args slip.List, depth int) sli
 	return nil
 }
 
-func (caller testResetCaller) Docs() string {
-	return `__:reset__
-
-
-Resets the test.
-`
+func (caller testResetCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":reset",
+		Text: "Resets the test.",
+	}
 }
 
 type testReportCaller bool
@@ -176,11 +185,18 @@ func (caller testReportCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	return nil
 }
 
-func (caller testReportCaller) Docs() string {
-	return `__:report__ &optional stream
-   _stream_ stream to print the results on. Default _*standard-output*_
-
-
-Reports prints the test result.
-`
+func (caller testReportCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":report",
+		Text: "Reports prints the test results.",
+		Args: []*slip.DocArg{
+			{Name: "&optional"},
+			{
+				Name:    ":stream",
+				Type:    "output-stream",
+				Text:    `Stream to print the results on.`,
+				Default: slip.Symbol("*stadard-output*"),
+			},
+		},
+	}
 }
