@@ -3,12 +3,14 @@
 package test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/sen"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -164,4 +166,44 @@ func TestMethodCompareArgs(t *testing.T) {
 	m2.Doc.Return = "fixnum"
 	m2.Doc.Args = m2.Doc.Args[:1]
 	tt.Panic(t, func() { m.CompareArgs(m2.Doc) })
+}
+
+func TestMethodBoundCall(t *testing.T) {
+	defer undefFlavor("blueberry")
+	defer undefFlavor("berry")
+	scope := slip.NewScope()
+	var buf strings.Builder
+	out := slip.OutputStream{Writer: &buf}
+	scope.Let(slip.Symbol("out"), &out)
+	code := slip.ReadString(`
+(defflavor berry () ())
+(defwhopper (berry :double) (x) (continue-whopper (1+ x)))
+(defflavor blueberry ((size "medium")) (berry) :gettable-instance-variables :settable-instance-variables)
+(defmethod (blueberry :before :size) (x) (format out "before~%"))
+(defmethod (blueberry :after :size) (x) (format out "after~%"))
+(defmethod (blueberry :length) () 5)
+(defmethod (blueberry :double) (x) (* 2 x))
+(defwhopper (blueberry :double) (x) (continue-whopper (* 2 x)))
+;; (defwhopper (berry :double) (x) (continue-whopper (1+ x)))
+(setq berry (make-instance 'blueberry))
+`, scope)
+	berry := code.Eval(scope, nil).(*flavors.Instance)
+
+	result := berry.BoundReceive(scope, ":length", nil, 0)
+	tt.Equal(t, "5", slip.ObjectString(result))
+
+	bindings := slip.NewScope()
+	bindings.Let(slip.Symbol("x"), slip.Fixnum(3))
+	result = berry.BoundReceive(scope, ":double", bindings, 0)
+	tt.Equal(t, "14", slip.ObjectString(result))
+
+	result = berry.BoundReceive(scope, ":size", nil, 0)
+	tt.Equal(t, `"medium"`, slip.ObjectString(result))
+	tt.Equal(t, "before\nafter\n", buf.String())
+}
+
+func undefFlavor(fn string) {
+	defer func() { _ = recover() }()
+	scope := slip.NewScope()
+	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn), scope).Eval(scope, nil)
 }

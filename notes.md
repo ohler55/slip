@@ -7,6 +7,8 @@
  - pp should also set *print-escape* to true
 
  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
+  - fix defmethod propogation in flavor
+   - insertMethod
   - tests
    - local test
     - Method
@@ -25,6 +27,7 @@
    - clos instances don't bind slot by default
     - not a slip.Scope, just map or rather a specific Slots map so cl/slot-value works with it
      - Getter interface or Getter and Setter interfaces
+  - call-next-method, alias for continue-whopper
 
   - defgeneric (needed before defclass for slot accessors)
    - build generic dispatch table on Package
