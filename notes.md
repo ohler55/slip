@@ -4,13 +4,8 @@
 
 - next
 
- - pp should also set *print-escape* to true
-
- - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
-  - update plugins - new-method branches on all
-
---------
  - generics branch
+  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
    - clos.Generic
     - embeds flavors.Method
     - adds parameters - list of type symbols, later type specifier lists
