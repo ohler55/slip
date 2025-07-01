@@ -144,12 +144,13 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 func (obj *Flavor) insertMethod(super *Flavor, method *slip.Method, combo *slip.Combination) {
 	fmt.Printf("*** insert %s from %s into %s\n", method.Name, super.name, obj.name)
 
-	//
-
 	// TBD get method, if method does not exist add a new method and this one's combination
+
 	// else if exists, then insert combo into correct position according to inherits
-	//  walk backwards on inherits, when combo match dec pos
-	//   when super matches inherit then insert into combinations and break
+	//   walk inherited
+	//   track position in combinations
+	//   when inherit hits super break
+	//     insert append(append(x[:pos], c), x[pos:]...)
 
 }
 
