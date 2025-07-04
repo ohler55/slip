@@ -36,7 +36,7 @@ func TestInstanceMisc(t *testing.T) {
 			"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(berry.(*flavors.Instance)))), 16),
 			"vars":   map[string]any{"size": "medium"},
 		},
-		Hierarchy: "blueberry.instance.t",
+		Hierarchy: "blueberry.vanilla-flavor.instance.t",
 		Equals: []*sliptest.EqTest{
 			{Other: berry, Expect: true},
 			{Other: slip.True, Expect: false},
@@ -134,7 +134,7 @@ berry
 			"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(berry.(*flavors.Instance)))), 16),
 			"vars":   map[string]any{"me": berry.String()},
 		},
-		Hierarchy: "blueberry.instance.t",
+		Hierarchy: "blueberry.vanilla-flavor.instance.t",
 		Eval:      berry,
 	}).Test(t)
 }

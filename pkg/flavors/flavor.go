@@ -40,6 +40,7 @@ type Flavor struct {
 	noVanilla        bool
 	allowOtherKeys   bool
 	pkg              *slip.Package
+	precedence       []slip.Symbol
 	Final            bool
 	GoMakeOnly       bool
 }
@@ -313,6 +314,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 func (obj *Flavor) MakeInstance() slip.Instance {
 	inst := Instance{Type: obj}
 	inst.Vars = map[string]slip.Object{}
+	inst.SetSynchronized(true)
 	for k, v := range obj.defaultVars {
 		inst.Vars[k] = v
 	}

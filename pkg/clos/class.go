@@ -251,13 +251,13 @@ func (c *Class) MakeInstance() slip.Instance {
 
 // InvokeMethod on an object. A temporary flavors.Instance is created and the
 // method is invoked on that instance.
-func (c *Class) InvokeMethod(obj slip.Object, s *slip.Scope, message string, args slip.List, depth int) slip.Object {
-	inst := c.MakeInstance()
-	if c.InstanceInit != nil {
-		c.InstanceInit(inst, obj)
-	}
-	return inst.Receive(s, message, args, depth)
-}
+// func (c *Class) InvokeMethod(obj slip.Object, s *slip.Scope, message string, args slip.List, depth int) slip.Object {
+// 	inst := c.MakeInstance()
+// 	if c.InstanceInit != nil {
+// 		c.InstanceInit(inst, obj)
+// 	}
+// 	return inst.Receive(s, message, args, depth)
+// }
 
 func (c *Class) mergeInherited() {
 	if c.slots == nil {

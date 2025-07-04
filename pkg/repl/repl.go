@@ -73,6 +73,7 @@ var (
 )
 
 func init() {
+	scope.SetSynchronized(false)
 	if ev := os.Getenv("XDG_CONFIG_HOME"); 0 < len(ev) {
 		stashLoadPath = append(slip.List{slip.String(ev)}, stashLoadPath...)
 	}

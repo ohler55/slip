@@ -4,17 +4,15 @@
 
 - next
 
- - precedence branch
-  - flavor remains the same
-  - clos class becomes standard-class in hierarchy
-   - class standard-class t
+ - instance-update branch
+  - flavor.Instance - foo super-foo vanilla-flavor instance t
+  - clos.StandardObject
+   - foo super-foo standard-object t
+   - locker slip.Locker
+   - Slots
   - class-of return standard-class instance or built-in-class instance for built-ins
    - for flavor instances return flavor instance #<flavor foo 12345>
-  - instance
-   - flavor.Instance - foo super-foo vanilla-flavor (flavor-)instance t
-   - clos.Instance - foo super-foo standard-object t
-   - build class then instance get hierarchy from class/flavor
-    - maybe a name class hierarchy as well as instance
+
 
  - generics branch
   - sparse method combinations, no need for empties

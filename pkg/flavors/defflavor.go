@@ -174,6 +174,13 @@ func DefFlavor(
 	if !nf.noVanilla {
 		nf.inheritFlavor(&vanilla)
 	}
+	nf.precedence = make([]slip.Symbol, 0, len(nf.inherit)+1)
+	nf.precedence = append(nf.precedence, slip.Symbol(nf.name))
+	for _, f := range nf.inherit {
+		nf.precedence = append(nf.precedence, slip.Symbol(f.name))
+	}
+	nf.precedence = append(nf.precedence, InstanceSymbol, slip.TrueSymbol)
+
 	if !nf.abstract {
 		validateFlavor(nf)
 	}

@@ -15,7 +15,7 @@ type Scope struct {
 	parents []*Scope
 	Name    Object // can be nil so type can't be Symbol
 	Vars    map[string]Object
-	moo     sync.Mutex
+	locker  Locker
 	Block   bool
 	TagBody bool
 	Macro   bool
@@ -25,7 +25,8 @@ type Scope struct {
 // NewScope create a new top level Scope.
 func NewScope() *Scope {
 	return &Scope{
-		Vars: map[string]Object{},
+		Vars:   map[string]Object{},
+		locker: NoOpLocker{},
 	}
 }
 
@@ -38,6 +39,7 @@ func (s *Scope) NewScope() *Scope {
 		TagBody: s.TagBody,
 		Macro:   s.Macro,
 		Keep:    s.Keep,
+		locker:  NoOpLocker{},
 	}
 }
 
@@ -65,6 +67,31 @@ func (s *Scope) InBlock(name Object) bool {
 	return false
 }
 
+// SetSynchronized set the synchronized mode of the scope.
+func (s *Scope) SetSynchronized(on bool) {
+	if on {
+		s.locker = &sync.Mutex{}
+	} else {
+		s.locker = NoOpLocker{}
+	}
+}
+
+// Synchronized returns true if the scope is in synchronized mode.
+func (s *Scope) Synchronized() bool {
+	_, ok := s.locker.(*sync.Mutex)
+	return ok
+}
+
+// Lock the scope to synchronize changes.
+func (s *Scope) Lock() {
+	s.locker.Lock()
+}
+
+// Unlock the scope to synchronize changes.
+func (s *Scope) Unlock() {
+	s.locker.Unlock()
+}
+
 // AllVars returns a map of all the variables in the scope and it's parents.
 func (s *Scope) AllVars() map[string]Object {
 	all := map[string]Object{}
@@ -73,11 +100,11 @@ func (s *Scope) AllVars() map[string]Object {
 			all[k] = v
 		}
 	}
-	s.moo.Lock()
+	s.locker.Lock()
 	for k, v := range s.Vars {
 		all[k] = v
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 	return all
 }
 
@@ -87,25 +114,25 @@ func (s *Scope) Let(sym Symbol, value Object) {
 	if vv := CurrentPackage.GetVarVal(name); vv != nil && vv.Const {
 		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
-	s.moo.Lock()
+	s.locker.Lock()
 	if s.Vars == nil {
 		s.Vars = map[string]Object{name: value}
 	} else {
 		s.Vars[name] = value
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 }
 
 // UnsafeLet a symbol be bound to the value in this Scope. No case conversion
 // is performed and no checks are performed.
 func (s *Scope) UnsafeLet(sym Symbol, value Object) {
-	s.moo.Lock()
+	s.locker.Lock()
 	if s.Vars == nil {
 		s.Vars = map[string]Object{string(sym): value}
 	} else {
 		s.Vars[string(sym)] = value
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 }
 
 // Get a named variable value.
@@ -120,14 +147,14 @@ func (s *Scope) get(name string) Object {
 		}
 		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
 	}
-	s.moo.Lock()
+	s.locker.Lock()
 	if s.Vars != nil {
 		if value, has := s.Vars[name]; has {
-			s.moo.Unlock()
+			s.locker.Unlock()
 			return value
 		}
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 	for _, p := range s.parents {
 		if value, has := p.localGet(name); has {
 			return value
@@ -167,14 +194,14 @@ func (s *Scope) LocalGet(sym Symbol) (Object, bool) {
 }
 
 func (s *Scope) localGet(name string) (Object, bool) {
-	s.moo.Lock()
+	s.locker.Lock()
 	if s.Vars != nil {
 		if value, has := s.Vars[name]; has {
-			s.moo.Unlock()
+			s.locker.Unlock()
 			return value, true
 		}
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 	for _, p := range s.parents {
 		if value, has := p.localGet(name); has {
 			return value, true
@@ -207,15 +234,15 @@ func (s *Scope) set(name string, value Object) bool {
 	if vv := CurrentPackage.GetVarVal(name); vv != nil && vv.Const {
 		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
-	s.moo.Lock()
+	s.locker.Lock()
 	if s.Vars != nil {
 		if _, has := s.Vars[name]; has {
 			s.Vars[name] = value
-			s.moo.Unlock()
+			s.locker.Unlock()
 			return true
 		}
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 	for _, p := range s.parents {
 		if has := p.set(name, value); has {
 			return true
@@ -230,14 +257,14 @@ func (s *Scope) Has(sym Symbol) bool {
 }
 
 func (s *Scope) has(name string) bool {
-	s.moo.Lock()
+	s.locker.Lock()
 	if s.Vars != nil {
 		if _, has := s.Vars[name]; has {
-			s.moo.Unlock()
+			s.locker.Unlock()
 			return true
 		}
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 	for _, p := range s.parents {
 		if p.has(name) {
 			return true
@@ -252,14 +279,14 @@ func (s *Scope) Bound(sym Symbol) bool {
 }
 
 func (s *Scope) bound(name string) bool {
-	s.moo.Lock()
+	s.locker.Lock()
 	if s.Vars != nil {
 		if v, has := s.Vars[name]; has {
-			s.moo.Unlock()
+			s.locker.Unlock()
 			return Unbound != v
 		}
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 	for _, p := range s.parents {
 		if p.bound(name) {
 			return true
@@ -277,15 +304,15 @@ func (s *Scope) Remove(sym Symbol) bool {
 }
 
 func (s *Scope) remove(name string) bool {
-	s.moo.Lock()
+	s.locker.Lock()
 	if s.Vars != nil {
 		if _, has := s.Vars[name]; has {
 			delete(s.Vars, name)
-			s.moo.Unlock()
+			s.locker.Unlock()
 			return true
 		}
 	}
-	s.moo.Unlock()
+	s.locker.Unlock()
 	for _, p := range s.parents {
 		if p.remove(name) {
 			return true

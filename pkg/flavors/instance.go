@@ -18,7 +18,8 @@ const InstanceSymbol = slip.Symbol("instance")
 // Instance is an instance of a Flavor.
 type Instance struct {
 	slip.Scope
-	Type slip.Class
+	// Type *Flavor
+	Type slip.Class // change to *Flavor
 	// Any is available to go methods.
 	Any any
 }
@@ -59,7 +60,7 @@ func (obj *Instance) Simplify() interface{} {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *Instance) Hierarchy() []slip.Symbol {
-	return []slip.Symbol{slip.Symbol(obj.Type.Name()), InstanceSymbol, slip.TrueSymbol}
+	return obj.Type.(*Flavor).precedence
 }
 
 // IsA return true if the instance is of a flavor that inherits from the
@@ -76,6 +77,34 @@ func (obj *Instance) IsA(class slip.Class) bool {
 		}
 	}
 	return false
+}
+
+// SlotNames returns a list of the slots names for the instance.
+func (obj *Instance) SlotNames() []string {
+	names := make([]string, 0, len(obj.Vars))
+	for k := range obj.Vars {
+		names = append(names, k)
+	}
+	return names
+}
+
+// SlotValue return the value of an instance variable.
+func (obj *Instance) SlotValue(sym slip.Symbol) (slip.Object, bool) {
+	return obj.LocalGet(sym)
+}
+
+// SetSlotValue sets the value of an instance variable.
+func (obj *Instance) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool) {
+	name := strings.ToLower(string(sym))
+	if name != "self" {
+		obj.Lock()
+		if _, has = obj.Vars[name]; has {
+			obj.Vars[name] = value
+
+		}
+		obj.Unlock()
+	}
+	return
 }
 
 // Init the instance slots from the provided args list. If the scope is not

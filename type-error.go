@@ -86,7 +86,7 @@ func NewTypeError(use string, value Object, wants ...string) *TypePanic {
 	}
 	b = append(b, " not "...)
 	b = append(b, ObjectString(value)...)
-	if value != nil {
+	if !IsNil(value) {
 		b = append(b, ", a "...)
 		b = append(b, value.Hierarchy()[0]...)
 	}

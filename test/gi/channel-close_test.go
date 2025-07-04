@@ -11,11 +11,11 @@ import (
 )
 
 func TestChannelCloseOk(t *testing.T) {
-	var scope slip.Scope
+	scope := slip.NewScope()
 	ch := make(chan slip.Object, 3)
 	scope.Let(slip.Symbol("queue"), gi.Channel(ch))
 	(&sliptest.Function{
-		Scope:  &scope,
+		Scope:  scope,
 		Source: `(channel-close queue)`,
 		Expect: "",
 	}).Test(t)

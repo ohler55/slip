@@ -12,11 +12,11 @@ import (
 )
 
 func TestRunOk(t *testing.T) {
-	var scope slip.Scope
+	scope := slip.NewScope()
 	x := slip.Symbol("x")
 	scope.Let(x, slip.Fixnum(7))
 	(&sliptest.Function{
-		Scope:  &scope,
+		Scope:  scope,
 		Source: `(run (setq x 3))`,
 		Expect: "",
 	}).Test(t)

@@ -5,6 +5,7 @@ package slip
 import (
 	"fmt"
 	"time"
+	"unsafe"
 )
 
 // Object is the interface for all LISP entities other than nil.
@@ -30,7 +31,7 @@ type Object interface {
 
 // ObjectString returns the string for an Object or "nil" if nil.
 func ObjectString(obj Object) string {
-	if obj == nil {
+	if IsNil(obj) {
 		return "nil"
 	}
 	return obj.String()
@@ -51,6 +52,15 @@ func ObjectEqual(x, y Object) (eq bool) {
 		return y == nil
 	}
 	return x.Equal(y)
+}
+
+// IsNil checks for a nil value of an interface. Go values have two components
+// not exposed, a type component and a value component. Further reading:
+// https://research.swtch.com/interfaces. To ascertain whether the value is
+// nil we ignore the type component and just check if the value component is
+// set to 0.
+func IsNil(v any) bool {
+	return (*[2]uintptr)(unsafe.Pointer(&v))[1] == 0
 }
 
 // SimpleObject creates an Object from simple data.

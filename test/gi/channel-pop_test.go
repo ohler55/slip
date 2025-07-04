@@ -11,13 +11,13 @@ import (
 )
 
 func TestChannelPopOk(t *testing.T) {
-	var scope slip.Scope
+	scope := slip.NewScope()
 	ch := make(chan slip.Object, 3)
 	ch <- slip.Fixnum(7)
 	scope.Let(slip.Symbol("queue"), gi.Channel(ch))
 	defer func() { close(ch) }()
 	(&sliptest.Function{
-		Scope:  &scope,
+		Scope:  scope,
 		Source: `(channel-pop queue)`,
 		Expect: "7",
 	}).Test(t)

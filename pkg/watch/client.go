@@ -26,7 +26,7 @@ type symVal struct {
 
 type client struct {
 	wcon
-	self    slip.Instance
+	self    *flavors.Instance
 	host    string
 	port    int
 	vars    []*symVal
