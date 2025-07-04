@@ -131,23 +131,8 @@ func TestMakeInstanceBuiltIn(t *testing.T) {
 	})
 }
 
-type alphaXCaller struct{}
-
-func (caller alphaXCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	return s.Get("x")
-}
-
-func (caller alphaXCaller) Docs() string {
-	return `__:x__
-
-Returns the value of x.
-`
-}
-
 func TestMakeInstanceClass(t *testing.T) {
 	a := clos.DefClass("alpha", "an alpha", map[string]slip.Object{"x": slip.Fixnum(7)}, nil, false)
-	a.DefMethod(":x", "", alphaXCaller{})
-
 	b := clos.DefClass("bravo", "a bravo", map[string]slip.Object{"y": nil}, []*clos.Class{a}, false)
 	c := clos.DefClass(
 		"charlie",
@@ -157,17 +142,8 @@ func TestMakeInstanceClass(t *testing.T) {
 		false,
 	)
 	des := string(c.Describe(nil, 2, 100, false))
-	tt.Equal(t, "/:x/", des)
 	tt.Equal(t, "/Class precedence list: bravo alpha standard-object/", des)
 
-	(&sliptest.Function{
-		Source: `(send (make-instance 'charlie) :flavor)`,
-		Expect: "#<class charlie>",
-	}).Test(t)
-	(&sliptest.Function{
-		Source: `(send (make-instance 'charlie :x 5) :x)`,
-		Expect: "5",
-	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(make-instance 'charlie t)`,
 		PanicType: slip.TypeErrorSymbol,

@@ -245,7 +245,7 @@ type whichOpsCaller struct{}
 func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*Instance)
 
-	return self.Type.MethodNames()
+	return self.Type.(*Flavor).MethodNames()
 }
 
 func (caller whichOpsCaller) FuncDocs() *slip.FuncDoc {

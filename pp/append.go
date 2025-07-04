@@ -18,6 +18,14 @@ const (
 		"                                                                " // 256 wide should be enough
 )
 
+// This interface is needed since importing flavors causes an undetectable
+// import loop.
+type hasDefMethodList interface {
+	// DefMethodList returns a list that can be evaluated to define a method
+	// on the class or nil if no method is defined by the class.
+	DefMethodList(method, daemon string, inherited bool) slip.List
+}
+
 // Append appends a pretty formatted object using the default printer setting
 // with print variables overridden by scoped variables.
 func Append(b []byte, s *slip.Scope, obj slip.Object) []byte {
@@ -65,7 +73,7 @@ func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
 				return obj
 			}
 		}
-		if c := slip.FindClass(parts[0]); c != nil {
+		if c, _ := slip.FindClass(parts[0]).(hasDefMethodList); c != nil {
 			daemon := "primary"
 			if len(parts) == 3 && 1 < len(parts[1]) {
 				daemon = parts[1]

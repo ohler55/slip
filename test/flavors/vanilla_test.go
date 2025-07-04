@@ -133,6 +133,10 @@ func TestVanillaMethods(t *testing.T) {
 		Source:    `(change-class berry 'none-berry)`,
 		PanicType: slip.ClassNotFoundSymbol,
 	}).Test(t)
+
+	mm := flavors.VanillaMethods()
+	_, hasIt := mm[":inspect"]
+	tt.Equal(t, true, hasIt)
 }
 
 func TestVanillaEqualAny(t *testing.T) {

@@ -24,14 +24,14 @@ const (
 
 // Class is a CLOS class.
 type Class struct {
-	name         string
-	docs         string
-	inherit      []*Class // direct supers
-	prototype    slip.Object
-	final        bool
-	noMake       bool
-	slots        map[string]slip.Object
-	methods      map[string]*slip.Method
+	name      string
+	docs      string
+	inherit   []*Class // direct supers
+	prototype slip.Object
+	final     bool
+	noMake    bool
+	slots     map[string]slip.Object
+	// methods      map[string]*slip.Method
 	InstanceInit func(inst slip.Instance, obj slip.Object)
 }
 
@@ -51,8 +51,8 @@ func DefClass(
 		docs:    docs,
 		slots:   slots,
 		inherit: supers,
-		methods: map[string]*slip.Method{},
-		final:   final,
+		//methods: map[string]*slip.Method{},
+		final: final,
 	}
 	var hasSO bool
 	for _, c := range class.inherit {
@@ -91,15 +91,6 @@ func (c *Class) Simplify() any {
 	for k, o := range c.slots {
 		slots[k] = slip.Simplify(o)
 	}
-	methods := make([]any, 0, len(c.methods))
-	var keys []string
-	for k := range c.methods {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		methods = append(methods, k)
-	}
 	return map[string]any{
 		"name":      c.name,
 		"docs":      c.docs,
@@ -107,7 +98,6 @@ func (c *Class) Simplify() any {
 		"final":     c.final,
 		"prototype": slip.Simplify(c.prototype),
 		"slots":     slots,
-		"methods":   methods,
 	}
 }
 
@@ -229,19 +219,6 @@ func (c *Class) Describe(b []byte, indent, right int, ansi bool) []byte {
 	} else {
 		b = append(b, " None\n"...)
 	}
-	b = append(b, indentSpaces[:i2]...)
-	b = append(b, "Methods:"...)
-	var keys []string
-	for k := range c.methods {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		b = append(b, '\n')
-		b = append(b, indentSpaces[:i3]...)
-		b = append(b, k...)
-	}
-	b = append(b, '\n')
 	if c.prototype != nil {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "Prototype: "...)
@@ -276,7 +253,8 @@ func (c *Class) MakeInstance() slip.Instance {
 
 // DefMethod defines a method for the class. TBD place holder for now.
 func (c *Class) DefMethod(name string, methodType string, caller slip.Caller) {
-	flavors.DefMethod(c, c.methods, name, methodType, caller)
+	// TBD is this needed?
+	// flavors.DefMethod(c, c.methods, name, methodType, caller)
 }
 
 // InvokeMethod on an object. A temporary flavors.Instance is created and the
@@ -291,16 +269,18 @@ func (c *Class) InvokeMethod(obj slip.Object, s *slip.Scope, message string, arg
 
 // GetMethod returns the method if it exists.
 func (c *Class) GetMethod(name string) *slip.Method {
-	return c.methods[name]
+	// TBD
+	return nil
+	//return c.methods[name]
 }
 
 func (c *Class) mergeInherited() {
 	if c.slots == nil {
 		c.slots = map[string]slip.Object{}
 	}
-	if c.methods == nil {
-		c.methods = map[string]*slip.Method{}
-	}
+	// if c.methods == nil {
+	// 	c.methods = map[string]*slip.Method{}
+	// }
 	var iif func(inst slip.Instance, obj slip.Object)
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
 		ic := c.inherit[i]
@@ -310,23 +290,23 @@ func (c *Class) mergeInherited() {
 		for k, v := range ic.slots {
 			c.slots[k] = v
 		}
-		for k, im := range ic.methods {
-			m := c.methods[k]
-			if m == nil {
-				m = &slip.Method{
-					Name:         k,
-					Doc:          im.Doc,
-					Combinations: []*slip.Combination{{From: c}},
-				}
-				c.methods[k] = m
-			}
-			for _, ic := range im.Combinations {
-				// TBD make sure vanilla remains at the end
-				if !m.HasMethodFromClass(ic.From.Name()) {
-					m.Combinations = append(m.Combinations, ic)
-				}
-			}
-		}
+		// for k, im := range ic.methods {
+		// 	m := c.methods[k]
+		// 	if m == nil {
+		// 		m = &slip.Method{
+		// 			Name:         k,
+		// 			Doc:          im.Doc,
+		// 			Combinations: []*slip.Combination{{From: c}},
+		// 		}
+		// 		c.methods[k] = m
+		// 	}
+		// 	for _, ic := range im.Combinations {
+		// 		// TBD make sure vanilla remains at the end
+		// 		if !m.HasMethodFromClass(ic.From.Name()) {
+		// 			m.Combinations = append(m.Combinations, ic)
+		// 		}
+		// 	}
+		// }
 	}
 	if c.InstanceInit == nil {
 		c.InstanceInit = iif
@@ -334,18 +314,20 @@ func (c *Class) mergeInherited() {
 }
 
 // MethodNames returns a sorted list of the methods of the class.
-func (obj *Class) MethodNames() slip.List {
-	names := make([]string, 0, len(obj.methods))
-	for k := range obj.methods {
-		names = append(names, k)
-	}
-	sort.Strings(names)
-	methods := make(slip.List, len(names))
-	for i, name := range names {
-		methods[i] = slip.Symbol(name)
-	}
-	return methods
-}
+//func (obj *Class) MethodNames() slip.List {
+// names := make([]string, 0, len(obj.methods))
+// for k := range obj.methods {
+// 	names = append(names, k)
+// }
+// sort.Strings(names)
+// methods := make(slip.List, len(names))
+// for i, name := range names {
+// 	methods[i] = slip.Symbol(name)
+// }
+// return methods
+// TBD
+//	return nil
+//}
 
 // DefList returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
@@ -355,7 +337,7 @@ func (c *Class) DefList() slip.List {
 }
 
 // DefMethodList returns nil.
-func (c *Class) DefMethodList(method, daemon string, inherited bool) slip.List {
-	// There is no defmethods for classes currently.
-	return nil
-}
+// func (c *Class) DefMethodList(method, daemon string, inherited bool) slip.List {
+// 	// There is no defmethods for classes currently.
+// 	return nil
+// }

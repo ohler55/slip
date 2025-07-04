@@ -3,14 +3,12 @@
 package clos_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
-	"github.com/ohler55/slip/sliptest"
 )
 
 func TestClassBasic(t *testing.T) {
@@ -32,47 +30,12 @@ func TestClassBasic(t *testing.T) {
   docs: "built-in fixed number class"
   final: true
   inherit: [integer]
-  methods: [
-    ":change-class"
-    ":change-flavor"
-    ":describe"
-    ":equal"
-    ":eval-inside-yourself"
-    ":flavor"
-    ":id"
-    ":init"
-    ":inspect"
-    ":operation-handled-p"
-    ":print-self"
-    ":send-if-handles"
-    ":shared-initialize"
-    ":update-instance-for-different-class"
-    ":which-operations"
-  ]
   name: fixnum
   prototype: 42
   slots: {}
 }`, pretty.SEN(c.Simplify()))
 	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`, scope).Eval(scope, nil) })
 
-	names := c.(slip.Class).MethodNames()
-	tt.Equal(t, `[
-  ":change-class"
-  ":change-flavor"
-  ":describe"
-  ":equal"
-  ":eval-inside-yourself"
-  ":flavor"
-  ":id"
-  ":init"
-  ":inspect"
-  ":operation-handled-p"
-  ":print-self"
-  ":send-if-handles"
-  ":shared-initialize"
-  ":update-instance-for-different-class"
-  ":which-operations"
-]`, pretty.SEN(names))
 }
 
 func TestClassDescribeBasic(t *testing.T) {
@@ -85,22 +48,6 @@ func TestClassDescribeBasic(t *testing.T) {
   Direct superclasses: integer
   Class precedence list: integer rational real number built-in-class
   Slots: None
-  Methods:
-    :change-class
-    :change-flavor
-    :describe
-    :equal
-    :eval-inside-yourself
-    :flavor
-    :id
-    :init
-    :inspect
-    :operation-handled-p
-    :print-self
-    :send-if-handles
-    :shared-initialize
-    :update-instance-for-different-class
-    :which-operations
   Prototype: 42
 `, string(out))
 
@@ -111,22 +58,6 @@ func TestClassDescribeBasic(t *testing.T) {
 		"  Direct superclasses: integer\n"+
 		"  Class precedence list: integer rational real number built-in-class\n"+
 		"  Slots: None\n"+
-		"  Methods:\n"+
-		"    :change-class\n"+
-		"    :change-flavor\n"+
-		"    :describe\n"+
-		"    :equal\n"+
-		"    :eval-inside-yourself\n"+
-		"    :flavor\n"+
-		"    :id\n"+
-		"    :init\n"+
-		"    :inspect\n"+
-		"    :operation-handled-p\n"+
-		"    :print-self\n"+
-		"    :send-if-handles\n"+
-		"    :shared-initialize\n"+
-		"    :update-instance-for-different-class\n"+
-		"    :which-operations\n"+
 		"  Prototype: 42\n", string(out))
 }
 
@@ -138,7 +69,6 @@ func TestClassDefClass(t *testing.T) {
 		nil, // supers
 		false,
 	)
-	c.DefMethod(":fun", "", nil)
 	scope := slip.NewScope()
 	found := slip.ReadString(`(find-class 'dummy)`, scope).Eval(scope, nil).(slip.Class)
 	tt.Equal(t, c, found)
@@ -151,47 +81,12 @@ func TestClassDefClass(t *testing.T) {
   Slots:
     x = 3
     y = 5
-  Methods:
-    :change-class
-    :change-flavor
-    :describe
-    :equal
-    :eval-inside-yourself
-    :flavor
-    :fun
-    :id
-    :init
-    :inspect
-    :operation-handled-p
-    :print-self
-    :send-if-handles
-    :shared-initialize
-    :update-instance-for-different-class
-    :which-operations
 `, string(out))
 
 	tt.Equal(t, `{
   docs: "dummy class"
   final: false
   inherit: [standard-object]
-  methods: [
-    ":change-class"
-    ":change-flavor"
-    ":describe"
-    ":equal"
-    ":eval-inside-yourself"
-    ":flavor"
-    ":fun"
-    ":id"
-    ":init"
-    ":inspect"
-    ":operation-handled-p"
-    ":print-self"
-    ":send-if-handles"
-    ":shared-initialize"
-    ":update-instance-for-different-class"
-    ":which-operations"
-  ]
   name: dummy
   prototype: null
   slots: {x: 3 y: 5}
@@ -204,22 +99,6 @@ func TestClassDefClass(t *testing.T) {
 	tt.Equal(t, true, c.NoMake())
 }
 
-func TestClassInstanceInit(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(send (make-condition 'error :message "quux") :message)`,
-		Expect: `"quux"`,
-	}).Test(t)
-}
-
-func TestConditionMessageDocs(t *testing.T) {
-	scope := slip.NewScope()
-	var out strings.Builder
-	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-
-	_ = slip.ReadString(`(describe-method (find-class 'condition) :message out)`, scope).Eval(scope, nil)
-	tt.Equal(t, true, strings.Contains(out.String(), ":message"))
-}
-
 func TestClassInherits(t *testing.T) {
 	c := slip.FindClass("fixnum")
 	tt.Equal(t, true, c.Inherits(slip.FindClass("integer")))
@@ -229,9 +108,4 @@ func TestClassInherits(t *testing.T) {
 func TestClassDefList(t *testing.T) {
 	c := slip.FindClass("fixnum")
 	tt.Equal(t, 0, len(c.DefList()))
-}
-
-func TestClassDefMethodList(t *testing.T) {
-	c := slip.FindClass("fixnum")
-	tt.Equal(t, 0, len(c.DefMethodList(":describe", ":before", true)))
 }

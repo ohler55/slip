@@ -12,10 +12,9 @@ import (
 
 var (
 	builtInClass = Class{
-		name:    "built-in-class",
-		final:   true,
-		noMake:  true,
-		methods: flavors.VanillaMethods(),
+		name:   "built-in-class",
+		final:  true,
+		noMake: true,
 	}
 	symbolClass = Class{
 		name:    "symbol",
@@ -261,11 +260,10 @@ var (
 		inherit: []*Class{&builtInClass},
 	}
 	standardObjectClass = Class{
-		name:    "standard-object",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in super class for all classes",
-		methods: flavors.VanillaMethods(),
+		name:   "standard-object",
+		final:  true,
+		noMake: true,
+		docs:   "built-in super class for all classes",
 	}
 	classClass = Class{
 		name:    "class",
@@ -524,9 +522,6 @@ func init() {
 	} {
 		slip.RegisterClass(c.name, c)
 		c.mergeInherited()
-		if c == &conditionClass {
-			flavors.DefMethod(c, c.methods, ":message", "", conditionMessageCaller{})
-		}
 	}
 }
 

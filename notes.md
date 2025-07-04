@@ -4,9 +4,33 @@
 
 - next
 
+ - sparse-cominations branch
+  - sparse method combinations, no need for empties
+  - drop methods from clos.Class?? either now or later
+
+ - precedence branch
+  - flavor remains the same
+  - clos class becomes standard-class in hierarchy
+   - class standard-class t
+  - class-of return standard-class instance or built-in-class instance for built-ins
+   - for flavor instances return flavor instance #<flavor foo 12345>
+  - instance
+   - flavor.Instance - foo super-foo vanilla-flavor (flavor-)instance t
+   - clos.Instance - foo super-foo standard-object t
+   - build class then instance get hierarchy from class/flavor
+    - maybe a name class hierarchy as well as instance
+
  - generics branch
+  - sparse method combinations, no need for empties
+  - add flavor/class hierarchy to regular hierarchy
+   - build class then instance get hierarchy from class/flavor
+    - maybe a name class hierarchy as well as instance
+    - precedence-list
+     - foo super-foo standard-object t
+
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
    - clos.Generic
+    - start with built in types
     - embeds flavors.Method
     - adds parameters - list of type symbols, later type specifier lists
     - add specifics []*clos.Generic
@@ -128,6 +152,7 @@
  - [ ] WITH-SLOTS
 
 -----------------
+  - [ ] inspect [interactive]
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND

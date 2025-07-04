@@ -14,13 +14,13 @@ import (
 )
 
 func TestDefwhopperBasic(t *testing.T) {
+	undefFlavors("berry", "blueberry")
 	defer undefFlavors("berry", "blueberry")
 	var b strings.Builder
 	scope := slip.NewScope()
 	scope.Set(slip.Symbol("out"), &slip.OutputStream{Writer: &b})
 	_ = slip.ReadString(`
 (defflavor berry (color) ())
-(defmethod (berry :rot) () (princ "berry rot" out) (terpri out))
 (defmethod (berry :after :rot) () (princ "berry after rot" out) (terpri out))
 (defwhopper (berry :rot) ()
  "What a whopper!"
@@ -32,6 +32,7 @@ func TestDefwhopperBasic(t *testing.T) {
 (defflavor blueberry () (berry))
 (defmethod (blueberry :before :rot) () (princ "blueberry before rot" out) (terpri out))
 (defmethod (blueberry :after :rot) () (princ "blueberry after rot" out) (terpri out))
+(defmethod (berry :rot) () (princ "berry rot" out) (terpri out))
 (defwhopper (blueberry :rot) ()
  (princ "blueberry whopper rot start" out) (terpri out)
  (continue-whopper)
@@ -46,8 +47,8 @@ func TestDefwhopperBasic(t *testing.T) {
 berry whopper rot start
 blueberry before rot
 berry rot
-blueberry after rot
 berry after rot
+blueberry after rot
 berry whopper rot done
 blueberry whopper rot done
 `, b.String())
@@ -97,8 +98,8 @@ func TestDefwhopperOneWrap(t *testing.T) {
 	tt.Equal(t, `blueberry whopper rot start
 blueberry before rot
 berry rot
-blueberry after rot
 berry after rot
+blueberry after rot
 blueberry whopper rot done
 `, b.String())
 
@@ -107,8 +108,8 @@ blueberry whopper rot done
 	tt.Equal(t, `blueberry whopper rot start
 blueberry before rot
 berry rot
-blueberry after rot
 berry after rot
+blueberry after rot
 blueberry whopper rot done
 `, b.String())
 }
