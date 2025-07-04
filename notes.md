@@ -4,10 +4,6 @@
 
 - next
 
- - sparse-cominations branch
-  - sparse method combinations, no need for empties
-  - drop methods from clos.Class?? either now or later
-
  - precedence branch
   - flavor remains the same
   - clos class becomes standard-class in hierarchy

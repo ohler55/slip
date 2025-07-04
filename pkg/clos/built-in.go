@@ -524,16 +524,3 @@ func init() {
 		c.mergeInherited()
 	}
 }
-
-type conditionMessageCaller struct{}
-
-func (caller conditionMessageCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	return s.Get("message")
-}
-
-func (caller conditionMessageCaller) Docs() string {
-	return `__:message__ => _string_
-
-Returns the message of the instance.
-`
-}
