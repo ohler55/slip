@@ -35,13 +35,6 @@ type Class interface {
 	// or nil if the class is a built in class. As an example, a flavor would
 	// be created by a defflavor expression.
 	DefList() List
-
-	// DefMethodList returns a list that can be evaluated to define a method
-	// on the class or nil if no method is defined by the class.
-	DefMethodList(method, daemon string, inherited bool) List
-
-	// MethodNames returns a sorted list of the methods of the class.
-	MethodNames() List
 }
 
 // Find finds the named class.

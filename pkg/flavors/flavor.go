@@ -101,7 +101,7 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 	// If there is a combination for this flavor it will be the first on the
 	// list.
 	var c *slip.Combination
-	if 0 < len(m.Combinations) {
+	if 0 < len(m.Combinations) && m.Combinations[0].From == obj {
 		c = m.Combinations[0]
 	} else {
 		addCombo = true
@@ -124,7 +124,7 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 		mm[name] = m
 	}
 	if addCombo {
-		m.Combinations = []*slip.Combination{c}
+		m.Combinations = append([]*slip.Combination{c}, m.Combinations...)
 	}
 	if addCombo {
 		if flavor, ok := obj.(*Flavor); ok {
@@ -144,12 +144,9 @@ func (obj *Flavor) insertMethod(super *Flavor, method *slip.Method, combo *slip.
 	m := obj.methods[method.Name]
 	if m == nil {
 		m = &slip.Method{
-			Name: method.Name,
-			Doc:  method.Doc,
-			Combinations: []*slip.Combination{
-				{From: obj},
-				combo,
-			},
+			Name:         method.Name,
+			Doc:          method.Doc,
+			Combinations: []*slip.Combination{combo},
 		}
 		obj.methods[method.Name] = m
 		return
@@ -294,9 +291,8 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 		m := obj.methods[k]
 		if m == nil {
 			m = &slip.Method{
-				Name:         k,
-				Doc:          im.Doc,
-				Combinations: []*slip.Combination{{From: obj}},
+				Name: k,
+				Doc:  im.Doc,
 			}
 			obj.methods[k] = m
 		}

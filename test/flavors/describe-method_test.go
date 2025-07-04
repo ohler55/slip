@@ -93,10 +93,6 @@ func TestDescribeMethodNotMethod(t *testing.T) {
 		Source:    `(describe-method 'vanilla-flavor :not-a-method)`,
 		PanicType: slip.UnboundSlotSymbol,
 	}).Test(t)
-	(&sliptest.Function{
-		Source:    `(describe-method 'fixnum :not-a-method)`,
-		PanicType: slip.UnboundSlotSymbol,
-	}).Test(t)
 }
 
 func TestDescribeMethodNotStream(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -45,6 +46,26 @@ func TestDefmethodBasic(t *testing.T) {
 	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].primary").First(sf))
 	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].after").First(sf))
 	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':color')].combinations[*].before").First(sf))
+}
+
+func TestDefmethodInsert(t *testing.T) {
+	defer undefFlavors("f1", "f2", "f3")
+	scope := slip.NewScope()
+	slip.ReadString(`
+(defflavor f1 () ())
+(defflavor f2 () (f1))
+(defflavor f3 () (f2))
+(defmethod (f2 :quux) () 'q2)
+(defmethod (f3 :before :quux) () 'q3)
+(defmethod (f1 :before :quux) () 'q1)
+`, scope).Eval(scope, nil)
+
+	f := slip.ReadString("f3", scope).Eval(scope, nil).(*flavors.Flavor)
+	m := f.GetMethod(":quux")
+	tt.Equal(t, `{
+  combinations: [{before: true from: f3} {from: f2 primary: true} {before: true from: f1}]
+  name: ":quux"
+}`, pretty.SEN(m.Simplify()))
 }
 
 func TestDefmethodInherit(t *testing.T) {

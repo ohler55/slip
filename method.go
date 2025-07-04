@@ -57,7 +57,8 @@ func (m *Method) InnerCall(s *Scope, args List, depth int) (result Object) {
 			break
 		}
 	}
-	for _, c := range m.Combinations {
+	for i := len(m.Combinations) - 1; 0 <= i; i-- {
+		c := m.Combinations[i]
 		if c.After != nil {
 			c.After.Call(s, args, depth)
 		}

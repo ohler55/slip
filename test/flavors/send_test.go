@@ -157,16 +157,9 @@ func TestSendDaemons(t *testing.T) {
 	_ = slip.ReadString("(send blue :rot)", scope).Eval(scope, nil)
 	tt.Equal(t, `blueberry before rot
 berry rot
-blueberry after rot
 berry after rot
+blueberry after rot
 `, b.String())
-}
-
-func TestSendClass(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(send (make-condition 'error :message "quux") :message)`,
-		Expect: `"quux"`,
-	}).Test(t)
 }
 
 func TestSendNil(t *testing.T) {
