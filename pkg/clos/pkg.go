@@ -6,6 +6,12 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const (
+	bold         = "\x1b[1m"
+	colorOff     = "\x1b[m"
+	indentSpaces = "                                                                                "
+)
+
 var (
 	// Pkg is the Class package.
 	Pkg = slip.Package{

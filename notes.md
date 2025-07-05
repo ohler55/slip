@@ -5,22 +5,25 @@
 - next
 
  - instance-update branch
-  - clos.StandardObject
-   - foo super-foo standard-object t
-   - locker slip.Locker
-   - Slots
+  - defclass function
+   - also go version for defining class in go
+  - test
+
   - clos
    - standard-class #<standard-class foo>
     - replaces clos/class
    + BuiltInClass built-in-class #<build-in-class fixnum
    - ConditionClass #<condition-class error>
+    - condition t
     - subclass of standard but with over-rides
     - like class but with restrictions like slot-values not allowed
      - define-condition
      - make-condition - maybe allow make-instance
      - has slots
      - maybe a sub-class of class with just append and string changed
-      -
+      - also deny slot-value
+      - defclass with condition must fail as it should for built in
+       - basically, all super classes must be of the same type
 
  - rename bag-flavor to just bag?
 

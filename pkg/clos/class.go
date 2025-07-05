@@ -12,13 +12,6 @@ import (
 const (
 	// ClassSymbol is the symbol with a value of "class".
 	ClassSymbol = slip.Symbol("class")
-
-	// StandardObjectSymbol is the symbol with a value of "standard-object".
-	StandardObjectSymbol = slip.Symbol("standard-object")
-
-	bold         = "\x1b[1m"
-	colorOff     = "\x1b[m"
-	indentSpaces = "                                                                                "
 )
 
 // Class is a CLOS class.
