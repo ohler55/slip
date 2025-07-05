@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"unsafe"
 
 	"github.com/ohler55/slip"
@@ -18,9 +17,8 @@ const StandardObjectSymbol = slip.Symbol("standard-object")
 
 // StandardObject is an instance of a Flavor.
 type StandardObject struct {
-	Vars   map[string]slip.Object
-	locker slip.Locker
-	Type   *StandardClass
+	WithSlots
+	Type *StandardClass
 }
 
 // String representation of the Object.
@@ -39,21 +37,10 @@ func (obj *StandardObject) Append(b []byte) []byte {
 
 // Simplify by returning the string representation of the flavor.
 func (obj *StandardObject) Simplify() interface{} {
-	vars := map[string]any{}
-	for name, val := range obj.Vars {
-		if name != "self" {
-			if iv, ok := val.(*StandardObject); ok {
-				vars[name] = iv.String()
-			} else {
-				vars[name] = slip.Simplify(val)
-			}
-		}
-	}
-	simple := map[string]any{
-		"class": obj.Type.name,
-		"id":    strconv.FormatUint(uint64(uintptr(unsafe.Pointer(obj))), 16),
-		"vars":  vars,
-	}
+	simple := obj.WithSlots.Simplify()
+	simple.(map[string]any)["class"] = obj.Type.name
+	simple.(map[string]any)["id"] = strconv.FormatUint(uint64(uintptr(unsafe.Pointer(obj))), 16)
+
 	return simple
 }
 
@@ -74,62 +61,6 @@ func (obj *StandardObject) IsA(class slip.Class) bool {
 		}
 	}
 	return false
-}
-
-// SlotNames returns a list of the slots names for the instance.
-func (obj *StandardObject) SlotNames() []string {
-	names := make([]string, 0, len(obj.Vars))
-	for k := range obj.Vars {
-		names = append(names, k)
-	}
-	return names
-}
-
-// SlotValue return the value of an instance variable.
-func (obj *StandardObject) SlotValue(sym slip.Symbol) (value slip.Object, has bool) {
-	name := strings.ToLower(string(sym))
-	obj.locker.Lock()
-	if obj.Vars != nil {
-		value, has = obj.Vars[name]
-	}
-	obj.locker.Unlock()
-	return
-}
-
-// SetSlotValue sets the value of an instance variable.
-func (obj *StandardObject) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool) {
-	name := strings.ToLower(string(sym))
-	obj.Lock()
-	if _, has = obj.Vars[name]; has {
-		obj.Vars[name] = value
-	}
-	obj.Unlock()
-	return
-}
-
-// SetSynchronized set the synchronized mode of the scope.
-func (obj *StandardObject) SetSynchronized(on bool) {
-	if on {
-		obj.locker = &sync.Mutex{}
-	} else {
-		obj.locker = slip.NoOpLocker{}
-	}
-}
-
-// Synchronized returns true if the scope is in synchronized mode.
-func (obj *StandardObject) Synchronized() bool {
-	_, ok := obj.locker.(*sync.Mutex)
-	return ok
-}
-
-// Lock the scope to synchronize changes.
-func (obj *StandardObject) Lock() {
-	obj.locker.Lock()
-}
-
-// Unlock the scope to synchronize changes.
-func (obj *StandardObject) Unlock() {
-	obj.locker.Unlock()
 }
 
 // Init the instance slots from the provided args list. If the scope is not

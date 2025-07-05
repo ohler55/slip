@@ -7,6 +7,7 @@
  - instance-update branch
   - defclass function
    - also go version for defining class in go
+   - multiple readers, writers, and accessors are allowed
   - test
 
   - clos
@@ -28,6 +29,7 @@
  - rename bag-flavor to just bag?
 
  - generics branch
+  - is a flag needed to indicate some generics/method do not allow qualifiers like :before and :after
   - sparse method combinations, no need for empties
   - add flavor/class hierarchy to regular hierarchy
    - build class then instance get hierarchy from class/flavor

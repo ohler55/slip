@@ -38,7 +38,7 @@ variable values and plist options.`,
 		}, &Pkg)
 }
 
-// MakeInstance represents the makeInstance function.
+// MakeInstance represents the make-instance function.
 type MakeInstance struct {
 	slip.Function
 }

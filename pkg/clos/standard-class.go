@@ -13,31 +13,30 @@ const StandardClassSymbol = slip.Symbol("standard-class")
 
 // SlotDef encapsulates the definition of a slot on a class.
 type SlotDef struct {
-	name         string
-	defaultValue slip.Object
-	initName     slip.Symbol
-	initForm     slip.Caller
-	argType      slip.Symbol
-	docs         string
+	name     string
+	initName slip.Symbol
+	initForm slip.Object // TBD this should be evaluated on each make-instance
+	argType  slip.Symbol
+	docs     string
 }
 
 func (sd *SlotDef) Simplify() any {
 	return map[string]any{
 		"name":     sd.name,
 		"initName": sd.initName,
-		"initForm": sd.initForm != nil,
 		"type":     sd.argType,
-		"default":  slip.SimpleObject(sd.defaultValue),
+		"initForm": slip.SimpleObject(sd.initForm),
 		"docs":     sd.docs,
 	}
 }
 
 // StandardClass is a CLOS standard-class.
 type StandardClass struct {
+	WithSlots
 	name       string
 	docs       string
 	inherit    []*StandardClass // direct supers
-	slots      map[string]*SlotDef
+	slotDefs   map[string]*SlotDef
 	precedence []slip.Symbol
 }
 
@@ -59,15 +58,16 @@ func (c *StandardClass) Simplify() any {
 	for _, s := range c.inherit {
 		clist = append(clist, s.name)
 	}
-	slots := map[string]any{}
-	for k, sd := range c.slots {
-		slots[k] = sd.Simplify()
+	slotDefs := map[string]any{}
+	for k, sd := range c.slotDefs {
+		slotDefs[k] = sd.Simplify()
 	}
+	// TBD slots values also
 	return map[string]any{
-		"name":    c.name,
-		"docs":    c.docs,
-		"inherit": clist,
-		"slots":   slots,
+		"name":     c.name,
+		"docs":     c.docs,
+		"inherit":  clist,
+		"slotDefs": slotDefs,
 	}
 }
 
@@ -149,10 +149,10 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 
 	b = append(b, indentSpaces[:i2]...)
 	b = append(b, "Slots:"...)
-	if 0 < len(c.slots) {
+	if 0 < len(c.slotDefs) {
 		b = append(b, '\n')
 		var keys []string
-		for k := range c.slots {
+		for k := range c.slotDefs {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
@@ -160,24 +160,27 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 			b = append(b, indentSpaces[:i3]...)
 			b = append(b, k...)
 			b = append(b, " = "...)
-			b = slip.Append(b, c.slots[k].defaultValue)
+			b = slip.Append(b, c.slotDefs[k].initForm)
 			b = append(b, '\n')
 		}
 	} else {
 		b = append(b, " None\n"...)
 	}
+	// TBD slot values or class variables or class slots
 	return b
 }
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *StandardClass) MakeInstance() slip.Instance {
 	obj := StandardObject{
-		Vars:   map[string]slip.Object{},
-		locker: slip.NoOpLocker{},
-		Type:   c,
+		WithSlots: WithSlots{
+			Vars:   map[string]slip.Object{},
+			locker: slip.NoOpLocker{},
+		},
+		Type: c,
 	}
-	for k, sd := range c.slots {
-		obj.Vars[k] = sd.defaultValue
+	for k, sd := range c.slotDefs {
+		obj.Vars[k] = sd.initForm
 	}
 	return &obj
 }
