@@ -312,6 +312,9 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (obj *Flavor) MakeInstance() slip.Instance {
+	if obj.abstract || obj.GoMakeOnly {
+		slip.NewPanic("Can not create an instance of flavor %s.", obj.name)
+	}
 	inst := Instance{Type: obj}
 	inst.Vars = map[string]slip.Object{}
 	inst.SetSynchronized(true)
@@ -504,12 +507,6 @@ func (obj *Flavor) Documentation() string {
 // SetDocumentation of the class.
 func (obj *Flavor) SetDocumentation(doc string) {
 	obj.docs = doc
-}
-
-// NoMake returns true if the class does not allows creating a new instance
-// with make-instance which should signal an error.
-func (obj *Flavor) NoMake() bool {
-	return obj.abstract || obj.GoMakeOnly
 }
 
 // Document a variable or method.

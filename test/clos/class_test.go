@@ -18,21 +18,19 @@ func TestClassBasic(t *testing.T) {
 	tt.Equal(t, c, c.Eval(nil, 0))
 	tt.Equal(t, true, c.Equal(c2))
 	tt.Equal(t, false, c.Equal(nil))
-	tt.Equal(t, "[class standard-object t]", pretty.SEN(c.Hierarchy()))
+	tt.Equal(t, "[built-in-class class standard-object t]", pretty.SEN(c.Hierarchy()))
 	doc := c.(slip.Class).Documentation()
 	tt.Equal(t, "built-in fixed number class", doc)
 	c.(slip.Class).SetDocumentation("quux")
 	tt.Equal(t, "quux", c.(slip.Class).Documentation())
 	c.(slip.Class).SetDocumentation(doc)
 
-	tt.Equal(t, "#<class fixnum>", c.String())
+	tt.Equal(t, "#<built-in-class fixnum>", c.String())
 	tt.Equal(t, `{
   docs: "built-in fixed number class"
-  final: true
-  inherit: [integer]
+  inherit: integer
   name: fixnum
   prototype: 42
-  slots: {}
 }`, pretty.SEN(c.Simplify()))
 	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`, scope).Eval(scope, nil) })
 
@@ -46,8 +44,7 @@ func TestClassDescribeBasic(t *testing.T) {
   Documentation:
     built-in fixed number class
   Direct superclasses: integer
-  Class precedence list: integer rational real number built-in-class
-  Slots: None
+  Class precedence list: fixnum integer rational real number t
   Prototype: 42
 `, string(out))
 
@@ -56,8 +53,7 @@ func TestClassDescribeBasic(t *testing.T) {
 		"  Documentation:\n"+
 		"    built-in fixed number class\n"+
 		"  Direct superclasses: integer\n"+
-		"  Class precedence list: integer rational real number built-in-class\n"+
-		"  Slots: None\n"+
+		"  Class precedence list: fixnum integer rational real number t\n"+
 		"  Prototype: 42\n", string(out))
 }
 

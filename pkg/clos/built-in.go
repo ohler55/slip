@@ -16,248 +16,179 @@ var (
 		final:  true,
 		noMake: true,
 	}
-	symbolClass = Class{
-		name:    "symbol",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in symbol class",
-		inherit: []*Class{&builtInClass},
+	symbolClass = BuiltInClass{
+		name: "symbol",
+		docs: "built-in symbol class",
 	}
-	numberClass = Class{
-		name:    "number",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in number class",
-		inherit: []*Class{&builtInClass},
+	numberClass = BuiltInClass{
+		name: "number",
+		docs: "built-in number class",
 	}
-	realClass = Class{
+	realClass = BuiltInClass{
 		name:    "real",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in real number class",
-		inherit: []*Class{&numberClass},
+		inherit: &numberClass,
 	}
-	rationalClass = Class{
+	rationalClass = BuiltInClass{
 		name:    "rational",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in rational number class",
-		inherit: []*Class{&realClass},
+		inherit: &realClass,
 	}
-	integerClass = Class{
+	integerClass = BuiltInClass{
 		name:    "integer",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in integer class",
-		inherit: []*Class{&rationalClass},
+		inherit: &rationalClass,
 	}
-	fixnumClass = Class{
+	fixnumClass = BuiltInClass{
 		name:      "fixnum",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in fixed number class",
-		inherit:   []*Class{&integerClass},
+		inherit:   &integerClass,
 		prototype: slip.Fixnum(42),
 	}
-	octetClass = Class{
+	octetClass = BuiltInClass{
 		name:      "octet",
-		final:     true,
 		docs:      "built-in unsigned 8 bit integer class",
-		inherit:   []*Class{&integerClass},
+		inherit:   &integerClass,
 		prototype: slip.Octet(42),
 	}
-	byteClass = Class{
+	byteClass = BuiltInClass{
 		name:      "byte",
-		final:     true,
 		docs:      "built-in unsigned 8 bit integer class",
-		inherit:   []*Class{&integerClass},
+		inherit:   &integerClass,
 		prototype: slip.Byte(42),
 	}
-	signedByteClass = Class{
+	signedByteClass = BuiltInClass{
 		name:      "signed-byte",
-		final:     true,
 		docs:      "built-in signed integer class with a configurable number of bits.",
-		inherit:   []*Class{&integerClass},
+		inherit:   &integerClass,
 		prototype: &slip.SignedByte{Bytes: []byte{1}},
 	}
-	unsignedByteClass = Class{
+	unsignedByteClass = BuiltInClass{
 		name:      "unsigned-byte",
-		final:     true,
 		docs:      "built-in unsigned integer class with a configurable number of bits.",
-		inherit:   []*Class{&signedByteClass},
+		inherit:   &signedByteClass,
 		prototype: &slip.UnsignedByte{Bytes: []byte{1}},
 	}
-	bitClass = Class{
+	bitClass = BuiltInClass{
 		name:      "bit",
-		final:     true,
 		docs:      "built-in one bit unsigned integer class.",
-		inherit:   []*Class{&unsignedByteClass},
+		inherit:   &unsignedByteClass,
 		prototype: slip.Bit(0),
 	}
-	bignumClass = Class{
+	bignumClass = BuiltInClass{
 		name:      "bignum",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in fixed number class",
-		inherit:   []*Class{&integerClass},
+		inherit:   &integerClass,
 		prototype: (*slip.Bignum)(big.NewInt(42)),
 	}
-	floatClass = Class{
+	floatClass = BuiltInClass{
 		name:    "float",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in float number class",
-		inherit: []*Class{&realClass},
+		inherit: &realClass,
 	}
-	doubleFloatClass = Class{
+	doubleFloatClass = BuiltInClass{
 		name:      "double-float",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in double-float number class",
-		inherit:   []*Class{&floatClass},
+		inherit:   &floatClass,
 		prototype: slip.DoubleFloat(42.1),
 	}
-	singleFloatClass = Class{
+	singleFloatClass = BuiltInClass{
 		name:      "single-float",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in single-float number class",
-		inherit:   []*Class{&floatClass},
+		inherit:   &floatClass,
 		prototype: slip.SingleFloat(42.1),
 	}
-	shortFloatClass = Class{
+	shortFloatClass = BuiltInClass{
 		name:      "short-float",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in short-float number class",
-		inherit:   []*Class{&floatClass},
+		inherit:   &floatClass,
 		prototype: slip.ShortFloat(42.1),
 	}
-	longFloatClass = Class{
+	longFloatClass = BuiltInClass{
 		name:      "long-float",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in long-float number class",
-		inherit:   []*Class{&floatClass},
+		inherit:   &floatClass,
 		prototype: (*slip.LongFloat)(big.NewFloat(42.1)),
 	}
-	ratioClass = Class{
+	ratioClass = BuiltInClass{
 		name:      "ratio",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in ratio class",
-		inherit:   []*Class{&rationalClass},
+		inherit:   &rationalClass,
 		prototype: slip.NewRatio(3, 4),
 	}
-	sequenceClass = Class{
-		name:    "sequence",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in sequence class",
-		inherit: []*Class{&builtInClass},
+	sequenceClass = BuiltInClass{
+		name: "sequence",
+		docs: "built-in sequence class",
 	}
-	arrayClass = Class{
+	arrayClass = BuiltInClass{
 		name:    "array",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in array class",
-		inherit: []*Class{&sequenceClass},
+		inherit: &sequenceClass,
 	}
-	vectorClass = Class{
+	vectorClass = BuiltInClass{
 		name:    "vector",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in vector class",
-		inherit: []*Class{&arrayClass},
+		inherit: &arrayClass,
 	}
-	stringClass = Class{
+	stringClass = BuiltInClass{
 		name:    "string",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in symbol class",
-		inherit: []*Class{&vectorClass},
+		inherit: &vectorClass,
 	}
-	octetsClass = Class{
+	octetsClass = BuiltInClass{
 		name:      "octets",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in octets class",
-		inherit:   []*Class{&vectorClass},
+		inherit:   &vectorClass,
 		prototype: slip.Octets{'x'},
 	}
-	bitVectorClass = Class{
+	bitVectorClass = BuiltInClass{
 		name:      "bit-vector",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in bit-vector class",
-		inherit:   []*Class{&vectorClass},
+		inherit:   &vectorClass,
 		prototype: &slip.BitVector{Bytes: []byte{3}, Len: 4},
 	}
-	complexClass = Class{
+	complexClass = BuiltInClass{
 		name:      "complex",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in complex number class",
-		inherit:   []*Class{&numberClass},
+		inherit:   &numberClass,
 		prototype: slip.Complex(1 + 2i),
 	}
-	characterClass = Class{
+	characterClass = BuiltInClass{
 		name:      "character",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in character class",
-		inherit:   []*Class{&builtInClass},
 		prototype: slip.Character('A'),
 	}
-	timeClass = Class{
+	timeClass = BuiltInClass{
 		name:      "time",
-		final:     true,
-		noMake:    true,
 		docs:      "built-in time class",
-		inherit:   []*Class{&builtInClass},
 		prototype: slip.Time(time.Date(2022, time.April, 1, 0, 0, 0, 0, time.UTC)),
 	}
-	hashTableClass = Class{
-		name:    "hash-table",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in hash-table class",
-		inherit: []*Class{&builtInClass},
+	hashTableClass = BuiltInClass{
+		name: "hash-table",
+		docs: "built-in hash-table class",
 	}
-	streamClass = Class{
-		name:    "stream",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in stream class",
-		inherit: []*Class{&builtInClass},
+	streamClass = BuiltInClass{
+		name: "stream",
+		docs: "built-in stream class",
 	}
-	fileStreamClass = Class{
+	fileStreamClass = BuiltInClass{
 		name:    "file-stream",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in file-stream class",
-		inherit: []*Class{&streamClass},
+		inherit: &streamClass,
 	}
-	inputStreamClass = Class{
+	inputStreamClass = BuiltInClass{
 		name:    "input-stream",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in input-stream class",
-		inherit: []*Class{&streamClass},
+		inherit: &streamClass,
 	}
-	outputStreamClass = Class{
+	outputStreamClass = BuiltInClass{
 		name:    "output-stream",
-		final:   true,
-		noMake:  true,
 		docs:    "built-in output-stream class",
-		inherit: []*Class{&streamClass},
+		inherit: &streamClass,
 	}
-	packageClass = Class{
-		name:    "package",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in package class",
-		inherit: []*Class{&builtInClass},
+	packageClass = BuiltInClass{
+		name: "package",
+		docs: "built-in package class",
 	}
 	standardObjectClass = Class{
 		name:   "standard-object",
@@ -293,12 +224,12 @@ var (
 		inherit: []*Class{&builtInClass},
 	}
 	conditionClass = Class{
-		name:    "condition",
-		slots:   map[string]slip.Object{"message": nil},
-		final:   true,
-		noMake:  true,
-		docs:    "built-in condition class",
-		inherit: []*Class{&builtInClass},
+		name:   "condition",
+		slots:  map[string]slip.Object{"message": nil},
+		final:  true,
+		noMake: true,
+		docs:   "built-in condition class",
+		// inherit: []*Class{&builtInClass}, // TBD
 		InstanceInit: func(inst slip.Instance, obj slip.Object) {
 			if self, ok := inst.(*flavors.Instance); ok {
 				if cond, ok2 := obj.(slip.Condition); ok2 {
@@ -457,9 +388,7 @@ var (
 )
 
 func init() {
-	for _, c := range []*Class{
-		&builtInClass,
-		&standardObjectClass,
+	for _, c := range []*BuiltInClass{
 		&symbolClass,
 		&numberClass,
 		&realClass,
@@ -493,6 +422,12 @@ func init() {
 		&inputStreamClass,
 		&outputStreamClass,
 		&packageClass,
+	} {
+		slip.RegisterClass(c.name, c)
+		c.buildPrecedence()
+	}
+	for _, c := range []*Class{
+		&standardObjectClass,
 		&classClass,
 		&flavorClass,
 		&conditionClass,

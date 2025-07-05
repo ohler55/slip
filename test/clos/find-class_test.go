@@ -15,7 +15,7 @@ func TestFindClassFound(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(find-class 'fixnum)`,
-		Expect: "#<class fixnum>",
+		Expect: "#<built-in-class fixnum>",
 	}).Test(t)
 }
 

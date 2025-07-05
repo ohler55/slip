@@ -9,20 +9,20 @@
    - foo super-foo standard-object t
    - locker slip.Locker
    - Slots
-  - class-of return standard-class instance or built-in-class instance for built-ins
-   - for flavor instances return flavor instance #<flavor foo 12345>
-   - should a new BuiltIn class be created?
-  - slip.Class
-   - remove NoMake - panic on MakeInstance instead
   - clos
-   - baseClass
-    - name         string
-    - docs         string
-    - prototype    slip.Object
-   - BuiltIn
+   - standard-class #<standard-class foo>
+    - replaces clos/class
+   + BuiltInClass built-in-class #<build-in-class fixnum
+   - ConditionClass #<condition-class error>
+    - subclass of standard but with over-rides
+    - like class but with restrictions like slot-values not allowed
+     - define-condition
+     - make-condition - maybe allow make-instance
+     - has slots
+     - maybe a sub-class of class with just append and string changed
+      -
 
-
- - rename bag-flavor to just bag
+ - rename bag-flavor to just bag?
 
  - generics branch
   - sparse method combinations, no need for empties
