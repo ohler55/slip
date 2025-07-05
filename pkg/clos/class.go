@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/flavors"
 )
 
 const (
@@ -239,14 +238,15 @@ func (c *Class) SetNoMake(noMake bool) {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *Class) MakeInstance() slip.Instance {
-	inst := flavors.Instance{Type: c}
-	inst.Vars = map[string]slip.Object{}
-	for k, v := range c.slots {
-		inst.Vars[k] = v
-	}
-	inst.Vars["self"] = &inst
+	panic("clos make instance called")
+	// inst := flavors.Instance{Type: c}
+	// inst.Vars = map[string]slip.Object{}
+	// for k, v := range c.slots {
+	// 	inst.Vars[k] = v
+	// }
+	// inst.Vars["self"] = &inst
 
-	return &inst
+	// return &inst
 }
 
 // InvokeMethod on an object. A temporary flavors.Instance is created and the

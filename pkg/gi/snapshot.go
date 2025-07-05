@@ -329,7 +329,7 @@ func ppInstance(inst *flavors.Instance) slip.Object {
 					slip.Symbol("make-instance"),
 					slip.List{
 						slip.Symbol("quote"),
-						slip.Symbol(inst.Type.(*flavors.Flavor).Name()),
+						slip.Symbol(inst.Type.Name()),
 					},
 				},
 			},

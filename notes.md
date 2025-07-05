@@ -5,14 +5,24 @@
 - next
 
  - instance-update branch
-  - flavor.Instance - foo super-foo vanilla-flavor instance t
   - clos.StandardObject
    - foo super-foo standard-object t
    - locker slip.Locker
    - Slots
   - class-of return standard-class instance or built-in-class instance for built-ins
    - for flavor instances return flavor instance #<flavor foo 12345>
+   - should a new BuiltIn class be created?
+  - slip.Class
+   - remove NoMake - panic on MakeInstance instead
+  - clos
+   - baseClass
+    - name         string
+    - docs         string
+    - prototype    slip.Object
+   - BuiltIn
 
+
+ - rename bag-flavor to just bag
 
  - generics branch
   - sparse method combinations, no need for empties
