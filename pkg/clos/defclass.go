@@ -71,8 +71,69 @@ type Defclass struct {
 
 // Call the the function with the arguments provided.
 func (f *Defclass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.ArgCountCheck(f, args, 3, 6)
+	name, ok := args[0].(slip.Symbol)
+	if !ok {
+		slip.PanicType("class-name", args[0], "symbol")
+	}
+	var (
+		supers    slip.List
+		slotSpecs slip.List
+	)
+	if supers, ok = args[1].(slip.List); !ok {
+		slip.PanicType("superclass-names", args[1], "list")
+	}
+	if slotSpecs, ok = args[2].(slip.List); !ok {
+		slip.PanicType("slot-specifiers", args[2], "list")
+	}
+	return DefStandardClass(string(name), supers, slotSpecs, args[3:])
+}
 
+// DefStandardClass defines a standard-class.
+func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *StandardClass {
+	sc := StandardClass{
+		name:     name,
+		slotDefs: map[string]*SlotDef{},
+	}
+	sc.Vars = map[string]slip.Object{}
+	sc.locker = slip.NoOpLocker{}
+
+	for _, opt := range classOptions {
+		list, ok := opt.(slip.List)
+		if !ok || len(list) < 2 {
+			slip.PanicType("class-options", opt, "list")
+		}
+		switch list[0] {
+		case slip.Symbol(":documentation"):
+			if docs, ok := list[1].(slip.String); ok {
+				sc.docs = string(docs)
+			} else {
+				slip.PanicType("class-options :documentation", list[1], "string")
+			}
+		case slip.Symbol(":default-initargs"):
+			sc.defaultInitArgs = list[1:]
+		case slip.Symbol(":metaclass"):
+			// ignore
+		default:
+			slip.PanicType("class-options directive", list[0], ":documentation", "default-initargs", ":metaclass")
+		}
+	}
 	// TBD
+	// inherit    []*StandardClass // direct supers
+	//   place holder if class not found add placeholder with empty precedence
 
-	return nil
+	// TBD calculate
+	// precedence []slip.Symbol
+
+	// TBD try to build inherits first, if that fails then leave as no finished
+
+	// TBD search all classes for placeholder in inherits
+	//   place holder is one that has an empty precedence
+	//   mergeSupers
+
+	// TBD mergeSupers
+	//  form inherits
+	//  merge slotdefs keeping existing
+
+	return &sc
 }

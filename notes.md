@@ -8,6 +8,9 @@
   - defclass function
    - also go version for defining class in go
    - multiple readers, writers, and accessors are allowed
+   - class slots
+    - accessors must consider slot on obj.Type.Vars
+     - if not found then look back on inherit
   - test
 
   - clos

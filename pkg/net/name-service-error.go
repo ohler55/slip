@@ -26,7 +26,6 @@ func defNameServiceError() {
 		true)
 
 	slip.RegisterCondition("name-service-error", makeNameServiceError)
-
 }
 
 type nameServiceError struct {

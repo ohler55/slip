@@ -4,6 +4,8 @@ package clos
 
 import (
 	"sort"
+	"strconv"
+	"unsafe"
 
 	"github.com/ohler55/slip"
 )
@@ -11,33 +13,16 @@ import (
 // StandardClassSymbol is the symbol with a value of "standard-class".
 const StandardClassSymbol = slip.Symbol("standard-class")
 
-// SlotDef encapsulates the definition of a slot on a class.
-type SlotDef struct {
-	name     string
-	initName slip.Symbol
-	initForm slip.Object // TBD this should be evaluated on each make-instance
-	argType  slip.Symbol
-	docs     string
-}
-
-func (sd *SlotDef) Simplify() any {
-	return map[string]any{
-		"name":     sd.name,
-		"initName": sd.initName,
-		"type":     sd.argType,
-		"initForm": slip.SimpleObject(sd.initForm),
-		"docs":     sd.docs,
-	}
-}
-
 // StandardClass is a CLOS standard-class.
 type StandardClass struct {
 	WithSlots
-	name       string
-	docs       string
-	inherit    []*StandardClass // direct supers
-	slotDefs   map[string]*SlotDef
-	precedence []slip.Symbol
+	name            string
+	docs            string
+	supers          []slip.Symbol
+	inherit         []*StandardClass // direct supers
+	slotDefs        map[string]*SlotDef
+	precedence      []slip.Symbol
+	defaultInitArgs slip.List
 }
 
 // String representation of the Object.
@@ -54,21 +39,19 @@ func (c *StandardClass) Append(b []byte) []byte {
 
 // Simplify by returning the string representation of the class.
 func (c *StandardClass) Simplify() any {
-	clist := make([]any, 0, len(c.inherit))
-	for _, s := range c.inherit {
-		clist = append(clist, s.name)
-	}
+	simple := c.WithSlots.Simplify()
+	simple.(map[string]any)["id"] = strconv.FormatUint(uint64(uintptr(unsafe.Pointer(c))), 16)
+	simple.(map[string]any)["name"] = c.name
+	simple.(map[string]any)["docs"] = c.docs
+	simple.(map[string]any)["superclasses"] = simplifySymList(c.supers)
+
 	slotDefs := map[string]any{}
 	for k, sd := range c.slotDefs {
 		slotDefs[k] = sd.Simplify()
 	}
-	// TBD slots values also
-	return map[string]any{
-		"name":     c.name,
-		"docs":     c.docs,
-		"inherit":  clist,
-		"slotDefs": slotDefs,
-	}
+	simple.(map[string]any)["slotDefs"] = slotDefs
+
+	return simple
 }
 
 // Equal returns true if this Object and the other are equal in value.
@@ -166,7 +149,21 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 	} else {
 		b = append(b, " None\n"...)
 	}
-	// TBD slot values or class variables or class slots
+	if 0 < len(c.Vars) {
+		b = append(b, "Class Slots:\n"...)
+		var keys []string
+		for k := range c.Vars {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			b = append(b, indentSpaces[:i3]...)
+			b = append(b, k...)
+			b = append(b, " = "...)
+			b = slip.Append(b, c.Vars[k])
+			b = append(b, '\n')
+		}
+	}
 	return b
 }
 
@@ -180,7 +177,9 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 		Type: c,
 	}
 	for k, sd := range c.slotDefs {
-		obj.Vars[k] = sd.initForm
+		if !sd.classStore {
+			obj.Vars[k] = sd.initForm
+		}
 	}
 	return &obj
 }
