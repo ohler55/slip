@@ -5,35 +5,32 @@
 - next
 
  - instance-update branch
-   - mergeSupers
-   - makeClassesReady()
-   - DefList
-
-   - class slots
-    - accessors must consider slot on obj.Type.Vars
-     - if not found then look back on inherit
+  - DefList - useful for testing?
   - test
    - place holder for reader, writer, and accessor functions
 
-  - clos
-   - standard-class #<standard-class foo>
-    - replaces clos/class
-   + BuiltInClass built-in-class #<build-in-class fixnum
-   - ConditionClass #<condition-class error>
-    - condition t
-    - subclass of standard but with over-rides
-    - like class but with restrictions like slot-values not allowed
-     - define-condition
-     - make-condition - maybe allow make-instance
-     - has slots
-     - maybe a sub-class of class with just append and string changed
-      - also deny slot-value
-      - defclass with condition must fail as it should for built in
-       - basically, all super classes must be of the same type
+  - ConditionClass #<condition-class error>
+   - condition t
+   - subclass of standard but with over-rides
+   - like class but with restrictions like slot-values not allowed
+    - define-condition
+    - make-condition - maybe allow make-instance
+    - has slots
+    - maybe a sub-class of class with just append and string changed
+     - also deny slot-value
+     - defclass with condition must fail as it should for built in
+      - basically, all super classes must be of the same type
 
- - rename bag-flavor to just bag?
+  - remove clos/class
+
+---------------------
 
  - generics branch
+  - standard-class reader, writer, and accessor
+   - class slots
+    - accessors must consider slot on standard-object.Type.Vars
+     - if not found then look back on inherit
+
   - generics are tied to a package just like functions
   - is a flag needed to indicate some generics/method do not allow qualifiers like :before and :after
   - sparse method combinations, no need for empties
@@ -76,27 +73,6 @@
      - parameters - list of arg types - just types, no forms, or maybe rely on coerce type matching
      - specifics - []*Method to search
 
-
-  - defclass (class-name superclass-names slot-specifiers &rest class-options*)
-   - update clos/class struct
-   - implement for vars/slots only
-   - class-options
-    - :default-initargs init-arg-list
-    - :documentation string
-    - :metaclass classname - limit to standard-class and ignore otherwise
-   - slot-specifier like (name :initarg :name :accessor name)
-    - :reader reader-function-name * - names of functions to access slot
-    - :writer writer-function-name *
-    - :accessor reader-function-name *
-    - :allocation allocation-type
-    - :initarg initarg-name *
-    - :initform form
-    - :type type-specifier
-    - :documentation string
-   - make sure all validation is handled for name collisions
-  - standard-class
-  - standard-object - like vanilla
-
   - defmethod class daemon bindings/args
    - find class to determine how to define
    - maybe separate function/method table for all clos classes
@@ -112,9 +88,9 @@
         - nill type matches anything
        - if no qualifier then it is generic
       - docs
-  - optimize for binding of one to a class using the class method
-  - register as normal function but handle differently
-  - move defmethod to clos
+
+ - flavor allow out of order defflavor like standard-class
+ - rename bag-flavor to just bag?
 
  - [ ] ADD-METHOD
  - [ ] CALL-METHOD

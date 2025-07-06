@@ -898,3 +898,12 @@ func (obj *Package) FindClass(name string) (c Class) {
 	}
 	return
 }
+
+// AllClasses returns list of all classes visible in the package.
+func (obj *Package) AllClasses() []Class {
+	all := make([]Class, 0, len(obj.classes))
+	for _, c := range obj.classes {
+		all = append(all, c)
+	}
+	return all
+}

@@ -19,7 +19,7 @@ type StandardClass struct {
 	name            string
 	docs            string
 	supers          []slip.Symbol
-	inherit         []*StandardClass // direct supers
+	inherit         []*StandardClass
 	slotDefs        map[string]*SlotDef
 	pkg             *slip.Package
 	precedence      []slip.Symbol
@@ -205,21 +205,69 @@ func (c *StandardClass) Ready() bool {
 }
 
 func (c *StandardClass) mergeSupers() bool {
+	// Just look at the super inherited. No need to dig any deeper if the
+	// super is ready.
+	c.inherit = c.inherit[:0]
+	for _, super := range c.supers {
+		sc := c.pkg.FindClass(string(super))
+		ssc, ok := sc.(*StandardClass)
+		if !ok {
+			slip.PanicType("superclass", sc, "standard-class")
+		}
+		if ssc == nil || len(ssc.precedence) == 0 {
+			c.inherit = c.inherit[:0]
+			return false
+		}
+		if c.Inherits(ssc) {
+			continue
+		}
+		c.inherit = append(c.inherit, ssc)
+		for _, ic := range ssc.inherit {
+			if !c.Inherits(ic) {
+				c.inherit = append(c.inherit, ic)
+			}
+		}
+	}
+	// TBD add readers, writers, and accessors for each slot before inheriting
 
-	// TBD
-	// attempt to build the inherit list
-	//  if that fails then return false
-	// if all found and are ready then
-	//   merge slots
-	//   build precedence
+	for _, ic := range c.inherit {
+		for name, isd := range ic.slotDefs {
+			sd := c.slotDefs[name]
+			if sd == nil {
+				c.slotDefs[name] = isd
+			}
+		}
+	}
+	c.precedence = make([]slip.Symbol, 0, len(c.inherit)+3)
+	c.precedence = append(c.precedence, slip.Symbol(c.name))
+	for _, ic := range c.inherit {
+		c.precedence = append(c.precedence, slip.Symbol(ic.name))
+	}
+	c.precedence = append(c.precedence, StandardObjectSymbol, slip.TrueSymbol)
 
-	return false
+	return true
 }
 
-func makeClassesReady() {
-	// TBD
-	// search all classes for !Ready() and collect
-	//   for each not ready attempt mergeSupers
-	//     repeat until no changes
-
+func makeClassesReady(p *slip.Package) {
+	var not []*StandardClass
+	for _, c := range p.AllClasses() {
+		if sc, ok := c.(*StandardClass); ok && len(sc.precedence) == 0 {
+			not = append(not, sc)
+		}
+	}
+	if 0 < len(not) {
+		for {
+			var changed bool
+			for _, sc := range not {
+				if len(sc.precedence) == 0 {
+					if sc.mergeSupers() {
+						changed = true
+					}
+				}
+			}
+			if !changed {
+				break
+			}
+		}
+	}
 }

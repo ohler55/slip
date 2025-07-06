@@ -126,7 +126,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 	_ = sc.mergeSupers()
 	slip.RegisterClass(sc.name, &sc)
 
-	makeClassesReady()
+	makeClassesReady(slip.CurrentPackage)
 
 	return &sc
 }
