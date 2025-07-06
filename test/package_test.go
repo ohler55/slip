@@ -150,6 +150,7 @@ func TestPackageDef(t *testing.T) {
 	tt.Panic(t, func() { pc.Import(pb, "x") })
 
 	tt.Equal(t, `{
+  classes: []
   doc: Sailing.
   functions: []
   imports: {bb: {name: bb pkg: "#<package b>"}}

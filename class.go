@@ -2,10 +2,6 @@
 
 package slip
 
-import "strings"
-
-var allClasses = map[string]Class{}
-
 type Class interface {
 	Object
 
@@ -38,14 +34,14 @@ type Class interface {
 
 // Find finds the named class.
 func FindClass(name string) (c Class) {
-	if c = allClasses[name]; c == nil {
-		c = allClasses[strings.ToLower(name)]
-	}
-	return
+	return CurrentPackage.FindClass(name)
 }
 
 // RegisterClass a class.
 func RegisterClass(name string, c Class) {
-	name = strings.ToLower(name)
-	allClasses[name] = c
+	p := c.Pkg()
+	if p == nil {
+		p = CurrentPackage
+	}
+	p.RegisterClass(name, c)
 }

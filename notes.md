@@ -5,13 +5,8 @@
 - next
 
  - instance-update branch
-   - move allClasses to package
-   - RegisterClass => RegisterClass(name string, c Class)
-    - add Package.RegisterClass
-    - find-class should look at current package
-
-    - defclass function
    - mergeSupers
+   - makeClassesReady()
    - DefList
 
    - class slots

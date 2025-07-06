@@ -43,6 +43,7 @@ type Package struct {
 	lambdas  map[string]*Lambda
 	funcs    map[string]*FuncInfo
 	vars     map[string]*VarVal
+	classes  map[string]Class
 	PreSet   func(p *Package, name string, value Object) (string, Object)
 	mu       sync.Mutex
 	path     string
@@ -61,6 +62,7 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		Imports:   map[string]*Import{},
 		lambdas:   map[string]*Lambda{},
 		funcs:     map[string]*FuncInfo{},
+		classes:   map[string]Class{},
 		PreSet:    DefaultPreSet,
 	}
 	packages = append(packages, &pkg)
@@ -115,6 +117,9 @@ func (obj *Package) Initialize(vars map[string]*VarVal, local ...any) {
 		vv.name = k
 		obj.vars[k] = vv
 	}
+	if obj.classes == nil {
+		obj.classes = map[string]Class{}
+	}
 	if len(obj.path) == 0 && 0 < len(local) {
 		obj.path = reflect.TypeOf(local[0]).Elem().PkgPath()
 		obj.Locked = true
@@ -156,6 +161,21 @@ func (obj *Package) Use(pkg *Package) {
 				obj.funcs[name] = fi
 			}
 		}
+		if obj.classes == nil {
+			obj.classes = map[string]Class{}
+		}
+		for name, c := range pkg.classes {
+			// TBD check if exported
+			if xc, has := obj.classes[name]; has {
+				if xc.Pkg() == c.Pkg() {
+					continue
+				}
+				PanicPackage(obj, "Package %s already defines class %s which can not be replaced "+
+					"with a class with the same name in package %s.",
+					obj, name, pkg)
+			}
+			obj.classes[name] = c
+		}
 	}
 }
 
@@ -186,12 +206,16 @@ func (obj *Package) Unuse(pkg *Package) {
 		// Rebuild to make sure use tree branches are removed as well.
 		obj.vars = map[string]*VarVal{}
 		obj.funcs = map[string]*FuncInfo{}
+		obj.classes = map[string]Class{}
 		for _, p := range obj.Uses {
 			for name, vv := range p.vars {
 				obj.vars[name] = vv
 			}
 			for name, fi := range p.funcs {
 				obj.funcs[name] = fi
+			}
+			for name, c := range p.classes {
+				obj.classes[name] = c
 			}
 		}
 	}
@@ -527,6 +551,12 @@ func (obj *Package) Simplify() any {
 	}
 	sort.Strings(funcs)
 
+	classes := make([]string, 0, len(obj.classes))
+	for name := range obj.classes {
+		classes = append(classes, name)
+	}
+	sort.Strings(classes)
+
 	return map[string]any{
 		"name":      obj.Name,
 		"nicknames": nicknames,
@@ -535,6 +565,7 @@ func (obj *Package) Simplify() any {
 		"imports":   imports,
 		"uses":      uses,
 		"functions": funcs,
+		"classes":   classes,
 	}
 }
 
@@ -727,6 +758,37 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 			}
 		}
 	}
+	if 0 < len(obj.classes) {
+		names = names[:0]
+		mx = 0
+		for k, c := range obj.classes {
+			if obj != c.Pkg() {
+				continue
+			}
+			names = append(names, k)
+			if mx < len(k) {
+				mx = len(k)
+			}
+		}
+		b = append(b, indentSpaces[:indent]...)
+		b = append(b, "Classes:\n"...)
+		sort.Strings(names)
+		cols := (right - indent - 2) / (mx + 1)
+		col := 0
+		for _, k := range names {
+			if col == 0 {
+				b = append(b, indentSpaces[:indent+2]...)
+			}
+			col++
+			b = append(b, k...)
+			if cols <= col {
+				b = append(b, '\n')
+				col = 0
+			} else {
+				b = append(b, indentSpaces[:mx-len(k)+1]...)
+			}
+		}
+	}
 	return append(b, '\n')
 }
 
@@ -809,6 +871,29 @@ func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Objec
 	if 0 < len(name) && !strings.EqualFold(name, "lambda") {
 		for _, h := range defunHooks {
 			h.fun(obj, name)
+		}
+	}
+	return
+}
+
+// RegisterClass registers a class in the package
+func (obj *Package) RegisterClass(name string, c Class) {
+	if obj.classes == nil {
+		obj.classes = map[string]Class{}
+	}
+	name = strings.ToLower(name)
+	obj.classes[name] = c
+
+	for _, up := range obj.Users {
+		up.RegisterClass(name, c)
+	}
+}
+
+// Find finds the named class.
+func (obj *Package) FindClass(name string) (c Class) {
+	if obj.classes != nil {
+		if c = obj.classes[name]; c == nil {
+			c = obj.classes[strings.ToLower(name)]
 		}
 	}
 	return

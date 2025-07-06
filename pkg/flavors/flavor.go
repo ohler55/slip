@@ -15,10 +15,6 @@ const FlavorSymbol = slip.Symbol("flavor")
 
 var allFlavors = map[string]*Flavor{vanilla.name: &vanilla}
 
-func init() {
-	slip.RegisterClass(vanilla.name, &vanilla)
-}
-
 // Flavor of Objects.
 type Flavor struct {
 	name             string
@@ -210,6 +206,7 @@ func (obj *Flavor) Simplify() any {
 	_, isDefHand := obj.defaultHandler.(defHand)
 	return map[string]any{
 		"name":             obj.name,
+		"package":          obj.pkg.Name,
 		"docs":             obj.docs,
 		"inherit":          flist,
 		"defaultVars":      vars,

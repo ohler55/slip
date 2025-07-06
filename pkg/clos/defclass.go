@@ -130,11 +130,3 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 
 	return &sc
 }
-
-func makeClassesReady() {
-	// TBD
-	// search all classes for !Ready() and collect
-	//   for each not ready attempt mergeSupers
-	//     repeat until no changes
-
-}

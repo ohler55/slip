@@ -30,6 +30,7 @@ func TestClassBasic(t *testing.T) {
   docs: "built-in fixed number class"
   inherit: integer
   name: fixnum
+  package: common-lisp
   prototype: 42
 }`, pretty.SEN(c.Simplify()))
 	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`, scope).Eval(scope, nil) })

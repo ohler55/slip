@@ -43,6 +43,7 @@ func (c *StandardClass) Simplify() any {
 	simple := c.WithSlots.Simplify()
 	simple.(map[string]any)["id"] = strconv.FormatUint(uint64(uintptr(unsafe.Pointer(c))), 16)
 	simple.(map[string]any)["name"] = c.name
+	simple.(map[string]any)["package"] = c.pkg.Name
 	simple.(map[string]any)["docs"] = c.docs
 	simple.(map[string]any)["superclasses"] = simplifySymList(c.supers)
 
@@ -213,4 +214,12 @@ func (c *StandardClass) mergeSupers() bool {
 	//   build precedence
 
 	return false
+}
+
+func makeClassesReady() {
+	// TBD
+	// search all classes for !Ready() and collect
+	//   for each not ready attempt mergeSupers
+	//     repeat until no changes
+
 }

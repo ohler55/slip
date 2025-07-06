@@ -96,6 +96,7 @@ func TestFlavorSimple(t *testing.T) {
     }
   ]
   name: blueberry
+  package: common-lisp-user
   required: []
   requiredKeywords: []
   requiredMethods: []
@@ -303,6 +304,7 @@ func TestFlavorReceive(t *testing.T) {
     }
   ]
   name: blueberry
+  package: common-lisp-user
   required: []
   requiredKeywords: []
   requiredMethods: []

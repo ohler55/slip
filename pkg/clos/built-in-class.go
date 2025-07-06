@@ -39,6 +39,7 @@ func (c *BuiltInClass) Simplify() any {
 		"name":      c.name,
 		"docs":      c.docs,
 		"prototype": slip.Simplify(c.prototype),
+		"package":   c.pkg.Name,
 	}
 	if c.inherit != nil {
 		simple["inherit"] = c.inherit.name
