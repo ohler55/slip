@@ -24,6 +24,7 @@ type Class struct {
 	noMake       bool
 	slots        map[string]slip.Object
 	InstanceInit func(inst slip.Instance, obj slip.Object)
+	pkg          *slip.Package
 }
 
 // DefClass creates a Class.
@@ -119,6 +120,11 @@ func (c *Class) Eval(s *slip.Scope, depth int) slip.Object {
 // Name of the class.
 func (c *Class) Name() string {
 	return c.name
+}
+
+// Pkg returns the package the class was defined in.
+func (c *Class) Pkg() *slip.Package {
+	return c.pkg
 }
 
 // Documentation of the class.

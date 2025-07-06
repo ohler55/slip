@@ -94,6 +94,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 	sc := StandardClass{
 		name:     name,
 		slotDefs: map[string]*SlotDef{},
+		pkg:      slip.CurrentPackage,
 	}
 	sc.Vars = map[string]slip.Object{}
 	sc.locker = slip.NoOpLocker{}
@@ -118,22 +119,22 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 			slip.PanicType("class-options directive", list[0], ":documentation", "default-initargs", ":metaclass")
 		}
 	}
-	// TBD
-	// inherit    []*StandardClass // direct supers
-	//   place holder if class not found add placeholder with empty precedence
+	for _, ss := range slotSpecs {
+		sd := NewSlotDef(ss)
+		sc.slotDefs[sd.name] = sd
+	}
+	_ = sc.mergeSupers()
+	slip.RegisterClass(sc.name, &sc)
 
-	// TBD calculate
-	// precedence []slip.Symbol
-
-	// TBD try to build inherits first, if that fails then leave as no finished
-
-	// TBD search all classes for placeholder in inherits
-	//   place holder is one that has an empty precedence
-	//   mergeSupers
-
-	// TBD mergeSupers
-	//  form inherits
-	//  merge slotdefs keeping existing
+	makeClassesReady()
 
 	return &sc
+}
+
+func makeClassesReady() {
+	// TBD
+	// search all classes for !Ready() and collect
+	//   for each not ready attempt mergeSupers
+	//     repeat until no changes
+
 }

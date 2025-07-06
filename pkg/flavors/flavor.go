@@ -62,7 +62,7 @@ func All() (all []*Flavor) {
 	return
 }
 
-// Pkg returns the package the flavor was defined in
+// Pkg returns the package the flavor was defined in.
 func (obj *Flavor) Pkg() *slip.Package {
 	return obj.pkg
 }

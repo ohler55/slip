@@ -7,15 +7,11 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
 var (
-	builtInClass = Class{
-		name:   "built-in-class",
-		final:  true,
-		noMake: true,
-	}
 	symbolClass = BuiltInClass{
 		name: "symbol",
 		docs: "built-in symbol class",
@@ -190,38 +186,31 @@ var (
 		name: "package",
 		docs: "built-in package class",
 	}
-	standardObjectClass = Class{
+	bagPathClass = BuiltInClass{
+		name: "bag-path",
+		docs: "built-in bag-path is a JSON path class in the bag package",
+		pkg:  &bag.Pkg,
+	}
+	channelClass = BuiltInClass{
+		name: "channel",
+		docs: "built-in channel class in the Go Integration (gi) package",
+	}
+	flavorClass = BuiltInClass{
+		name: "flavor",
+		docs: "built-in flavor class in the flavors package",
+		pkg:  &flavors.Pkg,
+	}
+
+	standardObjectClass = Class{ // TBD remove
 		name:   "standard-object",
 		final:  true,
 		noMake: true,
 		docs:   "built-in super class for all classes",
 	}
 	classClass = Class{
-		name:    "class",
-		final:   true,
-		noMake:  true,
-		inherit: []*Class{&standardObjectClass},
-	}
-	channelClass = Class{
-		name:    "channel",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in channel class in the Go Integration (gi) package",
-		inherit: []*Class{&builtInClass},
-	}
-	bagPathClass = Class{
-		name:    "bag-path",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in bag-path is a JSON path class in the bag package",
-		inherit: []*Class{&builtInClass},
-	}
-	flavorClass = Class{
-		name:    "flavor",
-		final:   true,
-		noMake:  true,
-		docs:    "built-in flavor class in the flavors package",
-		inherit: []*Class{&builtInClass},
+		name:   "class",
+		final:  true,
+		noMake: true,
 	}
 	conditionClass = Class{
 		name:   "condition",
@@ -422,14 +411,20 @@ func init() {
 		&inputStreamClass,
 		&outputStreamClass,
 		&packageClass,
+		&bagPathClass,
+		&flavorClass,
+		&channelClass,
 	} {
+		if c.pkg == nil {
+			c.pkg = &slip.CLPkg
+		}
 		slip.RegisterClass(c.name, c)
 		c.buildPrecedence()
 	}
+	// TBD change to Condition class
 	for _, c := range []*Class{
 		&standardObjectClass,
-		&classClass,
-		&flavorClass,
+		&classClass, // TBD remove
 		&conditionClass,
 		&seriousConditionClass,
 		&errorClass,
@@ -452,9 +447,8 @@ func init() {
 		&simpleErrorClass,
 		&simpleTypeErrorClass,
 		&simpleWarningClass,
-		&bagPathClass,
-		&channelClass,
 	} {
+		c.pkg = &Pkg
 		slip.RegisterClass(c.name, c)
 		c.mergeInherited()
 	}

@@ -17,6 +17,7 @@ type BuiltInClass struct {
 	docs       string
 	inherit    *BuiltInClass // direct super
 	prototype  slip.Object
+	pkg        *slip.Package
 	precedence []slip.Symbol
 }
 
@@ -74,6 +75,11 @@ func (c *BuiltInClass) Eval(s *slip.Scope, depth int) slip.Object {
 // Name of the class.
 func (c *BuiltInClass) Name() string {
 	return c.name
+}
+
+// Pkg returns the package the class was defined in.
+func (c *BuiltInClass) Pkg() *slip.Package {
+	return c.pkg
 }
 
 // Documentation of the class.

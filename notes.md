@@ -5,13 +5,20 @@
 - next
 
  - instance-update branch
-  - defclass function
-   - also go version for defining class in go
-   - multiple readers, writers, and accessors are allowed
+   - move allClasses to package
+   - RegisterClass => RegisterClass(name string, c Class)
+    - add Package.RegisterClass
+    - find-class should look at current package
+
+    - defclass function
+   - mergeSupers
+   - DefList
+
    - class slots
     - accessors must consider slot on obj.Type.Vars
      - if not found then look back on inherit
   - test
+   - place holder for reader, writer, and accessor functions
 
   - clos
    - standard-class #<standard-class foo>
@@ -32,6 +39,7 @@
  - rename bag-flavor to just bag?
 
  - generics branch
+  - generics are tied to a package just like functions
   - is a flag needed to indicate some generics/method do not allow qualifiers like :before and :after
   - sparse method combinations, no need for empties
   - add flavor/class hierarchy to regular hierarchy

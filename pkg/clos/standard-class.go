@@ -21,6 +21,7 @@ type StandardClass struct {
 	supers          []slip.Symbol
 	inherit         []*StandardClass // direct supers
 	slotDefs        map[string]*SlotDef
+	pkg             *slip.Package
 	precedence      []slip.Symbol
 	defaultInitArgs slip.List
 }
@@ -84,6 +85,11 @@ func (c *StandardClass) Name() string {
 	return c.name
 }
 
+// Pkg returns the package the class was defined in.
+func (c *StandardClass) Pkg() *slip.Package {
+	return c.pkg
+}
+
 // Documentation of the class.
 func (c *StandardClass) Documentation() string {
 	return c.docs
@@ -143,7 +149,7 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 			b = append(b, indentSpaces[:i3]...)
 			b = append(b, k...)
 			b = append(b, " = "...)
-			b = slip.Append(b, c.slotDefs[k].initForm)
+			b = slip.Append(b, c.slotDefs[k].initform)
 			b = append(b, '\n')
 		}
 	} else {
@@ -178,7 +184,7 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 	}
 	for k, sd := range c.slotDefs {
 		if !sd.classStore {
-			obj.Vars[k] = sd.initForm
+			obj.Vars[k] = sd.initform
 		}
 	}
 	return &obj
@@ -189,4 +195,22 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 func (c *StandardClass) DefList() slip.List {
 	// TBD
 	return nil
+}
+
+// Ready returns true when the class is ready for use or that all superclasses
+// have been defined and merged.
+func (c *StandardClass) Ready() bool {
+	return 0 < len(c.precedence)
+}
+
+func (c *StandardClass) mergeSupers() bool {
+
+	// TBD
+	// attempt to build the inherit list
+	//  if that fails then return false
+	// if all found and are ready then
+	//   merge slots
+	//   build precedence
+
+	return false
 }

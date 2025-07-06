@@ -12,6 +12,9 @@ type Class interface {
 	// Name of the class.
 	Name() string
 
+	// Package the class is defined in.
+	Pkg() *Package
+
 	// Documentation of the class.
 	Documentation() string
 
