@@ -191,8 +191,18 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		node = defflavorFromList(args, p)
 	case "defmethod", "defwhopper":
 		node = defmethodFromList(name, args, p)
+	case "defclass":
+		node = defclassFromList(args, p)
 	default:
-		node = newFun(name, args, p, 1)
+		if name[0] == ':' { // some option
+			list := &List{children: []Node{&Leaf{text: []byte(name)}}}
+			for _, a := range args {
+				list.children = append(list.children, buildNode(a, p))
+			}
+			node = list
+		} else {
+			node = newFun(name, args, p, 1)
+		}
 	}
 	return
 }

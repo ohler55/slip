@@ -9,6 +9,7 @@ import (
 // SlotDef encapsulates the definition of a slot on a class.
 type SlotDef struct {
 	name       string
+	class      slip.Class
 	initargs   []slip.Symbol
 	readers    []slip.Symbol
 	writers    []slip.Symbol
@@ -21,8 +22,8 @@ type SlotDef struct {
 
 // NewSlotDef creates a new SlotDef from a slot-specification provided to
 // defclass.
-func NewSlotDef(def slip.Object) *SlotDef {
-	var sd SlotDef
+func NewSlotDef(class slip.Class, def slip.Object) *SlotDef {
+	sd := SlotDef{class: class}
 	switch td := def.(type) {
 	case slip.Symbol:
 		sd.name = string(td)
@@ -37,7 +38,7 @@ func NewSlotDef(def slip.Object) *SlotDef {
 			slip.NewPanic("slot-specification for %s must have a slot-name followed by pairs of key and value.",
 				sd.name)
 		}
-		for i := 1; i < len(td); i++ {
+		for i := 1; i < len(td); i += 2 {
 			switch td[i] {
 			case slip.Symbol(":reader"):
 				sd.readers = appendSymbol(":reader", sd.readers, td[i+1])
@@ -88,6 +89,40 @@ func NewSlotDef(def slip.Object) *SlotDef {
 		slip.PanicType("slot-specification", td, "symbol", "list")
 	}
 	return &sd
+}
+
+// DefList returns a list as that could be used in a defclass
+// slot-specifications.
+func (sd *SlotDef) DefList() slip.Object {
+	def := slip.List{slip.Symbol(sd.name)}
+	for _, sym := range sd.initargs {
+		def = append(def, slip.List{slip.Symbol(":initarg"), sym})
+	}
+	for _, sym := range sd.readers {
+		def = append(def, slip.List{slip.Symbol(":readers"), sym})
+	}
+	for _, sym := range sd.writers {
+		def = append(def, slip.List{slip.Symbol(":writers"), sym})
+	}
+	for _, sym := range sd.accessors {
+		def = append(def, slip.List{slip.Symbol(":accessors"), sym})
+	}
+	if 0 < len(sd.docs) {
+		def = append(def, slip.List{slip.Symbol(":documentation"), slip.String(sd.docs)})
+	}
+	if sd.classStore {
+		def = append(def, slip.List{slip.Symbol(":allocation"), slip.Symbol(":class")})
+	}
+	if sd.initform != nil {
+		def = append(def, slip.List{slip.Symbol(":initform"), sd.initform})
+	}
+	if 0 < len(sd.argType) {
+		def = append(def, slip.List{slip.Symbol(":type"), sd.argType})
+	}
+	if len(def) == 1 {
+		return def[0]
+	}
+	return def
 }
 
 func (sd *SlotDef) Simplify() any {

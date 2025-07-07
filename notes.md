@@ -5,9 +5,15 @@
 - next
 
  - instance-update branch
-  - DefList - useful for testing?
+  - pp for defclass
+   - defclass
+    - always name on and start of supers on same line
+    - can wrap supers
+    - slots start indented 2 all the time
+     - if list then new line and indent each pair one more space
+
   - test
-   - place holder for reader, writer, and accessor functions
+   - defclass then pretty-print
 
   - ConditionClass #<condition-class error>
    - condition t

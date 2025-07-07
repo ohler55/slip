@@ -194,8 +194,30 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 // DefList returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
 func (c *StandardClass) DefList() slip.List {
-	// TBD
-	return nil
+	supers := make(slip.List, len(c.supers))
+	for i, super := range c.supers {
+		supers[i] = super
+	}
+	var slots slip.List
+	for _, sd := range c.slotDefs {
+		if sd.class != c {
+			continue
+		}
+		slots = append(slots, sd.DefList())
+	}
+	def := slip.List{
+		slip.Symbol("defclass"),
+		slip.Symbol(c.name),
+		supers,
+		slots,
+	}
+	if 0 < len(c.docs) {
+		def = append(def, slip.List{slip.Symbol(":documentation"), slip.String(c.docs)})
+	}
+	if 0 < len(c.defaultInitArgs) {
+		def = append(def, append(slip.List{slip.Symbol(":default-initargs")}, c.defaultInitArgs...))
+	}
+	return def
 }
 
 // Ready returns true when the class is ready for use or that all superclasses

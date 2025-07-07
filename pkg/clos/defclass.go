@@ -120,7 +120,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		}
 	}
 	for _, ss := range slotSpecs {
-		sd := NewSlotDef(ss)
+		sd := NewSlotDef(&sc, ss)
 		sc.slotDefs[sd.name] = sd
 	}
 	_ = sc.mergeSupers()
