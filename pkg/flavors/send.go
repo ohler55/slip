@@ -50,25 +50,14 @@ type Send struct {
 // Call the the function with the arguments provided.
 func (f *Send) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
-	switch self := args[0].(type) {
-	case Receiver:
+	if self, ok := args[0].(Receiver); ok {
 		if method, ok := args[1].(slip.Symbol); ok {
 			result = self.Receive(s, string(method), args[2:], depth)
 		} else {
 			slip.PanicType("method of send", args[1], "keyword")
 		}
-	case nil:
+	} else {
 		slip.PanicType("object of send", args[0], "instance")
-	default:
-		if mi, _ := slip.FindClass(string(self.Hierarchy()[0])).(slip.MethodInvoker); mi != nil {
-			if method, ok := args[1].(slip.Symbol); ok {
-				result = mi.InvokeMethod(self, s, string(method), args[2:], depth)
-			} else {
-				slip.PanicType("method", args[1], "keyword")
-			}
-		} else {
-			slip.PanicType("object of send", args[0], "instance")
-		}
 	}
 	return
 }

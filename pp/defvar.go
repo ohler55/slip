@@ -22,7 +22,7 @@ func defvarFromList(name string, args slip.List, p *slip.Printer) Node {
 		defvar.children = append(defvar.children, buildNode(args[1], p))
 		if 2 < len(args) {
 			if doc, ok := args[2].(slip.String); ok {
-				defvar.children = append(defvar.children, &Doc{text: string(doc)})
+				defvar.children = append(defvar.children, &Doc{text: string(doc), nl: true})
 			}
 		}
 	}

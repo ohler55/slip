@@ -211,6 +211,7 @@ func TestFlavorDescribeOptions(t *testing.T) {
 	tt.Equal(t, "an abstract", f.(*flavors.Flavor).Documentation())
 
 	tt.Equal(t, f, flavors.Find("Abbey"))
+	tt.Panic(t, func() { _ = f.(*flavors.Flavor).MakeInstance() })
 }
 
 func TestFlavorReceive(t *testing.T) {

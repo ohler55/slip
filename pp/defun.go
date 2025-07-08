@@ -25,7 +25,7 @@ func defunFromList(name string, args slip.List, p *slip.Printer) Node {
 	for i, v := range args {
 		if i == 0 {
 			if doc, ok := v.(slip.String); ok {
-				defun.children[i] = &Doc{text: string(doc)}
+				defun.children[i] = &Doc{text: string(doc), nl: true}
 				continue
 			}
 		}

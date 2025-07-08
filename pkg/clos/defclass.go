@@ -57,7 +57,9 @@ following keywords:
 				},
 			},
 			Return: "class",
-			Text:   `__defclass__ defines a new class and returns the new class.`,
+			Text: `__defclass__ defines a new class and returns the new class. If the named
+class already exists it is over-written but existing objects continue to reference the original
+class.`,
 			Examples: []string{
 				"(defclass berry :color 'red) => #<standard-class berry>",
 			},

@@ -17,7 +17,8 @@ func defclassFromList(args slip.List, p *slip.Printer) Node {
 			children: make([]Node, len(args)),
 		},
 	}
-	dc.List.children[0] = buildNode(args[0], p)
+	dc.List.children[0] = buildNode(args[0], p) // class name
+	// supers
 	if args[1] == nil {
 		dc.children[1] = &Leaf{text: []byte{'(', ')'}}
 	} else if list, ok := args[1].(slip.List); ok {
@@ -25,21 +26,44 @@ func defclassFromList(args slip.List, p *slip.Printer) Node {
 	} else {
 		dc.List.children[1] = buildNode(args[1], p)
 	}
-
+	// slot specifications
 	if args[2] == nil {
 		dc.children[2] = &Leaf{text: []byte{'(', ')'}}
-	} else if list, ok := args[1].(slip.List); ok {
-		// TBD special for slot specs
-		dc.List.children[2] = newList(list, p, false)
+	} else if list, ok := args[2].(slip.List); ok {
+		ssa := Vertical{List: List{children: make([]Node, len(list))}}
+		for i, v := range list {
+			switch tv := v.(type) {
+			case slip.Symbol:
+				ssa.List.children[i] = &Leaf{text: []byte(tv)}
+			case slip.List:
+				ssa.List.children[i] = newOptPairs(tv, p)
+			default:
+				ssa.List.children[i] = buildNode(v, p)
+			}
+		}
+		dc.List.children[2] = &ssa
 	} else {
 		dc.List.children[2] = buildNode(args[2], p)
 	}
+	// class options
 	for i, v := range args[3:] {
-		dc.List.children[i+3] = buildNode(v, p)
-		if copt, ok := v.(slip.List); ok && 1 < len(copt) && copt[0] == slip.Symbol(":documentation") {
-			if ss, ok2 := copt[1].(slip.String); ok2 {
-				dc.List.children[i+3].(*List).children[1] = &Doc{text: string(ss)}
+		if option, ok := v.(slip.List); ok && 2 <= len(option) {
+			switch option[0] {
+			case slip.Symbol(":documentation"):
+				if ss, _ := option[1].(slip.String); 0 < len(ss) {
+					dc.List.children[i+3] = &List{
+						children: []Node{
+							&Leaf{text: []byte(":documentation")},
+							&Doc{text: string(ss)},
+						},
+					}
+				}
+			case slip.Symbol(":default-initargs"):
+				dc.List.children[i+3] = newOptPairs(option, p)
 			}
+		}
+		if dc.List.children[i+3] == nil {
+			dc.List.children[i+3] = buildNode(v, p)
 		}
 	}
 	return &dc
@@ -79,10 +103,14 @@ func (dc *Defclass) reorg(edge int) int {
 		if edge < dc.children[1].right() {   // supers list
 			dc.children[1].setNewline(true)
 			dc.children[1].setLeft(dc.x + 4)
+			dc.children[1].reorg(edge)
 		}
+		dc.children[2].setLeft(dc.x + 2)
+		dc.children[2].reorg(edge)
 		rest := dc.children[3:]
 		last := len(rest) - 1
 		for i, n := range rest {
+			dc.children[i].setLeft(dc.x + 2)
 			_ = n.reorg(edge)
 			r := n.right()
 			if i == last {

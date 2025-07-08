@@ -96,28 +96,28 @@ func NewSlotDef(class slip.Class, def slip.Object) *SlotDef {
 func (sd *SlotDef) DefList() slip.Object {
 	def := slip.List{slip.Symbol(sd.name)}
 	for _, sym := range sd.initargs {
-		def = append(def, slip.List{slip.Symbol(":initarg"), sym})
+		def = append(def, slip.Symbol(":initarg"), sym)
 	}
 	for _, sym := range sd.readers {
-		def = append(def, slip.List{slip.Symbol(":readers"), sym})
+		def = append(def, slip.Symbol(":readers"), sym)
 	}
 	for _, sym := range sd.writers {
-		def = append(def, slip.List{slip.Symbol(":writers"), sym})
+		def = append(def, slip.Symbol(":writers"), sym)
 	}
 	for _, sym := range sd.accessors {
-		def = append(def, slip.List{slip.Symbol(":accessors"), sym})
+		def = append(def, slip.Symbol(":accessors"), sym)
 	}
 	if 0 < len(sd.docs) {
-		def = append(def, slip.List{slip.Symbol(":documentation"), slip.String(sd.docs)})
+		def = append(def, slip.Symbol(":documentation"), slip.String(sd.docs))
 	}
 	if sd.classStore {
-		def = append(def, slip.List{slip.Symbol(":allocation"), slip.Symbol(":class")})
+		def = append(def, slip.Symbol(":allocation"), slip.Symbol(":class"))
 	}
 	if sd.initform != nil {
-		def = append(def, slip.List{slip.Symbol(":initform"), sd.initform})
+		def = append(def, slip.Symbol(":initform"), sd.initform)
 	}
 	if 0 < len(sd.argType) {
-		def = append(def, slip.List{slip.Symbol(":type"), sd.argType})
+		def = append(def, slip.Symbol(":type"), sd.argType)
 	}
 	if len(def) == 1 {
 		return def[0]

@@ -5,15 +5,16 @@
 - next
 
  - instance-update branch
-  - pp for defclass
-   - defclass
-    - always name on and start of supers on same line
-    - can wrap supers
-    - slots start indented 2 all the time
-     - if list then new line and indent each pair one more space
-
   - test
-   - defclass then pretty-print
+   - clos
+    - defclass then pretty-print
+  - makunbound should remove class from package
+   - should subclasses be updated
+    - what happens to
+   - slotdef should not be propogated up
+   - sbcl changes class of all instances when the class changes - not supported
+  - defclass
+   - if class exists replace fields but keep original object so references get new fields
 
   - ConditionClass #<condition-class error>
    - condition t
@@ -28,6 +29,7 @@
       - basically, all super classes must be of the same type
 
   - remove clos/class
+  - remove MethodInvoker interface
 
 ---------------------
 

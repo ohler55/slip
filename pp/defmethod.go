@@ -25,7 +25,7 @@ func defmethodFromList(name string, args slip.List, p *slip.Printer) Node {
 	for i, v := range args[2:] {
 		if i == 0 { // first form in function
 			if ss, ok := v.(slip.String); ok {
-				dm.children[i+2] = &Doc{text: string(ss)}
+				dm.children[i+2] = &Doc{text: string(ss), nl: true}
 				continue
 			}
 		}

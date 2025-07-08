@@ -21,7 +21,7 @@ func lambdaFromList(args slip.List, p *slip.Printer) Node {
 	for i, v := range args {
 		if i == 0 {
 			if doc, ok := v.(slip.String); ok {
-				lambda.children[i] = &Doc{text: string(doc)}
+				lambda.children[i] = &Doc{text: string(doc), nl: true}
 				continue
 			}
 		}
