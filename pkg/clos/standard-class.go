@@ -176,6 +176,9 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *StandardClass) MakeInstance() slip.Instance {
+	if len(c.precedence) == 0 {
+		slip.NewPanic("The class %s is has undefined superclasses.", c.name)
+	}
 	obj := StandardObject{
 		WithSlots: WithSlots{
 			Vars:   map[string]slip.Object{},
@@ -188,6 +191,13 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 			obj.Vars[k] = sd.initform
 		}
 	}
+	for _, ic := range c.inherit {
+		for k, sd := range ic.slotDefs {
+			if _, has := obj.Vars[k]; !has && !sd.classStore {
+				obj.Vars[k] = sd.initform
+			}
+		}
+	}
 	return &obj
 }
 
@@ -198,12 +208,14 @@ func (c *StandardClass) DefList() slip.List {
 	for i, super := range c.supers {
 		supers[i] = super
 	}
-	var slots slip.List
-	for _, sd := range c.slotDefs {
-		if sd.class != c {
-			continue
-		}
-		slots = append(slots, sd.DefList())
+	keys := make([]string, 0, len(c.slotDefs))
+	for k := range c.slotDefs {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	slots := make(slip.List, len(keys))
+	for i, k := range keys {
+		slots[i] = c.slotDefs[k].DefList()
 	}
 	def := slip.List{
 		slip.Symbol("defclass"),
@@ -233,7 +245,7 @@ func (c *StandardClass) mergeSupers() bool {
 	for _, super := range c.supers {
 		sc := c.pkg.FindClass(string(super))
 		ssc, ok := sc.(*StandardClass)
-		if !ok {
+		if !ok && sc != nil {
 			slip.PanicType("superclass", sc, "standard-class")
 		}
 		if ssc == nil || len(ssc.precedence) == 0 {
@@ -252,14 +264,6 @@ func (c *StandardClass) mergeSupers() bool {
 	}
 	// TBD add readers, writers, and accessors for each slot before inheriting
 
-	for _, ic := range c.inherit {
-		for name, isd := range ic.slotDefs {
-			sd := c.slotDefs[name]
-			if sd == nil {
-				c.slotDefs[name] = isd
-			}
-		}
-	}
 	c.precedence = make([]slip.Symbol, 0, len(c.inherit)+3)
 	c.precedence = append(c.precedence, slip.Symbol(c.name))
 	for _, ic := range c.inherit {

@@ -97,6 +97,14 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		name:     name,
 		slotDefs: map[string]*SlotDef{},
 		pkg:      slip.CurrentPackage,
+		supers:   make([]slip.Symbol, len(supers)),
+	}
+	for i, super := range supers {
+		if sym, ok := super.(slip.Symbol); ok {
+			sc.supers[i] = sym
+		} else {
+			slip.PanicType("super", super, "symbol")
+		}
 	}
 	sc.Vars = map[string]slip.Object{}
 	sc.locker = slip.NoOpLocker{}
@@ -122,7 +130,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		}
 	}
 	for _, ss := range slotSpecs {
-		sd := NewSlotDef(&sc, ss)
+		sd := NewSlotDef(ss)
 		sc.slotDefs[sd.name] = sd
 	}
 	_ = sc.mergeSupers()

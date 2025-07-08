@@ -9,7 +9,6 @@ import (
 // SlotDef encapsulates the definition of a slot on a class.
 type SlotDef struct {
 	name       string
-	class      slip.Class
 	initargs   []slip.Symbol
 	readers    []slip.Symbol
 	writers    []slip.Symbol
@@ -22,8 +21,8 @@ type SlotDef struct {
 
 // NewSlotDef creates a new SlotDef from a slot-specification provided to
 // defclass.
-func NewSlotDef(class slip.Class, def slip.Object) *SlotDef {
-	sd := SlotDef{class: class}
+func NewSlotDef(def slip.Object) *SlotDef {
+	var sd SlotDef
 	switch td := def.(type) {
 	case slip.Symbol:
 		sd.name = string(td)

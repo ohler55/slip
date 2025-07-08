@@ -14,9 +14,7 @@ import (
 )
 
 func TestSlotDefSymbol(t *testing.T) {
-	var sc clos.StandardClass // not accessed during the test so no need to initialize
-
-	sd := clos.NewSlotDef(&sc, slip.Symbol("quux"))
+	sd := clos.NewSlotDef(slip.Symbol("quux"))
 
 	tt.Equal(t, `{
   accessors: []
@@ -73,69 +71,66 @@ func TestSlotDefOptions(t *testing.T) {
 `, string(pp.Append(nil, scope, sc.DefList())))
 }
 
-// fmt.Printf("*** %s\n", pretty.SEN(jp.C("slotDefs").First(simple)))
-// fmt.Printf("*** %s\n", pp.Append(nil, scope, sc.DefList()))
-
 func TestSlotDefBadName(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'("quux" :initarg :quux)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefNotEven(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :initarg)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefNotAnOption(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :not-an-option :x)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefBadAllocation(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :allocation :nothing)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefDoubleInitform(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :initform 5 :initform 6)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefBadType(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :type t)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefDoubleType(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :type fixnum :type float)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefBadDoc(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :documentation t)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefDoubleDoc(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :documentation "docs" :documentation "doc2")`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
 
 func TestSlotDefBadSpec(t *testing.T) {
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, slip.True) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(slip.True) })
 }
 
 func TestSlotDefReaderNotSymbol(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :reader t)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(&clos.StandardClass{}, def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
 }
