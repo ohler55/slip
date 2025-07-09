@@ -18,7 +18,7 @@ func TestWithSlots(t *testing.T) {
 	ws.SetSynchronized(false)
 	ws.SetSlotValue(slip.Symbol("quux"), slip.Fixnum(5))
 	simple := ws.Simplify()
-	jp.C("id").Del(simple)
+	_ = jp.C("id").Del(simple)
 	tt.Equal(t, "{vars: {quux: 5}}", pretty.SEN(simple))
 	value, has := ws.SlotValue(slip.Symbol("quux"))
 	tt.Equal(t, true, has)
