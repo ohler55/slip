@@ -23,7 +23,9 @@ type StandardClass struct {
 	slotDefs        map[string]*SlotDef
 	pkg             *slip.Package
 	precedence      []slip.Symbol
-	defaultInitArgs slip.List
+	defaultInitArgs map[string]slip.Object
+	initArgs        map[string]*SlotDef // map with keys of initargs
+	initForms       map[string]*SlotDef
 }
 
 // String representation of the Object.
@@ -139,24 +141,35 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 
 	b = append(b, indentSpaces[:i2]...)
 	b = append(b, "Slots:"...)
-	if 0 < len(c.slotDefs) {
+	slotDefs := c.allSlotsDefs()
+	if 0 < len(slotDefs) {
 		b = append(b, '\n')
-		var keys []string
-		for k := range c.slotDefs {
+		for _, sd := range slotDefs {
+			b = append(b, indentSpaces[:i3]...)
+			b = sd.Describe(b, c, i3, right, ansi)
+		}
+	} else {
+		b = append(b, " None\n"...)
+	}
+	if 0 < len(c.defaultInitArgs) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Default-initargs:\n"...)
+		keys := make([]string, 0, len(c.defaultInitArgs))
+		for k := range c.defaultInitArgs {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
 		for _, k := range keys {
 			b = append(b, indentSpaces[:i3]...)
+			v := c.defaultInitArgs[k]
 			b = append(b, k...)
-			b = append(b, " = "...)
-			b = slip.Append(b, c.slotDefs[k].initform)
+			b = append(b, ':', ' ')
+			b = slip.Append(b, v)
 			b = append(b, '\n')
 		}
-	} else {
-		b = append(b, " None\n"...)
 	}
 	if 0 < len(c.Vars) {
+		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "Class Slots:\n"...)
 		var keys []string
 		for k := range c.Vars {
@@ -172,6 +185,29 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 		}
 	}
 	return b
+}
+
+func (c *StandardClass) allSlotsDefs() []*SlotDef {
+	defs := map[string]*SlotDef{}
+	for i := len(c.inherit) - 1; 0 <= i; i-- {
+		ic := c.inherit[i]
+		for k, sd := range ic.slotDefs {
+			defs[k] = sd
+		}
+	}
+	for k, sd := range c.slotDefs {
+		defs[k] = sd
+	}
+	keys := make([]string, 0, len(defs))
+	for k := range defs {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	sda := make([]*SlotDef, len(keys))
+	for i, k := range keys {
+		sda[i] = defs[k]
+	}
+	return sda
 }
 
 // MakeInstance creates a new instance but does not call the :init method.
@@ -227,7 +263,16 @@ func (c *StandardClass) DefList() slip.List {
 		def = append(def, slip.List{slip.Symbol(":documentation"), slip.String(c.docs)})
 	}
 	if 0 < len(c.defaultInitArgs) {
-		def = append(def, append(slip.List{slip.Symbol(":default-initargs")}, c.defaultInitArgs...))
+		defs := make(slip.List, 0, len(c.defaultInitArgs)*2)
+		keys := make([]string, 0, len(c.defaultInitArgs))
+		for k := range c.defaultInitArgs {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			defs = append(defs, slip.Symbol(k), c.defaultInitArgs[k])
+		}
+		def = append(def, append(slip.List{slip.Symbol(":default-initargs")}, defs...))
 	}
 	return def
 }
@@ -262,7 +307,30 @@ func (c *StandardClass) mergeSupers() bool {
 			}
 		}
 	}
-	// TBD add readers, writers, and accessors for each slot before inheriting
+	// TBD add readers, writers, and accessors for each slot if not already added
+	//  maybe keep pointer to the generic method for each
+
+	c.initArgs = map[string]*SlotDef{}
+	c.initForms = map[string]*SlotDef{}
+	for i := len(c.inherit) - 1; 0 <= i; i-- {
+		ic := c.inherit[i]
+		for _, sd := range ic.slotDefs {
+			for _, ia := range sd.initargs {
+				c.initArgs[string(ia)] = sd
+			}
+			if sd.initform != nil {
+				c.initForms[sd.name] = sd
+			}
+		}
+	}
+	for _, sd := range c.slotDefs {
+		for _, ia := range sd.initargs {
+			c.initArgs[string(ia)] = sd
+		}
+		if sd.initform != nil {
+			c.initForms[sd.name] = sd
+		}
+	}
 
 	c.precedence = make([]slip.Symbol, 0, len(c.inherit)+3)
 	c.precedence = append(c.precedence, slip.Symbol(c.name))
@@ -294,6 +362,14 @@ func makeClassesReady(p *slip.Package) {
 			if !changed {
 				break
 			}
+		}
+	}
+}
+
+func classChanged(cc *StandardClass, p *slip.Package) {
+	for _, c := range p.AllClasses() {
+		if sc, ok := c.(*StandardClass); ok && sc.Inherits(cc) {
+			sc.mergeSupers()
 		}
 	}
 }

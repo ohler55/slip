@@ -3,6 +3,8 @@
 package clos
 
 import (
+	"strings"
+
 	"github.com/ohler55/slip"
 )
 
@@ -94,11 +96,15 @@ func (f *Defclass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 // DefStandardClass defines a standard-class.
 func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *StandardClass {
 	sc := StandardClass{
-		name:     name,
-		slotDefs: map[string]*SlotDef{},
-		pkg:      slip.CurrentPackage,
-		supers:   make([]slip.Symbol, len(supers)),
+		name:            name,
+		slotDefs:        map[string]*SlotDef{},
+		pkg:             slip.CurrentPackage,
+		supers:          make([]slip.Symbol, len(supers)),
+		defaultInitArgs: map[string]slip.Object{},
+		initArgs:        map[string]*SlotDef{},
+		initForms:       map[string]*SlotDef{},
 	}
+	sc.Vars = map[string]slip.Object{}
 	for i, super := range supers {
 		if sym, ok := super.(slip.Symbol); ok {
 			sc.supers[i] = sym
@@ -122,7 +128,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 				slip.PanicType("class-options :documentation", list[1], "string")
 			}
 		case slip.Symbol(":default-initargs"):
-			sc.defaultInitArgs = list[1:]
+			fillMapFromKeyArgs(list[1:], sc.defaultInitArgs)
 		case slip.Symbol(":metaclass"):
 			// ignore
 		default:
@@ -131,12 +137,32 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 	}
 	for _, ss := range slotSpecs {
 		sd := NewSlotDef(ss)
+		sd.class = &sc
 		sc.slotDefs[sd.name] = sd
+		if sd.classStore {
+			sc.Vars[sd.name] = sd.initform
+		}
 	}
 	_ = sc.mergeSupers()
 	slip.RegisterClass(sc.name, &sc)
 
 	makeClassesReady(slip.CurrentPackage)
+	classChanged(&sc, slip.CurrentPackage)
 
 	return &sc
+}
+
+func fillMapFromKeyArgs(args slip.List, m map[string]slip.Object) {
+	if len(args)%2 != 0 {
+		slip.NewPanic("Odd number of &key arguments.")
+	}
+	for i := 0; i < len(args); i++ {
+		sym, ok := args[i].(slip.Symbol)
+		if !ok {
+			slip.PanicType("keyword", args[i], "symbol")
+		}
+		key := strings.ToLower(string(sym))
+		i++
+		m[key] = args[i]
+	}
 }

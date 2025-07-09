@@ -4,7 +4,13 @@
 
 - next
 
+ - eval default args and initforms in obj.Init
+ - only initialize if :instance allocation on obj, class for others
+
  - instance-update branch
+  - standard-class
+   - also convert lists to functions in initforms and default-initargs
+
   - test
    - clos
     - defclass then pretty-print

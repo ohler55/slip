@@ -9,6 +9,7 @@ import (
 // SlotDef encapsulates the definition of a slot on a class.
 type SlotDef struct {
 	name       string
+	class      slip.Class
 	initargs   []slip.Symbol
 	readers    []slip.Symbol
 	writers    []slip.Symbol
@@ -140,6 +141,76 @@ func (sd *SlotDef) Simplify() any {
 		"accessors":  simplifySymList(sd.accessors),
 		"allocation": alloc,
 	}
+}
+
+func (sd *SlotDef) Describe(b []byte, class slip.Class, indent, right int, ansi bool) []byte {
+	b = append(b, sd.name...)
+	if class != sd.class && sd.class != nil {
+		b = append(b, ' ', '(')
+		b = append(b, sd.class.Name()...)
+		b = append(b, ')')
+	}
+	b = append(b, '\n')
+	i2 := indent + 2
+	if 0 < len(sd.initargs) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "initargs:"...)
+		for _, sym := range sd.initargs {
+			b = append(b, ' ')
+			b = append(b, sym...)
+		}
+		b = append(b, '\n')
+	}
+	if sd.initform != nil {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "initform: "...)
+		b = slip.Append(b, sd.initform)
+		b = append(b, '\n')
+	}
+	if 0 < len(sd.readers) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "readers:"...)
+		for _, sym := range sd.readers {
+			b = append(b, ' ')
+			b = append(b, sym...)
+		}
+		b = append(b, '\n')
+	}
+	if 0 < len(sd.writers) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "writers:"...)
+		for _, sym := range sd.writers {
+			b = append(b, ' ')
+			b = append(b, sym...)
+		}
+		b = append(b, '\n')
+	}
+	if 0 < len(sd.accessors) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "accessors:"...)
+		for _, sym := range sd.accessors {
+			b = append(b, ' ')
+			b = append(b, sym...)
+		}
+		b = append(b, '\n')
+	}
+	if 0 < len(sd.docs) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "documentation: "...)
+		b = slip.AppendDoc(b, sd.docs, 0, right, ansi)
+		b = append(b, '\n')
+	}
+	if sd.classStore {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "allocation: class\n"...)
+	}
+	if 0 < len(sd.argType) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "type: "...)
+		b = append(b, sd.argType...)
+		b = append(b, '\n')
+	}
+	return b
 }
 
 func appendSymbol(option string, sa []slip.Symbol, v slip.Object) []slip.Symbol {

@@ -3,10 +3,8 @@
 package clos
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 	"unsafe"
 
 	"github.com/ohler55/slip"
@@ -66,16 +64,33 @@ func (obj *StandardObject) IsA(class slip.Class) bool {
 // Init the instance slots from the provided args list. If the scope is not
 // nil then send :init is called.
 func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
-	// The default values are set in make-instance.
-	for i := 0; i < len(args); i++ {
-		sym, ok := args[i].(slip.Symbol)
-		if !ok {
-			slip.PanicType("initialization keyword", args[i], "symbol")
+	nameMap := map[string]string{}
+	argMap := map[string]slip.Object{}
+	fillMapFromKeyArgs(args, argMap)
+	for k, v := range argMap {
+		sd := obj.Type.initArgs[k]
+		if sd == nil {
+			slip.NewPanic("%s is not a valid initarg for %s.", k, obj.Type.name)
 		}
-		key := strings.ToLower(string(sym))
-		// TBD look in class (obj.Type) for slot initarg keys
-		// TBD if no initarg then look for initform (maybe slots are a struct with name, value, and form
-		fmt.Printf("*** key: %s\n", key)
+		if n, has := nameMap[sd.name]; has {
+			slip.NewPanic("Duplicate initarg (%s) for slot %s. %s already specified.", sd.name, k, n)
+		}
+		obj.Vars[sd.name] = v
+		nameMap[sd.name] = k
+	}
+	for k, v := range obj.Type.defaultInitArgs {
+		sd := obj.Type.initArgs[k]
+		if _, has := nameMap[sd.name]; !has {
+			// TBD eval if a func
+			obj.Vars[sd.name] = v
+			nameMap[sd.name] = k
+		}
+	}
+	for k, sd := range obj.Type.initForms {
+		if _, has := nameMap[k]; !has {
+			// TBD eval
+			obj.Vars[sd.name] = sd.initform
+		}
 	}
 }
 

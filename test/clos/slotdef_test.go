@@ -69,6 +69,23 @@ func TestSlotDefOptions(t *testing.T) {
     :initform (1+ qqq)
     :type fixnum)))
 `, string(pp.Append(nil, scope, sc.DefList())))
+
+	tt.Equal(t, `quux-class is a class:
+  Direct superclasses:
+  Class precedence list: quux-class standard-object t
+  Slots:
+    quux
+      initargs: :quux
+      initform: (1+ qqq)
+      readers: get-quux
+      writers: set-quux
+      accessors: quux
+      documentation: quack quack
+      allocation: class
+      type: fixnum
+  Class Slots:
+    quux = (1+ qqq)
+`, string(sc.Describe(nil, 0, 80, false)))
 }
 
 func TestSlotDefBadName(t *testing.T) {
