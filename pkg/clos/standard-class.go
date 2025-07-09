@@ -213,7 +213,7 @@ func (c *StandardClass) allSlotsDefs() []*SlotDef {
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *StandardClass) MakeInstance() slip.Instance {
 	if len(c.precedence) == 0 {
-		slip.NewPanic("The class %s is has undefined superclasses.", c.name)
+		slip.NewPanic("The class %s has undefined superclasses.", c.name)
 	}
 	obj := StandardObject{
 		WithSlots: WithSlots{

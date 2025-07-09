@@ -15,7 +15,7 @@ type SlotDef struct {
 	writers    []slip.Symbol
 	accessors  []slip.Symbol
 	initform   slip.Object // TBD this should be evaluated on each make-instance
-	argType    slip.Symbol
+	argType    slip.Object
 	docs       string
 	classStore bool
 }
@@ -63,7 +63,7 @@ func NewSlotDef(def slip.Object) *SlotDef {
 				}
 				sd.initform = td[i+1]
 			case slip.Symbol(":type"):
-				if 0 < len(sd.argType) {
+				if sd.argType != nil {
 					slip.NewPanic("For slot %s, the :type option can only be specified once.", sd.name)
 				}
 				if sym, ok := td[i+1].(slip.Symbol); ok {
@@ -116,7 +116,7 @@ func (sd *SlotDef) DefList() slip.Object {
 	if sd.initform != nil {
 		def = append(def, slip.Symbol(":initform"), sd.initform)
 	}
-	if 0 < len(sd.argType) {
+	if sd.argType != nil {
 		def = append(def, slip.Symbol(":type"), sd.argType)
 	}
 	if len(def) == 1 {
@@ -204,10 +204,10 @@ func (sd *SlotDef) Describe(b []byte, class slip.Class, indent, right int, ansi 
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "allocation: class\n"...)
 	}
-	if 0 < len(sd.argType) {
+	if sd.argType != nil {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "type: "...)
-		b = append(b, sd.argType...)
+		b = slip.Append(b, sd.argType)
 		b = append(b, '\n')
 	}
 	return b

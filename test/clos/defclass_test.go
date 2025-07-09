@@ -10,8 +10,8 @@ import (
 )
 
 func TestDefclassMinimal(t *testing.T) {
-	// There is no undef for a class but a new defclass will replace it or at
-	// least the fields in the class.
+	// There is no undef for a class but a new defclass will replace an
+	// existing class or at least the fields in the class.
 	(&sliptest.Function{
 		Source: `(pretty-print (defclass quux () ()) nil)`,
 		Expect: `"(defclass quux ()
@@ -56,6 +56,14 @@ func TestDefclassBadClassOption(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(defclass quux () () (:documentation))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defclass quux () () (:default-initargs :x))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defclass quux () () (:default-initargs t t))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

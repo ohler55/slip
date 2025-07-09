@@ -4,27 +4,20 @@
 
 - next
 
- - eval default args and initforms in obj.Init
- - only initialize if :instance allocation on obj, class for others
-
  - instance-update branch
-  - standard-class
-   - also convert lists to functions in initforms and default-initargs
+  - define ConditionClass like StandardClass
+  - define Condition like StandardObject
+   - allow slots despite the spec restriction
 
-  - test
-   - clos
-    - defclass then pretty-print
-  - makunbound should remove class from package
-   - should subclasses be updated
-    - what happens to
-   - slotdef should not be propogated up
-   - sbcl changes class of all instances when the class changes - not supported
-  - defclass
-   - if class exists replace fields but keep original object so references get new fields
+  - slip.MakeCondition(typeName string, args slip.List, p ...*Package)
+   - args is a property list (key values)
+   - look up class in package, verify it is a condition-class
+   - create then Init with args
+   - start with Condition as a condition-class
 
   - ConditionClass #<condition-class error>
-   - condition t
-   - subclass of standard but with over-rides
+   - precedence: condition t
+   - Condition is an instance of condition-class
    - like class but with restrictions like slot-values not allowed
     - define-condition
     - make-condition - maybe allow make-instance
@@ -36,6 +29,7 @@
 
   - remove clos/class
   - remove MethodInvoker interface
+  - clean up built-in.go
 
 ---------------------
 

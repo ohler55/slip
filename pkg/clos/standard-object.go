@@ -75,22 +75,47 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 		if n, has := nameMap[sd.name]; has {
 			slip.NewPanic("Duplicate initarg (%s) for slot %s. %s already specified.", sd.name, k, n)
 		}
-		obj.Vars[sd.name] = v
+		obj.setSlot(sd, v)
 		nameMap[sd.name] = k
 	}
 	for k, v := range obj.Type.defaultInitArgs {
 		sd := obj.Type.initArgs[k]
 		if _, has := nameMap[sd.name]; !has {
-			// TBD eval if a func
-			obj.Vars[sd.name] = v
+			if v == nil {
+				obj.setSlot(sd, nil)
+			} else {
+				obj.setSlot(sd, v.Eval(scope, depth+1))
+			}
 			nameMap[sd.name] = k
 		}
 	}
 	for k, sd := range obj.Type.initForms {
 		if _, has := nameMap[k]; !has {
-			// TBD eval
-			obj.Vars[sd.name] = sd.initform
+			// If in the initForms then initform will not be nil.
+			obj.setSlot(sd, sd.initform.Eval(scope, depth+1))
 		}
+	}
+}
+
+func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
+	if sd.argType != nil && sd.argType != slip.TrueSymbol {
+		var typeOk bool
+		if sym, ok := sd.argType.(slip.Symbol); ok { // TBD handle more complex type specs
+			for _, h := range value.Hierarchy() {
+				if h == sym {
+					typeOk = true
+					break
+				}
+			}
+		}
+		if !typeOk {
+			slip.PanicType(sd.name, value, slip.ObjectString(sd.argType))
+		}
+	}
+	if sd.classStore {
+		obj.Type.Vars[sd.name] = value
+	} else {
+		obj.Vars[sd.name] = value
 	}
 }
 
@@ -135,12 +160,7 @@ func (obj *StandardObject) Describe(b []byte, indent, right int, ansi bool) []by
 	}
 	b = append(b, ",\n"...)
 
-	keys := make([]string, 0, len(obj.Vars))
-	for k := range obj.Vars {
-		if k != "self" {
-			keys = append(keys, k)
-		}
-	}
+	keys := obj.SlotNames()
 	if 0 < len(keys) {
 		b = append(b, indentSpaces[:indent]...)
 		b = append(b, "  has slot values:\n"...)
@@ -149,7 +169,8 @@ func (obj *StandardObject) Describe(b []byte, indent, right int, ansi bool) []by
 			b = append(b, indentSpaces[:indent+4]...)
 			b = append(b, k...)
 			b = append(b, ": "...)
-			b = slip.ObjectAppend(b, obj.Vars[k])
+			v, _ := obj.SlotValue(slip.Symbol(k))
+			b = slip.ObjectAppend(b, v)
 			b = append(b, '\n')
 		}
 	}
@@ -159,4 +180,29 @@ func (obj *StandardObject) Describe(b []byte, indent, right int, ansi bool) []by
 // Class returns the flavor of the instance.
 func (obj *StandardObject) Class() slip.Class {
 	return obj.Type
+}
+
+// SlotNames returns a list of the slots names for the instance.
+func (obj *StandardObject) SlotNames() []string {
+	names := obj.WithSlots.SlotNames()
+	for k := range obj.Type.Vars {
+		names = append(names, k)
+	}
+	return names
+}
+
+// SlotValue return the value of an instance variable.
+func (obj *StandardObject) SlotValue(sym slip.Symbol) (value slip.Object, has bool) {
+	if value, has = obj.WithSlots.SlotValue(sym); !has {
+		value, has = obj.Type.SlotValue(sym)
+	}
+	return
+}
+
+// SetSlotValue sets the value of an instance variable.
+func (obj *StandardObject) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool) {
+	if has = obj.WithSlots.SetSlotValue(sym, value); !has {
+		has = obj.Type.SetSlotValue(sym, value)
+	}
+	return
 }

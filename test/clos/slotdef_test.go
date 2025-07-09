@@ -24,7 +24,7 @@ func TestSlotDefSymbol(t *testing.T) {
   intargs: []
   name: quux
   readers: []
-  type: ""
+  type: null
   writers: []
 }`, pretty.SEN(sd.Simplify()))
 

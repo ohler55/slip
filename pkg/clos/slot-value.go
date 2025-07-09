@@ -47,9 +47,9 @@ func (f *SlotValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	if !ok {
 		slip.PanicType("slot-name", args[1], "symbol")
 	}
-	if inst, ok := args[0].(*flavors.Instance); ok {
-		var has bool
-		if result, has = inst.LocalGet(sym); !has {
+	var has bool
+	if inst, ok := args[0].(slip.Instance); ok {
+		if result, has = inst.SlotValue(sym); !has {
 			slotMissing(inst, sym, "slot-value")
 		}
 		if result == slip.Unbound {

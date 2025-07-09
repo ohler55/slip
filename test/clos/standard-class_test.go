@@ -29,6 +29,7 @@ func TestStandardClassBasic(t *testing.T) {
 `, string(pp.Append(nil, scope, quux.DefList())))
 
 	tt.Equal(t, false, quux.Ready())
+	tt.Panic(t, func() { _ = quux.MakeInstance() })
 
 	buux := slip.ReadString(`
 (defclass buux ()
