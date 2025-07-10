@@ -5,7 +5,21 @@
 - next
 
  - instance-update branch
+ - ConditionClass
+  - embed StandardClass
+  - overwrite
+   - String
+   - Append
+   - Equal
+   - Hierarchy
+   - Eval
+   - standardClass()
+  - modify
+   - MakeInstance - maybe have a check function
+   - mergeSupers - check against type of parent
+
   - define ConditionClass like StandardClass
+   - can it be standard-class sub-type
   - define Condition like StandardObject
    - allow slots despite the spec restriction
 

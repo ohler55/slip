@@ -97,6 +97,7 @@ func (f *Defclass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *StandardClass {
 	sc := StandardClass{
 		name:            name,
+		defname:         "defclass",
 		slotDefs:        map[string]*SlotDef{},
 		pkg:             slip.CurrentPackage,
 		supers:          make([]slip.Symbol, len(supers)),

@@ -18,8 +18,9 @@ type StandardClass struct {
 	WithSlots
 	name            string
 	docs            string
+	defname         string
 	supers          []slip.Symbol
-	inherit         []*StandardClass
+	inherit         []slip.Class
 	slotDefs        map[string]*SlotDef
 	pkg             *slip.Package
 	precedence      []slip.Symbol
@@ -127,7 +128,7 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 	b = append(b, "Direct superclasses:"...)
 	for _, f := range c.inherit {
 		b = append(b, ' ')
-		b = append(b, f.name...)
+		b = append(b, f.Name()...)
 	}
 	b = append(b, '\n')
 
@@ -190,9 +191,10 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 func (c *StandardClass) allSlotsDefs() []*SlotDef {
 	defs := map[string]*SlotDef{}
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
-		ic := c.inherit[i]
-		for k, sd := range ic.slotDefs {
-			defs[k] = sd
+		if sc, ok := c.inherit[i].(isStandardClass); ok {
+			for k, sd := range sc.standardClass().slotDefs {
+				defs[k] = sd
+			}
 		}
 	}
 	for k, sd := range c.slotDefs {
@@ -228,9 +230,11 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 		}
 	}
 	for _, ic := range c.inherit {
-		for k, sd := range ic.slotDefs {
-			if _, has := obj.Vars[k]; !has && !sd.classStore {
-				obj.Vars[k] = sd.initform
+		if sc, ok := ic.(isStandardClass); ok {
+			for k, sd := range sc.standardClass().slotDefs {
+				if _, has := obj.Vars[k]; !has && !sd.classStore {
+					obj.Vars[k] = sd.initform
+				}
 			}
 		}
 	}
@@ -254,7 +258,7 @@ func (c *StandardClass) DefList() slip.List {
 		slots[i] = c.slotDefs[k].DefList()
 	}
 	def := slip.List{
-		slip.Symbol("defclass"),
+		slip.Symbol(c.defname),
 		slip.Symbol(c.name),
 		supers,
 		slots,
@@ -289,6 +293,7 @@ func (c *StandardClass) mergeSupers() bool {
 	c.inherit = c.inherit[:0]
 	for _, super := range c.supers {
 		sc := c.pkg.FindClass(string(super))
+		// TBD check class and return StandardClass
 		ssc, ok := sc.(*StandardClass)
 		if !ok && sc != nil {
 			slip.PanicType("superclass", sc, "standard-class")
@@ -313,13 +318,14 @@ func (c *StandardClass) mergeSupers() bool {
 	c.initArgs = map[string]*SlotDef{}
 	c.initForms = map[string]*SlotDef{}
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
-		ic := c.inherit[i]
-		for _, sd := range ic.slotDefs {
-			for _, ia := range sd.initargs {
-				c.initArgs[string(ia)] = sd
-			}
-			if sd.initform != nil {
-				c.initForms[sd.name] = sd
+		if sc, ok := c.inherit[i].(isStandardClass); ok {
+			for _, sd := range sc.standardClass().slotDefs {
+				for _, ia := range sd.initargs {
+					c.initArgs[string(ia)] = sd
+				}
+				if sd.initform != nil {
+					c.initForms[sd.name] = sd
+				}
 			}
 		}
 	}
@@ -335,11 +341,15 @@ func (c *StandardClass) mergeSupers() bool {
 	c.precedence = make([]slip.Symbol, 0, len(c.inherit)+3)
 	c.precedence = append(c.precedence, slip.Symbol(c.name))
 	for _, ic := range c.inherit {
-		c.precedence = append(c.precedence, slip.Symbol(ic.name))
+		c.precedence = append(c.precedence, slip.Symbol(ic.Name()))
 	}
 	c.precedence = append(c.precedence, StandardObjectSymbol, slip.TrueSymbol)
 
 	return true
+}
+
+func (c *StandardClass) standardClass() *StandardClass {
+	return c
 }
 
 func makeClassesReady(p *slip.Package) {
