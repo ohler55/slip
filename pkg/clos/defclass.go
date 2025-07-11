@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defDefclass() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Defclass{Function: slip.Function{Name: "defclass", Args: args, SkipEval: []bool{true}}}
@@ -58,12 +58,12 @@ following keywords:
 `,
 				},
 			},
-			Return: "class",
+			Return: "standard-class",
 			Text: `__defclass__ defines a new class and returns the new class. If the named
 class already exists it is over-written but existing objects continue to reference the original
 class.`,
 			Examples: []string{
-				"(defclass berry :color 'red) => #<standard-class berry>",
+				"(defclass berry () (x y)) => #<standard-class berry>",
 			},
 		}, &Pkg)
 }
@@ -104,8 +104,15 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		defaultInitArgs: map[string]slip.Object{},
 		initArgs:        map[string]*SlotDef{},
 		initForms:       map[string]*SlotDef{},
+		inheritCheck: func(c slip.Class) *StandardClass {
+			sc, ok := c.(*StandardClass)
+			if !ok && c != nil {
+				slip.PanicType("superclass", c, "standard-class")
+			}
+			return sc
+		},
+		baseClass: StandardObjectSymbol,
 	}
-	sc.Vars = map[string]slip.Object{}
 	for i, super := range supers {
 		if sym, ok := super.(slip.Symbol); ok {
 			sc.supers[i] = sym

@@ -3,7 +3,6 @@
 package clos_test
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
@@ -13,17 +12,18 @@ import (
 	"github.com/ohler55/slip/pp"
 )
 
-func TestStandardClassBasic(t *testing.T) {
+func TestConditionClassBasic(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`(progn (makunbound 'quux) (makunbound 'buux))`, scope).Eval(scope, nil)
+
 	quux := slip.ReadString(`
-(defclass quux (buux)
+(define-condition quux (buux)
   (x
    (y :initarg :y))
   (:documentation "quack quack")
-  (:default-initargs :y 3))`, scope).Eval(scope, nil).(*clos.StandardClass)
+  (:default-initargs :y 3))`, scope).Eval(scope, nil).(*clos.ConditionClass)
 
-	tt.Equal(t, `(defclass quux (buux)
+	tt.Equal(t, `(define-condition quux (buux)
   (x (y :initarg :y))
   (:documentation "quack quack")
   (:default-initargs :y 3))
@@ -33,7 +33,7 @@ func TestStandardClassBasic(t *testing.T) {
 	tt.Panic(t, func() { _ = quux.MakeInstance() })
 
 	buux := slip.ReadString(`
-(defclass buux ()
+(define-condition buux ()
   ((z
     :initarg :z
     :initarg :zz
@@ -41,7 +41,7 @@ func TestStandardClassBasic(t *testing.T) {
     :reader get-z
     :writer set-z
     :accessor z-access
-    :type fixnum)))`, scope).Eval(scope, nil).(*clos.StandardClass)
+    :type fixnum)))`, scope).Eval(scope, nil).(*clos.ConditionClass)
 	tt.Equal(t, true, buux.Ready())
 	tt.Equal(t, true, quux.Ready())
 
@@ -50,52 +50,28 @@ func TestStandardClassBasic(t *testing.T) {
 	buux.SetDocumentation("buck buck")
 	tt.Equal(t, "buck buck", buux.Documentation())
 
-	tt.Equal(t, "#<standard-class quux>", quux.String())
+	tt.Equal(t, "#<condition-class quux>", quux.String())
 	tt.Equal(t, false, quux.Equal(buux))
 
-	tt.Equal(t, "[standard-class class standard-object t]", pretty.SEN(quux.Hierarchy()))
+	tt.Equal(t, "[condition-class class standard-object t]", pretty.SEN(quux.Hierarchy()))
 	tt.Equal(t, "quux", quux.Name())
 	tt.Equal(t, true, quux == quux.Eval(nil, 0))
 
 	tt.Equal(t, true, quux.Inherits(buux))
 	tt.Equal(t, false, quux.Inherits(slip.FindClass("vanilla-flavor")))
-
-	desc := quux.Describe(nil, 0, 80, false)
-	tt.Equal(t, `quux is a class:
-  Documentation:
-    quack quack
-  Direct superclasses: buux
-  Class precedence list: quux buux standard-object t
-  Slots:
-    x
-    y
-      initargs: :y
-    z (buux)
-      initargs: :z :zz
-      initform: 3
-      readers: get-z
-      writers: set-z
-      accessors: z-access
-      type: fixnum
-  Default-initargs:
-    :y: 3
-`, string(desc))
-
-	desc = quux.Describe(nil, 0, 80, true)
-	tt.Equal(t, true, bytes.Contains(desc, []byte{0x1b, '[', '1', 'm'}))
 }
 
-func TestStandardClassAllocClass(t *testing.T) {
+func TestConditionClassAllocClass(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`(makunbound 'quux)`, scope).Eval(scope, nil)
 	quux := slip.ReadString(`
-(defclass quux ()
-  ((x :initarg :x :initform 3 :allocation :class)))`, scope).Eval(scope, nil).(*clos.StandardClass)
+(define-condition quux ()
+  ((x :initarg :x :initform 3 :allocation :class)))`, scope).Eval(scope, nil).(*clos.ConditionClass)
 
 	desc := quux.Describe(nil, 0, 80, false)
 	tt.Equal(t, `quux is a class:
   Direct superclasses:
-  Class precedence list: quux standard-object t
+  Class precedence list: quux t
   Slots:
     x
       initargs: :x
@@ -106,27 +82,27 @@ func TestStandardClassAllocClass(t *testing.T) {
 `, string(desc))
 }
 
-func TestStandardClassMinimal(t *testing.T) {
+func TestConditionClassMinimal(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`(makunbound 'quux)`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`(defclass quux () ())`, scope).Eval(scope, nil).(*clos.StandardClass)
+	quux := slip.ReadString(`(define-condition quux () ())`, scope).Eval(scope, nil).(*clos.ConditionClass)
 	desc := quux.Describe(nil, 0, 80, false)
 
 	tt.Equal(t, `quux is a class:
   Direct superclasses:
-  Class precedence list: quux standard-object t
+  Class precedence list: quux t
   Slots: None
 `, string(desc))
 }
 
-func TestStandardClassMergeSupers(t *testing.T) {
+func TestConditionClassMergeSupers(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`(progn (makunbound 'quux) (makunbound 'buux) (makunbound 'duux))`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`(defclass quux (buux duux) ())`, scope).Eval(scope, nil).(*clos.StandardClass)
-	_ = slip.ReadString(`(defclass buux (duux) ())`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(defclass duux () ())`, scope).Eval(scope, nil)
+	quux := slip.ReadString(`(define-condition quux (buux duux) ())`, scope).Eval(scope, nil).(*clos.ConditionClass)
+	_ = slip.ReadString(`(define-condition buux (duux) ())`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(define-condition duux () ())`, scope).Eval(scope, nil)
 
-	tt.Equal(t, `(defclass quux (buux duux)
+	tt.Equal(t, `(define-condition quux (buux duux)
   ())
 `, string(pp.Append(nil, scope, quux.DefList())))
 

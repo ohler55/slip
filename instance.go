@@ -29,6 +29,7 @@ type Instance interface {
 	// SlotValue return the value of an instance variable.
 	SlotValue(name Symbol) (Object, bool)
 
-	// SetSlotValue sets the value of an instance variable and return true if the name slot exists and was set.
+	// SetSlotValue sets the value of an instance variable and return true if
+	// the name slot exists and was set.
 	SetSlotValue(sym Symbol, value Object) (has bool)
 }

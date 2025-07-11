@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defMakeInstance() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MakeInstance{Function: slip.Function{Name: "make-instance", Args: args}}
@@ -46,6 +46,10 @@ type MakeInstance struct {
 // Call the the function with the arguments provided.
 func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	class := classFromArg0(f, s, args)
+	if _, ok := class.(*ConditionClass); ok {
+		slip.NewPanic("make-instance can not be used to make instances of %s. Use define-condition instead.",
+			class.Name())
+	}
 	inst := class.MakeInstance()
 	inst.Init(s, args[1:], depth)
 

@@ -145,7 +145,7 @@ func (sd *SlotDef) Simplify() any {
 
 func (sd *SlotDef) Describe(b []byte, class slip.Class, indent, right int, ansi bool) []byte {
 	b = append(b, sd.name...)
-	if class != sd.class && sd.class != nil {
+	if sd.class != nil && class.Name() != sd.class.Name() {
 		b = append(b, ' ', '(')
 		b = append(b, sd.class.Name()...)
 		b = append(b, ')')

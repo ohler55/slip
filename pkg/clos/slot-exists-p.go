@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSlotExistsp() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SlotExistsp{Function: slip.Function{Name: "slot-exists-p", Args: args}}

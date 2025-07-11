@@ -16,7 +16,7 @@ const StandardObjectSymbol = slip.Symbol("standard-object")
 // StandardObject is an instance of a Flavor.
 type StandardObject struct {
 	WithSlots
-	Type *StandardClass
+	Type isStandardClass
 }
 
 // String representation of the Object.
@@ -27,7 +27,7 @@ func (obj *StandardObject) String() string {
 // Append a buffer with a representation of the Object.
 func (obj *StandardObject) Append(b []byte) []byte {
 	b = append(b, "#<"...)
-	b = append(b, obj.Type.name...)
+	b = append(b, obj.Type.Name()...)
 	b = append(b, ' ')
 	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(obj))), 16)
 	return append(b, '>')
@@ -36,7 +36,7 @@ func (obj *StandardObject) Append(b []byte) []byte {
 // Simplify by returning the string representation of the flavor.
 func (obj *StandardObject) Simplify() interface{} {
 	simple := obj.WithSlots.Simplify()
-	simple.(map[string]any)["class"] = obj.Type.name
+	simple.(map[string]any)["class"] = obj.Type.Name()
 	simple.(map[string]any)["id"] = strconv.FormatUint(uint64(uintptr(unsafe.Pointer(obj))), 16)
 
 	return simple
@@ -44,7 +44,7 @@ func (obj *StandardObject) Simplify() interface{} {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *StandardObject) Hierarchy() []slip.Symbol {
-	return obj.Type.precedence
+	return obj.Type.standardClass().precedence
 }
 
 // IsA return true if the instance is of a flavor that inherits from the
@@ -53,7 +53,7 @@ func (obj *StandardObject) IsA(class slip.Class) bool {
 	if obj.Type == class {
 		return true
 	}
-	for _, f := range obj.Type.inherit {
+	for _, f := range obj.Type.standardClass().inherit {
 		if class == f {
 			return true
 		}
@@ -68,9 +68,9 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 	argMap := map[string]slip.Object{}
 	fillMapFromKeyArgs(args, argMap)
 	for k, v := range argMap {
-		sd := obj.Type.initArgs[k]
+		sd := obj.Type.standardClass().initArgs[k]
 		if sd == nil {
-			slip.NewPanic("%s is not a valid initarg for %s.", k, obj.Type.name)
+			slip.NewPanic("%s is not a valid initarg for %s.", k, obj.Type.Name())
 		}
 		if n, has := nameMap[sd.name]; has {
 			slip.NewPanic("Duplicate initarg (%s) for slot %s. %s already specified.", sd.name, k, n)
@@ -78,8 +78,8 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 		obj.setSlot(sd, v)
 		nameMap[sd.name] = k
 	}
-	for k, v := range obj.Type.defaultInitArgs {
-		sd := obj.Type.initArgs[k]
+	for k, v := range obj.Type.standardClass().defaultInitArgs {
+		sd := obj.Type.standardClass().initArgs[k]
 		if _, has := nameMap[sd.name]; !has {
 			if v == nil {
 				obj.setSlot(sd, nil)
@@ -89,7 +89,7 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 			nameMap[sd.name] = k
 		}
 	}
-	for k, sd := range obj.Type.initForms {
+	for k, sd := range obj.Type.standardClass().initForms {
 		if _, has := nameMap[k]; !has {
 			// If in the initForms then initform will not be nil.
 			obj.setSlot(sd, sd.initform.Eval(scope, depth+1))
@@ -113,7 +113,7 @@ func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
 		}
 	}
 	if sd.classStore {
-		obj.Type.Vars[sd.name] = value
+		obj.Type.standardClass().Vars[sd.name] = value
 	} else {
 		obj.Vars[sd.name] = value
 	}
@@ -153,10 +153,10 @@ func (obj *StandardObject) Describe(b []byte, indent, right int, ansi bool) []by
 	b = append(b, ", an instance of class "...)
 	if ansi {
 		b = append(b, bold...)
-		b = append(b, obj.Type.name...)
+		b = append(b, obj.Type.Name()...)
 		b = append(b, colorOff...)
 	} else {
-		b = append(b, obj.Type.name...)
+		b = append(b, obj.Type.Name()...)
 	}
 	b = append(b, ",\n"...)
 
@@ -185,7 +185,7 @@ func (obj *StandardObject) Class() slip.Class {
 // SlotNames returns a list of the slots names for the instance.
 func (obj *StandardObject) SlotNames() []string {
 	names := obj.WithSlots.SlotNames()
-	for k := range obj.Type.Vars {
+	for k := range obj.Type.standardClass().Vars {
 		names = append(names, k)
 	}
 	return names

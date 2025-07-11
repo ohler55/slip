@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSlotMakunbound() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SlotMakunbound{Function: slip.Function{Name: "slot-makunbound", Args: args}}

@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSlotValue() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SlotValue{Function: slip.Function{Name: "slot-value", Args: args}}

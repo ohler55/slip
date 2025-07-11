@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defClassName() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ClassName{Function: slip.Function{Name: "class-name", Args: args}}

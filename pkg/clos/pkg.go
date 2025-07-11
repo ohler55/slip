@@ -34,6 +34,23 @@ func init() {
 		},
 		&ClassName{},
 	)
+	defBuiltIns()
+	defAllocateInstance()
+	defChangeClass()
+	defClassName()
+	defClassOf()
+	defDefclass()
+	defDefineCondition()
+	defDefmethod()
+	defFindClass()
+	defMakeInstance()
+	defSlotBoundp()
+	defSlotExistsp()
+	defSlotMakunbound()
+	defSlotMissing()
+	defSlotUnbound()
+	defSlotValue()
+
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 }

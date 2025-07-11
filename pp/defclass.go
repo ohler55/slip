@@ -9,10 +9,12 @@ import (
 // Defclass represents a defclass block.
 type Defclass struct {
 	List
+	name string
 }
 
-func defclassFromList(args slip.List, p *slip.Printer) Node {
+func defclassFromList(name string, args slip.List, p *slip.Printer) Node {
 	dc := Defclass{
+		name: name,
 		List: List{
 			children: make([]Node, len(args)),
 		},
@@ -71,7 +73,7 @@ func defclassFromList(args slip.List, p *slip.Printer) Node {
 
 func (dc *Defclass) layout(left int) (w int) {
 	dc.x = left
-	w = 10                        // (defclass + space
+	w = len(dc.name) + 2          // (defclass + space
 	w += dc.children[0].layout(w) // class name
 	w++
 	w += dc.children[1].layout(w) // supers list
@@ -126,7 +128,8 @@ func (dc *Defclass) reorg(edge int) int {
 }
 
 func (dc *Defclass) adjoin(b []byte) []byte {
-	b = append(b, "(defclass"...)
+	b = append(b, '(')
+	b = append(b, dc.name...)
 	for _, n := range dc.children {
 		if n.newline() {
 			b = append(b, indent[:n.left()+1]...)

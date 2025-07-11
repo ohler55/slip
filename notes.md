@@ -4,24 +4,22 @@
 
 - next
 
+ - makunbound to remove class symbol/from list
  - instance-update branch
- - ConditionClass
-  - embed StandardClass
-  - overwrite
-   - String
-   - Append
-   - Equal
-   - Hierarchy
-   - Eval
-   - standardClass()
-  - modify
-   - MakeInstance - maybe have a check function
-   - mergeSupers - check against type of parent
+  - define-condition
+   - test
+  - Condition class
+   - embed StandardObject
+   - add Error()
+   - what needs to be overridden?
+   - try not to add any additional fields is possible
 
-  - define ConditionClass like StandardClass
-   - can it be standard-class sub-type
-  - define Condition like StandardObject
-   - allow slots despite the spec restriction
+  - define condition class in pkg init
+   - test with errors in clos like slot-missing
+    - not a clos class so flexible implemenation
+    - use in slot-value failures
+   - want it to be an go error as well?
+    - or just get rid of that feature since it is only used in tests
 
   - slip.MakeCondition(typeName string, args slip.List, p ...*Package)
    - args is a property list (key values)
@@ -29,19 +27,10 @@
    - create then Init with args
    - start with Condition as a condition-class
 
-  - ConditionClass #<condition-class error>
-   - precedence: condition t
-   - Condition is an instance of condition-class
-   - like class but with restrictions like slot-values not allowed
-    - define-condition
-    - make-condition - maybe allow make-instance
-    - has slots
-    - maybe a sub-class of class with just append and string changed
-     - also deny slot-value
-     - defclass with condition must fail as it should for built in
-      - basically, all super classes must be of the same type
+  - deny slot-value?
+  - defclass with condition must fail as it should for built in
 
-  - remove clos/class
+  - remove clos.Class
   - remove MethodInvoker interface
   - clean up built-in.go
 

@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defClassOf() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ClassOf{Function: slip.Function{Name: "class-of", Args: args}}

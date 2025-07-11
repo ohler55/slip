@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defSlotUnbound() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SlotUnbound{Function: slip.Function{Name: "slot-unbound", Args: args}}

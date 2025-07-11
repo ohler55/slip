@@ -376,7 +376,7 @@ var (
 	// }
 )
 
-func init() {
+func defBuiltIns() {
 	for _, c := range []*BuiltInClass{
 		&symbolClass,
 		&numberClass,

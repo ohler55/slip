@@ -21,12 +21,14 @@ type StandardClass struct {
 	defname         string
 	supers          []slip.Symbol
 	inherit         []slip.Class
+	inheritCheck    func(c slip.Class) *StandardClass
 	slotDefs        map[string]*SlotDef
 	pkg             *slip.Package
 	precedence      []slip.Symbol
 	defaultInitArgs map[string]slip.Object
 	initArgs        map[string]*SlotDef // map with keys of initargs
 	initForms       map[string]*SlotDef
+	baseClass       slip.Symbol
 }
 
 // String representation of the Object.
@@ -69,10 +71,10 @@ func (c *StandardClass) Hierarchy() []slip.Symbol {
 	return []slip.Symbol{StandardClassSymbol, ClassSymbol, StandardObjectSymbol, slip.TrueSymbol}
 }
 
-// Inherits returns true if this StandardClass inherits from a specified Class.
+// Inherits returns true if this Class inherits from a specified Class.
 func (c *StandardClass) Inherits(sc slip.Class) bool {
 	for _, c2 := range c.inherit {
-		if c2 == sc {
+		if c2.Name() == sc.Name() {
 			return true
 		}
 	}
@@ -224,6 +226,12 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 		},
 		Type: c,
 	}
+	c.initObjSlots(&obj)
+
+	return &obj
+}
+
+func (c *StandardClass) initObjSlots(obj *StandardObject) {
 	for k, sd := range c.slotDefs {
 		if !sd.classStore {
 			obj.Vars[k] = sd.initform
@@ -238,7 +246,6 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 			}
 		}
 	}
-	return &obj
 }
 
 // DefList returns a list that can be evaluated to create the class or nil if
@@ -293,11 +300,7 @@ func (c *StandardClass) mergeSupers() bool {
 	c.inherit = c.inherit[:0]
 	for _, super := range c.supers {
 		sc := c.pkg.FindClass(string(super))
-		// TBD check class and return StandardClass
-		ssc, ok := sc.(*StandardClass)
-		if !ok && sc != nil {
-			slip.PanicType("superclass", sc, "standard-class")
-		}
+		ssc := c.inheritCheck(sc)
 		if ssc == nil || len(ssc.precedence) == 0 {
 			c.inherit = c.inherit[:0]
 			return false
@@ -343,7 +346,10 @@ func (c *StandardClass) mergeSupers() bool {
 	for _, ic := range c.inherit {
 		c.precedence = append(c.precedence, slip.Symbol(ic.Name()))
 	}
-	c.precedence = append(c.precedence, StandardObjectSymbol, slip.TrueSymbol)
+	if 0 < len(c.baseClass) {
+		c.precedence = append(c.precedence, c.baseClass)
+	}
+	c.precedence = append(c.precedence, slip.TrueSymbol)
 
 	return true
 }
@@ -353,9 +359,9 @@ func (c *StandardClass) standardClass() *StandardClass {
 }
 
 func makeClassesReady(p *slip.Package) {
-	var not []*StandardClass
+	var not []isStandardClass
 	for _, c := range p.AllClasses() {
-		if sc, ok := c.(*StandardClass); ok && len(sc.precedence) == 0 {
+		if sc, ok := c.(isStandardClass); ok && !sc.Ready() {
 			not = append(not, sc)
 		}
 	}
@@ -363,7 +369,7 @@ func makeClassesReady(p *slip.Package) {
 		for {
 			var changed bool
 			for _, sc := range not {
-				if len(sc.precedence) == 0 {
+				if !sc.Ready() {
 					if sc.mergeSupers() {
 						changed = true
 					}
@@ -376,10 +382,12 @@ func makeClassesReady(p *slip.Package) {
 	}
 }
 
-func classChanged(cc *StandardClass, p *slip.Package) {
+func classChanged(cc slip.Class, p *slip.Package) {
 	for _, c := range p.AllClasses() {
-		if sc, ok := c.(*StandardClass); ok && sc.Inherits(cc) {
-			sc.mergeSupers()
+		if c.Inherits(cc) {
+			if sc, ok := c.(isStandardClass); ok {
+				sc.mergeSupers()
+			}
 		}
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defChangeClass() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ChangeClass{Function: slip.Function{Name: "change-class", Args: args}}

@@ -378,6 +378,7 @@ func (obj *Package) Remove(name string) (removed bool) {
 			}
 		}
 	}
+	delete(obj.classes, name)
 	obj.mu.Unlock()
 	for _, h := range unsetHooks {
 		h.fun(obj, name)

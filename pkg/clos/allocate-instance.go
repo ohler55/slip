@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defAllocateInstance() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := AllocateInstance{Function: slip.Function{Name: "allocate-instance", Args: args}}

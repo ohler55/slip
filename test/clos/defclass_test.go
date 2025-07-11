@@ -13,7 +13,7 @@ func TestDefclassMinimal(t *testing.T) {
 	// There is no undef for a class but a new defclass will replace an
 	// existing class or at least the fields in the class.
 	(&sliptest.Function{
-		Source: `(pretty-print (defclass quux () ()) nil)`,
+		Source: `(let ((cc (defclass quux () ()))) (pretty-print cc nil))`,
 		Expect: `"(defclass quux ()
   ())
 "`,
