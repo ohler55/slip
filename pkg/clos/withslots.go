@@ -13,14 +13,40 @@ import (
 
 // WithSlots is an instance of a Flavor.
 type WithSlots struct {
-	Vars   map[string]slip.Object
+	vars   map[string]slip.Object
 	locker slip.Locker
+}
+
+// Init initializes the object.
+func (obj *WithSlots) Init(synchronize bool) {
+	obj.vars = map[string]slip.Object{}
+	if synchronize {
+		obj.locker = &sync.Mutex{}
+	} else {
+		obj.locker = slip.NoOpLocker{}
+	}
+}
+
+// AddSlot adds a new slot with the initial value provided.
+func (obj *WithSlots) AddSlot(sym slip.Symbol, value slip.Object) {
+	name := strings.ToLower(string(sym))
+	obj.Lock()
+	obj.vars[name] = value
+	obj.Unlock()
+}
+
+// RemoveSlot remove a slot.
+func (obj *WithSlots) RemoveSlot(sym slip.Symbol) {
+	name := strings.ToLower(string(sym))
+	obj.Lock()
+	delete(obj.vars, name)
+	obj.Unlock()
 }
 
 // Simplify by returning the string representation of the flavor.
 func (obj *WithSlots) Simplify() any {
 	vars := map[string]any{}
-	for name, val := range obj.Vars {
+	for name, val := range obj.vars {
 		vars[name] = slip.Simplify(val)
 	}
 	simple := map[string]any{
@@ -32,8 +58,8 @@ func (obj *WithSlots) Simplify() any {
 
 // SlotNames returns a list of the slots names for the instance.
 func (obj *WithSlots) SlotNames() []string {
-	names := make([]string, 0, len(obj.Vars))
-	for k := range obj.Vars {
+	names := make([]string, 0, len(obj.vars))
+	for k := range obj.vars {
 		names = append(names, k)
 	}
 	return names
@@ -43,8 +69,8 @@ func (obj *WithSlots) SlotNames() []string {
 func (obj *WithSlots) SlotValue(sym slip.Symbol) (value slip.Object, has bool) {
 	name := strings.ToLower(string(sym))
 	obj.locker.Lock()
-	if obj.Vars != nil {
-		value, has = obj.Vars[name]
+	if obj.vars != nil {
+		value, has = obj.vars[name]
 	}
 	obj.locker.Unlock()
 	return
@@ -54,8 +80,8 @@ func (obj *WithSlots) SlotValue(sym slip.Symbol) (value slip.Object, has bool) {
 func (obj *WithSlots) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool) {
 	name := strings.ToLower(string(sym))
 	obj.Lock()
-	if _, has = obj.Vars[name]; has {
-		obj.Vars[name] = value
+	if _, has = obj.vars[name]; has {
+		obj.vars[name] = value
 	}
 	obj.Unlock()
 	return
@@ -84,4 +110,9 @@ func (obj *WithSlots) Lock() {
 // Unlock the scope to synchronize changes.
 func (obj *WithSlots) Unlock() {
 	obj.locker.Unlock()
+}
+
+// Vars returns the vars map.
+func (obj *WithSlots) Vars() map[string]slip.Object {
+	return obj.vars
 }

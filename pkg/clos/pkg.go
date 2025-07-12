@@ -51,6 +51,8 @@ func init() {
 	defSlotUnbound()
 	defSlotValue()
 
+	defConditions()
+
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 }

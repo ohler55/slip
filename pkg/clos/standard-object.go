@@ -13,7 +13,7 @@ import (
 // StandardObjectSymbol is the symbol with a value of "standard-object".
 const StandardObjectSymbol = slip.Symbol("standard-object")
 
-// StandardObject is an instance of a Flavor.
+// StandardObject is an instance of a standard-class.
 type StandardObject struct {
 	WithSlots
 	Type isStandardClass
@@ -44,16 +44,16 @@ func (obj *StandardObject) Simplify() interface{} {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *StandardObject) Hierarchy() []slip.Symbol {
-	return obj.Type.standardClass().precedence
+	return obj.Type.precedenceList()
 }
 
-// IsA return true if the instance is of a flavor that inherits from the
-// provided flavor.
+// IsA return true if the instance is of a class that inherits from the
+// provided class.
 func (obj *StandardObject) IsA(class slip.Class) bool {
 	if obj.Type == class {
 		return true
 	}
-	for _, f := range obj.Type.standardClass().inherit {
+	for _, f := range obj.Type.inheritedClasses() {
 		if class == f {
 			return true
 		}
@@ -68,7 +68,7 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 	argMap := map[string]slip.Object{}
 	fillMapFromKeyArgs(args, argMap)
 	for k, v := range argMap {
-		sd := obj.Type.standardClass().initArgs[k]
+		sd := obj.Type.initArgDef(k)
 		if sd == nil {
 			slip.NewPanic("%s is not a valid initarg for %s.", k, obj.Type.Name())
 		}
@@ -78,8 +78,8 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 		obj.setSlot(sd, v)
 		nameMap[sd.name] = k
 	}
-	for k, v := range obj.Type.standardClass().defaultInitArgs {
-		sd := obj.Type.standardClass().initArgs[k]
+	for k, v := range obj.Type.defaultsMap() {
+		sd := obj.Type.initArgDef(k)
 		if _, has := nameMap[sd.name]; !has {
 			if v == nil {
 				obj.setSlot(sd, nil)
@@ -89,7 +89,7 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 			nameMap[sd.name] = k
 		}
 	}
-	for k, sd := range obj.Type.standardClass().initForms {
+	for k, sd := range obj.Type.initFormMap() {
 		if _, has := nameMap[k]; !has {
 			// If in the initForms then initform will not be nil.
 			obj.setSlot(sd, sd.initform.Eval(scope, depth+1))
@@ -113,9 +113,9 @@ func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
 		}
 	}
 	if sd.classStore {
-		obj.Type.standardClass().Vars[sd.name] = value
+		obj.Type.Vars()[sd.name] = value
 	} else {
-		obj.Vars[sd.name] = value
+		obj.vars[sd.name] = value
 	}
 }
 
@@ -125,8 +125,8 @@ func (obj *StandardObject) Equal(other slip.Object) bool {
 		return true
 	}
 	if o, ok := other.(*StandardObject); ok && obj.Type == o.Type {
-		for k, val := range obj.Vars {
-			if !slip.ObjectEqual(val, o.Vars[k]) {
+		for k, val := range obj.vars {
+			if !slip.ObjectEqual(val, o.vars[k]) {
 				return false
 			}
 		}
@@ -185,7 +185,7 @@ func (obj *StandardObject) Class() slip.Class {
 // SlotNames returns a list of the slots names for the instance.
 func (obj *StandardObject) SlotNames() []string {
 	names := obj.WithSlots.SlotNames()
-	for k := range obj.Type.standardClass().Vars {
+	for k := range obj.Type.Vars() {
 		names = append(names, k)
 	}
 	return names

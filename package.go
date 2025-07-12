@@ -829,6 +829,24 @@ func (obj *Package) EachVarVal(cb func(name string, vv *VarVal)) {
 	obj.mu.Unlock()
 }
 
+// EachClass call the cb for each class in the package.
+func (obj *Package) EachClass(cb func(c Class)) {
+	obj.mu.Lock()
+	for _, c := range obj.classes {
+		cb(c)
+	}
+	obj.mu.Unlock()
+}
+
+// EachClassName call the cb for each class in the package.
+func (obj *Package) EachClassName(cb func(name string)) {
+	obj.mu.Lock()
+	for _, c := range obj.classes {
+		cb(c.Name())
+	}
+	obj.mu.Unlock()
+}
+
 // GetFunc returns the FuncInfo associated with the name which must be
 // lowercase.
 func (obj *Package) GetFunc(name string) (fi *FuncInfo) {
@@ -887,6 +905,9 @@ func (obj *Package) RegisterClass(name string, c Class) {
 
 	for _, up := range obj.Users {
 		up.RegisterClass(name, c)
+	}
+	for _, h := range classHooks {
+		h.fun(obj, name)
 	}
 }
 

@@ -33,6 +33,7 @@ func initWords() {
 	}
 	slip.CurrentPackage.EachFuncName(insert)
 	slip.CurrentPackage.EachVarName(insert)
+	slip.CurrentPackage.EachClassName(insert)
 	sort.Strings(completerWords)
 }
 
@@ -53,9 +54,6 @@ func setHook(p *slip.Package, key string) {
 		modifiedVars[key] = true
 		updateConfigFile()
 	}
-	if len(completerWords) == 0 {
-		initWords()
-	}
 	addWord(key)
 }
 
@@ -63,10 +61,7 @@ func unsetHook(p *slip.Package, key string) {
 	removeWord(key)
 }
 
-func defunHook(p *slip.Package, key string) {
-	if len(completerWords) == 0 {
-		initWords()
-	}
+func addHook(p *slip.Package, key string) {
 	addWord(key)
 }
 

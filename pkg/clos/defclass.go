@@ -90,6 +90,11 @@ func (f *Defclass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if slotSpecs, ok = args[2].(slip.List); !ok {
 		slip.PanicType("slot-specifiers", args[2], "list")
 	}
+	if c := slip.FindClass(string(name)); c != nil {
+		if sc, ok := c.(*StandardClass); ok && sc.Final {
+			slip.NewPanic("Can not redefine class %s.", name)
+		}
+	}
 	return DefStandardClass(string(name), supers, slotSpecs, args[3:])
 }
 
@@ -120,8 +125,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 			slip.PanicType("super", super, "symbol")
 		}
 	}
-	sc.Vars = map[string]slip.Object{}
-	sc.locker = slip.NoOpLocker{}
+	sc.Init(false)
 
 	for _, opt := range classOptions {
 		list, ok := opt.(slip.List)
@@ -148,7 +152,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		sd.class = &sc
 		sc.slotDefs[sd.name] = sd
 		if sd.classStore {
-			sc.Vars[sd.name] = sd.initform
+			sc.vars[sd.name] = sd.initform
 		}
 	}
 	_ = sc.mergeSupers()

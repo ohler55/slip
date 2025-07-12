@@ -6,10 +6,17 @@ import "github.com/ohler55/slip"
 
 type isStandardClass interface {
 	slip.Class
-	standardClass() *StandardClass
+
+	mergeSupers() bool
+	slotDefMap() map[string]*SlotDef
+	initArgDef(name string) *SlotDef
+	initFormMap() map[string]*SlotDef
+	defaultsMap() map[string]slip.Object
+	precedenceList() []slip.Symbol
+	inheritedClasses() []slip.Class
 
 	Ready() bool
-	mergeSupers() bool
+	Vars() map[string]slip.Object
 
 	// SlotValue return the value of an instance variable.
 	SlotValue(name slip.Symbol) (slip.Object, bool)

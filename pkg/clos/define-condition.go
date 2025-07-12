@@ -89,6 +89,11 @@ func (f *DefineCondition) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 	if slotSpecs, ok = args[2].(slip.List); !ok {
 		slip.PanicType("slot-specifiers", args[2], "list")
 	}
+	if c := slip.FindClass(string(name)); c != nil {
+		if cc, ok := c.(*ConditionClass); ok && cc.Final {
+			slip.NewPanic("Can not redefine class %s.", name)
+		}
+	}
 	return DefConditionClass(string(name), supers, slotSpecs, args[3:])
 }
 
@@ -123,8 +128,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 			slip.PanicType("super", super, "symbol")
 		}
 	}
-	cc.Vars = map[string]slip.Object{}
-	cc.locker = slip.NoOpLocker{}
+	cc.Init(false)
 
 	for _, opt := range classOptions {
 		list, ok := opt.(slip.List)
@@ -142,7 +146,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 			fillMapFromKeyArgs(list[1:], cc.defaultInitArgs)
 		case slip.Symbol(":report"):
 			if list[1] != nil {
-				cc.Vars["report"] = list[1].Eval(slip.NewScope(), 0)
+				cc.vars["report"] = list[1].Eval(slip.NewScope(), 0)
 			}
 		default:
 			slip.PanicType("options directive", list[0], ":documentation", "default-initargs", ":report")
@@ -153,7 +157,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 		sd.class = &cc
 		cc.slotDefs[sd.name] = sd
 		if sd.classStore {
-			cc.Vars[sd.name] = sd.initform
+			cc.vars[sd.name] = sd.initform
 		}
 	}
 	_ = cc.mergeSupers()

@@ -29,6 +29,7 @@ type StandardClass struct {
 	initArgs        map[string]*SlotDef // map with keys of initargs
 	initForms       map[string]*SlotDef
 	baseClass       slip.Symbol
+	Final           bool
 }
 
 // String representation of the Object.
@@ -171,11 +172,11 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 			b = append(b, '\n')
 		}
 	}
-	if 0 < len(c.Vars) {
+	if 0 < len(c.vars) {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "Class Slots:\n"...)
 		var keys []string
-		for k := range c.Vars {
+		for k := range c.vars {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
@@ -183,7 +184,7 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 			b = append(b, indentSpaces[:i3]...)
 			b = append(b, k...)
 			b = append(b, " = "...)
-			b = slip.Append(b, c.Vars[k])
+			b = slip.Append(b, c.vars[k])
 			b = append(b, '\n')
 		}
 	}
@@ -194,7 +195,7 @@ func (c *StandardClass) allSlotsDefs() []*SlotDef {
 	defs := map[string]*SlotDef{}
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
 		if sc, ok := c.inherit[i].(isStandardClass); ok {
-			for k, sd := range sc.standardClass().slotDefs {
+			for k, sd := range sc.slotDefMap() {
 				defs[k] = sd
 			}
 		}
@@ -221,7 +222,7 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 	}
 	obj := StandardObject{
 		WithSlots: WithSlots{
-			Vars:   map[string]slip.Object{},
+			vars:   map[string]slip.Object{},
 			locker: slip.NoOpLocker{},
 		},
 		Type: c,
@@ -234,14 +235,14 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 func (c *StandardClass) initObjSlots(obj *StandardObject) {
 	for k, sd := range c.slotDefs {
 		if !sd.classStore {
-			obj.Vars[k] = sd.initform
+			obj.vars[k] = sd.initform
 		}
 	}
 	for _, ic := range c.inherit {
 		if sc, ok := ic.(isStandardClass); ok {
-			for k, sd := range sc.standardClass().slotDefs {
-				if _, has := obj.Vars[k]; !has && !sd.classStore {
-					obj.Vars[k] = sd.initform
+			for k, sd := range sc.slotDefMap() {
+				if _, has := obj.vars[k]; !has && !sd.classStore {
+					obj.vars[k] = sd.initform
 				}
 			}
 		}
@@ -295,7 +296,7 @@ func (c *StandardClass) Ready() bool {
 }
 
 func (c *StandardClass) mergeSupers() bool {
-	// Just look at the super inherited. No need to dig any deeper if the
+	// Just look at the super precedence. No need to dig any deeper if the
 	// super is ready.
 	c.inherit = c.inherit[:0]
 	for _, super := range c.supers {
@@ -308,13 +309,20 @@ func (c *StandardClass) mergeSupers() bool {
 		if c.Inherits(ssc) {
 			continue
 		}
-		c.inherit = append(c.inherit, ssc)
-		for _, ic := range ssc.inherit {
-			if !c.Inherits(ic) {
-				c.inherit = append(c.inherit, ic)
+		// Place all direct classes on the list first.
+		c.inherit = append(c.inherit, sc)
+	}
+	// Expand the inheritance list based on super-supers.
+	ics := c.inherit
+	for _, ic := range ics {
+		sc := c.inheritCheck(ic)
+		for _, super := range sc.inherit {
+			if !c.Inherits(super) {
+				c.inherit = append(c.inherit, super)
 			}
 		}
 	}
+
 	// TBD add readers, writers, and accessors for each slot if not already added
 	//  maybe keep pointer to the generic method for each
 
@@ -322,7 +330,7 @@ func (c *StandardClass) mergeSupers() bool {
 	c.initForms = map[string]*SlotDef{}
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
 		if sc, ok := c.inherit[i].(isStandardClass); ok {
-			for _, sd := range sc.standardClass().slotDefs {
+			for _, sd := range sc.slotDefMap() {
 				for _, ia := range sd.initargs {
 					c.initArgs[string(ia)] = sd
 				}
@@ -354,8 +362,28 @@ func (c *StandardClass) mergeSupers() bool {
 	return true
 }
 
-func (c *StandardClass) standardClass() *StandardClass {
-	return c
+func (c *StandardClass) slotDefMap() map[string]*SlotDef {
+	return c.slotDefs
+}
+
+func (c *StandardClass) initArgDef(name string) *SlotDef {
+	return c.initArgs[name]
+}
+
+func (c *StandardClass) initFormMap() map[string]*SlotDef {
+	return c.initForms
+}
+
+func (c *StandardClass) defaultsMap() map[string]slip.Object {
+	return c.defaultInitArgs
+}
+
+func (c *StandardClass) precedenceList() []slip.Symbol {
+	return c.precedence
+}
+
+func (c *StandardClass) inheritedClasses() []slip.Class {
+	return c.inherit
 }
 
 func makeClassesReady(p *slip.Package) {

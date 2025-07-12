@@ -197,7 +197,7 @@ func (sd *SlotDef) Describe(b []byte, class slip.Class, indent, right int, ansi 
 	if 0 < len(sd.docs) {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "documentation: "...)
-		b = slip.AppendDoc(b, sd.docs, 0, right, ansi)
+		b = slip.AppendDoc(b, sd.docs, 21, right, ansi, 0)
 		b = append(b, '\n')
 	}
 	if sd.classStore {

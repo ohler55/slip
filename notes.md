@@ -4,15 +4,33 @@
 
 - next
 
- - makunbound to remove class symbol/from list
  - instance-update branch
-  - define-condition
-   - test
+  - add slip level panic and error creation
+   - test in repl
+
+   - AppendObject in print-object.go file
+    - if condition and :report then use that for printing, others like *print-escape*
+    - else call generic
+    - if no generic match print .String() - should be generic method for t
+
   - Condition class
-   - embed StandardObject
-   - add Error()
-   - what needs to be overridden?
-   - try not to add any additional fields is possible
+
+   - Error()
+    - check report for reporting function else just default message string
+   - AppendToStack(name string, args List)
+   - AppendFull(b []byte) []byte
+   - Stack() []string - store in a slot as a list?
+    - list of strings or function call list like (car foo)
+     - list of lists might be best
+   - inheritance
+    - define-condition for each?
+     - Conditon object for all condition classes
+      - it has then Error() and other functions
+     - field on condition-class for objectInit or condInit or instInit
+      - function that adds and sets slots and values like initargs and initforms would do
+       - or should the init stuff be used so daemon generics are triggered?
+   - restrict changes in class, maybe add final flag in condition-class
+    - define-condition needs to check for existance and panic if exists and final
 
   - define condition class in pkg init
    - test with errors in clos like slot-missing
@@ -30,12 +48,17 @@
   - deny slot-value?
   - defclass with condition must fail as it should for built in
 
+  - error (datum &rest aruments) update
+
   - remove clos.Class
   - remove MethodInvoker interface
   - clean up built-in.go
 
 ---------------------
-
+ - bugs
+  - open doesn't handle absolute paths nor ~
+   - ~someone/x
+---------------------
  - generics branch
   - standard-class reader, writer, and accessor
    - class slots
@@ -103,6 +126,12 @@
  - flavor allow out of order defflavor like standard-class
  - rename bag-flavor to just bag?
 
+ - bonus functions
+  - [ ] list-all-classes (&optional metaclass)
+  - [ ] class-precedence
+  - [ ] class-supers
+  - [ ] class-metaclass => standard-class, condition-class, build-in-class
+
  - [ ] ADD-METHOD
  - [ ] CALL-METHOD
  - [ ] CALL-NEXT-METHOD
@@ -110,9 +139,9 @@
  - [ ] CLASS-NAME
  - [ ] CLASS-OF
  - [ ] COMPUTE-APPLICABLE-METHODS
- - [ ] DEFCLASS
+ - [x] DEFCLASS
  - [ ] DEFGENERIC
- - [ ] DEFINE-CONDITION
+ - [x] DEFINE-CONDITION
  - [ ] DEFINE-METHOD-COMBINATION
  - [ ] DEFMETHOD
  - [ ] DESCRIBE-OBJECT
@@ -152,6 +181,18 @@
  - [ ] WITH-ACCESSORS
  - [ ] WITH-ADDED-METHODS
  - [ ] WITH-SLOTS
+ - [ ] arithmetic-error-operands
+ - [ ] simple-condition-format-arguments
+ - [ ] arithmetic-error-operation
+ - [ ] simple-condition-format-control
+ - [ ] cell-error-name
+ - [ ] stream-error-stream
+ - [ ] file-error-pathname
+ - [ ] type-error-datum
+ - [ ] package-error-package
+ - [ ] type-error-expected-type
+ - [ ] print-not-readable-object
+ - [ ] unbound-slot-instance
 
 -----------------
   - [ ] inspect [interactive]

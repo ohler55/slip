@@ -9,6 +9,7 @@ import (
 	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/clos"
 )
 
 func TestMakeInstanceSimple(t *testing.T) {
@@ -129,33 +130,11 @@ func TestMakeInstanceBuiltIn(t *testing.T) {
 	})
 }
 
-// func TestMakeInstanceClass(t *testing.T) {
-// 	a := clos.DefClass("alpha", "an alpha", map[string]slip.Object{"x": slip.Fixnum(7)}, nil, false)
-// 	b := clos.DefClass("bravo", "a bravo", map[string]slip.Object{"y": nil}, []*clos.Class{a}, false)
-// 	c := clos.DefClass(
-// 		"charlie",
-// 		"a charlie",
-// 		nil,
-// 		[]*clos.Class{b, a, slip.FindClass("standard-object").(*clos.Class)},
-// 		false,
-// 	)
-// 	des := string(c.Describe(nil, 2, 100, false))
-// 	tt.Equal(t, "/Class precedence list: bravo alpha standard-object/", des)
-
-// 	(&sliptest.Function{
-// 		Source:    `(make-instance 'charlie t)`,
-// 		PanicType: slip.TypeErrorSymbol,
-// 	}).Test(t)
-// 	(&sliptest.Function{
-// 		Source:    `(make-instance 'charlie :self t)`,
-// 		PanicType: slip.ErrorSymbol,
-// 	}).Test(t)
-// 	(&sliptest.Function{
-// 		Source:    `(make-instance 'charlie :self t)`,
-// 		PanicType: slip.ErrorSymbol,
-// 	}).Test(t)
-// 	(&sliptest.Function{
-// 		Source:    `(make-instance 'charlie :z 1)`,
-// 		PanicType: slip.ErrorSymbol,
-// 	}).Test(t)
-// }
+func TestMakeInstanceCondition(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`(makunbound 'quux)`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(define-condition quux () ())`, scope).Eval(scope, nil).(*clos.ConditionClass)
+	tt.Panic(t, func() {
+		_ = slip.ReadString(`(make-instance 'quux)`, scope).Eval(scope, nil)
+	})
+}

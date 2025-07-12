@@ -13,8 +13,11 @@ import (
 )
 
 func TestWithSlots(t *testing.T) {
-	ws := clos.WithSlots{Vars: map[string]slip.Object{"quux": nil}}
+	var ws clos.WithSlots
+	ws.Init(false)
+	ws.AddSlot(slip.Symbol("quux"), nil)
 
+	ws.SetSynchronized(true)
 	ws.SetSynchronized(false)
 	ws.SetSlotValue(slip.Symbol("quux"), slip.Fixnum(5))
 	simple := ws.Simplify()
@@ -32,4 +35,20 @@ func TestWithSlots(t *testing.T) {
 	tt.Equal(t, true, has)
 	tt.Equal(t, slip.Fixnum(7), value)
 	tt.Equal(t, true, ws.Synchronized())
+
+	ws.RemoveSlot(slip.Symbol("quux"))
+	simple = ws.Simplify()
+	_ = jp.C("id").Del(simple)
+	tt.Equal(t, "{vars: {}}", pretty.SEN(simple))
+}
+
+func TestWithSlotsSync(t *testing.T) {
+	var ws clos.WithSlots
+	ws.Init(true)
+	ws.AddSlot(slip.Symbol("quux"), nil)
+
+	ws.SetSlotValue(slip.Symbol("quux"), slip.Fixnum(5))
+	simple := ws.Simplify()
+	_ = jp.C("id").Del(simple)
+	tt.Equal(t, "{vars: {quux: 5}}", pretty.SEN(simple))
 }

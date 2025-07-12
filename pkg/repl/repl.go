@@ -95,7 +95,8 @@ func init() {
 
 	slip.AddSetHook("repl", setHook)
 	slip.AddUnsetHook("repl", unsetHook)
-	slip.AddDefunHook("repl", defunHook)
+	slip.AddDefunHook("repl", addHook)
+	slip.AddClassHook("repl", addHook)
 }
 
 // Die is used with panic to print an error and then exit.

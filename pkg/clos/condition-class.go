@@ -48,7 +48,7 @@ func (c *ConditionClass) MakeInstance() slip.Instance {
 	}
 	obj := StandardObject{
 		WithSlots: WithSlots{
-			Vars:   map[string]slip.Object{},
+			vars:   map[string]slip.Object{},
 			locker: slip.NoOpLocker{},
 		},
 		Type: c,
@@ -58,6 +58,12 @@ func (c *ConditionClass) MakeInstance() slip.Instance {
 	return &obj
 }
 
-func (c *ConditionClass) standardClass() *StandardClass {
-	return &c.StandardClass
+// DefList returns a list that can be evaluated to create the class or nil if
+// the class is a built in class.
+func (c *ConditionClass) DefList() slip.List {
+	def := c.StandardClass.DefList()
+	if report := c.vars["report"]; report != nil {
+		def = append(def, slip.List{slip.Symbol(":report"), report})
+	}
+	return def
 }
