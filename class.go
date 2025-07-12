@@ -30,6 +30,10 @@ type Class interface {
 	// or nil if the class is a built in class. As an example, a flavor would
 	// be created by a defflavor expression.
 	DefList() List
+
+	// Metaclass returns the name of the class's meta class which can be
+	// built-in-class, standard-class, flavor, or condition-class.
+	Metaclass() Symbol
 }
 
 // Find finds the named class.

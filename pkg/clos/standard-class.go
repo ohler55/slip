@@ -362,6 +362,11 @@ func (c *StandardClass) mergeSupers() bool {
 	return true
 }
 
+// Metaclass returns the symbol standard-class.
+func (c *StandardClass) Metaclass() slip.Symbol {
+	return StandardClassSymbol
+}
+
 func (c *StandardClass) slotDefMap() map[string]*SlotDef {
 	return c.slotDefs
 }

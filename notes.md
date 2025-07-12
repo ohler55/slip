@@ -7,48 +7,17 @@
  - instance-update branch
   - slip.type-error and slip.error
   - convert all old conditions then remove
-
-  - make-condition
-   - need a way in make-condition to check the type is a condition
-    - maybe something on class to get metaclass
-   - func that makes condition should build stack and pass in
+  - check for *slip.Panic and not Error interface
 
 
-  - add slip level panic and error creation
-   - test in repl
-   - panic after make-condition
-    - eventually call print-object
-
-   - AppendObject in print-object.go file
-    - if condition and :report then use that for printing, others like *print-escape*
+  - panic after make-condition
+  - call print-object in slip.Panic to form message
+   - if condition and :report then use that for printing, others like *print-escape*
     - else call generic
     - if no generic match print .String() - should be generic method for t
+  - pass scope in then various error creation panic
+   - allow for report function to use local variables
 
-  - Condition class
-
-   - Error()
-    - check report for reporting function else just default message string
-   - AppendToStack(name string, args List)
-   - AppendFull(b []byte) []byte
-   - Stack() []string - store in a slot as a list?
-    - list of strings or function call list like (car foo)
-     - list of lists might be best
-   - inheritance
-    - define-condition for each?
-     - Conditon object for all condition classes
-      - it has then Error() and other functions
-     - field on condition-class for objectInit or condInit or instInit
-      - function that adds and sets slots and values like initargs and initforms would do
-       - or should the init stuff be used so daemon generics are triggered?
-   - restrict changes in class, maybe add final flag in condition-class
-    - define-condition needs to check for existance and panic if exists and final
-
-  - define condition class in pkg init
-   - test with errors in clos like slot-missing
-    - not a clos class so flexible implemenation
-    - use in slot-value failures
-   - want it to be an go error as well?
-    - or just get rid of that feature since it is only used in tests
 
   - slip.MakeCondition(typeName string, args slip.List, p ...*Package)
    - args is a property list (key values)

@@ -67,3 +67,8 @@ func (c *ConditionClass) DefList() slip.List {
 	}
 	return def
 }
+
+// Metaclass returns the symbol condition-class.
+func (c *ConditionClass) Metaclass() slip.Symbol {
+	return ConditionClassSymbol
+}

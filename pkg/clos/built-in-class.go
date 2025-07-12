@@ -68,6 +68,11 @@ func (c *BuiltInClass) Inherits(sc slip.Class) bool {
 	return false
 }
 
+// Metaclass returns the symbol built-in-class.
+func (c *BuiltInClass) Metaclass() slip.Symbol {
+	return BuiltInClassSymbol
+}
+
 // Eval returns self.
 func (c *BuiltInClass) Eval(s *slip.Scope, depth int) slip.Object {
 	return c

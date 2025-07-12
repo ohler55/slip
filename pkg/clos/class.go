@@ -60,6 +60,11 @@ func DefClass(
 	return
 }
 
+// Metaclass returns the symbol class.
+func (c *Class) Metaclass() slip.Symbol {
+	return ClassSymbol
+}
+
 // String representation of the Object.
 func (c *Class) String() string {
 	return string(c.Append([]byte{}))

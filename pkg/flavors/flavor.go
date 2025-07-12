@@ -175,6 +175,11 @@ func (obj *Flavor) Append(b []byte) []byte {
 	return append(b, '>')
 }
 
+// Metaclass returns the symbol flavor.
+func (obj *Flavor) Metaclass() slip.Symbol {
+	return slip.Symbol("flavor")
+}
+
 // Simplify by returning the string representation of the flavor.
 func (obj *Flavor) Simplify() any {
 	flist := make([]any, 0, len(obj.inherit))
