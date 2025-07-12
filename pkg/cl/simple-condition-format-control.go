@@ -44,8 +44,6 @@ type SimpleConditionFormatControl struct {
 func (f *SimpleConditionFormatControl) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	switch cond := args[0].(type) {
-	case SimpleCondition:
-		result = slip.String(cond.Control())
 	case slip.Instance:
 		var has bool
 		if result, has = cond.SlotValue(formatControlSymbol); !has {

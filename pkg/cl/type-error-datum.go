@@ -42,8 +42,8 @@ type TypeErrorDatum struct {
 func (f *TypeErrorDatum) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	switch cond := args[0].(type) {
-	case slip.TypeError:
-		result = cond.Datum()
+	// case slip.TypeError:
+	// 	result = cond.Datum()
 	case slip.Instance:
 		var has bool
 		if result, has = cond.SlotValue(datumSymbol); !has {

@@ -44,11 +44,11 @@ func (f *TypeErrorExpectedType) Call(s *slip.Scope, args slip.List, depth int) (
 	slip.ArgCountCheck(f, args, 1, 1)
 	switch cond := args[0].(type) {
 	case slip.TypeError:
-		ta := cond.ExpectedTypes()
-		if len(ta) == 1 {
-			return ta[0]
-		}
-		result = slip.Values(ta)
+		// ta := cond.ExpectedTypes()
+		// if len(ta) == 1 {
+		// 	return ta[0]
+		// }
+		// result = slip.Values(ta)
 	case slip.Instance:
 		var has bool
 		if result, has = cond.SlotValue(expectedTypeSymbol); !has {

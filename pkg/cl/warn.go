@@ -52,19 +52,24 @@ type Warn struct {
 // Call the function with the arguments provided.
 func (f *Warn) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, -1)
-	var cond slip.Condition
+	var cond slip.Instance
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		cond = slip.MakeCondition(string(ta), args[1:])
-		if _, ok := cond.(slip.Warning); !ok {
-			slip.NewPanic("%s does not designate a condition class.", ta)
+		c := slip.FindClass(string(ta))
+		cond = c.MakeInstance()
+		wc := slip.FindClass("warning")
+		if !cond.IsA(wc) {
+			slip.NewPanic("%s does not designate a warning class.", ta)
 		}
+		args = args[1:]
+		cond.Init(s, args, 0)
 	case slip.String:
-		cond = NewSimpleWarning(s, string(ta), args[1:]...)
+		cond = NewSimpleWarning(s, string(ta), args[1:]...).(slip.Instance)
 	default:
 		slip.PanicType("datum", ta, "symbol", "string")
 	}
-	if _, err := fmt.Fprintf(slip.ErrorOutput.(io.Writer), "Warning: %s\n", cond.Error()); err != nil {
+	msg := SimpleCondMsg(s, cond)
+	if _, err := fmt.Fprintf(slip.ErrorOutput.(io.Writer), "Warning: %s\n", msg); err != nil {
 		ss, _ := slip.StandardOutput.(slip.Stream)
 		slip.PanicStream(ss, "warn write failed. %s", err)
 	}

@@ -63,7 +63,7 @@ func (f *SlotMissing) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if sym, ok2 := args[3].(slip.Symbol); ok2 {
 		slotMissing(args[1], slotName, string(sym))
 	}
-	panic(slip.NewTypeError("operation", args[3], "symbol"))
+	panic(slip.NewTypeErrorObject("operation", args[3], "symbol"))
 }
 
 func slotMissing(obj slip.Object, name slip.Symbol, op string) {

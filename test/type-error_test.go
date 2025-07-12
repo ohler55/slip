@@ -11,18 +11,20 @@ import (
 )
 
 func TestTypeErrorObj(t *testing.T) {
-	cond := slip.NewTypeError("testing", slip.Fixnum(3), "symbol")
+	cond := slip.NewTypeErrorObject("testing", slip.Fixnum(3), "symbol")
 	(&sliptest.Object{
 		Target: cond,
-		String: "/^#<TYPE-ERROR [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   cond,
+		String: "/^#<type-error [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: cond,
 		Equals: []*sliptest.EqTest{
 			{Other: cond, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "testing must be a symbol not 3, a fixnum.", cond.Error())
 }
 
 func TestTypeErrorMake(t *testing.T) {

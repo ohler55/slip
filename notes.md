@@ -5,7 +5,13 @@
 - next
 
  - instance-update branch
+  - convert simple-type-error first
+  - change NewTypeErrorObject back to NewTypeError
+
   - slip.type-error and slip.error
+   - type to remove register condition
+   - update test/type-error_test.go
+
   - convert all old conditions then remove
   - check for *slip.Panic and not Error interface
 
