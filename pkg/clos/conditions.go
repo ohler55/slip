@@ -54,7 +54,10 @@ const (
 	// ClassNotFoundSymbol is the symbol with a value of "class-not-found".
 	ClassNotFoundSymbol = slip.Symbol("class-not-found")
 
-	docSym = slip.Symbol(":documentation")
+	docSym     = slip.Symbol(":documentation")
+	readerSym  = slip.Symbol(":reader")
+	initargSym = slip.Symbol(":initarg")
+	typeSym    = slip.Symbol(":type")
 )
 
 func defConditions() {
@@ -88,8 +91,8 @@ func defCondition() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("report"),
-				slip.Symbol(":reader"), slip.Symbol("condition-report"),
-				slip.Symbol(":initarg"), slip.Symbol(":report"),
+				readerSym, slip.Symbol("condition-report"),
+				initargSym, slip.Symbol(":report"),
 				docSym, slip.String(`Can be a _string_, _lambda_, or a _symbol_ bound to a function. The
 function must take two arguments. The first is the condition and the second is a stream. If a _string_
 then only the string is written to the stream. The report call is triggered by a call to the
@@ -111,8 +114,8 @@ func defWarning() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("message"),
-				slip.Symbol(":reader"), slip.Symbol("warning-message"),
-				slip.Symbol(":initarg"), slip.Symbol(":message"),
+				readerSym, slip.Symbol("warning-message"),
+				initargSym, slip.Symbol(":message"),
 				docSym, slip.String(`The _message_ slot if for a message that describes the warning.`),
 			},
 		},
@@ -143,23 +146,16 @@ func defError() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("message"),
-				slip.Symbol(":reader"), slip.Symbol("error-message"),
-				slip.Symbol(":initarg"), slip.Symbol(":message"),
+				readerSym, slip.Symbol("error-message"),
+				initargSym, slip.Symbol(":message"),
 				docSym, slip.String(`The _message_ slot if for a message that describes the error.`),
 			},
 			slip.List{
 				slip.Symbol("stack"),
-				slip.Symbol(":reader"), slip.Symbol("error-stack"),
-				slip.Symbol(":initarg"), slip.Symbol(":stack"),
+				readerSym, slip.Symbol("error-stack"),
+				initargSym, slip.Symbol(":stack"),
 				docSym, slip.String(`The _stack_ is a representation of the call stack. It is a
 list of function call lists describing the call stack to the place the error was created.`),
-			},
-			slip.List{
-				slip.Symbol("fatal"),
-				slip.Symbol(":reader"), slip.Symbol("error-fatal"),
-				slip.Symbol(":initarg"), slip.Symbol(":fatal"),
-				docSym, slip.String(`The _fatal_ slot if non-nil indicates the error is severe enough
-to cause the application to exit.`),
 			},
 		},
 		slip.List{ // options
@@ -176,14 +172,14 @@ func defArithmeticError() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("operation"),
-				slip.Symbol(":reader"), slip.Symbol("arithmetic-error-operation"),
-				slip.Symbol(":initarg"), slip.Symbol(":operation"),
+				readerSym, slip.Symbol("arithmetic-error-operation"),
+				initargSym, slip.Symbol(":operation"),
 				docSym, slip.String(`The _operation_ slot indicates the operation that caused the error.`),
 			},
 			slip.List{
 				slip.Symbol("operands"),
-				slip.Symbol(":reader"), slip.Symbol("arithmetic-error-operands"),
-				slip.Symbol(":initarg"), slip.Symbol(":operands"),
+				readerSym, slip.Symbol("arithmetic-error-operands"),
+				initargSym, slip.Symbol(":operands"),
 				docSym, slip.String(`The _operands_ slot is a list of the operands for the
 operation triggering the error.`),
 			},
@@ -228,8 +224,8 @@ func defFileError() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("pathname"),
-				slip.Symbol(":reader"), slip.Symbol("file-error-pathname"),
-				slip.Symbol(":initarg"), slip.Symbol(":pathname"),
+				readerSym, slip.Symbol("file-error-pathname"),
+				initargSym, slip.Symbol(":pathname"),
 				docSym, slip.String(`The _pathname_ slot identifies the file pathname the error occurred for.`),
 			},
 		},
@@ -247,8 +243,8 @@ func defPackageError() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("package"),
-				slip.Symbol(":reader"), slip.Symbol("package-error-package"),
-				slip.Symbol(":initarg"), slip.Symbol(":package"),
+				readerSym, slip.Symbol("package-error-package"),
+				initargSym, slip.Symbol(":package"),
 				docSym, slip.String(`The _package_ slot identifies the package the error occurred for.`),
 			},
 		},
@@ -278,14 +274,14 @@ func defTypeError() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("datum"),
-				slip.Symbol(":reader"), slip.Symbol("type-error-datum"),
-				slip.Symbol(":initarg"), slip.Symbol(":datum"),
+				readerSym, slip.Symbol("type-error-datum"),
+				initargSym, slip.Symbol(":datum"),
 				docSym, slip.String(`The _datum_ slot holds the offending value.`),
 			},
 			slip.List{
 				slip.Symbol("expected-type"),
-				slip.Symbol(":reader"), slip.Symbol("type-error-expected-type"),
-				slip.Symbol(":initarg"), slip.Symbol(":expected-type"),
+				readerSym, slip.Symbol("type-error-expected-type"),
+				initargSym, slip.Symbol(":expected-type"),
 				docSym, slip.String(`The _expected-type_ slot holds the expected type or types.`),
 			},
 		},
@@ -315,9 +311,9 @@ func defStreamError() {
 	DefConditionClass("stream-error", slip.List{ErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
-				slip.Symbol("datum"),
-				slip.Symbol(":reader"), slip.Symbol("stream-error-stream"),
-				slip.Symbol(":initarg"), slip.Symbol(":stream"),
+				slip.Symbol("stream"),
+				readerSym, slip.Symbol("stream-error-stream"),
+				initargSym, slip.Symbol(":stream"),
 				docSym, slip.String(`The _stream_ slot references the stream the error occurred on.`),
 			},
 		},
@@ -348,8 +344,8 @@ func defCellError() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("name"),
-				slip.Symbol(":reader"), slip.Symbol("cell-error-name"),
-				slip.Symbol(":initarg"), slip.Symbol(":name"),
+				readerSym, slip.Symbol("cell-error-name"),
+				initargSym, slip.Symbol(":name"),
 				docSym, slip.String(`The _name_ of the cell or slot related to the error.`),
 			},
 		},
@@ -367,8 +363,8 @@ func defUnboundSlot() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("instance"),
-				slip.Symbol(":reader"), slip.Symbol("unbound-slot-instance"),
-				slip.Symbol(":initarg"), slip.Symbol(":instance"),
+				readerSym, slip.Symbol("unbound-slot-instance"),
+				initargSym, slip.Symbol(":instance"),
 				docSym, slip.String(`The _instance_ of the unbound slot.`),
 			},
 		},
@@ -410,15 +406,17 @@ func defSimpleCondition() {
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("format-control"),
-				slip.Symbol(":reader"), slip.Symbol("simple-condition-format-control"),
-				slip.Symbol(":initarg"), slip.Symbol(":format-control"),
+				readerSym, slip.Symbol("simple-condition-format-control"),
+				initargSym, slip.Symbol(":format-control"),
+				typeSym, slip.Symbol("string"),
 				docSym, slip.String(`The _format-control_ slot is __format__ control string used to generate
 the condition message.`),
 			},
 			slip.List{
 				slip.Symbol("format-arguments"),
-				slip.Symbol(":reader"), slip.Symbol("simple-condition-format-arguments"),
-				slip.Symbol(":initarg"), slip.Symbol(":format-arguments"),
+				readerSym, slip.Symbol("simple-condition-format-arguments"),
+				initargSym, slip.Symbol(":format-arguments"),
+				typeSym, slip.Symbol("list"),
 				docSym, slip.String(`The _format-arguments_ are the arguments given to the control string
 to form the condition message.`),
 			},
@@ -440,7 +438,7 @@ func defSimpleError() {
 			slip.List{
 				docSym,
 				slip.String(`A __simple-error__ represents an error where the error message
-is formed using __format__ arguments..`),
+is formed using __format__ arguments.`),
 			},
 		},
 	).Final = true

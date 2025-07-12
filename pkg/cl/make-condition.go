@@ -49,6 +49,12 @@ func (f *MakeCondition) Call(s *slip.Scope, args slip.List, depth int) (cond sli
 	if !ok {
 		slip.PanicType("type", args[0], "symbol")
 	}
+	if c := slip.FindClass(string(sym)); c != nil {
+		// TBD verify a condition
+		obj := c.MakeInstance()
+		obj.Init(s, args[1:], depth+1)
+		return obj
+	}
 	if cond = slip.MakeCondition(string(sym), args[1:]); cond == nil {
 		slip.NewPanic("%s does not designate a condition class.", sym)
 	}

@@ -6,6 +6,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const instanceSymbol = slip.Symbol("instance")
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -37,11 +39,18 @@ type UnboundSlotInstance struct {
 }
 
 // Call the function with the arguments provided.
-func (f *UnboundSlotInstance) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *UnboundSlotInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	cond, ok := args[0].(slip.UnboundSlot)
-	if !ok {
-		slip.PanicUnboundSlot(args[0], slip.Symbol("instance"), "")
+	switch cond := args[0].(type) {
+	case slip.UnboundSlot:
+		result = cond.Instance()
+	case slip.Instance:
+		var has bool
+		if result, has = cond.SlotValue(instanceSymbol); !has {
+			slip.PanicUnboundSlot(args[0], instanceSymbol, "")
+		}
+	default:
+		slip.PanicUnboundSlot(args[0], instanceSymbol, "")
 	}
-	return cond.Instance()
+	return
 }

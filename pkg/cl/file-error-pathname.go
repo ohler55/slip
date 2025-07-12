@@ -6,6 +6,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const pathnameSymbol = slip.Symbol("pathname")
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -37,11 +39,18 @@ type FileErrorPathname struct {
 }
 
 // Call the function with the arguments provided.
-func (f *FileErrorPathname) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *FileErrorPathname) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	cond, ok := args[0].(slip.FileError)
-	if !ok {
-		slip.PanicUnboundSlot(args[0], slip.Symbol("pathname"), "")
+	switch cond := args[0].(type) {
+	case slip.FileError:
+		result = cond.Pathname()
+	case slip.Instance:
+		var has bool
+		if result, has = cond.SlotValue(pathnameSymbol); !has {
+			slip.PanicUnboundSlot(args[0], pathnameSymbol, "")
+		}
+	default:
+		slip.PanicUnboundSlot(args[0], pathnameSymbol, "")
 	}
-	return cond.Pathname()
+	return
 }

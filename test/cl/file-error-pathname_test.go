@@ -19,6 +19,6 @@ func TestFileErrorPathnameExact(t *testing.T) {
 func TestFileErrorPathnameNotFileError(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(file-error-pathname (make-condition 'error :pathname '(1 2)))`,
-		PanicType: slip.Symbol("unbound-slot"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

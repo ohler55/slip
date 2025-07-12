@@ -33,10 +33,11 @@ func TestEcaseNoMatch(t *testing.T) {
 		Source:    `(ecase 5 (1 'one) ((2 3) 'several))`,
 		PanicType: slip.TypeErrorSymbol,
 		Validate: func(t *testing.T, v slip.Object) {
-			te, ok := v.(slip.TypeError)
+			p, ok := v.(*slip.Panic)
 			tt.Equal(t, true, ok)
-			str := te.Error()
-			tt.Equal(t, "/1, 2 or 3/", str)
+			v = p.Condition
+			tt.Equal(t, slip.TypeErrorSymbol, v.Hierarchy()[0])
+			tt.Equal(t, "/1, 2 or 3/", p.Message)
 		},
 	}).Test(t)
 }

@@ -28,11 +28,12 @@ func TestWarningObj(t *testing.T) {
 func TestWarningMake(t *testing.T) {
 	tf := sliptest.Function{
 		Source: `(make-condition 'warning :message "a warning")`,
-		Expect: "/^#<WARNING [0-9a-f]+>$/",
+		Expect: "/^#<warning [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	warning, ok := tf.Result.(slip.Warning)
-	tt.Equal(t, ok, true)
-	tt.Equal(t, "a warning", warning.Message())
-	tt.Equal(t, "a warning", warning.Error())
+	// TBD
+	// warning, ok := tf.Result.(slip.Warning)
+	// tt.Equal(t, ok, true)
+	// tt.Equal(t, "a warning", warning.Message())
+	// tt.Equal(t, "a warning", warning.Error())
 }

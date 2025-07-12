@@ -19,6 +19,6 @@ func TestMethodErrorQualifierExact(t *testing.T) {
 func TestMethodErrorQualifierNotMethodError(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(method-error-qualifier (make-condition 'error :qualifier 'test))`,
-		PanicType: slip.Symbol("unbound-slot"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

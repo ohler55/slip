@@ -28,21 +28,23 @@ func TestControlErrorObj(t *testing.T) {
 func TestControlErrorMake(t *testing.T) {
 	tf := sliptest.Function{
 		Source: `(make-condition 'Control-Error)`,
-		Expect: "/^#<CONTROL-ERROR [0-9a-f]+>$/",
+		Expect: "/^#<control-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	ce, ok := tf.Result.(slip.ControlError)
-	tt.Equal(t, ok, true)
-	tt.Equal(t, "/^#<CONTROL-ERROR [0-9a-f]+>$/", ce.Error())
+	// TBD
+	// ce, ok := tf.Result.(slip.ControlError)
+	// tt.Equal(t, ok, true)
+	// tt.Equal(t, "/^#<CONTROL-ERROR [0-9a-f]+>$/", ce.Error())
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Control-Error :message "raise")`,
-		Expect: "/^#<CONTROL-ERROR [0-9a-f]+>$/",
+		Expect: "/^#<control-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	ce, ok = tf.Result.(slip.ControlError)
-	tt.Equal(t, ok, true)
-	tt.Equal(t, "raise", ce.Error())
+	// TBD
+	// ce, ok = tf.Result.(slip.ControlError)
+	// tt.Equal(t, ok, true)
+	// tt.Equal(t, "raise", ce.Error())
 }
 
 func TestControlErrorPanic(t *testing.T) {

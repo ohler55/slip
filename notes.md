@@ -5,8 +5,19 @@
 - next
 
  - instance-update branch
+  - slip.type-error and slip.error
+  - convert all old conditions then remove
+
+  - make-condition
+   - need a way in make-condition to check the type is a condition
+    - maybe something on class to get metaclass
+   - func that makes condition should build stack and pass in
+
+
   - add slip level panic and error creation
    - test in repl
+   - panic after make-condition
+    - eventually call print-object
 
    - AppendObject in print-object.go file
     - if condition and :report then use that for printing, others like *print-escape*

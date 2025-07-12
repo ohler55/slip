@@ -6,6 +6,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const nameSymbol = slip.Symbol("name")
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -37,11 +39,18 @@ type CellErrorName struct {
 }
 
 // Call the function with the arguments provided.
-func (f *CellErrorName) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *CellErrorName) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	cond, ok := args[0].(slip.CellError)
-	if !ok {
-		slip.PanicUnboundSlot(args[0], slip.Symbol("name"), "")
+	switch cond := args[0].(type) {
+	case slip.CellError:
+		result = cond.Name()
+	case slip.Instance:
+		var has bool
+		if result, has = cond.SlotValue(nameSymbol); !has {
+			slip.PanicUnboundSlot(args[0], nameSymbol, "")
+		}
+	default:
+		slip.PanicUnboundSlot(args[0], nameSymbol, "")
 	}
-	return cond.Name()
+	return
 }

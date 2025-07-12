@@ -26,11 +26,8 @@ func TestSeriousConditionObj(t *testing.T) {
 }
 
 func TestSeriousConditionMake(t *testing.T) {
-	tf := sliptest.Function{
+	(&sliptest.Function{
 		Source: `(make-condition 'serious-condition)`,
-		Expect: "/^#<SERIOUS-CONDITION [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	_, ok := tf.Result.(slip.SeriousCondition)
-	tt.Equal(t, ok, true)
+		Expect: "/^#<serious-condition [0-9a-f]+>$/",
+	}).Test(t)
 }
