@@ -124,16 +124,19 @@ func NewError(format string, args ...any) *Panic {
 // clos condition.
 func WrapError(s *Scope, obj Instance, name string, args List) *Panic {
 	line := append(List{Symbol(name)}, args...)
-	p := Panic{
-		Condition: obj,
-		stack:     []string{ObjectString(line)},
-	}
+	p := Panic{Condition: obj}
 	p.hierarchy = obj.Hierarchy()
-
+	var stack List
 	if sv, has := obj.SlotValue(stackSymbol); has {
-		stack, _ := sv.(List)
-		obj.SetSlotValue(stackSymbol, append(stack, line))
+		stack, _ = sv.(List)
 	}
+	if 0 < len(name) {
+		p.stack = []string{ObjectString(line)}
+		obj.SetSlotValue(stackSymbol, append(stack, line))
+	} else if 0 < len(stack) {
+		p.stack = append(p.stack, ObjectString(line))
+	}
+
 	// TBD check report slot
 	if msg, has := obj.SlotValue(messageSymbol); has {
 		if str, ok2 := msg.(String); ok2 {

@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/clos"
 )
 
 const (
@@ -266,6 +267,7 @@ func process() {
 		if strings.Contains(warnPrefix, "\u001b") {
 			suffix = "\x1b[m"
 		}
+	top:
 		switch tr := rec.(type) {
 		case *slip.PartialPanic:
 			replReader.setDepth(tr.Depth)
@@ -302,6 +304,9 @@ func process() {
 				debug.PrintStack()
 			}
 			reset()
+		case *clos.StandardObject:
+			rec = slip.WrapError(&scope, tr, "", nil)
+			goto top
 		default:
 			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
 			if scope.Get("*repl-debug*") != nil {

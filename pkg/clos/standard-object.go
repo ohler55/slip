@@ -49,12 +49,16 @@ func (obj *StandardObject) Hierarchy() []slip.Symbol {
 
 // IsA return true if the instance is of a class that inherits from the
 // provided class.
-func (obj *StandardObject) IsA(class slip.Class) bool {
-	if obj.Type == class {
-		return true
+func (obj *StandardObject) IsA(class slip.Object) bool {
+	var classname slip.Symbol
+	switch tc := class.(type) {
+	case slip.Symbol:
+		classname = tc
+	case slip.Class:
+		classname = slip.Symbol(tc.Name())
 	}
-	for _, f := range obj.Type.inheritedClasses() {
-		if class == f {
+	for _, sym := range obj.Type.precedenceList() {
+		if classname == sym {
 			return true
 		}
 	}

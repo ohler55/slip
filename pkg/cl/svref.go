@@ -56,7 +56,7 @@ func (f *Svref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			}
 		}
 	}
-	panic(slip.NewTypeErrorObject("simple-vector", args[0], "simple-vector"))
+	panic(slip.NewTypeError("simple-vector", args[0], "simple-vector"))
 }
 
 // Place a value in the first position of a list or cons.
@@ -76,5 +76,5 @@ func (f *Svref) Place(s *slip.Scope, args slip.List, value slip.Object) {
 			}
 		}
 	}
-	panic(slip.NewTypeErrorObject("simple-vector", args[0], "simple-vector"))
+	panic(slip.NewTypeError("simple-vector", args[0], "simple-vector"))
 }

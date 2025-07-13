@@ -42,20 +42,13 @@ type TypeErrorExpectedType struct {
 // Call the function with the arguments provided.
 func (f *TypeErrorExpectedType) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch cond := args[0].(type) {
-	case slip.TypeError:
-		// ta := cond.ExpectedTypes()
-		// if len(ta) == 1 {
-		// 	return ta[0]
-		// }
-		// result = slip.Values(ta)
-	case slip.Instance:
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("type-error")) {
+		slip.PanicType("type-error", args[0], "type-error")
+	} else {
 		var has bool
-		if result, has = cond.SlotValue(expectedTypeSymbol); !has {
-			slip.PanicUnboundSlot(args[0], expectedTypeSymbol, "")
+		if result, has = ci.SlotValue(expectedTypeSymbol); !has {
+			slip.PanicUnboundSlot(ci, expectedTypeSymbol, "")
 		}
-	default:
-		slip.PanicUnboundSlot(args[0], expectedTypeSymbol, "")
 	}
 	return
 }

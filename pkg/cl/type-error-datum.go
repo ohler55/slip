@@ -41,16 +41,13 @@ type TypeErrorDatum struct {
 // Call the function with the arguments provided.
 func (f *TypeErrorDatum) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch cond := args[0].(type) {
-	// case slip.TypeError:
-	// 	result = cond.Datum()
-	case slip.Instance:
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("type-error")) {
+		slip.PanicType("type-error", args[0], "type-error")
+	} else {
 		var has bool
-		if result, has = cond.SlotValue(datumSymbol); !has {
-			slip.PanicUnboundSlot(args[0], datumSymbol, "")
+		if result, has = ci.SlotValue(datumSymbol); !has {
+			slip.PanicUnboundSlot(ci, datumSymbol, "")
 		}
-	default:
-		slip.PanicUnboundSlot(args[0], datumSymbol, "")
 	}
 	return
 }

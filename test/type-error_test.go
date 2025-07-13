@@ -11,7 +11,7 @@ import (
 )
 
 func TestTypeErrorObj(t *testing.T) {
-	cond := slip.NewTypeErrorObject("testing", slip.Fixnum(3), "symbol")
+	cond := slip.NewTypeError("testing", slip.Fixnum(3), "symbol")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<type-error [0-9a-f]+>$/",

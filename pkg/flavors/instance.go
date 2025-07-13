@@ -64,12 +64,16 @@ func (obj *Instance) Hierarchy() []slip.Symbol {
 
 // IsA return true if the instance is of a flavor that inherits from the
 // provided flavor.
-func (obj *Instance) IsA(class slip.Class) bool {
-	if obj.Type == class {
-		return true
+func (obj *Instance) IsA(class slip.Object) bool {
+	var classname slip.Symbol
+	switch tc := class.(type) {
+	case slip.Symbol:
+		classname = tc
+	case slip.Class:
+		classname = slip.Symbol(tc.Name())
 	}
-	for _, f := range obj.Type.inherit {
-		if class == f {
+	for _, sym := range obj.Type.precedence {
+		if classname == sym {
 			return true
 		}
 	}

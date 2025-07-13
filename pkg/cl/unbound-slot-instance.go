@@ -41,16 +41,13 @@ type UnboundSlotInstance struct {
 // Call the function with the arguments provided.
 func (f *UnboundSlotInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch cond := args[0].(type) {
-	case slip.UnboundSlot:
-		result = cond.Instance()
-	case slip.Instance:
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("unbound-slot")) {
+		slip.PanicType("unbound-slot", args[0], "unbound-slot")
+	} else {
 		var has bool
-		if result, has = cond.SlotValue(instanceSymbol); !has {
-			slip.PanicUnboundSlot(args[0], instanceSymbol, "")
+		if result, has = ci.SlotValue(instanceSymbol); !has {
+			slip.PanicUnboundSlot(ci, instanceSymbol, "")
 		}
-	default:
-		slip.PanicUnboundSlot(args[0], instanceSymbol, "")
 	}
 	return
 }

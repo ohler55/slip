@@ -14,15 +14,19 @@ func TestUnboundSlotObj(t *testing.T) {
 	cond := slip.NewUnboundSlot(slip.Symbol("vanilla"), slip.Symbol(":slop"), "not a %s unbound-slot", "real")
 	(&sliptest.Object{
 		Target: cond,
-		String: "/^#<UNBOUND-SLOT [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   cond,
+		String: "/^#<unbound-slot [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: cond,
 		Equals: []*sliptest.EqTest{
 			{Other: cond, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real unbound-slot", cond.Error())
+	// TBD
+	// tt.Equal(t, "not a real unbound-slot", cond.Error())
 }
 
 func TestUnboundSlotMake(t *testing.T) {

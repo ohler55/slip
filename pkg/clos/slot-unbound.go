@@ -48,5 +48,5 @@ func (f *SlotUnbound) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if slotName, ok := args[2].(slip.Symbol); ok {
 		slip.PanicUnboundSlot(args[1], slotName, "")
 	}
-	panic(slip.NewTypeErrorObject("slot-name", args[2], "symbol"))
+	panic(slip.NewTypeError("slot-name", args[2], "symbol"))
 }

@@ -5,65 +5,9 @@ package slip
 // TypeErrorSymbol is the symbol with a value of "type-error".
 const TypeErrorSymbol = Symbol("type-error")
 
-// TypeError is the interface for all type-errors.
-type TypeError interface {
-	Error
-
-	// IsTypeError need not do anything other than exist.
-	IsTypeError()
-
-	// Datum is the object provided.
-	Datum() Object
-
-	// ExpectedTypes are the expected types. This deviates from common LSIP
-	// where this is only one expected-type.
-	ExpectedTypes() List
-
-	// Context of the error.
-	Context() Object
-}
-
-// TypePanic represents a type-error.
-type TypePanic struct {
-	Panic
-	datum         Object
-	context       Object
-	expectedTypes List
-}
-
-// IsTypeError need not do anything other than exist.
-func (tp *TypePanic) IsTypeError() {
-}
-
-// Datum is the object provided.
-func (tp *TypePanic) Datum() Object {
-	return tp.datum
-}
-
-// Context is the context provided.
-func (tp *TypePanic) Context() Object {
-	return tp.context
-}
-
-// ExpectedTypes are the expected types. This deviates from common LSIP
-// where this is only one expected-type.
-func (tp *TypePanic) ExpectedTypes() List {
-	return tp.expectedTypes
-}
-
-// Equal returns true if this Object and the other are equal in value.
-func (tp *TypePanic) Equal(other Object) bool {
-	return tp == other
-}
-
-// Eval the object.
-func (tp *TypePanic) Eval(s *Scope, depth int) Object {
-	return tp
-}
-
-// NewTypeErrorObject returns a new type-error describing an incorrect type
-// being used.
-func NewTypeErrorObject(use string, value Object, wants ...string) Object {
+// NewTypeError returns a new type-error describing an incorrect type being
+// used.
+func NewTypeError(use string, value Object, wants ...string) Object {
 	c := FindClass("type-error")
 	obj := c.MakeInstance()
 	xt := make(List, len(wants))
@@ -103,5 +47,5 @@ func NewTypeErrorObject(use string, value Object, wants ...string) Object {
 // PanicType raises a TypePanic (type-error) describing an incorrect type
 // being used.
 func PanicType(use string, value Object, wants ...string) {
-	panic(NewTypeErrorObject(use, value, wants...))
+	panic(NewTypeError(use, value, wants...))
 }
