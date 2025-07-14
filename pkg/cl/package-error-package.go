@@ -42,16 +42,13 @@ type PackageErrorPackage struct {
 // Call the function with the arguments provided.
 func (f *PackageErrorPackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch cond := args[0].(type) {
-	case slip.PackageError:
-		result = cond.Package()
-	case slip.Instance:
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("package-error")) {
+		slip.PanicType("package-error", args[0], "package-error")
+	} else {
 		var has bool
-		if result, has = cond.SlotValue(packageSymbol); !has {
-			slip.PanicUnboundSlot(args[0], packageSymbol, "")
+		if result, has = ci.SlotValue(packageSymbol); !has {
+			slip.PanicUnboundSlot(ci, packageSymbol, "")
 		}
-	default:
-		slip.PanicUnboundSlot(args[0], packageSymbol, "")
 	}
 	return
 }

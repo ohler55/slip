@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -14,15 +15,18 @@ func TestFileErrorObj(t *testing.T) {
 	cond := slip.NewFileError(slip.String("somefile"), "not a %s file-error", "real")
 	(&sliptest.Object{
 		Target: cond,
-		String: "/^#<FILE-ERROR [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   cond,
+		String: "/^#<file-error [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: cond,
 		Equals: []*sliptest.EqTest{
 			{Other: cond, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real file-error", cond.Error())
+	tt.Equal(t, "not a real file-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestFileErrorMake(t *testing.T) {
@@ -31,22 +35,22 @@ func TestFileErrorMake(t *testing.T) {
 		Expect: "/^#<file-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok := tf.Result.(slip.FileError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "/^#<FILE-ERROR [0-9a-f]+>$/", ce.Error())
-	// tt.Equal(t, nil, ce.Pathname())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, ok, true)
+	value, has := cond.SlotValue(slip.Symbol("pathname"))
+	tt.Equal(t, has, true)
+	tt.Equal(t, nil, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'File-Error :pathname "somefile" :message "raise")`,
 		Expect: "/^#<file-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok = tf.Result.(slip.FileError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "raise", ce.Error())
-	// tt.Equal(t, slip.String("somefile"), ce.Pathname())
+	cond, ok = tf.Result.(slip.Instance)
+	tt.Equal(t, ok, true)
+	value, has = cond.SlotValue(slip.Symbol("pathname"))
+	tt.Equal(t, has, true)
+	tt.Equal(t, slip.String("somefile"), value)
 }
 
 func TestFileErrorPanic(t *testing.T) {

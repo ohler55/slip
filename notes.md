@@ -6,9 +6,13 @@
 
  - instance-update branch
   - convert all old conditions then remove
-
-  - add methods to standard-class and add vanilla-flavor to hierarchy before standard-object
-   - update describe
+   - control-error
+   - division-by-zero
+   - arithmetic-error
+   - error
+   - serious-condition
+   - warning
+   - condition
 
   - update all TBDs in tests
 
@@ -24,20 +28,16 @@
 
   - make standard-object support direct methods
 
-  - slip.MakeCondition(typeName string, args slip.List, p ...*Package)
-   - args is a property list (key values)
-   - look up class in package, verify it is a condition-class
-   - create then Init with args
-   - start with Condition as a condition-class
-
-  - deny slot-value?
-  - defclass with condition must fail as it should for built in
-
   - error (datum &rest aruments) update
 
   - remove clos.Class
   - remove MethodInvoker interface
   - clean up built-in.go
+
+---------------------
+ - standard-flavor branch
+  - add methods to standard-class and add vanilla-flavor to hierarchy before standard-object
+   - update describe
 
 ---------------------
  - bugs

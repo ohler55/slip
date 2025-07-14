@@ -41,16 +41,13 @@ type FileErrorPathname struct {
 // Call the function with the arguments provided.
 func (f *FileErrorPathname) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch cond := args[0].(type) {
-	case slip.FileError:
-		result = cond.Pathname()
-	case slip.Instance:
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("file-error")) {
+		slip.PanicType("file-error", args[0], "file-error")
+	} else {
 		var has bool
-		if result, has = cond.SlotValue(pathnameSymbol); !has {
-			slip.PanicUnboundSlot(args[0], pathnameSymbol, "")
+		if result, has = ci.SlotValue(pathnameSymbol); !has {
+			slip.PanicUnboundSlot(ci, pathnameSymbol, "")
 		}
-	default:
-		slip.PanicUnboundSlot(args[0], pathnameSymbol, "")
 	}
 	return
 }
