@@ -414,9 +414,9 @@ func (c *client) listen(s *slip.Scope) {
 		for {
 			obj := c.readExpr()
 			if obj != nil {
-				if serr, ok := obj.(slip.Error); ok {
+				if cond, ok := obj.(slip.Instance); ok && cond.IsA(slip.Symbol("error")) {
 					c.expr = c.expr[:0]
-					c.results <- slip.List{nil, serr}
+					c.results <- slip.List{nil, cond}
 					continue
 				}
 				if list, ok := obj.(slip.List); ok && 2 <= len(list) {

@@ -87,8 +87,9 @@ func (obj ConcatenatedStream) Eval(s *slip.Scope, depth int) slip.Object {
 // Read each component streams until the last one returns EOF.
 func (obj ConcatenatedStream) Read(b []byte) (n int, err error) {
 	if obj[0] != nil {
-		err = slip.NewStreamError(obj, "closed")
-		return
+		return 0, slip.WrapError(slip.NewScope(),
+			slip.NewStreamError(obj, "closed").(slip.Instance),
+			"closed", nil)
 	}
 	var read bool
 	for i, s := range obj {

@@ -88,7 +88,9 @@ func (obj BroadcastStream) Eval(s *slip.Scope, depth int) slip.Object {
 // is called.
 func (obj BroadcastStream) Write(b []byte) (n int, err error) {
 	if obj[0] != nil {
-		return 0, slip.NewStreamError(obj, "closed")
+		return 0, slip.WrapError(slip.NewScope(),
+			slip.NewStreamError(obj, "closed").(slip.Instance),
+			"closed", nil)
 	}
 	for _, s := range obj {
 		if s != nil {
@@ -104,7 +106,9 @@ func (obj BroadcastStream) Write(b []byte) (n int, err error) {
 // determine the position of the last component stream only.
 func (obj BroadcastStream) Seek(offset int64, whence int) (n int64, err error) {
 	if obj[0] != nil {
-		return 0, slip.NewStreamError(obj, "closed")
+		return 0, slip.WrapError(slip.NewScope(),
+			slip.NewStreamError(obj, "closed").(slip.Instance),
+			"closed", nil)
 	}
 	if 1 < len(obj) {
 		if seeker, ok := obj[len(obj)-1].(io.Seeker); ok {

@@ -14,15 +14,19 @@ func TestParseErrorObj(t *testing.T) {
 	cond := slip.NewParseError("not a %s parse-error", "real")
 	(&sliptest.Object{
 		Target: cond,
-		String: "/^#<PARSE-ERROR [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   cond,
+		String: "/^#<parse-error [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: cond,
 		Equals: []*sliptest.EqTest{
 			{Other: cond, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real parse-error", cond.Error())
+	// TBD
+	// tt.Equal(t, "not a real parse-error", cond.Error())
 }
 
 func TestParseErrorMake(t *testing.T) {

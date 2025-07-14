@@ -6,17 +6,21 @@ import "fmt"
 
 // PartialPanic read panic.
 type PartialPanic struct {
-	ParsePanic
-
 	// Depth of the read when EOF encountered.
 	Depth int
+	// Message for the error.
+	Message string
+}
+
+// Error
+func (pp *PartialPanic) Error() string {
+	return pp.Message
 }
 
 // NewPartial creates a new PartialPanic.
 func NewPartial(depth int, format string, args ...any) *PartialPanic {
-	var p PartialPanic
-	p.hierarchy = parseErrorHierarchy
-	p.Depth = depth
-	p.Message = fmt.Sprintf(format, args...)
-	return &p
+	return &PartialPanic{
+		Depth:   depth,
+		Message: fmt.Sprintf(format, args...),
+	}
 }

@@ -5,11 +5,13 @@
 - next
 
  - instance-update branch
-  - change NewTypeErrorObject back to NewTypeError
+  - convert all old conditions then remove
+
+  - add methods to standard-class and add vanilla-flavor to hierarchy before standard-object
+   - update describe
 
   - update all TBDs in tests
 
-  - convert all old conditions then remove
   - check for *slip.Panic and not Error interface
 
   - panic after make-condition
@@ -20,6 +22,7 @@
   - pass scope in then various error creation panic
    - allow for report function to use local variables
 
+  - make standard-object support direct methods
 
   - slip.MakeCondition(typeName string, args slip.List, p ...*Package)
    - args is a property list (key values)

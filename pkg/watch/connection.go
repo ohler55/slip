@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/gi"
 )
 
@@ -48,6 +49,7 @@ func (c *connection) listen() {
 	go c.sendLoop()
 	go c.evalLoop()
 	go c.periodicLoop()
+	scope := slip.NewScope()
 
 	buf := make([]byte, 4096)
 	for {
@@ -62,13 +64,13 @@ func (c *connection) listen() {
 		for {
 			obj := c.readExpr()
 			if obj != nil {
-				if serr, ok := obj.(slip.Error); ok {
+				if cond, ok := obj.(slip.Instance); ok && cond.IsA(slip.Symbol("error")) {
 					c.expr = c.expr[:0]
 					c.sendQueue <- slip.List{
 						slip.Symbol("error"),
 						nil,
-						serr.Hierarchy()[0],
-						slip.String(serr.Error()),
+						cond.Hierarchy()[0],
+						slip.String(cl.SimpleCondMsg(scope, cond)),
 					}
 					continue
 				}

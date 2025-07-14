@@ -41,16 +41,13 @@ type StreamErrorStream struct {
 // Call the function with the arguments provided.
 func (f *StreamErrorStream) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch cond := args[0].(type) {
-	case slip.StreamError:
-		result = cond.Stream()
-	case slip.Instance:
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("stream-error")) {
+		slip.PanicType("stream-error", args[0], "stream-error")
+	} else {
 		var has bool
-		if result, has = cond.SlotValue(streamSymbol); !has {
-			slip.PanicUnboundSlot(args[0], streamSymbol, "")
+		if result, has = ci.SlotValue(streamSymbol); !has {
+			slip.PanicUnboundSlot(ci, streamSymbol, "")
 		}
-	default:
-		slip.PanicUnboundSlot(args[0], streamSymbol, "")
 	}
 	return
 }
