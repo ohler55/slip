@@ -74,7 +74,7 @@ type Printer struct {
 	// Gensym backs *print-gensym*.
 	Gensym bool
 
-	// Readably *print-lambda* .
+	// Lambda should be printed readably *print-lambda* .
 	Lambda bool
 
 	// Length backs *print-length*.
@@ -98,6 +98,9 @@ type Printer struct {
 	// Readably *print-readably* .
 	Readably bool
 
+	// ReadablyError if true non-readably objects will generate an error.
+	ReadablyError bool
+
 	// RightMargin *print-right-margin*.
 	RightMargin uint
 
@@ -107,23 +110,24 @@ type Printer struct {
 
 var (
 	printer = Printer{
-		ANSI:        true,
-		Array:       false,
-		Base:        10,
-		Case:        downcaseKey,
-		Circle:      false,
-		Escape:      true,
-		Gensym:      true,
-		Lambda:      false,
-		Length:      math.MaxInt,
-		Level:       math.MaxInt,
-		Lines:       math.MaxInt,
-		Prec:        -1,
-		MiserWidth:  0,
-		Pretty:      true,
-		Radix:       false,
-		Readably:    false,
-		RightMargin: DefaultRightMargin,
+		ANSI:          true,
+		Array:         false,
+		Base:          10,
+		Case:          downcaseKey,
+		Circle:        false,
+		Escape:        true,
+		Gensym:        true,
+		Lambda:        false,
+		Length:        math.MaxInt,
+		Level:         math.MaxInt,
+		Lines:         math.MaxInt,
+		Prec:          -1,
+		MiserWidth:    0,
+		Pretty:        true,
+		Radix:         false,
+		Readably:      false,
+		ReadablyError: true,
+		RightMargin:   DefaultRightMargin,
 	}
 )
 
@@ -443,10 +447,11 @@ Top:
 		b = append(b, to.Name...)
 		b = append(b, '>')
 	default:
-		b = to.Append(b)
-		if p.Readably && bytes.HasPrefix(b, []byte("#<")) {
+		buf := to.Append(nil)
+		if p.Readably && p.ReadablyError && bytes.HasPrefix(buf, []byte("#<")) {
 			NewPanic("%s can not be written readably", to)
 		}
+		b = append(b, buf...)
 	}
 	/* TBD
 	if bytes.ContainsRune(b, '\n') {

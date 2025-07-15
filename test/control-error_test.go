@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -14,15 +15,18 @@ func TestControlErrorObj(t *testing.T) {
 	cond := slip.NewControlError("not a %s control-error", "real")
 	(&sliptest.Object{
 		Target: cond,
-		String: "/^#<CONTROL-ERROR [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   cond,
+		String: "/^#<control-error [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: cond,
 		Equals: []*sliptest.EqTest{
 			{Other: cond, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real control-error", cond.Error())
+	tt.Equal(t, "not a real control-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestControlErrorMake(t *testing.T) {
@@ -31,20 +35,22 @@ func TestControlErrorMake(t *testing.T) {
 		Expect: "/^#<control-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok := tf.Result.(slip.ControlError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "/^#<CONTROL-ERROR [0-9a-f]+>$/", ce.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, ok, true)
+	value, has := cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, has, true)
+	tt.Nil(t, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Control-Error :message "raise")`,
 		Expect: "/^#<control-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok = tf.Result.(slip.ControlError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "raise", ce.Error())
+	cond, ok = tf.Result.(slip.Instance)
+	tt.Equal(t, ok, true)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, has, true)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestControlErrorPanic(t *testing.T) {

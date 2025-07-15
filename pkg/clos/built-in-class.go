@@ -158,6 +158,5 @@ func (c *BuiltInClass) MakeInstance() slip.Instance {
 // DefList returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
 func (c *BuiltInClass) DefList() slip.List {
-	// There is no defclass currently.
 	return nil
 }

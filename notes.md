@@ -4,10 +4,10 @@
 
 - next
 
+ - printer readably
+
  - instance-update branch
   - convert all old conditions then remove
-   - control-error
-   - division-by-zero
    - arithmetic-error
    - error
    - serious-condition
@@ -15,6 +15,10 @@
    - condition
 
   - update all TBDs in tests
+
+ - watch.connect.safeEval
+  - encode condition and decode
+  - frame test broken
 
   - check for *slip.Panic and not Error interface
 
