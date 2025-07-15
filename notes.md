@@ -8,7 +8,6 @@
 
  - instance-update branch
   - convert all old conditions then remove
-   - arithmetic-error
    - error
    - serious-condition
    - warning
