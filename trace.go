@@ -71,6 +71,9 @@ func noopBefore(s *Scope, name string, args List, depth int) {
 func normalAfter(s *Scope, name string, args List, depth int, result *Object) {
 	switch tr := recover().(type) {
 	case nil:
+	case *Panic:
+		tr.AppendToStack(name, args)
+		panic(tr)
 	case Error:
 		tr.AppendToStack(name, args)
 		panic(tr)
@@ -122,6 +125,10 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 		if w, _ := s.Get(Symbol("*trace-output*")).(io.Writer); w != nil {
 			_, _ = w.Write(b)
 		}
+	case *Panic:
+		tr.AppendToStack(name, args)
+		traceWriterPanic(s, b, tr)
+		panic(tr)
 	case Error:
 		tr.AppendToStack(name, args)
 		traceWriterPanic(s, b, tr)

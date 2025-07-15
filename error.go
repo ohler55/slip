@@ -40,6 +40,7 @@ type Error interface {
 // Panic is used to gather a stack trace when panic occurs.
 type Panic struct {
 	SeriousConditionObj
+	// hierarchy []Symbol
 
 	Message   string
 	Condition Instance

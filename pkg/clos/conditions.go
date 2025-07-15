@@ -35,6 +35,8 @@ const (
 	StreamErrorSymbol = slip.Symbol("stream-error")
 	// ReaderErrorSymbol is the symbol with a value of "reader-error".
 	ReaderErrorSymbol = slip.Symbol("reader-error")
+	// EndOfFileSymbol is the symbol with a value of "end-of-file".
+	EndOfFileSymbol = slip.Symbol("end-of-file")
 	// CellErrorSymbol is the symbol with a value of "cell-error".
 	CellErrorSymbol = slip.Symbol("cell-error")
 	// UnboundSlotSymbol is the symbol with a value of "unbound-slot".
@@ -77,6 +79,7 @@ func defConditions() {
 	defParseError()
 	defStreamError()
 	defReaderError()
+	defEndOfFile()
 	defCellError()
 	defUnboundSlot()
 	defUnboundVariable()
@@ -337,6 +340,18 @@ func defReaderError() {
 				docSym,
 				slip.String(`A __reader-error__ is a error related to reading, tokenizing, and
 parsing by the LISP reader.`),
+			},
+		},
+	).Final = true
+}
+
+func defEndOfFile() {
+	DefConditionClass("end-of-file", slip.List{StreamErrorSymbol},
+		slip.List{}, // slot-specifications
+		slip.List{ // options
+			slip.List{
+				docSym,
+				slip.String(`A __end-of-file__ is a error signifying the end of a file has been reached.`),
 			},
 		},
 	).Final = true
