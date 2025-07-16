@@ -8,9 +8,6 @@
 
  - instance-update branch
   - convert all old conditions then remove
-   - error - separate panic from error
-    - add PanicError for error.go file
-
    - serious-condition
    - warning
    - condition
