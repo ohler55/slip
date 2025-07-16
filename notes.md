@@ -8,10 +8,9 @@
 
  - instance-update branch
   - convert all old conditions then remove
-   - serious-condition
    - warning
    - condition
-
+  - remove slip.MakeCondition
   - update all TBDs in tests
 
   - maybe switch IsA() to only use symbol
