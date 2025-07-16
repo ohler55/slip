@@ -54,8 +54,7 @@ func (f *MakeCondition) Call(s *slip.Scope, args slip.List, depth int) (cond sli
 		obj.Init(s, args[1:], depth+1)
 		return obj
 	}
-	if cond = slip.MakeCondition(string(sym), args[1:]); cond == nil {
-		slip.NewPanic("%s does not designate a condition class.", sym)
-	}
+	slip.NewPanic("%s does not designate a condition class.", sym)
+
 	return
 }

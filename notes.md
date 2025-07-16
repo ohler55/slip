@@ -7,21 +7,14 @@
  - printer readably
 
  - instance-update branch
-  - convert all old conditions then remove
-   - warning
-   - condition
-  - remove slip.MakeCondition
-  - update all TBDs in tests
 
-  - maybe switch IsA() to only use symbol
+  - maybe switch IsA() to take just a string
+  - update all TBDs in tests
 
  - watch.connect.safeEval
   - encode condition and decode
   - frame test broken
 
-  - check for *slip.Panic and not Error interface
-
-  - panic after make-condition
   - call print-object in slip.Panic to form message
    - if condition and :report then use that for printing, others like *print-escape*
     - else call generic
@@ -29,13 +22,10 @@
   - pass scope in then various error creation panic
    - allow for report function to use local variables
 
-  - make standard-object support direct methods
-
-  - error (datum &rest aruments) update
+  - make standard-object and standard-class support direct methods
 
   - remove clos.Class
   - remove MethodInvoker interface
-  - clean up built-in.go
 
 ---------------------
  - standard-flavor branch

@@ -1298,12 +1298,8 @@ func (c *control) dirAS(colon, at bool, params []any, p *slip.Printer) {
 		} else {
 			out = append(out, ta...)
 		}
-	case slip.Condition:
-		if p.Readably {
-			out = ta.Append(out)
-		} else {
-			out = append(out, ta.Error()...)
-		}
+	case slip.Instance:
+		out = ta.Append(out)
 	default:
 		out = p.Append(out, ta, 0)
 	}

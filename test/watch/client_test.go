@@ -93,8 +93,7 @@ func TestClientPeriodicBadOp(t *testing.T) {
      ((not (null x)) x))
  (channel-pop chan))
 `, port, port),
-		Expect: `(pub nil)`, // TBD what make sense here?
-		// Expect: `/\(pub #<ERROR [0-9a-f]+>\)/`,
+		Expect: `/\(pub #<error [0-9a-f]+>\)/`,
 	}).Test(t)
 }
 

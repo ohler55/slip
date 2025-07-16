@@ -11,18 +11,20 @@ import (
 )
 
 func TestConditionObj(t *testing.T) {
-	condition := &slip.ConditionObj{}
+	cond := slip.NewCondition(nil)
 	(&sliptest.Object{
-		Target: condition,
-		String: "/^#<CONDITION [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   condition,
+		Target: cond,
+		String: "/^#<condition [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: cond,
 		Equals: []*sliptest.EqTest{
-			{Other: condition, Expect: true},
+			{Other: cond, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "/^#<CONDITION [0-9a-f]+>$/", condition.Error())
 }
 
 func TestConditionMake(t *testing.T) {
