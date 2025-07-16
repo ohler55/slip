@@ -200,13 +200,6 @@ var (
 		docs: "built-in flavor class in the flavors package",
 		pkg:  &flavors.Pkg,
 	}
-
-	standardObjectClass = Class{ // TBD remove
-		name:   "standard-object",
-		final:  true,
-		noMake: true,
-		docs:   "built-in super class for all classes",
-	}
 )
 
 func defBuiltIns() {

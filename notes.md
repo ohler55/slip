@@ -4,31 +4,17 @@
 
 - next
 
- - printer readably
-
  - instance-update branch
 
-  - maybe switch IsA() to take just a string
   - update all TBDs in tests
 
  - watch.connect.safeEval
   - encode condition and decode
   - frame test broken
 
-  - call print-object in slip.Panic to form message
-   - if condition and :report then use that for printing, others like *print-escape*
-    - else call generic
-    - if no generic match print .String() - should be generic method for t
-  - pass scope in then various error creation panic
-   - allow for report function to use local variables
-
-  - make standard-object and standard-class support direct methods
-
-  - remove clos.Class
-  - remove MethodInvoker interface
-
 ---------------------
  - standard-flavor branch
+  - make standard-object and standard-class support direct methods
   - add methods to standard-class and add vanilla-flavor to hierarchy before standard-object
    - update describe
 
@@ -37,11 +23,19 @@
   - open doesn't handle absolute paths nor ~
    - ~someone/x
 ---------------------
+
  - generics branch
   - standard-class reader, writer, and accessor
    - class slots
     - accessors must consider slot on standard-object.Type.Vars
      - if not found then look back on inherit
+
+  - call print-object in slip.Panic to form message
+   - if condition and :report then use that for printing, others like *print-escape*
+    - else call generic
+    - if no generic match print .String() - should be generic method for t
+  - pass scope in then various error creation panic
+   - allow for report function to use local variables
 
   - generics are tied to a package just like functions
   - is a flag needed to indicate some generics/method do not allow qualifiers like :before and :after

@@ -9,9 +9,8 @@ type Instance interface {
 	Class() Class
 
 	// IsA returns true if the instance's class is the specified class or a
-	// sub-class of the specified class. The class argument can be either a
-	// Class or a symbol name of a class.
-	IsA(class Object) bool
+	// sub-class of the specified class.
+	IsA(class string) bool
 
 	// Init the instance slots from the provided args list. If the scope is
 	// not nil then send :init is called.

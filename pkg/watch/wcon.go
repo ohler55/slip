@@ -36,7 +36,7 @@ type wcon struct {
 func (c *wcon) readExpr() (obj slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
-			if inst, ok := rec.(*clos.StandardObject); ok && inst.IsA(slip.Symbol("error")) {
+			if inst, ok := rec.(*clos.StandardObject); ok && inst.IsA("error") {
 				obj = inst
 			}
 		}

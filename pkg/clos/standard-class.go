@@ -10,8 +10,12 @@ import (
 	"github.com/ohler55/slip"
 )
 
-// StandardClassSymbol is the symbol with a value of "standard-class".
-const StandardClassSymbol = slip.Symbol("standard-class")
+const (
+	// StandardClassSymbol is the symbol with a value of "standard-class".
+	StandardClassSymbol = slip.Symbol("standard-class")
+	// ClassSymbol is the symbol with a value of "class".
+	ClassSymbol = slip.Symbol("class")
+)
 
 // StandardClass is a CLOS standard-class.
 type StandardClass struct {

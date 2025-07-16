@@ -55,9 +55,9 @@ func TestStandardObjectBasic(t *testing.T) {
 	tt.Equal(t, "/#<quux [0-9a-f]+>/", obj.String())
 	tt.Equal(t, `[quux buux standard-object t]`, pretty.SEN(obj.Hierarchy()))
 
-	tt.Equal(t, true, obj.IsA(slip.FindClass("quux")))
-	tt.Equal(t, true, obj.IsA(slip.FindClass("buux")))
-	tt.Equal(t, false, obj.IsA(slip.FindClass("vanilla-flavor")))
+	tt.Equal(t, true, obj.IsA("quux"))
+	tt.Equal(t, true, obj.IsA("buux"))
+	tt.Equal(t, false, obj.IsA("vanilla-flavor"))
 
 	obj.SetSlotValue(slip.Symbol("x"), slip.Fixnum(9))
 	value, has := obj.SlotValue(slip.Symbol("x"))

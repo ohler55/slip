@@ -41,7 +41,7 @@ type MethodErrorQualifier struct {
 // Call the function with the arguments provided.
 func (f *MethodErrorQualifier) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("method-error")) {
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("method-error") {
 		slip.PanicType("method-error", args[0], "method-error")
 	} else {
 		var has bool

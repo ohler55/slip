@@ -84,7 +84,7 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 		if v.sym == args[0] {
 			setCursor(w, top+i, left)
 			var vs string
-			if cond, ok := v.val.(slip.Instance); ok && cond.IsA(slip.Symbol("error")) {
+			if cond, ok := v.val.(slip.Instance); ok && cond.IsA("error") {
 				vs = fmt.Sprintf("#<%s: %s>", cond.Hierarchy()[0],
 					slip.String(cl.SimpleCondMsg(s, cond)))
 			} else {

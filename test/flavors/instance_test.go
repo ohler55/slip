@@ -60,11 +60,11 @@ func TestInstanceMisc(t *testing.T) {
 	tt.Equal(t, true, b2.Equal(berry))
 	tt.Equal(t, slip.ReadString(`blueberry`, scope).Eval(scope, nil), b2.Class())
 
-	tt.Equal(t, true, b2.IsA(flavors.Find("blueberry")))
-	tt.Equal(t, true, b2.IsA(flavors.Find("vanilla-flavor")))
+	tt.Equal(t, true, b2.IsA("blueberry"))
+	tt.Equal(t, true, b2.IsA("vanilla-flavor"))
 	_ = slip.ReadString(`(defflavor blackberry () ())`, scope).Eval(scope, nil)
 	defer slip.ReadString("(undefflavor 'blackberry)", scope).Eval(scope, nil)
-	tt.Equal(t, false, b2.IsA(flavors.Find("blackberry")))
+	tt.Equal(t, false, b2.IsA("blackberry"))
 
 	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
 	tt.Equal(t, false, b2.Equal(berry))

@@ -42,7 +42,7 @@ type PackageErrorPackage struct {
 // Call the function with the arguments provided.
 func (f *PackageErrorPackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("package-error")) {
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("package-error") {
 		slip.PanicType("package-error", args[0], "package-error")
 	} else {
 		var has bool

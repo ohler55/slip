@@ -41,7 +41,7 @@ type CellErrorName struct {
 // Call the function with the arguments provided.
 func (f *CellErrorName) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA(slip.Symbol("cell-error")) {
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("cell-error") {
 		slip.PanicType("cell-error", args[0], "cell-error")
 	} else {
 		var has bool

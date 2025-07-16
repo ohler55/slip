@@ -39,7 +39,7 @@ type SocketP struct {
 // Call the function with the arguments provided.
 func (f *SocketP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if self, ok := args[0].(*flavors.Instance); ok && self.IsA(socketFlavor) {
+	if self, ok := args[0].(*flavors.Instance); ok && self.IsA("socket") {
 		result = slip.True
 	}
 	return

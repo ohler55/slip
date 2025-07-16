@@ -57,8 +57,7 @@ func (f *Warn) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.Symbol:
 		c := slip.FindClass(string(ta))
 		cond = c.MakeInstance()
-		wc := slip.FindClass("warning")
-		if !cond.IsA(wc) {
+		if !cond.IsA("warning") {
 			slip.NewPanic("%s does not designate a warning class.", ta)
 		}
 		args = args[1:]

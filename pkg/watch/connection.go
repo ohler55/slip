@@ -65,7 +65,7 @@ func (c *connection) listen() {
 		for {
 			obj := c.readExpr()
 			if obj != nil {
-				if cond, ok := obj.(slip.Instance); ok && cond.IsA(slip.Symbol("error")) {
+				if cond, ok := obj.(slip.Instance); ok && cond.IsA("error") {
 					c.expr = c.expr[:0]
 					c.sendQueue <- slip.List{
 						slip.Symbol("error"),
@@ -160,7 +160,7 @@ func (c *connection) evalLoop() {
 		if sp, ok := val.(*slip.Panic); ok {
 			val = sp.Condition
 		}
-		if cond, ok := val.(slip.Instance); ok && cond.IsA(slip.Symbol("error")) {
+		if cond, ok := val.(slip.Instance); ok && cond.IsA("error") {
 			c.sendQueue <- slip.List{
 				slip.Symbol("error"),
 				slip.Symbol(p.id),
@@ -179,7 +179,7 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 	case slip.Symbol("eval"):
 		if 2 < len(req) {
 			val := safeEval(req[2])
-			if cond, ok := val.(slip.Instance); ok && cond.IsA(slip.Symbol("error")) {
+			if cond, ok := val.(slip.Instance); ok && cond.IsA("error") {
 				c.sendQueue <- slip.List{
 					slip.Symbol("error"),
 					req[1],
@@ -261,7 +261,7 @@ func safeEval(val slip.Object) (result slip.Object) {
 	scope := slip.NewScope()
 	defer func() {
 		if rec := recover(); rec != nil {
-			if cond, ok := rec.(slip.Instance); ok && cond.IsA(slip.Symbol("error")) {
+			if cond, ok := rec.(slip.Instance); ok && cond.IsA("error") {
 				result = slip.String(cl.SimpleCondMsg(scope, cond))
 			} else {
 				result = slip.String(fmt.Sprintf("%s", rec))
