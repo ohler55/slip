@@ -143,7 +143,7 @@ func TestClientWriteFail(t *testing.T) {
      ((not x) x))
  (send wc :watch 'foo))
 `, port, port),
-		Expect: "/#<ERROR [0-9a-f]+>/",
+		Expect: "/#<error [0-9a-f]+>/",
 	}).Test(t)
 }
 
@@ -285,7 +285,7 @@ func TestClientEvalTimeout(t *testing.T) {
        (wc (make-instance 'watch-client :host "127.0.0.1" :port %d)))
  (send wc :eval '(sleep 0.1) :timeout 0.05))
 `, port, port),
-		Expect: `/#<ERROR [0-9a-f]+>/`,
+		Expect: `/#<error [0-9a-f]+>/`,
 	}).Test(t)
 }
 

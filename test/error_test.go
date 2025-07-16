@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -14,15 +15,18 @@ func TestErrorObj(t *testing.T) {
 	err := slip.NewError("not a %s error", "real")
 	(&sliptest.Object{
 		Target: err,
-		String: "/^#<ERROR [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   err,
+		String: "/^#<error [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: err,
 		Equals: []*sliptest.EqTest{
 			{Other: err, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real error", err.Error())
+	tt.Equal(t, "not a real error", cl.SimpleCondMsg(slip.NewScope(), err.(slip.Instance)))
 }
 
 func TestErrorMake(t *testing.T) {

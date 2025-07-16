@@ -8,7 +8,8 @@
 
  - instance-update branch
   - convert all old conditions then remove
-   - error
+   - error - separate panic from error
+    - remove the Error interface IsXxxx methods
    - serious-condition
    - warning
    - condition
