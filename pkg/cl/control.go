@@ -750,30 +750,23 @@ func (c *control) dirProc(colon, at bool, params []any) {
 }
 
 func (c *control) dirA(colon, at bool, params []any) {
+	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(c.scope)
+	p.Escape = false
+	p.Readably = false
 	if !colon && !at && len(params) == 0 { // bare ~A, the most common case
 		var arg slip.Object
 		if 0 <= c.argPos {
 			arg = c.args[c.argPos]
 			c.argPos++
 		}
-		switch ta := arg.(type) {
-		case slip.String:
-			c.out = append(c.out, ta...)
-		case slip.Condition:
-			c.out = append(c.out, ta.Error()...)
-		default:
-			p := *slip.DefaultPrinter()
-			p.ScopedUpdate(c.scope)
-			p.Escape = false
-			p.Readably = false
+		if ss, ok := arg.(slip.String); ok {
+			c.out = append(c.out, ss...)
+		} else {
 			c.out = p.Append(c.out, arg, 0)
 		}
 		return
 	}
-	p := *slip.DefaultPrinter()
-	p.ScopedUpdate(c.scope)
-	p.Escape = false
-	p.Readably = false
 	c.dirAS(colon, at, params, &p)
 }
 

@@ -30,7 +30,7 @@ panic is recovered from then the return is two values, _nil_ and the condition t
 condition is raised then the result of the forms is returned.`,
 			Examples: []string{
 				`(ignore-errors (+ 1 2)) => 3`,
-				`(ignore-errors (/ 1 0)) => nil, #<ARITHMETIC-ERROR 12345>`,
+				`(ignore-errors (/ 1 0)) => nil, #<arithmetic-error 12345>`,
 			},
 		}, &slip.CLPkg)
 }
@@ -44,8 +44,12 @@ type IgnoreErrors struct {
 func (f *IgnoreErrors) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
-			ro, _ := rec.(slip.Condition)
-			result = slip.Values{nil, ro}
+			if p, ok := rec.(*slip.Panic); ok {
+				result = slip.Values{nil, p}
+				if p.Condition != nil {
+					result = slip.Values{nil, p.Condition}
+				}
+			}
 		}
 	}()
 	d2 := depth + 1

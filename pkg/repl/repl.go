@@ -272,8 +272,8 @@ func process() {
 		case *slip.PartialPanic:
 			replReader.setDepth(tr.Depth)
 			return
-		case slip.Error:
-			if p, ok := tr.(*slip.Panic); ok && len(p.Message) == 0 && p.Fatal {
+		case *slip.Panic:
+			if len(tr.Message) == 0 && tr.Fatal {
 				panic("")
 			}
 			msg := tr.Error()
@@ -289,7 +289,7 @@ func process() {
 			if scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
 			}
-			if p, ok := tr.(*slip.Panic); ok && p.Fatal {
+			if tr.Fatal {
 				panic("")
 			}
 		case die:

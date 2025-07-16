@@ -17,26 +17,6 @@ const (
 
 var errorHierarchy = []Symbol{ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
 
-// Error is the interface for all errors. It has no functions that provide
-// useful information other than to indicate the type is an Error which is
-// also an Object.
-type Error interface {
-	SeriousCondition
-	error
-
-	// IsError need not do anything other than exist.
-	IsError()
-
-	// AppendToStack appends a function name and argument to the stack.
-	AppendToStack(name string, args List)
-
-	// AppendFull appends the message and stack of the error to a byte slice.
-	AppendFull(b []byte) []byte
-
-	// Stack returns the call stack for the error.
-	Stack() []string
-}
-
 // Panic is used to gather a stack trace when panic occurs.
 type Panic struct {
 	Message   string
@@ -44,10 +24,6 @@ type Panic struct {
 	stack     []string
 	Value     Object // used when the panic function is called
 	Fatal     bool   // used in repl to indicate an exit should be made
-}
-
-// IsError indicates Panic is a Condition.
-func (p *Panic) IsError() {
 }
 
 // String returns the panic message.
@@ -181,12 +157,4 @@ func WrapError(s *Scope, obj Instance, name string, args List) *Panic {
 // NewPanic returns a Panic object that can then be used with a call to panic.
 func NewPanic(format string, args ...any) {
 	panic(NewError(format, args...))
-}
-
-// IsCondition indicates ConditionObj is a Condition.
-func (p *Panic) IsCondition() {
-}
-
-// IsSeriousCondition indicates SeriousConditionObj is a Condition.
-func (p *Panic) IsSeriousCondition() {
 }

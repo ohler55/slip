@@ -47,7 +47,7 @@ func TestArgCountCheck(t *testing.T) {
 
 func recoverPanic(obj slip.Object) (msg, stack string) {
 	defer func() {
-		if se, ok := recover().(slip.Error); ok {
+		if se, ok := recover().(*slip.Panic); ok {
 			se.AppendToStack("recover", nil)
 			msg = se.Error()
 			stack = string(se.AppendFull(nil))

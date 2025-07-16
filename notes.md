@@ -9,12 +9,15 @@
  - instance-update branch
   - convert all old conditions then remove
    - error - separate panic from error
-    - remove the Error interface IsXxxx methods
+    - add PanicError for error.go file
+
    - serious-condition
    - warning
    - condition
 
   - update all TBDs in tests
+
+  - maybe switch IsA() to only use symbol
 
  - watch.connect.safeEval
   - encode condition and decode

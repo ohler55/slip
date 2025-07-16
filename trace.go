@@ -74,9 +74,6 @@ func normalAfter(s *Scope, name string, args List, depth int, result *Object) {
 	case *Panic:
 		tr.AppendToStack(name, args)
 		panic(tr)
-	case Error:
-		tr.AppendToStack(name, args)
-		panic(tr)
 	case Instance:
 		p := WrapError(s, tr, name, args)
 		panic(p)
@@ -130,10 +127,6 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 		tr.AppendToStack(name, args)
 		traceWriterPanic(s, b, tr)
 		panic(tr)
-	case Error:
-		tr.AppendToStack(name, args)
-		traceWriterPanic(s, b, tr)
-		panic(tr)
 	case Instance:
 		p := WrapError(s, tr, name, args)
 		traceWriterPanic(s, b, p)
@@ -160,7 +153,7 @@ func traceSelectedAfter(s *Scope, name string, args List, depth int, result *Obj
 	}
 }
 
-func traceWriterPanic(s *Scope, b []byte, p Error) {
+func traceWriterPanic(s *Scope, b []byte, p *Panic) {
 	if s.Get(Symbol("*print-ansi*")) != nil {
 		color := "\x1b[31m"
 		sym := Symbol(warnANSIKey)
