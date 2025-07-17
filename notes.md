@@ -4,9 +4,6 @@
 
 - next
 
- - instance-update branch
-
----------------------
  - standard-flavor branch
   - make standard-object and standard-class support direct methods
   - add methods to standard-class and add vanilla-flavor to hierarchy before standard-object
