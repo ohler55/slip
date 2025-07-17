@@ -6,6 +6,12 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const (
+	bold         = "\x1b[1m"
+	colorOff     = "\x1b[m"
+	indentSpaces = "                                                                                "
+)
+
 var (
 	// Pkg is the Class package.
 	Pkg = slip.Package{
@@ -28,6 +34,25 @@ func init() {
 		},
 		&ClassName{},
 	)
+	defBuiltIns()
+	defAllocateInstance()
+	defChangeClass()
+	defClassName()
+	defClassOf()
+	defDefclass()
+	defDefineCondition()
+	defDefmethod()
+	defFindClass()
+	defMakeInstance()
+	defSlotBoundp()
+	defSlotExistsp()
+	defSlotMakunbound()
+	defSlotMissing()
+	defSlotUnbound()
+	defSlotValue()
+
+	defConditions()
+
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 }

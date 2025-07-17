@@ -32,6 +32,6 @@ func TestSimpleConditionFormatArgumentsSub(t *testing.T) {
 func TestSimpleConditionFormatArgumentsNotSimpleCondition(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(simple-condition-format-arguments (make-condition 'condition :format-arguments '(2)))`,
-		PanicType: slip.Symbol("unbound-slot"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

@@ -42,7 +42,7 @@ type SockoptOobInline struct {
 func (f *SockoptOobInline) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || !self.IsA(socketFlavor) {
+	if !ok || !self.IsA("socket") {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
@@ -57,7 +57,7 @@ func (f *SockoptOobInline) Call(s *slip.Scope, args slip.List, depth int) (resul
 func (f *SockoptOobInline) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || !self.IsA(socketFlavor) {
+	if !ok || !self.IsA("socket") {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {

@@ -15,10 +15,6 @@ const FlavorSymbol = slip.Symbol("flavor")
 
 var allFlavors = map[string]*Flavor{vanilla.name: &vanilla}
 
-func init() {
-	slip.RegisterClass(vanilla.name, &vanilla)
-}
-
 // Flavor of Objects.
 type Flavor struct {
 	name             string
@@ -40,6 +36,7 @@ type Flavor struct {
 	noVanilla        bool
 	allowOtherKeys   bool
 	pkg              *slip.Package
+	precedence       []slip.Symbol
 	Final            bool
 	GoMakeOnly       bool
 }
@@ -61,7 +58,7 @@ func All() (all []*Flavor) {
 	return
 }
 
-// Pkg returns the package the flavor was defined in
+// Pkg returns the package the flavor was defined in.
 func (obj *Flavor) Pkg() *slip.Package {
 	return obj.pkg
 }
@@ -178,6 +175,11 @@ func (obj *Flavor) Append(b []byte) []byte {
 	return append(b, '>')
 }
 
+// Metaclass returns the symbol flavor.
+func (obj *Flavor) Metaclass() slip.Symbol {
+	return slip.Symbol("flavor")
+}
+
 // Simplify by returning the string representation of the flavor.
 func (obj *Flavor) Simplify() any {
 	flist := make([]any, 0, len(obj.inherit))
@@ -209,6 +211,7 @@ func (obj *Flavor) Simplify() any {
 	_, isDefHand := obj.defaultHandler.(defHand)
 	return map[string]any{
 		"name":             obj.name,
+		"package":          obj.pkg.Name,
 		"docs":             obj.docs,
 		"inherit":          flist,
 		"defaultVars":      vars,
@@ -311,8 +314,12 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (obj *Flavor) MakeInstance() slip.Instance {
+	if obj.abstract || obj.GoMakeOnly {
+		slip.NewPanic("Can not create an instance of flavor %s.", obj.name)
+	}
 	inst := Instance{Type: obj}
 	inst.Vars = map[string]slip.Object{}
+	inst.SetSynchronized(true)
 	for k, v := range obj.defaultVars {
 		inst.Vars[k] = v
 	}
@@ -502,12 +509,6 @@ func (obj *Flavor) Documentation() string {
 // SetDocumentation of the class.
 func (obj *Flavor) SetDocumentation(doc string) {
 	obj.docs = doc
-}
-
-// NoMake returns true if the class does not allows creating a new instance
-// with make-instance which should signal an error.
-func (obj *Flavor) NoMake() bool {
-	return obj.abstract || obj.GoMakeOnly
 }
 
 // Document a variable or method.

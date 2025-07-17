@@ -6,6 +6,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const datumSymbol = slip.Symbol("datum")
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -37,11 +39,15 @@ type TypeErrorDatum struct {
 }
 
 // Call the function with the arguments provided.
-func (f *TypeErrorDatum) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *TypeErrorDatum) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	cond, ok := args[0].(slip.TypeError)
-	if !ok {
-		slip.PanicUnboundSlot(args[0], slip.Symbol("datum"), "")
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("type-error") {
+		slip.PanicType("type-error", args[0], "type-error")
+	} else {
+		var has bool
+		if result, has = ci.SlotValue(datumSymbol); !has {
+			slip.PanicUnboundSlot(ci, datumSymbol, "")
+		}
 	}
-	return cond.Datum()
+	return
 }

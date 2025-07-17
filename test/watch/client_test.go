@@ -93,7 +93,7 @@ func TestClientPeriodicBadOp(t *testing.T) {
      ((not (null x)) x))
  (channel-pop chan))
 `, port, port),
-		Expect: `/\(pub #<ERROR [0-9a-f]+>\)/`,
+		Expect: `/\(pub #<error [0-9a-f]+>\)/`,
 	}).Test(t)
 }
 
@@ -142,7 +142,7 @@ func TestClientWriteFail(t *testing.T) {
      ((not x) x))
  (send wc :watch 'foo))
 `, port, port),
-		Expect: "/#<ERROR [0-9a-f]+>/",
+		Expect: "/#<error [0-9a-f]+>/",
 	}).Test(t)
 }
 
@@ -272,7 +272,7 @@ func TestClientEvalError(t *testing.T) {
        (wc (make-instance 'watch-client :host "127.0.0.1" :port %d)))
  (send wc :eval '(/ 1 0)))
 `, port, port),
-		Expect: "/#<DIVISION-BY-ZERO [0-9a-f]+>/",
+		Expect: `"divide by zero"`,
 	}).Test(t)
 }
 
@@ -284,7 +284,7 @@ func TestClientEvalTimeout(t *testing.T) {
        (wc (make-instance 'watch-client :host "127.0.0.1" :port %d)))
  (send wc :eval '(sleep 0.1) :timeout 0.05))
 `, port, port),
-		Expect: `/#<ERROR [0-9a-f]+>/`,
+		Expect: `/#<error [0-9a-f]+>/`,
 	}).Test(t)
 }
 

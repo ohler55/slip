@@ -11,6 +11,6 @@ import (
 func TestNameServiceErrorMake(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(make-condition 'name-service-error :message "name not found")`,
-		Expect: "/#<NAME-SERVICE-ERROR [0-9a-h]+>/",
+		Expect: "/#<name-service-error [0-9a-h]+>/",
 	}).Test(t)
 }

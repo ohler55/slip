@@ -59,6 +59,8 @@ The _flavor_ itself is an instance and can be sent a limited set of methods.`,
 			Doc:    `A whopper location. Private for continue-whopper.`,
 		},
 	})
+	Pkg.RegisterClass(vanilla.name, &vanilla)
+
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 }

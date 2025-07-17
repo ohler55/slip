@@ -4,19 +4,35 @@
 
 - next
 
- - precedence branch
-  - flavor remains the same
-  - clos class becomes standard-class in hierarchy
-   - class standard-class t
-  - class-of return standard-class instance or built-in-class instance for built-ins
-   - for flavor instances return flavor instance #<flavor foo 12345>
-  - instance
-   - flavor.Instance - foo super-foo vanilla-flavor (flavor-)instance t
-   - clos.Instance - foo super-foo standard-object t
-   - build class then instance get hierarchy from class/flavor
-    - maybe a name class hierarchy as well as instance
+ - instance-update branch
+
+---------------------
+ - standard-flavor branch
+  - make standard-object and standard-class support direct methods
+  - add methods to standard-class and add vanilla-flavor to hierarchy before standard-object
+   - update describe
+
+---------------------
+ - bugs
+  - open doesn't handle absolute paths nor ~
+   - ~someone/x
+---------------------
 
  - generics branch
+  - standard-class reader, writer, and accessor
+   - class slots
+    - accessors must consider slot on standard-object.Type.Vars
+     - if not found then look back on inherit
+
+  - call print-object in slip.Panic to form message
+   - if condition and :report then use that for printing, others like *print-escape*
+    - else call generic
+    - if no generic match print .String() - should be generic method for t
+  - pass scope in then various error creation panic
+   - allow for report function to use local variables
+
+  - generics are tied to a package just like functions
+  - is a flag needed to indicate some generics/method do not allow qualifiers like :before and :after
   - sparse method combinations, no need for empties
   - add flavor/class hierarchy to regular hierarchy
    - build class then instance get hierarchy from class/flavor
@@ -57,27 +73,6 @@
      - parameters - list of arg types - just types, no forms, or maybe rely on coerce type matching
      - specifics - []*Method to search
 
-
-  - defclass (class-name superclass-names slot-specifiers &rest class-options*)
-   - update clos/class struct
-   - implement for vars/slots only
-   - class-options
-    - :default-initargs init-arg-list
-    - :documentation string
-    - :metaclass classname - limit to standard-class and ignore otherwise
-   - slot-specifier like (name :initarg :name :accessor name)
-    - :reader reader-function-name * - names of functions to access slot
-    - :writer writer-function-name *
-    - :accessor reader-function-name *
-    - :allocation allocation-type
-    - :initarg initarg-name *
-    - :initform form
-    - :type type-specifier
-    - :documentation string
-   - make sure all validation is handled for name collisions
-  - standard-class
-  - standard-object - like vanilla
-
   - defmethod class daemon bindings/args
    - find class to determine how to define
    - maybe separate function/method table for all clos classes
@@ -93,9 +88,15 @@
         - nill type matches anything
        - if no qualifier then it is generic
       - docs
-  - optimize for binding of one to a class using the class method
-  - register as normal function but handle differently
-  - move defmethod to clos
+
+ - flavor allow out of order defflavor like standard-class
+ - rename bag-flavor to just bag?
+
+ - bonus functions
+  - [ ] list-all-classes (&optional metaclass)
+  - [ ] class-precedence
+  - [ ] class-supers
+  - [ ] class-metaclass => standard-class, condition-class, build-in-class
 
  - [ ] ADD-METHOD
  - [ ] CALL-METHOD
@@ -104,9 +105,9 @@
  - [ ] CLASS-NAME
  - [ ] CLASS-OF
  - [ ] COMPUTE-APPLICABLE-METHODS
- - [ ] DEFCLASS
+ - [x] DEFCLASS
  - [ ] DEFGENERIC
- - [ ] DEFINE-CONDITION
+ - [x] DEFINE-CONDITION
  - [ ] DEFINE-METHOD-COMBINATION
  - [ ] DEFMETHOD
  - [ ] DESCRIBE-OBJECT
@@ -146,6 +147,18 @@
  - [ ] WITH-ACCESSORS
  - [ ] WITH-ADDED-METHODS
  - [ ] WITH-SLOTS
+ - [ ] arithmetic-error-operands
+ - [ ] simple-condition-format-arguments
+ - [ ] arithmetic-error-operation
+ - [ ] simple-condition-format-control
+ - [ ] cell-error-name
+ - [ ] stream-error-stream
+ - [ ] file-error-pathname
+ - [ ] type-error-datum
+ - [ ] package-error-package
+ - [ ] type-error-expected-type
+ - [ ] print-not-readable-object
+ - [ ] unbound-slot-instance
 
 -----------------
   - [ ] inspect [interactive]
@@ -162,6 +175,10 @@
      - isOk method for true or false
       - separate for each type like integer, float, etc
        - IntegerSpec - low, high
+
+ - watch.connect.safeEval
+  - encode condition and decode
+  - frame test broken
 
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots

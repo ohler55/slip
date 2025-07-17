@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -29,7 +30,7 @@ func TestDefSystem(t *testing.T) {
 		Expect: "/#<system [0-9a-f]+>/",
 	}
 	tf.Test(t)
-	sys, ok := tf.Result.(slip.Instance)
+	sys, ok := tf.Result.(*flavors.Instance)
 	tt.Equal(t, true, ok)
 
 	tt.Equal(t, `"quux"`, slip.ObjectString(sys.Receive(scope, ":name", nil, 0)))

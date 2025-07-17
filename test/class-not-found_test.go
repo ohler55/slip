@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -14,37 +15,48 @@ func TestClassNotFoundObj(t *testing.T) {
 	cond := slip.NewClassNotFound(slip.Symbol("klas"), "not a %s class-not-found", "real")
 	(&sliptest.Object{
 		Target: cond,
-		String: "/^#<CLASS-NOT-FOUND [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   cond,
+		String: "/^#<class-not-found [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: cond,
 		Equals: []*sliptest.EqTest{
 			{Other: cond, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real class-not-found", cond.Error())
+	tt.Equal(t, "not a real class-not-found", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestClassNotFoundMake(t *testing.T) {
 	tf := sliptest.Function{
 		Source: `(make-condition 'Class-Not-Found :name 'klas)`,
-		Expect: "/^#<CLASS-NOT-FOUND [0-9a-f]+>$/",
+		Expect: "/^#<class-not-found [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	ce, ok := tf.Result.(slip.ClassNotFound)
-	tt.Equal(t, ok, true)
-	tt.Equal(t, slip.Symbol("klas"), ce.Name())
-	tt.Equal(t, "class klas not found", ce.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol("klas"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Nil(t, value)
 
 	tf = sliptest.Function{
-		Source: `(make-condition 'class-not-found :name 'klas :instance 'vanilla)`,
-		Expect: "/^#<CLASS-NOT-FOUND [0-9a-f]+>$/",
+		Source: `(make-condition 'class-not-found :name 'klas :message "raise")`,
+		Expect: "/^#<class-not-found [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	ce, ok = tf.Result.(slip.ClassNotFound)
-	tt.Equal(t, ok, true)
-	tt.Equal(t, slip.Symbol("klas"), ce.Name())
-	tt.Equal(t, "class klas not found", ce.Error())
+	cond, ok = tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has = cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol("klas"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestClassNotFoundPanic(t *testing.T) {

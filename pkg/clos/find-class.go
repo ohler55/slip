@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defFindClass() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := FindClass{Function: slip.Function{Name: "find-class", Args: args}}

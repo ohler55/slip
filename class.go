@@ -2,15 +2,14 @@
 
 package slip
 
-import "strings"
-
-var allClasses = map[string]Class{}
-
 type Class interface {
 	Object
 
 	// Name of the class.
 	Name() string
+
+	// Package the class is defined in.
+	Pkg() *Package
 
 	// Documentation of the class.
 	Documentation() string
@@ -20,10 +19,6 @@ type Class interface {
 
 	// Describe the class in detail.
 	Describe(b []byte, indent, right int, ansi bool) []byte
-
-	// NoMake returns true if the class does not allows creating a new
-	// instance with make-instance which should signal an error.
-	NoMake() bool
 
 	// MakeInstance creates a new instance but does not call the :init method.
 	MakeInstance() Instance
@@ -35,18 +30,22 @@ type Class interface {
 	// or nil if the class is a built in class. As an example, a flavor would
 	// be created by a defflavor expression.
 	DefList() List
+
+	// Metaclass returns the name of the class's meta class which can be
+	// built-in-class, standard-class, flavor, or condition-class.
+	Metaclass() Symbol
 }
 
 // Find finds the named class.
 func FindClass(name string) (c Class) {
-	if c = allClasses[name]; c == nil {
-		c = allClasses[strings.ToLower(name)]
-	}
-	return
+	return CurrentPackage.FindClass(name)
 }
 
 // RegisterClass a class.
 func RegisterClass(name string, c Class) {
-	name = strings.ToLower(name)
-	allClasses[name] = c
+	p := c.Pkg()
+	if p == nil {
+		p = CurrentPackage
+	}
+	p.RegisterClass(name, c)
 }

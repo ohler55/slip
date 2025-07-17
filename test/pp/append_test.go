@@ -5,7 +5,6 @@ package pp_test
 import (
 	"testing"
 
-	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -195,7 +194,8 @@ func TestAppendBuiltIn(t *testing.T) {
 		Source: `(let ((*print-right-margin* 60)
                        (c (find-class 'fixnum)))
                    (pretty-print c nil))`,
-		PanicType: slip.ErrorSymbol,
+		Expect: `"#<built-in-class fixnum>
+"`,
 	}).Test(t)
 }
 

@@ -96,6 +96,7 @@ func TestFlavorSimple(t *testing.T) {
     }
   ]
   name: blueberry
+  package: common-lisp-user
   required: []
   requiredKeywords: []
   requiredMethods: []
@@ -210,6 +211,7 @@ func TestFlavorDescribeOptions(t *testing.T) {
 	tt.Equal(t, "an abstract", f.(*flavors.Flavor).Documentation())
 
 	tt.Equal(t, f, flavors.Find("Abbey"))
+	tt.Panic(t, func() { _ = f.(*flavors.Flavor).MakeInstance() })
 }
 
 func TestFlavorReceive(t *testing.T) {
@@ -303,6 +305,7 @@ func TestFlavorReceive(t *testing.T) {
     }
   ]
   name: blueberry
+  package: common-lisp-user
   required: []
   requiredKeywords: []
   requiredMethods: []

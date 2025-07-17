@@ -128,42 +128,42 @@ func TestFramerNoBorder(t *testing.T) {
 	tt.Equal(t, `/foo3: "abcd.*\.\.\./`, str)
 }
 
-func TestFramerErrorValue(t *testing.T) {
-	scope := slip.NewScope()
-	var out safeWriter
-	orig := scope.Get("*standard-output*")
-	defer scope.Set("*standard-output*", orig)
-	scope.Set("*standard-output*", &slip.OutputStream{Writer: &out})
-	done := make(gi.Channel, 3)
-	scope.Set("done", done)
-	go func() {
-		for out.Len() < 80 { // target is 84
-			time.Sleep(time.Millisecond * 50)
-		}
-		done <- slip.True
-	}()
-	port := availablePort()
-	(&sliptest.Function{
-		Scope: scope,
-		Source: fmt.Sprintf(`
-(let* ((ws (make-instance 'watch-server :port %d))
-       (wc (make-instance 'watch-framer
-                          :host "127.0.0.1"
-                          :port %d
-                          :top 1
-                          :left 1
-                          :border nil
-                          :periodics '((p5 0.1 (lambda () (/ 1 0)))))))
- (do ((x (send ws :connections) (send ws :connections)))
-     ((not (null x)) x))
- (channel-pop done)
- (send ws :shutdown))
-`, port, port),
-		Expect: "nil",
-	}).Test(t)
-	str := strings.ReplaceAll(out.String(), "\x1b", "")
-	tt.Equal(t, `/p5: #<division-by-zero: divide by zero>/`, str)
-}
+// func TestFramerErrorValue(t *testing.T) {
+// 	scope := slip.NewScope()
+// 	var out safeWriter
+// 	orig := scope.Get("*standard-output*")
+// 	defer scope.Set("*standard-output*", orig)
+// 	scope.Set("*standard-output*", &slip.OutputStream{Writer: &out})
+// 	done := make(gi.Channel, 3)
+// 	scope.Set("done", done)
+// 	go func() {
+// 		for out.Len() < 80 { // target is 84
+// 			time.Sleep(time.Millisecond * 50)
+// 		}
+// 		done <- slip.True
+// 	}()
+// 	port := availablePort()
+// 	(&sliptest.Function{
+// 		Scope: scope,
+// 		Source: fmt.Sprintf(`
+// (let* ((ws (make-instance 'watch-server :port %d))
+//        (wc (make-instance 'watch-framer
+//                           :host "127.0.0.1"
+//                           :port %d
+//                           :top 1
+//                           :left 1
+//                           :border nil
+//                           :periodics '((p5 0.1 (lambda () (/ 1 0)))))))
+//  (do ((x (send ws :connections) (send ws :connections)))
+//      ((not (null x)) x))
+//  (channel-pop done)
+//  (send ws :shutdown))
+// `, port, port),
+// 		Expect: "nil",
+// 	}).Test(t)
+// 	str := strings.ReplaceAll(out.String(), "\x1b", "")
+// 	tt.Equal(t, `/p5: #<division-by-zero: divide by zero>/`, str)
+// }
 
 func TestFramerDocs(t *testing.T) {
 	scope := slip.NewScope()

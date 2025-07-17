@@ -9,109 +9,31 @@ import (
 // MethodErrorSymbol is the symbol with a value of "invalid-method-error".
 const MethodErrorSymbol = Symbol("method-error")
 
-var invalidMethodErrorHierarchy = []Symbol{
-	MethodErrorSymbol,
-	CellErrorSymbol,
-	ErrorSymbol,
-	SeriousConditionSymbol,
-	ConditionSymbol,
-	TrueSymbol,
-}
-
-func init() {
-	RegisterCondition("method-error", makeMethodError)
-}
-
-// MethodError is the interface for all invalid-method-errors.
-type MethodError interface {
-	CellError
-
-	// IsMethodError need not do anything other than exist.
-	IsMethodError()
-
-	// Class returns the class or flavor associated with the method-error.
-	Class() Object
-
-	// Qualifier returns the qualifier if any that is associated with the
-	// method-error.
-	Qualifier() Object
-}
-
-// MethodPanic represents a invalid-method-error.
-type MethodPanic struct {
-	CellPanic
-	class     Object
-	qualifier Object
-}
-
-// IsMethodError need not do anything other than exist.
-func (uv *MethodPanic) IsMethodError() {
-}
-
-// Class returns the class or flavor associated with the method-error.
-func (uv *MethodPanic) Class() Object {
-	return uv.class
-}
-
-// Qualifier returns the qualifier if any that is associated with the
-// method-error.
-func (uv *MethodPanic) Qualifier() Object {
-	return uv.qualifier
-}
-
-// Equal returns true if this Object and the other are equal in value.
-func (uv *MethodPanic) Equal(other Object) bool {
-	return uv == other
-}
-
-// Eval the object.
-func (uv *MethodPanic) Eval(s *Scope, depth int) Object {
-	return uv
-}
-
 // NewMethodError raises a MethodPanic (invalid-method-error)
 // describing a invalid-method-error error.
-func NewMethodError(class, qualifier, name Object, format string, args ...any) *MethodPanic {
-	var cond MethodPanic
-	cond.hierarchy = invalidMethodErrorHierarchy
-	cond.class = class
-	cond.name = name
-	cond.qualifier = qualifier
-	if 0 < len(format) {
-		cond.Message = fmt.Sprintf(format, args...)
-	} else {
-		cond.Message = fmt.Sprintf("%s %s is not a valid method combination for %s.",
-			qualifier, name, class)
+func NewMethodError(class, qualifier, name Object, format string, args ...any) Object {
+	c := FindClass("method-error")
+	obj := c.MakeInstance()
+
+	argList := List{
+		Symbol(":class"), class,
+		Symbol(":qualifier"), qualifier,
+		Symbol(":method"), name,
 	}
-	return &cond
+	if 0 < len(format) {
+		argList = append(argList, Symbol(":message"), String(fmt.Sprintf(format, args...)))
+	} else {
+		argList = append(argList,
+			Symbol(":message"),
+			String(fmt.Sprintf("%s %s is not a valid method combination for %s.", qualifier, name, class)))
+	}
+	obj.Init(NewScope(), argList, 0)
+
+	return obj
 }
 
 // PanicMethodError raises a MethodPanic (invalid-method-error)
 // describing a invalid-method-error error.
 func PanicMethod(class, qualifier, name Object, format string, args ...any) {
 	panic(NewMethodError(class, qualifier, name, format, args...))
-}
-
-func makeMethodError(args List) Condition {
-	var (
-		name      Object
-		class     Object
-		qualifier Object
-		msg       String
-		ctrl      string
-	)
-	for k, v := range ParseInitList(args) {
-		switch k {
-		case ":name", ":method":
-			name = v
-		case ":class":
-			class = v
-		case ":qualifier":
-			qualifier = v
-		case ":message":
-			msg, _ = v.(String)
-			ctrl = "%s"
-		}
-	}
-	return NewMethodError(class, qualifier, name, ctrl, string(msg))
 }

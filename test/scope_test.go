@@ -12,7 +12,7 @@ import (
 
 func TestScopeLet(t *testing.T) {
 	sym := slip.Symbol("x")
-	var parent slip.Scope
+	parent := slip.NewScope()
 	parent.Let(sym, slip.Fixnum(1))
 	child := parent.NewScope()
 	tt.Equal(t, true, child.Has(sym))
@@ -30,7 +30,7 @@ func TestScopeSet(t *testing.T) {
 	y := slip.Symbol("y")
 	z := slip.Symbol("z")
 
-	var parent slip.Scope
+	parent := slip.NewScope()
 	parent.Let(x, slip.Fixnum(0))
 	child := parent.NewScope()
 	child.Let(y, slip.Fixnum(0))
@@ -62,7 +62,7 @@ func TestScopeRemove(t *testing.T) {
 	x := slip.Symbol("x")
 	y := slip.Symbol("y")
 
-	var parent slip.Scope
+	parent := slip.NewScope()
 	parent.Let(x, slip.Fixnum(0))
 	child := parent.NewScope()
 	child.Let(y, slip.Fixnum(0))
@@ -83,7 +83,7 @@ func TestScopeRemove(t *testing.T) {
 }
 
 func TestScopeAllVars(t *testing.T) {
-	var parent slip.Scope
+	parent := slip.NewScope()
 	parent.Let("x", slip.Fixnum(0))
 	child := parent.NewScope()
 	child.Let("y", slip.Fixnum(1))
@@ -96,7 +96,7 @@ func TestScopeAllVars(t *testing.T) {
 
 func TestScopeString(t *testing.T) {
 	parent := slip.NewScope()
-	var child slip.Scope
+	child := slip.NewScope()
 	child.AddParent(parent)
 	child.UnsafeLet("x", slip.Fixnum(0))
 	child.UnsafeLet("x", slip.Fixnum(1))

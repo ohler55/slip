@@ -6,6 +6,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const classSymbol = slip.Symbol("class")
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -37,11 +39,15 @@ type MethodErrorClass struct {
 }
 
 // Call the function with the arguments provided.
-func (f *MethodErrorClass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *MethodErrorClass) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	cond, ok := args[0].(slip.MethodError)
-	if !ok {
-		slip.PanicUnboundSlot(args[0], slip.Symbol("class"), "")
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("method-error") {
+		slip.PanicType("method-error", args[0], "method-error")
+	} else {
+		var has bool
+		if result, has = ci.SlotValue(classSymbol); !has {
+			slip.PanicUnboundSlot(ci, classSymbol, "")
+		}
 	}
-	return cond.Class()
+	return
 }

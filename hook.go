@@ -6,6 +6,7 @@ var (
 	setHooks   []*hook
 	unsetHooks []*hook
 	defunHooks []*hook
+	classHooks []*hook
 )
 
 type hook struct {
@@ -49,11 +50,26 @@ func AddDefunHook(id string, fun func(p *Package, key string)) {
 	defunHooks = append(defunHooks, &hook{id: id, fun: fun})
 }
 
+// AddClassHook add a hook that is called after a class is added.
+func AddClassHook(id string, fun func(p *Package, key string)) {
+	classHooks = append(classHooks, &hook{id: id, fun: fun})
+}
+
 // RemoveDefunHook removes the defun hook with the specified ID.
 func RemoveDefunHook(id string) {
 	for i, h := range defunHooks {
 		if id == h.id {
 			defunHooks = append(defunHooks[:i], defunHooks[i+1:]...)
+			return
+		}
+	}
+}
+
+// RemoveClassHook removes the class hook with the specified ID.
+func RemoveClassHook(id string) {
+	for i, h := range classHooks {
+		if id == h.id {
+			classHooks = append(classHooks[:i], classHooks[i+1:]...)
 			return
 		}
 	}

@@ -4,12 +4,14 @@ package watch
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"sort"
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/gi"
 )
 
@@ -48,6 +50,7 @@ func (c *connection) listen() {
 	go c.sendLoop()
 	go c.evalLoop()
 	go c.periodicLoop()
+	scope := slip.NewScope()
 
 	buf := make([]byte, 4096)
 	for {
@@ -62,13 +65,13 @@ func (c *connection) listen() {
 		for {
 			obj := c.readExpr()
 			if obj != nil {
-				if serr, ok := obj.(slip.Error); ok {
+				if cond, ok := obj.(slip.Instance); ok && cond.IsA("error") {
 					c.expr = c.expr[:0]
 					c.sendQueue <- slip.List{
 						slip.Symbol("error"),
 						nil,
-						serr.Hierarchy()[0],
-						slip.String(serr.Error()),
+						cond.Hierarchy()[0],
+						slip.String(cl.SimpleCondMsg(scope, cond)),
 					}
 					continue
 				}
@@ -154,14 +157,18 @@ func (c *connection) evalLoop() {
 			break
 		}
 		val := p.eval(scope)
-		if serr, ok := val.(slip.Error); ok {
+		if sp, ok := val.(*slip.Panic); ok {
+			val = sp.Condition
+		}
+		if cond, ok := val.(slip.Instance); ok && cond.IsA("error") {
 			c.sendQueue <- slip.List{
 				slip.Symbol("error"),
 				slip.Symbol(p.id),
-				serr.Hierarchy()[0],
-				slip.String(serr.Error()),
+				cond.Hierarchy()[0],
+				slip.String(cl.SimpleCondMsg(scope, cond)),
 			}
 		} else {
+			// fmt.Printf("*** changed %T %s\n", val, val)
 			c.sendQueue <- slip.List{slip.Symbol("changed"), slip.Symbol(p.id), val}
 		}
 	}
@@ -172,12 +179,12 @@ func (c *connection) evalReq(scope *slip.Scope, req slip.List) {
 	case slip.Symbol("eval"):
 		if 2 < len(req) {
 			val := safeEval(req[2])
-			if serr, ok := val.(slip.Error); ok {
+			if cond, ok := val.(slip.Instance); ok && cond.IsA("error") {
 				c.sendQueue <- slip.List{
 					slip.Symbol("error"),
 					req[1],
-					serr.Hierarchy()[0],
-					slip.String(serr.Error()),
+					cond.Hierarchy()[0],
+					slip.String(cl.SimpleCondMsg(scope, cond)),
 				}
 			} else {
 				c.sendQueue <- slip.List{slip.Symbol("result"), req[1], val}
@@ -254,8 +261,10 @@ func safeEval(val slip.Object) (result slip.Object) {
 	scope := slip.NewScope()
 	defer func() {
 		if rec := recover(); rec != nil {
-			if result, _ = rec.(slip.Error); result == nil {
-				result = slip.NewError("%s", rec)
+			if cond, ok := rec.(slip.Instance); ok && cond.IsA("error") {
+				result = slip.String(cl.SimpleCondMsg(scope, cond))
+			} else {
+				result = slip.String(fmt.Sprintf("%s", rec))
 			}
 		}
 	}()

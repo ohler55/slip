@@ -6,6 +6,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const streamSymbol = slip.Symbol("stream")
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -37,11 +39,15 @@ type StreamErrorStream struct {
 }
 
 // Call the function with the arguments provided.
-func (f *StreamErrorStream) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *StreamErrorStream) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	cond, ok := args[0].(slip.StreamError)
-	if !ok {
-		slip.PanicUnboundSlot(args[0], slip.Symbol("stream"), "")
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("stream-error") {
+		slip.PanicType("stream-error", args[0], "stream-error")
+	} else {
+		var has bool
+		if result, has = ci.SlotValue(streamSymbol); !has {
+			slip.PanicUnboundSlot(ci, streamSymbol, "")
+		}
 	}
-	return cond.Stream()
+	return
 }

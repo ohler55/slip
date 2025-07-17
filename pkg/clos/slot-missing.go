@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defSlotMissing() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SlotMissing{Function: slip.Function{Name: "slot-missing", Args: args}}

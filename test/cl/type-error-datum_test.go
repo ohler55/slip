@@ -26,6 +26,6 @@ func TestTypeErrorDatumSub(t *testing.T) {
 func TestTypeErrorDatumNotTypeError(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(type-error-datum (make-condition 'error :datum 'test))`,
-		PanicType: slip.Symbol("unbound-slot"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

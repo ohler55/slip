@@ -18,7 +18,7 @@ const InstanceSymbol = slip.Symbol("instance")
 // Instance is an instance of a Flavor.
 type Instance struct {
 	slip.Scope
-	Type slip.Class
+	Type *Flavor
 	// Any is available to go methods.
 	Any any
 }
@@ -31,7 +31,7 @@ func (obj *Instance) String() string {
 // Append a buffer with a representation of the Object.
 func (obj *Instance) Append(b []byte) []byte {
 	b = append(b, "#<"...)
-	b = append(b, obj.Type.Name()...)
+	b = append(b, obj.Type.name...)
 	b = append(b, ' ')
 	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(obj))), 16)
 	return append(b, '>')
@@ -50,7 +50,7 @@ func (obj *Instance) Simplify() interface{} {
 		}
 	}
 	simple := map[string]any{
-		"flavor": obj.Type.Name(),
+		"flavor": obj.Type.name,
 		"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(obj))), 16),
 		"vars":   vars,
 	}
@@ -59,23 +59,46 @@ func (obj *Instance) Simplify() interface{} {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *Instance) Hierarchy() []slip.Symbol {
-	return []slip.Symbol{slip.Symbol(obj.Type.Name()), InstanceSymbol, slip.TrueSymbol}
+	return obj.Type.precedence
 }
 
 // IsA return true if the instance is of a flavor that inherits from the
 // provided flavor.
-func (obj *Instance) IsA(class slip.Class) bool {
-	if obj.Type == class {
-		return true
-	}
-	if flavor, ok := obj.Type.(*Flavor); ok {
-		for _, f := range flavor.inherit {
-			if class == f {
-				return true
-			}
+func (obj *Instance) IsA(class string) bool {
+	for _, sym := range obj.Type.precedence {
+		if class == string(sym) {
+			return true
 		}
 	}
 	return false
+}
+
+// SlotNames returns a list of the slots names for the instance.
+func (obj *Instance) SlotNames() []string {
+	names := make([]string, 0, len(obj.Vars))
+	for k := range obj.Vars {
+		names = append(names, k)
+	}
+	return names
+}
+
+// SlotValue return the value of an instance variable.
+func (obj *Instance) SlotValue(sym slip.Symbol) (slip.Object, bool) {
+	return obj.LocalGet(sym)
+}
+
+// SetSlotValue sets the value of an instance variable.
+func (obj *Instance) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool) {
+	name := strings.ToLower(string(sym))
+	if name != "self" {
+		obj.Lock()
+		if _, has = obj.Vars[name]; has {
+			obj.Vars[name] = value
+
+		}
+		obj.Unlock()
+	}
+	return
 }
 
 // Init the instance slots from the provided args list. If the scope is not
@@ -84,7 +107,7 @@ func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
 	obj.Keep = true
 	var plist slip.List
 	keys := map[string]bool{}
-	cf := obj.Type.(*Flavor)
+	cf := obj.Type
 	for i := 0; i < len(args); i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok || len(sym) < 2 || sym[0] != ':' {
@@ -124,7 +147,7 @@ func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
 
 // HasMethod returns true if the instance handles the named method.
 func (obj *Instance) HasMethod(method string) (has bool) {
-	if hm, ok := obj.Type.(HasMethods); ok && hm.GetMethod(method) != nil {
+	if obj.Type.GetMethod(method) != nil {
 		has = true
 	}
 	return
@@ -134,18 +157,13 @@ func (obj *Instance) HasMethod(method string) (has bool) {
 // called by any code other than the send function but is public to allow it
 // to be over-ridden.
 func (obj *Instance) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
-	var m *slip.Method
-	if hm, ok := obj.Type.(HasMethods); ok {
-		m = hm.GetMethod(message)
-	}
+	m := obj.Type.GetMethod(message)
 	if m == nil {
 		xargs := make(slip.List, 0, len(args)+1)
 		xargs = append(xargs, slip.Symbol(message))
 		xargs = append(xargs, args...)
-		if flavor, ok := obj.Type.(*Flavor); ok {
-			return flavor.defaultHandler.Call(&obj.Scope, xargs, depth)
-		}
-		slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.Name())
+
+		return obj.Type.defaultHandler.Call(&obj.Scope, xargs, depth)
 	}
 	scope := obj.NewScope()
 	if s != nil {
@@ -194,23 +212,18 @@ func (obj *Instance) BoundReceive(ps *slip.Scope, message string, bindings *slip
 			s.Vars[k] = v
 		}
 	}
-	var m *slip.Method
-	if hm, ok := obj.Type.(HasMethods); ok {
-		m = hm.GetMethod(message)
-	}
+	m := obj.Type.GetMethod(message)
 	if m == nil {
-		if flavor, ok := obj.Type.(*Flavor); ok {
-			if bc, _ := flavor.defaultHandler.(slip.BoundCaller); bc != nil {
-				s.Let(slip.Symbol("method"), slip.Symbol(message))
-				var args slip.List
-				for k, v := range bindings.Vars {
-					args = append(args, slip.List{slip.Symbol(k), slip.Tail{Value: v}})
-				}
-				s.Let(slip.Symbol("args"), args)
-				return bc.BoundCall(s, depth)
+		if bc, _ := obj.Type.defaultHandler.(slip.BoundCaller); bc != nil {
+			s.Let(slip.Symbol("method"), slip.Symbol(message))
+			var args slip.List
+			for k, v := range bindings.Vars {
+				args = append(args, slip.List{slip.Symbol(k), slip.Tail{Value: v}})
 			}
+			s.Let(slip.Symbol("args"), args)
+			return bc.BoundCall(s, depth)
 		}
-		slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.Name())
+		slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.name)
 	}
 	return m.BoundCall(s, depth)
 }
@@ -264,7 +277,7 @@ func (obj *Instance) Describe(b []byte, indent, right int, ansi bool) []byte {
 
 // Length returns the length of the object.
 func (obj *Instance) Length() (size int) {
-	if hm, ok := obj.Type.(HasMethods); ok && hm.GetMethod(":length") != nil {
+	if obj.Type.GetMethod(":length") != nil {
 		v := obj.Receive(nil, ":length", slip.List{}, 0)
 		if num, ok := v.(slip.Fixnum); ok {
 			size = int(num)

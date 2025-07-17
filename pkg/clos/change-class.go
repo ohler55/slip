@@ -4,9 +4,10 @@ package clos
 
 import (
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defChangeClass() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ChangeClass{Function: slip.Function{Name: "change-class", Args: args}}
@@ -43,11 +44,13 @@ type ChangeClass struct {
 // Call the the function with the arguments provided.
 func (f *ChangeClass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, -1)
-	inst, ok := args[0].(slip.Instance)
+	inst, ok := args[0].(*flavors.Instance)
 	if !ok {
 		slip.PanicType("instance", args[0], "instance")
 	}
 	_ = inst.Receive(s, ":change-class", args[1:], depth)
+
+	// TBD support clos.StandardObject
 
 	return inst
 }

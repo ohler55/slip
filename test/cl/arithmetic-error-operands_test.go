@@ -19,6 +19,6 @@ func TestArithmeticErrorOperandsExact(t *testing.T) {
 func TestArithmeticErrorOperandsNotArithmeticError(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(arithmetic-error-operands (make-condition 'error :operands '(1 2)))`,
-		PanicType: slip.Symbol("unbound-slot"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

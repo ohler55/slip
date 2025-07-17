@@ -251,9 +251,8 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 			}
 		}
 	}
-	p := NewError("|%s| is not a function", ObjectString(list[0]))
-	p.stack = []string{list.String()}
-	panic(p)
+	cond := NewError("|%s| is not a function", ObjectString(list[0]))
+	panic(cond)
 }
 
 // CompileArgs for the function.

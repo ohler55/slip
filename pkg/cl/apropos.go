@@ -79,6 +79,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	pr := *slip.DefaultPrinter()
 	pr.ScopedUpdate(s)
 	pr.Readably = true
+	pr.ReadablyError = false
 
 	var lines []string
 	if pkg != nil {

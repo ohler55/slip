@@ -12,6 +12,7 @@ import (
 	xterm "golang.org/x/term"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -83,8 +84,9 @@ func (caller framerChangedCaller) Call(s *slip.Scope, args slip.List, depth int)
 		if v.sym == args[0] {
 			setCursor(w, top+i, left)
 			var vs string
-			if serr, _ := v.val.(slip.Error); serr != nil {
-				vs = fmt.Sprintf("#<%s: %s>", serr.Hierarchy()[0], serr.Error())
+			if cond, ok := v.val.(slip.Instance); ok && cond.IsA("error") {
+				vs = fmt.Sprintf("#<%s: %s>", cond.Hierarchy()[0],
+					slip.String(cl.SimpleCondMsg(s, cond)))
 			} else {
 				vs = slip.ObjectString(v.val)
 			}

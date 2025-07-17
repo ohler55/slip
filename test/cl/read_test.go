@@ -60,7 +60,7 @@ func TestReadStreamMoreOne(t *testing.T) {
 func TestReadEOF(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(read (make-string-input-stream "(123 "))`,
-		PanicType: slip.Symbol("parse-error"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }
 

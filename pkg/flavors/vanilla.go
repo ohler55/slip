@@ -35,6 +35,7 @@ var vanilla = Flavor{
 		},
 	},
 	defaultHandler: defHand{},
+	precedence:     []slip.Symbol{slip.Symbol("vanilla-flavor"), InstanceSymbol, slip.TrueSymbol},
 	pkg:            &Pkg,
 }
 
@@ -213,7 +214,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 		slip.PanicMethodArgCount(self, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
-		if hm, ok := self.Type.(HasMethods); ok && hm.GetMethod(string(sym)) != nil {
+		if self.Type.GetMethod(string(sym)) != nil {
 			return self.Receive(s, string(sym), args[1:], depth+1)
 		}
 	}
@@ -245,7 +246,7 @@ type whichOpsCaller struct{}
 func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	self := s.Get("self").(*Instance)
 
-	return self.Type.(*Flavor).MethodNames()
+	return self.Type.MethodNames()
 }
 
 func (caller whichOpsCaller) FuncDocs() *slip.FuncDoc {
@@ -421,14 +422,13 @@ func (caller updateInstanceForDifferentClassCaller) Call(s *slip.Scope, args sli
 	self := s.Get("self").(*Instance)
 	// args[0] is previous
 	rest := args[1:]
-	flavor := self.Type.(*Flavor)
 	for i := 0; i < len(rest)-1; i += 2 {
 		if sym, ok := rest[i].(slip.Symbol); ok && 1 < len(sym) {
-			if _, has := flavor.defaultVars[string(sym[1:])]; has {
+			if _, has := self.Type.defaultVars[string(sym[1:])]; has {
 				continue
 			}
 		}
-		slip.NewPanic("%s is not a valid initialize keyword for %s.", rest[i], flavor.Name())
+		slip.NewPanic("%s is not a valid initialize keyword for %s.", rest[i], self.Type.name)
 	}
 	var names slip.List
 	for k := range self.Vars {

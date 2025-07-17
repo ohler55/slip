@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -14,37 +15,48 @@ func TestCellErrorObj(t *testing.T) {
 	cond := slip.NewCellError(slip.Symbol("sell"), "not a %s cell-error", "real")
 	(&sliptest.Object{
 		Target: cond,
-		String: "/^#<CELL-ERROR [0-9a-f]+>$/",
-		Simple: func(t2 *testing.T, v any) { _, ok := v.(string); tt.Equal(t2, true, ok) },
-		Eval:   cond,
+		String: "/^#<cell-error [0-9a-f]+>$/",
+		Simple: func(t2 *testing.T, v any) {
+			_, ok := v.(map[string]any)
+			tt.Equal(t2, true, ok)
+		},
+		Eval: cond,
 		Equals: []*sliptest.EqTest{
 			{Other: cond, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real cell-error", cond.Error())
+	tt.Equal(t, "not a real cell-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestCellErrorMake(t *testing.T) {
 	tf := sliptest.Function{
 		Source: `(make-condition 'Cell-Error :name :sell)`,
-		Expect: "/^#<CELL-ERROR [0-9a-f]+>$/",
+		Expect: "/^#<cell-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	ce, ok := tf.Result.(slip.CellError)
-	tt.Equal(t, ok, true)
-	tt.Equal(t, slip.Symbol(":sell"), ce.Name())
-	tt.Equal(t, "/^#<CELL-ERROR [0-9a-f]+>$/", ce.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol(":sell"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Nil(t, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Cell-Error :name :sell :message "raise")`,
-		Expect: "/^#<CELL-ERROR [0-9a-f]+>$/",
+		Expect: "/^#<cell-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	ce, ok = tf.Result.(slip.CellError)
-	tt.Equal(t, ok, true)
-	tt.Equal(t, slip.Symbol(":sell"), ce.Name())
-	tt.Equal(t, "raise", ce.Error())
+	cond, ok = tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has = cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol(":sell"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestCellErrorPanic(t *testing.T) {

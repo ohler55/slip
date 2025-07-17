@@ -19,6 +19,6 @@ func TestStreamErrorStreamExact(t *testing.T) {
 func TestStreamErrorStreamNotStreamError(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(stream-error-stream (make-condition 'error :stream *standard-output*))`,
-		PanicType: slip.Symbol("unbound-slot"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

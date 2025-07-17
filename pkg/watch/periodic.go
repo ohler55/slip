@@ -19,8 +19,9 @@ type periodic struct {
 func (p *periodic) eval(s *slip.Scope) (result slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
-			if result, _ = rec.(slip.Error); result == nil {
-				result = slip.NewError("%s", rec)
+			if result, _ = rec.(*slip.Panic); result == nil {
+				cond := slip.NewError("%s", rec).(slip.Instance)
+				result = slip.WrapError(s, cond, p.id, nil)
 			}
 		}
 	}()

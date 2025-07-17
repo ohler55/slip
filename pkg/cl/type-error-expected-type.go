@@ -6,6 +6,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const expectedTypeSymbol = slip.Symbol("expected-type")
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -38,15 +40,15 @@ type TypeErrorExpectedType struct {
 }
 
 // Call the function with the arguments provided.
-func (f *TypeErrorExpectedType) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *TypeErrorExpectedType) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	cond, ok := args[0].(slip.TypeError)
-	if !ok {
-		slip.PanicUnboundSlot(args[0], slip.Symbol("expected-type"), "")
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("type-error") {
+		slip.PanicType("type-error", args[0], "type-error")
+	} else {
+		var has bool
+		if result, has = ci.SlotValue(expectedTypeSymbol); !has {
+			slip.PanicUnboundSlot(ci, expectedTypeSymbol, "")
+		}
 	}
-	ta := cond.ExpectedTypes()
-	if len(ta) == 1 {
-		return ta[0]
-	}
-	return slip.Values(ta)
+	return
 }

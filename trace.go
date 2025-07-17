@@ -71,12 +71,16 @@ func noopBefore(s *Scope, name string, args List, depth int) {
 func normalAfter(s *Scope, name string, args List, depth int, result *Object) {
 	switch tr := recover().(type) {
 	case nil:
-	case Error:
+	case *Panic:
 		tr.AppendToStack(name, args)
 		panic(tr)
+	case Instance:
+		p := WrapError(s, tr, name, args)
+		panic(p)
 	default:
-		p := NewError("%s", tr)
-		p.stack = []string{ObjectString(append(List{Symbol(name)}, args...))}
+		cond := NewError("%s", tr).(Instance)
+		_ = cond.SetSlotValue(Symbol("stack"), append(List{Symbol(name)}, args...))
+		p := WrapError(s, cond, name, args)
 		p.Value = SimpleObject(tr)
 		panic(p)
 	}
@@ -119,13 +123,19 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 		if w, _ := s.Get(Symbol("*trace-output*")).(io.Writer); w != nil {
 			_, _ = w.Write(b)
 		}
-	case Error:
+	case *Panic:
 		tr.AppendToStack(name, args)
 		traceWriterPanic(s, b, tr)
 		panic(tr)
+	case Instance:
+		p := WrapError(s, tr, name, args)
+		traceWriterPanic(s, b, p)
+		panic(p)
 	default:
-		p := NewError("%s", tr)
-		p.stack = []string{ObjectString(append(List{Symbol(name)}, args...))}
+		cond := NewError("%s", tr).(Instance)
+		_ = cond.SetSlotValue(Symbol("stack"), append(List{Symbol(name)}, args...))
+		p := WrapError(s, cond, name, args)
+		p.Value = SimpleObject(tr)
 		traceWriterPanic(s, b, p)
 		panic(p)
 	}
@@ -143,7 +153,7 @@ func traceSelectedAfter(s *Scope, name string, args List, depth int, result *Obj
 	}
 }
 
-func traceWriterPanic(s *Scope, b []byte, p Error) {
+func traceWriterPanic(s *Scope, b []byte, p *Panic) {
 	if s.Get(Symbol("*print-ansi*")) != nil {
 		color := "\x1b[31m"
 		sym := Symbol(warnANSIKey)

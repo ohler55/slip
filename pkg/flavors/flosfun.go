@@ -86,7 +86,7 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 
 func (f *flosWrap) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, -1)
-	inst, ok := args[0].(slip.Instance)
+	inst, ok := args[0].(*Instance)
 	if !ok {
 		slip.PanicType("instance", args[0], "instance")
 	}

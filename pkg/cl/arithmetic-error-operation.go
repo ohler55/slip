@@ -6,6 +6,8 @@ import (
 	"github.com/ohler55/slip"
 )
 
+const operationSymbol = slip.Symbol("operation")
+
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
@@ -37,11 +39,15 @@ type ArithmeticErrorOperation struct {
 }
 
 // Call the function with the arguments provided.
-func (f *ArithmeticErrorOperation) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *ArithmeticErrorOperation) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	cond, ok := args[0].(slip.ArithmeticError)
-	if !ok {
-		slip.PanicUnboundSlot(args[0], slip.Symbol("operation"), "")
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("arithmetic-error") {
+		slip.PanicType("arithmetic-error", args[0], "arithmetic-error")
+	} else {
+		var has bool
+		if result, has = ci.SlotValue(operationSymbol); !has {
+			slip.PanicUnboundSlot(ci, operationSymbol, "")
+		}
 	}
-	return cond.Operation()
+	return
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defDefmethod() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Defmethod{Function: slip.Function{Name: "defmethod", Args: args, SkipEval: []bool{true}}}

@@ -56,6 +56,6 @@ func TestWarnBadDatum(t *testing.T) {
 func TestWarnNotWarning(t *testing.T) {
 	(&sliptest.Function{
 		Source:    "(warn 'error)",
-		PanicType: slip.Symbol("error"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

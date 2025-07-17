@@ -597,17 +597,20 @@ func TestSimpleObject(t *testing.T) {
 		fmt.Errorf("dummy error"),
 		map[string]any{"x": 7},
 	}
+	scope := slip.NewScope()
 	obj := slip.SimpleObject(simple)
 	tt.Equal(t,
 		`(t -1 -2 -3 -4 -5 1 2 3 4 5 4.5 5.4 @2022-04-01T00:00:00Z t "abc" "def" "dummy error" (("x" . 7)))`,
 		obj.String())
 
-	p := slip.NewError("")
+	cond := slip.NewError("").(slip.Instance)
+	p := slip.WrapError(scope, cond, "sample", nil)
 	p.Value = slip.Fixnum(7)
 	obj = slip.SimpleObject(p)
 	tt.Equal(t, "7", obj.String())
 
-	p = slip.NewError("sample")
+	cond = slip.NewError("sample").(slip.Instance)
+	p = slip.WrapError(scope, cond, "sample", nil)
 	obj = slip.SimpleObject(p)
 	tt.Equal(t, `"sample"`, obj.String())
 }

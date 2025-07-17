@@ -58,7 +58,13 @@ func (tf *Function) Test(t *testing.T) {
 		}, tf.Source)
 		so, ok := r.(slip.Object)
 		tt.Equal(t, true, ok, "expected a panic of %s not a %T", tf.PanicType, r)
-		tt.Equal(t, tf.PanicType, so.Hierarchy()[0], "expected a panic of %s not a %s", tf.PanicType, so.Hierarchy()[0])
+		if tf.PanicType != so.Hierarchy()[0] {
+			if p, ok := r.(*slip.Panic); ok && p.Condition != nil {
+				so = p.Condition
+			}
+		}
+		tt.Equal(t, tf.PanicType, so.Hierarchy()[0], "expected a panic of %s not a %s (%s)",
+			tf.PanicType, so.Hierarchy()[0], so)
 		if tf.Validate != nil {
 			tf.Validate(t, so)
 		}

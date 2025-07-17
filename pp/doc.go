@@ -11,6 +11,7 @@ type Doc struct {
 	text string
 	x    int
 	wide int
+	nl   bool
 }
 
 func (doc *Doc) layout(left int) int {
@@ -51,9 +52,9 @@ func (doc *Doc) right() int {
 }
 
 func (doc *Doc) newline() bool {
-	return true
+	return doc.nl
 }
 
 func (doc *Doc) setNewline(nl bool) {
-	// do nothing
+	doc.nl = nl
 }

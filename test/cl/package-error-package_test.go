@@ -19,6 +19,6 @@ func TestPackageErrorPackageExact(t *testing.T) {
 func TestPackageErrorPackageNotPackageError(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(package-error-package (make-condition 'error :package *package*))`,
-		PanicType: slip.Symbol("unbound-slot"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

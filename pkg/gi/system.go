@@ -437,7 +437,7 @@ func loadDir(s *slip.Scope, self *flavors.Instance, dir string) {
 }
 
 func loadSystemFile(s *slip.Scope, self *flavors.Instance, dir, path string) {
-	sys, ok := loadFile(s, self, path).(slip.Instance)
+	sys, ok := loadFile(s, self, path).(*flavors.Instance)
 	if !ok {
 		slip.PanicType("system", sys, "instance")
 	}

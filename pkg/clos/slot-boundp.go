@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defSlotBoundp() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SlotBoundp{Function: slip.Function{Name: "slot-boundp", Args: args}}

@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/clos"
 )
 
 var watchPrinter = slip.Printer{
@@ -35,10 +36,8 @@ type wcon struct {
 func (c *wcon) readExpr() (obj slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
-			if _, ok := rec.(*slip.PartialPanic); !ok {
-				if serr, ok := rec.(slip.Error); ok {
-					obj = serr
-				}
+			if inst, ok := rec.(*clos.StandardObject); ok && inst.IsA("error") {
+				obj = inst
 			}
 		}
 	}()

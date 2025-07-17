@@ -47,7 +47,7 @@ func TestArgCountCheck(t *testing.T) {
 
 func recoverPanic(obj slip.Object) (msg, stack string) {
 	defer func() {
-		if se, ok := recover().(slip.Error); ok {
+		if se, ok := recover().(*slip.Panic); ok {
 			se.AppendToStack("recover", nil)
 			msg = se.Error()
 			stack = string(se.AppendFull(nil))
@@ -55,10 +55,4 @@ func recoverPanic(obj slip.Object) (msg, stack string) {
 	}()
 	_ = obj.Eval(slip.NewScope(), 0)
 	return
-}
-
-func TestPanicPartial(t *testing.T) {
-	p := slip.NewPartial(3, "test")
-	tt.Equal(t, "/^#<PARSE-ERROR [0-9a-f]+>$/", p.String())
-	tt.Equal(t, "test", p.Error())
 }

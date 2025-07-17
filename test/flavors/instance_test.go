@@ -3,12 +3,14 @@
 package flavors_test
 
 import (
+	"sort"
 	"strconv"
 	"testing"
 	"unsafe"
 
 	"github.com/ohler55/ojg"
 	"github.com/ohler55/ojg/oj"
+	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -36,7 +38,7 @@ func TestInstanceMisc(t *testing.T) {
 			"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(berry.(*flavors.Instance)))), 16),
 			"vars":   map[string]any{"size": "medium"},
 		},
-		Hierarchy: "blueberry.instance.t",
+		Hierarchy: "blueberry.vanilla-flavor.instance.t",
 		Equals: []*sliptest.EqTest{
 			{Other: berry, Expect: true},
 			{Other: slip.True, Expect: false},
@@ -58,11 +60,11 @@ func TestInstanceMisc(t *testing.T) {
 	tt.Equal(t, true, b2.Equal(berry))
 	tt.Equal(t, slip.ReadString(`blueberry`, scope).Eval(scope, nil), b2.Class())
 
-	tt.Equal(t, true, b2.IsA(flavors.Find("blueberry")))
-	tt.Equal(t, true, b2.IsA(flavors.Find("vanilla-flavor")))
+	tt.Equal(t, true, b2.IsA("blueberry"))
+	tt.Equal(t, true, b2.IsA("vanilla-flavor"))
 	_ = slip.ReadString(`(defflavor blackberry () ())`, scope).Eval(scope, nil)
 	defer slip.ReadString("(undefflavor 'blackberry)", scope).Eval(scope, nil)
-	tt.Equal(t, false, b2.IsA(flavors.Find("blackberry")))
+	tt.Equal(t, false, b2.IsA("blackberry"))
 
 	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
 	tt.Equal(t, false, b2.Equal(berry))
@@ -85,6 +87,18 @@ func TestInstanceMisc(t *testing.T) {
 	_ = slip.ReadString(`(defmethod (blueberry :get-size) () size)`, scope).Eval(scope, nil)
 	result := slip.ReadString(`(send berry :get-size)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.String("medium"), result)
+
+	slots := bi.SlotNames()
+	sort.Strings(slots)
+	tt.Equal(t, "[self size]", pretty.SEN(slots))
+
+	value, has := bi.SlotValue(slip.Symbol("size"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("medium"), value)
+
+	bi.SetSlotValue(slip.Symbol("size"), slip.String("large"))
+	value, _ = bi.SlotValue(slip.Symbol("size"))
+	tt.Equal(t, slip.String("large"), value)
 }
 
 func TestInstanceBoundCall(t *testing.T) {
@@ -134,7 +148,7 @@ berry
 			"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(berry.(*flavors.Instance)))), 16),
 			"vars":   map[string]any{"me": berry.String()},
 		},
-		Hierarchy: "blueberry.instance.t",
+		Hierarchy: "blueberry.vanilla-flavor.instance.t",
 		Eval:      berry,
 	}).Test(t)
 }

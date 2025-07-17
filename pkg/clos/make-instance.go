@@ -3,14 +3,10 @@
 package clos
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defMakeInstance() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MakeInstance{Function: slip.Function{Name: "make-instance", Args: args}}
@@ -42,62 +38,33 @@ variable values and plist options.`,
 		}, &Pkg)
 }
 
-// MakeInstance represents the makeInstance function.
+// MakeInstance represents the make-instance function.
 type MakeInstance struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	c := classFromArg0(f, s, args, "make-instance")
-	if c.NoMake() {
-		slip.NewPanic("Can not create an instance of class or flavor %s.", c.Name())
+func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	class := classFromArg0(f, s, args)
+	if _, ok := class.(*ConditionClass); ok {
+		slip.NewPanic("make-instance can not be used to make instances of %s. Use define-condition instead.",
+			class.Name())
 	}
-	inst := c.MakeInstance().(*flavors.Instance)
-	if _, ok := c.(*flavors.Flavor); ok {
-		inst.Init(s, args[1:], depth)
-	} else {
-		for i := 1; i < len(args); i++ {
-			sym, ok := args[i].(slip.Symbol)
-			if !ok || len(sym) < 2 || sym[0] != ':' {
-				slip.PanicType("initialization keyword", args[i], "keyword")
-			}
-			key := strings.ToLower(string(sym))
-			if key == ":self" {
-				slip.NewPanic("initialization keyword 'self' is not initable.")
-			}
-			i++
-			val := args[i]
-			vkey := key[1:]
-			if inst.Has(slip.Symbol(vkey)) {
-				inst.Let(slip.Symbol(vkey), val)
-			} else {
-				slip.NewPanic("initialization keyword '%s' is not valid for %s.", key, c.Name())
-			}
-		}
-	}
+	inst := class.MakeInstance()
+	inst.Init(s, args[1:], depth)
+
 	return inst
 }
 
-func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, label string) (class slip.Class) {
+func classFromArg0(f slip.Object, s *slip.Scope, args slip.List) (class slip.Class) {
 	slip.ArgCountCheck(f, args, 1, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		if cf := flavors.Find(string(ta)); cf == nil {
-			if c := slip.FindClass(string(ta)); c == nil {
-				slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
-			} else {
-				class = c
-			}
-		} else {
-			class = cf
-		}
-	case *flavors.Flavor:
-		class = ta
-	case *Class:
+		class = slip.FindClass(string(ta))
+	case slip.Class:
 		class = ta
 	default:
-		slip.PanicType(fmt.Sprintf("class argument to %s", label), ta, "symbol", "flavor", "class")
+		slip.PanicType("class", ta, "symbol", "flavor", "class")
 	}
 	return
 }

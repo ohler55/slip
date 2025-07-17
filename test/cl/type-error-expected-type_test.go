@@ -12,7 +12,7 @@ import (
 func TestTypeErrorExpectedTypeExact(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(type-error-expected-type (make-condition 'type-error :expected-type '(fixnum float)))`,
-		Expect: "fixnum, float",
+		Expect: "(fixnum float)",
 	}).Test(t)
 }
 
@@ -26,6 +26,6 @@ func TestTypeErrorExpectedTypeSub(t *testing.T) {
 func TestTypeErrorExpectedTypeNotTypeError(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(type-error-expected-type (make-condition 'error :expected-type 'test))`,
-		PanicType: slip.Symbol("unbound-slot"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

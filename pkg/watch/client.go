@@ -26,7 +26,7 @@ type symVal struct {
 
 type client struct {
 	wcon
-	self    slip.Instance
+	self    *flavors.Instance
 	host    string
 	port    int
 	vars    []*symVal
@@ -414,9 +414,9 @@ func (c *client) listen(s *slip.Scope) {
 		for {
 			obj := c.readExpr()
 			if obj != nil {
-				if serr, ok := obj.(slip.Error); ok {
+				if cond, ok := obj.(slip.Instance); ok && cond.IsA("error") {
 					c.expr = c.expr[:0]
-					c.results <- slip.List{nil, serr}
+					c.results <- slip.List{nil, cond}
 					continue
 				}
 				if list, ok := obj.(slip.List); ok && 2 <= len(list) {
@@ -446,9 +446,15 @@ func (c *client) listen(s *slip.Scope) {
 
 func formError(list slip.List) (serr slip.Object) {
 	msg := list[3].(slip.String)
-	class := string(list[2].(slip.Symbol))
-	serr = slip.MakeCondition(class, slip.List{slip.Symbol(":message"), msg})
+	class := list[2].(slip.Symbol)
 
+	if c := slip.FindClass(string(class)); c != nil && c.Metaclass() == slip.Symbol("condition-class") {
+		obj := c.MakeInstance()
+		obj.Init(slip.NewScope(), slip.List{slip.Symbol(":message"), msg}, 0)
+		serr = obj
+	} else {
+		slip.NewPanic("%s does not designate a condition class.", class)
+	}
 	return
 }
 

@@ -46,7 +46,7 @@ type SocketAccept struct {
 func (f *SocketAccept) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
-	if !ok || !self.IsA(socketFlavor) {
+	if !ok || !self.IsA("socket") {
 		slip.PanicType("socket", args[0], "socket")
 	}
 	return socketAccept(self)
