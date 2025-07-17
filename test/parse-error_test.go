@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -25,30 +26,20 @@ func TestParseErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "not a real parse-error", cond.Error())
+	tt.Equal(t, "not a real parse-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestParseErrorMake(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-condition 'Parse-Error)`,
-		Expect: "/^#<parse-error [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// pe, ok := tf.Result.(slip.ParseError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "/^#<PARSE-ERROR [0-9a-f]+>$/", pe.Error())
-
-	tf = sliptest.Function{
 		Source: `(make-condition 'Parse-Error :message "raise")`,
 		Expect: "/^#<parse-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// pe, ok = tf.Result.(slip.ParseError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "raise", pe.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestParseErrorPanic(t *testing.T) {

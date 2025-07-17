@@ -36,9 +36,9 @@ func TestControlErrorMake(t *testing.T) {
 	}
 	tf.Test(t)
 	cond, ok := tf.Result.(slip.Instance)
-	tt.Equal(t, ok, true)
+	tt.Equal(t, true, ok)
 	value, has := cond.SlotValue(slip.Symbol("message"))
-	tt.Equal(t, has, true)
+	tt.Equal(t, true, has)
 	tt.Nil(t, value)
 
 	tf = sliptest.Function{
@@ -47,9 +47,9 @@ func TestControlErrorMake(t *testing.T) {
 	}
 	tf.Test(t)
 	cond, ok = tf.Result.(slip.Instance)
-	tt.Equal(t, ok, true)
+	tt.Equal(t, true, ok)
 	value, has = cond.SlotValue(slip.Symbol("message"))
-	tt.Equal(t, has, true)
+	tt.Equal(t, true, has)
 	tt.Equal(t, slip.String("raise"), value)
 }
 

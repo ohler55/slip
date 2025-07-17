@@ -12,7 +12,7 @@ import (
 )
 
 func TestSimpleTypeErrorObj(t *testing.T) {
-	cond := cl.NewSimpleTypeError(nil, "condition ~A-~D", slip.List{slip.Symbol("dummy"), slip.Fixnum(3)})
+	cond := cl.NewSimpleTypeError(nil, "condition ~A-~D", slip.Symbol("dummy"), slip.Fixnum(3))
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<simple-type-error [0-9a-f]+>$/",
@@ -26,22 +26,11 @@ func TestSimpleTypeErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "condition dummy-3", cond.Error())
+	tt.Equal(t, "condition dummy-3", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestSimpleTypeErrorMake(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-condition 'Simple-Type-Error)`,
-		Expect: "/^#<simple-type-error [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// sc, ok := tf.Result.(cl.SimpleTypeError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "", sc.Error())
-
-	tf = sliptest.Function{
 		Source: `(make-condition 'Simple-Type-Error
                                  :format-control "condition ~A-~D"
                                  :format-arguments '(dummy 3)
@@ -50,37 +39,24 @@ func TestSimpleTypeErrorMake(t *testing.T) {
 		Expect: "/^#<simple-type-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// sc, ok = tf.Result.(cl.SimpleTypeError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "condition dummy-3", sc.Error())
-	// tt.Equal(t, "condition ~A-~D", sc.Control())
-	// tt.Equal(t, "(dummy 3)", slip.ObjectString(sc.Arguments()))
-	// tt.Equal(t, slip.Symbol("day"), sc.Datum())
-	// tt.Equal(t, slip.String("con"), sc.Context())
-	// tt.Equal(t, "(fixnum)", slip.ObjectString(sc.ExpectedTypes()))
-}
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
 
-func TestSimpleTypeErrorMakeString(t *testing.T) {
-	tf := sliptest.Function{
-		Source: `(make-condition 'Simple-Type-Error :expected-type "fixnum")`,
-		Expect: "/^#<simple-type-error [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// ste, _ := tf.Result.(cl.SimpleTypeError)
-	// tt.Equal(t, "(fixnum)", slip.ObjectString(ste.ExpectedTypes()))
-}
+	value, has := cond.SlotValue(slip.Symbol("format-control"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("condition ~A-~D"), value)
 
-func TestSimpleTypeErrorMakeList(t *testing.T) {
-	tf := sliptest.Function{
-		Source: `(make-condition 'Simple-Type-Error :expected-type '("fixnum" float))`,
-		Expect: "/^#<simple-type-error [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// ste, _ := tf.Result.(cl.SimpleTypeError)
-	// tt.Equal(t, "(fixnum float)", slip.ObjectString(ste.ExpectedTypes()))
+	value, has = cond.SlotValue(slip.Symbol("format-arguments"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.List{slip.Symbol("dummy"), slip.Fixnum(3)}, value)
+
+	value, has = cond.SlotValue(slip.Symbol("datum"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol("day"), value)
+
+	value, has = cond.SlotValue(slip.Symbol("expected-type"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol("fixnum"), value)
 }
 
 func TestSimpleTypeErrorMakeBadArgs(t *testing.T) {

@@ -26,32 +26,23 @@ func TestSimpleConditionObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "condition dummy-3", cond.Error())
+	tt.Equal(t, "condition dummy-3", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestSimpleConditionMake(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-condition 'Simple-Condition)`,
-		Expect: "/^#<simple-condition [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// sc, ok := tf.Result.(cl.SimpleCondition)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "", sc.Error())
-
-	tf = sliptest.Function{
 		Source: `(make-condition 'Simple-Condition :format-control "condition ~A-~D" :format-arguments '(dummy 3))`,
 		Expect: "/^#<simple-condition [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// sc, ok = tf.Result.(cl.SimpleCondition)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "condition dummy-3", sc.Error())
-	// tt.Equal(t, "condition ~A-~D", sc.Control())
-	// tt.Equal(t, "(dummy 3)", slip.ObjectString(sc.Arguments()))
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("format-control"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("condition ~A-~D"), value)
+	value, has = cond.SlotValue(slip.Symbol("format-arguments"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.List{slip.Symbol("dummy"), slip.Fixnum(3)}, value)
 }
 
 func TestSimpleConditionMakeBadArgs(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -25,32 +26,23 @@ func TestUndefinedFunctionObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "not a real undefined-function", cond.Error())
+	tt.Equal(t, "not a real undefined-function", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestUndefinedFunctionMake(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-condition 'Undefined-Function :name 'nothing)`,
-		Expect: "/^#<undefined-function [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// us, ok := tf.Result.(slip.UndefinedFunction)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol("nothing"), us.Name())
-	// tt.Equal(t, "The function nothing is undefined.", us.Error())
-
-	tf = sliptest.Function{
 		Source: `(make-condition 'Undefined-Function :name 'nothing :message "raise")`,
 		Expect: "/^#<undefined-function [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// us, ok = tf.Result.(slip.UndefinedFunction)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol("nothing"), us.Name())
-	// tt.Equal(t, "raise", us.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol("nothing"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestUndefinedFunctionPanic(t *testing.T) {

@@ -14,7 +14,7 @@ type SlotDef struct {
 	readers    []slip.Symbol
 	writers    []slip.Symbol
 	accessors  []slip.Symbol
-	initform   slip.Object // TBD this should be evaluated on each make-instance
+	initform   slip.Object
 	argType    slip.Object
 	docs       string
 	classStore bool

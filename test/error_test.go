@@ -35,20 +35,20 @@ func TestErrorMake(t *testing.T) {
 		Expect: "/^#<error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// e, ok := tf.Result.(slip.Error)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "/^#<error [0-9a-f]+>$/", e.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Nil(t, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Error :message "raise")`,
 		Expect: "/^#<error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// e, ok = tf.Result.(slip.Error)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "raise", e.Error())
-	// // Created outside a function so stack should be empty.
-	// tt.Equal(t, 0, len(e.Stack()))
+	cond, ok = tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }

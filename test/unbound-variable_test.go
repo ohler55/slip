@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -25,32 +26,23 @@ func TestUnboundVariableObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "not a real unbound-variable", cond.Error())
+	tt.Equal(t, "not a real unbound-variable", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestUnboundVariableMake(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-condition 'Unbound-Variable :name 'very)`,
-		Expect: "/^#<unbound-variable [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// uv, ok := tf.Result.(slip.UnboundVariable)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol("very"), uv.Name())
-	// tt.Equal(t, "The variable very is unbound.", uv.Error())
-
-	tf = sliptest.Function{
 		Source: `(make-condition 'Unbound-Variable :name 'very :message "raise")`,
 		Expect: "/^#<unbound-variable [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// uv, ok = tf.Result.(slip.UnboundVariable)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol("very"), uv.Name())
-	// tt.Equal(t, "raise", uv.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol("very"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestUnboundVariablePanic(t *testing.T) {

@@ -56,10 +56,3 @@ func recoverPanic(obj slip.Object) (msg, stack string) {
 	_ = obj.Eval(slip.NewScope(), 0)
 	return
 }
-
-// TBD
-// func TestPanicPartial(t *testing.T) {
-// 	p := slip.NewPartial(3, "test")
-// 	tt.Equal(t, "/^#<PARSE-ERROR [0-9a-f]+>$/", p.String())
-// 	tt.Equal(t, "test", p.Error())
-// }

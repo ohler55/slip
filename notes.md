@@ -6,12 +6,6 @@
 
  - instance-update branch
 
-  - update all TBDs in tests
-
- - watch.connect.safeEval
-  - encode condition and decode
-  - frame test broken
-
 ---------------------
  - standard-flavor branch
   - make standard-object and standard-class support direct methods
@@ -181,6 +175,10 @@
      - isOk method for true or false
       - separate for each type like integer, float, etc
        - IntegerSpec - low, high
+
+ - watch.connect.safeEval
+  - encode condition and decode
+  - frame test broken
 
 
  - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots

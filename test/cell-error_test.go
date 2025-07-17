@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -25,8 +26,7 @@ func TestCellErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "not a real cell-error", cond.Error())
+	tt.Equal(t, "not a real cell-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestCellErrorMake(t *testing.T) {
@@ -35,22 +35,28 @@ func TestCellErrorMake(t *testing.T) {
 		Expect: "/^#<cell-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok := tf.Result.(slip.CellError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol(":sell"), ce.Name())
-	// tt.Equal(t, "/^#<CELL-ERROR [0-9a-f]+>$/", ce.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol(":sell"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Nil(t, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Cell-Error :name :sell :message "raise")`,
 		Expect: "/^#<cell-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok = tf.Result.(slip.CellError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol(":sell"), ce.Name())
-	// tt.Equal(t, "raise", ce.Error())
+	cond, ok = tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has = cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol(":sell"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestCellErrorPanic(t *testing.T) {

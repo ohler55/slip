@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -25,34 +26,23 @@ func TestUnboundSlotObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "not a real unbound-slot", cond.Error())
+	tt.Equal(t, "not a real unbound-slot", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestUnboundSlotMake(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-condition 'Unbound-Slot :instance 'vanilla :name :slop)`,
-		Expect: "/^#<unbound-slot [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// us, ok := tf.Result.(slip.UnboundSlot)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol("vanilla"), us.Instance())
-	// tt.Equal(t, slip.Symbol(":slop"), us.Name())
-	// tt.Equal(t, "The slot :slop is unbound in the object vanilla.", us.Error())
-
-	tf = sliptest.Function{
 		Source: `(make-condition 'Unbound-Slot :instance 'vanilla :name :slop :message "raise")`,
 		Expect: "/^#<unbound-slot [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// us, ok = tf.Result.(slip.UnboundSlot)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol("vanilla"), us.Instance())
-	// tt.Equal(t, slip.Symbol(":slop"), us.Name())
-	// tt.Equal(t, "raise", us.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol(":slop"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestUnboundSlotPanic(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -25,8 +26,7 @@ func TestClassNotFoundObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "not a real class-not-found", cond.Error())
+	tt.Equal(t, "not a real class-not-found", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestClassNotFoundMake(t *testing.T) {
@@ -35,22 +35,28 @@ func TestClassNotFoundMake(t *testing.T) {
 		Expect: "/^#<class-not-found [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok := tf.Result.(slip.ClassNotFound)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol("klas"), ce.Name())
-	// tt.Equal(t, "class klas not found", ce.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol("klas"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Nil(t, value)
 
 	tf = sliptest.Function{
-		Source: `(make-condition 'class-not-found :name 'klas)`,
+		Source: `(make-condition 'class-not-found :name 'klas :message "raise")`,
 		Expect: "/^#<class-not-found [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok = tf.Result.(slip.ClassNotFound)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, slip.Symbol("klas"), ce.Name())
-	// tt.Equal(t, "class klas not found", ce.Error())
+	cond, ok = tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has = cond.SlotValue(slip.Symbol("name"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.Symbol("klas"), value)
+	value, has = cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestClassNotFoundPanic(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -25,30 +26,20 @@ func TestProgramErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	// TBD
-	// tt.Equal(t, "not a real program-error", cond.Error())
+	tt.Equal(t, "not a real program-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
 func TestProgramErrorMake(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-condition 'Program-Error)`,
-		Expect: "/^#<program-error [0-9a-f]+>$/",
-	}
-	tf.Test(t)
-	// TBD
-	// ce, ok := tf.Result.(slip.ProgramError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "/^#<PROGRAM-ERROR [0-9a-f]+>$/", ce.Error())
-
-	tf = sliptest.Function{
 		Source: `(make-condition 'Program-Error :message "raise")`,
 		Expect: "/^#<program-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
-	// TBD
-	// ce, ok = tf.Result.(slip.ProgramError)
-	// tt.Equal(t, ok, true)
-	// tt.Equal(t, "raise", ce.Error())
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	value, has := cond.SlotValue(slip.Symbol("message"))
+	tt.Equal(t, true, has)
+	tt.Equal(t, slip.String("raise"), value)
 }
 
 func TestProgramErrorPanic(t *testing.T) {

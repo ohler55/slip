@@ -35,7 +35,9 @@ be either created or over-written`,
 				},
 			},
 			Return: "string|nil",
-			Text:   `__snapshot__ TBD limitation as well as behavior`,
+			Text: `__snapshot__ takes a snapshot of the currently defined constants, variables,
+functions, classes, and instances. Objects that can not be encoded such as streams are excluded.
+Thw snapshot is written as a LISP file suitable for loading to re-created the current state.`,
 			Examples: []string{
 				`(snapshot t)`,
 			},
