@@ -5,6 +5,7 @@ package clos
 import (
 	"sort"
 	"strconv"
+	"strings"
 	"unsafe"
 
 	"github.com/ohler55/slip"
@@ -194,6 +195,20 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 			b = append(b, '\n')
 		}
 	}
+	if 0 < len(c.methods) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Direct Methods:\n"...)
+		var keys []string
+		for k := range c.methods {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			b = append(b, indentSpaces[:i3]...)
+			b = append(b, k...)
+			b = append(b, '\n')
+		}
+	}
 	return b
 }
 
@@ -350,6 +365,9 @@ func (c *StandardClass) mergeSupers() bool {
 		}
 	}
 	for k, im := range flavors.VanillaMethods() {
+		if strings.Contains(im.Name, "flavor") {
+			continue
+		}
 		m := c.methods[k]
 		if m == nil {
 			m = &slip.Method{

@@ -5,14 +5,10 @@
 - next
 
  - standard-flavor branch
-  - standard-object
-   - Receive should panic on no method found
   - flavor
    - DefMethod
     - addCombo at bottom should handle standard-class as well
-
-  - update describe with methods list for standard-class and standard-object
-  - improve coverage
+  - improve test coverage
 
 ---------------------
  - bugs

@@ -79,6 +79,21 @@ func TestStandardClassBasic(t *testing.T) {
       type: fixnum
   Default-initargs:
     :y: 3
+  Direct Methods:
+    :change-class
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
+    :which-operations
 `, string(desc))
 
 	desc = quux.Describe(nil, 0, 80, true)
@@ -103,6 +118,21 @@ func TestStandardClassAllocClass(t *testing.T) {
       allocation: class
   Class Slots:
     x = 3
+  Direct Methods:
+    :change-class
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
+    :which-operations
 `, string(desc))
 }
 
@@ -116,6 +146,21 @@ func TestStandardClassMinimal(t *testing.T) {
   Direct superclasses:
   Class precedence list: quux standard-object t
   Slots: None
+  Direct Methods:
+    :change-class
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
+    :which-operations
 `, string(desc))
 }
 

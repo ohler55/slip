@@ -79,6 +79,21 @@ func TestConditionClassAllocClass(t *testing.T) {
       allocation: class
   Class Slots:
     x = 3
+  Direct Methods:
+    :change-class
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
+    :which-operations
 `, string(desc))
 }
 
@@ -92,6 +107,21 @@ func TestConditionClassMinimal(t *testing.T) {
   Direct superclasses:
   Class precedence list: quux t
   Slots: None
+  Direct Methods:
+    :change-class
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :update-instance-for-different-class
+    :which-operations
 `, string(desc))
 }
 
