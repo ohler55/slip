@@ -6,7 +6,7 @@
 
  - standard-flavor branch
   - standard-object
-   - have Init() call :init if present
+   - Receive should panic on no method found
   - standard-class
    - merge direct methods in mergeSupers
   - flavor

@@ -92,6 +92,9 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 			obj.setSlot(sd, sd.initform.Eval(scope, depth+1))
 		}
 	}
+	if scope != nil {
+		_ = obj.Receive(scope, ":init", slip.List{args}, depth+1)
+	}
 }
 
 func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
@@ -209,17 +212,26 @@ func (obj *StandardObject) SetSlotValue(sym slip.Symbol, value slip.Object) (has
 // to be over-ridden.
 func (obj *StandardObject) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
 	m := obj.Type.GetMethod(message)
+	if m == nil {
+		// TBD panic with method-error
+		return nil
+	}
 	scope := slip.NewScope()
 	if s != nil {
 		scope.AddParent(s)
 	}
-	scope.Let(slip.Symbol("self"), obj)
+	obj.setObjectScope(s)
+
+	return m.Call(scope, args, depth)
+}
+
+func (obj *StandardObject) setObjectScope(scope *slip.Scope) {
 	obj.Lock()
 	defer obj.Unlock()
+	scope.UnsafeLet(slip.Symbol("self"), obj)
 	for name, value := range obj.Vars() {
-		scope.Let(slip.Symbol(name), value)
+		scope.UnsafeLet(slip.Symbol(name), value)
 	}
-	return m.Call(scope, args, depth)
 }
 
 // GetMethod returns the method if it exists.
