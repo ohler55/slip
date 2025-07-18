@@ -8,4 +8,7 @@ import "github.com/ohler55/slip"
 type HasMethods interface {
 	// GetMethod returns the method if it exists.
 	GetMethod(name string) *slip.Method
+
+	// Methods returns a map of the methods.
+	Methods() map[string]*slip.Method
 }

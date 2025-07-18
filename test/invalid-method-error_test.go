@@ -11,15 +11,15 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestMethodErrorObj(t *testing.T) {
-	cond := slip.NewMethodError(
+func TestInvalidMethodErrorObj(t *testing.T) {
+	cond := slip.NewInvalidMethodError(
 		slip.Symbol("vanilla"),
 		slip.Symbol(":nonsense"),
 		slip.Symbol(":meth"),
-		"not a %s method-error", "real")
+		"not a %s invalid-method-error", "real")
 	(&sliptest.Object{
 		Target: cond,
-		String: "/^#<method-error [0-9a-f]+>$/",
+		String: "/^#<invalid-method-error [0-9a-f]+>$/",
 		Simple: func(t2 *testing.T, v any) {
 			_, ok := v.(map[string]any)
 			tt.Equal(t2, true, ok)
@@ -30,13 +30,13 @@ func TestMethodErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real method-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real invalid-method-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
-func TestMethodErrorMake(t *testing.T) {
+func TestInvalidMethodErrorMake(t *testing.T) {
 	tf := sliptest.Function{
-		Source: `(make-condition 'Method-Error :class 'vanilla :name :meth :qualifier :nonsense)`,
-		Expect: "/^#<method-error [0-9a-f]+>$/",
+		Source: `(make-condition 'Invalid-Method-Error :class 'vanilla :name :meth :qualifier :nonsense)`,
+		Expect: "/^#<invalid-method-error [0-9a-f]+>$/",
 	}
 	tf.Test(t)
 	cond, ok := tf.Result.(slip.Instance)
@@ -59,6 +59,6 @@ func TestMethodErrorMake(t *testing.T) {
 	tt.Nil(t, value)
 }
 
-func TestMethodErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicMethod(slip.Symbol("vanilla"), slip.Symbol(":meth"), nil, "raise") })
+func TestInvalidMethodErrorPanic(t *testing.T) {
+	tt.Panic(t, func() { slip.PanicInvalidMethod(slip.Symbol("vanilla"), slip.Symbol(":meth"), nil, "raise") })
 }

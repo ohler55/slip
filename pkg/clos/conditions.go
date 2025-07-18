@@ -55,8 +55,8 @@ const (
 	SimpleWarningSymbol = slip.Symbol("simple-warning")
 	// ClassNotFoundSymbol is the symbol with a value of "class-not-found".
 	ClassNotFoundSymbol = slip.Symbol("class-not-found")
-	// MethodErrorSymbol is the symbol with a value of "method-error".
-	MethodErrorSymbol = slip.Symbol("method-error")
+	// InvalidMethodErrorSymbol is the symbol with a value of "invalid-method-error".
+	InvalidMethodErrorSymbol = slip.Symbol("invalid-method-error")
 
 	docSym     = slip.Symbol(":documentation")
 	readerSym  = slip.Symbol(":reader")
@@ -89,7 +89,7 @@ func defConditions() {
 	defSimpleTypeError()
 	defSimpleWarning()
 	defClassNotFound()
-	defMethodError()
+	defInvalidMethodError()
 }
 
 func defCondition() {
@@ -500,8 +500,8 @@ func defClassNotFound() {
 	).Final = true
 }
 
-func defMethodError() {
-	DefConditionClass("method-error", slip.List{CellErrorSymbol},
+func defInvalidMethodError() {
+	DefConditionClass("invalid-method-error", slip.List{CellErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("name"),
@@ -527,7 +527,7 @@ func defMethodError() {
 		slip.List{ // options
 			slip.List{
 				docSym,
-				slip.String(`A __method-error__ represents errors related to a method.`),
+				slip.String(`A __invalid-method-error__ represents errors related to a method.`),
 			},
 		},
 	).Final = true

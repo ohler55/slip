@@ -328,10 +328,38 @@ func (c *StandardClass) mergeSupers() bool {
 			}
 		}
 	}
-
-	// TBD build methods from c.inherit then pull in vanilla
-
-	slip.InheritMethods(c.methods, flavors.VanillaMethods())
+	// The inherit list includes the expanded set of inherited supers in the
+	// precedence order.
+	for _, ic := range c.inherit {
+		if hm, ok := ic.(flavors.HasMethods); ok {
+			for k, im := range hm.Methods() {
+				m := c.methods[k]
+				if m == nil {
+					m = &slip.Method{
+						Name: k,
+						Doc:  im.Doc,
+					}
+					c.methods[k] = m
+				}
+				for _, imc := range im.Combinations {
+					if imc.From == ic {
+						m.Combinations = append(m.Combinations, imc)
+					}
+				}
+			}
+		}
+	}
+	for k, im := range flavors.VanillaMethods() {
+		m := c.methods[k]
+		if m == nil {
+			m = &slip.Method{
+				Name: k,
+				Doc:  im.Doc,
+			}
+			c.methods[k] = m
+		}
+		m.Combinations = append(m.Combinations, im.Combinations...)
+	}
 
 	// TBD add readers, writers, and accessors for each slot if not already added
 	//  maybe keep pointer to the generic method for each
@@ -380,6 +408,11 @@ func (c *StandardClass) Metaclass() slip.Symbol {
 // GetMethod returns the method if it exists.
 func (c *StandardClass) GetMethod(name string) *slip.Method {
 	return c.methods[name]
+}
+
+// Methods returns a map of the methods.
+func (obj *StandardClass) Methods() map[string]*slip.Method {
+	return obj.methods
 }
 
 // MethodNames returns a sorted list of the methods of the class.

@@ -7,8 +7,6 @@
  - standard-flavor branch
   - standard-object
    - Receive should panic on no method found
-  - standard-class
-   - merge direct methods in mergeSupers
   - flavor
    - DefMethod
     - addCombo at bottom should handle standard-class as well

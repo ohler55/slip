@@ -33,11 +33,11 @@ func init() {
 					Text: `Arguments to the _format-control_.`,
 				},
 			},
-			Return: "method-error",
+			Return: "invalid-method-error",
 			Text: `__invalid-method-error__ makes a _method-error_ initialized with the _method_ and a
 string generated from the _format-control_ and _args_.`,
 			Examples: []string{
-				`(invalid-method-error :mess "test") => #<METHOD-ERROR 12345>`,
+				`(invalid-method-error :mess "test") => #<invalid-method-error 12345>`,
 			},
 		}, &slip.CLPkg)
 }
@@ -62,5 +62,5 @@ func (f *InvalidMethodError) Call(s *slip.Scope, args slip.List, depth int) (con
 	var sf SimpleFormatterEmbed
 	sf.Init(s, string(ctrl), args[2:])
 
-	panic(slip.NewMethodError(nil, nil, method, "%s", sf.Output()))
+	panic(slip.NewInvalidMethodError(nil, nil, method, "%s", sf.Output()))
 }

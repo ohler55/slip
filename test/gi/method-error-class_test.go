@@ -11,7 +11,7 @@ import (
 
 func TestMethodErrorClassExact(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(method-error-class (make-condition 'method-error :class 'test))`,
+		Source: `(method-error-class (make-condition 'invalid-method-error :class 'test))`,
 		Expect: "test",
 	}).Test(t)
 }

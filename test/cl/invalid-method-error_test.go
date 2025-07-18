@@ -12,7 +12,7 @@ import (
 func TestInvalidMethodErrorBasic(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(invalid-method-error :mess "test")`,
-		PanicType: slip.Symbol("method-error"),
+		PanicType: slip.Symbol("invalid-method-error"),
 	}).Test(t)
 }
 

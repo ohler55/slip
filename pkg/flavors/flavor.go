@@ -115,7 +115,7 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 	case ":whopper", ":wrapper":
 		c.Wrap = caller
 	default:
-		slip.PanicMethod(obj, slip.Symbol(daemon), slip.Symbol(name), "")
+		slip.PanicInvalidMethod(obj, slip.Symbol(daemon), slip.Symbol(name), "")
 	}
 	if addMethod {
 		mm[name] = m
@@ -290,7 +290,21 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 			obj.keywords[k] = v
 		}
 	}
-	slip.InheritMethods(obj.methods, cf.methods)
+	for k, im := range cf.methods {
+		m := obj.methods[k]
+		if m == nil {
+			m = &slip.Method{
+				Name: k,
+				Doc:  im.Doc,
+			}
+			obj.methods[k] = m
+		}
+		for _, ic := range im.Combinations {
+			if !m.HasMethodFromClass(ic.From.Name()) {
+				m.Combinations = append(m.Combinations, ic)
+			}
+		}
+	}
 	for _, f2 := range cf.inherit {
 		if &vanilla != f2 {
 			obj.inheritFlavor(f2)
@@ -505,6 +519,11 @@ func (obj *Flavor) Document(name, desc string) {
 // GetMethod returns the method if it exists.
 func (obj *Flavor) GetMethod(name string) *slip.Method {
 	return obj.methods[name]
+}
+
+// Methods returns a map of the methods.
+func (obj *Flavor) Methods() map[string]*slip.Method {
+	return obj.methods
 }
 
 // MethodNames returns a sorted list of the methods of the class.
