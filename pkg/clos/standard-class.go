@@ -8,6 +8,7 @@ import (
 	"unsafe"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 const (
@@ -32,6 +33,7 @@ type StandardClass struct {
 	defaultInitArgs map[string]slip.Object
 	initArgs        map[string]*SlotDef // map with keys of initargs
 	initForms       map[string]*SlotDef
+	methods         map[string]*slip.Method
 	baseClass       slip.Symbol
 	Final           bool
 }
@@ -327,6 +329,10 @@ func (c *StandardClass) mergeSupers() bool {
 		}
 	}
 
+	// TBD build methods from c.inherit then pull in vanilla
+
+	slip.InheritMethods(c.methods, flavors.VanillaMethods())
+
 	// TBD add readers, writers, and accessors for each slot if not already added
 	//  maybe keep pointer to the generic method for each
 
@@ -369,6 +375,25 @@ func (c *StandardClass) mergeSupers() bool {
 // Metaclass returns the symbol standard-class.
 func (c *StandardClass) Metaclass() slip.Symbol {
 	return StandardClassSymbol
+}
+
+// GetMethod returns the method if it exists.
+func (c *StandardClass) GetMethod(name string) *slip.Method {
+	return c.methods[name]
+}
+
+// MethodNames returns a sorted list of the methods of the class.
+func (obj *StandardClass) MethodNames() slip.List {
+	names := make([]string, 0, len(obj.methods))
+	for k := range obj.methods {
+		names = append(names, k)
+	}
+	sort.Strings(names)
+	methods := make(slip.List, len(names))
+	for i, name := range names {
+		methods[i] = slip.Symbol(name)
+	}
+	return methods
 }
 
 func (c *StandardClass) slotDefMap() map[string]*SlotDef {

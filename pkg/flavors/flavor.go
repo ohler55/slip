@@ -290,21 +290,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 			obj.keywords[k] = v
 		}
 	}
-	for k, im := range cf.methods {
-		m := obj.methods[k]
-		if m == nil {
-			m = &slip.Method{
-				Name: k,
-				Doc:  im.Doc,
-			}
-			obj.methods[k] = m
-		}
-		for _, ic := range im.Combinations {
-			if !m.HasMethodFromClass(ic.From.Name()) {
-				m.Combinations = append(m.Combinations, ic)
-			}
-		}
-	}
+	slip.InheritMethods(obj.methods, cf.methods)
 	for _, f2 := range cf.inherit {
 		if &vanilla != f2 {
 			obj.inheritFlavor(f2)

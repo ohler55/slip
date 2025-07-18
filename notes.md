@@ -5,9 +5,16 @@
 - next
 
  - standard-flavor branch
-  - make standard-object and standard-class support direct methods
-  - add methods to standard-class and add vanilla-flavor to hierarchy before standard-object
-   - update describe
+  - standard-object
+   - have Init() call :init if present
+  - standard-class
+   - merge direct methods in mergeSupers
+  - flavor
+   - DefMethod
+    - addCombo at bottom should handle standard-class as well
+
+  - update describe with methods list for standard-class and standard-object
+  - improve coverage
 
 ---------------------
  - bugs
@@ -144,18 +151,7 @@
  - [ ] WITH-ACCESSORS
  - [ ] WITH-ADDED-METHODS
  - [ ] WITH-SLOTS
- - [ ] arithmetic-error-operands
- - [ ] simple-condition-format-arguments
- - [ ] arithmetic-error-operation
- - [ ] simple-condition-format-control
- - [ ] cell-error-name
- - [ ] stream-error-stream
- - [ ] file-error-pathname
- - [ ] type-error-datum
- - [ ] package-error-package
- - [ ] type-error-expected-type
  - [ ] print-not-readable-object
- - [ ] unbound-slot-instance
 
 -----------------
   - [ ] inspect [interactive]

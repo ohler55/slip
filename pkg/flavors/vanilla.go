@@ -4,7 +4,6 @@ package flavors
 
 import (
 	"io"
-	"unsafe"
 
 	"github.com/ohler55/slip"
 )
@@ -18,6 +17,7 @@ var vanilla = Flavor{
 		":equal":                {Combinations: []*slip.Combination{{Primary: equalCaller{}}}},
 		":eval-inside-yourself": {Combinations: []*slip.Combination{{Primary: insideCaller{}}}},
 		":flavor":               {Combinations: []*slip.Combination{{Primary: flavorCaller{}}}},
+		":class":                {Combinations: []*slip.Combination{{Primary: flavorCaller{}}}},
 		":init":                 {Combinations: []*slip.Combination{{Primary: initCaller{}}}},
 		":id":                   {Combinations: []*slip.Combination{{Primary: idCaller{}}}},
 		":inspect":              {Combinations: []*slip.Combination{{Primary: inspectCaller{}}}},
@@ -73,10 +73,13 @@ func (caller initCaller) FuncDocs() *slip.FuncDoc {
 type describeCaller struct{}
 
 func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*Instance)
+	self := s.Get("self").(slip.Instance)
 	ansi := s.Get("*print-ansi*") != nil
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
-	b := self.Describe([]byte{}, 0, right, ansi)
+	var b []byte
+	if di, ok := self.(slip.Describer); ok {
+		b = di.Describe(b, 0, right, ansi)
+	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
 		if 1 < len(args) {
@@ -111,8 +114,8 @@ func (caller describeCaller) FuncDocs() *slip.FuncDoc {
 type idCaller struct{}
 
 func (caller idCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*Instance)
-	return slip.Fixnum(uintptr(unsafe.Pointer(self)))
+	self := s.Get("self").(slip.Instance)
+	return slip.Fixnum(self.ID())
 }
 
 func (caller idCaller) FuncDocs() *slip.FuncDoc {
@@ -126,8 +129,8 @@ func (caller idCaller) FuncDocs() *slip.FuncDoc {
 type flavorCaller struct{}
 
 func (caller flavorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*Instance)
-	return self.Type
+	self := s.Get("self").(slip.Instance)
+	return self.Class()
 }
 
 func (caller flavorCaller) FuncDocs() *slip.FuncDoc {
@@ -141,11 +144,11 @@ func (caller flavorCaller) FuncDocs() *slip.FuncDoc {
 type hasOpCaller struct{}
 
 func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*Instance)
+	self := s.Get("self").(slip.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(self, ":has", len(args), "1")
 	}
-	if sym, ok := args[0].(slip.Symbol); ok && self.HasMethod(string(sym)) {
+	if sym, ok := args[0].(slip.Symbol); ok && self.GetMethod(string(sym)) != nil {
 		return slip.True
 	}
 	return nil
@@ -171,7 +174,7 @@ type printCaller struct{}
 func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	// Args should be stream print-depth escape-p. The second two arguments are
 	// ignored.
-	self := s.Get("self").(*Instance)
+	self := s.Get("self").(slip.Instance)
 	so := s.Get("*standard-output*")
 	ss, _ := so.(slip.Stream)
 	w := so.(io.Writer)
@@ -209,13 +212,15 @@ func (caller printCaller) FuncDocs() *slip.FuncDoc {
 type sendIfCaller struct{}
 
 func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	self := s.Get("self").(*Instance)
+	self := s.Get("self").(slip.Instance)
 	if len(args) == 0 {
 		slip.PanicMethodArgCount(self, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
-		if self.Type.GetMethod(string(sym)) != nil {
-			return self.Receive(s, string(sym), args[1:], depth+1)
+		if self.GetMethod(string(sym)) != nil {
+			if recv, ok2 := self.(Receiver); ok2 {
+				return recv.Receive(s, string(sym), args[1:], depth+1)
+			}
 		}
 	}
 	return nil
@@ -244,9 +249,9 @@ func (caller sendIfCaller) FuncDocs() *slip.FuncDoc {
 type whichOpsCaller struct{}
 
 func (caller whichOpsCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*Instance)
+	self := s.Get("self").(slip.Instance)
 
-	return self.Type.MethodNames()
+	return self.MethodNames()
 }
 
 func (caller whichOpsCaller) FuncDocs() *slip.FuncDoc {
@@ -261,7 +266,7 @@ type insideCaller struct{}
 
 func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
-		self := s.Get("self").(*Instance)
+		self := s.Get("self").(slip.Instance)
 		slip.PanicMethodArgChoice(self, ":eval-inside-yourself", len(args), "1")
 	}
 	return s.Eval(args[0], depth+1)
@@ -285,7 +290,7 @@ func (caller insideCaller) FuncDocs() *slip.FuncDoc {
 type inspectCaller struct{}
 
 func (caller inspectCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	self := s.Get("self").(*Instance)
+	self := s.Get("self").(slip.Instance)
 	cf := allFlavors["bag-flavor"]
 	inst := cf.MakeInstance().(*Instance)
 	inst.Any = self.Simplify()
@@ -304,7 +309,7 @@ func (caller inspectCaller) FuncDocs() *slip.FuncDoc {
 type equalCaller struct{}
 
 func (caller equalCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	self := s.Get("self").(*Instance)
+	self := s.Get("self").(slip.Instance)
 	slip.CheckMethodArgCount(self, ":equal", len(args), 1, 1)
 	if self.Equal(args[0]) {
 		return slip.True

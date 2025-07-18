@@ -29,7 +29,7 @@ func (obj *StandardObject) Append(b []byte) []byte {
 	b = append(b, "#<"...)
 	b = append(b, obj.Type.Name()...)
 	b = append(b, ' ')
-	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(obj))), 16)
+	b = strconv.AppendUint(b, obj.ID(), 16)
 	return append(b, '>')
 }
 
@@ -37,7 +37,7 @@ func (obj *StandardObject) Append(b []byte) []byte {
 func (obj *StandardObject) Simplify() interface{} {
 	simple := obj.WithSlots.Simplify()
 	simple.(map[string]any)["class"] = obj.Type.Name()
-	simple.(map[string]any)["id"] = strconv.FormatUint(uint64(uintptr(unsafe.Pointer(obj))), 16)
+	simple.(map[string]any)["id"] = strconv.FormatUint(obj.ID(), 16)
 
 	return simple
 }
@@ -202,4 +202,37 @@ func (obj *StandardObject) SetSlotValue(sym slip.Symbol, value slip.Object) (has
 		has = obj.Type.SetSlotValue(sym, value)
 	}
 	return
+}
+
+// Receive a method invocation from the send function. Not intended to be
+// called by any code other than the send function but is public to allow it
+// to be over-ridden.
+func (obj *StandardObject) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
+	m := obj.Type.GetMethod(message)
+	scope := slip.NewScope()
+	if s != nil {
+		scope.AddParent(s)
+	}
+	scope.Let(slip.Symbol("self"), obj)
+	obj.Lock()
+	defer obj.Unlock()
+	for name, value := range obj.Vars() {
+		scope.Let(slip.Symbol(name), value)
+	}
+	return m.Call(scope, args, depth)
+}
+
+// GetMethod returns the method if it exists.
+func (obj *StandardObject) GetMethod(name string) *slip.Method {
+	return obj.Type.GetMethod(name)
+}
+
+// MethodNames returns a sorted list of the methods of the instance.
+func (obj *StandardObject) MethodNames() slip.List {
+	return obj.Type.MethodNames()
+}
+
+// ID returns unique ID for the instance.
+func (obj *StandardObject) ID() uint64 {
+	return uint64(uintptr(unsafe.Pointer(obj)))
 }

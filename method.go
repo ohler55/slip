@@ -161,6 +161,26 @@ func (m *Method) CompareArgs(fd *FuncDoc) {
 	}
 }
 
+// InheritMethods merges methods from one map of methods to another. The imm
+// map is from a super class.
+func InheritMethods(mm, imm map[string]*Method) {
+	for k, im := range imm {
+		m := mm[k]
+		if m == nil {
+			m = &Method{
+				Name: k,
+				Doc:  im.Doc,
+			}
+			mm[k] = m
+		}
+		for _, ic := range im.Combinations {
+			if !m.HasMethodFromClass(ic.From.Name()) {
+				m.Combinations = append(m.Combinations, ic)
+			}
+		}
+	}
+}
+
 // CheckMethodArgCount raises a panic describing the wrong number of arguments
 // to a method if the argument count is outside the expected bounds.
 func CheckMethodArgCount(inst Instance, method string, cnt, mn, mx int) {

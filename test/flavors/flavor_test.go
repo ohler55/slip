@@ -44,6 +44,10 @@ func TestFlavorSimple(t *testing.T) {
     }
     {
       combinations: [{from: vanilla-flavor primary: true}]
+      name: ":class"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
       name: ":describe"
     }
     {
@@ -136,6 +140,7 @@ func TestFlavorDescribeBasic(t *testing.T) {
   Methods:
     :change-class
     :change-flavor
+    :class
     :describe
     :equal
     :eval-inside-yourself
@@ -159,6 +164,7 @@ func TestFlavorDescribeBasic(t *testing.T) {
 		"  Methods:\n"+
 		"    :change-class\n"+
 		"    :change-flavor\n"+
+		"    :class\n"+
 		"    :describe\n"+
 		"    :equal\n"+
 		"    :eval-inside-yourself\n"+
@@ -253,6 +259,10 @@ func TestFlavorReceive(t *testing.T) {
     }
     {
       combinations: [{from: vanilla-flavor primary: true}]
+      name: ":class"
+    }
+    {
+      combinations: [{from: vanilla-flavor primary: true}]
       name: ":describe"
     }
     {
@@ -331,6 +341,7 @@ func TestFlavorReceive(t *testing.T) {
   Methods:
     :change-class
     :change-flavor
+    :class
     :describe
     :equal
     :eval-inside-yourself

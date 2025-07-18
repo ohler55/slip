@@ -24,6 +24,7 @@ func TestDescribeFlavor(t *testing.T) {
   Methods:
     :change-class
     :change-flavor
+    :class
     :describe
     :equal
     :eval-inside-yourself

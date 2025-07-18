@@ -109,6 +109,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 			defaultInitArgs: map[string]slip.Object{},
 			initArgs:        map[string]*SlotDef{},
 			initForms:       map[string]*SlotDef{},
+			methods:         map[string]*slip.Method{},
 			inheritCheck: func(c slip.Class) *StandardClass {
 				if c == nil {
 					return nil

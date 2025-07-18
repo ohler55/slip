@@ -109,6 +109,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		defaultInitArgs: map[string]slip.Object{},
 		initArgs:        map[string]*SlotDef{},
 		initForms:       map[string]*SlotDef{},
+		methods:         map[string]*slip.Method{},
 		inheritCheck: func(c slip.Class) *StandardClass {
 			sc, ok := c.(*StandardClass)
 			if !ok && c != nil {
