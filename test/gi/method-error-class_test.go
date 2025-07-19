@@ -18,7 +18,7 @@ func TestMethodErrorClassExact(t *testing.T) {
 
 func TestMethodErrorClassNotMethodError(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(method-error-class (make-condition 'error :class 'test))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(method-error-class (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

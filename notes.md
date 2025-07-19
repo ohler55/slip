@@ -6,14 +6,16 @@
 
  - standard-flavor branch
   - improve test coverage
+   - cl
+   - clos
+   - generic
+   - local
   - functions
    - [ ] list-all-classes (&optional metaclass)
    - [ ] class-precedence
    - [ ] class-supers
    - [ ] class-metaclass => standard-class, condition-class, build-in-class
    - [ ] CHANGE-CLASS
-   - [ ] DEFCLASS - needs accessors
-   - [ ] DOCUMENTATION
    - [ ] MAKE-INSTANCES-OBSOLETE
    - [ ] SLOT-BOUNDP
    - [ ] SLOT-EXISTS-P
@@ -24,7 +26,9 @@
    - [ ] WITH-SLOTS
    - [x] CLASS-NAME
    - [x] CLASS-OF
+   - [x] DEFCLASS - needs accessors
    - [x] DEFINE-CONDITION
+   - [x] DOCUMENTATION
    - [x] FIND-CLASS
    - [x] INVALID-METHOD-ERROR
    - [x] MAKE-INSTANCE

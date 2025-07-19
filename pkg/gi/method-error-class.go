@@ -44,10 +44,7 @@ func (f *MethodErrorClass) Call(s *slip.Scope, args slip.List, depth int) (resul
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("invalid-method-error") {
 		slip.PanicType("invalid-method-error", args[0], "invalid-method-error")
 	} else {
-		var has bool
-		if result, has = ci.SlotValue(classSymbol); !has {
-			slip.PanicUnboundSlot(ci, classSymbol, "")
-		}
+		result, _ = ci.SlotValue(classSymbol)
 	}
 	return
 }
