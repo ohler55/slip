@@ -6,9 +6,6 @@
 
  - standard-flavor branch
   - improve test coverage
-   - cl
-   - clos
-   - generic
    - local
   - functions
    - [ ] list-all-classes (&optional metaclass)

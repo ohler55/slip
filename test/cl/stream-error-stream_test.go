@@ -18,7 +18,7 @@ func TestStreamErrorStreamExact(t *testing.T) {
 
 func TestStreamErrorStreamNotStreamError(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(stream-error-stream (make-condition 'error :stream *standard-output*))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(stream-error-stream (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

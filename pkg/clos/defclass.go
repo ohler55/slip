@@ -91,8 +91,8 @@ func (f *Defclass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.PanicType("slot-specifiers", args[2], "list")
 	}
 	if c := slip.FindClass(string(name)); c != nil {
-		if sc, ok := c.(*StandardClass); ok && sc.Final {
-			slip.NewPanic("Can not redefine class %s.", name)
+		if sc, ok := c.(*StandardClass); !ok || sc.Final {
+			slip.NewPanic("Can not redefine class %s, a %s.", name, c.Metaclass())
 		}
 	}
 	return DefStandardClass(string(name), supers, slotSpecs, args[3:])

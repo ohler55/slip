@@ -69,6 +69,13 @@ blueberry whopper rot done
   (terpri out))
 "`,
 	}).Test(t)
+
+	tt.Equal(t, `(defmethod (blueberry :before :rot) () (princ "blueberry before rot" out) (terpri out))`,
+		f.(*flavors.Flavor).DefMethodList(":rot", ":before", true).String())
+	tt.Equal(t, `(defmethod (blueberry :primary :rot) () (princ "berry rot" out) (terpri out))`,
+		f.(*flavors.Flavor).DefMethodList(":rot", ":primary", true).String())
+	tt.Equal(t, `(defmethod (blueberry :after :rot) () (princ "blueberry after rot" out) (terpri out))`,
+		f.(*flavors.Flavor).DefMethodList(":rot", ":after", true).String())
 }
 
 func TestDefwhopperOneWrap(t *testing.T) {

@@ -44,10 +44,7 @@ func (f *StreamErrorStream) Call(s *slip.Scope, args slip.List, depth int) (resu
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("stream-error") {
 		slip.PanicType("stream-error", args[0], "stream-error")
 	} else {
-		var has bool
-		if result, has = ci.SlotValue(streamSymbol); !has {
-			slip.PanicUnboundSlot(ci, streamSymbol, "")
-		}
+		result, _ = ci.SlotValue(streamSymbol)
 	}
 	return
 }

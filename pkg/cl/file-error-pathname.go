@@ -44,10 +44,7 @@ func (f *FileErrorPathname) Call(s *slip.Scope, args slip.List, depth int) (resu
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("file-error") {
 		slip.PanicType("file-error", args[0], "file-error")
 	} else {
-		var has bool
-		if result, has = ci.SlotValue(pathnameSymbol); !has {
-			slip.PanicUnboundSlot(ci, pathnameSymbol, "")
-		}
+		result, _ = ci.SlotValue(pathnameSymbol)
 	}
 	return
 }

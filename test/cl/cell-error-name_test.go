@@ -25,7 +25,7 @@ func TestCellErrorNameSub(t *testing.T) {
 
 func TestCellErrorNameNotCellError(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(cell-error-name (make-condition 'error :name 'test))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(cell-error-name (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

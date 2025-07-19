@@ -44,10 +44,7 @@ func (f *PrintNotReadableObject) Call(s *slip.Scope, args slip.List, depth int) 
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("print-not-readable") {
 		slip.PanicType("print-not-readable", args[0], "print-not-readable")
 	} else {
-		var has bool
-		if result, has = ci.SlotValue(objectSymbol); !has {
-			slip.PanicUnboundSlot(ci, objectSymbol, "")
-		}
+		result, _ = ci.SlotValue(objectSymbol)
 	}
 	return
 }

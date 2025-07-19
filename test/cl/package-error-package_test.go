@@ -18,7 +18,7 @@ func TestPackageErrorPackageExact(t *testing.T) {
 
 func TestPackageErrorPackageNotPackageError(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(package-error-package (make-condition 'error :package *package*))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(package-error-package (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

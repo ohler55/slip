@@ -25,7 +25,7 @@ func TestTypeErrorExpectedTypeSub(t *testing.T) {
 
 func TestTypeErrorExpectedTypeNotTypeError(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(type-error-expected-type (make-condition 'error :expected-type 'test))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(type-error-expected-type (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

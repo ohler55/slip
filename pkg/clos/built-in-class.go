@@ -60,7 +60,7 @@ func (c *BuiltInClass) Hierarchy() []slip.Symbol {
 // Inherits returns true if this Class inherits from a specified Class.
 func (c *BuiltInClass) Inherits(sc slip.Class) bool {
 	name := slip.Symbol(sc.Name())
-	for _, sym := range c.precedence {
+	for _, sym := range c.precedence[1:] {
 		if name == sym {
 			return true
 		}
@@ -70,7 +70,7 @@ func (c *BuiltInClass) Inherits(sc slip.Class) bool {
 
 // InheritsList returns a list of all inherited classes.
 func (c *BuiltInClass) InheritsList() (ca []slip.Class) {
-	for ic := c; ic != nil; ic = ic.inherit {
+	for ic := c.inherit; ic != nil; ic = ic.inherit {
 		ca = append(ca, ic)
 	}
 	return

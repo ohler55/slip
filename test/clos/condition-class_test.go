@@ -59,6 +59,8 @@ func TestConditionClassBasic(t *testing.T) {
 
 	tt.Equal(t, true, quux.Inherits(buux))
 	tt.Equal(t, false, quux.Inherits(slip.FindClass("vanilla-flavor")))
+
+	tt.Equal(t, slip.Symbol("condition-class"), quux.Metaclass())
 }
 
 func TestConditionClassAllocClass(t *testing.T) {

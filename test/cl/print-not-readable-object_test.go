@@ -18,7 +18,7 @@ func TestPrintNotReadableExact(t *testing.T) {
 
 func TestPrintNotReadableWrongCondition(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(print-not-readable-object (make-condition 'error :object '(1 2)))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(print-not-readable-object (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

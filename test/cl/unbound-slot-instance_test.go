@@ -18,7 +18,7 @@ func TestUnboundSlotInstanceExact(t *testing.T) {
 
 func TestUnboundSlotInstanceNotUnboundSlot(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(unbound-slot-instance (make-condition 'error :instance 'test))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(unbound-slot-instance (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

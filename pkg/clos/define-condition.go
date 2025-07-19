@@ -90,7 +90,7 @@ func (f *DefineCondition) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 		slip.PanicType("slot-specifiers", args[2], "list")
 	}
 	if c := slip.FindClass(string(name)); c != nil {
-		if cc, ok := c.(*ConditionClass); ok && cc.Final {
+		if cc, ok := c.(*ConditionClass); !ok || cc.Final {
 			slip.NewPanic("Can not redefine class %s.", name)
 		}
 	}

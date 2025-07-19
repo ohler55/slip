@@ -18,7 +18,7 @@ func TestFileErrorPathnameExact(t *testing.T) {
 
 func TestFileErrorPathnameNotFileError(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(file-error-pathname (make-condition 'error :pathname '(1 2)))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(file-error-pathname (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

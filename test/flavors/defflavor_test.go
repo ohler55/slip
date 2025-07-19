@@ -10,6 +10,7 @@ import (
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/pp"
 )
 
@@ -133,6 +134,9 @@ func TestDefflavorInherit(t *testing.T) {
 	tt.Equal(t, false, strings.Contains(names.String(), "f1"))
 	tt.Equal(t, false, strings.Contains(names.String(), "f2"))
 	tt.Equal(t, false, strings.Contains(names.String(), "f3"))
+
+	tt.Equal(t, []slip.Class{slip.FindClass("f2"), slip.FindClass("f1"), slip.FindClass("vanilla-flavor")},
+		f.(*flavors.Flavor).InheritsList())
 }
 
 func TestDefflavorInheritSame(t *testing.T) {
