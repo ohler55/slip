@@ -99,6 +99,8 @@ func TestInstanceMisc(t *testing.T) {
 	bi.SetSlotValue(slip.Symbol("size"), slip.String("large"))
 	value, _ = bi.SlotValue(slip.Symbol("size"))
 	tt.Equal(t, slip.String("large"), value)
+
+	tt.Equal(t, true, bi.HasMethod(":id"))
 }
 
 func TestInstanceBoundCall(t *testing.T) {

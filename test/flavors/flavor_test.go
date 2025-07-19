@@ -121,6 +121,8 @@ func TestFlavorSimple(t *testing.T) {
 
 	f.(*flavors.Flavor).SetDocumentation("quux")
 	tt.Equal(t, "quux", f.(*flavors.Flavor).Documentation())
+
+	tt.Equal(t, slip.Symbol("flavor"), f.(slip.Class).Metaclass())
 }
 
 func TestFlavorDescribeBasic(t *testing.T) {
