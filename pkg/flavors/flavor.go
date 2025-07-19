@@ -28,7 +28,7 @@ type Flavor struct {
 	requiredMethods  []string
 	requiredVars     []string
 	requiredKeywords []string
-	varNames         []string // for DefMethod, requiredVars and defaultVars combined
+	varNames         []string
 	varDocs          map[string]string
 	initable         map[string]bool
 	defaultHandler   slip.Caller
@@ -63,14 +63,25 @@ func (obj *Flavor) Pkg() *slip.Package {
 	return obj.pkg
 }
 
+// VarNames for DefMethod, requiredVars and defaultVars combined.
+func (obj *Flavor) VarNames() []string {
+	return obj.varNames
+}
+
 // DefMethod adds a method to the Flavor.
 func (obj *Flavor) DefMethod(name string, daemon string, caller slip.Caller) {
-	DefMethod(obj, obj.methods, name, daemon, caller)
+	DefMethod(obj, name, daemon, caller)
 }
 
 // DefMethod adds a method to the class or flavor.
-func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, caller slip.Caller) {
+func DefMethod(obj slip.Class, name, daemon string, caller slip.Caller) {
 	name = strings.ToLower(name)
+	hm, ok := obj.(HasMethods)
+	if !ok {
+		slip.PanicInvalidMethod(obj, slip.Symbol(daemon), slip.Symbol(name),
+			"Can not define a direct method, %s on class %s.", name, obj.Name())
+	}
+	mm := hm.Methods()
 	var (
 		addMethod bool
 		addCombo  bool
@@ -95,7 +106,7 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 			m.Doc = &slip.FuncDoc{Name: name, Text: text, Kind: slip.MethodSymbol}
 		}
 	}
-	// If there is a combination for this flavor it will be the first on the
+	// If there is a combination for this class it will be the first on the
 	// list.
 	var c *slip.Combination
 	if 0 < len(m.Combinations) && m.Combinations[0].From == obj {
@@ -124,35 +135,36 @@ func DefMethod(obj slip.Class, mm map[string]*slip.Method, name, daemon string, 
 		m.Combinations = append([]*slip.Combination{c}, m.Combinations...)
 	}
 	if addCombo {
-		if flavor, ok := obj.(*Flavor); ok {
-			// If there are supers that inherit from this flavor then insert
-			// the new method into the method combinations.
-			fname := obj.Name()
-			for _, f := range allFlavors {
-				if f.inheritsFlavor(fname) {
-					f.insertMethod(flavor, m, c)
-				}
+		// If there are supers that inherit from this flavor then insert
+		// the new method into the method combinations.
+		for _, ac := range slip.CurrentPackage.AllClasses() {
+			if ac.Inherits(obj) {
+				insertMethod(ac, obj, m, c)
 			}
 		}
 	}
 }
 
-func (obj *Flavor) insertMethod(super *Flavor, method *slip.Method, combo *slip.Combination) {
-	m := obj.methods[method.Name]
+func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Combination) {
+	var mm map[string]*slip.Method
+	if hm, ok := class.(HasMethods); ok {
+		mm = hm.Methods()
+	}
+	m := mm[method.Name]
 	if m == nil {
 		m = &slip.Method{
 			Name:         method.Name,
 			Doc:          method.Doc,
 			Combinations: []*slip.Combination{combo},
 		}
-		obj.methods[method.Name] = m
+		mm[method.Name] = m
 		return
 	}
 	var pos int
-	if pos < len(m.Combinations) && m.Combinations[pos].From == obj {
+	if pos < len(m.Combinations) && m.Combinations[pos].From == class {
 		pos++
 	}
-	for _, f := range obj.inherit {
+	for _, f := range class.InheritsList() {
 		if len(m.Combinations) <= pos || m.Combinations[pos].From == super {
 			break
 		}
@@ -268,6 +280,15 @@ func (obj *Flavor) Inherits(sc slip.Class) bool {
 		}
 	}
 	return false
+}
+
+// InheritsList returns a list of all inherited classes.
+func (obj *Flavor) InheritsList() []slip.Class {
+	ca := make([]slip.Class, len(obj.inherit))
+	for i, f := range obj.inherit {
+		ca[i] = f
+	}
+	return ca
 }
 
 func (obj *Flavor) inheritFlavor(cf *Flavor) {

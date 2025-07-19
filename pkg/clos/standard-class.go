@@ -89,6 +89,11 @@ func (c *StandardClass) Inherits(sc slip.Class) bool {
 	return false
 }
 
+// InheritsList returns a list of all inherited classes.
+func (c *StandardClass) InheritsList() []slip.Class {
+	return c.inherit
+}
+
 // Eval returns self.
 func (c *StandardClass) Eval(s *slip.Scope, depth int) slip.Object {
 	return c
@@ -469,6 +474,25 @@ func (c *StandardClass) precedenceList() []slip.Symbol {
 
 func (c *StandardClass) inheritedClasses() []slip.Class {
 	return c.inherit
+}
+
+func (c *StandardClass) slotDefNames() []string {
+	defs := map[string]struct{}{}
+	for i := len(c.inherit) - 1; 0 <= i; i-- {
+		if sc, ok := c.inherit[i].(isStandardClass); ok {
+			for k := range sc.slotDefMap() {
+				defs[k] = struct{}{}
+			}
+		}
+	}
+	for k := range c.slotDefs {
+		defs[k] = struct{}{}
+	}
+	names := make([]string, 0, len(defs))
+	for k := range defs {
+		names = append(names, k)
+	}
+	return names
 }
 
 func makeClassesReady(p *slip.Package) {

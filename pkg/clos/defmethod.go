@@ -65,9 +65,53 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	case slip.Symbol:
 		slip.NewPanic("Not yet implemented")
 	case slip.List:
-		flavors.DefmethodCall(s, ta, args[1:])
+		defMethodCall(s, ta, args[1:])
 	default:
 		slip.PanicType("method designator for defmethod", ta, "symbol", "list")
 	}
 	return
+}
+
+// DefmethodCall is the flavors implementation of defmethod.
+func defMethodCall(s *slip.Scope, ml, args slip.List) {
+	var (
+		class  slip.Class
+		daemon string
+		method string
+	)
+	switch len(ml) {
+	case 0, 1:
+		slip.NewPanic("Too few elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml))
+	case 2:
+		if sym, ok2 := ml[0].(slip.Symbol); ok2 {
+			class = slip.FindClass(string(sym))
+		}
+	case 3:
+		if sym, ok2 := ml[0].(slip.Symbol); ok2 {
+			class = slip.FindClass(string(sym))
+		}
+		if sym, ok2 := ml[1].(slip.Symbol); ok2 {
+			daemon = string(sym)
+		}
+	default:
+		slip.NewPanic("Too many elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml))
+	}
+	if sym, ok2 := ml[len(ml)-1].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
+		method = string(sym)
+	} else {
+		slip.PanicType("method for defmethod", ml[len(ml)-1], "keyword")
+	}
+	switch tc := class.(type) {
+	case nil:
+		slip.PanicType("class for defmethod", ml[0], "name of class or flavor")
+	case *flavors.Flavor:
+		flavors.DefMethod(class, method, daemon, slip.DefLambda(method, s, args, tc.VarNames()...))
+	case *StandardClass:
+		flavors.DefMethod(class, method, daemon, slip.DefLambda(method, s, args, tc.slotDefNames()...))
+	case *ConditionClass:
+		flavors.DefMethod(class, method, daemon, slip.DefLambda(method, s, args, tc.slotDefNames()...))
+	default:
+		slip.PanicInvalidMethod(class, slip.Symbol(daemon), slip.Symbol(method),
+			"Can not define a direct method, %s on class %s.", method, class.Name())
+	}
 }

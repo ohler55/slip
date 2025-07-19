@@ -68,6 +68,14 @@ func (c *BuiltInClass) Inherits(sc slip.Class) bool {
 	return false
 }
 
+// InheritsList returns a list of all inherited classes.
+func (c *BuiltInClass) InheritsList() (ca []slip.Class) {
+	for ic := c; ic != nil; ic = ic.inherit {
+		ca = append(ca, ic)
+	}
+	return
+}
+
 // Metaclass returns the symbol built-in-class.
 func (c *BuiltInClass) Metaclass() slip.Symbol {
 	return BuiltInClassSymbol

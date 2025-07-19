@@ -5,9 +5,6 @@
 - next
 
  - standard-flavor branch
-  - flavor
-   - DefMethod
-    - addCombo at bottom should handle standard-class as well
   - improve test coverage
 
 ---------------------
