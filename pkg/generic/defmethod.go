@@ -104,10 +104,11 @@ func defDirectMethod(s *slip.Scope, ml, args slip.List) {
 	if class == nil {
 		slip.PanicType("class for defmethod", ml[0], "name of class or flavor")
 	}
-	defClassMethod(class, method, daemon, slip.DefLambda(method, s, args, class.VarNames()...))
+	DefClassMethod(class, method, daemon, slip.DefLambda(method, s, args, class.VarNames()...))
 }
 
-func defClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) {
+// DefClassMethod defines a direct method on a class.
+func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) {
 	name = strings.ToLower(name)
 	hm, ok := obj.(HasMethods)
 	if !ok {

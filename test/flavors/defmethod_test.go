@@ -203,12 +203,6 @@ func TestDefmethodNotFlavor(t *testing.T) {
 	})
 }
 
-func TestDefmethodNotAllowed(t *testing.T) {
-	tt.Panic(t, func() {
-		flavors.DefMethod(slip.FindClass("fixnum"), ":quux", "", nil)
-	})
-}
-
 type rottenCaller struct{}
 
 func (caller rottenCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {

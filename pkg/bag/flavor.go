@@ -9,6 +9,7 @@ import (
 	"github.com/ohler55/ojg/sen"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/pkg/generic"
 )
 
 var flavor *flavors.Flavor
@@ -36,17 +37,17 @@ nil and boolean false.`),
 		},
 		&Pkg,
 	)
-	flavor.DefMethod(":init", "", initCaller{})
-	flavor.DefMethod(":set", "", setCaller{})
-	flavor.DefMethod(":parse", "", parseCaller{})
-	flavor.DefMethod(":read", "", readCaller{})
-	flavor.DefMethod(":get", "", getCaller{})
-	flavor.DefMethod(":has", "", hasCaller{})
-	flavor.DefMethod(":remove", "", removeCaller{})
-	flavor.DefMethod(":modify", "", modifyCaller{})
-	flavor.DefMethod(":native", "", nativeCaller{})
-	flavor.DefMethod(":write", "", writeCaller{})
-	flavor.DefMethod(":walk", "", walkCaller{})
+	generic.DefClassMethod(flavor, ":init", "", initCaller{})
+	generic.DefClassMethod(flavor, ":set", "", setCaller{})
+	generic.DefClassMethod(flavor, ":parse", "", parseCaller{})
+	generic.DefClassMethod(flavor, ":read", "", readCaller{})
+	generic.DefClassMethod(flavor, ":get", "", getCaller{})
+	generic.DefClassMethod(flavor, ":has", "", hasCaller{})
+	generic.DefClassMethod(flavor, ":remove", "", removeCaller{})
+	generic.DefClassMethod(flavor, ":modify", "", modifyCaller{})
+	generic.DefClassMethod(flavor, ":native", "", nativeCaller{})
+	generic.DefClassMethod(flavor, ":write", "", writeCaller{})
+	generic.DefClassMethod(flavor, ":walk", "", walkCaller{})
 
 	return flavor
 }

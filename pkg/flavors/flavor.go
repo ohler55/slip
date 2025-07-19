@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/generic"
 )
 
 // FlavorSymbol is the symbol with a value of "flavor".
@@ -70,7 +71,7 @@ func (obj *Flavor) VarNames() []string {
 
 // DefMethod adds a method to the Flavor.
 func (obj *Flavor) DefMethod(name string, daemon string, caller slip.Caller) {
-	DefMethod(obj, name, daemon, caller)
+	generic.DefClassMethod(obj, name, daemon, caller)
 }
 
 // String representation of the Object.

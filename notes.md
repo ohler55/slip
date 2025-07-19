@@ -6,10 +6,7 @@
 
  - standard-flavor branch
   - improve test coverage
-  - create pkg/generic
-  - move defmethod to generic from both clos and flavors
   - functions
-   - [ ] print-not-readable-object - a condition
    - [ ] list-all-classes (&optional metaclass)
    - [ ] class-precedence
    - [ ] class-supers
@@ -31,8 +28,8 @@
    - [x] FIND-CLASS
    - [x] INVALID-METHOD-ERROR
    - [x] MAKE-INSTANCE
-
-  - simplify flavors.Defmethod to only be for accessors
+   - [x] print-not-readable-object
+   - [x] print-not-readable
 
 ---------------------
  - bugs

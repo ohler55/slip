@@ -57,6 +57,8 @@ const (
 	ClassNotFoundSymbol = slip.Symbol("class-not-found")
 	// InvalidMethodErrorSymbol is the symbol with a value of "invalid-method-error".
 	InvalidMethodErrorSymbol = slip.Symbol("invalid-method-error")
+	// PrintNotReadableSymbol is the symbol with a value of "print-not-readable".
+	PrintNotReadableSymbol = slip.Symbol("print-not-readable")
 
 	docSym     = slip.Symbol(":documentation")
 	readerSym  = slip.Symbol(":reader")
@@ -90,6 +92,7 @@ func defConditions() {
 	defSimpleWarning()
 	defClassNotFound()
 	defInvalidMethodError()
+	defPrintNotReadable()
 }
 
 func defCondition() {
@@ -528,6 +531,26 @@ func defInvalidMethodError() {
 			slip.List{
 				docSym,
 				slip.String(`A __invalid-method-error__ represents errors related to a method.`),
+			},
+		},
+	).Final = true
+}
+
+func defPrintNotReadable() {
+	DefConditionClass("print-not-readable", slip.List{ErrorSymbol},
+		slip.List{ // slot-specifications
+			slip.List{
+				slip.Symbol("object"),
+				readerSym, slip.Symbol("print-not-readable-object"),
+				initargSym, slip.Symbol(":object"),
+				docSym, slip.String(`The _object_ that could not be printed readably.`),
+			},
+		},
+		slip.List{ // options
+			slip.List{
+				docSym,
+				slip.String(`A __print-not-readable__ occurs during an attempt to print a
+non-readable object when __*print-readably*__ is non-nil.`),
 			},
 		},
 	).Final = true
