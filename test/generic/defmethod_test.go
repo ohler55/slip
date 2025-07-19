@@ -1,8 +1,9 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package clos_test
+package generic_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/ohler55/slip"
@@ -34,4 +35,10 @@ func TestDefmethodBadMethod(t *testing.T) {
 		Source:    `(defmethod 7 () (setq color 'brown))`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
+}
+
+func undefFlavor(fn string) {
+	defer func() { _ = recover() }()
+	scope := slip.NewScope()
+	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn), scope).Eval(scope, nil)
 }

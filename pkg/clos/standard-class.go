@@ -476,7 +476,8 @@ func (c *StandardClass) inheritedClasses() []slip.Class {
 	return c.inherit
 }
 
-func (c *StandardClass) slotDefNames() []string {
+// VarNames for DefMethod, requiredVars and defaultVars combined.
+func (c *StandardClass) VarNames() []string {
 	defs := map[string]struct{}{}
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
 		if sc, ok := c.inherit[i].(isStandardClass); ok {

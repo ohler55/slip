@@ -106,6 +106,11 @@ func (c *BuiltInClass) SetDocumentation(doc string) {
 	c.docs = doc
 }
 
+// VarNames for DefMethod, requiredVars and defaultVars combined.
+func (c *BuiltInClass) VarNames() []string {
+	return nil
+}
+
 // Describe the class in detail.
 func (c *BuiltInClass) Describe(b []byte, indent, right int, ansi bool) []byte {
 	b = append(b, indentSpaces[:indent]...)

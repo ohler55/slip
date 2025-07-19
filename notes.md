@@ -6,6 +6,33 @@
 
  - standard-flavor branch
   - improve test coverage
+  - create pkg/generic
+  - move defmethod to generic from both clos and flavors
+  - functions
+   - [ ] print-not-readable-object - a condition
+   - [ ] list-all-classes (&optional metaclass)
+   - [ ] class-precedence
+   - [ ] class-supers
+   - [ ] class-metaclass => standard-class, condition-class, build-in-class
+   - [ ] CHANGE-CLASS
+   - [ ] DEFCLASS - needs accessors
+   - [ ] DOCUMENTATION
+   - [ ] MAKE-INSTANCES-OBSOLETE
+   - [ ] SLOT-BOUNDP
+   - [ ] SLOT-EXISTS-P
+   - [ ] SLOT-MAKUNBOUND
+   - [ ] SLOT-MISSING
+   - [ ] SLOT-UNBOUND
+   - [ ] SLOT-VALUE
+   - [ ] WITH-SLOTS
+   - [x] CLASS-NAME
+   - [x] CLASS-OF
+   - [x] DEFINE-CONDITION
+   - [x] FIND-CLASS
+   - [x] INVALID-METHOD-ERROR
+   - [x] MAKE-INSTANCE
+
+  - simplify flavors.Defmethod to only be for accessors
 
 ---------------------
  - bugs
@@ -18,6 +45,9 @@
    - class slots
     - accessors must consider slot on standard-object.Type.Vars
      - if not found then look back on inherit
+  - pkg/gen or pkg/generic
+   - might need to move defmethod (defmethod depends on flavors)
+   - maybe add VarName() to slip.Class to break dependency
 
   - call print-object in slip.Panic to form message
    - if condition and :report then use that for printing, others like *print-escape*
@@ -88,36 +118,22 @@
  - rename bag-flavor to just bag?
 
  - bonus functions
-  - [ ] list-all-classes (&optional metaclass)
-  - [ ] class-precedence
-  - [ ] class-supers
-  - [ ] class-metaclass => standard-class, condition-class, build-in-class
 
  - [ ] ADD-METHOD
  - [ ] CALL-METHOD
  - [ ] CALL-NEXT-METHOD
- - [ ] CHANGE-CLASS
- - [ ] CLASS-NAME
- - [ ] CLASS-OF
  - [ ] COMPUTE-APPLICABLE-METHODS
- - [x] DEFCLASS
  - [ ] DEFGENERIC
- - [x] DEFINE-CONDITION
  - [ ] DEFINE-METHOD-COMBINATION
- - [ ] DEFMETHOD
+ - [ ] DEFMETHOD - need generic support
  - [ ] DESCRIBE-OBJECT
- - [ ] DOCUMENTATION
  - [ ] ENSURE-GENERIC-FUNCTION
- - [ ] FIND-CLASS
  - [ ] FIND-METHOD
  - [ ] FUNCTION-KEYWORDS
  - [ ] GENERIC-FLET
  - [ ] GENERIC-FUNCTION
  - [ ] GENERIC-LABELS
  - [ ] INITIALIZE-INSTANCE
- - [ ] INVALID-METHOD-ERROR
- - [ ] MAKE-INSTANCE
- - [ ] MAKE-INSTANCES-OBSOLETE
  - [ ] MAKE-LOAD-FORM
  - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
  - [ ] MAKE-METHOD
@@ -131,18 +147,10 @@
  - [ ] REINITIALIZE-INSTANCE
  - [ ] REMOVE-METHOD
  - [ ] SHARED-INITIALIZE
- - [ ] SLOT-BOUNDP
- - [ ] SLOT-EXISTS-P
- - [ ] SLOT-MAKUNBOUND
- - [ ] SLOT-MISSING
- - [ ] SLOT-UNBOUND
- - [ ] SLOT-VALUE
  - [ ] SYMBOL-MACROLET
  - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [ ] WITH-ACCESSORS
  - [ ] WITH-ADDED-METHODS
- - [ ] WITH-SLOTS
- - [ ] print-not-readable-object
 
 -----------------
   - [ ] inspect [interactive]

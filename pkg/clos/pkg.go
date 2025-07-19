@@ -41,7 +41,6 @@ func init() {
 	defClassOf()
 	defDefclass()
 	defDefineCondition()
-	defDefmethod()
 	defFindClass()
 	defMakeInstance()
 	defSlotBoundp()

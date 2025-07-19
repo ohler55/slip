@@ -37,6 +37,9 @@ type Class interface {
 	// Metaclass returns the name of the class's meta class which can be
 	// built-in-class, standard-class, flavor, or condition-class.
 	Metaclass() Symbol
+
+	// VarNames for DefMethod, requiredVars and defaultVars combined.
+	VarNames() []string
 }
 
 // Find finds the named class.
