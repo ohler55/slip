@@ -6,15 +6,14 @@
 
  - standard-flavor branch
   - functions
-   - [ ] list-all-classes (&optional metaclass)
-   - [ ] CHANGE-CLASS
-   - [ ] MAKE-INSTANCES-OBSOLETE
    - [ ] SLOT-BOUNDP
    - [ ] SLOT-EXISTS-P
    - [ ] SLOT-MAKUNBOUND
    - [ ] SLOT-MISSING
    - [ ] SLOT-UNBOUND
    - [ ] SLOT-VALUE
+   - [ ] CHANGE-CLASS
+   - [ ] MAKE-INSTANCES-OBSOLETE
    - [ ] WITH-SLOTS
    - [x] CLASS-NAME
    - [x] CLASS-OF
@@ -29,6 +28,7 @@
    - [x] class-precedence
    - [x] class-supers
    - [x] class-metaclass
+   - [x] list-all-classes
 
 ---------------------
  - bugs
