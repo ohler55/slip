@@ -54,6 +54,7 @@ func TestPrintArray(t *testing.T) {
 
 	a0 := slip.NewArray([]int{}, slip.TrueSymbol, slip.Fixnum(0), nil, true)
 	a1 := slip.NewVector(3, slip.TrueSymbol, slip.Fixnum(1), nil, true)
+	octets := slip.Octets([]byte("abc"))
 	a := testArray()
 	out := slip.Append([]byte{}, a0)
 	tt.Equal(t, "#0Anil", string(out))
@@ -61,6 +62,8 @@ func TestPrintArray(t *testing.T) {
 	tt.Equal(t, "#(1 1 1)", string(out))
 	out = slip.Append([]byte{}, a)
 	tt.Equal(t, "#3A(((0 1 2 3) (4 5 6 7) (8 9 10 11)) ((12 13 14 15) (16 17 18 19) (20 21 22 23)))", string(out))
+	out = slip.Append([]byte{}, octets)
+	tt.Equal(t, "#(97 98 99)", string(out))
 
 	slip.SetVar(key, nil)
 	val, _ = slip.GetVar(key)
@@ -72,6 +75,8 @@ func TestPrintArray(t *testing.T) {
 	tt.Equal(t, "#<(VECTOR 3)>", string(out))
 	out = slip.Append([]byte{}, a)
 	tt.Equal(t, "#<(ARRAY T (2 3 4))>", string(out))
+	out = slip.Append([]byte{}, octets)
+	tt.Equal(t, "#<(VECTOR 3)>", string(out))
 
 	doc := slip.DescribeVar(key)
 	tt.NotEqual(t, "", doc)

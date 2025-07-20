@@ -37,7 +37,7 @@ type Flavor struct {
 	noVanilla        bool
 	allowOtherKeys   bool
 	pkg              *slip.Package
-	precedence       []slip.Symbol
+	Precedence       []slip.Symbol
 	Final            bool
 	GoMakeOnly       bool
 }

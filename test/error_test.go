@@ -52,3 +52,7 @@ func TestErrorMake(t *testing.T) {
 	tt.Equal(t, true, has)
 	tt.Equal(t, slip.String("raise"), value)
 }
+
+func TestErrorPanic(t *testing.T) {
+	tt.Panic(t, func() { slip.PanicError("raise") })
+}

@@ -49,6 +49,8 @@ func init() {
 	defSlotMissing()
 	defSlotUnbound()
 	defSlotValue()
+	defClassSupers()
+	defClassPrecedence()
 
 	defConditions()
 

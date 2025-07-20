@@ -64,13 +64,13 @@ func (obj *Instance) Simplify() interface{} {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *Instance) Hierarchy() []slip.Symbol {
-	return obj.Type.precedence
+	return obj.Type.Precedence
 }
 
 // IsA return true if the instance is of a flavor that inherits from the
 // provided flavor.
 func (obj *Instance) IsA(class string) bool {
-	for _, sym := range obj.Type.precedence {
+	for _, sym := range obj.Type.Precedence {
 		if class == string(sym) {
 			return true
 		}

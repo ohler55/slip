@@ -5,12 +5,8 @@
 - next
 
  - standard-flavor branch
-  - improve test coverage
-   - local
   - functions
    - [ ] list-all-classes (&optional metaclass)
-   - [ ] class-precedence
-   - [ ] class-supers
    - [ ] class-metaclass => standard-class, condition-class, build-in-class
    - [ ] CHANGE-CLASS
    - [ ] MAKE-INSTANCES-OBSOLETE
@@ -31,6 +27,8 @@
    - [x] MAKE-INSTANCE
    - [x] print-not-readable-object
    - [x] print-not-readable
+   - [x] class-precedence
+   - [x] class-supers
 
 ---------------------
  - bugs

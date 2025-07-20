@@ -120,6 +120,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 				}
 				return &cc.StandardClass
 			},
+			baseClass: ConditionSymbol,
 		},
 	}
 	for i, super := range supers {

@@ -35,7 +35,7 @@ var vanilla = Flavor{
 		},
 	},
 	defaultHandler: defHand{},
-	precedence:     []slip.Symbol{slip.Symbol("vanilla-flavor"), InstanceSymbol, slip.TrueSymbol},
+	Precedence:     []slip.Symbol{slip.Symbol("vanilla-flavor"), InstanceSymbol, slip.TrueSymbol},
 	pkg:            &Pkg,
 }
 

@@ -73,7 +73,7 @@ func TestConditionClassAllocClass(t *testing.T) {
 	desc := quux.Describe(nil, 0, 80, false)
 	tt.Equal(t, `quux is a class:
   Direct superclasses:
-  Class precedence list: quux t
+  Class precedence list: quux condition t
   Slots:
     x
       initargs: :x
@@ -107,7 +107,7 @@ func TestConditionClassMinimal(t *testing.T) {
 
 	tt.Equal(t, `quux is a class:
   Direct superclasses:
-  Class precedence list: quux t
+  Class precedence list: quux condition t
   Slots: None
   Direct Methods:
     :change-class

@@ -14,6 +14,7 @@ func TestSetHook(t *testing.T) {
 	var log []byte
 	slip.AddSetHook("hook-set", func(p *slip.Package, key string) { log = fmt.Appendf(log, "set %s\n", key) })
 	slip.AddUnsetHook("hook-unset", func(p *slip.Package, key string) { log = fmt.Appendf(log, "unset %s\n", key) })
+	slip.AddClassHook("hook-class", func(p *slip.Package, key string) { log = fmt.Appendf(log, "class %s\n", key) })
 
 	slip.CurrentPackage.Set("set-hook-test", slip.True)
 	slip.CurrentPackage.Remove("set-hook-test")
@@ -22,6 +23,7 @@ func TestSetHook(t *testing.T) {
 
 	slip.RemoveSetHook("hook-set")
 	slip.RemoveUnsetHook("hook-unset")
+	slip.RemoveClassHook("hook-class")
 
 	slip.CurrentPackage.Set("set-hook-test", slip.True)
 	slip.CurrentPackage.Remove("set-hook-test")

@@ -59,6 +59,16 @@ func TestInvalidMethodErrorMake(t *testing.T) {
 	tt.Nil(t, value)
 }
 
+func TestInvalidMethodErrorNoFormat(t *testing.T) {
+	cond := slip.NewInvalidMethodError(
+		slip.Symbol("vanilla"),
+		slip.Symbol(":nonsense"),
+		slip.Symbol(":meth"),
+		"")
+	tt.Equal(t, ":nonsense :meth is not a valid method combination for vanilla.",
+		cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+}
+
 func TestInvalidMethodErrorPanic(t *testing.T) {
 	tt.Panic(t, func() { slip.PanicInvalidMethod(slip.Symbol("vanilla"), slip.Symbol(":meth"), nil, "raise") })
 }
