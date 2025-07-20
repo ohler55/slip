@@ -51,6 +51,7 @@ func init() {
 	defSlotValue()
 	defClassSupers()
 	defClassPrecedence()
+	defClassMetaclass()
 
 	defConditions()
 

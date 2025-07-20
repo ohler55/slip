@@ -7,7 +7,6 @@
  - standard-flavor branch
   - functions
    - [ ] list-all-classes (&optional metaclass)
-   - [ ] class-metaclass => standard-class, condition-class, build-in-class
    - [ ] CHANGE-CLASS
    - [ ] MAKE-INSTANCES-OBSOLETE
    - [ ] SLOT-BOUNDP
@@ -29,6 +28,7 @@
    - [x] print-not-readable
    - [x] class-precedence
    - [x] class-supers
+   - [x] class-metaclass
 
 ---------------------
  - bugs
