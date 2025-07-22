@@ -26,7 +26,7 @@ func TestSlotMakunboundOk(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(slot-makunbound (make-instance 'blueberry) 'not-a-slot)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 }
 
@@ -40,6 +40,6 @@ func TestSlotMakunboundBadName(t *testing.T) {
 func TestSlotMakunboundNoSlot(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(slot-makunbound 7 'size)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 }

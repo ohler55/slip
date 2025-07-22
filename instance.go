@@ -4,6 +4,7 @@ package slip
 
 type Instance interface {
 	Object
+	Receiver
 
 	// Class of the instance.
 	Class() Class
@@ -41,4 +42,7 @@ type Instance interface {
 
 	// ID returns unique ID for the instance.
 	ID() uint64
+
+	// Dup returns a duplicate of the instance.
+	Dup() Instance
 }

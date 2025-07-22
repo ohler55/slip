@@ -68,10 +68,12 @@ func (f *SlotMissing) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 
 func slotMissing(obj slip.Object, name slip.Symbol, op string) {
 	if op == "setf" {
-		slip.NewPanic("When attempting to set the slot's value (%s), the slot %s is missing from the object %s.",
+		slip.PanicCell(name,
+			"When attempting to set the slot's value (%s), the slot %s is missing from the object %s.",
 			op, name, obj)
 	} else {
-		slip.NewPanic("When attempting to read the slot's value (%s), the slot %s is missing from the object %s.",
+		slip.PanicCell(name,
+			"When attempting to read the slot's value (%s), the slot %s is missing from the object %s.",
 			op, name, obj)
 	}
 }

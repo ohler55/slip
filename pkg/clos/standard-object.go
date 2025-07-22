@@ -247,3 +247,14 @@ func (obj *StandardObject) MethodNames() slip.List {
 func (obj *StandardObject) ID() uint64 {
 	return uint64(uintptr(unsafe.Pointer(obj)))
 }
+
+// Dup returns a duplicate of the instance.
+func (obj *StandardObject) Dup() slip.Instance {
+	dup := StandardObject{Type: obj.Type}
+	dup.locker = slip.NoOpLocker{}
+	dup.vars = map[string]slip.Object{}
+	for k, v := range obj.vars {
+		dup.vars[k] = v
+	}
+	return &dup
+}

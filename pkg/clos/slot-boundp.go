@@ -4,7 +4,6 @@ package clos
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func defSlotBoundp() {
@@ -48,8 +47,8 @@ func (f *SlotBoundp) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	if !ok {
 		slip.PanicType("slot-name", args[1], "symbol")
 	}
-	if inst, ok := args[0].(*flavors.Instance); ok {
-		if v, has := inst.LocalGet(sym); has {
+	if inst, ok := args[0].(slip.Instance); ok {
+		if v, has := inst.SlotValue(sym); has {
 			if v != slip.Unbound {
 				result = slip.True
 			}

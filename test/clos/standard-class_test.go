@@ -82,7 +82,6 @@ func TestStandardClassBasic(t *testing.T) {
   Default-initargs:
     :y: 3
   Direct Methods:
-    :change-class
     :class
     :describe
     :equal
@@ -94,7 +93,6 @@ func TestStandardClassBasic(t *testing.T) {
     :print-self
     :send-if-handles
     :shared-initialize
-    :update-instance-for-different-class
     :which-operations
 `, string(desc))
 
@@ -131,7 +129,6 @@ func TestStandardClassAllocClass(t *testing.T) {
   Class Slots:
     x = 3
   Direct Methods:
-    :change-class
     :class
     :describe
     :equal
@@ -143,7 +140,6 @@ func TestStandardClassAllocClass(t *testing.T) {
     :print-self
     :send-if-handles
     :shared-initialize
-    :update-instance-for-different-class
     :which-operations
 `, string(desc))
 }
@@ -159,7 +155,6 @@ func TestStandardClassMinimal(t *testing.T) {
   Class precedence list: quux standard-object t
   Slots: None
   Direct Methods:
-    :change-class
     :class
     :describe
     :equal
@@ -171,7 +166,6 @@ func TestStandardClassMinimal(t *testing.T) {
     :print-self
     :send-if-handles
     :shared-initialize
-    :update-instance-for-different-class
     :which-operations
 `, string(desc))
 }

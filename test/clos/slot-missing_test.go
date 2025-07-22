@@ -12,7 +12,7 @@ import (
 func TestSlotMissingOk(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(slot-missing nil (make-instance 'vanilla-flavor) 'anything 'setf 7)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 }
 

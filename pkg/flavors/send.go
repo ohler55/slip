@@ -50,7 +50,7 @@ type Send struct {
 // Call the the function with the arguments provided.
 func (f *Send) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, -1)
-	if self, ok := args[0].(Receiver); ok {
+	if self, ok := args[0].(slip.Receiver); ok {
 		if method, ok := args[1].(slip.Symbol); ok {
 			result = self.Receive(s, string(method), args[2:], depth)
 		} else {

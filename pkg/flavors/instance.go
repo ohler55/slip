@@ -316,7 +316,7 @@ func (obj *Instance) Class() slip.Class {
 }
 
 // Dup returns a duplicate of the instance.
-func (obj *Instance) Dup() *Instance {
+func (obj *Instance) Dup() slip.Instance {
 	dup := Instance{
 		Type: obj.Type,
 		Any:  obj.Any,

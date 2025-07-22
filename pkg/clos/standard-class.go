@@ -370,7 +370,9 @@ func (c *StandardClass) mergeSupers() bool {
 		}
 	}
 	for k, im := range flavors.VanillaMethods() {
-		if strings.Contains(im.Name, "flavor") {
+		if strings.Contains(im.Name, "flavor") ||
+			im.Name == ":update-instance-for-different-class" ||
+			im.Name == ":change-class" {
 			continue
 		}
 		m := c.methods[k]

@@ -6,15 +6,10 @@
 
  - standard-flavor branch
   - functions
-   - [ ] SLOT-BOUNDP
-   - [ ] SLOT-EXISTS-P
-   - [ ] SLOT-MAKUNBOUND
-   - [ ] SLOT-MISSING
-   - [ ] SLOT-UNBOUND
-   - [ ] SLOT-VALUE
    - [ ] CHANGE-CLASS
-   - [ ] MAKE-INSTANCES-OBSOLETE
+    - test
    - [ ] WITH-SLOTS
+
    - [x] CLASS-NAME
    - [x] CLASS-OF
    - [x] DEFCLASS - needs accessors
@@ -29,6 +24,12 @@
    - [x] class-supers
    - [x] class-metaclass
    - [x] list-all-classes
+   - [x] SLOT-BOUNDP
+   - [x] SLOT-EXISTS-P
+   - [x] SLOT-MAKUNBOUND
+   - [x] SLOT-MISSING
+   - [x] SLOT-UNBOUND
+   - [x] SLOT-VALUE
 
 ---------------------
  - bugs
@@ -115,6 +116,8 @@
 
  - bonus functions
 
+ - [ ] SLOT-MISSING - make generic
+ - [ ] SLOT-UNBOUND - make generic
  - [ ] ADD-METHOD
  - [ ] CALL-METHOD
  - [ ] CALL-NEXT-METHOD

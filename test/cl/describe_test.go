@@ -129,7 +129,6 @@ quux is a class:
   Class precedence list: quux standard-object t
   Slots: None
   Direct Methods:
-    :change-class
     :class
     :describe
     :equal
@@ -141,7 +140,6 @@ quux is a class:
     :print-self
     :send-if-handles
     :shared-initialize
-    :update-instance-for-different-class
     :which-operations
   Value = quux
 `,

@@ -218,7 +218,7 @@ func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		if self.GetMethod(string(sym)) != nil {
-			if recv, ok2 := self.(Receiver); ok2 {
+			if recv, ok2 := self.(slip.Receiver); ok2 {
 				return recv.Receive(s, string(sym), args[1:], depth+1)
 			}
 		}

@@ -4,7 +4,6 @@ package clos
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func defSlotValue() {
@@ -68,11 +67,10 @@ func (f *SlotValue) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	if !ok {
 		slip.PanicType("slot-name", args[1], "symbol")
 	}
-	if inst, ok := args[0].(*flavors.Instance); ok {
-		if !inst.Has(sym) {
+	if inst, ok := args[0].(slip.Instance); ok {
+		if !inst.SetSlotValue(sym, value) {
 			slotMissing(inst, sym, "setf")
 		}
-		inst.Set(sym, value)
 	} else {
 		slotMissing(args[0], sym, "slot-value")
 	}

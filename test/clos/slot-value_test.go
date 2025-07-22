@@ -51,19 +51,19 @@ func TestSlotValueBadName(t *testing.T) {
 func TestSlotValueNoSlot(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(slot-value 7 'size)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(slot-value (make-instance 'vanilla-flavor) 'size)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 
 	(&sliptest.Function{
 		Source:    `(setf (slot-value 7 'size) 3)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(setf (slot-value (make-instance 'vanilla-flavor) 'size) 3)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 }

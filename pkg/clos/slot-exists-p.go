@@ -4,7 +4,6 @@ package clos
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func defSlotExistsp() {
@@ -48,8 +47,8 @@ func (f *SlotExistsp) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	if !ok {
 		slip.PanicType("slot-name", args[1], "symbol")
 	}
-	if inst, ok := args[0].(*flavors.Instance); ok {
-		if inst.Has(sym) {
+	if inst, ok := args[0].(slip.Instance); ok {
+		if _, has := inst.SlotValue(sym); has {
 			result = slip.True
 		}
 	}
