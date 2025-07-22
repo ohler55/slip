@@ -6,8 +6,6 @@
 
  - standard-flavor branch
   - functions
-   - [ ] CHANGE-CLASS
-    - test
    - [ ] WITH-SLOTS
 
    - [x] CLASS-NAME
@@ -30,6 +28,7 @@
    - [x] SLOT-MISSING
    - [x] SLOT-UNBOUND
    - [x] SLOT-VALUE
+   - [x] CHANGE-CLASS
 
 ---------------------
  - bugs
@@ -121,6 +120,7 @@
  - [ ] ADD-METHOD
  - [ ] CALL-METHOD
  - [ ] CALL-NEXT-METHOD
+ - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
  - [ ] COMPUTE-APPLICABLE-METHODS
  - [ ] DEFGENERIC
  - [ ] DEFINE-METHOD-COMBINATION

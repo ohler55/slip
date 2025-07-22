@@ -68,22 +68,23 @@ func (f *ChangeClass) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	switch ti := inst.(type) {
 	case *StandardObject:
 		ti.Type = class.(isStandardClass)
+		ti.vars = map[string]slip.Object{}
 		sdm := ti.Type.slotDefMap()
 		for name, sd := range sdm {
 			sym := slip.Symbol(name)
 			if v, has := dup.SlotValue(sym); has {
-				_ = inst.SetSlotValue(sym, v)
+				ti.vars[name] = v
 			} else {
 				var inited bool
 				for _, key := range sd.initargs {
 					if v, has = slip.GetArgsKeyValue(args, key); has {
-						_ = inst.SetSlotValue(sym, v)
+						ti.vars[name] = v
 						inited = true
 						break
 					}
 				}
 				if !inited {
-					_ = inst.SetSlotValue(sym, sd.initform)
+					ti.vars[name] = sd.initform
 				}
 			}
 		}
@@ -91,8 +92,6 @@ func (f *ChangeClass) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	case *flavors.Instance:
 		ti.ChangeFlavor(class.(*flavors.Flavor))
 		_ = ti.Receive(s, ":update-instance-for-different-class", append(slip.List{dup}, args...), depth)
-	default:
-		slip.PanicType("instance", inst, "standard-object", "flavors instance")
 	}
 	return inst
 }
