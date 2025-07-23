@@ -6,7 +6,10 @@
 
  - standard-flavor branch
   - functions
-   - [ ] WITH-SLOTS
+   - [ ] WITH-SLOTS (slot-entry*) instance-form forms*)
+    - setq and setf for variable that will access slot values
+    - update scope to redirect through Ref to get value
+    - setf continues as usual
 
    - [x] CLASS-NAME
    - [x] CLASS-OF
