@@ -150,6 +150,9 @@ func (s *Scope) get(name string) Object {
 	s.locker.Lock()
 	if s.Vars != nil {
 		if value, has := s.Vars[name]; has {
+			if ref, ok := value.(*Ref); ok {
+				value = ref.Get()
+			}
 			s.locker.Unlock()
 			return value
 		}
@@ -197,6 +200,9 @@ func (s *Scope) localGet(name string) (Object, bool) {
 	s.locker.Lock()
 	if s.Vars != nil {
 		if value, has := s.Vars[name]; has {
+			if ref, ok := value.(*Ref); ok {
+				value = ref.Get()
+			}
 			s.locker.Unlock()
 			return value, true
 		}
@@ -236,8 +242,12 @@ func (s *Scope) set(name string, value Object) bool {
 	}
 	s.locker.Lock()
 	if s.Vars != nil {
-		if _, has := s.Vars[name]; has {
-			s.Vars[name] = value
+		if sv, has := s.Vars[name]; has {
+			if ref, ok := sv.(*Ref); ok {
+				ref.Instance.SetSlotValue(ref.Key, value)
+			} else {
+				s.Vars[name] = value
+			}
 			s.locker.Unlock()
 			return true
 		}

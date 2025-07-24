@@ -15,7 +15,7 @@ const StandardObjectSymbol = slip.Symbol("standard-object")
 
 // StandardObject is an instance of a standard-class.
 type StandardObject struct {
-	WithSlots
+	HasSlots
 	Type isStandardClass
 }
 
@@ -35,7 +35,7 @@ func (obj *StandardObject) Append(b []byte) []byte {
 
 // Simplify by returning the string representation of the flavor.
 func (obj *StandardObject) Simplify() interface{} {
-	simple := obj.WithSlots.Simplify()
+	simple := obj.HasSlots.Simplify()
 	simple.(map[string]any)["class"] = obj.Type.Name()
 	simple.(map[string]any)["id"] = strconv.FormatUint(obj.ID(), 16)
 
@@ -184,7 +184,7 @@ func (obj *StandardObject) Class() slip.Class {
 
 // SlotNames returns a list of the slots names for the instance.
 func (obj *StandardObject) SlotNames() []string {
-	names := obj.WithSlots.SlotNames()
+	names := obj.HasSlots.SlotNames()
 	for k := range obj.Type.Vars() {
 		names = append(names, k)
 	}
@@ -193,7 +193,7 @@ func (obj *StandardObject) SlotNames() []string {
 
 // SlotValue return the value of an instance variable.
 func (obj *StandardObject) SlotValue(sym slip.Symbol) (value slip.Object, has bool) {
-	if value, has = obj.WithSlots.SlotValue(sym); !has {
+	if value, has = obj.HasSlots.SlotValue(sym); !has {
 		value, has = obj.Type.SlotValue(sym)
 	}
 	return
@@ -201,7 +201,7 @@ func (obj *StandardObject) SlotValue(sym slip.Symbol) (value slip.Object, has bo
 
 // SetSlotValue sets the value of an instance variable.
 func (obj *StandardObject) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool) {
-	if has = obj.WithSlots.SetSlotValue(sym, value); !has {
+	if has = obj.HasSlots.SetSlotValue(sym, value); !has {
 		has = obj.Type.SetSlotValue(sym, value)
 	}
 	return

@@ -21,7 +21,7 @@ const (
 
 // StandardClass is a CLOS standard-class.
 type StandardClass struct {
-	WithSlots
+	HasSlots
 	name            string
 	docs            string
 	defname         string
@@ -53,7 +53,7 @@ func (c *StandardClass) Append(b []byte) []byte {
 
 // Simplify by returning the string representation of the class.
 func (c *StandardClass) Simplify() any {
-	simple := c.WithSlots.Simplify()
+	simple := c.HasSlots.Simplify()
 	simple.(map[string]any)["id"] = strconv.FormatUint(uint64(uintptr(unsafe.Pointer(c))), 16)
 	simple.(map[string]any)["name"] = c.name
 	simple.(map[string]any)["package"] = c.pkg.Name
@@ -247,7 +247,7 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 		slip.NewPanic("The class %s has undefined superclasses.", c.name)
 	}
 	obj := StandardObject{
-		WithSlots: WithSlots{
+		HasSlots: HasSlots{
 			vars:   map[string]slip.Object{},
 			locker: slip.NoOpLocker{},
 		},

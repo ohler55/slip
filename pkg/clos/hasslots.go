@@ -11,14 +11,14 @@ import (
 	"github.com/ohler55/slip"
 )
 
-// WithSlots is an instance of a Flavor.
-type WithSlots struct {
+// HasSlots is an instance of a Flavor.
+type HasSlots struct {
 	vars   map[string]slip.Object
 	locker slip.Locker
 }
 
 // Init initializes the object.
-func (obj *WithSlots) Init(synchronize bool) {
+func (obj *HasSlots) Init(synchronize bool) {
 	obj.vars = map[string]slip.Object{}
 	if synchronize {
 		obj.locker = &sync.Mutex{}
@@ -28,7 +28,7 @@ func (obj *WithSlots) Init(synchronize bool) {
 }
 
 // AddSlot adds a new slot with the initial value provided.
-func (obj *WithSlots) AddSlot(sym slip.Symbol, value slip.Object) {
+func (obj *HasSlots) AddSlot(sym slip.Symbol, value slip.Object) {
 	name := strings.ToLower(string(sym))
 	obj.Lock()
 	obj.vars[name] = value
@@ -36,7 +36,7 @@ func (obj *WithSlots) AddSlot(sym slip.Symbol, value slip.Object) {
 }
 
 // RemoveSlot remove a slot.
-func (obj *WithSlots) RemoveSlot(sym slip.Symbol) {
+func (obj *HasSlots) RemoveSlot(sym slip.Symbol) {
 	name := strings.ToLower(string(sym))
 	obj.Lock()
 	delete(obj.vars, name)
@@ -44,7 +44,7 @@ func (obj *WithSlots) RemoveSlot(sym slip.Symbol) {
 }
 
 // Simplify by returning the string representation of the flavor.
-func (obj *WithSlots) Simplify() any {
+func (obj *HasSlots) Simplify() any {
 	vars := map[string]any{}
 	for name, val := range obj.vars {
 		vars[name] = slip.Simplify(val)
@@ -57,7 +57,7 @@ func (obj *WithSlots) Simplify() any {
 }
 
 // SlotNames returns a list of the slots names for the instance.
-func (obj *WithSlots) SlotNames() []string {
+func (obj *HasSlots) SlotNames() []string {
 	names := make([]string, 0, len(obj.vars))
 	for k := range obj.vars {
 		names = append(names, k)
@@ -66,7 +66,7 @@ func (obj *WithSlots) SlotNames() []string {
 }
 
 // SlotValue return the value of an instance variable.
-func (obj *WithSlots) SlotValue(sym slip.Symbol) (value slip.Object, has bool) {
+func (obj *HasSlots) SlotValue(sym slip.Symbol) (value slip.Object, has bool) {
 	name := strings.ToLower(string(sym))
 	obj.locker.Lock()
 	if obj.vars != nil {
@@ -77,7 +77,7 @@ func (obj *WithSlots) SlotValue(sym slip.Symbol) (value slip.Object, has bool) {
 }
 
 // SetSlotValue sets the value of an instance variable.
-func (obj *WithSlots) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool) {
+func (obj *HasSlots) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool) {
 	name := strings.ToLower(string(sym))
 	obj.Lock()
 	if _, has = obj.vars[name]; has {
@@ -88,7 +88,7 @@ func (obj *WithSlots) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool
 }
 
 // SetSynchronized set the synchronized mode of the scope.
-func (obj *WithSlots) SetSynchronized(on bool) {
+func (obj *HasSlots) SetSynchronized(on bool) {
 	if on {
 		obj.locker = &sync.Mutex{}
 	} else {
@@ -97,22 +97,22 @@ func (obj *WithSlots) SetSynchronized(on bool) {
 }
 
 // Synchronized returns true if the scope is in synchronized mode.
-func (obj *WithSlots) Synchronized() bool {
+func (obj *HasSlots) Synchronized() bool {
 	_, ok := obj.locker.(*sync.Mutex)
 	return ok
 }
 
 // Lock the scope to synchronize changes.
-func (obj *WithSlots) Lock() {
+func (obj *HasSlots) Lock() {
 	obj.locker.Lock()
 }
 
 // Unlock the scope to synchronize changes.
-func (obj *WithSlots) Unlock() {
+func (obj *HasSlots) Unlock() {
 	obj.locker.Unlock()
 }
 
 // Vars returns the vars map.
-func (obj *WithSlots) Vars() map[string]slip.Object {
+func (obj *HasSlots) Vars() map[string]slip.Object {
 	return obj.vars
 }

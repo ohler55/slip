@@ -53,6 +53,7 @@ func init() {
 	defClassPrecedence()
 	defClassMetaclass()
 	defListAllClasses()
+	defWithSlots()
 
 	defConditions()
 
