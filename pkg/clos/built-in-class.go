@@ -60,12 +60,20 @@ func (c *BuiltInClass) Hierarchy() []slip.Symbol {
 // Inherits returns true if this Class inherits from a specified Class.
 func (c *BuiltInClass) Inherits(sc slip.Class) bool {
 	name := slip.Symbol(sc.Name())
-	for _, sym := range c.precedence {
+	for _, sym := range c.precedence[1:] {
 		if name == sym {
 			return true
 		}
 	}
 	return false
+}
+
+// InheritsList returns a list of all inherited classes.
+func (c *BuiltInClass) InheritsList() (ca []slip.Class) {
+	for ic := c.inherit; ic != nil; ic = ic.inherit {
+		ca = append(ca, ic)
+	}
+	return
 }
 
 // Metaclass returns the symbol built-in-class.
@@ -96,6 +104,11 @@ func (c *BuiltInClass) Documentation() string {
 // SetDocumentation of the class.
 func (c *BuiltInClass) SetDocumentation(doc string) {
 	c.docs = doc
+}
+
+// VarNames for DefMethod, requiredVars and defaultVars combined.
+func (c *BuiltInClass) VarNames() []string {
+	return nil
 }
 
 // Describe the class in detail.

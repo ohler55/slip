@@ -16,6 +16,7 @@ github.com/ohler55/slip/sliptest\
 	make -C gi
 	make -C bag
 	make -C clos
+	make -C generic
 	make -C net
 	make -C repl
 	make -C csv
@@ -28,6 +29,7 @@ github.com/ohler55/slip/sliptest\
 	$Q grep github gi/cov.out >> cov.out
 	$Q grep github bag/cov.out >> cov.out
 	$Q grep github clos/cov.out >> cov.out
+	$Q grep github generic/cov.out >> cov.out
 	$Q grep github net/cov.out >> cov.out
 	$Q grep github repl/cov.out >> cov.out
 	$Q grep github csv/cov.out >> cov.out

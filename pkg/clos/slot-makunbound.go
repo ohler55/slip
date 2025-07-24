@@ -4,7 +4,6 @@ package clos
 
 import (
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func defSlotMakunbound() {
@@ -47,11 +46,10 @@ func (f *SlotMakunbound) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	if !ok {
 		slip.PanicType("slot-name", args[1], "symbol")
 	}
-	if inst, ok := args[0].(*flavors.Instance); ok {
-		if !inst.Has(sym) {
+	if inst, ok := args[0].(slip.Instance); ok {
+		if !inst.SetSlotValue(sym, slip.Unbound) {
 			slotMissing(inst, sym, "slot-makunbound")
 		}
-		inst.Set(sym, slip.Unbound)
 	} else {
 		slotMissing(args[0], sym, "slot-makunbound")
 	}

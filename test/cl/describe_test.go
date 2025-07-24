@@ -109,6 +109,43 @@ pi names a double-float:
 		out.String())
 }
 
+func TestDescribeClass(t *testing.T) {
+	var out strings.Builder
+	scope := slip.NewScope()
+	scope.Let("*standard-output*", &slip.OutputStream{Writer: &out})
+	scope.Let("*print-ansi*", nil)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(progn (defclass quux () ()) (describe 'quux))`,
+		//Source: `(describe 'vanilla-flavor)`,
+		Expect: "",
+	}).Test(t)
+
+	tt.Equal(t, `common-lisp-user:quux
+  [symbol]
+
+quux is a class:
+  Direct superclasses:
+  Class precedence list: quux standard-object t
+  Slots: None
+  Direct Methods:
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :which-operations
+  Value = quux
+`,
+		out.String())
+}
+
 func TestDescribeBaseType(t *testing.T) {
 	var out strings.Builder
 	scope := slip.NewScope()

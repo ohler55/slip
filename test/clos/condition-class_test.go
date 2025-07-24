@@ -59,6 +59,8 @@ func TestConditionClassBasic(t *testing.T) {
 
 	tt.Equal(t, true, quux.Inherits(buux))
 	tt.Equal(t, false, quux.Inherits(slip.FindClass("vanilla-flavor")))
+
+	tt.Equal(t, slip.Symbol("condition-class"), quux.Metaclass())
 }
 
 func TestConditionClassAllocClass(t *testing.T) {
@@ -71,7 +73,7 @@ func TestConditionClassAllocClass(t *testing.T) {
 	desc := quux.Describe(nil, 0, 80, false)
 	tt.Equal(t, `quux is a class:
   Direct superclasses:
-  Class precedence list: quux t
+  Class precedence list: quux condition t
   Slots:
     x
       initargs: :x
@@ -79,6 +81,19 @@ func TestConditionClassAllocClass(t *testing.T) {
       allocation: class
   Class Slots:
     x = 3
+  Direct Methods:
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :which-operations
 `, string(desc))
 }
 
@@ -90,8 +105,21 @@ func TestConditionClassMinimal(t *testing.T) {
 
 	tt.Equal(t, `quux is a class:
   Direct superclasses:
-  Class precedence list: quux t
+  Class precedence list: quux condition t
   Slots: None
+  Direct Methods:
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :which-operations
 `, string(desc))
 }
 

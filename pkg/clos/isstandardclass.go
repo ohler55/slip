@@ -24,4 +24,10 @@ type isStandardClass interface {
 	// SetSlotValue sets the value of an instance variable and return true if
 	// the name slot exists and was set.
 	SetSlotValue(sym slip.Symbol, value slip.Object) (has bool)
+
+	// GetMethod returns the method if it exists.
+	GetMethod(name string) *slip.Method
+
+	// MethodNames returns a sorted list of the methods of the class.
+	MethodNames() slip.List
 }

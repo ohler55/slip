@@ -37,7 +37,7 @@ func init() {
 					Text: `Arguments to the _format-control_.`,
 				},
 			},
-			Return: "method-error",
+			Return: "invalid-method-error",
 			Text: `__method-combination-error__ makes a _method-error_ initialized with the _method_ and a
 string generated from the _format-control_ and _args_.`,
 			Examples: []string{

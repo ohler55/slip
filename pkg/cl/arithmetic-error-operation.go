@@ -44,10 +44,7 @@ func (f *ArithmeticErrorOperation) Call(s *slip.Scope, args slip.List, depth int
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("arithmetic-error") {
 		slip.PanicType("arithmetic-error", args[0], "arithmetic-error")
 	} else {
-		var has bool
-		if result, has = ci.SlotValue(operationSymbol); !has {
-			slip.PanicUnboundSlot(ci, operationSymbol, "")
-		}
+		result, _ = ci.SlotValue(operationSymbol)
 	}
 	return
 }

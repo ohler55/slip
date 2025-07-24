@@ -47,7 +47,7 @@ func (c *ConditionClass) MakeInstance() slip.Instance {
 		slip.NewPanic("The class %s has undefined superclasses.", c.name)
 	}
 	obj := StandardObject{
-		WithSlots: WithSlots{
+		HasSlots: HasSlots{
 			vars:   map[string]slip.Object{},
 			locker: slip.NoOpLocker{},
 		},

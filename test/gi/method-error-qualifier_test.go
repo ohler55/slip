@@ -11,14 +11,14 @@ import (
 
 func TestMethodErrorQualifierExact(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(method-error-qualifier (make-condition 'method-error :qualifier 'test))`,
+		Source: `(method-error-qualifier (make-condition 'invalid-method-error :qualifier 'test))`,
 		Expect: "test",
 	}).Test(t)
 }
 
 func TestMethodErrorQualifierNotMethodError(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(method-error-qualifier (make-condition 'error :qualifier 'test))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(method-error-qualifier (make-condition 'error))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

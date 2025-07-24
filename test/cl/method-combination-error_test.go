@@ -12,7 +12,7 @@ import (
 func TestMethodCombinationErrorBasic(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(method-combination-error :mess "test")`,
-		PanicType: slip.Symbol("method-error"),
+		PanicType: slip.Symbol("invalid-method-error"),
 	}).Test(t)
 }
 

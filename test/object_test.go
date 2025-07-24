@@ -446,7 +446,7 @@ func TestTime(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(send @2024-11-24T12:00:00Z :not-a-method)`,
-		PanicType: slip.MethodErrorSymbol,
+		PanicType: slip.UndefinedFunctionSymbol,
 	}).Test(t)
 }
 

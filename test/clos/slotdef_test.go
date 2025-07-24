@@ -85,6 +85,19 @@ func TestSlotDefOptions(t *testing.T) {
       type: fixnum
   Class Slots:
     quux = (1+ qqq)
+  Direct Methods:
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :which-operations
 `, string(sc.Describe(nil, 0, 80, false)))
 }
 

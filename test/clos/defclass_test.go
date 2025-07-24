@@ -10,6 +10,7 @@ import (
 )
 
 func TestDefclassMinimal(t *testing.T) {
+	slip.CurrentPackage.Remove("quux")
 	// There is no undef for a class but a new defclass will replace an
 	// existing class or at least the fields in the class.
 	(&sliptest.Function{
@@ -72,5 +73,12 @@ func TestDefclassBadDocs(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(defclass quux () () (:documentation t))`,
 		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefclassNoRedefine(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(defclass fixnum () ())`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

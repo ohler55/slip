@@ -19,6 +19,9 @@ import (
 	// Pull in clos functions.
 	_ "github.com/ohler55/slip/pkg/clos"
 
+	// Pull in generic functions.
+	_ "github.com/ohler55/slip/pkg/generic"
+
 	// Pull in net functions.
 	_ "github.com/ohler55/slip/pkg/net"
 

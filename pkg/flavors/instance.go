@@ -33,8 +33,13 @@ func (obj *Instance) Append(b []byte) []byte {
 	b = append(b, "#<"...)
 	b = append(b, obj.Type.name...)
 	b = append(b, ' ')
-	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(obj))), 16)
+	b = strconv.AppendUint(b, obj.ID(), 16)
 	return append(b, '>')
+}
+
+// ID returns unique ID for the instance.
+func (obj *Instance) ID() uint64 {
+	return uint64(uintptr(unsafe.Pointer(obj)))
 }
 
 // Simplify by returning the string representation of the flavor.
@@ -51,7 +56,7 @@ func (obj *Instance) Simplify() interface{} {
 	}
 	simple := map[string]any{
 		"flavor": obj.Type.name,
-		"id":     strconv.FormatUint(uint64(uintptr(unsafe.Pointer(obj))), 16),
+		"id":     strconv.FormatUint(obj.ID(), 16),
 		"vars":   vars,
 	}
 	return simple
@@ -59,13 +64,13 @@ func (obj *Instance) Simplify() interface{} {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (obj *Instance) Hierarchy() []slip.Symbol {
-	return obj.Type.precedence
+	return obj.Type.Precedence
 }
 
 // IsA return true if the instance is of a flavor that inherits from the
 // provided flavor.
 func (obj *Instance) IsA(class string) bool {
-	for _, sym := range obj.Type.precedence {
+	for _, sym := range obj.Type.Precedence {
 		if class == string(sym) {
 			return true
 		}
@@ -151,6 +156,16 @@ func (obj *Instance) HasMethod(method string) (has bool) {
 		has = true
 	}
 	return
+}
+
+// GetMethod returns the method if it exists.
+func (obj *Instance) GetMethod(name string) *slip.Method {
+	return obj.Type.methods[name]
+}
+
+// MethodNames returns a sorted list of the methods of the instance.
+func (obj *Instance) MethodNames() slip.List {
+	return obj.Type.MethodNames()
 }
 
 // Receive a method invocation from the send function. Not intended to be
@@ -301,7 +316,7 @@ func (obj *Instance) Class() slip.Class {
 }
 
 // Dup returns a duplicate of the instance.
-func (obj *Instance) Dup() *Instance {
+func (obj *Instance) Dup() slip.Instance {
 	dup := Instance{
 		Type: obj.Type,
 		Any:  obj.Any,

@@ -45,6 +45,37 @@ func TestSimpleConditionMake(t *testing.T) {
 	tt.Equal(t, slip.List{slip.Symbol("dummy"), slip.Fixnum(3)}, value)
 }
 
+func TestSimpleConditionEmpty(t *testing.T) {
+	tf := sliptest.Function{
+		Source: `(make-condition 'Simple-Condition)`,
+		Expect: "/^#<simple-condition [0-9a-f]+>$/",
+	}
+	tf.Test(t)
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	tt.Equal(t, "/^#<simple-condition [0-9a-f]+>$/", cl.SimpleCondMsg(slip.NewScope(), cond))
+}
+
+func TestSimpleConditionMessage(t *testing.T) {
+	tf := sliptest.Function{
+		Source: `(make-condition 'Warning :message "raise")`,
+		Expect: "/^#<warning [0-9a-f]+>$/",
+	}
+	tf.Test(t)
+	cond, ok := tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	tt.Equal(t, "raise", cl.SimpleCondMsg(slip.NewScope(), cond))
+
+	tf = sliptest.Function{
+		Source: `(make-condition 'Warning :message 'raise)`,
+		Expect: "/^#<warning [0-9a-f]+>$/",
+	}
+	tf.Test(t)
+	cond, ok = tf.Result.(slip.Instance)
+	tt.Equal(t, true, ok)
+	tt.Equal(t, "/^#<warning [0-9a-f]+>$/", cl.SimpleCondMsg(slip.NewScope(), cond))
+}
+
 func TestSimpleConditionMakeBadArgs(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(make-condition 'Simple-Condition :format-control t)`,

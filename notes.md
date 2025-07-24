@@ -4,14 +4,6 @@
 
 - next
 
- - instance-update branch
-
----------------------
- - standard-flavor branch
-  - make standard-object and standard-class support direct methods
-  - add methods to standard-class and add vanilla-flavor to hierarchy before standard-object
-   - update describe
-
 ---------------------
  - bugs
   - open doesn't handle absolute paths nor ~
@@ -23,6 +15,9 @@
    - class slots
     - accessors must consider slot on standard-object.Type.Vars
      - if not found then look back on inherit
+  - pkg/gen or pkg/generic
+   - might need to move defmethod (defmethod depends on flavors)
+   - maybe add VarName() to slip.Class to break dependency
 
   - call print-object in slip.Panic to form message
    - if condition and :report then use that for printing, others like *print-escape*
@@ -93,36 +88,25 @@
  - rename bag-flavor to just bag?
 
  - bonus functions
-  - [ ] list-all-classes (&optional metaclass)
-  - [ ] class-precedence
-  - [ ] class-supers
-  - [ ] class-metaclass => standard-class, condition-class, build-in-class
 
+ - [ ] SLOT-MISSING - make generic
+ - [ ] SLOT-UNBOUND - make generic
  - [ ] ADD-METHOD
  - [ ] CALL-METHOD
  - [ ] CALL-NEXT-METHOD
- - [ ] CHANGE-CLASS
- - [ ] CLASS-NAME
- - [ ] CLASS-OF
+ - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
  - [ ] COMPUTE-APPLICABLE-METHODS
- - [x] DEFCLASS
  - [ ] DEFGENERIC
- - [x] DEFINE-CONDITION
  - [ ] DEFINE-METHOD-COMBINATION
- - [ ] DEFMETHOD
+ - [ ] DEFMETHOD - need generic support
  - [ ] DESCRIBE-OBJECT
- - [ ] DOCUMENTATION
  - [ ] ENSURE-GENERIC-FUNCTION
- - [ ] FIND-CLASS
  - [ ] FIND-METHOD
  - [ ] FUNCTION-KEYWORDS
  - [ ] GENERIC-FLET
  - [ ] GENERIC-FUNCTION
  - [ ] GENERIC-LABELS
  - [ ] INITIALIZE-INSTANCE
- - [ ] INVALID-METHOD-ERROR
- - [ ] MAKE-INSTANCE
- - [ ] MAKE-INSTANCES-OBSOLETE
  - [ ] MAKE-LOAD-FORM
  - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
  - [ ] MAKE-METHOD
@@ -136,29 +120,10 @@
  - [ ] REINITIALIZE-INSTANCE
  - [ ] REMOVE-METHOD
  - [ ] SHARED-INITIALIZE
- - [ ] SLOT-BOUNDP
- - [ ] SLOT-EXISTS-P
- - [ ] SLOT-MAKUNBOUND
- - [ ] SLOT-MISSING
- - [ ] SLOT-UNBOUND
- - [ ] SLOT-VALUE
  - [ ] SYMBOL-MACROLET
  - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [ ] WITH-ACCESSORS
  - [ ] WITH-ADDED-METHODS
- - [ ] WITH-SLOTS
- - [ ] arithmetic-error-operands
- - [ ] simple-condition-format-arguments
- - [ ] arithmetic-error-operation
- - [ ] simple-condition-format-control
- - [ ] cell-error-name
- - [ ] stream-error-stream
- - [ ] file-error-pathname
- - [ ] type-error-datum
- - [ ] package-error-package
- - [ ] type-error-expected-type
- - [ ] print-not-readable-object
- - [ ] unbound-slot-instance
 
 -----------------
   - [ ] inspect [interactive]

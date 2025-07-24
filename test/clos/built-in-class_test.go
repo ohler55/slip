@@ -34,6 +34,13 @@ func TestBuiltInClassBasic(t *testing.T) {
 }`, pretty.SEN(c.Simplify()))
 	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`, scope).Eval(scope, nil) })
 
+	tt.Equal(t, 0, len(c.(slip.Class).VarNames()))
+	tt.Equal(t, []slip.Class{
+		slip.FindClass("integer"),
+		slip.FindClass("rational"),
+		slip.FindClass("real"),
+		slip.FindClass("number"),
+	}, c.(slip.Class).InheritsList())
 }
 
 func TestBuiltInClassDescribeBasic(t *testing.T) {

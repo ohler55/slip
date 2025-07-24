@@ -31,6 +31,7 @@ func TestDefineConditionBadName(t *testing.T) {
 }
 
 func TestDefineConditionBadSupers(t *testing.T) {
+	slip.CurrentPackage.Remove("quux")
 	(&sliptest.Function{
 		Source:    `(define-condition quux t ())`,
 		PanicType: slip.TypeErrorSymbol,
@@ -50,6 +51,7 @@ func TestDefineConditionBadSupers(t *testing.T) {
 }
 
 func TestDefineConditionBadSlots(t *testing.T) {
+	slip.CurrentPackage.Remove("quux")
 	(&sliptest.Function{
 		Source:    `(define-condition quux () t)`,
 		PanicType: slip.TypeErrorSymbol,
@@ -76,8 +78,16 @@ func TestDefineConditionBadClassOption(t *testing.T) {
 }
 
 func TestDefineConditionBadDocs(t *testing.T) {
+	slip.CurrentPackage.Remove("quux")
 	(&sliptest.Function{
 		Source:    `(define-condition quux () () (:documentation t))`,
 		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefineConditionNoRedefine(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(define-condition fixnum () ())`,
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 }

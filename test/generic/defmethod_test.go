@@ -1,8 +1,9 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package flavors_test
+package generic_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -11,8 +12,52 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	"github.com/ohler55/slip/pkg/generic"
 	"github.com/ohler55/slip/sliptest"
 )
+
+func undefFlavors(fns ...string) {
+	for _, fn := range fns {
+		undefFlavor(fn)
+	}
+}
+
+func undefFlavor(fn string) {
+	defer func() { _ = recover() }()
+	scope := slip.NewScope()
+	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn), scope).Eval(scope, nil)
+}
+
+func TestDefmethodFlavors(t *testing.T) {
+	defer undefFlavor("berry")
+	(&sliptest.Function{
+		Source: `(progn
+                   (defflavor berry (color) ()
+                                    :gettable-instance-variables
+                                    :settable-instance-variables
+                                    :initable-instance-variables)
+                   (defmethod (berry :rot) () "When berries rot they turn brown." (setq color 'brown)))`,
+		Expect: "nil",
+	}).Test(t)
+}
+
+func TestDefmethodCLOS(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(defmethod rot ((b berry)) (setq color 'brown))`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestDefmethodBadMethod(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(defmethod 7 () (setq color 'brown))`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefClassMethodBadClass(t *testing.T) {
+	tt.Panic(t, func() { generic.DefClassMethod(slip.FindClass("fixnum"), ":quux", "", nil) })
+}
 
 func defineBerry(t *testing.T) {
 	scope := slip.NewScope()
@@ -58,12 +103,17 @@ func TestDefmethodInsert(t *testing.T) {
 (defmethod (f2 :quux) () 'q2)
 (defmethod (f3 :before :quux) () 'q3)
 (defmethod (f1 :before :quux) () 'q1)
+(defwhopper (f1 :quux) nil)
 `, scope).Eval(scope, nil)
 
 	f := slip.ReadString("f3", scope).Eval(scope, nil).(*flavors.Flavor)
 	m := f.GetMethod(":quux")
 	tt.Equal(t, `{
-  combinations: [{before: true from: f3} {from: f2 primary: true} {before: true from: f1}]
+  combinations: [
+    {before: true from: f3}
+    {from: f2 primary: true}
+    {before: true from: f1 whopper: true}
+  ]
   name: ":quux"
 }`, pretty.SEN(m.Simplify()))
 }

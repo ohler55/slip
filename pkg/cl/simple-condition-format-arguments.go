@@ -43,14 +43,10 @@ type SimpleConditionFormatArguments struct {
 // Call the function with the arguments provided.
 func (f *SimpleConditionFormatArguments) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch cond := args[0].(type) {
-	case slip.Instance:
-		var has bool
-		if result, has = cond.SlotValue(formatArgumentsSymbol); !has {
-			slip.PanicUnboundSlot(args[0], formatArgumentsSymbol, "")
-		}
-	default:
-		slip.PanicUnboundSlot(args[0], formatArgumentsSymbol, "")
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("simple-condition") {
+		slip.PanicType("simple-condition", args[0], "simple-condition")
+	} else {
+		result, _ = ci.SlotValue(formatArgumentsSymbol)
 	}
 	return
 }

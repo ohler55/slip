@@ -43,14 +43,10 @@ type SimpleConditionFormatControl struct {
 // Call the function with the control provided.
 func (f *SimpleConditionFormatControl) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	switch cond := args[0].(type) {
-	case slip.Instance:
-		var has bool
-		if result, has = cond.SlotValue(formatControlSymbol); !has {
-			slip.PanicUnboundSlot(args[0], formatControlSymbol, "")
-		}
-	default:
-		slip.PanicUnboundSlot(args[0], formatControlSymbol, "")
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("simple-condition") {
+		slip.PanicType("simple-condition", args[0], "simple-condition")
+	} else {
+		result, _ = ci.SlotValue(formatControlSymbol)
 	}
 	return
 }

@@ -44,10 +44,7 @@ func (f *UnboundSlotInstance) Call(s *slip.Scope, args slip.List, depth int) (re
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("unbound-slot") {
 		slip.PanicType("unbound-slot", args[0], "unbound-slot")
 	} else {
-		var has bool
-		if result, has = ci.SlotValue(instanceSymbol); !has {
-			slip.PanicUnboundSlot(ci, instanceSymbol, "")
-		}
+		result, _ = ci.SlotValue(instanceSymbol)
 	}
 	return
 }

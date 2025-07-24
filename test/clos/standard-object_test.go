@@ -5,6 +5,7 @@ package clos_test
 import (
 	"bytes"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/jp"
@@ -92,6 +93,13 @@ func TestStandardObjectBasic(t *testing.T) {
 
 	desc = obj.Describe(nil, 0, 80, true)
 	tt.Equal(t, true, bytes.Contains(desc, []byte{0x1b, '[', '1', 'm'}))
+
+	tt.Panic(t, func() { _ = obj.Receive(scope, ":nothing", nil, 0) })
+	namesStr := obj.MethodNames().String()
+	tt.Equal(t, true, strings.Contains(namesStr, ":class"))
+	tt.Equal(t, true, strings.Contains(namesStr, ":describe"))
+	tt.Equal(t, true, strings.Contains(namesStr, ":print-self"))
+	tt.NotNil(t, obj.GetMethod(":id"))
 }
 
 func TestStandardObjectInitform(t *testing.T) {

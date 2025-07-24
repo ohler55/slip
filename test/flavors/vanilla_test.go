@@ -48,9 +48,9 @@ func TestVanillaMethods(t *testing.T) {
 
 	methods := slip.ReadString("(send berry :which-operations)", scope).Eval(scope, nil)
 	tt.Equal(t,
-		"(:change-class :change-flavor :describe :equal :eval-inside-yourself :flavor :id :init :inspect "+
-			":operation-handled-p\n               :print-self :send-if-handles :set-size :shared-initialize "+
-			":size :update-instance-for-different-class\n               :which-operations)",
+		"(:change-class :change-flavor :class :describe :equal :eval-inside-yourself :flavor :id :init :inspect\n"+
+			"               :operation-handled-p :print-self :send-if-handles :set-size :shared-initialize :size\n"+
+			"               :update-instance-for-different-class :which-operations)",
 		methods.String())
 
 	pr, pw, err := os.Pipe()

@@ -31,7 +31,7 @@ func TestSimpleConditionFormatControlSub(t *testing.T) {
 
 func TestSimpleConditionFormatControlNotSimpleCondition(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(simple-condition-format-control (make-condition 'condition :format-control "x"))`,
-		PanicType: slip.ErrorSymbol,
+		Source:    `(simple-condition-format-control (make-condition 'condition))`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

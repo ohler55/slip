@@ -45,6 +45,12 @@ func TestUnboundSlotMake(t *testing.T) {
 	tt.Equal(t, slip.String("raise"), value)
 }
 
+func TestUnboundSlotNoFormat(t *testing.T) {
+	cond := slip.NewUnboundSlot(slip.Symbol("vanilla"), slip.Symbol(":slop"), "")
+	tt.Equal(t, "The slot :slop is unbound in the object vanilla.",
+		cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+}
+
 func TestUnboundSlotPanic(t *testing.T) {
 	tt.Panic(t, func() { slip.PanicUnboundSlot(slip.Symbol("vanilla"), slip.Symbol(":slop"), "raise") })
 }

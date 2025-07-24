@@ -44,13 +44,54 @@ type ChangeClass struct {
 // Call the the function with the arguments provided.
 func (f *ChangeClass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, -1)
-	inst, ok := args[0].(*flavors.Instance)
+	inst, ok := args[0].(slip.Instance)
 	if !ok {
 		slip.PanicType("instance", args[0], "instance")
 	}
-	_ = inst.Receive(s, ":change-class", args[1:], depth)
-
-	// TBD support clos.StandardObject
-
+	var class slip.Class
+	switch ta := args[1].(type) {
+	case slip.Symbol:
+		if class = slip.FindClass(string(ta)); class == nil {
+			slip.PanicClassNotFound(ta, "Class %s not found.", ta)
+		}
+	case slip.Class:
+		class = ta
+	default:
+		slip.PanicType("new-class", ta, "symbol", "flavor", "class")
+	}
+	if class.Metaclass() != inst.Class().Metaclass() {
+		slip.NewPanic("Can not change the class of an instance of a %s class to a %s class.",
+			inst.Class().Metaclass(), class.Metaclass())
+	}
+	args = args[2:]
+	dup := inst.Dup()
+	switch ti := inst.(type) {
+	case *StandardObject:
+		ti.Type = class.(isStandardClass)
+		ti.vars = map[string]slip.Object{}
+		sdm := ti.Type.slotDefMap()
+		for name, sd := range sdm {
+			sym := slip.Symbol(name)
+			if v, has := dup.SlotValue(sym); has {
+				ti.vars[name] = v
+			} else {
+				var inited bool
+				for _, key := range sd.initargs {
+					if v, has = slip.GetArgsKeyValue(args, key); has {
+						ti.vars[name] = v
+						inited = true
+						break
+					}
+				}
+				if !inited {
+					ti.vars[name] = sd.initform
+				}
+			}
+		}
+		// TBD call generic update-instance-for-different-class
+	case *flavors.Instance:
+		ti.ChangeFlavor(class.(*flavors.Flavor))
+		_ = ti.Receive(s, ":update-instance-for-different-class", append(slip.List{dup}, args...), depth)
+	}
 	return inst
 }

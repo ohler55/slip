@@ -108,7 +108,7 @@ func (obj Time) Init(scope *Scope, args List, depth int) {
 func (obj Time) Receive(s *Scope, message string, args List, depth int) Object {
 	f := timeMethods[strings.ToLower(message)]
 	if f == nil {
-		PanicMethod(Symbol("time"), nil, Symbol(message), "")
+		PanicUndefinedFunction(Symbol("time"), "%s", message)
 	}
 	return f(s, obj, args, depth)
 }

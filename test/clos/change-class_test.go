@@ -68,3 +68,56 @@ func TestChangeClassNotInstance(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestChangeClassNotClass(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(change-class (make-instance 'vanilla-flavor) t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestChangeClassStandard(t *testing.T) {
+	slip.CurrentPackage.Remove("quux")
+	slip.CurrentPackage.Remove("buux")
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defclass buux ()
+  ((x :initarg :x)
+   (a :initform 1)))
+(defclass quux ()
+  ((x :initarg :x)
+   (y :initarg :y)
+   (z :initform 3)))
+`, scope)
+	_ = code.Eval(scope, nil)
+
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((inst (make-instance 'buux :x 2)))
+                  (change-class inst 'quux :y 5)
+                  (list
+                   (slot-value inst 'x)
+                   (slot-value inst 'y)
+                   (slot-value inst 'z)
+                   (slot-exists-p inst 'a)))`,
+		Expect: "(2 5 3 nil)",
+	}).Test(t)
+}
+
+func TestChangeClassMetaclass(t *testing.T) {
+	slip.CurrentPackage.Remove("quux")
+	slip.CurrentPackage.Remove("cuux")
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(define-condition cuux () ())
+(defclass quux () ())
+`, scope)
+	_ = code.Eval(scope, nil)
+
+	(&sliptest.Function{
+		Scope: scope,
+		Source: `(let ((inst (make-condition 'cuux)))
+                  (change-class inst 'quux))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}

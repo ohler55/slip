@@ -4,6 +4,8 @@ package clos_test
 
 import (
 	"bytes"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/pretty"
@@ -79,10 +81,33 @@ func TestStandardClassBasic(t *testing.T) {
       type: fixnum
   Default-initargs:
     :y: 3
+  Direct Methods:
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :which-operations
 `, string(desc))
 
 	desc = quux.Describe(nil, 0, 80, true)
 	tt.Equal(t, true, bytes.Contains(desc, []byte{0x1b, '[', '1', 'm'}))
+
+	tt.Equal(t, []slip.Class{slip.FindClass("buux")}, quux.InheritsList())
+	tt.Equal(t, slip.Symbol("standard-class"), quux.Metaclass())
+	names := quux.MethodNames().String()
+	tt.Equal(t, true, strings.Contains(names, ":class"))
+	tt.Equal(t, true, strings.Contains(names, ":describe"))
+	tt.Equal(t, true, strings.Contains(names, ":print-self"))
+	vars := quux.VarNames()
+	sort.Strings(vars)
+	tt.Equal(t, []string{"x", "y", "z"}, vars)
 }
 
 func TestStandardClassAllocClass(t *testing.T) {
@@ -103,6 +128,19 @@ func TestStandardClassAllocClass(t *testing.T) {
       allocation: class
   Class Slots:
     x = 3
+  Direct Methods:
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :which-operations
 `, string(desc))
 }
 
@@ -116,6 +154,19 @@ func TestStandardClassMinimal(t *testing.T) {
   Direct superclasses:
   Class precedence list: quux standard-object t
   Slots: None
+  Direct Methods:
+    :class
+    :describe
+    :equal
+    :eval-inside-yourself
+    :id
+    :init
+    :inspect
+    :operation-handled-p
+    :print-self
+    :send-if-handles
+    :shared-initialize
+    :which-operations
 `, string(desc))
 }
 

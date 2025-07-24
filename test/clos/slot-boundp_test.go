@@ -30,7 +30,7 @@ func TestSlotBoundpOk(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(slot-boundp (make-instance 'blueberry) 'not-a-slot)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 }
 
@@ -44,6 +44,6 @@ func TestSlotBoundpBadName(t *testing.T) {
 func TestSlotBoundpNoSlot(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(slot-boundp 7 'size)`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 }

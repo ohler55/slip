@@ -90,7 +90,7 @@ func (f *DefineCondition) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 		slip.PanicType("slot-specifiers", args[2], "list")
 	}
 	if c := slip.FindClass(string(name)); c != nil {
-		if cc, ok := c.(*ConditionClass); ok && cc.Final {
+		if cc, ok := c.(*ConditionClass); !ok || cc.Final {
 			slip.NewPanic("Can not redefine class %s.", name)
 		}
 	}
@@ -109,6 +109,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 			defaultInitArgs: map[string]slip.Object{},
 			initArgs:        map[string]*SlotDef{},
 			initForms:       map[string]*SlotDef{},
+			methods:         map[string]*slip.Method{},
 			inheritCheck: func(c slip.Class) *StandardClass {
 				if c == nil {
 					return nil
@@ -119,6 +120,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 				}
 				return &cc.StandardClass
 			},
+			baseClass: ConditionSymbol,
 		},
 	}
 	for i, super := range supers {

@@ -20,7 +20,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "condition",
-					Type: "method-error",
+					Type: "invalid-method-error",
 					Text: "The method-error or subqualifier of method-error to get the qualifier of.",
 				},
 			},
@@ -41,13 +41,10 @@ type MethodErrorQualifier struct {
 // Call the function with the arguments provided.
 func (f *MethodErrorQualifier) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("method-error") {
-		slip.PanicType("method-error", args[0], "method-error")
+	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("invalid-method-error") {
+		slip.PanicType("invalid-method-error", args[0], "invalid-method-error")
 	} else {
-		var has bool
-		if result, has = ci.SlotValue(qualifierSymbol); !has {
-			slip.PanicUnboundSlot(ci, qualifierSymbol, "")
-		}
+		result, _ = ci.SlotValue(qualifierSymbol)
 	}
 	return
 }

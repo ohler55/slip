@@ -47,7 +47,7 @@ type MakeInstance struct {
 func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	class := classFromArg0(f, s, args)
 	if _, ok := class.(*ConditionClass); ok {
-		slip.NewPanic("make-instance can not be used to make instances of %s. Use define-condition instead.",
+		slip.NewPanic("make-instance can not be used to make instances of %s. Use make-condition instead.",
 			class.Name())
 	}
 	inst := class.MakeInstance()

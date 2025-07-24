@@ -12,8 +12,8 @@ import (
 	"github.com/ohler55/slip/pkg/clos"
 )
 
-func TestWithSlots(t *testing.T) {
-	var ws clos.WithSlots
+func TestHasSlots(t *testing.T) {
+	var ws clos.HasSlots
 	ws.Init(false)
 	ws.AddSlot(slip.Symbol("quux"), nil)
 
@@ -42,8 +42,8 @@ func TestWithSlots(t *testing.T) {
 	tt.Equal(t, "{vars: {}}", pretty.SEN(simple))
 }
 
-func TestWithSlotsSync(t *testing.T) {
-	var ws clos.WithSlots
+func TestHasSlotsSync(t *testing.T) {
+	var ws clos.HasSlots
 	ws.Init(true)
 	ws.AddSlot(slip.Symbol("quux"), nil)
 

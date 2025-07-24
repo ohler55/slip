@@ -4,6 +4,7 @@ package slip
 
 type Instance interface {
 	Object
+	Receiver
 
 	// Class of the instance.
 	Class() Class
@@ -32,4 +33,16 @@ type Instance interface {
 	// SetSlotValue sets the value of an instance variable and return true if
 	// the name slot exists and was set.
 	SetSlotValue(sym Symbol, value Object) (has bool)
+
+	// GetMethod returns the method if it exists.
+	GetMethod(name string) *Method
+
+	// MethodNames returns a sorted list of the methods of the class.
+	MethodNames() List
+
+	// ID returns unique ID for the instance.
+	ID() uint64
+
+	// Dup returns a duplicate of the instance.
+	Dup() Instance
 }

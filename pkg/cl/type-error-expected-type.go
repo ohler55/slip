@@ -45,10 +45,7 @@ func (f *TypeErrorExpectedType) Call(s *slip.Scope, args slip.List, depth int) (
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("type-error") {
 		slip.PanicType("type-error", args[0], "type-error")
 	} else {
-		var has bool
-		if result, has = ci.SlotValue(expectedTypeSymbol); !has {
-			slip.PanicUnboundSlot(ci, expectedTypeSymbol, "")
-		}
+		result, _ = ci.SlotValue(expectedTypeSymbol)
 	}
 	return
 }

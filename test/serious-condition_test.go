@@ -35,3 +35,7 @@ func TestSeriousConditionMake(t *testing.T) {
 		Expect: "/^#<serious-condition [0-9a-f]+>$/",
 	}).Test(t)
 }
+
+func TestSeriousConditionPanic(t *testing.T) {
+	tt.Panic(t, func() { slip.PanicSeriousCondition() })
+}

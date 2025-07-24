@@ -5,9 +5,11 @@ package clos
 import (
 	"sort"
 	"strconv"
+	"strings"
 	"unsafe"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 const (
@@ -19,7 +21,7 @@ const (
 
 // StandardClass is a CLOS standard-class.
 type StandardClass struct {
-	WithSlots
+	HasSlots
 	name            string
 	docs            string
 	defname         string
@@ -32,6 +34,7 @@ type StandardClass struct {
 	defaultInitArgs map[string]slip.Object
 	initArgs        map[string]*SlotDef // map with keys of initargs
 	initForms       map[string]*SlotDef
+	methods         map[string]*slip.Method
 	baseClass       slip.Symbol
 	Final           bool
 }
@@ -50,7 +53,7 @@ func (c *StandardClass) Append(b []byte) []byte {
 
 // Simplify by returning the string representation of the class.
 func (c *StandardClass) Simplify() any {
-	simple := c.WithSlots.Simplify()
+	simple := c.HasSlots.Simplify()
 	simple.(map[string]any)["id"] = strconv.FormatUint(uint64(uintptr(unsafe.Pointer(c))), 16)
 	simple.(map[string]any)["name"] = c.name
 	simple.(map[string]any)["package"] = c.pkg.Name
@@ -84,6 +87,11 @@ func (c *StandardClass) Inherits(sc slip.Class) bool {
 		}
 	}
 	return false
+}
+
+// InheritsList returns a list of all inherited classes.
+func (c *StandardClass) InheritsList() []slip.Class {
+	return c.inherit
 }
 
 // Eval returns self.
@@ -192,6 +200,20 @@ func (c *StandardClass) Describe(b []byte, indent, right int, ansi bool) []byte 
 			b = append(b, '\n')
 		}
 	}
+	if 0 < len(c.methods) {
+		b = append(b, indentSpaces[:i2]...)
+		b = append(b, "Direct Methods:\n"...)
+		var keys []string
+		for k := range c.methods {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			b = append(b, indentSpaces[:i3]...)
+			b = append(b, k...)
+			b = append(b, '\n')
+		}
+	}
 	return b
 }
 
@@ -225,7 +247,7 @@ func (c *StandardClass) MakeInstance() slip.Instance {
 		slip.NewPanic("The class %s has undefined superclasses.", c.name)
 	}
 	obj := StandardObject{
-		WithSlots: WithSlots{
+		HasSlots: HasSlots{
 			vars:   map[string]slip.Object{},
 			locker: slip.NoOpLocker{},
 		},
@@ -326,6 +348,43 @@ func (c *StandardClass) mergeSupers() bool {
 			}
 		}
 	}
+	// The inherit list includes the expanded set of inherited supers in the
+	// precedence order.
+	for _, ic := range c.inherit {
+		if hm, ok := ic.(flavors.HasMethods); ok {
+			for k, im := range hm.Methods() {
+				m := c.methods[k]
+				if m == nil {
+					m = &slip.Method{
+						Name: k,
+						Doc:  im.Doc,
+					}
+					c.methods[k] = m
+				}
+				for _, imc := range im.Combinations {
+					if imc.From == ic {
+						m.Combinations = append(m.Combinations, imc)
+					}
+				}
+			}
+		}
+	}
+	for k, im := range flavors.VanillaMethods() {
+		if strings.Contains(im.Name, "flavor") ||
+			im.Name == ":update-instance-for-different-class" ||
+			im.Name == ":change-class" {
+			continue
+		}
+		m := c.methods[k]
+		if m == nil {
+			m = &slip.Method{
+				Name: k,
+				Doc:  im.Doc,
+			}
+			c.methods[k] = m
+		}
+		m.Combinations = append(m.Combinations, im.Combinations...)
+	}
 
 	// TBD add readers, writers, and accessors for each slot if not already added
 	//  maybe keep pointer to the generic method for each
@@ -371,6 +430,30 @@ func (c *StandardClass) Metaclass() slip.Symbol {
 	return StandardClassSymbol
 }
 
+// GetMethod returns the method if it exists.
+func (c *StandardClass) GetMethod(name string) *slip.Method {
+	return c.methods[name]
+}
+
+// Methods returns a map of the methods.
+func (obj *StandardClass) Methods() map[string]*slip.Method {
+	return obj.methods
+}
+
+// MethodNames returns a sorted list of the methods of the class.
+func (obj *StandardClass) MethodNames() slip.List {
+	names := make([]string, 0, len(obj.methods))
+	for k := range obj.methods {
+		names = append(names, k)
+	}
+	sort.Strings(names)
+	methods := make(slip.List, len(names))
+	for i, name := range names {
+		methods[i] = slip.Symbol(name)
+	}
+	return methods
+}
+
 func (c *StandardClass) slotDefMap() map[string]*SlotDef {
 	return c.slotDefs
 }
@@ -393,6 +476,26 @@ func (c *StandardClass) precedenceList() []slip.Symbol {
 
 func (c *StandardClass) inheritedClasses() []slip.Class {
 	return c.inherit
+}
+
+// VarNames for DefMethod, requiredVars and defaultVars combined.
+func (c *StandardClass) VarNames() []string {
+	defs := map[string]struct{}{}
+	for i := len(c.inherit) - 1; 0 <= i; i-- {
+		if sc, ok := c.inherit[i].(isStandardClass); ok {
+			for k := range sc.slotDefMap() {
+				defs[k] = struct{}{}
+			}
+		}
+	}
+	for k := range c.slotDefs {
+		defs[k] = struct{}{}
+	}
+	names := make([]string, 0, len(defs))
+	for k := range defs {
+		names = append(names, k)
+	}
+	return names
 }
 
 func makeClassesReady(p *slip.Package) {

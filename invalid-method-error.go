@@ -6,13 +6,13 @@ import (
 	"fmt"
 )
 
-// MethodErrorSymbol is the symbol with a value of "invalid-method-error".
-const MethodErrorSymbol = Symbol("method-error")
+// InvalidMethodErrorSymbol is the symbol with a value of "invalid-method-error".
+const InvalidMethodErrorSymbol = Symbol("invalid-method-error")
 
-// NewMethodError raises a MethodPanic (invalid-method-error)
+// NewInvalidMethodError raises a MethodPanic (invalid-method-error)
 // describing a invalid-method-error error.
-func NewMethodError(class, qualifier, name Object, format string, args ...any) Object {
-	c := FindClass("method-error")
+func NewInvalidMethodError(class, qualifier, name Object, format string, args ...any) Object {
+	c := FindClass("invalid-method-error")
 	obj := c.MakeInstance()
 
 	argList := List{
@@ -32,8 +32,8 @@ func NewMethodError(class, qualifier, name Object, format string, args ...any) O
 	return obj
 }
 
-// PanicMethodError raises a MethodPanic (invalid-method-error)
+// PanicInvalidMethodError raises a MethodPanic (invalid-method-error)
 // describing a invalid-method-error error.
-func PanicMethod(class, qualifier, name Object, format string, args ...any) {
-	panic(NewMethodError(class, qualifier, name, format, args...))
+func PanicInvalidMethod(class, qualifier, name Object, format string, args ...any) {
+	panic(NewInvalidMethodError(class, qualifier, name, format, args...))
 }
