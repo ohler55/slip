@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/generic"
 )
 
 func defDefclass() {
@@ -37,12 +38,14 @@ or a list of the slot name and a property list of slot options. Slot options are
   __:reader__ [symbol] the name of a generic function to read the value of the slot.
   __:writer__ [symbol] the name of a generic function to set the value of the slot.
   __:accessor__ [symbol] the name of a generic function to read the value of
-  the slot that can also be used with __setf__.
+the slot that can also be used with __setf__.
   __:allocation__ [:instance_|_:class] indicates where the slot is located.
   __:initarg__ [symbol] initial argument keys words. (multiple are allowed)
   __:initform__ [form] an expression or object to evaluate on instance initialization.
   __:type__ [type-specifier] a type specification to validate initial values.
   __:documentation__ [string] documentation for the slot.
+  __:gettable__ [boolean] if true a direct method with the slot name prefixed with a ':' will return the slot value.
+This is an addition to the CLOS specification.
 `,
 				},
 				{Name: slip.AmpRest},
@@ -155,6 +158,12 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		if sd.classStore {
 			sc.vars[sd.name] = sd.initform
 		}
+		if sd.gettable {
+			generic.DefClassMethod(&sc, ":"+sd.name, "", getter(sd.name))
+		}
+		if sd.settable {
+			generic.DefClassMethod(&sc, ":set-"+sd.name, "", setter(sd.name))
+		}
 	}
 	_ = sc.mergeSupers()
 	slip.RegisterClass(sc.name, &sc)
@@ -178,4 +187,27 @@ func fillMapFromKeyArgs(args slip.List, m map[string]slip.Object) {
 		i++
 		m[key] = args[i]
 	}
+}
+
+type getter string
+
+// Call returns the value of a variable in the instance.
+func (g getter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+	self := scope.Get("self").(slip.Instance)
+	value, _ := self.SlotValue(slip.Symbol(g))
+
+	return value
+}
+
+type setter string
+
+// Call returns the value of a variable in the instance.
+func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+	if len(args) < 1 {
+		slip.NewPanic("no value given for set-%s.", s)
+	}
+	self := scope.Get("self").(slip.Instance)
+	_ = self.SetSlotValue(slip.Symbol(s), args[0])
+
+	return args[0]
 }

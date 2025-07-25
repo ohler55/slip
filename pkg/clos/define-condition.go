@@ -4,6 +4,7 @@ package clos
 
 import (
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/generic"
 )
 
 func defDefineCondition() {
@@ -35,12 +36,14 @@ or a list of the slot name and a property list of slot options. Slot options are
   __:reader__ [symbol] the name of a generic function to read the value of the slot.
   __:writer__ [symbol] the name of a generic function to set the value of the slot.
   __:accessor__ [symbol] the name of a generic function to read the value of
-  the slot that can also be used with __setf__.
+the slot that can also be used with __setf__.
   __:allocation__ [:instance_|_:class] indicates where the slot is located.
   __:initarg__ [symbol] initial argument keys words. (multiple are allowed)
   __:initform__ [form] an expression or object to evaluate on instance initialization.
   __:type__ [type-specifier] a type specification to validate initial values.
   __:documentation__ [string] documentation for the slot. This is an addition to the common-lisp specification.
+  __:gettable__ [boolean] if true a direct method with the slot name prefixed with a ':' will return the slot value.
+This is an addition to the CLOS specification.
 `,
 				},
 				{Name: slip.AmpRest},
@@ -160,6 +163,12 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 		cc.slotDefs[sd.name] = sd
 		if sd.classStore {
 			cc.vars[sd.name] = sd.initform
+		}
+		if sd.gettable {
+			generic.DefClassMethod(&cc, ":"+sd.name, "", getter(sd.name))
+		}
+		if sd.settable {
+			generic.DefClassMethod(&cc, ":set-"+sd.name, "", setter(sd.name))
 		}
 	}
 	_ = cc.mergeSupers()

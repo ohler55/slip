@@ -5,12 +5,6 @@
 - next
 
 ---------------------
- - bugs
-  - open doesn't handle absolute paths nor ~
-   - ~someone/x
----------------------
-- docs to explain implementation and deviations of clos and others
----------------------
 
  - generics branch
   - Generic that implements FuncInfo and sits along side ordinary functions in package
@@ -20,6 +14,13 @@
   - defgeneric
    - create a Generic but the bahavior is to panic if called without any defmethods
   - all daemons are called for matching method specializers
+  - cache callers, remove cached on defmethod or defgeneric for matching, or maybe all
+   - build a cached method from all matches and store as exact match even if no exact found
+   - keep exacts or cached separate from defined/methods
+    - cached are GenMeths also
+
+  - map with type as key
+   - walk hierarchy to find matches in order
 
   - standard-class reader, writer, and accessor
    - class slots
@@ -94,11 +95,6 @@
        - if no qualifier then it is generic
       - docs
 
- - flavor allow out of order defflavor like standard-class
- - rename bag-flavor to just bag?
-
- - bonus functions
-
  - [ ] SLOT-MISSING - make generic
  - [ ] SLOT-UNBOUND - make generic
  - [ ] ADD-METHOD
@@ -134,6 +130,13 @@
  - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [ ] WITH-ACCESSORS
  - [ ] WITH-ADDED-METHODS
+
+---------------------
+ - flavor allow out of order defflavor like standard-class
+ - rename bag-flavor to just bag?
+
+---------------------
+- docs to explain implementation and deviations of clos and others
 
 -----------------
   - [ ] inspect [interactive]

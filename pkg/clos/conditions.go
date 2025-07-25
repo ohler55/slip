@@ -60,10 +60,12 @@ const (
 	// PrintNotReadableSymbol is the symbol with a value of "print-not-readable".
 	PrintNotReadableSymbol = slip.Symbol("print-not-readable")
 
-	docSym     = slip.Symbol(":documentation")
-	readerSym  = slip.Symbol(":reader")
-	initargSym = slip.Symbol(":initarg")
-	typeSym    = slip.Symbol(":type")
+	docSym      = slip.Symbol(":documentation")
+	readerSym   = slip.Symbol(":reader")
+	initargSym  = slip.Symbol(":initarg")
+	typeSym     = slip.Symbol(":type")
+	gettableSym = slip.Symbol(":gettable")
+	settableSym = slip.Symbol(":settable")
 )
 
 func defConditions() {
@@ -106,6 +108,8 @@ func defCondition() {
 function must take two arguments. The first is the condition and the second is a stream. If a _string_
 then only the string is written to the stream. The report call is triggered by a call to the
 __print-object__ function if __*print-escape*__ is _nil_.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -126,6 +130,8 @@ func defWarning() {
 				readerSym, slip.Symbol("warning-message"),
 				initargSym, slip.Symbol(":message"),
 				docSym, slip.String(`The _message_ slot if for a message that describes the warning.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -158,6 +164,8 @@ func defError() {
 				readerSym, slip.Symbol("error-message"),
 				initargSym, slip.Symbol(":message"),
 				docSym, slip.String(`The _message_ slot if for a message that describes the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 			slip.List{
 				slip.Symbol("stack"),
@@ -184,6 +192,8 @@ func defArithmeticError() {
 				readerSym, slip.Symbol("arithmetic-error-operation"),
 				initargSym, slip.Symbol(":operation"),
 				docSym, slip.String(`The _operation_ slot indicates the operation that caused the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 			slip.List{
 				slip.Symbol("operands"),
@@ -191,6 +201,8 @@ func defArithmeticError() {
 				initargSym, slip.Symbol(":operands"),
 				docSym, slip.String(`The _operands_ slot is a list of the operands for the
 operation triggering the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -236,6 +248,8 @@ func defFileError() {
 				readerSym, slip.Symbol("file-error-pathname"),
 				initargSym, slip.Symbol(":pathname"),
 				docSym, slip.String(`The _pathname_ slot identifies the file pathname the error occurred for.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -255,6 +269,8 @@ func defPackageError() {
 				readerSym, slip.Symbol("package-error-package"),
 				initargSym, slip.Symbol(":package"),
 				docSym, slip.String(`The _package_ slot identifies the package the error occurred for.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -286,12 +302,16 @@ func defTypeError() {
 				readerSym, slip.Symbol("type-error-datum"),
 				initargSym, slip.Symbol(":datum"),
 				docSym, slip.String(`The _datum_ slot holds the offending value.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 			slip.List{
 				slip.Symbol("expected-type"),
 				readerSym, slip.Symbol("type-error-expected-type"),
 				initargSym, slip.Symbol(":expected-type"),
 				docSym, slip.String(`The _expected-type_ slot holds the expected type or types.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -324,6 +344,8 @@ func defStreamError() {
 				readerSym, slip.Symbol("stream-error-stream"),
 				initargSym, slip.Symbol(":stream"),
 				docSym, slip.String(`The _stream_ slot references the stream the error occurred on.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -368,6 +390,8 @@ func defCellError() {
 				readerSym, slip.Symbol("cell-error-name"),
 				initargSym, slip.Symbol(":name"),
 				docSym, slip.String(`The _name_ of the cell or slot related to the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -387,6 +411,8 @@ func defUnboundSlot() {
 				readerSym, slip.Symbol("unbound-slot-instance"),
 				initargSym, slip.Symbol(":instance"),
 				docSym, slip.String(`The _instance_ of the unbound slot.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -432,6 +458,8 @@ func defSimpleCondition() {
 				typeSym, slip.Symbol("string"),
 				docSym, slip.String(`The _format-control_ slot is __format__ control string used to generate
 the condition message.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 			slip.List{
 				slip.Symbol("format-arguments"),
@@ -440,6 +468,8 @@ the condition message.`),
 				typeSym, slip.Symbol("list"),
 				docSym, slip.String(`The _format-arguments_ are the arguments given to the control string
 to form the condition message.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -513,18 +543,24 @@ func defInvalidMethodError() {
 				slip.Symbol(":initarg"), slip.Symbol(":name"),
 				slip.Symbol(":initarg"), slip.Symbol(":method"),
 				docSym, slip.String(`The _method_ related to the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 			slip.List{
 				slip.Symbol("class"),
 				slip.Symbol(":reader"), slip.Symbol("method-error-class"),
 				slip.Symbol(":initarg"), slip.Symbol(":class"),
 				docSym, slip.String(`The _name_ of the class the method is for.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 			slip.List{
 				slip.Symbol("qualifier"),
 				slip.Symbol(":reader"), slip.Symbol("method-error-qualifier"),
 				slip.Symbol(":initarg"), slip.Symbol(":qualifier"),
 				docSym, slip.String(`The _qualifier_ of the method related to the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options
@@ -544,6 +580,8 @@ func defPrintNotReadable() {
 				readerSym, slip.Symbol("print-not-readable-object"),
 				initargSym, slip.Symbol(":object"),
 				docSym, slip.String(`The _object_ that could not be printed readably.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
 			},
 		},
 		slip.List{ // options

@@ -18,6 +18,8 @@ type SlotDef struct {
 	argType    slip.Object
 	docs       string
 	classStore bool
+	gettable   bool
+	settable   bool
 }
 
 // NewSlotDef creates a new SlotDef from a slot-specification provided to
@@ -80,6 +82,10 @@ func NewSlotDef(def slip.Object) *SlotDef {
 				} else {
 					slip.PanicType(":documentation", td[i+1], "string")
 				}
+			case slip.Symbol(":gettable"):
+				sd.gettable = td[i+1] != nil
+			case slip.Symbol(":settable"):
+				sd.settable = td[i+1] != nil
 			default:
 				slip.PanicType("slot-option", td[i], ":reader", ":writer", ":accessor",
 					":allocation", ":initarg", ":initform", ":type", ":documentation")
