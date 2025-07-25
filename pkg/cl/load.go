@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 
@@ -100,12 +101,28 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}()
 	switch ta := args[0].(type) {
 	case slip.String:
-		path = filepath.Join(slip.WorkingDir, string(ta))
+		switch {
+		case len(ta) == 0:
+			slip.PanicFile(ta, "can not load a file with an empty path.")
+		case filepath.IsAbs(string(ta)):
+			path = string(ta)
+		case ta[0] == '~':
+			if usr, err := user.Current(); err == nil {
+				if 1 < len(ta) && ta[1] == '/' {
+					path = filepath.Join(usr.HomeDir, string(ta)[2:])
+				} else {
+					path = filepath.Join(filepath.Dir(usr.HomeDir), string(ta)[1:], string(ta))
+				}
+			}
+		default:
+			wd, _ := s.Get(slip.Symbol("*default-pathname-defaults*")).(slip.String)
+			path = filepath.Join(string(wd), string(ta))
+		}
 		if buf, err = os.ReadFile(path); err != nil {
 			if os.IsNotExist(err) && ifNotExist == nil {
 				return nil
 			}
-			slip.NewPanic("loading %s: %s", path, err)
+			slip.PanicFile(slip.String(path), "loading %s: %s", path, err)
 		}
 	case io.Reader:
 		path = slip.ObjectString(args[0])

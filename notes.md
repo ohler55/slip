@@ -9,8 +9,18 @@
   - open doesn't handle absolute paths nor ~
    - ~someone/x
 ---------------------
+- docs to explain implementation and deviations of clos and others
+---------------------
 
  - generics branch
+  - Generic that implements FuncInfo and sits along side ordinary functions in package
+  - GenMeth embeds Method
+   - add type symbol
+   - has subs (or specializers? or specifics)
+  - defgeneric
+   - create a Generic but the bahavior is to panic if called without any defmethods
+  - all daemons are called for matching method specializers
+
   - standard-class reader, writer, and accessor
    - class slots
     - accessors must consider slot on standard-object.Type.Vars
