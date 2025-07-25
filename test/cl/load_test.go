@@ -4,6 +4,9 @@ package cl_test
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"os/user"
 	"strings"
 	"testing"
 	"testing/iotest"
@@ -34,6 +37,35 @@ func TestLoadFile(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, slip.Fixnum(3), scope.Get(slip.Symbol("load-test-me")))
 	tt.Equal(t, slip.Fixnum(5), scope.Get(slip.Symbol("load-test-me-too")))
+}
+
+func TestLoadRoot(t *testing.T) {
+	wd, err := os.Getwd()
+	tt.Nil(t, err)
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`(let ((load-test-me-too 1))
+                               (load "%s/testdata/load-me.lisp")
+                               load-test-me-too)`, wd),
+		Expect: "5",
+	}).Test(t)
+}
+
+func TestLoadHome(t *testing.T) {
+	wd, err := os.Getwd()
+	tt.Nil(t, err)
+	var usr *user.User
+	usr, err = user.Current()
+	tt.Nil(t, err)
+	if strings.HasPrefix(wd, usr.HomeDir) {
+		wd = string(append([]byte{'~'}, strings.TrimPrefix(wd, usr.HomeDir)...))
+	}
+	fmt.Printf("*** %s %s\n", wd, usr.HomeDir)
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`(let ((load-test-me-too 1))
+                               (load "%s/testdata/load-me.lisp")
+                               load-test-me-too)`, wd),
+		Expect: "5",
+	}).Test(t)
 }
 
 func TestLoadFileVerbose(t *testing.T) {
@@ -137,5 +169,12 @@ func TestLoadReadError(t *testing.T) {
 		Scope:  scope,
 		Source: `(load input)`,
 		Panics: true,
+	}).Test(t)
+}
+
+func TestLoadEmptyPath(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(load "")`,
+		PanicType: slip.FileErrorSymbol,
 	}).Test(t)
 }
