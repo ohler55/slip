@@ -928,7 +928,7 @@ func TestCoerceToHashTable(t *testing.T) {
 func TestCoerceToFunction(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(coerce 'car 'function)`,
-		Expect: `#<function car>`,
+		Expect: `#<built-in car>`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(coerce (lambda () nil) 'function)`,

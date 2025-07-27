@@ -21,9 +21,9 @@ const (
 	// MethodSymbol is the symbol with a value of "method" for Flavors
 	// methods.
 	MethodSymbol = Symbol("method")
-	// GenericSymbol is the symbol with a value of "generic" for CLOS generics
-	// and methods.
-	GenericSymbol = Symbol("generic")
+	// GenericFunctionSymbol is the symbol with a value of "generic-function"
+	// for CLOS generics and methods.
+	GenericFunctionSymbol = Symbol("generic-function")
 )
 
 // Function is the base type for most if not all functions.
@@ -53,7 +53,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 	if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	pkg.Define(creator, doc)
+	_ = pkg.Define(creator, doc)
 }
 
 // NewFunc creates a new instance of the named function with the arguments

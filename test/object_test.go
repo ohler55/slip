@@ -1037,7 +1037,7 @@ func TestFuncInfo(t *testing.T) {
 	fi := slip.MustFindFunc("car")
 	(&sliptest.Object{
 		Target: fi,
-		String: "#<function car>",
+		String: "#<built-in car>",
 		Simple: func(t *testing.T, simple any) {
 			tt.Equal(t, "car", jp.C("name").First(simple))
 		},

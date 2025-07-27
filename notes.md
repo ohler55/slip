@@ -5,9 +5,12 @@
 - next
 
 ---------------------
+ - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
+
 
  - generics branch
-  - Generic that implements FuncInfo and sits along side ordinary functions in package
+
+
   - GenMeth embeds Method
    - add type symbol
    - has subs (or specializers? or specifics)

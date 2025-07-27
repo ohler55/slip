@@ -12,7 +12,7 @@ import (
 func TestFunctionSymbol(t *testing.T) {
 	scope := slip.NewScope()
 	code := slip.ReadString("(function car)", scope)
-	tt.Equal(t, "#<function car>", slip.ObjectString(code.Eval(scope, nil)))
+	tt.Equal(t, "#<built-in car>", slip.ObjectString(code.Eval(scope, nil)))
 }
 
 func TestFunctionLambda(t *testing.T) {
@@ -24,7 +24,7 @@ func TestFunctionLambda(t *testing.T) {
 func TestFunctionSharpQuote(t *testing.T) {
 	scope := slip.NewScope()
 	code := slip.ReadString("#'car", scope)
-	tt.Equal(t, "#<function car>", slip.ObjectString(code.Eval(scope, nil)))
+	tt.Equal(t, "#<built-in car>", slip.ObjectString(code.Eval(scope, nil)))
 	tt.Equal(t, "#'car", slip.ObjectString(code[0]))
 }
 

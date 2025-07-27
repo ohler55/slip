@@ -59,6 +59,8 @@ const (
 	InvalidMethodErrorSymbol = slip.Symbol("invalid-method-error")
 	// PrintNotReadableSymbol is the symbol with a value of "print-not-readable".
 	PrintNotReadableSymbol = slip.Symbol("print-not-readable")
+	// NoApplicableMethodErrorSymbol is the symbol with a value of "no-applicable-method-error".
+	NoApplicableMethodErrorSymbol = slip.Symbol("no-applicable-method-error")
 
 	docSym      = slip.Symbol(":documentation")
 	readerSym   = slip.Symbol(":reader")
@@ -95,6 +97,7 @@ func defConditions() {
 	defClassNotFound()
 	defInvalidMethodError()
 	defPrintNotReadable()
+	defNoApplicableMethodError()
 }
 
 func defCondition() {
@@ -589,6 +592,36 @@ func defPrintNotReadable() {
 				docSym,
 				slip.String(`A __print-not-readable__ occurs during an attempt to print a
 non-readable object when __*print-readably*__ is non-nil.`),
+			},
+		},
+	).Final = true
+}
+
+func defNoApplicableMethodError() {
+	DefConditionClass("no-applicable-method-error", slip.List{CellErrorSymbol},
+		slip.List{ // slot-specifications
+			slip.List{
+				slip.Symbol("generic-function"),
+				slip.Symbol(":reader"), slip.Symbol("no-applicable-method-error-generic-function"),
+				slip.Symbol(":initarg"), slip.Symbol(":generic-function"),
+				docSym, slip.String(`The _generic-function_ related to the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
+			},
+			slip.List{
+				slip.Symbol("function-arguments"),
+				slip.Symbol(":reader"), slip.Symbol("no-applicable-method-error-function-arguments"),
+				slip.Symbol(":initarg"), slip.Symbol(":function-arguments"),
+				docSym, slip.String(`The _function-arguments_ related to the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
+			},
+		},
+		slip.List{ // options
+			slip.List{
+				docSym,
+				slip.String(`A __no-applicable-method-error__ represents errors related to a the
+lack of a matching method on a generic function.`),
 			},
 		},
 	).Final = true

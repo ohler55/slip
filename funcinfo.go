@@ -11,6 +11,7 @@ type FuncInfo struct {
 	Doc    *FuncDoc
 	Pkg    *Package // package interned in
 	Kind   Symbol
+	Aux    any
 	Export bool
 }
 
@@ -22,7 +23,7 @@ func (obj *FuncInfo) String() string {
 // Append a buffer with a representation of the Object.
 func (obj *FuncInfo) Append(b []byte) []byte {
 	b = append(b, "#<"...)
-	b = append(b, printer.caseName("function")...)
+	b = append(b, obj.Kind...)
 	b = append(b, ' ')
 	b = append(b, printer.caseName(obj.Name)...)
 	return append(b, '>')

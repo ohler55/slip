@@ -12,7 +12,7 @@ import (
 func TestSymbolFunctionNormal(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(symbol-function 'car)`,
-		Expect: "#<function car>",
+		Expect: "#<built-in car>",
 	}).Test(t)
 }
 

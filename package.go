@@ -400,7 +400,7 @@ func (obj *Package) String() string {
 }
 
 // Define a new golang function.
-func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
+func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc, aux ...any) *FuncInfo {
 	name := strings.ToLower(doc.Name)
 	if obj.Locked {
 		f := creator(nil)
@@ -421,6 +421,9 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	if len(fi.Kind) == 0 {
 		fi.Kind = BuiltInSymbol
 	}
+	if 0 < len(aux) {
+		fi.Aux = aux[0]
+	}
 	obj.mu.Lock()
 	if obj.funcs == nil {
 		obj.funcs = map[string]*FuncInfo{}
@@ -438,6 +441,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc) {
 	for _, h := range defunHooks {
 		h.fun(obj, name)
 	}
+	return &fi
 }
 
 // Export a function.

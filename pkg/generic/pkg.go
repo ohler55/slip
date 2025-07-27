@@ -29,6 +29,8 @@ func init() {
 		&Defmethod{},
 	)
 	defDefmethod()
+	defNoApplicableMethod()
+	defDefgeneric()
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
