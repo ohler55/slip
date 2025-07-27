@@ -2,7 +2,9 @@
 
 package generic
 
-import "github.com/ohler55/slip"
+import (
+	"github.com/ohler55/slip"
+)
 
 type Meth struct {
 	slip.Method
@@ -15,7 +17,7 @@ type Aux struct {
 	docs    *slip.FuncDoc // var-symbol, &optional, &rest, &key &allow-other-keys
 	cache   map[string]*Meth
 	methods map[string]*Meth
-	// TBD mutex
+	// TBD mutex to avoid defmethod with access? Maybe not needed. although cache can be updated at any time
 }
 
 // NewAux creates a new generic aux.
@@ -39,12 +41,9 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 	//   maybe add option arg to Package.Define, an any for storing generic?
 	//
 
-	// look for no-applicable-method. If not found then panic with no-applicable-method-error
+	nam := slip.MustFindFunc("no-applicable-method")
 
-	// The generic function no-applicable-method not found in the current
-	// package so raise a no-applicable-method-error. This is a way to handle
-	// a new package that does not yet have any generics defined.
-	panic(slip.NewNoApplicableMethodError(gf, args, ""))
+	return nam.Apply(s, append(slip.List{gf}, args...), depth)
 }
 
 // TBD **** defgeneric should be like any other function

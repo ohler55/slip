@@ -3,6 +3,8 @@
 package generic
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
 )
 
@@ -30,7 +32,10 @@ is invoked and no method with the argument specializers is found.`,
 	aux := NewAux(&fd)
 	Pkg.Define(
 		func(args slip.List) slip.Object {
-			f := NoApplicableMethod{Function: slip.Function{Name: "no-applicable-method", Args: args}, aux: aux}
+			f := NoApplicableMethod{
+				Function: slip.Function{Name: "no-applicable-method", Args: args, SkipEval: []bool{true}},
+				aux:      aux,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -47,5 +52,9 @@ type NoApplicableMethod struct {
 
 // Call the the function with the arguments provided.
 func (f *NoApplicableMethod) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+
+	// TBD check for methods
+	fmt.Printf("*** NoApplicableMethod called\n")
+
 	panic(slip.NewNoApplicableMethodError(args[0], args[1:], ""))
 }

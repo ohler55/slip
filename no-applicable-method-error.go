@@ -22,12 +22,19 @@ func NewNoApplicableMethodError(gf Object, fargs List, format string, args ...an
 	if 0 < len(format) {
 		argList = append(argList, Symbol(":message"), String(fmt.Sprintf(format, args...)))
 	} else {
-		argList = append(argList,
-			Symbol(":message"),
-			String(fmt.Sprintf(`There is no applicable method for the generic function
+		var msg String
+		if f, ok := gf.(Funky); ok {
+			msg = String(fmt.Sprintf(`There is no applicable method for the generic function
+#<generic-function %s>
+  when called with arguments
+    %s.`, f.GetName(), fargs))
+		} else {
+			msg = String(fmt.Sprintf(`There is no applicable method for the generic function
 %s
   when called with arguments
-    %s.`, gf, fargs)))
+    %s.`, gf, fargs))
+		}
+		argList = append(argList, Symbol(":message"), msg)
 	}
 	obj.Init(NewScope(), argList, 0)
 
