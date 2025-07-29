@@ -258,8 +258,13 @@ func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *L
 			PanicType("lambda list element", ta, "symbol", "list")
 		}
 	}
-	// Compile forms while in the current package instead of waiting until
-	// invoked.
+	lam.Compile(s, extraVars...)
+	return
+}
+
+// Compile forms while in the current package instead of waiting until
+// invoked.
+func (lam *Lambda) Compile(s *Scope, extraVars ...string) {
 	for i, f := range lam.Forms {
 	expand:
 		switch tf := f.(type) {
@@ -286,7 +291,6 @@ func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *L
 			lam.Forms[i] = CompileList(tf)
 		}
 	}
-	return
 }
 
 // String representation of the Object.

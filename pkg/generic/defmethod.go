@@ -64,7 +64,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	slip.ArgCountCheck(f, args, 2, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		slip.NewPanic("Not yet implemented")
+		defGenericMethod(s, ta, args[1:])
 	case slip.List:
 		defDirectMethod(s, ta, args[1:])
 	default:
@@ -207,4 +207,132 @@ func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Comb
 		}
 	}
 	m.Combinations = append(append(m.Combinations[:pos], combo), m.Combinations[pos:]...)
+}
+
+func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List) {
+	fi := slip.FindFunc(string(fname))
+	var aux *Aux
+	if fi != nil {
+		if aux, _ = fi.Aux.(*Aux); aux != nil {
+			slip.PanicProgram("%s already names an ordinary function or macro.", fname)
+		}
+	}
+	var qual string
+	if sym, ok := args[0].(slip.Symbol); ok {
+		switch strings.ToLower(string(sym)) {
+		case ":before", ":after", ":around":
+			qual = string(sym)
+		default:
+			slip.PanicInvalidMethod(nil, sym, fname, "")
+		}
+		args = args[1:]
+	}
+	ll, ok := args[0].(slip.List)
+	if !ok {
+		slip.PanicType("specialize-lambda-list", args[0], "list")
+	}
+	args = args[1:]
+	if aux == nil {
+		fd := slip.FuncDoc{
+			Name:   string(fname),
+			Kind:   slip.GenericFunctionSymbol,
+			Args:   make([]*slip.DocArg, len(ll)),
+			Return: "object",
+		}
+		for i, v := range ll {
+			switch tv := v.(type) {
+			case slip.Symbol:
+				fd.Args[i] = &slip.DocArg{Name: string(tv)}
+			case slip.List:
+				if 1 < len(tv) {
+					if sym, _ := tv[0].(slip.Symbol); 0 < len(sym) {
+						fd.Args[i] = &slip.DocArg{Name: string(sym)}
+						continue
+					}
+				}
+				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+			default:
+				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+			}
+		}
+		aux := NewAux(&fd)
+		_ = slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := genfun{Function: slip.Function{Name: string(fname), Args: args}, aux: aux}
+				f.Self = &f
+				return &f
+			},
+			&fd,
+			aux,
+		)
+	}
+	var key []byte
+	for i, a := range ll {
+		if aux.reqCnt <= i {
+			break
+		}
+		if 0 < i {
+			key = append(key, '|')
+		}
+		if a == nil {
+			key = append(key, 't')
+		} else {
+			key = append(key, a.Hierarchy()[0]...)
+		}
+	}
+	meth := aux.methods[string(key)]
+	if meth == nil {
+		meth = &slip.Method{Name: string(fname)}
+		aux.methods[string(key)] = meth
+	}
+	// Set the function docs for the method mostly for a call to describe.
+	fd := slip.FuncDoc{
+		Name:   string(fname),
+		Kind:   slip.MethodSymbol,
+		Args:   make([]*slip.DocArg, len(ll)),
+		Return: "object",
+	}
+	if 0 < len(args) {
+		if ss, ok := args[0].(slip.String); ok {
+			fd.Text = string(ss)
+			args = args[1:]
+		}
+	}
+	for i, v := range ll {
+		switch tv := v.(type) {
+		case slip.Symbol:
+			fd.Args[i] = &slip.DocArg{Name: string(tv)}
+		case slip.List:
+			if 1 < len(tv) {
+				if sym, _ := tv[0].(slip.Symbol); 0 < len(sym) {
+					fd.Args[i] = &slip.DocArg{Name: string(sym), Default: tv[1]}
+					continue
+				}
+			}
+			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+		default:
+			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+		}
+	}
+	lam := &slip.Lambda{
+		Doc:   &fd,
+		Forms: args,
+	}
+	lam.Compile(s)
+	var c slip.Combination
+	switch qual {
+	case "":
+		c.Primary = lam
+	case ":before":
+		c.Before = lam
+	case ":after":
+		c.After = lam
+	case ":around":
+		c.Wrap = lam
+	default:
+		slip.PanicInvalidMethod(nil, slip.Symbol(qual), fname, "")
+	}
+	meth.Combinations = []*slip.Combination{&c}
+
+	aux.cache = map[string]*slip.Method{}
 }

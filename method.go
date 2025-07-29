@@ -7,7 +7,7 @@ import (
 	"unsafe"
 )
 
-// Method represents a method for flavors and clos classes.
+// Method represents a method for flavors and CLOS generics.
 type Method struct {
 	Name         string
 	Doc          *FuncDoc
