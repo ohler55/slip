@@ -9,22 +9,9 @@
 
 
  - generics branch
-  - aux validate args
+  - test defgeneric, defmethod, and method combinations
 
-  - GenMeth embeds Method
-   - add type symbol
-   - has subs (or specializers? or specifics)
-  - defgeneric
-   - create a Generic but the bahavior is to panic if called without any defmethods
-  - all daemons are called for matching method specializers
-  - cache callers, remove cached on defmethod or defgeneric for matching, or maybe all
-   - build a cached method from all matches and store as exact match even if no exact found
-   - keep exacts or cached separate from defined/methods
-    - cached are GenMeths also
-
-  - map with type as key
-   - walk hierarchy to find matches in order
-
+  - make sure snapshot works as expected
   - standard-class reader, writer, and accessor
    - class slots
     - accessors must consider slot on standard-object.Type.Vars
@@ -40,63 +27,7 @@
   - pass scope in then various error creation panic
    - allow for report function to use local variables
 
-  - generics are tied to a package just like functions
-  - is a flag needed to indicate some generics/method do not allow qualifiers like :before and :after
-  - sparse method combinations, no need for empties
-  - add flavor/class hierarchy to regular hierarchy
-   - build class then instance get hierarchy from class/flavor
-    - maybe a name class hierarchy as well as instance
-    - precedence-list
-     - foo super-foo standard-object t
-
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
-   - clos.Generic
-    - start with built in types
-    - embeds flavors.Method
-    - adds parameters - list of type symbols, later type specifier lists
-    - add specifics []*clos.Generic
-   - want this on package for lookup
-   - clos instances don't bind slot by default
-    - not a slip.Scope, just map or rather a specific Slots map so cl/slot-value works with it
-     - Getter interface or Getter and Setter interfaces
-  - call-next-method, alias for continue-whopper
-
-  - defgeneric (needed before defclass for slot accessors)
-   - build generic dispatch table on Package
-   - as default and flavor instance (send inst function-name args) if it has :function-name
-   - map by name to *Generic
-   - Generic [same as clos Method conceptually]
-    - name
-    - methods (lookup based on arg types)
-     - branch for each specializer (arg types)
-      - nested maps or a list?
-       - if map
-        - need to consider sub-classes so not a direct lookup
-       - if list then walk and check each arg-type until a match
-        - sort order is most specialize
-        - maybe more of a tree with first level as first arg then branches off for 2 and additions arguments
-     - leaf has daemons like flavors - can tht be reused?
-     - as method defined the qualifiers/daemons are propogated to reduce call time lookups
-    - Method or Generic to avoid name confusion
-     - embed flavors.Method
-     - parameters - list of arg types - just types, no forms, or maybe rely on coerce type matching
-     - specifics - []*Method to search
-
-  - defmethod class daemon bindings/args
-   - find class to determine how to define
-   - maybe separate function/method table for all clos classes
-    - when executing consider based method-qualifier
-    - map of function name and methods
-     - method includes:
-      - functions to call
-       - daemons
-       - most specific type for primary
-      - qualifier
-       - list of var-name and type pairs
-        - match is when all types for the arguments match
-        - nill type matches anything
-       - if no qualifier then it is generic
-      - docs
 
  - [ ] SLOT-MISSING - make generic
  - [ ] SLOT-UNBOUND - make generic

@@ -64,16 +64,22 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	slip.ArgCountCheck(f, args, 2, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		defGenericMethod(s, ta, args[1:])
+		var aux *Aux
+		if fi := slip.FindFunc(string(ta)); fi != nil {
+			if aux, _ = fi.Aux.(*Aux); aux == nil {
+				slip.PanicProgram("%s already names an ordinary function or macro.", ta)
+			}
+		}
+		result = defGenericMethod(s, ta, args[1:], aux)
 	case slip.List:
-		defDirectMethod(s, ta, args[1:])
+		result = defDirectMethod(s, ta, args[1:])
 	default:
 		slip.PanicType("method designator for defmethod", ta, "symbol", "list")
 	}
 	return
 }
 
-func defDirectMethod(s *slip.Scope, ml, args slip.List) {
+func defDirectMethod(s *slip.Scope, ml, args slip.List) slip.Object {
 	var (
 		class  slip.Class
 		daemon string
@@ -104,11 +110,11 @@ func defDirectMethod(s *slip.Scope, ml, args slip.List) {
 	if class == nil {
 		slip.PanicType("class for defmethod", ml[0], "name of class or flavor")
 	}
-	DefClassMethod(class, method, daemon, slip.DefLambda(method, s, args, class.VarNames()...))
+	return DefClassMethod(class, method, daemon, slip.DefLambda(method, s, args, class.VarNames()...))
 }
 
 // DefClassMethod defines a direct method on a class.
-func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) {
+func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) slip.Object {
 	name = strings.ToLower(name)
 	hm, ok := obj.(HasMethods)
 	if !ok {
@@ -177,6 +183,7 @@ func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) {
 			}
 		}
 	}
+	return m
 }
 
 func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Combination) {
@@ -209,14 +216,7 @@ func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Comb
 	m.Combinations = append(append(m.Combinations[:pos], combo), m.Combinations[pos:]...)
 }
 
-func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List) {
-	fi := slip.FindFunc(string(fname))
-	var aux *Aux
-	if fi != nil {
-		if aux, _ = fi.Aux.(*Aux); aux != nil {
-			slip.PanicProgram("%s already names an ordinary function or macro.", fname)
-		}
-	}
+func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux) slip.Object {
 	var qual string
 	if sym, ok := args[0].(slip.Symbol); ok {
 		switch strings.ToLower(string(sym)) {
@@ -255,7 +255,7 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List) {
 				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
 			}
 		}
-		aux := NewAux(&fd)
+		aux = NewAux(&fd)
 		_ = slip.CurrentPackage.Define(
 			func(args slip.List) slip.Object {
 				f := genfun{Function: slip.Function{Name: string(fname), Args: args}, aux: aux}
@@ -267,17 +267,32 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List) {
 		)
 	}
 	var key []byte
-	for i, a := range ll {
+	for i, v := range ll {
 		if aux.reqCnt <= i {
 			break
 		}
 		if 0 < i {
 			key = append(key, '|')
 		}
-		if a == nil {
+		switch tv := v.(type) {
+		case slip.Symbol:
 			key = append(key, 't')
-		} else {
-			key = append(key, a.Hierarchy()[0]...)
+		case slip.List:
+			if 1 < len(tv) {
+				if tv[1] == nil {
+					key = append(key, 't')
+				} else if sym, ok := tv[1].(slip.Symbol); ok {
+					key = append(key, sym...)
+				} else if tv[1] == slip.True {
+					key = append(key, 't')
+				} else {
+					slip.PanicType("parameter-specializer-name", tv[1], "symbol")
+				}
+			} else {
+				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+			}
+		default:
+			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
 		}
 	}
 	meth := aux.methods[string(key)]
@@ -319,7 +334,13 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List) {
 		Forms: args,
 	}
 	lam.Compile(s)
-	var c slip.Combination
+	var c *slip.Combination
+	if 0 < len(meth.Combinations) {
+		c = meth.Combinations[0]
+	} else {
+		c = &slip.Combination{}
+		meth.Combinations = []*slip.Combination{c}
+	}
 	switch qual {
 	case "":
 		c.Primary = lam
@@ -332,7 +353,8 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List) {
 	default:
 		slip.PanicInvalidMethod(nil, slip.Symbol(qual), fname, "")
 	}
-	meth.Combinations = []*slip.Combination{&c}
-
-	aux.cache = map[string]*slip.Method{}
+	if 0 < len(aux.cache) {
+		aux.cache = map[string]*slip.Method{}
+	}
+	return meth
 }

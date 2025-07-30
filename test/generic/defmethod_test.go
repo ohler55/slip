@@ -37,14 +37,7 @@ func TestDefmethodFlavors(t *testing.T) {
                                     :settable-instance-variables
                                     :initable-instance-variables)
                    (defmethod (berry :rot) () "When berries rot they turn brown." (setq color 'brown)))`,
-		Expect: "nil",
-	}).Test(t)
-}
-
-func TestDefmethodCLOS(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(defmethod rot ((b berry)) (setq color 'brown))`,
-		Panics: true,
+		Expect: `/#<method :rot nil \{[0-9a-f]+\}>/`,
 	}).Test(t)
 }
 
@@ -276,4 +269,63 @@ func TestDefmethodArgsMismatch(t *testing.T) {
 	scope := slip.NewScope()
 	f := slip.ReadString("berry", scope).Eval(scope, nil).(*flavors.Flavor)
 	tt.Panic(t, func() { f.DefMethod(":rot", ":after", rottenCaller{}) })
+}
+
+func TestDefmethodGenericOrdinaryError(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(defmethod defmethod ((a fixnum)) nil)`,
+		PanicType: slip.ProgramErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericAutoDef(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux (a (b fixnum)) (+ a b))`,
+		Expect: `/#<method quux \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(quux 1 2)`,
+		Expect: "3",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(quux 1 2.1)`,
+		PanicType: slip.NoApplicableMethodErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericBadLambdaList(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source:    `(defmethod quux t nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux (t) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((7)) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericQualifier(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux ((s output-stream) (x fixnum)) (format s "primary"))`,
+		Expect: `/#<method quux \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(defmethod quux :after ((s output-stream) (x real)) (format s "-after"))`,
+		Expect: `/#<method quux \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(defmethod quux :before ((s output-stream) (x real)) (format s "before-"))`,
+		Expect: `/#<method quux \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(with-output-to-string(os) (quux os 3))`,
+		Expect: `"before-primary-after"`,
+	}).Test(t)
 }

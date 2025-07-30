@@ -209,6 +209,15 @@ func (f *Function) Equal(other Object) bool {
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (f *Function) Hierarchy() []Symbol {
+	var fi *FuncInfo
+	if f.Pkg == nil {
+		fi = FindFunc(f.Name)
+	} else {
+		fi = FindFunc(f.Name, f.Pkg)
+	}
+	if fi != nil {
+		return fi.Hierarchy()
+	}
 	for _, skip := range f.SkipEval {
 		if skip {
 			return []Symbol{MacroSymbol, TrueSymbol}

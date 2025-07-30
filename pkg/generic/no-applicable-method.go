@@ -3,8 +3,6 @@
 package generic
 
 import (
-	"fmt"
-
 	"github.com/ohler55/slip"
 )
 
@@ -30,6 +28,17 @@ func defNoApplicableMethod() {
 is invoked and no method with the argument specializers is found.`,
 	}
 	aux := NewAux(&fd)
+	md := slip.FuncDoc{
+		Name:   fd.Name,
+		Kind:   slip.MethodSymbol,
+		Args:   fd.Args,
+		Return: "object",
+	}
+	aux.methods["t"] = &slip.Method{
+		Name:         fd.Name,
+		Doc:          &md,
+		Combinations: []*slip.Combination{{Primary: defaultNoAppMethCaller{}}},
+	}
 	Pkg.Define(
 		func(args slip.List) slip.Object {
 			f := NoApplicableMethod{
@@ -51,10 +60,26 @@ type NoApplicableMethod struct {
 }
 
 // Call the the function with the arguments provided.
-func (f *NoApplicableMethod) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (f *NoApplicableMethod) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	var key []byte
+	key = append(key, f.Hierarchy()[0]...)
+	key = append(key, '|', 't')
+	f.aux.moo.Lock()
+	meth := f.aux.cache[string(key)]
+	if meth == nil {
+		if meth = f.aux.buildCacheMeth(args); meth != nil {
+			f.aux.cache[string(key)] = meth
+		}
+	}
+	f.aux.moo.Unlock()
+	if meth != nil {
+		return meth.Call(s, args, depth)
+	}
+	panic(slip.NewNoApplicableMethodError(args[0], args[1:], ""))
+}
 
-	// TBD check for methods
-	fmt.Printf("*** NoApplicableMethod called\n")
+type defaultNoAppMethCaller struct{}
 
+func (defaultNoAppMethCaller) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
 	panic(slip.NewNoApplicableMethodError(args[0], args[1:], ""))
 }

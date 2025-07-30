@@ -72,6 +72,11 @@ func (f *Defgeneric) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	if !ok {
 		slip.PanicType("function-name", args[0], "symbol")
 	}
+	if fi := slip.FindFunc(string(name)); fi != nil {
+		if _, ok = fi.Aux.(*Aux); !ok {
+			slip.PanicProgram("%s already names an ordinary function or macro.", name)
+		}
+	}
 	var ll slip.List
 	if ll, ok = args[1].(slip.List); !ok {
 		slip.PanicType("gf-lambda-list", args[1], "list")
@@ -89,11 +94,29 @@ func (f *Defgeneric) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 		}
 		fd.Args[i] = &slip.DocArg{Name: string(sym)}
 	}
-	// TBD options
-	// docs
-	// method
-
 	aux := NewAux(&fd)
+	for _, a := range args[2:] {
+		var option slip.List
+		if option, ok = a.(slip.List); !ok || len(option) < 2 {
+			slip.PanicType("option", a, "list")
+		}
+		switch option[0] {
+		case slip.Symbol(":documentation"):
+			if ss, _ := option[1].(slip.String); 0 < len(ss) {
+				fd.Text = string(ss)
+			}
+		case slip.Symbol("declare"),
+			slip.Symbol(":argument-precedence-order"),
+			slip.Symbol(":method-combination"),
+			slip.Symbol(":generic-function-class"),
+			slip.Symbol(":method-class"):
+			// ignore
+		case slip.Symbol(":method"):
+			defGenericMethod(s, name, option[1:], aux)
+		default:
+			slip.PanicType("option keyword", option[0], "symbol")
+		}
+	}
 	return slip.CurrentPackage.Define(
 		func(args slip.List) slip.Object {
 			f := genfun{Function: slip.Function{Name: string(name), Args: args}, aux: aux}

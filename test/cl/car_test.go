@@ -15,7 +15,7 @@ func TestCarEmpty(t *testing.T) {
 		Target:    slip.NewFunc("car", slip.List{nil}),
 		String:    "(car nil)",
 		Simple:    []interface{}{"car", nil},
-		Hierarchy: "function.t",
+		Hierarchy: "built-in.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},

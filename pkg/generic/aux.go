@@ -22,11 +22,11 @@ type Aux struct {
 // NewAux creates a new generic aux.
 func NewAux(fd *slip.FuncDoc) *Aux {
 	var cnt int
-	for i, da := range fd.Args {
+	for _, da := range fd.Args {
 		if da.Name[0] == '&' {
-			cnt = i
 			break
 		}
+		cnt++
 	}
 	return &Aux{
 		cache:   map[string]*slip.Method{},
@@ -77,22 +77,10 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 	return nam.Apply(s, append(slip.List{gf}, args...), depth)
 }
 
-// TBD **** defgeneric should be like any other function
-
-// func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc, aux ... any) {
-
-// TBD for the :method option, use defmethod but in the lisp defgeneric allow :method
-// (defgeneric to-list (object)
-//   (:method ((object t))
-//     (list object))
-//   (:method ((object list))
-//     object))
-
 func (g *Aux) buildCacheMeth(args slip.List) *slip.Method {
 	var meth slip.Method
 	key := make([]string, g.reqCnt)
 	g.collectMethods(&meth, key, 0, args)
-
 	if len(meth.Combinations) == 0 {
 		return nil
 	}
@@ -109,7 +97,7 @@ func (g *Aux) collectMethods(meth *slip.Method, key []string, ki int, args slip.
 	} else {
 		hier = args[ki].Hierarchy()
 	}
-	if len(key) == ki-1 { // last one
+	if len(key) == ki+1 { // last one
 		for _, h := range hier {
 			key[ki] = string(h)
 			if m, has := g.methods[strings.Join(key, "|")]; has {

@@ -115,9 +115,11 @@ func (fd *FuncDoc) Describe(b []byte, indent, right int, ansi bool) []byte {
 			} else {
 				b = append(b, da.Name...)
 			}
-			b = append(b, ": ["...)
-			b = append(b, da.Type...)
-			b = append(b, ']')
+			if 0 < len(da.Type) {
+				b = append(b, ": ["...)
+				b = append(b, da.Type...)
+				b = append(b, ']')
+			}
 			if da.Default != nil {
 				b = append(b, " = "...)
 				b = da.Default.Append(b)
