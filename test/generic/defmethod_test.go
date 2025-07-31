@@ -282,7 +282,7 @@ func TestDefmethodGenericAutoDef(t *testing.T) {
 	slip.CurrentPackage.Undefine("quux")
 	(&sliptest.Function{
 		Source: `(defmethod quux (a (b fixnum)) (+ a b))`,
-		Expect: `/#<method quux \{[0-9a-f]+\}>/`,
+		Expect: `/#<method quux \(a \(b fixnum\)\) \{[0-9a-f]+\}>/`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(quux 1 2)`,
@@ -291,6 +291,14 @@ func TestDefmethodGenericAutoDef(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(quux 1 2.1)`,
 		PanicType: slip.NoApplicableMethodErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericDocs(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(documentation (defmethod quux (a (b fixnum)) "quacker" (+ a b)) 'method)`,
+		Expect: `"quacker"`,
 	}).Test(t)
 }
 
@@ -314,18 +322,66 @@ func TestDefmethodGenericQualifier(t *testing.T) {
 	slip.CurrentPackage.Undefine("quux")
 	(&sliptest.Function{
 		Source: `(defmethod quux ((s output-stream) (x fixnum)) (format s "primary"))`,
-		Expect: `/#<method quux \{[0-9a-f]+\}>/`,
+		Expect: `/#<method quux \(\(s output-stream\) \(x fixnum\)\) \{[0-9a-f]+\}>/`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(defmethod quux :after ((s output-stream) (x real)) (format s "-after"))`,
-		Expect: `/#<method quux \{[0-9a-f]+\}>/`,
+		Expect: `/#<method quux \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(with-output-to-string(os) (quux os 3))`,
+		Expect: `"primary-after"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(defmethod quux :before ((s output-stream) (x real)) (format s "before-"))`,
-		Expect: `/#<method quux \{[0-9a-f]+\}>/`,
+		Expect: `/#<method quux \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(with-output-to-string(os) (quux os 3))`,
 		Expect: `"before-primary-after"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux :not-a-qualifier (x) nil)`,
+		PanicType: slip.InvalidMethodErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericLambdaList(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux ((a nil) (b t)) (list a b))`,
+		Expect: `/#<method quux \(a \(b t\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(quux 'x 1)`,
+		Expect: "(x 1)",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((a 7)) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((a)) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux (7) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericBadOptional(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defgeneric quux (a &optional b))`,
+		Expect: "#<generic-function quux>",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((a t) &optional 7) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((a t) &optional (x)) nil)`,
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

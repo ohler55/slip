@@ -341,6 +341,9 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 		c = &slip.Combination{}
 		meth.Combinations = []*slip.Combination{c}
 	}
+	if meth.Doc == nil {
+		meth.Doc = &fd
+	}
 	switch qual {
 	case "":
 		c.Primary = lam
@@ -350,8 +353,6 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 		c.After = lam
 	case ":around":
 		c.Wrap = lam
-	default:
-		slip.PanicInvalidMethod(nil, slip.Symbol(qual), fname, "")
 	}
 	if 0 < len(aux.cache) {
 		aux.cache = map[string]*slip.Method{}

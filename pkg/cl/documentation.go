@@ -30,7 +30,7 @@ func init() {
 			},
 			Return: "string|nil",
 			Text: `__documentation__ returns the documentation _x_ or what _x_ refers to. The supported
-_doc-type_ values supported are _function_, _variable_, _type_, and _constant_.
+_doc-type_ values supported are _function_, _method_, _class_, _variable_, _type_, and _constant_.
 `,
 			Examples: []string{
 				"(documentation '*standard-output* 'variable)",
@@ -91,8 +91,12 @@ Top:
 			result = slip.String(ta.Doc)
 		}
 	case slip.Class:
-		if docType == slip.Symbol("type") {
+		if docType == nil || docType == slip.Symbol("type") || docType == slip.Symbol("class") {
 			result = slip.String(ta.Documentation())
+		}
+	case *slip.Method:
+		if ta.Doc != nil && (docType == nil || docType == slip.Symbol("method")) {
+			result = slip.String(ta.Doc.Text)
 		}
 	default:
 		f.unsup(docType, ta)
