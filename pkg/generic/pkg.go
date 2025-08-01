@@ -30,7 +30,10 @@ func init() {
 	)
 	defDefmethod()
 	defNoApplicableMethod()
+	defSlotMissing()
+	defSlotUnbound()
 	defDefgeneric()
+	defCallNextMethod()
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)

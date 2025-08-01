@@ -65,7 +65,7 @@ func (f *WithSlots) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			if _, has := inst.SlotValue(te); has {
 				ns.UnsafeLet(te, &slip.Ref{Instance: inst, Key: te})
 			} else {
-				slotMissing(inst, te, "with-slots")
+				return slotMissing(s, inst, te, "with-slots")
 			}
 		case slip.List:
 			if len(te) != 2 {
@@ -84,7 +84,7 @@ func (f *WithSlots) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			if _, has := inst.SlotValue(sname); has {
 				ns.UnsafeLet(vname, &slip.Ref{Instance: inst, Key: sname})
 			} else {
-				slotMissing(inst, sname, "with-slots")
+				return slotMissing(s, inst, sname, "with-slots")
 			}
 		default:
 			slip.PanicType("slot-entry", entry, "symbol", "list")

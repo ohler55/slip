@@ -1,6 +1,6 @@
 // Copyright (c) 2024, Peter Ohler, All rights reserved.
 
-package clos
+package generic
 
 import (
 	"github.com/ohler55/slip"

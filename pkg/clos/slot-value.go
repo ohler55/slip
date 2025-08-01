@@ -49,13 +49,13 @@ func (f *SlotValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	var has bool
 	if inst, ok := args[0].(slip.Instance); ok {
 		if result, has = inst.SlotValue(sym); !has {
-			slotMissing(inst, sym, "slot-value")
+			return slotMissing(s, inst, sym, "slot-value")
 		}
 		if result == slip.Unbound {
 			slip.PanicUnboundSlot(inst, sym, "")
 		}
 	} else {
-		slotMissing(args[0], sym, "slot-value")
+		return slotMissing(s, args[0], sym, "slot-value")
 	}
 	return
 }
@@ -69,9 +69,9 @@ func (f *SlotValue) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	}
 	if inst, ok := args[0].(slip.Instance); ok {
 		if !inst.SetSlotValue(sym, value) {
-			slotMissing(inst, sym, "setf")
+			_ = slotMissing(s, inst, sym, "setf")
 		}
 	} else {
-		slotMissing(args[0], sym, "slot-value")
+		_ = slotMissing(s, args[0], sym, "slot-value")
 	}
 }

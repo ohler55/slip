@@ -53,10 +53,10 @@ func (f *SlotBoundp) Call(s *slip.Scope, args slip.List, depth int) (result slip
 				result = slip.True
 			}
 		} else {
-			slotMissing(inst, sym, "slot-boundp")
+			return slotMissing(s, inst, sym, "slot-boundp")
 		}
 	} else {
-		slotMissing(args[0], sym, "slot-boundp")
+		return slotMissing(s, args[0], sym, "slot-boundp")
 	}
 	return
 }

@@ -294,6 +294,18 @@ func TestDefmethodGenericAutoDef(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDefmethodGenericCallNextMethodError(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux (a (b fixnum)) (call-next-method))`,
+		Expect: `/#<method quux \(a \(b fixnum\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(quux 1 2)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
 func TestDefmethodGenericDocs(t *testing.T) {
 	slip.CurrentPackage.Undefine("quux")
 	(&sliptest.Function{
@@ -337,8 +349,15 @@ func TestDefmethodGenericQualifier(t *testing.T) {
 		Expect: `/#<method quux \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
 	}).Test(t)
 	(&sliptest.Function{
+		Source: `(defmethod quux :around ((s output-stream) (x fixnum))
+                   (format s "around-")
+                   (call-next-method)
+                   (format s "-around"))`,
+		Expect: `/#<method quux \(\(s output-stream\) \(x fixnum\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
 		Source: `(with-output-to-string(os) (quux os 3))`,
-		Expect: `"before-primary-after"`,
+		Expect: `"around-before-primary-after-around"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(defmethod quux :not-a-qualifier (x) nil)`,

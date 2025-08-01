@@ -43,11 +43,9 @@ func init() {
 	defDefineCondition()
 	defFindClass()
 	defMakeInstance()
-	defSlotBoundp()
 	defSlotExistsp()
 	defSlotMakunbound()
-	defSlotMissing()
-	defSlotUnbound()
+	defSlotBoundp()
 	defSlotValue()
 	defClassSupers()
 	defClassPrecedence()
@@ -59,4 +57,28 @@ func init() {
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
+}
+
+func slotMissing(s *slip.Scope, obj slip.Object, name slip.Symbol, op string) slip.Object {
+	fi := slip.FindFunc("slot-missing")
+	if fi == nil || obj == nil || obj.Hierarchy()[0] == slip.BuiltInSymbol {
+		if op == "setf" {
+			slip.PanicCell(name,
+				"When attempting to set the slot's value (%s), the slot %s is missing from the object %s.",
+				op, name, obj)
+		} else {
+			slip.PanicCell(name,
+				"When attempting to read the slot's value (%s), the slot %s is missing from the object %s.",
+				op, name, obj)
+		}
+	}
+	args := slip.List{
+		slip.FindClass(string(obj.Hierarchy()[0])),
+		obj,
+		name,
+		slip.Symbol(op),
+	}
+	f, _ := fi.Create(args).(slip.Funky)
+
+	return f.Caller().Call(s, args, 0)
 }

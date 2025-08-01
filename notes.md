@@ -9,16 +9,17 @@
 
 
  - generics branch
-  - test defgeneric, defmethod, and method combinations
+  - make slot-missing a go defined generic
+   - only call generic for standard-class, condition-class, and flavor
+   - built in can just panic
+  - make slot-unbound a go defined generic
+  - both called by slot-value
 
   - make sure snapshot works as expected
   - standard-class reader, writer, and accessor
    - class slots
     - accessors must consider slot on standard-object.Type.Vars
      - if not found then look back on inherit
-  - pkg/gen or pkg/generic
-   - might need to move defmethod (defmethod depends on flavors)
-   - maybe add VarName() to slip.Class to break dependency
 
   - call print-object in slip.Panic to form message
    - if condition and :report then use that for printing, others like *print-escape*
@@ -33,12 +34,12 @@
  - [ ] SLOT-UNBOUND - make generic
  - [ ] ADD-METHOD
  - [ ] CALL-METHOD
- - [ ] CALL-NEXT-METHOD
+ - [x] CALL-NEXT-METHOD
  - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
  - [ ] COMPUTE-APPLICABLE-METHODS
- - [ ] DEFGENERIC
+ - [x] DEFGENERIC
  - [ ] DEFINE-METHOD-COMBINATION
- - [ ] DEFMETHOD - need generic support
+ - [x] DEFMETHOD - need generic support
  - [ ] DESCRIBE-OBJECT
  - [ ] ENSURE-GENERIC-FUNCTION
  - [ ] FIND-METHOD
@@ -54,7 +55,7 @@
  - [ ] METHOD-COMBINATION-ERROR
  - [ ] METHOD-QUALIFIERS
  - [ ] NEXT-METHOD-P
- - [ ] NO-APPLICABLE-METHOD
+ - [x] NO-APPLICABLE-METHOD
  - [ ] NO-NEXT-METHOD
  - [ ] PRINT-OBJECT
  - [ ] REINITIALIZE-INSTANCE
