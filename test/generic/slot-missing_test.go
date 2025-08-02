@@ -1,6 +1,6 @@
 // Copyright (c) 2024, Peter Ohler, All rights reserved.
 
-package clos_test
+package generic_test
 
 import (
 	"testing"
@@ -11,7 +11,11 @@ import (
 
 func TestSlotMissingOk(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(slot-missing nil (make-instance 'vanilla-flavor) 'anything 'setf 7)`,
+		Source:    `(slot-value (make-instance 'vanilla-flavor) 'anything)`,
+		PanicType: slip.CellErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(setf (slot-value (make-instance 'vanilla-flavor) 'anything) 7)`,
 		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 }

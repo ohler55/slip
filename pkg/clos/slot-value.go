@@ -53,6 +53,16 @@ func (f *SlotValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		}
 		if result == slip.Unbound {
 			slip.PanicUnboundSlot(inst, sym, "")
+			if fi := slip.FindFunc("slot-unbound"); fi != nil {
+				args := slip.List{
+					slip.FindClass(string(inst.Hierarchy()[0])),
+					inst,
+					sym,
+				}
+				f, _ := fi.Create(args).(slip.Funky)
+
+				return f.Caller().Call(s, args, depth)
+			}
 		}
 	} else {
 		return slotMissing(s, args[0], sym, "slot-value")

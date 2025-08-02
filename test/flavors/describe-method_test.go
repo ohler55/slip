@@ -91,7 +91,7 @@ func TestDescribeMethodNotFlavor(t *testing.T) {
 func TestDescribeMethodNotMethod(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(describe-method 'vanilla-flavor :not-a-method)`,
-		PanicType: slip.UnboundSlotSymbol,
+		PanicType: slip.InvalidMethodErrorSymbol,
 	}).Test(t)
 }
 

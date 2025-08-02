@@ -9,12 +9,6 @@
 
 
  - generics branch
-  - make slot-missing a go defined generic
-   - only call generic for standard-class, condition-class, and flavor
-   - built in can just panic
-  - make slot-unbound a go defined generic
-  - both called by slot-value
-
   - make sure snapshot works as expected
   - standard-class reader, writer, and accessor
    - class slots
@@ -30,15 +24,13 @@
 
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
- - [ ] SLOT-MISSING - make generic
- - [ ] SLOT-UNBOUND - make generic
+ - [x] SLOT-MISSING
+ - [x] SLOT-UNBOUND - make generic
  - [ ] ADD-METHOD
- - [ ] CALL-METHOD
  - [x] CALL-NEXT-METHOD
  - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
  - [ ] COMPUTE-APPLICABLE-METHODS
  - [x] DEFGENERIC
- - [ ] DEFINE-METHOD-COMBINATION
  - [x] DEFMETHOD - need generic support
  - [ ] DESCRIBE-OBJECT
  - [ ] ENSURE-GENERIC-FUNCTION
@@ -48,10 +40,8 @@
  - [ ] GENERIC-FUNCTION
  - [ ] GENERIC-LABELS
  - [ ] INITIALIZE-INSTANCE
- - [ ] MAKE-LOAD-FORM
+ - [ ] MAKE-LOAD-FORM - same as what is called by snapshot
  - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
- - [ ] MAKE-METHOD
- - [ ] METHOD-COMBINATION
  - [ ] METHOD-COMBINATION-ERROR
  - [ ] METHOD-QUALIFIERS
  - [ ] NEXT-METHOD-P

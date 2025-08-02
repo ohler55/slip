@@ -7,73 +7,113 @@ import (
 )
 
 func defSlotMissing() {
-	slip.Define(
+	fd := slip.FuncDoc{
+		Name: "slot-missing",
+		Kind: slip.GenericFunctionSymbol,
+		Args: []*slip.DocArg{
+			{
+				Name: "class",
+				Type: "class",
+				Text: "The class of the object.",
+			},
+			{
+				Name: "object",
+				Type: "instance",
+				Text: "The instance that is missing the slot.",
+			},
+			{
+				Name: "slot-name",
+				Type: "symbol",
+				Text: "The name of a slot.",
+			},
+			{
+				Name: "operation",
+				Type: "symbol",
+				Text: "The operation attempted.",
+			},
+			{Name: "&optional"},
+			{
+				Name: "new-value",
+				Type: "object",
+				Text: "The new value if the operation is a __setf__.",
+			},
+		},
+		Text: `__slot-missing__ default method raises a cell-error.`,
+	}
+	aux := NewAux(&fd)
+	md := slip.FuncDoc{
+		Name:   fd.Name,
+		Kind:   slip.MethodSymbol,
+		Args:   fd.Args,
+		Return: "object",
+	}
+	aux.methods["t|t|t|t"] = &slip.Method{
+		Name:         fd.Name,
+		Doc:          &md,
+		Combinations: []*slip.Combination{{Primary: defaultSlotMissingCaller{}}},
+	}
+	Pkg.Define(
 		func(args slip.List) slip.Object {
-			f := SlotMissing{Function: slip.Function{Name: "slot-missing", Args: args}}
+			f := SlotMissing{
+				Function: slip.Function{Name: "slot-missing", Args: args, SkipEval: []bool{true}},
+				aux:      aux,
+			}
 			f.Self = &f
 			return &f
 		},
-		&slip.FuncDoc{
-			Name: "slot-missing",
-			Args: []*slip.DocArg{
-				{
-					Name: "class",
-					Type: "class",
-					Text: "The class of the object.",
-				},
-				{
-					Name: "object",
-					Type: "instance",
-					Text: "The instance that is missing the slot.",
-				},
-				{
-					Name: "slot-name",
-					Type: "symbol",
-					Text: "The name of a slot.",
-				},
-				{
-					Name: "operation",
-					Type: "symbol",
-					Text: "The operation attempted.",
-				},
-				{Name: "&optional"},
-				{
-					Name: "new-value",
-					Type: "object",
-					Text: "The new value if the operation is a __setf__.",
-				},
-			},
-			Text: `__slot-missing__ raises an error.`,
-		}, &Pkg)
+		&fd,
+		aux,
+	)
 }
 
 // SlotMissing represents the slot-missing function.
 type SlotMissing struct {
 	slip.Function
+	aux *Aux
 }
 
 // Call the the function with the arguments provided.
 func (f *SlotMissing) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 4, 5)
+	var caller slip.Caller = defaultSlotMissingCaller{}
+	key := buildSpecKey(args[:4])
+	f.aux.moo.Lock()
+	meth := f.aux.cache[key]
+	if meth == nil {
+		if meth = f.aux.buildCacheMeth(args); meth != nil {
+			f.aux.cache[key] = meth
+		}
+	}
+	f.aux.moo.Unlock()
+	if meth != nil {
+		caller = meth
+	}
+	return caller.Call(s, args, depth)
+}
+
+type defaultSlotMissingCaller struct{}
+
+func (defaultSlotMissingCaller) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
+	slip.ArgCountCheck(args[3], args, 4, 5)
+	var cond slip.Object
 	// Ignore class as it is not used in forming the error message.
 	slotName, ok := args[2].(slip.Symbol)
 	if !ok {
 		slip.PanicType("slot-name", args[2], "symbol")
 	}
-	if sym, ok2 := args[3].(slip.Symbol); ok2 {
-		slotMissing(args[1], slotName, string(sym))
-	}
-	panic(slip.NewTypeError("operation", args[3], "symbol"))
-}
-
-func slotMissing(obj slip.Object, name slip.Symbol, op string) {
-	if op == "setf" {
-		slip.PanicCell(name,
+	if sym, ok2 := args[3].(slip.Symbol); ok2 && string(sym) == "setf" {
+		cond = slip.NewCellError(
+			slotName,
 			"When attempting to set the slot's value (%s), the slot %s is missing from the object %s.",
-			op, name, obj)
+			sym,
+			slotName,
+			args[1])
 	} else {
-		slip.PanicCell(name,
+		cond = slip.NewCellError(
+			slotName,
 			"When attempting to read the slot's value (%s), the slot %s is missing from the object %s.",
-			op, name, obj)
+			args[3],
+			slotName,
+			args[1])
 	}
+	panic(cond)
 }

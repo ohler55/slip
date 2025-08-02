@@ -66,7 +66,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	meth, _ := args[1].(slip.Symbol)
 	m := hm.GetMethod(string(meth))
 	if m == nil {
-		slip.PanicUnboundSlot(args[0], meth, "%s is not a method on %s.", args[1], args[0])
+		slip.PanicInvalidMethod(sc, nil, meth, "%s is not a method on %s.", meth, sc)
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 2 < len(args) {

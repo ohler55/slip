@@ -61,6 +61,7 @@ type NoApplicableMethod struct {
 
 // Call the the function with the arguments provided.
 func (f *NoApplicableMethod) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	var caller slip.Caller = defaultNoAppMethCaller{}
 	var key []byte
 	key = append(key, f.Hierarchy()[0]...)
 	key = append(key, '|', 't')
@@ -73,9 +74,9 @@ func (f *NoApplicableMethod) Call(s *slip.Scope, args slip.List, depth int) slip
 	}
 	f.aux.moo.Unlock()
 	if meth != nil {
-		return meth.Call(s, args, depth)
+		caller = meth
 	}
-	panic(slip.NewNoApplicableMethodError(args[0], args[1:], ""))
+	return caller.Call(s, args, depth)
 }
 
 type defaultNoAppMethCaller struct{}

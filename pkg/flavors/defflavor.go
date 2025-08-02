@@ -444,7 +444,6 @@ type defHand struct{}
 func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
 	method, _ := args[0].(slip.Symbol)
-	defer slip.PanicUnboundSlot(inst, method,
-		"Flavor %s does not include the %s method.", inst.Type.Name(), args[0])
+	defer slip.PanicInvalidMethod(inst, nil, method, "%s does not include the %s method.", inst.Type.Name(), args[0])
 	return nil
 }

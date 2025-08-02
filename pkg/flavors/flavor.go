@@ -407,7 +407,7 @@ top:
 		obj.varDocs[name] = desc
 	default:
 		if lo {
-			slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a valid method for a Flavor.", message)
+			slip.PanicInvalidMethod(obj, nil, slip.Symbol(message), "%s is not a valid method for a Flavor.", message)
 		}
 		message = strings.ToLower(message)
 		lo = true

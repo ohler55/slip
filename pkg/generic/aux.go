@@ -112,3 +112,19 @@ func (g *Aux) collectMethods(meth *slip.Method, key []string, ki int, args slip.
 		}
 	}
 }
+
+// args should be only specializer arguments.
+func buildSpecKey(args slip.List) string {
+	var b []byte
+	for i, a := range args {
+		if 0 < i {
+			b = append(b, '|')
+		}
+		if a == nil {
+			b = append(b, 't')
+		} else {
+			b = append(b, a.Hierarchy()[0]...)
+		}
+	}
+	return string(b)
+}
