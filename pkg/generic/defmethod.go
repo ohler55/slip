@@ -216,6 +216,78 @@ func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Comb
 	m.Combinations = append(append(m.Combinations[:pos], combo), m.Combinations[pos:]...)
 }
 
+// DefCallerMethod defines a method for a caller. The caller should implement
+// the slip.HasFuncDocs interface. The key should be the specializers names
+// separated by '|'.
+func DefCallerMethod(qualifier string, caller slip.Caller, fd *slip.FuncDoc) *slip.Method {
+	var aux *Aux
+	if fi := slip.FindFunc(fd.Name); fi != nil {
+		if aux, _ = fi.Aux.(*Aux); aux == nil {
+			slip.PanicProgram("%s already names an ordinary function or macro.", fd.Name)
+		}
+	}
+	if aux == nil {
+		gfd := slip.FuncDoc{
+			Name:   fd.Name,
+			Kind:   slip.GenericFunctionSymbol,
+			Args:   make([]*slip.DocArg, len(fd.Args)),
+			Return: "object",
+		}
+		for i, da := range fd.Args {
+			gfd.Args[i] = &slip.DocArg{Name: da.Name}
+		}
+		aux = NewAux(&gfd)
+		_ = slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := genfun{Function: slip.Function{Name: fd.Name, Args: args}, aux: aux}
+				f.Self = &f
+				return &f
+			},
+			&gfd,
+			aux,
+		)
+	}
+	var key []byte
+	for i, da := range fd.Args {
+		if da.Name[0] == '&' {
+			break
+		}
+		for 0 < i {
+			key = append(key, '|')
+		}
+		key = append(key, da.Type...)
+	}
+	meth := aux.methods[string(key)]
+	if meth == nil {
+		meth = &slip.Method{Name: fd.Name}
+		aux.methods[string(key)] = meth
+	}
+	var c *slip.Combination
+	if 0 < len(meth.Combinations) {
+		c = meth.Combinations[0]
+	} else {
+		c = &slip.Combination{}
+		meth.Combinations = []*slip.Combination{c}
+	}
+	if meth.Doc == nil {
+		meth.Doc = fd
+	}
+	switch qualifier {
+	case "":
+		c.Primary = caller
+	case ":before":
+		c.Before = caller
+	case ":after":
+		c.After = caller
+	case ":around":
+		c.Wrap = caller
+	}
+	if 0 < len(aux.cache) {
+		aux.cache = map[string]*slip.Method{}
+	}
+	return meth
+}
+
 func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux) slip.Object {
 	var qual string
 	if sym, ok := args[0].(slip.Symbol); ok {
@@ -231,74 +303,14 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 	if !ok {
 		slip.PanicType("specialize-lambda-list", args[0], "list")
 	}
-	args = args[1:]
 	if aux == nil {
-		fd := slip.FuncDoc{
-			Name:   string(fname),
-			Kind:   slip.GenericFunctionSymbol,
-			Args:   make([]*slip.DocArg, len(ll)),
-			Return: "object",
-		}
-		for i, v := range ll {
-			switch tv := v.(type) {
-			case slip.Symbol:
-				fd.Args[i] = &slip.DocArg{Name: string(tv)}
-			case slip.List:
-				if 1 < len(tv) {
-					if sym, _ := tv[0].(slip.Symbol); 0 < len(sym) {
-						fd.Args[i] = &slip.DocArg{Name: string(sym)}
-						continue
-					}
-				}
-				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
-			default:
-				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
-			}
-		}
-		aux = NewAux(&fd)
-		_ = slip.CurrentPackage.Define(
-			func(args slip.List) slip.Object {
-				f := genfun{Function: slip.Function{Name: string(fname), Args: args}, aux: aux}
-				f.Self = &f
-				return &f
-			},
-			&fd,
-			aux,
-		)
+		aux = newGfAux(fname, ll)
 	}
-	var key []byte
-	for i, v := range ll {
-		if aux.reqCnt <= i {
-			break
-		}
-		if 0 < i {
-			key = append(key, '|')
-		}
-		switch tv := v.(type) {
-		case slip.Symbol:
-			key = append(key, 't')
-		case slip.List:
-			if 1 < len(tv) {
-				if tv[1] == nil {
-					key = append(key, 't')
-				} else if sym, ok := tv[1].(slip.Symbol); ok {
-					key = append(key, sym...)
-				} else if tv[1] == slip.True {
-					key = append(key, 't')
-				} else {
-					slip.PanicType("parameter-specializer-name", tv[1], "symbol")
-				}
-			} else {
-				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
-			}
-		default:
-			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
-		}
-	}
-	meth := aux.methods[string(key)]
+	key := formMethKey(ll[:aux.reqCnt])
+	meth := aux.methods[key]
 	if meth == nil {
 		meth = &slip.Method{Name: string(fname)}
-		aux.methods[string(key)] = meth
+		aux.methods[key] = meth
 	}
 	// Set the function docs for the method mostly for a call to describe.
 	fd := slip.FuncDoc{
@@ -306,12 +318,6 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 		Kind:   slip.MethodSymbol,
 		Args:   make([]*slip.DocArg, len(ll)),
 		Return: "object",
-	}
-	if 0 < len(args) {
-		if ss, ok := args[0].(slip.String); ok {
-			fd.Text = string(ss)
-			args = args[1:]
-		}
 	}
 	for i, v := range ll {
 		switch tv := v.(type) {
@@ -327,6 +333,13 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
 		default:
 			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+		}
+	}
+	args = args[1:]
+	if 0 < len(args) {
+		if ss, ok := args[0].(slip.String); ok {
+			fd.Text = string(ss)
+			args = args[1:]
 		}
 	}
 	lam := &slip.Lambda{
@@ -358,4 +371,70 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 		aux.cache = map[string]*slip.Method{}
 	}
 	return meth
+}
+
+func newGfAux(fname slip.Symbol, ll slip.List) *Aux {
+	fd := slip.FuncDoc{
+		Name:   string(fname),
+		Kind:   slip.GenericFunctionSymbol,
+		Args:   make([]*slip.DocArg, len(ll)),
+		Return: "object",
+	}
+	for i, v := range ll {
+		switch tv := v.(type) {
+		case slip.Symbol:
+			fd.Args[i] = &slip.DocArg{Name: string(tv)}
+		case slip.List:
+			if 1 < len(tv) {
+				if sym, _ := tv[0].(slip.Symbol); 0 < len(sym) {
+					fd.Args[i] = &slip.DocArg{Name: string(sym)}
+					continue
+				}
+			}
+			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+		default:
+			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+		}
+	}
+	aux := NewAux(&fd)
+	_ = slip.CurrentPackage.Define(
+		func(args slip.List) slip.Object {
+			f := genfun{Function: slip.Function{Name: string(fname), Args: args}, aux: aux}
+			f.Self = &f
+			return &f
+		},
+		&fd,
+		aux,
+	)
+	return aux
+}
+
+func formMethKey(ll slip.List) string {
+	var key []byte
+	for i, v := range ll {
+		if 0 < i {
+			key = append(key, '|')
+		}
+		switch tv := v.(type) {
+		case slip.Symbol:
+			key = append(key, 't')
+		case slip.List:
+			if 1 < len(tv) {
+				if tv[1] == nil {
+					key = append(key, 't')
+				} else if sym, ok := tv[1].(slip.Symbol); ok {
+					key = append(key, sym...)
+				} else if tv[1] == slip.True {
+					key = append(key, 't')
+				} else {
+					slip.PanicType("parameter-specializer-name", tv[1], "symbol")
+				}
+			} else {
+				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+			}
+		default:
+			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+		}
+	}
+	return string(key)
 }

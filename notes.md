@@ -7,10 +7,16 @@
 ---------------------
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
-
  - generics branch
-  - make sure snapshot works as expected
+  - reader
+   - package define method for type
+    - method just reads slot
+     - no need to verify it is bound or missing
+  - writer
+  - accessor
   - standard-class reader, writer, and accessor
+   - find or create generic
+    - add method for the new type
    - class slots
     - accessors must consider slot on standard-object.Type.Vars
      - if not found then look back on inherit
@@ -21,6 +27,8 @@
     - if no generic match print .String() - should be generic method for t
   - pass scope in then various error creation panic
    - allow for report function to use local variables
+
+  - make sure snapshot works as expected
 
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 

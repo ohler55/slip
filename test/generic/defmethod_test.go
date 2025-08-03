@@ -375,6 +375,7 @@ func TestDefmethodGenericLambdaList(t *testing.T) {
 		Source: `(quux 'x 1)`,
 		Expect: "(x 1)",
 	}).Test(t)
+	slip.CurrentPackage.Undefine("quux")
 	(&sliptest.Function{
 		Source:    `(defmethod quux ((a 7)) nil)`,
 		PanicType: slip.TypeErrorSymbol,
