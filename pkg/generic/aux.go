@@ -46,25 +46,12 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 	}
 	// Any further argument checking gets tricky as optinal could be keywords
 	// depending on then method's forms.
-	var key []byte
-	for i, a := range args {
-		if g.reqCnt <= i {
-			break
-		}
-		if 0 < i {
-			key = append(key, '|')
-		}
-		if a == nil {
-			key = append(key, 't')
-		} else {
-			key = append(key, a.Hierarchy()[0]...)
-		}
-	}
+	key := buildSpecKey(args[:g.reqCnt])
 	g.moo.Lock()
-	meth := g.cache[string(key)]
+	meth := g.cache[key]
 	if meth == nil {
 		if meth = g.buildCacheMeth(args); meth != nil {
-			g.cache[string(key)] = meth
+			g.cache[key] = meth
 		}
 	}
 	g.moo.Unlock()

@@ -72,7 +72,18 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		}
 		result = defGenericMethod(s, ta, args[1:], aux)
 	case slip.List:
-		result = defDirectMethod(s, ta, args[1:])
+		if len(ta) == 2 && slip.Symbol("setf") == ta[0] {
+			fname := ta.String()
+			var aux *Aux
+			if fi := slip.FindFunc(fname); fi != nil {
+				if aux, _ = fi.Aux.(*Aux); aux == nil {
+					slip.PanicProgram("%s already names an ordinary function or macro.", fname)
+				}
+			}
+			result = defGenericMethod(s, slip.Symbol(fname), args[1:], aux)
+		} else {
+			result = defDirectMethod(s, ta, args[1:])
+		}
 	default:
 		slip.PanicType("method designator for defmethod", ta, "symbol", "list")
 	}
@@ -252,40 +263,12 @@ func DefCallerMethod(qualifier string, caller slip.Caller, fd *slip.FuncDoc) *sl
 		if da.Name[0] == '&' {
 			break
 		}
-		for 0 < i {
+		if 0 < i {
 			key = append(key, '|')
 		}
 		key = append(key, da.Type...)
 	}
-	meth := aux.methods[string(key)]
-	if meth == nil {
-		meth = &slip.Method{Name: fd.Name}
-		aux.methods[string(key)] = meth
-	}
-	var c *slip.Combination
-	if 0 < len(meth.Combinations) {
-		c = meth.Combinations[0]
-	} else {
-		c = &slip.Combination{}
-		meth.Combinations = []*slip.Combination{c}
-	}
-	if meth.Doc == nil {
-		meth.Doc = fd
-	}
-	switch qualifier {
-	case "":
-		c.Primary = caller
-	case ":before":
-		c.Before = caller
-	case ":after":
-		c.After = caller
-	case ":around":
-		c.Wrap = caller
-	}
-	if 0 < len(aux.cache) {
-		aux.cache = map[string]*slip.Method{}
-	}
-	return meth
+	return addMethodCaller(aux, fd.Name, qualifier, string(key), caller, fd)
 }
 
 func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux) slip.Object {
@@ -305,12 +288,6 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 	}
 	if aux == nil {
 		aux = newGfAux(fname, ll)
-	}
-	key := formMethKey(ll[:aux.reqCnt])
-	meth := aux.methods[key]
-	if meth == nil {
-		meth = &slip.Method{Name: string(fname)}
-		aux.methods[key] = meth
 	}
 	// Set the function docs for the method mostly for a call to describe.
 	fd := slip.FuncDoc{
@@ -347,6 +324,17 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 		Forms: args,
 	}
 	lam.Compile(s)
+	key := formMethKey(ll[:aux.reqCnt])
+
+	return addMethodCaller(aux, string(fname), qual, key, lam, &fd)
+}
+
+func addMethodCaller(aux *Aux, fname, qualifier, key string, caller slip.Caller, fd *slip.FuncDoc) *slip.Method {
+	meth := aux.methods[key]
+	if meth == nil {
+		meth = &slip.Method{Name: fname}
+		aux.methods[key] = meth
+	}
 	var c *slip.Combination
 	if 0 < len(meth.Combinations) {
 		c = meth.Combinations[0]
@@ -355,17 +343,17 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 		meth.Combinations = []*slip.Combination{c}
 	}
 	if meth.Doc == nil {
-		meth.Doc = &fd
+		meth.Doc = fd
 	}
-	switch qual {
+	switch qualifier {
 	case "":
-		c.Primary = lam
+		c.Primary = caller
 	case ":before":
-		c.Before = lam
+		c.Before = caller
 	case ":after":
-		c.After = lam
+		c.After = caller
 	case ":around":
-		c.Wrap = lam
+		c.Wrap = caller
 	}
 	if 0 < len(aux.cache) {
 		aux.cache = map[string]*slip.Method{}

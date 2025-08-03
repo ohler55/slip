@@ -3,7 +3,6 @@
 package clos
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ohler55/slip"
@@ -165,22 +164,9 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		if sd.settable {
 			generic.DefClassMethod(&sc, ":set-"+sd.name, "", setter(sd.name))
 		}
-		for _, sym := range sd.readers {
-			_ = generic.DefCallerMethod(
-				"",
-				getter(sd.name),
-				&slip.FuncDoc{
-					Name: string(sym),
-					Args: []*slip.DocArg{
-						{Name: "object", Type: name},
-					},
-					Return: "object",
-					Text:   fmt.Sprintf("Return the %s slot value.", sd.name),
-					Kind:   slip.MethodSymbol,
-				})
-		}
-		// TBD writers
-		// TBD accessors
+		sd.defReaderMethods(name)
+		sd.defWriterMethods(name)
+		sd.defAccessorMethods(name)
 	}
 	_ = sc.mergeSupers()
 	slip.RegisterClass(sc.name, &sc)

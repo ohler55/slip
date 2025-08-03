@@ -3,7 +3,10 @@
 package clos
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/generic"
 )
 
 // SlotDef encapsulates the definition of a slot on a class.
@@ -129,6 +132,91 @@ func (sd *SlotDef) DefList() slip.Object {
 		return def[0]
 	}
 	return def
+}
+
+func (sd *SlotDef) defReaderMethods(cname string) {
+	for _, sym := range sd.readers {
+		_ = generic.DefCallerMethod(
+			"",
+			readSlot(sd.name),
+			&slip.FuncDoc{
+				Name: string(sym),
+				Args: []*slip.DocArg{
+					{Name: "object", Type: cname},
+				},
+				Return: "object",
+				Text:   fmt.Sprintf("Return the %s slot value.", sd.name),
+				Kind:   slip.MethodSymbol,
+			})
+	}
+}
+
+type readSlot string
+
+// Call returns the value of a variable in the instance.
+func (rs readSlot) Call(_ *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	if inst, _ := args[0].(slip.Instance); inst != nil {
+		value, _ = inst.SlotValue(slip.Symbol(rs))
+	}
+	return
+}
+
+func (sd *SlotDef) defWriterMethods(cname string) {
+	for _, sym := range sd.writers {
+		_ = generic.DefCallerMethod(
+			"",
+			writeSlot(sd.name),
+			&slip.FuncDoc{
+				Name: string(sym),
+				Args: []*slip.DocArg{
+					{Name: "object", Type: cname},
+					{Name: "value", Type: "t"},
+				},
+				Return: "object",
+				Text:   fmt.Sprintf("Sets the value of slot %s with the provided value.", sd.name),
+				Kind:   slip.MethodSymbol,
+			})
+	}
+}
+
+type writeSlot string
+
+// Call returns the value of a variable in the instance.
+func (ws writeSlot) Call(_ *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	if inst, _ := args[0].(slip.Instance); inst != nil {
+		_ = inst.SetSlotValue(slip.Symbol(ws), args[1])
+	}
+	return args[1]
+}
+
+func (sd *SlotDef) defAccessorMethods(cname string) {
+	for _, sym := range sd.accessors {
+		_ = generic.DefCallerMethod(
+			"",
+			readSlot(sd.name),
+			&slip.FuncDoc{
+				Name: string(sym),
+				Args: []*slip.DocArg{
+					{Name: "object", Type: cname},
+				},
+				Return: "object",
+				Text:   fmt.Sprintf("Return the %s slot value.", sd.name),
+				Kind:   slip.MethodSymbol,
+			})
+		_ = generic.DefCallerMethod(
+			"",
+			writeSlot(sd.name),
+			&slip.FuncDoc{
+				Name: fmt.Sprintf("(setf %s)", sym),
+				Args: []*slip.DocArg{
+					{Name: "object", Type: cname},
+					{Name: "value", Type: "t"},
+				},
+				Return: "object",
+				Text:   fmt.Sprintf("Sets the value of slot %s with the provided value.", sd.name),
+				Kind:   slip.MethodSymbol,
+			})
+	}
 }
 
 func (sd *SlotDef) Simplify() any {

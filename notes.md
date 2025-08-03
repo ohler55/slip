@@ -8,19 +8,7 @@
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
  - generics branch
-  - reader
-   - package define method for type
-    - method just reads slot
-     - no need to verify it is bound or missing
-  - writer
-  - accessor
-  - standard-class reader, writer, and accessor
-   - find or create generic
-    - add method for the new type
-   - class slots
-    - accessors must consider slot on standard-object.Type.Vars
-     - if not found then look back on inherit
-
+  - test for clos, generic, and setf
   - call print-object in slip.Panic to form message
    - if condition and :report then use that for printing, others like *print-escape*
     - else call generic
