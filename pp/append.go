@@ -62,6 +62,7 @@ func Append(b []byte, s *slip.Scope, obj slip.Object) []byte {
 }
 
 func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
+	fmt.Printf("*** resolve symbol %s\n", sym)
 	if strings.ContainsRune(string(sym), ':') {
 		parts := strings.Split(string(sym), ":")
 		name := parts[len(parts)-1]
@@ -109,8 +110,6 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		node = &Leaf{text: []byte("nil")}
 	case *slip.Lambda:
 		node = buildLambda(to, p)
-	case *slip.FuncInfo:
-		node = buildFuncInfo(to, p)
 	case *slip.Vector:
 		node = arrayFromList("#", to.AsList(), p)
 	case slip.Octets:
@@ -128,7 +127,7 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		node = arrayFromList(prefix, to.AsList(), p)
 	case slip.Funky:
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
-	case slip.Class:
+	case slip.DefLister:
 		if dl := to.DefList(); dl != nil && 0 < len(dl) {
 			if sym, ok := dl[0].(slip.Symbol); ok {
 				node = buildCall(sym, dl[1:], p)
@@ -207,15 +206,27 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 	return
 }
 
-func buildFuncInfo(fi *slip.FuncInfo, p *slip.Printer) Node {
+func buildFuncInfo(fi *slip.FuncInfo, p *slip.Printer) (node Node) {
+	switch fi.Kind {
+	case slip.MacroSymbol:
+		node = buildDefun(fi, p, "defmacro")
+	case slip.LambdaSymbol:
+		// TBD same as defun?
+	case slip.FlosSymbol:
+		// TBD same as defun?
+	case slip.GenericFunctionSymbol:
+		// TBD
+	default:
+		node = buildDefun(fi, p, "defun")
+	}
+	return
+}
+
+func buildDefun(fi *slip.FuncInfo, p *slip.Printer, kind string) Node {
 	defun := Defun{
 		fname: fi.Name,
+		name:  kind,
 		args:  buildDocArgs(fi.Doc.Args, p),
-	}
-	if fi.Kind == slip.MacroSymbol {
-		defun.name = "defmacro"
-	} else {
-		defun.name = "defun"
 	}
 	if 0 < len(fi.Doc.Text) {
 		defun.children = append(defun.children, &Doc{text: fi.Doc.Text})

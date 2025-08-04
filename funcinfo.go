@@ -2,7 +2,11 @@
 
 package slip
 
-import "github.com/ohler55/ojg/alt"
+import (
+	"fmt"
+
+	"github.com/ohler55/ojg/alt"
+)
 
 // FuncInfo stores information about a function.
 type FuncInfo struct {
@@ -69,4 +73,42 @@ func (obj *FuncInfo) Describe(b []byte, indent, right int, ansi bool) []byte {
 // FuncDocs returns the documentation for the object.
 func (obj *FuncInfo) FuncDocs() *FuncDoc {
 	return obj.Doc
+}
+
+// DefList returns a list that when evaluated defines then function described
+// by this FuncInfo.
+func (obj *FuncInfo) DefList() (def List) {
+	fmt.Printf("\n\n\n\n*** doc kind: %s\n", obj.Doc.Kind)
+
+	switch obj.Kind {
+	case MacroSymbol:
+		def = append(def, Symbol("defmacro"))
+	case LambdaSymbol:
+		// TBD same as defun?
+		fmt.Printf("*** lambda\n")
+	case FlosSymbol:
+		fmt.Printf("*** flos\n")
+		// TBD same as defun?
+	case GenericFunctionSymbol:
+		// TBD
+	default:
+		def = append(def, Symbol("defun"))
+	}
+	args := make(List, len(obj.Doc.Args))
+	for i, da := range obj.Doc.Args {
+		if da.Default == nil {
+			args[i] = Symbol(da.Name)
+		} else {
+			args[i] = List{Symbol(da.Name), da.Default}
+		}
+	}
+	def = append(def, args)
+	if 0 < len(obj.Doc.Text) {
+		def = append(def, String(obj.Doc.Text))
+	}
+	fun := obj.Create(nil).(Funky)
+	if lam, ok := fun.Caller().(*Lambda); ok {
+		def = append(def, lam.Forms...)
+	}
+	return
 }

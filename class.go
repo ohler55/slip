@@ -2,6 +2,7 @@
 
 package slip
 
+// Class represents all class types.
 type Class interface {
 	Object
 
