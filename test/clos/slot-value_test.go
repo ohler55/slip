@@ -67,3 +67,17 @@ func TestSlotValueNoSlot(t *testing.T) {
 		PanicType: slip.CellErrorSymbol,
 	}).Test(t)
 }
+
+func TestSlotValueBuiltIn(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(slot-value 7 'size)`,
+		PanicType: slip.CellErrorSymbol,
+	}).Test(t)
+}
+
+func TestSlotValueNilIn(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(slot-value nil 'size)`,
+		PanicType: slip.CellErrorSymbol,
+	}).Test(t)
+}

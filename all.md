@@ -952,7 +952,7 @@
  - [c] ADD-METHOD
  - [c] COMPUTE-APPLICABLE-METHODS
  - [c] DEFINE-METHOD-COMBINATION
- - [c] DESCRIBE-OBJECT
+ - [-] DESCRIBE-OBJECT (must not be called by the user so not included)
  - [c] ENSURE-GENERIC-FUNCTION
  - [c] FIND-METHOD
  - [c] FUNCTION-KEYWORDS

@@ -46,6 +46,8 @@ the slot that can also be used with __setf__.
   __:documentation__ [string] documentation for the slot.
   __:gettable__ [boolean] if true a direct method with the slot name prefixed with a ':' will return the slot value.
 This is an addition to the CLOS specification.
+  __:settable__ [boolean] if true a direct method with the slot name prefixed with ':set-' will set the slot value.
+This is an addition to the CLOS specification.
 `,
 				},
 				{Name: slip.AmpRest},

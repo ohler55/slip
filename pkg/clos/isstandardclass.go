@@ -13,7 +13,6 @@ type isStandardClass interface {
 	initFormMap() map[string]*SlotDef
 	defaultsMap() map[string]slip.Object
 	precedenceList() []slip.Symbol
-	inheritedClasses() []slip.Class
 
 	Ready() bool
 	Vars() map[string]slip.Object

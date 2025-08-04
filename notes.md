@@ -8,15 +8,9 @@
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
  - generics branch
-  - test for clos, generic, and setf
-  - call print-object in slip.Panic to form message
-   - if condition and :report then use that for printing, others like *print-escape*
-    - else call generic
-    - if no generic match print .String() - should be generic method for t
-  - pass scope in then various error creation panic
-   - allow for report function to use local variables
-
   - make sure snapshot works as expected
+   - defgeneric
+   - defmethod
 
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
@@ -28,13 +22,10 @@
  - [ ] COMPUTE-APPLICABLE-METHODS
  - [x] DEFGENERIC
  - [x] DEFMETHOD - need generic support
- - [ ] DESCRIBE-OBJECT
  - [ ] ENSURE-GENERIC-FUNCTION
  - [ ] FIND-METHOD
  - [ ] FUNCTION-KEYWORDS
- - [ ] GENERIC-FLET
- - [ ] GENERIC-FUNCTION
- - [ ] GENERIC-LABELS
+ - [x] GENERIC-FUNCTION
  - [ ] INITIALIZE-INSTANCE
  - [ ] MAKE-LOAD-FORM - same as what is called by snapshot
  - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
@@ -43,7 +34,6 @@
  - [ ] NEXT-METHOD-P
  - [x] NO-APPLICABLE-METHOD
  - [ ] NO-NEXT-METHOD
- - [ ] PRINT-OBJECT
  - [ ] REINITIALIZE-INSTANCE
  - [ ] REMOVE-METHOD
  - [ ] SHARED-INITIALIZE

@@ -76,9 +76,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			fname := ta.String()
 			var aux *Aux
 			if fi := slip.FindFunc(fname); fi != nil {
-				if aux, _ = fi.Aux.(*Aux); aux == nil {
-					slip.PanicProgram("%s already names an ordinary function or macro.", fname)
-				}
+				aux, _ = fi.Aux.(*Aux)
 			}
 			result = defGenericMethod(s, slip.Symbol(fname), args[1:], aux)
 		} else {
@@ -227,9 +225,7 @@ func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Comb
 	m.Combinations = append(append(m.Combinations[:pos], combo), m.Combinations[pos:]...)
 }
 
-// DefCallerMethod defines a method for a caller. The caller should implement
-// the slip.HasFuncDocs interface. The key should be the specializers names
-// separated by '|'.
+// DefCallerMethod defines a method for a caller.
 func DefCallerMethod(qualifier string, caller slip.Caller, fd *slip.FuncDoc) *slip.Method {
 	var aux *Aux
 	if fi := slip.FindFunc(fd.Name); fi != nil {
@@ -417,11 +413,7 @@ func formMethKey(ll slip.List) string {
 				} else {
 					slip.PanicType("parameter-specializer-name", tv[1], "symbol")
 				}
-			} else {
-				slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
 			}
-		default:
-			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
 		}
 	}
 	return string(key)

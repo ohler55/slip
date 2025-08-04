@@ -385,10 +385,6 @@ func (c *StandardClass) mergeSupers() bool {
 		}
 		m.Combinations = append(m.Combinations, im.Combinations...)
 	}
-
-	// TBD add readers, writers, and accessors for each slot if not already added
-	//  maybe keep pointer to the generic method for each
-
 	c.initArgs = map[string]*SlotDef{}
 	c.initForms = map[string]*SlotDef{}
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
@@ -472,10 +468,6 @@ func (c *StandardClass) defaultsMap() map[string]slip.Object {
 
 func (c *StandardClass) precedenceList() []slip.Symbol {
 	return c.precedence
-}
-
-func (c *StandardClass) inheritedClasses() []slip.Class {
-	return c.inherit
 }
 
 // VarNames for DefMethod, requiredVars and defaultVars combined.
