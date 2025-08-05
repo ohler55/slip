@@ -7,12 +7,13 @@ import (
 	"strings"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 )
 
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Flosfun{Function: slip.Function{Name: "flosfun", Args: args}}
+			f := Flosfun{Function: slip.Function{Name: "flosfun", Args: args, SkipEval: []bool{true, false}}}
 			f.Self = &f
 			return &f
 		},
@@ -55,7 +56,21 @@ type flosWrap struct {
 // Call the the function with the arguments provided.
 func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, 3)
-	fname := slip.MustBeString(args[0], "function-name")
+	var fname string
+	switch ta := args[0].(type) {
+	case slip.Symbol:
+		fname = string(ta)
+	case slip.String:
+		fname = string(ta)
+	case *cl.Quote:
+		// TBD
+		if sym, ok := ta.Args[0].(slip.Symbol); ok {
+			fname = string(sym)
+		}
+	}
+	if len(fname) == 0 {
+		slip.PanicType("function-name", args[0], "symbol")
+	}
 	var (
 		meth string
 		docs any
@@ -109,7 +124,7 @@ func FlosFun(fname, meth string, docs any, p *slip.Package) {
 	}
 	switch td := docs.(type) {
 	case string:
-		fd.Text = fmt.Sprintf(`__%s__ sends to _instance_ %s`, fname, td)
+		fd.Text = fmt.Sprintf(`__%s__ sends %s to _instance_ %s`, fname, meth, td)
 		fd.Args = append(fd.Args, &slip.DocArg{Name: "&rest"})
 		fd.Args = append(fd.Args, &slip.DocArg{
 			Name: "args",
@@ -129,10 +144,19 @@ func FlosFun(fname, meth string, docs any, p *slip.Package) {
 			Text: fmt.Sprintf("The argument to the %s method.", meth),
 		})
 	}
-	slip.Define(
+	_ = p.Define(
 		func(wargs slip.List) slip.Object {
 			fw := flosWrap{Function: slip.Function{Name: fname, Args: wargs}, meth: meth}
 			fw.Self = &fw
 			return &fw
-		}, &fd, p)
+		},
+		&fd,
+		meth,
+	)
+	// slip.Define(
+	// 	func(wargs slip.List) slip.Object {
+	// 		fw := flosWrap{Function: slip.Function{Name: fname, Args: wargs}, meth: meth}
+	// 		fw.Self = &fw
+	// 		return &fw
+	// 	}, &fd, p)
 }

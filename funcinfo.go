@@ -78,7 +78,7 @@ func (obj *FuncInfo) FuncDocs() *FuncDoc {
 // DefList returns a list that when evaluated defines then function described
 // by this FuncInfo.
 func (obj *FuncInfo) DefList() (def List) {
-	fmt.Printf("\n\n\n\n*** doc kind: %s\n", obj.Doc.Kind)
+	fmt.Printf("*** %s doc kind: %q %q\n", obj.Name, obj.Kind, obj.Doc.Kind)
 
 	switch obj.Kind {
 	case MacroSymbol:
@@ -87,13 +87,14 @@ func (obj *FuncInfo) DefList() (def List) {
 		// TBD same as defun?
 		fmt.Printf("*** lambda\n")
 	case FlosSymbol:
-		fmt.Printf("*** flos\n")
-		// TBD same as defun?
+		meth, _ := obj.Aux.(string)
+		return List{Symbol("flosfun"), Symbol(obj.Name), Symbol(meth)}
 	case GenericFunctionSymbol:
 		// TBD
 	default:
 		def = append(def, Symbol("defun"))
 	}
+	def = append(def, Symbol(obj.Name))
 	args := make(List, len(obj.Doc.Args))
 	for i, da := range obj.Doc.Args {
 		if da.Default == nil {
@@ -109,6 +110,8 @@ func (obj *FuncInfo) DefList() (def List) {
 	fun := obj.Create(nil).(Funky)
 	if lam, ok := fun.Caller().(*Lambda); ok {
 		def = append(def, lam.Forms...)
+	} else {
+		def = append(def, Symbol("..."))
 	}
 	return
 }
