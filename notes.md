@@ -8,9 +8,7 @@
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
  - generics branch
-  - add DefList to FuncInfo
-   - if Aux is implements DefLister then call that
-   -
+  - Aux.DefList()
 
   - test defgeneric, defmethod, and method combinations
 

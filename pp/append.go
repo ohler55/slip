@@ -62,7 +62,6 @@ func Append(b []byte, s *slip.Scope, obj slip.Object) []byte {
 }
 
 func resolveSymbol(sym slip.Symbol, s *slip.Scope) slip.Object {
-	fmt.Printf("*** resolve symbol %s\n", sym)
 	if strings.ContainsRune(string(sym), ':') {
 		parts := strings.Split(string(sym), ":")
 		name := parts[len(parts)-1]
@@ -127,10 +126,6 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		node = arrayFromList(prefix, to.AsList(), p)
 	case slip.Funky:
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
-	case *slip.FuncInfo:
-		fmt.Printf("*** ------------\n")
-		node = buildFuncInfo(to, p)
-		fmt.Printf("*** def: %s\n", to.DefList())
 	case slip.DefLister:
 		if dl := to.DefList(); dl != nil && 0 < len(dl) {
 			if sym, ok := dl[0].(slip.Symbol); ok {
@@ -192,8 +187,17 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		node = newFun1i2(name, args, p)
 	case "defflavor":
 		node = defflavorFromList(args, p)
-	case "defmethod", "defwhopper":
+	case "defwhopper":
 		node = defmethodFromList(name, args, p)
+	case "defmethod":
+		fmt.Printf("***defmethod  %s %s\n", name, args)
+		if _, ok := args[0].(slip.List); ok {
+			node = defmethodFromList(name, args, p)
+		} else {
+			// TBD different defmethod?
+			//
+			node = newFun(name, args, p, 1)
+		}
 	case "defclass", "define-condition":
 		node = defclassFromList(name, args, p)
 	default:
@@ -208,42 +212,6 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		}
 	}
 	return
-}
-
-func buildFuncInfo(fi *slip.FuncInfo, p *slip.Printer) (node Node) {
-	switch fi.Kind {
-	case slip.MacroSymbol:
-		node = buildDefun(fi, p, "defmacro")
-	case slip.LambdaSymbol:
-		// TBD same as defun?
-	case slip.FlosSymbol:
-		// TBD same as defun?
-	case slip.GenericFunctionSymbol:
-		// TBD
-	default:
-		node = buildDefun(fi, p, "defun")
-	}
-	return
-}
-
-func buildDefun(fi *slip.FuncInfo, p *slip.Printer, kind string) Node {
-	defun := Defun{
-		fname: fi.Name,
-		name:  kind,
-		args:  buildDocArgs(fi.Doc.Args, p),
-	}
-	if 0 < len(fi.Doc.Text) {
-		defun.children = append(defun.children, &Doc{text: fi.Doc.Text})
-	}
-	fun := fi.Create(nil).(slip.Funky)
-	if lam, ok := fun.Caller().(*slip.Lambda); ok {
-		for _, form := range lam.Forms {
-			defun.children = append(defun.children, buildNode(form, p))
-		}
-	} else {
-		defun.children = append(defun.children, &Leaf{text: []byte("...")})
-	}
-	return &defun
 }
 
 func buildLambda(lam *slip.Lambda, p *slip.Printer) Node {

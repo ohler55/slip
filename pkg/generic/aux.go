@@ -3,6 +3,8 @@
 package generic
 
 import (
+	"fmt"
+	"sort"
 	"strings"
 	"sync"
 
@@ -62,6 +64,50 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 	nam := slip.MustFindFunc("no-applicable-method")
 
 	return nam.Apply(s, append(slip.List{gf}, args...), depth)
+}
+
+// DefList returns a list that can be evaluated to define a generic and all
+// specialized methods for the generic as a progn.
+func (g *Aux) DefList() slip.List {
+	ll := make(slip.List, len(g.docs.Args))
+	for i, da := range g.docs.Args {
+		ll[i] = slip.Symbol(da.Name)
+	}
+	gdef := slip.List{
+		slip.Symbol("defgeneric"),
+		slip.Symbol(g.docs.Name),
+		ll,
+	}
+	if 0 < len(g.docs.Text) {
+		gdef = append(gdef, slip.List{slip.Symbol(":documentation"), slip.String(g.docs.Text)})
+	}
+	if len(g.methods) == 0 {
+		return gdef
+	}
+	progn := slip.List{slip.Symbol("progn"), gdef}
+	keys := make([]string, 0, len(g.methods))
+	for k := range g.methods {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		method := g.methods[k]
+		sll := make(slip.List, len(method.Doc.Args))
+		for i, da := range g.docs.Args {
+			// TBD handle all variations
+			sll[i] = slip.List{slip.Symbol(da.Name), slip.True}
+		}
+		// TBD build specializer list
+		// for each combination, if lambda then get forms else skip
+		if 0 < len(method.Combinations) {
+			if method.Combinations[0].Primary != nil {
+				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), sll}
+				progn = append(progn, mdef)
+			}
+		}
+	}
+	fmt.Printf("*** progn %s\n", progn)
+	return progn
 }
 
 func (g *Aux) buildCacheMeth(args slip.List) *slip.Method {

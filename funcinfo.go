@@ -3,8 +3,6 @@
 package slip
 
 import (
-	"fmt"
-
 	"github.com/ohler55/ojg/alt"
 )
 
@@ -78,19 +76,16 @@ func (obj *FuncInfo) FuncDocs() *FuncDoc {
 // DefList returns a list that when evaluated defines then function described
 // by this FuncInfo.
 func (obj *FuncInfo) DefList() (def List) {
-	fmt.Printf("*** %s doc kind: %q %q\n", obj.Name, obj.Kind, obj.Doc.Kind)
-
 	switch obj.Kind {
 	case MacroSymbol:
 		def = append(def, Symbol("defmacro"))
-	case LambdaSymbol:
-		// TBD same as defun?
-		fmt.Printf("*** lambda\n")
 	case FlosSymbol:
 		meth, _ := obj.Aux.(string)
 		return List{Symbol("flosfun"), Symbol(obj.Name), Symbol(meth)}
 	case GenericFunctionSymbol:
-		// TBD
+		if dl, ok := obj.Aux.(DefLister); ok {
+			return dl.DefList()
+		}
 	default:
 		def = append(def, Symbol("defun"))
 	}
