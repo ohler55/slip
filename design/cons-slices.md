@@ -63,5 +63,15 @@ difference.
 
 ### Sacrifices
 
-- loops
-- cons to a list, copied code versus new code
+With a `Cons` struct it is possible to forms loops where then tail of
+a list refer back to the head of the list. While not frequently used
+it is possible to create a hoop. Of course using such a hoop with an
+iterator will end up putting the evaluator in an infinite loop. Not
+supporting creating such a data items in SLIP seemed like a very minor
+sacrifice.
+
+As noted earlier consing onto the head of a list it not optimum in
+SLIP. It is a common use case in LISP code though so while copying
+LISP code that builds list with `cons` will not be optimum. To
+compensate for this a new function named `add` is included in SLIP and
+is much more efficient at beuilding list by appending to a list.
