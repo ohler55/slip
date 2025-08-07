@@ -8,13 +8,16 @@
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
  - generics branch
-  - Aux.DefList()
+
+  - design dir
+   - index.md
+   - cons and lists
+   - generics
+   - flavors
+   - clos
+   - flos
 
   - test defgeneric, defmethod, and method combinations
-
-  - make sure snapshot works as expected
-   - defgeneric
-   - defmethod
 
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 

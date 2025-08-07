@@ -135,6 +135,8 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		if node == nil {
 			node = &Leaf{text: p.Append(nil, obj, 0)}
 		}
+	case slip.Symbol:
+		node = &Leaf{text: []byte(to)}
 	default:
 		node = &Leaf{text: p.Append(nil, obj, 0)}
 	}
@@ -165,6 +167,8 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		node = defvarFromList(name, args, p)
 	case "cond":
 		node = newFun(name, args, p, 2)
+	case "progn":
+		node = newProgn(args, p)
 	case "block",
 		"defpackage",
 		"dotimes",
@@ -187,16 +191,11 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		node = newFun1i2(name, args, p)
 	case "defflavor":
 		node = defflavorFromList(args, p)
-	case "defwhopper":
-		node = defmethodFromList(name, args, p)
-	case "defmethod":
-		fmt.Printf("***defmethod  %s %s\n", name, args)
+	case "defmethod", "defwhopper":
 		if _, ok := args[0].(slip.List); ok {
 			node = defmethodFromList(name, args, p)
 		} else {
-			// TBD different defmethod?
-			//
-			node = newFun(name, args, p, 1)
+			node = defGenMethod(args, p)
 		}
 	case "defclass", "define-condition":
 		node = defclassFromList(name, args, p)

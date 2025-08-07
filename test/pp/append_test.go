@@ -92,6 +92,27 @@ func TestAppendLet(t *testing.T) {
 	}).Test(t)
 }
 
+func TestAppendProgn(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20)) (pretty-print (progn (list aaa 1)(list bbb 2)) nil))`,
+		Expect: `"(progn
+  (list aaa 1)
+  (list bbb 2))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 10)) (pretty-print (progn (list aaa 1)(list bbb 2)) nil))`,
+		Expect: `"(progn
+  (list
+   aaa
+   1)
+  (list
+   bbb
+   2))
+"`,
+	}).Test(t)
+}
+
 func TestAppendDefvar(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((*print-right-margin* 20)) (pretty-print (defvar x) nil))`,

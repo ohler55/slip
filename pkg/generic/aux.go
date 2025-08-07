@@ -3,7 +3,6 @@
 package generic
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -93,20 +92,59 @@ func (g *Aux) DefList() slip.List {
 	for _, k := range keys {
 		method := g.methods[k]
 		sll := make(slip.List, len(method.Doc.Args))
-		for i, da := range g.docs.Args {
-			// TBD handle all variations
-			sll[i] = slip.List{slip.Symbol(da.Name), slip.True}
+		for i, da := range method.Doc.Args {
+			if i < g.reqCnt {
+				sll[i] = slip.List{slip.Symbol(da.Name), slip.Symbol(da.Type)}
+			} else {
+				if da.Name[0] == '&' || da.Default == nil {
+					sll[i] = slip.Symbol(da.Name)
+				} else {
+					sll[i] = slip.List{slip.Symbol(da.Name), da.Default}
+				}
+			}
 		}
-		// TBD build specializer list
-		// for each combination, if lambda then get forms else skip
+		var doc slip.Object
+		if 0 < len(g.docs.Text) {
+			doc = slip.String(g.docs.Text)
+		}
+		if 0 < len(method.Doc.Text) {
+			doc = slip.String(method.Doc.Text)
+		}
 		if 0 < len(method.Combinations) {
-			if method.Combinations[0].Primary != nil {
+			if lam, ok := method.Combinations[0].Primary.(*slip.Lambda); ok {
 				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), sll}
+				if doc != nil {
+					mdef = append(mdef, doc)
+				}
+				mdef = append(mdef, lam.Forms...)
+				progn = append(progn, mdef)
+			}
+			if lam, ok := method.Combinations[0].Before.(*slip.Lambda); ok {
+				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), slip.Symbol(":before"), sll}
+				if doc != nil {
+					mdef = append(mdef, doc)
+				}
+				mdef = append(mdef, lam.Forms...)
+				progn = append(progn, mdef)
+			}
+			if lam, ok := method.Combinations[0].After.(*slip.Lambda); ok {
+				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), slip.Symbol(":after"), sll}
+				if doc != nil {
+					mdef = append(mdef, doc)
+				}
+				mdef = append(mdef, lam.Forms...)
+				progn = append(progn, mdef)
+			}
+			if lam, ok := method.Combinations[0].Wrap.(*slip.Lambda); ok {
+				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), slip.Symbol(":around"), sll}
+				if doc != nil {
+					mdef = append(mdef, doc)
+				}
+				mdef = append(mdef, lam.Forms...)
 				progn = append(progn, mdef)
 			}
 		}
 	}
-	fmt.Printf("*** progn %s\n", progn)
 	return progn
 }
 

@@ -65,3 +65,61 @@ func TestDefmethodLongLine(t *testing.T) {
 "`,
 	}).Test(t)
 }
+
+func TestDefmethodGeneric(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 80))
+                   (pretty-print (defmethod quux :before ((x fixnum) (y real))
+                                   "quack quack" (+ x y)) nil))`,
+		Expect: `"(defmethod quux :before ((x fixnum) (y real))
+  "quack quack"
+  (+ x y))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 30))
+                   (pretty-print (defmethod quux :before ((x fixnum) (y real))
+                                   "quack quack" (+ x y)) nil))`,
+		Expect: `"(defmethod quux :before
+    ((x fixnum) (y real))
+  "quack quack"
+  (+ x y))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20))
+                   (pretty-print (defmethod quux :before ((x fixnum) (y real))
+                                   "quack quack" (+ x y)) nil))`,
+		Expect: `"(defmethod quux
+    :before
+    ((x fixnum)
+     (y real))
+  "quack quack"
+  (+ x y))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 10))
+                   (pretty-print (defmethod quux :before ((x fixnum) (y real))
+                                   "quack quack" (+ x y)) nil))`,
+		Expect: `"(defmethod
+    quux
+    :before
+    ((x
+      fixnum)
+     (y
+      real))
+  "quack
+   quack"
+  (+ x y))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 80))
+                   (pretty-print (defmethod quux ((x t))
+                                   (+ x *some-long-global-variable*)) nil))`,
+		Expect: `"(defmethod quux ((x t))
+  (+ x *some-long-global-variable*))
+"`,
+	}).Test(t)
+}

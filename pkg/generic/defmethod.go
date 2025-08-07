@@ -299,7 +299,17 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 		case slip.List:
 			if 1 < len(tv) {
 				if sym, _ := tv[0].(slip.Symbol); 0 < len(sym) {
-					fd.Args[i] = &slip.DocArg{Name: string(sym), Default: tv[1]}
+					if i < aux.reqCnt {
+						if tsym, _ := tv[1].(slip.Symbol); 0 < len(tsym) {
+							fd.Args[i] = &slip.DocArg{Name: string(sym), Type: string(tsym)}
+						} else if tv[1] == slip.True {
+							fd.Args[i] = &slip.DocArg{Name: string(sym), Type: "t"}
+						} else {
+							slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+						}
+					} else {
+						fd.Args[i] = &slip.DocArg{Name: string(sym), Default: tv[1]}
+					}
 					continue
 				}
 			}
@@ -328,7 +338,7 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 func addMethodCaller(aux *Aux, fname, qualifier, key string, caller slip.Caller, fd *slip.FuncDoc) *slip.Method {
 	meth := aux.methods[key]
 	if meth == nil {
-		meth = &slip.Method{Name: fname}
+		meth = &slip.Method{Name: fname, Doc: fd}
 		aux.methods[key] = meth
 	}
 	var c *slip.Combination
@@ -337,9 +347,6 @@ func addMethodCaller(aux *Aux, fname, qualifier, key string, caller slip.Caller,
 	} else {
 		c = &slip.Combination{}
 		meth.Combinations = []*slip.Combination{c}
-	}
-	if meth.Doc == nil {
-		meth.Doc = fd
 	}
 	switch qualifier {
 	case "":
@@ -404,14 +411,10 @@ func formMethKey(ll slip.List) string {
 			key = append(key, 't')
 		case slip.List:
 			if 1 < len(tv) {
-				if tv[1] == nil {
-					key = append(key, 't')
-				} else if sym, ok := tv[1].(slip.Symbol); ok {
+				if sym, ok := tv[1].(slip.Symbol); ok {
 					key = append(key, sym...)
-				} else if tv[1] == slip.True {
-					key = append(key, 't')
 				} else {
-					slip.PanicType("parameter-specializer-name", tv[1], "symbol")
+					key = append(key, 't')
 				}
 			}
 		}

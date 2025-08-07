@@ -55,9 +55,19 @@ func (fd *FuncDoc) getArg(name string) *DocArg {
 func (fd *FuncDoc) DefList() List {
 	dl := make(List, len(fd.Args))
 	for i, da := range fd.Args {
-		if da.Default == nil {
+		switch {
+		case fd.Kind == GenericFunctionSymbol || fd.Kind == MethodSymbol:
+			switch {
+			case 0 < len(da.Type):
+				dl[i] = List{Symbol(da.Name), Symbol(da.Type)}
+			case da.Default == nil:
+				dl[i] = Symbol(da.Name)
+			default:
+				dl[i] = List{Symbol(da.Name), da.Default}
+			}
+		case da.Default == nil:
 			dl[i] = Symbol(da.Name)
-		} else {
+		default:
 			dl[i] = List{Symbol(da.Name), da.Default}
 		}
 	}
