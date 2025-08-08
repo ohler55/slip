@@ -9,23 +9,11 @@
 
  - generics branch
 
-  - design dir
-   - index.md
-   - cons and lists
-   - generics
-   - flavors
-   - clos
-   - flos
-
-  - test defgeneric, defmethod, and method combinations
-
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
  - [x] SLOT-MISSING
  - [x] SLOT-UNBOUND - make generic
- - [ ] ADD-METHOD
  - [x] CALL-NEXT-METHOD
- - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
  - [ ] COMPUTE-APPLICABLE-METHODS
  - [x] DEFGENERIC
  - [x] DEFMETHOD - need generic support
@@ -48,6 +36,7 @@
  - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [ ] WITH-ACCESSORS
  - [ ] WITH-ADDED-METHODS
+ - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
 
 ---------------------
  - flavor allow out of order defflavor like standard-class

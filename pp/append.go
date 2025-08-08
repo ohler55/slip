@@ -197,6 +197,8 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		} else {
 			node = defGenMethod(args, p)
 		}
+	case "defgeneric":
+		node = defGeneric(args, p)
 	case "defclass", "define-condition":
 		node = defclassFromList(name, args, p)
 	default:

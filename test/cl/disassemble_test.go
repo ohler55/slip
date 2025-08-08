@@ -23,7 +23,7 @@ func TestDisassembleBuiltIn(t *testing.T) {
 		Source: `(disassemble 'list)`,
 		Expect: "nil",
 	}).Test(t)
-	tt.Equal(t, `(defun common-lisp:list (&rest objects)
+	tt.Equal(t, `(defun list (&rest objects)
   "list returns a list of all the objects."
   ...)
 `, out.String())
@@ -61,7 +61,7 @@ func TestDisassembleDefun(t *testing.T) {
                   (fmakunbound 'quux))`,
 		Expect: "quux",
 	}).Test(t)
-	tt.Equal(t, `(defun common-lisp-user:quux (x)
+	tt.Equal(t, `(defun quux (x)
   (1+ x))
 `, out.String())
 }
@@ -81,7 +81,7 @@ func TestDisassembleDefmacro(t *testing.T) {
                   (fmakunbound 'quux))`,
 		Expect: "quux",
 	}).Test(t)
-	tt.Equal(t, `(defmacro common-lisp-user:quux (x)
+	tt.Equal(t, `(defmacro quux (x)
   (1+ x))
 `, out.String())
 }

@@ -470,18 +470,18 @@ func TestDefmethodGenericDefList(t *testing.T) {
                      (:method :around ((a fixnum) (b real)) (call-next-method a b)))
                    (let ((*print-right-margin* 80))
                      (pretty-print quux nil)))`,
-		Expect: `"(progn
-  (defgeneric quux (a b) (:documentation "quack quack"))
-  (defmethod quux ((a fixnum) (b fixnum))
+		Expect: `"(defgeneric quux (a b)
+  (:documentation "quack quack")
+  (:method ((a fixnum) (b fixnum))
     "quack quack"
     (list a b))
-  (defmethod quux :before ((a fixnum) (b fixnum))
+  (:method :before ((a fixnum) (b fixnum))
     "quack quack"
     (princ a))
-  (defmethod quux :after ((a fixnum) (b fixnum))
+  (:method :after ((a fixnum) (b fixnum))
     "quack quack"
     (princ b))
-  (defmethod quux :around ((a fixnum) (b real))
+  (:method :around ((a fixnum) (b real))
     "quack quack"
     (call-next-method a b)))
 "`,
@@ -496,9 +496,8 @@ func TestDefmethodGenericDefListDoc(t *testing.T) {
                    (defmethod quux ((a fixnum) (b fixnum)) "quack quack" (list a b))
                    (let ((*print-right-margin* 80))
                      (pretty-print quux nil)))`,
-		Expect: `"(progn
-  (defgeneric quux (a b))
-  (defmethod quux ((a fixnum) (b fixnum))
+		Expect: `"(defgeneric quux (a b)
+  (:method ((a fixnum) (b fixnum))
     "quack quack"
     (list a b)))
 "`,
@@ -513,9 +512,8 @@ func TestDefmethodGenericDefListLambdaList(t *testing.T) {
                    (defmethod quux ((a fixnum) &optional (b 5) c) (list a b c))
                    (let ((*print-right-margin* 80))
                      (pretty-print quux nil)))`,
-		Expect: `"(progn
-  (defgeneric quux (a &optional b c))
-  (defmethod quux ((a fixnum) &optional (b 5) c)
+		Expect: `"(defgeneric quux (a &optional b c)
+  (:method ((a fixnum) &optional (b 5) c)
     (list a b c)))
 "`,
 	}).Test(t)
@@ -528,7 +526,8 @@ func TestDefmethodGenericDefListEmpty(t *testing.T) {
                    (defgeneric quux (a b) (:documentation "quack quack"))
                    (let ((*print-right-margin* 80))
                      (pretty-print quux nil)))`,
-		Expect: `"(defgeneric quux (a b) (:documentation "quack quack"))
+		Expect: `"(defgeneric quux (a b)
+  (:documentation "quack quack"))
 "`,
 	}).Test(t)
 }

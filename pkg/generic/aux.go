@@ -66,7 +66,7 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 }
 
 // DefList returns a list that can be evaluated to define a generic and all
-// specialized methods for the generic as a progn.
+// specialized methods for the generic.
 func (g *Aux) DefList() slip.List {
 	ll := make(slip.List, len(g.docs.Args))
 	for i, da := range g.docs.Args {
@@ -80,10 +80,6 @@ func (g *Aux) DefList() slip.List {
 	if 0 < len(g.docs.Text) {
 		gdef = append(gdef, slip.List{slip.Symbol(":documentation"), slip.String(g.docs.Text)})
 	}
-	if len(g.methods) == 0 {
-		return gdef
-	}
-	progn := slip.List{slip.Symbol("progn"), gdef}
 	keys := make([]string, 0, len(g.methods))
 	for k := range g.methods {
 		keys = append(keys, k)
@@ -112,40 +108,40 @@ func (g *Aux) DefList() slip.List {
 		}
 		if 0 < len(method.Combinations) {
 			if lam, ok := method.Combinations[0].Primary.(*slip.Lambda); ok {
-				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), sll}
+				mdef := slip.List{slip.Symbol(":method"), sll}
 				if doc != nil {
 					mdef = append(mdef, doc)
 				}
 				mdef = append(mdef, lam.Forms...)
-				progn = append(progn, mdef)
+				gdef = append(gdef, mdef)
 			}
 			if lam, ok := method.Combinations[0].Before.(*slip.Lambda); ok {
-				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), slip.Symbol(":before"), sll}
+				mdef := slip.List{slip.Symbol(":method"), slip.Symbol(":before"), sll}
 				if doc != nil {
 					mdef = append(mdef, doc)
 				}
 				mdef = append(mdef, lam.Forms...)
-				progn = append(progn, mdef)
+				gdef = append(gdef, mdef)
 			}
 			if lam, ok := method.Combinations[0].After.(*slip.Lambda); ok {
-				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), slip.Symbol(":after"), sll}
+				mdef := slip.List{slip.Symbol(":method"), slip.Symbol(":after"), sll}
 				if doc != nil {
 					mdef = append(mdef, doc)
 				}
 				mdef = append(mdef, lam.Forms...)
-				progn = append(progn, mdef)
+				gdef = append(gdef, mdef)
 			}
 			if lam, ok := method.Combinations[0].Wrap.(*slip.Lambda); ok {
-				mdef := slip.List{slip.Symbol("defmethod"), slip.Symbol(method.Name), slip.Symbol(":around"), sll}
+				mdef := slip.List{slip.Symbol(":method"), slip.Symbol(":around"), sll}
 				if doc != nil {
 					mdef = append(mdef, doc)
 				}
 				mdef = append(mdef, lam.Forms...)
-				progn = append(progn, mdef)
+				gdef = append(gdef, mdef)
 			}
 		}
 	}
-	return progn
+	return gdef
 }
 
 func (g *Aux) buildCacheMeth(args slip.List) *slip.Method {

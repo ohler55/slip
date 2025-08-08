@@ -816,6 +816,7 @@
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
  - [-] ABORT
+ - [-] ADD-METHOD (use defmethod, add-method is too restrictive to be useful)
  - [-] ASSERT
  - [-] BASE-CHAR
  - [-] BASE-STRING
@@ -850,6 +851,7 @@
  - [-] DEFSETF
  - [-] DEFTYPE
  - [-] DELETE-IF-NOT (deprecated)
+ - [-] DESCRIBE-OBJECT (must not be called by the user so not included)
  - [-] ED
  - [-] EVAL-WHEN
  - [-] EXTENDED-CHAR
@@ -949,10 +951,8 @@
  - [-] WITH-COMPILATION-UNIT
  - [-] WITH-CONDITION-RESTARTS
  - [-] WITH-SIMPLE-RESTART
- - [c] ADD-METHOD
  - [c] COMPUTE-APPLICABLE-METHODS
  - [c] DEFINE-METHOD-COMBINATION
- - [-] DESCRIBE-OBJECT (must not be called by the user so not included)
  - [c] ENSURE-GENERIC-FUNCTION
  - [c] FIND-METHOD
  - [c] FUNCTION-KEYWORDS
