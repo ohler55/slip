@@ -110,6 +110,24 @@ func (m *Method) String() string {
 func (m *Method) Append(b []byte) []byte {
 	b = append(b, "#<method "...)
 	b = append(b, m.Name...)
+	for _, c := range m.Combinations {
+		if c.Before != nil {
+			b = append(b, " :before"...)
+			break
+		}
+	}
+	for _, c := range m.Combinations {
+		if c.After != nil {
+			b = append(b, " :after"...)
+			break
+		}
+	}
+	for _, c := range m.Combinations {
+		if c.Wrap != nil {
+			b = append(b, " :around"...)
+			break
+		}
+	}
 	if m.Doc != nil {
 		b = append(b, ' ')
 		b = printer.Append(b, m.Doc.DefList(), 0)

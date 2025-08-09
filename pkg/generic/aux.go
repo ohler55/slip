@@ -180,6 +180,89 @@ func (g *Aux) collectMethods(meth *slip.Method, key []string, ki int, args slip.
 	}
 }
 
+type methComp struct {
+	primary *slip.Method
+	around  []*slip.Method
+	before  []*slip.Method
+	after   []*slip.Method
+}
+
+func (g *Aux) compMethList(args slip.List) slip.List {
+	var mc methComp
+	key := make([]string, g.reqCnt)
+
+	g.compMeths(&mc, key, 0, args)
+
+	methods := make(slip.List, 0, len(mc.around)+len(mc.before)+len(mc.after)+1)
+	for _, m := range mc.around {
+		methods = append(methods, m)
+	}
+	for _, m := range mc.before {
+		methods = append(methods, m)
+	}
+	if mc.primary != nil {
+		methods = append(methods, mc.primary)
+	}
+	for i := len(mc.after) - 1; 0 <= i; i-- {
+		methods = append(methods, mc.after[i])
+	}
+	return methods
+}
+
+func (g *Aux) compMeths(mc *methComp, key []string, ki int, args slip.List) {
+	var hier []slip.Symbol
+	if args[ki] == nil {
+		hier = []slip.Symbol{slip.TrueSymbol}
+	} else {
+		hier = args[ki].Hierarchy()
+	}
+	if len(key) == ki+1 { // last one
+		for _, h := range hier {
+			key[ki] = string(h)
+			if m, has := g.methods[strings.Join(key, "|")]; has {
+				c := m.Combinations[0] // should only be one
+				if mc.primary == nil && c.Primary != nil {
+					mc.primary = &slip.Method{
+						Name:         m.Name,
+						Combinations: []*slip.Combination{{Primary: c.Primary}},
+						Doc:          m.Doc,
+					}
+				}
+				if c.Before != nil {
+					mc.before = append(mc.before,
+						&slip.Method{
+							Name:         m.Name,
+							Combinations: []*slip.Combination{{Before: c.Before}},
+							Doc:          m.Doc,
+						})
+				}
+				if c.After != nil {
+					mc.after = append(mc.after,
+						&slip.Method{
+							Name:         m.Name,
+							Combinations: []*slip.Combination{{After: c.After}},
+							Doc:          m.Doc,
+						})
+				}
+				if c.Wrap != nil {
+					mc.around = append(mc.around,
+						&slip.Method{
+							Name:         m.Name,
+							Combinations: []*slip.Combination{{Wrap: c.Wrap}},
+							Doc:          m.Doc,
+						})
+				}
+			}
+		}
+	} else {
+		k2 := ki + 1
+		for _, h := range hier {
+			key[ki] = string(h)
+			g.compMeths(mc, key, k2, args)
+		}
+	}
+}
+
 // args should be only specializer arguments.
 func buildSpecKey(args slip.List) string {
 	var b []byte

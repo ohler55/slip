@@ -338,7 +338,7 @@ func TestDefmethodGenericQualifier(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(defmethod quux :after ((s output-stream) (x real)) (format s "-after"))`,
-		Expect: `/#<method quux \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
+		Expect: `/#<method quux :after \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(with-output-to-string(os) (quux os 3))`,
@@ -346,14 +346,14 @@ func TestDefmethodGenericQualifier(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(defmethod quux :before ((s output-stream) (x real)) (format s "before-"))`,
-		Expect: `/#<method quux \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
+		Expect: `/#<method quux :before :after \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(defmethod quux :around ((s output-stream) (x fixnum))
                    (format s "around-")
                    (call-next-method)
                    (format s "-around"))`,
-		Expect: `/#<method quux \(\(s output-stream\) \(x fixnum\)\) \{[0-9a-f]+\}>/`,
+		Expect: `/#<method quux :around \(\(s output-stream\) \(x fixnum\)\) \{[0-9a-f]+\}>/`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(with-output-to-string(os) (quux os 3))`,

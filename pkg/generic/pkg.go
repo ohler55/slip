@@ -34,6 +34,7 @@ func init() {
 	defSlotUnbound()
 	defDefgeneric()
 	defCallNextMethod()
+	defComputeApplicableMethods()
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
