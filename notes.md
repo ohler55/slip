@@ -14,7 +14,7 @@
  - [x] SLOT-MISSING
  - [x] SLOT-UNBOUND - make generic
  - [x] CALL-NEXT-METHOD
- - [ ] COMPUTE-APPLICABLE-METHODS
+ - [x] COMPUTE-APPLICABLE-METHODS
  - [x] DEFGENERIC
  - [x] DEFMETHOD - need generic support
  - [ ] ENSURE-GENERIC-FUNCTION
