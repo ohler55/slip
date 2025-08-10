@@ -66,17 +66,66 @@ top:
 	if aux == nil {
 		slip.PanicType("generic-function", args[0], "symbol", "generic-function")
 	}
-
-	// TBD qualifier either empty list or list of 1 that is (:before), (:after), or (:around)
-
-	gfa, _ := args[2].(slip.List)
-	if len(gfa) != aux.reqCnt {
+	specializers, _ := args[2].(slip.List)
+	if len(specializers) != aux.reqCnt {
 		slip.PanicType("specializers", args[2], "list")
 	}
-
-	// TBD
-
-	// TBD form key and lookup, then find qualifier match
-
-	return nil
+	var key []byte
+	for i, sp := range specializers {
+		if 0 < i {
+			key = append(key, '|')
+		}
+		switch tsp := sp.(type) {
+		case slip.Symbol:
+			key = append(key, tsp...)
+		case slip.Class:
+			key = append(key, tsp.Name()...)
+		default:
+			slip.PanicType("specializer", tsp, "symbol", "class")
+		}
+	}
+	m := aux.methods[string(key)]
+	if m != nil {
+		switch ta := args[1].(type) {
+		case nil:
+			if m.Combinations[0].Primary == nil {
+				m = nil
+			}
+		case slip.List:
+			switch len(ta) {
+			case 0:
+				if m.Combinations[0].Primary == nil {
+					m = nil
+				}
+			case 1:
+				switch ta[0] {
+				case slip.Symbol(":before"):
+					if m.Combinations[0].Before == nil {
+						m = nil
+					}
+				case slip.Symbol(":after"):
+					if m.Combinations[0].After == nil {
+						m = nil
+					}
+				case slip.Symbol(":around"):
+					if m.Combinations[0].Wrap == nil {
+						m = nil
+					}
+				default:
+					slip.PanicType("qualifiers", args[1], "()", "(:before)", "(:after)", "(:around)")
+				}
+			default:
+				slip.PanicType("qualifiers", args[1], "()", "(:before)", "(:after)", "(:around)")
+			}
+		default:
+			slip.PanicType("qualifiers", args[1], "()", "(:before)", "(:after)", "(:around)")
+		}
+	}
+	if m == nil {
+		if 3 < len(args) && args[3] != nil {
+			slip.PanicError("Method for %s %s %s does not exist.", aux.docs.Name, args[1], specializers)
+		}
+		return nil
+	}
+	return m
 }
