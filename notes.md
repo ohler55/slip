@@ -18,7 +18,8 @@
  - [x] DEFGENERIC
  - [x] DEFMETHOD - need generic support
  - [ ] ENSURE-GENERIC-FUNCTION
- - [ ] FIND-METHOD
+ - [ ] FDEFINITION
+ - [ ] FIND-METHOD <<<<<< next
  - [ ] FUNCTION-KEYWORDS
  - [x] GENERIC-FUNCTION
  - [ ] INITIALIZE-INSTANCE
@@ -28,7 +29,7 @@
  - [ ] METHOD-QUALIFIERS
  - [ ] NEXT-METHOD-P
  - [x] NO-APPLICABLE-METHOD
- - [ ] NO-NEXT-METHOD
+ - [ ] NO-NEXT-METHOD - generic that defaults to a panic
  - [ ] REINITIALIZE-INSTANCE
  - [ ] REMOVE-METHOD
  - [ ] SHARED-INITIALIZE

@@ -28,7 +28,7 @@ func defComputeApplicableMethods() {
 				},
 			},
 			Return: "list",
-			Text: `__compute-applicable-methods__ returns a list of methods of the )generic-function_ that
+			Text: `__compute-applicable-methods__ returns a list of methods of the _generic-function_ that
 match the _function-arguments_ as then specifiers.`,
 		}, &Pkg)
 }
