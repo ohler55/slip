@@ -40,7 +40,7 @@ type MethodQualifiers struct {
 
 // Call the the function with the arguments provided.
 func (f *MethodQualifiers) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(args[0], args, 1, 1)
+	slip.ArgCountCheck(f, args, 1, 1)
 	meth, ok := args[0].(*slip.Method)
 	if !ok {
 		slip.PanicType("method", args[0], "method")

@@ -18,12 +18,18 @@
  - [x] DEFGENERIC
  - [x] DEFMETHOD - need generic support
  - [ ] ENSURE-GENERIC-FUNCTION
- - [ ] FDEFINITION
+ - [x] FDEFINITION
  - [x] FIND-METHOD
  - [ ] FUNCTION-KEYWORDS
  - [x] GENERIC-FUNCTION
  - [ ] INITIALIZE-INSTANCE
  - [ ] MAKE-LOAD-FORM - same as what is called by snapshot
+       - test with instance as well (also flavor instance)
+       - class
+       - condition
+       - generic
+       - ordinary function?
+        - might need fdefinition to test
  - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
  - [ ] METHOD-COMBINATION-ERROR
  - [x] METHOD-QUALIFIERS

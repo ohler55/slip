@@ -56,7 +56,7 @@ type FindMethod struct {
 
 // Call the the function with the arguments provided.
 func (f *FindMethod) Call(s *slip.Scope, args slip.List, depth int) (meth slip.Object) {
-	slip.ArgCountCheck(args[0], args, 3, 4)
+	slip.ArgCountCheck(f, args, 3, 4)
 	var aux *Aux
 	a0 := args[0]
 top:
