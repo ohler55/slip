@@ -19,7 +19,7 @@
  - [x] DEFMETHOD - need generic support
  - [ ] ENSURE-GENERIC-FUNCTION
  - [ ] FDEFINITION
- - [ ] FIND-METHOD <<<<<< next
+ - [x] FIND-METHOD
  - [ ] FUNCTION-KEYWORDS
  - [x] GENERIC-FUNCTION
  - [ ] INITIALIZE-INSTANCE

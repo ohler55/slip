@@ -51,7 +51,7 @@ type FindMethod struct {
 }
 
 // Call the the function with the arguments provided.
-func (f *FindMethod) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *FindMethod) Call(s *slip.Scope, args slip.List, depth int) (meth slip.Object) {
 	slip.ArgCountCheck(args[0], args, 3, 4)
 	var aux *Aux
 	a0 := args[0]
@@ -81,51 +81,68 @@ top:
 		case slip.Class:
 			key = append(key, tsp.Name()...)
 		default:
-			slip.PanicType("specializer", tsp, "symbol", "class")
+			if slip.True == tsp {
+				key = append(key, 't')
+			} else {
+				slip.PanicType("specializer", tsp, "symbol", "class", "t")
+			}
 		}
 	}
-	m := aux.methods[string(key)]
-	if m != nil {
-		switch ta := args[1].(type) {
-		case nil:
-			if m.Combinations[0].Primary == nil {
-				m = nil
+	var qual string
+	switch ta := args[1].(type) {
+	case nil:
+		qual = ":primary"
+	case slip.List:
+		switch len(ta) {
+		case 0:
+			qual = ":primary"
+		case 1:
+			sym, _ := ta[0].(slip.Symbol)
+			qual = string(sym)
+		}
+	}
+	if m := aux.methods[string(key)]; m != nil {
+		switch qual {
+		case ":primary":
+			if m.Combinations[0].Primary != nil {
+				meth = &slip.Method{
+					Name:         m.Name,
+					Doc:          m.Doc,
+					Combinations: []*slip.Combination{{Primary: m.Combinations[0].Primary}},
+				}
 			}
-		case slip.List:
-			switch len(ta) {
-			case 0:
-				if m.Combinations[0].Primary == nil {
-					m = nil
+		case ":before":
+			if m.Combinations[0].Before != nil {
+				meth = &slip.Method{
+					Name:         m.Name,
+					Doc:          m.Doc,
+					Combinations: []*slip.Combination{{Before: m.Combinations[0].Before}},
 				}
-			case 1:
-				switch ta[0] {
-				case slip.Symbol(":before"):
-					if m.Combinations[0].Before == nil {
-						m = nil
-					}
-				case slip.Symbol(":after"):
-					if m.Combinations[0].After == nil {
-						m = nil
-					}
-				case slip.Symbol(":around"):
-					if m.Combinations[0].Wrap == nil {
-						m = nil
-					}
-				default:
-					slip.PanicType("qualifiers", args[1], "()", "(:before)", "(:after)", "(:around)")
+			}
+		case ":after":
+			if m.Combinations[0].After != nil {
+				meth = &slip.Method{
+					Name:         m.Name,
+					Doc:          m.Doc,
+					Combinations: []*slip.Combination{{After: m.Combinations[0].After}},
 				}
-			default:
-				slip.PanicType("qualifiers", args[1], "()", "(:before)", "(:after)", "(:around)")
+			}
+		case ":around":
+			if m.Combinations[0].Wrap != nil {
+				meth = &slip.Method{
+					Name:         m.Name,
+					Doc:          m.Doc,
+					Combinations: []*slip.Combination{{Wrap: m.Combinations[0].Wrap}},
+				}
 			}
 		default:
 			slip.PanicType("qualifiers", args[1], "()", "(:before)", "(:after)", "(:around)")
 		}
 	}
-	if m == nil {
+	if meth == nil {
 		if 3 < len(args) && args[3] != nil {
 			slip.PanicError("Method for %s %s %s does not exist.", aux.docs.Name, args[1], specializers)
 		}
-		return nil
 	}
-	return m
+	return
 }

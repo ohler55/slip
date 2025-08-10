@@ -30,12 +30,31 @@ func TestComputeApplicableMethods(t *testing.T) {
 			tt.Equal(t, true, strings.Contains(list[1].String(), ":before"))
 			tt.Equal(t, true, strings.Contains(list[2].String(), "method quux ((a fixnum)"))
 			tt.Equal(t, true, strings.Contains(list[3].String(), ":after"))
-
 		},
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(compute-applicable-methods 'quux '(1))`,
 		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestComputeApplicableMethodsNil(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defgeneric quux (a b)
+                   (:method ((a fixnum) (b real) (+ a b)))
+                   (:method :before ((a real) (b t) (print a)))
+                   (:method :after ((a real) (b t) (print b))))`,
+		Expect: "#<generic-function quux>",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(compute-applicable-methods 'quux '(1 nil))`,
+		Validate: func(t *testing.T, v slip.Object) {
+			list, _ := v.(slip.List)
+			tt.Equal(t, 2, len(list))
+			tt.Equal(t, true, strings.Contains(list[0].String(), ":before"))
+			tt.Equal(t, true, strings.Contains(list[1].String(), ":after"))
+		},
 	}).Test(t)
 }
 
