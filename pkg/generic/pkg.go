@@ -36,6 +36,7 @@ func init() {
 	defCallNextMethod()
 	defComputeApplicableMethods()
 	defFindMethod()
+	defMethodQualifiers()
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)

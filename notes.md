@@ -26,7 +26,7 @@
  - [ ] MAKE-LOAD-FORM - same as what is called by snapshot
  - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
  - [ ] METHOD-COMBINATION-ERROR
- - [ ] METHOD-QUALIFIERS
+ - [x] METHOD-QUALIFIERS
  - [ ] NEXT-METHOD-P
  - [x] NO-APPLICABLE-METHOD
  - [ ] NO-NEXT-METHOD - generic that defaults to a panic

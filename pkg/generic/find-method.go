@@ -42,6 +42,10 @@ Deviating from common lisp, type names are also allowed`,
 			Return: "method",
 			Text: `__find-method__ returns a method of the generic-function_ that
 matchs the _specializers_ as well as _qualifiers_.`,
+			Examples: []string{
+				`(defgeneric quux (x y) (:method :before ((x real) (y real)) (print "before"))`,
+				`(find-method 'quux '(:before) '(real real)) => #<method quux :before ((x real) (y real)) {1234}>`,
+			},
 		}, &Pkg)
 }
 
