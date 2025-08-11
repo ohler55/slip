@@ -8,6 +8,12 @@
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
  - generics branch
+  - handle all type in make-load-form
+
+  - DefLister
+   - standard-object
+    - condition should call make-condition
+   - flavors.Instance
 
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
