@@ -102,3 +102,9 @@ func (obj *Ratio) RealValue() float64 {
 	f, _ := (*big.Rat)(obj).Float64()
 	return f
 }
+
+// LoadForm returns a form that can be evaluated to create the object or nil
+// if that is not possible.
+func (obj *Ratio) LoadForm() Object {
+	return obj
+}

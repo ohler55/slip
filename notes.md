@@ -13,10 +13,6 @@
    - update snapshot
    - update pp
 
-susan erwin
-3889
-416 340 4800
-
   - DefLister
    - standard-object
     - condition should call make-condition

@@ -93,3 +93,9 @@ func (obj *LongFloat) RealValue() float64 {
 	f, _ := (*big.Float)(obj).Float64()
 	return f
 }
+
+// LoadForm returns a form that can be evaluated to create the object or nil
+// if that is not possible.
+func (obj *LongFloat) LoadForm() Object {
+	return obj
+}

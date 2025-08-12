@@ -109,3 +109,9 @@ func (obj *Bignum) IsInt64() bool {
 func (obj *Bignum) Int64() int64 {
 	return (*big.Int)(obj).Int64()
 }
+
+// LoadForm returns a form that can be evaluated to create the object or nil
+// if that is not possible.
+func (obj *Bignum) LoadForm() Object {
+	return obj
+}

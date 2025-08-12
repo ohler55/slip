@@ -61,7 +61,7 @@ func TestFixnum(t *testing.T) {
 	tt.Equal(t, 7.0, slip.Fixnum(7).RealValue())
 	tt.Equal(t, 7, slip.Fixnum(7).Int64())
 	tt.Equal(t, true, slip.Fixnum(7).IsInt64())
-	tt.Equal(t, "7", slip.Fixnum(7).LoadForm().String())
+	tt.Equal(t, slip.Fixnum(7), slip.Fixnum(7).LoadForm())
 }
 
 func TestOctet(t *testing.T) {
@@ -152,6 +152,8 @@ func TestRatio(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 1.5, slip.NewRatio(12, 8).RealValue())
 
+	tt.Equal(t, slip.NewRatio(7, 9), slip.NewRatio(7, 9).LoadForm())
+
 	tt.Panic(t, func() { _ = slip.NewRatio(7, 0) })
 	tt.Panic(t, func() { _ = slip.NewBigRatio(big.NewInt(7), big.NewInt(0)) })
 }
@@ -194,6 +196,7 @@ func TestBignum(t *testing.T) {
 	tt.Equal(t, 123.0, slip.NewBignum(123).RealValue())
 	tt.Equal(t, 123, slip.NewBignum(123).Int64())
 	tt.Equal(t, true, slip.NewBignum(123).IsInt64())
+	tt.Equal(t, slip.NewBignum(123), slip.NewBignum(123).LoadForm())
 }
 
 func TestShortFloat(t *testing.T) {
@@ -250,6 +253,7 @@ func TestSingleFloat(t *testing.T) {
 		Eval: slip.SingleFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.SingleFloat(7.0).RealValue())
+	tt.Equal(t, slip.SingleFloat(2.5), slip.SingleFloat(2.5).LoadForm())
 }
 
 func TestDoubleFloat(t *testing.T) {
@@ -307,6 +311,7 @@ func TestLongFloat(t *testing.T) {
 		Eval: slip.NewLongFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.NewLongFloat(7.0).RealValue())
+	tt.Equal(t, slip.NewLongFloat(2.5), slip.NewLongFloat(2.5).LoadForm())
 }
 
 func TestComplex(t *testing.T) {

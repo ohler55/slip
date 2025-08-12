@@ -88,5 +88,5 @@ func (obj Bit) Int64() (i int64) {
 // LoadForm returns a form that can be evaluated to create the object or nil
 // if that is not possible.
 func (obj Bit) LoadForm() Object {
-	return List{Symbol("coerce"), obj, List{Symbol("quote"), Symbol("bit")}}
+	return List{coerceSymbol, obj, List{quoteSymbol, BitSymbol}}
 }

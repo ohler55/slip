@@ -222,5 +222,5 @@ func (obj Octets) LoadForm() Object {
 	for i, o := range obj {
 		list[i+1] = Fixnum(o)
 	}
-	return List{Symbol("coerce"), list, List{Symbol("quote"), Symbol("octets")}}
+	return List{coerceSymbol, list, List{quoteSymbol, OctetsSymbol}}
 }

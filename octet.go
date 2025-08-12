@@ -98,5 +98,5 @@ func (obj Octet) Int64() int64 {
 // LoadForm returns a form that can be evaluated to create the object or nil
 // if that is not possible.
 func (obj Octet) LoadForm() Object {
-	return List{Symbol("coerce"), obj, List{Symbol("quote"), Symbol("octet")}}
+	return List{coerceSymbol, obj, List{quoteSymbol, OctetSymbol}}
 }
