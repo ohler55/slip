@@ -30,10 +30,10 @@ type Class interface {
 	// InheritsList returns a list of all inherited classes.
 	InheritsList() []Class
 
-	// DefList should return a list that can be evaluated to create the class
+	// LoadForm should return a list that can be evaluated to create the class
 	// or nil if the class is a built in class. As an example, a flavor would
 	// be created by a defflavor expression.
-	DefList() List
+	LoadForm() Object
 
 	// Metaclass returns the name of the class's meta class which can be
 	// built-in-class, standard-class, flavor, or condition-class.

@@ -9,6 +9,13 @@
 
  - generics branch
   - handle all type in make-load-form
+   - add LoadForm() to all types
+   - update snapshot
+   - update pp
+
+susan erwin
+3889
+416 340 4800
 
   - DefLister
    - standard-object

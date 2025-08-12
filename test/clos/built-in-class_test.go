@@ -70,7 +70,8 @@ func TestBuiltInClassInherits(t *testing.T) {
 	tt.Equal(t, false, c.Inherits(slip.FindClass("float")))
 }
 
-func TestBuiltInClassDefList(t *testing.T) {
+func TestBuiltInClassLoadForm(t *testing.T) {
 	c := slip.FindClass("fixnum")
-	tt.Equal(t, 0, len(c.DefList()))
+	form, _ := c.LoadForm().(slip.List)
+	tt.Equal(t, 0, len(form))
 }

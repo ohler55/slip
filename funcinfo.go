@@ -73,23 +73,24 @@ func (obj *FuncInfo) FuncDocs() *FuncDoc {
 	return obj.Doc
 }
 
-// DefList returns a list that when evaluated defines then function described
+// LoadForm returns a list that when evaluated defines then function described
 // by this FuncInfo.
-func (obj *FuncInfo) DefList() (def List) {
+func (obj *FuncInfo) LoadForm() Object {
+	var form List
 	switch obj.Kind {
 	case MacroSymbol:
-		def = append(def, Symbol("defmacro"))
+		form = append(form, Symbol("defmacro"))
 	case FlosSymbol:
 		meth, _ := obj.Aux.(string)
 		return List{Symbol("flosfun"), Symbol(obj.Name), Symbol(meth)}
 	case GenericFunctionSymbol:
-		if dl, ok := obj.Aux.(DefLister); ok {
-			return dl.DefList()
+		if dl, ok := obj.Aux.(LoadFormer); ok {
+			return dl.LoadForm()
 		}
 	default:
-		def = append(def, Symbol("defun"))
+		form = append(form, Symbol("defun"))
 	}
-	def = append(def, Symbol(obj.Name))
+	form = append(form, Symbol(obj.Name))
 	args := make(List, len(obj.Doc.Args))
 	for i, da := range obj.Doc.Args {
 		if da.Default == nil {
@@ -98,15 +99,15 @@ func (obj *FuncInfo) DefList() (def List) {
 			args[i] = List{Symbol(da.Name), da.Default}
 		}
 	}
-	def = append(def, args)
+	form = append(form, args)
 	if 0 < len(obj.Doc.Text) {
-		def = append(def, String(obj.Doc.Text))
+		form = append(form, String(obj.Doc.Text))
 	}
 	fun := obj.Create(nil).(Funky)
 	if lam, ok := fun.Caller().(*Lambda); ok {
-		def = append(def, lam.Forms...)
+		form = append(form, lam.Forms...)
 	} else {
-		def = append(def, Symbol("..."))
+		form = append(form, Symbol("..."))
 	}
-	return
+	return form
 }

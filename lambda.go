@@ -341,11 +341,11 @@ func (lam *Lambda) Docs() (docs string) {
 	return
 }
 
-// DefList returns a definition list such as (lambda (x) (1+ x)).
-func (lam *Lambda) DefList() List {
+// LoadForm returns a definition list such as (lambda (x) (1+ x)).
+func (lam *Lambda) LoadForm() Object {
 	var dl List
 	dl = append(dl, Symbol("lambda"))
-	dl = append(dl, lam.Doc.DefList())
+	dl = append(dl, lam.Doc.LoadForm())
 	if 0 < len(lam.Doc.Text) {
 		dl = append(dl, String(lam.Doc.Text))
 	}

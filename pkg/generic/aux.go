@@ -65,9 +65,9 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 	return nam.Apply(s, append(slip.List{gf}, args...), depth)
 }
 
-// DefList returns a list that can be evaluated to define a generic and all
+// LoadForm returns a list that can be evaluated to define a generic and all
 // specialized methods for the generic.
-func (g *Aux) DefList() slip.List {
+func (g *Aux) LoadForm() slip.Object {
 	ll := make(slip.List, len(g.docs.Args))
 	for i, da := range g.docs.Args {
 		ll[i] = slip.Symbol(da.Name)

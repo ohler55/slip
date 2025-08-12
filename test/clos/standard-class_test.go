@@ -29,7 +29,7 @@ func TestStandardClassBasic(t *testing.T) {
   (x (y :initarg :y))
   (:documentation "quack quack")
   (:default-initargs :y 3))
-`, string(pp.Append(nil, scope, quux.DefList())))
+`, string(pp.Append(nil, scope, quux.LoadForm())))
 
 	tt.Equal(t, false, quux.Ready())
 	tt.Panic(t, func() { _ = quux.MakeInstance() })
@@ -179,7 +179,7 @@ func TestStandardClassMergeSupers(t *testing.T) {
 
 	tt.Equal(t, `(defclass quux (buux duux)
   ())
-`, string(pp.Append(nil, scope, quux.DefList())))
+`, string(pp.Append(nil, scope, quux.LoadForm())))
 
 	tt.Equal(t, true, quux.Ready())
 }

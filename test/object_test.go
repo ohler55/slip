@@ -61,6 +61,7 @@ func TestFixnum(t *testing.T) {
 	tt.Equal(t, 7.0, slip.Fixnum(7).RealValue())
 	tt.Equal(t, 7, slip.Fixnum(7).Int64())
 	tt.Equal(t, true, slip.Fixnum(7).IsInt64())
+	tt.Equal(t, "7", slip.Fixnum(7).LoadForm().String())
 }
 
 func TestOctet(t *testing.T) {
@@ -91,6 +92,7 @@ func TestOctet(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.Octet(7).RealValue())
 	tt.Equal(t, 7, slip.Octet(7).Int64())
+	tt.Equal(t, "(coerce 7 (quote octet))", slip.Octet(7).LoadForm().String())
 }
 
 func TestRatio(t *testing.T) {
@@ -276,6 +278,7 @@ func TestDoubleFloat(t *testing.T) {
 		Eval: slip.DoubleFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.DoubleFloat(7.0).RealValue())
+	tt.Equal(t, "2.5", slip.DoubleFloat(2.5).LoadForm().String())
 }
 
 func TestLongFloat(t *testing.T) {
@@ -472,6 +475,7 @@ func TestListObj(t *testing.T) {
 	tt.Equal(t, slip.List{slip.Fixnum(2), slip.Fixnum(3)},
 		slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}.Cdr())
 	tt.Equal(t, 2, slip.List{slip.True, nil}.Length())
+	tt.Equal(t, "(3)", slip.List{slip.Fixnum(3)}.LoadForm().String())
 }
 
 func TestListObjEmpty(t *testing.T) {
@@ -1031,6 +1035,8 @@ func TestBit(t *testing.T) {
 	tt.Equal(t, 0, slip.Bit(0).Int64())
 	tt.Equal(t, true, slip.Bit(0).IsInt64())
 	tt.Equal(t, "0", slip.Bit(0).String())
+	tt.Equal(t, "(coerce 0 (quote bit))", slip.Bit(0).LoadForm().String())
+	tt.Equal(t, "(coerce 1 (quote bit))", slip.Bit(1).LoadForm().String())
 }
 
 func TestFuncInfo(t *testing.T) {

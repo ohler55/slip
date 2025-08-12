@@ -168,8 +168,8 @@ func (c *BuiltInClass) MakeInstance() slip.Instance {
 	panic(slip.NewError("Can not allocate an instance of %s.", c))
 }
 
-// DefList returns a list that can be evaluated to create the class or nil if
+// LoadForm returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
-func (c *BuiltInClass) DefList() slip.List {
+func (c *BuiltInClass) LoadForm() slip.Object {
 	return nil
 }

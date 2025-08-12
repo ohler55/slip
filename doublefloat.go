@@ -82,3 +82,9 @@ func (obj DoubleFloat) Eval(s *Scope, depth int) Object {
 func (obj DoubleFloat) RealValue() float64 {
 	return float64(obj)
 }
+
+// LoadForm returns a form that can be evaluated to create the object or nil
+// if that is not possible.
+func (obj DoubleFloat) LoadForm() Object {
+	return obj
+}

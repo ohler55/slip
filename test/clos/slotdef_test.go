@@ -28,7 +28,7 @@ func TestSlotDefSymbol(t *testing.T) {
   writers: []
 }`, pretty.SEN(sd.Simplify()))
 
-	tt.Equal(t, slip.Symbol("quux"), sd.DefList())
+	tt.Equal(t, slip.Symbol("quux"), sd.LoadForm())
 }
 
 func TestSlotDefOptions(t *testing.T) {
@@ -68,7 +68,7 @@ func TestSlotDefOptions(t *testing.T) {
     :allocation :class
     :initform (1+ qqq)
     :type fixnum)))
-`, string(pp.Append(nil, scope, sc.DefList())))
+`, string(pp.Append(nil, scope, sc.LoadForm())))
 
 	tt.Equal(t, `quux-class is a class:
   Direct superclasses:

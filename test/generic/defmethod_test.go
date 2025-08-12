@@ -458,7 +458,7 @@ func TestDefmethodCaller(t *testing.T) {
 	}).Test(t)
 }
 
-func TestDefmethodGenericDefList(t *testing.T) {
+func TestDefmethodGenericLoadForm(t *testing.T) {
 	slip.CurrentPackage.Undefine("quux")
 	(&sliptest.Function{
 		Source: `(progn
@@ -488,7 +488,7 @@ func TestDefmethodGenericDefList(t *testing.T) {
 	}).Test(t)
 }
 
-func TestDefmethodGenericDefListDoc(t *testing.T) {
+func TestDefmethodGenericLoadFormDoc(t *testing.T) {
 	slip.CurrentPackage.Undefine("quux")
 	(&sliptest.Function{
 		Source: `(progn
@@ -504,7 +504,7 @@ func TestDefmethodGenericDefListDoc(t *testing.T) {
 	}).Test(t)
 }
 
-func TestDefmethodGenericDefListLambdaList(t *testing.T) {
+func TestDefmethodGenericLoadFormLambdaList(t *testing.T) {
 	slip.CurrentPackage.Undefine("quux")
 	(&sliptest.Function{
 		Source: `(progn
@@ -519,7 +519,7 @@ func TestDefmethodGenericDefListLambdaList(t *testing.T) {
 	}).Test(t)
 }
 
-func TestDefmethodGenericDefListEmpty(t *testing.T) {
+func TestDefmethodGenericLoadFormEmpty(t *testing.T) {
 	slip.CurrentPackage.Undefine("quux")
 	(&sliptest.Function{
 		Source: `(progn

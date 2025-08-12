@@ -130,7 +130,7 @@ func (m *Method) Append(b []byte) []byte {
 	}
 	if m.Doc != nil {
 		b = append(b, ' ')
-		b = printer.Append(b, m.Doc.DefList(), 0)
+		b = printer.Append(b, m.Doc.LoadForm(), 0)
 	}
 	b = append(b, ' ', '{')
 	b = strconv.AppendUint(b, uint64(uintptr(unsafe.Pointer(m))), 16)

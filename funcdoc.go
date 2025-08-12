@@ -51,8 +51,8 @@ func (fd *FuncDoc) getArg(name string) *DocArg {
 	return nil
 }
 
-// DefList return a argument list for function or lambda args list.
-func (fd *FuncDoc) DefList() List {
+// LoadForm return a argument list for function or lambda args list.
+func (fd *FuncDoc) LoadForm() Object {
 	dl := make(List, len(fd.Args))
 	for i, da := range fd.Args {
 		switch {

@@ -100,9 +100,9 @@ func NewSlotDef(def slip.Object) *SlotDef {
 	return &sd
 }
 
-// DefList returns a list as that could be used in a defclass
+// LoadForm returns a list as that could be used in a defclass
 // slot-specifications.
-func (sd *SlotDef) DefList() slip.Object {
+func (sd *SlotDef) LoadForm() slip.Object {
 	def := slip.List{slip.Symbol(sd.name)}
 	for _, sym := range sd.initargs {
 		def = append(def, slip.Symbol(":initarg"), sym)

@@ -275,9 +275,9 @@ func (c *StandardClass) initObjSlots(obj *StandardObject) {
 	}
 }
 
-// DefList returns a list that can be evaluated to create the class or nil if
+// LoadForm returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
-func (c *StandardClass) DefList() slip.List {
+func (c *StandardClass) LoadForm() slip.Object {
 	supers := make(slip.List, len(c.supers))
 	for i, super := range c.supers {
 		supers[i] = super
@@ -289,7 +289,7 @@ func (c *StandardClass) DefList() slip.List {
 	sort.Strings(keys)
 	slots := make(slip.List, len(keys))
 	for i, k := range keys {
-		slots[i] = c.slotDefs[k].DefList()
+		slots[i] = c.slotDefs[k].LoadForm()
 	}
 	def := slip.List{
 		slip.Symbol(c.defname),

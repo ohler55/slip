@@ -47,7 +47,7 @@ func (f *MakeLoadForm) Call(s *slip.Scope, args slip.List, depth int) (form slip
 }
 
 // ObjectLoadForm
-func ObjectLoadForm(obj slip.Object, follow bool) (form slip.List) {
+func ObjectLoadForm(obj slip.Object, follow bool) (form slip.Object) {
 Top:
 	switch to := obj.(type) {
 	case slip.Symbol:
@@ -60,8 +60,8 @@ Top:
 			obj = v
 		}
 		goto Top
-	case slip.DefLister:
-		form = to.DefList()
+	case slip.LoadFormer:
+		form = to.LoadForm()
 	case slip.Instance:
 		form = instanceLoadForm(to)
 	default:

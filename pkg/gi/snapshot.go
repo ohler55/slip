@@ -221,7 +221,7 @@ func appendSnapshotFlavors(b []byte, s *slip.Scope) []byte {
 	})
 	for _, f := range fa {
 		b = append(b, '\n')
-		b = pp.Append(b, s, f.DefList())
+		b = pp.Append(b, s, f.LoadForm())
 	}
 	return b
 }

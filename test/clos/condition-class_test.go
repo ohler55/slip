@@ -27,7 +27,7 @@ func TestConditionClassBasic(t *testing.T) {
   (x (y :initarg :y))
   (:documentation "quack quack")
   (:default-initargs :y 3))
-`, string(pp.Append(nil, scope, quux.DefList())))
+`, string(pp.Append(nil, scope, quux.LoadForm())))
 
 	tt.Equal(t, false, quux.Ready())
 	tt.Panic(t, func() { _ = quux.MakeInstance() })
@@ -132,7 +132,7 @@ func TestConditionClassMergeSupers(t *testing.T) {
 
 	tt.Equal(t, `(define-condition quux (buux duux)
   ())
-`, string(pp.Append(nil, scope, quux.DefList())))
+`, string(pp.Append(nil, scope, quux.LoadForm())))
 
 	tt.Equal(t, true, quux.Ready())
 }

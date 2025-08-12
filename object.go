@@ -27,6 +27,11 @@ type Object interface {
 
 	// Eval the object.
 	Eval(s *Scope, depth int) Object
+
+	// LoadForm should return a form that can be evaluated to create the object
+	// or nil if that is not possible.
+	// LoadForm() Object
+	// TBD keep trying
 }
 
 // ObjectString returns the string for an Object or "nil" if nil.

@@ -460,9 +460,9 @@ func (obj *Flavor) MethodNames() slip.List {
 	return methods
 }
 
-// DefList returns a list that can be evaluated to create the class or nil if
+// LoadForm returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
-func (obj *Flavor) DefList() slip.List {
+func (obj *Flavor) LoadForm() slip.Object {
 	keys := make([]string, 0, len(obj.defaultVars)-1)
 	for k, v := range obj.defaultVars {
 		if k != "self" && !obj.inheritedVar(k, v) {
@@ -559,7 +559,7 @@ func (obj *Flavor) DefList() slip.List {
 	df = appendStringSliceOption(df, ":required-init-keywords", obj.requiredKeywords)
 	if lam, ok := obj.defaultHandler.(*slip.Lambda); ok {
 		if lam.Doc.Name == "lambda" {
-			df = append(df, slip.List{slip.Symbol(":default-handler"), lam.DefList()})
+			df = append(df, slip.List{slip.Symbol(":default-handler"), lam.LoadForm()})
 		} else {
 			df = append(df, slip.List{slip.Symbol(":default-handler"), slip.Symbol(lam.Doc.Name)})
 		}
@@ -616,7 +616,7 @@ func (obj *Flavor) DefMethodList(method, daemon string, inherited bool) (dml sli
 					slip.Symbol("defmethod"),
 					slip.List{slip.Symbol(obj.name), slip.Symbol(daemon), slip.Symbol(method)},
 				}
-				dml = append(dml, lam.DefList()[1:]...)
+				dml = append(dml, lam.LoadForm().(slip.List)[1:]...)
 				break
 			}
 		}

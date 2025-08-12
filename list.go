@@ -107,3 +107,9 @@ func (obj List) Cdr() (cdr Object) {
 	}
 	return
 }
+
+// LoadForm returns a form that can be evaluated to create the object or nil
+// if that is not possible.
+func (obj List) LoadForm() Object {
+	return obj
+}
