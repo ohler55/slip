@@ -187,3 +187,8 @@ func (obj *InputStream) IsOpen() bool {
 	_, err := obj.Reader.Read([]byte{})
 	return err == nil
 }
+
+// LoadForm panics.
+func (obj *InputStream) LoadForm() Object {
+	panic(NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
+}

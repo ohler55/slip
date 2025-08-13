@@ -29,6 +29,7 @@ func TestConcatenatedStreamObject(t *testing.T) {
 		},
 		Eval: cl.NewConcatenatedStream((*slip.FileStream)(os.Stdin)),
 	}).Test(t)
+	tt.Panic(t, func() { _ = cl.NewConcatenatedStream((*slip.FileStream)(os.Stdout)).LoadForm() })
 }
 
 func TestConcatenatedStreamReadOk(t *testing.T) {

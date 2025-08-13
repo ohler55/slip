@@ -85,8 +85,7 @@ func (obj Bit) Int64() (i int64) {
 	return int64(obj)
 }
 
-// LoadForm returns a form that can be evaluated to create the object or nil
-// if that is not possible.
+// LoadForm returns a form that can be evaluated to create the object.
 func (obj Bit) LoadForm() Object {
-	return List{coerceSymbol, obj, List{quoteSymbol, BitSymbol}}
+	return List{coerceSymbol, Fixnum(obj), List{quoteSymbol, BitSymbol}}
 }

@@ -108,8 +108,39 @@ func (obj List) Cdr() (cdr Object) {
 	return
 }
 
-// LoadForm returns a form that can be evaluated to create the object or nil
-// if that is not possible.
+// LoadForm returns a form that can be evaluated to create the object or
+// panics if that is not possible.
 func (obj List) LoadForm() Object {
-	return obj
+	if 2 <= len(obj) {
+		if tail, ok := obj[len(obj)-1].(Tail); ok {
+			form := List{Symbol("cons"), nil, nil}
+			if lf, ok := obj[len(obj)-2].(LoadFormer); ok {
+				form[1] = lf.LoadForm()
+			}
+			if lf, ok := tail.Value.(LoadFormer); ok {
+				form[2] = lf.LoadForm()
+			}
+			if 2 < len(obj) {
+				head := make(List, len(obj)-1)
+				head[0] = ListSymbol
+				for i := 0; i < len(obj)-2; i++ {
+					// TBD remove type assert when object are all LoadFormers but do check for nil
+					if lf, ok := obj[i].(LoadFormer); ok {
+						head[i+1] = lf.LoadForm()
+					}
+				}
+				form = List{Symbol("append"), head, form}
+			}
+			return form
+		}
+	}
+	form := make(List, len(obj)+1)
+	form[0] = ListSymbol
+	for i, v := range obj {
+		// TBD remove type assert when object are all LoadFormers but do check for nil
+		if lf, ok := v.(LoadFormer); ok {
+			form[i+1] = lf.LoadForm()
+		}
+	}
+	return form
 }

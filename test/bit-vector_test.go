@@ -36,6 +36,7 @@ func TestBitVector(t *testing.T) {
 	tt.Equal(t, "#*101010101", bv.String())
 	bv.Len = 0
 	tt.Equal(t, "#*", bv.String())
+	tt.Equal(t, &bv, bv.LoadForm())
 }
 
 func TestBitVectorAt(t *testing.T) {

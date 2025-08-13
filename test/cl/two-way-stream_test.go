@@ -26,6 +26,7 @@ func TestTwoWayStreamObject(t *testing.T) {
 		},
 		Eval: &cl.TwoWayStream{},
 	}).Test(t)
+	tt.Panic(t, func() { _ = (&cl.TwoWayStream{}).LoadForm() })
 }
 
 func TestTwoWayStreamReadWriteOk(t *testing.T) {

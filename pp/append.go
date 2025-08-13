@@ -126,6 +126,8 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		node = arrayFromList(prefix, to.AsList(), p)
 	case slip.Funky:
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
+	case slip.Symbol:
+		node = &Leaf{text: []byte(to)}
 	case slip.LoadFormer:
 		form := to.LoadForm()
 		if dl, _ := form.(slip.List); 0 < len(dl) {
@@ -136,8 +138,6 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		if node == nil {
 			node = &Leaf{text: p.Append(nil, obj, 0)}
 		}
-	case slip.Symbol:
-		node = &Leaf{text: []byte(to)}
 	default:
 		node = &Leaf{text: p.Append(nil, obj, 0)}
 	}

@@ -29,6 +29,7 @@ func TestBroadcastStreamObject(t *testing.T) {
 		},
 		Eval: cl.NewBroadcastStream((*slip.FileStream)(os.Stdout)),
 	}).Test(t)
+	tt.Panic(t, func() { _ = cl.NewBroadcastStream((*slip.FileStream)(os.Stdout)).LoadForm() })
 }
 
 func TestBroadcastStreamWriteOk(t *testing.T) {

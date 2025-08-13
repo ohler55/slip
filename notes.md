@@ -9,7 +9,13 @@
 
  - generics branch
   - handle all type in make-load-form
-   - add LoadForm() to all types
+   - add LoadForm() to all types (criteria, recreate on load, test with print with pp)
+    - array
+    - vector
+    - streams - panic
+   - add Readable() to Object interface
+    - printer, pp, snapshot, etc can then decide
+
    - update snapshot
    - update pp
 

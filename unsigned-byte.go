@@ -40,7 +40,7 @@ func (obj *UnsignedByte) Simplify() any {
 // Equal returns true if this Object and the other are equal in value.
 func (obj *UnsignedByte) Equal(other Object) (eq bool) {
 	if ub, ok := other.(*UnsignedByte); ok {
-		return bytes.Equal(obj.Bytes, ub.Bytes)
+		return bytes.Equal(bytes.TrimLeft(obj.Bytes, string([]byte{0})), bytes.TrimLeft(ub.Bytes, string([]byte{0})))
 	}
 	return obj.AsFixOrBig().Equal(other)
 }
@@ -173,4 +173,9 @@ func (obj *UnsignedByte) Invert() {
 	for i, b := range obj.Bytes {
 		obj.Bytes[i] = ^b
 	}
+}
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *UnsignedByte) LoadForm() Object {
+	return List{coerceSymbol, obj.AsFixOrBig(), List{quoteSymbol, UnsignedByteSymbol}}
 }

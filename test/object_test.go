@@ -30,6 +30,7 @@ func TestTrue(t *testing.T) {
 		},
 		Eval: slip.True,
 	}).Test(t)
+	sliptest.LoadForm(t, slip.True)
 }
 
 func TestFixnum(t *testing.T) {
@@ -61,7 +62,7 @@ func TestFixnum(t *testing.T) {
 	tt.Equal(t, 7.0, slip.Fixnum(7).RealValue())
 	tt.Equal(t, 7, slip.Fixnum(7).Int64())
 	tt.Equal(t, true, slip.Fixnum(7).IsInt64())
-	tt.Equal(t, slip.Fixnum(7), slip.Fixnum(7).LoadForm())
+	sliptest.LoadForm(t, slip.Fixnum(7))
 }
 
 func TestOctet(t *testing.T) {
@@ -92,7 +93,7 @@ func TestOctet(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.Octet(7).RealValue())
 	tt.Equal(t, 7, slip.Octet(7).Int64())
-	tt.Equal(t, "(coerce 7 (quote octet))", slip.Octet(7).LoadForm().String())
+	sliptest.LoadForm(t, slip.Octet(7))
 }
 
 func TestRatio(t *testing.T) {
@@ -152,7 +153,7 @@ func TestRatio(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 1.5, slip.NewRatio(12, 8).RealValue())
 
-	tt.Equal(t, slip.NewRatio(7, 9), slip.NewRatio(7, 9).LoadForm())
+	sliptest.LoadForm(t, slip.NewRatio(7, 9))
 
 	tt.Panic(t, func() { _ = slip.NewRatio(7, 0) })
 	tt.Panic(t, func() { _ = slip.NewBigRatio(big.NewInt(7), big.NewInt(0)) })
@@ -196,7 +197,9 @@ func TestBignum(t *testing.T) {
 	tt.Equal(t, 123.0, slip.NewBignum(123).RealValue())
 	tt.Equal(t, 123, slip.NewBignum(123).Int64())
 	tt.Equal(t, true, slip.NewBignum(123).IsInt64())
-	tt.Equal(t, slip.NewBignum(123), slip.NewBignum(123).LoadForm())
+
+	sliptest.LoadForm(t, b)
+	sliptest.LoadForm(t, slip.NewBignum(123))
 }
 
 func TestShortFloat(t *testing.T) {
@@ -253,7 +256,7 @@ func TestSingleFloat(t *testing.T) {
 		Eval: slip.SingleFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.SingleFloat(7.0).RealValue())
-	tt.Equal(t, slip.SingleFloat(2.5), slip.SingleFloat(2.5).LoadForm())
+	sliptest.LoadForm(t, slip.SingleFloat(2.5))
 }
 
 func TestDoubleFloat(t *testing.T) {
@@ -282,7 +285,7 @@ func TestDoubleFloat(t *testing.T) {
 		Eval: slip.DoubleFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.DoubleFloat(7.0).RealValue())
-	tt.Equal(t, "2.5", slip.DoubleFloat(2.5).LoadForm().String())
+	sliptest.LoadForm(t, slip.DoubleFloat(2.5))
 }
 
 func TestLongFloat(t *testing.T) {
@@ -311,7 +314,7 @@ func TestLongFloat(t *testing.T) {
 		Eval: slip.NewLongFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.NewLongFloat(7.0).RealValue())
-	tt.Equal(t, slip.NewLongFloat(2.5), slip.NewLongFloat(2.5).LoadForm())
+	sliptest.LoadForm(t, slip.NewLongFloat(2.5))
 }
 
 func TestComplex(t *testing.T) {
@@ -347,6 +350,8 @@ func TestString(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, slip.Symbol("string"), slip.String("x").SequenceType())
 	tt.Equal(t, 3, slip.String("abc").Length())
+
+	sliptest.LoadForm(t, slip.String("abc"))
 }
 
 func TestSymbolKey(t *testing.T) {
@@ -378,6 +383,7 @@ func TestSymbol(t *testing.T) {
 		},
 		PanicType: slip.Symbol("unbound-variable"),
 	}).Test(t)
+	sliptest.LoadForm(t, slip.Symbol("abc"))
 }
 
 func TestTime(t *testing.T) {
@@ -480,7 +486,7 @@ func TestListObj(t *testing.T) {
 	tt.Equal(t, slip.List{slip.Fixnum(2), slip.Fixnum(3)},
 		slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}.Cdr())
 	tt.Equal(t, 2, slip.List{slip.True, nil}.Length())
-	tt.Equal(t, "(3)", slip.List{slip.Fixnum(3)}.LoadForm().String())
+	sliptest.LoadForm(t, slip.List{slip.Fixnum(3)})
 }
 
 func TestListObjEmpty(t *testing.T) {
@@ -509,6 +515,12 @@ func TestCons(t *testing.T) {
 		},
 	}).Test(t)
 	tt.Equal(t, slip.Fixnum(2), slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}.Cdr())
+	sliptest.LoadForm(t, slip.List{slip.Fixnum(3), slip.Tail{Value: slip.Fixnum(2)}})
+	sliptest.LoadForm(t, slip.List{
+		slip.Fixnum(1),
+		slip.Fixnum(2),
+		slip.Tail{Value: slip.Fixnum(3)},
+	})
 }
 
 func TestConsString(t *testing.T) {
@@ -652,6 +664,7 @@ func TestFileStream(t *testing.T) {
 		},
 		Eval: (*slip.FileStream)(os.Stdout),
 	}).Test(t)
+	tt.Panic(t, func() { _ = (*slip.FileStream)(os.Stdout).LoadForm() })
 }
 
 func TestFileStreamFile(t *testing.T) {
@@ -763,6 +776,8 @@ func TestOutputStream(t *testing.T) {
 	_, err := stream.Write([]byte{'x'})
 	tt.NotNil(t, err)
 	tt.Equal(t, false, stream.IsOpen())
+
+	tt.Panic(t, func() { _ = stream.LoadForm() })
 }
 
 func TestIOStream(t *testing.T) {
@@ -806,6 +821,8 @@ func TestIOStream(t *testing.T) {
 	tt.Equal(t, true, stream.IsOpen())
 	_ = stream.Close()
 	tt.Equal(t, false, stream.IsOpen())
+
+	tt.Panic(t, func() { _ = stream.LoadForm() })
 }
 
 func TestIOStream2(t *testing.T) {
@@ -851,6 +868,8 @@ func TestSignedByteSmall(t *testing.T) {
 	sb = slip.SignedByteFromInt64(-2050)
 	tt.Equal(t, -2050, sb.Int64())
 	tt.Equal(t, true, sb.IsNeg())
+
+	sliptest.LoadForm(t, sb)
 
 	sb = slip.SignedByteFromUint64(2050)
 	tt.Equal(t, 2050, sb.Int64())
@@ -905,6 +924,7 @@ func TestSignedByteBig(t *testing.T) {
 	sb = slip.SignedByteFromBigInt(big.NewInt(2050))
 	sb.Neg()
 	tt.Equal(t, -2050, sb.Int64())
+	sliptest.LoadForm(t, sb)
 
 	sb = slip.SignedByteFromBigInt(big.NewInt(0))
 	tt.Equal(t, 0, sb.Int64())
@@ -970,6 +990,8 @@ func TestUnsignedByteSmall(t *testing.T) {
 	tt.Equal(t, false, ub.GetBit(10))
 	tt.Equal(t, true, ub.GetBit(11))
 	tt.Equal(t, false, ub.GetBit(16))
+
+	sliptest.LoadForm(t, &ub)
 
 	dup := ub.Dup()
 	tt.Equal(t, 2050, dup.Int64())
@@ -1040,8 +1062,9 @@ func TestBit(t *testing.T) {
 	tt.Equal(t, 0, slip.Bit(0).Int64())
 	tt.Equal(t, true, slip.Bit(0).IsInt64())
 	tt.Equal(t, "0", slip.Bit(0).String())
-	tt.Equal(t, "(coerce 0 (quote bit))", slip.Bit(0).LoadForm().String())
-	tt.Equal(t, "(coerce 1 (quote bit))", slip.Bit(1).LoadForm().String())
+
+	sliptest.LoadForm(t, slip.Bit(0))
+	sliptest.LoadForm(t, slip.Bit(1))
 }
 
 func TestFuncInfo(t *testing.T) {

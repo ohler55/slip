@@ -29,7 +29,7 @@ type Object interface {
 	Eval(s *Scope, depth int) Object
 
 	// LoadForm should return a form that can be evaluated to create the object
-	// or nil if that is not possible.
+	// or panics if that is not possible.
 	// LoadForm() Object
 	// TBD keep trying
 }

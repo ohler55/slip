@@ -83,8 +83,7 @@ func (obj SingleFloat) RealValue() float64 {
 	return float64(obj)
 }
 
-// LoadForm returns a form that can be evaluated to create the object or nil
-// if that is not possible.
+// LoadForm returns a form that can be evaluated to create the object.
 func (obj SingleFloat) LoadForm() Object {
 	return obj
 }

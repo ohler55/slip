@@ -214,8 +214,7 @@ func (obj Octets) MajorSet(index int, value Object) {
 	obj.Set(value, index)
 }
 
-// LoadForm returns a form that can be evaluated to create the object or nil
-// if that is not possible.
+// LoadForm returns a form that can be evaluated to create the object.
 func (obj Octets) LoadForm() Object {
 	list := make(List, len(obj)+1)
 	list[0] = Symbol("list")

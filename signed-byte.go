@@ -100,7 +100,10 @@ func (obj *SignedByte) Simplify() any {
 // Equal returns true if this Object and the other are equal in value.
 func (obj *SignedByte) Equal(other Object) (eq bool) {
 	if sb, ok := other.(*SignedByte); ok {
-		return bytes.Equal(obj.Bytes, sb.Bytes)
+		return bytes.Equal(
+			bytes.TrimLeft(obj.Bytes, string([]byte{255})),
+			bytes.TrimLeft(sb.Bytes, string([]byte{255})),
+		)
 	}
 	return obj.AsFixOrBig().Equal(other)
 }
@@ -239,4 +242,9 @@ func (obj *SignedByte) grow(cnt uint) {
 	} else {
 		obj.Bytes = append(bytes.Repeat([]byte{0x00}, int(cnt)), obj.Bytes...)
 	}
+}
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *SignedByte) LoadForm() Object {
+	return List{coerceSymbol, obj.AsFixOrBig(), List{quoteSymbol, SignedByteSymbol}}
 }

@@ -94,8 +94,7 @@ func (obj *LongFloat) RealValue() float64 {
 	return f
 }
 
-// LoadForm returns a form that can be evaluated to create the object or nil
-// if that is not possible.
+// LoadForm returns a form that can be evaluated to create the object.
 func (obj *LongFloat) LoadForm() Object {
 	return obj
 }

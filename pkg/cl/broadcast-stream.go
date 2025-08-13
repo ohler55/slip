@@ -151,3 +151,8 @@ func (obj BroadcastStream) FileLength() (length slip.Object) {
 	}
 	return
 }
+
+// LoadForm panics.
+func (obj BroadcastStream) LoadForm() slip.Object {
+	panic(slip.NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
+}

@@ -101,3 +101,8 @@ func (obj *EchoStream) Write(b []byte) (n int, err error) {
 	}
 	return obj.output.Write(b)
 }
+
+// LoadForm panics.
+func (obj *EchoStream) LoadForm() slip.Object {
+	panic(slip.NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
+}

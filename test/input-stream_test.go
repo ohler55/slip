@@ -53,6 +53,7 @@ func TestInputStreamObject(t *testing.T) {
 	data, err := io.ReadAll(&stream)
 	tt.Nil(t, err)
 	tt.Equal(t, "abc", string(data))
+	tt.Panic(t, func() { _ = stream.LoadForm() })
 }
 
 func TestInputStreamReadEasy(t *testing.T) {
