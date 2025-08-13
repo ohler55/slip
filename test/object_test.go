@@ -550,6 +550,7 @@ func TestCharacterUnicode(t *testing.T) {
 		},
 		Eval: slip.Character('ぴ'),
 	}).Test(t)
+	sliptest.LoadForm(t, slip.Character('A'))
 }
 
 func TestCharacterSpecial(t *testing.T) {
@@ -1217,6 +1218,11 @@ func (sb simplyBad) Hierarchy() []slip.Symbol {
 // Eval the object.
 func (sb simplyBad) Eval(s *slip.Scope, depth int) slip.Object {
 	return nil
+}
+
+// LoadForm panics.
+func (sb simplyBad) LoadForm() slip.Object {
+	panic(slip.NewPrintNotReadble(sb, "Can not make a load form for %s.", sb))
 }
 
 func TestSlipTest(t *testing.T) {

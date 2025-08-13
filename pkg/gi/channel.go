@@ -67,3 +67,8 @@ func (obj Channel) Range(s *slip.Scope, caller slip.Caller, depth int) {
 		_ = caller.Call(s, slip.List{v}, depth)
 	}
 }
+
+// LoadForm panics.
+func (obj Channel) LoadForm() slip.Object {
+	panic(slip.NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
+}

@@ -113,3 +113,8 @@ func (obj Character) Hierarchy() []Symbol {
 func (obj Character) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Character) LoadForm() Object {
+	return obj
+}

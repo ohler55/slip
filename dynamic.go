@@ -55,3 +55,8 @@ func (f *Dynamic) Simplify() any {
 	}
 	return simple
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *Dynamic) LoadForm() Object {
+	return obj
+}

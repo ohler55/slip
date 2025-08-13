@@ -48,3 +48,8 @@ func (obj *Simple) Hierarchy() []Symbol {
 func (obj *Simple) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *Simple) LoadForm() Object {
+	return obj
+}

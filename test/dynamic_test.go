@@ -36,7 +36,7 @@ func TestDynamicLambda(t *testing.T) {
                                        2]`)),
 		Hierarchy: "function.t",
 		Equals: []*sliptest.EqTest{
-			{Other: lambda, Expect: false},
+			{Other: lambda, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 		Eval: slip.Fixnum(1),

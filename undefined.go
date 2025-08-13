@@ -34,3 +34,8 @@ func (obj Undefined) Hierarchy() []Symbol {
 func (obj Undefined) Eval(s *Scope, depth int) Object {
 	panic(NewUndefinedFunction(obj, "Function %s is not defined.", obj))
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Undefined) LoadForm() Object {
+	return obj
+}

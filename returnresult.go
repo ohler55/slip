@@ -46,3 +46,8 @@ func (rr *ReturnResult) Hierarchy() []Symbol {
 func (rr *ReturnResult) Eval(s *Scope, depth int) Object {
 	return rr
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (rr *ReturnResult) LoadForm() Object {
+	return rr
+}

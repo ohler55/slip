@@ -3,6 +3,8 @@
 package sliptest
 
 import (
+	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -15,17 +17,20 @@ import (
 // call to recreate the object. The final test is to compare the loaded object
 // with the original.
 func LoadForm(t *testing.T, obj slip.Object, show ...bool) {
-	lf := obj.(slip.LoadFormer)
-	form := lf.LoadForm()
+	form := obj.LoadForm()
 	scope := slip.NewScope()
 	fb := pp.Append(nil, scope, form)
-	// if 0 < len(show) && show[0] {
-	// 	fmt.Printf("--- %s => %s [%s]\n", obj, form, bytes.TrimSpace(fb))
-	// }
+	if 0 < len(show) && show[0] {
+		fmt.Printf("--- %T %s => %s [%s]\n", obj, obj, form, bytes.TrimSpace(fb))
+	}
 	code, _ := slip.ReadOne(fb, scope)
 	o2 := code[0]
-	if _, ok := o2.(slip.List); ok {
-		o2 = o2.Eval(scope, 0)
+	if list, ok := o2.(slip.List); ok {
+		if _, ok = obj.(slip.Funky); ok {
+			o2 = slip.ListToFunc(scope, list, 0)
+		} else {
+			o2 = o2.Eval(scope, 0)
+		}
 	}
 	tt.Equal(t, obj.Hierarchy()[0], o2.Hierarchy()[0], "types %s != %s", obj.Hierarchy()[0], o2.Hierarchy()[0])
 	tt.Equal(t, true, obj.Equal(o2), "obj: %s form: %s loaded: %s", obj, form, o2)

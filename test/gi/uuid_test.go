@@ -25,6 +25,8 @@ func TestUUID(t *testing.T) {
 		Eval: u,
 	}).Test(t)
 	tt.Equal(t, "6ef16994-701d-44d5-87ec-7ef3e2e5709b", u.IETF())
+
+	sliptest.LoadForm(t, &u)
 }
 
 func TestUUIDParse(t *testing.T) {

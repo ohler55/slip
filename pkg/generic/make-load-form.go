@@ -3,8 +3,6 @@
 package generic
 
 import (
-	"sort"
-
 	"github.com/ohler55/slip"
 )
 
@@ -60,55 +58,10 @@ Top:
 			obj = v
 		}
 		goto Top
-	case slip.LoadFormer:
-		form = to.LoadForm()
 	case slip.Instance:
-		form = instanceLoadForm(to)
+		form = slip.InstanceLoadForm(to)
 	default:
-		slip.PanicType("object", obj, "class", "condition", "standard-object", "instance", "function")
+		form = to.LoadForm()
 	}
-
-	// TBD handle built in
-	// add to switch
-	return
-}
-
-func instanceLoadForm(obj slip.Instance) (form slip.List) {
-	names := obj.SlotNames()
-	sort.Strings(names)
-	form = slip.List{
-		slip.Symbol("let"),
-		slip.List{
-			slip.List{
-				slip.Symbol("inst"),
-				slip.List{
-					slip.Symbol("make-instance"),
-					slip.List{
-						slip.Symbol("quote"),
-						slip.Symbol(obj.Class().Name()),
-					},
-				},
-			},
-		},
-	}
-	for _, name := range names {
-		iv, _ := obj.SlotValue(slip.Symbol(name))
-		form = append(form,
-			slip.List{
-				slip.Symbol("setf"),
-				slip.List{
-					slip.Symbol("slot-value"),
-					slip.Symbol("inst"),
-					slip.List{
-						slip.Symbol("quote"),
-						slip.Symbol(name),
-					},
-				},
-				iv, // TBD handle more complex values
-			},
-		)
-	}
-	form = append(form, slip.Symbol("inst"))
-
 	return
 }

@@ -114,19 +114,18 @@ func (obj List) LoadForm() Object {
 	if 2 <= len(obj) {
 		if tail, ok := obj[len(obj)-1].(Tail); ok {
 			form := List{Symbol("cons"), nil, nil}
-			if lf, ok := obj[len(obj)-2].(LoadFormer); ok {
-				form[1] = lf.LoadForm()
+			if obj[len(obj)-2] != nil {
+				form[1] = obj[len(obj)-2].LoadForm()
 			}
-			if lf, ok := tail.Value.(LoadFormer); ok {
-				form[2] = lf.LoadForm()
+			if tail.Value != nil {
+				form[2] = tail.Value.LoadForm()
 			}
 			if 2 < len(obj) {
 				head := make(List, len(obj)-1)
 				head[0] = ListSymbol
 				for i := 0; i < len(obj)-2; i++ {
-					// TBD remove type assert when object are all LoadFormers but do check for nil
-					if lf, ok := obj[i].(LoadFormer); ok {
-						head[i+1] = lf.LoadForm()
+					if obj[i] != nil {
+						head[i+1] = obj[i].LoadForm()
 					}
 				}
 				form = List{Symbol("append"), head, form}
@@ -137,9 +136,8 @@ func (obj List) LoadForm() Object {
 	form := make(List, len(obj)+1)
 	form[0] = ListSymbol
 	for i, v := range obj {
-		// TBD remove type assert when object are all LoadFormers but do check for nil
-		if lf, ok := v.(LoadFormer); ok {
-			form[i+1] = lf.LoadForm()
+		if v != nil {
+			form[i+1] = v.LoadForm()
 		}
 	}
 	return form

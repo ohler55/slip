@@ -30,8 +30,7 @@ type Object interface {
 
 	// LoadForm should return a form that can be evaluated to create the object
 	// or panics if that is not possible.
-	// LoadForm() Object
-	// TBD keep trying
+	LoadForm() Object
 }
 
 // ObjectString returns the string for an Object or "nil" if nil.

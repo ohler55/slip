@@ -38,3 +38,8 @@ func (obj marker) Hierarchy() []Symbol {
 func (obj marker) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj marker) LoadForm() Object {
+	return obj
+}

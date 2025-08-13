@@ -269,3 +269,8 @@ func (tm *Termock) Eval(s *slip.Scope, depth int) slip.Object {
 func (tm *Termock) getSize() (w, h int) {
 	return tm.width, tm.height
 }
+
+// LoadForm panics.
+func (tm *Termock) LoadForm() slip.Object {
+	panic(slip.NewPrintNotReadble(tm, "Can not make a load form for %s.", tm))
+}

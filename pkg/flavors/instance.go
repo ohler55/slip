@@ -344,3 +344,8 @@ func (obj *Instance) ChangeFlavor(flavor *Flavor) {
 		obj.Vars[k] = v
 	}
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *Instance) LoadForm() slip.Object {
+	return slip.InstanceLoadForm(obj)
+}

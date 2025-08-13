@@ -64,3 +64,8 @@ func (ref *Ref) Get() Object {
 	}
 	return value
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (ref *Ref) LoadForm() Object {
+	return ref
+}

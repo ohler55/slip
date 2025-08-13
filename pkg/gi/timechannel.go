@@ -63,3 +63,8 @@ func (obj TimeChannel) Range(s *slip.Scope, caller slip.Caller, depth int) {
 		_ = caller.Call(s, slip.List{slip.Time(v)}, depth)
 	}
 }
+
+// LoadForm panics.
+func (obj TimeChannel) LoadForm() slip.Object {
+	panic(slip.NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
+}

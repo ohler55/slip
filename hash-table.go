@@ -95,3 +95,23 @@ func (obj HashTable) Length() int {
 func (obj HashTable) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj HashTable) LoadForm() Object {
+	tsym := Symbol("table")
+	form := List{
+		Symbol("let"),
+		List{List{tsym, List{Symbol("make-hash-table")}}},
+	}
+	for k, v := range obj {
+		switch k.(type) {
+		case Symbol:
+			form = append(form, List{Symbol("setf"), List{Symbol("gethash"), List{quoteSymbol, k}, tsym}, v})
+		case String, Number, nil:
+			form = append(form, List{Symbol("setf"), List{Symbol("gethash"), k, tsym}, v})
+		}
+	}
+	form = append(form, Symbol("table"))
+
+	return form
+}

@@ -84,8 +84,8 @@ func (obj *FuncInfo) LoadForm() Object {
 		meth, _ := obj.Aux.(string)
 		return List{Symbol("flosfun"), Symbol(obj.Name), Symbol(meth)}
 	case GenericFunctionSymbol:
-		if dl, ok := obj.Aux.(LoadFormer); ok {
-			return dl.LoadForm()
+		if lf, ok := obj.Aux.(LoadFormer); ok {
+			return lf.LoadForm()
 		}
 	default:
 		form = append(form, Symbol("defun"))

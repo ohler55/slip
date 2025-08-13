@@ -933,3 +933,9 @@ func (obj *Package) AllClasses() []Class {
 	}
 	return all
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *Package) LoadForm() Object {
+	// TBD defpackage
+	return obj
+}

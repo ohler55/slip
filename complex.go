@@ -84,3 +84,8 @@ func newComplex(list List) Complex {
 	}
 	return Complex(complex(r, i))
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Complex) LoadForm() Object {
+	return obj
+}

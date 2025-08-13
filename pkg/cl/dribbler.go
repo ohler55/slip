@@ -79,3 +79,8 @@ func (d *Dribbler) Write(b []byte) (n int, err error) {
 	}
 	return
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (d *Dribbler) LoadForm() slip.Object {
+	return d
+}

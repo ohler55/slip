@@ -2,6 +2,8 @@
 
 package slip
 
+import "sort"
+
 type Instance interface {
 	Object
 	Receiver
@@ -45,4 +47,48 @@ type Instance interface {
 
 	// Dup returns a duplicate of the instance.
 	Dup() Instance
+}
+
+// InstanceLoadForm created a load form for an instance.
+func InstanceLoadForm(obj Instance) (form List) {
+
+	// TBD if condition then make-condition
+
+	names := obj.SlotNames()
+	sort.Strings(names)
+	form = List{
+		Symbol("let"),
+		List{
+			List{
+				Symbol("inst"),
+				List{
+					Symbol("make-instance"),
+					List{
+						Symbol("quote"),
+						Symbol(obj.Class().Name()),
+					},
+				},
+			},
+		},
+	}
+	for _, name := range names {
+		iv, _ := obj.SlotValue(Symbol(name))
+		form = append(form,
+			List{
+				Symbol("setf"),
+				List{
+					Symbol("slot-value"),
+					Symbol("inst"),
+					List{
+						Symbol("quote"),
+						Symbol(name),
+					},
+				},
+				iv, // TBD handle more complex values
+			},
+		)
+	}
+	form = append(form, Symbol("inst"))
+
+	return
 }

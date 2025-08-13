@@ -258,3 +258,8 @@ func (obj *StandardObject) Dup() slip.Instance {
 	}
 	return &dup
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *StandardObject) LoadForm() slip.Object {
+	return slip.InstanceLoadForm(obj)
+}

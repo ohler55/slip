@@ -204,6 +204,19 @@ func (f *Function) Simplify() any {
 
 // Equal returns true if this Object and the other are equal in value.
 func (f *Function) Equal(other Object) bool {
+	if of, ok := other.(Funky); ok {
+		if f.Name == of.GetName() {
+			oargs := of.GetArgs()
+			if len(f.Args) == len(oargs) {
+				for i, a := range f.Args {
+					if !ObjectEqual(a, oargs[i]) {
+						return false
+					}
+				}
+				return true
+			}
+		}
+	}
 	return false
 }
 
@@ -234,6 +247,26 @@ func (f *Function) GetArgs() List {
 // GetName returns the function name.
 func (f *Function) GetName() string {
 	return f.Name
+}
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (f *Function) LoadForm() Object {
+	form := make(List, len(f.Args)+1)
+	if CurrentPackage == f.Pkg || f.Pkg == nil {
+		form[0] = Symbol(f.Name)
+	} else {
+		form[0] = Symbol(fmt.Sprintf("%s:%s", f.Pkg.Name, f.Name))
+	}
+	for i, a := range f.Args {
+		if a != nil {
+			if f.SkipArgEval(i) {
+				form[i+1] = a
+			} else {
+				form[i+1] = a.LoadForm()
+			}
+		}
+	}
+	return form
 }
 
 // ListToFunc converts a list to a function.

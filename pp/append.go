@@ -97,6 +97,8 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 	// Quoted values are treated as the value quoted. Lists are converted to
 	// functions if possible.
 	switch to := obj.(type) {
+	case nil:
+		node = &Leaf{text: []byte("nil")}
 	case slip.List:
 		if 0 < len(to) {
 			if sym, ok := to[0].(slip.Symbol); ok {
@@ -128,7 +130,7 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
 	case slip.Symbol:
 		node = &Leaf{text: []byte(to)}
-	case slip.LoadFormer:
+	default:
 		form := to.LoadForm()
 		if dl, _ := form.(slip.List); 0 < len(dl) {
 			if sym, ok := dl[0].(slip.Symbol); ok {
@@ -138,8 +140,6 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		if node == nil {
 			node = &Leaf{text: p.Append(nil, obj, 0)}
 		}
-	default:
-		node = &Leaf{text: p.Append(nil, obj, 0)}
 	}
 	return
 }

@@ -160,6 +160,11 @@ func (obj Time) Describe(b []byte, indent, right int, ansi bool) []byte {
 	return b
 }
 
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Time) LoadForm() Object {
+	return obj
+}
+
 func describeTime(s *Scope, obj Time, args List, depth int) Object {
 	w, _ := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
