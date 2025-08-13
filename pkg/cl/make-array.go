@@ -102,6 +102,8 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if option, has := slip.GetArgsKeyValue(rest, slip.Symbol(":element-type")); has {
 		if sym, ok := option.(slip.Symbol); ok {
 			elementType = sym
+		} else if option == slip.True {
+			elementType = slip.TrueSymbol
 		} else {
 			slip.PanicType(":element-type", option, "symbol")
 		}

@@ -3,8 +3,6 @@
 package sliptest
 
 import (
-	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -21,9 +19,9 @@ func LoadForm(t *testing.T, obj slip.Object, show ...bool) {
 	form := lf.LoadForm()
 	scope := slip.NewScope()
 	fb := pp.Append(nil, scope, form)
-	if 0 < len(show) && show[0] {
-		fmt.Printf("--- %s => %s [%s]\n", obj, form, bytes.TrimSpace(fb))
-	}
+	// if 0 < len(show) && show[0] {
+	// 	fmt.Printf("--- %s => %s [%s]\n", obj, form, bytes.TrimSpace(fb))
+	// }
 	code, _ := slip.ReadOne(fb, scope)
 	o2 := code[0]
 	if _, ok := o2.(slip.List); ok {
