@@ -11,6 +11,7 @@ import (
 // Object is the interface for all LISP entities other than nil.
 type Object interface {
 	fmt.Stringer
+	LoadFormer
 
 	// Append the object to a byte slice.
 	Append(b []byte) []byte
@@ -27,10 +28,6 @@ type Object interface {
 
 	// Eval the object.
 	Eval(s *Scope, depth int) Object
-
-	// LoadForm should return a form that can be evaluated to create the object
-	// or panics if that is not possible.
-	LoadForm() Object
 }
 
 // ObjectString returns the string for an Object or "nil" if nil.
