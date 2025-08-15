@@ -32,7 +32,6 @@ func TestStringStreamObject(t *testing.T) {
 	tt.Equal(t, "hello", string(data))
 
 	tt.Equal(t, "hello", stream.Content())
-	tt.Panic(t, func() { _ = stream.LoadForm() })
 }
 
 func TestStringStreamRead(t *testing.T) {

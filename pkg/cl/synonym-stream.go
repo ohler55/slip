@@ -131,8 +131,3 @@ func (obj *SynonymStream) Write(b []byte) (n int, err error) {
 	}
 	return w.Write(b)
 }
-
-// LoadForm panics.
-func (obj *SynonymStream) LoadForm() slip.Object {
-	panic(slip.NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
-}

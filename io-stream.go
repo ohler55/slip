@@ -85,8 +85,3 @@ func (obj *IOStream) LastByte() byte {
 	}
 	return b[0]
 }
-
-// LoadForm panics.
-func (obj *IOStream) LoadForm() Object {
-	panic(NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
-}

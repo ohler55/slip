@@ -179,11 +179,6 @@ func (m *Method) CompareArgs(fd *FuncDoc) {
 	}
 }
 
-// LoadForm returns a form that can be evaluated to create the object.
-func (m *Method) LoadForm() Object {
-	return m
-}
-
 // CheckMethodArgCount raises a panic describing the wrong number of arguments
 // to a method if the argument count is outside the expected bounds.
 func CheckMethodArgCount(inst Instance, method string, cnt, mn, mx int) {

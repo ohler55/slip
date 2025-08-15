@@ -98,8 +98,3 @@ func (obj *TwoWayStream) Write(b []byte) (n int, err error) {
 	}
 	return obj.Output.Write(b)
 }
-
-// LoadForm panics.
-func (obj *TwoWayStream) LoadForm() slip.Object {
-	panic(slip.NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
-}

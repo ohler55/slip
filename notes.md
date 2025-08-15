@@ -8,23 +8,17 @@
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
  - generics branch
-  - package.LoadForm()
 
-  - handle all type in make-load-form
-   - add LoadForm() to all types (criteria, recreate on load, test with print with pp)
-    - Dynamic
-    - review load form for readable/not
+  - Package.LoadForm()
+  - Dynamic.LoadForm()
 
-   - add Readable() to Object interface
-    - printer, pp, snapshot, etc can then decide
-
-   - update snapshot
-   - update pp
-
-  - DefLister
-   - standard-object
-    - condition should call make-condition
-   - flavors.Instance
+  - add IsReadable or Readably or **Readable** API
+   - Readable(b []byte) []byte or **Readably(b []byte) []byte**
+   - Readable(b []byte, op ...*slip.Printer) []byte
+    - always readable but op[0] for base, radix, prec
+    - maybe op[0] for pretty and rightMargin
+    - maybe op[0].Case
+   - use in printer, pp, snapshot, etc can then decide
 
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
@@ -41,12 +35,6 @@
  - [x] GENERIC-FUNCTION
  - [ ] INITIALIZE-INSTANCE
  - [ ] MAKE-LOAD-FORM - same as what is called by snapshot
-       - test with instance as well (also flavor instance)
-       - class
-       - condition
-       - generic
-       - ordinary function?
-        - might need fdefinition to test
  - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
  - [ ] METHOD-COMBINATION-ERROR
  - [x] METHOD-QUALIFIERS

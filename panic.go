@@ -116,11 +116,6 @@ func (p *Panic) Stack() []string {
 	return p.stack
 }
 
-// LoadForm returns a form that can be evaluated to create the object.
-func (p *Panic) LoadForm() Object {
-	return p
-}
-
 // WrapError creates a Panic that wraps a Instance which is expected to be a
 // clos condition.
 func WrapError(s *Scope, obj Instance, name string, args List) *Panic {

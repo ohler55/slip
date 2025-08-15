@@ -665,7 +665,6 @@ func TestFileStream(t *testing.T) {
 		},
 		Eval: (*slip.FileStream)(os.Stdout),
 	}).Test(t)
-	tt.Panic(t, func() { _ = (*slip.FileStream)(os.Stdout).LoadForm() })
 }
 
 func TestFileStreamFile(t *testing.T) {
@@ -777,8 +776,6 @@ func TestOutputStream(t *testing.T) {
 	_, err := stream.Write([]byte{'x'})
 	tt.NotNil(t, err)
 	tt.Equal(t, false, stream.IsOpen())
-
-	tt.Panic(t, func() { _ = stream.LoadForm() })
 }
 
 func TestIOStream(t *testing.T) {
@@ -822,8 +819,6 @@ func TestIOStream(t *testing.T) {
 	tt.Equal(t, true, stream.IsOpen())
 	_ = stream.Close()
 	tt.Equal(t, false, stream.IsOpen())
-
-	tt.Panic(t, func() { _ = stream.LoadForm() })
 }
 
 func TestIOStream2(t *testing.T) {
@@ -1218,11 +1213,6 @@ func (sb simplyBad) Hierarchy() []slip.Symbol {
 // Eval the object.
 func (sb simplyBad) Eval(s *slip.Scope, depth int) slip.Object {
 	return nil
-}
-
-// LoadForm panics.
-func (sb simplyBad) LoadForm() slip.Object {
-	panic(slip.NewPrintNotReadble(sb, "Can not make a load form for %s.", sb))
 }
 
 func TestSlipTest(t *testing.T) {

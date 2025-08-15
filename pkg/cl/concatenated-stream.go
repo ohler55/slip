@@ -127,8 +127,3 @@ func (obj ConcatenatedStream) Close() error {
 func (obj ConcatenatedStream) IsOpen() bool {
 	return obj[0] == nil
 }
-
-// LoadForm panics.
-func (obj ConcatenatedStream) LoadForm() slip.Object {
-	panic(slip.NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
-}

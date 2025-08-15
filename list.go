@@ -114,18 +114,33 @@ func (obj List) LoadForm() Object {
 	if 2 <= len(obj) {
 		if tail, ok := obj[len(obj)-1].(Tail); ok {
 			form := List{Symbol("cons"), nil, nil}
-			if obj[len(obj)-2] != nil {
-				form[1] = obj[len(obj)-2].LoadForm()
+			switch te := obj[len(obj)-2].(type) {
+			case nil:
+				// already nil
+			case LoadFormer:
+				form[1] = te.LoadForm()
+			default:
+				PanicPrintNotReadble(te, "Can not make a load form for %s.", te)
 			}
-			if tail.Value != nil {
-				form[2] = tail.Value.LoadForm()
+			switch te := tail.Value.(type) {
+			case nil:
+				// already nil
+			case LoadFormer:
+				form[2] = te.LoadForm()
+			default:
+				PanicPrintNotReadble(te, "Can not make a load form for %s.", te)
 			}
 			if 2 < len(obj) {
 				head := make(List, len(obj)-1)
 				head[0] = ListSymbol
 				for i := 0; i < len(obj)-2; i++ {
-					if obj[i] != nil {
-						head[i+1] = obj[i].LoadForm()
+					switch te := obj[i].(type) {
+					case nil:
+						// already nil
+					case LoadFormer:
+						head[i+1] = te.LoadForm()
+					default:
+						PanicPrintNotReadble(te, "Can not make a load form for %s.", te)
 					}
 				}
 				form = List{Symbol("append"), head, form}
@@ -136,8 +151,13 @@ func (obj List) LoadForm() Object {
 	form := make(List, len(obj)+1)
 	form[0] = ListSymbol
 	for i, v := range obj {
-		if v != nil {
-			form[i+1] = v.LoadForm()
+		switch tv := v.(type) {
+		case nil:
+			// already nil
+		case LoadFormer:
+			form[i+1] = tv.LoadForm()
+		default:
+			PanicPrintNotReadble(tv, "Can not make a load form for %s.", tv)
 		}
 	}
 	return form

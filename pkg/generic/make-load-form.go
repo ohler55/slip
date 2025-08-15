@@ -60,8 +60,10 @@ Top:
 		goto Top
 	case slip.Instance:
 		form = slip.InstanceLoadForm(to)
-	default:
+	case slip.LoadFormer:
 		form = to.LoadForm()
+	default:
+		slip.PanicPrintNotReadble(to, "Can not make a load form for %s.", to)
 	}
 	return
 }

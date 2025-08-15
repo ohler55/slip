@@ -46,8 +46,3 @@ func (t Tail) Hierarchy() []Symbol {
 func (t Tail) Eval(s *Scope, depth int) Object {
 	return t.Value.Eval(s, depth)
 }
-
-// LoadForm returns a form that can be evaluated to create the object.
-func (obj Tail) LoadForm() Object {
-	return obj
-}

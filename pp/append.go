@@ -130,7 +130,7 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
 	case slip.Symbol:
 		node = &Leaf{text: []byte(to)}
-	default:
+	case slip.LoadFormer:
 		form := to.LoadForm()
 		if dl, _ := form.(slip.List); 0 < len(dl) {
 			if sym, ok := dl[0].(slip.Symbol); ok {
@@ -140,6 +140,8 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		if node == nil {
 			node = &Leaf{text: p.Append(nil, obj, 0)}
 		}
+	default:
+		node = &Leaf{text: p.Append(nil, obj, 0)}
 	}
 	return
 }

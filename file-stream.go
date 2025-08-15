@@ -96,8 +96,3 @@ func (obj *FileStream) Seek(offset int64, whence int) (n int64, err error) {
 	return (*os.File)(obj).Seek(offset, whence)
 
 }
-
-// LoadForm panics.
-func (obj *FileStream) LoadForm() Object {
-	panic(NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
-}

@@ -36,8 +36,3 @@ func (obj atList) Hierarchy() []slip.Symbol {
 func (obj atList) Eval(_ *slip.Scope, _ int) slip.Object {
 	return obj
 }
-
-// LoadForm returns a form that can be evaluated to create the object.
-func (obj atList) LoadForm() slip.Object {
-	return obj
-}

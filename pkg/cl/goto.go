@@ -45,8 +45,3 @@ func (gt *GoTo) Hierarchy() []slip.Symbol {
 func (gt *GoTo) Eval(s *slip.Scope, depth int) slip.Object {
 	return gt
 }
-
-// LoadForm returns a form that can be evaluated to create the object.
-func (gt *GoTo) LoadForm() slip.Object {
-	return gt
-}

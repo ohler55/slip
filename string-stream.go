@@ -207,8 +207,3 @@ func (obj *StringStream) LastByte() (b byte) {
 func (obj *StringStream) Content() string {
 	return string(obj.buf)
 }
-
-// LoadForm panics.
-func (obj *StringStream) LoadForm() Object {
-	panic(NewPrintNotReadble(obj, "Can not make a load form for %s.", obj))
-}

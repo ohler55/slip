@@ -78,11 +78,6 @@ func (vv *VarVal) Eval(s *Scope, depth int) Object {
 	return vv.Value()
 }
 
-// LoadForm returns a form that can be evaluated to create the object.
-func (vv *VarVal) LoadForm() Object {
-	return vv
-}
-
 func newUnboundVar(name string) *VarVal {
 	return &VarVal{
 		name: name,

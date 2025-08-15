@@ -37,8 +37,3 @@ func (obj novalue) Hierarchy() []Symbol {
 func (obj novalue) Eval(s *Scope, depth int) Object {
 	return nil
 }
-
-// LoadForm returns a form that can be evaluated to create the object.
-func (obj novalue) LoadForm() Object {
-	return obj
-}

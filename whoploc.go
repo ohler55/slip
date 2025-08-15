@@ -57,8 +57,3 @@ func (wl *WhopLoc) Continue(s *Scope, args List, depth int) Object {
 	}
 	return wl.Method.InnerCall(s, args, depth)
 }
-
-// LoadForm returns a form that can be evaluated to create the object.
-func (obj *WhopLoc) LoadForm() Object {
-	return obj
-}

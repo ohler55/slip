@@ -17,7 +17,7 @@ import (
 // call to recreate the object. The final test is to compare the loaded object
 // with the original.
 func LoadForm(t *testing.T, obj slip.Object, show ...bool) {
-	form := obj.LoadForm()
+	form := obj.(slip.LoadFormer).LoadForm()
 	scope := slip.NewScope()
 	fb := pp.Append(nil, scope, form)
 	if 0 < len(show) && show[0] {

@@ -26,7 +26,6 @@ func TestSynonymStreamObject(t *testing.T) {
 		},
 		Eval: cl.NewSynonymStream(slip.Symbol("ss")),
 	}).Test(t)
-	tt.Panic(t, func() { _ = cl.NewSynonymStream(slip.Symbol("ss")).LoadForm() })
 }
 
 func TestSynonymStreamReadWriteOk(t *testing.T) {

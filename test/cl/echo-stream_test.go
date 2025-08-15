@@ -26,7 +26,6 @@ func TestEchoStreamObject(t *testing.T) {
 		},
 		Eval: &cl.EchoStream{},
 	}).Test(t)
-	tt.Panic(t, func() { _ = (&cl.EchoStream{}).LoadForm() })
 }
 
 func TestEchoStreamReadWriteOk(t *testing.T) {

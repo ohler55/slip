@@ -262,7 +262,14 @@ func (f *Function) LoadForm() Object {
 			if f.SkipArgEval(i) {
 				form[i+1] = a
 			} else {
-				form[i+1] = a.LoadForm()
+				switch ta := a.(type) {
+				case nil:
+				// already nil
+				case LoadFormer:
+					form[i+1] = ta.LoadForm()
+				default:
+					PanicPrintNotReadble(ta, "Can not make a load form for %s.", ta)
+				}
 			}
 		}
 	}

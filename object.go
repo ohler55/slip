@@ -11,7 +11,6 @@ import (
 // Object is the interface for all LISP entities other than nil.
 type Object interface {
 	fmt.Stringer
-	LoadFormer
 
 	// Append the object to a byte slice.
 	Append(b []byte) []byte
