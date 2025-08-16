@@ -449,7 +449,7 @@ Top:
 	default:
 		buf := to.Append(nil)
 		if p.Readably && p.ReadablyError && bytes.HasPrefix(buf, []byte("#<")) {
-			PanicPrintNotReadble(to, "%s can not be written readably", to)
+			PanicPrintNotReadable(to, "%s can not be written readably", to)
 		}
 		b = append(b, buf...)
 	}

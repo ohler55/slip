@@ -63,7 +63,7 @@ Top:
 	case slip.LoadFormer:
 		form = to.LoadForm()
 	default:
-		slip.PanicPrintNotReadble(to, "Can not make a load form for %s.", to)
+		slip.PanicPrintNotReadable(to, "Can not make a load form for %s.", to)
 	}
 	return
 }

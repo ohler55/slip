@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ohler55/ojg/sen"
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -41,6 +42,20 @@ func TestDynamicLambda(t *testing.T) {
 		},
 		Eval: slip.Fixnum(1),
 	}).Test(t)
+	sliptest.LoadForm(t, lambda)
+
+	lambda = &slip.Dynamic{
+		Function: slip.Function{
+			Args: slip.List{nil, slip.NewStringStream(nil)},
+		},
+	}
+	lambda.Self = &slip.Lambda{
+		Doc: &slip.FuncDoc{
+			Args: []*slip.DocArg{{Name: "x"}, {Name: "y"}},
+		},
+		Forms: slip.List{nil},
+	}
+	tt.Panic(t, func() { _ = lambda.LoadForm() })
 }
 
 func TestDynamicDefun(t *testing.T) {
@@ -67,6 +82,7 @@ func TestDynamicDefun(t *testing.T) {
 		Hierarchy: "function.t",
 		Eval:      slip.Fixnum(1),
 	}).Test(t)
+	tt.Equal(t, "(dummy (quote (1 nil)) 2)", dummy.LoadForm().String())
 }
 
 func TestDynamicAmps(t *testing.T) {
@@ -175,7 +191,7 @@ func TestDynamicAmpOptKey(t *testing.T) {
 	lambda.Self = &slip.Lambda{
 		Doc: &slip.FuncDoc{
 			Args: []*slip.DocArg{
-				{Name: "&optional"}, {Name: "x"},
+				{Name: "&optional"}, {Name: "x", Default: slip.Fixnum(3)},
 				{Name: "&key"}, {Name: "k1"},
 			},
 		},
@@ -188,6 +204,7 @@ func TestDynamicAmpOptKey(t *testing.T) {
 		Hierarchy: "function.t",
 		Eval:      slip.List{slip.Fixnum(1), slip.Fixnum(2)},
 	}).Test(t)
+	sliptest.LoadForm(t, lambda)
 }
 
 func TestDynamicAmpDefaults(t *testing.T) {
@@ -217,6 +234,7 @@ func TestDynamicAmpDefaults(t *testing.T) {
 		Hierarchy: "function.t",
 		Eval:      slip.List{nil, nil},
 	}).Test(t)
+	sliptest.LoadForm(t, lambda)
 }
 
 func TestDynamicAmpNoKeyValue(t *testing.T) {

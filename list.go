@@ -120,7 +120,7 @@ func (obj List) LoadForm() Object {
 			case LoadFormer:
 				form[1] = te.LoadForm()
 			default:
-				PanicPrintNotReadble(te, "Can not make a load form for %s.", te)
+				PanicPrintNotReadable(te, "Can not make a load form for %s.", te)
 			}
 			switch te := tail.Value.(type) {
 			case nil:
@@ -128,7 +128,7 @@ func (obj List) LoadForm() Object {
 			case LoadFormer:
 				form[2] = te.LoadForm()
 			default:
-				PanicPrintNotReadble(te, "Can not make a load form for %s.", te)
+				PanicPrintNotReadable(te, "Can not make a load form for %s.", te)
 			}
 			if 2 < len(obj) {
 				head := make(List, len(obj)-1)
@@ -140,7 +140,7 @@ func (obj List) LoadForm() Object {
 					case LoadFormer:
 						head[i+1] = te.LoadForm()
 					default:
-						PanicPrintNotReadble(te, "Can not make a load form for %s.", te)
+						PanicPrintNotReadable(te, "Can not make a load form for %s.", te)
 					}
 				}
 				form = List{Symbol("append"), head, form}
@@ -157,7 +157,7 @@ func (obj List) LoadForm() Object {
 		case LoadFormer:
 			form[i+1] = tv.LoadForm()
 		default:
-			PanicPrintNotReadble(tv, "Can not make a load form for %s.", tv)
+			PanicPrintNotReadable(tv, "Can not make a load form for %s.", tv)
 		}
 	}
 	return form

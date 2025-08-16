@@ -72,6 +72,9 @@ func InstanceLoadForm(obj Instance) (form List) {
 		},
 	}
 	for _, name := range names {
+		if name == "self" {
+			continue
+		}
 		iv, _ := obj.SlotValue(Symbol(name))
 		form = append(form,
 			List{

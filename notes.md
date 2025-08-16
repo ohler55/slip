@@ -12,8 +12,6 @@
 
  - generics branch
 
-  - Dynamic.LoadForm()
-
   - add IsReadable or Readably or **Readable** API
    - Readable(b []byte) []byte or **Readably(b []byte) []byte**
    - Readable(b []byte, op ...*slip.Printer) []byte
@@ -36,7 +34,7 @@
  - [ ] FUNCTION-KEYWORDS
  - [x] GENERIC-FUNCTION
  - [ ] INITIALIZE-INSTANCE
- - [ ] MAKE-LOAD-FORM - same as what is called by snapshot
+ - [x] MAKE-LOAD-FORM
  - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
  - [ ] METHOD-COMBINATION-ERROR
  - [x] METHOD-QUALIFIERS

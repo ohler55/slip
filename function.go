@@ -252,11 +252,7 @@ func (f *Function) GetName() string {
 // LoadForm returns a form that can be evaluated to create the object.
 func (f *Function) LoadForm() Object {
 	form := make(List, len(f.Args)+1)
-	if CurrentPackage == f.Pkg || f.Pkg == nil {
-		form[0] = Symbol(f.Name)
-	} else {
-		form[0] = Symbol(fmt.Sprintf("%s:%s", f.Pkg.Name, f.Name))
-	}
+	form[0] = Symbol(f.Name)
 	for i, a := range f.Args {
 		if a != nil {
 			if f.SkipArgEval(i) {
@@ -268,7 +264,7 @@ func (f *Function) LoadForm() Object {
 				case LoadFormer:
 					form[i+1] = ta.LoadForm()
 				default:
-					PanicPrintNotReadble(ta, "Can not make a load form for %s.", ta)
+					PanicPrintNotReadable(ta, "Can not make a load form for %s.", ta)
 				}
 			}
 		}

@@ -4,11 +4,11 @@ package slip
 
 import "fmt"
 
-// PrintNotReadbleSymbol is the symbol with a value of "print-not-readable".
-const PrintNotReadbleSymbol = Symbol("print-not-readable")
+// PrintNotReadableSymbol is the symbol with a value of "print-not-readable".
+const PrintNotReadableSymbol = Symbol("print-not-readable")
 
-// NewPrintNotReadble creates a FilePanic (file-error) describing a file error.
-func NewPrintNotReadble(object Object, format string, args ...any) Object {
+// NewPrintNotReadable creates a FilePanic (file-error) describing a file error.
+func NewPrintNotReadable(object Object, format string, args ...any) Object {
 	c := FindClass("print-not-readable")
 	obj := c.MakeInstance()
 	obj.Init(NewScope(), List{
@@ -18,7 +18,7 @@ func NewPrintNotReadble(object Object, format string, args ...any) Object {
 	return obj
 }
 
-// PanicPrintNotReadble raises a print-not-readable.
-func PanicPrintNotReadble(object Object, format string, args ...any) {
-	panic(NewPrintNotReadble(object, format, args...))
+// PanicPrintNotReadable raises a print-not-readable.
+func PanicPrintNotReadable(object Object, format string, args ...any) {
+	panic(NewPrintNotReadable(object, format, args...))
 }
