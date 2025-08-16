@@ -97,6 +97,7 @@ func run() {
 		repl.Stop()
 	}()
 	if trace {
+		repl.Trace = true
 		slip.Trace(slip.List{slip.True})
 	}
 	var scope *slip.Scope

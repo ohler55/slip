@@ -204,8 +204,11 @@ func TestAppendCond(t *testing.T) {
 
 func TestAppendPackageVar(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((*print-right-margin* 20)) (pretty-print common-lisp:*package* nil))`,
-		Expect: `"#<package common-lisp-user>
+		Source: `(let ((*print-right-margin* 80)) (pretty-print common-lisp:*package* nil))`,
+		Expect: `"(defpackage common-lisp-user
+  (:nicknames cl-user user)
+  (:documentation "The default package for user code and variables.")
+  (:use keyword common-lisp generic xml flavors gi bag clos csv test watch net))
 "`,
 	}).Test(t)
 }

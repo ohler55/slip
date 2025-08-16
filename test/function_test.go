@@ -19,7 +19,7 @@ func TestFunctionNew(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing", slip.List{}) })
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing:at-all", slip.List{}) })
 
-	sliptest.LoadForm(t, f, true)
+	sliptest.LoadForm(t, f)
 
 	code := slip.ReadString(`(car '(1 2))`, slip.NewScope())
 	code.Compile()

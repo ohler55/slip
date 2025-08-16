@@ -36,6 +36,10 @@ var (
 	// Interactive is set to true when the REPL is interactive.
 	Interactive bool
 
+	// Trace reflects the value of tracing as set on startup. It does no
+	// reflect the current trace state.
+	Trace bool
+
 	// DebugEditor if set before Run() is called will log keystrokes to
 	// editor.log when using the editor.
 	DebugEditor bool
@@ -134,12 +138,15 @@ func SetConfigDir(dir string) {
 	}()
 	if buf, err = os.ReadFile(cfgPath); err == nil {
 		configFilename = "" // Turn off writing while evaluating config file.
+		if Trace {
+			fmt.Printf("Loading %q.\n", cfgPath)
+		}
 		code := slip.Read(buf, &scope)
 		pathname := slip.String(filepath.Join(slip.WorkingDir, cfgPath))
 		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
 		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
 		code.Compile()
-		code.Eval(&scope, nil) // TBD look at load-verbose and load-print
+		code.Eval(&scope, nil) // TBD consider at load-verbose and load-print
 	} else {
 		if os.IsNotExist(err) {
 			if err = os.WriteFile(cfgPath, []byte(configHeader), 0666); err != nil {
@@ -153,6 +160,9 @@ func SetConfigDir(dir string) {
 		pathname := slip.String(filepath.Join(slip.WorkingDir, customPath))
 		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
 		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
+		if Trace {
+			fmt.Printf("Loading %q.\n", pathname)
+		}
 		code := slip.Read(buf, &scope)
 		code.Compile()
 		code.Eval(&scope, nil) // TBD look at load-verbose and load-print

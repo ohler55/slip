@@ -7,9 +7,11 @@
 ---------------------
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
+ - plugins
+  - PkgUse with clos and generics
+
  - generics branch
 
-  - Package.LoadForm()
   - Dynamic.LoadForm()
 
   - add IsReadable or Readably or **Readable** API

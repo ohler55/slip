@@ -936,6 +936,33 @@ func (obj *Package) AllClasses() []Class {
 
 // LoadForm returns a form that can be evaluated to create the object.
 func (obj *Package) LoadForm() Object {
-	// TBD defpackage
-	return obj
+	form := List{Symbol("defpackage"), Symbol(obj.Name)}
+	if 0 < len(obj.Nicknames) {
+		nn := make(List, len(obj.Nicknames)+1)
+		nn[0] = Symbol(":nicknames")
+		for i, n := range obj.Nicknames {
+			nn[i+1] = Symbol(n)
+		}
+		form = append(form, nn)
+	}
+	if 0 < len(obj.Doc) {
+		form = append(form, List{Symbol(":documentation"), String(obj.Doc)})
+	}
+	if 0 < len(obj.Uses) {
+		uses := make(List, len(obj.Uses)+1)
+		uses[0] = Symbol(":use")
+		for i, p := range obj.Uses {
+			uses[i+1] = Symbol(p.Name)
+		}
+		form = append(form, uses)
+	}
+	if 0 < len(obj.Exports) {
+		exports := make(List, len(obj.Exports)+1)
+		exports[0] = Symbol(":export")
+		for i, x := range obj.Exports {
+			exports[i+1] = Symbol(x)
+		}
+		form = append(form, exports)
+	}
+	return form
 }
