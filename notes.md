@@ -12,14 +12,6 @@
 
  - generics branch
 
-  - add IsReadable or Readably or **Readable** API
-   - Readable(b []byte) []byte or **Readably(b []byte) []byte**
-   - Readable(b []byte, op ...*slip.Printer) []byte
-    - always readable but op[0] for base, radix, prec
-    - maybe op[0] for pretty and rightMargin
-    - maybe op[0].Case
-   - use in printer, pp, snapshot, etc can then decide
-
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
  - [x] SLOT-MISSING
@@ -49,6 +41,16 @@
  - [ ] WITH-ACCESSORS
  - [ ] WITH-ADDED-METHODS
  - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
+
+
+-------------------
+ - readably branch
+  - add Readably or **Readable** interface
+   - Readably(b []byte, op ...*slip.Printer) []byte
+    - always readable but op[0] for base, radix, prec
+    - maybe op[0] for pretty and rightMargin
+    - maybe op[0].Case
+   - use in printer, pp, snapshot, etc can then decide
 
 ---------------------
  - flavor allow out of order defflavor like standard-class
