@@ -32,12 +32,10 @@
  - [x] NO-APPLICABLE-METHOD
  - [ ] NO-NEXT-METHOD - generic that defaults to a panic
  - [ ] REINITIALIZE-INSTANCE
- - [ ] REMOVE-METHOD <<<<<< next
+ - [x] REMOVE-METHOD
  - [ ] SHARED-INITIALIZE
- - [ ] SYMBOL-MACROLET
  - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [ ] WITH-ACCESSORS
- - [ ] WITH-ADDED-METHODS
  - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
 
 

@@ -617,6 +617,7 @@
  * [x] REMOVE
  * [x] REMOVE-DUPLICATES
  * [x] REMOVE-IF
+ * [x] REMOVE-METHOD
  * [x] REMPROP
  * [x] RENAME-FILE
  * [x] RENAME-PACKAGE
@@ -848,6 +849,7 @@
  - [-] CTYPECASE
  - [-] DEBUG
  - [-] DEFINE-COMPILER-MACRO
+ - [-] DEFINE-METHOD-COMBINATION (only standard is supported using a different mechanism)
  - [-] DEFINE-MODIFY-MACRO
  - [-] DEFINE-SETF-EXPANDER
  - [-] DEFINE-SYMBOL-MACRO
@@ -896,6 +898,7 @@
  - [-] MAKE-PATHNAME
  - [-] MEMBER-IF-NOT (deprecated)
  - [-] METHOD-COMBINATION (only standard is supported using a different mechanism)
+ - [-] METHOD-COMBINATION-ERROR (only standard is supported using a different mechanism)
  - [-] MUFFLE-WARNING
  - [-] NO-NEXT-METHOD
  - [-] NSUBST-IF-NOT (deprecated)
@@ -955,15 +958,12 @@
  - [-] WITH-COMPILATION-UNIT
  - [-] WITH-CONDITION-RESTARTS
  - [-] WITH-SIMPLE-RESTART
- - [-] DEFINE-METHOD-COMBINATION (only standard is supported using a different mechanism)
  - [c] ENSURE-GENERIC-FUNCTION
  - [c] FUNCTION-KEYWORDS
  - [c] INITIALIZE-INSTANCE
- - [-] METHOD-COMBINATION-ERROR (only standard is supported using a different mechanism)
  - [c] METHOD-QUALIFIERS
  - [c] NEXT-METHOD-P
  - [c] REINITIALIZE-INSTANCE
- - [c] REMOVE-METHOD
  - [c] SHARED-INITIALIZE
  - [c] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [c] WITH-ACCESSORS

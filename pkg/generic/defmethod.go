@@ -336,6 +336,8 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 }
 
 func addMethodCaller(aux *Aux, fname, qualifier, key string, caller slip.Caller, fd *slip.FuncDoc) *slip.Method {
+	aux.moo.Lock()
+	defer aux.moo.Unlock()
 	meth := aux.methods[key]
 	if meth == nil {
 		meth = &slip.Method{Name: fname, Doc: fd}
