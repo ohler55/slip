@@ -333,6 +333,7 @@
  * [x] FIND-ALL-SYMBOLS
  * [x] FIND-CLASS
  * [x] FIND-IF
+ * [x] FIND-METHOD
  * [x] FIND-PACKAGE
  * [x] FIND-SYMBOL
  * [x] FIRST
@@ -462,6 +463,7 @@
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
  * [x] MAKE-LIST
+ * [x] MAKE-LOAD-FORM
  * [x] MAKE-PACKAGE
  * [x] MAKE-RANDOM-STATE
  * [x] MAKE-SEQUENCE
@@ -889,10 +891,11 @@
  - [-] MACROLET
  - [-] MAKE-DISPATCH-MACRO-CHARACTER
  - [-] MAKE-INSTANCES-OBSOLETE
+ - [-] MAKE-LOAD-FORM-SAVING-SLOTS (requires magic to work properly, sbcl only works if not copied)
  - [-] MAKE-METHOD (internal detail not applicable)
  - [-] MAKE-PATHNAME
  - [-] MEMBER-IF-NOT (deprecated)
- - [-] METHOD-COMBINATION - only standard is supported using a different mechanism
+ - [-] METHOD-COMBINATION (only standard is supported using a different mechanism)
  - [-] MUFFLE-WARNING
  - [-] NO-NEXT-METHOD
  - [-] NSUBST-IF-NOT (deprecated)
@@ -952,14 +955,11 @@
  - [-] WITH-COMPILATION-UNIT
  - [-] WITH-CONDITION-RESTARTS
  - [-] WITH-SIMPLE-RESTART
- - [c- DEFINE-METHOD-COMBINATION
+ - [-] DEFINE-METHOD-COMBINATION (only standard is supported using a different mechanism)
  - [c] ENSURE-GENERIC-FUNCTION
- * [x] FIND-METHOD
  - [c] FUNCTION-KEYWORDS
  - [c] INITIALIZE-INSTANCE
- * [x] MAKE-LOAD-FORM
- - [c] MAKE-LOAD-FORM-SAVING-SLOTS
- - [c] METHOD-COMBINATION-ERROR
+ - [-] METHOD-COMBINATION-ERROR (only standard is supported using a different mechanism)
  - [c] METHOD-QUALIFIERS
  - [c] NEXT-METHOD-P
  - [c] REINITIALIZE-INSTANCE

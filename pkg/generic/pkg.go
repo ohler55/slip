@@ -38,6 +38,7 @@ func init() {
 	defFindMethod()
 	defMethodQualifiers()
 	defMakeLoadForm()
+	defFunctionKeywords()
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
