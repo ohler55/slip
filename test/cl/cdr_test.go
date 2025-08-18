@@ -15,7 +15,7 @@ func TestCdrEmpty(t *testing.T) {
 		Target:    slip.NewFunc("cdr", slip.List{nil}),
 		String:    "(cdr nil)",
 		Simple:    []interface{}{"cdr", nil},
-		Hierarchy: "built-in.t",
+		Hierarchy: "built-in.function.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},

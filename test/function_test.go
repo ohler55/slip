@@ -40,7 +40,7 @@ func TestFunctionFind(t *testing.T) {
 	cl := slip.FindPackage("common-lisp")
 	f := slip.MustFindFunc("car", cl)
 	tt.NotNil(t, f)
-	tt.Equal(t, []slip.Symbol{slip.BuiltInSymbol, slip.TrueSymbol}, f.Hierarchy())
+	tt.Equal(t, []slip.Symbol{slip.BuiltInSymbol, slip.FunctionSymbol, slip.TrueSymbol}, f.Hierarchy())
 
 	tt.Panic(t, func() { _ = slip.MustFindFunc("nothing", &slip.CLPkg) })
 }

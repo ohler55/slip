@@ -15,7 +15,7 @@ func TestListEmpty(t *testing.T) {
 		Target:    slip.NewFunc("list", slip.List{}),
 		String:    "(list)",
 		Simple:    []interface{}{"list"},
-		Hierarchy: "built-in.t",
+		Hierarchy: "built-in.function.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},
@@ -28,7 +28,7 @@ func TestListBasic(t *testing.T) {
 		Target:    slip.NewFunc("list", slip.List{slip.Fixnum(1), slip.Fixnum(2)}),
 		String:    "(list 1 2)",
 		Simple:    []interface{}{"list", 1, 2},
-		Hierarchy: "built-in.t",
+		Hierarchy: "built-in.function.t",
 		Equals: []*sliptest.EqTest{
 			{Other: slip.True, Expect: false},
 		},

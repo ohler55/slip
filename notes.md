@@ -12,6 +12,8 @@
 
  - generics branch
 
+  - add hierarchy to function describe
+
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
  - [x] SLOT-MISSING
@@ -31,6 +33,7 @@
  - [x] NEXT-METHOD-P
  - [x] NO-APPLICABLE-METHOD
  - [ ] NO-NEXT-METHOD - generic that defaults to a panic
+   - generic of generic-function and method
  - [ ] REINITIALIZE-INSTANCE
  - [x] REMOVE-METHOD
  - [ ] SHARED-INITIALIZE

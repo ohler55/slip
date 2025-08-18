@@ -50,7 +50,10 @@ func (obj *FuncInfo) Hierarchy() []Symbol {
 	if len(obj.Kind) == 0 {
 		obj.Kind = FunctionSymbol
 	}
-	return []Symbol{obj.Kind, TrueSymbol}
+	if obj.Kind == FunctionSymbol {
+		return []Symbol{FunctionSymbol, TrueSymbol}
+	}
+	return []Symbol{obj.Kind, FunctionSymbol, TrueSymbol}
 }
 
 // Eval returns self.
