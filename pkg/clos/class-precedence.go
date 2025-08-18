@@ -63,6 +63,13 @@ top:
 			pa[i] = name
 		}
 		result = pa
+	default:
+		h := tc.Hierarchy()
+		pa := make(slip.List, len(h))
+		for i, name := range h {
+			pa[i] = name
+		}
+		result = pa
 	}
 	return
 }

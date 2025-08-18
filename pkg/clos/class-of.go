@@ -42,8 +42,15 @@ func (f *ClassOf) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		slip.PanicArgCount(f, 1, 1)
 	}
-	if inst, ok := args[0].(slip.Instance); ok {
-		return inst.Class()
+	switch ta := args[0].(type) {
+	case nil:
+		return nil
+	case slip.List:
+		if len(ta) == 0 {
+			return nil
+		}
+	case slip.Instance:
+		return ta.Class()
 	}
-	return nil
+	return slip.FindClass(string(args[0].Hierarchy()[0]))
 }

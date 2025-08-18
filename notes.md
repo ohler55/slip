@@ -12,8 +12,6 @@
 
  - generics branch
 
-  - add hierarchy to function describe
-
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
  - [x] SLOT-MISSING
