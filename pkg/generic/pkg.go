@@ -40,6 +40,7 @@ func init() {
 	defMakeLoadForm()
 	defFunctionKeywords()
 	defRemoveMethod()
+	defNextMethodP()
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)

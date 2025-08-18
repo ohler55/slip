@@ -28,7 +28,7 @@
  - [ ] INITIALIZE-INSTANCE
  - [x] MAKE-LOAD-FORM
  - [x] METHOD-QUALIFIERS
- - [ ] NEXT-METHOD-P
+ - [x] NEXT-METHOD-P
  - [x] NO-APPLICABLE-METHOD
  - [ ] NO-NEXT-METHOD - generic that defaults to a panic
  - [ ] REINITIALIZE-INSTANCE
