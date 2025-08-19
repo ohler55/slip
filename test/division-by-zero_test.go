@@ -43,13 +43,13 @@ func TestDivisionByZeroMake(t *testing.T) {
 	tt.Equal(t, ok, true)
 	value, has := cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 	value, has = cond.SlotValue(slip.Symbol("operation"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 	value, has = cond.SlotValue(slip.Symbol("operands"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Division-By-Zero :operation 'divide :operands '(1 0) :message "raise")`,

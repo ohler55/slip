@@ -46,7 +46,7 @@ func TestNoApplicableMethodErrorMake(t *testing.T) {
 
 	value, has := cond.SlotValue(slip.Symbol("generic-function"))
 	tt.Equal(t, true, has)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	value, has = cond.SlotValue(slip.Symbol("function-arguments"))
 	tt.Equal(t, true, has)
@@ -54,7 +54,7 @@ func TestNoApplicableMethodErrorMake(t *testing.T) {
 
 	value, has = cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, true, has)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 }
 
 func TestNoApplicableMethodErrorPanic(t *testing.T) {

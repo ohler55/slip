@@ -28,7 +28,7 @@ type SlotDef struct {
 // NewSlotDef creates a new SlotDef from a slot-specification provided to
 // defclass.
 func NewSlotDef(def slip.Object) *SlotDef {
-	var sd SlotDef
+	sd := SlotDef{initform: slip.Unbound}
 	switch td := def.(type) {
 	case slip.Symbol:
 		sd.name = string(td)
@@ -63,7 +63,7 @@ func NewSlotDef(def slip.Object) *SlotDef {
 					slip.PanicType(":allocation", td[i+1], ":instance", ":class")
 				}
 			case slip.Symbol(":initform"):
-				if sd.initform != nil {
+				if sd.initform != slip.Unbound {
 					slip.NewPanic("For slot %s, the :initform option can only be specified once.", sd.name)
 				}
 				sd.initform = td[i+1]
@@ -122,7 +122,7 @@ func (sd *SlotDef) LoadForm() slip.Object {
 	if sd.classStore {
 		def = append(def, slip.Symbol(":allocation"), slip.Symbol(":class"))
 	}
-	if sd.initform != nil {
+	if sd.initform != slip.Unbound {
 		def = append(def, slip.Symbol(":initform"), sd.initform)
 	}
 	if sd.argType != nil {
@@ -255,7 +255,7 @@ func (sd *SlotDef) Describe(b []byte, class slip.Class, indent, right int, ansi 
 		}
 		b = append(b, '\n')
 	}
-	if sd.initform != nil {
+	if sd.initform != slip.Unbound {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "initform: "...)
 		b = slip.Append(b, sd.initform)

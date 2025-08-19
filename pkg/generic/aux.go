@@ -15,25 +15,32 @@ type Aux struct {
 	docs   *slip.FuncDoc // var-symbol, &optional, &rest, &key &allow-other-keys
 	reqCnt int
 	// Keys to the cache and methods is a join of then types separated by '|'.
-	cache   map[string]*slip.Method
-	methods map[string]*slip.Method
-	moo     sync.Mutex
+	cache         map[string]*slip.Method
+	methods       map[string]*slip.Method
+	defaultKey    string
+	defaultCaller slip.Caller
+	moo           sync.Mutex
 }
 
 // NewAux creates a new generic aux.
 func NewAux(fd *slip.FuncDoc) *Aux {
-	var cnt int
+	var (
+		cnt int
+		dk  []byte
+	)
 	for _, da := range fd.Args {
 		if da.Name[0] == '&' {
 			break
 		}
+		dk = append(dk, 't', '|')
 		cnt++
 	}
 	return &Aux{
-		cache:   map[string]*slip.Method{},
-		methods: map[string]*slip.Method{},
-		docs:    fd,
-		reqCnt:  cnt,
+		cache:      map[string]*slip.Method{},
+		methods:    map[string]*slip.Method{},
+		docs:       fd,
+		reqCnt:     cnt,
+		defaultKey: string(dk[:len(dk)-2]),
 	}
 }
 
@@ -45,10 +52,15 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 		slip.NewPanic("generic-function %s requires at least %d arguments. Received %d.",
 			g.docs.Name, g.reqCnt, len(args))
 	}
+	g.moo.Lock()
+	if g.defaultCaller != nil {
+		caller := g.defaultCaller
+		g.moo.Unlock()
+		return caller.Call(s, args, depth)
+	}
 	// Any further argument checking gets tricky as optinal could be keywords
 	// depending on then method's forms.
 	key := buildSpecKey(args[:g.reqCnt])
-	g.moo.Lock()
 	meth := g.cache[key]
 	if meth == nil {
 		if meth = g.buildCacheMeth(args); meth != nil {
@@ -63,6 +75,31 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 	nam := slip.MustFindFunc("no-applicable-method")
 
 	return nam.Apply(s, append(slip.List{gf}, args...), depth)
+}
+
+// AddMethod adds a method to the Aux.
+func (g *Aux) AddMethod(key string, method *slip.Method) {
+	g.moo.Lock()
+	g.methods[key] = method
+	if 0 < len(g.cache) {
+		g.cache = map[string]*slip.Method{}
+	}
+	g.updateDefaultCaller()
+	g.moo.Unlock()
+}
+
+func (g *Aux) updateDefaultCaller() {
+	g.defaultCaller = nil
+	if len(g.methods) == 1 {
+		for k, m := range g.methods {
+			if len(m.Combinations) == 1 && g.defaultKey == k {
+				c := m.Combinations[0]
+				if c.Primary != nil && c.Before == nil && c.After == nil && c.Wrap == nil {
+					g.defaultCaller = c.Primary
+				}
+			}
+		}
+	}
 }
 
 // LoadForm returns a list that can be evaluated to define a generic and all

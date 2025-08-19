@@ -43,7 +43,7 @@ func TestEndOfFileMake(t *testing.T) {
 
 	value, has = cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'end-of-file :stream (make-string-output-stream) :message "raise")`,

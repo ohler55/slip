@@ -39,7 +39,7 @@ func TestFileErrorMake(t *testing.T) {
 	tt.Equal(t, ok, true)
 	value, has := cond.SlotValue(slip.Symbol("pathname"))
 	tt.Equal(t, has, true)
-	tt.Equal(t, nil, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'File-Error :pathname "somefile" :message "raise")`,

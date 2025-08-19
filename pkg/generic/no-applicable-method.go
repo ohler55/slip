@@ -34,11 +34,11 @@ is invoked and no method with the argument specializers is found.`,
 		Args:   fd.Args,
 		Return: "object",
 	}
-	aux.methods["t"] = &slip.Method{
+	aux.AddMethod("t", &slip.Method{
 		Name:         fd.Name,
 		Doc:          &md,
 		Combinations: []*slip.Combination{{Primary: defaultNoAppMethCaller{}}},
-	}
+	})
 	Pkg.Define(
 		func(args slip.List) slip.Object {
 			f := NoApplicableMethod{

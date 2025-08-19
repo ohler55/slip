@@ -44,8 +44,8 @@ func TestStandardObjectBasic(t *testing.T) {
 
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(list (slot-value qube 'x) (slot-value qube 'y) (slot-value qube 'z))`,
-		Expect: `(nil 5 4)`,
+		Source: `(list (slot-value qube 'y) (slot-value qube 'z))`,
+		Expect: `(5 4)`,
 	}).Test(t)
 
 	obj := scope.Get("qube").(*clos.StandardObject)
@@ -118,8 +118,8 @@ func TestStandardObjectInitform(t *testing.T) {
 
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(list (slot-value qube 'x) (slot-value qube 'y) (slot-value qube 'z))`,
-		Expect: `(nil 1 4)`,
+		Source: `(list (slot-value qube 'y) (slot-value qube 'z))`,
+		Expect: `(1 4)`,
 	}).Test(t)
 }
 

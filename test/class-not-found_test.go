@@ -42,7 +42,7 @@ func TestClassNotFoundMake(t *testing.T) {
 	tt.Equal(t, slip.Symbol("klas"), value)
 	value, has = cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, true, has)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'class-not-found :name 'klas :message "raise")`,

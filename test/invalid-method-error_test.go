@@ -56,7 +56,7 @@ func TestInvalidMethodErrorMake(t *testing.T) {
 
 	value, has = cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, true, has)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 }
 
 func TestInvalidMethodErrorNoFormat(t *testing.T) {

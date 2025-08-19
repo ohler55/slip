@@ -2,7 +2,9 @@
 
 package slip
 
-import "sort"
+import (
+	"sort"
+)
 
 type Instance interface {
 	Object
@@ -76,6 +78,9 @@ func InstanceLoadForm(obj Instance) (form List) {
 			continue
 		}
 		iv, _ := obj.SlotValue(Symbol(name))
+		if iv == Unbound {
+			continue
+		}
 		form = append(form,
 			List{
 				Symbol("setf"),

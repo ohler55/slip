@@ -363,6 +363,8 @@ func addMethodCaller(aux *Aux, fname, qualifier, key string, caller slip.Caller,
 	if 0 < len(aux.cache) {
 		aux.cache = map[string]*slip.Method{}
 	}
+	aux.updateDefaultCaller()
+
 	return meth
 }
 

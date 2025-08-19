@@ -10,9 +10,9 @@
  - plugins
   - PkgUse with clos and generics
 
- - generics branch
+- generics branch
 
-  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
+ - InstanceLoadForm for condition
 
  - [x] SLOT-MISSING
  - [x] SLOT-UNBOUND - make generic
@@ -24,22 +24,31 @@
  - [x] FIND-METHOD
  - [x] FUNCTION-KEYWORDS
  - [x] GENERIC-FUNCTION
- - [ ] INITIALIZE-INSTANCE
  - [x] MAKE-LOAD-FORM
  - [x] METHOD-QUALIFIERS
  - [x] NEXT-METHOD-P
  - [x] NO-APPLICABLE-METHOD
  - [x] NO-NEXT-METHOD
  - [x] REMOVE-METHOD
+ - [ ] INITIALIZE-INSTANCE
+  - standard-object
+   - init should call generic initialize-instance
+    - which by default calls shared-initialize
+
+ - [ ] SHARED-INITIALIZE
+  - change standard-object.Init to set all instance slots to unbound
+   - call shared-initialize
+
  - [ ] WITH-ACCESSORS
 
 ----------
 - for later
  - [ ] ENSURE-GENERIC-FUNCTION
  - [ ] REINITIALIZE-INSTANCE
- - [ ] SHARED-INITIALIZE
  - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
+
+  - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
 -------------------
  - readably branch

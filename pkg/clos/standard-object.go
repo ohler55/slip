@@ -92,13 +92,14 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 			obj.setSlot(sd, sd.initform.Eval(scope, depth+1))
 		}
 	}
+	// TBD call instance-initialize if no :init method or maybe both
 	if scope != nil {
 		_ = obj.Receive(scope, ":init", slip.List{args}, depth+1)
 	}
 }
 
 func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
-	if sd.argType != nil && sd.argType != slip.TrueSymbol {
+	if value != slip.Unbound && sd.argType != nil && sd.argType != slip.TrueSymbol {
 		var typeOk bool
 		if sym, ok := sd.argType.(slip.Symbol); ok { // TBD handle more complex type specs
 			for _, h := range value.Hierarchy() {

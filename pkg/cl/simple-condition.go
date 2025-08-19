@@ -29,12 +29,14 @@ func PanicSimpleCondition(s *slip.Scope, ctrl string, args slip.List) {
 // SimpleCondMsg uses a format-control and format-arguments to generate a
 // message for a simple-condition.
 func SimpleCondMsg(s *slip.Scope, cond slip.Instance) (msg string) {
-	if m, has := cond.SlotValue(slip.Symbol("message")); has && m != nil {
+	if m, has := cond.SlotValue(slip.Symbol("message")); has && m != nil && m != slip.Unbound {
 		if ss, ok := m.(slip.String); ok {
 			msg = string(ss)
 		} else {
 			msg = cond.String()
 		}
+		cond.SetSlotValue(slip.Symbol("format-control"), slip.String("~A"))
+		cond.SetSlotValue(slip.Symbol("format-arguments"), slip.List{m})
 	} else {
 		var args slip.List
 

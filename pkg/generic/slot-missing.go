@@ -47,11 +47,11 @@ func defSlotMissing() {
 		Args:   fd.Args,
 		Return: "object",
 	}
-	aux.methods["t|t|t|t"] = &slip.Method{
+	aux.AddMethod("t|t|t|t", &slip.Method{
 		Name:         fd.Name,
 		Doc:          &md,
 		Combinations: []*slip.Combination{{Primary: defaultSlotMissingCaller{}}},
-	}
+	})
 	Pkg.Define(
 		func(args slip.List) slip.Object {
 			f := SlotMissing{

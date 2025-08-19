@@ -393,7 +393,7 @@ func (c *StandardClass) mergeSupers() bool {
 				for _, ia := range sd.initargs {
 					c.initArgs[string(ia)] = sd
 				}
-				if sd.initform != nil {
+				if sd.initform != slip.Unbound {
 					c.initForms[sd.name] = sd
 				}
 			}
@@ -403,7 +403,7 @@ func (c *StandardClass) mergeSupers() bool {
 		for _, ia := range sd.initargs {
 			c.initArgs[string(ia)] = sd
 		}
-		if sd.initform != nil {
+		if sd.initform != slip.Unbound {
 			c.initForms[sd.name] = sd
 		}
 	}

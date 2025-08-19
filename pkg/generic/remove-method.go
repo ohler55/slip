@@ -109,6 +109,7 @@ top:
 		if 0 < len(aux.cache) { // clear cache
 			aux.cache = map[string]*slip.Method{}
 		}
+		aux.updateDefaultCaller()
 	}
 	return args[0]
 }

@@ -39,11 +39,11 @@ is invoked and no next method in an :around method is encountered.`,
 		Args:   fd.Args,
 		Return: "object",
 	}
-	aux.methods["t"] = &slip.Method{
+	aux.AddMethod("t|t", &slip.Method{
 		Name:         fd.Name,
 		Doc:          &md,
 		Combinations: []*slip.Combination{{Primary: defaultNoNextMethCaller{}}},
-	}
+	})
 	Pkg.Define(
 		func(args slip.List) slip.Object {
 			f := NoNextMethod{
