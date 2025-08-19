@@ -490,6 +490,7 @@
  * [x] MERGE
  * [x] MERGE-PATHNAMES
  * [x] METHOD
+ * [x] METHOD-QUALIFIERS
  * [x] MIN
  * [x] MINUSP
  * [x] MISMATCH
@@ -514,10 +515,12 @@
  * [x] NAMESTRING
  * [x] NBUTLAST
  * [x] NCONC
+ * [x] NEXT-METHOD-P
  * [x] NIL
  * [x] NINTERSECTION
  * [x] NINTH
  * [x] NO-APPLICABLE-METHOD
+ * [x] NO-NEXT-METHOD
  * [x] NOT
  * [x] NOTANY
  * [x] NOTEVERY
@@ -900,7 +903,6 @@
  - [-] METHOD-COMBINATION (only standard is supported using a different mechanism)
  - [-] METHOD-COMBINATION-ERROR (only standard is supported using a different mechanism)
  - [-] MUFFLE-WARNING
- - [-] NO-NEXT-METHOD
  - [-] NSUBST-IF-NOT (deprecated)
  - [-] NSUBSTITUTE-IF-NOT (deprecated)
  - [-] PARSE-NAMESTRING
@@ -961,8 +963,6 @@
  - [c] ENSURE-GENERIC-FUNCTION
  - [c] FUNCTION-KEYWORDS
  - [c] INITIALIZE-INSTANCE
- - [c] METHOD-QUALIFIERS
- * [x] NEXT-METHOD-P
  - [c] REINITIALIZE-INSTANCE
  - [c] SHARED-INITIALIZE
  - [c] UPDATE-INSTANCE-FOR-REDEFINED-CLASS

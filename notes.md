@@ -20,7 +20,6 @@
  - [x] COMPUTE-APPLICABLE-METHODS
  - [x] DEFGENERIC
  - [x] DEFMETHOD - need generic support
- - [ ] ENSURE-GENERIC-FUNCTION
  - [x] FDEFINITION
  - [x] FIND-METHOD
  - [x] FUNCTION-KEYWORDS
@@ -30,15 +29,17 @@
  - [x] METHOD-QUALIFIERS
  - [x] NEXT-METHOD-P
  - [x] NO-APPLICABLE-METHOD
- - [ ] NO-NEXT-METHOD - generic that defaults to a panic
-   - generic of generic-function and method
- - [ ] REINITIALIZE-INSTANCE
+ - [x] NO-NEXT-METHOD
  - [x] REMOVE-METHOD
+ - [ ] WITH-ACCESSORS
+
+----------
+- for later
+ - [ ] ENSURE-GENERIC-FUNCTION
+ - [ ] REINITIALIZE-INSTANCE
  - [ ] SHARED-INITIALIZE
  - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
- - [ ] WITH-ACCESSORS
  - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
-
 
 -------------------
  - readably branch

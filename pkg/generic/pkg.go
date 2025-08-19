@@ -41,6 +41,7 @@ func init() {
 	defFunctionKeywords()
 	defRemoveMethod()
 	defNextMethodP()
+	defNoNextMethod()
 
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)

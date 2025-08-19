@@ -45,5 +45,11 @@ func (f *CallNextMethod) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	if loc == nil {
 		slip.NewPanic("%s called outside an around method qualifier.", f.Name)
 	}
+	if !loc.HasNext() {
+		nnm := slip.MustFindFunc("no-next-method")
+		gf := slip.MustFindFunc(loc.Method.Name)
+
+		return nnm.Apply(s, append(slip.List{gf, loc.Method}, args...), depth)
+	}
 	return loc.Continue(s, args, depth)
 }
