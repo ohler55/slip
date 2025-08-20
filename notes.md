@@ -12,8 +12,6 @@
 
 - generics branch
 
- - InstanceLoadForm for condition
-
  - [x] SLOT-MISSING
  - [x] SLOT-UNBOUND - make generic
  - [x] CALL-NEXT-METHOD

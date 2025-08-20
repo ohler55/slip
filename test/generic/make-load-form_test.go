@@ -42,6 +42,13 @@ func TestMakeLoadFormInstance(t *testing.T) {
 	}).Test(t)
 }
 
+func TestMakeLoadFormCondition(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-load-form (make-condition 'Condition))`,
+		Expect: `(let ((inst (make-condition (quote condition)))) inst)`,
+	}).Test(t)
+}
+
 func TestMakeLoadFormPanic(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(make-load-form (make-string-output-stream))`,

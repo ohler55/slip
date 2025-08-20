@@ -407,13 +407,12 @@ func (c *StandardClass) mergeSupers() bool {
 			c.initForms[sd.name] = sd
 		}
 	}
-
 	c.precedence = make([]slip.Symbol, 0, len(c.inherit)+3)
 	c.precedence = append(c.precedence, slip.Symbol(c.name))
 	for _, ic := range c.inherit {
 		c.precedence = append(c.precedence, slip.Symbol(ic.Name()))
 	}
-	if 0 < len(c.baseClass) {
+	if 0 < len(c.baseClass) && c.precedence[len(c.precedence)-1] != c.baseClass {
 		c.precedence = append(c.precedence, c.baseClass)
 	}
 	c.precedence = append(c.precedence, slip.TrueSymbol)

@@ -4,6 +4,7 @@ package slip
 
 import (
 	"sort"
+	"strings"
 )
 
 type Instance interface {
@@ -53,9 +54,13 @@ type Instance interface {
 
 // InstanceLoadForm created a load form for an instance.
 func InstanceLoadForm(obj Instance) (form List) {
-
-	// TBD if condition then make-condition
-
+	makeInstSym := Symbol("make-instance")
+	for _, h := range obj.Hierarchy() {
+		if strings.EqualFold(string(h), "condition") {
+			makeInstSym = Symbol("make-condition")
+			break
+		}
+	}
 	names := obj.SlotNames()
 	sort.Strings(names)
 	form = List{
@@ -64,7 +69,7 @@ func InstanceLoadForm(obj Instance) (form List) {
 			List{
 				Symbol("inst"),
 				List{
-					Symbol("make-instance"),
+					makeInstSym,
 					List{
 						Symbol("quote"),
 						Symbol(obj.Class().Name()),
