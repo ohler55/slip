@@ -45,29 +45,29 @@ func NewAux(fd *slip.FuncDoc) *Aux {
 }
 
 // Call the the function with the arguments provided.
-func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) slip.Object {
+func (aux *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) slip.Object {
 	// All calls must match the gf-lambda-list so check here as much as
 	// reasonable.
-	if len(args) < g.reqCnt {
+	if len(args) < aux.reqCnt {
 		slip.NewPanic("generic-function %s requires at least %d arguments. Received %d.",
-			g.docs.Name, g.reqCnt, len(args))
+			aux.docs.Name, aux.reqCnt, len(args))
 	}
-	g.moo.Lock()
-	if g.defaultCaller != nil {
-		caller := g.defaultCaller
-		g.moo.Unlock()
+	aux.moo.Lock()
+	if aux.defaultCaller != nil {
+		caller := aux.defaultCaller
+		aux.moo.Unlock()
 		return caller.Call(s, args, depth)
 	}
 	// Any further argument checking gets tricky as optinal could be keywords
 	// depending on then method's forms.
-	key := buildSpecKey(args[:g.reqCnt])
-	meth := g.cache[key]
+	key := buildSpecKey(args[:aux.reqCnt])
+	meth := aux.cache[key]
 	if meth == nil {
-		if meth = g.buildCacheMeth(args); meth != nil {
-			g.cache[key] = meth
+		if meth = aux.buildCacheMeth(args); meth != nil {
+			aux.cache[key] = meth
 		}
 	}
-	g.moo.Unlock()
+	aux.moo.Unlock()
 	if meth != nil {
 		return meth.Call(s, args, depth)
 	}
@@ -78,24 +78,24 @@ func (g *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) sli
 }
 
 // AddMethod adds a method to the Aux.
-func (g *Aux) AddMethod(key string, method *slip.Method) {
-	g.moo.Lock()
-	g.methods[key] = method
-	if 0 < len(g.cache) {
-		g.cache = map[string]*slip.Method{}
+func (aux *Aux) AddMethod(key string, method *slip.Method) {
+	aux.moo.Lock()
+	aux.methods[key] = method
+	if 0 < len(aux.cache) {
+		aux.cache = map[string]*slip.Method{}
 	}
-	g.updateDefaultCaller()
-	g.moo.Unlock()
+	aux.updateDefaultCaller()
+	aux.moo.Unlock()
 }
 
-func (g *Aux) updateDefaultCaller() {
-	g.defaultCaller = nil
-	if len(g.methods) == 1 {
-		for k, m := range g.methods {
-			if len(m.Combinations) == 1 && g.defaultKey == k {
+func (aux *Aux) updateDefaultCaller() {
+	aux.defaultCaller = nil
+	if len(aux.methods) == 1 {
+		for k, m := range aux.methods {
+			if len(m.Combinations) == 1 && aux.defaultKey == k {
 				c := m.Combinations[0]
 				if c.Primary != nil && c.Before == nil && c.After == nil && c.Wrap == nil {
-					g.defaultCaller = c.Primary
+					aux.defaultCaller = c.Primary
 				}
 			}
 		}
@@ -104,29 +104,29 @@ func (g *Aux) updateDefaultCaller() {
 
 // LoadForm returns a list that can be evaluated to define a generic and all
 // specialized methods for the generic.
-func (g *Aux) LoadForm() slip.Object {
-	ll := make(slip.List, len(g.docs.Args))
-	for i, da := range g.docs.Args {
+func (aux *Aux) LoadForm() slip.Object {
+	ll := make(slip.List, len(aux.docs.Args))
+	for i, da := range aux.docs.Args {
 		ll[i] = slip.Symbol(da.Name)
 	}
 	gdef := slip.List{
 		slip.Symbol("defgeneric"),
-		slip.Symbol(g.docs.Name),
+		slip.Symbol(aux.docs.Name),
 		ll,
 	}
-	if 0 < len(g.docs.Text) {
-		gdef = append(gdef, slip.List{slip.Symbol(":documentation"), slip.String(g.docs.Text)})
+	if 0 < len(aux.docs.Text) {
+		gdef = append(gdef, slip.List{slip.Symbol(":documentation"), slip.String(aux.docs.Text)})
 	}
-	keys := make([]string, 0, len(g.methods))
-	for k := range g.methods {
+	keys := make([]string, 0, len(aux.methods))
+	for k := range aux.methods {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 	for _, k := range keys {
-		method := g.methods[k]
+		method := aux.methods[k]
 		sll := make(slip.List, len(method.Doc.Args))
 		for i, da := range method.Doc.Args {
-			if i < g.reqCnt {
+			if i < aux.reqCnt {
 				sll[i] = slip.List{slip.Symbol(da.Name), slip.Symbol(da.Type)}
 			} else {
 				if da.Name[0] == '&' || da.Default == nil {
@@ -137,8 +137,8 @@ func (g *Aux) LoadForm() slip.Object {
 			}
 		}
 		var doc slip.Object
-		if 0 < len(g.docs.Text) {
-			doc = slip.String(g.docs.Text)
+		if 0 < len(aux.docs.Text) {
+			doc = slip.String(aux.docs.Text)
 		}
 		if 0 < len(method.Doc.Text) {
 			doc = slip.String(method.Doc.Text)
@@ -181,20 +181,20 @@ func (g *Aux) LoadForm() slip.Object {
 	return gdef
 }
 
-func (g *Aux) buildCacheMeth(args slip.List) *slip.Method {
+func (aux *Aux) buildCacheMeth(args slip.List) *slip.Method {
 	var meth slip.Method
-	key := make([]string, g.reqCnt)
-	g.collectMethods(&meth, key, 0, args)
+	key := make([]string, aux.reqCnt)
+	aux.collectMethods(&meth, key, 0, args)
 	if len(meth.Combinations) == 0 {
 		return nil
 	}
-	meth.Name = g.docs.Name
-	meth.Doc = g.docs
+	meth.Name = aux.docs.Name
+	meth.Doc = aux.docs
 
 	return &meth
 }
 
-func (g *Aux) collectMethods(meth *slip.Method, key []string, ki int, args slip.List) {
+func (aux *Aux) collectMethods(meth *slip.Method, key []string, ki int, args slip.List) {
 	var hier []slip.Symbol
 	if args[ki] == nil {
 		hier = []slip.Symbol{slip.TrueSymbol}
@@ -204,7 +204,7 @@ func (g *Aux) collectMethods(meth *slip.Method, key []string, ki int, args slip.
 	if len(key) == ki+1 { // last one
 		for _, h := range hier {
 			key[ki] = string(h)
-			if m, has := g.methods[strings.Join(key, "|")]; has {
+			if m, has := aux.methods[strings.Join(key, "|")]; has {
 				meth.Combinations = append(meth.Combinations, m.Combinations...) // should only be one
 			}
 		}
@@ -212,7 +212,7 @@ func (g *Aux) collectMethods(meth *slip.Method, key []string, ki int, args slip.
 		k2 := ki + 1
 		for _, h := range hier {
 			key[ki] = string(h)
-			g.collectMethods(meth, key, k2, args)
+			aux.collectMethods(meth, key, k2, args)
 		}
 	}
 }
@@ -224,11 +224,11 @@ type methComp struct {
 	after   []*slip.Method
 }
 
-func (g *Aux) compMethList(args slip.List) slip.List {
+func (aux *Aux) compMethList(args slip.List) slip.List {
 	var mc methComp
-	key := make([]string, g.reqCnt)
+	key := make([]string, aux.reqCnt)
 
-	g.compMeths(&mc, key, 0, args)
+	aux.compMeths(&mc, key, 0, args)
 
 	methods := make(slip.List, 0, len(mc.around)+len(mc.before)+len(mc.after)+1)
 	for _, m := range mc.around {
@@ -246,7 +246,7 @@ func (g *Aux) compMethList(args slip.List) slip.List {
 	return methods
 }
 
-func (g *Aux) compMeths(mc *methComp, key []string, ki int, args slip.List) {
+func (aux *Aux) compMeths(mc *methComp, key []string, ki int, args slip.List) {
 	var hier []slip.Symbol
 	if args[ki] == nil {
 		hier = []slip.Symbol{slip.TrueSymbol}
@@ -256,7 +256,7 @@ func (g *Aux) compMeths(mc *methComp, key []string, ki int, args slip.List) {
 	if len(key) == ki+1 { // last one
 		for _, h := range hier {
 			key[ki] = string(h)
-			if m, has := g.methods[strings.Join(key, "|")]; has {
+			if m, has := aux.methods[strings.Join(key, "|")]; has {
 				c := m.Combinations[0] // should only be one
 				if mc.primary == nil && c.Primary != nil {
 					mc.primary = &slip.Method{
@@ -295,7 +295,7 @@ func (g *Aux) compMeths(mc *methComp, key []string, ki int, args slip.List) {
 		k2 := ki + 1
 		for _, h := range hier {
 			key[ki] = string(h)
-			g.compMeths(mc, key, k2, args)
+			aux.compMeths(mc, key, k2, args)
 		}
 	}
 }

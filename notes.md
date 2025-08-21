@@ -11,6 +11,7 @@
   - PkgUse with clos and generics
 
 - generics branch
+ - scope for shared-initialize should be caller scope
 
  - [x] SLOT-MISSING
  - [x] SLOT-UNBOUND - make generic
@@ -29,14 +30,7 @@
  - [x] NO-NEXT-METHOD
  - [x] REMOVE-METHOD
  - [ ] INITIALIZE-INSTANCE
-  - standard-object
-   - init should call generic initialize-instance
-    - which by default calls shared-initialize
-
  - [ ] SHARED-INITIALIZE
-  - change standard-object.Init to set all instance slots to unbound
-   - call shared-initialize
-
  - [ ] WITH-ACCESSORS
 
 ----------

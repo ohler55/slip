@@ -61,38 +61,9 @@ func (obj *StandardObject) IsA(class string) bool {
 // Init the instance slots from the provided args list. If the scope is not
 // nil then send :init is called.
 func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
-	nameMap := map[string]string{}
-	argMap := map[string]slip.Object{}
-	fillMapFromKeyArgs(args, argMap)
-	for k, v := range argMap {
-		sd := obj.Type.initArgDef(k)
-		if sd == nil {
-			slip.NewPanic("%s is not a valid initarg for %s.", k, obj.Type.Name())
-		}
-		if n, has := nameMap[sd.name]; has {
-			slip.NewPanic("Duplicate initarg (%s) for slot %s. %s already specified.", sd.name, k, n)
-		}
-		obj.setSlot(sd, v)
-		nameMap[sd.name] = k
+	if fi := slip.FindFunc("initialize-instance"); fi != nil {
+		_ = fi.Apply(scope, append(slip.List{obj}, args), depth+1)
 	}
-	for k, v := range obj.Type.defaultsMap() {
-		sd := obj.Type.initArgDef(k)
-		if _, has := nameMap[sd.name]; !has {
-			if v == nil {
-				obj.setSlot(sd, nil)
-			} else {
-				obj.setSlot(sd, v.Eval(scope, depth+1))
-			}
-			nameMap[sd.name] = k
-		}
-	}
-	for k, sd := range obj.Type.initFormMap() {
-		if _, has := nameMap[k]; !has {
-			// If in the initForms then initform will not be nil.
-			obj.setSlot(sd, sd.initform.Eval(scope, depth+1))
-		}
-	}
-	// TBD call instance-initialize if no :init method or maybe both
 	if scope != nil {
 		_ = obj.Receive(scope, ":init", slip.List{args}, depth+1)
 	}

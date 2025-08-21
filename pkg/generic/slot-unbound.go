@@ -63,20 +63,7 @@ type SlotUnbound struct {
 
 // Call the the function with the arguments provided.
 func (f *SlotUnbound) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	var caller slip.Caller = defaultSlotUnboundCaller{}
-	key := buildSpecKey(args[:3])
-	f.aux.moo.Lock()
-	meth := f.aux.cache[key]
-	if meth == nil {
-		if meth = f.aux.buildCacheMeth(args); meth != nil {
-			f.aux.cache[key] = meth
-		}
-	}
-	f.aux.moo.Unlock()
-	if meth != nil {
-		caller = meth
-	}
-	return caller.Call(s, args, depth)
+	return f.aux.Call(f, s, args, depth)
 }
 
 type defaultSlotUnboundCaller struct{}

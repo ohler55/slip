@@ -52,6 +52,8 @@ func init() {
 	defClassMetaclass()
 	defListAllClasses()
 	defWithSlots()
+	defSharedInitialize()
+	defInitializeInstance()
 
 	defConditions()
 

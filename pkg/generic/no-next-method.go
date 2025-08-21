@@ -66,22 +66,7 @@ type NoNextMethod struct {
 
 // Call the the function with the arguments provided.
 func (f *NoNextMethod) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	var caller slip.Caller = defaultNoNextMethCaller{}
-	var key []byte
-	key = append(key, f.Hierarchy()[0]...)
-	key = append(key, '|', 't')
-	f.aux.moo.Lock()
-	meth := f.aux.cache[string(key)]
-	if meth == nil {
-		if meth = f.aux.buildCacheMeth(args); meth != nil {
-			f.aux.cache[string(key)] = meth
-		}
-	}
-	f.aux.moo.Unlock()
-	if meth != nil {
-		caller = meth
-	}
-	return caller.Call(s, args, depth)
+	return f.aux.Call(f, s, args, depth)
 }
 
 type defaultNoNextMethCaller struct{}
