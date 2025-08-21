@@ -11,7 +11,8 @@ import (
 const NameServiceErrorSymbol = slip.Symbol("name-service-error")
 
 func defNameServiceError() {
-	clos.DefConditionClass("name-service-error", slip.List{slip.ErrorSymbol},
+	s := slip.NewScope()
+	clos.DefConditionClass(s, "name-service-error", slip.List{slip.ErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -19,5 +20,5 @@ func defNameServiceError() {
 				slip.String(`A __name-service-error__ represents an error with the network naming service.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }

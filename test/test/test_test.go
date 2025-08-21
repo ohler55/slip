@@ -4,6 +4,7 @@ package test_test
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -46,15 +47,21 @@ func TestTestFail(t *testing.T) {
 	result := slip.ReadString(`(send toot :result)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Symbol(":fail"), result)
 	_ = slip.ReadString(`(send toot :report)`, scope).Eval(scope, nil)
-	tt.Equal(t, `0: (+ 1 (/ 2 0))
-  1: (/ 2 0)
-  1: (/ 2 0) => divide by zero
-0: (+ 1 (/ 2 0)) => divide by zero
-toot: FAIL
+
+	for _, seq := range []string{
+		"0: (+ 1 (/ 2 0))\n",
+		"  1: (/ 2 0)\n",
+		"    2: (initialize-instance #<division-by-zero",
+		"      3: (shared-initialize #<division-by-zero",
+		"  1: (/ 2 0) => divide by zero\n",
+		"0: (+ 1 (/ 2 0)) => divide by zero\n",
+		`toot: FAIL
   divide by zero
 toot: FAIL
-`, out.String())
-
+`,
+	} {
+		tt.Equal(t, true, strings.Contains(out.String(), seq), seq)
+	}
 	out.Reset()
 	_ = slip.ReadString(`(send toot :reset)`, scope).Eval(scope, nil)
 	_ = slip.ReadString(`(send toot :report)`, scope).Eval(scope, nil)

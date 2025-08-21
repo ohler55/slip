@@ -69,7 +69,7 @@ func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
 	}
 }
 
-func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
+func (obj *StandardObject) setSlot(s *slip.Scope, sd *SlotDef, value slip.Object, depth int) {
 	if value != slip.Unbound && sd.argType != nil && sd.argType != slip.TrueSymbol {
 		var typeOk bool
 		if sym, ok := sd.argType.(slip.Symbol); ok { // TBD handle more complex type specs
@@ -81,7 +81,7 @@ func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
 			}
 		}
 		if !typeOk {
-			slip.PanicType(sd.name, value, slip.ObjectString(sd.argType))
+			slip.TypePanic(s, depth, sd.name, value, slip.ObjectString(sd.argType))
 		}
 	}
 	if sd.classStore {

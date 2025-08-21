@@ -45,7 +45,7 @@ type MakeInstance struct {
 
 // Call the the function with the arguments provided.
 func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	class := classFromArg0(f, s, args)
+	class := classFromArg0(f, s, args, depth)
 	if _, ok := class.(*ConditionClass); ok {
 		slip.NewPanic("make-instance can not be used to make instances of %s. Use make-condition instead.",
 			class.Name())
@@ -56,7 +56,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	return inst
 }
 
-func classFromArg0(f slip.Object, s *slip.Scope, args slip.List) (class slip.Class) {
+func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, depth int) (class slip.Class) {
 	slip.ArgCountCheck(f, args, 1, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
@@ -64,7 +64,7 @@ func classFromArg0(f slip.Object, s *slip.Scope, args slip.List) (class slip.Cla
 	case slip.Class:
 		class = ta
 	default:
-		slip.PanicType("class", ta, "symbol", "flavor", "class")
+		slip.TypePanic(s, depth, "class", ta, "symbol", "flavor", "class")
 	}
 	return
 }

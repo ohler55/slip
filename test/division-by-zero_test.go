@@ -13,6 +13,8 @@ import (
 
 func TestDivisionByZeroObj(t *testing.T) {
 	cond := slip.NewDivisionByZero(
+		slip.NewScope(),
+		0,
 		slip.Symbol("/"),
 		slip.List{slip.Fixnum(1), slip.Fixnum(0)},
 		"not a %s division-by-zero", "real",
@@ -74,6 +76,7 @@ func TestDivisionByZeroMake(t *testing.T) {
 
 func TestDivisionByZeroPanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicDivisionByZero(slip.Symbol("/"), slip.List{slip.Fixnum(1), slip.Fixnum(0)}, "raise")
+		slip.PanicDivisionByZero(slip.NewScope(), 0,
+			slip.Symbol("/"), slip.List{slip.Fixnum(1), slip.Fixnum(0)}, "raise")
 	})
 }

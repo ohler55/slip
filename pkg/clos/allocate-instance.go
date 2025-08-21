@@ -46,7 +46,7 @@ type AllocateInstance struct {
 
 // Call the the function with the arguments provided.
 func (f *AllocateInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	c := classFromArg0(f, s, args)
+	c := classFromArg0(f, s, args, depth)
 	inst := c.MakeInstance()
 	inst.Init(s, args[1:], 0)
 

@@ -72,7 +72,7 @@ type defaultInitializeInstanceCaller struct{}
 func (defaultInitializeInstanceCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if fi := slip.FindFunc("shared-initialize"); fi != nil {
 		args = append(slip.List{args[0], slip.True}, args[1:]...)
-		_ = fi.Apply(s, args, depth)
+		_ = fi.Apply(s, args, depth+1)
 	}
 	return args[0]
 }

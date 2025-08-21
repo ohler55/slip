@@ -84,5 +84,5 @@ func (f *Etypecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		}
 	}
 	wants = append(wants, "t")
-	panic(slip.NewTypeError("test-key", key, wants...))
+	panic(slip.NewTypeError(s, depth, "test-key", key, wants...))
 }

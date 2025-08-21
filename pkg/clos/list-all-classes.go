@@ -59,7 +59,7 @@ func (f *ListAllClasses) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 				slip.NewPanic("%s does not name a package.", tv)
 			}
 		default:
-			slip.PanicType(":package", v, "symbol", "string", "package")
+			slip.TypePanic(s, depth, ":package", v, "symbol", "string", "package")
 		}
 	}
 	var meta slip.Object

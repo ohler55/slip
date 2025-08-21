@@ -8,20 +8,20 @@ import "fmt"
 const DivisionByZeroSymbol = Symbol("division-by-zero")
 
 // NewDivisionByZero creates a DivisionByZeroPanic (arithmetic-error) describing a arithmetic error.
-func NewDivisionByZero(operation Object, operands List, format string, args ...any) Object {
+func NewDivisionByZero(s *Scope, depth int, operation Object, operands List, format string, args ...any) Object {
 	c := FindClass("division-by-zero")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":operation"), operation,
 		Symbol(":operands"), operands,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
 // PanicDivisionByZero raises a DivisionByZeroPanic (division-by-zero)
 // describing a division by zero error.
-func PanicDivisionByZero(operation Object, operands List, format string, args ...any) {
-	panic(NewDivisionByZero(operation, operands, format, args...))
+func PanicDivisionByZero(s *Scope, depth int, operation Object, operands List, format string, args ...any) {
+	panic(NewDivisionByZero(s, depth, operation, operands, format, args...))
 }

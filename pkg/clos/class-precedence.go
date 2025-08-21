@@ -38,7 +38,7 @@ type ClassPrecedence struct {
 
 // Call the the function with the arguments provided.
 func (f *ClassPrecedence) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	c := classFromArg0(f, s, args)
+	c := classFromArg0(f, s, args, depth)
 top:
 	switch tc := c.(type) {
 	case *StandardClass:
@@ -60,13 +60,6 @@ top:
 	case *BuiltInClass:
 		pa := make(slip.List, len(tc.precedence))
 		for i, name := range tc.precedence {
-			pa[i] = name
-		}
-		result = pa
-	default:
-		h := tc.Hierarchy()
-		pa := make(slip.List, len(h))
-		for i, name := range h {
 			pa[i] = name
 		}
 		result = pa

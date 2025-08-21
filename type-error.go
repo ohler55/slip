@@ -7,7 +7,7 @@ const TypeErrorSymbol = Symbol("type-error")
 
 // NewTypeError returns a new type-error describing an incorrect type being
 // used.
-func NewTypeError(use string, value Object, wants ...string) Object {
+func NewTypeError(s *Scope, depth int, use string, value Object, wants ...string) Object {
 	c := FindClass("type-error")
 	obj := c.MakeInstance()
 	xt := make(List, len(wants))
@@ -36,16 +36,26 @@ func NewTypeError(use string, value Object, wants ...string) Object {
 	}
 	b = append(b, '.')
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":datum"), value,
 		Symbol(":expected-type"), xt,
 		Symbol(":message"), String(b),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicType raises a TypePanic (type-error) describing an incorrect type
-// being used.
+// PanicType raises a TypePanic (type-error) describing an
+// incorrect type being used.
 func PanicType(use string, value Object, wants ...string) {
-	panic(NewTypeError(use, value, wants...))
+	// func PanicType(s *Scope, depth int, use string, value Object, wants ...string) {
+	// TBD temporary
+	s := NewScope()
+	depth := 0
+	panic(NewTypeError(s, depth, use, value, wants...))
+}
+
+// TypePanic raises a TypeError (type-error) describing an incorrect type
+// being used.
+func TypePanic(s *Scope, depth int, use string, value Object, wants ...string) {
+	panic(NewTypeError(s, depth, use, value, wants...))
 }

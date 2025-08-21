@@ -37,5 +37,5 @@ type ClassName struct {
 
 // Call the the function with the arguments provided.
 func (f *ClassName) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return slip.Symbol(classFromArg0(f, s, args).Name())
+	return slip.Symbol(classFromArg0(f, s, args, depth).Name())
 }

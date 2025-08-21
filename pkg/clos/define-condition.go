@@ -80,28 +80,33 @@ func (f *DefineCondition) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 	slip.ArgCountCheck(f, args, 3, 6)
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name", args[0], "symbol")
+		slip.TypePanic(s, depth, "name", args[0], "symbol")
 	}
 	var (
 		supers    slip.List
 		slotSpecs slip.List
 	)
 	if supers, ok = args[1].(slip.List); !ok {
-		slip.PanicType("parent-types", args[1], "list")
+		slip.TypePanic(s, depth, "parent-types", args[1], "list")
 	}
 	if slotSpecs, ok = args[2].(slip.List); !ok {
-		slip.PanicType("slot-specifiers", args[2], "list")
+		slip.TypePanic(s, depth, "slot-specifiers", args[2], "list")
 	}
 	if c := slip.FindClass(string(name)); c != nil {
 		if cc, ok := c.(*ConditionClass); !ok || cc.Final {
 			slip.NewPanic("Can not redefine class %s.", name)
 		}
 	}
-	return DefConditionClass(string(name), supers, slotSpecs, args[3:])
+	return DefConditionClass(s, string(name), supers, slotSpecs, args[3:], depth)
 }
 
 // DefConditionClass defines a standard-class.
-func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *ConditionClass {
+func DefConditionClass(
+	s *slip.Scope,
+	name string,
+	supers, slotSpecs, classOptions slip.List,
+	depth int) *ConditionClass {
+
 	cc := ConditionClass{
 		StandardClass: StandardClass{
 			name:            name,
@@ -119,7 +124,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 				}
 				cc, ok := c.(*ConditionClass)
 				if !ok {
-					slip.PanicType("parent-type", c, "condition-class")
+					slip.TypePanic(s, depth, "parent-type", c, "condition-class")
 				}
 				return &cc.StandardClass
 			},
@@ -130,7 +135,7 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 		if sym, ok := super.(slip.Symbol); ok {
 			cc.supers[i] = sym
 		} else {
-			slip.PanicType("super", super, "symbol")
+			slip.TypePanic(s, depth, "super", super, "symbol")
 		}
 	}
 	cc.Init(false)
@@ -138,27 +143,27 @@ func DefConditionClass(name string, supers, slotSpecs, classOptions slip.List) *
 	for _, opt := range classOptions {
 		list, ok := opt.(slip.List)
 		if !ok || len(list) < 2 {
-			slip.PanicType("options", opt, "list")
+			slip.TypePanic(s, depth, "options", opt, "list")
 		}
 		switch list[0] {
 		case slip.Symbol(":documentation"):
 			if docs, ok := list[1].(slip.String); ok {
 				cc.docs = string(docs)
 			} else {
-				slip.PanicType("options :documentation", list[1], "string")
+				slip.TypePanic(s, depth, "options :documentation", list[1], "string")
 			}
 		case slip.Symbol(":default-initargs"):
-			fillMapFromKeyArgs(list[1:], cc.defaultInitArgs)
+			fillMapFromKeyArgs(s, list[1:], cc.defaultInitArgs, depth)
 		case slip.Symbol(":report"):
 			if list[1] != nil {
 				cc.vars["report"] = list[1].Eval(slip.NewScope(), 0)
 			}
 		default:
-			slip.PanicType("options directive", list[0], ":documentation", "default-initargs", ":report")
+			slip.TypePanic(s, depth, "options directive", list[0], ":documentation", "default-initargs", ":report")
 		}
 	}
 	for _, ss := range slotSpecs {
-		sd := NewSlotDef(ss)
+		sd := NewSlotDef(s, ss, depth)
 		sd.class = &cc
 		cc.slotDefs[sd.name] = sd
 		if sd.classStore {

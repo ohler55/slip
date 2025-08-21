@@ -44,7 +44,7 @@ func (f *SlotValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	slip.ArgCountCheck(f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("slot-name", args[1], "symbol")
+		slip.TypePanic(s, depth, "slot-name", args[1], "symbol")
 	}
 	var has bool
 	if inst, ok := args[0].(slip.Instance); ok {
@@ -74,7 +74,7 @@ func (f *SlotValue) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("slot-name", args[1], "symbol")
+		slip.TypePanic(s, 0, "slot-name", args[1], "symbol")
 	}
 	if inst, ok := args[0].(slip.Instance); ok {
 		if !inst.SetSlotValue(sym, value) {

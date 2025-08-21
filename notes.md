@@ -11,30 +11,13 @@
   - PkgUse with clos and generics
 
 - generics branch
- - scope for shared-initialize should be caller scope
-
- - [x] SLOT-MISSING
- - [x] SLOT-UNBOUND - make generic
- - [x] CALL-NEXT-METHOD
- - [x] COMPUTE-APPLICABLE-METHODS
- - [x] DEFGENERIC
- - [x] DEFMETHOD - need generic support
- - [x] FDEFINITION
- - [x] FIND-METHOD
- - [x] FUNCTION-KEYWORDS
- - [x] GENERIC-FUNCTION
- - [x] MAKE-LOAD-FORM
- - [x] METHOD-QUALIFIERS
- - [x] NEXT-METHOD-P
- - [x] NO-APPLICABLE-METHOD
- - [x] NO-NEXT-METHOD
- - [x] REMOVE-METHOD
- - [ ] INITIALIZE-INSTANCE
- - [ ] SHARED-INITIALIZE
- - [ ] WITH-ACCESSORS
+ - add scope and depth to all condition creations
+  - deprecate old and flip name order
+  - replace all in slip, later in plugins
 
 ----------
 - for later
+ - [ ] WITH-ACCESSORS
  - [ ] ENSURE-GENERIC-FUNCTION
  - [ ] REINITIALIZE-INSTANCE
  - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS

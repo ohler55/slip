@@ -37,5 +37,5 @@ type ClassMetaclass struct {
 
 // Call the the function with the arguments provided.
 func (f *ClassMetaclass) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return classFromArg0(f, s, args).Metaclass()
+	return classFromArg0(f, s, args, depth).Metaclass()
 }

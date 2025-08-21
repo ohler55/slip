@@ -85,7 +85,7 @@ func (defaultSharedInitializeCaller) Call(s *slip.Scope, args slip.List, depth i
 	}
 	nameMap := map[string]string{}
 	argMap := map[string]slip.Object{}
-	fillMapFromKeyArgs(args, argMap)
+	fillMapFromKeyArgs(s, args, argMap, depth)
 	for k, v := range argMap {
 		sd := obj.Type.initArgDef(k)
 		if sd == nil {
@@ -94,16 +94,16 @@ func (defaultSharedInitializeCaller) Call(s *slip.Scope, args slip.List, depth i
 		if n, has := nameMap[sd.name]; has {
 			slip.NewPanic("Duplicate initarg (%s) for slot %s. %s already specified.", sd.name, k, n)
 		}
-		obj.setSlot(sd, v)
+		obj.setSlot(s, sd, v, depth)
 		nameMap[sd.name] = k
 	}
 	for k, v := range obj.Type.defaultsMap() {
 		sd := obj.Type.initArgDef(k)
 		if _, has := nameMap[sd.name]; !has {
 			if v == nil {
-				obj.setSlot(sd, nil)
+				obj.setSlot(s, sd, nil, depth)
 			} else {
-				obj.setSlot(sd, v.Eval(s, depth+1))
+				obj.setSlot(s, sd, v.Eval(s, depth+1), depth)
 			}
 			nameMap[sd.name] = k
 		}
@@ -111,7 +111,7 @@ func (defaultSharedInitializeCaller) Call(s *slip.Scope, args slip.List, depth i
 	for k, sd := range obj.Type.initFormMap() {
 		if _, has := nameMap[k]; !has {
 			// If in the initForms then initform will not be nil.
-			obj.setSlot(sd, sd.initform.Eval(s, depth+1))
+			obj.setSlot(s, sd, sd.initform.Eval(s, depth+1), depth)
 		}
 	}
 	return obj

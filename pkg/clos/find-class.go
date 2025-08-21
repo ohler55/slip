@@ -46,7 +46,7 @@ func (f *FindClass) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	slip.ArgCountCheck(f, args, 1, 2)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name", args[0], "symbol")
+		slip.TypePanic(s, depth, "name", args[0], "symbol")
 	}
 	if c := slip.FindClass(string(sym)); c != nil {
 		return c
