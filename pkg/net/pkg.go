@@ -82,7 +82,7 @@ func init() {
 	slip.UserPkg.Use(&Pkg)
 }
 
-func getSockArgValue(name string, arg slip.Object, argMap map[slip.Symbol]int) int {
+func getSockArgValue(s *slip.Scope, name string, arg slip.Object, argMap map[slip.Symbol]int, depth int) int {
 	sym, _ := arg.(slip.Symbol)
 	if _, has := argMap[sym]; !has {
 		keys := make([]string, 0, len(argMap))
@@ -90,7 +90,7 @@ func getSockArgValue(name string, arg slip.Object, argMap map[slip.Symbol]int) i
 			keys = append(keys, string(sym))
 		}
 		sort.Strings(keys)
-		slip.PanicType(name, arg, keys...)
+		slip.TypePanic(s, depth, name, arg, keys...)
 	}
 	return argMap[sym]
 }

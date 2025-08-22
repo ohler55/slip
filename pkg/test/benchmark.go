@@ -62,13 +62,13 @@ func (f *Benchmark) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if r, ok := args[1].(slip.Real); ok {
 			dur = time.Duration(r.RealValue() * float64(time.Second))
 		} else {
-			slip.PanicType("duration", args[1], "real")
+			slip.TypePanic(s, depth, "duration", args[1], "real")
 		}
 		if 2 < len(args) {
 			if num, ok := args[2].(slip.Fixnum); ok && 0 < num {
 				iter = int64(num)
 			} else {
-				slip.PanicType("iterations", args[2], "fixnum")
+				slip.TypePanic(s, depth, "iterations", args[2], "fixnum")
 			}
 		}
 	}

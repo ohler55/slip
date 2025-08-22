@@ -367,7 +367,7 @@ func (obj *Flavor) describeStrings(b []byte, label string, list []string, indent
 // Receive a method invocation from the send function. Not intended to be
 // call by any code other than the send function but is public to allow it
 // to be over-ridden.
-func (obj *Flavor) Receive(_ *slip.Scope, message string, args slip.List, depth int) (result slip.Object) {
+func (obj *Flavor) Receive(s *slip.Scope, message string, args slip.List, depth int) (result slip.Object) {
 	var lo bool
 top:
 	switch message {
@@ -378,7 +378,7 @@ top:
 		if 0 < len(args) {
 			var ok bool
 			if w, ok = args[0].(io.Writer); !ok {
-				slip.PanicType("describe output-stream", args[0], "output-stream")
+				slip.TypePanic(s, depth, "describe output-stream", args[0], "output-stream")
 			}
 		}
 		ansi := slip.CurrentPackage.JustGet("*print-ansi*") != nil

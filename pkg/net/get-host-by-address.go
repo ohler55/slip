@@ -40,7 +40,7 @@ type GetHostByAddress struct {
 // Call the function with the arguments provided.
 func (f *GetHostByAddress) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 1)
-	oct, addr := addressToString(args[0])
+	oct, addr := addressToString(s, args[0], depth)
 	if names, err := net.LookupAddr(addr); err == nil && 0 < len(names) {
 		result = makeHostEnt(slip.String(names[0]), slip.List{oct})
 	}

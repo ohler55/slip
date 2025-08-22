@@ -58,7 +58,7 @@ func (f *AssertMatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if ss, ok := args[0].(slip.String); ok {
 		rx = regexp.MustCompile(string(ss))
 	} else {
-		slip.PanicType("regexp", args[0], "string")
+		slip.TypePanic(s, depth, "regexp", args[0], "string")
 	}
 	switch ta := args[1].(type) {
 	case slip.String:

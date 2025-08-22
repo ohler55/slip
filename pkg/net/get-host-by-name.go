@@ -43,7 +43,7 @@ func (f *GetHostByName) Call(s *slip.Scope, args slip.List, depth int) (result s
 	slip.ArgCountCheck(f, args, 1, 1)
 	node, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("node", args[0], "string")
+		slip.TypePanic(s, depth, "node", args[0], "string")
 	}
 	if addrs, err := net.LookupHost(string(node)); err == nil {
 		addresses := make(slip.List, len(addrs))

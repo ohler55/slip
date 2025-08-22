@@ -60,7 +60,7 @@ func (f *SocketMakeStream) Call(s *slip.Scope, args slip.List, depth int) (resul
 	slip.ArgCountCheck(f, args, 1, 7)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
 	return makeStream(self, args[1:])
 }

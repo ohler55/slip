@@ -96,11 +96,11 @@ func (f *Iterate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case io.Reader:
 		ir = ta
 	default:
-		slip.PanicType("input", ta, "string", "input-stream")
+		slip.TypePanic(s, depth, "input", ta, "string", "input-stream")
 	}
 	cr := csv.NewReader(ir)
 	cr.ReuseRecord = false
-	bagIt := csvSetReaderOptions(cr, args[2:], true)
+	bagIt := csvSetReaderOptions(s, cr, args[2:], true, depth)
 	var header []string
 	for {
 		rec, err := cr.Read()

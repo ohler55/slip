@@ -63,17 +63,17 @@ func (f *Set) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	}
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
 	if 2 < len(args) {
-		setBag(obj, args[1], args[2])
+		setBag(s, obj, args[1], args[2], depth)
 	} else {
-		setBag(obj, args[1], nil)
+		setBag(s, obj, args[1], nil, depth)
 	}
 	return obj
 }
 
-func setBag(obj *flavors.Instance, value, path slip.Object) {
+func setBag(s *slip.Scope, obj *flavors.Instance, value, path slip.Object, depth int) {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -82,9 +82,9 @@ func setBag(obj *flavors.Instance, value, path slip.Object) {
 	case Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string")
+		slip.TypePanic(s, depth, "path", p, "string")
 	}
-	v := ObjectToBag(value)
+	v := ObjectToBag(s, value, depth)
 	if x == nil {
 		obj.Any = v
 	} else {
@@ -94,7 +94,7 @@ func setBag(obj *flavors.Instance, value, path slip.Object) {
 
 // ObjectToBag is the same as slip.Simplify except for assoc lists which are
 // converted to map[string]any.
-func ObjectToBag(obj slip.Object) (v any) {
+func ObjectToBag(s *slip.Scope, obj slip.Object, depth int) (v any) {
 	switch val := obj.(type) {
 	case nil:
 		// leave v as nil
@@ -115,7 +115,7 @@ func ObjectToBag(obj slip.Object) (v any) {
 				m := map[string]any{}
 				for _, e := range val {
 					if pair, ok = e.(slip.List); !ok || len(pair) != 2 {
-						slip.PanicType("assoc list item", e, "cons")
+						slip.TypePanic(s, depth, "assoc list item", e, "cons")
 					}
 					var key string
 					switch tk := pair[0].(type) {
@@ -124,14 +124,14 @@ func ObjectToBag(obj slip.Object) (v any) {
 					case slip.String:
 						key = string(tk)
 					default:
-						slip.PanicType("assoc list item car", tk, "symbol", "string")
+						slip.TypePanic(s, depth, "assoc list item car", tk, "symbol", "string")
 					}
 					cdr := pair[1]
 					var tail slip.Tail
 					if tail, ok = cdr.(slip.Tail); ok {
 						cdr = tail.Value
 					}
-					m[key] = ObjectToBag(cdr)
+					m[key] = ObjectToBag(s, cdr, depth)
 				}
 				v = m
 				break
@@ -142,13 +142,13 @@ func ObjectToBag(obj slip.Object) (v any) {
 			if o == nil {
 				list[i] = nil
 			} else {
-				list[i] = ObjectToBag(o)
+				list[i] = ObjectToBag(s, o, depth)
 			}
 		}
 		v = list
 	case *flavors.Instance:
 		if val.Type != flavor {
-			slip.PanicType("value", val, "nil", "t", ":false", "integer", "float", "string", "symbol", "gi::time",
+			slip.TypePanic(s, depth, "value", val, "nil", "t", ":false", "integer", "float", "string", "symbol", "gi::time",
 				"list", "hash-table", "bag-instance")
 		}
 		v = val.Any

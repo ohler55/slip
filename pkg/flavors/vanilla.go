@@ -58,7 +58,7 @@ func VanillaMethods() map[string]*slip.Method {
 
 type initCaller struct{}
 
-func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller initCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	// Does nothing.
 	return nil
 }
@@ -72,7 +72,7 @@ func (caller initCaller) FuncDocs() *slip.FuncDoc {
 
 type describeCaller struct{}
 
-func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller describeCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(slip.Instance)
 	ansi := s.Get("*print-ansi*") != nil
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
@@ -87,7 +87,7 @@ func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 		}
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType(":describe output-stream", args[0], "output-stream")
+			slip.TypePanic(s, depth, ":describe output-stream", args[0], "output-stream")
 		}
 	}
 	_, _ = w.Write(b)
@@ -171,7 +171,7 @@ func (caller hasOpCaller) FuncDocs() *slip.FuncDoc {
 
 type printCaller struct{}
 
-func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller printCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	// Args should be stream print-depth escape-p. The second two arguments are
 	// ignored.
 	self := s.Get("self").(slip.Instance)
@@ -182,7 +182,7 @@ func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 		var ok bool
 		ss, _ = args[0].(slip.Stream)
 		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType(":describe output-stream", args[0], "output-stream")
+			slip.TypePanic(s, depth, ":describe output-stream", args[0], "output-stream")
 		}
 	}
 	if _, err := w.Write(self.Append(nil)); err != nil {
@@ -346,7 +346,7 @@ func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, depth int) s
 			slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
 		}
 	default:
-		slip.PanicType("new-class", args[0], "flavor")
+		slip.TypePanic(s, depth, "new-class", args[0], "flavor")
 	}
 	prev := self.Dup()
 	self.ChangeFlavor(nf)

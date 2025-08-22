@@ -145,14 +145,14 @@ func (caller respHeaderCaller) FuncDocs() *slip.FuncDoc {
 
 type respHeaderGetCaller struct{}
 
-func (caller respHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respHeaderGetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(obj, ":header-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("response :header-get key", args[0], "string")
+		slip.TypePanic(s, depth, "response :header-get key", args[0], "string")
 	}
 	header := (obj.Any.(*http.Response)).Header
 	if value := header.Get(string(key)); 0 < len(value) {
@@ -178,7 +178,7 @@ func (caller respHeaderGetCaller) FuncDocs() *slip.FuncDoc {
 
 type respTrailerCaller struct{}
 
-func (caller respTrailerCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respTrailerCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		slip.PanicMethodArgChoice(obj, ":trailer", len(args), "0")
@@ -205,14 +205,14 @@ func (caller respTrailerCaller) FuncDocs() *slip.FuncDoc {
 
 type respTrailerGetCaller struct{}
 
-func (caller respTrailerGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respTrailerGetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(obj, ":trailer-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("response :trailer-get key", args[0], "string")
+		slip.TypePanic(s, depth, "response :trailer-get key", args[0], "string")
 	}
 	trailer := (obj.Any.(*http.Response)).Trailer
 	if value := trailer.Get(string(key)); 0 < len(value) {

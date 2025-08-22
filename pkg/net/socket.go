@@ -62,7 +62,7 @@ and is based on the unix or BSD socket model.`),
 
 type socketInitCaller struct{}
 
-func (caller socketInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
@@ -76,13 +76,13 @@ func (caller socketInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		pro    int
 	)
 	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":domain")); has {
-		domain = getSockArgValue(":domain", val, domainMap)
+		domain = getSockArgValue(s, ":domain", val, domainMap, depth)
 	}
 	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":type")); has {
-		typ = getSockArgValue(":type", val, typeMap)
+		typ = getSockArgValue(s, ":type", val, typeMap, depth)
 	}
 	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":protocol")); has && val != nil {
-		pro = getSockArgValue(":protocol", val, protocolMap)
+		pro = getSockArgValue(s, ":protocol", val, protocolMap, depth)
 	}
 	if domain != 0 && typ != 0 {
 		if fd, err := syscall.Socket(domain, typ, pro); err == nil {
@@ -147,7 +147,7 @@ func (caller socketSocketCaller) FuncDocs() *slip.FuncDoc {
 
 type socketSetSocketCaller struct{}
 
-func (caller socketSetSocketCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketSetSocketCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.ArgCountCheck(self, args, 1, 1)
 	switch ta := args[0].(type) {
@@ -156,7 +156,7 @@ func (caller socketSetSocketCaller) Call(s *slip.Scope, args slip.List, _ int) s
 	case slip.Fixnum:
 		self.Any = int(ta)
 	default:
-		slip.PanicType("socket", ta, "fixnum", "socket-stream", "file-stream")
+		slip.TypePanic(s, depth, "socket", ta, "fixnum", "socket-stream", "file-stream")
 	}
 	return nil
 }

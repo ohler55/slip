@@ -145,7 +145,7 @@ func (f *Help) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case slip.String:
 			topic = string(ta)
 		default:
-			slip.PanicType("topic", ta, "string", "symbol")
+			slip.TypePanic(s, depth, "topic", ta, "string", "symbol")
 		}
 		switch strings.ToLower(topic) {
 		case "index":

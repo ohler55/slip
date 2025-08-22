@@ -43,7 +43,7 @@ func (f *ParseAddress) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	slip.ArgCountCheck(f, args, 1, 1)
 	str, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	return slip.Octets(netip.MustParseAddr(string(str)).AsSlice())
 }

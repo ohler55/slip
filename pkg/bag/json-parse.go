@@ -89,7 +89,7 @@ func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		case io.Reader:
 			oj.MustLoad(ta, cb)
 		default:
-			slip.PanicType("input", ta, "string", "input-stream")
+			slip.TypePanic(s, depth, "input", ta, "string", "input-stream")
 		}
 	} else {
 		switch ta := args[1].(type) {
@@ -100,7 +100,7 @@ func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		case io.Reader:
 			sen.MustParseReader(ta, cb)
 		default:
-			slip.PanicType("input", ta, "string", "input-stream")
+			slip.TypePanic(s, depth, "input", ta, "string", "input-stream")
 		}
 	}
 	return nil

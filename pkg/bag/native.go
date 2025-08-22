@@ -47,7 +47,7 @@ func (f *Native) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	}
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
 	return slip.SimpleObject(obj.Any)
 }

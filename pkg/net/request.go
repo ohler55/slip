@@ -70,7 +70,7 @@ the data associated with the HTTP reply.`),
 
 type reqInitCaller struct{}
 
-func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -82,13 +82,13 @@ func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 		k := string(key)
 		switch {
 		case strings.EqualFold(":method", k):
-			req.Method = getStrArg(args[i+1], k)
+			req.Method = getStrArg(s, args[i+1], k, depth)
 			if !methodChoices[req.Method] {
-				slip.PanicType("method", slip.String(req.Method),
+				slip.TypePanic(s, depth, "method", slip.String(req.Method),
 					"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE")
 			}
 		case strings.EqualFold(":protocol", k):
-			req.Proto = getStrArg(args[i+1], k)
+			req.Proto = getStrArg(s, args[i+1], k, depth)
 			if pos := strings.IndexByte(req.Proto, '/'); 0 < pos {
 				pos++
 				if dot := strings.IndexByte(req.Proto[pos:], '.'); 0 < dot {
@@ -106,21 +106,21 @@ func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 			}
 		case strings.EqualFold(":url", k):
 			var err error
-			req.RequestURI = getStrArg(args[i+1], k)
+			req.RequestURI = getStrArg(s, args[i+1], k, depth)
 			if req.URL, err = url.Parse(req.RequestURI); err != nil {
 				panic(err)
 			}
 			req.Host = req.URL.Host
 		case strings.EqualFold(":remote-addr", k):
-			req.RemoteAddr = getStrArg(args[i+1], k)
+			req.RemoteAddr = getStrArg(s, args[i+1], k, depth)
 		case strings.EqualFold(":header", k):
-			req.Header = assocToHeader(args[i+1], ":header")
+			req.Header = assocToHeader(s, args[i+1], ":header", depth)
 		case strings.EqualFold(":trailer", k):
-			req.Trailer = assocToHeader(args[i+1], ":trailer")
+			req.Trailer = assocToHeader(s, args[i+1], ":trailer", depth)
 		case strings.EqualFold(":content-length", k):
 			num, ok := args[i+1].(slip.Integer)
 			if !ok {
-				slip.PanicType(":content-length", args[i+1], "integer")
+				slip.TypePanic(s, depth, ":content-length", args[i+1], "integer")
 			}
 			req.ContentLength = num.Int64()
 		case strings.EqualFold(":body", k):
@@ -130,7 +130,7 @@ func (caller reqInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obje
 			case io.ReadCloser:
 				req.Body = tb
 			default:
-				slip.PanicType(":body", args[i+1], "string", "input-stream")
+				slip.TypePanic(s, depth, ":body", args[i+1], "string", "input-stream")
 			}
 		}
 	}
@@ -309,14 +309,14 @@ func (caller reqHeaderCaller) FuncDocs() *slip.FuncDoc {
 
 type reqHeaderGetCaller struct{}
 
-func (caller reqHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller reqHeaderGetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(obj, ":header-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("request :header-get key", args[0], "string")
+		slip.TypePanic(s, depth, "request :header-get key", args[0], "string")
 	}
 	header := (obj.Any.(*http.Request)).Header
 	if value := header.Get(string(key)); 0 < len(value) {
@@ -342,7 +342,7 @@ func (caller reqHeaderGetCaller) FuncDocs() *slip.FuncDoc {
 
 type reqTrailerCaller struct{}
 
-func (caller reqTrailerCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller reqTrailerCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		slip.PanicMethodArgChoice(obj, ":trailer", len(args), "0")
@@ -369,14 +369,14 @@ func (caller reqTrailerCaller) FuncDocs() *slip.FuncDoc {
 
 type reqTrailerGetCaller struct{}
 
-func (caller reqTrailerGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller reqTrailerGetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(obj, ":trailer-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("request :trailer-get key", args[0], "string")
+		slip.TypePanic(s, depth, "request :trailer-get key", args[0], "string")
 	}
 	trailer := (obj.Any.(*http.Request)).Trailer
 	if value := trailer.Get(string(key)); 0 < len(value) {
@@ -402,7 +402,7 @@ func (caller reqTrailerGetCaller) FuncDocs() *slip.FuncDoc {
 
 type reqBodyCaller struct{}
 
-func (caller reqBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller reqBodyCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		slip.PanicMethodArgChoice(obj, ":body", len(args), "0")
@@ -437,7 +437,7 @@ func (caller reqCloseCaller) FuncDocs() *slip.FuncDoc {
 
 type reqWriteCaller struct{}
 
-func (caller reqWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller reqWriteCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	var (
 		dest slip.Object
@@ -464,7 +464,7 @@ func (caller reqWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 				panic(err)
 			}
 		} else {
-			slip.PanicType("request :write destination", dest, "nil", "t", "output-stream")
+			slip.TypePanic(s, depth, "request :write destination", dest, "nil", "t", "output-stream")
 		}
 	}
 	return nil

@@ -43,7 +43,7 @@ func (f *MethodQualifiers) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	slip.ArgCountCheck(f, args, 1, 1)
 	meth, ok := args[0].(*slip.Method)
 	if !ok {
-		slip.PanicType("method", args[0], "method")
+		slip.TypePanic(s, depth, "method", args[0], "method")
 	}
 	qm := map[string]bool{}
 	for _, c := range meth.Combinations {

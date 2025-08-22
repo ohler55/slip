@@ -67,11 +67,11 @@ func (caller initCaller) FuncDocs() *slip.FuncDoc {
 	}
 }
 
-func getRunKeys(args slip.List) (filter slip.List, verbose, trace bool) {
+func getRunKeys(s *slip.Scope, args slip.List, depth int) (filter slip.List, verbose, trace bool) {
 	for pos := 0; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			panic(fmt.Sprintf("%s missing an argument", sym))
@@ -84,7 +84,7 @@ func getRunKeys(args slip.List) (filter slip.List, verbose, trace bool) {
 		case ":trace":
 			trace = args[pos+1] != nil
 		default:
-			slip.PanicType("keyword", sym, ":filter", ":verbose", "trace")
+			slip.TypePanic(s, depth, "keyword", sym, ":filter", ":verbose", "trace")
 		}
 	}
 	return

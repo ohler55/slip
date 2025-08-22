@@ -61,11 +61,11 @@ top:
 		aux, _ = ta.Aux.(*Aux)
 	}
 	if aux == nil {
-		slip.PanicType("generic-function", args[0], "symbol", "generic-function")
+		slip.TypePanic(s, depth, "generic-function", args[0], "symbol", "generic-function")
 	}
 	meth, ok := args[1].(*slip.Method)
 	if !ok || len(meth.Combinations) == 0 {
-		slip.PanicType("method", args[1], "method")
+		slip.TypePanic(s, depth, "method", args[1], "method")
 	}
 	if meth.Name != aux.docs.Name {
 		return args[0]

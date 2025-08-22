@@ -41,11 +41,11 @@ type AddressToString struct {
 // Call the function with the arguments provided.
 func (f *AddressToString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
-	_, str := addressToString(args[0])
+	_, str := addressToString(s, args[0], depth)
 	return slip.String(str)
 }
 
-func addressToString(arg slip.Object) (oct slip.Octets, str string) {
+func addressToString(s *slip.Scope, arg slip.Object, depth int) (oct slip.Octets, str string) {
 	switch ta := arg.(type) {
 	case slip.Octets:
 		oct = ta
@@ -61,7 +61,7 @@ func addressToString(arg slip.Object) (oct slip.Octets, str string) {
 			oct[i] = byte(slip.ToOctet(v).(slip.Octet))
 		}
 	default:
-		slip.PanicType("address", arg, "octets")
+		slip.TypePanic(s, depth, "address", arg, "octets")
 	}
 	var addr netip.Addr
 	switch len(oct) {

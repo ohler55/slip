@@ -48,7 +48,7 @@ func (f *Undefflavor) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	case *Flavor:
 		cf = ta
 	default:
-		slip.PanicType("flavor argument to undefflavor", ta, "symbol", "flavor")
+		slip.TypePanic(s, depth, "flavor argument to undefflavor", ta, "symbol", "flavor")
 	}
 	f.removeFlavor(cf)
 

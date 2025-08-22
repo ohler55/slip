@@ -40,7 +40,7 @@ func (f *Completions) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	slip.ArgCountCheck(f, args, 1, 1)
 	prefix, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("prefix", args[0], "string")
+		slip.TypePanic(s, depth, "prefix", args[0], "string")
 	}
 	var matches slip.List
 	if words, lo, hi := WordMatch(string(prefix)); words != nil && lo <= hi {

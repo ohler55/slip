@@ -11,52 +11,52 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func getStrArg(arg slip.Object, use string) string {
+func getStrArg(s *slip.Scope, arg slip.Object, use string, depth int) string {
 	ss, ok := arg.(slip.String)
 	if !ok {
-		slip.PanicType(use, arg, "string")
+		slip.TypePanic(s, depth, use, arg, "string")
 	}
 	return string(ss)
 }
 
-func getDurationArg(arg slip.Object, use string) time.Duration {
+func getDurationArg(s *slip.Scope, arg slip.Object, use string, depth int) time.Duration {
 	sr, ok := arg.(slip.Real)
 	if !ok {
-		slip.PanicType(use, arg, "real")
+		slip.TypePanic(s, depth, use, arg, "real")
 	}
 	return time.Duration(sr.RealValue() * float64(time.Second))
 }
 
-func getIntArg(arg slip.Object, use string) int64 {
+func getIntArg(s *slip.Scope, arg slip.Object, use string, depth int) int64 {
 	si, ok := arg.(slip.Integer)
 	if !ok {
-		slip.PanicType(use, arg, "integer")
+		slip.TypePanic(s, depth, use, arg, "integer")
 	}
 	return si.Int64()
 }
 
-func assocToHeader(value slip.Object, field string) http.Header {
+func assocToHeader(s *slip.Scope, value slip.Object, field string, depth int) http.Header {
 	alist, ok := value.(slip.List)
 	if !ok {
-		slip.PanicType(field, value, "assoc")
+		slip.TypePanic(s, depth, field, value, "assoc")
 	}
 	header := http.Header{}
 	for _, element := range alist {
 		elist, ok2 := element.(slip.List)
 		if !ok2 || len(elist) < 2 {
-			slip.PanicType("assoc element", element, "list")
+			slip.TypePanic(s, depth, "assoc element", element, "list")
 		}
 		var (
 			key    slip.String
 			values []string
 		)
 		if key, ok = elist[0].(slip.String); !ok {
-			slip.PanicType("header key", elist[0], "string")
+			slip.TypePanic(s, depth, "header key", elist[0], "string")
 		}
 		for _, v := range elist[1:] {
 			var ss slip.String
 			if ss, ok = v.(slip.String); !ok {
-				slip.PanicType("header value", v, "string")
+				slip.TypePanic(s, depth, "header value", v, "string")
 			}
 			values = append(values, string(ss))
 		}

@@ -61,7 +61,7 @@ func (f *WriteRow) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 6)
 	row, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("row", args[0], "list")
+		slip.TypePanic(s, depth, "row", args[0], "list")
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	args = args[1:]
@@ -79,14 +79,14 @@ func (f *WriteRow) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if ta == slip.True {
 				args = args[1:]
 			} else {
-				slip.PanicType("output", ta, "output-stream", "t", "nil")
+				slip.TypePanic(s, depth, "output", ta, "output-stream", "t", "nil")
 			}
 		}
 	}
 	cw := csv.NewWriter(w)
-	csvSetWriterOptions(cw, args)
+	csvSetWriterOptions(s, cw, args, depth)
 	var rec []string
-	csvWriteRow(cw, row, rec)
+	csvWriteRow(s, cw, row, rec, depth)
 	cw.Flush()
 	var sb *strings.Builder
 	if sb, ok = w.(*strings.Builder); ok {
@@ -95,10 +95,10 @@ func (f *WriteRow) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return nil
 }
 
-func csvWriteRow(cw *csv.Writer, row slip.Object, rec []string) {
+func csvWriteRow(s *slip.Scope, cw *csv.Writer, row slip.Object, rec []string, depth int) {
 	list, ok := row.(slip.List)
 	if !ok {
-		slip.PanicType("row", row, "list")
+		slip.TypePanic(s, depth, "row", row, "list")
 	}
 	rec = rec[:0]
 	for _, v := range list {

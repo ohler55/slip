@@ -70,7 +70,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 				slip.PanicProgram("%s already names an ordinary function or macro.", ta)
 			}
 		}
-		result = defGenericMethod(s, ta, args[1:], aux)
+		result = defGenericMethod(s, ta, args[1:], aux, depth)
 	case slip.List:
 		if len(ta) == 2 && slip.Symbol("setf") == ta[0] {
 			fname := ta.String()
@@ -78,17 +78,17 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			if fi := slip.FindFunc(fname); fi != nil {
 				aux, _ = fi.Aux.(*Aux)
 			}
-			result = defGenericMethod(s, slip.Symbol(fname), args[1:], aux)
+			result = defGenericMethod(s, slip.Symbol(fname), args[1:], aux, depth)
 		} else {
-			result = defDirectMethod(s, ta, args[1:])
+			result = defDirectMethod(s, ta, args[1:], depth)
 		}
 	default:
-		slip.PanicType("method designator for defmethod", ta, "symbol", "list")
+		slip.TypePanic(s, depth, "method designator for defmethod", ta, "symbol", "list")
 	}
 	return
 }
 
-func defDirectMethod(s *slip.Scope, ml, args slip.List) slip.Object {
+func defDirectMethod(s *slip.Scope, ml, args slip.List, depth int) slip.Object {
 	var (
 		class  slip.Class
 		daemon string
@@ -114,10 +114,10 @@ func defDirectMethod(s *slip.Scope, ml, args slip.List) slip.Object {
 	if sym, ok2 := ml[len(ml)-1].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
 		method = string(sym)
 	} else {
-		slip.PanicType("method for defmethod", ml[len(ml)-1], "keyword")
+		slip.TypePanic(s, depth, "method for defmethod", ml[len(ml)-1], "keyword")
 	}
 	if class == nil {
-		slip.PanicType("class for defmethod", ml[0], "name of class or flavor")
+		slip.TypePanic(s, depth, "class for defmethod", ml[0], "name of class or flavor")
 	}
 	return DefClassMethod(class, method, daemon, slip.DefLambda(method, s, args, class.VarNames()...))
 }
@@ -267,7 +267,7 @@ func DefCallerMethod(qualifier string, caller slip.Caller, fd *slip.FuncDoc) *sl
 	return addMethodCaller(aux, fd.Name, qualifier, string(key), caller, fd)
 }
 
-func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux) slip.Object {
+func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux, depth int) slip.Object {
 	var qual string
 	if sym, ok := args[0].(slip.Symbol); ok {
 		switch strings.ToLower(string(sym)) {
@@ -280,10 +280,10 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 	}
 	ll, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("specialize-lambda-list", args[0], "list")
+		slip.TypePanic(s, depth, "specialize-lambda-list", args[0], "list")
 	}
 	if aux == nil {
-		aux = newGfAux(fname, ll)
+		aux = newGfAux(s, fname, ll, depth)
 	}
 	// Set the function docs for the method mostly for a call to describe.
 	fd := slip.FuncDoc{
@@ -305,7 +305,7 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 						} else if tv[1] == slip.True {
 							fd.Args[i] = &slip.DocArg{Name: string(sym), Type: "t"}
 						} else {
-							slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+							slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
 						}
 					} else {
 						fd.Args[i] = &slip.DocArg{Name: string(sym), Default: tv[1]}
@@ -313,9 +313,9 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 					continue
 				}
 			}
-			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+			slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
 		default:
-			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+			slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
 		}
 	}
 	args = args[1:]
@@ -368,7 +368,7 @@ func addMethodCaller(aux *Aux, fname, qualifier, key string, caller slip.Caller,
 	return meth
 }
 
-func newGfAux(fname slip.Symbol, ll slip.List) *Aux {
+func newGfAux(s *slip.Scope, fname slip.Symbol, ll slip.List, depth int) *Aux {
 	fd := slip.FuncDoc{
 		Name:   string(fname),
 		Kind:   slip.GenericFunctionSymbol,
@@ -386,9 +386,9 @@ func newGfAux(fname slip.Symbol, ll slip.List) *Aux {
 					continue
 				}
 			}
-			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+			slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
 		default:
-			slip.PanicType("specialize-lambda-list element", tv, "symbol", "list")
+			slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
 		}
 	}
 	aux := NewAux(&fd)

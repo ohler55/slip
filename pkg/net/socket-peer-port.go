@@ -43,7 +43,7 @@ func (f *SocketPeerPort) Call(s *slip.Scope, args slip.List, depth int) (result 
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
 	if self.Any != nil {
 		_, port := socketPeerName(self)

@@ -68,11 +68,11 @@ top:
 		aux, _ = ta.Aux.(*Aux)
 	}
 	if aux == nil {
-		slip.PanicType("generic-function", args[0], "symbol", "generic-function")
+		slip.TypePanic(s, depth, "generic-function", args[0], "symbol", "generic-function")
 	}
 	specializers, _ := args[2].(slip.List)
 	if len(specializers) != aux.reqCnt {
-		slip.PanicType("specializers", args[2], "list")
+		slip.TypePanic(s, depth, "specializers", args[2], "list")
 	}
 	var key []byte
 	for i, sp := range specializers {
@@ -88,7 +88,7 @@ top:
 			if slip.True == tsp {
 				key = append(key, 't')
 			} else {
-				slip.PanicType("specializer", tsp, "symbol", "class", "t")
+				slip.TypePanic(s, depth, "specializer", tsp, "symbol", "class", "t")
 			}
 		}
 	}
@@ -140,7 +140,7 @@ top:
 				}
 			}
 		default:
-			slip.PanicType("qualifiers", args[1], "()", "(:before)", "(:after)", "(:around)")
+			slip.TypePanic(s, depth, "qualifiers", args[1], "()", "(:before)", "(:after)", "(:around)")
 		}
 	}
 	if meth == nil {

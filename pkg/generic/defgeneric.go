@@ -66,11 +66,11 @@ func (gf *genfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 }
 
 // Call the the function with the arguments provided.
-func (f *Defgeneric) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (f *Defgeneric) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 2, -1)
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("function-name", args[0], "symbol")
+		slip.TypePanic(s, depth, "function-name", args[0], "symbol")
 	}
 	if fi := slip.FindFunc(string(name)); fi != nil {
 		if _, ok = fi.Aux.(*Aux); !ok {
@@ -79,7 +79,7 @@ func (f *Defgeneric) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	}
 	var ll slip.List
 	if ll, ok = args[1].(slip.List); !ok {
-		slip.PanicType("gf-lambda-list", args[1], "list")
+		slip.TypePanic(s, depth, "gf-lambda-list", args[1], "list")
 	}
 	fd := slip.FuncDoc{
 		Name:   string(name),
@@ -90,7 +90,7 @@ func (f *Defgeneric) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	for i, v := range ll {
 		var sym slip.Symbol
 		if sym, ok = v.(slip.Symbol); !ok {
-			slip.PanicType("gf-lambda-list element", v, "symbol")
+			slip.TypePanic(s, depth, "gf-lambda-list element", v, "symbol")
 		}
 		fd.Args[i] = &slip.DocArg{Name: string(sym)}
 	}
@@ -98,7 +98,7 @@ func (f *Defgeneric) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	for _, a := range args[2:] {
 		var option slip.List
 		if option, ok = a.(slip.List); !ok || len(option) < 2 {
-			slip.PanicType("option", a, "list")
+			slip.TypePanic(s, depth, "option", a, "list")
 		}
 		switch option[0] {
 		case slip.Symbol(":documentation"):
@@ -112,9 +112,9 @@ func (f *Defgeneric) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 			slip.Symbol(":method-class"):
 			// ignore
 		case slip.Symbol(":method"):
-			defGenericMethod(s, name, option[1:], aux)
+			defGenericMethod(s, name, option[1:], aux, depth)
 		default:
-			slip.PanicType("option keyword", option[0], "symbol")
+			slip.TypePanic(s, depth, "option keyword", option[0], "symbol")
 		}
 	}
 	return slip.CurrentPackage.Define(

@@ -50,18 +50,18 @@ func (f *SocketListen) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	slip.ArgCountCheck(f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
-	listenSocket(self, args[1:])
+	listenSocket(s, self, args[1:], depth)
 	return nil
 }
 
 type socketListenCaller struct{}
 
-func (caller socketListenCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketListenCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":listen", args, 1, 1)
-	listenSocket(self, args)
+	listenSocket(s, self, args, depth)
 	return nil
 }
 
@@ -71,10 +71,10 @@ func (caller socketListenCaller) FuncDocs() *slip.FuncDoc {
 	return md
 }
 
-func listenSocket(self *flavors.Instance, args slip.List) {
+func listenSocket(s *slip.Scope, self *flavors.Instance, args slip.List, depth int) {
 	backlog, ok := args[0].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("backlog", args[0], "fixnum")
+		slip.TypePanic(s, depth, "backlog", args[0], "fixnum")
 	}
 	var fd int
 	if fd, ok = self.Any.(int); !ok {

@@ -116,7 +116,7 @@ func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
 	for i := 0; i < len(args); i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok || len(sym) < 2 || sym[0] != ':' {
-			slip.PanicType("initialization keyword", args[i], "keyword")
+			slip.TypePanic(scope, depth, "initialization keyword", args[i], "keyword")
 		}
 		key := strings.ToLower(string(sym))
 		if key == ":self" {

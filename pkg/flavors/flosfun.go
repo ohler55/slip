@@ -69,7 +69,7 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	}
 	if len(fname) == 0 {
-		slip.PanicType("function-name", args[0], "symbol")
+		slip.TypePanic(s, depth, "function-name", args[0], "symbol")
 	}
 	var (
 		meth string
@@ -78,7 +78,7 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if sym, ok := args[1].(slip.Symbol); ok && 1 < len(sym) && sym[0] == ':' {
 		meth = strings.ToLower(string(sym))
 	} else {
-		slip.PanicType("method", args[1], "keyword")
+		slip.TypePanic(s, depth, "method", args[1], "keyword")
 	}
 	if 2 < len(args) {
 		switch ta := args[2].(type) {
@@ -87,11 +87,11 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case *Flavor:
 			m := ta.methods[meth]
 			if m == nil {
-				slip.PanicType("doc-source", args[2], "string", "flavor")
+				slip.TypePanic(s, depth, "doc-source", args[2], "string", "flavor")
 			}
 			docs = m.Doc
 		default:
-			slip.PanicType("doc-source", args[2], "string", "flavor")
+			slip.TypePanic(s, depth, "doc-source", args[2], "string", "flavor")
 		}
 	}
 	FlosFun(fname, meth, docs, slip.CurrentPackage)
@@ -103,7 +103,7 @@ func (f *flosWrap) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, -1)
 	inst, ok := args[0].(*Instance)
 	if !ok {
-		slip.PanicType("instance", args[0], "instance")
+		slip.TypePanic(s, depth, "instance", args[0], "instance")
 	}
 	return inst.Receive(s, f.meth, args[1:], depth)
 }

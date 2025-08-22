@@ -51,7 +51,7 @@ func (f *Ansi) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for _, arg := range args {
 		sym, ok := arg.(slip.Symbol)
 		if !ok || len(sym) < 2 || sym[0] != ':' {
-			slip.PanicType("code", arg, "keyword")
+			slip.TypePanic(s, depth, "code", arg, "keyword")
 		}
 		switch strings.ToLower(string(sym)) {
 		case ":reset":

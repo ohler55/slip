@@ -52,11 +52,11 @@ top:
 		aux, _ = ta.Aux.(*Aux)
 	}
 	if aux == nil {
-		slip.PanicType("generic-function", args[0], "symbol", "generic-function")
+		slip.TypePanic(s, depth, "generic-function", args[0], "symbol", "generic-function")
 	}
 	gfa, _ := args[1].(slip.List)
 	if len(gfa) < aux.reqCnt {
-		slip.PanicType("function-arguments", args[1], "list")
+		slip.TypePanic(s, depth, "function-arguments", args[1], "list")
 	}
 	return aux.compMethList(gfa)
 }

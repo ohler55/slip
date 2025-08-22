@@ -51,18 +51,18 @@ func (f *SocketBind) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	slip.ArgCountCheck(f, args, 1, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
-	bindSocket(self, args[1:])
+	bindSocket(s, self, args[1:], depth)
 	return nil
 }
 
 type socketBindCaller struct{}
 
-func (caller socketBindCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketBindCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":bind", args, 0, 2)
-	bindSocket(self, args)
+	bindSocket(s, self, args, depth)
 	return nil
 }
 
@@ -72,8 +72,8 @@ func (caller socketBindCaller) FuncDocs() *slip.FuncDoc {
 	return md
 }
 
-func bindSocket(self *flavors.Instance, args slip.List) {
-	fd, sa := getAddressArgs(self, args)
+func bindSocket(s *slip.Scope, self *flavors.Instance, args slip.List, depth int) {
+	fd, sa := getAddressArgs(s, self, args, depth)
 	if err := syscall.Bind(fd, sa); err != nil {
 		panic(err)
 	}

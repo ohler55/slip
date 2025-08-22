@@ -79,13 +79,13 @@ func (f *SlotMissing) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 
 type defaultSlotMissingCaller struct{}
 
-func (defaultSlotMissingCaller) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
+func (defaultSlotMissingCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(args[3], args, 4, 5)
 	var cond slip.Object
 	// Ignore class as it is not used in forming the error message.
 	slotName, ok := args[2].(slip.Symbol)
 	if !ok {
-		slip.PanicType("slot-name", args[2], "symbol")
+		slip.TypePanic(s, depth, "slot-name", args[2], "symbol")
 	}
 	if sym, ok2 := args[3].(slip.Symbol); ok2 && string(sym) == "setf" {
 		cond = slip.NewCellError(

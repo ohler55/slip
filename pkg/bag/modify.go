@@ -69,7 +69,7 @@ func (f *Modify) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	slip.ArgCountCheck(f, args, 2, 5)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
 	modifyBag(s, obj, args[1:], depth+1)
 
@@ -90,13 +90,13 @@ func modifyBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 		case Path:
 			x = jp.Expr(p)
 		default:
-			slip.PanicType("path", p, "string")
+			slip.TypePanic(s, depth, "path", p, "string")
 		}
 		if 2 < len(args) {
 			for pos := 2; pos < len(args); pos += 2 {
 				sym, ok := args[pos].(slip.Symbol)
 				if !ok {
-					slip.PanicType("keyword", args[pos], "keyword")
+					slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 				}
 				if len(args)-1 <= pos {
 					slip.NewPanic("keyword %s is missing a value", sym)
@@ -104,7 +104,7 @@ func modifyBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 				if strings.EqualFold(string(sym), ":as-bag") {
 					asBag = args[pos+1] != nil
 				} else {
-					slip.PanicType("keyword", sym, ":as-bag")
+					slip.TypePanic(s, depth, "keyword", sym, ":as-bag")
 				}
 			}
 		}

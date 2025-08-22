@@ -46,7 +46,7 @@ func (f *FlavorName) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	case *Flavor:
 		cf = ta
 	default:
-		slip.PanicType("flavor argument to flavor-name", ta, "flavor")
+		slip.TypePanic(s, depth, "flavor argument to flavor-name", ta, "flavor")
 	}
 	return slip.Symbol(cf.name)
 }

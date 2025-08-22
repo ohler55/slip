@@ -52,18 +52,18 @@ func (f *SocketShutdown) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	slip.ArgCountCheck(f, args, 1, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
-	shutdownSocket(self, args[1:])
+	shutdownSocket(s, self, args[1:], depth)
 	return nil
 }
 
 type socketShutdownCaller struct{}
 
-func (caller socketShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketShutdownCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	slip.SendArgCountCheck(self, ":shutdown", args, 0, 2)
-	shutdownSocket(self, args)
+	shutdownSocket(s, self, args, depth)
 	return nil
 }
 
@@ -73,7 +73,7 @@ func (caller socketShutdownCaller) FuncDocs() *slip.FuncDoc {
 	return md
 }
 
-func shutdownSocket(self *flavors.Instance, args slip.List) {
+func shutdownSocket(s *slip.Scope, self *flavors.Instance, args slip.List, depth int) {
 	if fd, ok := self.Any.(int); ok {
 		var err error
 		if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":direction")); has {
@@ -85,7 +85,7 @@ func shutdownSocket(self *flavors.Instance, args slip.List) {
 			case slip.Symbol(":io"):
 				err = syscall.Shutdown(fd, syscall.SHUT_RDWR)
 			default:
-				slip.PanicType(":direction", value, ":input", ":output", ":io")
+				slip.TypePanic(s, depth, ":direction", value, ":input", ":output", ":io")
 			}
 		}
 		if err != nil {

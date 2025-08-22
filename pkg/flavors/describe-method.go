@@ -60,7 +60,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	case HasMethods:
 		hm = ta
 	default:
-		slip.PanicType("flavor argument to describe-method", ta, "symbol", "flavor")
+		slip.TypePanic(s, depth, "flavor argument to describe-method", ta, "symbol", "flavor")
 	}
 	sc := hm.(slip.Class)
 	meth, _ := args[1].(slip.Symbol)
@@ -72,7 +72,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	if 2 < len(args) {
 		var ok bool
 		if w, ok = args[2].(io.Writer); !ok {
-			slip.PanicType("describe-method output-stream", args[2], "output-stream")
+			slip.TypePanic(s, depth, "describe-method output-stream", args[2], "output-stream")
 		}
 	}
 	ansi := s.Get("*print-ansi*") != nil

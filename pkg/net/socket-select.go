@@ -60,20 +60,20 @@ func (f *SocketSelect) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	slip.ArgCountCheck(f, args, 3, 5)
 
 	timeout := -time.Second
-	rlist := socketListArg(args[0], "read")
-	wlist := socketListArg(args[1], "write")
-	elist := socketListArg(args[2], "error")
+	rlist := socketListArg(s, args[0], "read", depth)
+	wlist := socketListArg(s, args[1], "write", depth)
+	elist := socketListArg(s, args[2], "error", depth)
 
 	if val, has := slip.GetArgsKeyValue(args[3:], slip.Symbol(":timeout")); has && val != nil {
 		if r, ok := val.(slip.Real); ok && 0.0 <= r.RealValue() {
 			timeout = time.Duration(r.RealValue() * float64(time.Second))
 		} else {
-			slip.PanicType(":timeout", val, "non-negative real")
+			slip.TypePanic(s, depth, ":timeout", val, "non-negative real")
 		}
 	}
-	rset := setSocketSets(rlist, "read")
-	wset := setSocketSets(wlist, "write")
-	eset := setSocketSets(elist, "error")
+	rset := setSocketSets(s, rlist, "read", depth)
+	wset := setSocketSets(s, wlist, "write", depth)
+	eset := setSocketSets(s, elist, "error", depth)
 
 	_ = Select(rset, wset, eset, timeout)
 
@@ -84,7 +84,7 @@ func (f *SocketSelect) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	}
 }
 
-func socketListArg(arg slip.Object, name string) (list slip.List) {
+func socketListArg(s *slip.Scope, arg slip.Object, name string, depth int) (list slip.List) {
 	switch ta := arg.(type) {
 	case nil:
 	case *flavors.Instance:
@@ -92,12 +92,12 @@ func socketListArg(arg slip.Object, name string) (list slip.List) {
 	case slip.List:
 		list = ta
 	default:
-		slip.PanicType(name, arg, "socket", "list of socket")
+		slip.TypePanic(s, depth, name, arg, "socket", "list of socket")
 	}
 	return
 }
 
-func setSocketSets(list slip.List, name string) *FdSet {
+func setSocketSets(s *slip.Scope, list slip.List, name string, depth int) *FdSet {
 	var set FdSet
 	for _, val := range list {
 		if sock, _ := val.(*flavors.Instance); sock.IsA("socket") {
@@ -105,7 +105,7 @@ func setSocketSets(list slip.List, name string) *FdSet {
 				set.Set(fd)
 			}
 		} else {
-			slip.PanicType(name, val, "socket", "list of sockets")
+			slip.TypePanic(s, depth, name, val, "socket", "list of sockets")
 		}
 	}
 	return &set

@@ -43,7 +43,7 @@ func (f *SocketClose) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	slip.ArgCountCheck(f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
 		_ = syscall.Close(fd)
