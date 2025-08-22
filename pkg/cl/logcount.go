@@ -41,7 +41,7 @@ type Logcount struct {
 
 // Call the function with the arguments provided.
 func (f *Logcount) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	var cnt slip.Fixnum
 	switch ti := args[0].(type) {
 	case slip.Fixnum:
@@ -72,7 +72,7 @@ func (f *Logcount) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			cnt--
 		}
 	default:
-		slip.PanicType("integer", ti, "integer")
+		slip.TypePanic(s, depth, "integer", ti, "integer")
 	}
 	return cnt
 }

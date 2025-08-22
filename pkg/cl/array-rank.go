@@ -37,11 +37,11 @@ type ArrayRank struct {
 
 // Call the function with the arguments provided.
 func (f *ArrayRank) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if al, ok := args[0].(slip.ArrayLike); ok {
 		result = slip.Fixnum(al.Rank())
 	} else {
-		slip.PanicType("array", args[0], "array")
+		slip.TypePanic(s, depth, "array", args[0], "array")
 	}
 	return
 }

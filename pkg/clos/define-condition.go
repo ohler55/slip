@@ -77,7 +77,7 @@ type DefineCondition struct {
 
 // Call the the function with the arguments provided.
 func (f *DefineCondition) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 6)
+	slip.CheckArgCount(s, depth, f, args, 3, 6)
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
 		slip.TypePanic(s, depth, "name", args[0], "symbol")

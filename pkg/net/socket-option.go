@@ -59,7 +59,7 @@ type SocketOption struct {
 
 // Call the function with the arguments provided.
 func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
 		slip.TypePanic(s, depth, "socket", args[0], "socket")
@@ -72,7 +72,7 @@ func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result sl
 
 // Place a value in an option using the :set-option method.
 func (f *SocketOption) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
 		slip.TypePanic(s, 0, "socket", args[0], "socket")
@@ -84,7 +84,7 @@ type socketOptionCaller struct{}
 
 func (caller socketOptionCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":option", args, 1, 1)
+	slip.CheckSendArgCount(s, depth, self, ":option", args, 1, 1)
 	if fd, ok := self.Any.(int); ok {
 		result = getSockopt(s, fd, args[0], depth)
 	}
@@ -101,7 +101,7 @@ type socketSetOptionCaller struct{}
 
 func (caller socketSetOptionCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":option", args, 2, 2)
+	slip.CheckSendArgCount(s, depth, self, ":option", args, 2, 2)
 	if fd, ok := self.Any.(int); ok {
 		setSockopt(s, fd, args[0], args[1], depth)
 	}

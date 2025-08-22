@@ -46,11 +46,9 @@ type Mod struct {
 
 // Call the function with the arguments provided.
 func (f *Mod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	if _, ok := args[1].(slip.Real); !ok {
-		slip.PanicType("divisor", args[1], "real")
+		slip.TypePanic(s, depth, "divisor", args[1], "real")
 	}
 	n, d := slip.NormalizeNumber(args[0], args[1])
 	switch num := n.(type) {
@@ -89,7 +87,7 @@ func (f *Mod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		}
 		result = slip.DoubleFloat(m)
 	case slip.Complex:
-		slip.PanicType("number", num, "real")
+		slip.TypePanic(s, depth, "number", num, "real")
 	}
 	return
 }

@@ -40,13 +40,11 @@ type Min struct {
 
 // Call the function with the arguments provided.
 func (f *Min) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) == 0 {
-		slip.PanicArgCount(f, 1, -1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	pos := 0
 	min := args[pos]
 	if _, ok := min.(slip.Real); !ok {
-		slip.PanicType("reals", min, "real")
+		slip.TypePanic(s, depth, "reals", min, "real")
 	}
 	pos++
 	for ; pos < len(args); pos++ {
@@ -77,7 +75,7 @@ func (f *Min) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				min = args[pos]
 			}
 		case slip.Complex:
-			slip.PanicType("reals", arg, "real")
+			slip.TypePanic(s, depth, "reals", arg, "real")
 		}
 	}
 	return min

@@ -46,7 +46,7 @@ type Butlast struct {
 
 // Call the function with the arguments provided.
 func (f *Butlast) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	a := args[0]
 	switch list := a.(type) {
 	case nil:
@@ -57,7 +57,7 @@ func (f *Butlast) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			if i, ok := args[1].(slip.Integer); ok {
 				n = int(i.Int64())
 			} else {
-				slip.PanicType("n", args[1], "integer")
+				slip.TypePanic(s, depth, "n", args[1], "integer")
 			}
 		}
 		if 0 < len(list) {
@@ -72,7 +72,7 @@ func (f *Butlast) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			}
 		}
 	default:
-		slip.PanicType("list", list, "list")
+		slip.TypePanic(s, depth, "list", list, "list")
 	}
 	return
 }

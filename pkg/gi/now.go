@@ -47,7 +47,7 @@ func (f *Now) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	case 1:
 		t = time.Now().In(getLocArg(s, args[0], depth))
 	default:
-		slip.PanicArgCount(f, 0, 1)
+		slip.CheckArgCount(s, depth, f, args, 0, 1)
 	}
 	return slip.Time(t)
 }

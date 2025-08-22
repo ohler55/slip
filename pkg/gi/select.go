@@ -50,7 +50,7 @@ const (
 
 // Call the function with the arguments provided.
 func (f *Select) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var (
 		clauses [maxSlipChan + maxTimeChan]slip.List
 		sc      [maxSlipChan]Channel

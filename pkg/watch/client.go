@@ -235,7 +235,7 @@ func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (r
 		case result = <-rc:
 			_ = timer.Stop()
 		case <-timer.C:
-			result = slip.NewError(":eval request timed out")
+			result = slip.ErrorNew(s, depth, ":eval request timed out")
 		}
 	}
 	return
@@ -531,7 +531,7 @@ func (c *client) writeMsg(x slip.List) slip.Object {
 	msg = append(msg, '\n')
 	if cnt, err := c.con.Write(msg); err != nil || cnt == 0 {
 		c.shutdown()
-		return slip.NewError("%s", err)
+		return slip.ErrorNew(slip.NewScope(), 0, "%s", err)
 	}
 	return nil
 }

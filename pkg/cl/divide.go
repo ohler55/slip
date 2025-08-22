@@ -41,14 +41,12 @@ type Divide struct {
 
 // Call the function with the arguments provided.
 func (f *Divide) Call(s *slip.Scope, args slip.List, depth int) (quot slip.Object) {
-	if len(args) < 1 {
-		slip.PanicArgCount(f, 1, -1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	for pos, a := range args {
 		if quot == nil {
 			quot = a
 			if _, ok := quot.(slip.Number); !ok {
-				slip.PanicType("numbers", quot, "number")
+				slip.TypePanic(s, depth, "numbers", quot, "number")
 			}
 			if pos == len(args)-1 {
 				switch td := quot.(type) {

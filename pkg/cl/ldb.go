@@ -44,9 +44,9 @@ type Ldb struct {
 // Call the function with the arguments provided.
 func (f *Ldb) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	// Helper functions are defined in deposit-field.go.
-	slip.ArgCountCheck(f, args, 2, 2)
-	integer, _ := ToUnsignedByte(args[1], "integer")
-	size, pos := byteSpecArg(args[0])
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
+	integer, _ := ToUnsignedByte(s, args[1], "integer", depth)
+	size, pos := byteSpecArg(s, args[0], depth)
 
 	max := uint(integer.Size())
 	ub := slip.UnsignedByte{Bytes: make([]byte, size/8+1)}
@@ -63,9 +63,9 @@ func (f *Ldb) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 
 // Place a value in the first position of a list or cons.
 func (f *Ldb) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
-	size, pos := byteSpecArg(args[0])
-	uv, _ := ToUnsignedByte(value, "setf value")
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
+	size, pos := byteSpecArg(s, args[0], 0)
+	uv, _ := ToUnsignedByte(s, value, "setf value", 0)
 
 	switch ti := args[1].(type) {
 	case *slip.Bignum:
@@ -86,6 +86,6 @@ func (f *Ldb) Place(s *slip.Scope, args slip.List, value slip.Object) {
 			ti.SetBit(i+uint(pos), uv.GetBit(i))
 		}
 	default:
-		slip.PanicType("integer", ti, "bitnum", "signed-byte", "unsigned-byte")
+		slip.TypePanic(s, 0, "integer", ti, "bitnum", "signed-byte", "unsigned-byte")
 	}
 }

@@ -34,7 +34,7 @@ func NewBroadcastStream(args ...slip.Object) BroadcastStream {
 				continue
 			}
 		}
-		slip.PanicType("output-stream", a, "output-stream")
+		slip.TypePanic(slip.NewScope(), 0, "output-stream", a, "output-stream")
 	}
 	return bs
 }

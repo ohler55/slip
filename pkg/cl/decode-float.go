@@ -41,7 +41,7 @@ type DecodeFloat struct {
 
 // Call the function with the arguments provided.
 func (f *DecodeFloat) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if r, ok := args[0].(slip.Float); ok {
 		rv := r.RealValue()
 		neg := slip.DoubleFloat(1.0)
@@ -52,7 +52,7 @@ func (f *DecodeFloat) Call(s *slip.Scope, args slip.List, depth int) (result sli
 		sig, exp := math.Frexp(rv)
 		result = slip.Values{slip.DoubleFloat(sig), slip.Fixnum(exp), neg}
 	} else {
-		slip.PanicType("float", args[0], "real")
+		slip.TypePanic(s, depth, "float", args[0], "real")
 	}
 	return
 }

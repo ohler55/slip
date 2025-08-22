@@ -47,7 +47,7 @@ type Decf struct {
 
 // Call the function with the arguments provided.
 func (f *Decf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var delta slip.Object = slip.Fixnum(-1)
 	if 1 < len(args) {
 		delta = args[1]
@@ -72,7 +72,7 @@ func (f *Decf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		case slip.Complex:
 			delta = slip.Complex(complex(-real(td), -imag(td)))
 		default:
-			slip.PanicType("decf value", td, "number")
+			slip.TypePanic(s, depth, "decf value", td, "number")
 		}
 	}
 	d2 := depth + 1
@@ -97,7 +97,7 @@ Retry:
 		result = addNumbers(tp.Apply(s, pargs, d2), delta)
 		tp.Place(s, pargs, result)
 	default:
-		slip.PanicType("decf placer", tp, "placer", "symbol")
+		slip.TypePanic(s, depth, "decf placer", tp, "placer", "symbol")
 	}
 	return
 }

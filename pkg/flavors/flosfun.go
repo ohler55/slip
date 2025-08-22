@@ -55,7 +55,7 @@ type flosWrap struct {
 
 // Call the the function with the arguments provided.
 func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	var fname string
 	switch ta := args[0].(type) {
 	case slip.Symbol:
@@ -100,7 +100,7 @@ func (f *Flosfun) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 }
 
 func (f *flosWrap) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	inst, ok := args[0].(*Instance)
 	if !ok {
 		slip.TypePanic(s, depth, "instance", args[0], "instance")

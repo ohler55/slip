@@ -50,7 +50,7 @@ type YOrNP struct {
 func (f *YOrNP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	var prompt []byte
 	if 0 < len(args) {
-		prompt = FormatArgs(s, args)
+		prompt = FormatArgs(s, args, depth)
 		prompt = append(prompt, ' ')
 	}
 	prompt = append(prompt, "(y or n) "...)

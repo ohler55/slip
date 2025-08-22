@@ -79,7 +79,7 @@ func (f *Psetf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			}
 			ta.Place(s, pargs, result)
 		default:
-			slip.PanicType("placer argument to psetf", p, "symbol", "placer")
+			slip.TypePanic(s, depth, "placer argument to psetf", p, "symbol", "placer")
 		}
 	}
 	return

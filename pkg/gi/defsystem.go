@@ -91,7 +91,7 @@ type DefSystem struct {
 
 // Call the function with the arguments provided.
 func (f *DefSystem) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 25)
+	slip.CheckArgCount(s, depth, f, args, 1, 25)
 	self := system.MakeInstance().(*flavors.Instance)
 	xargs := make(slip.List, len(args)+1)
 	xargs[0] = slip.Symbol(":name")

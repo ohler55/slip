@@ -47,7 +47,7 @@ type UnixTime struct {
 
 // Call the function with the arguments provided.
 func (f *UnixTime) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	r, ok := args[0].(slip.Real)
 	if !ok {
 		slip.TypePanic(s, depth, "seconds", args[0], "real")

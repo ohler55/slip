@@ -32,6 +32,6 @@ type ProcessID struct {
 
 // Call the function with the arguments provided.
 func (f *ProcessID) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 0)
+	slip.CheckArgCount(s, depth, f, args, 0, 0)
 	return slip.Fixnum(os.Getpid())
 }

@@ -33,7 +33,7 @@ type EditStash struct {
 
 // Call the the function with the arguments provided.
 func (f *EditStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 0)
+	slip.CheckArgCount(s, depth, f, args, 0, 0)
 
 	var xargs []string
 	xed := externalEditor

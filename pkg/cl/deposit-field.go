@@ -49,10 +49,10 @@ type DepositField struct {
 
 // Call the function with the arguments provided.
 func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 3)
-	newbyte, nneg := ToUnsignedByte(args[0], "newbyte")
-	integer, neg := ToUnsignedByte(args[2], "integer")
-	size, pos := byteSpecArg(args[1])
+	slip.CheckArgCount(s, depth, f, args, 3, 3)
+	newbyte, nneg := ToUnsignedByte(s, args[0], "newbyte", depth)
+	integer, neg := ToUnsignedByte(s, args[2], "integer", depth)
+	size, pos := byteSpecArg(s, args[1], depth)
 
 	integer = integer.Dup()
 	max := uint(newbyte.Size())
@@ -73,7 +73,7 @@ func (f *DepositField) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 }
 
 // ToUnsignedByte converts the arg to an UnsignedByte or panics.
-func ToUnsignedByte(arg slip.Object, name string) (ub *slip.UnsignedByte, neg bool) {
+func ToUnsignedByte(s *slip.Scope, arg slip.Object, name string, depth int) (ub *slip.UnsignedByte, neg bool) {
 	switch ta := arg.(type) {
 	case slip.Fixnum:
 		sb := slip.SignedByteFromInt64(ta.Int64())
@@ -95,30 +95,30 @@ func ToUnsignedByte(arg slip.Object, name string) (ub *slip.UnsignedByte, neg bo
 	case *slip.UnsignedByte:
 		ub = ta
 	default:
-		slip.PanicType(name, arg, "integer")
+		slip.TypePanic(s, depth, name, arg, "integer")
 	}
 	return
 }
 
-func byteSpecArg(arg slip.Object) (size, pos int) {
+func byteSpecArg(s *slip.Scope, arg slip.Object, depth int) (size, pos int) {
 	spec, ok := arg.(slip.List)
 	if !ok || len(spec) != 2 {
-		slip.PanicType("bytespec", arg, "cons")
+		slip.TypePanic(s, depth, "bytespec", arg, "cons")
 	}
 	var num slip.Fixnum
 	if num, ok = spec[0].(slip.Fixnum); ok {
 		size = int(num)
 	} else {
-		slip.PanicType("size", spec[0], "fixnum")
+		slip.TypePanic(s, depth, "size", spec[0], "fixnum")
 	}
 	var tail slip.Tail
 	if tail, ok = spec[1].(slip.Tail); !ok {
-		slip.PanicType("bytespec", arg, "cons")
+		slip.TypePanic(s, depth, "bytespec", arg, "cons")
 	}
 	if num, ok = tail.Value.(slip.Fixnum); ok {
 		pos = int(num)
 	} else {
-		slip.PanicType("position", tail.Value, "fixnum")
+		slip.TypePanic(s, depth, "position", tail.Value, "fixnum")
 	}
 	return
 }

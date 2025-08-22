@@ -45,7 +45,7 @@ type Setenv struct {
 
 // Call the function with the arguments provided.
 func (f *Setenv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	var (
 		name  string
 		value string

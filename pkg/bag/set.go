@@ -58,9 +58,7 @@ type Set struct {
 
 // Call the function with the arguments provided.
 func (f *Set) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 2 || 3 < len(args) {
-		slip.PanicArgCount(f, 2, 3)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
 		slip.TypePanic(s, depth, "bag", args[0], "bag")

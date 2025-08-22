@@ -57,7 +57,7 @@ type StableSort struct {
 
 // Call the function with the arguments provided.
 func (f *StableSort) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 4)
+	slip.CheckArgCount(s, depth, f, args, 1, 4)
 	result = args[0]
 	var (
 		keyFunc   slip.Caller
@@ -70,12 +70,12 @@ func (f *StableSort) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		for pos := 2; pos < len(args); pos += 2 {
 			sym, ok := args[pos].(slip.Symbol)
 			if !ok {
-				slip.PanicType("keyword", args[pos], "keyword")
+				slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 			}
 			if strings.EqualFold(string(sym), ":key") && pos < len(args)-1 {
 				keyFunc = ResolveToCaller(s, args[pos+1], depth)
 			} else {
-				slip.PanicType("keyword", sym, ":key")
+				slip.TypePanic(s, depth, "keyword", sym, ":key")
 			}
 		}
 	}
@@ -105,7 +105,7 @@ func (f *StableSort) Call(s *slip.Scope, args slip.List, depth int) (result slip
 			stableSortObjects(s, elements, keyFunc, predicate, depth)
 		}
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	return
 }

@@ -40,10 +40,10 @@ type GetOutputStreamString struct {
 
 // Call the function with the arguments provided.
 func (f *GetOutputStreamString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	os, ok := args[0].(*slip.StringStream)
 	if !ok {
-		slip.PanicType("stream", args[0], "string-output-stream")
+		slip.TypePanic(s, depth, "stream", args[0], "string-output-stream")
 	}
 	return slip.String(os.Content())
 }

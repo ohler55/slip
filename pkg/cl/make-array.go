@@ -76,7 +76,7 @@ type MakeArray struct {
 
 // Call the function with the arguments provided.
 func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 15)
+	slip.CheckArgCount(s, depth, f, args, 1, 15)
 	var (
 		dims         []int
 		initContents slip.List
@@ -92,11 +92,11 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if num, _ := v.(slip.Fixnum); 0 < num {
 				dims = append(dims, int(num))
 			} else {
-				slip.PanicType("dimensions", args[0], "list of positive fixnums")
+				slip.TypePanic(s, depth, "dimensions", args[0], "list of positive fixnums")
 			}
 		}
 	default:
-		slip.PanicType("dimensions", ta, "fixnum", "list of positive fixnums")
+		slip.TypePanic(s, depth, "dimensions", ta, "fixnum", "list of positive fixnums")
 	}
 	rest := args[1:]
 	if option, has := slip.GetArgsKeyValue(rest, slip.Symbol(":element-type")); has {
@@ -105,7 +105,7 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		} else if option == slip.True {
 			elementType = slip.TrueSymbol
 		} else {
-			slip.PanicType(":element-type", option, "symbol")
+			slip.TypePanic(s, depth, ":element-type", option, "symbol")
 		}
 	}
 	initElement, _ := slip.GetArgsKeyValue(rest, slip.Symbol(":initial-element"))
@@ -113,7 +113,7 @@ func (f *MakeArray) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if list, ok := option.(slip.List); ok {
 			initContents = list
 		} else {
-			slip.PanicType(":initial-contents", option, "list")
+			slip.TypePanic(s, depth, ":initial-contents", option, "list")
 		}
 	}
 	if option, has := slip.GetArgsKeyValue(rest, slip.Symbol(":adjustable")); has {

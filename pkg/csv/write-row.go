@@ -58,7 +58,7 @@ type WriteRow struct {
 
 // Call the function with the arguments provided.
 func (f *WriteRow) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 6)
+	slip.CheckArgCount(s, depth, f, args, 1, 6)
 	row, ok := args[0].(slip.List)
 	if !ok {
 		slip.TypePanic(s, depth, "row", args[0], "list")

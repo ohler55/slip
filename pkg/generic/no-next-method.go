@@ -71,6 +71,6 @@ func (f *NoNextMethod) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 
 type defaultNoNextMethCaller struct{}
 
-func (defaultNoNextMethCaller) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
-	panic(slip.NewError("No next method for %s %s. %s", args[0], args[1], args[2:]))
+func (defaultNoNextMethCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	panic(slip.ErrorNew(s, depth, "No next method for %s %s. %s", args[0], args[1], args[2:]))
 }

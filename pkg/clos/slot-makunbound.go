@@ -41,7 +41,7 @@ type SlotMakunbound struct {
 
 // Call the the function with the arguments provided.
 func (f *SlotMakunbound) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
 		slip.TypePanic(s, depth, "slot-name", args[1], "symbol")

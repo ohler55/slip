@@ -49,7 +49,7 @@ type SocketShutdown struct {
 
 // Call the function with the arguments provided.
 func (f *SocketShutdown) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
 		slip.TypePanic(s, depth, "socket", args[0], "socket")
@@ -62,7 +62,7 @@ type socketShutdownCaller struct{}
 
 func (caller socketShutdownCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":shutdown", args, 0, 2)
+	slip.CheckSendArgCount(s, depth, self, ":shutdown", args, 0, 2)
 	shutdownSocket(s, self, args, depth)
 	return nil
 }

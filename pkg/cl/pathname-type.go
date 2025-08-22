@@ -46,10 +46,10 @@ type PathnameType struct {
 
 // Call the function with the arguments provided.
 func (f *PathnameType) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	ext := strings.TrimLeft(filepath.Ext(string(path)), ".")
 	if 0 < len(ext) {

@@ -165,7 +165,7 @@ func (c *BuiltInClass) buildPrecedence() {
 
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *BuiltInClass) MakeInstance() slip.Instance {
-	panic(slip.NewError("Can not allocate an instance of %s.", c))
+	panic(slip.ErrorNew(slip.NewScope(), 0, "Can not allocate an instance of %s.", c))
 }
 
 // LoadForm returns a list that can be evaluated to create the class or nil if

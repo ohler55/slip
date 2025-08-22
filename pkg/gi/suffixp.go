@@ -45,7 +45,7 @@ type Suffixp struct {
 
 // Call the function with the arguments provided.
 func (f *Suffixp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	str := slip.MustBeString(args[0], "string")
 	suffix := slip.MustBeString(args[1], "suffix")
 	if strings.HasSuffix(str, suffix) {

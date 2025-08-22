@@ -101,7 +101,7 @@ type SocketSend struct {
 
 // Call the function with the arguments provided.
 func (f *SocketSend) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 22)
+	slip.CheckArgCount(s, depth, f, args, 2, 22)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
 		if fd, ok2 := self.Any.(int); ok2 {
@@ -115,7 +115,7 @@ type socketSendCaller struct{}
 
 func (caller socketSendCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":send", args, 1, 21)
+	slip.CheckSendArgCount(s, depth, self, ":send", args, 1, 21)
 	if self.Any != nil {
 		result = slip.Fixnum(socketSend(s, self.Any.(int), args, depth))
 	}

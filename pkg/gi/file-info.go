@@ -58,7 +58,7 @@ var modeTypeMap = map[fs.FileMode]slip.Object{
 
 // Call the function with the arguments provided.
 func (f *FileInfo) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	path, ok := args[0].(slip.String)
 	if !ok {
 		slip.TypePanic(s, depth, "filepath", args[0], "string")

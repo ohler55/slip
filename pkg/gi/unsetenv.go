@@ -41,7 +41,7 @@ type Unsetenv struct {
 
 // Call the function with the arguments provided.
 func (f *Unsetenv) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	vs, ok := args[0].(slip.String)
 	if !ok {
 		slip.TypePanic(s, depth, "name", args[0], "string")

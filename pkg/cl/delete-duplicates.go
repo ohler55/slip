@@ -89,7 +89,7 @@ func (f *DeleteDuplicates) Call(s *slip.Scope, args slip.List, depth int) (resul
 	case slip.Octets:
 		result = di.inOctets(s, ta, depth)
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	return
 }

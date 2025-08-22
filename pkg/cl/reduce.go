@@ -75,7 +75,7 @@ type Reduce struct {
 
 // Call the function with the arguments provided.
 func (f *Reduce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 12)
+	slip.CheckArgCount(s, depth, f, args, 2, 12)
 	d2 := depth + 1
 	caller := ResolveToCaller(s, args[0], d2)
 	list := slip.CoerceToList(args[1]).(slip.List)
@@ -84,14 +84,14 @@ func (f *Reduce) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		if num, ok := v.(slip.Fixnum); ok && 0 <= num && int(num) <= len(list) {
 			list = list[:int(num)]
 		} else {
-			slip.PanicType(":end", v, fmt.Sprintf("fixnum between 0 and %d", len(list)))
+			slip.TypePanic(s, depth, ":end", v, fmt.Sprintf("fixnum between 0 and %d", len(list)))
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":start")); has {
 		if num, ok := v.(slip.Fixnum); ok && 0 <= num && int(num) < len(list) {
 			list = list[int(num):]
 		} else {
-			slip.PanicType(":start", v, fmt.Sprintf("fixnum between 0 and %d", len(list)))
+			slip.TypePanic(s, depth, ":start", v, fmt.Sprintf("fixnum between 0 and %d", len(list)))
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":key")); has {

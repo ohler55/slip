@@ -51,7 +51,7 @@ type PrettyPrint struct {
 
 // Call the function with the arguments provided.
 func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 
 	b := pp.Append(nil, s, args[0])
 

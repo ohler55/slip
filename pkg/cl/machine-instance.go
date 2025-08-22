@@ -33,7 +33,7 @@ type MachineInstance struct {
 
 // Call the function with the arguments provided.
 func (f *MachineInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 0, 0)
+	slip.CheckArgCount(s, depth, f, args, 0, 0)
 	// Need something unique that works across multiple OSs. A Mac Address should do.
 	if ints, err := net.Interfaces(); err == nil && 0 < len(ints) {
 		for i := 0; i < len(ints); i++ {

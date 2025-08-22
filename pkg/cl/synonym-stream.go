@@ -101,7 +101,7 @@ func (obj *SynonymStream) Read(p []byte) (int, error) {
 		r = slip.CurrentPackage.JustGet("*standard-input*").(io.Reader)
 	default:
 		if slip.True != tv {
-			slip.PanicType(string(obj.symbol), tv, "input-stream")
+			slip.TypePanic(slip.NewScope(), 0, string(obj.symbol), tv, "input-stream")
 		}
 		r = slip.CurrentPackage.JustGet("*standard-input*").(io.Reader)
 	}
@@ -125,7 +125,7 @@ func (obj *SynonymStream) Write(b []byte) (n int, err error) {
 		w = slip.CurrentPackage.JustGet("*standard-output*").(io.Writer)
 	default:
 		if slip.True != tv {
-			slip.PanicType(string(obj.symbol), tv, "output-stream")
+			slip.TypePanic(slip.NewScope(), 0, string(obj.symbol), tv, "output-stream")
 		}
 		w = slip.CurrentPackage.JustGet("*standard-output*").(io.Writer)
 	}

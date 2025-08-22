@@ -38,7 +38,7 @@ type ValuesList struct {
 
 // Call the function with the arguments provided.
 func (f *ValuesList) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	a := args[0]
 	switch list := a.(type) {
 	case nil:
@@ -46,7 +46,7 @@ func (f *ValuesList) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	case slip.List:
 		result = slip.Values(list)
 	default:
-		slip.PanicType("argument to values-list", list, "list")
+		slip.TypePanic(s, depth, "argument to values-list", list, "list")
 	}
 	return
 }

@@ -59,7 +59,7 @@ type Read struct {
 
 // Call the the function with the arguments provided.
 func (f *Read) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
 		slip.TypePanic(s, depth, "bag", args[0], "bag")

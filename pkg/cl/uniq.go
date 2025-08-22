@@ -43,12 +43,10 @@ type Uniq struct {
 
 // Call the function with the arguments provided.
 func (f *Uniq) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	switch len(args) {
-	case 0:
-		slip.PanicArgCount(f, 1, -1)
-	case 1:
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
+	if len(args) == 1 {
 		if _, ok := args[0].(slip.Number); !ok {
-			slip.PanicType("numbers", args[0], "number")
+			slip.TypePanic(s, depth, "numbers", args[0], "number")
 		}
 		return slip.True
 	}
@@ -62,7 +60,7 @@ func (f *Uniq) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if target == nil {
 				target = args[pos]
 				if _, ok := target.(slip.Number); !ok {
-					slip.PanicType("numbers", target, "number")
+					slip.TypePanic(s, depth, "numbers", target, "number")
 				}
 				continue
 			}

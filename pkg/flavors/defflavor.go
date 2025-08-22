@@ -73,9 +73,7 @@ type Defflavor struct {
 
 // Call the the function with the arguments provided.
 func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 3 {
-		slip.PanicArgCount(f, 3, 14)
-	}
+	slip.CheckArgCount(s, depth, f, args, 3, 15)
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
 		slip.TypePanic(s, depth, "name argument to defflavor", args[0], "symbol")

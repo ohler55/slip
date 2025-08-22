@@ -82,7 +82,7 @@ type Iterate struct {
 
 // Call the function with the arguments provided.
 func (f *Iterate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 12)
+	slip.CheckArgCount(s, depth, f, args, 2, 12)
 	d2 := depth + 1
 	var caller slip.Caller
 	channel, ok := args[0].(gi.Channel)

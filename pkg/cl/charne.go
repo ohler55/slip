@@ -40,12 +40,12 @@ type CharNe struct {
 
 // Call the function with the arguments provided.
 func (f *CharNe) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	m := map[rune]bool{}
 	var has bool
 	for _, a := range args {
 		if c, ok := a.(slip.Character); !ok {
-			slip.PanicType("characters", a, "character")
+			slip.TypePanic(s, depth, "characters", a, "character")
 		} else if _, has = m[rune(c)]; !has {
 			m[rune(c)] = true
 		} else {

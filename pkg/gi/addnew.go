@@ -65,7 +65,7 @@ type Addnew struct {
 
 // Call the function with the arguments provided.
 func (f *Addnew) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 8)
+	slip.CheckArgCount(s, depth, f, args, 2, 8)
 	item := args[0]
 	place := args[1]
 	var (

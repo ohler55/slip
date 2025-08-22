@@ -51,7 +51,7 @@ type YesOrNoP struct {
 func (f *YesOrNoP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	var prompt []byte
 	if 0 < len(args) {
-		prompt = FormatArgs(s, args)
+		prompt = FormatArgs(s, args, depth)
 		prompt = append(prompt, ' ')
 	}
 	prompt = append(prompt, "(yes or no) "...)

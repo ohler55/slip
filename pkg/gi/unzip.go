@@ -43,7 +43,7 @@ type Unzip struct {
 
 // Call the function with the arguments provided.
 func (f *Unzip) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 12)
+	slip.CheckArgCount(s, depth, f, args, 1, 12)
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
 
 	r, _ := gzip.NewReader(bytes.NewReader(data)) // can't fail

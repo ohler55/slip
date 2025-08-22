@@ -43,7 +43,7 @@ var defaultSymbol = slip.Symbol(":default")
 
 // Call the function with the arguments provided.
 func (f *Room) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 1)
+	slip.CheckArgCount(s, depth, f, args, 0, 1)
 	var ms runtime.MemStats
 	runtime.ReadMemStats(&ms)
 	w := s.Get("*standard-output*").(io.Writer)

@@ -38,7 +38,7 @@ type Imagpart struct {
 
 // Call the function with the arguments provided.
 func (f *Imagpart) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Fixnum:
 		result = slip.Fixnum(0)
@@ -55,7 +55,7 @@ func (f *Imagpart) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	case slip.Complex:
 		result = slip.DoubleFloat(imag(ta))
 	default:
-		slip.PanicType("number", args[0], "number")
+		slip.TypePanic(s, depth, "number", args[0], "number")
 	}
 	return
 }

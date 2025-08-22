@@ -69,7 +69,7 @@ type stepBind struct {
 
 // Call the function with the arguments provided.
 func (f *Do) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	ns := s.NewScope()
 	d2 := depth + 1
 	steps, test, rforms := setupDo(s, ns, args, d2)
@@ -114,7 +114,7 @@ func (f *Do) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object)
 func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, test slip.Object, rforms slip.List) {
 	bindings, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("do bindings", args[0], "list")
+		slip.TypePanic(s, depth, "do bindings", args[0], "list")
 	}
 	ns.Block = true
 	ns.TagBody = true
@@ -126,11 +126,11 @@ func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, t
 			steps[i] = &stepBind{sym: slip.Symbol(strings.ToLower(string(tb)))}
 		case slip.List:
 			if len(tb) < 1 {
-				slip.PanicType("do binding", nil, "list", "symbol")
+				slip.TypePanic(s, depth, "do binding", nil, "list", "symbol")
 			}
 			var sym slip.Symbol
 			if sym, ok = tb[0].(slip.Symbol); !ok {
-				slip.PanicType("do binding", tb[0], "symbol")
+				slip.TypePanic(s, depth, "do binding", tb[0], "symbol")
 			}
 			sym = slip.Symbol(strings.ToLower(string(sym)))
 			sb := stepBind{sym: sym}
@@ -149,11 +149,11 @@ func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, t
 				ns.UnsafeLet(sym, nil)
 			}
 		default:
-			slip.PanicType("do binding", tb, "list", "symbol")
+			slip.TypePanic(s, depth, "do binding", tb, "list", "symbol")
 		}
 	}
 	if list, ok2 := args[1].(slip.List); !ok2 || len(list) == 0 {
-		slip.PanicType("do test", args[1], "list")
+		slip.TypePanic(s, depth, "do test", args[1], "list")
 	} else {
 		if t1, ok3 := list[0].(slip.List); ok3 {
 			test = slip.ListToFunc(ns, t1, depth)

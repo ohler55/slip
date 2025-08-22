@@ -48,7 +48,7 @@ type MakePackage struct {
 
 // Call the function with the arguments provided.
 func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	name := slip.MustBeString(args[0], "name")
 	if slip.FindPackage(name) != nil {
 		slip.NewPanic("Package %s already exists.", name)
@@ -58,7 +58,7 @@ func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if value, has := slip.GetArgsKeyValue(rest, slip.Symbol(":nicknames")); has {
 		list, ok := value.(slip.List)
 		if !ok {
-			slip.PanicType("nicknames", value, "list")
+			slip.TypePanic(s, depth, "nicknames", value, "list")
 		}
 		for _, v := range list {
 			nn := slip.MustBeString(v, "nickname")
@@ -72,7 +72,7 @@ func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if value, has := slip.GetArgsKeyValue(rest, slip.Symbol(":use")); has {
 		list, ok := value.(slip.List)
 		if !ok && value != nil {
-			slip.PanicType("use", value, "list")
+			slip.TypePanic(s, depth, "use", value, "list")
 		}
 		for _, v := range list {
 			var p *slip.Package
@@ -84,7 +84,7 @@ func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 			case *slip.Package:
 				p = tv
 			default:
-				slip.PanicType("use", tv, "symbol", "string", "package")
+				slip.TypePanic(s, depth, "use", tv, "symbol", "string", "package")
 			}
 			if p == nil {
 				slip.NewPanic("Package %s does not exist.", v)

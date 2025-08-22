@@ -51,7 +51,7 @@ func SimpleCondMsg(s *slip.Scope, cond slip.Instance) (msg string) {
 			}
 		}
 		if 0 < len(args) {
-			msg = string(FormatArgs(s, args))
+			msg = string(FormatArgs(s, args, 0))
 		} else {
 			msg = cond.String()
 		}

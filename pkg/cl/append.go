@@ -63,7 +63,7 @@ func (f *Append) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 				break
 			}
 			if _, ok := tr[len(tr)-1].(slip.Tail); ok {
-				slip.PanicType("list", tr, "list")
+				slip.TypePanic(s, depth, "list", tr, "list")
 			}
 			switch ta := a.(type) {
 			case nil:
@@ -78,7 +78,7 @@ func (f *Append) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 				result = tr
 			}
 		default:
-			slip.PanicType("list", tr, "list")
+			slip.TypePanic(s, depth, "list", tr, "list")
 		}
 	}
 	return

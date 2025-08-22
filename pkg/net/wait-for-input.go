@@ -54,7 +54,7 @@ type WaitForInput struct {
 
 // Call the function with the arguments provided.
 func (f *WaitForInput) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	var sockets slip.List
 	timeout := -time.Second
 	readyOnly := true

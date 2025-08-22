@@ -46,9 +46,7 @@ type AproposList struct {
 
 // Call the function with the arguments provided.
 func (f *AproposList) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var pat string
 	switch ta := args[0].(type) {
 	case slip.Symbol:
@@ -56,7 +54,7 @@ func (f *AproposList) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	case slip.String:
 		pat = strings.ToLower(string(ta))
 	default:
-		slip.PanicType("string", ta, "string", "symbol")
+		slip.TypePanic(s, depth, "string", ta, "string", "symbol")
 	}
 	var pkg *slip.Package
 	if 1 < len(args) {
@@ -67,7 +65,7 @@ func (f *AproposList) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 		case slip.String:
 			name = string(ta)
 		default:
-			slip.PanicType("package", ta, "string", "symbol")
+			slip.TypePanic(s, depth, "package", ta, "string", "symbol")
 		}
 		if pkg = slip.FindPackage(name); pkg == nil {
 			slip.NewPanic("Package %s not found.", name)

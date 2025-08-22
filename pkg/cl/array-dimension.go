@@ -42,7 +42,7 @@ type ArrayDimension struct {
 
 // Call the function with the arguments provided.
 func (f *ArrayDimension) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	var (
 		axis int
 		dims []int
@@ -50,12 +50,12 @@ func (f *ArrayDimension) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	if al, ok := args[0].(slip.ArrayLike); ok {
 		dims = al.Dimensions()
 	} else {
-		slip.PanicType("array", args[0], "array")
+		slip.TypePanic(s, depth, "array", args[0], "array")
 	}
 	if num, ok := args[1].(slip.Fixnum); ok {
 		axis = int(num)
 	} else {
-		slip.PanicType("axis-number", args[1], "fixnum")
+		slip.TypePanic(s, depth, "axis-number", args[1], "fixnum")
 	}
 	if axis < 0 || len(dims) <= axis {
 		slip.NewPanic("Axis number %d is out of range for array of rank %d.", axis, len(dims))

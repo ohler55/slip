@@ -54,7 +54,7 @@ func (f *Setq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	for i := 0; i < last; i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok {
-			slip.PanicType("symbol argument to setq", args[i], "symbol")
+			slip.TypePanic(s, depth, "symbol argument to setq", args[i], "symbol")
 		}
 		i++
 		result = slip.EvalArg(s, args, i, d2)

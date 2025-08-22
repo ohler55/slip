@@ -66,7 +66,7 @@ type Load struct {
 
 // Call the function with the arguments provided.
 func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 9)
+	slip.CheckArgCount(s, depth, f, args, 1, 9)
 
 	verbose := s.Get(slip.Symbol("*load-verbose*"))
 	print := s.Get(slip.Symbol("*load-print*"))
@@ -79,7 +79,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for pos := 1; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
@@ -92,7 +92,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case ":external-format":
 			// ignore
 		default:
-			slip.PanicType("keyword", sym, ":verbose", ":print", ":if-does-not-exist", "external-format")
+			slip.TypePanic(s, depth, "keyword", sym, ":verbose", ":print", ":if-does-not-exist", "external-format")
 		}
 	}
 	defer func() {
@@ -131,7 +131,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			slip.PanicStream(ss, "loading %s: %s", path, err)
 		}
 	default:
-		slip.PanicType("filespec", ta, "stream", "string")
+		slip.TypePanic(s, depth, "filespec", ta, "stream", "string")
 	}
 	s.Set(slip.Symbol("*load-pathname*"), slip.String(path))
 	s.Set(slip.Symbol("*load-truename*"), slip.String(path))

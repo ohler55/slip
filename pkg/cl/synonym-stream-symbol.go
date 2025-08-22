@@ -37,10 +37,10 @@ type SynonymStreamSymbolf struct {
 
 // Call the function with the arguments provided.
 func (f *SynonymStreamSymbolf) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	ss, ok := args[0].(*SynonymStream)
 	if !ok {
-		slip.PanicType("synonym-stream", args[0], "synonym-stream")
+		slip.TypePanic(s, depth, "synonym-stream", args[0], "synonym-stream")
 	}
 	return ss.symbol
 }

@@ -45,10 +45,10 @@ type Logbitp struct {
 
 // Call the function with the arguments provided.
 func (f *Logbitp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	index, ok := args[0].(slip.Fixnum)
 	if !ok || index < 0 {
-		slip.PanicType("index", args[0], "non-negative fixnum")
+		slip.TypePanic(s, depth, "index", args[0], "non-negative fixnum")
 	}
 	switch ti := args[1].(type) {
 	case slip.Fixnum:
@@ -73,7 +73,7 @@ func (f *Logbitp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	default:
-		slip.PanicType("integer", ti, "integer")
+		slip.TypePanic(s, depth, "integer", ti, "integer")
 	}
 	return nil
 }

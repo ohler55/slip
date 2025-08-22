@@ -63,7 +63,7 @@ type Defun struct {
 func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defun", args[0], "symbol")
+		slip.TypePanic(s, depth, "name argument to defun", args[0], "symbol")
 	}
 	pkg, low, _ := slip.UnpackName(string(name))
 	if pkg == nil {

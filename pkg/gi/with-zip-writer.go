@@ -53,14 +53,14 @@ type WithZipWriter struct {
 
 // Call the function with the arguments provided.
 func (f *WithZipWriter) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	forms := args[1:]
 	if list, ok := args[0].(slip.List); ok {
 		args = list
 	} else {
 		slip.TypePanic(s, depth, "args", args[0], "list")
 	}
-	slip.ArgCountCheck(f, args, 2, 13)
+	slip.CheckArgCount(s, depth, f, args, 2, 13)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
 		slip.TypePanic(s, depth, "args[0]", args[0], "symbol")

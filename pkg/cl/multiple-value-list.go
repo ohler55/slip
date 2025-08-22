@@ -40,7 +40,7 @@ type MultipleValueList struct {
 
 // List the function with the arguments provided.
 func (f *MultipleValueList) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	d2 := depth + 1
 	form := args[0]
 	if list, ok := form.(slip.List); ok {

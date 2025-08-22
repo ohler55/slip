@@ -51,7 +51,7 @@ type Warn struct {
 
 // Call the function with the arguments provided.
 func (f *Warn) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var cond slip.Instance
 	switch ta := args[0].(type) {
 	case slip.Symbol:
@@ -65,7 +65,7 @@ func (f *Warn) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.String:
 		cond = NewSimpleWarning(s, string(ta), args[1:]...).(slip.Instance)
 	default:
-		slip.PanicType("datum", ta, "symbol", "string")
+		slip.TypePanic(s, depth, "datum", ta, "symbol", "string")
 	}
 	msg := SimpleCondMsg(s, cond)
 	if _, err := fmt.Fprintf(slip.ErrorOutput.(io.Writer), "Warning: %s\n", msg); err != nil {

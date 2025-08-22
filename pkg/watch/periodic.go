@@ -20,7 +20,7 @@ func (p *periodic) eval(s *slip.Scope) (result slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			if result, _ = rec.(*slip.Panic); result == nil {
-				cond := slip.NewError("%s", rec).(slip.Instance)
+				cond := slip.ErrorNew(s, 0, "%s", rec).(slip.Instance)
 				result = slip.WrapError(s, cond, p.id, nil)
 			}
 		}
@@ -35,7 +35,7 @@ top:
 	case *slip.Lambda:
 		result = to.Call(s, slip.List{}, 0)
 	default:
-		result = slip.NewError("%s is not a valid operation for a periodic.", to)
+		result = slip.ErrorNew(s, 0, "%s is not a valid operation for a periodic.", to)
 	}
 	return
 }

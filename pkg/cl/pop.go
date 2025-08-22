@@ -40,7 +40,7 @@ type Pop struct {
 
 // Call the function with the arguments provided.
 func (f *Pop) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 
 	place := args[0]
 retry:
@@ -55,7 +55,7 @@ retry:
 				s.Set(ta, pv[1:])
 			}
 		default:
-			slip.PanicType("place referral", pv, "list")
+			slip.TypePanic(s, depth, "place referral", pv, "list")
 		}
 	case slip.List:
 		place = slip.ListToFunc(s, ta, depth+1)
@@ -76,10 +76,10 @@ retry:
 				ta.Place(s, pargs, pv[1:])
 			}
 		default:
-			slip.PanicType("place referral", pv, "list")
+			slip.TypePanic(s, depth, "place referral", pv, "list")
 		}
 	default:
-		slip.PanicType("place", ta, "symbol", "placer")
+		slip.TypePanic(s, depth, "place", ta, "symbol", "placer")
 	}
 	return
 }

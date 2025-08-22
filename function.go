@@ -296,7 +296,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 			}
 		}
 	}
-	cond := NewError("|%s| is not a function", ObjectString(list[0]))
+	cond := ErrorNew(s, depth, "|%s| is not a function", ObjectString(list[0]))
 	panic(cond)
 }
 

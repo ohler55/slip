@@ -39,7 +39,7 @@ type TrimSpace struct {
 
 // Call the function with the arguments provided.
 func (f *TrimSpace) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	str := slip.MustBeString(args[0], "string")
 
 	return slip.String(strings.TrimSpace(str))

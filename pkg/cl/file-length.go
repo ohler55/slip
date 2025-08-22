@@ -42,10 +42,10 @@ type FileLength struct {
 
 // Call the function with the arguments provided.
 func (f *FileLength) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	hfl, ok := args[0].(hasFileLength)
 	if !ok {
-		slip.PanicType("stream", args[0], "file-stream", "broadcast-stream", "synonym-stream")
+		slip.TypePanic(s, depth, "stream", args[0], "file-stream", "broadcast-stream", "synonym-stream")
 	}
 	return hfl.FileLength()
 }

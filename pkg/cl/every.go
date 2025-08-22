@@ -46,7 +46,7 @@ type Every struct {
 
 // Call the function with the arguments provided.
 func (f *Every) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	predicate := ResolveToCaller(s, args[0], depth)
 	args = args[1:]
 	cnt := len(args)
@@ -73,7 +73,7 @@ iter:
 				}
 				pargs[i] = ta.Get(n)
 			default:
-				slip.PanicType("sequence", args[i], "string", "list", "vector")
+				slip.TypePanic(s, depth, "sequence", args[i], "string", "list", "vector")
 			}
 		}
 		if predicate.Call(s, pargs, d2) == nil {

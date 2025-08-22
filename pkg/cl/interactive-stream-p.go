@@ -39,9 +39,9 @@ type InteractiveStreamP struct {
 
 // Call the function with the arguments provided.
 func (f *InteractiveStreamP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if _, ok := args[0].(slip.Stream); !ok {
-		slip.PanicType("stream", args[0], "stream")
+		slip.TypePanic(s, depth, "stream", args[0], "stream")
 	}
 	if args[0] == s.Get(slip.Symbol("*standard-input*")) {
 		result = slip.True

@@ -62,7 +62,7 @@ type PeekChar struct {
 
 // Call the function with the arguments provided.
 func (f *PeekChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 5)
+	slip.CheckArgCount(s, depth, f, args, 0, 5)
 	is := s.Get(slip.Symbol("*standard-input*"))
 	var (
 		pt  slip.Object
@@ -78,7 +78,7 @@ func (f *PeekChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	ss, _ := is.(slip.Stream)
 	rs, ok := is.(io.RuneScanner)
 	if !ok {
-		slip.PanicType("stream", args[1], "input-stream")
+		slip.TypePanic(s, depth, "stream", args[1], "input-stream")
 	}
 	switch tpt := pt.(type) {
 	case nil:
@@ -92,7 +92,7 @@ func (f *PeekChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	default:
 		if pt != slip.True {
-			slip.PanicType("peek-type", pt, "character", "t", "nil")
+			slip.TypePanic(s, depth, "peek-type", pt, "character", "t", "nil")
 		}
 		r, err = f.nextNonWhite(rs)
 	}

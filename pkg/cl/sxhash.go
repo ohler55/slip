@@ -40,9 +40,7 @@ type Sxhash struct {
 
 // Call the function with the arguments provided.
 func (f *Sxhash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	var h uint64
 	for _, b := range sen.Bytes(slip.SimpleObject(args[0])) {
 		h += uint64(0xdf & b) // mask 0x20 to ignore ascii case, for others it doesn't matter

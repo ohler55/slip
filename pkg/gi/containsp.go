@@ -44,7 +44,7 @@ type Containsp struct {
 
 // Call the function with the arguments provided.
 func (f *Containsp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	str := slip.MustBeString(args[0], "string")
 	sub := slip.MustBeString(args[1], "substr")
 

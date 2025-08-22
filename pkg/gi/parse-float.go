@@ -63,7 +63,7 @@ type ParseFloat struct {
 
 // Call the function with the arguments provided.
 func (f *ParseFloat) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 7)
+	slip.CheckArgCount(s, depth, f, args, 1, 7)
 	ss, ok := args[0].(slip.String)
 	if !ok {
 		slip.TypePanic(s, depth, "string", args[0], "string")

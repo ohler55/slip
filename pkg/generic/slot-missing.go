@@ -80,7 +80,7 @@ func (f *SlotMissing) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 type defaultSlotMissingCaller struct{}
 
 func (defaultSlotMissingCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(args[3], args, 4, 5)
+	slip.CheckArgCount(s, depth, args[3], args, 4, 5)
 	var cond slip.Object
 	// Ignore class as it is not used in forming the error message.
 	slotName, ok := args[2].(slip.Symbol)

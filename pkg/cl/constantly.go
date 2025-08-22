@@ -38,7 +38,7 @@ type Constantly struct {
 
 // Call the function with the arguments provided.
 func (f *Constantly) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 
 	return &slip.Lambda{
 		Doc: &slip.FuncDoc{

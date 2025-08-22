@@ -64,7 +64,7 @@ type Defmacro struct {
 func (f *Defmacro) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defmacro", args[0], "symbol")
+		slip.TypePanic(s, depth, "name argument to defmacro", args[0], "symbol")
 	}
 	low := strings.ToLower(string(name))
 	lc := slip.DefLambda("defmacro", s, args[1:])

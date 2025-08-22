@@ -44,7 +44,7 @@ type TimeElapsed struct {
 
 // Call the function with the arguments provided.
 func (f *TimeElapsed) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	start, ok := args[0].(slip.Time)
 	if !ok {
 		slip.TypePanic(s, depth, "start", args[0], "time")

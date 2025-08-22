@@ -48,7 +48,7 @@ type DecodeUniversalTime struct {
 
 // Call the function with the arguments provided.
 func (f *DecodeUniversalTime) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var tm time.Time
 	switch ta := args[0].(type) {
 	case slip.Time:
@@ -56,13 +56,13 @@ func (f *DecodeUniversalTime) Call(s *slip.Scope, args slip.List, depth int) sli
 	case slip.Fixnum:
 		tm = time.Unix(int64(ta)-2208988800, 0)
 	default:
-		slip.PanicType("time", ta, "time", "fixnum")
+		slip.TypePanic(s, depth, "time", ta, "time", "fixnum")
 	}
 	if 1 < len(args) {
 		if r, ok := args[1].(slip.Real); ok && -86400.0 <= r.RealValue() && r.RealValue() <= 86400.0 {
 			tm = tm.In(time.FixedZone("UTC", int(r.RealValue()*-3600.0)))
 		} else {
-			slip.PanicType("time-zone", args[1], "real")
+			slip.TypePanic(s, depth, "time-zone", args[1], "real")
 		}
 	} else {
 		tm = tm.In(time.Local)

@@ -46,10 +46,10 @@ type UnreadChar struct {
 
 // Call the function with the arguments provided.
 func (f *UnreadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	c, ok := args[0].(slip.Character)
 	if !ok {
-		slip.PanicType("character", args[0], "character")
+		slip.TypePanic(s, depth, "character", args[0], "character")
 	}
 	is := s.Get(slip.Symbol("*standard-input*"))
 	if 1 < len(args) {
@@ -57,7 +57,7 @@ func (f *UnreadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	}
 	var sis *slip.InputStream
 	if sis, ok = is.(*slip.InputStream); !ok {
-		slip.PanicType("stream", args[1], "input-stream")
+		slip.TypePanic(s, depth, "stream", args[1], "input-stream")
 	}
 	sis.PushRune(rune(c))
 

@@ -76,7 +76,7 @@ type MakeTime struct {
 
 // Call the function with the arguments provided.
 func (f *MakeTime) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 8)
+	slip.CheckArgCount(s, depth, f, args, 3, 8)
 	var (
 		year   slip.Fixnum
 		month  slip.Fixnum

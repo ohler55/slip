@@ -40,7 +40,7 @@ type Rational struct {
 
 // Call the function with the arguments provided.
 func (f *Rational) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Fixnum, *slip.Bignum, *slip.Ratio, slip.Octet:
 		result = ta
@@ -56,7 +56,7 @@ func (f *Rational) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		rat, _ := (*big.Float)(ta).Rat(&z)
 		result = ratReduce(rat)
 	default:
-		slip.PanicType("number", ta, "real")
+		slip.TypePanic(s, depth, "number", ta, "real")
 	}
 	return
 }

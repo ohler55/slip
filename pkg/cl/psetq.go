@@ -57,7 +57,7 @@ func (f *Psetq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	for i := 0; i < last; i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok {
-			slip.PanicType("symbol argument to psetq", args[i], "symbol")
+			slip.TypePanic(s, depth, "symbol argument to psetq", args[i], "symbol")
 		}
 		i++
 		result = slip.EvalArg(s, args, i, d2)

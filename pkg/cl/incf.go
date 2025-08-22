@@ -45,7 +45,7 @@ type Incf struct {
 
 // Call the function with the arguments provided.
 func (f *Incf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var delta slip.Object = slip.Fixnum(1)
 	if 1 < len(args) {
 		delta = args[1]
@@ -72,7 +72,7 @@ Retry:
 		result = addNumbers(tp.Apply(s, pargs, d2), delta)
 		tp.Place(s, pargs, result)
 	default:
-		slip.PanicType("incf placer", tp, "placer", "symbol")
+		slip.TypePanic(s, depth, "incf placer", tp, "placer", "symbol")
 	}
 	return
 }

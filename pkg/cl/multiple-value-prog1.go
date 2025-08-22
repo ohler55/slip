@@ -48,7 +48,7 @@ type MultipleValueProg1 struct {
 
 // Call the function with the arguments provided.
 func (f *MultipleValueProg1) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	d2 := depth + 1
 	ff := args[0]
 	if list, ok := ff.(slip.List); ok {

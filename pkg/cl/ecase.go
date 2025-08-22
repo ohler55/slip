@@ -55,7 +55,7 @@ func (f *Ecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	for _, a := range args[1:] {
 		clause, ok := a.(slip.List)
 		if !ok || len(clause) == 0 {
-			slip.PanicType("clause", a, "list")
+			slip.TypePanic(s, depth, "clause", a, "list")
 		}
 		var same bool
 		if keys, ok := clause[0].(slip.List); ok {
@@ -89,7 +89,7 @@ func (f *Ecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 				wants = append(wants, slip.ObjectString(clause[0]))
 			}
 		}
-		slip.PanicType("key", key, wants...)
+		slip.TypePanic(s, depth, "key", key, wants...)
 	}
 	return
 }

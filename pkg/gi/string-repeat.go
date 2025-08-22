@@ -44,7 +44,7 @@ type StringRepeat struct {
 
 // Call the function with the arguments provided.
 func (f *StringRepeat) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	var (
 		str   string
 		count int

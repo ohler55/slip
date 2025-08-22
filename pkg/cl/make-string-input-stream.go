@@ -48,10 +48,10 @@ type MakeStringInputStream struct {
 
 // Call the function with the arguments provided.
 func (f *MakeStringInputStream) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	str, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	if 1 < len(args) {
 		var (
@@ -65,7 +65,7 @@ func (f *MakeStringInputStream) Call(s *slip.Scope, args slip.List, depth int) s
 				slip.NewPanic("start, %d is outside the bounds of the string of length %d", start, len(ra))
 			}
 		} else {
-			slip.PanicType("start", args[1], "fixnum")
+			slip.TypePanic(s, depth, "start", args[1], "fixnum")
 		}
 		if 2 < len(args) && args[2] != nil {
 			if num, ok := args[2].(slip.Fixnum); ok {
@@ -77,7 +77,7 @@ func (f *MakeStringInputStream) Call(s *slip.Scope, args slip.List, depth int) s
 					slip.NewPanic("end, %d is before start %d", end, start)
 				}
 			} else {
-				slip.PanicType("end", args[2], "fixnum", "nil")
+				slip.TypePanic(s, depth, "end", args[2], "fixnum", "nil")
 			}
 		} else {
 			end = len(ra)

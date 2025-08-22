@@ -58,7 +58,7 @@ type CryptoHash struct {
 
 // Call the function with the arguments provided.
 func (f *CryptoHash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
 	var h crypto.Hash
 	switch args[1] {

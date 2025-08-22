@@ -39,7 +39,7 @@ type ReadAll struct {
 
 // Call the function with the arguments provided.
 func (f *ReadAll) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	r, ok := args[0].(io.Reader)
 	if !ok {
 		slip.TypePanic(s, depth, "stream", args[0], "input-stream")

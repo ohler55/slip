@@ -38,7 +38,7 @@ type Constantp struct {
 
 // Call the function with the arguments provided.
 func (f *Constantp) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case nil:
 		return slip.True

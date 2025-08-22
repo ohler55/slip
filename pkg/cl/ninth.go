@@ -39,10 +39,10 @@ type Ninth struct {
 
 // Call the function with the arguments provided.
 func (f *Ninth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return callN(f, args, 8)
+	return callN(s, f, args, 8, depth)
 }
 
 // Place a value in the ninth position of a list or cons.
 func (f *Ninth) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	placeN(f, args, 8, value)
+	placeN(s, f, args, 8, value)
 }

@@ -45,7 +45,7 @@ type Remf struct {
 
 // Call the function with the arguments provided.
 func (f *Remf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	d2 := depth + 1
 	var plist slip.List
 	switch ta := s.Eval(args[0], d2).(type) {
@@ -54,7 +54,7 @@ func (f *Remf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	case slip.List:
 		plist = ta
 	default:
-		slip.PanicType("plist", args[0], "property list")
+		slip.TypePanic(s, depth, "plist", args[0], "property list")
 	}
 	ind := args[1]
 	for i := 0; i < len(plist)-1; i += 2 {
@@ -75,7 +75,7 @@ Retry:
 	case slip.Placer:
 		callPlace(s, ta, plist, d2)
 	default:
-		slip.PanicType("place", p, "symbol", "placer")
+		slip.TypePanic(s, depth, "place", p, "symbol", "placer")
 	}
 	return
 }

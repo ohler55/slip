@@ -50,16 +50,14 @@ type Truncate struct {
 
 // Call the function with the arguments provided.
 func (f *Truncate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	return truncate(f, args)
+	return truncate(s, f, args, depth)
 }
 
-func truncate(f slip.Object, args slip.List) slip.Values {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+func truncate(s *slip.Scope, f slip.Object, args slip.List, depth int) slip.Values {
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	num := args[0]
 	if _, ok := num.(slip.Number); !ok {
-		slip.PanicType("number", num, "real")
+		slip.TypePanic(s, depth, "number", num, "real")
 	}
 	var (
 		div slip.Object = slip.Fixnum(1)
@@ -120,7 +118,7 @@ func truncate(f slip.Object, args slip.List) slip.Values {
 		q = (*slip.Bignum)(&bi)
 		r = (*slip.Ratio)(&zr)
 	case slip.Complex:
-		slip.PanicType("number", tn, "real")
+		slip.TypePanic(s, depth, "number", tn, "real")
 	}
 	return slip.Values{q, r}
 }

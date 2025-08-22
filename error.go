@@ -14,13 +14,6 @@ func NewError(format string, args ...any) Object {
 	return ErrorNew(NewScope(), 0, format, args...)
 }
 
-// PanicError raises an error.
-func PanicError(format string, args ...any) {
-	// func PanicError(s *Scope, depth int, format string, args ...any) {
-	// panic(NewError(s, depth, format, args...))
-	panic(NewError(format, args...))
-}
-
 // ErrorNew returns an Error object that can then be used with a call to panic.
 func ErrorNew(s *Scope, depth int, format string, args ...any) Object {
 	c := FindClass("error")
@@ -33,6 +26,5 @@ func ErrorNew(s *Scope, depth int, format string, args ...any) Object {
 
 // ErrorPanic raises an error.
 func ErrorPanic(s *Scope, depth int, format string, args ...any) {
-	// panic(NewError(s, depth, format, args...))
 	panic(ErrorNew(s, depth, format, args...))
 }

@@ -109,7 +109,7 @@ type MakeApp struct {
 
 // Call the function with the arguments provided.
 func (f *MakeApp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 20)
+	slip.CheckArgCount(s, depth, f, args, 3, 20)
 	appPath := slip.MustBeString(args[0], "app-filepath")
 	app := slip.App{
 		Title:         filepath.Base(appPath),

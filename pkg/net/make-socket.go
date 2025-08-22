@@ -55,7 +55,7 @@ type MakeSocket struct {
 
 // Call the function with the arguments provided.
 func (f *MakeSocket) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 6)
+	slip.CheckArgCount(s, depth, f, args, 0, 6)
 	self := socketFlavor.MakeInstance().(*flavors.Instance)
 
 	_ = self.Receive(s, ":init", slip.List{args}, 0)

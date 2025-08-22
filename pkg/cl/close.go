@@ -45,10 +45,10 @@ type Close struct {
 
 // Call the function with the arguments provided.
 func (f *Close) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	closer, ok := args[0].(io.Closer)
 	if !ok {
-		slip.PanicType("stream", args[0], "stream")
+		slip.TypePanic(s, depth, "stream", args[0], "stream")
 	}
 	if closer.Close() != nil {
 		return nil

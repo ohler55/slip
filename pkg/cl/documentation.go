@@ -46,13 +46,13 @@ type Documentation struct {
 
 // Call the function with the arguments provided.
 func (f *Documentation) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 
 	var docType slip.Object
 	if dt, ok := args[1].(slip.Symbol); ok {
 		docType = dt
 	} else if args[1] != slip.True {
-		slip.PanicType("doc-type", args[1], "symbol", "t")
+		slip.TypePanic(s, depth, "doc-type", args[1], "symbol", "t")
 	}
 	a := args[0]
 Top:
@@ -106,16 +106,16 @@ Top:
 
 // Place a value in the first position of a list or cons.
 func (f *Documentation) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	doc, ok := value.(slip.String)
 	if !ok {
-		slip.PanicType("new-value", value, "string")
+		slip.TypePanic(s, 0, "new-value", value, "string")
 	}
 	var docType slip.Object
 	if dt, ok := args[1].(slip.Symbol); ok {
 		docType = dt
 	} else if args[1] != slip.True {
-		slip.PanicType("doc-type", args[1], "symbol", "t")
+		slip.TypePanic(s, 0, "doc-type", args[1], "symbol", "t")
 	}
 	a := args[0]
 Top:

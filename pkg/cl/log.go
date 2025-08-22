@@ -47,9 +47,7 @@ type Log struct {
 
 // Call the function with the arguments provided.
 func (f *Log) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 && len(args) != 2 {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	isE := true
 	var baseArg slip.Object = slip.DoubleFloat(math.E)
 	numArg := args[0]
@@ -78,7 +76,7 @@ func (f *Log) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		case slip.Complex:
 			result = slip.Complex(cmplx.Log(complex(rn, 0.0)) / cmplx.Log(complex128(base)))
 		default:
-			slip.PanicType("base", base, "number")
+			slip.TypePanic(s, depth, "base", base, "number")
 		}
 	case slip.Complex:
 		switch base := baseArg.(type) {
@@ -87,10 +85,10 @@ func (f *Log) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		case slip.Complex:
 			result = slip.Complex(cmplx.Log(complex128(num)) / cmplx.Log(complex128(base)))
 		default:
-			slip.PanicType("base", base, "number")
+			slip.TypePanic(s, depth, "base", base, "number")
 		}
 	default:
-		slip.PanicType("number", num, "number")
+		slip.TypePanic(s, depth, "number", num, "number")
 	}
 	return
 }

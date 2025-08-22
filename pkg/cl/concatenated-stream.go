@@ -24,6 +24,7 @@ func init() {
 // io.Readers
 type ConcatenatedStream []slip.Stream
 
+// NewConcatenatedStream creates a new concatenated-stream.
 func NewConcatenatedStream(args ...slip.Object) ConcatenatedStream {
 	cs := make(ConcatenatedStream, len(args)+1)
 	cs[0] = nil
@@ -34,7 +35,7 @@ func NewConcatenatedStream(args ...slip.Object) ConcatenatedStream {
 				continue
 			}
 		}
-		slip.PanicType("input-stream", a, "input-stream")
+		slip.TypePanic(slip.NewScope(), 0, "input-stream", a, "input-stream")
 	}
 	return cs
 }

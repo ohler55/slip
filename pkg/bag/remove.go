@@ -51,7 +51,7 @@ type Remove struct {
 
 // Call the the function with the arguments provided.
 func (f *Remove) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
 		slip.TypePanic(s, depth, "bag", args[0], "bag")

@@ -46,9 +46,7 @@ type Block struct {
 
 // Call the function with the arguments provided.
 func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 {
-		slip.PanicArgCount(f, 1, -1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	ns := s.NewScope()
 	ns.Block = true
 	switch ta := args[0].(type) {
@@ -57,7 +55,7 @@ func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case slip.Symbol:
 		ns.Name = ta
 	default:
-		slip.PanicType("name", ta, "symbol", "nil")
+		slip.TypePanic(s, depth, "name", ta, "symbol", "nil")
 	}
 	d2 := depth + 1
 	for i := 1; i < len(args); i++ {

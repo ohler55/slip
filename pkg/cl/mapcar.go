@@ -44,7 +44,7 @@ type Mapcar struct {
 
 // Call the function with the arguments provided.
 func (f *Mapcar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	pos := 0
 	fn := args[pos]
 	d2 := depth + 1
@@ -53,7 +53,7 @@ func (f *Mapcar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	pos++
 	list, ok := args[pos].(slip.List)
 	if !ok {
-		slip.PanicType("lists", args[pos], "list")
+		slip.TypePanic(s, depth, "lists", args[pos], "list")
 	}
 	var rlist slip.List
 	if pos < len(args)-1 {
@@ -61,7 +61,7 @@ func (f *Mapcar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		var l2 slip.List
 		for i := 1; i < len(args); i++ {
 			if l2, ok = args[i].(slip.List); !ok {
-				slip.PanicType("lists", args[i], "list")
+				slip.TypePanic(s, depth, "lists", args[i], "list")
 			}
 			if len(l2) < min {
 				min = len(l2)

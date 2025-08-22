@@ -131,7 +131,7 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, depth int) s
 			case slip.Symbol(":git"):
 				fetchGit(self, dir, ll[2:])
 			case slip.Symbol(":require"):
-				fetchRequire(self, dir, ll[2:])
+				fetchRequire(s, self, dir, ll[2:], depth)
 			case slip.Symbol(":call"):
 				fetchCall(s, self, dir, ll[2:], depth)
 			default:
@@ -170,7 +170,7 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 		case slip.Symbol(":file"), slip.Symbol(":git"):
 			loadFiles(s, self, dir, ll[2:], depth)
 		case slip.Symbol(":require"):
-			loadRequire(s, self, dir, ll[2:])
+			loadRequire(s, self, dir, ll[2:], depth)
 		case slip.Symbol(":call"):
 			loadCall(s, self, dir, ll[2:], depth)
 		default:
@@ -212,7 +212,7 @@ type systemRunCaller struct{}
 
 func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.ArgCountCheck(self, args, 1, -1)
+	slip.CheckArgCount(s, depth, self, args, 1, -1)
 	iot, ok := self.Get("in-order-to").(slip.List)
 	if !ok {
 		slip.TypePanic(s, depth, "in-order-to", self.Get("in-order-to"), "list")
@@ -374,8 +374,8 @@ func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch
 	mvGitScratchToCache(dir, scratch, subdir)
 }
 
-func fetchRequire(self *flavors.Instance, dir string, args slip.List) {
-	slip.ArgCountCheck(self, args, 2, 2)
+func fetchRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
+	slip.CheckArgCount(s, depth, self, args, 2, 2)
 	path := filepath.Join(slip.MustBeString(args[1], "load-path"), slip.MustBeString(args[0], "package-name"))
 	if err := exec.Command("cp", path, dir).Run(); err != nil {
 		slip.NewPanic("Failed to copy %s to %s. %s\n", path, dir, err)
@@ -449,8 +449,8 @@ func loadSystemFile(s *slip.Scope, self *flavors.Instance, dir, path string, dep
 	sys.Receive(scope, ":load", nil, 0)
 }
 
-func loadRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
-	slip.ArgCountCheck(self, args, 2, 2)
+func loadRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
+	slip.CheckArgCount(s, depth, self, args, 2, 2)
 	path := filepath.Join(dir, slip.MustBeString(args[0], "package-name"))
 	cl.OpenPlugin(path)
 }

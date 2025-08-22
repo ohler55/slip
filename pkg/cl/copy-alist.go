@@ -41,7 +41,7 @@ type CopyAlist struct {
 
 // Call the function with the arguments provided.
 func (f *CopyAlist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	var alist slip.List
 	switch ta := args[0].(type) {
 	case nil:
@@ -58,7 +58,7 @@ func (f *CopyAlist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	default:
-		slip.PanicType("list", args[0], "list")
+		slip.TypePanic(s, depth, "list", args[0], "list")
 	}
 	return alist
 }

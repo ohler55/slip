@@ -48,7 +48,7 @@ type BitNor struct {
 
 // Call the function with the arguments provided.
 func (f *BitNor) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	a1, a2, r := bitOpArrays(f, args)
+	a1, a2, r := bitOpArrays(s, f, args, depth)
 	switch ba1 := a1.(type) {
 	case *slip.Array:
 		ra := r.(*slip.Array)

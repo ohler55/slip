@@ -46,14 +46,14 @@ type WithOpenStream struct {
 
 // Call the function with the arguments provided.
 func (f *WithOpenStream) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	subArgs, ok := args[0].(slip.List)
 	if !ok || len(subArgs) < 2 {
-		slip.PanicType("args", args[0], "list of (var stream)")
+		slip.TypePanic(s, depth, "args", args[0], "list of (var stream)")
 	}
 	var sym slip.Symbol
 	if sym, ok = subArgs[0].(slip.Symbol); !ok {
-		slip.PanicType("var", subArgs[0], "symbol")
+		slip.TypePanic(s, depth, "var", subArgs[0], "symbol")
 	}
 	var stream slip.Stream
 	if stream, ok = slip.EvalArg(s, subArgs, 1, depth).(slip.Stream); ok {
@@ -65,7 +65,7 @@ func (f *WithOpenStream) Call(s *slip.Scope, args slip.List, depth int) (result 
 			result = slip.EvalArg(s2, args, i, d2)
 		}
 	} else {
-		slip.PanicType("stream", subArgs[1], "stream")
+		slip.TypePanic(s, depth, "stream", subArgs[1], "stream")
 	}
 	return
 }

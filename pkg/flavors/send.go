@@ -49,7 +49,7 @@ type Send struct {
 
 // Call the the function with the arguments provided.
 func (f *Send) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	if self, ok := args[0].(slip.Receiver); ok {
 		if method, ok := args[1].(slip.Symbol); ok {
 			result = self.Receive(s, string(method), args[2:], depth)
@@ -64,7 +64,7 @@ func (f *Send) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 
 // Place a value in the instance variable identified in the send.
 func (f *Send) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, 0, f, args, 2, -1)
 	self, ok := args[0].(*Instance)
 	if !ok {
 		slip.TypePanic(s, 0, "object of send", args[0], "instance")

@@ -101,7 +101,7 @@ type Mismatch struct {
 
 // Call the function with the arguments provided.
 func (f *Mismatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 16)
+	slip.CheckArgCount(s, depth, f, args, 2, 16)
 	var (
 		start1  int
 		start2  int
@@ -115,7 +115,7 @@ func (f *Mismatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for pos = 2; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
@@ -127,7 +127,7 @@ func (f *Mismatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
 				start1 = int(num)
 			} else {
-				slip.PanicType("start1", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "start1", args[pos+1], "fixnum")
 			}
 		case ":end1":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
@@ -135,13 +135,13 @@ func (f *Mismatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			} else if args[pos+1] == nil {
 				end1 = -1
 			} else {
-				slip.PanicType("end1", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "end1", args[pos+1], "fixnum")
 			}
 		case ":start2":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
 				start2 = int(num)
 			} else {
-				slip.PanicType("start2", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "start2", args[pos+1], "fixnum")
 			}
 		case ":end2":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
@@ -149,19 +149,19 @@ func (f *Mismatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			} else if args[pos+1] == nil {
 				end2 = -1
 			} else {
-				slip.PanicType("end2", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "end2", args[pos+1], "fixnum")
 			}
 		case ":from-end":
 			fromEnd = args[pos+1] != nil
 		default:
-			slip.PanicType("keyword", sym, ":key", ":test", ":start1", ":start2", ":end1", ":end2", ":from-end")
+			slip.TypePanic(s, depth, "keyword", sym, ":key", ":test", ":start1", ":start2", ":end1", ":end2", ":from-end")
 		}
 	}
 	if pos < len(args) {
 		slip.NewPanic("extra arguments that are not keyword and value pairs")
 	}
-	seq1 := seqToList(args[0], "sequence-1", start1, end1)
-	seq2 := seqToList(args[1], "sequence-2", start2, end2)
+	seq1 := seqToList(s, args[0], "sequence-1", start1, end1, depth)
+	seq2 := seqToList(s, args[1], "sequence-2", start2, end2, depth)
 	d2 := depth + 1
 	if fromEnd {
 		for i := 1; i <= len(seq1); i++ {
@@ -214,7 +214,7 @@ func (f *Mismatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return nil
 }
 
-func seqToList(seq slip.Object, name string, start, end int) (list slip.List) {
+func seqToList(s *slip.Scope, seq slip.Object, name string, start, end, depth int) (list slip.List) {
 	switch ts := seq.(type) {
 	case nil:
 	case slip.List:
@@ -228,7 +228,7 @@ func seqToList(seq slip.Object, name string, start, end int) (list slip.List) {
 	case slip.VectorLike:
 		list = ts.AsList()
 	default:
-		slip.PanicType(name, ts, "sequence")
+		slip.TypePanic(s, depth, name, ts, "sequence")
 	}
 	// Special case.
 	if start == 0 && end == -1 && len(list) == 0 {

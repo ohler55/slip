@@ -69,7 +69,7 @@ func (f *ShowStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 }
 
 func showStashCall(f slip.Object, stash *Stash, s *slip.Scope, args slip.List) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 11)
+	slip.CheckArgCount(s, 0, f, args, 0, 11)
 	w := s.Get("*standard-output*").(io.Writer)
 	start := 0
 	end := -1

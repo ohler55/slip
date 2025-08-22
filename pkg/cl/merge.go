@@ -62,7 +62,7 @@ type Merge struct {
 
 // Call the function with the arguments provided.
 func (f *Merge) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 4, 6)
+	slip.CheckArgCount(s, depth, f, args, 4, 6)
 	var rt string
 	switch ta := args[0].(type) {
 	case nil:
@@ -72,10 +72,10 @@ func (f *Merge) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		switch rt {
 		case "list", "vector", "string", "octets":
 		default:
-			slip.PanicType("result-type", ta, "nil", "list", "string", "vector", "octets")
+			slip.TypePanic(s, depth, "result-type", ta, "nil", "list", "string", "vector", "octets")
 		}
 	default:
-		slip.PanicType("result-type", ta, "nil", "list", "string", "vector", "octets")
+		slip.TypePanic(s, depth, "result-type", ta, "nil", "list", "string", "vector", "octets")
 	}
 	seq1 := slip.CoerceToList(args[1]).(slip.List)
 	seq2 := slip.CoerceToList(args[2]).(slip.List)

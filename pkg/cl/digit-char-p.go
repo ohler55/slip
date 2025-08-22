@@ -53,17 +53,17 @@ var charWeights = []int{
 
 // Call the function with the arguments provided.
 func (f *DigitCharP) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	radix := 10
 	c, ok := args[0].(slip.Character)
 	if !ok {
-		slip.PanicType("char", args[0], "character")
+		slip.TypePanic(s, depth, "char", args[0], "character")
 	}
 	if 1 < len(args) {
 		if r, ok := args[1].(slip.Fixnum); ok && 0 < r && r <= 36 {
 			radix = int(r)
 		} else {
-			slip.PanicType("radix", args[1], "integer less than or equal to 36")
+			slip.TypePanic(s, depth, "radix", args[1], "integer less than or equal to 36")
 		}
 	}
 	if c < '0' || 'z' < c {

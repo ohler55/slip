@@ -80,7 +80,7 @@ type SocketReceive struct {
 
 // Call the function with the arguments provided.
 func (f *SocketReceive) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 13)
+	slip.CheckArgCount(s, depth, f, args, 1, 13)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
 		if fd, ok2 := self.Any.(int); ok2 {
@@ -94,7 +94,7 @@ type socketReceiveCaller struct{}
 
 func (caller socketReceiveCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":receive", args, 1, 8)
+	slip.CheckSendArgCount(s, depth, self, ":receive", args, 1, 8)
 	if self.Any != nil {
 		result = socketReceive(s, self.Any.(int), args, depth)
 	}

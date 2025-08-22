@@ -47,7 +47,7 @@ type SocketListen struct {
 
 // Call the function with the arguments provided.
 func (f *SocketListen) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
 		slip.TypePanic(s, depth, "socket", args[0], "socket")
@@ -60,7 +60,7 @@ type socketListenCaller struct{}
 
 func (caller socketListenCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":listen", args, 1, 1)
+	slip.CheckSendArgCount(s, depth, self, ":listen", args, 1, 1)
 	listenSocket(s, self, args, depth)
 	return nil
 }

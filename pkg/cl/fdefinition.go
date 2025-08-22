@@ -38,11 +38,11 @@ type Fdefinition struct {
 
 // Call the function with the arguments provided.
 func (f *Fdefinition) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	sym, _ := args[0].(slip.Symbol)
 	fi := slip.FindFunc(string(sym))
 	if fi == nil {
-		slip.PanicType("function-name", args[0], "function-name")
+		slip.TypePanic(s, depth, "function-name", args[0], "function-name")
 	}
 	return fi
 }

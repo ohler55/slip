@@ -133,7 +133,7 @@ func (caller initCaller) FuncDocs() *slip.FuncDoc {
 	}
 }
 
-func logFormat(s *slip.Scope, level int, args slip.List, check bool) {
+func logFormat(s *slip.Scope, level int, args slip.List, check bool, depth int) {
 	if check {
 		limit, _ := s.Get("level").(slip.Fixnum)
 		if int(limit) < level {
@@ -142,7 +142,7 @@ func logFormat(s *slip.Scope, level int, args slip.List, check bool) {
 	}
 	asJSON := s.Get("json") != nil
 	color := s.Get("colorize") != nil
-	message := cl.FormatArgs(s, args)
+	message := cl.FormatArgs(s, args, depth)
 	var buf []byte
 	if asJSON {
 		entry := map[string]any{
@@ -174,8 +174,8 @@ func logFormat(s *slip.Scope, level int, args slip.List, check bool) {
 
 type errorCaller struct{}
 
-func (caller errorCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	logFormat(s, 0, args, true)
+func (caller errorCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	logFormat(s, 0, args, true, depth)
 	return nil
 }
 
@@ -201,8 +201,8 @@ func (caller errorCaller) FuncDocs() *slip.FuncDoc {
 
 type warnCaller struct{}
 
-func (caller warnCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	logFormat(s, 1, args, true)
+func (caller warnCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	logFormat(s, 1, args, true, depth)
 	return nil
 }
 
@@ -228,8 +228,8 @@ func (caller warnCaller) FuncDocs() *slip.FuncDoc {
 
 type infoCaller struct{}
 
-func (caller infoCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	logFormat(s, 2, args, true)
+func (caller infoCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	logFormat(s, 2, args, true, depth)
 	return nil
 }
 
@@ -255,8 +255,8 @@ func (caller infoCaller) FuncDocs() *slip.FuncDoc {
 
 type debugCaller struct{}
 
-func (caller debugCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	logFormat(s, 3, args, true)
+func (caller debugCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	logFormat(s, 3, args, true, depth)
 
 	return nil
 }
@@ -283,7 +283,7 @@ func (caller debugCaller) FuncDocs() *slip.FuncDoc {
 
 type logCaller struct{}
 
-func (caller logCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller logCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	level := 0
 	switch ta := args[0].(type) {
 	case slip.Fixnum:
@@ -305,7 +305,7 @@ func (caller logCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 			level = 3
 		}
 	}
-	logFormat(s, level, args[1:], false)
+	logFormat(s, level, args[1:], false, depth)
 
 	return nil
 }

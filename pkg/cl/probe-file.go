@@ -40,10 +40,10 @@ type ProbeFile struct {
 
 // Call the function with the arguments provided.
 func (f *ProbeFile) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	if _, err := os.Stat(string(path)); err != nil {
 		return nil

@@ -47,9 +47,7 @@ type Float struct {
 
 // Call the function with the arguments provided.
 func (f *Float) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var f64 float64
 	switch ta := args[0].(type) {
 	case *slip.LongFloat:
@@ -62,7 +60,7 @@ func (f *Float) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.Real:
 		f64 = ta.RealValue()
 	default:
-		slip.PanicType("number", ta, "number")
+		slip.TypePanic(s, depth, "number", ta, "number")
 	}
 	if 1 < len(args) {
 		switch ta := args[1].(type) {
@@ -73,7 +71,7 @@ func (f *Float) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case *slip.LongFloat:
 			return (*slip.LongFloat)(big.NewFloat(f64))
 		default:
-			slip.PanicType("prototype", ta, "float")
+			slip.TypePanic(s, depth, "prototype", ta, "float")
 		}
 	}
 	return slip.DoubleFloat(f64)

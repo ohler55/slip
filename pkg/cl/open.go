@@ -82,14 +82,14 @@ type Open struct {
 
 // Call the function with the arguments provided.
 func (f *Open) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	return f.openFile(args)
+	return f.openFile(s, args, depth)
 }
 
-func (f *Open) openFile(args slip.List) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 9)
+func (f *Open) openFile(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 1, 9)
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("filepath", args[0], "string")
+		slip.TypePanic(s, depth, "filepath", args[0], "string")
 	}
 	var (
 		flags    int
@@ -101,7 +101,7 @@ func (f *Open) openFile(args slip.List) slip.Object {
 	for pos := 1; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -119,7 +119,7 @@ func (f *Open) openFile(args slip.List) slip.Object {
 			case slip.Symbol(":probe"):
 				probe = true
 			default:
-				slip.PanicType(string(sym), val, ":input", ":output", ":io", ":probe")
+				slip.TypePanic(s, depth, string(sym), val, ":input", ":output", ":io", ":probe")
 			}
 		case ":if-exists":
 			switch val {
@@ -140,7 +140,7 @@ func (f *Open) openFile(args slip.List) slip.Object {
 			case slip.Symbol(":new-version"), slip.Symbol(":rename-and-delete"):
 				// not supported
 			default:
-				slip.PanicType(string(sym), val,
+				slip.TypePanic(s, depth, string(sym), val,
 					":error", ":new-version", ":rename", ":overwrite", ":append", ":supersede", "nil")
 			}
 		case ":if-does-not-exist":
@@ -152,17 +152,17 @@ func (f *Open) openFile(args slip.List) slip.Object {
 			case slip.Symbol(":create"):
 				flags |= os.O_CREATE
 			default:
-				slip.PanicType(string(sym), val, ":error", ":create", "nil")
+				slip.TypePanic(s, depth, string(sym), val, ":error", ":create", "nil")
 			}
 		case ":permission":
 			var num slip.Fixnum
 			if num, ok = val.(slip.Fixnum); ok {
 				perm = fs.FileMode(num)
 			} else {
-				slip.PanicType(string(sym), val, "fixnum")
+				slip.TypePanic(s, depth, string(sym), val, "fixnum")
 			}
 		default:
-			slip.PanicType("keyword", sym, ":direction", ":if-exists", ":if-does-not-exist", ":permission")
+			slip.TypePanic(s, depth, "keyword", sym, ":direction", ":if-exists", ":if-does-not-exist", ":permission")
 		}
 	}
 	if rename {

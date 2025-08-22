@@ -47,7 +47,7 @@ func (f *Rotatef) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for i := range args {
 		values[i] = slip.EvalArg(s, args, i, depth)
 		if _, ok := args[i].(slip.Placer); !ok {
-			slip.PanicType("places", args[i], "place")
+			slip.TypePanic(s, depth, "places", args[i], "place")
 		}
 	}
 	for i := len(args) - 2; 0 <= i; i-- {

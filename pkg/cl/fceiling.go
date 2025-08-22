@@ -49,7 +49,7 @@ type Fceiling struct {
 
 // Call the function with the arguments provided.
 func (f *Fceiling) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	values := ceiling(f, args)
+	values := ceiling(s, f, args, depth)
 	switch tv := values[0].(type) {
 	case slip.Fixnum:
 		switch values[1].(type) {

@@ -69,7 +69,7 @@ type Read struct {
 
 // Call the function with the arguments provided.
 func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 7)
+	slip.CheckArgCount(s, depth, f, args, 1, 7)
 	var ir io.Reader
 	switch ta := args[0].(type) {
 	case slip.String:

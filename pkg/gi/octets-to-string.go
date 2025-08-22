@@ -49,7 +49,7 @@ type OctetsToString struct {
 
 // Call the function with the arguments provided.
 func (f *OctetsToString) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	start, end := seqStarEndArgs(s, args, depth)
 	a0 := args[0]
 top:

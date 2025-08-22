@@ -39,10 +39,10 @@ type Second struct {
 
 // Call the function with the arguments provided.
 func (f *Second) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return callN(f, args, 1)
+	return callN(s, f, args, 1, depth)
 }
 
 // Place a value in the second position of a list or cons.
 func (f *Second) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	placeN(f, args, 1, value)
+	placeN(s, f, args, 1, value)
 }

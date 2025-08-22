@@ -38,9 +38,7 @@ type Atom struct {
 
 // Call the function with the arguments provided.
 func (f *Atom) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if list, ok := args[0].(slip.List); ok && 0 < len(list) {
 		return nil
 	}

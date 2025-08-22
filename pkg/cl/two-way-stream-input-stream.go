@@ -40,10 +40,10 @@ type TwoWayStreamInputStream struct {
 
 // Call the function with the arguments provided.
 func (f *TwoWayStreamInputStream) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	es, ok := args[0].(*TwoWayStream)
 	if !ok {
-		slip.PanicType("two-way-stream", args[0], "two-way-stream")
+		slip.TypePanic(s, depth, "two-way-stream", args[0], "two-way-stream")
 	}
 	return es.Input.(slip.Object)
 }

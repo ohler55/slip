@@ -47,9 +47,7 @@ type Prin1 struct {
 
 // Call the function with the arguments provided.
 func (f *Prin1) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	p := *slip.DefaultPrinter()
 	p.ScopedUpdate(s)
 	p.Escape = true
@@ -61,7 +59,7 @@ func (f *Prin1) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		var ok bool
 		ss, _ = args[1].(slip.Stream)
 		if w, ok = args[1].(io.Writer); !ok {
-			slip.PanicType("prin1 output-stream", args[1], "output-stream")
+			slip.TypePanic(s, depth, "prin1 output-stream", args[1], "output-stream")
 		}
 	}
 	if _, err := w.Write(p.Append([]byte{}, obj, 0)); err != nil {

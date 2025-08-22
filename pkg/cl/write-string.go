@@ -56,22 +56,26 @@ type WriteString struct {
 
 // Call the function with the arguments provided.
 func (f *WriteString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 6)
-	str, ra, w, ss := parseWriteStringArgs(s, args)
+	slip.CheckArgCount(s, depth, f, args, 1, 6)
+	str, ra, w, ss := parseWriteStringArgs(s, args, depth)
 	if _, err := w.Write([]byte(string(ra))); err != nil {
 		slip.PanicStream(ss, "write-string failed. %s", err)
 	}
 	return str
 }
 
-func parseWriteStringArgs(s *slip.Scope, args slip.List) (str slip.String, ra []rune, w io.Writer, ss slip.Stream) {
+func parseWriteStringArgs(
+	s *slip.Scope,
+	args slip.List,
+	depth int) (str slip.String, ra []rune, w io.Writer, ss slip.Stream) {
+
 	so := s.Get("*standard-output*")
 	w = so.(io.Writer)
 	ss, _ = so.(slip.Stream)
 
 	var ok bool
 	if str, ok = args[0].(slip.String); !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	ra = []rune(str)
 	if 1 < len(args) {
@@ -90,7 +94,7 @@ func parseWriteStringArgs(s *slip.Scope, args slip.List) (str slip.String, ra []
 					slip.NewPanic(":start (%d) out of range 0 to %d.", start, len(ra)-1)
 				}
 			} else {
-				slip.PanicType("start", value, "fixnum")
+				slip.TypePanic(s, depth, "start", value, "fixnum")
 			}
 		}
 		if value, has := slip.GetArgsKeyValue(rest, slip.Symbol(":end")); has {
@@ -103,7 +107,7 @@ func parseWriteStringArgs(s *slip.Scope, args slip.List) (str slip.String, ra []
 					slip.NewPanic(":end (%d) out of range %d to %d.", end, start, len(ra)-1)
 				}
 			default:
-				slip.PanicType("end", value, "fixnum")
+				slip.TypePanic(s, depth, "end", value, "fixnum")
 			}
 		}
 		ra = ra[start:end]

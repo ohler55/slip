@@ -50,8 +50,8 @@ type stringCompare struct {
 }
 
 // Call the function with the arguments provided.
-func (f *stringCompare) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 10)
+func (f *stringCompare) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 2, 10)
 	var (
 		str1   string
 		str2   string
@@ -66,7 +66,7 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	case slip.Character:
 		str1 = string([]rune{rune(ta)})
 	default:
-		slip.PanicType("string1", args[0], "string", "symbol", "character")
+		slip.TypePanic(s, depth, "string1", args[0], "string", "symbol", "character")
 	}
 	switch ta := args[1].(type) {
 	case slip.String:
@@ -76,14 +76,14 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 	case slip.Character:
 		str2 = string([]rune{rune(ta)})
 	default:
-		slip.PanicType("string2", args[1], "string", "symbol", "character")
+		slip.TypePanic(s, depth, "string2", args[1], "string", "symbol", "character")
 	}
 	end1 := len(str1)
 	end2 := len(str2)
 	for pos := 2; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -94,28 +94,28 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
 			if n, ok = args[pos+1].(slip.Fixnum); ok {
 				start1 = int(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum")
 			}
 		case ":end1":
 			if n, ok = args[pos+1].(slip.Fixnum); ok {
 				end1 = int(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum")
 			}
 		case ":start2":
 			if n, ok = args[pos+1].(slip.Fixnum); ok {
 				start2 = int(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum")
 			}
 		case ":end2":
 			if n, ok = args[pos+1].(slip.Fixnum); ok {
 				end2 = int(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum")
 			}
 		default:
-			slip.PanicType("keyword", sym, ":start1", ":end1", ":start2", ":end2")
+			slip.TypePanic(s, depth, "keyword", sym, ":start1", ":end1", ":start2", ":end2")
 		}
 	}
 	if end1 < start1 || len(str1) < end1 || start1 < 0 {

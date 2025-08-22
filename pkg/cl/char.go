@@ -35,16 +35,16 @@ type Char struct {
 
 // Call the function with the arguments provided.
 func (f *Char) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	str, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	var index int
 	if si, ok2 := args[1].(slip.Integer); ok2 {
 		index = int(si.Int64())
 	} else {
-		slip.PanicType("index", args[1], "integer")
+		slip.TypePanic(s, depth, "index", args[1], "integer")
 	}
 	ra := []rune(str)
 	if index < 0 || len(ra) <= index {

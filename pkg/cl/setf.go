@@ -82,9 +82,9 @@ Retry:
 			f.Eval(s, depth)
 			return
 		}
-		slip.PanicType("placer argument to setf", x, "symbol", "placer")
+		slip.TypePanic(s, depth, "placer argument to setf", x, "symbol", "placer")
 	default:
-		slip.PanicType("placer argument to setf", x, "symbol", "placer")
+		slip.TypePanic(s, depth, "placer argument to setf", x, "symbol", "placer")
 	}
 }
 

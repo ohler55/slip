@@ -38,10 +38,10 @@ type OpenStreamP struct {
 
 // Call the function with the arguments provided.
 func (f *OpenStreamP) Call(s *slip.Scope, args slip.List, depth int) (open slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	stream, ok := args[0].(slip.Stream)
 	if !ok {
-		slip.PanicType("stream", args[0], "stream")
+		slip.TypePanic(s, depth, "stream", args[0], "stream")
 	}
 	if stream.IsOpen() {
 		open = slip.True

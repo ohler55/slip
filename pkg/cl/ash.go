@@ -45,10 +45,10 @@ type Ash struct {
 
 // Call the function with the arguments provided.
 func (f *Ash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	shift, ok := args[1].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("shift", args[1], "fixnum")
+		slip.TypePanic(s, depth, "shift", args[1], "fixnum")
 	}
 	sh := int(shift)
 	switch ti := args[0].(type) {
@@ -98,7 +98,7 @@ func (f *Ash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		}
 		result = (*slip.Bignum)(&bi)
 	default:
-		slip.PanicType("integer", ti, "integer")
+		slip.TypePanic(s, depth, "integer", ti, "integer")
 	}
 	return
 }

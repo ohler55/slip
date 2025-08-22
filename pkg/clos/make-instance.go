@@ -57,7 +57,7 @@ func (f *MakeInstance) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 }
 
 func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, depth int) (class slip.Class) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		class = slip.FindClass(string(ta))

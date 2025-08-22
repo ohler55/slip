@@ -57,12 +57,12 @@ type Adjoin struct {
 
 // Call the function with the arguments provided.
 func (f *Adjoin) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	item := args[0]
 	list, ok := args[1].(slip.List)
 	if !ok {
 		if args[1] != nil {
-			slip.PanicType("list", args[1], "list")
+			slip.TypePanic(s, depth, "list", args[1], "list")
 		}
 	}
 	var (
@@ -72,7 +72,7 @@ func (f *Adjoin) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for pos := 2; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
@@ -81,7 +81,7 @@ func (f *Adjoin) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case ":test":
 			testFunc = ResolveToCaller(s, args[pos+1], depth)
 		default:
-			slip.PanicType("keyword", sym, ":key", ":test")
+			slip.TypePanic(s, depth, "keyword", sym, ":key", ":test")
 		}
 	}
 	d2 := depth + 1

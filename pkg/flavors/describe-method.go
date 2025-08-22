@@ -50,7 +50,7 @@ type DescribeMethod struct {
 
 // Call the the function with the arguments provided.
 func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	var hm HasMethods
 	switch ta := args[0].(type) {
 	case slip.Symbol:

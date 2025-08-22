@@ -40,14 +40,14 @@ type Byte struct {
 
 // Call the function with the arguments provided.
 func (f *Byte) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	size, ok := args[0].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("size", args[0], "fixnum")
+		slip.TypePanic(s, depth, "size", args[0], "fixnum")
 	}
 	var pos slip.Fixnum
 	if pos, ok = args[1].(slip.Fixnum); !ok {
-		slip.PanicType("position", args[1], "fixnum")
+		slip.TypePanic(s, depth, "position", args[1], "fixnum")
 	}
 	return slip.List{size, slip.Tail{Value: pos}}
 }

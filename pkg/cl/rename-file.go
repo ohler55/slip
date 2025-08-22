@@ -46,14 +46,14 @@ type RenameFile struct {
 
 // Call the function with the arguments provided.
 func (f *RenameFile) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	name, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("filename", args[0], "string")
+		slip.TypePanic(s, depth, "filename", args[0], "string")
 	}
 	var newName slip.String
 	if newName, ok = args[1].(slip.String); !ok {
-		slip.PanicType("new-name", args[1], "string")
+		slip.TypePanic(s, depth, "new-name", args[1], "string")
 	}
 	oldPath, _ := filepath.Abs(string(name))
 	newPath, _ := filepath.Abs(string(newName))

@@ -40,7 +40,7 @@ type Base64Decode struct {
 
 // Call the the function with the arguments provided.
 func (f *Base64Decode) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	source := string(slip.CoerceToOctets(args[0]).(slip.Octets))
 
 	decoded, err := base64.StdEncoding.DecodeString(source)

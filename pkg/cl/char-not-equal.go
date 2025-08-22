@@ -42,12 +42,12 @@ type CharNotEqual struct {
 
 // Call the function with the arguments provided.
 func (f *CharNotEqual) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	m := map[rune]bool{}
 	var has bool
 	for _, a := range args {
 		if c, ok := a.(slip.Character); !ok {
-			slip.PanicType("characters", a, "character")
+			slip.TypePanic(s, depth, "characters", a, "character")
 		} else {
 			lo := unicode.ToLower(rune(c))
 			if _, has = m[lo]; has {

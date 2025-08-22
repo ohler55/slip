@@ -53,7 +53,7 @@ type Read struct {
 
 // Call the function with the arguments provided.
 func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 3)
+	slip.CheckArgCount(s, depth, f, args, 0, 3)
 	r := s.Get("*standard-input*").(io.Reader)
 	eofp := true
 	var eofv slip.Object
@@ -62,7 +62,7 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if args[0] != nil {
 			var ok bool
 			if r, ok = args[0].(io.Reader); !ok {
-				slip.PanicType("input-stream", args[0], "input-stream")
+				slip.TypePanic(s, depth, "input-stream", args[0], "input-stream")
 			}
 		}
 		if 1 < len(args) {

@@ -61,7 +61,7 @@ type Dox struct {
 
 // Call the function with the arguments provided.
 func (f *Dox) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	ns := s.NewScope()
 	d2 := depth + 1
 	steps, test, rforms := setupDo(ns, ns, args, d2)

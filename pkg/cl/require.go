@@ -48,9 +48,7 @@ type Require struct {
 
 // Call the function with the arguments provided.
 func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var name string
 	switch ta := args[0].(type) {
 	case slip.String:
@@ -58,7 +56,7 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.Symbol:
 		name = string(ta)
 	default:
-		slip.PanicType("name", ta, "string", "symbol")
+		slip.TypePanic(s, depth, "name", ta, "string", "symbol")
 	}
 	var paths []string
 
@@ -71,11 +69,11 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				if str, ok := a2.(slip.String); ok {
 					paths = append(paths, expandPath(string(str)))
 				} else {
-					slip.PanicType("path members", a2, "string")
+					slip.TypePanic(s, depth, "path members", a2, "string")
 				}
 			}
 		default:
-			slip.PanicType("name", ta, "string", "symbol")
+			slip.TypePanic(s, depth, "name", ta, "string", "symbol")
 		}
 	}
 	if len(paths) == 0 {
@@ -89,11 +87,11 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				if str, ok := a2.(slip.String); ok {
 					paths = append(paths, expandPath(string(str)))
 				} else {
-					slip.PanicType("*package-load-path* members", a2, "string")
+					slip.TypePanic(s, depth, "*package-load-path* members", a2, "string")
 				}
 			}
 		default:
-			slip.PanicType("*package-load-path*", lp, "string", "list of strings")
+			slip.TypePanic(s, depth, "*package-load-path*", lp, "string", "list of strings")
 		}
 	}
 	defer func() { slip.CurrentPackageLoadPath = "" }()
@@ -116,7 +114,7 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			return slip.Novalue
 		}
 	}
-	panic(slip.NewError("Failed to find %s in any of the load paths.", name))
+	panic(slip.ErrorNew(s, depth, "Failed to find %s in any of the load paths.", name))
 }
 
 func expandPath(path string) string {

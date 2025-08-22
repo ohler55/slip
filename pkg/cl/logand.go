@@ -40,25 +40,25 @@ type Logand struct {
 
 // Call the function with the arguments provided.
 func (f *Logand) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	return logand(args)
+	return logand(s, args, depth)
 }
 
-func logand(args slip.List) slip.Object {
+func logand(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var result uint64 = 0xffffffffffffffff
 	for _, v := range args {
 		switch tv := v.(type) {
 		case slip.Fixnum:
 			result &= uint64(tv)
 		case *slip.Bignum:
-			return bigLogAnd(args)
+			return bigLogAnd(s, args, depth)
 		default:
-			slip.PanicType("integer", tv, "integer")
+			slip.TypePanic(s, depth, "integer", tv, "integer")
 		}
 	}
 	return slip.Fixnum(result)
 }
 
-func bigLogAnd(args slip.List) slip.Object {
+func bigLogAnd(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var bi big.Int
 	first := true
 	for _, v := range args {
@@ -78,7 +78,7 @@ func bigLogAnd(args slip.List) slip.Object {
 				_ = bi.And(&bi, (*big.Int)(tv))
 			}
 		default:
-			slip.PanicType("integer", tv, "integer")
+			slip.TypePanic(s, depth, "integer", tv, "integer")
 		}
 	}
 	return (*slip.Bignum)(&bi)

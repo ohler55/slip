@@ -45,17 +45,17 @@ type Join struct {
 
 // Call the function with the arguments provided.
 func (f *Join) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var sep string
 	if so, ok := args[0].(slip.String); ok {
 		sep = string(so)
 	} else {
-		slip.PanicType("separator", args[0], "string")
+		slip.TypePanic(s, depth, "separator", args[0], "string")
 	}
-	return slip.String(strings.Join(f.joinArgs(nil, args[1:]), sep))
+	return slip.String(strings.Join(f.joinArgs(s, nil, args[1:], depth), sep))
 }
 
-func (f *Join) joinArgs(sa []string, args slip.List) []string {
+func (f *Join) joinArgs(s *slip.Scope, sa []string, args slip.List, depth int) []string {
 	for _, arg := range args {
 		switch ta := arg.(type) {
 		case slip.String:
@@ -63,9 +63,9 @@ func (f *Join) joinArgs(sa []string, args slip.List) []string {
 		case slip.Symbol:
 			sa = append(sa, string(ta))
 		case slip.List:
-			sa = f.joinArgs(sa, ta)
+			sa = f.joinArgs(s, sa, ta, depth)
 		default:
-			slip.PanicType("&rest", ta, "string", "symbol", "list")
+			slip.TypePanic(s, depth, "&rest", ta, "string", "symbol", "list")
 		}
 	}
 	return sa

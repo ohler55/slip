@@ -40,10 +40,10 @@ type ConcatenatedStreamStreams struct {
 
 // Call the function with the arguments provided.
 func (f *ConcatenatedStreamStreams) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	cs, ok := args[0].(ConcatenatedStream)
 	if !ok {
-		slip.PanicType("concatenated-stream", args[0], "concatenated-stream")
+		slip.TypePanic(s, depth, "concatenated-stream", args[0], "concatenated-stream")
 	}
 	streams := make(slip.List, len(cs)-1)
 	for i, stream := range cs[1:] {

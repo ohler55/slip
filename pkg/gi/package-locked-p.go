@@ -38,7 +38,7 @@ type PackageLockedp struct {
 
 // Call the function with the arguments provided.
 func (f *PackageLockedp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	pkg := slip.PackageFromArg(args[0])
 	if pkg.Locked {
 		return slip.True

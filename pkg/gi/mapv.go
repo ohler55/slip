@@ -49,7 +49,7 @@ type Mapv struct {
 
 // Call the function with the arguments provided.
 func (f *Mapv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	fn := args[0]
 	d2 := depth + 1
 	caller := cl.ResolveToCaller(s, fn, d2)

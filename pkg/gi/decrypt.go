@@ -63,7 +63,7 @@ type Decrypt struct {
 
 // Call the function with the arguments provided.
 func (f *Decrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	var (
 		non []byte
 		dup bool

@@ -41,7 +41,7 @@ type SlotValue struct {
 
 // Call the the function with the arguments provided.
 func (f *SlotValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
 		slip.TypePanic(s, depth, "slot-name", args[1], "symbol")
@@ -71,7 +71,7 @@ func (f *SlotValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 
 // Place a value in the slot of an instance.
 func (f *SlotValue) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
 		slip.TypePanic(s, 0, "slot-name", args[1], "symbol")

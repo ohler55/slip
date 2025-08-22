@@ -70,7 +70,7 @@ type Encrypt struct {
 
 // Call the function with the arguments provided.
 func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 8)
+	slip.CheckArgCount(s, depth, f, args, 2, 8)
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
 	non, pad, block, bsize := extractEncryptArgs(s, args[1:], depth)
 	// Data must be a multiple of the block size so pad as needed.

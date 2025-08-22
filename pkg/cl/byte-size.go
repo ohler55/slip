@@ -36,14 +36,14 @@ type ByteSize struct {
 
 // Call the function with the arguments provided.
 func (f *ByteSize) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	spec, ok := args[0].(slip.List)
 	if !ok || len(spec) != 2 {
-		slip.PanicType("bytespec", args[0], "cons")
+		slip.TypePanic(s, depth, "bytespec", args[0], "cons")
 	}
 	var size slip.Fixnum
 	if size, ok = spec[0].(slip.Fixnum); !ok {
-		slip.PanicType("size", spec[0], "fixnum")
+		slip.TypePanic(s, depth, "size", spec[0], "fixnum")
 	}
 	return size
 }

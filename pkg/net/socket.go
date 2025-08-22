@@ -128,9 +128,9 @@ _domain_, _type_ and optional _protocol_.`,
 
 type socketSocketCaller struct{}
 
-func (caller socketSocketCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketSocketCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.ArgCountCheck(self, args, 0, 0)
+	slip.CheckArgCount(s, depth, self, args, 0, 0)
 	if self.Any != nil {
 		result = slip.Fixnum(self.Any.(int))
 	}
@@ -149,7 +149,7 @@ type socketSetSocketCaller struct{}
 
 func (caller socketSetSocketCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	slip.ArgCountCheck(self, args, 1, 1)
+	slip.CheckArgCount(s, depth, self, args, 1, 1)
 	switch ta := args[0].(type) {
 	case *slip.FileStream:
 		self.Any = int((*os.File)(ta).Fd())
@@ -178,9 +178,9 @@ or a fixnum file descriptor.`,
 
 type socketTypeCaller struct{}
 
-func (caller socketTypeCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketTypeCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.ArgCountCheck(self, args, 0, 0)
+	slip.CheckArgCount(s, depth, self, args, 0, 0)
 	if self.Any != nil {
 		if val, err := syscall.GetsockoptInt(self.Any.(int), syscall.SOL_SOCKET, syscall.SO_TYPE); err == nil {
 			for typ, num := range typeMap {

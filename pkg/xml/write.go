@@ -54,7 +54,7 @@ type Write struct {
 
 // Call the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 4)
+	slip.CheckArgCount(s, depth, f, args, 1, 4)
 	data, ok := args[0].(slip.List)
 	if !ok || len(data) < 1 {
 		slip.TypePanic(s, depth, "data", args[0], "list")

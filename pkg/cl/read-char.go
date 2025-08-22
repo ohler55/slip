@@ -57,14 +57,14 @@ type ReadChar struct {
 
 // Call the function with the arguments provided.
 func (f *ReadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 4)
+	slip.CheckArgCount(s, depth, f, args, 0, 4)
 	is := s.Get(slip.Symbol("*standard-input*"))
 	if 0 < len(args) {
 		is = args[0]
 	}
 	rr, ok := is.(io.RuneReader)
 	if !ok {
-		slip.PanicType("stream", args[0], "input-stream")
+		slip.TypePanic(s, depth, "stream", args[0], "input-stream")
 	}
 	r, _, err := rr.ReadRune()
 	if err != nil {

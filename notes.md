@@ -12,8 +12,37 @@
 
 - generics branch
  - add scope and depth to all condition creations
-  - deprecate old and flip name order
   - replace all in slip, later in plugins
+  + PanicType => TypePanic
+  + ArgCountCheck => CheckArgCount
+  + NewError => ErrorNew
+  - NewPanic => ErrorPanic where there is a scope and depth
+  - CheckMethodArgCount
+  - PanicMethodArgCount
+  - ArithmeticError
+  - DivisionByZero
+  - ControlError
+  - FileError
+  - PackageError
+  - ProgramError
+  - TypeError
+  - ParseError
+  - StreamError
+  - ReaderError
+  - EndOfFile
+  - CellError
+  - UnboundSlot
+  - UnboundVariable
+  - UndefinedFunction
+  - SimpleCondition
+  - SimpleError
+  - SimpleTypeError
+  - SimpleWarning
+  - ClassNotFound
+  - InvalidMethodError
+  - PrintNotReadable
+  - NoApplicableMethodError
+
 
 ----------
 - for later

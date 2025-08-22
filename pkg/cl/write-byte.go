@@ -45,22 +45,22 @@ type WriteByte struct {
 
 // Call the function with the arguments provided.
 func (f *WriteByte) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	w, ok := args[1].(io.Writer)
 	if !ok {
-		slip.PanicType("stream", args[1], "output-stream")
+		slip.TypePanic(s, depth, "stream", args[1], "output-stream")
 	}
 	var b byte
 	switch ta := args[0].(type) {
 	case slip.Fixnum:
 		if ta < 0 || 255 < ta {
-			slip.PanicType("byte", args[0], "fixnum")
+			slip.TypePanic(s, depth, "byte", args[0], "fixnum")
 		}
 		b = byte(ta)
 	case slip.Octet:
 		b = byte(ta)
 	default:
-		slip.PanicType("byte", args[0], "fixnum")
+		slip.TypePanic(s, depth, "byte", args[0], "fixnum")
 	}
 	if _, err := w.Write([]byte{b}); err != nil {
 		slip.PanicStream(args[1].(slip.Stream), "write-byte failed. %s", err)

@@ -48,7 +48,7 @@ type FloatSign struct {
 
 // Call the function with the arguments provided.
 func (f *FloatSign) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	f2 := 1.0
 	if 1 < len(args) {
 		if fa, ok := args[1].(slip.Float); ok {
@@ -57,7 +57,7 @@ func (f *FloatSign) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 				f2 = -f2
 			}
 		} else {
-			slip.PanicType("float-2", args[1], "float")
+			slip.TypePanic(s, depth, "float-2", args[1], "float")
 		}
 	}
 	switch ta := args[0].(type) {
@@ -80,7 +80,7 @@ func (f *FloatSign) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			result = (*slip.LongFloat)(big.NewFloat(-f2))
 		}
 	default:
-		slip.PanicType("float-1", args[0], "float")
+		slip.TypePanic(s, depth, "float-1", args[0], "float")
 	}
 	return
 }

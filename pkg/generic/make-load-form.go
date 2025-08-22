@@ -39,7 +39,7 @@ type MakeLoadForm struct {
 
 // Call the the function with the arguments provided.
 func (f *MakeLoadForm) Call(s *slip.Scope, args slip.List, depth int) (form slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 
 	return ObjectLoadForm(args[0], true)
 }

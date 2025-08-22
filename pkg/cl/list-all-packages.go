@@ -31,9 +31,7 @@ type ListAllPackages struct {
 
 // Call the function with the arguments provided.
 func (f *ListAllPackages) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 0 {
-		slip.PanicArgCount(f, 0, 0)
-	}
+	slip.CheckArgCount(s, depth, f, args, 0, 0)
 	var pkgs slip.List
 	for _, str := range slip.PackageNames() {
 		pkgs = append(pkgs, slip.FindPackage(string(str.(slip.String))))

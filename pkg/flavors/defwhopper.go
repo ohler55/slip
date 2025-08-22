@@ -50,7 +50,7 @@ type Defwhopper struct {
 
 // Call the the function with the arguments provided.
 func (f *Defwhopper) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	ml, ok := args[0].(slip.List)
 	if !ok {
 		slip.TypePanic(s, depth, "whopper designator for defwhopper", args[0], "list")

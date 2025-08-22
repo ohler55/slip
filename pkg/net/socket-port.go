@@ -40,7 +40,7 @@ type SocketPort struct {
 
 // Call the function with the arguments provided.
 func (f *SocketPort) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
 		slip.TypePanic(s, depth, "socket", args[0], "socket")
@@ -54,9 +54,9 @@ func (f *SocketPort) Call(s *slip.Scope, args slip.List, depth int) (result slip
 
 type socketPortCaller struct{}
 
-func (caller socketPortCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketPortCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":port", args, 0, 0)
+	slip.CheckSendArgCount(s, depth, self, ":port", args, 0, 0)
 	if self.Any != nil {
 		_, port := socketLocalName(self)
 		result = port

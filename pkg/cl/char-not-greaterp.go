@@ -42,11 +42,11 @@ type CharNotGreaterp struct {
 
 // Call the function with the arguments provided.
 func (f *CharNotGreaterp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var prev rune
 	for _, a := range args {
 		if c, ok := a.(slip.Character); !ok {
-			slip.PanicType("characters", a, "character")
+			slip.TypePanic(s, depth, "characters", a, "character")
 		} else {
 			lo := unicode.ToLower(rune(c))
 			if lo < prev {

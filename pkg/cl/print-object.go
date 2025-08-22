@@ -45,10 +45,10 @@ type PrintObject struct {
 
 // Call the function with the arguments provided.
 func (f *PrintObject) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	w, ok := args[1].(io.Writer)
 	if !ok {
-		slip.PanicType("stream", args[1], "output-stream")
+		slip.TypePanic(s, depth, "stream", args[1], "output-stream")
 	}
 	if _, err := w.Write(slip.Append(nil, args[0])); err != nil {
 		panic(err)

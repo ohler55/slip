@@ -46,13 +46,13 @@ type Nth struct {
 
 // Call the function with the arguments provided.
 func (f *Nth) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	switch list := args[1].(type) {
 	case nil:
 	case slip.List:
 		num, ok := args[0].(slip.Integer)
 		if !ok {
-			slip.PanicType("n", args[0], "integer")
+			slip.TypePanic(s, depth, "n", args[0], "integer")
 		}
 		n := int(num.Int64())
 		if len(list) <= n || n < 0 {
@@ -60,21 +60,21 @@ func (f *Nth) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 		return list[n]
 	default:
-		slip.PanicType("list", args[1], "list")
+		slip.TypePanic(s, depth, "list", args[1], "list")
 	}
 	return nil
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Nth) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	list, ok := args[1].(slip.List)
 	if !ok {
-		slip.PanicType("list", args[1], "list")
+		slip.TypePanic(s, 0, "list", args[1], "list")
 	}
 	var num slip.Integer
 	if num, ok = args[0].(slip.Integer); !ok {
-		slip.PanicType("n", args[1], "integer")
+		slip.TypePanic(s, 0, "n", args[1], "integer")
 	}
 	n := int(num.Int64())
 	if len(list) <= n || n < 0 {

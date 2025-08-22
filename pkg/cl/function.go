@@ -42,9 +42,7 @@ type Function struct {
 
 // Call the function with the arguments provided.
 func (f *Function) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		return slip.MustFindFunc(string(ta))
@@ -58,7 +56,7 @@ func (f *Function) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	}
-	panic(slip.NewError("|%s| is not a function name or lambda", slip.ObjectString(args[0])))
+	panic(slip.ErrorNew(s, depth, "|%s| is not a function name or lambda", slip.ObjectString(args[0])))
 }
 
 // String representation of the Object.

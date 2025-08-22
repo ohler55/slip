@@ -40,7 +40,7 @@ type GetHostByName struct {
 
 // Call the function with the arguments provided.
 func (f *GetHostByName) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	node, ok := args[0].(slip.String)
 	if !ok {
 		slip.TypePanic(s, depth, "node", args[0], "string")

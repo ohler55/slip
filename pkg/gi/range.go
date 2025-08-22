@@ -49,7 +49,7 @@ type Range struct {
 
 // Call the function with the arguments provided.
 func (f *Range) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	d2 := depth + 1
 	caller := cl.ResolveToCaller(s, args[0], d2)
 

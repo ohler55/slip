@@ -187,7 +187,7 @@ func CheckMethodArgCount(inst Instance, method string, cnt, mn, mx int) {
 			inst.Class().Name(), method, mn, cnt)
 	}
 	if mx != -1 && mx < cnt {
-		panic(NewError("Too many arguments to the %s %s method. At most %d expected but got %d.",
+		panic(ErrorNew(NewScope(), 0, "Too many arguments to the %s %s method. At most %d expected but got %d.",
 			inst.Class().Name(), method, mx, cnt))
 	}
 }
@@ -199,7 +199,7 @@ func PanicMethodArgCount(inst Instance, method string, cnt, mn, mx int) {
 		NewPanic("Too few arguments to the %s %s method. At least %d expected but got %d.",
 			inst.Class().Name(), method, mn, cnt)
 	}
-	panic(NewError("Too many arguments to the %s %s method. At most %d expected but got %d.",
+	panic(ErrorNew(NewScope(), 0, "Too many arguments to the %s %s method. At most %d expected but got %d.",
 		inst.Class().Name(), method, mx, cnt))
 }
 

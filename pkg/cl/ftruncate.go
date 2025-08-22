@@ -49,7 +49,7 @@ type Ftruncate struct {
 
 // Call the function with the arguments provided.
 func (f *Ftruncate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	values := truncate(f, args)
+	values := truncate(s, f, args, depth)
 	switch tv := values[0].(type) {
 	case slip.Fixnum:
 		switch values[1].(type) {

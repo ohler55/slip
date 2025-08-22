@@ -114,11 +114,11 @@ func TestPanicMethodArgChoice(t *testing.T) {
 	tt.Panic(t, func() { slip.PanicMethodArgChoice(inst, "method-1", 1, "2 or 3") })
 }
 
-func TestSendArgCountCheck(t *testing.T) {
+func TestCheckSendArgCount(t *testing.T) {
 	scope := slip.NewScope()
 	inst := slip.ReadString(`(make-instance 'vanilla-flavor)`, scope).Eval(scope, nil).(slip.Instance)
 
-	tt.Panic(t, func() { slip.SendArgCountCheck(inst, "method-1", slip.List{nil}, 2, 3) })
+	tt.Panic(t, func() { slip.CheckSendArgCount(scope, 0, inst, "method-1", slip.List{nil}, 2, 3) })
 }
 
 func TestMethodCompareArgs(t *testing.T) {

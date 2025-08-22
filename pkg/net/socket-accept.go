@@ -44,7 +44,7 @@ type SocketAccept struct {
 
 // Call the function with the arguments provided.
 func (f *SocketAccept) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
 		slip.TypePanic(s, depth, "socket", args[0], "socket")
@@ -54,9 +54,9 @@ func (f *SocketAccept) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 
 type socketAcceptCaller struct{}
 
-func (caller socketAcceptCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketAcceptCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":accept", args, 0, 0)
+	slip.CheckSendArgCount(s, depth, self, ":accept", args, 0, 0)
 
 	return socketAccept(self)
 }

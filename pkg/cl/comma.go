@@ -41,9 +41,7 @@ type Comma struct {
 
 // Call the function with the arguments provided.
 func (f *Comma) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	return args[0]
 }
 

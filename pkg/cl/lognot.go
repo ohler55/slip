@@ -39,11 +39,11 @@ type Lognot struct {
 
 // Call the function with the arguments provided.
 func (f *Lognot) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
-	return lognot(args[0])
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
+	return lognot(s, args[0], depth)
 }
 
-func lognot(arg slip.Object) (result slip.Object) {
+func lognot(s *slip.Scope, arg slip.Object, depth int) (result slip.Object) {
 	switch ta := arg.(type) {
 	case slip.Fixnum:
 		result = slip.Fixnum(^uint64(ta))
@@ -52,7 +52,7 @@ func lognot(arg slip.Object) (result slip.Object) {
 		_ = bi.Not((*big.Int)(ta))
 		result = (*slip.Bignum)(&bi)
 	default:
-		slip.PanicType("integer", ta, "integer")
+		slip.TypePanic(s, depth, "integer", ta, "integer")
 	}
 	return
 }

@@ -53,7 +53,7 @@ type Benchmark struct {
 
 // Call the function with the arguments provided.
 func (f *Benchmark) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	d2 := depth + 1
 	caller := cl.ResolveToCaller(s, args[0], d2)
 	dur := time.Second * 3

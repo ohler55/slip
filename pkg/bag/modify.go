@@ -66,7 +66,7 @@ type Modify struct {
 
 // Call the the function with the arguments provided.
 func (f *Modify) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 5)
+	slip.CheckArgCount(s, depth, f, args, 2, 5)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
 		slip.TypePanic(s, depth, "bag", args[0], "bag")

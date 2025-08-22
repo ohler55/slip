@@ -48,7 +48,7 @@ type WithSlots struct {
 
 // Call the the function with the arguments provided.
 func (f *WithSlots) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	inst, ok := args[1].(slip.Instance)
 	if !ok {
 		slip.TypePanic(s, depth, "instance", args[1], "instance")

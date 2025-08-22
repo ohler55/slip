@@ -48,7 +48,7 @@ type Subseq struct {
 
 // Call the function with the arguments provided.
 func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	start, end, seq := f.getArgs(args)
+	start, end, seq := f.getArgs(s, args, depth)
 	switch ta := seq.(type) {
 	case slip.List:
 		result = ta[start:end]
@@ -79,7 +79,7 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 
 // Place a value in the first position of a list or cons.
 func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	start, end, seq := f.getArgs(args)
+	start, end, seq := f.getArgs(s, args, 0)
 	switch ta := seq.(type) {
 	case slip.List:
 		if rep, ok := value.(slip.List); ok {
@@ -88,7 +88,7 @@ func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
 				ta[start+i] = rep[i]
 			}
 		} else {
-			slip.PanicType("newvalue", value, "list")
+			slip.TypePanic(s, 0, "newvalue", value, "list")
 		}
 	case slip.String:
 		slip.NewPanic("setf called on constant value %s", ta)
@@ -99,7 +99,7 @@ func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
 				ta.Set(rep.Get(i), start+i)
 			}
 		} else {
-			slip.PanicType("newvalue", value, "list")
+			slip.TypePanic(s, 0, "newvalue", value, "list")
 		}
 	case slip.Octets:
 		if rep, ok := value.(slip.Octets); ok {
@@ -108,7 +108,7 @@ func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
 				ta[start+i] = rep[i]
 			}
 		} else {
-			slip.PanicType("newvalue", value, "octets")
+			slip.TypePanic(s, 0, "newvalue", value, "octets")
 		}
 	case *slip.BitVector:
 		if rep, ok := value.(*slip.BitVector); ok {
@@ -117,17 +117,17 @@ func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
 				ta.Put(uint(i+start), rep.At(uint(i)))
 			}
 		} else {
-			slip.PanicType("newvalue", value, "octets")
+			slip.TypePanic(s, 0, "newvalue", value, "octets")
 		}
 	}
 }
 
-func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+func (f *Subseq) getArgs(s *slip.Scope, args slip.List, depth int) (start, end int, seq slip.Object) {
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	if v, ok := args[1].(slip.Fixnum); ok && 0 <= v {
 		start = int(v)
 	} else {
-		slip.PanicType("start", args[1], "fixnum")
+		slip.TypePanic(s, depth, "start", args[1], "fixnum")
 	}
 	end = -1
 	if 2 < len(args) {
@@ -137,10 +137,10 @@ func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 		case slip.Fixnum:
 			end = int(ta)
 			if end < 0 {
-				slip.PanicType("end", args[2], "non negative fixnum")
+				slip.TypePanic(s, depth, "end", args[2], "non negative fixnum")
 			}
 		default:
-			slip.PanicType("end", args[2], "non negative fixnum")
+			slip.TypePanic(s, depth, "end", args[2], "non negative fixnum")
 		}
 	}
 	switch ta := args[0].(type) {
@@ -188,7 +188,7 @@ func (f *Subseq) getArgs(args slip.List) (start, end int, seq slip.Object) {
 		}
 		seq = ta
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	return
 }

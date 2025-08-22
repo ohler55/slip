@@ -64,7 +64,7 @@ type Pushnew struct {
 
 // Call the function with the arguments provided.
 func (f *Pushnew) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 8)
+	slip.CheckArgCount(s, depth, f, args, 2, 8)
 	item := args[0]
 	place := args[1]
 	var (
@@ -96,7 +96,7 @@ retry:
 			}
 			result = append(slip.List{item}, pv...)
 		default:
-			slip.PanicType("place referral", pv, "list")
+			slip.TypePanic(s, depth, "place referral", pv, "list")
 		}
 		s.Set(ta, result)
 	case slip.List:
@@ -113,7 +113,7 @@ retry:
 			}
 			result = append(slip.List{item}, pv...)
 		default:
-			slip.PanicType("place referral", pv, "list")
+			slip.TypePanic(s, depth, "place referral", pv, "list")
 		}
 		targs := ta.GetArgs()
 		pargs := make(slip.List, len(targs))
@@ -122,7 +122,7 @@ retry:
 		}
 		ta.Place(s, pargs, result)
 	default:
-		slip.PanicType("place", ta, "symbol", "placer")
+		slip.TypePanic(s, depth, "place", ta, "symbol", "placer")
 	}
 	return
 }

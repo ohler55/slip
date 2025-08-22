@@ -49,7 +49,7 @@ type CharLength struct {
 
 // Call the function with the arguments provided.
 func (f *CharLength) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	start, end := seqStarEndArgs(s, args, depth)
 	var size int
 	a0 := args[0]

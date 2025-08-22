@@ -37,7 +37,7 @@ type Completions struct {
 
 // Call the the function with the arguments provided.
 func (f *Completions) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	prefix, ok := args[0].(slip.String)
 	if !ok {
 		slip.TypePanic(s, depth, "prefix", args[0], "string")

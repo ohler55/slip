@@ -40,7 +40,7 @@ type Isqrt struct {
 
 // Call the function with the arguments provided.
 func (f *Isqrt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case *slip.Bignum:
 		result = (*slip.Bignum)((*big.Int)(ta).Sqrt((*big.Int)(ta)))
@@ -55,7 +55,7 @@ func (f *Isqrt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		}
 		result = slip.Fixnum(math.Sqrt(rv))
 	default:
-		slip.PanicType("number", args[0], "real")
+		slip.TypePanic(s, depth, "number", args[0], "real")
 	}
 	return
 }

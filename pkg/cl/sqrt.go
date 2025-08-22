@@ -40,9 +40,7 @@ type Sqrt struct {
 
 // Call the function with the arguments provided.
 func (f *Sqrt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Fixnum:
 		if ta < 0 {
@@ -84,7 +82,7 @@ func (f *Sqrt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			result = slip.DoubleFloat(math.Sqrt(v))
 		}
 	default:
-		slip.PanicType("number", ta, "number")
+		slip.TypePanic(s, depth, "number", ta, "number")
 	}
 	return
 }

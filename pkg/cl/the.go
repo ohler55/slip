@@ -46,20 +46,20 @@ type The struct {
 
 // Call the function with the arguments provided.
 func (f *The) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	result = slip.EvalArg(s, args, 1, 0)
-	valueIsA(result, args[0])
+	valueIsA(s, result, args[0], depth)
 	return
 }
 
 // Place a value place indicated by the form.
 func (f *The) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
-	valueIsA(value, args[0])
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
+	valueIsA(s, value, args[0], 0)
 	placeExprValue(s, args[1], value, 0)
 }
 
-func valueIsA(value, valueType slip.Object) {
+func valueIsA(s *slip.Scope, value, valueType slip.Object, depth int) {
 	var match bool
 	if valueType != slip.True && value != nil {
 		if vt, ok := valueType.(slip.Symbol); ok {
@@ -73,7 +73,7 @@ func valueIsA(value, valueType slip.Object) {
 				slip.NewPanic("The value %s is not of type %s.", value, vt)
 			}
 		} else {
-			slip.PanicType("value-type", valueType, "symbol", "t")
+			slip.TypePanic(s, depth, "value-type", valueType, "symbol", "t")
 		}
 	}
 }

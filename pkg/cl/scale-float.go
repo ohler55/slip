@@ -47,16 +47,16 @@ type ScaleFloat struct {
 
 // Call the function with the arguments provided.
 func (f *ScaleFloat) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	var flt float64
 	if r, ok := args[0].(slip.Float); ok {
 		flt = r.RealValue()
 	} else {
-		slip.PanicType("float", args[0], "real")
+		slip.TypePanic(s, depth, "float", args[0], "real")
 	}
 	i, ok := args[1].(slip.Integer)
 	if !ok {
-		slip.PanicType("integer", args[1], "integer")
+		slip.TypePanic(s, depth, "integer", args[1], "integer")
 	}
 	return slip.DoubleFloat(flt * math.Pow(2.0, float64(i.Int64())))
 }

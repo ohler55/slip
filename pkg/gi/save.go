@@ -75,7 +75,7 @@ type Save struct {
 
 // Call the function with the arguments provided.
 func (f *Save) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	w, ok := args[1].(io.Writer)
 	if !ok {
 		slip.TypePanic(s, depth, "output-stream", args[1], "output-stream")

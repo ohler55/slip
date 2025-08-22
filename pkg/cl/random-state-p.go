@@ -39,7 +39,7 @@ type RandomStatep struct {
 
 // Call the function with the arguments provided.
 func (f *RandomStatep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if _, ok := args[0].(*RandomState); ok {
 		return slip.True
 	}

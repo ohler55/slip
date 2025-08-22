@@ -45,7 +45,7 @@ type Disassemble struct {
 
 // Call the the function with the arguments provided.
 func (f *Disassemble) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	ansi := s.Get("*print-ansi*") != nil
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
 	w := s.Get("*standard-output*").(io.Writer)
@@ -58,13 +58,13 @@ Top:
 			a = fi
 			goto Top
 		}
-		slip.PanicType("fn", ta, "function designator")
+		slip.TypePanic(s, depth, "fn", ta, "function designator")
 	case *slip.Lambda:
 		buf = f.disassembleLambda(s, ta, right, ansi)
 	case *slip.FuncInfo:
 		buf = f.disassembleFunction(s, ta, right, ansi)
 	default:
-		slip.PanicType("fn", ta, "function designator")
+		slip.TypePanic(s, depth, "fn", ta, "function designator")
 	}
 	_, _ = w.Write(buf)
 

@@ -39,10 +39,10 @@ type Seventh struct {
 
 // Call the function with the arguments provided.
 func (f *Seventh) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return callN(f, args, 6)
+	return callN(s, f, args, 6, depth)
 }
 
 // Place a value in the seventh position of a list or cons.
 func (f *Seventh) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	placeN(f, args, 6, value)
+	placeN(s, f, args, 6, value)
 }

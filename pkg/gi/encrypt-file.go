@@ -79,7 +79,7 @@ type EncryptFile struct {
 
 // Call the function with the arguments provided.
 func (f *EncryptFile) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 11)
+	slip.CheckArgCount(s, depth, f, args, 3, 11)
 	outPath := string(slip.CoerceToString(args[1]).(slip.String))
 	data, err := os.ReadFile(string(slip.CoerceToString(args[0]).(slip.String)))
 	if err != nil {

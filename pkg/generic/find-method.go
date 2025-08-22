@@ -56,7 +56,7 @@ type FindMethod struct {
 
 // Call the the function with the arguments provided.
 func (f *FindMethod) Call(s *slip.Scope, args slip.List, depth int) (meth slip.Object) {
-	slip.ArgCountCheck(f, args, 3, 4)
+	slip.CheckArgCount(s, depth, f, args, 3, 4)
 	var aux *Aux
 	a0 := args[0]
 top:
@@ -145,7 +145,7 @@ top:
 	}
 	if meth == nil {
 		if 3 < len(args) && args[3] != nil {
-			slip.PanicError("Method for %s %s %s does not exist.", aux.docs.Name, args[1], specializers)
+			slip.ErrorPanic(s, depth, "Method for %s %s %s does not exist.", aux.docs.Name, args[1], specializers)
 		}
 	}
 	return

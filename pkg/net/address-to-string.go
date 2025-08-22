@@ -40,7 +40,7 @@ type AddressToString struct {
 
 // Call the function with the arguments provided.
 func (f *AddressToString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	_, str := addressToString(s, args[0], depth)
 	return slip.String(str)
 }

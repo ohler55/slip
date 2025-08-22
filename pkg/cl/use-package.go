@@ -45,7 +45,7 @@ type UsePackage struct {
 
 // Call the function with the arguments provided.
 func (f *UsePackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	pkg := slip.CurrentPackage
 	pto := slip.PackageFromArg(args[0])
 	if pto == nil {

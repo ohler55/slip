@@ -39,7 +39,7 @@ type First struct {
 
 // Call the function with the arguments provided.
 func (f *First) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	a := args[0]
 	switch list := a.(type) {
 	case nil:
@@ -49,17 +49,17 @@ func (f *First) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			result = list[0]
 		}
 	default:
-		slip.PanicType("argument to first", list, "cons", "list")
+		slip.TypePanic(s, depth, "argument to first", list, "cons", "list")
 	}
 	return
 }
 
 // Place a value in the first position of a list or cons.
 func (f *First) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, 0, f, args, 1, 1)
 	if list, ok := args[0].(slip.List); ok && 0 < len(list) {
 		list[0] = value
 		return
 	}
-	slip.PanicType("argument to first", args[0], "cons", "list")
+	slip.TypePanic(s, 0, "argument to first", args[0], "cons", "list")
 }

@@ -45,24 +45,24 @@ type Concatenate struct {
 
 // Call the function with the arguments provided.
 func (f *Concatenate) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	switch args[0] {
 	case slip.ListSymbol:
-		result = f.listConc(args[1:])
+		result = f.listConc(s, args[1:], depth)
 	case slip.StringSymbol:
-		result = f.stringConc(args[1:])
+		result = f.stringConc(s, args[1:], depth)
 	case slip.VectorSymbol:
-		elements := f.listConc(args[1:])
+		elements := f.listConc(s, args[1:], depth)
 		result = slip.NewVector(len(elements), slip.TrueSymbol, nil, elements, true)
 	case slip.OctetsSymbol:
-		result = f.octetsConc(args[1:])
+		result = f.octetsConc(s, args[1:], depth)
 	default:
-		slip.PanicType("result-type", args[0], "symbol (list, string, vector, or bit-vector)")
+		slip.TypePanic(s, depth, "result-type", args[0], "symbol (list, string, vector, or bit-vector)")
 	}
 	return
 }
 
-func (f *Concatenate) listConc(args slip.List) (result slip.List) {
+func (f *Concatenate) listConc(s *slip.Scope, args slip.List, depth int) (result slip.List) {
 	for _, arg := range args {
 		switch ta := arg.(type) {
 		case nil:
@@ -76,13 +76,13 @@ func (f *Concatenate) listConc(args slip.List) (result slip.List) {
 		case slip.VectorLike:
 			result = append(result, ta.AsList()...)
 		default:
-			slip.PanicType("&rest", ta, "list", "string", "vector")
+			slip.TypePanic(s, depth, "&rest", ta, "list", "string", "vector")
 		}
 	}
 	return
 }
 
-func (f *Concatenate) stringConc(args slip.List) slip.String {
+func (f *Concatenate) stringConc(s *slip.Scope, args slip.List, depth int) slip.String {
 	var ra []rune
 	for _, arg := range args {
 	each:
@@ -97,7 +97,7 @@ func (f *Concatenate) stringConc(args slip.List) slip.String {
 				case slip.Octet:
 					ra = append(ra, rune(te))
 				default:
-					slip.PanicType("list element", a, "character", "octet")
+					slip.TypePanic(s, depth, "list element", a, "character", "octet")
 				}
 			}
 		case slip.String:
@@ -106,13 +106,13 @@ func (f *Concatenate) stringConc(args slip.List) slip.String {
 			arg = ta.AsList()
 			goto each
 		default:
-			slip.PanicType("&rest", ta, "list", "string", "vector")
+			slip.TypePanic(s, depth, "&rest", ta, "list", "string", "vector")
 		}
 	}
 	return slip.String(ra)
 }
 
-func (f *Concatenate) octetsConc(args slip.List) slip.Octets {
+func (f *Concatenate) octetsConc(s *slip.Scope, args slip.List, depth int) slip.Octets {
 	var b []byte
 	for _, arg := range args {
 	each:
@@ -130,11 +130,11 @@ func (f *Concatenate) octetsConc(args slip.List) slip.Octets {
 					b = append(b, byte(te))
 				case slip.Fixnum:
 					if te < 0 || 255 < te {
-						slip.PanicType("list element", a, "character", "octet")
+						slip.TypePanic(s, depth, "list element", a, "character", "octet")
 					}
 					b = append(b, byte(te))
 				default:
-					slip.PanicType("list element", a, "character", "octet")
+					slip.TypePanic(s, depth, "list element", a, "character", "octet")
 				}
 			}
 		case slip.String:
@@ -145,7 +145,7 @@ func (f *Concatenate) octetsConc(args slip.List) slip.Octets {
 			arg = ta.AsList()
 			goto each
 		default:
-			slip.PanicType("&rest", ta, "list", "string", "vector")
+			slip.TypePanic(s, depth, "&rest", ta, "list", "string", "vector")
 		}
 	}
 	return slip.Octets(b)

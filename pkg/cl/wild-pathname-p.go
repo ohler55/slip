@@ -41,10 +41,10 @@ type WildPathnameP struct {
 
 // Call the function with the arguments provided.
 func (f *WildPathnameP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("pathname", args[0], "string")
+		slip.TypePanic(s, depth, "pathname", args[0], "string")
 	}
 	if strings.ContainsAny(string(path), "*?[") {
 		result = slip.True

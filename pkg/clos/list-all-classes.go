@@ -44,7 +44,7 @@ type ListAllClasses struct {
 
 // Call the the function with the arguments provided.
 func (f *ListAllClasses) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 4)
+	slip.CheckArgCount(s, depth, f, args, 0, 4)
 	p := slip.CurrentPackage
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":package")); has {
 		switch tv := v.(type) {

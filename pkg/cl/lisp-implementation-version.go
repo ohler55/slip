@@ -35,7 +35,7 @@ type LispImplementationVersion struct {
 
 // Call the function with the arguments provided.
 func (f *LispImplementationVersion) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 0)
+	slip.CheckArgCount(s, depth, f, args, 0, 0)
 	if len(version) == 0 {
 		if bi, _ := debug.ReadBuildInfo(); bi != nil {
 			version = bi.Main.Version

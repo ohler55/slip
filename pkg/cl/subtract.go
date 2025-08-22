@@ -41,15 +41,13 @@ type Subtract struct {
 
 // Call the function with the arguments provided.
 func (f *Subtract) Call(s *slip.Scope, args slip.List, depth int) (dif slip.Object) {
-	if len(args) < 1 {
-		slip.PanicArgCount(f, 1, -1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var arg slip.Object
 	for pos, a := range args {
 		if dif == nil {
 			dif = a
 			if _, ok := dif.(slip.Number); !ok {
-				slip.PanicType("numbers", dif, "number")
+				slip.TypePanic(s, depth, "numbers", dif, "number")
 			}
 			if pos == len(args)-1 {
 				switch td := dif.(type) {

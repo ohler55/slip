@@ -39,7 +39,7 @@ type Prog2 struct {
 
 // Call the function with the arguments provided.
 func (f *Prog2) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 
 	return args[1]
 }

@@ -46,7 +46,7 @@ type Add struct {
 
 // Call the the function with the arguments provided.
 func (f *Add) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var list slip.List
 	switch ta := args[0].(type) {
 	case nil:

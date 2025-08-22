@@ -63,7 +63,7 @@ type Split struct {
 
 // Call the function with the arguments provided.
 func (f *Split) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 8)
+	slip.CheckArgCount(s, depth, f, args, 2, 8)
 	str := slip.MustBeString(args[0], "string")
 	sep := slip.MustBeString(args[1], "separator")
 	limit := -1

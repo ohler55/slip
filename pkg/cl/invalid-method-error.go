@@ -49,15 +49,15 @@ type InvalidMethodError struct {
 
 // Call the function with the arguments provided.
 func (f *InvalidMethodError) Call(s *slip.Scope, args slip.List, depth int) (cond slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	method, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("method", args[0], "symbol")
+		slip.TypePanic(s, depth, "method", args[0], "symbol")
 	}
 	var ctrl slip.String
 
 	if ctrl, ok = args[1].(slip.String); !ok {
-		slip.PanicType("format-control", args[1], "string")
+		slip.TypePanic(s, depth, "format-control", args[1], "string")
 	}
 	var sf SimpleFormatterEmbed
 	sf.Init(s, string(ctrl), args[2:])

@@ -59,7 +59,7 @@ type JSONParse struct {
 
 // Call the the function with the arguments provided.
 func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	d2 := depth + 1
 	var caller slip.Caller
 	channel, ok := args[0].(gi.Channel)

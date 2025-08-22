@@ -55,16 +55,16 @@ type EnsureDirectoriesExist struct {
 
 // Call the function with the arguments provided.
 func (f *EnsureDirectoriesExist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	var perm fs.FileMode = 0755
 	for pos := 1; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -76,12 +76,12 @@ func (f *EnsureDirectoriesExist) Call(s *slip.Scope, args slip.List, depth int) 
 			if num, ok = val.(slip.Fixnum); ok {
 				perm = fs.FileMode(num)
 			} else {
-				slip.PanicType(string(sym), val, "fixnum")
+				slip.TypePanic(s, depth, string(sym), val, "fixnum")
 			}
 		case ":verbose":
 			// ignore
 		default:
-			slip.PanicType("keyword", sym, ":permission", ":verbose")
+			slip.TypePanic(s, depth, "keyword", sym, ":permission", ":verbose")
 		}
 	}
 	if err := os.MkdirAll(string(path), perm); err != nil {

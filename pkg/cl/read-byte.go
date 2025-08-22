@@ -52,14 +52,14 @@ type ReadByte struct {
 
 // Call the function with the arguments provided.
 func (f *ReadByte) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 3)
+	slip.CheckArgCount(s, depth, f, args, 0, 3)
 	is := s.Get(slip.Symbol("*standard-input*"))
 	if 0 < len(args) {
 		is = args[0]
 	}
 	rr, ok := is.(io.ByteReader)
 	if !ok {
-		slip.PanicType("stream", args[0], "input-stream")
+		slip.TypePanic(s, depth, "stream", args[0], "input-stream")
 	}
 	b, err := rr.ReadByte()
 	if err != nil {

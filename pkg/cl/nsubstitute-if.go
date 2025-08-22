@@ -84,7 +84,7 @@ func (f *NsubstituteIf) Call(s *slip.Scope, args slip.List, depth int) (result s
 		result = sr.replace(seq)
 	case slip.String:
 		if _, ok := sr.rep.(slip.Character); !ok {
-			slip.PanicType("new", sr.rep, "character")
+			slip.TypePanic(s, depth, "new", sr.rep, "character")
 		}
 		ra := []rune(seq)
 		dup := make(slip.List, len(ra))
@@ -102,11 +102,11 @@ func (f *NsubstituteIf) Call(s *slip.Scope, args slip.List, depth int) (result s
 		result = seq
 	case slip.Octets:
 		if _, ok := sr.rep.(slip.Octet); !ok {
-			slip.PanicType("new", sr.rep, "Octet")
+			slip.TypePanic(s, depth, "new", sr.rep, "Octet")
 		}
 		result = sr.replaceBytes(seq)
 	default:
-		slip.PanicType("sequence", seq, "sequence")
+		slip.TypePanic(s, depth, "sequence", seq, "sequence")
 	}
 	return
 }

@@ -41,9 +41,7 @@ type Backquote struct {
 
 // Call the function with the arguments provided.
 func (f *Backquote) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	result = f.expand(s, args[0], depth)
 	if s.Macro && result != nil {
 		result = result.Eval(s, depth+1)

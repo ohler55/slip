@@ -52,7 +52,7 @@ type MultipleValueBind struct {
 
 // Call the function with the arguments provided.
 func (f *MultipleValueBind) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	v := slip.EvalArg(s, args, 1, depth)
 	values, ok := v.(slip.Values)
 	if !ok {
@@ -61,13 +61,13 @@ func (f *MultipleValueBind) Call(s *slip.Scope, args slip.List, depth int) (resu
 	ns := s.NewScope()
 	var vars slip.List
 	if vars, ok = args[0].(slip.List); !ok {
-		slip.PanicType("vars", args[0], "list of symbols")
+		slip.TypePanic(s, depth, "vars", args[0], "list of symbols")
 	}
 	var i int
 	for i, v = range vars {
 		var sym slip.Symbol
 		if sym, ok = v.(slip.Symbol); !ok {
-			slip.PanicType("vars", v, "list of symbols")
+			slip.TypePanic(s, depth, "vars", v, "list of symbols")
 		}
 		if i < len(values) {
 			ns.Let(sym, values[i])

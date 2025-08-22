@@ -49,10 +49,10 @@ type Dpb struct {
 // Call the function with the arguments provided.
 func (f *Dpb) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	// Helper functions are defined in deposit-field.go.
-	slip.ArgCountCheck(f, args, 3, 3)
-	newbyte, nneg := ToUnsignedByte(args[0], "newbyte")
-	integer, neg := ToUnsignedByte(args[2], "integer")
-	size, pos := byteSpecArg(args[1])
+	slip.CheckArgCount(s, depth, f, args, 3, 3)
+	newbyte, nneg := ToUnsignedByte(s, args[0], "newbyte", depth)
+	integer, neg := ToUnsignedByte(s, args[2], "integer", depth)
+	size, pos := byteSpecArg(s, args[1], depth)
 
 	integer = integer.Dup()
 	max := uint(newbyte.Size())

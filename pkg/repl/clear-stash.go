@@ -44,7 +44,7 @@ func (f *ClearStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 }
 
 func cleanStaskCall(f slip.Object, stash *Stash, s *slip.Scope, args slip.List) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 4)
+	slip.CheckArgCount(s, 0, f, args, 0, 4)
 	start := 0
 	end := -1
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":start")); has {

@@ -48,9 +48,7 @@ type Pprint struct {
 
 // Call the function with the arguments provided.
 func (f *Pprint) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	p := *slip.DefaultPrinter()
 	p.ScopedUpdate(s)
 	p.Escape = true
@@ -64,7 +62,7 @@ func (f *Pprint) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		var ok bool
 		ss, _ = args[1].(slip.Stream)
 		if w, ok = args[1].(io.Writer); !ok {
-			slip.PanicType("pprint output-stream", args[1], "output-stream")
+			slip.TypePanic(s, depth, "pprint output-stream", args[1], "output-stream")
 		}
 	}
 	b := p.Append([]byte{'\n'}, obj, 0)
