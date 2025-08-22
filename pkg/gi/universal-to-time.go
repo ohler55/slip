@@ -42,7 +42,7 @@ func (f *UniversalToTime) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 	slip.ArgCountCheck(f, args, 1, 1)
 	ut, ok := args[0].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("universal-time", args[0], "fixnum")
+		slip.TypePanic(s, depth, "universal-time", args[0], "fixnum")
 	}
 	return slip.Time(time.Unix(int64(ut)-2208988800, 0).UTC())
 }

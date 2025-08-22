@@ -85,7 +85,7 @@ func (f *EncryptFile) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if err != nil {
 		panic(err)
 	}
-	non, pad, block, bsize := extractEncryptArgs(args[2:])
+	non, pad, block, bsize := extractEncryptArgs(s, args[2:], depth)
 	perm := os.FileMode(0666)
 	if 3 < len(args) {
 		if obj, has := slip.GetArgsKeyValue(args[3:], slip.Symbol(":perm")); has {

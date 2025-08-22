@@ -72,7 +72,7 @@ type Encrypt struct {
 func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 2, 8)
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
-	non, pad, block, bsize := extractEncryptArgs(args[1:])
+	non, pad, block, bsize := extractEncryptArgs(s, args[1:], depth)
 	// Data must be a multiple of the block size so pad as needed.
 	if len(data)%bsize != 0 {
 		data = append(data, bytes.Repeat([]byte{pad}, bsize-len(data)%bsize)...)
@@ -90,7 +90,11 @@ func (f *Encrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	return slip.Octets(buf)
 }
 
-func extractEncryptArgs(args slip.List) (nonce []byte, pad byte, block cipher.Block, bsize int) {
+func extractEncryptArgs(
+	s *slip.Scope,
+	args slip.List,
+	depth int) (nonce []byte, pad byte, block cipher.Block, bsize int) {
+
 	key := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
 	var ciph slip.Object = slip.Symbol(":aes")
 	pad = byte(0)
@@ -128,7 +132,7 @@ func extractEncryptArgs(args slip.List) (nonce []byte, pad byte, block cipher.Bl
 		block, _ = des.NewCipher(key)
 		bsize = des.BlockSize
 	default:
-		slip.PanicType("cipher", ciph, ":aes", ":des")
+		slip.TypePanic(s, depth, "cipher", ciph, ":aes", ":des")
 	}
 	return
 }

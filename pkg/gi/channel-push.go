@@ -48,7 +48,7 @@ func (f *ChannelPush) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	}
 	ch, ok := args[0].(Channel)
 	if !ok {
-		slip.PanicType("channel", args[0], "channel")
+		slip.TypePanic(s, depth, "channel", args[0], "channel")
 	}
 	ch <- args[1]
 

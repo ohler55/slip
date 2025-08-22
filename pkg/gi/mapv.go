@@ -58,7 +58,7 @@ func (f *Mapv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		min := math.MaxInt
 		lists := make([]slip.List, len(args)-1)
 		for i, arg := range args[1:] {
-			list := f.asList(arg)
+			list := f.asList(s, arg, depth)
 			lists[i] = list
 			if len(list) < min {
 				min = len(list)
@@ -73,14 +73,14 @@ func (f *Mapv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		}
 	} else {
 		// The most common case.
-		for _, v := range f.asList(args[1]) {
+		for _, v := range f.asList(s, args[1], depth) {
 			_ = caller.Call(s, slip.List{v}, d2)
 		}
 	}
 	return args[1]
 }
 
-func (f *Mapv) asList(v slip.Object) (list slip.List) {
+func (f *Mapv) asList(s *slip.Scope, v slip.Object, depth int) (list slip.List) {
 	switch tv := v.(type) {
 	case nil:
 		// leave empty
@@ -89,7 +89,7 @@ func (f *Mapv) asList(v slip.Object) (list slip.List) {
 	case slip.VectorLike:
 		list = tv.AsList()
 	default:
-		slip.PanicType("vector", tv, "vector", "list")
+		slip.TypePanic(s, depth, "vector", tv, "vector", "list")
 	}
 	return
 }

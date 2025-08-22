@@ -60,7 +60,7 @@ func (f *RegexFindAll) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 		if num, ok := v.(slip.Fixnum); ok {
 			limit = int(num)
 		} else {
-			slip.PanicType(":limit", v, "fixnum")
+			slip.TypePanic(s, depth, ":limit", v, "fixnum")
 		}
 	}
 	var found slip.List

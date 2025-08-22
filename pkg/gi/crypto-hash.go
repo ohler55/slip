@@ -87,7 +87,7 @@ func (f *CryptoHash) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	case slip.Symbol(":sha512-256"):
 		h = crypto.SHA512_256
 	default:
-		slip.PanicType("method", args[1],
+		slip.TypePanic(s, depth, "method", args[1],
 			":md5",
 			":sha1",
 			":sha224",

@@ -61,7 +61,7 @@ func (f *FileInfo) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("filepath", args[0], "string")
+		slip.TypePanic(s, depth, "filepath", args[0], "string")
 	}
 	if abs, err := filepath.Abs(string(path)); err == nil {
 		var file *os.File

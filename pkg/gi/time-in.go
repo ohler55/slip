@@ -49,9 +49,9 @@ func (f *TimeIn) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	t, ok := args[0].(slip.Time)
 	if !ok {
-		slip.PanicType("time", args[0], "time")
+		slip.TypePanic(s, depth, "time", args[0], "time")
 	}
-	loc := getLocArg(args[1])
+	loc := getLocArg(s, args[1], depth)
 
 	return slip.Time(time.Time(t).In(loc))
 }

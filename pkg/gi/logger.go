@@ -78,7 +78,7 @@ func Logger() *flavors.Flavor {
 
 type initCaller struct{}
 
-func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller initCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	queue := logQueue{
 		queue: make(chan []byte, 100),
@@ -95,7 +95,7 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 					case io.Writer:
 						out = list[i+1]
 					default:
-						slip.PanicType(":out", list[i+1], "output-stream")
+						slip.TypePanic(s, depth, ":out", list[i+1], "output-stream")
 					}
 				}
 			}
@@ -352,7 +352,7 @@ func (caller outCaller) FuncDocs() *slip.FuncDoc {
 
 type setOutCaller struct{}
 
-func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller setOutCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get(slip.Symbol("self")).(*flavors.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(self, ":set-out", len(args), "1")
@@ -363,7 +363,7 @@ func (caller setOutCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Objec
 	case io.Writer:
 		self.Let("out", args[0])
 	default:
-		slip.PanicType(":out", args[0], "output-stream")
+		slip.TypePanic(s, depth, ":out", args[0], "output-stream")
 	}
 	return nil
 }

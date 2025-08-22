@@ -50,7 +50,7 @@ type CharLength struct {
 // Call the function with the arguments provided.
 func (f *CharLength) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 5)
-	start, end := seqStarEndArgs(args)
+	start, end := seqStarEndArgs(s, args, depth)
 	var size int
 	a0 := args[0]
 top:
@@ -65,14 +65,14 @@ top:
 		size = end - start
 		for _, v := range ta[start:end] {
 			if _, ok := v.(slip.Character); !ok {
-				slip.PanicType("list element", v, "character")
+				slip.TypePanic(s, depth, "list element", v, "character")
 			}
 		}
 	case slip.VectorLike:
 		a0 = ta.AsList()
 		goto top
 	default:
-		slip.PanicType("sequence", args[0], "octets", "string", "list of characters")
+		slip.TypePanic(s, depth, "sequence", args[0], "octets", "string", "list of characters")
 	}
 	return slip.Fixnum(size)
 }

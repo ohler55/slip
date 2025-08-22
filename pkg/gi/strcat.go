@@ -51,7 +51,7 @@ func (f *Strcat) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				if r, ok := a.(slip.Character); ok {
 					ra = append(ra, rune(r))
 				} else {
-					slip.PanicType("list element", a, "character")
+					slip.TypePanic(s, depth, "list element", a, "character")
 				}
 			}
 		case slip.String:
@@ -64,7 +64,7 @@ func (f *Strcat) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			arg = ta.AsList()
 			goto each
 		default:
-			slip.PanicType("&rest", ta, "string", "character")
+			slip.TypePanic(s, depth, "&rest", ta, "string", "character")
 		}
 	}
 	return slip.String(ra)

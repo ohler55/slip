@@ -47,7 +47,7 @@ func (f *SignalWait) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 		if num, ok := a.(slip.Fixnum); ok {
 			sigs = append(sigs, syscall.Signal(num))
 		} else {
-			slip.PanicType("signal", a, "fixnum")
+			slip.TypePanic(s, depth, "signal", a, "fixnum")
 		}
 	}
 	done := make(chan os.Signal, 1)

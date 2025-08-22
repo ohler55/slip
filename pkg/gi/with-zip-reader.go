@@ -56,18 +56,18 @@ func (f *WithZipReader) Call(s *slip.Scope, args slip.List, depth int) (result s
 	if list, ok := args[0].(slip.List); ok {
 		args = list
 	} else {
-		slip.PanicType("args", args[0], "list")
+		slip.TypePanic(s, depth, "args", args[0], "list")
 	}
 	slip.ArgCountCheck(f, args, 2, 2)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("args[0]", args[0], "symbol")
+		slip.TypePanic(s, depth, "args[0]", args[0], "symbol")
 	}
 	d2 := depth + 1
 	args[1] = slip.EvalArg(s, args, 1, d2)
 	var r io.Reader
 	if r, ok = args[1].(io.Reader); !ok {
-		slip.PanicType("args[1]", args[1], "input-stream")
+		slip.TypePanic(s, depth, "args[1]", args[1], "input-stream")
 	}
 	z, err := gzip.NewReader(r)
 	if err != nil {

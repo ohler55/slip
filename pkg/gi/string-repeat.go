@@ -52,12 +52,12 @@ func (f *StringRepeat) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	if ss, ok := args[0].(slip.String); ok {
 		str = string(ss)
 	} else {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	if num, ok := args[1].(slip.Fixnum); ok {
 		count = int(num)
 	} else {
-		slip.PanicType("count", args[1], "fixnum")
+		slip.TypePanic(s, depth, "count", args[1], "fixnum")
 	}
 	return slip.String(strings.Repeat(str, count))
 }

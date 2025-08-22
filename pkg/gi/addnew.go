@@ -97,7 +97,7 @@ retry:
 			}
 			result = append(pv, item)
 		default:
-			slip.PanicType("place referral", pv, "list")
+			slip.TypePanic(s, depth, "place referral", pv, "list")
 		}
 		s.Set(ta, result)
 	case slip.List:
@@ -114,7 +114,7 @@ retry:
 			}
 			result = append(pv, item)
 		default:
-			slip.PanicType("place referral", pv, "list")
+			slip.TypePanic(s, depth, "place referral", pv, "list")
 		}
 		targs := ta.GetArgs()
 		pargs := make(slip.List, len(targs))
@@ -123,7 +123,7 @@ retry:
 		}
 		ta.Place(s, pargs, result)
 	default:
-		slip.PanicType("place", ta, "symbol", "placer")
+		slip.TypePanic(s, depth, "place", ta, "symbol", "placer")
 	}
 	return
 }

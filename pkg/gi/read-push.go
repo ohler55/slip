@@ -49,11 +49,11 @@ func (f *ReadPush) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	slip.ArgCountCheck(f, args, 2, 2)
 	r, ok := args[0].(io.Reader)
 	if !ok {
-		slip.PanicType("input-stream", args[0], "input-stream")
+		slip.TypePanic(s, depth, "input-stream", args[0], "input-stream")
 	}
 	var channel Channel
 	if channel, ok = args[1].(Channel); !ok {
-		slip.PanicType("channel", args[1], "channel")
+		slip.TypePanic(s, depth, "channel", args[1], "channel")
 	}
 	slip.ReadStreamPush(r, s, channel)
 

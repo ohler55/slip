@@ -77,7 +77,7 @@ func (f *DecryptFile) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if err != nil {
 		panic(err)
 	}
-	strip, block, bsize, trim := extractDencryptArgs(args[2:])
+	strip, block, bsize, trim := extractDencryptArgs(s, args[2:], depth)
 	perm := os.FileMode(0666)
 	if 3 < len(args) {
 		if obj, has := slip.GetArgsKeyValue(args[3:], slip.Symbol(":perm")); has {

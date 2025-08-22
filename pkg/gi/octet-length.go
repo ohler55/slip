@@ -53,7 +53,7 @@ type OctetLength struct {
 // Call the function with the arguments provided.
 func (f *OctetLength) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 5)
-	start, end := seqStarEndArgs(args)
+	start, end := seqStarEndArgs(s, args, depth)
 	var size int
 	a0 := args[0]
 top:
@@ -70,14 +70,14 @@ top:
 			if c, ok := v.(slip.Character); ok {
 				size += utf8.RuneLen(rune(c))
 			} else {
-				slip.PanicType("string element", v, "character")
+				slip.TypePanic(s, depth, "string element", v, "character")
 			}
 		}
 	case slip.VectorLike:
 		a0 = ta.AsList()
 		goto top
 	default:
-		slip.PanicType("string", args[0], "string", "list of characters")
+		slip.TypePanic(s, depth, "string", args[0], "string", "list of characters")
 	}
 	return slip.Fixnum(size)
 }

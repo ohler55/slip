@@ -42,7 +42,7 @@ func (f *TimeToUniversal) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 	slip.ArgCountCheck(f, args, 1, 1)
 	st, ok := args[0].(slip.Time)
 	if !ok {
-		slip.PanicType("time", args[0], "time")
+		slip.TypePanic(s, depth, "time", args[0], "time")
 	}
 	return slip.Fixnum(time.Time(st).Unix() + 2208988800)
 }

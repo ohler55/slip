@@ -73,7 +73,7 @@ func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result sli
 				break
 			}
 		}
-		slip.PanicType("destination", ta, "output-stream")
+		slip.TypePanic(s, depth, "destination", ta, "output-stream")
 	}
 	if _, err := w.Write(b); err != nil {
 		slip.PanicStream(ss, "write failed. %s", err)

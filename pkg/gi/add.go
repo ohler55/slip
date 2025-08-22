@@ -54,7 +54,7 @@ func (f *Add) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	case slip.List:
 		list = ta
 	default:
-		slip.PanicType("list", ta, "list")
+		slip.TypePanic(s, depth, "list", ta, "list")
 	}
 	return append(list, args[1:]...)
 }

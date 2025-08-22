@@ -42,7 +42,7 @@ func (f *ReadAll) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.ArgCountCheck(f, args, 1, 1)
 	r, ok := args[0].(io.Reader)
 	if !ok {
-		slip.PanicType("stream", args[0], "input-stream")
+		slip.TypePanic(s, depth, "stream", args[0], "input-stream")
 	}
 	b, err := io.ReadAll(r)
 	if err != nil {

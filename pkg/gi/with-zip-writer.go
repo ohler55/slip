@@ -58,12 +58,12 @@ func (f *WithZipWriter) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	if list, ok := args[0].(slip.List); ok {
 		args = list
 	} else {
-		slip.PanicType("args", args[0], "list")
+		slip.TypePanic(s, depth, "args", args[0], "list")
 	}
 	slip.ArgCountCheck(f, args, 2, 13)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("args[0]", args[0], "symbol")
+		slip.TypePanic(s, depth, "args[0]", args[0], "symbol")
 	}
 	d2 := depth + 1
 	args = args[1:]
@@ -72,7 +72,7 @@ func (f *WithZipWriter) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	}
 	var w io.Writer
 	if w, ok = args[0].(io.Writer); !ok {
-		slip.PanicType("args[1]", args[0], "output-stream")
+		slip.TypePanic(s, depth, "args[1]", args[0], "output-stream")
 	}
 	args = args[1:]
 	level := gzip.DefaultCompression
@@ -87,14 +87,14 @@ func (f *WithZipWriter) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 		case slip.Symbol:
 			// not a level
 		default:
-			slip.PanicType("level", ta, "fixnum", "nil")
+			slip.TypePanic(s, depth, "level", ta, "fixnum", "nil")
 		}
 	}
 	z, err := gzip.NewWriterLevel(w, level)
 	if err != nil {
 		panic(err)
 	}
-	setZipHeader(z, args)
+	setZipHeader(s, z, args, depth)
 	s2 := s.NewScope()
 	s2.Let(sym, &slip.OutputStream{Writer: z})
 	for i := range forms {

@@ -50,7 +50,7 @@ type OctetsToString struct {
 // Call the function with the arguments provided.
 func (f *OctetsToString) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.ArgCountCheck(f, args, 1, 5)
-	start, end := seqStarEndArgs(args)
+	start, end := seqStarEndArgs(s, args, depth)
 	a0 := args[0]
 top:
 	switch ta := a0.(type) {
@@ -68,7 +68,7 @@ top:
 		a0 = ta.AsList()
 		goto top
 	default:
-		slip.PanicType("octets", args[0], "list", "vector", "octets")
+		slip.TypePanic(s, depth, "octets", args[0], "list", "vector", "octets")
 	}
 	return
 }

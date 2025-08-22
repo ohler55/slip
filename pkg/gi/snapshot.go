@@ -77,7 +77,7 @@ top:
 			a0 = s.Get("*standard-output*")
 			goto top
 		}
-		slip.PanicType("destination", ta, "output-stream", "t", "nil", "string")
+		slip.TypePanic(s, depth, "destination", ta, "output-stream", "t", "nil", "string")
 	}
 	return nil
 }

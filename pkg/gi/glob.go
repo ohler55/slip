@@ -53,7 +53,7 @@ func (f *Glob) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	caller := cl.ResolveToCaller(s, args[0], d2)
 	pat, ok := args[1].(slip.String)
 	if !ok {
-		slip.PanicType("pattern", args[1], "string")
+		slip.TypePanic(s, depth, "pattern", args[1], "string")
 	}
 	matches, err := filepath.Glob(string(pat))
 	if err != nil {

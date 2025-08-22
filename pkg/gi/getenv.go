@@ -43,7 +43,7 @@ func (f *Getenv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	slip.ArgCountCheck(f, args, 1, 1)
 	vs, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("name", args[0], "string")
+		slip.TypePanic(s, depth, "name", args[0], "string")
 	}
 	if v := os.Getenv(string(vs)); 0 < len(v) {
 		result = slip.String(v)

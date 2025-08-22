@@ -69,7 +69,7 @@ func (f *Range) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case Ranger:
 		t1.Range(s, caller, d2)
 	default:
-		slip.PanicType("collection", t1, "channel", "list")
+		slip.TypePanic(s, depth, "collection", t1, "channel", "list")
 	}
 	return nil
 }

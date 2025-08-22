@@ -44,7 +44,7 @@ func (f *ChannelPop) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	}
 	ch, ok := args[0].(Popper)
 	if !ok {
-		slip.PanicType("channel", args[0], "channel")
+		slip.TypePanic(s, depth, "channel", args[0], "channel")
 	}
 	return ch.Pop()
 }

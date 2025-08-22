@@ -73,7 +73,7 @@ func (f *Split) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if num, ok := v.(slip.Fixnum); ok {
 			limit = int(num)
 		} else {
-			slip.PanicType(":limit", v, "fixnum")
+			slip.TypePanic(s, depth, ":limit", v, "fixnum")
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args[2:], slip.Symbol(":omit-empty")); has && v != nil {

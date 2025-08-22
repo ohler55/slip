@@ -46,7 +46,7 @@ func (f *FilepathJoin) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			if sa, ok := a.(slip.String); ok {
 				elements[i] = string(sa)
 			} else {
-				slip.PanicType("element", a, "string")
+				slip.TypePanic(s, depth, "element", a, "string")
 			}
 		}
 		result = slip.String(filepath.Join(elements...))

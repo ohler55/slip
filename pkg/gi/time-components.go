@@ -42,7 +42,7 @@ func (f *TimeComponents) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	slip.ArgCountCheck(f, args, 1, 1)
 	t, ok := args[0].(slip.Time)
 	if !ok {
-		slip.PanicType("time", args[0], "time")
+		slip.TypePanic(s, depth, "time", args[0], "time")
 	}
 	return slip.TimeComponents(s, t, nil, depth)
 }
