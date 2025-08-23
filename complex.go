@@ -66,7 +66,7 @@ func (obj Complex) Eval(s *Scope, depth int) Object {
 
 func newComplex(list List) Complex {
 	if len(list) != 2 {
-		PanicParse("Can not forms a complex object from %s.", list)
+		ParsePanic(NewScope(), 0, "Can not forms a complex object from %s.", list)
 	}
 	var (
 		r float64
@@ -75,12 +75,12 @@ func newComplex(list List) Complex {
 	if rv, ok := list[0].(Real); ok {
 		r = rv.RealValue()
 	} else {
-		PanicParse("Can not convert %s, a %T into a float.", list[0], list[0])
+		ParsePanic(NewScope(), 0, "Can not convert %s, a %T into a float.", list[0], list[0])
 	}
 	if rv, ok := list[1].(Real); ok {
 		i = rv.RealValue()
 	} else {
-		PanicParse("Can not convert %s, a %T into a float.", list[1], list[1])
+		ParsePanic(NewScope(), 0, "Can not convert %s, a %T into a float.", list[1], list[1])
 	}
 	return Complex(complex(r, i))
 }

@@ -74,7 +74,7 @@ func (f *Defgeneric) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	}
 	if fi := slip.FindFunc(string(name)); fi != nil {
 		if _, ok = fi.Aux.(*Aux); !ok {
-			slip.PanicProgram("%s already names an ordinary function or macro.", name)
+			slip.ProgramPanic(s, depth, "%s already names an ordinary function or macro.", name)
 		}
 	}
 	var ll slip.List

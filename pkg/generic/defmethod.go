@@ -67,7 +67,7 @@ func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		var aux *Aux
 		if fi := slip.FindFunc(string(ta)); fi != nil {
 			if aux, _ = fi.Aux.(*Aux); aux == nil {
-				slip.PanicProgram("%s already names an ordinary function or macro.", ta)
+				slip.ProgramPanic(s, depth, "%s already names an ordinary function or macro.", ta)
 			}
 		}
 		result = defGenericMethod(s, ta, args[1:], aux, depth)
@@ -230,7 +230,7 @@ func DefCallerMethod(qualifier string, caller slip.Caller, fd *slip.FuncDoc) *sl
 	var aux *Aux
 	if fi := slip.FindFunc(fd.Name); fi != nil {
 		if aux, _ = fi.Aux.(*Aux); aux == nil {
-			slip.PanicProgram("%s already names an ordinary function or macro.", fd.Name)
+			slip.ProgramPanic(slip.NewScope(), 0, "%s already names an ordinary function or macro.", fd.Name)
 		}
 	}
 	if aux == nil {

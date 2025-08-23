@@ -85,7 +85,7 @@ func (f *EnsureDirectoriesExist) Call(s *slip.Scope, args slip.List, depth int) 
 		}
 	}
 	if err := os.MkdirAll(string(path), perm); err != nil {
-		slip.PanicFile(path, "mkdir failed: %s", err)
+		slip.FilePanic(s, depth, path, "mkdir failed: %s", err)
 	}
 	spath, _ := filepath.Abs(string(path))
 

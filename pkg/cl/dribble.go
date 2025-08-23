@@ -61,7 +61,7 @@ func (f *Dribble) start(s *slip.Scope, filepath slip.Object, depth int) {
 	}
 	file, err := os.Create(string(fp))
 	if err != nil {
-		slip.PanicFile(filepath, "%s", err)
+		slip.FilePanic(s, depth, filepath, "%s", err)
 	}
 	in := slip.CurrentPackage.JustGet("*standard-input*")
 	if d, ok := in.(*Dribbler); ok {

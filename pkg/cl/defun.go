@@ -81,7 +81,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	}
 	if fi := pkg.GetFunc(low); fi != nil {
 		if fi.Pkg.Locked {
-			slip.PanicPackage(fi.Pkg, "Redefining %s:%s in defun. Package %s is locked.",
+			slip.PackagePanic(s, depth, fi.Pkg, "Redefining %s:%s in defun. Package %s is locked.",
 				fi.Pkg.Name, low, fi.Pkg.Name)
 		}
 		if 0 < len(fi.Kind) {

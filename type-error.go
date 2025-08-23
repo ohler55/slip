@@ -5,9 +5,9 @@ package slip
 // TypeErrorSymbol is the symbol with a value of "type-error".
 const TypeErrorSymbol = Symbol("type-error")
 
-// NewTypeError returns a new type-error describing an incorrect type being
+// TypeErrorNew returns a new type-error describing an incorrect type being
 // used.
-func NewTypeError(s *Scope, depth int, use string, value Object, wants ...string) Object {
+func TypeErrorNew(s *Scope, depth int, use string, value Object, wants ...string) Object {
 	c := FindClass("type-error")
 	obj := c.MakeInstance()
 	xt := make(List, len(wants))
@@ -51,11 +51,11 @@ func PanicType(use string, value Object, wants ...string) {
 	// TBD temporary
 	s := NewScope()
 	depth := 0
-	panic(NewTypeError(s, depth, use, value, wants...))
+	panic(TypeErrorNew(s, depth, use, value, wants...))
 }
 
 // TypePanic raises a TypeError (type-error) describing an incorrect type
 // being used.
 func TypePanic(s *Scope, depth int, use string, value Object, wants ...string) {
-	panic(NewTypeError(s, depth, use, value, wants...))
+	panic(TypeErrorNew(s, depth, use, value, wants...))
 }

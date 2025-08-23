@@ -103,7 +103,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.String:
 		switch {
 		case len(ta) == 0:
-			slip.PanicFile(ta, "can not load a file with an empty path.")
+			slip.FilePanic(s, depth, ta, "can not load a file with an empty path.")
 		case filepath.IsAbs(string(ta)):
 			path = string(ta)
 		case ta[0] == '~':
@@ -122,7 +122,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if os.IsNotExist(err) && ifNotExist == nil {
 				return nil
 			}
-			slip.PanicFile(slip.String(path), "loading %s: %s", path, err)
+			slip.FilePanic(s, depth, slip.String(path), "loading %s: %s", path, err)
 		}
 	case io.Reader:
 		path = slip.ObjectString(args[0])

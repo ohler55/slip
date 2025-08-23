@@ -91,20 +91,20 @@ func TestMethodCallWrap(t *testing.T) {
 	tt.Equal(t, "whopper", buf.String())
 }
 
-func TestCheckMethodArgCount(t *testing.T) {
+func TestMethodArgCountCheck(t *testing.T) {
 	scope := slip.NewScope()
 	inst := slip.ReadString(`(make-instance 'vanilla-flavor)`, scope).Eval(scope, nil).(slip.Instance)
 
-	tt.Panic(t, func() { slip.CheckMethodArgCount(inst, "method-1", 1, 2, 3) })
-	tt.Panic(t, func() { slip.CheckMethodArgCount(inst, "method-1", 4, 2, 3) })
+	tt.Panic(t, func() { slip.MethodArgCountCheck(scope, 0, inst, "method-1", 1, 2, 3) })
+	tt.Panic(t, func() { slip.MethodArgCountCheck(scope, 0, inst, "method-1", 4, 2, 3) })
 }
 
-func TestPanicMethodArgCount(t *testing.T) {
+func TestMethodArgCountPanic(t *testing.T) {
 	scope := slip.NewScope()
 	inst := slip.ReadString(`(make-instance 'vanilla-flavor)`, scope).Eval(scope, nil).(slip.Instance)
 
-	tt.Panic(t, func() { slip.PanicMethodArgCount(inst, "method-1", 1, 2, 3) })
-	tt.Panic(t, func() { slip.PanicMethodArgCount(inst, "method-1", 4, 2, 3) })
+	tt.Panic(t, func() { slip.MethodArgCountPanic(scope, 0, inst, "method-1", 1, 2, 3) })
+	tt.Panic(t, func() { slip.MethodArgCountPanic(scope, 0, inst, "method-1", 4, 2, 3) })
 }
 
 func TestPanicMethodArgChoice(t *testing.T) {

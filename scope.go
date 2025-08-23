@@ -112,7 +112,7 @@ func (s *Scope) AllVars() map[string]Object {
 func (s *Scope) Let(sym Symbol, value Object) {
 	name := strings.ToLower(string(sym))
 	if vv := CurrentPackage.GetVarVal(name); vv != nil && vv.Const {
-		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
+		PackagePanic(s, 0, CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
 	s.locker.Lock()
 	if s.Vars == nil {
@@ -238,7 +238,7 @@ func (s *Scope) Set(sym Symbol, value Object) {
 
 func (s *Scope) set(name string, value Object) bool {
 	if vv := CurrentPackage.GetVarVal(name); vv != nil && vv.Const {
-		PanicPackage(CurrentPackage, "%s is a constant and thus can't be set", name)
+		PackagePanic(s, 0, CurrentPackage, "%s is a constant and thus can't be set", name)
 	}
 	s.locker.Lock()
 	if s.Vars != nil {

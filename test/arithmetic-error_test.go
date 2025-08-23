@@ -12,7 +12,10 @@ import (
 )
 
 func TestArithmeticErrorObj(t *testing.T) {
-	cond := slip.NewArithmeticError(
+	scope := slip.NewScope()
+	cond := slip.ArithmeticErrorNew(
+		scope,
+		0,
 		slip.Symbol("/"),
 		slip.List{slip.Fixnum(1), slip.Fixnum(0)},
 		"not a %s arithmetic-error", "real",
@@ -30,7 +33,7 @@ func TestArithmeticErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real arithmetic-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real arithmetic-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestArithmeticErrorMake(t *testing.T) {
@@ -74,6 +77,6 @@ func TestArithmeticErrorMake(t *testing.T) {
 
 func TestArithmeticErrorPanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicArithmetic(slip.Symbol("/"), slip.List{slip.Fixnum(1), slip.Fixnum(0)}, "raise")
+		slip.ArithmeticPanic(slip.NewScope(), 0, slip.Symbol("/"), slip.List{slip.Fixnum(1), slip.Fixnum(0)}, "raise")
 	})
 }

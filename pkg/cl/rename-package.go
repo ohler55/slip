@@ -53,7 +53,7 @@ func (f *RenamePackage) Call(s *slip.Scope, args slip.List, depth int) (result s
 	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	pkg := slip.PackageFromArg(args[0])
 	if pkg == nil {
-		slip.PanicPackage(nil, "Package %s does not exist.", args[0])
+		slip.PackagePanic(s, depth, nil, "Package %s does not exist.", args[0])
 	}
 	name := slip.MustBeString(args[1], "new-name")
 	if slip.FindPackage(name) != nil {

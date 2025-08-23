@@ -51,7 +51,7 @@ func (f *Isqrt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case slip.Real:
 		rv := ta.RealValue()
 		if rv < 0.0 {
-			slip.PanicArithmetic(f, args, "only non-negative values are allowed")
+			slip.ArithmeticPanic(s, depth, f, args, "only non-negative values are allowed")
 		}
 		result = slip.Fixnum(math.Sqrt(rv))
 	default:

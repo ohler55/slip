@@ -66,7 +66,7 @@ top:
 		slip.TypePanic(s, depth, "filespec", ta, "string", "file-stream", "synonym-stream for a file-stream")
 	}
 	if err != nil {
-		slip.PanicFile(arg, "%s", err)
+		slip.FilePanic(s, depth, arg, "%s", err)
 	}
 	abs, _ := filepath.Abs(fi.Name())
 

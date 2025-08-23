@@ -40,7 +40,7 @@ func (f *PackageName) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	pkg := slip.PackageFromArg(args[0])
 	if pkg == nil {
-		slip.PanicPackage(nil, "Package %s does not exist.", args[0])
+		slip.PackagePanic(s, depth, nil, "Package %s does not exist.", args[0])
 	}
 	if 0 < len(pkg.Name) {
 		return slip.String(pkg.Name)

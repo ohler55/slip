@@ -19,7 +19,7 @@ func NewReaderError(stream Stream, format string, args ...any) Object {
 	return obj
 }
 
-// PanicParse raises a ReaderPanic (reader-error) describing a parse
+// PanicReader raises a ReaderPanic (reader-error) describing a parse
 // error.
 func PanicReader(stream Stream, format string, args ...any) {
 	panic(NewReaderError(stream, format, args...))

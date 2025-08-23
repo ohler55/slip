@@ -64,7 +64,7 @@ func (f *Defconstant) Call(s *slip.Scope, args slip.List, depth int) (result sli
 		pkg = slip.CurrentPackage
 	}
 	if pkg.Locked {
-		slip.PanicPackage(pkg, "Redefining %s:%s constant. Package %s is locked.",
+		slip.PackagePanic(s, depth, pkg, "Redefining %s:%s constant. Package %s is locked.",
 			pkg.Name, vname, pkg.Name)
 	}
 	var doc slip.String

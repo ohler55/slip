@@ -41,7 +41,7 @@ type Character rune
 func ReadCharacter(src []byte) (c Character) {
 	switch len(src) {
 	case 0:
-		PanicParse(`'#\' is not a valid character`)
+		ParsePanic(NewScope(), 0, `'#\' is not a valid character`)
 	case 1:
 		c = Character(src[0])
 	default:
@@ -67,7 +67,7 @@ func ReadCharacter(src []byte) (c Character) {
 		}
 	}
 	if c == 0 {
-		PanicParse(`'#\%s' is not a valid character`, src)
+		ParsePanic(NewScope(), 0, `'#\%s' is not a valid character`, src)
 	}
 	return
 }

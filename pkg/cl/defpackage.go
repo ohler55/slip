@@ -70,7 +70,7 @@ func (f *Defpackage) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	var use []*slip.Package
 	for _, name := range readDefOption(s, ":use", rest, depth) {
 		if p := slip.FindPackage(name); p == nil {
-			slip.PanicPackage(nil, "Package %s does not exist.", name)
+			slip.PackagePanic(s, depth, nil, "Package %s does not exist.", name)
 		} else {
 			use = append(use, p)
 		}

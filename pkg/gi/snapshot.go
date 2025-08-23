@@ -67,7 +67,7 @@ top:
 	case slip.String:
 		f, err := os.Create(string(ta))
 		if err != nil {
-			slip.PanicFile(ta, "failed to create: %s", err)
+			slip.FilePanic(s, depth, ta, "failed to create: %s", err)
 		}
 		defer func() { _ = f.Close() }()
 		a0 = (*slip.FileStream)(f)

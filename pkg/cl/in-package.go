@@ -40,7 +40,7 @@ func (f *InPackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	pkg := slip.PackageFromArg(args[0])
 	if pkg == nil {
-		slip.PanicPackage(nil, "The name %q does not designate any package.", pkg)
+		slip.PackagePanic(s, depth, nil, "The name %q does not designate any package.", pkg)
 	}
 	slip.CLPkg.Set("*package*", pkg)
 

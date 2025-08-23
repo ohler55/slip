@@ -168,14 +168,14 @@ func (f *Open) openFile(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if rename {
 		if _, err := os.Stat(string(path)); err == nil {
 			if err = os.Rename(string(path), string(path)+".bak"); err != nil {
-				slip.PanicFile(path, "rename failed: %s", err)
+				slip.FilePanic(s, depth, path, "rename failed: %s", err)
 			}
 		}
 	}
 	file, err := os.OpenFile(string(path), flags, perm)
 	if err != nil {
 		if !nilError {
-			slip.PanicFile(path, "failed to open %s. %s", path, err)
+			slip.FilePanic(s, depth, path, "failed to open %s. %s", path, err)
 		}
 		return nil
 	}

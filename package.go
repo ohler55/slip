@@ -129,7 +129,7 @@ func (obj *Package) Initialize(vars map[string]*VarVal, local ...any) {
 // Use another package
 func (obj *Package) Use(pkg *Package) {
 	if obj.Locked {
-		PanicPackage(obj, "Package %s is locked and can not be modified.", obj)
+		PackagePanic(NewScope(), 0, obj, "Package %s is locked and can not be modified.", obj)
 	}
 	if obj != pkg {
 		obj.mu.Lock()
@@ -170,7 +170,7 @@ func (obj *Package) Use(pkg *Package) {
 				if xc.Pkg() == c.Pkg() {
 					continue
 				}
-				PanicPackage(obj, "Package %s already defines class %s which can not be replaced "+
+				PackagePanic(NewScope(), 0, obj, "Package %s already defines class %s which can not be replaced "+
 					"with a class with the same name in package %s.",
 					obj, name, pkg)
 			}
@@ -182,7 +182,7 @@ func (obj *Package) Use(pkg *Package) {
 // Unuse a package
 func (obj *Package) Unuse(pkg *Package) {
 	if obj.Locked {
-		PanicPackage(obj, "Package %s is locked and can not be modified.", obj)
+		PackagePanic(NewScope(), 0, obj, "Package %s is locked and can not be modified.", obj)
 	}
 	if obj != pkg {
 		obj.mu.Lock()
@@ -237,7 +237,7 @@ func (obj *Package) Import(pkg *Package, varName string) {
 		obj.funcs[name] = fi
 		obj.Imports[name] = &Import{Pkg: pkg, Name: name}
 	} else {
-		PanicPackage(obj, "%s is not a variable or function in %s", name, pkg)
+		PackagePanic(NewScope(), 0, obj, "%s is not a variable or function in %s", name, pkg)
 	}
 }
 
@@ -247,7 +247,7 @@ func (obj *Package) Set(name string, value Object, privates ...bool) (vv *VarVal
 	private := 0 < len(privates) && privates[0]
 	if vv = obj.SetIfHas(name, value, private); vv == nil {
 		if obj.Locked {
-			PanicPackage(obj, "Package %s is locked thus no new variables can be set.", obj.Name)
+			PackagePanic(NewScope(), 0, obj, "Package %s is locked thus no new variables can be set.", obj.Name)
 		}
 		vv = &VarVal{Val: value, Pkg: obj, name: name}
 		obj.mu.Lock()
@@ -271,7 +271,7 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 	if vv = obj.vars[name]; vv != nil {
 		if vv.Export || CurrentPackage == obj || private {
 			if vv.Const {
-				PanicPackage(obj, "%s is a constant and thus can't be set", name)
+				PackagePanic(NewScope(), 0, obj, "%s is a constant and thus can't be set", name)
 			}
 			if vv.Set != nil {
 				unlock = false
@@ -306,10 +306,10 @@ func (obj *Package) DefConst(name string, value Object, doc string) (vv *VarVal)
 		if vv.Const && ObjectEqual(vv.Val, value) {
 			return vv
 		}
-		PanicPackage(obj, "%s is a constant and thus can't be changed", name)
+		PackagePanic(NewScope(), 0, obj, "%s is a constant and thus can't be changed", name)
 	}
 	if obj.Locked {
-		PanicPackage(obj, "Package %s is locked thus no new constants can be set.", obj.Name)
+		PackagePanic(NewScope(), 0, obj, "Package %s is locked thus no new constants can be set.", obj.Name)
 	}
 	vv = &VarVal{Val: value, Const: true, Pkg: obj, name: name, Doc: doc}
 	obj.vars[name] = vv
@@ -365,7 +365,7 @@ func (obj *Package) JustGet(name string) (value Object) {
 // Remove a variable.
 func (obj *Package) Remove(name string) (removed bool) {
 	if obj.Locked {
-		PanicPackage(obj, "Package %s is locked.", obj.Name)
+		PackagePanic(NewScope(), 0, obj, "Package %s is locked.", obj.Name)
 	}
 	name = strings.ToLower(name)
 	obj.mu.Lock()
@@ -406,7 +406,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc, aux ...
 		f := creator(nil)
 		pp := reflect.TypeOf(f).Elem().PkgPath()
 		if pp != obj.path {
-			PanicPackage(obj, "Can not define %s in package %s. Package %s is locked.",
+			PackagePanic(NewScope(), 0, obj, "Can not define %s in package %s. Package %s is locked.",
 				f, obj.Name, obj.Name)
 		}
 	}

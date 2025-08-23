@@ -33,7 +33,7 @@ func init() {
 
 func keywordPreSet(p *Package, name string, value Object) (string, Object) {
 	if len(name) == 0 {
-		PanicPackage(keywordPkg, "An empty symbol is not a valid keyword.")
+		PackagePanic(NewScope(), 0, keywordPkg, "An empty symbol is not a valid keyword.")
 	}
 	if name[0] != ':' {
 		name = ":" + name
@@ -43,7 +43,7 @@ func keywordPreSet(p *Package, name string, value Object) (string, Object) {
 		if ObjectEqual(value, vv.Val) {
 			return name, value
 		}
-		PanicPackage(keywordPkg, "%s is a constant and thus can't be set", name)
+		PackagePanic(NewScope(), 0, keywordPkg, "%s is a constant and thus can't be set", name)
 	}
 	value = Symbol(name)
 

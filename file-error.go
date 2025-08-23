@@ -7,20 +7,20 @@ import "fmt"
 // FileErrorSymbol is the symbol with a value of "file-error".
 const FileErrorSymbol = Symbol("file-error")
 
-// NewFileError creates a FilePanic (file-error) describing a file error.
-func NewFileError(pathname Object, format string, args ...any) Object {
+// FileErrorNew creates a FilePanic (file-error) describing a file error.
+func FileErrorNew(s *Scope, depth int, pathname Object, format string, args ...any) Object {
 	c := FindClass("file-error")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":pathname"), pathname,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicFile raises a FilePanic (file-error) describing a file
+// FilePanic raises a FilePanic (file-error) describing a file
 // error.
-func PanicFile(pathname Object, format string, args ...any) {
-	panic(NewFileError(pathname, format, args...))
+func FilePanic(s *Scope, depth int, pathname Object, format string, args ...any) {
+	panic(FileErrorNew(s, depth, pathname, format, args...))
 }

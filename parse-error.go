@@ -7,19 +7,19 @@ import "fmt"
 // ParseErrorSymbol is the symbol with a value of "parse-error".
 const ParseErrorSymbol = Symbol("parse-error")
 
-// NewParseError creates a ParsePanic (parse-error) describing a parse error.
-func NewParseError(format string, args ...any) Object {
+// ParseErrorNew creates a ParsePanic (parse-error) describing a parse error.
+func ParseErrorNew(s *Scope, depth int, format string, args ...any) Object {
 	c := FindClass("parse-error")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicParse raises a ParsePanic (parse-error) describing a parse
+// ParsePanic raises a ParseError (parse-error) describing a parse
 // error.
-func PanicParse(format string, args ...any) {
-	panic(NewParseError(format, args...))
+func ParsePanic(s *Scope, depth int, format string, args ...any) {
+	panic(ParseErrorNew(s, depth, format, args...))
 }

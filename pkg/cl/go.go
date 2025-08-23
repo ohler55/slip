@@ -52,7 +52,7 @@ func (f *Go) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		gt.Tag = ta
 	}
 	if !s.TagBody {
-		slip.PanicControl("attempt to go to nonexistent tag: %s", gt.Tag)
+		slip.ControlPanic(s, depth, "attempt to go to nonexistent tag: %s", gt.Tag)
 	}
 	return &gt
 }

@@ -17,15 +17,8 @@
   + ArgCountCheck => CheckArgCount
   + NewError => ErrorNew
   - NewPanic => ErrorPanic where there is a scope and depth
-  - CheckMethodArgCount
-  - PanicMethodArgCount
-  - ArithmeticError
-  - DivisionByZero
-  - ControlError
-  - FileError
-  - PackageError
-  - ProgramError
-  - TypeError
+  + CheckMethodArgCount => MethodArgCountCheck
+  + PanicMethodArgCount => MethodArgCountPanic (slip-flow)
   - ParseError
   - StreamError
   - ReaderError

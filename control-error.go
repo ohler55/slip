@@ -7,19 +7,20 @@ import "fmt"
 // ControlErrorSymbol is the symbol with a value of "control-error".
 const ControlErrorSymbol = Symbol("control-error")
 
-// NewControlError creates a ControlPanic (control-error) describing a control error.
-func NewControlError(format string, args ...any) Object {
+// ControlErrorNew creates a ControlError (control-error) describing a control
+// error.
+func ControlErrorNew(s *Scope, depth int, format string, args ...any) Object {
 	c := FindClass("control-error")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicControl raises a ControlPanic (control-error) describing a control
+// ControlPanic raises a ControlError (control-error) describing a control
 // error.
-func PanicControl(format string, args ...any) {
-	panic(NewControlError(format, args...))
+func ControlPanic(s *Scope, depth int, format string, args ...any) {
+	panic(ControlErrorNew(s, depth, format, args...))
 }

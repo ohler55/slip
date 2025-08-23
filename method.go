@@ -192,6 +192,19 @@ func CheckMethodArgCount(inst Instance, method string, cnt, mn, mx int) {
 	}
 }
 
+// MethodArgCountCheck raises a panic describing the wrong number of arguments
+// to a method if the argument count is outside the expected bounds.
+func MethodArgCountCheck(s *Scope, depth int, inst Instance, method string, cnt, mn, mx int) {
+	if cnt < mn {
+		NewPanic("Too few arguments to the %s %s method. At least %d expected but got %d.",
+			inst.Class().Name(), method, mn, cnt)
+	}
+	if mx != -1 && mx < cnt {
+		panic(ErrorNew(s, depth, "Too many arguments to the %s %s method. At most %d expected but got %d.",
+			inst.Class().Name(), method, mx, cnt))
+	}
+}
+
 // PanicMethodArgCount raises a panic describing the wrong number of arguments
 // to a method.
 func PanicMethodArgCount(inst Instance, method string, cnt, mn, mx int) {
@@ -200,6 +213,17 @@ func PanicMethodArgCount(inst Instance, method string, cnt, mn, mx int) {
 			inst.Class().Name(), method, mn, cnt)
 	}
 	panic(ErrorNew(NewScope(), 0, "Too many arguments to the %s %s method. At most %d expected but got %d.",
+		inst.Class().Name(), method, mx, cnt))
+}
+
+// MethodArgCountPanic raises a panic describing the wrong number of arguments
+// to a method.
+func MethodArgCountPanic(s *Scope, depth int, inst Instance, method string, cnt, mn, mx int) {
+	if cnt < mn {
+		ErrorPanic(s, depth, "Too few arguments to the %s %s method. At least %d expected but got %d.",
+			inst.Class().Name(), method, mn, cnt)
+	}
+	panic(ErrorNew(s, depth, "Too many arguments to the %s %s method. At most %d expected but got %d.",
 		inst.Class().Name(), method, mx, cnt))
 }
 
