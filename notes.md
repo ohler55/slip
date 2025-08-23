@@ -19,9 +19,7 @@
   - NewPanic => ErrorPanic where there is a scope and depth
   + CheckMethodArgCount => MethodArgCountCheck
   + PanicMethodArgCount => MethodArgCountPanic (slip-flow)
-  - ParseError
   - StreamError
-  - ReaderError
   - EndOfFile
   - CellError
   - UnboundSlot
