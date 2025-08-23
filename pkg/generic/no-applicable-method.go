@@ -66,6 +66,6 @@ func (f *NoApplicableMethod) Call(s *slip.Scope, args slip.List, depth int) slip
 
 type defaultNoAppMethCaller struct{}
 
-func (defaultNoAppMethCaller) Call(_ *slip.Scope, args slip.List, _ int) slip.Object {
-	panic(slip.NewNoApplicableMethodError(args[0], args[1:], ""))
+func (defaultNoAppMethCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	panic(slip.NoApplicableMethodErrorNew(s, depth, args[0], args[1:], ""))
 }

@@ -20,9 +20,6 @@
   + CheckMethodArgCount => MethodArgCountCheck
   + PanicMethodArgCount => MethodArgCountPanic (slip-flow)
   + PanicStream => StreamPanic (slip-flow)
-  - PrintNotReadable
-  - NoApplicableMethodError
-
 
 ----------
 - for later

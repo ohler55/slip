@@ -9,9 +9,9 @@ import (
 // NoApplicableMethodErrorSymbol is the symbol with a value of "no-applicable-method-error".
 const NoApplicableMethodErrorSymbol = Symbol("no-applicable-method-error")
 
-// NewNoApplicableMethodError raises a NoApplicableMethodPanic (no-applicable-method-error)
-// describing a no-applicable-method-error error.
-func NewNoApplicableMethodError(gf Object, fargs List, format string, args ...any) Object {
+// NoApplicableMethodErrorNew raises a no-applicable-method-error describing a
+// no-applicable-method-error error.
+func NoApplicableMethodErrorNew(s *Scope, depth int, gf Object, fargs List, format string, args ...any) Object {
 	c := FindClass("no-applicable-method-error")
 	obj := c.MakeInstance()
 
@@ -36,13 +36,13 @@ func NewNoApplicableMethodError(gf Object, fargs List, format string, args ...an
 		}
 		argList = append(argList, Symbol(":message"), msg)
 	}
-	obj.Init(NewScope(), argList, 0)
+	obj.Init(s, argList, depth)
 
 	return obj
 }
 
-// PanicNoApplicableMethodError raises a MethodPanic (no-applicable-method-error)
-// describing a no-applicable-method-error error.
-func PanicNoApplicableMethod(gf Object, fargs List, format string, args ...any) {
-	panic(NewNoApplicableMethodError(gf, fargs, format, args...))
+// NoApplicableMethodPanic raises a no-applicable-method-error describing a
+// no-applicable-method-error error.
+func NoApplicableMethodPanic(s *Scope, depth int, gf Object, fargs List, format string, args ...any) {
+	panic(NoApplicableMethodErrorNew(s, depth, gf, fargs, format, args...))
 }

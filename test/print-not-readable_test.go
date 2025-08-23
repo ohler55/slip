@@ -12,7 +12,8 @@ import (
 )
 
 func TestPrintNotReadableObj(t *testing.T) {
-	cond := slip.NewPrintNotReadable(slip.Symbol("something"), "not a %s print-not-readable", "real")
+	scope := slip.NewScope()
+	cond := slip.PrintNotReadableNew(scope, 0, slip.Symbol("something"), "not a %s print-not-readable", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<print-not-readable [0-9a-f]+>$/",
@@ -55,6 +56,6 @@ func TestPrintNotReadableMake(t *testing.T) {
 
 func TestPrintNotReadablePanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicPrintNotReadable(slip.Symbol("something"), "raise")
+		slip.PrintNotReadablePanic(nil, 0, slip.Symbol("something"), "raise")
 	})
 }

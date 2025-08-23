@@ -12,9 +12,10 @@ import (
 )
 
 func TestNoApplicableMethodErrorObj(t *testing.T) {
+	scope := slip.NewScope()
 	args := slip.List{slip.Fixnum(1), slip.Fixnum(2)}
 	fi := slip.FindFunc("and")
-	cond := slip.NewNoApplicableMethodError(fi, args, "")
+	cond := slip.NoApplicableMethodErrorNew(scope, 0, fi, args, "")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<no-applicable-method-error [0-9a-f]+>$/",
@@ -32,7 +33,7 @@ func TestNoApplicableMethodErrorObj(t *testing.T) {
 #<macro and>
   when called with arguments
     (1 2).`,
-		cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+		cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestNoApplicableMethodErrorMake(t *testing.T) {
@@ -58,5 +59,5 @@ func TestNoApplicableMethodErrorMake(t *testing.T) {
 }
 
 func TestNoApplicableMethodErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicNoApplicableMethod(nil, slip.List{}, "raise") })
+	tt.Panic(t, func() { slip.NoApplicableMethodPanic(nil, 0, nil, slip.List{}, "raise") })
 }

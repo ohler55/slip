@@ -44,7 +44,7 @@ func (f *MakeLoadForm) Call(s *slip.Scope, args slip.List, depth int) (form slip
 	return ObjectLoadForm(args[0], true)
 }
 
-// ObjectLoadForm
+// ObjectLoadForm returns then load form for and object.
 func ObjectLoadForm(obj slip.Object, follow bool) (form slip.Object) {
 Top:
 	switch to := obj.(type) {
@@ -63,7 +63,7 @@ Top:
 	case slip.LoadFormer:
 		form = to.LoadForm()
 	default:
-		slip.PanicPrintNotReadable(to, "Can not make a load form for %s.", to)
+		slip.PrintNotReadablePanic(slip.NewScope(), 0, to, "Can not make a load form for %s.", to)
 	}
 	return
 }

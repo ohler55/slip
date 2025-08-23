@@ -85,7 +85,7 @@ func (obj *Dynamic) LoadForm() Object {
 			case LoadFormer:
 				form[i+1] = ta.LoadForm()
 			default:
-				PanicPrintNotReadable(ta, "Can not make a load form for %s.", ta)
+				PrintNotReadablePanic(NewScope(), 0, ta, "Can not make a load form for %s.", ta)
 			}
 		}
 	}
