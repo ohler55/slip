@@ -55,7 +55,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		if hm, _ = slip.FindClass(string(ta)).(HasMethods); hm == nil {
-			slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
+			slip.ClassNotFoundPanic(s, depth, ta, "%s is not a defined class or flavor.", ta)
 		}
 	case HasMethods:
 		hm = ta
@@ -66,7 +66,7 @@ func (f *DescribeMethod) Call(s *slip.Scope, args slip.List, depth int) (result 
 	meth, _ := args[1].(slip.Symbol)
 	m := hm.GetMethod(string(meth))
 	if m == nil {
-		slip.PanicInvalidMethod(sc, nil, meth, "%s is not a method on %s.", meth, sc)
+		slip.InvalidMethodPanic(s, depth, sc, nil, meth, "%s is not a method on %s.", meth, sc)
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 2 < len(args) {

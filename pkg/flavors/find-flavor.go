@@ -50,7 +50,7 @@ func (f *FindFlavor) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		return cf
 	}
 	if 1 < len(args) && args[1] != nil {
-		slip.PanicClassNotFound(args[0], "%s is not a defined flavor.", name)
+		slip.ClassNotFoundPanic(s, depth, args[0], "%s is not a defined flavor.", name)
 	}
 	return nil
 }

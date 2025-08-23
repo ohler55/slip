@@ -44,7 +44,7 @@ func (f *SymbolFunction) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	}
 	fn := slip.CurrentPackage.GetFunc(string(sym))
 	if fn == nil {
-		slip.PanicUndefinedFunction(sym, "The function %s:%s is undefined.", slip.CurrentPackage.Name, sym)
+		slip.UndefinedFunctionPanic(s, depth, sym, "The function %s:%s is undefined.", slip.CurrentPackage.Name, sym)
 	}
 	return fn
 }

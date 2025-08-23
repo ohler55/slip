@@ -34,6 +34,6 @@ type Optimize struct {
 
 // Call the function with the arguments provided.
 func (f *Optimize) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	panic(slip.NewUndefinedFunction(slip.Symbol("optimize"),
+	panic(slip.UndefinedFunctionNew(s, depth, slip.Symbol("optimize"),
 		"is not a defined function. I can only be used as a declaration specifier."))
 }

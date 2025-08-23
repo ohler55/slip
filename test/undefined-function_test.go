@@ -12,7 +12,8 @@ import (
 )
 
 func TestUndefinedFunctionObj(t *testing.T) {
-	cond := slip.NewUndefinedFunction(slip.Symbol("nothing"), "not a %s undefined-function", "real")
+	scope := slip.NewScope()
+	cond := slip.UndefinedFunctionNew(scope, 0, slip.Symbol("nothing"), "not a %s undefined-function", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<undefined-function [0-9a-f]+>$/",
@@ -46,5 +47,5 @@ func TestUndefinedFunctionMake(t *testing.T) {
 }
 
 func TestUndefinedFunctionPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicUndefinedFunction(slip.Symbol("nothing"), "raise") })
+	tt.Panic(t, func() { slip.UndefinedFunctionPanic(nil, 0, slip.Symbol("nothing"), "raise") })
 }

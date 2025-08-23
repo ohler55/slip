@@ -343,7 +343,7 @@ func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, depth int) s
 		nf = ta
 	case slip.Symbol:
 		if nf = Find(string(ta)); nf == nil {
-			slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
+			slip.ClassNotFoundPanic(s, depth, ta, "%s is not a defined class or flavor.", ta)
 		}
 	default:
 		slip.TypePanic(s, depth, "new-class", args[0], "flavor")

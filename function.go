@@ -75,7 +75,7 @@ func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
 	if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined in %s.",
+	panic(UndefinedFunctionNew(NewScope(), 0, Symbol(name), "Function %s is not defined in %s.",
 		printer.caseName(name), pkg.Name))
 }
 

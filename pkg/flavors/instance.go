@@ -238,7 +238,8 @@ func (obj *Instance) BoundReceive(ps *slip.Scope, message string, bindings *slip
 			s.Let(slip.Symbol("args"), args)
 			return bc.BoundCall(s, depth)
 		}
-		slip.PanicInvalidMethod(obj, nil, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.name)
+		slip.InvalidMethodPanic(ps, depth,
+			obj, nil, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.name)
 	}
 	return m.BoundCall(s, depth)
 }

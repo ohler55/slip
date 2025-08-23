@@ -160,7 +160,7 @@ func DefFlavor(
 				nf.defaultHandler = cf.defaultHandler
 			}
 		} else {
-			slip.PanicClassNotFound(slip.Symbol(fname), "%s is not a defined flavor.", fname)
+			slip.ClassNotFoundPanic(s, 0, slip.Symbol(fname), "%s is not a defined flavor.", fname)
 		}
 	}
 	if nf.defaultHandler == nil {
@@ -202,7 +202,7 @@ func addIncludes(nf *Flavor) {
 			if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
 				nf.inheritFlavor(cf)
 			} else {
-				slip.PanicClassNotFound(slip.Symbol(fn), "%s is not a defined flavor.", fn)
+				slip.ClassNotFoundPanic(slip.NewScope(), 0, slip.Symbol(fn), "%s is not a defined flavor.", fn)
 			}
 		}
 	}
@@ -213,7 +213,7 @@ func addIncludes(nf *Flavor) {
 				if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
 					nf.inheritFlavor(cf)
 				} else {
-					slip.PanicClassNotFound(slip.Symbol(fn), "%s is not a defined flavor.", fn)
+					slip.ClassNotFoundPanic(slip.NewScope(), 0, slip.Symbol(fn), "%s is not a defined flavor.", fn)
 				}
 			}
 		}
@@ -440,9 +440,10 @@ func (s setter) BoundCall(scope *slip.Scope, _ int) (value slip.Object) {
 type defHand struct{}
 
 // Call the default handler.
-func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+func (dh defHand) Call(scope *slip.Scope, args slip.List, depth int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
 	method, _ := args[0].(slip.Symbol)
-	defer slip.PanicInvalidMethod(inst, nil, method, "%s does not include the %s method.", inst.Type.Name(), args[0])
+	defer slip.InvalidMethodPanic(scope, depth,
+		inst, nil, method, "%s does not include the %s method.", inst.Type.Name(), args[0])
 	return nil
 }

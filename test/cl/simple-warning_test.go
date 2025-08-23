@@ -12,7 +12,7 @@ import (
 )
 
 func TestSimpleWarningObj(t *testing.T) {
-	cond := cl.NewSimpleWarning(nil, "condition ~A-~D", slip.Symbol("dummy"), slip.Fixnum(3))
+	cond := cl.SimpleWarningNew(nil, 0, "condition ~A-~D", slip.Symbol("dummy"), slip.Fixnum(3))
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<simple-warning [0-9a-f]+>$/",
@@ -57,5 +57,5 @@ func TestSimpleWarningMakeBadArgs(t *testing.T) {
 }
 
 func TestPanicSimpleWarning(t *testing.T) {
-	tt.Panic(t, func() { cl.PanicSimpleWarning(nil, "raise", nil) })
+	tt.Panic(t, func() { cl.SimpleWarningPanic(nil, 0, "raise", nil) })
 }

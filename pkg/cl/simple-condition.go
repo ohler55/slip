@@ -9,21 +9,22 @@ import (
 // SimpleConditionSymbol is the symbol with a value of "simple-condition".
 const SimpleConditionSymbol = slip.Symbol("simple-condition")
 
-// NewSimpleCondition returns a SimpleConditionObj object that can then be used with a call to panic.
-func NewSimpleCondition(s *slip.Scope, ctrl string, args slip.List) slip.Object {
+// SimpleConditionNew returns a SimpleCondition object that can then be used
+// with a call to panic.
+func SimpleConditionNew(s *slip.Scope, depth int, ctrl string, args slip.List) slip.Object {
 	c := slip.FindClass("simple-condition")
 	obj := c.MakeInstance()
 	obj.Init(s, slip.List{
 		slip.Symbol(":format-control"), slip.String(ctrl),
 		slip.Symbol(":format-arguments"), args,
-	}, 0)
+	}, depth)
 
 	return obj
 }
 
-// PanicSimpleCondition raises a SimpleConditionObj instance.
-func PanicSimpleCondition(s *slip.Scope, ctrl string, args slip.List) {
-	panic(NewSimpleCondition(s, ctrl, args))
+// SimpleConditionPanic raises a SimpleConditionObj instance.
+func SimpleConditionPanic(s *slip.Scope, depth int, ctrl string, args slip.List) {
+	panic(SimpleConditionNew(s, depth, ctrl, args))
 }
 
 // SimpleCondMsg uses a format-control and format-arguments to generate a

@@ -34,6 +34,6 @@ type Declaration struct {
 
 // Call the function with the arguments provided.
 func (f *Declaration) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	panic(slip.NewUndefinedFunction(slip.Symbol("declaration"),
+	panic(slip.UndefinedFunctionNew(s, depth, slip.Symbol("declaration"),
 		"is not a defined function. I can only be used as a declaration specifier."))
 }

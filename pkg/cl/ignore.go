@@ -34,6 +34,6 @@ type Ignore struct {
 
 // Call the function with the arguments provided.
 func (f *Ignore) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	panic(slip.NewUndefinedFunction(slip.Symbol("ignore"),
+	panic(slip.UndefinedFunctionNew(s, depth, slip.Symbol("ignore"),
 		"is not a defined function. I can only be used as a declaration specifier."))
 }

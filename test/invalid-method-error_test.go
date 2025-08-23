@@ -12,7 +12,9 @@ import (
 )
 
 func TestInvalidMethodErrorObj(t *testing.T) {
-	cond := slip.NewInvalidMethodError(
+	scope := slip.NewScope()
+	cond := slip.InvalidMethodErrorNew(
+		scope, 0,
 		slip.Symbol("vanilla"),
 		slip.Symbol(":nonsense"),
 		slip.Symbol(":meth"),
@@ -30,7 +32,7 @@ func TestInvalidMethodErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real invalid-method-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real invalid-method-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestInvalidMethodErrorMake(t *testing.T) {
@@ -60,7 +62,8 @@ func TestInvalidMethodErrorMake(t *testing.T) {
 }
 
 func TestInvalidMethodErrorNoFormat(t *testing.T) {
-	cond := slip.NewInvalidMethodError(
+	cond := slip.InvalidMethodErrorNew(
+		slip.NewScope(), 0,
 		slip.Symbol("vanilla"),
 		slip.Symbol(":nonsense"),
 		slip.Symbol(":meth"),
@@ -70,5 +73,5 @@ func TestInvalidMethodErrorNoFormat(t *testing.T) {
 }
 
 func TestInvalidMethodErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicInvalidMethod(slip.Symbol("vanilla"), slip.Symbol(":meth"), nil, "raise") })
+	tt.Panic(t, func() { slip.InvalidMethodPanic(nil, 0, slip.Symbol("vanilla"), slip.Symbol(":meth"), nil, "raise") })
 }

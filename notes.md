@@ -20,13 +20,6 @@
   + CheckMethodArgCount => MethodArgCountCheck
   + PanicMethodArgCount => MethodArgCountPanic (slip-flow)
   + PanicStream => StreamPanic (slip-flow)
-  - UndefinedFunction
-  - SimpleCondition
-  - SimpleError
-  - SimpleTypeError
-  - SimpleWarning
-  - ClassNotFound
-  - InvalidMethodError
   - PrintNotReadable
   - NoApplicableMethodError
 

@@ -34,6 +34,6 @@ type Notinline struct {
 
 // Call the function with the arguments provided.
 func (f *Notinline) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	panic(slip.NewUndefinedFunction(slip.Symbol("notinline"),
+	panic(slip.UndefinedFunctionNew(s, depth, slip.Symbol("notinline"),
 		"is not a defined function. I can only be used as a declaration specifier."))
 }

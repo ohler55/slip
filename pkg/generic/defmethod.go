@@ -127,7 +127,7 @@ func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) sli
 	name = strings.ToLower(name)
 	hm, ok := obj.(HasMethods)
 	if !ok {
-		slip.PanicInvalidMethod(obj, slip.Symbol(daemon), slip.Symbol(name),
+		slip.InvalidMethodPanic(slip.NewScope(), 0, obj, slip.Symbol(daemon), slip.Symbol(name),
 			"Can not define a direct method, %s on class %s.", name, obj.Name())
 	}
 	mm := hm.Methods()
@@ -175,7 +175,7 @@ func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) sli
 	case ":whopper", ":wrapper":
 		c.Wrap = caller
 	default:
-		slip.PanicInvalidMethod(obj, slip.Symbol(daemon), slip.Symbol(name), "")
+		slip.InvalidMethodPanic(slip.NewScope(), 0, obj, slip.Symbol(daemon), slip.Symbol(name), "")
 	}
 	if addMethod {
 		mm[name] = m
@@ -274,7 +274,7 @@ func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux
 		case ":before", ":after", ":around":
 			qual = string(sym)
 		default:
-			slip.PanicInvalidMethod(nil, sym, fname, "")
+			slip.InvalidMethodPanic(s, depth, nil, sym, fname, "")
 		}
 		args = args[1:]
 	}

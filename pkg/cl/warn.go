@@ -63,7 +63,7 @@ func (f *Warn) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		args = args[1:]
 		cond.Init(s, args, 0)
 	case slip.String:
-		cond = NewSimpleWarning(s, string(ta), args[1:]...).(slip.Instance)
+		cond = SimpleWarningNew(s, depth, string(ta), args[1:]...).(slip.Instance)
 	default:
 		slip.TypePanic(s, depth, "datum", ta, "symbol", "string")
 	}

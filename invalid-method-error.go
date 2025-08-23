@@ -9,9 +9,9 @@ import (
 // InvalidMethodErrorSymbol is the symbol with a value of "invalid-method-error".
 const InvalidMethodErrorSymbol = Symbol("invalid-method-error")
 
-// NewInvalidMethodError raises a MethodPanic (invalid-method-error)
-// describing a invalid-method-error error.
-func NewInvalidMethodError(class, qualifier, name Object, format string, args ...any) Object {
+// InvalidMethodErrorNew raises a invalid-method-error describing a
+// invalid-method-error error.
+func InvalidMethodErrorNew(s *Scope, depth int, class, qualifier, name Object, format string, args ...any) Object {
 	c := FindClass("invalid-method-error")
 	obj := c.MakeInstance()
 
@@ -27,13 +27,13 @@ func NewInvalidMethodError(class, qualifier, name Object, format string, args ..
 			Symbol(":message"),
 			String(fmt.Sprintf("%s %s is not a valid method combination for %s.", qualifier, name, class)))
 	}
-	obj.Init(NewScope(), argList, 0)
+	obj.Init(s, argList, depth)
 
 	return obj
 }
 
-// PanicInvalidMethodError raises a MethodPanic (invalid-method-error)
-// describing a invalid-method-error error.
-func PanicInvalidMethod(class, qualifier, name Object, format string, args ...any) {
-	panic(NewInvalidMethodError(class, qualifier, name, format, args...))
+// InvalidMethodPanic raises a invalid-method-error describing a
+// invalid-method-error error.
+func InvalidMethodPanic(s *Scope, depth int, class, qualifier, name Object, format string, args ...any) {
+	panic(InvalidMethodErrorNew(s, depth, class, qualifier, name, format, args...))
 }

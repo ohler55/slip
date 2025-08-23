@@ -50,7 +50,7 @@ func (f *DescribeFlavor) Call(s *slip.Scope, args slip.List, depth int) (result 
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		if cf = allFlavors[string(ta)]; cf == nil {
-			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
+			slip.ClassNotFoundPanic(s, depth, ta, "%s is not a defined flavor.", ta)
 		}
 	case *Flavor:
 		cf = ta

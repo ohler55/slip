@@ -407,7 +407,8 @@ top:
 		obj.varDocs[name] = desc
 	default:
 		if lo {
-			slip.PanicInvalidMethod(obj, nil, slip.Symbol(message), "%s is not a valid method for a Flavor.", message)
+			slip.InvalidMethodPanic(s, depth,
+				obj, nil, slip.Symbol(message), "%s is not a valid method for a Flavor.", message)
 		}
 		message = strings.ToLower(message)
 		lo = true

@@ -185,7 +185,8 @@ func (obj *StandardObject) SetSlotValue(sym slip.Symbol, value slip.Object) (has
 func (obj *StandardObject) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
 	m := obj.Type.GetMethod(message)
 	if m == nil {
-		slip.PanicUndefinedFunction(slip.Symbol(message), "%s does not have a %s direct method.", obj, message)
+		slip.UndefinedFunctionPanic(s, depth,
+			slip.Symbol(message), "%s does not have a %s direct method.", obj, message)
 	}
 	scope := slip.NewScope()
 	if s != nil {

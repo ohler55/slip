@@ -62,5 +62,5 @@ func (f *InvalidMethodError) Call(s *slip.Scope, args slip.List, depth int) (con
 	var sf SimpleFormatterEmbed
 	sf.Init(s, string(ctrl), args[2:])
 
-	panic(slip.NewInvalidMethodError(nil, nil, method, "%s", sf.Output()))
+	panic(slip.InvalidMethodErrorNew(s, depth, nil, nil, method, "%s", sf.Output()))
 }

@@ -52,7 +52,7 @@ func (f *FindClass) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		return c
 	}
 	if 1 < len(args) && args[1] != nil {
-		slip.PanicClassNotFound(sym, "%s is not a defined flavor.", sym)
+		slip.ClassNotFoundPanic(s, depth, sym, "%s is not a defined flavor.", sym)
 	}
 	return nil
 }

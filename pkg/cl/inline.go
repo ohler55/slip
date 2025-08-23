@@ -34,6 +34,6 @@ type Inline struct {
 
 // Call the function with the arguments provided.
 func (f *Inline) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	panic(slip.NewUndefinedFunction(slip.Symbol("inline"),
+	panic(slip.UndefinedFunctionNew(s, depth, slip.Symbol("inline"),
 		"is not a defined function. I can only be used as a declaration specifier."))
 }

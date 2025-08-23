@@ -12,7 +12,8 @@ import (
 )
 
 func TestClassNotFoundObj(t *testing.T) {
-	cond := slip.NewClassNotFound(slip.Symbol("klas"), "not a %s class-not-found", "real")
+	scope := slip.NewScope()
+	cond := slip.ClassNotFoundNew(scope, 0, slip.Symbol("klas"), "not a %s class-not-found", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<class-not-found [0-9a-f]+>$/",
@@ -60,5 +61,5 @@ func TestClassNotFoundMake(t *testing.T) {
 }
 
 func TestClassNotFoundPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicClassNotFound(slip.Symbol("klas"), "raise") })
+	tt.Panic(t, func() { slip.ClassNotFoundPanic(nil, 0, slip.Symbol("klas"), "raise") })
 }

@@ -34,6 +34,6 @@ type DynamicExtent struct {
 
 // Call the function with the arguments provided.
 func (f *DynamicExtent) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	panic(slip.NewUndefinedFunction(slip.Symbol("dynamic-extent"),
+	panic(slip.UndefinedFunctionNew(s, depth, slip.Symbol("dynamic-extent"),
 		"is not a defined function. I can only be used as a declaration specifier."))
 }

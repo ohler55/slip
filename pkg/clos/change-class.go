@@ -52,7 +52,7 @@ func (f *ChangeClass) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	switch ta := args[1].(type) {
 	case slip.Symbol:
 		if class = slip.FindClass(string(ta)); class == nil {
-			slip.PanicClassNotFound(ta, "Class %s not found.", ta)
+			slip.ClassNotFoundPanic(s, depth, ta, "Class %s not found.", ta)
 		}
 	case slip.Class:
 		class = ta
