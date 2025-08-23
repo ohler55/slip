@@ -12,7 +12,8 @@ import (
 )
 
 func TestUnboundVariableObj(t *testing.T) {
-	cond := slip.NewUnboundVariable(slip.Symbol("very"), "not a %s unbound-variable", "real")
+	scope := slip.NewScope()
+	cond := slip.UnboundVariableNew(scope, 0, slip.Symbol("very"), "not a %s unbound-variable", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<unbound-variable [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestUnboundVariableObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real unbound-variable", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real unbound-variable", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestUnboundVariableMake(t *testing.T) {
@@ -46,5 +47,5 @@ func TestUnboundVariableMake(t *testing.T) {
 }
 
 func TestUnboundVariablePanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicUnboundVariable(slip.Symbol("very"), "raise") })
+	tt.Panic(t, func() { slip.UnboundVariablePanic(nil, 0, slip.Symbol("very"), "raise") })
 }

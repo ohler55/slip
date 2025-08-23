@@ -60,7 +60,7 @@ func (obj *StringStream) Eval(s *Scope, depth int) Object {
 func (obj *StringStream) Write(b []byte) (int, error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
-			NewStreamError(obj, "stream closed").(Instance),
+			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
 			"stream closed", nil)
 	}
 	if obj.pos < len(obj.buf) {
@@ -81,7 +81,7 @@ func (obj *StringStream) Write(b []byte) (int, error) {
 func (obj *StringStream) WriteAt(b []byte, off int64) (int, error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
-			NewStreamError(obj, "stream closed").(Instance),
+			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
 			"stream closed", nil)
 	}
 	if off < int64(len(obj.buf)) {
@@ -100,7 +100,7 @@ func (obj *StringStream) WriteAt(b []byte, off int64) (int, error) {
 func (obj *StringStream) Read(p []byte) (n int, err error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
-			NewStreamError(obj, "stream closed").(Instance),
+			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
 			"stream closed", nil)
 	}
 	if len(obj.buf) <= obj.pos {
@@ -120,7 +120,7 @@ func (obj *StringStream) Read(p []byte) (n int, err error) {
 func (obj *StringStream) ReadAt(p []byte, off int64) (n int, err error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
-			NewStreamError(obj, "stream closed").(Instance),
+			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
 			"stream closed", nil)
 	}
 	if off <= 0 {
@@ -142,7 +142,7 @@ func (obj *StringStream) ReadAt(p []byte, off int64) (n int, err error) {
 func (obj *StringStream) ReadRune() (r rune, size int, err error) {
 	if obj.pos < 0 {
 		return 0, 0, WrapError(NewScope(),
-			NewStreamError(obj, "stream closed").(Instance),
+			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
 			"stream closed", nil)
 	}
 	if len(obj.buf) <= obj.pos {
@@ -159,7 +159,7 @@ func (obj *StringStream) ReadRune() (r rune, size int, err error) {
 func (obj *StringStream) Seek(offset int64, whence int) (n int64, err error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
-			NewStreamError(obj, "stream closed").(Instance),
+			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
 			"stream closed", nil)
 	}
 	switch whence {

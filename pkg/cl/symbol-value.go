@@ -47,7 +47,7 @@ func (f *SymbolValue) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	}
 	result, has := slip.CurrentPackage.Get(string(sym))
 	if !has {
-		slip.PanicUnboundVariable(sym, "The variable %s is unbound.", sym)
+		slip.UnboundVariablePanic(s, depth, sym, "The variable %s is unbound.", sym)
 	}
 	return result
 }

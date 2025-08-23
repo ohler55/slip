@@ -58,7 +58,7 @@ top:
 	case *SynonymStream:
 		value, has := slip.CurrentPackage.Get(string(ta.symbol))
 		if !has {
-			slip.PanicUnboundVariable(ta.symbol, "unbound")
+			slip.UnboundVariablePanic(s, depth, ta.symbol, "unbound")
 		}
 		arg = value
 		goto top

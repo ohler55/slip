@@ -60,7 +60,7 @@ func (f *YOrNP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 top:
 	for {
 		if _, err := w.Write(prompt); err != nil {
-			slip.PanicStream(w.(slip.Stream), "%s", err)
+			slip.StreamPanic(s, depth, w.(slip.Stream), "%s", err)
 		}
 		answer := readLine(r)
 		switch string(answer) {
@@ -84,7 +84,7 @@ func readLine(r io.Reader) (line []byte) {
 	for {
 		if n, err := r.Read(b); err != nil || n != 1 {
 			if err != nil {
-				slip.PanicStream(r.(slip.Stream), "%s", err)
+				slip.StreamPanic(slip.NewScope(), 0, r.(slip.Stream), "%s", err)
 			}
 		}
 		if b[0] == '\n' || b[0] == '\r' {

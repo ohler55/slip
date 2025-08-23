@@ -65,7 +65,7 @@ func (f *Print) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	b := p.Append([]byte{'\n'}, obj, 0)
 	b = append(b, ' ')
 	if _, err := w.Write(b); err != nil {
-		slip.PanicStream(ss, "print write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "print write failed. %s", err)
 	}
 	return obj
 }

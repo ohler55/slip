@@ -186,7 +186,7 @@ func (caller printCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 		}
 	}
 	if _, err := w.Write(self.Append(nil)); err != nil {
-		slip.PanicStream(ss, "%s", err)
+		slip.StreamPanic(s, depth, ss, "%s", err)
 	}
 	return nil
 }

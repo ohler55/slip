@@ -48,10 +48,10 @@ func (f *SlotMakunbound) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	}
 	if inst, ok := args[0].(slip.Instance); ok {
 		if !inst.SetSlotValue(sym, slip.Unbound) {
-			return slotMissing(s, inst, sym, "slot-makunbound")
+			return slotMissing(s, inst, sym, "slot-makunbound", depth)
 		}
 	} else {
-		return slotMissing(s, args[0], sym, "slot-makunbound")
+		return slotMissing(s, args[0], sym, "slot-makunbound", depth)
 	}
 	return nil
 }

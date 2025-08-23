@@ -58,7 +58,7 @@ func (ref *Ref) Eval(s *Scope, depth int) (v Object) {
 func (ref *Ref) Get() Object {
 	value, has := ref.Instance.SlotValue(ref.Key)
 	if !has {
-		PanicCell(ref.Key,
+		CellPanic(NewScope(), 0, ref.Key,
 			"When attempting to read the slot's value, the slot %s is missing from the object %s.",
 			ref.Key, ref.Instance)
 	}

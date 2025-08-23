@@ -331,7 +331,7 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		return slip.String(out)
 	}
 	if _, err := w.Write(out); err != nil {
-		slip.PanicStream(ss, "write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write failed. %s", err)
 	}
 	return nil
 }

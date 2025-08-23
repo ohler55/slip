@@ -61,7 +61,7 @@ func (f *WriteChar) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	}
 
 	if _, err := w.Write([]byte(string([]rune{rune(c)}))); err != nil {
-		slip.PanicStream(ss, "write-char failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write-char failed. %s", err)
 	}
 	return c
 }

@@ -179,7 +179,7 @@ func describeTime(s *Scope, obj Time, args List, depth int) Object {
 	b := obj.Describe(nil, 0, right, ansi)
 	if _, err := w.Write(b); err != nil {
 		ss, _ := w.(Stream)
-		PanicStream(ss, "write failed: %s", err)
+		StreamPanic(s, depth, ss, "write failed: %s", err)
 	}
 	return nil
 }

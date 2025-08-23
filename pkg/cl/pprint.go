@@ -67,7 +67,7 @@ func (f *Pprint) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	b := p.Append([]byte{'\n'}, obj, 0)
 	if _, err := w.Write(b); err != nil {
-		slip.PanicStream(ss, "pprint write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "pprint write failed. %s", err)
 	}
 	return slip.Novalue
 }

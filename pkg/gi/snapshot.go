@@ -62,7 +62,7 @@ top:
 	case io.Writer:
 		if _, err := ta.Write(b); err != nil {
 			ss, _ := ta.(slip.Stream)
-			slip.PanicStream(ss, "writing snapshot: %s", err)
+			slip.StreamPanic(s, depth, ss, "writing snapshot: %s", err)
 		}
 	case slip.String:
 		f, err := os.Create(string(ta))

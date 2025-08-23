@@ -128,7 +128,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		path = slip.ObjectString(args[0])
 		if buf, err = io.ReadAll(ta); err != nil {
 			ss, _ := args[0].(slip.Stream)
-			slip.PanicStream(ss, "loading %s: %s", path, err)
+			slip.StreamPanic(s, depth, ss, "loading %s: %s", path, err)
 		}
 	default:
 		slip.TypePanic(s, depth, "filespec", ta, "stream", "string")

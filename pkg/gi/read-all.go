@@ -47,7 +47,7 @@ func (f *ReadAll) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	b, err := io.ReadAll(r)
 	if err != nil {
 		stream, _ := args[0].(slip.Stream)
-		slip.PanicStream(stream, "read failed: %s", err)
+		slip.StreamPanic(s, depth, stream, "read failed: %s", err)
 	}
 	return slip.String(b)
 }

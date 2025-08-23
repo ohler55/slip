@@ -107,7 +107,7 @@ func (f *PeekChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 			return result
 		}
-		slip.PanicStream(ss, "read failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "read failed. %s", err)
 	}
 	return slip.Character(r)
 }

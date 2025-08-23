@@ -12,7 +12,8 @@ import (
 )
 
 func TestUnboundSlotObj(t *testing.T) {
-	cond := slip.NewUnboundSlot(slip.Symbol("vanilla"), slip.Symbol(":slop"), "not a %s unbound-slot", "real")
+	scope := slip.NewScope()
+	cond := slip.UnboundSlotNew(scope, 0, slip.Symbol("vanilla"), slip.Symbol(":slop"), "not a %s unbound-slot", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<unbound-slot [0-9a-f]+>$/",
@@ -46,11 +47,11 @@ func TestUnboundSlotMake(t *testing.T) {
 }
 
 func TestUnboundSlotNoFormat(t *testing.T) {
-	cond := slip.NewUnboundSlot(slip.Symbol("vanilla"), slip.Symbol(":slop"), "")
-	tt.Equal(t, "The slot :slop is unbound in the object vanilla.",
-		cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	scope := slip.NewScope()
+	cond := slip.UnboundSlotNew(scope, 0, slip.Symbol("vanilla"), slip.Symbol(":slop"), "")
+	tt.Equal(t, "The slot :slop is unbound in the object vanilla.", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestUnboundSlotPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicUnboundSlot(slip.Symbol("vanilla"), slip.Symbol(":slop"), "raise") })
+	tt.Panic(t, func() { slip.UnboundSlotPanic(nil, 0, slip.Symbol("vanilla"), slip.Symbol(":slop"), "raise") })
 }

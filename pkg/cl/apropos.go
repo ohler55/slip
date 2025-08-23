@@ -118,7 +118,7 @@ func (f *Apropos) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	w := slip.StandardOutput.(io.Writer)
 	for _, line := range lines {
 		if _, err := w.Write(append([]byte(line), '\n')); err != nil {
-			slip.PanicStream(slip.StandardOutput.(slip.Stream), "%s", err)
+			slip.StreamPanic(s, depth, slip.StandardOutput.(slip.Stream), "%s", err)
 		}
 	}
 	return slip.Novalue

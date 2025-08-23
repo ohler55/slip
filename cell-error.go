@@ -9,21 +9,19 @@ import (
 // CellErrorSymbol is the symbol with a value of "cell-error".
 const CellErrorSymbol = Symbol("cell-error")
 
-// NewCellError raises a CellPanic (cell-error) describing a cell
-// error.
-func NewCellError(name Object, format string, args ...any) Object {
+// CellErrorNew raises a CellError (cell-error) describing a cell error.
+func CellErrorNew(s *Scope, depth int, name Object, format string, args ...any) Object {
 	c := FindClass("cell-error")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":name"), name,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicCell raises a CellPanic (cell-error) describing a cell
-// error.
-func PanicCell(name Object, format string, args ...any) {
-	panic(NewCellError(name, format, args...))
+// CellPanic raises a CellError (cell-error) describing a cell error.
+func CellPanic(s *Scope, depth int, name Object, format string, args ...any) {
+	panic(CellErrorNew(s, depth, name, format, args...))
 }

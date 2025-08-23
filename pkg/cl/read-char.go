@@ -76,7 +76,7 @@ func (f *ReadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			return result
 		}
 		ss, _ := is.(slip.Stream)
-		slip.PanicStream(ss, "read failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "read failed. %s", err)
 	}
 	return slip.Character(r)
 }

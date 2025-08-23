@@ -7,21 +7,25 @@ import "fmt"
 // StreamErrorSymbol is the symbol with a value of "stream-error".
 const StreamErrorSymbol = Symbol("stream-error")
 
-// NewStreamError returns a new StreamPanic (stream-error) describing a stream
+// StreamErrorNew returns a new StreamError (stream-error) describing a stream
 // error.
-func NewStreamError(stream Stream, format string, args ...any) Object {
+func StreamErrorNew(s *Scope, depth int, stream Stream, format string, args ...any) Object {
 	c := FindClass("stream-error")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":stream"), stream,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicStream raises a StreamPanic (stream-error) describing a stream
-// error.
+// PanicStream raises a StreamError (stream-error) describing a stream error.
 func PanicStream(stream Stream, format string, args ...any) {
-	panic(NewStreamError(stream, format, args...))
+	panic(StreamErrorNew(NewScope(), 0, stream, format, args...))
+}
+
+// StreamPanic raises a StreamError (stream-error) describing a stream error.
+func StreamPanic(s *Scope, depth int, stream Stream, format string, args ...any) {
+	panic(StreamErrorNew(s, depth, stream, format, args...))
 }

@@ -70,5 +70,5 @@ type defaultSlotUnboundCaller struct{}
 
 func (defaultSlotUnboundCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, args[0], args, 3, 3)
-	panic(slip.NewUnboundSlot(args[1], args[2], ""))
+	panic(slip.UnboundSlotNew(s, depth, args[1], args[2], ""))
 }

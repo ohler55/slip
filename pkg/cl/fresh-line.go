@@ -53,7 +53,7 @@ func (f *FreshLine) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	}
 	if peeker, ok := ss.(slip.LastBytePeeker); !ok || peeker.LastByte() != '\n' {
 		if _, err := w.Write([]byte{'\n'}); err != nil {
-			slip.PanicStream(ss, "fresh-line write failed. %s", err)
+			slip.StreamPanic(s, depth, ss, "fresh-line write failed. %s", err)
 		}
 		result = slip.True
 	}

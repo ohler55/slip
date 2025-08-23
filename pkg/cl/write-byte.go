@@ -63,7 +63,7 @@ func (f *WriteByte) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.TypePanic(s, depth, "byte", args[0], "fixnum")
 	}
 	if _, err := w.Write([]byte{b}); err != nil {
-		slip.PanicStream(args[1].(slip.Stream), "write-byte failed. %s", err)
+		slip.StreamPanic(s, depth, args[1].(slip.Stream), "write-byte failed. %s", err)
 	}
 	return slip.Octet(b)
 }

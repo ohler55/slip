@@ -87,11 +87,11 @@ func (obj *SynonymStream) IsOpen() bool {
 // Read from the stream bound to the symbol.
 func (obj *SynonymStream) Read(p []byte) (int, error) {
 	if obj.closed {
-		slip.PanicStream(obj, "closed")
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	value, has := slip.CurrentPackage.Get(string(obj.symbol))
 	if !has {
-		slip.PanicUnboundVariable(obj.symbol, "unbound")
+		slip.UnboundVariablePanic(slip.NewScope(), 0, obj.symbol, "unbound")
 	}
 	var r io.Reader
 	switch tv := value.(type) {
@@ -111,11 +111,11 @@ func (obj *SynonymStream) Read(p []byte) (int, error) {
 // Write to the stream bound to the symbol.
 func (obj *SynonymStream) Write(b []byte) (n int, err error) {
 	if obj.closed {
-		slip.PanicStream(obj, "closed")
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	value, has := slip.CurrentPackage.Get(string(obj.symbol))
 	if !has {
-		slip.PanicUnboundVariable(obj.symbol, "unbound")
+		slip.UnboundVariablePanic(slip.NewScope(), 0, obj.symbol, "unbound")
 	}
 	var w io.Writer
 	switch tv := value.(type) {

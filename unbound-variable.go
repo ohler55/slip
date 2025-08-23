@@ -7,21 +7,21 @@ import "fmt"
 // UnboundVariableSymbol is the symbol with a value of "unbound-variable".
 const UnboundVariableSymbol = Symbol("unbound-variable")
 
-// NewUnboundVariable returns a new UnboundVariablePanic (unbound-variable)
+// UnboundVariableNew returns a new UnboundVariable (unbound-variable)
 // describing a unbound-variable error.
-func NewUnboundVariable(name Object, format string, args ...any) Object {
+func UnboundVariableNew(s *Scope, depth int, name Object, format string, args ...any) Object {
 	c := FindClass("unbound-variable")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":name"), name,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicUnboundVariable raises a UnboundVariablePanic (unbound-variable)
-// describing a unbound-variable error.
-func PanicUnboundVariable(name Object, format string, args ...any) {
-	panic(NewUnboundVariable(name, format, args...))
+// UnboundVariablePanic raises a UnboundVariable (unbound-variable) describing
+// a unbound-variable error.
+func UnboundVariablePanic(s *Scope, depth int, name Object, format string, args ...any) {
+	panic(UnboundVariableNew(s, depth, name, format, args...))
 }

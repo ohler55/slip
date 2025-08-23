@@ -149,7 +149,7 @@ func Append(b []byte, obj Object) []byte {
 // Write an Object to *standard-output* using the Printer variables.
 func (p *Printer) Write(obj Object) {
 	if _, err := StandardOutput.(io.Writer).Write(p.Append([]byte{}, obj, 0)); err != nil {
-		PanicStream(StandardOutput.(Stream), "%s", err)
+		StreamPanic(NewScope(), 0, StandardOutput.(Stream), "%s", err)
 	}
 }
 

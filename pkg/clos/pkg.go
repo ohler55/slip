@@ -61,18 +61,18 @@ func init() {
 	slip.UserPkg.Use(&Pkg)
 }
 
-func slotMissing(s *slip.Scope, obj slip.Object, name slip.Symbol, op string) slip.Object {
+func slotMissing(s *slip.Scope, obj slip.Object, name slip.Symbol, op string, depth int) slip.Object {
 	fi := slip.FindFunc("slot-missing")
 	panicFormat := "When attempting to read the slot's value (%s), the slot %s is missing from the object %s."
 	if op == "setf" {
 		panicFormat = "When attempting to set the slot's value (%s), the slot %s is missing from the object %s."
 	}
 	if fi == nil || obj == nil {
-		slip.PanicCell(name, panicFormat, op, name, obj)
+		slip.CellPanic(s, depth, name, panicFormat, op, name, obj)
 	}
 	class := slip.FindClass(string(obj.Hierarchy()[0]))
 	if class.Metaclass() == slip.Symbol("built-in-class") {
-		slip.PanicCell(name, panicFormat, op, name, obj)
+		slip.CellPanic(s, depth, name, panicFormat, op, name, obj)
 	}
 	args := slip.List{
 		slip.FindClass(string(obj.Hierarchy()[0])),

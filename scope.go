@@ -145,7 +145,7 @@ func (s *Scope) get(name string) Object {
 		if vv := pkg.GetVarVal(vname); vv != nil && (vv.Export || private) {
 			return vv.Value()
 		}
-		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
+		UnboundVariablePanic(s, 0, Symbol(name), "Variable %s is unbound.", name)
 	}
 	s.locker.Lock()
 	if s.Vars != nil {
@@ -165,7 +165,7 @@ func (s *Scope) get(name string) Object {
 	}
 	value, has := CurrentPackage.Get(name)
 	if !has || Unbound == value {
-		PanicUnboundVariable(Symbol(name), "Variable %s is unbound.", name)
+		UnboundVariablePanic(s, 0, Symbol(name), "Variable %s is unbound.", name)
 	}
 	return value
 }

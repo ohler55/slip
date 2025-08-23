@@ -88,14 +88,16 @@ func (defaultSlotMissingCaller) Call(s *slip.Scope, args slip.List, depth int) s
 		slip.TypePanic(s, depth, "slot-name", args[2], "symbol")
 	}
 	if sym, ok2 := args[3].(slip.Symbol); ok2 && string(sym) == "setf" {
-		cond = slip.NewCellError(
+		cond = slip.CellErrorNew(
+			s, depth,
 			slotName,
 			"When attempting to set the slot's value (%s), the slot %s is missing from the object %s.",
 			sym,
 			slotName,
 			args[1])
 	} else {
-		cond = slip.NewCellError(
+		cond = slip.CellErrorNew(
+			s, depth,
 			slotName,
 			"When attempting to read the slot's value (%s), the slot %s is missing from the object %s.",
 			args[3],

@@ -85,7 +85,7 @@ func (obj *TwoWayStream) IsOpen() bool {
 // Read from the current position in the buf. This is part of the io.Reader interface.
 func (obj *TwoWayStream) Read(p []byte) (n int, err error) {
 	if obj.Input == nil {
-		slip.PanicStream(obj, "closed")
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	return obj.Input.Read(p)
 }
@@ -94,7 +94,7 @@ func (obj *TwoWayStream) Read(p []byte) (n int, err error) {
 // is called.
 func (obj *TwoWayStream) Write(b []byte) (n int, err error) {
 	if obj.Output == nil {
-		slip.PanicStream(obj, "closed")
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	return obj.Output.Write(b)
 }

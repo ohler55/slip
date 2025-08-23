@@ -118,7 +118,7 @@ func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 		ra = ra[start:end]
 	}
 	if _, err := w.Write([]byte(string(ra))); err != nil {
-		slip.PanicStream(ss, "write-sequence failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write-sequence failed. %s", err)
 	}
 	return args[0]
 }

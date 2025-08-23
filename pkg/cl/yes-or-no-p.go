@@ -61,7 +61,7 @@ func (f *YesOrNoP) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 top:
 	for {
 		if _, err := w.Write(prompt); err != nil {
-			slip.PanicStream(w.(slip.Stream), "%s", err)
+			slip.StreamPanic(s, depth, w.(slip.Stream), "%s", err)
 		}
 		answer := readLine(r)
 		switch strings.ToLower(string(answer)) {

@@ -19,11 +19,7 @@
   - NewPanic => ErrorPanic where there is a scope and depth
   + CheckMethodArgCount => MethodArgCountCheck
   + PanicMethodArgCount => MethodArgCountPanic (slip-flow)
-  - StreamError
-  - EndOfFile
-  - CellError
-  - UnboundSlot
-  - UnboundVariable
+  + PanicStream => StreamPanic (slip-flow)
   - UndefinedFunction
   - SimpleCondition
   - SimpleError

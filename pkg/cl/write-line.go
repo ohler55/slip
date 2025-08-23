@@ -58,7 +58,7 @@ func (f *WriteLine) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	str, ra, w, ss := parseWriteStringArgs(s, args, depth)
 	ra = append(ra, '\n')
 	if _, err := w.Write([]byte(string(ra))); err != nil {
-		slip.PanicStream(ss, "write-string failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write-string failed. %s", err)
 	}
 	return str
 }

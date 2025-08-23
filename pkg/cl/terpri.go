@@ -52,7 +52,7 @@ func (f *Terpri) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		}
 	}
 	if _, err := w.Write([]byte{'\n'}); err != nil {
-		slip.PanicStream(ss, "terpri write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "terpri write failed. %s", err)
 	}
 	return nil
 }

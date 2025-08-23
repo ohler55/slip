@@ -89,7 +89,7 @@ func (obj ConcatenatedStream) Eval(s *slip.Scope, depth int) slip.Object {
 func (obj ConcatenatedStream) Read(b []byte) (n int, err error) {
 	if obj[0] != nil {
 		return 0, slip.WrapError(slip.NewScope(),
-			slip.NewStreamError(obj, "closed").(slip.Instance),
+			slip.StreamErrorNew(slip.NewScope(), 0, obj, "closed").(slip.Instance),
 			"closed", nil)
 	}
 	var read bool

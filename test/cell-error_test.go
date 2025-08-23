@@ -12,7 +12,8 @@ import (
 )
 
 func TestCellErrorObj(t *testing.T) {
-	cond := slip.NewCellError(slip.Symbol("sell"), "not a %s cell-error", "real")
+	scope := slip.NewScope()
+	cond := slip.CellErrorNew(scope, 0, slip.Symbol("sell"), "not a %s cell-error", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<cell-error [0-9a-f]+>$/",
@@ -60,5 +61,5 @@ func TestCellErrorMake(t *testing.T) {
 }
 
 func TestCellErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicCell(slip.Symbol(":sell"), "raise") })
+	tt.Panic(t, func() { slip.CellPanic(nil, 0, slip.Symbol(":sell"), "raise") })
 }

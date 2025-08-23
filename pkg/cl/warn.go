@@ -70,7 +70,7 @@ func (f *Warn) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	msg := SimpleCondMsg(s, cond)
 	if _, err := fmt.Fprintf(slip.ErrorOutput.(io.Writer), "Warning: %s\n", msg); err != nil {
 		ss, _ := slip.StandardOutput.(slip.Stream)
-		slip.PanicStream(ss, "warn write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "warn write failed. %s", err)
 	}
 	return nil
 }

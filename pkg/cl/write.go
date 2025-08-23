@@ -100,7 +100,7 @@ type Write struct {
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	b, w, ss := writeBuf(f, s, args, true, depth)
 	if _, err := w.Write(b); err != nil {
-		slip.PanicStream(ss, "write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write failed. %s", err)
 	}
 	return args[0]
 }

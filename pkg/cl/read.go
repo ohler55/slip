@@ -72,10 +72,10 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	}
-	return f.wrapRead(s, r, eofp, eofv)
+	return f.wrapRead(s, r, eofp, eofv, depth)
 }
 
-func (f *Read) wrapRead(s *slip.Scope, r io.Reader, eofp bool, eofv slip.Object) (result slip.Object) {
+func (f *Read) wrapRead(s *slip.Scope, r io.Reader, eofp bool, eofv slip.Object, depth int) (result slip.Object) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			if eofp {
@@ -133,7 +133,7 @@ func (f *Read) wrapRead(s *slip.Scope, r io.Reader, eofp bool, eofv slip.Object)
 		}
 	}
 	if eofp {
-		slip.PanicEndOfFile(r.(slip.Stream), "end of file or stream")
+		slip.EndOfFilePanic(s, depth, r.(slip.Stream), "end of file or stream")
 	}
 	return eofv
 }

@@ -69,7 +69,7 @@ func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		_, err = w.Write(p.Append([]byte{}, obj, 0))
 	}
 	if err != nil {
-		slip.PanicStream(ss, "princ write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "princ write failed. %s", err)
 	}
 	return obj
 }
