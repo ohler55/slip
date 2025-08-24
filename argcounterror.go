@@ -4,19 +4,6 @@ package slip
 
 import "fmt"
 
-// ArgCountCheck panics if the number of arguments is outside the range
-// specified. TBD deprecate or remove after updating plugins
-func ArgCountCheck(obj Object, args List, mn, mx int) {
-	if len(args) < mn || (0 <= mx && mx < len(args)) {
-		name := ObjectString(obj)
-		if f, ok := obj.(Funky); ok {
-			name = f.GetName()
-			args = f.GetArgs()
-		}
-		minMaxPanic(NewScope(), 0, name, len(args), mn, mx)
-	}
-}
-
 // CheckArgCount panics if the number of arguments is outside the range
 // specified.
 func CheckArgCount(s *Scope, depth int, obj Object, args List, mn, mx int) {

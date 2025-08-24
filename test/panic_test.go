@@ -64,7 +64,7 @@ func TestPanicAppend(t *testing.T) {
 
 func TestArgCountCheck(t *testing.T) {
 	fun := slip.NewFunc("car", slip.List{})
-	tt.Panic(t, func() { slip.ArgCountCheck(fun, slip.List{}, 1, 2) })
+	tt.Panic(t, func() { slip.CheckArgCount(nil, 0, fun, slip.List{}, 1, 2) })
 }
 
 func recoverPanic(obj slip.Object) (se *slip.Panic, msg, stack string) {

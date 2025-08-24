@@ -12,10 +12,8 @@
 
 - generics branch
  - replace all in slip and plugins
-  - ArgCountCheck => CheckArgCount
-  - NewPanic => ErrorPanic where there is a scope and depth
-  - CheckMethodArgCount => MethodArgCountCheck
-  - PanicMethodArgChoice => MethodArgChoicePanic
+  - NewPanic => ErrorPanic where there is a scope and depth (only in slip)
+  - PanicMethodArgChoice => MethodArgChoicePanic (slip and slip-flow)
 
 ----------
 - for later
