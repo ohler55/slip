@@ -44,7 +44,7 @@ type Time struct {
 
 // Call the function with the arguments provided.
 func (f *Time) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	t0 := time.Now()
 	result = slip.EvalArg(s, args, 0, depth+1)
 	dur := time.Since(t0)

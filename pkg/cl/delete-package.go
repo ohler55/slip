@@ -40,16 +40,16 @@ type DeletePackage struct {
 
 // Call the function with the arguments provided.
 func (f *DeletePackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	pkg := slip.PackageFromArg(args[0])
 	if pkg == nil {
-		slip.PanicPackage(nil, "Package %s does not exist.", args[0])
+		slip.PackagePanic(s, depth, nil, "Package %s does not exist.", args[0])
 	}
 	if pkg.Locked {
-		slip.PanicPackage(pkg, "Package %s is locked and can not be deleted.", pkg)
+		slip.PackagePanic(s, depth, pkg, "Package %s is locked and can not be deleted.", pkg)
 	}
 	if 0 < len(pkg.Users) {
-		slip.PanicPackage(pkg, "Package %s is still in use and can not be deleted.", pkg)
+		slip.PackagePanic(s, depth, pkg, "Package %s is still in use and can not be deleted.", pkg)
 	}
 	if len(pkg.Name) == 0 {
 		return nil

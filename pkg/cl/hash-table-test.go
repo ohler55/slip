@@ -37,11 +37,9 @@ type HashTableTest struct {
 
 // Call the function with the arguments provided.
 func (f *HashTableTest) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if _, ok := args[0].(slip.HashTable); !ok {
-		slip.PanicType("hash-table", args[0], "hash-table")
+		slip.TypePanic(s, depth, "hash-table", args[0], "hash-table")
 	}
 	return slip.Symbol("eql")
 }

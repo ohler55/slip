@@ -38,9 +38,7 @@ type TypeOf struct {
 
 // Call the function with the arguments provided.
 func (f *TypeOf) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case nil:
 		return slip.Symbol("null")

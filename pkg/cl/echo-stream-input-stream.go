@@ -40,10 +40,10 @@ type EchoStreamInputStream struct {
 
 // Call the function with the arguments provided.
 func (f *EchoStreamInputStream) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	es, ok := args[0].(*EchoStream)
 	if !ok {
-		slip.PanicType("echo-stream", args[0], "echo-stream")
+		slip.TypePanic(s, depth, "echo-stream", args[0], "echo-stream")
 	}
 	return es.input.(slip.Object)
 }

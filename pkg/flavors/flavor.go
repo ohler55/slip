@@ -367,7 +367,7 @@ func (obj *Flavor) describeStrings(b []byte, label string, list []string, indent
 // Receive a method invocation from the send function. Not intended to be
 // call by any code other than the send function but is public to allow it
 // to be over-ridden.
-func (obj *Flavor) Receive(_ *slip.Scope, message string, args slip.List, depth int) (result slip.Object) {
+func (obj *Flavor) Receive(s *slip.Scope, message string, args slip.List, depth int) (result slip.Object) {
 	var lo bool
 top:
 	switch message {
@@ -378,7 +378,7 @@ top:
 		if 0 < len(args) {
 			var ok bool
 			if w, ok = args[0].(io.Writer); !ok {
-				slip.PanicType("describe output-stream", args[0], "output-stream")
+				slip.TypePanic(s, depth, "describe output-stream", args[0], "output-stream")
 			}
 		}
 		ansi := slip.CurrentPackage.JustGet("*print-ansi*") != nil
@@ -407,7 +407,8 @@ top:
 		obj.varDocs[name] = desc
 	default:
 		if lo {
-			slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a valid method for a Flavor.", message)
+			slip.InvalidMethodPanic(s, depth,
+				obj, nil, slip.Symbol(message), "%s is not a valid method for a Flavor.", message)
 		}
 		message = strings.ToLower(message)
 		lo = true
@@ -460,9 +461,9 @@ func (obj *Flavor) MethodNames() slip.List {
 	return methods
 }
 
-// DefList returns a list that can be evaluated to create the class or nil if
+// LoadForm returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
-func (obj *Flavor) DefList() slip.List {
+func (obj *Flavor) LoadForm() slip.Object {
 	keys := make([]string, 0, len(obj.defaultVars)-1)
 	for k, v := range obj.defaultVars {
 		if k != "self" && !obj.inheritedVar(k, v) {
@@ -559,7 +560,7 @@ func (obj *Flavor) DefList() slip.List {
 	df = appendStringSliceOption(df, ":required-init-keywords", obj.requiredKeywords)
 	if lam, ok := obj.defaultHandler.(*slip.Lambda); ok {
 		if lam.Doc.Name == "lambda" {
-			df = append(df, slip.List{slip.Symbol(":default-handler"), lam.DefList()})
+			df = append(df, slip.List{slip.Symbol(":default-handler"), lam.LoadForm()})
 		} else {
 			df = append(df, slip.List{slip.Symbol(":default-handler"), slip.Symbol(lam.Doc.Name)})
 		}
@@ -616,7 +617,7 @@ func (obj *Flavor) DefMethodList(method, daemon string, inherited bool) (dml sli
 					slip.Symbol("defmethod"),
 					slip.List{slip.Symbol(obj.name), slip.Symbol(daemon), slip.Symbol(method)},
 				}
-				dml = append(dml, lam.DefList()[1:]...)
+				dml = append(dml, lam.LoadForm().(slip.List)[1:]...)
 				break
 			}
 		}

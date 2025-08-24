@@ -66,13 +66,16 @@ func TestTracePanicANSI(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.ReadString("(car (car (car 7)))", scope).Eval(scope, nil) })
 	slip.Untrace(nil)
 
-	tt.Equal(t, "0: (car (car (car 7)))\n"+
-		"  1: (car (car 7))\n"+
-		"    2: (car 7)\n"+
-		"    2: (car 7) => \x1b[31margument to car must be a cons or list not 7, a fixnum.\x1b[m\n"+
-		"  1: (car (car 7)) => \x1b[31margument to car must be a cons or list not 7, a fixnum.\x1b[m\n"+
+	checkHasLines(t, out.String(), []string{
+		"0: (car (car (car 7)))\n",
+		"  1: (car (car 7))\n",
+		"    2: (car 7)\n",
+		"      3: (initialize-instance #<type-error ",
+		"        4: (shared-initialize #<type-error ",
+		"    2: (car 7) => \x1b[31margument to car must be a cons or list not 7, a fixnum.\x1b[m\n",
+		"  1: (car (car 7)) => \x1b[31margument to car must be a cons or list not 7, a fixnum.\x1b[m\n",
 		"0: (car (car (car 7))) => \x1b[31margument to car must be a cons or list not 7, a fixnum.\x1b[m\n",
-		out.String())
+	})
 }
 
 func TestTracePanicNotANSI(t *testing.T) {
@@ -84,13 +87,16 @@ func TestTracePanicNotANSI(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.ReadString("(car (car (car 7)))", scope).Eval(scope, nil) })
 	slip.Untrace(nil)
 
-	tt.Equal(t, "0: (car (car (car 7)))\n"+
-		"  1: (car (car 7))\n"+
-		"    2: (car 7)\n"+
-		"    2: (car 7) => argument to car must be a cons or list not 7, a fixnum.\n"+
-		"  1: (car (car 7)) => argument to car must be a cons or list not 7, a fixnum.\n"+
+	checkHasLines(t, out.String(), []string{
+		"0: (car (car (car 7)))\n",
+		"  1: (car (car 7))\n",
+		"    2: (car 7)\n",
+		"      3: (initialize-instance #<type-error ",
+		"        4: (shared-initialize #<type-error ",
+		"    2: (car 7) => argument to car must be a cons or list not 7, a fixnum.\n",
+		"  1: (car (car 7)) => argument to car must be a cons or list not 7, a fixnum.\n",
 		"0: (car (car (car 7))) => argument to car must be a cons or list not 7, a fixnum.\n",
-		out.String())
+	})
 }
 
 func TestTracePanicDeep(t *testing.T) {
@@ -134,10 +140,12 @@ func TestTracePanicString(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.ReadString("(panic-test)", scope).Eval(scope, nil) })
 	slip.Untrace(nil)
 
-	tt.Equal(t, `0: (panic-test)
-0: (panic-test) => string panic
-`,
-		out.String())
+	checkHasLines(t, out.String(), []string{
+		"0: (panic-test)",
+		"  1: (initialize-instance #<error ",
+		"    2: (shared-initialize #<error ",
+		"0: (panic-test) => string panic",
+	})
 }
 
 type panicTest struct {
@@ -147,4 +155,10 @@ type panicTest struct {
 // Call the the function with the arguments provided.
 func (f *panicTest) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	panic("string panic")
+}
+
+func checkHasLines(t *testing.T, str string, lines []string) {
+	for _, line := range lines {
+		tt.Equal(t, true, strings.Contains(str, line))
+	}
 }

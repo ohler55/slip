@@ -39,10 +39,10 @@ type Tenth struct {
 
 // Call the function with the arguments provided.
 func (f *Tenth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return callN(f, args, 9)
+	return callN(s, f, args, 9, depth)
 }
 
 // Place a value in the tenth position of a list or cons.
 func (f *Tenth) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	placeN(f, args, 9, value)
+	placeN(s, f, args, 9, value)
 }

@@ -40,12 +40,12 @@ type Cis struct {
 
 // Call the function with the arguments provided.
 func (f *Cis) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if real, ok := args[0].(slip.Real); ok {
 		sin, cos := math.Sincos(real.RealValue())
 		result = slip.Complex(complex(cos, sin))
 	} else {
-		slip.PanicType("number", args[0], "number")
+		slip.TypePanic(s, depth, "number", args[0], "number")
 	}
 	return
 }

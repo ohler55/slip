@@ -76,7 +76,7 @@ type MakeTime struct {
 
 // Call the function with the arguments provided.
 func (f *MakeTime) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 8)
+	slip.CheckArgCount(s, depth, f, args, 3, 8)
 	var (
 		year   slip.Fixnum
 		month  slip.Fixnum
@@ -90,49 +90,49 @@ func (f *MakeTime) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	)
 	pos := 0
 	if year, ok = args[pos].(slip.Fixnum); !ok {
-		slip.PanicType("year", args[pos], "fixnum")
+		slip.TypePanic(s, depth, "year", args[pos], "fixnum")
 	}
 	pos++
 	if month, ok = args[pos].(slip.Fixnum); !ok {
-		slip.PanicType("month", args[pos], "fixnum")
+		slip.TypePanic(s, depth, "month", args[pos], "fixnum")
 	}
 	pos++
 	if day, ok = args[pos].(slip.Fixnum); !ok {
-		slip.PanicType("day", args[pos], "fixnum")
+		slip.TypePanic(s, depth, "day", args[pos], "fixnum")
 	}
 	pos++
 	if pos < len(args) {
 		if hour, ok = args[pos].(slip.Fixnum); !ok {
-			slip.PanicType("hour", args[pos], "fixnum")
+			slip.TypePanic(s, depth, "hour", args[pos], "fixnum")
 		}
 		pos++
 	}
 	if pos < len(args) {
 		if minute, ok = args[pos].(slip.Fixnum); !ok {
-			slip.PanicType("minute", args[pos], "fixnum")
+			slip.TypePanic(s, depth, "minute", args[pos], "fixnum")
 		}
 		pos++
 	}
 	if pos < len(args) {
 		if second, ok = args[pos].(slip.Fixnum); !ok {
-			slip.PanicType("second", args[pos], "fixnum")
+			slip.TypePanic(s, depth, "second", args[pos], "fixnum")
 		}
 		pos++
 	}
 	if pos < len(args) {
 		if nsec, ok = args[pos].(slip.Fixnum); !ok {
-			slip.PanicType("nanosecond", args[pos], "fixnum")
+			slip.TypePanic(s, depth, "nanosecond", args[pos], "fixnum")
 		}
 		pos++
 	}
 	if pos < len(args) {
-		loc = getLocArg(args[pos])
+		loc = getLocArg(s, args[pos], depth)
 	}
 	return slip.Time(time.Date(int(year), time.Month(month), int(day),
 		int(hour), int(minute), int(second), int(nsec), loc))
 }
 
-func getLocArg(arg slip.Object) (loc *time.Location) {
+func getLocArg(s *slip.Scope, arg slip.Object, depth int) (loc *time.Location) {
 	switch ta := arg.(type) {
 	case slip.Symbol:
 		switch strings.ToLower(string(ta)) {
@@ -141,7 +141,7 @@ func getLocArg(arg slip.Object) (loc *time.Location) {
 		case "local":
 			loc = time.Local
 		default:
-			slip.PanicType("location", ta, "string", "symbol UTC", "symbol local")
+			slip.TypePanic(s, depth, "location", ta, "string", "symbol UTC", "symbol local")
 		}
 	case slip.String:
 		var err error
@@ -149,7 +149,7 @@ func getLocArg(arg slip.Object) (loc *time.Location) {
 			slip.NewPanic("failed to load time locations: %s", err)
 		}
 	default:
-		slip.PanicType("location", ta, "string", "symbol")
+		slip.TypePanic(s, depth, "location", ta, "string", "symbol")
 	}
 	return
 }

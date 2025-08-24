@@ -60,14 +60,14 @@ type ReadLine struct {
 
 // Call the function with the arguments provided.
 func (f *ReadLine) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 4)
+	slip.CheckArgCount(s, depth, f, args, 0, 4)
 	is := s.Get(slip.Symbol("*standard-input*"))
 	if 0 < len(args) {
 		is = args[0]
 	}
 	rr, ok := is.(io.RuneReader)
 	if !ok {
-		slip.PanicType("stream", args[0], "input-stream")
+		slip.TypePanic(s, depth, "stream", args[0], "input-stream")
 	}
 	// Not at all efficient but it's the best that can be done with a buffered
 	// input.
@@ -91,7 +91,7 @@ func (f *ReadLine) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 					return slip.Values{result, slip.True}
 				}
 				ss, _ := is.(slip.Stream)
-				slip.PanicStream(ss, "read failed. %s", err)
+				slip.StreamPanic(s, depth, ss, "read failed. %s", err)
 			}
 		}
 		if r == '\n' {

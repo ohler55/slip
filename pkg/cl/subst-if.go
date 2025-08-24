@@ -57,7 +57,7 @@ type SubstIf struct {
 
 // Call the function with the arguments provided.
 func (f *SubstIf) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 7)
+	slip.CheckArgCount(s, depth, f, args, 3, 7)
 	pc := ResolveToCaller(s, args[1], depth)
 	var kc slip.Caller
 	if v, ok := slip.GetArgsKeyValue(args[3:], slip.Symbol(":key")); ok {

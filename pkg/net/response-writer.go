@@ -32,14 +32,14 @@ func defResponseWriter() *flavors.Flavor {
 
 type respWriterStatusCaller bool
 
-func (caller respWriterStatusCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respWriterStatusCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(obj, ":write-status", len(args), "1")
 	}
 	code, ok := args[0].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("response-writer :write-status status", args[0], "fixnum")
+		slip.TypePanic(s, depth, "response-writer :write-status status", args[0], "fixnum")
 	}
 	(obj.Any.(http.ResponseWriter)).WriteHeader(int(code))
 	return nil
@@ -55,14 +55,14 @@ Writes the status code as part of the response.
 
 type respWriterWriteCaller bool
 
-func (caller respWriterWriteCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respWriterWriteCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(obj, ":write", len(args), "1")
 	}
 	content, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("response-writer :write content", args[0], "string")
+		slip.TypePanic(s, depth, "response-writer :write content", args[0], "string")
 	}
 	if _, err := (obj.Any.(http.ResponseWriter)).Write([]byte(content)); err != nil {
 		panic(err)
@@ -80,7 +80,7 @@ Write _content_ as the response.
 
 type respWriterHeaderCaller bool
 
-func (caller respWriterHeaderCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respWriterHeaderCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		slip.PanicMethodArgChoice(obj, ":header", len(args), "0")
@@ -106,14 +106,14 @@ Returns the header of the responseWriter as an association list.
 
 type respWriterHeaderGetCaller bool
 
-func (caller respWriterHeaderGetCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respWriterHeaderGetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
 		slip.PanicMethodArgChoice(obj, ":header-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("responseWriter :header-get key", args[0], "string")
+		slip.TypePanic(s, depth, "responseWriter :header-get key", args[0], "string")
 	}
 	header := (obj.Any.(http.ResponseWriter)).Header()
 	if value := header.Get(string(key)); 0 < len(value) {

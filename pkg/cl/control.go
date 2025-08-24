@@ -402,7 +402,7 @@ func (c *control) dirAmp(colon, at bool, params []any) {
 	}
 }
 
-func scanDirBlock(buf []byte, pos int, dirName string, open, close byte, colonOk bool) int {
+func (c *control) scanDirBlock(buf []byte, pos int, dirName string, open, close byte, colonOk bool) int {
 	end := len(buf)
 	var (
 		colon bool
@@ -420,7 +420,7 @@ func scanDirBlock(buf []byte, pos int, dirName string, open, close byte, colonOk
 			case '@':
 				at = true
 			case open:
-				pos = scanDirBlock(buf, pos, dirName, open, close, colonOk) + 2
+				pos = c.scanDirBlock(buf, pos, dirName, open, close, colonOk) + 2
 			case close:
 				if at || (colon && !colonOk) {
 					invalidDir(buf, pos)
@@ -440,11 +440,11 @@ func scanDirBlock(buf []byte, pos int, dirName string, open, close byte, colonOk
 			tilde = false
 		}
 	}
-	panic(slip.NewError("%s directive not terminated at %d of %q", dirName, pos, buf))
+	panic(slip.ErrorNew(c.scope, 0, "%s directive not terminated at %d of %q", dirName, pos, buf))
 }
 
 func (c *control) dirCase(colon, at bool, params []any) {
-	pos := scanDirBlock(c.str, c.pos, "case", '(', ')', false)
+	pos := c.scanDirBlock(c.str, c.pos, "case", '(', ')', false)
 	c2 := *c
 	c2.out = make([]byte, 0, pos-c.pos)
 	c2.end = pos
@@ -684,7 +684,7 @@ func (c *control) scanJustify(buf []byte, pos int) ([]*control, *control, int) {
 			tilde = false
 		}
 	}
-	panic(slip.NewError("justification directive not terminated at %d of %q", pos, buf))
+	panic(slip.ErrorNew(c.scope, 0, "justification directive not terminated at %d of %q", pos, buf))
 }
 
 func (c *control) dirEval(colon, at bool, params []any) {
@@ -1166,7 +1166,7 @@ func (c *control) dirR(colon, at bool, params []any) {
 	case *slip.Bignum:
 		digits = (*big.Int)(ta).Append(nil, 10)
 	default:
-		slip.PanicType("argument to radix directive", ta, "fixnum", "bignum")
+		slip.TypePanic(c.scope, 0, "argument to radix directive", ta, "fixnum", "bignum")
 	}
 	if at {
 		if digits[0] == '-' {
@@ -1437,7 +1437,7 @@ func (c *control) dirCond(colon, at bool, params []any) {
 			c.argPos++
 		}
 	}
-	strs, def, pos := scanCond(c.str, c.pos)
+	strs, def, pos := c.scanCond(c.str, c.pos)
 	switch {
 	case colon && at:
 		invalidDir(c.str, c.pos)
@@ -1463,7 +1463,7 @@ func (c *control) dirCond(colon, at bool, params []any) {
 			if no, ok := arg.(slip.Fixnum); ok {
 				n = int(no)
 			} else {
-				slip.PanicType("conditional directive argument", arg, "fixnum")
+				slip.TypePanic(c.scope, 0, "conditional directive argument", arg, "fixnum")
 			}
 		}
 		if 0 <= n && n < len(strs) {
@@ -1475,7 +1475,7 @@ func (c *control) dirCond(colon, at bool, params []any) {
 	c.pos = pos + 2
 }
 
-func scanCond(buf []byte, pos int) ([]string, string, int) {
+func (c *control) scanCond(buf []byte, pos int) ([]string, string, int) {
 	var strs []string
 	end := len(buf)
 	var (
@@ -1504,7 +1504,7 @@ func scanCond(buf []byte, pos int) ([]string, string, int) {
 			case '[':
 				// This ends up with a double scan, maybe fine for the rare
 				// case where it occurs.
-				_, _, pos = scanCond(buf, pos)
+				_, _, pos = c.scanCond(buf, pos)
 				pos += 2
 			case ']':
 				if at || colon {
@@ -1528,7 +1528,7 @@ func scanCond(buf []byte, pos int) ([]string, string, int) {
 			tilde = false
 		}
 	}
-	panic(slip.NewError("conditional directive not terminated at %d of %q", pos, buf))
+	panic(slip.ErrorNew(c.scope, 0, "conditional directive not terminated at %d of %q", pos, buf))
 }
 
 func (c *control) subProcess(str string) {
@@ -1545,7 +1545,7 @@ func (c *control) subProcess(str string) {
 }
 
 func (c *control) dirIter(colon, at bool, params []any) {
-	pos := scanDirBlock(c.str, c.pos, "iteration", '{', '}', true)
+	pos := c.scanDirBlock(c.str, c.pos, "iteration", '{', '}', true)
 	start := c.pos
 	c2 := *c
 	c2.out = make([]byte, 0, pos-start)
@@ -1568,7 +1568,7 @@ func (c *control) dirIter(colon, at bool, params []any) {
 			}
 			c2.args = slip.List{}
 			if c.argPos < len(c.args) {
-				c2.args = objAsList(c.args[c.argPos], "iteration directive argument")
+				c2.args = c.objAsList(c.args[c.argPos], "iteration directive argument")
 				c.argPos++
 			}
 			c2.argPos = 0
@@ -1583,7 +1583,7 @@ func (c *control) dirIter(colon, at bool, params []any) {
 		// element being consumed by one iteration.
 		var argList slip.List
 		if c.argPos < len(c.args) {
-			argList = objAsList(c.args[c.argPos], "iteration directive argument")
+			argList = c.objAsList(c.args[c.argPos], "iteration directive argument")
 			c.argPos++
 		}
 		if atLeastOnce && len(argList) == 0 {
@@ -1594,7 +1594,7 @@ func (c *control) dirIter(colon, at bool, params []any) {
 				break
 			}
 			n--
-			c2.args = objAsList(al, "iteration directive sub-argument")
+			c2.args = c.objAsList(al, "iteration directive sub-argument")
 			c2.argPos = 0
 			c2.pos = start
 			c2.process()
@@ -1619,7 +1619,7 @@ func (c *control) dirIter(colon, at bool, params []any) {
 		// for each iteration.
 		c2.args = nil
 		if c.argPos < len(c.args) {
-			c2.args = objAsList(c.args[c.argPos], "iteration directive argument")
+			c2.args = c.objAsList(c.args[c.argPos], "iteration directive argument")
 			c.argPos++
 		}
 		c2.argPos = 0
@@ -1690,14 +1690,14 @@ func (c *control) getCharParam(pos int, params []any, defVal []byte) []byte {
 	return defVal
 }
 
-func objAsList(obj slip.Object, loc string) (list slip.List) {
+func (c *control) objAsList(obj slip.Object, loc string) (list slip.List) {
 	switch tobj := obj.(type) {
 	case nil:
 		list = slip.List{}
 	case slip.List:
 		list = tobj
 	default:
-		slip.PanicType(loc, obj, "list")
+		slip.TypePanic(c.scope, 0, loc, obj, "list")
 	}
 	return
 }

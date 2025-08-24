@@ -282,21 +282,21 @@ func init() {
 	slip.UserPkg.Use(&Pkg)
 }
 
-func seqStarEndArgs(args slip.List) (start, end int) {
+func seqStarEndArgs(s *slip.Scope, args slip.List, depth int) (start, end int) {
 	start = 0
 	end = -1
 	if v, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":start")); has {
 		if num, ok := v.(slip.Fixnum); ok && 0 <= num {
 			start = int(num)
 		} else {
-			slip.PanicType(":start", v, "fixnum")
+			slip.TypePanic(s, depth, ":start", v, "fixnum")
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":end")); has && v != nil {
 		if num, ok := v.(slip.Fixnum); ok && 0 <= num {
 			end = int(num)
 		} else {
-			slip.PanicType(":start", v, "fixnum")
+			slip.TypePanic(s, depth, ":start", v, "fixnum")
 		}
 	}
 	var size int

@@ -38,14 +38,14 @@ type Realpart struct {
 
 // Call the function with the arguments provided.
 func (f *Realpart) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Fixnum, *slip.Bignum, slip.SingleFloat, slip.DoubleFloat, *slip.LongFloat, *slip.Ratio:
 		result = ta
 	case slip.Complex:
 		result = slip.DoubleFloat(real(ta))
 	default:
-		slip.PanicType("number", args[0], "number")
+		slip.TypePanic(s, depth, "number", args[0], "number")
 	}
 	return
 }

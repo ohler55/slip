@@ -42,9 +42,7 @@ type Abs struct {
 
 // Call the function with the arguments provided.
 func (f *Abs) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	result = args[0]
 	switch ta := result.(type) {
 	case slip.Fixnum:
@@ -82,7 +80,7 @@ func (f *Abs) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		}
 		result = slip.Complex(complex(r, i))
 	default:
-		slip.PanicType("number", ta, "number")
+		slip.TypePanic(s, depth, "number", ta, "number")
 	}
 	return
 }

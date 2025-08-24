@@ -11,15 +11,20 @@ const ErrorSymbol = Symbol("error")
 
 // NewError returns a Panic object that can then be used with a call to panic.
 func NewError(format string, args ...any) Object {
+	return ErrorNew(NewScope(), 0, format, args...)
+}
+
+// ErrorNew returns an Error object that can then be used with a call to panic.
+func ErrorNew(s *Scope, depth int, format string, args ...any) Object {
 	c := FindClass("error")
 	obj := c.MakeInstance()
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicError raises an error.
-func PanicError(format string, args ...any) {
-	panic(NewError(format, args...))
+// ErrorPanic raises an error.
+func ErrorPanic(s *Scope, depth int, format string, args ...any) {
+	panic(ErrorNew(s, depth, format, args...))
 }

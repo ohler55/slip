@@ -45,12 +45,12 @@ type StringLeftTrim struct {
 
 // Call the function with the arguments provided.
 func (f *StringLeftTrim) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	var str string
 	if ss, ok := args[1].(slip.String); ok {
 		str = string(ss)
 	} else {
-		slip.PanicType("string", args[1], "string")
+		slip.TypePanic(s, depth, "string", args[1], "string")
 	}
 	switch ta := args[0].(type) {
 	case nil:
@@ -63,12 +63,12 @@ func (f *StringLeftTrim) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 			if r, ok := v.(slip.Character); ok {
 				cutset = append(cutset, rune(r))
 			} else {
-				slip.PanicType("cutset list element", ta, "character")
+				slip.TypePanic(s, depth, "cutset list element", ta, "character")
 			}
 		}
 		str = strings.TrimLeft(str, string(cutset))
 	default:
-		slip.PanicType("cutset", args[0], "string", "list")
+		slip.TypePanic(s, depth, "cutset", args[0], "string", "list")
 	}
 	return slip.String(str)
 }

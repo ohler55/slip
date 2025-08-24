@@ -47,10 +47,10 @@ type MultipleValueSetq struct {
 
 // Call the function with the arguments provided.
 func (f *MultipleValueSetq) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	list, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("vars", args[0], "list of symbols")
+		slip.TypePanic(s, depth, "vars", args[0], "list of symbols")
 	}
 	form := args[1]
 	d2 := depth + 1
@@ -68,7 +68,7 @@ func (f *MultipleValueSetq) Call(s *slip.Scope, args slip.List, depth int) slip.
 	)
 	for i, v = range list {
 		if sym, ok = v.(slip.Symbol); !ok {
-			slip.PanicType("vars", v, "list of symbols")
+			slip.TypePanic(s, depth, "vars", v, "list of symbols")
 		}
 		if i < len(values) {
 			s.Set(sym, values[i])

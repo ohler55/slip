@@ -53,25 +53,25 @@ type RassocIf struct {
 
 // Call the function with the arguments provided.
 func (f *RassocIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	pos := 0
 	predicate := ResolveToCaller(s, args[pos], depth)
 	pos++
 	alist, ok := args[pos].(slip.List)
 	if !ok {
-		slip.PanicType("alist", args[pos], "list")
+		slip.TypePanic(s, depth, "alist", args[pos], "list")
 	}
 	pos++
 	var keyFunc slip.Caller
 	for ; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if keyword := strings.ToLower(string(sym)); keyword == ":key" {
 			keyFunc = ResolveToCaller(s, args[pos+1], depth)
 		} else {
-			slip.PanicType("keyword", sym, ":key")
+			slip.TypePanic(s, depth, "keyword", sym, ":key")
 		}
 	}
 	d2 := depth + 1
@@ -83,7 +83,7 @@ func (f *RassocIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Ob
 		case slip.List:
 			k = tv.Cdr()
 		default:
-			slip.PanicType("rassoc list element", tv, "cons")
+			slip.TypePanic(s, depth, "rassoc list element", tv, "cons")
 		}
 		if keyFunc != nil {
 			k = keyFunc.Call(s, slip.List{k}, d2)

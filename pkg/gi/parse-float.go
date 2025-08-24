@@ -63,10 +63,10 @@ type ParseFloat struct {
 
 // Call the function with the arguments provided.
 func (f *ParseFloat) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 7)
+	slip.CheckArgCount(s, depth, f, args, 1, 7)
 	ss, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	var (
 		typ slip.Object
@@ -86,21 +86,21 @@ func (f *ParseFloat) Call(s *slip.Scope, args slip.List, depth int) (result slip
 					if num, ok2 := args[pos].(slip.Fixnum); ok2 {
 						start = int(num)
 					} else {
-						slip.PanicType(":start", args[pos], "fixnum")
+						slip.TypePanic(s, depth, ":start", args[pos], "fixnum")
 					}
 				case slip.Symbol(":end"):
 					if num, ok2 := args[pos].(slip.Fixnum); ok2 {
 						end = int(num)
 					} else if args[pos] != nil {
-						slip.PanicType(":end", args[pos], "fixnum")
+						slip.TypePanic(s, depth, ":end", args[pos], "fixnum")
 					}
 				case slip.Symbol(":type"):
 					typ = args[pos]
 				default:
-					slip.PanicType("keyword", sym, ":start", ":end", ":type")
+					slip.TypePanic(s, depth, "keyword", sym, ":start", ":end", ":type")
 				}
 			} else {
-				slip.PanicType("keyword", sym, ":start", ":end", ":type")
+				slip.TypePanic(s, depth, "keyword", sym, ":start", ":end", ":type")
 			}
 		}
 		if end < 0 {

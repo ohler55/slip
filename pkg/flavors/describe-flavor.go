@@ -45,23 +45,23 @@ type DescribeFlavor struct {
 
 // Call the the function with the arguments provided.
 func (f *DescribeFlavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var cf *Flavor
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		if cf = allFlavors[string(ta)]; cf == nil {
-			slip.PanicClassNotFound(ta, "%s is not a defined flavor.", ta)
+			slip.ClassNotFoundPanic(s, depth, ta, "%s is not a defined flavor.", ta)
 		}
 	case *Flavor:
 		cf = ta
 	default:
-		slip.PanicType("flavor argument to describe-flavor", ta, "symbol", "flavor")
+		slip.TypePanic(s, depth, "flavor argument to describe-flavor", ta, "symbol", "flavor")
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 1 < len(args) {
 		var ok bool
 		if w, ok = args[1].(io.Writer); !ok {
-			slip.PanicType("describe-flavor output-stream", args[1], "output-stream")
+			slip.TypePanic(s, depth, "describe-flavor output-stream", args[1], "output-stream")
 		}
 	}
 	ansi := s.Get("*print-ansi*") != nil

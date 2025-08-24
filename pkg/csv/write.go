@@ -58,10 +58,10 @@ type Write struct {
 
 // Call the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 6)
+	slip.CheckArgCount(s, depth, f, args, 1, 6)
 	data, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("data", args[0], "list")
+		slip.TypePanic(s, depth, "data", args[0], "list")
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	args = args[1:]
@@ -79,15 +79,15 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if ta == slip.True {
 				args = args[1:]
 			} else {
-				slip.PanicType("output", ta, "output-stream", "t", "nil")
+				slip.TypePanic(s, depth, "output", ta, "output-stream", "t", "nil")
 			}
 		}
 	}
 	cw := csv.NewWriter(w)
-	csvSetWriterOptions(cw, args)
+	csvSetWriterOptions(s, cw, args, depth)
 	var rec []string
 	for _, row := range data {
-		csvWriteRow(cw, row, rec)
+		csvWriteRow(s, cw, row, rec, depth)
 	}
 	cw.Flush()
 	var sb *strings.Builder
@@ -97,11 +97,11 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return nil
 }
 
-func csvSetWriterOptions(cw *csv.Writer, args slip.List) {
+func csvSetWriterOptions(s *slip.Scope, cw *csv.Writer, args slip.List, depth int) {
 	for pos := 0; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -111,12 +111,12 @@ func csvSetWriterOptions(cw *csv.Writer, args slip.List) {
 			if c, ok := args[pos+1].(slip.Character); ok {
 				cw.Comma = rune(c)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "character")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "character")
 			}
 		case ":crlf":
 			cw.UseCRLF = args[pos+1] != nil
 		default:
-			slip.PanicType("keyword", sym, ":separator", ":crlf")
+			slip.TypePanic(s, depth, "keyword", sym, ":separator", ":crlf")
 		}
 	}
 }

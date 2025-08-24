@@ -52,9 +52,7 @@ type If struct {
 
 // Call the function with the arguments provided.
 func (f *If) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 2 {
-		slip.PanicArgCount(f, 2, 3)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	result = nil
 	d2 := depth + 1
 	pos := 0

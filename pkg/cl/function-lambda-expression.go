@@ -42,7 +42,7 @@ type FunctionLambdaExpression struct {
 
 // Call the the function with the arguments provided.
 func (f *FunctionLambdaExpression) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	values := slip.Values{nil, nil, nil}
 	a := args[0]
 Top:
@@ -52,7 +52,7 @@ Top:
 			a = fi
 			goto Top
 		}
-		slip.PanicType("fn", ta, "function designator")
+		slip.TypePanic(s, depth, "fn", ta, "function designator")
 	case *slip.Lambda:
 		values[0] = append(slip.List{slip.Symbol("lambda"), f.lambdaArgs(ta.Doc)}, ta.Forms...)
 		if ta.Closure != nil {
@@ -69,7 +69,7 @@ Top:
 		}
 		values[2] = slip.Symbol(ta.Name)
 	default:
-		slip.PanicType("fn", ta, "function designator")
+		slip.TypePanic(s, depth, "fn", ta, "function designator")
 	}
 	return values
 }

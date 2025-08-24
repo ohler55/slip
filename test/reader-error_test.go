@@ -12,7 +12,8 @@ import (
 )
 
 func TestReaderErrorObj(t *testing.T) {
-	cond := slip.NewReaderError(slip.StandardOutput.(slip.Stream), "not a %s reader-error", "real")
+	scope := slip.NewScope()
+	cond := slip.ReaderErrorNew(scope, 0, slip.StandardOutput.(slip.Stream), "not a %s reader-error", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<reader-error [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestReaderErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real reader-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real reader-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestReaderErrorMake(t *testing.T) {
@@ -46,5 +47,5 @@ func TestReaderErrorMake(t *testing.T) {
 }
 
 func TestReaderErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicReader(nil, "raise") })
+	tt.Panic(t, func() { slip.ReaderPanic(slip.NewScope(), 0, nil, "raise") })
 }

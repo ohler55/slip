@@ -37,17 +37,17 @@ type SymbolValue struct {
 
 // Call the function with the arguments provided.
 func (f *SymbolValue) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol", args[0], "symbol")
+		slip.TypePanic(s, depth, "symbol", args[0], "symbol")
 	}
 	if 0 < len(sym) && sym[0] == ':' {
 		return sym
 	}
 	result, has := slip.CurrentPackage.Get(string(sym))
 	if !has {
-		slip.PanicUnboundVariable(sym, "The variable %s is unbound.", sym)
+		slip.UnboundVariablePanic(s, depth, sym, "The variable %s is unbound.", sym)
 	}
 	return result
 }

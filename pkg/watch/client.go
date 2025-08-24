@@ -71,7 +71,7 @@ evaluations that will return the results to the client.`),
 
 type clientInitCaller struct{}
 
-func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -86,14 +86,14 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		if ss, ok := v.(slip.String); ok {
 			c.host = string(ss)
 		} else {
-			slip.PanicType(":host", v, "string")
+			slip.TypePanic(s, depth, ":host", v, "string")
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":port")); has {
 		if num, ok := v.(slip.Fixnum); ok {
 			c.port = int(num)
 		} else {
-			slip.PanicType(":port", v, "fixnum")
+			slip.TypePanic(s, depth, ":port", v, "fixnum")
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":watch")); has {
@@ -102,11 +102,11 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 				if sym, ok := v2.(slip.Symbol); ok {
 					c.vars = append(c.vars, &symVal{sym: sym, val: slip.Unbound})
 				} else {
-					slip.PanicType(":watch", v2, "list of symbols")
+					slip.TypePanic(s, depth, ":watch", v2, "list of symbols")
 				}
 			}
 		} else {
-			slip.PanicType(":watch", v, "list of symbols")
+			slip.TypePanic(s, depth, ":watch", v, "list of symbols")
 		}
 	}
 	self.Any = c
@@ -127,14 +127,14 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		if list, ok := v.(slip.List); ok {
 			for _, v2 := range list {
 				if pargs, ok2 := v2.(slip.List); ok2 {
-					id := c.addPeriodic(self, pargs)
+					id := c.addPeriodic(s, self, pargs, depth)
 					c.vars = append(c.vars, &symVal{sym: id, val: slip.Unbound})
 				} else {
-					slip.PanicType(":periodics", v, "list of lists")
+					slip.TypePanic(s, depth, ":periodics", v, "list of lists")
 				}
 			}
 		} else {
-			slip.PanicType(":periodics", v, "list of lists")
+			slip.TypePanic(s, depth, ":periodics", v, "list of lists")
 		}
 	}
 	return nil
@@ -219,7 +219,7 @@ func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (r
 		if num, ok := v.(slip.Real); ok {
 			timeout = time.Duration(num.RealValue() * float64(time.Second))
 		} else {
-			slip.PanicType(":timeout", v, "real")
+			slip.TypePanic(s, depth, ":timeout", v, "real")
 		}
 	}
 	id := c.cnt.Add(1)
@@ -235,7 +235,7 @@ func (caller clientEvalCaller) Call(s *slip.Scope, args slip.List, depth int) (r
 		case result = <-rc:
 			_ = timer.Stop()
 		case <-timer.C:
-			result = slip.NewError(":eval request timed out")
+			result = slip.ErrorNew(s, depth, ":eval request timed out")
 		}
 	}
 	return
@@ -367,7 +367,7 @@ type clientPeriodicCaller struct{}
 func (caller clientPeriodicCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
 	c := self.Any.(*client)
-	_ = c.addPeriodic(self, args)
+	_ = c.addPeriodic(s, self, args, depth)
 
 	return
 }
@@ -506,14 +506,14 @@ func (c *client) changeLoop() {
 	}
 }
 
-func (c *client) addPeriodic(self *flavors.Instance, args slip.List) (id slip.Symbol) {
+func (c *client) addPeriodic(s *slip.Scope, self *flavors.Instance, args slip.List, depth int) (id slip.Symbol) {
 	if len(args) != 3 {
 		slip.PanicMethodArgChoice(self, ":periodic", len(args), "3")
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		id = sym
 	} else {
-		slip.PanicType(":id", args[0], "symbol")
+		slip.TypePanic(s, depth, ":id", args[0], "symbol")
 	}
 	op := args[2]
 	if lam, ok := op.(*slip.Lambda); ok {
@@ -531,7 +531,7 @@ func (c *client) writeMsg(x slip.List) slip.Object {
 	msg = append(msg, '\n')
 	if cnt, err := c.con.Write(msg); err != nil || cnt == 0 {
 		c.shutdown()
-		return slip.NewError("%s", err)
+		return slip.ErrorNew(slip.NewScope(), 0, "%s", err)
 	}
 	return nil
 }

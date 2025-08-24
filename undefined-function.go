@@ -7,21 +7,21 @@ import "fmt"
 // UndefinedFunctionSymbol is the symbol with a value of "undefined-function".
 const UndefinedFunctionSymbol = Symbol("undefined-function")
 
-// NewUndefinedFunction returns a new UndefinedFunctionPanic
-// (undefined-function) describing a undefined-function error.
-func NewUndefinedFunction(name Object, format string, args ...any) Object {
+// UndefinedFunctionNew returns a new UndefinedFunction (undefined-function)
+// describing a undefined-function error.
+func UndefinedFunctionNew(s *Scope, depth int, name Object, format string, args ...any) Object {
 	c := FindClass("undefined-function")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":name"), name,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicUndefinedFunction raises a UndefinedFunctionPanic (undefined-function)
+// UndefinedFunctionPanic raises a UndefinedFunction (undefined-function)
 // describing a undefined-function error.
-func PanicUndefinedFunction(name Object, format string, args ...any) {
-	panic(NewUndefinedFunction(name, format, args...))
+func UndefinedFunctionPanic(s *Scope, depth int, name Object, format string, args ...any) {
+	panic(UndefinedFunctionNew(s, depth, name, format, args...))
 }

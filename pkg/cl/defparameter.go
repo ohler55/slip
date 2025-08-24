@@ -55,12 +55,10 @@ type Defparameter struct {
 
 // Call the function with the arguments provided.
 func (f *Defparameter) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 3 < len(args) {
-		slip.PanicArgCount(f, 1, 3)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defparameter", args[0], "symbol")
+		slip.TypePanic(s, depth, "name argument to defparameter", args[0], "symbol")
 	}
 	name = slip.Symbol(strings.ToLower(string(name)))
 	var (
@@ -72,7 +70,7 @@ func (f *Defparameter) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		if 2 < len(args) {
 			var ok bool
 			if doc, ok = args[2].(slip.String); !ok {
-				slip.PanicType("documentation argument to defparameter", args[2], "string")
+				slip.TypePanic(s, depth, "documentation argument to defparameter", args[2], "string")
 			}
 		}
 	}

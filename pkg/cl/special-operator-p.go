@@ -40,10 +40,10 @@ type SpecialOperatorP struct {
 
 // Call the function with the arguments provided.
 func (f *SpecialOperatorP) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol", args[0], "symbol")
+		slip.TypePanic(s, depth, "symbol", args[0], "symbol")
 	}
 	if strings.EqualFold("block", string(sym)) ||
 		strings.EqualFold("catch", string(sym)) ||

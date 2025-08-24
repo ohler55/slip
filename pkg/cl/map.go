@@ -51,7 +51,7 @@ type Map struct {
 
 // Call the function with the arguments provided.
 func (f *Map) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	var rt string
 	switch ta := args[0].(type) {
 	case nil:
@@ -61,11 +61,11 @@ func (f *Map) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		switch rt {
 		case "list", "vector", "string", "octets":
 		default:
-			slip.PanicType("result-type", ta, "nil", "list", "string", "vector", "octets")
+			slip.TypePanic(s, depth, "result-type", ta, "nil", "list", "string", "vector", "octets")
 		}
 	default:
 		// TBD expand in the future to support (vector * 3)
-		slip.PanicType("result-type", ta, "nil", "list", "string", "vector", "octets")
+		slip.TypePanic(s, depth, "result-type", ta, "nil", "list", "string", "vector", "octets")
 	}
 	fn := args[1]
 	d2 := depth + 1

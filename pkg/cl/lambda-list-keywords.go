@@ -32,7 +32,7 @@ type LambdaListKeywords struct {
 
 // Call the the function with the arguments provided.
 func (f *LambdaListKeywords) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 0)
+	slip.CheckArgCount(s, depth, f, args, 0, 0)
 
 	return slip.List{
 		slip.Symbol(slip.AmpAllowOtherKeys),

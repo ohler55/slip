@@ -49,19 +49,19 @@ type DoAllSymbols struct {
 
 // Call the function with the arguments provided.
 func (f *DoAllSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	d2 := depth + 1
 
 	sargs, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("args", args[0], "list")
+		slip.TypePanic(s, depth, "args", args[0], "list")
 	}
 	var (
 		sym   slip.Symbol
 		rform slip.Object
 	)
 	if sym, ok = sargs[0].(slip.Symbol); !ok {
-		slip.PanicType("args symbol", sargs[0], "symbol")
+		slip.TypePanic(s, depth, "args symbol", sargs[0], "symbol")
 	}
 	if 1 < len(sargs) {
 		rform = sargs[1]

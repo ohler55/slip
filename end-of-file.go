@@ -7,21 +7,21 @@ import "fmt"
 // EndOfFileSymbol is the symbol with a value of "end-of-file".
 const EndOfFileSymbol = Symbol("end-of-file")
 
-// NewEndOfFile returns a new EndOfFilePanic (end-of-file) describing a stream
+// EndOfFileNew returns a new EndOfFile (end-of-file) describing a stream
 // error.
-func NewEndOfFile(stream Stream, format string, args ...any) Object {
+func EndOfFileNew(s *Scope, depth int, stream Stream, format string, args ...any) Object {
 	c := FindClass("end-of-file")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":stream"), stream,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicStream raises a EndOfFilePanic (end-of-file) describing a stream
+// EndOfFilePanic raises a EndOfFile (end-of-file) describing a stream
 // error.
-func PanicEndOfFile(stream Stream, format string, args ...any) {
-	panic(NewEndOfFile(stream, format, args...))
+func EndOfFilePanic(s *Scope, depth int, stream Stream, format string, args ...any) {
+	panic(EndOfFileNew(s, depth, stream, format, args...))
 }

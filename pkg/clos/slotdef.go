@@ -3,7 +3,10 @@
 package clos
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/generic"
 )
 
 // SlotDef encapsulates the definition of a slot on a class.
@@ -24,8 +27,8 @@ type SlotDef struct {
 
 // NewSlotDef creates a new SlotDef from a slot-specification provided to
 // defclass.
-func NewSlotDef(def slip.Object) *SlotDef {
-	var sd SlotDef
+func NewSlotDef(s *slip.Scope, def slip.Object, depth int) *SlotDef {
+	sd := SlotDef{initform: slip.Unbound}
 	switch td := def.(type) {
 	case slip.Symbol:
 		sd.name = string(td)
@@ -34,7 +37,7 @@ func NewSlotDef(def slip.Object) *SlotDef {
 		if sym, ok := td[0].(slip.Symbol); ok {
 			sd.name = string(sym)
 		} else {
-			slip.PanicType("slot-name", td[0], "symbol")
+			slip.TypePanic(s, depth, "slot-name", td[0], "symbol")
 		}
 		if len(td)%2 != 1 { // not an even number of pairs plus then slot-name
 			slip.NewPanic("slot-specification for %s must have a slot-name followed by pairs of key and value.",
@@ -43,13 +46,13 @@ func NewSlotDef(def slip.Object) *SlotDef {
 		for i := 1; i < len(td); i += 2 {
 			switch td[i] {
 			case slip.Symbol(":reader"):
-				sd.readers = appendSymbol(":reader", sd.readers, td[i+1])
+				sd.readers = appendSymbol(s, depth, ":reader", sd.readers, td[i+1])
 			case slip.Symbol(":writer"):
-				sd.writers = appendSymbol(":writer", sd.writers, td[i+1])
+				sd.writers = appendSymbol(s, depth, ":writer", sd.writers, td[i+1])
 			case slip.Symbol(":accessor"):
-				sd.accessors = appendSymbol(":accessor", sd.accessors, td[i+1])
+				sd.accessors = appendSymbol(s, depth, ":accessor", sd.accessors, td[i+1])
 			case slip.Symbol(":initarg"):
-				sd.initargs = appendSymbol(":initarg", sd.initargs, td[i+1])
+				sd.initargs = appendSymbol(s, depth, ":initarg", sd.initargs, td[i+1])
 			case slip.Symbol(":allocation"):
 				switch td[i+1] {
 				case slip.Symbol(":instance"):
@@ -57,10 +60,10 @@ func NewSlotDef(def slip.Object) *SlotDef {
 				case slip.Symbol(":class"):
 					sd.classStore = true
 				default:
-					slip.PanicType(":allocation", td[i+1], ":instance", ":class")
+					slip.TypePanic(s, depth, ":allocation", td[i+1], ":instance", ":class")
 				}
 			case slip.Symbol(":initform"):
-				if sd.initform != nil {
+				if sd.initform != slip.Unbound {
 					slip.NewPanic("For slot %s, the :initform option can only be specified once.", sd.name)
 				}
 				sd.initform = td[i+1]
@@ -71,7 +74,7 @@ func NewSlotDef(def slip.Object) *SlotDef {
 				if sym, ok := td[i+1].(slip.Symbol); ok {
 					sd.argType = sym
 				} else {
-					slip.PanicType(":type", td[i+1], "symbol") // TBD allow more complex types
+					slip.TypePanic(s, depth, ":type", td[i+1], "symbol") // TBD allow more complex types
 				}
 			case slip.Symbol(":documentation"):
 				if 0 < len(sd.docs) {
@@ -80,26 +83,26 @@ func NewSlotDef(def slip.Object) *SlotDef {
 				if doc, ok := td[i+1].(slip.String); ok {
 					sd.docs = string(doc)
 				} else {
-					slip.PanicType(":documentation", td[i+1], "string")
+					slip.TypePanic(s, depth, ":documentation", td[i+1], "string")
 				}
 			case slip.Symbol(":gettable"):
 				sd.gettable = td[i+1] != nil
 			case slip.Symbol(":settable"):
 				sd.settable = td[i+1] != nil
 			default:
-				slip.PanicType("slot-option", td[i], ":reader", ":writer", ":accessor",
+				slip.TypePanic(s, depth, "slot-option", td[i], ":reader", ":writer", ":accessor",
 					":allocation", ":initarg", ":initform", ":type", ":documentation")
 			}
 		}
 	default:
-		slip.PanicType("slot-specification", td, "symbol", "list")
+		slip.TypePanic(s, depth, "slot-specification", td, "symbol", "list")
 	}
 	return &sd
 }
 
-// DefList returns a list as that could be used in a defclass
+// LoadForm returns a list as that could be used in a defclass
 // slot-specifications.
-func (sd *SlotDef) DefList() slip.Object {
+func (sd *SlotDef) LoadForm() slip.Object {
 	def := slip.List{slip.Symbol(sd.name)}
 	for _, sym := range sd.initargs {
 		def = append(def, slip.Symbol(":initarg"), sym)
@@ -119,7 +122,7 @@ func (sd *SlotDef) DefList() slip.Object {
 	if sd.classStore {
 		def = append(def, slip.Symbol(":allocation"), slip.Symbol(":class"))
 	}
-	if sd.initform != nil {
+	if sd.initform != slip.Unbound {
 		def = append(def, slip.Symbol(":initform"), sd.initform)
 	}
 	if sd.argType != nil {
@@ -129,6 +132,91 @@ func (sd *SlotDef) DefList() slip.Object {
 		return def[0]
 	}
 	return def
+}
+
+func (sd *SlotDef) defReaderMethods(cname string) {
+	for _, sym := range sd.readers {
+		_ = generic.DefCallerMethod(
+			"",
+			readSlot(sd.name),
+			&slip.FuncDoc{
+				Name: string(sym),
+				Args: []*slip.DocArg{
+					{Name: "object", Type: cname},
+				},
+				Return: "object",
+				Text:   fmt.Sprintf("Return the %s slot value.", sd.name),
+				Kind:   slip.MethodSymbol,
+			})
+	}
+}
+
+type readSlot string
+
+// Call returns the value of a variable in the instance.
+func (rs readSlot) Call(_ *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	if inst, _ := args[0].(slip.Instance); inst != nil {
+		value, _ = inst.SlotValue(slip.Symbol(rs))
+	}
+	return
+}
+
+func (sd *SlotDef) defWriterMethods(cname string) {
+	for _, sym := range sd.writers {
+		_ = generic.DefCallerMethod(
+			"",
+			writeSlot(sd.name),
+			&slip.FuncDoc{
+				Name: string(sym),
+				Args: []*slip.DocArg{
+					{Name: "object", Type: cname},
+					{Name: "value", Type: "t"},
+				},
+				Return: "object",
+				Text:   fmt.Sprintf("Sets the value of slot %s with the provided value.", sd.name),
+				Kind:   slip.MethodSymbol,
+			})
+	}
+}
+
+type writeSlot string
+
+// Call returns the value of a variable in the instance.
+func (ws writeSlot) Call(_ *slip.Scope, args slip.List, _ int) (value slip.Object) {
+	if inst, _ := args[0].(slip.Instance); inst != nil {
+		_ = inst.SetSlotValue(slip.Symbol(ws), args[1])
+	}
+	return args[1]
+}
+
+func (sd *SlotDef) defAccessorMethods(cname string) {
+	for _, sym := range sd.accessors {
+		_ = generic.DefCallerMethod(
+			"",
+			readSlot(sd.name),
+			&slip.FuncDoc{
+				Name: string(sym),
+				Args: []*slip.DocArg{
+					{Name: "object", Type: cname},
+				},
+				Return: "object",
+				Text:   fmt.Sprintf("Return the %s slot value.", sd.name),
+				Kind:   slip.MethodSymbol,
+			})
+		_ = generic.DefCallerMethod(
+			"",
+			writeSlot(sd.name),
+			&slip.FuncDoc{
+				Name: fmt.Sprintf("(setf %s)", sym),
+				Args: []*slip.DocArg{
+					{Name: "object", Type: cname},
+					{Name: "value", Type: "t"},
+				},
+				Return: "object",
+				Text:   fmt.Sprintf("Sets the value of slot %s with the provided value.", sd.name),
+				Kind:   slip.MethodSymbol,
+			})
+	}
 }
 
 func (sd *SlotDef) Simplify() any {
@@ -167,7 +255,7 @@ func (sd *SlotDef) Describe(b []byte, class slip.Class, indent, right int, ansi 
 		}
 		b = append(b, '\n')
 	}
-	if sd.initform != nil {
+	if sd.initform != slip.Unbound {
 		b = append(b, indentSpaces[:i2]...)
 		b = append(b, "initform: "...)
 		b = slip.Append(b, sd.initform)
@@ -219,10 +307,10 @@ func (sd *SlotDef) Describe(b []byte, class slip.Class, indent, right int, ansi 
 	return b
 }
 
-func appendSymbol(option string, sa []slip.Symbol, v slip.Object) []slip.Symbol {
+func appendSymbol(s *slip.Scope, depth int, option string, sa []slip.Symbol, v slip.Object) []slip.Symbol {
 	sym, ok := v.(slip.Symbol)
 	if !ok {
-		slip.PanicType(option, v, "symbol")
+		slip.TypePanic(s, depth, option, v, "symbol")
 	}
 	return append(sa, sym)
 }

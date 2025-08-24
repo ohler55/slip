@@ -41,9 +41,7 @@ type CommaAt struct {
 
 // Call the function with the arguments provided.
 func (f *CommaAt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case nil:
 		result = atList{}

@@ -63,7 +63,7 @@ type Decrypt struct {
 
 // Call the function with the arguments provided.
 func (f *Decrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	var (
 		non []byte
 		dup bool
@@ -72,7 +72,7 @@ func (f *Decrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		dup = true
 	}
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
-	strip, block, bsize, trim := extractDencryptArgs(args[1:])
+	strip, block, bsize, trim := extractDencryptArgs(s, args[1:], depth)
 
 	if len(data) < bsize {
 		slip.NewPanic("decrypt data is too short")
@@ -92,7 +92,11 @@ func (f *Decrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	return slip.Octets(data)
 }
 
-func extractDencryptArgs(args slip.List) (strip byte, block cipher.Block, bsize int, trim bool) {
+func extractDencryptArgs(
+	s *slip.Scope,
+	args slip.List,
+	depth int) (strip byte, block cipher.Block, bsize int, trim bool) {
+
 	var ciph slip.Object = slip.Symbol(":aes")
 
 	key := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
@@ -129,8 +133,7 @@ func extractDencryptArgs(args slip.List) (strip byte, block cipher.Block, bsize 
 		block, _ = des.NewCipher(key)
 		bsize = des.BlockSize
 	default:
-		slip.PanicType("cipher", ciph, ":aes", ":des")
+		slip.TypePanic(s, depth, "cipher", ciph, ":aes", ":des")
 	}
-
 	return
 }

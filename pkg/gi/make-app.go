@@ -109,7 +109,7 @@ type MakeApp struct {
 
 // Call the function with the arguments provided.
 func (f *MakeApp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 20)
+	slip.CheckArgCount(s, depth, f, args, 3, 20)
 	appPath := slip.MustBeString(args[0], "app-filepath")
 	app := slip.App{
 		Title:         filepath.Base(appPath),
@@ -121,7 +121,7 @@ func (f *MakeApp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			app.LispCode[i] = slip.MustBeString(v, "files")
 		}
 	} else {
-		slip.PanicType("app-filepath", args[2], "list")
+		slip.TypePanic(s, depth, "app-filepath", args[2], "list")
 	}
 	var (
 		key        []byte
@@ -156,10 +156,10 @@ func (f *MakeApp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if list, ok := v.(slip.List); ok {
 			app.Plugins = make([]string, len(list))
 			for i, v := range list {
-				app.Plugins[i] = f.findPluginPath(s, slip.MustBeString(v, ":plugins"))
+				app.Plugins[i] = f.findPluginPath(s, slip.MustBeString(v, ":plugins"), depth)
 			}
 		} else {
-			slip.PanicType(":plugins", v, "list")
+			slip.TypePanic(s, depth, ":plugins", v, "list")
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(rest, slip.Symbol(":usage")); has {
@@ -170,10 +170,10 @@ func (f *MakeApp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if list, ok := v.(slip.List); ok {
 			app.Options = make([]*slip.AppArg, len(list))
 			for i, v2 := range list {
-				app.Options[i] = f.appArgFromPlist(v2)
+				app.Options[i] = f.appArgFromPlist(s, v2, depth)
 			}
 		} else {
-			slip.PanicType(":options", v, "property-list")
+			slip.TypePanic(s, depth, ":options", v, "property-list")
 		}
 	}
 	app.Generate(scratchDir, key, replace, cleanup)
@@ -188,7 +188,7 @@ func (f *MakeApp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return slip.String(scratchDir)
 }
 
-func (f *MakeApp) findPluginPath(s *slip.Scope, name string) (path string) {
+func (f *MakeApp) findPluginPath(s *slip.Scope, name string, depth int) (path string) {
 	name = expandPath(name)
 	if strings.HasSuffix(name, ".so") {
 		if _, err := os.Stat(name); err == nil {
@@ -206,11 +206,11 @@ func (f *MakeApp) findPluginPath(s *slip.Scope, name string) (path string) {
 			if str, ok := a2.(slip.String); ok {
 				paths = append(paths, expandPath(string(str)))
 			} else {
-				slip.PanicType("*package-load-path* members", a2, "string")
+				slip.TypePanic(s, depth, "*package-load-path* members", a2, "string")
 			}
 		}
 	default:
-		slip.PanicType("*package-load-path*", lp, "string", "list of strings")
+		slip.TypePanic(s, depth, "*package-load-path*", lp, "string", "list of strings")
 	}
 	for _, p := range paths {
 		filepath := fmt.Sprintf("%s/%s.so", p, name)
@@ -225,10 +225,10 @@ func (f *MakeApp) findPluginPath(s *slip.Scope, name string) (path string) {
 	return
 }
 
-func (f *MakeApp) appArgFromPlist(v slip.Object) *slip.AppArg {
+func (f *MakeApp) appArgFromPlist(s *slip.Scope, v slip.Object, depth int) *slip.AppArg {
 	plist, ok := v.(slip.List)
 	if !ok {
-		slip.PanicType("options", v, "property-list")
+		slip.TypePanic(s, depth, "options", v, "property-list")
 	}
 	plen := len(plist)
 	var aa slip.AppArg
@@ -245,7 +245,7 @@ func (f *MakeApp) appArgFromPlist(v slip.Object) *slip.AppArg {
 		case slip.Symbol(":var"):
 			aa.Var = slip.MustBeString(plist[i+1], ":var")
 		default:
-			slip.PanicType("preperty", plist[i], ":flag", ":doc", ":default", ":type", ":var")
+			slip.TypePanic(s, depth, "preperty", plist[i], ":flag", ":doc", ":default", ":type", ":var")
 		}
 	}
 	return &aa

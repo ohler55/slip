@@ -102,7 +102,7 @@ method to cache sources and then invoke one of the operations defined in the
 
 type systemFetchCaller struct{}
 
-func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	var sources slip.List
 	switch tdo := self.Get("depends-on").(type) {
@@ -110,30 +110,30 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 	case slip.List:
 		sources = tdo
 	default:
-		slip.PanicType("depends-on", self.Get("depends-on"), "list")
+		slip.TypePanic(s, depth, "depends-on", self.Get("depends-on"), "list")
 	}
 	if 0 < len(sources) {
-		cache := getStringVar(self, "cache", "cache")
+		cache := getStringVar(s, self, "cache", "cache", depth)
 		if err := os.MkdirAll(cache, 0755); err != nil {
 			panic(err)
 		}
 		for _, src := range sources {
 			ll, ok := src.(slip.List)
 			if !ok || len(ll) < 3 {
-				slip.PanicType("source", src, "list")
+				slip.TypePanic(s, depth, "source", src, "list")
 			}
 			dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
 			_ = os.RemoveAll(dir)
 			_ = os.MkdirAll(dir, 0755) // ignore error and let later failures catch it
 			switch ll[1] {
 			case slip.Symbol(":file"):
-				fetchFiles(self, dir, ll[2:])
+				fetchFiles(s, self, dir, ll[2:], depth)
 			case slip.Symbol(":git"):
 				fetchGit(self, dir, ll[2:])
 			case slip.Symbol(":require"):
-				fetchRequire(self, dir, ll[2:])
+				fetchRequire(s, self, dir, ll[2:], depth)
 			case slip.Symbol(":call"):
-				fetchCall(self, dir, ll[2:])
+				fetchCall(s, self, dir, ll[2:], depth)
 			default:
 				slip.NewPanic("%s is not a valid source type.", ll[1])
 			}
@@ -149,7 +149,7 @@ in the cache.`
 
 type systemLoadCaller struct{}
 
-func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	var sources slip.List
 	switch tdo := self.Get("depends-on").(type) {
@@ -157,22 +157,22 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	case slip.List:
 		sources = tdo
 	default:
-		slip.PanicType("depends-on", self.Get("depends-on"), "list")
+		slip.TypePanic(s, depth, "depends-on", self.Get("depends-on"), "list")
 	}
-	cache := getStringVar(self, "cache", "cache")
+	cache := getStringVar(s, self, "cache", "cache", depth)
 	for _, src := range sources {
 		ll, ok := src.(slip.List)
 		if !ok || len(ll) < 3 {
-			slip.PanicType("source", src, "list")
+			slip.TypePanic(s, depth, "source", src, "list")
 		}
 		dir := filepath.Join(cache, slip.MustBeString(ll[0], "source name"))
 		switch ll[1] {
 		case slip.Symbol(":file"), slip.Symbol(":git"):
-			loadFiles(s, self, dir, ll[2:])
+			loadFiles(s, self, dir, ll[2:], depth)
 		case slip.Symbol(":require"):
-			loadRequire(s, self, dir, ll[2:])
+			loadRequire(s, self, dir, ll[2:], depth)
 		case slip.Symbol(":call"):
-			loadCall(s, self, dir, ll[2:])
+			loadCall(s, self, dir, ll[2:], depth)
 		default:
 			slip.NewPanic("%s is not a valid source type.", ll[1])
 		}
@@ -182,12 +182,12 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		var components slip.List
 		components, ok := gc.(slip.List)
 		if !ok {
-			slip.PanicType("components", gc, "list")
+			slip.TypePanic(s, depth, "components", gc, "list")
 		}
 		for _, comp := range components {
 			var path slip.String
 			if path, ok = comp.(slip.String); !ok {
-				slip.PanicType("component", comp, "string")
+				slip.TypePanic(s, depth, "component", comp, "string")
 			}
 			matches, _ := filepath.Glob(string(path))
 			if len(matches) == 0 {
@@ -210,12 +210,12 @@ func (caller systemLoadCaller) Docs() string {
 
 type systemRunCaller struct{}
 
-func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.ArgCountCheck(self, args, 1, -1)
+	slip.CheckArgCount(s, depth, self, args, 1, -1)
 	iot, ok := self.Get("in-order-to").(slip.List)
 	if !ok {
-		slip.PanicType("in-order-to", self.Get("in-order-to"), "list")
+		slip.TypePanic(s, depth, "in-order-to", self.Get("in-order-to"), "list")
 	}
 	var op slip.Object
 	for _, v := range iot {
@@ -229,7 +229,7 @@ func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, _ int) (result
 	for i := 1; i < len(args); i += 2 {
 		var key slip.Symbol
 		if key, ok = args[i].(slip.Symbol); !ok || len(key) < 2 || key[0] != ':' {
-			slip.PanicType("in-order-to key/values", args[i], "keyword")
+			slip.TypePanic(s, depth, "in-order-to key/values", args[i], "keyword")
 		}
 		if i+1 < len(args) {
 			scope.Set(key[1:], args[i+1])
@@ -268,7 +268,7 @@ func (caller systemRunCaller) FuncDocs() *slip.FuncDoc {
 	}
 }
 
-func getStringVar(self *flavors.Instance, key, defVal string) (sval string) {
+func getStringVar(s *slip.Scope, self *flavors.Instance, key, defVal string, depth int) (sval string) {
 	val := self.Get(slip.Symbol(key))
 	switch tv := val.(type) {
 	case slip.String:
@@ -276,17 +276,17 @@ func getStringVar(self *flavors.Instance, key, defVal string) (sval string) {
 	case nil:
 		sval = defVal
 	default:
-		slip.PanicType(key, tv, "string")
+		slip.TypePanic(s, depth, key, tv, "string")
 	}
 	return
 }
 
-func fetchFiles(self *flavors.Instance, dir string, args slip.List) {
+func fetchFiles(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
 	root := slip.MustBeString(args[0], "root")
 	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":files")); has {
 		files, ok := val.(slip.List)
 		if !ok {
-			slip.PanicType(":files", val, "list")
+			slip.TypePanic(s, depth, ":files", val, "list")
 		}
 		for _, v := range files {
 			path := slip.MustBeString(v, "file")
@@ -374,15 +374,15 @@ func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch
 	mvGitScratchToCache(dir, scratch, subdir)
 }
 
-func fetchRequire(self *flavors.Instance, dir string, args slip.List) {
-	slip.ArgCountCheck(self, args, 2, 2)
+func fetchRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
+	slip.CheckArgCount(s, depth, self, args, 2, 2)
 	path := filepath.Join(slip.MustBeString(args[1], "load-path"), slip.MustBeString(args[0], "package-name"))
 	if err := exec.Command("cp", path, dir).Run(); err != nil {
 		slip.NewPanic("Failed to copy %s to %s. %s\n", path, dir, err)
 	}
 }
 
-func fetchCall(self *flavors.Instance, dir string, args slip.List) {
+func fetchCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
 	switch ta := args[0].(type) {
 	case nil:
 		// nothing to do
@@ -391,20 +391,20 @@ func fetchCall(self *flavors.Instance, dir string, args slip.List) {
 		scope.Set("cache-dir", slip.String(dir))
 		_ = slip.CompileList(ta).Eval(scope, 0)
 	default:
-		slip.PanicType("fetch-function", args, "list")
+		slip.TypePanic(s, depth, "fetch-function", args, "list")
 	}
 }
 
-func loadFiles(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
+func loadFiles(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
 	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":system")); has {
 		subsys := slip.MustBeString(val, ":system")
-		loadSystemFile(s, self, dir, filepath.Join(dir, subsys))
+		loadSystemFile(s, self, dir, filepath.Join(dir, subsys), depth)
 		return
 	}
 	if val, has := slip.GetArgsKeyValue(args[1:], slip.Symbol(":files")); has {
 		files, ok := val.(slip.List)
 		if !ok {
-			slip.PanicType(":files", val, "list")
+			slip.TypePanic(s, depth, ":files", val, "list")
 		}
 		for _, arg := range files {
 			path := slip.MustBeString(arg, "filepath")
@@ -436,10 +436,10 @@ func loadDir(s *slip.Scope, self *flavors.Instance, dir string) {
 	})
 }
 
-func loadSystemFile(s *slip.Scope, self *flavors.Instance, dir, path string) {
+func loadSystemFile(s *slip.Scope, self *flavors.Instance, dir, path string, depth int) {
 	sys, ok := loadFile(s, self, path).(*flavors.Instance)
 	if !ok {
-		slip.PanicType("system", sys, "instance")
+		slip.TypePanic(s, depth, "system", sys, "instance")
 	}
 	wd, _ := os.Getwd()
 	defer func() { _ = os.Chdir(wd) }()
@@ -449,13 +449,13 @@ func loadSystemFile(s *slip.Scope, self *flavors.Instance, dir, path string) {
 	sys.Receive(scope, ":load", nil, 0)
 }
 
-func loadRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
-	slip.ArgCountCheck(self, args, 2, 2)
+func loadRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
+	slip.CheckArgCount(s, depth, self, args, 2, 2)
 	path := filepath.Join(dir, slip.MustBeString(args[0], "package-name"))
 	cl.OpenPlugin(path)
 }
 
-func loadCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List) {
+func loadCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
 	switch ta := args[1].(type) {
 	case nil:
 		// nothing to do
@@ -464,7 +464,7 @@ func loadCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List)
 		scope.Set("cache-dir", slip.String(dir))
 		_ = slip.CompileList(ta).Eval(scope, 0)
 	default:
-		slip.PanicType("load-function", args, "list")
+		slip.TypePanic(s, depth, "load-function", args, "list")
 	}
 }
 

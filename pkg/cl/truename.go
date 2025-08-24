@@ -43,7 +43,7 @@ type Truename struct {
 
 // Call the function with the arguments provided.
 func (f *Truename) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	arg := args[0]
 	var (
 		fi  fs.FileInfo
@@ -58,15 +58,15 @@ top:
 	case *SynonymStream:
 		value, has := slip.CurrentPackage.Get(string(ta.symbol))
 		if !has {
-			slip.PanicUnboundVariable(ta.symbol, "unbound")
+			slip.UnboundVariablePanic(s, depth, ta.symbol, "unbound")
 		}
 		arg = value
 		goto top
 	default:
-		slip.PanicType("filespec", ta, "string", "file-stream", "synonym-stream for a file-stream")
+		slip.TypePanic(s, depth, "filespec", ta, "string", "file-stream", "synonym-stream for a file-stream")
 	}
 	if err != nil {
-		slip.PanicFile(arg, "%s", err)
+		slip.FilePanic(s, depth, arg, "%s", err)
 	}
 	abs, _ := filepath.Abs(fi.Name())
 

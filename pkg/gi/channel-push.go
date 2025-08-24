@@ -43,12 +43,10 @@ type ChannelPush struct {
 
 // Call the function with the arguments provided.
 func (f *ChannelPush) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	ch, ok := args[0].(Channel)
 	if !ok {
-		slip.PanicType("channel", args[0], "channel")
+		slip.TypePanic(s, depth, "channel", args[0], "channel")
 	}
 	ch <- args[1]
 

@@ -51,14 +51,14 @@ type WithInputFromString struct {
 
 // Call the function with the arguments provided.
 func (f *WithInputFromString) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	subArgs, ok := args[0].(slip.List)
 	if !ok || len(subArgs) < 2 {
-		slip.PanicType("args", args[0], "list of (var string &key index start end)")
+		slip.TypePanic(s, depth, "args", args[0], "list of (var string &key index start end)")
 	}
 	var sym slip.Symbol
 	if sym, ok = subArgs[0].(slip.Symbol); !ok {
-		slip.PanicType("var", subArgs[0], "symbol")
+		slip.TypePanic(s, depth, "var", subArgs[0], "symbol")
 	}
 	var (
 		ra    []rune
@@ -70,7 +70,7 @@ func (f *WithInputFromString) Call(s *slip.Scope, args slip.List, depth int) (re
 		ra = []rune(ss)
 		end = len(ra)
 	} else {
-		slip.PanicType("string", subArgs[1], "string")
+		slip.TypePanic(s, depth, "string", subArgs[1], "string")
 	}
 	d2 := depth + 1
 	subArgs = subArgs[2:]
@@ -78,14 +78,14 @@ func (f *WithInputFromString) Call(s *slip.Scope, args slip.List, depth int) (re
 		if num, ok2 := s.Eval(v, depth).(slip.Fixnum); ok2 && 0 <= num && int(num) < len(ra) {
 			start = int(num)
 		} else {
-			slip.PanicType(":start", v, (fmt.Sprintf("fixnum between 0 and %d", len(ra))))
+			slip.TypePanic(s, depth, ":start", v, (fmt.Sprintf("fixnum between 0 and %d", len(ra))))
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(subArgs, slip.Symbol(":end")); has {
 		if num, ok2 := s.Eval(v, depth).(slip.Fixnum); ok2 && 0 <= num && int(num) < len(ra) && start <= int(num) {
 			end = int(num)
 		} else {
-			slip.PanicType(":end", v, (fmt.Sprintf("fixnum between %d and %d", start, len(ra))))
+			slip.TypePanic(s, depth, ":end", v, (fmt.Sprintf("fixnum between %d and %d", start, len(ra))))
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(subArgs, slip.Symbol(":index")); has {

@@ -37,10 +37,10 @@ type PackageUsedByList struct {
 
 // Call the function with the arguments provided.
 func (f *PackageUsedByList) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	pkg, ok := args[0].(*slip.Package)
 	if !ok {
-		slip.PanicType("package", args[0], "package")
+		slip.TypePanic(s, depth, "package", args[0], "package")
 	}
 	ul := make(slip.List, len(pkg.Users))
 	for i, u := range pkg.Users {

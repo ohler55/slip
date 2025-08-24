@@ -44,10 +44,10 @@ type MakeCondition struct {
 
 // Call the function with the arguments provided.
 func (f *MakeCondition) Call(s *slip.Scope, args slip.List, depth int) (cond slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("type", args[0], "symbol")
+		slip.TypePanic(s, depth, "type", args[0], "symbol")
 	}
 	if c := slip.FindClass(string(sym)); c != nil && c.Metaclass() == slip.Symbol("condition-class") {
 		obj := c.MakeInstance()

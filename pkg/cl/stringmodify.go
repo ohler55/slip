@@ -34,8 +34,8 @@ type stringModify struct {
 }
 
 // Call the function with the arguments provided.
-func (f *stringModify) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 5)
+func (f *stringModify) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	var (
 		str   string
 		start int
@@ -43,13 +43,13 @@ func (f *stringModify) Call(s *slip.Scope, args slip.List, _ int) (result slip.O
 	if ss, ok := args[0].(slip.String); ok {
 		str = string(ss)
 	} else {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	end := len(str)
 	for pos := 1; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -60,16 +60,16 @@ func (f *stringModify) Call(s *slip.Scope, args slip.List, _ int) (result slip.O
 			if n, ok = args[pos+1].(slip.Fixnum); ok {
 				start = int(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum")
 			}
 		case ":end":
 			if n, ok = args[pos+1].(slip.Fixnum); ok {
 				end = int(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum")
 			}
 		default:
-			slip.PanicType("keyword", sym, ":start", ":end")
+			slip.TypePanic(s, depth, "keyword", sym, ":start", ":end")
 		}
 	}
 	if end < start || len(str) < end || start < 0 {

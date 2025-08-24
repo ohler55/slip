@@ -7,21 +7,21 @@ import "fmt"
 // PackageErrorSymbol is the symbol with a value of "package-error".
 const PackageErrorSymbol = Symbol("package-error")
 
-// NewPackageError returns a new PackagePanic (package-error) describing a
+// PackageErrorNew returns a new PackageError (package-error) describing a
 // package error.
-func NewPackageError(pkg *Package, format string, args ...any) Object {
+func PackageErrorNew(s *Scope, depth int, pkg *Package, format string, args ...any) Object {
 	c := FindClass("package-error")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":package"), pkg,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicPackage raises a PackagePanic (package-error) describing a package
+// PackagePanic raises a PackageError (package-error) describing a package
 // error.
-func PanicPackage(pkg *Package, format string, args ...any) {
-	panic(NewPackageError(pkg, format, args...))
+func PackagePanic(s *Scope, depth int, pkg *Package, format string, args ...any) {
+	panic(PackageErrorNew(s, depth, pkg, format, args...))
 }

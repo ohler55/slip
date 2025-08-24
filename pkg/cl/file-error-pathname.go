@@ -40,9 +40,9 @@ type FileErrorPathname struct {
 
 // Call the function with the arguments provided.
 func (f *FileErrorPathname) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("file-error") {
-		slip.PanicType("file-error", args[0], "file-error")
+		slip.TypePanic(s, depth, "file-error", args[0], "file-error")
 	} else {
 		result, _ = ci.SlotValue(pathnameSymbol)
 	}

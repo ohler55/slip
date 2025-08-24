@@ -49,21 +49,21 @@ type SocketConnect struct {
 
 // Call the function with the arguments provided.
 func (f *SocketConnect) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
-	connectSocket(self, args[1:])
+	connectSocket(s, self, args[1:], depth)
 	return nil
 }
 
 type socketConnectCaller struct{}
 
-func (caller socketConnectCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketConnectCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":connect", args, 0, 2)
-	connectSocket(self, args)
+	slip.CheckSendArgCount(s, depth, self, ":connect", args, 0, 2)
+	connectSocket(s, self, args, depth)
 	return nil
 }
 
@@ -73,25 +73,25 @@ func (caller socketConnectCaller) FuncDocs() *slip.FuncDoc {
 	return md
 }
 
-func connectSocket(self *flavors.Instance, args slip.List) {
-	fd, sa := getAddressArgs(self, args)
+func connectSocket(s *slip.Scope, self *flavors.Instance, args slip.List, depth int) {
+	fd, sa := getAddressArgs(s, self, args, depth)
 	if err := syscall.Connect(fd, sa); err != nil {
 		panic(err)
 	}
 }
 
-func getAddressArgs(self *flavors.Instance, args slip.List) (fd int, sa syscall.Sockaddr) {
+func getAddressArgs(s *slip.Scope, self *flavors.Instance, args slip.List, depth int) (fd int, sa syscall.Sockaddr) {
 	switch len(args) {
 	case 1:
 		if ss, ok := args[0].(slip.String); ok {
 			sa = &syscall.SockaddrUnix{Name: string(ss)}
 		} else {
-			slip.PanicType("address", args, "string", "octets,fixnum")
+			slip.TypePanic(s, depth, "address", args, "string", "octets,fixnum")
 		}
 	case 2:
-		sa = addressFromList(args)
+		sa = addressFromList(s, args, depth)
 	default:
-		slip.PanicType("address", args, "string", "octets,fixnum")
+		slip.TypePanic(s, depth, "address", args, "string", "octets,fixnum")
 	}
 	var ok bool
 	if fd, ok = self.Any.(int); !ok {
@@ -100,7 +100,7 @@ func getAddressArgs(self *flavors.Instance, args slip.List) (fd int, sa syscall.
 	return
 }
 
-func addressFromList(list slip.List) (sa syscall.Sockaddr) {
+func addressFromList(s *slip.Scope, list slip.List, depth int) (sa syscall.Sockaddr) {
 	var (
 		addr []byte
 		port int
@@ -118,12 +118,12 @@ func addressFromList(list slip.List) (sa syscall.Sockaddr) {
 		}
 		addr = octs
 	default:
-		slip.PanicType("address", list, "string", "octets,fixnum")
+		slip.TypePanic(s, depth, "address", list, "string", "octets,fixnum")
 	}
 	if num, ok := list[1].(slip.Fixnum); ok {
 		port = int(num)
 	} else {
-		slip.PanicType("address port", list[1], "fixnum")
+		slip.TypePanic(s, depth, "address port", list[1], "fixnum")
 	}
 	switch len(addr) {
 	case 4:
@@ -131,7 +131,7 @@ func addressFromList(list slip.List) (sa syscall.Sockaddr) {
 	case 16:
 		sa = &syscall.SockaddrInet6{Port: port, Addr: [16]byte(addr)}
 	default:
-		slip.PanicType("address", list, "(octets fixnum)")
+		slip.TypePanic(s, depth, "address", list, "(octets fixnum)")
 	}
 	return
 }

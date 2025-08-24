@@ -49,35 +49,35 @@ type MakeSequence struct {
 
 // Call the function with the arguments provided.
 func (f *MakeSequence) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	var element slip.Object
 	if v, ok := slip.GetArgsKeyValue(args[2:], slip.Symbol(":initial-element")); ok {
 		element = v
 	}
-	size := getFixnumArg(args[1], "size")
+	size := getFixnumArg(s, args[1], "size", depth)
 	switch rt := args[0].(type) {
 	case slip.Symbol:
 		switch rt {
 		case slip.ListSymbol:
 			result = f.makeList(size, element)
 		case slip.StringSymbol:
-			result = f.makeString(size, element, 2 < len(args))
+			result = f.makeString(s, size, element, 2 < len(args), depth)
 		case slip.OctetsSymbol:
 			result = f.makeOctets(size, element, 2 < len(args))
 		case slip.VectorSymbol:
-			result = f.makeVector(size, element, slip.TrueSymbol)
+			result = f.makeVector(s, size, element, slip.TrueSymbol, depth)
 		case slip.BitVectorSymbol:
 			result = f.makeBitVector(size, element, 2 < len(args))
 		default:
-			slip.PanicType("result-type", rt, "list", "string", "vector", "octets")
+			slip.TypePanic(s, depth, "result-type", rt, "list", "string", "vector", "octets")
 		}
 	case slip.List:
 		if len(rt) != 2 || rt[0] != slip.Symbol("vector") {
-			slip.PanicType("result-type", rt, "sequence type-designator")
+			slip.TypePanic(s, depth, "result-type", rt, "sequence type-designator")
 		}
-		result = f.makeVector(size, element, rt[1])
+		result = f.makeVector(s, size, element, rt[1], depth)
 	default:
-		slip.PanicType("result-type", rt, "sequence type-designator")
+		slip.TypePanic(s, depth, "result-type", rt, "sequence type-designator")
 	}
 	return
 }
@@ -90,12 +90,18 @@ func (f *MakeSequence) makeList(size int, element slip.Object) slip.Object {
 	return list
 }
 
-func (f *MakeSequence) makeString(size int, element slip.Object, elementSet bool) slip.Object {
+func (f *MakeSequence) makeString(
+	s *slip.Scope,
+	size int,
+	element slip.Object,
+	elementSet bool,
+	depth int) slip.Object {
+
 	var r rune
 	if elementSet {
 		c, ok := element.(slip.Character)
 		if !ok {
-			slip.PanicType(":initial-value", element, "character")
+			slip.TypePanic(s, depth, ":initial-value", element, "character")
 		}
 		r = rune(c)
 	}
@@ -118,10 +124,16 @@ func (f *MakeSequence) makeOctets(size int, element slip.Object, elementSet bool
 	return seq
 }
 
-func (f *MakeSequence) makeVector(size int, element slip.Object, elementType slip.Object) slip.Object {
+func (f *MakeSequence) makeVector(
+	s *slip.Scope,
+	size int,
+	element slip.Object,
+	elementType slip.Object,
+	depth int) slip.Object {
+
 	et, ok := elementType.(slip.Symbol)
 	if !ok {
-		slip.PanicType("element-type", elementType, "symbol")
+		slip.TypePanic(s, depth, "element-type", elementType, "symbol")
 	}
 	return slip.NewVector(size, et, element, nil, false)
 }

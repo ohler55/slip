@@ -12,7 +12,10 @@ import (
 )
 
 func TestArithmeticErrorObj(t *testing.T) {
-	cond := slip.NewArithmeticError(
+	scope := slip.NewScope()
+	cond := slip.ArithmeticErrorNew(
+		scope,
+		0,
 		slip.Symbol("/"),
 		slip.List{slip.Fixnum(1), slip.Fixnum(0)},
 		"not a %s arithmetic-error", "real",
@@ -30,7 +33,7 @@ func TestArithmeticErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real arithmetic-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real arithmetic-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestArithmeticErrorMake(t *testing.T) {
@@ -43,13 +46,13 @@ func TestArithmeticErrorMake(t *testing.T) {
 	tt.Equal(t, ok, true)
 	value, has := cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 	value, has = cond.SlotValue(slip.Symbol("operation"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 	value, has = cond.SlotValue(slip.Symbol("operands"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Arithmetic-Error :operation 'divide :operands '(1 0) :message "raise")`,
@@ -74,6 +77,6 @@ func TestArithmeticErrorMake(t *testing.T) {
 
 func TestArithmeticErrorPanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicArithmetic(slip.Symbol("/"), slip.List{slip.Fixnum(1), slip.Fixnum(0)}, "raise")
+		slip.ArithmeticPanic(slip.NewScope(), 0, slip.Symbol("/"), slip.List{slip.Fixnum(1), slip.Fixnum(0)}, "raise")
 	})
 }

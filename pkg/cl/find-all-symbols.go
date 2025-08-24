@@ -46,7 +46,7 @@ type FindAllSymbols struct {
 
 // Call the function with the arguments provided.
 func (f *FindAllSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	target := strings.ToLower(slip.MustBeString(args[0], "string"))
 	var matches []string
 	for _, p := range slip.AllPackages() {

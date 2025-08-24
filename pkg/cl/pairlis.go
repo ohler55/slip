@@ -50,14 +50,14 @@ type Pairlis struct {
 
 // Call the function with the arguments provided.
 func (f *Pairlis) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	keys, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("keys", args[0], "list")
+		slip.TypePanic(s, depth, "keys", args[0], "list")
 	}
 	var values slip.List
 	if values, ok = args[1].(slip.List); !ok {
-		slip.PanicType("values", args[1], "list")
+		slip.TypePanic(s, depth, "values", args[1], "list")
 	}
 	if len(keys) != len(values) {
 		slip.NewPanic("Lists of keys and values are of unequal length.")
@@ -69,7 +69,7 @@ func (f *Pairlis) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if 2 < len(args) {
 		var tail slip.List
 		if tail, ok = args[2].(slip.List); !ok {
-			slip.PanicType("alist", args[2], "list")
+			slip.TypePanic(s, depth, "alist", args[2], "list")
 		}
 		alist = append(alist, tail...)
 	}

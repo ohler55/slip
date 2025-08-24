@@ -68,10 +68,10 @@ type ReadFromString struct {
 
 // Call the function with the arguments provided.
 func (f *ReadFromString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 9)
+	slip.CheckArgCount(s, depth, f, args, 1, 9)
 	ss, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	var (
 		eofp  bool
@@ -95,18 +95,18 @@ func (f *ReadFromString) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 					if num, ok2 := args[pos].(slip.Fixnum); ok2 {
 						start = int(num)
 					} else {
-						slip.PanicType(":start", args[pos], "fixnum")
+						slip.TypePanic(s, depth, ":start", args[pos], "fixnum")
 					}
 				case slip.Symbol(":end"):
 					if num, ok2 := args[pos].(slip.Fixnum); ok2 {
 						end = int(num)
 					} else if args[pos] != nil {
-						slip.PanicType(":end", args[pos], "fixnum")
+						slip.TypePanic(s, depth, ":end", args[pos], "fixnum")
 					}
 				case slip.Symbol(":preserve-whitespace"):
 					pw = args[pos] != nil
 				default:
-					slip.PanicType("keyword", sym, ":start", ":end", ":preserve-whitespace")
+					slip.TypePanic(s, depth, "keyword", sym, ":start", ":end", ":preserve-whitespace")
 				}
 			} else {
 				switch optPos {
@@ -117,7 +117,7 @@ func (f *ReadFromString) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 					eofv = args[pos]
 					optPos++
 				default:
-					slip.PanicType("keyword", args[pos], "keyword")
+					slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 				}
 			}
 		}

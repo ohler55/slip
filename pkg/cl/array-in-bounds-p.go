@@ -43,12 +43,12 @@ type ArrayInBoundsP struct {
 
 // Call the function with the arguments provided.
 func (f *ArrayInBoundsP) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var dims []int
 	if al, ok := args[0].(slip.ArrayLike); ok {
 		dims = al.Dimensions()
 	} else {
-		slip.PanicType("array", args[0], "array")
+		slip.TypePanic(s, depth, "array", args[0], "array")
 	}
 	if len(dims) != len(args)-1 {
 		slip.NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(args)-1, len(dims))
@@ -59,7 +59,7 @@ func (f *ArrayInBoundsP) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 				return nil
 			}
 		} else {
-			slip.PanicType("subscript", args[i+1], "list of fixnum")
+			slip.TypePanic(s, depth, "subscript", args[i+1], "list of fixnum")
 		}
 	}
 	return slip.True

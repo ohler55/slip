@@ -51,13 +51,13 @@ type TreeEqual struct {
 
 // Call the function with the arguments provided.
 func (f *TreeEqual) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	if 2 < len(args) {
 		var testFunc slip.Caller
 		for pos := 2; pos < len(args); pos += 2 {
 			sym, ok := args[pos].(slip.Symbol)
 			if !ok {
-				slip.PanicType("keyword", args[pos], "keyword")
+				slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 			}
 			if len(args)-1 <= pos {
 				slip.NewPanic("%s missing an argument", sym)
@@ -65,7 +65,7 @@ func (f *TreeEqual) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if strings.EqualFold(string(sym), ":test") {
 				testFunc = ResolveToCaller(s, args[pos+1], depth)
 			} else {
-				slip.PanicType("keyword", sym, ":test")
+				slip.TypePanic(s, depth, "keyword", sym, ":test")
 			}
 		}
 		if testFunc.Call(s, args[:2], depth+1) != nil {

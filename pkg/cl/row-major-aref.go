@@ -42,33 +42,33 @@ type RowMajorAref struct {
 
 // Call the function with the arguments provided.
 func (f *RowMajorAref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	index, ok := args[1].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("index", args[1], "fixnum")
+		slip.TypePanic(s, depth, "index", args[1], "fixnum")
 	}
 	switch ta := args[0].(type) {
 	case nil:
 	case slip.ArrayLike:
 		result = ta.MajorGet(int(index))
 	default:
-		slip.PanicType("array", ta, "array")
+		slip.TypePanic(s, depth, "array", ta, "array")
 	}
 	return
 }
 
 // Place a value in the first position of a list or cons.
 func (f *RowMajorAref) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	index, ok := args[1].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("index", args[1], "fixnum")
+		slip.TypePanic(s, 0, "index", args[1], "fixnum")
 	}
 	switch ta := args[0].(type) {
 	case nil:
 	case slip.ArrayLike:
 		ta.MajorSet(int(index), value)
 	default:
-		slip.PanicType("array", ta, "array")
+		slip.TypePanic(s, 0, "array", ta, "array")
 	}
 }

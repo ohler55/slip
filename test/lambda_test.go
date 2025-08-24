@@ -44,7 +44,7 @@ func TestDefLambdaArgs(t *testing.T) {
 		Eval: lam,
 	}).Test(t)
 	tt.Equal(t, `docs`, lam.Docs())
-	tt.Equal(t, `(lambda (x y) "docs" (1+ 1))`, lam.DefList().String())
+	tt.Equal(t, `(lambda (x y) "docs" (1+ 1))`, lam.LoadForm().String())
 }
 
 func TestDefLambdaArgsNotList(t *testing.T) {

@@ -40,25 +40,25 @@ type Logxor struct {
 
 // Call the function with the arguments provided.
 func (f *Logxor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	return logxor(args)
+	return logxor(s, args, depth)
 }
 
-func logxor(args slip.List) slip.Object {
+func logxor(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var result uint64
 	for _, v := range args {
 		switch tv := v.(type) {
 		case slip.Fixnum:
 			result ^= uint64(tv)
 		case *slip.Bignum:
-			return bigLogxor(args)
+			return bigLogxor(s, args, depth)
 		default:
-			slip.PanicType("integer", tv, "integer")
+			slip.TypePanic(s, depth, "integer", tv, "integer")
 		}
 	}
 	return slip.Fixnum(result)
 }
 
-func bigLogxor(args slip.List) slip.Object {
+func bigLogxor(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var bi big.Int
 	first := true
 	for _, v := range args {
@@ -78,7 +78,7 @@ func bigLogxor(args slip.List) slip.Object {
 				_ = bi.Xor(&bi, (*big.Int)(tv))
 			}
 		default:
-			slip.PanicType("integer", tv, "integer")
+			slip.TypePanic(s, depth, "integer", tv, "integer")
 		}
 	}
 	return (*slip.Bignum)(&bi)

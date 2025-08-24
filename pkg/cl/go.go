@@ -38,7 +38,7 @@ type Go struct {
 
 // Call the function with the arguments provided.
 func (f *Go) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	gt := GoTo{}
 	switch ta := args[0].(type) {
 	case nil:
@@ -47,12 +47,12 @@ func (f *Go) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		gt.Tag = ta
 	default:
 		if ta != slip.True {
-			slip.PanicType("name", ta, "symbol", "nil")
+			slip.TypePanic(s, depth, "name", ta, "symbol", "nil")
 		}
 		gt.Tag = ta
 	}
 	if !s.TagBody {
-		slip.PanicControl("attempt to go to nonexistent tag: %s", gt.Tag)
+		slip.ControlPanic(s, depth, "attempt to go to nonexistent tag: %s", gt.Tag)
 	}
 	return &gt
 }

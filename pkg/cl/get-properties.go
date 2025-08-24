@@ -43,7 +43,7 @@ type GetProperties struct {
 
 // Call the function with the arguments provided.
 func (f *GetProperties) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	var plist slip.List
 	switch ta := args[0].(type) {
 	case nil:
@@ -51,11 +51,11 @@ func (f *GetProperties) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	case slip.List:
 		plist = ta
 	default:
-		slip.PanicType("plist", args[0], "property list")
+		slip.TypePanic(s, depth, "plist", args[0], "property list")
 	}
 	indicators, ok := args[1].(slip.List)
 	if !ok {
-		slip.PanicType("indicator-list", args[1], "list")
+		slip.TypePanic(s, depth, "indicator-list", args[1], "list")
 	}
 	for i := 0; i < len(plist)-1; i += 2 {
 		for _, ind := range indicators {

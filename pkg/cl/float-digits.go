@@ -42,7 +42,7 @@ type FloatDigits struct {
 
 // Call the function with the arguments provided.
 func (f *FloatDigits) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.DoubleFloat:
 		result = slip.Fixnum(53)
@@ -51,7 +51,7 @@ func (f *FloatDigits) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	case *slip.LongFloat:
 		result = slip.Fixnum((*big.Float)(ta).Prec())
 	default:
-		slip.PanicType("float", args[0], "float")
+		slip.TypePanic(s, depth, "float", args[0], "float")
 	}
 	return
 }

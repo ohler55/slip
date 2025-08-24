@@ -12,7 +12,8 @@ import (
 )
 
 func TestControlErrorObj(t *testing.T) {
-	cond := slip.NewControlError("not a %s control-error", "real")
+	scope := slip.NewScope()
+	cond := slip.ControlErrorNew(scope, 0, "not a %s control-error", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<control-error [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestControlErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real control-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real control-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestControlErrorMake(t *testing.T) {
@@ -39,7 +40,7 @@ func TestControlErrorMake(t *testing.T) {
 	tt.Equal(t, true, ok)
 	value, has := cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, true, has)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Control-Error :message "raise")`,
@@ -55,6 +56,6 @@ func TestControlErrorMake(t *testing.T) {
 
 func TestControlErrorPanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicControl("raise")
+		slip.ControlPanic(slip.NewScope(), 0, "raise")
 	})
 }

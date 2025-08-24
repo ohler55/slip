@@ -56,7 +56,7 @@ type ReplaceFirst struct {
 
 // Call the function with the arguments provided.
 func (f *ReplaceFirst) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 5)
+	slip.CheckArgCount(s, depth, f, args, 3, 5)
 	str := slip.MustBeString(args[0], "string")
 	old := slip.MustBeString(args[1], "string")
 	nu := slip.MustBeString(args[2], "string")

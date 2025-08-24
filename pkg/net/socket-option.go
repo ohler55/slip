@@ -59,34 +59,34 @@ type SocketOption struct {
 
 // Call the function with the arguments provided.
 func (f *SocketOption) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
 	if fd, ok2 := self.Any.(int); ok2 {
-		result = getSockopt(fd, args[1])
+		result = getSockopt(s, fd, args[1], depth)
 	}
 	return
 }
 
 // Place a value in an option using the :set-option method.
 func (f *SocketOption) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, 0, "socket", args[0], "socket")
 	}
 	_ = self.Receive(s, ":set-option", slip.List{args[1], value}, 0)
 }
 
 type socketOptionCaller struct{}
 
-func (caller socketOptionCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketOptionCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":option", args, 1, 1)
+	slip.CheckSendArgCount(s, depth, self, ":option", args, 1, 1)
 	if fd, ok := self.Any.(int); ok {
-		result = getSockopt(fd, args[0])
+		result = getSockopt(s, fd, args[0], depth)
 	}
 	return
 }
@@ -99,16 +99,16 @@ func (caller socketOptionCaller) FuncDocs() *slip.FuncDoc {
 
 type socketSetOptionCaller struct{}
 
-func (caller socketSetOptionCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketSetOptionCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":option", args, 2, 2)
+	slip.CheckSendArgCount(s, depth, self, ":option", args, 2, 2)
 	if fd, ok := self.Any.(int); ok {
-		setSockopt(fd, args[0], args[1])
+		setSockopt(s, fd, args[0], args[1], depth)
 	}
 	return nil
 }
 
-func getSockopt(fd int, arg slip.Object) (result slip.Object) {
+func getSockopt(s *slip.Scope, fd int, arg slip.Object, depth int) (result slip.Object) {
 	var (
 		val int
 		err error
@@ -152,7 +152,7 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 			result = slip.True
 		}
 	default:
-		slip.PanicType("option", arg,
+		slip.TypePanic(s, depth, "option", arg,
 			":broadcast",
 			":debug",
 			":receive-buffer",
@@ -170,7 +170,7 @@ func getSockopt(fd int, arg slip.Object) (result slip.Object) {
 	return
 }
 
-func setSockopt(fd int, opt, val slip.Object) {
+func setSockopt(s *slip.Scope, fd int, opt, val slip.Object, depth int) {
 	var err error
 	switch opt {
 	case slip.Symbol(":tcp-keepalive"): // SO_KEEPALIVE
@@ -192,7 +192,7 @@ func setSockopt(fd int, opt, val slip.Object) {
 	case slip.Symbol(":debug"): // SO_DEBUG
 		err = setSockoptBool(fd, syscall.SO_DEBUG, val)
 	default:
-		slip.PanicType("option", opt,
+		slip.TypePanic(s, depth, "option", opt,
 			":broadcast",
 			":debug",
 			":receive-buffer",

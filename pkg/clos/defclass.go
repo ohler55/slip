@@ -46,6 +46,8 @@ the slot that can also be used with __setf__.
   __:documentation__ [string] documentation for the slot.
   __:gettable__ [boolean] if true a direct method with the slot name prefixed with a ':' will return the slot value.
 This is an addition to the CLOS specification.
+  __:settable__ [boolean] if true a direct method with the slot name prefixed with ':set-' will set the slot value.
+This is an addition to the CLOS specification.
 `,
 				},
 				{Name: slip.AmpRest},
@@ -78,31 +80,31 @@ type Defclass struct {
 
 // Call the the function with the arguments provided.
 func (f *Defclass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 6)
+	slip.CheckArgCount(s, depth, f, args, 3, 6)
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("class-name", args[0], "symbol")
+		slip.TypePanic(s, depth, "class-name", args[0], "symbol")
 	}
 	var (
 		supers    slip.List
 		slotSpecs slip.List
 	)
 	if supers, ok = args[1].(slip.List); !ok {
-		slip.PanicType("superclass-names", args[1], "list")
+		slip.TypePanic(s, depth, "superclass-names", args[1], "list")
 	}
 	if slotSpecs, ok = args[2].(slip.List); !ok {
-		slip.PanicType("slot-specifiers", args[2], "list")
+		slip.TypePanic(s, depth, "slot-specifiers", args[2], "list")
 	}
 	if c := slip.FindClass(string(name)); c != nil {
 		if sc, ok := c.(*StandardClass); !ok || sc.Final {
 			slip.NewPanic("Can not redefine class %s, a %s.", name, c.Metaclass())
 		}
 	}
-	return DefStandardClass(string(name), supers, slotSpecs, args[3:])
+	return DefStandardClass(s, string(name), supers, slotSpecs, args[3:], depth)
 }
 
 // DefStandardClass defines a standard-class.
-func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *StandardClass {
+func DefStandardClass(s *slip.Scope, name string, supers, slotSpecs, classOptions slip.List, depth int) *StandardClass {
 	sc := StandardClass{
 		name:            name,
 		defname:         "defclass",
@@ -116,7 +118,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		inheritCheck: func(c slip.Class) *StandardClass {
 			sc, ok := c.(*StandardClass)
 			if !ok && c != nil {
-				slip.PanicType("superclass", c, "standard-class")
+				slip.TypePanic(s, depth, "superclass", c, "standard-class")
 			}
 			return sc
 		},
@@ -126,7 +128,7 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		if sym, ok := super.(slip.Symbol); ok {
 			sc.supers[i] = sym
 		} else {
-			slip.PanicType("super", super, "symbol")
+			slip.TypePanic(s, depth, "super", super, "symbol")
 		}
 	}
 	sc.Init(false)
@@ -134,25 +136,25 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 	for _, opt := range classOptions {
 		list, ok := opt.(slip.List)
 		if !ok || len(list) < 2 {
-			slip.PanicType("class-options", opt, "list")
+			slip.TypePanic(s, depth, "class-options", opt, "list")
 		}
 		switch list[0] {
 		case slip.Symbol(":documentation"):
 			if docs, ok := list[1].(slip.String); ok {
 				sc.docs = string(docs)
 			} else {
-				slip.PanicType("class-options :documentation", list[1], "string")
+				slip.TypePanic(s, depth, "class-options :documentation", list[1], "string")
 			}
 		case slip.Symbol(":default-initargs"):
-			fillMapFromKeyArgs(list[1:], sc.defaultInitArgs)
+			fillMapFromKeyArgs(s, list[1:], sc.defaultInitArgs, depth)
 		case slip.Symbol(":metaclass"):
 			// ignore
 		default:
-			slip.PanicType("class-options directive", list[0], ":documentation", "default-initargs", ":metaclass")
+			slip.TypePanic(s, depth, "class-options directive", list[0], ":documentation", "default-initargs", ":metaclass")
 		}
 	}
 	for _, ss := range slotSpecs {
-		sd := NewSlotDef(ss)
+		sd := NewSlotDef(s, ss, depth)
 		sd.class = &sc
 		sc.slotDefs[sd.name] = sd
 		if sd.classStore {
@@ -164,6 +166,9 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 		if sd.settable {
 			generic.DefClassMethod(&sc, ":set-"+sd.name, "", setter(sd.name))
 		}
+		sd.defReaderMethods(name)
+		sd.defWriterMethods(name)
+		sd.defAccessorMethods(name)
 	}
 	_ = sc.mergeSupers()
 	slip.RegisterClass(sc.name, &sc)
@@ -174,14 +179,14 @@ func DefStandardClass(name string, supers, slotSpecs, classOptions slip.List) *S
 	return &sc
 }
 
-func fillMapFromKeyArgs(args slip.List, m map[string]slip.Object) {
+func fillMapFromKeyArgs(s *slip.Scope, args slip.List, m map[string]slip.Object, depth int) {
 	if len(args)%2 != 0 {
 		slip.NewPanic("Odd number of &key arguments.")
 	}
 	for i := 0; i < len(args); i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[i], "symbol")
+			slip.TypePanic(s, depth, "keyword", args[i], "symbol")
 		}
 		key := strings.ToLower(string(sym))
 		i++

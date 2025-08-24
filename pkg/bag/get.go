@@ -56,25 +56,23 @@ type Get struct {
 
 // Call the the function with the arguments provided.
 func (f *Get) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 3 < len(args) {
-		slip.PanicArgCount(f, 1, 3)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
 	switch len(args) {
 	case 1:
-		result = getBag(obj, nil, false)
+		result = getBag(s, obj, nil, false, depth)
 	case 2:
-		result = getBag(obj, args[1], false)
+		result = getBag(s, obj, args[1], false, depth)
 	case 3:
-		result = getBag(obj, args[1], args[2] != nil)
+		result = getBag(s, obj, args[1], args[2] != nil, depth)
 	}
 	return
 }
 
-func getBag(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {
+func getBag(s *slip.Scope, obj *flavors.Instance, path slip.Object, asBag bool, depth int) slip.Object {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -83,7 +81,7 @@ func getBag(obj *flavors.Instance, path slip.Object, asBag bool) slip.Object {
 	case Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string", "bag-path")
+		slip.TypePanic(s, depth, "path", p, "string", "bag-path")
 	}
 	var value any
 	if x == nil {

@@ -37,14 +37,14 @@ type ArrayHasFillPointerP struct {
 
 // Call the function with the arguments provided.
 func (f *ArrayHasFillPointerP) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if _, ok := args[0].(slip.ArrayLike); ok {
 		var v slip.FillPtrVector
 		if v, ok = args[0].(slip.FillPtrVector); ok && 0 <= v.FillPointer() {
 			result = slip.True
 		}
 	} else {
-		slip.PanicType("array", args[0], "array")
+		slip.TypePanic(s, depth, "array", args[0], "array")
 	}
 	return
 }

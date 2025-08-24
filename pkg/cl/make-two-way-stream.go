@@ -46,14 +46,14 @@ type MakeTwoWayStream struct {
 
 // Call the function with the arguments provided.
 func (f *MakeTwoWayStream) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	tws := TwoWayStream{}
 	var ok bool
 	if tws.Input, ok = args[0].(io.Reader); !ok {
-		slip.PanicType("input-stream", args[0], "input-stream")
+		slip.TypePanic(s, depth, "input-stream", args[0], "input-stream")
 	}
 	if tws.Output, ok = args[1].(io.Writer); !ok {
-		slip.PanicType("output-stream", args[1], "output-stream")
+		slip.TypePanic(s, depth, "output-stream", args[1], "output-stream")
 	}
 	return &tws
 }

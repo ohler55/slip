@@ -11,8 +11,9 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestPrintNotReadbleObj(t *testing.T) {
-	cond := slip.NewPrintNotReadble(slip.Symbol("something"), "not a %s print-not-readable", "real")
+func TestPrintNotReadableObj(t *testing.T) {
+	scope := slip.NewScope()
+	cond := slip.PrintNotReadableNew(scope, 0, slip.Symbol("something"), "not a %s print-not-readable", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<print-not-readable [0-9a-f]+>$/",
@@ -29,7 +30,7 @@ func TestPrintNotReadbleObj(t *testing.T) {
 	tt.Equal(t, "not a real print-not-readable", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
 }
 
-func TestPrintNotReadbleMake(t *testing.T) {
+func TestPrintNotReadableMake(t *testing.T) {
 	tf := sliptest.Function{
 		Source: `(make-condition 'Print-Not-Readable)`,
 		Expect: "/^#<print-not-readable [0-9a-f]+>$/",
@@ -39,7 +40,7 @@ func TestPrintNotReadbleMake(t *testing.T) {
 	tt.Equal(t, ok, true)
 	value, has := cond.SlotValue(slip.Symbol("object"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Print-Not-Readable :object 'something :message "raise")`,
@@ -53,8 +54,8 @@ func TestPrintNotReadbleMake(t *testing.T) {
 	tt.Equal(t, slip.Symbol("something"), value)
 }
 
-func TestPrintNotReadblePanic(t *testing.T) {
+func TestPrintNotReadablePanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicPrintNotReadble(slip.Symbol("something"), "raise")
+		slip.PrintNotReadablePanic(nil, 0, slip.Symbol("something"), "raise")
 	})
 }

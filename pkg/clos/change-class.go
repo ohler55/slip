@@ -43,21 +43,21 @@ type ChangeClass struct {
 
 // Call the the function with the arguments provided.
 func (f *ChangeClass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	inst, ok := args[0].(slip.Instance)
 	if !ok {
-		slip.PanicType("instance", args[0], "instance")
+		slip.TypePanic(s, depth, "instance", args[0], "instance")
 	}
 	var class slip.Class
 	switch ta := args[1].(type) {
 	case slip.Symbol:
 		if class = slip.FindClass(string(ta)); class == nil {
-			slip.PanicClassNotFound(ta, "Class %s not found.", ta)
+			slip.ClassNotFoundPanic(s, depth, ta, "Class %s not found.", ta)
 		}
 	case slip.Class:
 		class = ta
 	default:
-		slip.PanicType("new-class", ta, "symbol", "flavor", "class")
+		slip.TypePanic(s, depth, "new-class", ta, "symbol", "flavor", "class")
 	}
 	if class.Metaclass() != inst.Class().Metaclass() {
 		slip.NewPanic("Can not change the class of an instance of a %s class to a %s class.",

@@ -53,9 +53,7 @@ type Describe struct {
 
 // Call the function with the arguments provided.
 func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	obj := args[0]
 	so := s.Get("*standard-output*")
 	ss, _ := so.(slip.Stream)
@@ -64,7 +62,7 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		var ok bool
 		ss, _ = args[1].(slip.Stream)
 		if w, ok = args[1].(io.Writer); !ok {
-			slip.PanicType("describe output-stream", args[1], "output-stream")
+			slip.TypePanic(s, depth, "describe output-stream", args[1], "output-stream")
 		}
 	}
 	ansi := s.Get("*print-ansi*") != nil
@@ -72,7 +70,7 @@ func (f *Describe) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 
 	b := AppendDescribe(nil, obj, s, 0, right, ansi)
 	if _, err := w.Write(b); err != nil {
-		slip.PanicStream(ss, "write failed: %s", err)
+		slip.StreamPanic(s, depth, ss, "write failed: %s", err)
 	}
 	return slip.Novalue
 }

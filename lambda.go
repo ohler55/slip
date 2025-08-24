@@ -258,8 +258,13 @@ func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *L
 			PanicType("lambda list element", ta, "symbol", "list")
 		}
 	}
-	// Compile forms while in the current package instead of waiting until
-	// invoked.
+	lam.Compile(s, extraVars...)
+	return
+}
+
+// Compile forms while in the current package instead of waiting until
+// invoked.
+func (lam *Lambda) Compile(s *Scope, extraVars ...string) {
 	for i, f := range lam.Forms {
 	expand:
 		switch tf := f.(type) {
@@ -286,7 +291,6 @@ func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *L
 			lam.Forms[i] = CompileList(tf)
 		}
 	}
-	return
 }
 
 // String representation of the Object.
@@ -337,11 +341,11 @@ func (lam *Lambda) Docs() (docs string) {
 	return
 }
 
-// DefList returns a definition list such as (lambda (x) (1+ x)).
-func (lam *Lambda) DefList() List {
+// LoadForm returns a definition list such as (lambda (x) (1+ x)).
+func (lam *Lambda) LoadForm() Object {
 	var dl List
 	dl = append(dl, Symbol("lambda"))
-	dl = append(dl, lam.Doc.DefList())
+	dl = append(dl, lam.Doc.LoadForm())
 	if 0 < len(lam.Doc.Text) {
 		dl = append(dl, String(lam.Doc.Text))
 	}

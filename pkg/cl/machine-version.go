@@ -37,7 +37,7 @@ type MachineVersion struct {
 
 // Call the function with the arguments provided.
 func (f *MachineVersion) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 0, 0)
+	slip.CheckArgCount(s, depth, f, args, 0, 0)
 	// Assume MacOS and try system_profiler. If that fails assume linux and check /proc.
 	out, err := exec.Command("system_profiler", "-json", "SPHardwareDataType").Output()
 	if err == nil {

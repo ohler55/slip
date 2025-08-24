@@ -65,12 +65,12 @@ type Boole struct {
 
 // Call the function with the arguments provided.
 func (f *Boole) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 3, 3)
+	slip.CheckArgCount(s, depth, f, args, 3, 3)
 	if _, ok := args[1].(slip.Integer); !ok {
-		slip.PanicType("integer-1", args[1], "integer")
+		slip.TypePanic(s, depth, "integer-1", args[1], "integer")
 	}
 	if _, ok := args[2].(slip.Integer); !ok {
-		slip.PanicType("integer-2", args[2], "integer")
+		slip.TypePanic(s, depth, "integer-2", args[2], "integer")
 	}
 	switch args[0] {
 	case slip.Symbol("boole-1"):
@@ -78,11 +78,11 @@ func (f *Boole) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case slip.Symbol("boole-2"):
 		result = args[2]
 	case slip.Symbol("boole-and"):
-		result = logand(args[1:3])
+		result = logand(s, args[1:3], depth)
 	case slip.Symbol("boole-andc1"):
-		result = logandc1(args[1], args[2])
+		result = logandc1(s, args[1], args[2], depth)
 	case slip.Symbol("boole-andc2"):
-		result = logandc1(args[2], args[1])
+		result = logandc1(s, args[2], args[1], depth)
 	case slip.Symbol("boole-c1"):
 		result = complement(args[1])
 	case slip.Symbol("boole-c2"):
@@ -90,23 +90,23 @@ func (f *Boole) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case slip.Symbol("boole-clr"):
 		result = slip.Fixnum(0)
 	case slip.Symbol("boole-eqv"):
-		result = logeqv(args[1:3])
+		result = logeqv(s, args[1:3], depth)
 	case slip.Symbol("boole-ior"):
-		result = logior(args[1:3])
+		result = logior(s, args[1:3], depth)
 	case slip.Symbol("boole-nand"):
-		result = lognand(args[1], args[2])
+		result = lognand(s, args[1], args[2], depth)
 	case slip.Symbol("boole-nor"):
-		result = lognor(args[1], args[2])
+		result = lognor(s, args[1], args[2], depth)
 	case slip.Symbol("boole-orc1"):
-		result = logorc1(args[1], args[2])
+		result = logorc1(s, args[1], args[2], depth)
 	case slip.Symbol("boole-orc2"):
-		result = logorc1(args[2], args[1])
+		result = logorc1(s, args[2], args[1], depth)
 	case slip.Symbol("boole-set"):
 		result = slip.Fixnum(-1)
 	case slip.Symbol("boole-xor"):
-		result = logxor(args[1:3])
+		result = logxor(s, args[1:3], depth)
 	default:
-		slip.PanicType("op", args[0],
+		slip.TypePanic(s, depth, "op", args[0],
 			"boole-1",
 			"boole-2",
 			"boole-and",

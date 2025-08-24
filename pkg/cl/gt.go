@@ -43,12 +43,10 @@ type Gt struct {
 
 // Call the function with the arguments provided.
 func (f *Gt) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	switch len(args) {
-	case 0:
-		slip.PanicArgCount(f, 1, -1)
-	case 1:
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
+	if len(args) == 1 {
 		if _, ok := args[0].(slip.Real); !ok {
-			slip.PanicType("numbers", args[0], "real")
+			slip.TypePanic(s, depth, "numbers", args[0], "real")
 		}
 		return slip.True
 	}
@@ -56,7 +54,7 @@ func (f *Gt) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	pos := 0
 	target := args[pos]
 	if _, ok := target.(slip.Real); !ok {
-		slip.PanicType("numbers", target, "real")
+		slip.TypePanic(s, depth, "numbers", target, "real")
 	}
 	pos++
 	for ; pos < len(args); pos++ {
@@ -87,7 +85,7 @@ func (f *Gt) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				return nil
 			}
 		case slip.Complex:
-			slip.PanicType("numbers", arg, "real")
+			slip.TypePanic(s, depth, "numbers", arg, "real")
 		}
 	}
 	return slip.True

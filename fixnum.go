@@ -94,3 +94,8 @@ func (obj Fixnum) IsInt64() bool {
 func (obj Fixnum) Int64() int64 {
 	return int64(obj)
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Fixnum) LoadForm() Object {
+	return obj
+}

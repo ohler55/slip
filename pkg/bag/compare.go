@@ -60,15 +60,15 @@ type Compare struct {
 
 // Call the the function with the arguments provided.
 func (f *Compare) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
-	return compareBag(s, obj, args[1:])
+	return compareBag(s, obj, args[1:], depth)
 }
 
-func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List) (result slip.Object) {
+func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) (result slip.Object) {
 	other, ok := args[0].(*flavors.Instance)
 	if !ok || other.Type != flavor {
 		return slip.List{nil}
@@ -77,7 +77,7 @@ func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List) (result sl
 	if 1 < len(args) {
 		var ilist slip.List
 		if ilist, ok = args[1].(slip.List); !ok {
-			slip.PanicType("ignores", args[1], "list")
+			slip.TypePanic(s, depth, "ignores", args[1], "list")
 		}
 		for _, p := range ilist {
 		whichPath:
@@ -98,7 +98,7 @@ func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List) (result sl
 					case nil:
 						ign[i] = nil
 					default:
-						slip.PanicType("ignores path element", te, "string", "symbol", "fixnum", "nil")
+						slip.TypePanic(s, depth, "ignores path element", te, "string", "symbol", "fixnum", "nil")
 					}
 				}
 				ignores = append(ignores, ign)
@@ -121,7 +121,7 @@ func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List) (result sl
 				}
 				ignores = append(ignores, ign)
 			default:
-				slip.PanicType("ignores element", tp, "list", "string", "bag-path")
+				slip.TypePanic(s, depth, "ignores element", tp, "list", "string", "bag-path")
 			}
 		}
 	}

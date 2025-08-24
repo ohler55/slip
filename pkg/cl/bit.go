@@ -43,36 +43,36 @@ type Bit struct {
 
 // Call the function with the arguments provided.
 func (f *Bit) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	indices := make([]int, 0, len(args)-1)
 	for _, a := range args[1:] {
 		if num, ok := a.(slip.Fixnum); ok {
 			indices = append(indices, int(num))
 		} else {
-			slip.PanicType("subscript", a, "fixnum")
+			slip.TypePanic(s, depth, "subscript", a, "fixnum")
 		}
 	}
 	al, ok := args[0].(slip.ArrayLike)
 	if !ok || al.ElementType() != slip.BitSymbol {
-		slip.PanicType("bit-array", args[0], "bit-array")
+		slip.TypePanic(s, depth, "bit-array", args[0], "bit-array")
 	}
 	return al.Get(indices...)
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Bit) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, 0, f, args, 1, -1)
 	indices := make([]int, 0, len(args)-1)
 	for _, a := range args[1:] {
 		if num, ok := a.(slip.Fixnum); ok {
 			indices = append(indices, int(num))
 		} else {
-			slip.PanicType("subscript", a, "fixnum")
+			slip.TypePanic(s, 0, "subscript", a, "fixnum")
 		}
 	}
 	al, ok := args[0].(slip.ArrayLike)
 	if !ok || al.ElementType() != slip.BitSymbol {
-		slip.PanicType("bit-array", args[0], "bit-array")
+		slip.TypePanic(s, 0, "bit-array", args[0], "bit-array")
 	}
 	al.Set(value, indices...)
 }

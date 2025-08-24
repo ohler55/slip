@@ -33,14 +33,14 @@ func (sfv *seqFunVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List,
 		min--
 		pos--
 	}
-	slip.ArgCountCheck(f, args, min, max)
+	slip.CheckArgCount(s, depth, f, args, min, max)
 	sfv.item = args[0] // if noItem it doesn't matter so no harm is setting
 	sfv.end = -1
 	sfv.count = math.MaxInt
 	for ; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
@@ -52,7 +52,7 @@ func (sfv *seqFunVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List,
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
 				sfv.start = int(num)
 			} else {
-				slip.PanicType("start", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "start", args[pos+1], "fixnum")
 			}
 		case ":end":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
@@ -60,24 +60,24 @@ func (sfv *seqFunVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List,
 			} else if args[pos+1] == nil {
 				sfv.end = -1
 			} else {
-				slip.PanicType("end", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "end", args[pos+1], "fixnum")
 			}
 		case ":count":
 			if sfv.noCount {
-				slip.PanicType("keyword", sym, ":key", ":test", ":start", ":end", ":from-end")
+				slip.TypePanic(s, depth, "keyword", sym, ":key", ":test", ":start", ":end", ":from-end")
 			}
 			if num, ok := args[pos+1].(slip.Fixnum); ok {
 				sfv.count = int(num)
 			} else {
-				slip.PanicType("count", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "count", args[pos+1], "fixnum")
 			}
 		case ":from-end":
 			sfv.fromEnd = args[pos+1] != nil
 		default:
 			if sfv.noCount {
-				slip.PanicType("keyword", sym, ":key", ":test", ":start", ":end", ":from-end")
+				slip.TypePanic(s, depth, "keyword", sym, ":key", ":test", ":start", ":end", ":from-end")
 			}
-			slip.PanicType("keyword", sym, ":key", ":test", ":start", ":end", ":from-end", ":count")
+			slip.TypePanic(s, depth, "keyword", sym, ":key", ":test", ":start", ":end", ":from-end", ":count")
 		}
 	}
 	if pos < len(args) {
@@ -87,9 +87,9 @@ func (sfv *seqFunVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List,
 
 func (sfv *seqFunVars) setKeysIf(f slip.Object, s *slip.Scope, args slip.List, depth int) {
 	if sfv.noCount {
-		slip.ArgCountCheck(f, args, 2, 10)
+		slip.CheckArgCount(s, depth, f, args, 2, 10)
 	} else {
-		slip.ArgCountCheck(f, args, 2, 12)
+		slip.CheckArgCount(s, depth, f, args, 2, 12)
 	}
 	sfv.test = ResolveToCaller(s, args[0], depth)
 	sfv.end = -1
@@ -98,7 +98,7 @@ func (sfv *seqFunVars) setKeysIf(f slip.Object, s *slip.Scope, args slip.List, d
 	for ; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
@@ -108,7 +108,7 @@ func (sfv *seqFunVars) setKeysIf(f slip.Object, s *slip.Scope, args slip.List, d
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
 				sfv.start = int(num)
 			} else {
-				slip.PanicType("start", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "start", args[pos+1], "fixnum")
 			}
 		case ":end":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
@@ -116,24 +116,24 @@ func (sfv *seqFunVars) setKeysIf(f slip.Object, s *slip.Scope, args slip.List, d
 			} else if args[pos+1] == nil {
 				sfv.end = -1
 			} else {
-				slip.PanicType("end", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "end", args[pos+1], "fixnum")
 			}
 		case ":count":
 			if sfv.noCount {
-				slip.PanicType("keyword", sym, ":key", ":start", ":end", ":from-end")
+				slip.TypePanic(s, depth, "keyword", sym, ":key", ":start", ":end", ":from-end")
 			}
 			if num, ok := args[pos+1].(slip.Fixnum); ok {
 				sfv.count = int(num)
 			} else {
-				slip.PanicType("count", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "count", args[pos+1], "fixnum")
 			}
 		case ":from-end":
 			sfv.fromEnd = args[pos+1] != nil
 		default:
 			if sfv.noCount {
-				slip.PanicType("keyword", sym, ":key", ":start", ":end", ":from-end")
+				slip.TypePanic(s, depth, "keyword", sym, ":key", ":start", ":end", ":from-end")
 			}
-			slip.PanicType("keyword", sym, ":key", ":start", ":end", ":from-end", ":count")
+			slip.TypePanic(s, depth, "keyword", sym, ":key", ":start", ":end", ":from-end", ":count")
 		}
 	}
 	if pos < len(args) {

@@ -98,18 +98,24 @@ type Write struct {
 
 // Call the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	b, w, ss := writeBuf(f, s, args, true)
+	b, w, ss := writeBuf(f, s, args, true, depth)
 	if _, err := w.Write(b); err != nil {
-		slip.PanicStream(ss, "write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write failed. %s", err)
 	}
 	return args[0]
 }
 
-func writeBuf(f slip.Object, s *slip.Scope, args slip.List, withStream bool) ([]byte, io.Writer, slip.Stream) {
+func writeBuf(
+	f slip.Object,
+	s *slip.Scope,
+	args slip.List,
+	withStream bool,
+	depth int) ([]byte, io.Writer, slip.Stream) {
+
 	if withStream {
-		slip.ArgCountCheck(f, args, 1, 33)
+		slip.CheckArgCount(s, depth, f, args, 1, 33)
 	} else {
-		slip.ArgCountCheck(f, args, 1, 31)
+		slip.CheckArgCount(s, depth, f, args, 1, 31)
 	}
 	p := *slip.DefaultPrinter()
 	p.ScopedUpdate(s)
@@ -121,7 +127,7 @@ func writeBuf(f slip.Object, s *slip.Scope, args slip.List, withStream bool) ([]
 	for i := 1; i < len(args)-1; i += 2 {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[i], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[i], "keyword")
 		}
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
@@ -131,7 +137,7 @@ func writeBuf(f slip.Object, s *slip.Scope, args slip.List, withStream bool) ([]
 			if base, ok := args[i+1].(slip.Fixnum); ok && 2 <= base && base <= 36 {
 				p.Base = uint(base)
 			} else {
-				slip.PanicType(":base", args[i+1], "fixnum between 2 and 36 inclusive")
+				slip.TypePanic(s, depth, ":base", args[i+1], "fixnum between 2 and 36 inclusive")
 			}
 		case ":case":
 			if args[i+1] == nil {
@@ -143,7 +149,7 @@ func writeBuf(f slip.Object, s *slip.Scope, args slip.List, withStream bool) ([]
 				case slip.Symbol(":upcase"), slip.Symbol(":downcase"), slip.Symbol(":capitalize"):
 					p.Case = key
 				default:
-					slip.PanicType(":case", args[i+1], ":downcase", ":upcase", ":capitalize")
+					slip.TypePanic(s, depth, ":case", args[i+1], ":downcase", ":upcase", ":capitalize")
 				}
 			}
 		case ":circle":
@@ -153,13 +159,13 @@ func writeBuf(f slip.Object, s *slip.Scope, args slip.List, withStream bool) ([]
 		case ":gensym":
 			p.Gensym = args[i+1] != nil
 		case ":length":
-			p.Length = kvAsUint(keyword, args[i+1])
+			p.Length = kvAsUint(s, keyword, args[i+1], depth)
 		case ":level":
-			p.Level = kvAsUint(keyword, args[i+1])
+			p.Level = kvAsUint(s, keyword, args[i+1], depth)
 		case ":lines":
-			p.Lines = kvAsUint(keyword, args[i+1])
+			p.Lines = kvAsUint(s, keyword, args[i+1], depth)
 		case ":miser-width":
-			p.MiserWidth = kvAsUint(keyword, args[i+1])
+			p.MiserWidth = kvAsUint(s, keyword, args[i+1], depth)
 		case ":pretty":
 			p.Pretty = args[i+1] != nil
 		case ":radix":
@@ -167,33 +173,33 @@ func writeBuf(f slip.Object, s *slip.Scope, args slip.List, withStream bool) ([]
 		case ":readably":
 			p.Readably = args[i+1] != nil
 		case ":right-margin":
-			p.RightMargin = kvAsUint(keyword, args[i+1])
+			p.RightMargin = kvAsUint(s, keyword, args[i+1], depth)
 		case ":stream":
 			if !withStream {
-				slip.PanicType("keyword", sym, writeKeywords...)
+				slip.TypePanic(s, depth, "keyword", sym, writeKeywords...)
 			}
 			ss, _ = args[i+1].(slip.Stream)
 			if w, ok = args[i+1].(io.Writer); !ok {
-				slip.PanicType(":stream", args[i+1], "output-stream")
+				slip.TypePanic(s, depth, ":stream", args[i+1], "output-stream")
 			}
 		default:
 			if withStream {
-				slip.PanicType("keyword", sym, append(writeKeywords, ":stream")...)
+				slip.TypePanic(s, depth, "keyword", sym, append(writeKeywords, ":stream")...)
 			} else {
-				slip.PanicType("keyword", sym, writeKeywords...)
+				slip.TypePanic(s, depth, "keyword", sym, writeKeywords...)
 			}
 		}
 	}
 	return p.Append([]byte{}, obj, 0), w, ss
 }
 
-func kvAsUint(keyword string, a slip.Object) uint {
+func kvAsUint(s *slip.Scope, keyword string, a slip.Object, depth int) uint {
 	if a == nil {
 		return math.MaxInt
 	}
 	num, ok := a.(slip.Fixnum)
 	if !ok || num < 0 {
-		slip.PanicType(keyword, a, "non-negative fixnum")
+		slip.TypePanic(s, depth, keyword, a, "non-negative fixnum")
 	}
 	return uint(num)
 }

@@ -61,13 +61,13 @@ type SocketPair struct {
 
 // Call the function with the arguments provided.
 func (f *SocketPair) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 7)
+	slip.CheckArgCount(s, depth, f, args, 3, 7)
 
-	domain := getSockArgValue("domain", args[0], domainMap)
-	typ := getSockArgValue("type", args[1], typeMap)
+	domain := getSockArgValue(s, "domain", args[0], domainMap, depth)
+	typ := getSockArgValue(s, "type", args[1], typeMap, depth)
 	var proto int
 	if args[2] != nil {
-		proto = getSockArgValue("protocol", args[2], protocolMap)
+		proto = getSockArgValue(s, "protocol", args[2], protocolMap, depth)
 	}
 	fds, _ := syscall.Socketpair(domain, typ, proto)
 	sock0 := socketFlavor.MakeInstance().(*flavors.Instance)

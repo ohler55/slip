@@ -41,7 +41,7 @@ type Rationalize struct {
 
 // Call the function with the arguments provided.
 func (f *Rationalize) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Fixnum, *slip.Bignum, *slip.Ratio:
 		result = ta
@@ -54,7 +54,7 @@ func (f *Rationalize) Call(s *slip.Scope, args slip.List, depth int) (result sli
 		rat, _ := (*big.Float)(ta).Rat(&z)
 		result = ratReduce(rat)
 	default:
-		slip.PanicType("number", ta, "real")
+		slip.TypePanic(s, depth, "number", ta, "real")
 	}
 	return
 }

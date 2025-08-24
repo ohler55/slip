@@ -116,7 +116,7 @@ func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
 	for i := 0; i < len(args); i++ {
 		sym, ok := args[i].(slip.Symbol)
 		if !ok || len(sym) < 2 || sym[0] != ':' {
-			slip.PanicType("initialization keyword", args[i], "keyword")
+			slip.TypePanic(scope, depth, "initialization keyword", args[i], "keyword")
 		}
 		key := strings.ToLower(string(sym))
 		if key == ":self" {
@@ -238,7 +238,8 @@ func (obj *Instance) BoundReceive(ps *slip.Scope, message string, bindings *slip
 			s.Let(slip.Symbol("args"), args)
 			return bc.BoundCall(s, depth)
 		}
-		slip.PanicUnboundSlot(obj, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.name)
+		slip.InvalidMethodPanic(ps, depth,
+			obj, nil, slip.Symbol(message), "%s is not a method of %s.", message, obj.Type.name)
 	}
 	return m.BoundCall(s, depth)
 }
@@ -343,4 +344,9 @@ func (obj *Instance) ChangeFlavor(flavor *Flavor) {
 		}
 		obj.Vars[k] = v
 	}
+}
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *Instance) LoadForm() slip.Object {
+	return slip.InstanceLoadForm(obj)
 }

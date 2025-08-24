@@ -11,6 +11,7 @@ import (
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pp"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -311,4 +312,21 @@ func TestPackageUseLocked(t *testing.T) {
 
 func TestPackageUnuseLocked(t *testing.T) {
 	tt.Panic(t, func() { slip.CLPkg.Unuse(&slip.UserPkg) })
+}
+
+func TestPackageLoadForm(t *testing.T) {
+	form := (&slip.UserPkg).LoadForm()
+	pps := string(pp.Append(nil, slip.NewScope(), form))
+	tt.Equal(t, true, strings.Contains(pps, "(defpackage common-lisp-user"))
+	tt.Equal(t, true, strings.Contains(pps, "(:documentation "))
+	tt.Equal(t, true, strings.Contains(pps, "(:nicknames cl-user user)"))
+	tt.Equal(t, true,
+		strings.Contains(pps, "(:use keyword common-lisp generic xml flavors gi bag clos csv test watch net)"))
+
+	form = (&slip.CLPkg).LoadForm()
+	pps = string(pp.Append(nil, slip.NewScope(), form))
+	tt.Equal(t, true, strings.Contains(pps, "(defpackage common-lisp"))
+	tt.Equal(t, true, strings.Contains(pps, "(:nicknames cl)"))
+	tt.Equal(t, true, strings.Contains(pps, "(:documentation "))
+	tt.Equal(t, true, strings.Contains(pps, "(:export "))
 }

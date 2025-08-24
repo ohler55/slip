@@ -42,10 +42,10 @@ type SlotBoundp struct {
 
 // Call the the function with the arguments provided.
 func (f *SlotBoundp) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("slot-name", args[1], "symbol")
+		slip.TypePanic(s, depth, "slot-name", args[1], "symbol")
 	}
 	if inst, ok := args[0].(slip.Instance); ok {
 		if v, has := inst.SlotValue(sym); has {
@@ -53,10 +53,10 @@ func (f *SlotBoundp) Call(s *slip.Scope, args slip.List, depth int) (result slip
 				result = slip.True
 			}
 		} else {
-			slotMissing(inst, sym, "slot-boundp")
+			return slotMissing(s, inst, sym, "slot-boundp", depth)
 		}
 	} else {
-		slotMissing(args[0], sym, "slot-boundp")
+		return slotMissing(s, args[0], sym, "slot-boundp", depth)
 	}
 	return
 }

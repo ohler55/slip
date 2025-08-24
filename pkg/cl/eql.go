@@ -44,9 +44,7 @@ type Eql struct {
 
 // Call the function with the arguments provided.
 func (f *Eql) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	x := args[0]
 	y := args[1]
 	if eq(x, y) {

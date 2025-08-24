@@ -40,7 +40,7 @@ func (f *Lcm) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for i, a := range args {
 		num, ok := a.(slip.Fixnum)
 		if !ok {
-			slip.PanicType("integers", a, "fixnum")
+			slip.TypePanic(s, depth, "integers", a, "fixnum")
 		}
 		switch {
 		case num == 0:

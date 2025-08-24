@@ -43,7 +43,7 @@ type Phase struct {
 
 // Call the function with the arguments provided.
 func (f *Phase) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	var (
 		i float64
 		r float64
@@ -55,7 +55,7 @@ func (f *Phase) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.Real:
 		r = ta.RealValue()
 	default:
-		slip.PanicType("rational", args[0], "rational")
+		slip.TypePanic(s, depth, "rational", args[0], "rational")
 	}
 	return slip.DoubleFloat(math.Atan2(i, r))
 }

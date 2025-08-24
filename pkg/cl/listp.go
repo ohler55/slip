@@ -40,9 +40,7 @@ type Listp struct {
 
 // Call the function with the arguments provided.
 func (f *Listp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch args[0].(type) {
 	case nil, slip.List:
 		return slip.True

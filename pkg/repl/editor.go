@@ -988,7 +988,7 @@ func getHistoryLimit() slip.Object {
 func setHistoryLimit(value slip.Object) {
 	num, ok := value.(slip.Fixnum)
 	if !ok {
-		slip.PanicType("*repl-history-limit*", value, "fixnum")
+		slip.TypePanic(&scope, 0, "*repl-history-limit*", value, "fixnum")
 	}
 	if num < 0 {
 		num = 0

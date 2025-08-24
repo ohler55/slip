@@ -34,6 +34,6 @@ type Ignorable struct {
 
 // Call the function with the arguments provided.
 func (f *Ignorable) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	panic(slip.NewUndefinedFunction(slip.Symbol("ignorable"),
+	panic(slip.UndefinedFunctionNew(s, depth, slip.Symbol("ignorable"),
 		"is not a defined function. I can only be used as a declaration specifier."))
 }

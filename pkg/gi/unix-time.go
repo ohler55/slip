@@ -47,10 +47,10 @@ type UnixTime struct {
 
 // Call the function with the arguments provided.
 func (f *UnixTime) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	r, ok := args[0].(slip.Real)
 	if !ok {
-		slip.PanicType("seconds", args[0], "real")
+		slip.TypePanic(s, depth, "seconds", args[0], "real")
 	}
 	if 1 < len(args) {
 		switch args[1] {
@@ -63,7 +63,7 @@ func (f *UnixTime) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		case slip.Symbol(":nanosecond"), slip.Symbol(":nanoseconds"):
 			result = slip.Time(time.Unix(0, int64(r.RealValue())).UTC())
 		default:
-			slip.PanicType("units", args[1], ":second", ":millisecond", ":micorsecond", ":nanosecond")
+			slip.TypePanic(s, depth, "units", args[1], ":second", ":millisecond", ":micorsecond", ":nanosecond")
 		}
 	} else { // default to seconds
 		result = slip.Time(time.Unix(0, int64(r.RealValue()*float64(time.Second))).UTC())

@@ -58,14 +58,14 @@ type Nsublis struct {
 
 // Call the function with the arguments provided.
 func (f *Nsublis) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	alist, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("alist", args[0], "association list")
+		slip.TypePanic(s, depth, "alist", args[0], "association list")
 	}
 	for _, a := range alist {
 		if _, ok = a.(slip.List); !ok {
-			slip.PanicType("alist", args[0], "association list")
+			slip.TypePanic(s, depth, "alist", args[0], "association list")
 		}
 	}
 	tree := args[1]

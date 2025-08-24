@@ -47,7 +47,7 @@ type UnwindProtect struct {
 
 // Call the function with the arguments provided.
 func (f *UnwindProtect) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	d2 := depth + 1
 	defer func() {
 		for i := 1; i < len(args); i++ {

@@ -41,9 +41,7 @@ type MakeRandomState struct {
 
 // Call the function with the arguments provided.
 func (f *MakeRandomState) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if 1 < len(args) {
-		slip.PanicArgCount(f, 0, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 0, 1)
 	var state slip.Object
 	if 0 < len(args) {
 		state = args[0]
@@ -57,7 +55,7 @@ func (f *MakeRandomState) Call(s *slip.Scope, args slip.List, depth int) (result
 		case *RandomState:
 			rs = ts
 		default:
-			slip.PanicType("state", state, "random-state")
+			slip.TypePanic(s, depth, "state", state, "random-state")
 		}
 	}
 	return NewRandomState(rs)

@@ -52,7 +52,7 @@ type Progv struct {
 
 // Call the function with the arguments provided.
 func (f *Progv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	ns := s.NewScope()
 	var (
 		symbols slip.List
@@ -64,7 +64,7 @@ func (f *Progv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case slip.List:
 		symbols = ta
 	default:
-		slip.PanicType("symbols", ta, "list")
+		slip.TypePanic(s, depth, "symbols", ta, "list")
 	}
 	switch ta := args[1].(type) {
 	case nil:
@@ -72,7 +72,7 @@ func (f *Progv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case slip.List:
 		values = ta
 	default:
-		slip.PanicType("values", ta, "list")
+		slip.TypePanic(s, depth, "values", ta, "list")
 	}
 	for i, v := range symbols {
 		if sym, ok := v.(slip.Symbol); ok {
@@ -82,7 +82,7 @@ func (f *Progv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 				ns.Let(sym, slip.Unbound)
 			}
 		} else {
-			slip.PanicType("symbol element", v, "list of symbols")
+			slip.TypePanic(s, depth, "symbol element", v, "list of symbols")
 		}
 	}
 	d2 := depth + 1

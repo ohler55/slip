@@ -37,10 +37,10 @@ type MakeSymbol struct {
 
 // Call the function with the arguments provided.
 func (f *MakeSymbol) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	str, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("name", args[0], "string")
+		slip.TypePanic(s, depth, "name", args[0], "string")
 	}
 	return slip.Symbol(str)
 }

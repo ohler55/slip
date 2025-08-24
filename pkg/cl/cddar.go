@@ -38,10 +38,10 @@ type Cddar struct {
 
 // Call the function with the arguments provided.
 func (f *Cddar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return cadGet(f, args, []bool{true, false, false})
+	return cadGet(s, f, args, []bool{true, false, false}, depth)
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Cddar) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	cadPlace(f, args, []bool{true, false, false}, value)
+	cadPlace(s, f, args, []bool{true, false, false}, value)
 }

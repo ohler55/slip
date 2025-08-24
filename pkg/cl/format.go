@@ -305,9 +305,7 @@ type Format struct {
 
 // Call the function with the arguments provided.
 func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 2 {
-		slip.PanicArgCount(f, 2, -1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	var (
 		w  io.Writer
 		ss slip.Stream
@@ -326,24 +324,24 @@ func (f *Format) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 				break
 			}
 		}
-		slip.PanicType("destination", ta, "output-stream")
+		slip.TypePanic(s, depth, "destination", ta, "output-stream")
 	}
-	out := FormatArgs(s, args[1:])
+	out := FormatArgs(s, args[1:], depth)
 	if w == nil {
 		return slip.String(out)
 	}
 	if _, err := w.Write(out); err != nil {
-		slip.PanicStream(ss, "write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write failed. %s", err)
 	}
 	return nil
 }
 
 // FormatArgs uses the provided args as if a format function would to append
 // to a buffer.
-func FormatArgs(s *slip.Scope, args slip.List) []byte {
+func FormatArgs(s *slip.Scope, args slip.List, depth int) []byte {
 	cs, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("control", args[0], "string")
+		slip.TypePanic(s, depth, "control", args[0], "string")
 	}
 	ctrl := control{scope: s, str: []byte(cs), args: args[1:], argPos: 0}
 	ctrl.end = len(ctrl.str)

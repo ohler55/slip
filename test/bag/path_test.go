@@ -24,4 +24,5 @@ func TestBagPath(t *testing.T) {
 		},
 		Eval: bag.Path(jp.C("a").C("b").C("c")),
 	}).Test(t)
+	sliptest.LoadForm(t, bag.Path(jp.C("a").C("b").C("c")))
 }

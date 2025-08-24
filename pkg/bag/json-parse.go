@@ -59,7 +59,7 @@ type JSONParse struct {
 
 // Call the the function with the arguments provided.
 func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	d2 := depth + 1
 	var caller slip.Caller
 	channel, ok := args[0].(gi.Channel)
@@ -89,7 +89,7 @@ func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		case io.Reader:
 			oj.MustLoad(ta, cb)
 		default:
-			slip.PanicType("input", ta, "string", "input-stream")
+			slip.TypePanic(s, depth, "input", ta, "string", "input-stream")
 		}
 	} else {
 		switch ta := args[1].(type) {
@@ -100,7 +100,7 @@ func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		case io.Reader:
 			sen.MustParseReader(ta, cb)
 		default:
-			slip.PanicType("input", ta, "string", "input-stream")
+			slip.TypePanic(s, depth, "input", ta, "string", "input-stream")
 		}
 	}
 	return nil

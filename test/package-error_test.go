@@ -12,7 +12,8 @@ import (
 )
 
 func TestPackageErrorObj(t *testing.T) {
-	cond := slip.NewPackageError(&slip.CLPkg, "not a %s package-error", "real")
+	scope := slip.NewScope()
+	cond := slip.PackageErrorNew(scope, 0, &slip.CLPkg, "not a %s package-error", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<package-error [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestPackageErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real package-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real package-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestPackageErrorMake(t *testing.T) {
@@ -54,5 +55,5 @@ func TestPackageErrorMake(t *testing.T) {
 }
 
 func TestPackageErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicPackage(&slip.CLPkg, "raise") })
+	tt.Panic(t, func() { slip.PackagePanic(slip.NewScope(), 0, &slip.CLPkg, "raise") })
 }

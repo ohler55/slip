@@ -39,6 +39,7 @@ func TestVectorGet(t *testing.T) {
 	v := slip.NewVector(3, slip.TrueSymbol, nil, slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}, true)
 	val := v.Get(1)
 	tt.Equal(t, slip.Fixnum(2), val)
+	sliptest.LoadForm(t, v)
 }
 
 func TestVectorSet(t *testing.T) {

@@ -2,7 +2,9 @@
 
 package slip
 
-import "github.com/ohler55/ojg/alt"
+import (
+	"github.com/ohler55/ojg/alt"
+)
 
 // FuncInfo stores information about a function.
 type FuncInfo struct {
@@ -11,6 +13,7 @@ type FuncInfo struct {
 	Doc    *FuncDoc
 	Pkg    *Package // package interned in
 	Kind   Symbol
+	Aux    any
 	Export bool
 }
 
@@ -22,7 +25,7 @@ func (obj *FuncInfo) String() string {
 // Append a buffer with a representation of the Object.
 func (obj *FuncInfo) Append(b []byte) []byte {
 	b = append(b, "#<"...)
-	b = append(b, printer.caseName("function")...)
+	b = append(b, obj.Kind...)
 	b = append(b, ' ')
 	b = append(b, printer.caseName(obj.Name)...)
 	return append(b, '>')
@@ -47,7 +50,10 @@ func (obj *FuncInfo) Hierarchy() []Symbol {
 	if len(obj.Kind) == 0 {
 		obj.Kind = FunctionSymbol
 	}
-	return []Symbol{obj.Kind, TrueSymbol}
+	if obj.Kind == FunctionSymbol {
+		return []Symbol{FunctionSymbol, TrueSymbol}
+	}
+	return []Symbol{obj.Kind, FunctionSymbol, TrueSymbol}
 }
 
 // Eval returns self.
@@ -68,4 +74,43 @@ func (obj *FuncInfo) Describe(b []byte, indent, right int, ansi bool) []byte {
 // FuncDocs returns the documentation for the object.
 func (obj *FuncInfo) FuncDocs() *FuncDoc {
 	return obj.Doc
+}
+
+// LoadForm returns a list that when evaluated defines then function described
+// by this FuncInfo.
+func (obj *FuncInfo) LoadForm() Object {
+	var form List
+	switch obj.Kind {
+	case MacroSymbol:
+		form = append(form, Symbol("defmacro"))
+	case FlosSymbol:
+		meth, _ := obj.Aux.(string)
+		return List{Symbol("flosfun"), Symbol(obj.Name), Symbol(meth)}
+	case GenericFunctionSymbol:
+		if lf, ok := obj.Aux.(LoadFormer); ok {
+			return lf.LoadForm()
+		}
+	default:
+		form = append(form, Symbol("defun"))
+	}
+	form = append(form, Symbol(obj.Name))
+	args := make(List, len(obj.Doc.Args))
+	for i, da := range obj.Doc.Args {
+		if da.Default == nil {
+			args[i] = Symbol(da.Name)
+		} else {
+			args[i] = List{Symbol(da.Name), da.Default}
+		}
+	}
+	form = append(form, args)
+	if 0 < len(obj.Doc.Text) {
+		form = append(form, String(obj.Doc.Text))
+	}
+	fun := obj.Create(nil).(Funky)
+	if lam, ok := fun.Caller().(*Lambda); ok {
+		form = append(form, lam.Forms...)
+	} else {
+		form = append(form, Symbol("..."))
+	}
+	return form
 }

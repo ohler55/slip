@@ -12,7 +12,8 @@ import (
 )
 
 func TestEndOfFileObj(t *testing.T) {
-	cond := slip.NewEndOfFile(&slip.OutputStream{}, "not a %s end-of-file", "real")
+	scope := slip.NewScope()
+	cond := slip.EndOfFileNew(scope, 0, &slip.OutputStream{}, "not a %s end-of-file", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<end-of-file [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestEndOfFileObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real end-of-file", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real end-of-file", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestEndOfFileMake(t *testing.T) {
@@ -43,7 +44,7 @@ func TestEndOfFileMake(t *testing.T) {
 
 	value, has = cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'end-of-file :stream (make-string-output-stream) :message "raise")`,
@@ -62,5 +63,5 @@ func TestEndOfFileMake(t *testing.T) {
 }
 
 func TestEndOfFilePanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicEndOfFile(&slip.OutputStream{}, "raise") })
+	tt.Panic(t, func() { slip.EndOfFilePanic(nil, 0, &slip.OutputStream{}, "raise") })
 }

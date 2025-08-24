@@ -34,7 +34,7 @@ func NewBroadcastStream(args ...slip.Object) BroadcastStream {
 				continue
 			}
 		}
-		slip.PanicType("output-stream", a, "output-stream")
+		slip.TypePanic(slip.NewScope(), 0, "output-stream", a, "output-stream")
 	}
 	return bs
 }
@@ -89,7 +89,7 @@ func (obj BroadcastStream) Eval(s *slip.Scope, depth int) slip.Object {
 func (obj BroadcastStream) Write(b []byte) (n int, err error) {
 	if obj[0] != nil {
 		return 0, slip.WrapError(slip.NewScope(),
-			slip.NewStreamError(obj, "closed").(slip.Instance),
+			slip.StreamErrorNew(slip.NewScope(), 0, obj, "closed").(slip.Instance),
 			"closed", nil)
 	}
 	for _, s := range obj {
@@ -107,7 +107,7 @@ func (obj BroadcastStream) Write(b []byte) (n int, err error) {
 func (obj BroadcastStream) Seek(offset int64, whence int) (n int64, err error) {
 	if obj[0] != nil {
 		return 0, slip.WrapError(slip.NewScope(),
-			slip.NewStreamError(obj, "closed").(slip.Instance),
+			slip.StreamErrorNew(slip.NewScope(), 0, obj, "closed").(slip.Instance),
 			"closed", nil)
 	}
 	if 1 < len(obj) {

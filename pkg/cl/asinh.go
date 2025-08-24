@@ -39,11 +39,11 @@ type Asinh struct {
 
 // Call the function with the arguments provided.
 func (f *Asinh) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if real, ok := args[0].(slip.Real); ok {
 		result = slip.DoubleFloat(math.Asinh(real.RealValue()))
 	} else {
-		slip.PanicType("number", args[0], "number")
+		slip.TypePanic(s, depth, "number", args[0], "number")
 	}
 	return
 }

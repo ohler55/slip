@@ -21,9 +21,9 @@ const (
 	// MethodSymbol is the symbol with a value of "method" for Flavors
 	// methods.
 	MethodSymbol = Symbol("method")
-	// GenericSymbol is the symbol with a value of "generic" for CLOS generics
-	// and methods.
-	GenericSymbol = Symbol("generic")
+	// GenericFunctionSymbol is the symbol with a value of "generic-function"
+	// for CLOS generics and methods.
+	GenericFunctionSymbol = Symbol("generic-function")
 )
 
 // Function is the base type for most if not all functions.
@@ -53,7 +53,7 @@ func Define(creator func(args List) Object, doc *FuncDoc, pkgs ...*Package) {
 	if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	pkg.Define(creator, doc)
+	_ = pkg.Define(creator, doc)
 }
 
 // NewFunc creates a new instance of the named function with the arguments
@@ -75,7 +75,7 @@ func MustFindFunc(name string, pkgs ...*Package) *FuncInfo {
 	if 0 < len(pkgs) {
 		pkg = pkgs[0]
 	}
-	panic(NewUndefinedFunction(Symbol(name), "Function %s is not defined in %s.",
+	panic(UndefinedFunctionNew(NewScope(), 0, Symbol(name), "Function %s is not defined in %s.",
 		printer.caseName(name), pkg.Name))
 }
 
@@ -204,11 +204,33 @@ func (f *Function) Simplify() any {
 
 // Equal returns true if this Object and the other are equal in value.
 func (f *Function) Equal(other Object) bool {
+	if of, ok := other.(Funky); ok {
+		if f.Name == of.GetName() {
+			oargs := of.GetArgs()
+			if len(f.Args) == len(oargs) {
+				for i, a := range f.Args {
+					if !ObjectEqual(a, oargs[i]) {
+						return false
+					}
+				}
+				return true
+			}
+		}
+	}
 	return false
 }
 
 // Hierarchy returns the class hierarchy as symbols for the instance.
 func (f *Function) Hierarchy() []Symbol {
+	var fi *FuncInfo
+	if f.Pkg == nil {
+		fi = FindFunc(f.Name)
+	} else {
+		fi = FindFunc(f.Name, f.Pkg)
+	}
+	if fi != nil {
+		return fi.Hierarchy()
+	}
 	for _, skip := range f.SkipEval {
 		if skip {
 			return []Symbol{MacroSymbol, TrueSymbol}
@@ -225,6 +247,29 @@ func (f *Function) GetArgs() List {
 // GetName returns the function name.
 func (f *Function) GetName() string {
 	return f.Name
+}
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (f *Function) LoadForm() Object {
+	form := make(List, len(f.Args)+1)
+	form[0] = Symbol(f.Name)
+	for i, a := range f.Args {
+		if a != nil {
+			if f.SkipArgEval(i) {
+				form[i+1] = a
+			} else {
+				switch ta := a.(type) {
+				case nil:
+				// already nil
+				case LoadFormer:
+					form[i+1] = ta.LoadForm()
+				default:
+					PrintNotReadablePanic(NewScope(), 0, ta, "Can not make a load form for %s.", ta)
+				}
+			}
+		}
+	}
+	return form
 }
 
 // ListToFunc converts a list to a function.
@@ -251,7 +296,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 			}
 		}
 	}
-	cond := NewError("|%s| is not a function", ObjectString(list[0]))
+	cond := ErrorNew(s, depth, "|%s| is not a function", ObjectString(list[0]))
 	panic(cond)
 }
 

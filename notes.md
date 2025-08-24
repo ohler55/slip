@@ -5,131 +5,40 @@
 - next
 
 ---------------------
+ - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
- - generics branch
-  - Generic that implements FuncInfo and sits along side ordinary functions in package
-  - GenMeth embeds Method
-   - add type symbol
-   - has subs (or specializers? or specifics)
-  - defgeneric
-   - create a Generic but the bahavior is to panic if called without any defmethods
-  - all daemons are called for matching method specializers
-  - cache callers, remove cached on defmethod or defgeneric for matching, or maybe all
-   - build a cached method from all matches and store as exact match even if no exact found
-   - keep exacts or cached separate from defined/methods
-    - cached are GenMeths also
+ - plugins
+  - PkgUse with clos and generics
 
-  - map with type as key
-   - walk hierarchy to find matches in order
+- generics branch
+ - add scope and depth to all condition creations
+  - replace all in slip, later in plugins
+  + PanicType => TypePanic
+  + ArgCountCheck => CheckArgCount
+  + NewError => ErrorNew
+  - NewPanic => ErrorPanic where there is a scope and depth
+  + CheckMethodArgCount => MethodArgCountCheck
+  + PanicMethodArgCount => MethodArgCountPanic (slip-flow)
+  + PanicStream => StreamPanic (slip-flow)
 
-  - standard-class reader, writer, and accessor
-   - class slots
-    - accessors must consider slot on standard-object.Type.Vars
-     - if not found then look back on inherit
-  - pkg/gen or pkg/generic
-   - might need to move defmethod (defmethod depends on flavors)
-   - maybe add VarName() to slip.Class to break dependency
-
-  - call print-object in slip.Panic to form message
-   - if condition and :report then use that for printing, others like *print-escape*
-    - else call generic
-    - if no generic match print .String() - should be generic method for t
-  - pass scope in then various error creation panic
-   - allow for report function to use local variables
-
-  - generics are tied to a package just like functions
-  - is a flag needed to indicate some generics/method do not allow qualifiers like :before and :after
-  - sparse method combinations, no need for empties
-  - add flavor/class hierarchy to regular hierarchy
-   - build class then instance get hierarchy from class/flavor
-    - maybe a name class hierarchy as well as instance
-    - precedence-list
-     - foo super-foo standard-object t
+----------
+- for later
+ - [ ] WITH-ACCESSORS
+ - [ ] ENSURE-GENERIC-FUNCTION
+ - [ ] REINITIALIZE-INSTANCE
+ - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
+ - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
 
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
-   - clos.Generic
-    - start with built in types
-    - embeds flavors.Method
-    - adds parameters - list of type symbols, later type specifier lists
-    - add specifics []*clos.Generic
-   - want this on package for lookup
-   - clos instances don't bind slot by default
-    - not a slip.Scope, just map or rather a specific Slots map so cl/slot-value works with it
-     - Getter interface or Getter and Setter interfaces
-  - call-next-method, alias for continue-whopper
 
-  - defgeneric (needed before defclass for slot accessors)
-   - build generic dispatch table on Package
-   - as default and flavor instance (send inst function-name args) if it has :function-name
-   - map by name to *Generic
-   - Generic [same as clos Method conceptually]
-    - name
-    - methods (lookup based on arg types)
-     - branch for each specializer (arg types)
-      - nested maps or a list?
-       - if map
-        - need to consider sub-classes so not a direct lookup
-       - if list then walk and check each arg-type until a match
-        - sort order is most specialize
-        - maybe more of a tree with first level as first arg then branches off for 2 and additions arguments
-     - leaf has daemons like flavors - can tht be reused?
-     - as method defined the qualifiers/daemons are propogated to reduce call time lookups
-    - Method or Generic to avoid name confusion
-     - embed flavors.Method
-     - parameters - list of arg types - just types, no forms, or maybe rely on coerce type matching
-     - specifics - []*Method to search
-
-  - defmethod class daemon bindings/args
-   - find class to determine how to define
-   - maybe separate function/method table for all clos classes
-    - when executing consider based method-qualifier
-    - map of function name and methods
-     - method includes:
-      - functions to call
-       - daemons
-       - most specific type for primary
-      - qualifier
-       - list of var-name and type pairs
-        - match is when all types for the arguments match
-        - nill type matches anything
-       - if no qualifier then it is generic
-      - docs
-
- - [ ] SLOT-MISSING - make generic
- - [ ] SLOT-UNBOUND - make generic
- - [ ] ADD-METHOD
- - [ ] CALL-METHOD
- - [ ] CALL-NEXT-METHOD
- - [ ] CHANGE-CLASS - call generic update-instance-for-different-class
- - [ ] COMPUTE-APPLICABLE-METHODS
- - [ ] DEFGENERIC
- - [ ] DEFINE-METHOD-COMBINATION
- - [ ] DEFMETHOD - need generic support
- - [ ] DESCRIBE-OBJECT
- - [ ] ENSURE-GENERIC-FUNCTION
- - [ ] FIND-METHOD
- - [ ] FUNCTION-KEYWORDS
- - [ ] GENERIC-FLET
- - [ ] GENERIC-FUNCTION
- - [ ] GENERIC-LABELS
- - [ ] INITIALIZE-INSTANCE
- - [ ] MAKE-LOAD-FORM
- - [ ] MAKE-LOAD-FORM-SAVING-SLOTS
- - [ ] MAKE-METHOD
- - [ ] METHOD-COMBINATION
- - [ ] METHOD-COMBINATION-ERROR
- - [ ] METHOD-QUALIFIERS
- - [ ] NEXT-METHOD-P
- - [ ] NO-APPLICABLE-METHOD
- - [ ] NO-NEXT-METHOD
- - [ ] PRINT-OBJECT
- - [ ] REINITIALIZE-INSTANCE
- - [ ] REMOVE-METHOD
- - [ ] SHARED-INITIALIZE
- - [ ] SYMBOL-MACROLET
- - [ ] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
- - [ ] WITH-ACCESSORS
- - [ ] WITH-ADDED-METHODS
+-------------------
+ - readably branch
+  - add Readably or **Readable** interface
+   - Readably(b []byte, op ...*slip.Printer) []byte
+    - always readable but op[0] for base, radix, prec
+    - maybe op[0] for pretty and rightMargin
+    - maybe op[0].Case
+   - use in printer, pp, snapshot, etc can then decide
 
 ---------------------
  - flavor allow out of order defflavor like standard-class

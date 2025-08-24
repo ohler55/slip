@@ -42,7 +42,7 @@ type Error struct {
 
 // Call the function with the arguments provided.
 func (f *Error) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 
-	panic(slip.NewError("%s", FormatArgs(s, args)))
+	panic(slip.ErrorNew(s, depth, "%s", FormatArgs(s, args, depth)))
 }

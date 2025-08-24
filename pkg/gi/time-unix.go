@@ -46,10 +46,10 @@ type TimeUnix struct {
 
 // Call the function with the arguments provided.
 func (f *TimeUnix) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	t, ok := args[0].(slip.Time)
 	if !ok {
-		slip.PanicType("time", args[0], "time")
+		slip.TypePanic(s, depth, "time", args[0], "time")
 	}
 	nano := time.Time(t).UnixNano()
 	if 1 < len(args) {
@@ -63,7 +63,7 @@ func (f *TimeUnix) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		case slip.Symbol(":nanosecond"), slip.Symbol(":nanoseconds"):
 			result = slip.Fixnum(nano)
 		default:
-			slip.PanicType("units", args[1], ":second", ":millisecond", ":micorsecond", ":nanosecond")
+			slip.TypePanic(s, depth, "units", args[1], ":second", ":millisecond", ":micorsecond", ":nanosecond")
 		}
 	} else { // default to seconds
 		result = slip.DoubleFloat(float64(nano) / float64(time.Second))

@@ -53,14 +53,14 @@ type WithOpenFile struct {
 
 // Call the function with the arguments provided.
 func (f *WithOpenFile) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	fargs, ok := args[0].(slip.List)
 	if !ok || len(fargs) < 2 {
-		slip.PanicType("args", args[0], "list of (symbol filepath options*)")
+		slip.TypePanic(s, depth, "args", args[0], "list of (symbol filepath options*)")
 	}
 	var sym slip.Symbol
 	if sym, ok = fargs[0].(slip.Symbol); !ok {
-		slip.PanicType("stream", fargs[0], "symbol")
+		slip.TypePanic(s, depth, "stream", fargs[0], "symbol")
 	}
 	d2 := depth + 1
 	fargs = fargs[1:]
@@ -68,7 +68,7 @@ func (f *WithOpenFile) Call(s *slip.Scope, args slip.List, depth int) (result sl
 	for i := range fargs {
 		eargs[i] = slip.EvalArg(s, fargs, i, d2)
 	}
-	file := f.openFile(eargs)
+	file := f.openFile(s, eargs, depth)
 	defer func() {
 		if closer, _ := file.(io.Closer); closer != nil {
 			_ = closer.Close()

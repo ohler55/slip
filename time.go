@@ -108,7 +108,7 @@ func (obj Time) Init(scope *Scope, args List, depth int) {
 func (obj Time) Receive(s *Scope, message string, args List, depth int) Object {
 	f := timeMethods[strings.ToLower(message)]
 	if f == nil {
-		PanicUndefinedFunction(Symbol("time"), "%s", message)
+		UndefinedFunctionPanic(s, depth, Symbol("time"), "%s", message)
 	}
 	return f(s, obj, args, depth)
 }
@@ -160,6 +160,11 @@ func (obj Time) Describe(b []byte, indent, right int, ansi bool) []byte {
 	return b
 }
 
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Time) LoadForm() Object {
+	return obj
+}
+
 func describeTime(s *Scope, obj Time, args List, depth int) Object {
 	w, _ := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
@@ -174,7 +179,7 @@ func describeTime(s *Scope, obj Time, args List, depth int) Object {
 	b := obj.Describe(nil, 0, right, ansi)
 	if _, err := w.Write(b); err != nil {
 		ss, _ := w.(Stream)
-		PanicStream(ss, "write failed: %s", err)
+		StreamPanic(s, depth, ss, "write failed: %s", err)
 	}
 	return nil
 }

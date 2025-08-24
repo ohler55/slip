@@ -35,7 +35,7 @@ type Listx struct {
 func (f *Listx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	switch len(args) {
 	case 0:
-		slip.ArgCountCheck(f, args, 1, -1)
+		slip.CheckArgCount(s, depth, f, args, 1, -1)
 	case 1:
 		result = args[0]
 	default:

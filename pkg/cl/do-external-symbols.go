@@ -51,12 +51,12 @@ type DoExternalSymbols struct {
 
 // Call the function with the arguments provided.
 func (f *DoExternalSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	d2 := depth + 1
 
 	sargs, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("args", args[0], "list")
+		slip.TypePanic(s, depth, "args", args[0], "list")
 	}
 	pkg := s.Get("*package*").(*slip.Package)
 	var (
@@ -64,11 +64,11 @@ func (f *DoExternalSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.
 		rform slip.Object
 	)
 	if sym, ok = sargs[0].(slip.Symbol); !ok {
-		slip.PanicType("args symbol", sargs[0], "symbol")
+		slip.TypePanic(s, depth, "args symbol", sargs[0], "symbol")
 	}
 	if 1 < len(sargs) {
 		if pkg, ok = slip.EvalArg(s, sargs, 1, d2).(*slip.Package); !ok {
-			slip.PanicType("args package", sargs[1], "package")
+			slip.TypePanic(s, depth, "args package", sargs[1], "package")
 		}
 		if 2 < len(sargs) {
 			rform = sargs[2]

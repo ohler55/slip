@@ -49,17 +49,17 @@ type Deftest struct {
 
 // Call the function with the arguments provided.
 func (f *Deftest) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	inst := testFlavor.MakeInstance().(*flavors.Instance)
 	if name, ok := args[0].(slip.String); ok {
 		inst.Let(slip.Symbol("name"), name)
 	} else {
-		slip.PanicType("name", args[0], "string")
+		slip.TypePanic(s, depth, "name", args[0], "string")
 	}
 	inst.Let(slip.Symbol("parent"), args[1])
 	if args[1] != nil {
 		if parent, ok := args[1].(*flavors.Instance); !ok || parent.Type != suiteFlavor {
-			slip.PanicType("parent", args[1], "instance of test-flavor")
+			slip.TypePanic(s, depth, "parent", args[1], "instance of test-flavor")
 		}
 	}
 	inst.Let(slip.Symbol("forms"), args[2:])

@@ -43,9 +43,9 @@ type LdbTest struct {
 // Call the function with the arguments provided.
 func (f *LdbTest) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	// Helper functions are defined in deposit-field.go.
-	slip.ArgCountCheck(f, args, 2, 2)
-	integer, _ := ToUnsignedByte(args[1], "integer")
-	size, pos := byteSpecArg(args[0])
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
+	integer, _ := ToUnsignedByte(s, args[1], "integer", depth)
+	size, pos := byteSpecArg(s, args[0], depth)
 
 	for i := uint(0); i < uint(size); i++ {
 		if integer.GetBit(i + uint(pos)) {

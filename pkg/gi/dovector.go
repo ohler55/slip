@@ -50,7 +50,7 @@ type Dovector struct {
 
 // Call the function with the arguments provided.
 func (f *Dovector) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	ns := s.NewScope()
 	ns.Block = true
 	ns.TagBody = true
@@ -62,7 +62,7 @@ func (f *Dovector) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	)
 	if input, ok := args[0].(slip.List); ok && 2 <= len(input) {
 		if sym, ok = input[0].(slip.Symbol); !ok {
-			slip.PanicType("dovector input var", input[0], "symbol")
+			slip.TypePanic(s, depth, "dovector input var", input[0], "symbol")
 		}
 		sym = slip.Symbol(strings.ToLower(string(sym)))
 		switch t1 := ns.Eval(input[1], d2).(type) {
@@ -73,7 +73,7 @@ func (f *Dovector) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case slip.List:
 			list = t1
 		default:
-			slip.PanicType("dovector input list", t1, "list")
+			slip.TypePanic(s, depth, "dovector input list", t1, "list")
 		}
 		if 2 < len(input) {
 			rform = input[2]
@@ -82,7 +82,7 @@ func (f *Dovector) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		}
 	} else {
-		slip.PanicType("dovector input", args[0], "list")
+		slip.TypePanic(s, depth, "dovector input", args[0], "list")
 	}
 	ns.Let(sym, nil) // use the safe way to verify it's a valid symbol to use for a let.
 	for _, v := range list {

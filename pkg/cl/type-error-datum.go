@@ -40,9 +40,9 @@ type TypeErrorDatum struct {
 
 // Call the function with the arguments provided.
 func (f *TypeErrorDatum) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("type-error") {
-		slip.PanicType("type-error", args[0], "type-error")
+		slip.TypePanic(s, depth, "type-error", args[0], "type-error")
 	} else {
 		result, _ = ci.SlotValue(datumSymbol)
 	}

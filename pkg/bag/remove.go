@@ -51,20 +51,20 @@ type Remove struct {
 
 // Call the the function with the arguments provided.
 func (f *Remove) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
 	if 1 < len(args) {
-		removeBag(obj, args[1])
+		removeBag(s, obj, args[1], depth)
 	} else {
-		removeBag(obj, nil)
+		removeBag(s, obj, nil, depth)
 	}
 	return obj
 }
 
-func removeBag(obj *flavors.Instance, path slip.Object) {
+func removeBag(s *slip.Scope, obj *flavors.Instance, path slip.Object, depth int) {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -73,7 +73,7 @@ func removeBag(obj *flavors.Instance, path slip.Object) {
 	case Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string")
+		slip.TypePanic(s, depth, "path", p, "string")
 	}
 	if x == nil {
 		obj.Any = nil

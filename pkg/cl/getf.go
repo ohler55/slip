@@ -52,7 +52,7 @@ type Getf struct {
 
 // Call the function with the arguments provided.
 func (f *Getf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	var plist slip.List
 	switch ta := s.Eval(args[0], depth+1).(type) {
 	case nil:
@@ -60,7 +60,7 @@ func (f *Getf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	case slip.List:
 		plist = ta
 	default:
-		slip.PanicType("plist", args[0], "property list")
+		slip.TypePanic(s, depth, "plist", args[0], "property list")
 	}
 	ind := args[1]
 	if 2 < len(args) {
@@ -76,7 +76,7 @@ func (f *Getf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 
 // Place a value in the plist.
 func (f *Getf) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, 0, f, args, 2, 3)
 	var plist slip.List
 	switch ta := s.Eval(args[0], 0).(type) {
 	case nil:
@@ -84,7 +84,7 @@ func (f *Getf) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	case slip.List:
 		plist = ta
 	default:
-		slip.PanicType("plist", args[0], "property list")
+		slip.TypePanic(s, 0, "plist", args[0], "property list")
 	}
 	ind := args[1]
 	for i := 0; i < len(plist)-1; i += 2 {
@@ -100,6 +100,6 @@ func (f *Getf) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	case slip.Placer:
 		callPlace(s, ta, plist, 0)
 	default:
-		slip.PanicType("plist", args[0], "property list")
+		slip.TypePanic(s, 0, "plist", args[0], "property list")
 	}
 }

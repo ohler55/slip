@@ -51,7 +51,7 @@ type RegexFindAll struct {
 
 // Call the function with the arguments provided.
 func (f *RegexFindAll) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 
 	rx := regexp.MustCompile(slip.MustBeString(args[0], "regex"))
 	str := slip.MustBeString(args[1], "string")
@@ -60,7 +60,7 @@ func (f *RegexFindAll) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 		if num, ok := v.(slip.Fixnum); ok {
 			limit = int(num)
 		} else {
-			slip.PanicType(":limit", v, "fixnum")
+			slip.TypePanic(s, depth, ":limit", v, "fixnum")
 		}
 	}
 	var found slip.List

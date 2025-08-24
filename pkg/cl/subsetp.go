@@ -56,7 +56,7 @@ type Subsetp struct {
 
 // Call the function with the arguments provided.
 func (f *Subsetp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	var (
 		list1 slip.List
 		list2 slip.List
@@ -66,10 +66,10 @@ func (f *Subsetp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	)
 
 	if list1, ok = args[0].(slip.List); !ok {
-		slip.PanicType("list-1", args[0], "list")
+		slip.TypePanic(s, depth, "list-1", args[0], "list")
 	}
 	if list2, ok = args[1].(slip.List); !ok {
-		slip.PanicType("list-1", args[1], "list")
+		slip.TypePanic(s, depth, "list-1", args[1], "list")
 	}
 	args = args[2:]
 	if v, ok := slip.GetArgsKeyValue(args, slip.Symbol(":key")); ok {

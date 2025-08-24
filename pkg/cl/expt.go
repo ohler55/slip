@@ -46,9 +46,7 @@ type Expt struct {
 
 // Call the function with the arguments provided.
 func (f *Expt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	if base, ok := args[0].(slip.Fixnum); ok {
 		if pow, ok2 := args[1].(slip.Fixnum); ok2 {
 			x := math.Pow(float64(base), float64(pow))
@@ -66,7 +64,7 @@ func (f *Expt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		case slip.Complex:
 			result = slip.Complex(cmplx.Pow(complex(base.RealValue(), 0.0), complex128(pow)))
 		default:
-			slip.PanicType("power", pow, "number")
+			slip.TypePanic(s, depth, "power", pow, "number")
 		}
 	case slip.Complex:
 		switch pow := args[1].(type) {
@@ -75,10 +73,10 @@ func (f *Expt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		case slip.Complex:
 			result = slip.Complex(cmplx.Pow(complex128(base), complex128(pow)))
 		default:
-			slip.PanicType("power", pow, "number")
+			slip.TypePanic(s, depth, "power", pow, "number")
 		}
 	default:
-		slip.PanicType("base", base, "number")
+		slip.TypePanic(s, depth, "base", base, "number")
 	}
 	return
 }

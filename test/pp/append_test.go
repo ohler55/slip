@@ -92,6 +92,27 @@ func TestAppendLet(t *testing.T) {
 	}).Test(t)
 }
 
+func TestAppendProgn(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 20)) (pretty-print (progn (list aaa 1)(list bbb 2)) nil))`,
+		Expect: `"(progn
+  (list aaa 1)
+  (list bbb 2))
+"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((*print-right-margin* 10)) (pretty-print (progn (list aaa 1)(list bbb 2)) nil))`,
+		Expect: `"(progn
+  (list
+   aaa
+   1)
+  (list
+   bbb
+   2))
+"`,
+	}).Test(t)
+}
+
 func TestAppendDefvar(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((*print-right-margin* 20)) (pretty-print (defvar x) nil))`,
@@ -183,8 +204,11 @@ func TestAppendCond(t *testing.T) {
 
 func TestAppendPackageVar(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let ((*print-right-margin* 20)) (pretty-print common-lisp:*package* nil))`,
-		Expect: `"#<package common-lisp-user>
+		Source: `(let ((*print-right-margin* 80)) (pretty-print common-lisp:*package* nil))`,
+		Expect: `"(defpackage common-lisp-user
+  (:nicknames cl-user user)
+  (:documentation "The default package for user code and variables.")
+  (:use keyword common-lisp generic xml flavors gi bag clos csv test watch net))
 "`,
 	}).Test(t)
 }

@@ -59,7 +59,7 @@ func Flavor() *flavors.Flavor {
 
 type initCaller struct{}
 
-func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller initCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -71,11 +71,11 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 		key, _ := args[0].(slip.Symbol)
 		switch {
 		case strings.EqualFold(":set", string(key)):
-			obj.Any = ObjectToBag(args[1])
+			obj.Any = ObjectToBag(s, args[1], depth)
 		case strings.EqualFold(":parse", string(key)):
 			so, ok := args[1].(slip.String)
 			if !ok {
-				slip.PanicType("bag :init :parse", args[1], "string")
+				slip.TypePanic(s, depth, "bag :init :parse", args[1], "string")
 			}
 			obj.Any = sen.MustParse([]byte(so))
 			if options.Converter != nil {
@@ -84,7 +84,7 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object 
 		case strings.EqualFold(":read", string(key)):
 			r, ok := args[1].(io.Reader)
 			if !ok {
-				slip.PanicType("bag :init :read", args[1], "input-stream")
+				slip.TypePanic(s, depth, "bag :init :read", args[1], "input-stream")
 			}
 			obj.Any = sen.MustParseReader(r)
 			if options.Converter != nil {
@@ -124,13 +124,13 @@ func (caller initCaller) FuncDocs() *slip.FuncDoc {
 
 type setCaller struct{}
 
-func (caller setCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller setCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	switch len(args) {
 	case 1:
-		setBag(obj, args[0], nil)
+		setBag(s, obj, args[0], nil, depth)
 	case 2:
-		setBag(obj, args[0], args[1])
+		setBag(s, obj, args[0], args[1], depth)
 	default:
 		slip.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
 	}
@@ -162,13 +162,13 @@ The path must follow the JSONPath format.`,
 
 type parseCaller struct{}
 
-func (caller parseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller parseCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	switch len(args) {
 	case 1:
-		parseBag(obj, args[0], nil)
+		parseBag(s, obj, args[0], nil, depth)
 	case 2:
-		parseBag(obj, args[0], args[1])
+		parseBag(s, obj, args[0], args[1], depth)
 	default:
 		slip.PanicMethodArgChoice(obj, ":parse", len(args), "1 or 2")
 	}
@@ -200,13 +200,13 @@ The path must follow the JSONPath format.`,
 
 type readCaller struct{}
 
-func (caller readCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller readCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	switch len(args) {
 	case 1:
-		readBag(obj, args[0], nil)
+		readBag(s, obj, args[0], nil, depth)
 	case 2:
-		readBag(obj, args[0], args[1])
+		readBag(s, obj, args[0], args[1], depth)
 	default:
 		slip.PanicMethodArgChoice(obj, ":read", len(args), "1 or 2")
 	}
@@ -238,17 +238,17 @@ The path must follow the JSONPath format.`,
 
 type getCaller struct{}
 
-func (caller getCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller getCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	switch len(args) {
 	case 0:
-		value = getBag(obj, nil, false)
+		value = getBag(s, obj, nil, false, depth)
 	case 1:
-		value = getBag(obj, args[0], false)
+		value = getBag(s, obj, args[0], false, depth)
 	case 2:
-		value = getBag(obj, args[0], args[1] != nil)
+		value = getBag(s, obj, args[0], args[1] != nil, depth)
 	default:
-		slip.PanicMethodArgCount(obj, ":get", len(args), 0, 2)
+		slip.MethodArgCountPanic(s, depth, obj, ":get", len(args), 0, 2)
 	}
 	return
 }
@@ -278,10 +278,10 @@ the JSONPath format.`,
 
 type hasCaller struct{}
 
-func (caller hasCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller hasCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) == 1 {
-		value = hasBag(obj, args[0])
+		value = hasBag(s, obj, args[0], depth)
 	} else {
 		slip.PanicMethodArgChoice(obj, ":has", len(args), "1")
 	}
@@ -306,10 +306,10 @@ the JSONPath format.`,
 
 type removeCaller struct{}
 
-func (caller removeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller removeCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) == 1 {
-		removeBag(obj, args[0])
+		removeBag(s, obj, args[0], depth)
 	} else {
 		slip.PanicMethodArgChoice(obj, ":remove", len(args), "1")
 	}
@@ -391,9 +391,9 @@ func (caller nativeCaller) FuncDocs() *slip.FuncDoc {
 
 type writeCaller struct{}
 
-func (caller writeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller writeCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
-	return writeBag(obj, args)
+	return writeBag(s, obj, args, depth)
 }
 
 func (caller writeCaller) FuncDocs() *slip.FuncDoc {

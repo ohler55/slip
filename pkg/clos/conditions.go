@@ -59,6 +59,8 @@ const (
 	InvalidMethodErrorSymbol = slip.Symbol("invalid-method-error")
 	// PrintNotReadableSymbol is the symbol with a value of "print-not-readable".
 	PrintNotReadableSymbol = slip.Symbol("print-not-readable")
+	// NoApplicableMethodErrorSymbol is the symbol with a value of "no-applicable-method-error".
+	NoApplicableMethodErrorSymbol = slip.Symbol("no-applicable-method-error")
 
 	docSym      = slip.Symbol(":documentation")
 	readerSym   = slip.Symbol(":reader")
@@ -95,10 +97,12 @@ func defConditions() {
 	defClassNotFound()
 	defInvalidMethodError()
 	defPrintNotReadable()
+	defNoApplicableMethodError()
 }
 
 func defCondition() {
-	DefConditionClass("condition", slip.List{},
+	s := slip.NewScope()
+	DefConditionClass(s, "condition", slip.List{},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("report"),
@@ -119,11 +123,12 @@ __print-object__ function if __*print-escape*__ is _nil_.`),
 Conditions are defined using __define-condition__ and instance of conditions are created with the
 __make-condition__ function.`)},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defWarning() {
-	DefConditionClass("warning", slip.List{ConditionSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "warning", slip.List{ConditionSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("message"),
@@ -140,11 +145,12 @@ func defWarning() {
 				slip.String(`A __warning__ is used to raise warnings.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defSeriousCondition() {
-	DefConditionClass("serious-condition", slip.List{ConditionSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "serious-condition", slip.List{ConditionSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -153,11 +159,12 @@ func defSeriousCondition() {
 considered to be serious but with no additional slots it serves only as an indicator of seriousness.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defError() {
-	DefConditionClass("error", slip.List{SeriousConditionSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "error", slip.List{SeriousConditionSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("message"),
@@ -181,11 +188,12 @@ list of function call lists describing the call stack to the place the error was
 				slip.String(`The __error__ class is the superclass for all errors.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defArithmeticError() {
-	DefConditionClass("arithmetic-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "arithmetic-error", slip.List{ErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("operation"),
@@ -212,11 +220,12 @@ operation triggering the error.`),
 arithmetic operations.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defDivisionByZero() {
-	DefConditionClass("division-by-zero", slip.List{ArithmeticErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "division-by-zero", slip.List{ArithmeticErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -224,11 +233,12 @@ func defDivisionByZero() {
 				slip.String(`A __division-by-zero__ is an error class that occurs due to a division by zero.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defControlError() {
-	DefConditionClass("control-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "control-error", slip.List{ErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -237,11 +247,12 @@ func defControlError() {
 as a __return-from__ to a tag that is not available.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defFileError() {
-	DefConditionClass("file-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "file-error", slip.List{ErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("pathname"),
@@ -258,11 +269,12 @@ func defFileError() {
 				slip.String(`A __file-error__ occurs during an attempt to open or close a file.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defPackageError() {
-	DefConditionClass("package-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "package-error", slip.List{ErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("package"),
@@ -279,11 +291,12 @@ func defPackageError() {
 				slip.String(`A __package-error__ is related to an operation on a package.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defProgramError() {
-	DefConditionClass("program-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "program-error", slip.List{ErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -291,11 +304,12 @@ func defProgramError() {
 				slip.String(`A __program-error__ is used to describe incorrect program syntax.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defTypeError() {
-	DefConditionClass("type-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "type-error", slip.List{ErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("datum"),
@@ -321,11 +335,12 @@ func defTypeError() {
 not one of the expected types.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defParseError() {
-	DefConditionClass("parse-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "parse-error", slip.List{ErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -333,11 +348,12 @@ func defParseError() {
 				slip.String(`A __parse-error__ is a error related to parsing.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defStreamError() {
-	DefConditionClass("stream-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "stream-error", slip.List{ErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("stream"),
@@ -354,11 +370,12 @@ func defStreamError() {
 				slip.String(`A __stream-error__ represents error conditions related to a stream.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defReaderError() {
-	DefConditionClass("reader-error", slip.List{ParseErrorSymbol, StreamErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "reader-error", slip.List{ParseErrorSymbol, StreamErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -367,11 +384,12 @@ func defReaderError() {
 parsing by the LISP reader.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defEndOfFile() {
-	DefConditionClass("end-of-file", slip.List{StreamErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "end-of-file", slip.List{StreamErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -379,11 +397,12 @@ func defEndOfFile() {
 				slip.String(`A __end-of-file__ is a error signifying the end of a file has been reached.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defCellError() {
-	DefConditionClass("cell-error", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "cell-error", slip.List{ErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("name"),
@@ -400,11 +419,12 @@ func defCellError() {
 				slip.String(`A __cell-error__ represents errors related to a cell or slot.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defUnboundSlot() {
-	DefConditionClass("unbound-slot", slip.List{CellErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "unbound-slot", slip.List{CellErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("instance"),
@@ -421,11 +441,12 @@ func defUnboundSlot() {
 				slip.String(`A __unbound-error__ represents errors related to a unbound slot.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defUnboundVariable() {
-	DefConditionClass("unbound-variable", slip.List{CellErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "unbound-variable", slip.List{CellErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -433,11 +454,12 @@ func defUnboundVariable() {
 				slip.String(`A __unbound-error__ represents errors related to a unbound variable.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defUndefinedFunction() {
-	DefConditionClass("undefined-function", slip.List{CellErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "undefined-function", slip.List{CellErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -445,11 +467,12 @@ func defUndefinedFunction() {
 				slip.String(`A __undefined-error__ represents errors related to a undefined function.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defSimpleCondition() {
-	DefConditionClass("simple-condition", slip.List{ConditionSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "simple-condition", slip.List{ConditionSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("format-control"),
@@ -479,11 +502,12 @@ to form the condition message.`),
 is formed using __format__ arguments.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defSimpleError() {
-	DefConditionClass("simple-error", slip.List{SimpleConditionSymbol, ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "simple-error", slip.List{SimpleConditionSymbol, ErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -492,11 +516,12 @@ func defSimpleError() {
 is formed using __format__ arguments.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defSimpleTypeError() {
-	DefConditionClass("simple-type-error", slip.List{SimpleConditionSymbol, TypeErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "simple-type-error", slip.List{SimpleConditionSymbol, TypeErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -505,11 +530,12 @@ func defSimpleTypeError() {
 is formed using __format__ arguments..`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defSimpleWarning() {
-	DefConditionClass("simple-warning", slip.List{SimpleConditionSymbol, WarningSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "simple-warning", slip.List{SimpleConditionSymbol, WarningSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -518,11 +544,12 @@ func defSimpleWarning() {
 is formed using __format__ arguments..`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defClassNotFound() {
-	DefConditionClass("class-not-found", slip.List{CellErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "class-not-found", slip.List{CellErrorSymbol},
 		slip.List{}, // slot-specifications
 		slip.List{ // options
 			slip.List{
@@ -530,11 +557,12 @@ func defClassNotFound() {
 				slip.String(`A __class-not-found__ represents class not found error.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defInvalidMethodError() {
-	DefConditionClass("invalid-method-error", slip.List{CellErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "invalid-method-error", slip.List{CellErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("name"),
@@ -569,11 +597,12 @@ func defInvalidMethodError() {
 				slip.String(`A __invalid-method-error__ represents errors related to a method.`),
 			},
 		},
-	).Final = true
+		0).Final = true
 }
 
 func defPrintNotReadable() {
-	DefConditionClass("print-not-readable", slip.List{ErrorSymbol},
+	s := slip.NewScope()
+	DefConditionClass(s, "print-not-readable", slip.List{ErrorSymbol},
 		slip.List{ // slot-specifications
 			slip.List{
 				slip.Symbol("object"),
@@ -591,5 +620,36 @@ func defPrintNotReadable() {
 non-readable object when __*print-readably*__ is non-nil.`),
 			},
 		},
-	).Final = true
+		0).Final = true
+}
+
+func defNoApplicableMethodError() {
+	s := slip.NewScope()
+	DefConditionClass(s, "no-applicable-method-error", slip.List{CellErrorSymbol},
+		slip.List{ // slot-specifications
+			slip.List{
+				slip.Symbol("generic-function"),
+				slip.Symbol(":reader"), slip.Symbol("no-applicable-method-error-generic-function"),
+				slip.Symbol(":initarg"), slip.Symbol(":generic-function"),
+				docSym, slip.String(`The _generic-function_ related to the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
+			},
+			slip.List{
+				slip.Symbol("function-arguments"),
+				slip.Symbol(":reader"), slip.Symbol("no-applicable-method-error-function-arguments"),
+				slip.Symbol(":initarg"), slip.Symbol(":function-arguments"),
+				docSym, slip.String(`The _function-arguments_ related to the error.`),
+				gettableSym, slip.True,
+				settableSym, slip.True,
+			},
+		},
+		slip.List{ // options
+			slip.List{
+				docSym,
+				slip.String(`A __no-applicable-method-error__ represents errors related to a the
+lack of a matching method on a generic function.`),
+			},
+		},
+		0).Final = true
 }

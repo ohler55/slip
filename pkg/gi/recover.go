@@ -51,10 +51,10 @@ type Recover struct {
 
 // Call the function with the arguments provided.
 func (f *Recover) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol", args[0], "symbol")
+		slip.TypePanic(s, depth, "symbol", args[0], "symbol")
 	}
 	d2 := depth + 1
 	defer func() {

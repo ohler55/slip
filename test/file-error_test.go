@@ -12,7 +12,8 @@ import (
 )
 
 func TestFileErrorObj(t *testing.T) {
-	cond := slip.NewFileError(slip.String("somefile"), "not a %s file-error", "real")
+	scope := slip.NewScope()
+	cond := slip.FileErrorNew(scope, 0, slip.String("somefile"), "not a %s file-error", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<file-error [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestFileErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real file-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real file-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestFileErrorMake(t *testing.T) {
@@ -39,7 +40,7 @@ func TestFileErrorMake(t *testing.T) {
 	tt.Equal(t, ok, true)
 	value, has := cond.SlotValue(slip.Symbol("pathname"))
 	tt.Equal(t, has, true)
-	tt.Equal(t, nil, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'File-Error :pathname "somefile" :message "raise")`,
@@ -55,6 +56,6 @@ func TestFileErrorMake(t *testing.T) {
 
 func TestFileErrorPanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicFile(slip.String("somefile"), "raise")
+		slip.FilePanic(slip.NewScope(), 0, slip.String("somefile"), "raise")
 	})
 }

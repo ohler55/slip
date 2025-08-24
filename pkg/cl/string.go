@@ -38,7 +38,7 @@ type String struct {
 
 // Call the function with the arguments provided.
 func (f *String) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, 0, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.String:
 		result = ta

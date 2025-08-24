@@ -75,7 +75,7 @@ type Zip struct {
 
 // Call the function with the arguments provided.
 func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 12)
+	slip.CheckArgCount(s, depth, f, args, 1, 12)
 	data := []byte(slip.CoerceToOctets(args[0]).(slip.Octets))
 	level := gzip.DefaultCompression
 	args = args[1:]
@@ -90,7 +90,7 @@ func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case slip.Symbol:
 			// not a level
 		default:
-			slip.PanicType("level", ta, "fixnum", "nil")
+			slip.TypePanic(s, depth, "level", ta, "fixnum", "nil")
 		}
 	}
 	var buf bytes.Buffer
@@ -98,7 +98,7 @@ func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if err != nil {
 		panic(err)
 	}
-	setZipHeader(w, args)
+	setZipHeader(s, w, args, depth)
 	if _, err = w.Write(data); err != nil {
 		panic(err)
 	}
@@ -108,7 +108,7 @@ func (f *Zip) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return slip.Octets(buf.Bytes())
 }
 
-func setZipHeader(z *gzip.Writer, args slip.List) {
+func setZipHeader(s *slip.Scope, z *gzip.Writer, args slip.List, depth int) {
 	if 0 < len(args) {
 		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":comment")); has {
 			z.Comment = slip.MustBeString(val, ":comment")
@@ -120,7 +120,7 @@ func setZipHeader(z *gzip.Writer, args slip.List) {
 			if st, ok := val.(slip.Time); ok {
 				z.ModTime = time.Time(st).UTC()
 			} else {
-				slip.PanicType(":mod-time", val, "time")
+				slip.TypePanic(s, depth, ":mod-time", val, "time")
 			}
 		}
 		if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":name")); has {

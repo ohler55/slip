@@ -53,10 +53,10 @@ type Defconstant struct {
 
 // Call the function with the arguments provided.
 func (f *Defconstant) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defconstant", args[0], "symbol")
+		slip.TypePanic(s, depth, "name argument to defconstant", args[0], "symbol")
 	}
 	name := strings.ToLower(string(sym))
 	pkg, vname, _ := slip.UnpackName(name)
@@ -64,7 +64,7 @@ func (f *Defconstant) Call(s *slip.Scope, args slip.List, depth int) (result sli
 		pkg = slip.CurrentPackage
 	}
 	if pkg.Locked {
-		slip.PanicPackage(pkg, "Redefining %s:%s constant. Package %s is locked.",
+		slip.PackagePanic(s, depth, pkg, "Redefining %s:%s constant. Package %s is locked.",
 			pkg.Name, vname, pkg.Name)
 	}
 	var doc slip.String
@@ -72,7 +72,7 @@ func (f *Defconstant) Call(s *slip.Scope, args slip.List, depth int) (result sli
 	if 2 < len(args) {
 		var ok bool
 		if doc, ok = args[2].(slip.String); !ok {
-			slip.PanicType("documentation argument to defconstant", args[2], "string")
+			slip.TypePanic(s, depth, "documentation argument to defconstant", args[2], "string")
 		}
 	}
 	pkg.DefConst(vname, iv, string(doc))

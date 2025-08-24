@@ -87,11 +87,11 @@ func (obj *SynonymStream) IsOpen() bool {
 // Read from the stream bound to the symbol.
 func (obj *SynonymStream) Read(p []byte) (int, error) {
 	if obj.closed {
-		slip.PanicStream(obj, "closed")
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	value, has := slip.CurrentPackage.Get(string(obj.symbol))
 	if !has {
-		slip.PanicUnboundVariable(obj.symbol, "unbound")
+		slip.UnboundVariablePanic(slip.NewScope(), 0, obj.symbol, "unbound")
 	}
 	var r io.Reader
 	switch tv := value.(type) {
@@ -101,7 +101,7 @@ func (obj *SynonymStream) Read(p []byte) (int, error) {
 		r = slip.CurrentPackage.JustGet("*standard-input*").(io.Reader)
 	default:
 		if slip.True != tv {
-			slip.PanicType(string(obj.symbol), tv, "input-stream")
+			slip.TypePanic(slip.NewScope(), 0, string(obj.symbol), tv, "input-stream")
 		}
 		r = slip.CurrentPackage.JustGet("*standard-input*").(io.Reader)
 	}
@@ -111,11 +111,11 @@ func (obj *SynonymStream) Read(p []byte) (int, error) {
 // Write to the stream bound to the symbol.
 func (obj *SynonymStream) Write(b []byte) (n int, err error) {
 	if obj.closed {
-		slip.PanicStream(obj, "closed")
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	value, has := slip.CurrentPackage.Get(string(obj.symbol))
 	if !has {
-		slip.PanicUnboundVariable(obj.symbol, "unbound")
+		slip.UnboundVariablePanic(slip.NewScope(), 0, obj.symbol, "unbound")
 	}
 	var w io.Writer
 	switch tv := value.(type) {
@@ -125,7 +125,7 @@ func (obj *SynonymStream) Write(b []byte) (n int, err error) {
 		w = slip.CurrentPackage.JustGet("*standard-output*").(io.Writer)
 	default:
 		if slip.True != tv {
-			slip.PanicType(string(obj.symbol), tv, "output-stream")
+			slip.TypePanic(slip.NewScope(), 0, string(obj.symbol), tv, "output-stream")
 		}
 		w = slip.CurrentPackage.JustGet("*standard-output*").(io.Writer)
 	}

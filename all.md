@@ -176,6 +176,7 @@
  * [x] CADDR
  * [x] CADR
  * [x] CALL-ARGUMENTS-LIMIT
+ * [x] CALL-NEXT-METHOD
  * [x] CAR
  * [x] CASE
  * [x] CDAAAR
@@ -228,6 +229,7 @@
  * [x] COERCE
  * [x] COMPLEX
  * [x] COMPLEXP
+ * [x] COMPUTE-APPLICABLE-METHODS
  * [x] CONCATENATE
  * [x] CONCATENATED-STREAM
  * [x] CONCATENATED-STREAM-STREAMS
@@ -252,7 +254,10 @@
  * [x] DECLARE
  * [x] DECODE-FLOAT
  * [x] DECODE-UNIVERSAL-TIME
+ * [x] DEFCLASS
  * [x] DEFCONSTANT
+ * [x] DEFGENERIC
+ * [x] DEFINE-CONDITION
  * [x] DEFMACRO
  * [x] DEFMETHOD
  * [x] DEFPACKAGE
@@ -328,6 +333,7 @@
  * [x] FIND-ALL-SYMBOLS
  * [x] FIND-CLASS
  * [x] FIND-IF
+ * [x] FIND-METHOD
  * [x] FIND-PACKAGE
  * [x] FIND-SYMBOL
  * [x] FIRST
@@ -351,6 +357,7 @@
  * [x] FUNCTION-LAMBDA-EXPRESSION
  * [x] FUNCTIONP
  * [x] GCD
+ * [x] GENERIC-FUNCTION
  * [x] GENSYM
  * [x] GET
  * [x] GET-DECODED-TIME
@@ -378,6 +385,7 @@
  * [x] IMAGPART
  * [x] IN-PACKAGE
  * [x] INCF
+ * [x] INITIALIZE-INSTANCE
  * [x] INLINE
  * [x] INPUT-STREAM-P
  * [x] INTEGER
@@ -456,6 +464,7 @@
  * [x] MAKE-HASH-TABLE
  * [x] MAKE-INSTANCE
  * [x] MAKE-LIST
+ * [x] MAKE-LOAD-FORM
  * [x] MAKE-PACKAGE
  * [x] MAKE-RANDOM-STATE
  * [x] MAKE-SEQUENCE
@@ -482,6 +491,7 @@
  * [x] MERGE
  * [x] MERGE-PATHNAMES
  * [x] METHOD
+ * [x] METHOD-QUALIFIERS
  * [x] MIN
  * [x] MINUSP
  * [x] MISMATCH
@@ -506,9 +516,12 @@
  * [x] NAMESTRING
  * [x] NBUTLAST
  * [x] NCONC
+ * [x] NEXT-METHOD-P
  * [x] NIL
  * [x] NINTERSECTION
  * [x] NINTH
+ * [x] NO-APPLICABLE-METHOD
+ * [x] NO-NEXT-METHOD
  * [x] NOT
  * [x] NOTANY
  * [x] NOTEVERY
@@ -608,6 +621,7 @@
  * [x] REMOVE
  * [x] REMOVE-DUPLICATES
  * [x] REMOVE-IF
+ * [x] REMOVE-METHOD
  * [x] REMPROP
  * [x] RENAME-FILE
  * [x] RENAME-PACKAGE
@@ -637,6 +651,7 @@
  * [x] SETF
  * [x] SETQ
  * [x] SEVENTH
+ * [x] SHARED-INITIALIZE
  * [x] SHIFTF
  * [x] SHORT-FLOAT
  * [x] SHORT-FLOAT-EPSILON
@@ -677,6 +692,10 @@
  * [x] STABLE-SORT
  * [x] STANDARD-CHAR
  * [x] STANDARD-CHAR-P
+ * [x] STANDARD-CLASS
+ * [x] STANDARD-GENERIC-FUNCTION
+ * [x] STANDARD-METHOD
+ * [x] STANDARD-OBJECT
  * [x] STREAM
  * [x] STREAM-ELEMENT-TYPE
  * [x] STREAM-ERROR
@@ -777,6 +796,7 @@
  * [x] WITH-OPEN-FILE
  * [x] WITH-OPEN-STREAM
  * [x] WITH-OUTPUT-TO-STRING
+ * [x] WITH-SLOTS
  * [x] WITH-STANDARD-IO-SYNTAX
  * [x] WRITE
  * [x] WRITE-BYTE
@@ -805,10 +825,12 @@
  - [-] *READ-SUPPRESS*
  - [-] *READTABLE*
  - [-] ABORT
+ - [-] ADD-METHOD (use defmethod, add-method is too restrictive to be useful)
  - [-] ASSERT
  - [-] BASE-CHAR
  - [-] BASE-STRING
  - [-] BREAK
+ - [-] CALL-METHOD (internal detail not applicable)
  - [-] CATCH (use recover instead)
  - [-] CCASE
  - [-] CERROR
@@ -828,17 +850,18 @@
  - [-] COPY-PPRINT-DISPATCH
  - [-] COPY-READTABLE
  - [-] COPY-SYMBOL
- - [-] COUNT-IF-NOT
+ - [-] COUNT-IF-NOT (deprecated)
  - [-] CTYPECASE
  - [-] DEBUG
- - [-] DEFGENERIC
  - [-] DEFINE-COMPILER-MACRO
+ - [-] DEFINE-METHOD-COMBINATION (only standard is supported using a different mechanism)
  - [-] DEFINE-MODIFY-MACRO
  - [-] DEFINE-SETF-EXPANDER
  - [-] DEFINE-SYMBOL-MACRO
  - [-] DEFSETF
  - [-] DEFTYPE
- - [-] DELETE-IF-NOT
+ - [-] DELETE-IF-NOT (deprecated)
+ - [-] DESCRIBE-OBJECT (must not be called by the user so not included)
  - [-] ED
  - [-] EVAL-WHEN
  - [-] EXTENDED-CHAR
@@ -875,10 +898,13 @@
  - [-] MACROLET
  - [-] MAKE-DISPATCH-MACRO-CHARACTER
  - [-] MAKE-INSTANCES-OBSOLETE
+ - [-] MAKE-LOAD-FORM-SAVING-SLOTS (requires magic to work properly, sbcl only works if not copied)
+ - [-] MAKE-METHOD (internal detail not applicable)
  - [-] MAKE-PATHNAME
- - [-] MEMBER-IF-NOT
+ - [-] MEMBER-IF-NOT (deprecated)
+ - [-] METHOD-COMBINATION (only standard is supported using a different mechanism)
+ - [-] METHOD-COMBINATION-ERROR (only standard is supported using a different mechanism)
  - [-] MUFFLE-WARNING
- - [-] NO-NEXT-METHOD
  - [-] NSUBST-IF-NOT (deprecated)
  - [-] NSUBSTITUTE-IF-NOT (deprecated)
  - [-] PARSE-NAMESTRING
@@ -888,13 +914,13 @@
  - [-] PATHNAME-MATCH-P
  - [-] PATHNAME-VERSION
  - [-] PATHNAMEP
- - [-] POSITION-IF-NOT
+ - [-] POSITION-IF-NOT (deprecated)
  - [-] PPRINT-DISPATCH
  - [-] PPRINT-EXIT-IF-LIST-EXHAUSTED
  - [-] PRINT-NOT-READABLE
  - [-] PRINT-NOT-READABLE-OBJECT
  - [-] PROVIDE
- - [-] RASSOC-IF-NOT
+ - [-] RASSOC-IF-NOT (deprecated)
  - [-] READ-CHAR-NO-HANG
  - [-] READ-DELIMITED-LIST
  - [-] READ-PRESERVING-WHITESPACE
@@ -902,8 +928,7 @@
  - [-] READTABLE
  - [-] READTABLE-CASE
  - [-] READTABLEP
- - [-] REINITIALIZE-INSTANCE
- - [-] REMOVE-IF-NOT
+ - [-] REMOVE-IF-NOT (deprecated)
  - [-] RESTART
  - [-] RESTART-BIND
  - [-] RESTART-CASE
@@ -921,10 +946,6 @@
  - [-] SPACE
  - [-] SPEED
  - [-] STANDARD
- - [-] STANDARD-CLASS
- - [-] STANDARD-GENERIC-FUNCTION
- - [-] STANDARD-METHOD
- - [-] STANDARD-OBJECT
  - [-] STEP
  - [-] STORAGE-CONDITION
  - [-] STORE-VALUE
@@ -938,38 +959,17 @@
  - [-] TRANSLATE-LOGICAL-PATHNAME
  - [-] TRANSLATE-PATHNAME
  - [-] UNTRACE
- - [-] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [-] WITH-COMPILATION-UNIT
  - [-] WITH-CONDITION-RESTARTS
  - [-] WITH-SIMPLE-RESTART
- - [c] ADD-METHOD
- - [c] CALL-METHOD
- - [c] CALL-NEXT-METHOD
- - [c] COMPUTE-APPLICABLE-METHODS
- - [c] DEFINE-METHOD-COMBINATION
- - [c] DESCRIBE-OBJECT
  - [c] ENSURE-GENERIC-FUNCTION
- - [c] FIND-METHOD
  - [c] FUNCTION-KEYWORDS
- - [c] GENERIC-FUNCTION
- - [c] INITIALIZE-INSTANCE
- - [c] MAKE-LOAD-FORM
- - [c] MAKE-LOAD-FORM-SAVING-SLOTS
- - [c] MAKE-METHOD
- - [c] METHOD-COMBINATION
- - [c] METHOD-COMBINATION-ERROR
- - [c] METHOD-QUALIFIERS
- - [c] NEXT-METHOD-P
- - [c] NO-APPLICABLE-METHOD
- - [c] REMOVE-METHOD
- - [c] SHARED-INITIALIZE
+ - [c] REINITIALIZE-INSTANCE
+ - [c] UPDATE-INSTANCE-FOR-REDEFINED-CLASS
  - [c] WITH-ACCESSORS
- - [c] WITH-SLOTS
  - [s] COPY-STRUCTURE
  - [s] DEFSTRUCT
  - [s] DESTRUCTURING-BIND
  - [s] STRUCTURE
  - [s] STRUCTURE-CLASS
  - [s] STRUCTURE-OBJECT
- - [x] DEFCLASS
- - [x] DEFINE-CONDITION

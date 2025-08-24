@@ -44,10 +44,10 @@ type Revappend struct {
 
 // Call the function with the arguments provided.
 func (f *Revappend) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	list, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("list", args[0], "list")
+		slip.TypePanic(s, depth, "list", args[0], "list")
 	}
 	if 0 < len(list) {
 		nl := make(slip.List, len(list))

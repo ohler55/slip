@@ -80,11 +80,11 @@ type SocketReceive struct {
 
 // Call the function with the arguments provided.
 func (f *SocketReceive) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 13)
+	slip.CheckArgCount(s, depth, f, args, 1, 13)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
 		if fd, ok2 := self.Any.(int); ok2 {
-			result = socketReceive(fd, args[1:])
+			result = socketReceive(s, fd, args[1:], depth)
 		}
 	}
 	return
@@ -92,11 +92,11 @@ func (f *SocketReceive) Call(s *slip.Scope, args slip.List, depth int) (result s
 
 type socketReceiveCaller struct{}
 
-func (caller socketReceiveCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketReceiveCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":receive", args, 1, 8)
+	slip.CheckSendArgCount(s, depth, self, ":receive", args, 1, 8)
 	if self.Any != nil {
-		result = socketReceive(self.Any.(int), args)
+		result = socketReceive(s, self.Any.(int), args, depth)
 	}
 	return
 }
@@ -107,7 +107,7 @@ func (caller socketReceiveCaller) FuncDocs() *slip.FuncDoc {
 	return md
 }
 
-func socketReceive(fd int, args slip.List) slip.Object {
+func socketReceive(s *slip.Scope, fd int, args slip.List, depth int) slip.Object {
 	result := slip.Values{nil, nil, nil}
 	var (
 		buf    []byte
@@ -121,7 +121,7 @@ func socketReceive(fd int, args slip.List) slip.Object {
 		case slip.Octets:
 			buf = []byte(ta)
 		default:
-			slip.PanicType("buffer", ta, "octets")
+			slip.TypePanic(s, depth, "buffer", ta, "octets")
 		}
 		length = len(buf)
 		args = args[1:]
@@ -129,7 +129,7 @@ func socketReceive(fd int, args slip.List) slip.Object {
 			if args[0] != nil {
 				if num, ok := args[0].(slip.Fixnum); ok {
 					if num <= 0 {
-						slip.PanicType("length", num, "positive fixnum")
+						slip.TypePanic(s, depth, "length", num, "positive fixnum")
 					}
 					length = int(num)
 					args = args[1:]

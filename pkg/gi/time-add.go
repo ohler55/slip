@@ -44,14 +44,14 @@ type TimeAdd struct {
 
 // Call the function with the arguments provided.
 func (f *TimeAdd) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	t, ok := args[0].(slip.Time)
 	if !ok {
-		slip.PanicType("time", args[0], "time")
+		slip.TypePanic(s, depth, "time", args[0], "time")
 	}
 	var dur slip.Real
 	if dur, ok = args[1].(slip.Real); !ok {
-		slip.PanicType("duration", args[1], "real")
+		slip.TypePanic(s, depth, "duration", args[1], "real")
 	}
 	return slip.Time(time.Time(t).Add(time.Duration(dur.RealValue() * float64(time.Second))))
 }

@@ -52,7 +52,7 @@ type Get struct {
 
 // Call the function with the arguments provided.
 func (f *Get) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	var plist slip.List
 	switch ta := s.Eval(args[0], depth+1).(type) {
 	case nil:
@@ -60,7 +60,7 @@ func (f *Get) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	case slip.List:
 		plist = ta
 	default:
-		slip.PanicType("symbol", args[0], "symbol bound to a property list")
+		slip.TypePanic(s, depth, "symbol", args[0], "symbol bound to a property list")
 	}
 	ind := args[1]
 	if 2 < len(args) {
@@ -76,7 +76,7 @@ func (f *Get) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 
 // Place a value in the plist.
 func (f *Get) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, 0, f, args, 2, 3)
 	var plist slip.List
 	switch ta := s.Eval(args[0], 0).(type) {
 	case nil:
@@ -84,7 +84,7 @@ func (f *Get) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	case slip.List:
 		plist = ta
 	default:
-		slip.PanicType("plist", args[0], "property list")
+		slip.TypePanic(s, 0, "plist", args[0], "property list")
 	}
 	ind := args[1]
 	for i := 0; i < len(plist)-1; i += 2 {
@@ -97,6 +97,6 @@ func (f *Get) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	if sym, ok := args[0].(slip.Symbol); ok {
 		s.Set(sym, plist)
 	} else {
-		slip.PanicType("symbol", args[0], "symbol")
+		slip.TypePanic(s, 0, "symbol", args[0], "symbol")
 	}
 }

@@ -39,10 +39,10 @@ type SocketOpenp struct {
 
 // Call the function with the arguments provided.
 func (f *SocketOpenp) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
 	if _, ok = self.Any.(int); ok {
 		result = slip.True
@@ -52,9 +52,9 @@ func (f *SocketOpenp) Call(s *slip.Scope, args slip.List, depth int) (result sli
 
 type socketOpenpCaller struct{}
 
-func (caller socketOpenpCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketOpenpCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":open-p", args, 0, 0)
+	slip.CheckSendArgCount(s, depth, self, ":open-p", args, 0, 0)
 	if _, ok := self.Any.(int); ok {
 		result = slip.True
 	}

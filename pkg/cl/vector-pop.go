@@ -38,14 +38,14 @@ type VectorPop struct {
 
 // Call the function with the arguments provided.
 func (f *VectorPop) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	v, ok := args[0].(slip.FillPtrVector)
 	if !ok {
-		slip.PanicType("vector", args[0], "vector with a fill-pointer.")
+		slip.TypePanic(s, depth, "vector", args[0], "vector with a fill-pointer.")
 	}
 	fp := v.FillPointer()
 	if fp < 0 {
-		slip.PanicType("vector", v, "vector with a fill-pointer.")
+		slip.TypePanic(s, depth, "vector", v, "vector with a fill-pointer.")
 	}
 	if fp == 0 || v.Length() <= fp {
 		slip.NewPanic("There is nothing left to pop.")

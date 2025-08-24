@@ -47,9 +47,7 @@ type Random struct {
 
 // Call the function with the arguments provided.
 func (f *Random) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 && len(args) != 2 {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var rs *RandomState
 	if 1 < len(args) {
 		if args[1] == slip.True {
@@ -83,7 +81,7 @@ func (f *Random) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		_ = z.Mul(big.NewFloat(float64(rs.Uint64()%(1<<53))/float64(1<<53)), (*big.Float)(limit))
 		result = (*slip.LongFloat)(&z)
 	default:
-		slip.PanicType("limit", limit, "real")
+		slip.TypePanic(s, depth, "limit", limit, "real")
 	}
 	return
 }

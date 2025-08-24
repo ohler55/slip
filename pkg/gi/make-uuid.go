@@ -41,7 +41,7 @@ type MakeUUID struct {
 
 // Call the function with the arguments provided.
 func (f *MakeUUID) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 1)
+	slip.CheckArgCount(s, depth, f, args, 0, 1)
 	var uuid UUID
 	if len(args) == 0 {
 		uuid = NewUUID()
@@ -51,7 +51,7 @@ func (f *MakeUUID) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			uuid = UUIDParse(string(ta))
 		case slip.List:
 			if len(ta) != 2 {
-				slip.PanicType("value", ta, "string", "list of 2 fixnums")
+				slip.TypePanic(s, depth, "value", ta, "string", "list of 2 fixnums")
 			}
 			var (
 				ok  bool
@@ -64,10 +64,10 @@ func (f *MakeUUID) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 				}
 			}
 			if !ok {
-				slip.PanicType("value", ta, "string", "list of 2 fixnums")
+				slip.TypePanic(s, depth, "value", ta, "string", "list of 2 fixnums")
 			}
 		default:
-			slip.PanicType("value", ta, "string", "list of 2 fixnums")
+			slip.TypePanic(s, depth, "value", ta, "string", "list of 2 fixnums")
 		}
 	}
 	return uuid

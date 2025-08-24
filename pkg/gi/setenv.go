@@ -45,7 +45,7 @@ type Setenv struct {
 
 // Call the function with the arguments provided.
 func (f *Setenv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	var (
 		name  string
 		value string
@@ -53,12 +53,12 @@ func (f *Setenv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	if vs, ok := args[0].(slip.String); ok {
 		name = string(vs)
 	} else {
-		slip.PanicType("name", args[0], "string")
+		slip.TypePanic(s, depth, "name", args[0], "string")
 	}
 	if vs, ok := args[1].(slip.String); ok {
 		value = string(vs)
 	} else {
-		slip.PanicType("value", args[1], "string")
+		slip.TypePanic(s, depth, "value", args[1], "string")
 	}
 	if err := os.Setenv(name, value); err != nil {
 		slip.NewPanic("setenv of %s to %s failed. %s", name, value, err)

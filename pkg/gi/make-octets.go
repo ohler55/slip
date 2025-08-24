@@ -43,10 +43,10 @@ type MakeOctets struct {
 
 // Call the function with the arguments provided.
 func (f *MakeOctets) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	size, ok := args[0].(slip.Fixnum)
 	if !ok || size < 0 {
-		slip.PanicType("size", args[0], "fixnum")
+		slip.TypePanic(s, depth, "size", args[0], "fixnum")
 	}
 	ba := make([]byte, size)
 	if 1 < len(args) {

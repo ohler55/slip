@@ -7,21 +7,22 @@ import "fmt"
 // ArithmeticErrorSymbol is the symbol with a value of "arithmetic-error".
 const ArithmeticErrorSymbol = Symbol("arithmetic-error")
 
-// NewArithmeticError creates a ArithmeticPanic (arithmetic-error) describing a arithmetic error.
-func NewArithmeticError(operation Object, operands List, format string, args ...any) Object {
+// ArithmeticErrorNew creates a ArithmeticError (arithmetic-error) describing
+// a arithmetic error.
+func ArithmeticErrorNew(s *Scope, depth int, operation Object, operands List, format string, args ...any) Object {
 	c := FindClass("arithmetic-error")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":operation"), operation,
 		Symbol(":operands"), operands,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicArithmetic raises a ArithmeticPanic (arithmetic-error) describing a arithmetic
-// error.
-func PanicArithmetic(operation Object, operands List, format string, args ...any) {
-	panic(NewArithmeticError(operation, operands, format, args...))
+// ArithmeticPanic raises a ArithmeticError (arithmetic-error) describing a
+// arithmetic error.
+func ArithmeticPanic(s *Scope, depth int, operation Object, operands List, format string, args ...any) {
+	panic(ArithmeticErrorNew(s, depth, operation, operands, format, args...))
 }

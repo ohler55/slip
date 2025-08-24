@@ -53,7 +53,7 @@ type Benchmark struct {
 
 // Call the function with the arguments provided.
 func (f *Benchmark) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	d2 := depth + 1
 	caller := cl.ResolveToCaller(s, args[0], d2)
 	dur := time.Second * 3
@@ -62,13 +62,13 @@ func (f *Benchmark) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if r, ok := args[1].(slip.Real); ok {
 			dur = time.Duration(r.RealValue() * float64(time.Second))
 		} else {
-			slip.PanicType("duration", args[1], "real")
+			slip.TypePanic(s, depth, "duration", args[1], "real")
 		}
 		if 2 < len(args) {
 			if num, ok := args[2].(slip.Fixnum); ok && 0 < num {
 				iter = int64(num)
 			} else {
-				slip.PanicType("iterations", args[2], "fixnum")
+				slip.TypePanic(s, depth, "iterations", args[2], "fixnum")
 			}
 		}
 	}

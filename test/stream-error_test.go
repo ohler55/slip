@@ -12,7 +12,8 @@ import (
 )
 
 func TestStreamErrorObj(t *testing.T) {
-	cond := slip.NewStreamError(&slip.OutputStream{}, "not a %s stream-error", "real")
+	scope := slip.NewScope()
+	cond := slip.StreamErrorNew(scope, 0, &slip.OutputStream{}, "not a %s stream-error", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<stream-error [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestStreamErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real stream-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real stream-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestStreamErrorMake(t *testing.T) {
@@ -46,5 +47,5 @@ func TestStreamErrorMake(t *testing.T) {
 }
 
 func TestStreamErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicStream(&slip.OutputStream{}, "raise") })
+	tt.Panic(t, func() { slip.StreamPanic(nil, 0, &slip.OutputStream{}, "raise") })
 }

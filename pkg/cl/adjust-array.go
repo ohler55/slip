@@ -76,7 +76,7 @@ type AdjustArray struct {
 
 // Call the function with the arguments provided.
 func (f *AdjustArray) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 14)
+	slip.CheckArgCount(s, depth, f, args, 2, 14)
 	var (
 		dims         []int
 		initContents slip.List
@@ -90,7 +90,7 @@ func (f *AdjustArray) Call(s *slip.Scope, args slip.List, depth int) (result sli
 			fillPtr = v.FillPointer()
 		}
 	} else {
-		slip.PanicType("array", args[0], "array", "vector")
+		slip.TypePanic(s, depth, "array", args[0], "array", "vector")
 	}
 	switch ta := args[1].(type) {
 	case slip.Fixnum:
@@ -100,18 +100,18 @@ func (f *AdjustArray) Call(s *slip.Scope, args slip.List, depth int) (result sli
 			if num, _ := v.(slip.Fixnum); 0 < num {
 				dims = append(dims, int(num))
 			} else {
-				slip.PanicType("dimensions", args[0], "list of positive fixnums")
+				slip.TypePanic(s, depth, "dimensions", args[0], "list of positive fixnums")
 			}
 		}
 	default:
-		slip.PanicType("dimensions", ta, "fixnum", "list of positive fixnums")
+		slip.TypePanic(s, depth, "dimensions", ta, "fixnum", "list of positive fixnums")
 	}
 	rest := args[2:]
 	if option, has := slip.GetArgsKeyValue(rest, slip.Symbol(":element-type")); has {
 		if sym, ok := option.(slip.Symbol); ok {
 			elementType = sym
 		} else {
-			slip.PanicType(":element-type", option, "symbol")
+			slip.TypePanic(s, depth, ":element-type", option, "symbol")
 		}
 	}
 	initElement, _ := slip.GetArgsKeyValue(rest, slip.Symbol(":initial-element"))
@@ -119,7 +119,7 @@ func (f *AdjustArray) Call(s *slip.Scope, args slip.List, depth int) (result sli
 		if list, ok := option.(slip.List); ok {
 			initContents = list
 		} else {
-			slip.PanicType(":initial-contents", option, "list")
+			slip.TypePanic(s, depth, ":initial-contents", option, "list")
 		}
 	}
 	if option, has := slip.GetArgsKeyValue(rest, slip.Symbol(":fill-pointer")); has {

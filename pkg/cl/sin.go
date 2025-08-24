@@ -39,13 +39,11 @@ type Sin struct {
 
 // Call the function with the arguments provided.
 func (f *Sin) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if real, ok := args[0].(slip.Real); ok {
 		result = slip.DoubleFloat(math.Sin(real.RealValue()))
 	} else {
-		slip.PanicType("radians", args[0], "number")
+		slip.TypePanic(s, depth, "radians", args[0], "number")
 	}
 	return
 }

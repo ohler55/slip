@@ -46,9 +46,7 @@ type Let struct {
 
 // Call the function with the arguments provided.
 func (f *Let) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 {
-		slip.PanicArgCount(f, 1, -1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	ns := s.NewScope()
 	d2 := depth + 1
 	processBinding(s, ns, args[0], d2)

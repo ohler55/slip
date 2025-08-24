@@ -38,7 +38,7 @@ type Reverse struct {
 
 // Call the function with the arguments provided.
 func (f *Reverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	result = args[0]
 	switch ta := args[0].(type) {
 	case nil:
@@ -87,7 +87,7 @@ func (f *Reverse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		bv.Reverse()
 		result = bv
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	return
 }

@@ -43,14 +43,14 @@ type FindFlavor struct {
 
 // Call the the function with the arguments provided.
 func (f *FindFlavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var cf *Flavor
 	name := slip.MustBeString(args[0], "name")
 	if cf = Find(name); cf != nil {
 		return cf
 	}
 	if 1 < len(args) && args[1] != nil {
-		slip.PanicClassNotFound(args[0], "%s is not a defined flavor.", name)
+		slip.ClassNotFoundPanic(s, depth, args[0], "%s is not a defined flavor.", name)
 	}
 	return nil
 }

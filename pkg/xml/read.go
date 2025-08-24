@@ -69,7 +69,7 @@ type Read struct {
 
 // Call the function with the arguments provided.
 func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 7)
+	slip.CheckArgCount(s, depth, f, args, 1, 7)
 	var ir io.Reader
 	switch ta := args[0].(type) {
 	case slip.String:
@@ -77,14 +77,14 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case io.Reader:
 		ir = ta
 	default:
-		slip.PanicType("input", args[0], "string", "input-stream")
+		slip.TypePanic(s, depth, "input", args[0], "string", "input-stream")
 	}
 	dec := xml.NewDecoder(ir)
 	trim := true
 	for pos := 1; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -101,7 +101,7 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case ":trim":
 			trim = args[pos+1] != nil
 		default:
-			slip.PanicType("keyword", args[pos], ":strict", ":trim")
+			slip.TypePanic(s, depth, "keyword", args[pos], ":strict", ":trim")
 		}
 	}
 	var (

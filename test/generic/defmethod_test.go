@@ -37,14 +37,7 @@ func TestDefmethodFlavors(t *testing.T) {
                                     :settable-instance-variables
                                     :initable-instance-variables)
                    (defmethod (berry :rot) () "When berries rot they turn brown." (setq color 'brown)))`,
-		Expect: "nil",
-	}).Test(t)
-}
-
-func TestDefmethodCLOS(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(defmethod rot ((b berry)) (setq color 'brown))`,
-		Panics: true,
+		Expect: `/#<method :rot nil \{[0-9a-f]+\}>/`,
 	}).Test(t)
 }
 
@@ -276,4 +269,279 @@ func TestDefmethodArgsMismatch(t *testing.T) {
 	scope := slip.NewScope()
 	f := slip.ReadString("berry", scope).Eval(scope, nil).(*flavors.Flavor)
 	tt.Panic(t, func() { f.DefMethod(":rot", ":after", rottenCaller{}) })
+}
+
+func TestDefmethodGenericOrdinaryError(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(defmethod defmethod ((a fixnum)) nil)`,
+		PanicType: slip.ProgramErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericAutoDef(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux (a (b fixnum)) (+ a b))`,
+		Expect: `/#<method quux \(a \(b fixnum\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(quux 1 2)`,
+		Expect: "3",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(quux 1 2.1)`,
+		PanicType: slip.NoApplicableMethodErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericCallNextMethodError(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux (a (b fixnum)) (call-next-method))`,
+		Expect: `/#<method quux \(a \(b fixnum\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(quux 1 2)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericDocs(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(documentation (defmethod quux (a (b fixnum)) "quacker" (+ a b)) 'method)`,
+		Expect: `"quacker"`,
+	}).Test(t)
+}
+
+func TestDefmethodGenericBadLambdaList(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source:    `(defmethod quux t nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux (t) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((7)) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericQualifier(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux ((s output-stream) (x fixnum)) (format s "primary"))`,
+		Expect: `/#<method quux \(\(s output-stream\) \(x fixnum\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(defmethod quux :after ((s output-stream) (x real)) (format s "-after"))`,
+		Expect: `/#<method quux :after \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(with-output-to-string(os) (quux os 3))`,
+		Expect: `"primary-after"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(defmethod quux :before ((s output-stream) (x real)) (format s "before-"))`,
+		Expect: `/#<method quux :before :after \(\(s output-stream\) \(x real\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(defmethod quux :around ((s output-stream) (x fixnum))
+                   (format s "around-")
+                   (call-next-method)
+                   (format s "-around"))`,
+		Expect: `/#<method quux :around \(\(s output-stream\) \(x fixnum\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(with-output-to-string(os) (quux os 3))`,
+		Expect: `"around-before-primary-after-around"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux :not-a-qualifier (x) nil)`,
+		PanicType: slip.InvalidMethodErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericLambdaList(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux ((a t) (b t)) (list a b))`,
+		Expect: `/#<method quux \(\(a t\) \(b t\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(quux 'x 1)`,
+		Expect: "(x 1)",
+	}).Test(t)
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((a 7)) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((a)) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux (7) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericOptionalValue(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defmethod quux ((a t) &optional (b 7)) nil)`,
+		Expect: `/#<method quux \(\(a t\) &optional \(b 7\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+}
+
+func TestDefmethodGenericBadOptional(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defgeneric quux (a &optional b))`,
+		Expect: "#<generic-function quux>",
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((a t) &optional 7) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(defmethod quux ((a t) &optional (x)) nil)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestDefmethodGenericSetf(t *testing.T) {
+	slip.CurrentPackage.Undefine("(setf quux)")
+	(&sliptest.Function{
+		Source: `(defmethod (setf quux) ((x fixnum)) (list x))`,
+		Expect: `/#<method \(setf quux\) \(\(x fixnum\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	// repeat
+	(&sliptest.Function{
+		Source: `(defmethod (setf quux) ((x fixnum)) (list x))`,
+		Expect: `/#<method \(setf quux\) \(\(x fixnum\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+}
+
+func TestDefmethodCaller(t *testing.T) {
+	for _, name := range []string{"quux",
+		"quux-x", "quux-y",
+		"quux-set-x", "quux-set-y",
+		"quux-acc-x", "quux-acc-y",
+		"(setf-acc-x)", "(setf-acc-y)",
+	} {
+		slip.CurrentPackage.Remove(name)
+	}
+	(&sliptest.Function{
+		Source: `(progn
+                   (defclass quux ()
+                     ((x :initform 7 :reader quux-x :writer quux-set-x :accessor quux-acc-x :gettable t :settable t)
+                      (y :initform 2 :reader quux-y :writer quux-set-y :accessor quux-acc-y :allocation :class)))
+                   (let* ((q (make-instance 'quux))
+                          (result (list (quux-x q))))
+                     (quux-set-x q 3)
+                     (addf result (quux-x q))
+                     (setf (quux-acc-x q) 4)
+                     (addf result (quux-x q))
+                     (quux-set-y q 4)
+                     (addf result (quux-y q))
+                     (setf (quux-acc-y q) 6)
+                     (addf result (quux-y q))
+                     (send q :set-x 1)
+                     (addf result (send q :x))
+                     result))`,
+		Expect: "(7 3 4 4 6 1)",
+	}).Test(t)
+}
+
+func TestDefmethodGenericLoadForm(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(progn
+                   (defgeneric quux (a b)
+                     (:documentation "quack quack")
+                     (:method ((a fixnum) (b fixnum)) (list a b))
+                     (:method :before ((a fixnum) (b fixnum)) (princ a))
+                     (:method :after ((a fixnum) (b fixnum)) (princ b))
+                     (:method :around ((a fixnum) (b real)) (call-next-method a b)))
+                   (let ((*print-right-margin* 80))
+                     (pretty-print quux nil)))`,
+		Expect: `"(defgeneric quux (a b)
+  (:documentation "quack quack")
+  (:method ((a fixnum) (b fixnum))
+    "quack quack"
+    (list a b))
+  (:method :before ((a fixnum) (b fixnum))
+    "quack quack"
+    (princ a))
+  (:method :after ((a fixnum) (b fixnum))
+    "quack quack"
+    (princ b))
+  (:method :around ((a fixnum) (b real))
+    "quack quack"
+    (call-next-method a b)))
+"`,
+	}).Test(t)
+}
+
+func TestDefmethodGenericLoadFormDoc(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(progn
+                   (defgeneric quux (a b))
+                   (defmethod quux ((a fixnum) (b fixnum)) "quack quack" (list a b))
+                   (let ((*print-right-margin* 80))
+                     (pretty-print quux nil)))`,
+		Expect: `"(defgeneric quux (a b)
+  (:method ((a fixnum) (b fixnum))
+    "quack quack"
+    (list a b)))
+"`,
+	}).Test(t)
+}
+
+func TestDefmethodGenericLoadFormLambdaList(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(progn
+                   (defgeneric quux (a &optional b c))
+                   (defmethod quux ((a fixnum) &optional (b 5) c) (list a b c))
+                   (let ((*print-right-margin* 80))
+                     (pretty-print quux nil)))`,
+		Expect: `"(defgeneric quux (a &optional b c)
+  (:method ((a fixnum) &optional (b 5) c)
+    (list a b c)))
+"`,
+	}).Test(t)
+}
+
+func TestDefmethodGenericLoadFormEmpty(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(progn
+                   (defgeneric quux (a b) (:documentation "quack quack"))
+                   (let ((*print-right-margin* 80))
+                     (pretty-print quux nil)))`,
+		Expect: `"(defgeneric quux (a b)
+  (:documentation "quack quack"))
+"`,
+	}).Test(t)
+}
+
+func TestDefmethodCallerOrdinary(t *testing.T) {
+	tt.Panic(t, func() { _ = generic.DefCallerMethod("", nil, &slip.FuncDoc{Name: "coerce"}) })
+}
+
+func TestDefmethodCallerOptional(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	// Make sure it does not fail.
+	_ = generic.DefCallerMethod("", nil,
+		&slip.FuncDoc{
+			Name: "quux",
+			Args: []*slip.DocArg{{Name: "x"}, {Name: "&optional"}, {Name: "y"}},
+		})
 }

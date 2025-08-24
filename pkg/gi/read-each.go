@@ -47,10 +47,10 @@ type ReadEach struct {
 
 // Call the function with the arguments provided.
 func (f *ReadEach) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	r, ok := args[0].(io.Reader)
 	if !ok {
-		slip.PanicType("input-stream", args[0], "input-stream")
+		slip.TypePanic(s, depth, "input-stream", args[0], "input-stream")
 	}
 	caller := cl.ResolveToCaller(s, args[1], depth+1)
 	slip.ReadStreamEach(r, s, caller)

@@ -12,7 +12,8 @@ import (
 )
 
 func TestParseErrorObj(t *testing.T) {
-	cond := slip.NewParseError("not a %s parse-error", "real")
+	scope := slip.NewScope()
+	cond := slip.ParseErrorNew(scope, 0, "not a %s parse-error", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<parse-error [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestParseErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real parse-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real parse-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestParseErrorMake(t *testing.T) {
@@ -43,5 +44,5 @@ func TestParseErrorMake(t *testing.T) {
 }
 
 func TestParseErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicParse("raise") })
+	tt.Panic(t, func() { slip.ParsePanic(slip.NewScope(), 0, "raise") })
 }

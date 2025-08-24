@@ -43,12 +43,10 @@ type Rplaca struct {
 
 // Call the function with the arguments provided.
 func (f *Rplaca) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	list, ok := args[0].(slip.List)
 	if !ok || len(list) == 0 {
-		slip.PanicType("cons", args[0], "cons", "list")
+		slip.TypePanic(s, depth, "cons", args[0], "cons", "list")
 	}
 	list[0] = args[1]
 

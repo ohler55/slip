@@ -132,9 +132,7 @@ type Help struct {
 
 // Call the the function with the arguments provided.
 func (f *Help) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if 1 < len(args) {
-		slip.PanicArgCount(f, 0, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 0, 1)
 	w := s.Get(stdOutput).(io.Writer)
 	text := helpTop
 	if 0 < len(args) {
@@ -145,7 +143,7 @@ func (f *Help) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		case slip.String:
 			topic = string(ta)
 		default:
-			slip.PanicType("topic", ta, "string", "symbol")
+			slip.TypePanic(s, depth, "topic", ta, "string", "symbol")
 		}
 		switch strings.ToLower(topic) {
 		case "index":

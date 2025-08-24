@@ -44,19 +44,19 @@ type ArrayRowMajorIndex struct {
 
 // Call the function with the arguments provided.
 func (f *ArrayRowMajorIndex) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	indices := make([]int, 0, len(args)-1)
 	for _, a := range args[1:] {
 		if num, ok := a.(slip.Fixnum); ok {
 			indices = append(indices, int(num))
 		} else {
-			slip.PanicType("subscript", a, "fixnum")
+			slip.TypePanic(s, depth, "subscript", a, "fixnum")
 		}
 	}
 	if al, ok := args[0].(slip.ArrayLike); ok {
 		result = slip.Fixnum(al.MajorIndex(indices...))
 	} else {
-		slip.PanicType("array", args[0], "array")
+		slip.TypePanic(s, depth, "array", args[0], "array")
 	}
 	return
 }

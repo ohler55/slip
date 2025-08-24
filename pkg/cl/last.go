@@ -46,7 +46,7 @@ type Last struct {
 
 // Call the function with the arguments provided.
 func (f *Last) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	a := args[0]
 	switch list := a.(type) {
 	case nil:
@@ -57,7 +57,7 @@ func (f *Last) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			if i, ok := args[1].(slip.Integer); ok && 0 <= n {
 				n = int(i.Int64())
 			} else {
-				slip.PanicType("n", args[1], "non-negative integer")
+				slip.TypePanic(s, depth, "n", args[1], "non-negative integer")
 			}
 		}
 		if len(list) <= n {
@@ -83,7 +83,7 @@ func (f *Last) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			}
 		}
 	default:
-		slip.PanicType("list", list, "list")
+		slip.TypePanic(s, depth, "list", list, "list")
 	}
 	return
 }

@@ -54,7 +54,7 @@ type WaitForInput struct {
 
 // Call the function with the arguments provided.
 func (f *WaitForInput) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	var sockets slip.List
 	timeout := -time.Second
 	readyOnly := true
@@ -64,14 +64,14 @@ func (f *WaitForInput) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	case slip.List:
 		sockets = ta
 	default:
-		slip.PanicType("sockets", args[0], "socket", "list of socket")
+		slip.TypePanic(s, depth, "sockets", args[0], "socket", "list of socket")
 	}
 	args = args[1:]
 	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":timeout")); has && val != nil {
 		if r, ok := val.(slip.Real); ok && 0.0 <= r.RealValue() {
 			timeout = time.Duration(r.RealValue() * float64(time.Second))
 		} else {
-			slip.PanicType(":timeout", val, "non-negative real")
+			slip.TypePanic(s, depth, ":timeout", val, "non-negative real")
 		}
 	}
 	if val, has := slip.GetArgsKeyValue(args, slip.Symbol(":ready-only")); has {
@@ -84,7 +84,7 @@ func (f *WaitForInput) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 				rset.Set(fd)
 			}
 		} else {
-			slip.PanicType("sockets", val, "socket", "list of sockets")
+			slip.TypePanic(s, depth, "sockets", val, "socket", "list of sockets")
 		}
 	}
 	start := time.Now()

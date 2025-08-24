@@ -57,21 +57,21 @@ type Parse struct {
 
 // Call the the function with the arguments provided.
 func (f *Parse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
 
 	if 2 < len(args) {
-		parseBag(obj, args[1], args[2])
+		parseBag(s, obj, args[1], args[2], depth)
 	} else {
-		parseBag(obj, args[1], nil)
+		parseBag(s, obj, args[1], nil, depth)
 	}
 	return obj
 }
 
-func parseBag(obj *flavors.Instance, value, path slip.Object) {
+func parseBag(s *slip.Scope, obj *flavors.Instance, value, path slip.Object, depth int) {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -80,7 +80,7 @@ func parseBag(obj *flavors.Instance, value, path slip.Object) {
 	case Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string")
+		slip.TypePanic(s, depth, "path", p, "string")
 	}
 	var v any
 	switch tv := value.(type) {
@@ -89,7 +89,7 @@ func parseBag(obj *flavors.Instance, value, path slip.Object) {
 	case slip.Octets:
 		v = sen.MustParse([]byte(tv))
 	default:
-		slip.PanicType("string", value, "string", "octets")
+		slip.TypePanic(s, depth, "string", value, "string", "octets")
 	}
 	if options.Converter != nil {
 		v = options.Converter.Convert(v)

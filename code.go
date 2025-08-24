@@ -841,7 +841,7 @@ func (r *reader) raise(format string, args ...any) {
 	f = append(f, format...)
 	f = append(f, " at %d:%d"...)
 	args = append(args, r.line, r.pos-r.lineStart)
-	PanicParse(string(f), args...)
+	ParsePanic(NewScope(), 0, string(f), args...)
 }
 
 func (r *reader) partial(format string, args ...any) {
@@ -1243,9 +1243,9 @@ func (c Code) Compile() {
 					}
 				}
 			}
-			PanicParse("%s is not a function", tv)
+			ParsePanic(scope, 0, "%s is not a function", tv)
 		default:
-			PanicParse("%s is not a function", tv)
+			ParsePanic(scope, 0, "%s is not a function", tv)
 		}
 		var f Object
 		switch strings.ToLower(string(sym)) {

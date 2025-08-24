@@ -43,19 +43,19 @@ type BitNot struct {
 
 // Call the function with the arguments provided.
 func (f *BitNot) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	var ok bool
 	switch t1 := args[0].(type) {
 	case *slip.Array:
 		if t1.ElementType() != slip.BitSymbol {
-			slip.PanicType("bit-array1", t1, "bit-array")
+			slip.TypePanic(s, depth, "bit-array1", t1, "bit-array")
 		}
 		d1 := t1.Dimensions()
 		var ra *slip.Array
 		if 1 < len(args) {
 			ra, ok = args[1].(*slip.Array)
 			if !ok || ra.ElementType() != slip.BitSymbol {
-				slip.PanicType("opt-arg", args[1], "bit-array")
+				slip.TypePanic(s, depth, "opt-arg", args[1], "bit-array")
 			}
 			dr := ra.Dimensions()
 			if len(d1) != len(dr) {
@@ -82,7 +82,7 @@ func (f *BitNot) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		if 1 < len(args) {
 			ra, ok = args[1].(*slip.BitVector)
 			if !ok {
-				slip.PanicType("opt-arg", args[1], "bit-array")
+				slip.TypePanic(s, depth, "opt-arg", args[1], "bit-array")
 			}
 			if t1.Len != ra.Len {
 				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
@@ -99,7 +99,7 @@ func (f *BitNot) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		}
 		result = ra
 	default:
-		slip.PanicType("bit-array", t1, "bit-array")
+		slip.TypePanic(s, depth, "bit-array", t1, "bit-array")
 	}
 	return
 }

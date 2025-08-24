@@ -51,7 +51,7 @@ type PrettyPrint struct {
 
 // Call the function with the arguments provided.
 func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 
 	b := pp.Append(nil, s, args[0])
 
@@ -73,10 +73,10 @@ func (f *PrettyPrint) Call(s *slip.Scope, args slip.List, depth int) (result sli
 				break
 			}
 		}
-		slip.PanicType("destination", ta, "output-stream")
+		slip.TypePanic(s, depth, "destination", ta, "output-stream")
 	}
 	if _, err := w.Write(b); err != nil {
-		slip.PanicStream(ss, "write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write failed. %s", err)
 	}
 	return
 }

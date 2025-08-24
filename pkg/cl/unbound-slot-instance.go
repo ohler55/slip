@@ -40,9 +40,9 @@ type UnboundSlotInstance struct {
 
 // Call the function with the arguments provided.
 func (f *UnboundSlotInstance) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("unbound-slot") {
-		slip.PanicType("unbound-slot", args[0], "unbound-slot")
+		slip.TypePanic(s, depth, "unbound-slot", args[0], "unbound-slot")
 	} else {
 		result, _ = ci.SlotValue(instanceSymbol)
 	}

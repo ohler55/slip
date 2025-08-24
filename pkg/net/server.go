@@ -48,7 +48,7 @@ func defServer() *flavors.Flavor {
 
 type serverInitCaller struct{}
 
-func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -60,17 +60,17 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		k := string(key)
 		switch {
 		case strings.EqualFold(":address", k):
-			server.Addr = getStrArg(args[i+1], k)
+			server.Addr = getStrArg(s, args[i+1], k, depth)
 		case strings.EqualFold(":tls-config", k):
 			// TBD
 		case strings.EqualFold(":read-timeout", k):
-			server.ReadTimeout = getDurationArg(args[i+1], k)
+			server.ReadTimeout = getDurationArg(s, args[i+1], k, depth)
 		case strings.EqualFold(":write-timeout", k):
-			server.WriteTimeout = getDurationArg(args[i+1], k)
+			server.WriteTimeout = getDurationArg(s, args[i+1], k, depth)
 		case strings.EqualFold(":idle-timeout", k):
-			server.IdleTimeout = getDurationArg(args[i+1], k)
+			server.IdleTimeout = getDurationArg(s, args[i+1], k, depth)
 		case strings.EqualFold(":maximum-header-length", k):
-			server.MaxHeaderBytes = int(getIntArg(args[i+1], k))
+			server.MaxHeaderBytes = int(getIntArg(s, args[i+1], k, depth))
 		}
 	}
 	return nil
@@ -118,7 +118,7 @@ func (caller serverInitCaller) FuncDocs() *slip.FuncDoc {
 
 type serverStartCaller struct{}
 
-func (caller serverStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller serverStartCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 1 < len(args) {
 		slip.PanicMethodArgChoice(obj, ":start", len(args), "0 or 1")
@@ -135,7 +135,7 @@ func (caller serverStartCaller) Call(s *slip.Scope, args slip.List, _ int) slip.
 		} else {
 			u = fmt.Sprintf("http://%s", server.Addr)
 		}
-		dur := getDurationArg(args[0], "wait-ready")
+		dur := getDurationArg(s, args[0], "wait-ready", depth)
 		start := time.Now()
 		var err error
 		for time.Since(start) < dur {
@@ -208,7 +208,7 @@ func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, depth i
 	}
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("add-handler path", args[0], "string")
+		slip.TypePanic(s, depth, "add-handler path", args[0], "string")
 	}
 	server := obj.Any.(*http.Server)
 	if fpath, ok := args[1].(slip.String); ok {

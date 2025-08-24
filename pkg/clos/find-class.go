@@ -43,16 +43,16 @@ type FindClass struct {
 
 // Call the the function with the arguments provided.
 func (f *FindClass) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name", args[0], "symbol")
+		slip.TypePanic(s, depth, "name", args[0], "symbol")
 	}
 	if c := slip.FindClass(string(sym)); c != nil {
 		return c
 	}
 	if 1 < len(args) && args[1] != nil {
-		slip.PanicClassNotFound(sym, "%s is not a defined flavor.", sym)
+		slip.ClassNotFoundPanic(s, depth, sym, "%s is not a defined flavor.", sym)
 	}
 	return nil
 }

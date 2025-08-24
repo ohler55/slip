@@ -40,9 +40,9 @@ type MethodErrorClass struct {
 
 // Call the function with the arguments provided.
 func (f *MethodErrorClass) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("invalid-method-error") {
-		slip.PanicType("invalid-method-error", args[0], "invalid-method-error")
+		slip.TypePanic(s, depth, "invalid-method-error", args[0], "invalid-method-error")
 	} else {
 		result, _ = ci.SlotValue(classSymbol)
 	}

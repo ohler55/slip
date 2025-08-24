@@ -63,7 +63,7 @@ type Split struct {
 
 // Call the function with the arguments provided.
 func (f *Split) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 8)
+	slip.CheckArgCount(s, depth, f, args, 2, 8)
 	str := slip.MustBeString(args[0], "string")
 	sep := slip.MustBeString(args[1], "separator")
 	limit := -1
@@ -73,7 +73,7 @@ func (f *Split) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if num, ok := v.(slip.Fixnum); ok {
 			limit = int(num)
 		} else {
-			slip.PanicType(":limit", v, "fixnum")
+			slip.TypePanic(s, depth, ":limit", v, "fixnum")
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args[2:], slip.Symbol(":omit-empty")); has && v != nil {

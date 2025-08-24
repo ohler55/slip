@@ -30,7 +30,7 @@ func init() {
 			},
 			Return: "string|nil",
 			Text: `__documentation__ returns the documentation _x_ or what _x_ refers to. The supported
-_doc-type_ values supported are _function_, _variable_, _type_, and _constant_.
+_doc-type_ values supported are _function_, _method_, _class_, _variable_, _type_, and _constant_.
 `,
 			Examples: []string{
 				"(documentation '*standard-output* 'variable)",
@@ -46,13 +46,13 @@ type Documentation struct {
 
 // Call the function with the arguments provided.
 func (f *Documentation) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 
 	var docType slip.Object
 	if dt, ok := args[1].(slip.Symbol); ok {
 		docType = dt
 	} else if args[1] != slip.True {
-		slip.PanicType("doc-type", args[1], "symbol", "t")
+		slip.TypePanic(s, depth, "doc-type", args[1], "symbol", "t")
 	}
 	a := args[0]
 Top:
@@ -91,8 +91,12 @@ Top:
 			result = slip.String(ta.Doc)
 		}
 	case slip.Class:
-		if docType == slip.Symbol("type") {
+		if docType == nil || docType == slip.Symbol("type") || docType == slip.Symbol("class") {
 			result = slip.String(ta.Documentation())
+		}
+	case *slip.Method:
+		if ta.Doc != nil && (docType == nil || docType == slip.Symbol("method")) {
+			result = slip.String(ta.Doc.Text)
 		}
 	default:
 		f.unsup(docType, ta)
@@ -102,16 +106,16 @@ Top:
 
 // Place a value in the first position of a list or cons.
 func (f *Documentation) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	doc, ok := value.(slip.String)
 	if !ok {
-		slip.PanicType("new-value", value, "string")
+		slip.TypePanic(s, 0, "new-value", value, "string")
 	}
 	var docType slip.Object
 	if dt, ok := args[1].(slip.Symbol); ok {
 		docType = dt
 	} else if args[1] != slip.True {
-		slip.PanicType("doc-type", args[1], "symbol", "t")
+		slip.TypePanic(s, 0, "doc-type", args[1], "symbol", "t")
 	}
 	a := args[0]
 Top:

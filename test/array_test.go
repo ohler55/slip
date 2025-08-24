@@ -66,10 +66,12 @@ func TestArrayMajorSet(t *testing.T) {
 
 func TestArraySetAll(t *testing.T) {
 	content := testArray().AsList()
-	a := slip.NewArray([]int{2, 3, 4}, slip.TrueSymbol, nil, nil, true)
+	a := slip.NewArray([]int{2, 3, 4}, slip.FixnumSymbol, nil, nil, true)
 	a.SetAll(content)
 	tt.Equal(t, "(((0 1 2 3) (4 5 6 7) (8 9 10 11)) ((12 13 14 15) (16 17 18 19) (20 21 22 23)))",
 		a.AsList().String())
+
+	sliptest.LoadForm(t, a)
 
 	a = slip.NewArray([]int{2, 2}, slip.TrueSymbol, nil, nil, true)
 	tt.Panic(t, func() { a.SetAll(slip.List{slip.List{nil}, slip.List{nil}}) })
@@ -115,6 +117,8 @@ func TestArrayAdjustNotAdjustable(t *testing.T) {
 	a2 := a.Adjust([]int{1, 2}, slip.FixnumSymbol, nil, nil)
 	tt.Equal(t, slip.TrueSymbol, a.ElementType())
 	tt.Equal(t, slip.FixnumSymbol, a2.ElementType())
+
+	sliptest.LoadForm(t, a)
 }
 
 func TestArrayAdjustTypeCheck(t *testing.T) {

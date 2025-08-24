@@ -32,5 +32,5 @@ func (obj Undefined) Hierarchy() []Symbol {
 
 // Eval returns self.
 func (obj Undefined) Eval(s *Scope, depth int) Object {
-	panic(NewUndefinedFunction(obj, "Function %s is not defined.", obj))
+	panic(UndefinedFunctionNew(s, depth, obj, "Function %s is not defined.", obj))
 }

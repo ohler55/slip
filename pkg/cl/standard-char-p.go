@@ -46,10 +46,10 @@ type StandardCharP struct {
 
 // Call the function with the arguments provided.
 func (f *StandardCharP) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	c, ok := args[0].(slip.Character)
 	if !ok {
-		slip.PanicType("character", args[0], "character")
+		slip.TypePanic(s, depth, "character", args[0], "character")
 	}
 	if c < 0x007f && standardChars[c] == 'o' {
 		return slip.True

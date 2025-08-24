@@ -39,10 +39,10 @@ type TimeToUniversal struct {
 
 // Call the function with the arguments provided.
 func (f *TimeToUniversal) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	st, ok := args[0].(slip.Time)
 	if !ok {
-		slip.PanicType("time", args[0], "time")
+		slip.TypePanic(s, depth, "time", args[0], "time")
 	}
 	return slip.Fixnum(time.Time(st).Unix() + 2208988800)
 }

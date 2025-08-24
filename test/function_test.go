@@ -18,6 +18,13 @@ func TestFunctionNew(t *testing.T) {
 
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing", slip.List{}) })
 	tt.Panic(t, func() { _ = slip.NewFunc("nothing:at-all", slip.List{}) })
+
+	sliptest.LoadForm(t, f)
+
+	code := slip.ReadString(`(car '(1 2))`, slip.NewScope())
+	code.Compile()
+	f = code[0].(slip.Funky)
+	sliptest.LoadForm(t, f)
 }
 
 func TestFunctionHierarchy(t *testing.T) {
@@ -33,7 +40,7 @@ func TestFunctionFind(t *testing.T) {
 	cl := slip.FindPackage("common-lisp")
 	f := slip.MustFindFunc("car", cl)
 	tt.NotNil(t, f)
-	tt.Equal(t, []slip.Symbol{slip.BuiltInSymbol, slip.TrueSymbol}, f.Hierarchy())
+	tt.Equal(t, []slip.Symbol{slip.BuiltInSymbol, slip.FunctionSymbol, slip.TrueSymbol}, f.Hierarchy())
 
 	tt.Panic(t, func() { _ = slip.MustFindFunc("nothing", &slip.CLPkg) })
 }

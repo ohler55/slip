@@ -40,10 +40,10 @@ type SocketPeerPort struct {
 
 // Call the function with the arguments provided.
 func (f *SocketPeerPort) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	self, ok := args[0].(*flavors.Instance)
 	if !ok || !self.IsA("socket") {
-		slip.PanicType("socket", args[0], "socket")
+		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
 	if self.Any != nil {
 		_, port := socketPeerName(self)
@@ -54,9 +54,9 @@ func (f *SocketPeerPort) Call(s *slip.Scope, args slip.List, depth int) (result 
 
 type socketPeerPortCaller struct{}
 
-func (caller socketPeerPortCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketPeerPortCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":peer-port", args, 0, 0)
+	slip.CheckSendArgCount(s, depth, self, ":peer-port", args, 0, 0)
 	if self.Any != nil {
 		_, port := socketPeerName(self)
 		result = port

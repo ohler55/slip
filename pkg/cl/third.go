@@ -39,10 +39,10 @@ type Third struct {
 
 // Call the function with the arguments provided.
 func (f *Third) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return callN(f, args, 2)
+	return callN(s, f, args, 2, depth)
 }
 
 // Place a value in the third position of a list or cons.
 func (f *Third) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	placeN(f, args, 2, value)
+	placeN(s, f, args, 2, value)
 }

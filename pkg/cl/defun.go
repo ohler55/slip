@@ -63,7 +63,7 @@ type Defun struct {
 func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defun", args[0], "symbol")
+		slip.TypePanic(s, depth, "name argument to defun", args[0], "symbol")
 	}
 	pkg, low, _ := slip.UnpackName(string(name))
 	if pkg == nil {
@@ -81,7 +81,7 @@ func (f *Defun) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	}
 	if fi := pkg.GetFunc(low); fi != nil {
 		if fi.Pkg.Locked {
-			slip.PanicPackage(fi.Pkg, "Redefining %s:%s in defun. Package %s is locked.",
+			slip.PackagePanic(s, depth, fi.Pkg, "Redefining %s:%s in defun. Package %s is locked.",
 				fi.Pkg.Name, low, fi.Pkg.Name)
 		}
 		if 0 < len(fi.Kind) {

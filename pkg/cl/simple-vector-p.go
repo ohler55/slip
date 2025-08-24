@@ -37,7 +37,7 @@ type SimpleVectorP struct {
 
 // Call the function with the arguments provided.
 func (f *SimpleVectorP) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if vl, ok := args[0].(slip.VectorLike); ok {
 		et := vl.ElementType()
 		if et == slip.TrueSymbol || et == slip.BitSymbol || et == slip.OctetSymbol {

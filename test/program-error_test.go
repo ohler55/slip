@@ -12,7 +12,8 @@ import (
 )
 
 func TestProgramErrorObj(t *testing.T) {
-	cond := slip.NewProgramError("not a %s program-error", "real")
+	scope := slip.NewScope()
+	cond := slip.ProgramErrorNew(scope, 0, "not a %s program-error", "real")
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<program-error [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestProgramErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real program-error", cl.SimpleCondMsg(slip.NewScope(), cond.(slip.Instance)))
+	tt.Equal(t, "not a real program-error", cl.SimpleCondMsg(scope, cond.(slip.Instance)))
 }
 
 func TestProgramErrorMake(t *testing.T) {
@@ -44,6 +45,6 @@ func TestProgramErrorMake(t *testing.T) {
 
 func TestProgramErrorPanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicProgram("raise")
+		slip.ProgramPanic(slip.NewScope(), 0, "raise")
 	})
 }

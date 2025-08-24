@@ -39,7 +39,7 @@ type Endp struct {
 
 // Call the function with the arguments provided.
 func (f *Endp) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case nil:
 		result = slip.True
@@ -48,7 +48,7 @@ func (f *Endp) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			result = slip.True
 		}
 	default:
-		slip.PanicType("list", ta, "list")
+		slip.TypePanic(s, depth, "list", ta, "list")
 	}
 	return
 }

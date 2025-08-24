@@ -41,10 +41,10 @@ type FileAuthor struct {
 
 // Call the function with the arguments provided.
 func (f *FileAuthor) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	path, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("filepath", args[0], "string")
+		slip.TypePanic(s, depth, "filepath", args[0], "string")
 	}
 	var stat syscall.Stat_t
 	if syscall.Stat(string(path), &stat) == nil {

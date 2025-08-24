@@ -57,3 +57,17 @@ func (wl *WhopLoc) Continue(s *Scope, args List, depth int) Object {
 	}
 	return wl.Method.InnerCall(s, args, depth)
 }
+
+func (wl *WhopLoc) HasNext() bool {
+	for wl.Current++; wl.Current < len(wl.Method.Combinations); wl.Current++ {
+		if wl.Method.Combinations[wl.Current].Wrap != nil {
+			return true
+		}
+	}
+	for _, comb := range wl.Method.Combinations {
+		if comb.Primary != nil || comb.Before != nil || comb.After != nil {
+			return true
+		}
+	}
+	return false
+}

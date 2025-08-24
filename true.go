@@ -40,3 +40,8 @@ func (obj boolean) Hierarchy() []Symbol {
 func (obj boolean) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj boolean) LoadForm() Object {
+	return obj
+}

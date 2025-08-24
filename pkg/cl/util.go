@@ -28,7 +28,7 @@ CallFunc:
 		fn = s.Eval(tf, d2)
 		goto CallFunc
 	default:
-		slip.PanicType("function", tf, "function")
+		slip.TypePanic(s, depth, "function", tf, "function")
 	}
 	return
 }
@@ -57,14 +57,14 @@ func list2TestKeyArgs(
 	args slip.List,
 	depth int) (lists []slip.List, keyFunc slip.Caller, testFunc slip.Caller) {
 
-	slip.ArgCountCheck(f, args, 2, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	switch ta := args[0].(type) {
 	case nil:
 		// ok
 	case slip.List:
 		lists = append(lists, ta)
 	default:
-		slip.PanicType("list-1", ta, "list")
+		slip.TypePanic(s, depth, "list-1", ta, "list")
 	}
 	switch ta := args[1].(type) {
 	case nil:
@@ -72,13 +72,13 @@ func list2TestKeyArgs(
 	case slip.List:
 		lists = append(lists, ta)
 	default:
-		slip.PanicType("list-2", ta, "list")
+		slip.TypePanic(s, depth, "list-2", ta, "list")
 	}
 	if 2 < len(args) {
 		for pos := 2; pos < len(args); pos += 2 {
 			sym, ok := args[pos].(slip.Symbol)
 			if !ok {
-				slip.PanicType("keyword", args[pos], "keyword")
+				slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 			}
 			if len(args)-1 <= pos {
 				slip.NewPanic("%s missing an argument", sym)
@@ -89,7 +89,7 @@ func list2TestKeyArgs(
 			case ":test":
 				testFunc = ResolveToCaller(s, args[pos+1], depth)
 			default:
-				slip.PanicType("keyword", sym, ":key", ":test")
+				slip.TypePanic(s, depth, "keyword", sym, ":key", ":test")
 			}
 		}
 	}
@@ -103,7 +103,7 @@ func processBinding(s, ns *slip.Scope, arg slip.Object, depth int) {
 	case slip.List:
 		bindings = ta
 	default:
-		slip.PanicType("bindings", arg, "list")
+		slip.TypePanic(s, depth, "bindings", arg, "list")
 	}
 	for _, binding := range bindings {
 		switch tb := binding.(type) {
@@ -111,11 +111,11 @@ func processBinding(s, ns *slip.Scope, arg slip.Object, depth int) {
 			ns.Let(tb, nil)
 		case slip.List:
 			if len(tb) < 1 {
-				slip.PanicType("binding variable", nil, "list", "symbol")
+				slip.TypePanic(s, depth, "binding variable", nil, "list", "symbol")
 			}
 			sym, ok := tb[0].(slip.Symbol)
 			if !ok {
-				slip.PanicType("binding variable", tb[0], "symbol")
+				slip.TypePanic(s, depth, "binding variable", tb[0], "symbol")
 			}
 			if 1 < len(tb) {
 				// Use the original scope to avoid using the new bindings since
@@ -125,14 +125,14 @@ func processBinding(s, ns *slip.Scope, arg slip.Object, depth int) {
 				ns.Let(sym, nil)
 			}
 		default:
-			slip.PanicType("binding", tb, "list", "symbol")
+			slip.TypePanic(s, depth, "binding", tb, "list", "symbol")
 		}
 	}
 }
 
 // callN is used by second, third, fourth, etc.
-func callN(f slip.Object, args slip.List, n int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+func callN(s *slip.Scope, f slip.Object, args slip.List, n, depth int) (result slip.Object) {
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	a := args[0]
 	switch list := a.(type) {
 	case nil:
@@ -145,14 +145,14 @@ func callN(f slip.Object, args slip.List, n int) (result slip.Object) {
 			}
 		}
 	default:
-		slip.PanicType("list", list, "cons", "list")
+		slip.TypePanic(s, depth, "list", list, "cons", "list")
 	}
 	return
 }
 
 // placeN is used by second, third, fourth, etc.
-func placeN(f slip.Object, args slip.List, n int, value slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+func placeN(s *slip.Scope, f slip.Object, args slip.List, n int, value slip.Object) {
+	slip.CheckArgCount(s, 0, f, args, 1, 1)
 	if list, ok := args[0].(slip.List); ok && n < len(list) {
 		if _, ok := list[n].(slip.Tail); ok {
 			value = slip.Tail{Value: value}
@@ -160,7 +160,7 @@ func placeN(f slip.Object, args slip.List, n int, value slip.Object) {
 		list[n] = value
 		return
 	}
-	slip.PanicType("list", args[0], "cons", "list")
+	slip.TypePanic(s, 0, "list", args[0], "cons", "list")
 }
 
 func reverseBytes(buf []byte) {
@@ -199,19 +199,19 @@ func complement(v slip.Object) (result slip.Object) {
 	return
 }
 
-func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
-	slip.ArgCountCheck(f, args, 2, 3)
+func bitOpArrays(s *slip.Scope, f slip.Object, args slip.List, depth int) (a1, a2, r slip.ArrayLike) {
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	switch t1 := args[0].(type) {
 	case *slip.Array:
 		t2, ok := args[1].(*slip.Array)
 		if !ok {
-			slip.PanicType("bit-array2", args[1], "bit-array")
+			slip.TypePanic(s, depth, "bit-array2", args[1], "bit-array")
 		}
 		if t1.ElementType() != slip.BitSymbol {
-			slip.PanicType("bit-array1", t1, "bit-array")
+			slip.TypePanic(s, depth, "bit-array1", t1, "bit-array")
 		}
 		if t2.ElementType() != slip.BitSymbol {
-			slip.PanicType("bit-array2", t2, "bit-array")
+			slip.TypePanic(s, depth, "bit-array2", t2, "bit-array")
 		}
 		d1 := t1.Dimensions()
 		d2 := t2.Dimensions()
@@ -226,7 +226,7 @@ func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
 		if 2 < len(args) {
 			ra, ok := args[2].(*slip.Array)
 			if !ok || ra.ElementType() != slip.BitSymbol {
-				slip.PanicType("opt-arg", args[2], "bit-array")
+				slip.TypePanic(s, depth, "opt-arg", args[2], "bit-array")
 			}
 			dr := ra.Dimensions()
 			if len(d1) != len(dr) {
@@ -246,7 +246,7 @@ func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
 	case *slip.BitVector:
 		t2, ok := args[1].(*slip.BitVector)
 		if !ok {
-			slip.PanicType("bit-array2", args[1], "bit-array")
+			slip.TypePanic(s, depth, "bit-array2", args[1], "bit-array")
 		}
 		if t1.Length() != t2.Length() {
 			slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
@@ -254,7 +254,7 @@ func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
 		if 2 < len(args) {
 			ra, ok := args[2].(*slip.BitVector)
 			if !ok {
-				slip.PanicType("opt-arg", args[2], "bit-array")
+				slip.TypePanic(s, depth, "opt-arg", args[2], "bit-array")
 			}
 			if t1.Len != ra.Len {
 				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
@@ -270,7 +270,7 @@ func bitOpArrays(f slip.Object, args slip.List) (a1, a2, r slip.ArrayLike) {
 		a1 = t1
 		a2 = t2
 	default:
-		slip.PanicType("bit-array1", t1, "bit-array")
+		slip.TypePanic(s, depth, "bit-array1", t1, "bit-array")
 	}
 	return
 }

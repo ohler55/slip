@@ -54,10 +54,10 @@ type Write struct {
 
 // Call the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 4)
+	slip.CheckArgCount(s, depth, f, args, 1, 4)
 	data, ok := args[0].(slip.List)
 	if !ok || len(data) < 1 {
-		slip.PanicType("data", args[0], "list")
+		slip.TypePanic(s, depth, "data", args[0], "list")
 	}
 	w := s.Get("*standard-output*").(io.Writer)
 	if 1 < len(args) {
@@ -70,7 +70,7 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			// Most likely a keyword so just keep going.
 		default:
 			if ta != slip.True {
-				slip.PanicType("output", ta, "output-stream", "t", "nil")
+				slip.TypePanic(s, depth, "output", ta, "output-stream", "t", "nil")
 			}
 		}
 	}
@@ -78,7 +78,7 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	for pos := 2; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -88,20 +88,20 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			if ss, ok = args[pos+1].(slip.String); ok {
 				enc.Indent("", string(ss))
 			} else {
-				slip.PanicType(":indent", args[pos+1], "string")
+				slip.TypePanic(s, depth, ":indent", args[pos+1], "string")
 			}
 		} else {
-			slip.PanicType("keyword", args[pos], ":indent")
+			slip.TypePanic(s, depth, "keyword", args[pos], ":indent")
 		}
 	}
 	// The top level list can be a list of elements without a name. Determine
 	// that by looking at the first element of the list.
 	if _, ok := data[0].(slip.List); ok {
 		for _, child := range data {
-			f.encode(enc, child)
+			f.encode(s, enc, child, depth)
 		}
 	} else {
-		f.encode(enc, data)
+		f.encode(s, enc, data, depth)
 	}
 	if err := enc.Flush(); err != nil {
 		panic(err)
@@ -113,7 +113,7 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return nil
 }
 
-func (f *Write) encode(enc *xml.Encoder, data slip.Object) {
+func (f *Write) encode(s *slip.Scope, enc *xml.Encoder, data slip.Object, depth int) {
 	switch td := data.(type) {
 	case slip.List: // all except text
 		if len(td) < 2 {
@@ -126,7 +126,7 @@ func (f *Write) encode(enc *xml.Encoder, data slip.Object) {
 					panic(err)
 				}
 			} else {
-				slip.PanicType("comment", td[1], "string")
+				slip.TypePanic(s, depth, "comment", td[1], "string")
 			}
 		case slip.Symbol(":directive"):
 			if ss, ok := td[1].(slip.String); ok {
@@ -134,20 +134,20 @@ func (f *Write) encode(enc *xml.Encoder, data slip.Object) {
 					panic(err)
 				}
 			} else {
-				slip.PanicType("directive", td[1], "string")
+				slip.TypePanic(s, depth, "directive", td[1], "string")
 			}
 		case slip.Symbol(":processing-instruction"):
 			var pi xml.ProcInst
 			if ss, ok := td[1].(slip.String); ok {
 				pi.Target = string(ss)
 			} else {
-				slip.PanicType("processing instruction target", td[1], "string")
+				slip.TypePanic(s, depth, "processing instruction target", td[1], "string")
 			}
 			if 2 < len(td) {
 				if ss, ok := td[2].(slip.String); ok {
 					pi.Inst = []byte(ss)
 				} else {
-					slip.PanicType("processing instruction", td[2], "string")
+					slip.TypePanic(s, depth, "processing instruction", td[2], "string")
 				}
 			}
 			if err := enc.EncodeToken(pi); err != nil {
@@ -161,7 +161,7 @@ func (f *Write) encode(enc *xml.Encoder, data slip.Object) {
 			case slip.String:
 				se.Name.Local = string(t0)
 			default:
-				slip.PanicType("element name", t0, "string", "symbol")
+				slip.TypePanic(s, depth, "element name", t0, "string", "symbol")
 			}
 			switch t1 := td[1].(type) {
 			case nil:
@@ -176,7 +176,7 @@ func (f *Write) encode(enc *xml.Encoder, data slip.Object) {
 						case slip.String:
 							attr.Name.Local = string(ta)
 						default:
-							slip.PanicType("element attribute name", ta, "string", "symbol")
+							slip.TypePanic(s, depth, "element attribute name", ta, "string", "symbol")
 						}
 						v := a[1]
 					value:
@@ -189,21 +189,21 @@ func (f *Write) encode(enc *xml.Encoder, data slip.Object) {
 							v = tv.Value
 							goto value
 						default:
-							slip.PanicType("element attribute value", tv, "string", "symbol")
+							slip.TypePanic(s, depth, "element attribute value", tv, "string", "symbol")
 						}
 						se.Attr = append(se.Attr, attr)
 					} else {
-						slip.PanicType("element attribute", e, "cons")
+						slip.TypePanic(s, depth, "element attribute", e, "cons")
 					}
 				}
 			default:
-				slip.PanicType("element attributes", t1, "assoc list")
+				slip.TypePanic(s, depth, "element attributes", t1, "assoc list")
 			}
 			if err := enc.EncodeToken(se); err != nil {
 				panic(err)
 			}
 			for _, child := range td[2:] {
-				f.encode(enc, child)
+				f.encode(s, enc, child, depth)
 			}
 			if err := enc.EncodeToken(xml.EndElement{Name: se.Name}); err != nil {
 				panic(err)

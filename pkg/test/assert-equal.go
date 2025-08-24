@@ -50,7 +50,7 @@ type AssertEqual struct {
 
 // Call the function with the arguments provided.
 func (f *AssertEqual) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	if slip.ObjectEqual(args[0], args[1]) {
 		return nil
 	}

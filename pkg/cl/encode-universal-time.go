@@ -49,33 +49,33 @@ type EncodeUniversalTime struct {
 
 // Call the function with the arguments provided.
 func (f *EncodeUniversalTime) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 6, 7)
+	slip.CheckArgCount(s, depth, f, args, 6, 7)
 
 	loc := time.UTC
 	if 6 < len(args) {
 		if r, ok := args[6].(slip.Real); ok && -86400.0 <= r.RealValue() && r.RealValue() <= 86400.0 {
 			loc = time.FixedZone("UTC", int(r.RealValue()*-3600.0))
 		} else {
-			slip.PanicType("time-zone", args[6], "real")
+			slip.TypePanic(s, depth, "time-zone", args[6], "real")
 		}
 	}
 	tm := time.Date(
-		getFixnumArg(args[5], "year"),
-		time.Month(getFixnumArg(args[4], "month")),
-		getFixnumArg(args[3], "date"),
-		getFixnumArg(args[2], "hour"),
-		getFixnumArg(args[1], "minute"),
-		getFixnumArg(args[0], "second"),
+		getFixnumArg(s, args[5], "year", depth),
+		time.Month(getFixnumArg(s, args[4], "month", depth)),
+		getFixnumArg(s, args[3], "date", depth),
+		getFixnumArg(s, args[2], "hour", depth),
+		getFixnumArg(s, args[1], "minute", depth),
+		getFixnumArg(s, args[0], "second", depth),
 		0,
 		loc,
 	)
 	return slip.Fixnum(tm.Unix() + 2208988800)
 }
 
-func getFixnumArg(arg slip.Object, use string) int {
+func getFixnumArg(s *slip.Scope, arg slip.Object, use string, depth int) int {
 	num, ok := arg.(slip.Fixnum)
 	if !ok || num < 0 {
-		slip.PanicType(use, arg, "non-negative fixnum")
+		slip.TypePanic(s, depth, use, arg, "non-negative fixnum")
 	}
 	return int(num)
 }

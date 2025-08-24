@@ -39,7 +39,7 @@ type Export struct {
 
 // Call the function with the arguments provided.
 func (f *Export) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	p := slip.CurrentPackage
 	if 1 < len(args) {
 		p = slip.PackageFromArg(args[1])
@@ -57,11 +57,11 @@ func (f *Export) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			case slip.String:
 				p.Export(string(tv))
 			default:
-				slip.PanicType("symbol", tv, "symbol", "string")
+				slip.TypePanic(s, depth, "symbol", tv, "symbol", "string")
 			}
 		}
 	default:
-		slip.PanicType("symbols", ta, "symbol", "string", "list")
+		slip.TypePanic(s, depth, "symbols", ta, "symbol", "string", "list")
 	}
 	return slip.True
 }

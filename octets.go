@@ -213,3 +213,13 @@ func (obj Octets) MajorSet(index int, value Object) {
 	}
 	obj.Set(value, index)
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Octets) LoadForm() Object {
+	list := make(List, len(obj)+1)
+	list[0] = Symbol("list")
+	for i, o := range obj {
+		list[i+1] = Fixnum(o)
+	}
+	return List{coerceSymbol, list, List{quoteSymbol, OctetsSymbol}}
+}

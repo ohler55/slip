@@ -12,7 +12,8 @@ import (
 )
 
 func TestErrorObj(t *testing.T) {
-	err := slip.NewError("not a %s error", "real")
+	scope := slip.NewScope()
+	err := slip.ErrorNew(scope, 0, "not a %s error", "real")
 	(&sliptest.Object{
 		Target: err,
 		String: "/^#<error [0-9a-f]+>$/",
@@ -26,7 +27,7 @@ func TestErrorObj(t *testing.T) {
 			{Other: slip.True, Expect: false},
 		},
 	}).Test(t)
-	tt.Equal(t, "not a real error", cl.SimpleCondMsg(slip.NewScope(), err.(slip.Instance)))
+	tt.Equal(t, "not a real error", cl.SimpleCondMsg(scope, err.(slip.Instance)))
 }
 
 func TestErrorMake(t *testing.T) {
@@ -39,7 +40,7 @@ func TestErrorMake(t *testing.T) {
 	tt.Equal(t, true, ok)
 	value, has := cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, true, has)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Error :message "raise")`,
@@ -54,5 +55,5 @@ func TestErrorMake(t *testing.T) {
 }
 
 func TestErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicError("raise") })
+	tt.Panic(t, func() { slip.ErrorPanic(slip.NewScope(), 0, "raise") })
 }

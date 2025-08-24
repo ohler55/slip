@@ -55,7 +55,7 @@ type WriteToString struct {
 
 // Call the function with the arguments provided.
 func (f *WriteToString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	b, _, _ := writeBuf(f, s, args, false)
+	b, _, _ := writeBuf(f, s, args, false, depth)
 
 	return slip.String(b)
 }

@@ -40,7 +40,7 @@ type Denominator struct {
 
 // Call the function with the arguments provided.
 func (f *Denominator) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Fixnum, *slip.Bignum:
 		result = slip.Fixnum(1)
@@ -52,7 +52,7 @@ func (f *Denominator) Call(s *slip.Scope, args slip.List, depth int) (result sli
 			result = (*slip.Bignum)(bi)
 		}
 	default:
-		slip.PanicType("rational", args[0], "rational")
+		slip.TypePanic(s, depth, "rational", args[0], "rational")
 	}
 	return
 }

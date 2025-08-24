@@ -30,7 +30,7 @@ type Memstat struct {
 
 // Call the function with the arguments provided.
 func (f *Memstat) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 0)
+	slip.CheckArgCount(s, depth, f, args, 0, 0)
 	var ms runtime.MemStats
 	runtime.ReadMemStats(&ms)
 	alist := make(slip.List, 0, 20)

@@ -47,19 +47,19 @@ const baseChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 // Call the function with the arguments provided.
 func (f *DigitChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	radix := 10
 	var weight int
 	if w, ok := args[0].(slip.Fixnum); ok && 0 <= w {
 		weight = int(w)
 	} else {
-		slip.PanicType("weight", args[0], "unsigned integer")
+		slip.TypePanic(s, depth, "weight", args[0], "unsigned integer")
 	}
 	if 1 < len(args) {
 		if r, ok := args[1].(slip.Fixnum); ok && 0 < r && r <= 36 {
 			radix = int(r)
 		} else {
-			slip.PanicType("radix", args[1], "integer less than or equal to 36")
+			slip.TypePanic(s, depth, "radix", args[1], "integer less than or equal to 36")
 		}
 	}
 	if radix <= weight {

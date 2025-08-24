@@ -58,10 +58,10 @@ func (c *ConditionClass) MakeInstance() slip.Instance {
 	return &obj
 }
 
-// DefList returns a list that can be evaluated to create the class or nil if
+// LoadForm returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
-func (c *ConditionClass) DefList() slip.List {
-	def := c.StandardClass.DefList()
+func (c *ConditionClass) LoadForm() slip.Object {
+	def := c.StandardClass.LoadForm().(slip.List)
 	if report := c.vars["report"]; report != nil {
 		def = append(def, slip.List{slip.Symbol(":report"), report})
 	}

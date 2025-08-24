@@ -46,7 +46,7 @@ type Gensym struct {
 
 // Call the function with the arguments provided.
 func (f *Gensym) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 1)
+	slip.CheckArgCount(s, depth, f, args, 0, 1)
 	prefix := "G"
 	var suffix slip.Fixnum
 	if 0 < len(args) {
@@ -55,11 +55,11 @@ func (f *Gensym) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			prefix = string(ta)
 		case slip.Fixnum:
 			if ta.Int64() <= 0 {
-				slip.PanicType("x", ta, "string", "positive integer")
+				slip.TypePanic(s, depth, "x", ta, "string", "positive integer")
 			}
 			suffix = ta
 		default:
-			slip.PanicType("x", ta, "string", "positive integer")
+			slip.TypePanic(s, depth, "x", ta, "string", "positive integer")
 		}
 	}
 	if suffix == 0 {
@@ -68,7 +68,7 @@ func (f *Gensym) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if suffix, ok = s.Get(gsym).(slip.Fixnum); ok && 0 < suffix {
 			s.Set(gsym, suffix+1)
 		} else {
-			slip.PanicType("*gensym-counter*", s.Get(gsym), "string", "positive integer")
+			slip.TypePanic(s, depth, "*gensym-counter*", s.Get(gsym), "string", "positive integer")
 		}
 	}
 	return slip.Symbol(fmt.Sprintf("%s%s", prefix, suffix))

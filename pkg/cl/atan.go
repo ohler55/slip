@@ -44,19 +44,19 @@ type Atan struct {
 
 // Call the function with the arguments provided.
 func (f *Atan) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	if n1, ok := args[0].(slip.Real); ok {
 		if 1 < len(args) {
 			if n2, ok2 := args[1].(slip.Real); ok2 {
 				result = slip.DoubleFloat(math.Atan2(n1.RealValue(), n2.RealValue()))
 			} else {
-				slip.PanicType("number2", args[1], "number")
+				slip.TypePanic(s, depth, "number2", args[1], "number")
 			}
 		} else {
 			result = slip.DoubleFloat(math.Atan(n1.RealValue()))
 		}
 	} else {
-		slip.PanicType("number1", args[0], "number")
+		slip.TypePanic(s, depth, "number1", args[0], "number")
 	}
 	return
 }

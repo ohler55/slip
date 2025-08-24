@@ -107,3 +107,58 @@ func (obj List) Cdr() (cdr Object) {
 	}
 	return
 }
+
+// LoadForm returns a form that can be evaluated to create the object or
+// panics if that is not possible.
+func (obj List) LoadForm() Object {
+	if 2 <= len(obj) {
+		if tail, ok := obj[len(obj)-1].(Tail); ok {
+			form := List{Symbol("cons"), nil, nil}
+			switch te := obj[len(obj)-2].(type) {
+			case nil:
+				// already nil
+			case LoadFormer:
+				form[1] = te.LoadForm()
+			default:
+				PrintNotReadablePanic(NewScope(), 0, te, "Can not make a load form for %s.", te)
+			}
+			switch te := tail.Value.(type) {
+			case nil:
+				// already nil
+			case LoadFormer:
+				form[2] = te.LoadForm()
+			default:
+				PrintNotReadablePanic(NewScope(), 0, te, "Can not make a load form for %s.", te)
+			}
+			if 2 < len(obj) {
+				head := make(List, len(obj)-1)
+				head[0] = ListSymbol
+				for i := 0; i < len(obj)-2; i++ {
+					switch te := obj[i].(type) {
+					case nil:
+						// already nil
+					case LoadFormer:
+						head[i+1] = te.LoadForm()
+					default:
+						PrintNotReadablePanic(NewScope(), 0, te, "Can not make a load form for %s.", te)
+					}
+				}
+				form = List{Symbol("append"), head, form}
+			}
+			return form
+		}
+	}
+	form := make(List, len(obj)+1)
+	form[0] = ListSymbol
+	for i, v := range obj {
+		switch tv := v.(type) {
+		case nil:
+			// already nil
+		case LoadFormer:
+			form[i+1] = tv.LoadForm()
+		default:
+			PrintNotReadablePanic(NewScope(), 0, tv, "Can not make a load form for %s.", tv)
+		}
+	}
+	return form
+}

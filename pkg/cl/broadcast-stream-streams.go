@@ -40,10 +40,10 @@ type BroadcastStreamStreams struct {
 
 // Call the function with the arguments provided.
 func (f *BroadcastStreamStreams) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	bs, ok := args[0].(BroadcastStream)
 	if !ok {
-		slip.PanicType("broadcast-stream", args[0], "broadcast-stream")
+		slip.TypePanic(s, depth, "broadcast-stream", args[0], "broadcast-stream")
 	}
 	streams := make(slip.List, len(bs)-1)
 	for i, stream := range bs[1:] {

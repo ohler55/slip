@@ -110,13 +110,13 @@ func (f *Search) Call(s *slip.Scope, args slip.List, depth int) (index slip.Obje
 	case slip.Octets:
 		index = sv.inOctets(s, ta, depth)
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	return
 }
 
 func (sv *searchVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List, depth int) {
-	slip.ArgCountCheck(f, args, 2, 16)
+	slip.CheckArgCount(s, depth, f, args, 2, 16)
 	sv.seq1 = args[0]
 	sv.end1 = -1
 	sv.end2 = -1
@@ -124,7 +124,7 @@ func (sv *searchVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List, 
 	for ; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
@@ -136,7 +136,7 @@ func (sv *searchVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List, 
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
 				sv.start1 = int(num)
 			} else {
-				slip.PanicType("start1", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "start1", args[pos+1], "fixnum")
 			}
 		case ":end1":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
@@ -144,13 +144,13 @@ func (sv *searchVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List, 
 			} else if args[pos+1] == nil {
 				sv.end1 = -1
 			} else {
-				slip.PanicType("end1", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "end1", args[pos+1], "fixnum")
 			}
 		case ":start2":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
 				sv.start2 = int(num)
 			} else {
-				slip.PanicType("start2", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "start2", args[pos+1], "fixnum")
 			}
 		case ":end2":
 			if num, ok := args[pos+1].(slip.Fixnum); ok && 0 <= num {
@@ -158,12 +158,12 @@ func (sv *searchVars) setKeysItem(f slip.Object, s *slip.Scope, args slip.List, 
 			} else if args[pos+1] == nil {
 				sv.end2 = -1
 			} else {
-				slip.PanicType("end2", args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, "end2", args[pos+1], "fixnum")
 			}
 		case ":from-end":
 			sv.fromEnd = args[pos+1] != nil
 		default:
-			slip.PanicType("keyword", sym, ":key", ":test", ":start1", ":end1", ":start2", ":end2", ":from-end")
+			slip.TypePanic(s, depth, "keyword", sym, ":key", ":test", ":start1", ":end1", ":start2", ":end2", ":from-end")
 		}
 	}
 	if pos < len(args) {
@@ -186,7 +186,7 @@ func (sv *searchVars) inList(s *slip.Scope, seq2 slip.List, depth int) slip.Obje
 		}
 		return slip.Fixnum(0)
 	default:
-		slip.PanicType("sequence-1", s1, "sequence")
+		slip.TypePanic(s, depth, "sequence-1", s1, "sequence")
 	}
 	return sv.searchList(s, seq1, seq2, depth)
 }
@@ -317,7 +317,7 @@ func (sv *searchVars) inString(s *slip.Scope, seq2 slip.String, depth int) slip.
 		}
 		return slip.Fixnum(0)
 	default:
-		slip.PanicType("sequence-1", s1, "sequence")
+		slip.TypePanic(s, depth, "sequence-1", s1, "sequence")
 	}
 	ra := []rune(seq2)
 	sq2 := make(slip.List, len(ra))
@@ -353,7 +353,7 @@ func (sv *searchVars) inOctets(s *slip.Scope, seq2 slip.Octets, depth int) slip.
 			seq1[i] = slip.Octet(b)
 		}
 	default:
-		slip.PanicType("sequence-1", s1, "sequence")
+		slip.TypePanic(s, depth, "sequence-1", s1, "sequence")
 	}
 	sq2 := make(slip.List, len(seq2))
 	for i, b := range seq2 {

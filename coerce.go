@@ -7,7 +7,11 @@ import (
 	"unicode/utf8"
 )
 
-const starSym = Symbol("*")
+const (
+	starSym      = Symbol("*")
+	coerceSymbol = Symbol("coerce")
+	quoteSymbol  = Symbol("quote")
+)
 
 // Coerce_ returns object converted to type. A type of t always returns
 // object. Although not Common LISP standard other conversion are supported

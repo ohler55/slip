@@ -39,7 +39,7 @@ type SocketState struct {
 
 // Call the function with the arguments provided.
 func (f *SocketState) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if self, ok := args[0].(*flavors.Instance); ok {
 		result = socketState(self)
 	}
@@ -48,9 +48,9 @@ func (f *SocketState) Call(s *slip.Scope, args slip.List, depth int) (result sli
 
 type socketStateCaller struct{}
 
-func (caller socketStateCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller socketStateCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	slip.ArgCountCheck(self, args, 0, 0)
+	slip.CheckArgCount(s, depth, self, args, 0, 0)
 	return socketState(self)
 }
 

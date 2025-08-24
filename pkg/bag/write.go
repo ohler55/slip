@@ -95,15 +95,15 @@ type Write struct {
 
 // Call the the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 16)
+	slip.CheckArgCount(s, depth, f, args, 1, 16)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
-	return writeBag(obj, args[1:])
+	return writeBag(s, obj, args[1:], depth)
 }
 
-func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
+func writeBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) (result slip.Object) {
 	var out io.Writer
 	dp := slip.DefaultPrinter()
 	dp.ScopedUpdate(&obj.Scope)
@@ -129,7 +129,7 @@ func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
 			if ta == slip.True {
 				out = slip.StandardOutput.(io.Writer)
 			} else {
-				slip.PanicType("stream", ta, "nil", "t", "output-stream")
+				slip.TypePanic(s, depth, "stream", ta, "nil", "t", "output-stream")
 			}
 			pos++
 		}
@@ -141,7 +141,7 @@ func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
 			case ":depth":
 				num, ok := args[pos+1].(slip.Fixnum)
 				if !ok {
-					slip.PanicType(":depth", args[pos+1], "fixnum")
+					slip.TypePanic(s, depth, ":depth", args[pos+1], "fixnum")
 				}
 				pw.MaxDepth = int(num)
 				if pw.MaxDepth <= 0 {
@@ -150,7 +150,7 @@ func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
 			case ":right-margin":
 				num, ok := args[pos+1].(slip.Fixnum)
 				if !ok {
-					slip.PanicType(":right-margin", args[pos+1], "fixnum")
+					slip.TypePanic(s, depth, ":right-margin", args[pos+1], "fixnum")
 				}
 				pw.Width = int(num)
 			case ":time-format":
@@ -160,7 +160,7 @@ func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
 				case slip.String:
 					pw.TimeFormat = string(ta)
 				default:
-					slip.PanicType(":time-format", args[pos+1], "string")
+					slip.TypePanic(s, depth, ":time-format", args[pos+1], "string")
 				}
 			case ":time-wrap":
 				switch ta := args[pos+1].(type) {
@@ -169,7 +169,7 @@ func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
 				case slip.String:
 					pw.TimeWrap = string(ta)
 				default:
-					slip.PanicType(":time-wrap", args[pos+1], "string")
+					slip.TypePanic(s, depth, ":time-wrap", args[pos+1], "string")
 				}
 			case ":json":
 				pw.SEN = args[pos+1] == nil
@@ -177,7 +177,7 @@ func writeBag(obj *flavors.Instance, args slip.List) (result slip.Object) {
 				pw.Color = args[pos+1] != nil
 
 			default:
-				slip.PanicType("keyword", sym, ":pretty", ":depth", ":right-margin",
+				slip.TypePanic(s, depth, "keyword", sym, ":pretty", ":depth", ":right-margin",
 					":time-format", ":time-wrap", ":json", ":color")
 			}
 		}

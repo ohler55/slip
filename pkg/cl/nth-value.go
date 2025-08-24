@@ -44,13 +44,13 @@ type NthValue struct {
 
 // Call the function with the arguments provided.
 func (f *NthValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	arg1 := slip.EvalArg(s, args, 1, depth+1)
 
 	if values, ok := arg1.(slip.Values); ok {
 		var num slip.Integer
 		if num, ok = args[0].(slip.Integer); !ok {
-			slip.PanicType("n", args[0], "integer")
+			slip.TypePanic(s, depth, "n", args[0], "integer")
 		}
 		n := int(num.Int64())
 		if 0 <= n && n < len(values) {

@@ -10,10 +10,8 @@ import (
 
 // Used by the various car-cdr combinations like cadar.
 
-func cadGet(f slip.Object, args slip.List, ops []bool) slip.Object {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+func cadGet(s *slip.Scope, f slip.Object, args slip.List, ops []bool, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	a := args[0]
 	for _, op := range ops {
 		switch list := a.(type) {
@@ -26,16 +24,14 @@ func cadGet(f slip.Object, args slip.List, ops []bool) slip.Object {
 				a = list.Cdr()
 			}
 		default:
-			slip.PanicType(fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), args[0], "cons", "list")
+			slip.TypePanic(s, depth, fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), args[0], "cons", "list")
 		}
 	}
 	return a
 }
 
-func cadPlace(f slip.Object, args slip.List, ops []bool, value slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+func cadPlace(s *slip.Scope, f slip.Object, args slip.List, ops []bool, value slip.Object) {
+	slip.CheckArgCount(s, 0, f, args, 1, 1)
 	a := args[0]
 	for _, op := range ops[:len(ops)-1] {
 		if list, ok := a.(slip.List); ok {
@@ -45,7 +41,7 @@ func cadPlace(f slip.Object, args slip.List, ops []bool, value slip.Object) {
 				a = list.Cdr()
 			}
 		} else {
-			slip.PanicType(fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), a, "cons", "list")
+			slip.TypePanic(s, 0, fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), a, "cons", "list")
 		}
 	}
 	if list, ok := a.(slip.List); ok {
@@ -64,5 +60,5 @@ func cadPlace(f slip.Object, args slip.List, ops []bool, value slip.Object) {
 			slip.NewPanic("setf on cdr of a list is not supported")
 		}
 	}
-	slip.PanicType(fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), a, "cons", "list")
+	slip.TypePanic(s, 0, fmt.Sprintf("argument to %s", (f.(slip.Funky)).GetName()), a, "cons", "list")
 }

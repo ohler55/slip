@@ -13,6 +13,7 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/clos"
+	"github.com/ohler55/slip/pp"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -44,8 +45,8 @@ func TestStandardObjectBasic(t *testing.T) {
 
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(list (slot-value qube 'x) (slot-value qube 'y) (slot-value qube 'z))`,
-		Expect: `(nil 5 4)`,
+		Source: `(list (slot-value qube 'y) (slot-value qube 'z))`,
+		Expect: `(5 4)`,
 	}).Test(t)
 
 	obj := scope.Get("qube").(*clos.StandardObject)
@@ -100,6 +101,13 @@ func TestStandardObjectBasic(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(namesStr, ":describe"))
 	tt.Equal(t, true, strings.Contains(namesStr, ":print-self"))
 	tt.NotNil(t, obj.GetMethod(":id"))
+
+	tt.Equal(t, `(let ((inst (make-instance 'quux)))
+  (setf (slot-value inst 'x) 9)
+  (setf (slot-value inst 'y) 5)
+  (setf (slot-value inst 'z) 4)
+  inst)
+`, string(pp.Append(nil, scope, obj.LoadForm())))
 }
 
 func TestStandardObjectInitform(t *testing.T) {
@@ -118,8 +126,8 @@ func TestStandardObjectInitform(t *testing.T) {
 
 	(&sliptest.Function{
 		Scope:  scope,
-		Source: `(list (slot-value qube 'x) (slot-value qube 'y) (slot-value qube 'z))`,
-		Expect: `(nil 1 4)`,
+		Source: `(list (slot-value qube 'y) (slot-value qube 'z))`,
+		Expect: `(1 4)`,
 	}).Test(t)
 }
 

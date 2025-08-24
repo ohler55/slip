@@ -75,17 +75,17 @@ type Save struct {
 
 // Call the function with the arguments provided.
 func (f *Save) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	w, ok := args[1].(io.Writer)
 	if !ok {
-		slip.PanicType("output-stream", args[1], "output-stream")
+		slip.TypePanic(s, depth, "output-stream", args[1], "output-stream")
 	}
 	bsize := defaultSaveBufLimit
 	if val, has := slip.GetArgsKeyValue(args[2:], slip.Symbol(":buffer-size")); has {
 		if num, ok2 := val.(slip.Fixnum); ok2 && 0 < num {
 			bsize = int(num)
 		} else {
-			slip.PanicType("buffer-size", val, "fixnum")
+			slip.TypePanic(s, depth, "buffer-size", val, "fixnum")
 		}
 	}
 	b := saveObj(nil, args[0], w, bsize)

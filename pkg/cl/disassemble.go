@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pp"
 )
 
 func init() {
@@ -44,7 +45,7 @@ type Disassemble struct {
 
 // Call the the function with the arguments provided.
 func (f *Disassemble) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	ansi := s.Get("*print-ansi*") != nil
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
 	w := s.Get("*standard-output*").(io.Writer)
@@ -57,13 +58,13 @@ Top:
 			a = fi
 			goto Top
 		}
-		slip.PanicType("fn", ta, "function designator")
+		slip.TypePanic(s, depth, "fn", ta, "function designator")
 	case *slip.Lambda:
 		buf = f.disassembleLambda(s, ta, right, ansi)
 	case *slip.FuncInfo:
 		buf = f.disassembleFunction(s, ta, right, ansi)
 	default:
-		slip.PanicType("fn", ta, "function designator")
+		slip.TypePanic(s, depth, "fn", ta, "function designator")
 	}
 	_, _ = w.Write(buf)
 
@@ -71,46 +72,10 @@ Top:
 }
 
 func (f *Disassemble) disassembleFunction(s *slip.Scope, fi *slip.FuncInfo, right int, ansi bool) (b []byte) {
-	if fi.Kind == slip.Symbol("macro") {
-		b = append(b, "(defmacro "...)
-	} else {
-		b = append(b, "(defun "...)
-	}
-	b = append(b, fi.Pkg.Name...)
-	b = append(b, ':')
-	b = append(b, fi.Name...)
-	b = append(b, ' ', '(')
-	for i, da := range fi.Doc.Args {
-		if 0 < i {
-			b = append(b, ' ')
-		}
-		b = append(b, da.Name...)
-	}
-	b = append(b, ')', '\n')
-	if 0 < len(fi.Doc.Text) {
+	s2 := s.NewScope()
+	s2.UnsafeLet(slip.Symbol("*print-right-margin*"), slip.Fixnum(right))
 
-		b = append(b, "  \""...)
-		b2 := slip.AppendDoc(nil, fi.Doc.Text, 3, right, ansi)
-		b = append(b, b2[3:]...)
-		b = append(b, '"', '\n')
-	}
-	fun := fi.Create(nil).(slip.Funky)
-	p := slip.DefaultPrinter()
-	p.ScopedUpdate(s)
-	p.RightMargin = uint(right)
-	p.ANSI = ansi
-	if lam, ok := fun.Caller().(*slip.Lambda); ok {
-		for _, form := range lam.Forms {
-			b = append(b, ' ', ' ')
-			b = p.Append(b, form, 1)
-			b = append(b, '\n')
-		}
-		b[len(b)-1] = ')'
-		b = append(b, '\n')
-	} else {
-		b = append(b, "  ...)\n"...)
-	}
-	return
+	return pp.Append(nil, s2, fi)
 }
 
 func (f *Disassemble) disassembleLambda(s *slip.Scope, lam *slip.Lambda, right int, ansi bool) (b []byte) {

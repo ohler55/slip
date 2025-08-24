@@ -55,7 +55,7 @@ type server struct {
 
 type serverInitCaller struct{}
 
-func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
@@ -68,7 +68,7 @@ func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 			if num, ok := args[i+1].(slip.Fixnum); ok {
 				serv.port = int(num)
 			} else {
-				slip.PanicType(":port", args[i+1], "fixnum")
+				slip.TypePanic(s, depth, ":port", args[i+1], "fixnum")
 			}
 		}
 	}

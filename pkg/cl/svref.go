@@ -42,10 +42,10 @@ type Svref struct {
 
 // Call the function with the arguments provided.
 func (f *Svref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	index, ok := args[1].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("index", args[1], "fixnum")
+		slip.TypePanic(s, depth, "index", args[1], "fixnum")
 	}
 	var vl slip.VectorLike
 	if vl, ok = args[0].(slip.VectorLike); ok {
@@ -56,15 +56,15 @@ func (f *Svref) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			}
 		}
 	}
-	panic(slip.NewTypeError("simple-vector", args[0], "simple-vector"))
+	panic(slip.TypeErrorNew(s, depth, "simple-vector", args[0], "simple-vector"))
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Svref) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	index, ok := args[1].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("index", args[1], "fixnum")
+		slip.TypePanic(s, 0, "index", args[1], "fixnum")
 	}
 	var vl slip.VectorLike
 	if vl, ok = args[0].(slip.VectorLike); ok {
@@ -76,5 +76,5 @@ func (f *Svref) Place(s *slip.Scope, args slip.List, value slip.Object) {
 			}
 		}
 	}
-	panic(slip.NewTypeError("simple-vector", args[0], "simple-vector"))
+	panic(slip.TypeErrorNew(s, 0, "simple-vector", args[0], "simple-vector"))
 }

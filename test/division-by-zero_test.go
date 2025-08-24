@@ -12,7 +12,9 @@ import (
 )
 
 func TestDivisionByZeroObj(t *testing.T) {
-	cond := slip.NewDivisionByZero(
+	cond := slip.DivisionByZeroNew(
+		slip.NewScope(),
+		0,
 		slip.Symbol("/"),
 		slip.List{slip.Fixnum(1), slip.Fixnum(0)},
 		"not a %s division-by-zero", "real",
@@ -43,13 +45,13 @@ func TestDivisionByZeroMake(t *testing.T) {
 	tt.Equal(t, ok, true)
 	value, has := cond.SlotValue(slip.Symbol("message"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 	value, has = cond.SlotValue(slip.Symbol("operation"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 	value, has = cond.SlotValue(slip.Symbol("operands"))
 	tt.Equal(t, has, true)
-	tt.Nil(t, value)
+	tt.Equal(t, slip.Unbound, value)
 
 	tf = sliptest.Function{
 		Source: `(make-condition 'Division-By-Zero :operation 'divide :operands '(1 0) :message "raise")`,
@@ -74,6 +76,7 @@ func TestDivisionByZeroMake(t *testing.T) {
 
 func TestDivisionByZeroPanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PanicDivisionByZero(slip.Symbol("/"), slip.List{slip.Fixnum(1), slip.Fixnum(0)}, "raise")
+		slip.DivisionByZeroPanic(slip.NewScope(), 0,
+			slip.Symbol("/"), slip.List{slip.Fixnum(1), slip.Fixnum(0)}, "raise")
 	})
 }

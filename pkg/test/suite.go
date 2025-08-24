@@ -83,7 +83,7 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 		indent = append(indent, ' ', ' ')
 	}
 	w, _ := s.Get("*standard-output*").(io.Writer)
-	filter, verbose, _ := getRunKeys(args)
+	filter, verbose, _ := getRunKeys(s, args, depth)
 	if verbose {
 		_, _ = fmt.Fprintf(w, "%s%s:\n", indent, string(name))
 	}

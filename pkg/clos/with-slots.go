@@ -48,16 +48,16 @@ type WithSlots struct {
 
 // Call the the function with the arguments provided.
 func (f *WithSlots) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	inst, ok := args[1].(slip.Instance)
 	if !ok {
-		slip.PanicType("instance", args[1], "instance")
+		slip.TypePanic(s, depth, "instance", args[1], "instance")
 	}
 	ns := s.NewScope()
 	d2 := depth + 1
 	var entries slip.List
 	if entries, ok = args[0].(slip.List); !ok {
-		slip.PanicType("slot-entries", args[0], "list")
+		slip.TypePanic(s, depth, "slot-entries", args[0], "list")
 	}
 	for _, entry := range entries {
 		switch te := entry.(type) {
@@ -65,29 +65,29 @@ func (f *WithSlots) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			if _, has := inst.SlotValue(te); has {
 				ns.UnsafeLet(te, &slip.Ref{Instance: inst, Key: te})
 			} else {
-				slotMissing(inst, te, "with-slots")
+				return slotMissing(s, inst, te, "with-slots", depth)
 			}
 		case slip.List:
 			if len(te) != 2 {
-				slip.PanicType("slot-entry", entry, "symbol", "list of two symbols")
+				slip.TypePanic(s, depth, "slot-entry", entry, "symbol", "list of two symbols")
 			}
 			var (
 				vname slip.Symbol
 				sname slip.Symbol
 			)
 			if vname, ok = te[0].(slip.Symbol); !ok {
-				slip.PanicType("slot-entry", entry, "symbol", "list of two symbols")
+				slip.TypePanic(s, depth, "slot-entry", entry, "symbol", "list of two symbols")
 			}
 			if sname, ok = te[1].(slip.Symbol); !ok {
-				slip.PanicType("slot-entry", entry, "symbol", "list of two symbols")
+				slip.TypePanic(s, depth, "slot-entry", entry, "symbol", "list of two symbols")
 			}
 			if _, has := inst.SlotValue(sname); has {
 				ns.UnsafeLet(vname, &slip.Ref{Instance: inst, Key: sname})
 			} else {
-				slotMissing(inst, sname, "with-slots")
+				return slotMissing(s, inst, sname, "with-slots", depth)
 			}
 		default:
-			slip.PanicType("slot-entry", entry, "symbol", "list")
+			slip.TypePanic(s, depth, "slot-entry", entry, "symbol", "list")
 		}
 	}
 	for i := 2; i < len(args); i++ {

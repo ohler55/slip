@@ -61,44 +61,16 @@ func (obj *StandardObject) IsA(class string) bool {
 // Init the instance slots from the provided args list. If the scope is not
 // nil then send :init is called.
 func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
-	nameMap := map[string]string{}
-	argMap := map[string]slip.Object{}
-	fillMapFromKeyArgs(args, argMap)
-	for k, v := range argMap {
-		sd := obj.Type.initArgDef(k)
-		if sd == nil {
-			slip.NewPanic("%s is not a valid initarg for %s.", k, obj.Type.Name())
-		}
-		if n, has := nameMap[sd.name]; has {
-			slip.NewPanic("Duplicate initarg (%s) for slot %s. %s already specified.", sd.name, k, n)
-		}
-		obj.setSlot(sd, v)
-		nameMap[sd.name] = k
-	}
-	for k, v := range obj.Type.defaultsMap() {
-		sd := obj.Type.initArgDef(k)
-		if _, has := nameMap[sd.name]; !has {
-			if v == nil {
-				obj.setSlot(sd, nil)
-			} else {
-				obj.setSlot(sd, v.Eval(scope, depth+1))
-			}
-			nameMap[sd.name] = k
-		}
-	}
-	for k, sd := range obj.Type.initFormMap() {
-		if _, has := nameMap[k]; !has {
-			// If in the initForms then initform will not be nil.
-			obj.setSlot(sd, sd.initform.Eval(scope, depth+1))
-		}
+	if fi := slip.FindFunc("initialize-instance"); fi != nil {
+		_ = fi.Apply(scope, append(slip.List{obj}, args), depth+1)
 	}
 	if scope != nil {
 		_ = obj.Receive(scope, ":init", slip.List{args}, depth+1)
 	}
 }
 
-func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
-	if sd.argType != nil && sd.argType != slip.TrueSymbol {
+func (obj *StandardObject) setSlot(s *slip.Scope, sd *SlotDef, value slip.Object, depth int) {
+	if value != slip.Unbound && sd.argType != nil && sd.argType != slip.TrueSymbol {
 		var typeOk bool
 		if sym, ok := sd.argType.(slip.Symbol); ok { // TBD handle more complex type specs
 			for _, h := range value.Hierarchy() {
@@ -109,7 +81,7 @@ func (obj *StandardObject) setSlot(sd *SlotDef, value slip.Object) {
 			}
 		}
 		if !typeOk {
-			slip.PanicType(sd.name, value, slip.ObjectString(sd.argType))
+			slip.TypePanic(s, depth, sd.name, value, slip.ObjectString(sd.argType))
 		}
 	}
 	if sd.classStore {
@@ -213,7 +185,8 @@ func (obj *StandardObject) SetSlotValue(sym slip.Symbol, value slip.Object) (has
 func (obj *StandardObject) Receive(s *slip.Scope, message string, args slip.List, depth int) slip.Object {
 	m := obj.Type.GetMethod(message)
 	if m == nil {
-		slip.PanicUndefinedFunction(slip.Symbol(message), "%s does not have a %s direct method.", obj, message)
+		slip.UndefinedFunctionPanic(s, depth,
+			slip.Symbol(message), "%s does not have a %s direct method.", obj, message)
 	}
 	scope := slip.NewScope()
 	if s != nil {
@@ -257,4 +230,9 @@ func (obj *StandardObject) Dup() slip.Instance {
 		dup.vars[k] = v
 	}
 	return &dup
+}
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *StandardObject) LoadForm() slip.Object {
+	return slip.InstanceLoadForm(obj)
 }

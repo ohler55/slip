@@ -81,7 +81,7 @@ func (f *FindIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Obje
 	case slip.Octets:
 		found = f.inOctets(s, ta, depth, &sfv)
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	return
 }

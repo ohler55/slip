@@ -37,10 +37,10 @@ type MakeChannel struct {
 
 // Call the function with the arguments provided.
 func (f *MakeChannel) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	size, ok := args[0].(slip.Fixnum)
 	if !ok || int(size) < 0 {
-		slip.PanicType("size", args[0], "non-negative fixnum")
+		slip.TypePanic(s, depth, "size", args[0], "non-negative fixnum")
 	}
 	return Channel(make(chan slip.Object, int(size)))
 }

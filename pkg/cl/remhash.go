@@ -45,12 +45,10 @@ type Remhash struct {
 
 // Call the function with the arguments provided.
 func (f *Remhash) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	ht, ok := args[1].(slip.HashTable)
 	if !ok {
-		slip.PanicType("hash-table", args[1], "hash-table")
+		slip.TypePanic(s, depth, "hash-table", args[1], "hash-table")
 	}
 	_, has := ht[args[0]]
 	delete(ht, args[0])

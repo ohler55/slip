@@ -62,7 +62,7 @@ type Subst struct {
 
 // Call the function with the arguments provided.
 func (f *Subst) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 3, 7)
+	slip.CheckArgCount(s, depth, f, args, 3, 7)
 	var (
 		kc slip.Caller
 		tc slip.Caller

@@ -44,11 +44,11 @@ type Subtypep struct {
 
 // Call the function with the arguments provided.
 func (f *Subtypep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	result := slip.Values{nil, slip.True}
 
-	pt1, et1 := designatedType(args[0], "type-1")
-	pt2, et2 := designatedType(args[1], "type-2")
+	pt1, et1 := designatedType(s, args[0], "type-1", depth)
+	pt2, et2 := designatedType(s, args[1], "type-2", depth)
 
 	if pt1 != nil && pt2 != nil {
 		if (pt1 == pt2 || pt1 != nil && pt1.Inherits(pt2)) &&
@@ -59,7 +59,7 @@ func (f *Subtypep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return result
 }
 
-func designatedType(arg slip.Object, name string) (pt slip.Class, et slip.Class) {
+func designatedType(s *slip.Scope, arg slip.Object, name string, depth int) (pt slip.Class, et slip.Class) {
 	switch ta := arg.(type) {
 	case slip.Class:
 		pt = ta
@@ -67,11 +67,11 @@ func designatedType(arg slip.Object, name string) (pt slip.Class, et slip.Class)
 		pt = slip.FindClass(string(ta))
 	case slip.List:
 		if len(ta) == 2 {
-			pt, _ = designatedType(ta[0], name)
-			et, _ = designatedType(ta[1], name)
+			pt, _ = designatedType(s, ta[0], name, depth)
+			et, _ = designatedType(s, ta[1], name, depth)
 		}
 	default:
-		slip.PanicType(name, ta, "class", "symbol", "list")
+		slip.TypePanic(s, depth, name, ta, "class", "symbol", "list")
 	}
 	return
 }

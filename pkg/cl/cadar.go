@@ -41,10 +41,10 @@ type Cadar struct {
 
 // Call the function with the arguments provided.
 func (f *Cadar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return cadGet(f, args, []bool{true, false, true})
+	return cadGet(s, f, args, []bool{true, false, true}, depth)
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Cadar) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	cadPlace(f, args, []bool{true, false, true}, value)
+	cadPlace(s, f, args, []bool{true, false, true}, value)
 }

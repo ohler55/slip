@@ -55,3 +55,39 @@ func (f *Dynamic) Simplify() any {
 	}
 	return simple
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *Dynamic) LoadForm() Object {
+	form := make(List, len(obj.Args)+1)
+	if 0 < len(obj.Name) {
+		form[0] = Symbol(obj.Name)
+	} else {
+		lambda := List{Symbol("lambda")}
+		lc := obj.Self.(*Lambda)
+		dl := make(List, len(lc.Doc.Args))
+		for i, da := range lc.Doc.Args {
+			switch {
+			case da.Default == nil:
+				dl[i] = Symbol(da.Name)
+			default:
+				dl[i] = List{Symbol(da.Name), da.Default}
+			}
+		}
+		lambda = append(lambda, dl)
+		lambda = append(lambda, lc.Forms...)
+		form[0] = lambda
+	}
+	for i, a := range obj.Args {
+		if a != nil {
+			switch ta := a.(type) {
+			case nil:
+				// already nil
+			case LoadFormer:
+				form[i+1] = ta.LoadForm()
+			default:
+				PrintNotReadablePanic(NewScope(), 0, ta, "Can not make a load form for %s.", ta)
+			}
+		}
+	}
+	return form
+}

@@ -73,12 +73,10 @@ type Defflavor struct {
 
 // Call the the function with the arguments provided.
 func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 3 {
-		slip.PanicArgCount(f, 3, 14)
-	}
+	slip.CheckArgCount(s, depth, f, args, 3, 15)
 	name, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("name argument to defflavor", args[0], "symbol")
+		slip.TypePanic(s, depth, "name argument to defflavor", args[0], "symbol")
 	}
 	var vars slip.List
 	switch tl := args[1].(type) {
@@ -87,7 +85,7 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	case nil:
 		// leave as empty list
 	default:
-		slip.PanicType("vars of defflavor", tl, "list")
+		slip.TypePanic(s, depth, "vars of defflavor", tl, "list")
 	}
 
 	var inherit []string
@@ -97,13 +95,13 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			if sym, ok2 := a.(slip.Symbol); ok2 {
 				inherit = append(inherit, string(sym))
 			} else {
-				slip.PanicType("flavors of defflavor", tl, "list of symbols")
+				slip.TypePanic(s, depth, "flavors of defflavor", tl, "list of symbols")
 			}
 		}
 	case nil:
 		// leave as empty list
 	default:
-		slip.PanicType("flavors of defflavor", tl, "list")
+		slip.TypePanic(s, depth, "flavors of defflavor", tl, "list")
 	}
 
 	defVars := map[string]slip.Object{}
@@ -113,11 +111,11 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 			defVars[strings.ToLower(string(tv))] = nil
 		case slip.List:
 			if len(tv) != 2 {
-				slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
+				slip.TypePanic(s, depth, "vars element of defflavor", tv, "symbol", "list of symbol and value")
 			}
 			var sym slip.Symbol
 			if sym, ok = tv[0].(slip.Symbol); !ok {
-				slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
+				slip.TypePanic(s, depth, "vars element of defflavor", tv, "symbol", "list of symbol and value")
 			}
 			if tv[1] == nil {
 				defVars[strings.ToLower(string(sym))] = nil
@@ -125,7 +123,7 @@ func (f *Defflavor) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 				defVars[strings.ToLower(string(sym))] = tv[1].Eval(s, depth+1)
 			}
 		default:
-			slip.PanicType("vars element of defflavor", tv, "symbol", "list of symbol and value")
+			slip.TypePanic(s, depth, "vars element of defflavor", tv, "symbol", "list of symbol and value")
 		}
 	}
 	_ = DefFlavor(string(name), defVars, inherit, args[3:], slip.CurrentPackage)
@@ -141,6 +139,7 @@ func DefFlavor(
 	options slip.List,
 	p *slip.Package) *Flavor {
 
+	s := slip.NewScope()
 	name = strings.ToLower(name)
 	if _, has := allFlavors[name]; has {
 		slip.NewPanic("Flavor %s already defined.", name)
@@ -161,13 +160,13 @@ func DefFlavor(
 				nf.defaultHandler = cf.defaultHandler
 			}
 		} else {
-			slip.PanicClassNotFound(slip.Symbol(fname), "%s is not a defined flavor.", fname)
+			slip.ClassNotFoundPanic(s, 0, slip.Symbol(fname), "%s is not a defined flavor.", fname)
 		}
 	}
 	if nf.defaultHandler == nil {
 		nf.defaultHandler = defHand{}
 	}
-	processFlavorOptions(nf, options)
+	processFlavorOptions(s, nf, options, 0)
 	if !nf.abstract {
 		addIncludes(nf)
 	}
@@ -203,7 +202,7 @@ func addIncludes(nf *Flavor) {
 			if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
 				nf.inheritFlavor(cf)
 			} else {
-				slip.PanicClassNotFound(slip.Symbol(fn), "%s is not a defined flavor.", fn)
+				slip.ClassNotFoundPanic(slip.NewScope(), 0, slip.Symbol(fn), "%s is not a defined flavor.", fn)
 			}
 		}
 	}
@@ -214,7 +213,7 @@ func addIncludes(nf *Flavor) {
 				if cf := allFlavors[strings.ToLower(fn)]; cf != nil {
 					nf.inheritFlavor(cf)
 				} else {
-					slip.PanicClassNotFound(slip.Symbol(fn), "%s is not a defined flavor.", fn)
+					slip.ClassNotFoundPanic(slip.NewScope(), 0, slip.Symbol(fn), "%s is not a defined flavor.", fn)
 				}
 			}
 		}
@@ -255,7 +254,7 @@ func valsStringList(vals slip.List) (sa []string) {
 	return
 }
 
-func setDefaultHandler(nf *Flavor, val slip.Object) {
+func setDefaultHandler(s *slip.Scope, nf *Flavor, val slip.Object, depth int) {
 Top:
 	switch tv := val.(type) {
 	case slip.Symbol:
@@ -274,11 +273,11 @@ Top:
 			}
 		}
 	default:
-		slip.PanicType("defflavor default-handler", val, "symbol", "lambda")
+		slip.TypePanic(s, depth, "defflavor default-handler", val, "symbol", "lambda")
 	}
 }
 
-func processFlavorOptions(nf *Flavor, options slip.List) {
+func processFlavorOptions(s *slip.Scope, nf *Flavor, options slip.List, depth int) {
 	// Order of options doesn't matter so process the easy way.
 	for _, opt := range options {
 		var key slip.Symbol
@@ -288,24 +287,24 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 			key = to
 		case slip.List:
 			if len(to) < 2 {
-				slip.PanicType("options element of defflavor", opt, "symbol", "list of symbol and values")
+				slip.TypePanic(s, depth, "options element of defflavor", opt, "symbol", "list of symbol and values")
 			}
 			var ok bool
 			if key, ok = to[0].(slip.Symbol); !ok {
-				slip.PanicType("options element of defflavor", opt, "symbol", "list of symbol and values")
+				slip.TypePanic(s, depth, "options element of defflavor", opt, "symbol", "list of symbol and values")
 			}
 			vals = to[1:]
 		default:
-			slip.PanicType("options element of defflavor", opt, "symbol", "list of symbol and values")
+			slip.TypePanic(s, depth, "options element of defflavor", opt, "symbol", "list of symbol and values")
 		}
 		switch strings.ToLower(string(key)) {
 		case ":abstract-flavor":
 			nf.abstract = true
 		case ":default-handler":
 			if len(vals) != 1 {
-				slip.PanicType(":default-handler of defflavor", nil, "symbol")
+				slip.TypePanic(s, depth, ":default-handler of defflavor", nil, "symbol")
 			}
-			setDefaultHandler(nf, vals[len(vals)-1])
+			setDefaultHandler(s, nf, vals[len(vals)-1], depth)
 		case ":default-init-plist":
 			for _, v := range vals {
 				if plist, ok := v.(slip.List); ok && len(plist) == 2 {
@@ -328,7 +327,7 @@ func processFlavorOptions(nf *Flavor, options slip.List) {
 					nf.docs = string(ss)
 					break
 				}
-				slip.PanicType("defflavor :documentation", vals[0], "string")
+				slip.TypePanic(s, depth, "defflavor :documentation", vals[0], "string")
 			}
 		case ":gettable-instance-variables", ":readable-instance-variables":
 			if 0 < len(vals) {
@@ -441,10 +440,10 @@ func (s setter) BoundCall(scope *slip.Scope, _ int) (value slip.Object) {
 type defHand struct{}
 
 // Call the default handler.
-func (dh defHand) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+func (dh defHand) Call(scope *slip.Scope, args slip.List, depth int) slip.Object {
 	inst := scope.Get(slip.Symbol("self")).(*Instance)
 	method, _ := args[0].(slip.Symbol)
-	defer slip.PanicUnboundSlot(inst, method,
-		"Flavor %s does not include the %s method.", inst.Type.Name(), args[0])
+	defer slip.InvalidMethodPanic(scope, depth,
+		inst, nil, method, "%s does not include the %s method.", inst.Type.Name(), args[0])
 	return nil
 }

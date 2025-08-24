@@ -47,3 +47,8 @@ func (obj String) Length() int {
 func (obj String) Eval(s *Scope, depth int) Object {
 	return obj
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj String) LoadForm() Object {
+	return obj
+}

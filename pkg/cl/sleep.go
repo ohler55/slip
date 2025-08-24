@@ -39,12 +39,10 @@ type Sleep struct {
 
 // Call the function with the arguments provided.
 func (f *Sleep) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 1 {
-		slip.PanicArgCount(f, 1, 1)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	real, ok := args[0].(slip.Real)
 	if !ok {
-		slip.PanicType("seconds", args[0], "real")
+		slip.TypePanic(s, depth, "seconds", args[0], "real")
 	}
 	time.Sleep(time.Duration(float64(time.Second) * real.RealValue()))
 

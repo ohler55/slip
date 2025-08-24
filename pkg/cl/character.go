@@ -35,7 +35,7 @@ type Character struct {
 
 // Call the function with the arguments provided.
 func (f *Character) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
 		ra := []rune(ta)
@@ -50,7 +50,7 @@ func (f *Character) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.Character:
 		return ta
 	default:
-		slip.PanicType("character", args[0], "string", "symbol", "character")
+		slip.TypePanic(s, depth, "character", args[0], "string", "symbol", "character")
 	}
-	panic(slip.NewParseError("%s is not a valid character designator", args[0]))
+	panic(slip.ParseErrorNew(s, depth, "%s is not a valid character designator", args[0]))
 }

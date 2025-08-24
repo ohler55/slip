@@ -51,12 +51,10 @@ type FindSymbol struct {
 
 // Call the function with the arguments provided.
 func (f *FindSymbol) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	so, ok := args[0].(slip.String)
 	if !ok || len(so) < 1 {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	p := slip.CurrentPackage
 	if 1 < len(args) {
@@ -72,7 +70,7 @@ func (f *FindSymbol) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		case *slip.Package:
 			p = ta
 		default:
-			slip.PanicType("package", ta, "package", "string", "symbol")
+			slip.TypePanic(s, depth, "package", ta, "package", "string", "symbol")
 		}
 	}
 	if p == &slip.KeywordPkg && so[0] != ':' {

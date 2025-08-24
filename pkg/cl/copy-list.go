@@ -41,7 +41,7 @@ type CopyList struct {
 
 // Call the function with the arguments provided.
 func (f *CopyList) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	var list slip.List
 	switch ta := args[0].(type) {
 	case nil:
@@ -50,7 +50,7 @@ func (f *CopyList) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		list = make(slip.List, len(ta))
 		copy(list, ta)
 	default:
-		slip.PanicType("list", args[0], "list")
+		slip.TypePanic(s, depth, "list", args[0], "list")
 	}
 	return list
 }

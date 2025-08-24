@@ -98,7 +98,7 @@ func (f *SubstituteIf) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		result = sr.replace(dup)
 	case slip.String:
 		if _, ok := sr.rep.(slip.Character); !ok {
-			slip.PanicType("new", sr.rep, "character")
+			slip.TypePanic(s, depth, "new", sr.rep, "character")
 		}
 		ra := []rune(seq)
 		dup := make(slip.List, len(ra))
@@ -118,19 +118,19 @@ func (f *SubstituteIf) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		result = slip.NewVector(len(dup), seq.ElementType(), nil, dup, seq.Adjustable())
 	case slip.Octets:
 		if _, ok := sr.rep.(slip.Octet); !ok {
-			slip.PanicType("new", sr.rep, "Octet")
+			slip.TypePanic(s, depth, "new", sr.rep, "Octet")
 		}
 		dup := make([]byte, len(seq))
 		copy(dup, seq)
 		result = sr.replaceBytes(dup)
 	default:
-		slip.PanicType("sequence", seq, "sequence")
+		slip.TypePanic(s, depth, "sequence", seq, "sequence")
 	}
 	return
 }
 
 func parseSubstituteIfArgs(f slip.Object, s *slip.Scope, args slip.List, depth int) *subIfRep {
-	slip.ArgCountCheck(f, args, 3, 15)
+	slip.CheckArgCount(s, depth, f, args, 3, 15)
 	sr := subIfRep{
 		s:     s,
 		rep:   args[0],
@@ -155,7 +155,7 @@ func parseSubstituteIfArgs(f slip.Object, s *slip.Scope, args slip.List, depth i
 		case nil:
 			// leave at 0
 		default:
-			slip.PanicType(":start", v, "fixnum")
+			slip.TypePanic(s, depth, ":start", v, "fixnum")
 		}
 	}
 	if v, ok := slip.GetArgsKeyValue(kargs, slip.Symbol(":end")); ok {
@@ -165,7 +165,7 @@ func parseSubstituteIfArgs(f slip.Object, s *slip.Scope, args slip.List, depth i
 		case nil:
 			// leave as -1
 		default:
-			slip.PanicType(":end", v, "fixnum")
+			slip.TypePanic(s, depth, ":end", v, "fixnum")
 		}
 	}
 	if v, ok := slip.GetArgsKeyValue(kargs, slip.Symbol(":count")); ok {
@@ -175,7 +175,7 @@ func parseSubstituteIfArgs(f slip.Object, s *slip.Scope, args slip.List, depth i
 		case nil:
 			// leave as -1 for now
 		default:
-			slip.PanicType(":count", v, "fixnum")
+			slip.TypePanic(s, depth, ":count", v, "fixnum")
 		}
 	}
 	return &sr

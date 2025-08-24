@@ -51,17 +51,17 @@ type MakeString struct {
 
 // Call the function with the arguments provided.
 func (f *MakeString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 5)
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	size, ok := args[0].(slip.Fixnum)
 	if !ok || size < 0 {
-		slip.PanicType("size", args[0], "fixnum")
+		slip.TypePanic(s, depth, "size", args[0], "fixnum")
 	}
 	var c slip.Character
 	if 1 < len(args) {
 		for pos := 1; pos < len(args); pos += 2 {
 			sym, ok := args[pos].(slip.Symbol)
 			if !ok {
-				slip.PanicType("keyword", args[pos], "keyword")
+				slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 			}
 			if len(args)-1 <= pos {
 				slip.NewPanic("%s missing an argument", sym)
@@ -69,7 +69,7 @@ func (f *MakeString) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 			switch strings.ToLower(string(sym)) {
 			case ":initial-element":
 				if c, ok = args[pos+1].(slip.Character); !ok {
-					slip.PanicType("initial-element", sym, "character")
+					slip.TypePanic(s, depth, "initial-element", sym, "character")
 				}
 			case ":element-type":
 				switch ta := args[pos+1].(type) {
@@ -77,13 +77,13 @@ func (f *MakeString) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 					// ok
 				case slip.Symbol:
 					if !strings.EqualFold(string(ta), "character") {
-						slip.PanicType("element-type", args[pos+1], "'character", "nil")
+						slip.TypePanic(s, depth, "element-type", args[pos+1], "'character", "nil")
 					}
 				default:
-					slip.PanicType("element-type", args[pos+1], "'character", "nil")
+					slip.TypePanic(s, depth, "element-type", args[pos+1], "'character", "nil")
 				}
 			default:
-				slip.PanicType("keyword", sym, ":initial-element", ":element-type")
+				slip.TypePanic(s, depth, "keyword", sym, ":initial-element", ":element-type")
 			}
 		}
 	}

@@ -94,7 +94,7 @@ func WordMatch(word string) (words []string, lo, hi int) {
 		case word < mw:
 			hw = mw
 			hi = mid
-		case lw < mw:
+		case lw <= mw:
 			lw = mw
 			lo = mid
 		}

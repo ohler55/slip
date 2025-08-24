@@ -54,3 +54,8 @@ func (obj Path) Hierarchy() []slip.Symbol {
 func (obj Path) Eval(s *slip.Scope, depth int) slip.Object {
 	return obj
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Path) LoadForm() slip.Object {
+	return slip.List{slip.Symbol("make-bag-path"), slip.String(jp.Expr(obj).Append(nil))}
+}

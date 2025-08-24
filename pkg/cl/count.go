@@ -85,7 +85,7 @@ func (f *Count) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 	case slip.VectorLike:
 		result = slip.Fixnum(f.inList(s, ta.AsList(), depth, &sfv))
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	return
 }

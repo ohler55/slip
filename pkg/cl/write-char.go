@@ -45,23 +45,23 @@ type WriteChar struct {
 
 // Call the function with the arguments provided.
 func (f *WriteChar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	so := s.Get("*standard-output*")
 	w := so.(io.Writer)
 	ss, _ := so.(slip.Stream)
 	c, ok := args[0].(slip.Character)
 	if !ok {
-		slip.PanicType("char", args[0], "character")
+		slip.TypePanic(s, depth, "char", args[0], "character")
 	}
 	if 1 < len(args) {
 		if w, ok = args[1].(io.Writer); !ok {
-			slip.PanicType("output-stream", args[1], "output-stream")
+			slip.TypePanic(s, depth, "output-stream", args[1], "output-stream")
 		}
 		ss, _ = args[1].(slip.Stream)
 	}
 
 	if _, err := w.Write([]byte(string([]rune{rune(c)}))); err != nil {
-		slip.PanicStream(ss, "write-char failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write-char failed. %s", err)
 	}
 	return c
 }

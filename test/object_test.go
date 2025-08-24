@@ -30,6 +30,7 @@ func TestTrue(t *testing.T) {
 		},
 		Eval: slip.True,
 	}).Test(t)
+	sliptest.LoadForm(t, slip.True)
 }
 
 func TestFixnum(t *testing.T) {
@@ -61,6 +62,7 @@ func TestFixnum(t *testing.T) {
 	tt.Equal(t, 7.0, slip.Fixnum(7).RealValue())
 	tt.Equal(t, 7, slip.Fixnum(7).Int64())
 	tt.Equal(t, true, slip.Fixnum(7).IsInt64())
+	sliptest.LoadForm(t, slip.Fixnum(7))
 }
 
 func TestOctet(t *testing.T) {
@@ -91,6 +93,7 @@ func TestOctet(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.Octet(7).RealValue())
 	tt.Equal(t, 7, slip.Octet(7).Int64())
+	sliptest.LoadForm(t, slip.Octet(7))
 }
 
 func TestRatio(t *testing.T) {
@@ -150,6 +153,8 @@ func TestRatio(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, 1.5, slip.NewRatio(12, 8).RealValue())
 
+	sliptest.LoadForm(t, slip.NewRatio(7, 9))
+
 	tt.Panic(t, func() { _ = slip.NewRatio(7, 0) })
 	tt.Panic(t, func() { _ = slip.NewBigRatio(big.NewInt(7), big.NewInt(0)) })
 }
@@ -192,6 +197,9 @@ func TestBignum(t *testing.T) {
 	tt.Equal(t, 123.0, slip.NewBignum(123).RealValue())
 	tt.Equal(t, 123, slip.NewBignum(123).Int64())
 	tt.Equal(t, true, slip.NewBignum(123).IsInt64())
+
+	sliptest.LoadForm(t, b)
+	sliptest.LoadForm(t, slip.NewBignum(123))
 }
 
 func TestShortFloat(t *testing.T) {
@@ -248,6 +256,7 @@ func TestSingleFloat(t *testing.T) {
 		Eval: slip.SingleFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.SingleFloat(7.0).RealValue())
+	sliptest.LoadForm(t, slip.SingleFloat(2.5))
 }
 
 func TestDoubleFloat(t *testing.T) {
@@ -276,6 +285,7 @@ func TestDoubleFloat(t *testing.T) {
 		Eval: slip.DoubleFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.DoubleFloat(7.0).RealValue())
+	sliptest.LoadForm(t, slip.DoubleFloat(2.5))
 }
 
 func TestLongFloat(t *testing.T) {
@@ -304,6 +314,7 @@ func TestLongFloat(t *testing.T) {
 		Eval: slip.NewLongFloat(7.0),
 	}).Test(t)
 	tt.Equal(t, 7.0, slip.NewLongFloat(7.0).RealValue())
+	sliptest.LoadForm(t, slip.NewLongFloat(2.5))
 }
 
 func TestComplex(t *testing.T) {
@@ -339,6 +350,8 @@ func TestString(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, slip.Symbol("string"), slip.String("x").SequenceType())
 	tt.Equal(t, 3, slip.String("abc").Length())
+
+	sliptest.LoadForm(t, slip.String("abc"))
 }
 
 func TestSymbolKey(t *testing.T) {
@@ -370,6 +383,7 @@ func TestSymbol(t *testing.T) {
 		},
 		PanicType: slip.Symbol("unbound-variable"),
 	}).Test(t)
+	sliptest.LoadForm(t, slip.Symbol("abc"))
 }
 
 func TestTime(t *testing.T) {
@@ -472,6 +486,7 @@ func TestListObj(t *testing.T) {
 	tt.Equal(t, slip.List{slip.Fixnum(2), slip.Fixnum(3)},
 		slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}.Cdr())
 	tt.Equal(t, 2, slip.List{slip.True, nil}.Length())
+	sliptest.LoadForm(t, slip.List{slip.Fixnum(3)})
 }
 
 func TestListObjEmpty(t *testing.T) {
@@ -500,6 +515,12 @@ func TestCons(t *testing.T) {
 		},
 	}).Test(t)
 	tt.Equal(t, slip.Fixnum(2), slip.List{slip.Fixnum(1), slip.Tail{Value: slip.Fixnum(2)}}.Cdr())
+	sliptest.LoadForm(t, slip.List{slip.Fixnum(3), slip.Tail{Value: slip.Fixnum(2)}})
+	sliptest.LoadForm(t, slip.List{
+		slip.Fixnum(1),
+		slip.Fixnum(2),
+		slip.Tail{Value: slip.Fixnum(3)},
+	})
 }
 
 func TestConsString(t *testing.T) {
@@ -529,6 +550,7 @@ func TestCharacterUnicode(t *testing.T) {
 		},
 		Eval: slip.Character('ぴ'),
 	}).Test(t)
+	sliptest.LoadForm(t, slip.Character('A'))
 }
 
 func TestCharacterSpecial(t *testing.T) {
@@ -603,13 +625,13 @@ func TestSimpleObject(t *testing.T) {
 		`(t -1 -2 -3 -4 -5 1 2 3 4 5 4.5 5.4 @2022-04-01T00:00:00Z t "abc" "def" "dummy error" (("x" . 7)))`,
 		obj.String())
 
-	cond := slip.NewError("").(slip.Instance)
+	cond := slip.ErrorNew(scope, 0, "").(slip.Instance)
 	p := slip.WrapError(scope, cond, "sample", nil)
 	p.Value = slip.Fixnum(7)
 	obj = slip.SimpleObject(p)
 	tt.Equal(t, "7", obj.String())
 
-	cond = slip.NewError("sample").(slip.Instance)
+	cond = slip.ErrorNew(scope, 0, "sample").(slip.Instance)
 	p = slip.WrapError(scope, cond, "sample", nil)
 	obj = slip.SimpleObject(p)
 	tt.Equal(t, `"sample"`, obj.String())
@@ -843,6 +865,8 @@ func TestSignedByteSmall(t *testing.T) {
 	tt.Equal(t, -2050, sb.Int64())
 	tt.Equal(t, true, sb.IsNeg())
 
+	sliptest.LoadForm(t, sb)
+
 	sb = slip.SignedByteFromUint64(2050)
 	tt.Equal(t, 2050, sb.Int64())
 
@@ -896,6 +920,7 @@ func TestSignedByteBig(t *testing.T) {
 	sb = slip.SignedByteFromBigInt(big.NewInt(2050))
 	sb.Neg()
 	tt.Equal(t, -2050, sb.Int64())
+	sliptest.LoadForm(t, sb)
 
 	sb = slip.SignedByteFromBigInt(big.NewInt(0))
 	tt.Equal(t, 0, sb.Int64())
@@ -961,6 +986,8 @@ func TestUnsignedByteSmall(t *testing.T) {
 	tt.Equal(t, false, ub.GetBit(10))
 	tt.Equal(t, true, ub.GetBit(11))
 	tt.Equal(t, false, ub.GetBit(16))
+
+	sliptest.LoadForm(t, &ub)
 
 	dup := ub.Dup()
 	tt.Equal(t, 2050, dup.Int64())
@@ -1031,17 +1058,20 @@ func TestBit(t *testing.T) {
 	tt.Equal(t, 0, slip.Bit(0).Int64())
 	tt.Equal(t, true, slip.Bit(0).IsInt64())
 	tt.Equal(t, "0", slip.Bit(0).String())
+
+	sliptest.LoadForm(t, slip.Bit(0))
+	sliptest.LoadForm(t, slip.Bit(1))
 }
 
 func TestFuncInfo(t *testing.T) {
 	fi := slip.MustFindFunc("car")
 	(&sliptest.Object{
 		Target: fi,
-		String: "#<function car>",
+		String: "#<built-in car>",
 		Simple: func(t *testing.T, simple any) {
 			tt.Equal(t, "car", jp.C("name").First(simple))
 		},
-		Hierarchy: "built-in.t",
+		Hierarchy: "built-in.function.t",
 		Equals: []*sliptest.EqTest{
 			{Other: fi, Expect: true},
 			{Other: slip.True, Expect: false},

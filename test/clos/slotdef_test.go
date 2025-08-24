@@ -14,7 +14,7 @@ import (
 )
 
 func TestSlotDefSymbol(t *testing.T) {
-	sd := clos.NewSlotDef(slip.Symbol("quux"))
+	sd := clos.NewSlotDef(slip.NewScope(), slip.Symbol("quux"), 0)
 
 	tt.Equal(t, `{
   accessors: []
@@ -28,7 +28,7 @@ func TestSlotDefSymbol(t *testing.T) {
   writers: []
 }`, pretty.SEN(sd.Simplify()))
 
-	tt.Equal(t, slip.Symbol("quux"), sd.DefList())
+	tt.Equal(t, slip.Symbol("quux"), sd.LoadForm())
 }
 
 func TestSlotDefOptions(t *testing.T) {
@@ -41,7 +41,7 @@ func TestSlotDefOptions(t *testing.T) {
                                         :type fixnum
                                         :documentation "quack quack"
                                         :initform (1+ qqq)))`, scope).Eval(scope, nil).(slip.List)
-	sc := clos.DefStandardClass("quux-class", nil, slotSpecs, nil)
+	sc := clos.DefStandardClass(scope, "quux-class", nil, slotSpecs, nil, 0)
 
 	simple := sc.Simplify()
 	tt.Equal(t, `{
@@ -68,7 +68,7 @@ func TestSlotDefOptions(t *testing.T) {
     :allocation :class
     :initform (1+ qqq)
     :type fixnum)))
-`, string(pp.Append(nil, scope, sc.DefList())))
+`, string(pp.Append(nil, scope, sc.LoadForm())))
 
 	tt.Equal(t, `quux-class is a class:
   Direct superclasses:
@@ -104,63 +104,63 @@ func TestSlotDefOptions(t *testing.T) {
 func TestSlotDefBadName(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'("quux" :initarg :quux)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefNotEven(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :initarg)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefNotAnOption(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :not-an-option :x)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefBadAllocation(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :allocation :nothing)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefDoubleInitform(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :initform 5 :initform 6)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefBadType(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :type t)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefDoubleType(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :type fixnum :type float)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefBadDoc(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :documentation t)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefDoubleDoc(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :documentation "docs" :documentation "doc2")`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }
 
 func TestSlotDefBadSpec(t *testing.T) {
-	tt.Panic(t, func() { _ = clos.NewSlotDef(slip.True) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(slip.NewScope(), slip.True, 0) })
 }
 
 func TestSlotDefReaderNotSymbol(t *testing.T) {
 	scope := slip.NewScope()
 	def := slip.ReadString(`'(quux :reader t)`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = clos.NewSlotDef(def) })
+	tt.Panic(t, func() { _ = clos.NewSlotDef(scope, def, 0) })
 }

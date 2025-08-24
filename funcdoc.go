@@ -51,13 +51,23 @@ func (fd *FuncDoc) getArg(name string) *DocArg {
 	return nil
 }
 
-// DefList return a argument list for function or lambda args list.
-func (fd *FuncDoc) DefList() List {
+// LoadForm return a argument list for function or lambda args list.
+func (fd *FuncDoc) LoadForm() Object {
 	dl := make(List, len(fd.Args))
 	for i, da := range fd.Args {
-		if da.Default == nil {
+		switch {
+		case fd.Kind == GenericFunctionSymbol || fd.Kind == MethodSymbol:
+			switch {
+			case 0 < len(da.Type):
+				dl[i] = List{Symbol(da.Name), Symbol(da.Type)}
+			case da.Default == nil:
+				dl[i] = Symbol(da.Name)
+			default:
+				dl[i] = List{Symbol(da.Name), da.Default}
+			}
+		case da.Default == nil:
 			dl[i] = Symbol(da.Name)
-		} else {
+		default:
 			dl[i] = List{Symbol(da.Name), da.Default}
 		}
 	}
@@ -115,9 +125,11 @@ func (fd *FuncDoc) Describe(b []byte, indent, right int, ansi bool) []byte {
 			} else {
 				b = append(b, da.Name...)
 			}
-			b = append(b, ": ["...)
-			b = append(b, da.Type...)
-			b = append(b, ']')
+			if 0 < len(da.Type) {
+				b = append(b, ": ["...)
+				b = append(b, da.Type...)
+				b = append(b, ']')
+			}
 			if da.Default != nil {
 				b = append(b, " = "...)
 				b = da.Default.Append(b)

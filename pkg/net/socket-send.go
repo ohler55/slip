@@ -101,11 +101,11 @@ type SocketSend struct {
 
 // Call the function with the arguments provided.
 func (f *SocketSend) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 22)
+	slip.CheckArgCount(s, depth, f, args, 2, 22)
 	self, ok := args[0].(*flavors.Instance)
 	if ok && self.Any != nil {
 		if fd, ok2 := self.Any.(int); ok2 {
-			result = slip.Fixnum(socketSend(fd, args[1:]))
+			result = slip.Fixnum(socketSend(s, fd, args[1:], depth))
 		}
 	}
 	return
@@ -113,11 +113,11 @@ func (f *SocketSend) Call(s *slip.Scope, args slip.List, depth int) (result slip
 
 type socketSendCaller struct{}
 
-func (caller socketSendCaller) Call(s *slip.Scope, args slip.List, _ int) (result slip.Object) {
+func (caller socketSendCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	self := s.Get("self").(*flavors.Instance)
-	slip.SendArgCountCheck(self, ":send", args, 1, 21)
+	slip.CheckSendArgCount(s, depth, self, ":send", args, 1, 21)
 	if self.Any != nil {
-		result = slip.Fixnum(socketSend(self.Any.(int), args))
+		result = slip.Fixnum(socketSend(s, self.Any.(int), args, depth))
 	}
 	return
 }
@@ -128,7 +128,7 @@ func (caller socketSendCaller) FuncDocs() *slip.FuncDoc {
 	return md
 }
 
-func socketSend(fd int, args slip.List) int {
+func socketSend(s *slip.Scope, fd int, args slip.List, depth int) int {
 	var buf []byte
 	switch ta := args[0].(type) {
 	case slip.Octets:
@@ -136,7 +136,7 @@ func socketSend(fd int, args slip.List) int {
 	case slip.String:
 		buf = []byte(ta)
 	default:
-		slip.PanicType("buffer", ta, "octets", "string")
+		slip.TypePanic(s, depth, "buffer", ta, "octets", "string")
 	}
 	length := len(buf)
 	timeout := time.Duration(0)
@@ -144,7 +144,7 @@ func socketSend(fd int, args slip.List) int {
 	if 0 < len(args) {
 		if num, ok := args[0].(slip.Fixnum); ok {
 			if num <= 0 {
-				slip.PanicType("length", num, "positive fixnum")
+				slip.TypePanic(s, depth, "length", num, "positive fixnum")
 			}
 			length = int(num)
 			args = args[1:]
@@ -188,7 +188,7 @@ func socketSend(fd int, args slip.List) int {
 	}
 	var cnt int
 	if typ == syscall.SOCK_DGRAM {
-		cnt = datagramSend(fd, buf, args)
+		cnt = datagramSend(s, fd, buf, args, depth)
 	} else {
 		cnt, err = syscall.Write(fd, buf)
 		if err != nil {
@@ -198,7 +198,7 @@ func socketSend(fd int, args slip.List) int {
 	return cnt
 }
 
-func datagramSend(fd int, buf []byte, args slip.List) int {
+func datagramSend(s *slip.Scope, fd int, buf []byte, args slip.List, depth int) int {
 	var flags int
 
 	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":oob")); has && value != nil {
@@ -233,9 +233,9 @@ func datagramSend(fd int, buf []byte, args slip.List) int {
 		case slip.String:
 			sa = &syscall.SockaddrUnix{Name: string(tv)}
 		case slip.List:
-			sa = addressFromList(tv)
+			sa = addressFromList(s, tv, depth)
 		default:
-			slip.PanicType("address", args, "string", "(octets fixnum)")
+			slip.TypePanic(s, depth, "address", args, "string", "(octets fixnum)")
 		}
 	}
 	if sa == nil {

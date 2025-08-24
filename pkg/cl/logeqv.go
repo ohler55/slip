@@ -40,25 +40,25 @@ type Logeqv struct {
 
 // Call the function with the arguments provided.
 func (f *Logeqv) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	return logeqv(args)
+	return logeqv(s, args, depth)
 }
 
-func logeqv(args slip.List) slip.Object {
+func logeqv(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var result uint64 = 0xffffffffffffffff
 	for _, v := range args {
 		switch tv := v.(type) {
 		case slip.Fixnum:
 			result ^= ^uint64(tv)
 		case *slip.Bignum:
-			return bigLogeqv(args)
+			return bigLogeqv(s, args, depth)
 		default:
-			slip.PanicType("integer", tv, "integer")
+			slip.TypePanic(s, depth, "integer", tv, "integer")
 		}
 	}
 	return slip.Fixnum(result)
 }
 
-func bigLogeqv(args slip.List) slip.Object {
+func bigLogeqv(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var buf []byte // bytes in reverse
 	for _, v := range args {
 		var bb []byte
@@ -69,7 +69,7 @@ func bigLogeqv(args slip.List) slip.Object {
 			bb = (*big.Int)(tv).Bytes()
 			reverseBytes(bb)
 		default:
-			slip.PanicType("integer", tv, "integer")
+			slip.TypePanic(s, depth, "integer", tv, "integer")
 		}
 		if len(buf) == 0 {
 			buf = bb

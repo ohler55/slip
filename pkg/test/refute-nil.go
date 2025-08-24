@@ -43,7 +43,7 @@ type RefuteNil struct {
 
 // Call the function with the arguments provided.
 func (f *RefuteNil) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	if args[0] != nil {
 		return nil
 	}

@@ -43,13 +43,13 @@ type Nthcdr struct {
 
 // Call the function with the arguments provided.
 func (f *Nthcdr) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	switch list := args[1].(type) {
 	case nil:
 	case slip.List:
 		num, ok := args[0].(slip.Integer)
 		if !ok {
-			slip.PanicType("n", args[0], "integer")
+			slip.TypePanic(s, depth, "n", args[0], "integer")
 		}
 		n := int(num.Int64())
 		if len(list) <= n || n < 0 {
@@ -62,7 +62,7 @@ func (f *Nthcdr) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 		return list[n:]
 	default:
-		slip.PanicType("list", args[1], "list")
+		slip.TypePanic(s, depth, "list", args[1], "list")
 	}
 	return nil
 }

@@ -275,9 +275,9 @@ func (c *StandardClass) initObjSlots(obj *StandardObject) {
 	}
 }
 
-// DefList returns a list that can be evaluated to create the class or nil if
+// LoadForm returns a list that can be evaluated to create the class or nil if
 // the class is a built in class.
-func (c *StandardClass) DefList() slip.List {
+func (c *StandardClass) LoadForm() slip.Object {
 	supers := make(slip.List, len(c.supers))
 	for i, super := range c.supers {
 		supers[i] = super
@@ -289,7 +289,7 @@ func (c *StandardClass) DefList() slip.List {
 	sort.Strings(keys)
 	slots := make(slip.List, len(keys))
 	for i, k := range keys {
-		slots[i] = c.slotDefs[k].DefList()
+		slots[i] = c.slotDefs[k].LoadForm()
 	}
 	def := slip.List{
 		slip.Symbol(c.defname),
@@ -385,10 +385,6 @@ func (c *StandardClass) mergeSupers() bool {
 		}
 		m.Combinations = append(m.Combinations, im.Combinations...)
 	}
-
-	// TBD add readers, writers, and accessors for each slot if not already added
-	//  maybe keep pointer to the generic method for each
-
 	c.initArgs = map[string]*SlotDef{}
 	c.initForms = map[string]*SlotDef{}
 	for i := len(c.inherit) - 1; 0 <= i; i-- {
@@ -397,7 +393,7 @@ func (c *StandardClass) mergeSupers() bool {
 				for _, ia := range sd.initargs {
 					c.initArgs[string(ia)] = sd
 				}
-				if sd.initform != nil {
+				if sd.initform != slip.Unbound {
 					c.initForms[sd.name] = sd
 				}
 			}
@@ -407,17 +403,16 @@ func (c *StandardClass) mergeSupers() bool {
 		for _, ia := range sd.initargs {
 			c.initArgs[string(ia)] = sd
 		}
-		if sd.initform != nil {
+		if sd.initform != slip.Unbound {
 			c.initForms[sd.name] = sd
 		}
 	}
-
 	c.precedence = make([]slip.Symbol, 0, len(c.inherit)+3)
 	c.precedence = append(c.precedence, slip.Symbol(c.name))
 	for _, ic := range c.inherit {
 		c.precedence = append(c.precedence, slip.Symbol(ic.Name()))
 	}
-	if 0 < len(c.baseClass) {
+	if 0 < len(c.baseClass) && c.precedence[len(c.precedence)-1] != c.baseClass {
 		c.precedence = append(c.precedence, c.baseClass)
 	}
 	c.precedence = append(c.precedence, slip.TrueSymbol)
@@ -472,10 +467,6 @@ func (c *StandardClass) defaultsMap() map[string]slip.Object {
 
 func (c *StandardClass) precedenceList() []slip.Symbol {
 	return c.precedence
-}
-
-func (c *StandardClass) inheritedClasses() []slip.Class {
-	return c.inherit
 }
 
 // VarNames for DefMethod, requiredVars and defaultVars combined.

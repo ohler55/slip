@@ -12,7 +12,7 @@ import (
 )
 
 func TestSimpleConditionObj(t *testing.T) {
-	cond := cl.NewSimpleCondition(nil, "condition ~A-~D", slip.List{slip.Symbol("dummy"), slip.Fixnum(3)})
+	cond := cl.SimpleConditionNew(nil, 0, "condition ~A-~D", slip.List{slip.Symbol("dummy"), slip.Fixnum(3)})
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<simple-condition [0-9a-f]+>$/",
@@ -88,5 +88,5 @@ func TestSimpleConditionMakeBadArgs(t *testing.T) {
 }
 
 func TestPanicSimpleCondition(t *testing.T) {
-	tt.Panic(t, func() { cl.PanicSimpleCondition(nil, "raise", nil) })
+	tt.Panic(t, func() { cl.SimpleConditionPanic(nil, 0, "raise", nil) })
 }

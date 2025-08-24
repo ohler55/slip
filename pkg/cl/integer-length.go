@@ -37,7 +37,7 @@ type IntegerLength struct {
 
 // Call the function with the arguments provided.
 func (f *IntegerLength) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case slip.Fixnum:
 		if ta < 0 {
@@ -58,7 +58,7 @@ func (f *IntegerLength) Call(s *slip.Scope, args slip.List, depth int) (result s
 		}
 		result = slip.Fixnum(bi.BitLen())
 	default:
-		slip.PanicType("integer", ta, "integer")
+		slip.TypePanic(s, depth, "integer", ta, "integer")
 	}
 	return
 }

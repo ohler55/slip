@@ -40,9 +40,9 @@ type PrintNotReadableObject struct {
 
 // Call the function with the arguments provided.
 func (f *PrintNotReadableObject) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if ci, ok := args[0].(slip.Instance); !ok || !ci.IsA("print-not-readable") {
-		slip.PanicType("print-not-readable", args[0], "print-not-readable")
+		slip.TypePanic(s, depth, "print-not-readable", args[0], "print-not-readable")
 	} else {
 		result, _ = ci.SlotValue(objectSymbol)
 	}

@@ -45,8 +45,8 @@ type Elt struct {
 
 // Call the function with the arguments provided.
 func (f *Elt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
-	index := getFixnumArg(args[1], "index")
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
+	index := getFixnumArg(s, args[1], "index", depth)
 	switch seq := args[0].(type) {
 	case slip.List:
 		f.checkIndex(index, len(seq))
@@ -62,15 +62,15 @@ func (f *Elt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		f.checkIndex(index, seq.Length())
 		result = seq.Get(index)
 	default:
-		slip.PanicType("sequence", seq, "sequence")
+		slip.TypePanic(s, depth, "sequence", seq, "sequence")
 	}
 	return
 }
 
 // Place a value in the first position of a list or cons.
 func (f *Elt) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
-	index := getFixnumArg(args[1], "index")
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
+	index := getFixnumArg(s, args[1], "index", 0)
 	switch seq := args[0].(type) {
 	case slip.List:
 		f.checkIndex(index, len(seq))
@@ -84,7 +84,7 @@ func (f *Elt) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		f.checkIndex(index, seq.Length())
 		seq.Set(value, index)
 	default:
-		slip.PanicType("sequence", seq, "sequence")
+		slip.TypePanic(s, 0, "sequence", seq, "sequence")
 	}
 }
 

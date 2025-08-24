@@ -49,25 +49,25 @@ type Send struct {
 
 // Call the the function with the arguments provided.
 func (f *Send) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	if self, ok := args[0].(slip.Receiver); ok {
 		if method, ok := args[1].(slip.Symbol); ok {
 			result = self.Receive(s, string(method), args[2:], depth)
 		} else {
-			slip.PanicType("method of send", args[1], "keyword")
+			slip.TypePanic(s, depth, "method of send", args[1], "keyword")
 		}
 	} else {
-		slip.PanicType("object of send", args[0], "instance")
+		slip.TypePanic(s, depth, "object of send", args[0], "instance")
 	}
 	return
 }
 
 // Place a value in the instance variable identified in the send.
 func (f *Send) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, 0, f, args, 2, -1)
 	self, ok := args[0].(*Instance)
 	if !ok {
-		slip.PanicType("object of send", args[0], "instance")
+		slip.TypePanic(s, 0, "object of send", args[0], "instance")
 	}
 	if method, ok2 := args[1].(slip.Symbol); ok2 {
 		_ = self.Receive(
@@ -78,5 +78,5 @@ func (f *Send) Place(s *slip.Scope, args slip.List, value slip.Object) {
 		)
 		return
 	}
-	slip.PanicType("method", args[1], "symbol")
+	slip.TypePanic(s, 0, "method", args[1], "symbol")
 }

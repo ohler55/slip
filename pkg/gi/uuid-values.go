@@ -39,10 +39,10 @@ type UUIDValues struct {
 
 // Call the function with the arguments provided.
 func (f *UUIDValues) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	u, ok := args[0].(UUID)
 	if !ok {
-		slip.PanicType("uuid", args[0], "uuid")
+		slip.TypePanic(s, depth, "uuid", args[0], "uuid")
 	}
 	return slip.List{slip.Fixnum(u[0]), slip.Fixnum(u[1])}
 }

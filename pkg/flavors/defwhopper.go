@@ -50,10 +50,10 @@ type Defwhopper struct {
 
 // Call the the function with the arguments provided.
 func (f *Defwhopper) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	ml, ok := args[0].(slip.List)
 	if !ok {
-		slip.PanicType("whopper designator for defwhopper", args[0], "list")
+		slip.TypePanic(s, depth, "whopper designator for defwhopper", args[0], "list")
 	}
 	var (
 		flavor *Flavor
@@ -71,12 +71,12 @@ func (f *Defwhopper) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		flavor = allFlavors[string(sym)]
 	}
 	if flavor == nil {
-		slip.PanicType("flavor for defwhopper", ml[0], "name of flavor")
+		slip.TypePanic(s, depth, "flavor for defwhopper", ml[0], "name of flavor")
 	}
 	if sym, ok2 := ml[1].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
 		method = string(sym)
 	} else {
-		slip.PanicType("method for defwhopper", ml[1], "keyword")
+		slip.TypePanic(s, depth, "method for defwhopper", ml[1], "keyword")
 	}
 	flavor.DefMethod(method, ":whopper", slip.DefLambda(method, s, args[1:]))
 

@@ -58,16 +58,16 @@ type Fill struct {
 
 // Call the function with the arguments provided.
 func (f *Fill) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	item := args[1]
 	var start int
 	end := math.MaxInt
 	kargs := args[2:]
 	if v, ok := slip.GetArgsKeyValue(kargs, slip.Symbol(":start")); ok {
-		start = getFixnumArg(v, ":start")
+		start = getFixnumArg(s, v, ":start", depth)
 	}
 	if v, ok := slip.GetArgsKeyValue(kargs, slip.Symbol(":end")); ok {
-		end = getFixnumArg(v, ":end")
+		end = getFixnumArg(s, v, ":end", depth)
 	}
 	result = args[0]
 	switch seq := args[0].(type) {
@@ -79,7 +79,7 @@ func (f *Fill) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	case slip.String:
 		c, ok := item.(slip.Character)
 		if !ok {
-			slip.PanicType("item", item, "character")
+			slip.TypePanic(s, depth, "item", item, "character")
 		}
 		ra := []rune(seq)
 		end = checkStartEnd(start, end, len(ra))
@@ -93,7 +93,7 @@ func (f *Fill) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			seq.Set(item, i)
 		}
 	default:
-		slip.PanicType("sequence", seq, "sequence")
+		slip.TypePanic(s, depth, "sequence", seq, "sequence")
 	}
 	return
 }

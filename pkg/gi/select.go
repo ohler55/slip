@@ -50,7 +50,7 @@ const (
 
 // Call the function with the arguments provided.
 func (f *Select) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var (
 		clauses [maxSlipChan + maxTimeChan]slip.List
 		sc      [maxSlipChan]Channel
@@ -77,7 +77,7 @@ func (f *Select) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		}
 		if 1 < len(clause) {
 			if _, ok := clause[1].(slip.Symbol); !ok {
-				slip.PanicType("clause[1]", clause[1], "symbol")
+				slip.TypePanic(s, depth, "clause[1]", clause[1], "symbol")
 			}
 		}
 	}
@@ -117,7 +117,7 @@ func (f *Select) prepClauses(s *slip.Scope, args slip.List, depth int) bool {
 	for _, a := range args {
 		clause, ok := a.(slip.List)
 		if !ok || len(clause) == 0 {
-			slip.PanicType("clause", a, "list")
+			slip.TypePanic(s, depth, "clause", a, "list")
 		}
 		clause[0] = slip.EvalArg(s, clause, 0, depth)
 		switch clause[0].(type) {
@@ -138,7 +138,7 @@ func (f *Select) reflectClauses(s *slip.Scope, clauses slip.List, depth int) (re
 		clause := a.(slip.List)
 		rcv := reflect.ValueOf(clause[0])
 		if rcv.Kind() != reflect.Chan {
-			slip.PanicType("clause[0]", a, "channel")
+			slip.TypePanic(s, depth, "clause[0]", a, "channel")
 		}
 		cases[i] = reflect.SelectCase{
 			Dir:  reflect.SelectRecv,

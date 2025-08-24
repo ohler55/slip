@@ -97,6 +97,8 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 	// Quoted values are treated as the value quoted. Lists are converted to
 	// functions if possible.
 	switch to := obj.(type) {
+	case nil:
+		node = &Leaf{text: []byte("nil")}
 	case slip.List:
 		if 0 < len(to) {
 			if sym, ok := to[0].(slip.Symbol); ok {
@@ -109,8 +111,6 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		node = &Leaf{text: []byte("nil")}
 	case *slip.Lambda:
 		node = buildLambda(to, p)
-	case *slip.FuncInfo:
-		node = buildFuncInfo(to, p)
 	case *slip.Vector:
 		node = arrayFromList("#", to.AsList(), p)
 	case slip.Octets:
@@ -128,8 +128,11 @@ func buildNode(obj slip.Object, p *slip.Printer) (node Node) {
 		node = arrayFromList(prefix, to.AsList(), p)
 	case slip.Funky:
 		node = buildCall(slip.Symbol(to.GetName()), to.GetArgs(), p)
-	case slip.Class:
-		if dl := to.DefList(); dl != nil && 0 < len(dl) {
+	case slip.Symbol:
+		node = &Leaf{text: []byte(to)}
+	case slip.LoadFormer:
+		form := to.LoadForm()
+		if dl, _ := form.(slip.List); 0 < len(dl) {
 			if sym, ok := dl[0].(slip.Symbol); ok {
 				node = buildCall(sym, dl[1:], p)
 			}
@@ -167,6 +170,8 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		node = defvarFromList(name, args, p)
 	case "cond":
 		node = newFun(name, args, p, 2)
+	case "progn":
+		node = newProgn(args, p)
 	case "block",
 		"defpackage",
 		"dotimes",
@@ -190,7 +195,13 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 	case "defflavor":
 		node = defflavorFromList(args, p)
 	case "defmethod", "defwhopper":
-		node = defmethodFromList(name, args, p)
+		if _, ok := args[0].(slip.List); ok {
+			node = defmethodFromList(name, args, p)
+		} else {
+			node = defGenMethod(args, p)
+		}
+	case "defgeneric":
+		node = defGeneric(args, p)
 	case "defclass", "define-condition":
 		node = defclassFromList(name, args, p)
 	default:
@@ -205,30 +216,6 @@ func buildCall(sym slip.Symbol, args slip.List, p *slip.Printer) (node Node) {
 		}
 	}
 	return
-}
-
-func buildFuncInfo(fi *slip.FuncInfo, p *slip.Printer) Node {
-	defun := Defun{
-		fname: fi.Name,
-		args:  buildDocArgs(fi.Doc.Args, p),
-	}
-	if fi.Kind == slip.MacroSymbol {
-		defun.name = "defmacro"
-	} else {
-		defun.name = "defun"
-	}
-	if 0 < len(fi.Doc.Text) {
-		defun.children = append(defun.children, &Doc{text: fi.Doc.Text})
-	}
-	fun := fi.Create(nil).(slip.Funky)
-	if lam, ok := fun.Caller().(*slip.Lambda); ok {
-		for _, form := range lam.Forms {
-			defun.children = append(defun.children, buildNode(form, p))
-		}
-	} else {
-		defun.children = append(defun.children, &Leaf{text: []byte("...")})
-	}
-	return &defun
 }
 
 func buildLambda(lam *slip.Lambda, p *slip.Printer) Node {

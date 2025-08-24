@@ -45,23 +45,23 @@ type Dribble struct {
 
 // Call the function with the arguments provided.
 func (f *Dribble) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 1)
+	slip.CheckArgCount(s, depth, f, args, 0, 1)
 	if 0 < len(args) {
-		f.start(args[0])
+		f.start(s, args[0], depth)
 	} else {
 		f.stop()
 	}
 	return nil
 }
 
-func (f *Dribble) start(filepath slip.Object) {
+func (f *Dribble) start(s *slip.Scope, filepath slip.Object, depth int) {
 	fp, ok := filepath.(slip.String)
 	if !ok {
-		slip.PanicType("filepath", filepath, "string")
+		slip.TypePanic(s, depth, "filepath", filepath, "string")
 	}
 	file, err := os.Create(string(fp))
 	if err != nil {
-		slip.PanicFile(filepath, "%s", err)
+		slip.FilePanic(s, depth, filepath, "%s", err)
 	}
 	in := slip.CurrentPackage.JustGet("*standard-input*")
 	if d, ok := in.(*Dribbler); ok {

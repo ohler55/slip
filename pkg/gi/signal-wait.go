@@ -41,13 +41,13 @@ type SignalWait struct {
 
 // Call the function with the arguments provided.
 func (f *SignalWait) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var sigs []os.Signal
 	for _, a := range args {
 		if num, ok := a.(slip.Fixnum); ok {
 			sigs = append(sigs, syscall.Signal(num))
 		} else {
-			slip.PanicType("signal", a, "fixnum")
+			slip.TypePanic(s, depth, "signal", a, "fixnum")
 		}
 	}
 	done := make(chan os.Signal, 1)

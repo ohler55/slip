@@ -41,7 +41,7 @@ type CopySeq struct {
 
 // Call the function with the arguments provided.
 func (f *CopySeq) Call(s *slip.Scope, args slip.List, depth int) (seq slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	switch ta := args[0].(type) {
 	case nil:
 		// leave as nil
@@ -62,7 +62,7 @@ func (f *CopySeq) Call(s *slip.Scope, args slip.List, depth int) (seq slip.Objec
 	case *slip.BitVector:
 		seq = ta.Duplicate()
 	default:
-		slip.PanicType("sequence", args[0], "sequence")
+		slip.TypePanic(s, depth, "sequence", args[0], "sequence")
 	}
 	return seq
 }

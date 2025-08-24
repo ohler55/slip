@@ -265,7 +265,7 @@ func TestVanillaPrintSelfDocs(t *testing.T) {
   Arguments:
     output-stream: [output-stream] = *standard-output*
       output-stream to write the description to.
-    rest: []
+    rest
       ignored
 
   Implemented by:
@@ -283,7 +283,7 @@ func TestVanillaSendIfDocs(t *testing.T) {
   Arguments:
     method: [keyword]
       Method to send to the instance if the instance has the method.
-    arguments*: []
+    arguments*
       Argument to pass to the method call.
 
   Implemented by:

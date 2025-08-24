@@ -75,7 +75,7 @@ func (f *Nconc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 				result = ta
 				break
 			}
-			slip.PanicType("list", ta, "list")
+			slip.TypePanic(s, depth, "list", ta, "list")
 		}
 	}
 	return

@@ -41,37 +41,46 @@ type SlotValue struct {
 
 // Call the the function with the arguments provided.
 func (f *SlotValue) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("slot-name", args[1], "symbol")
+		slip.TypePanic(s, depth, "slot-name", args[1], "symbol")
 	}
 	var has bool
 	if inst, ok := args[0].(slip.Instance); ok {
 		if result, has = inst.SlotValue(sym); !has {
-			slotMissing(inst, sym, "slot-value")
+			return slotMissing(s, inst, sym, "slot-value", depth)
 		}
 		if result == slip.Unbound {
-			slip.PanicUnboundSlot(inst, sym, "")
+			if fi := slip.FindFunc("slot-unbound"); fi != nil {
+				args := slip.List{
+					slip.FindClass(string(inst.Hierarchy()[0])),
+					inst,
+					sym,
+				}
+				f, _ := fi.Create(args).(slip.Funky)
+
+				result = f.Caller().Call(s, args, depth)
+			}
 		}
 	} else {
-		slotMissing(args[0], sym, "slot-value")
+		return slotMissing(s, args[0], sym, "slot-value", depth)
 	}
 	return
 }
 
 // Place a value in the slot of an instance.
 func (f *SlotValue) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, 0, f, args, 2, 2)
 	sym, ok := args[1].(slip.Symbol)
 	if !ok {
-		slip.PanicType("slot-name", args[1], "symbol")
+		slip.TypePanic(s, 0, "slot-name", args[1], "symbol")
 	}
 	if inst, ok := args[0].(slip.Instance); ok {
 		if !inst.SetSlotValue(sym, value) {
-			slotMissing(inst, sym, "setf")
+			_ = slotMissing(s, inst, sym, "setf", 0)
 		}
 	} else {
-		slotMissing(args[0], sym, "slot-value")
+		_ = slotMissing(s, args[0], sym, "slot-value", 0)
 	}
 }

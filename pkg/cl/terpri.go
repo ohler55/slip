@@ -41,18 +41,18 @@ type Terpri struct {
 
 // Call the function with the arguments provided.
 func (f *Terpri) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 0, 1)
+	slip.CheckArgCount(s, depth, f, args, 0, 1)
 	w := slip.StandardOutput.(io.Writer)
 	ss, _ := slip.StandardOutput.(slip.Stream)
 	if 0 < len(args) {
 		var ok bool
 		ss, _ = args[0].(slip.Stream)
 		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType("terpri output-stream", args[0], "output-stream")
+			slip.TypePanic(s, depth, "terpri output-stream", args[0], "output-stream")
 		}
 	}
 	if _, err := w.Write([]byte{'\n'}); err != nil {
-		slip.PanicStream(ss, "terpri write failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "terpri write failed. %s", err)
 	}
 	return nil
 }

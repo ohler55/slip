@@ -46,10 +46,10 @@ type Addf struct {
 
 // Call the the function with the arguments provided.
 func (f *Addf) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol", args[0], "symbol")
+		slip.TypePanic(s, depth, "symbol", args[0], "symbol")
 	}
 	var list slip.List
 	switch tv := s.Get(sym).(type) {
@@ -58,7 +58,7 @@ func (f *Addf) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.List:
 		list = append(tv, args[1:]...)
 	default:
-		slip.PanicType("symbol", tv, "list")
+		slip.TypePanic(s, depth, "symbol", tv, "list")
 	}
 	s.Set(sym, list)
 

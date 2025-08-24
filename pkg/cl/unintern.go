@@ -45,12 +45,10 @@ type Unintern struct {
 
 // Call the function with the arguments provided.
 func (f *Unintern) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) < 1 || 2 < len(args) {
-		slip.PanicArgCount(f, 1, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	so, ok := args[0].(slip.Symbol)
 	if !ok || len(so) < 1 {
-		slip.PanicType("symbol", args[0], "symbol")
+		slip.TypePanic(s, depth, "symbol", args[0], "symbol")
 	}
 	p := slip.CurrentPackage
 	if 1 < len(args) {
@@ -66,7 +64,7 @@ func (f *Unintern) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		case *slip.Package:
 			p = ta
 		default:
-			slip.PanicType("package", args[1], "package", "string", "symbol")
+			slip.TypePanic(s, depth, "package", args[1], "package", "string", "symbol")
 		}
 	}
 	if p == &slip.KeywordPkg && so[0] != ':' {

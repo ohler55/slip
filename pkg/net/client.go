@@ -72,10 +72,10 @@ func ensureClient(obj *flavors.Instance) (client *http.Client, u string) {
 	return
 }
 
-func headerFromAssoc(obj slip.Object) http.Header {
+func headerFromAssoc(s *slip.Scope, obj slip.Object, depth int) http.Header {
 	alist, ok := obj.(slip.List)
 	if !ok {
-		slip.PanicType("header", obj, "list")
+		slip.TypePanic(s, depth, "header", obj, "list")
 	}
 	header := http.Header{}
 	for _, entry := range alist {
@@ -86,18 +86,18 @@ func headerFromAssoc(obj slip.Object) http.Header {
 			values []string
 		)
 		if elist, ok = entry.(slip.List); !ok || len(elist) < 1 {
-			slip.PanicType("header field", obj, "list")
+			slip.TypePanic(s, depth, "header field", obj, "list")
 		}
 		if ss, ok = elist[0].(slip.String); ok {
 			name = string(ss)
 		} else {
-			slip.PanicType("header field name", elist[0], "string")
+			slip.TypePanic(s, depth, "header field name", elist[0], "string")
 		}
 		for _, sv := range elist[1:] {
 			if ss, ok = sv.(slip.String); ok {
 				values = append(values, string(ss))
 			} else {
-				slip.PanicType("header field value", sv, "string")
+				slip.TypePanic(s, depth, "header field value", sv, "string")
 			}
 		}
 		header[name] = values
@@ -107,14 +107,14 @@ func headerFromAssoc(obj slip.Object) http.Header {
 
 type clientBodylessCaller string
 
-func (caller clientBodylessCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller clientBodylessCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	header := http.Header{}
 	switch len(args) {
 	case 0:
 		// no header
 	case 1:
-		header = headerFromAssoc(args[0])
+		header = headerFromAssoc(s, args[0], depth)
 	default:
 		slip.PanicMethodArgChoice(obj, ":"+string(caller), len(args), "0 or 1")
 	}
@@ -155,25 +155,25 @@ If an error occurs it is raised with a panic.`, caller),
 
 type clientBodyCaller string
 
-func wrapContent(arg slip.Object) (rc io.ReadCloser, ct string) {
+func wrapContent(s *slip.Scope, arg slip.Object, depth int) (rc io.ReadCloser, ct string) {
 	switch ta := arg.(type) {
 	case slip.String:
 		rc = bodyWrapString(string(ta))
 	case *flavors.Instance:
 		if ta.Type != bag.Flavor() {
-			slip.PanicType("content", arg, "string", "bag", "input-stream")
+			slip.TypePanic(s, depth, "content", arg, "string", "bag", "input-stream")
 		}
 		rc = bodyWrapString(oj.JSON(ta.Any))
 		ct = "application/json"
 	case io.Reader:
 		rc = bodyWrapReader(ta)
 	default:
-		slip.PanicType("content", arg, "string", "bag", "input-stream")
+		slip.TypePanic(s, depth, "content", arg, "string", "bag", "input-stream")
 	}
 	return
 }
 
-func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	header := http.Header{}
 	var (
@@ -184,12 +184,12 @@ func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 	)
 	switch len(args) {
 	case 1:
-		body, ct = wrapContent(args[0])
+		body, ct = wrapContent(s, args[0], depth)
 		if 0 < len(ct) {
 			header.Set("Content-Type", ct)
 		}
 	case 2:
-		body, ct = wrapContent(args[0])
+		body, ct = wrapContent(s, args[0], depth)
 		if 0 < len(ct) {
 			header.Set("Content-Type", ct)
 		}
@@ -200,10 +200,10 @@ func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 			ct = string(ta)
 			header.Set("Content-Type", ct)
 		default:
-			slip.PanicType("content-type", ta, "string")
+			slip.TypePanic(s, depth, "content-type", ta, "string")
 		}
 	case 3:
-		body, ct = wrapContent(args[0])
+		body, ct = wrapContent(s, args[0], depth)
 		if 0 < len(ct) {
 			header.Set("Content-Type", ct)
 		}
@@ -213,9 +213,9 @@ func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.O
 		case slip.String:
 			header.Set("Content-Type", string(ta))
 		default:
-			slip.PanicType("content-type", ta, "string")
+			slip.TypePanic(s, depth, "content-type", ta, "string")
 		}
-		header = headerFromAssoc(args[2])
+		header = headerFromAssoc(s, args[2], depth)
 	default:
 		slip.PanicMethodArgChoice(obj, ":"+string(caller), len(args), "1, 2, or 3")
 	}

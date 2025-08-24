@@ -51,7 +51,7 @@ type Snapshot struct {
 
 // Call the function with the arguments provided.
 func (f *Snapshot) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 
 	b := AppendSnapshot(nil, s)
 	a0 := args[0]
@@ -62,12 +62,12 @@ top:
 	case io.Writer:
 		if _, err := ta.Write(b); err != nil {
 			ss, _ := ta.(slip.Stream)
-			slip.PanicStream(ss, "writing snapshot: %s", err)
+			slip.StreamPanic(s, depth, ss, "writing snapshot: %s", err)
 		}
 	case slip.String:
 		f, err := os.Create(string(ta))
 		if err != nil {
-			slip.PanicFile(ta, "failed to create: %s", err)
+			slip.FilePanic(s, depth, ta, "failed to create: %s", err)
 		}
 		defer func() { _ = f.Close() }()
 		a0 = (*slip.FileStream)(f)
@@ -77,7 +77,7 @@ top:
 			a0 = s.Get("*standard-output*")
 			goto top
 		}
-		slip.PanicType("destination", ta, "output-stream", "t", "nil", "string")
+		slip.TypePanic(s, depth, "destination", ta, "output-stream", "t", "nil", "string")
 	}
 	return nil
 }
@@ -221,7 +221,7 @@ func appendSnapshotFlavors(b []byte, s *slip.Scope) []byte {
 	})
 	for _, f := range fa {
 		b = append(b, '\n')
-		b = pp.Append(b, s, f.DefList())
+		b = pp.Append(b, s, f.LoadForm())
 	}
 	return b
 }

@@ -43,14 +43,14 @@ type SendSignal struct {
 
 // Call the function with the arguments provided.
 func (f *SendSignal) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	pid, ok := args[0].(slip.Fixnum)
 	if !ok {
-		slip.PanicType("pid", args[0], "fixnum")
+		slip.TypePanic(s, depth, "pid", args[0], "fixnum")
 	}
 	var sig slip.Fixnum
 	if sig, ok = args[1].(slip.Fixnum); !ok {
-		slip.PanicType("signal", args[1], "fixnum")
+		slip.TypePanic(s, depth, "signal", args[1], "fixnum")
 	}
 	if err := syscall.Kill(int(pid), syscall.Signal(sig)); err != nil {
 		panic(err)

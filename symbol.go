@@ -45,3 +45,8 @@ func (obj Symbol) Eval(s *Scope, depth int) Object {
 	}
 	return s.Get(obj)
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Symbol) LoadForm() Object {
+	return obj
+}

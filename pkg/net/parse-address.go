@@ -40,10 +40,10 @@ type ParseAddress struct {
 
 // Call the function with the arguments provided.
 func (f *ParseAddress) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	str, ok := args[0].(slip.String)
 	if !ok {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	return slip.Octets(netip.MustParseAddr(string(str)).AsSlice())
 }

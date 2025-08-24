@@ -40,11 +40,11 @@ type CharEq struct {
 
 // Call the function with the arguments provided.
 func (f *CharEq) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	var target slip.Character
 	for i, a := range args {
 		if c, ok := a.(slip.Character); !ok {
-			slip.PanicType("characters", a, "character")
+			slip.TypePanic(s, depth, "characters", a, "character")
 		} else if i == 0 {
 			target = c
 		} else if target != c {

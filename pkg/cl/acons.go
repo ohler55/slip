@@ -46,7 +46,7 @@ type Acons struct {
 
 // Call the function with the arguments provided.
 func (f *Acons) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 3, 3)
+	slip.CheckArgCount(s, depth, f, args, 3, 3)
 	cons := slip.List{args[0], slip.Tail{Value: args[1]}}
 	switch alist := args[2].(type) {
 	case nil:

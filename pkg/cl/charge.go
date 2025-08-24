@@ -42,11 +42,11 @@ type CharGe struct {
 
 // Call the function with the arguments provided.
 func (f *CharGe) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	prev := slip.Character(unicode.MaxRune + 1)
 	for _, a := range args {
 		if c, ok := a.(slip.Character); !ok {
-			slip.PanicType("characters", a, "character")
+			slip.TypePanic(s, depth, "characters", a, "character")
 		} else if c <= prev {
 			prev = c
 		} else {

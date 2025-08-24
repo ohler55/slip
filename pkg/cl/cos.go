@@ -39,11 +39,11 @@ type Cos struct {
 
 // Call the function with the arguments provided.
 func (f *Cos) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	if real, ok := args[0].(slip.Real); ok {
 		result = slip.DoubleFloat(math.Cos(real.RealValue()))
 	} else {
-		slip.PanicType("radians", args[0], "number")
+		slip.TypePanic(s, depth, "radians", args[0], "number")
 	}
 	return
 }

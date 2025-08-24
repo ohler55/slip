@@ -59,20 +59,20 @@ type Read struct {
 
 // Call the the function with the arguments provided.
 func (f *Read) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 3)
+	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
 	if 2 < len(args) {
-		readBag(obj, args[1], args[2])
+		readBag(s, obj, args[1], args[2], depth)
 	} else {
-		readBag(obj, args[1], nil)
+		readBag(s, obj, args[1], nil, depth)
 	}
 	return obj
 }
 
-func readBag(obj *flavors.Instance, value, path slip.Object) {
+func readBag(s *slip.Scope, obj *flavors.Instance, value, path slip.Object, depth int) {
 	var x jp.Expr
 	switch p := path.(type) {
 	case nil:
@@ -81,11 +81,11 @@ func readBag(obj *flavors.Instance, value, path slip.Object) {
 	case Path:
 		x = jp.Expr(p)
 	default:
-		slip.PanicType("path", p, "string")
+		slip.TypePanic(s, depth, "path", p, "string")
 	}
 	r, ok := value.(io.Reader)
 	if !ok {
-		slip.PanicType("stream", value, "input-stream")
+		slip.TypePanic(s, depth, "stream", value, "input-stream")
 	}
 	v := sen.MustParseReader(r)
 	if options.Converter != nil {

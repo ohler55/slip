@@ -58,7 +58,7 @@ func VanillaMethods() map[string]*slip.Method {
 
 type initCaller struct{}
 
-func (caller initCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller initCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	// Does nothing.
 	return nil
 }
@@ -72,7 +72,7 @@ func (caller initCaller) FuncDocs() *slip.FuncDoc {
 
 type describeCaller struct{}
 
-func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller describeCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(slip.Instance)
 	ansi := s.Get("*print-ansi*") != nil
 	right := int(s.Get("*print-right-margin*").(slip.Fixnum))
@@ -83,11 +83,11 @@ func (caller describeCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Obj
 	w := s.Get("*standard-output*").(io.Writer)
 	if 0 < len(args) {
 		if 1 < len(args) {
-			slip.PanicMethodArgCount(self, ":describe", len(args), 0, 1)
+			slip.MethodArgCountPanic(s, depth, self, ":describe", len(args), 0, 1)
 		}
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType(":describe output-stream", args[0], "output-stream")
+			slip.TypePanic(s, depth, ":describe output-stream", args[0], "output-stream")
 		}
 	}
 	_, _ = w.Write(b)
@@ -171,7 +171,7 @@ func (caller hasOpCaller) FuncDocs() *slip.FuncDoc {
 
 type printCaller struct{}
 
-func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller printCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	// Args should be stream print-depth escape-p. The second two arguments are
 	// ignored.
 	self := s.Get("self").(slip.Instance)
@@ -182,11 +182,11 @@ func (caller printCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object
 		var ok bool
 		ss, _ = args[0].(slip.Stream)
 		if w, ok = args[0].(io.Writer); !ok {
-			slip.PanicType(":describe output-stream", args[0], "output-stream")
+			slip.TypePanic(s, depth, ":describe output-stream", args[0], "output-stream")
 		}
 	}
 	if _, err := w.Write(self.Append(nil)); err != nil {
-		slip.PanicStream(ss, "%s", err)
+		slip.StreamPanic(s, depth, ss, "%s", err)
 	}
 	return nil
 }
@@ -214,7 +214,7 @@ type sendIfCaller struct{}
 func (caller sendIfCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(slip.Instance)
 	if len(args) == 0 {
-		slip.PanicMethodArgCount(self, ":send-if-handles", len(args), 1, -1)
+		slip.MethodArgCountPanic(s, depth, self, ":send-if-handles", len(args), 1, -1)
 	}
 	if sym, ok := args[0].(slip.Symbol); ok {
 		if self.GetMethod(string(sym)) != nil {
@@ -308,9 +308,9 @@ func (caller inspectCaller) FuncDocs() *slip.FuncDoc {
 
 type equalCaller struct{}
 
-func (caller equalCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller equalCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(slip.Instance)
-	slip.CheckMethodArgCount(self, ":equal", len(args), 1, 1)
+	slip.MethodArgCountCheck(s, depth, self, ":equal", len(args), 1, 1)
 	if self.Equal(args[0]) {
 		return slip.True
 	}
@@ -336,17 +336,17 @@ type changeClassCaller struct{}
 
 func (caller changeClassCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*Instance)
-	slip.CheckMethodArgCount(self, ":change-class", len(args), 1, -1)
+	slip.MethodArgCountCheck(s, depth, self, ":change-class", len(args), 1, -1)
 	var nf *Flavor
 	switch ta := args[0].(type) {
 	case *Flavor:
 		nf = ta
 	case slip.Symbol:
 		if nf = Find(string(ta)); nf == nil {
-			slip.PanicClassNotFound(ta, "%s is not a defined class or flavor.", ta)
+			slip.ClassNotFoundPanic(s, depth, ta, "%s is not a defined class or flavor.", ta)
 		}
 	default:
-		slip.PanicType("new-class", args[0], "flavor")
+		slip.TypePanic(s, depth, "new-class", args[0], "flavor")
 	}
 	prev := self.Dup()
 	self.ChangeFlavor(nf)

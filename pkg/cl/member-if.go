@@ -52,7 +52,7 @@ type MemberIf struct {
 
 // Call the function with the arguments provided.
 func (f *MemberIf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	predicate := ResolveToCaller(s, args[0], depth)
 	var list slip.List
 	switch ta := args[1].(type) {
@@ -61,21 +61,21 @@ func (f *MemberIf) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 	case slip.List:
 		list = ta
 	default:
-		slip.PanicType("list", args[1], "list")
+		slip.TypePanic(s, depth, "list", args[1], "list")
 	}
 	var keyFunc slip.Caller
 	pos := 2
 	for ; pos < len(args)-1; pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		keyword := strings.ToLower(string(sym))
 		switch keyword {
 		case ":key":
 			keyFunc = ResolveToCaller(s, args[pos+1], depth)
 		default:
-			slip.PanicType("keyword", sym, ":key")
+			slip.TypePanic(s, depth, "keyword", sym, ":key")
 		}
 	}
 	if pos < len(args) {

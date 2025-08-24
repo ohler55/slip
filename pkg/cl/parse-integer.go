@@ -73,7 +73,7 @@ type ParseInteger struct {
 
 // Call the function with the arguments provided.
 func (f *ParseInteger) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 9)
+	slip.CheckArgCount(s, depth, f, args, 1, 9)
 	var (
 		ra    []rune
 		start int
@@ -83,13 +83,13 @@ func (f *ParseInteger) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	if so, ok := args[0].(slip.String); ok {
 		ra = []rune(so)
 	} else {
-		slip.PanicType("string", args[0], "string")
+		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
 	end := len(ra)
 	for pos := 1; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -100,24 +100,24 @@ func (f *ParseInteger) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 			if n, ok = args[pos+1].(slip.Fixnum); ok {
 				start = int(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum")
 			}
 		case ":end":
 			if n, ok = args[pos+1].(slip.Fixnum); ok {
 				end = int(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum")
 			}
 		case ":radix":
 			if n, ok = args[pos+1].(slip.Fixnum); ok && 2 <= n && n <= 36 {
 				radix = uint64(n)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "fixnum (2 to 36)")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "fixnum (2 to 36)")
 			}
 		case ":junk-allowed":
 			junk = args[pos+1] != nil
 		default:
-			slip.PanicType("keyword", sym, ":start", ":end", ":radix", ":junk-allowed")
+			slip.TypePanic(s, depth, "keyword", sym, ":start", ":end", ":radix", ":junk-allowed")
 		}
 	}
 	if end < start || len(ra) < end || start < 0 {

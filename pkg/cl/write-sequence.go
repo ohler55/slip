@@ -56,13 +56,13 @@ type WriteSequence struct {
 
 // Call the function with the arguments provided.
 func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 6)
+	slip.CheckArgCount(s, depth, f, args, 1, 6)
 	var ss slip.Stream
 	w, ok := args[1].(io.Writer)
 	if ok {
 		ss, _ = args[1].(slip.Stream)
 	} else {
-		slip.PanicType("stream", args[1], "output-stream")
+		slip.TypePanic(s, depth, "stream", args[1], "output-stream")
 	}
 	var ra []rune
 	switch ta := args[0].(type) {
@@ -77,11 +77,11 @@ func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 			case slip.Fixnum:
 				ra[i] = rune(tv)
 			default:
-				slip.PanicType("sequence element", v, "character", "fixnum")
+				slip.TypePanic(s, depth, "sequence element", v, "character", "fixnum")
 			}
 		}
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	if 2 < len(args) {
 		rest := args[2:]
@@ -99,7 +99,7 @@ func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 					slip.NewPanic(":start (%d) out of range 0 to %d.", start, len(ra)-1)
 				}
 			} else {
-				slip.PanicType("start", value, "fixnum")
+				slip.TypePanic(s, depth, "start", value, "fixnum")
 			}
 		}
 		if value, has := slip.GetArgsKeyValue(rest, slip.Symbol(":end")); has {
@@ -112,13 +112,13 @@ func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 					slip.NewPanic(":end (%d) out of range %d to %d.", end, start, len(ra)-1)
 				}
 			default:
-				slip.PanicType("end", value, "fixnum")
+				slip.TypePanic(s, depth, "end", value, "fixnum")
 			}
 		}
 		ra = ra[start:end]
 	}
 	if _, err := w.Write([]byte(string(ra))); err != nil {
-		slip.PanicStream(ss, "write-sequence failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write-sequence failed. %s", err)
 	}
 	return args[0]
 }

@@ -72,3 +72,8 @@ func TestHashTableMixedKey(t *testing.T) {
 		Eval:   slip.HashTable{slip.Fixnum(1): slip.True, slip.Symbol("a"): slip.Fixnum(3), nil: nil},
 	}).Test(t)
 }
+
+func TestHashTableLoadForm(t *testing.T) {
+	table := slip.HashTable{slip.Fixnum(1): slip.True, slip.Symbol("a"): slip.Fixnum(3), nil: nil}
+	sliptest.LoadForm(t, table)
+}

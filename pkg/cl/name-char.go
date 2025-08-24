@@ -36,7 +36,7 @@ type NameChar struct {
 
 // Call the function with the arguments provided.
 func (f *NameChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 1)
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	var name string
 	switch ta := args[0].(type) {
 	case slip.Symbol:
@@ -44,7 +44,7 @@ func (f *NameChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case slip.String:
 		name = string(ta)
 	default:
-		slip.PanicType("name", args[0], "string", "symbol")
+		slip.TypePanic(s, depth, "name", args[0], "string", "symbol")
 	}
 	if strings.HasPrefix(name, `#\`) {
 		ra := []rune(name)

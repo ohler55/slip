@@ -22,6 +22,17 @@ func TestClassOfNotInstance(t *testing.T) {
 	}).Test(t)
 }
 
+func TestClassOfNil(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(class-of nil)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(class-of '())`,
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestClassOfArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(class-of)`,

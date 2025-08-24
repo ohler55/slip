@@ -44,10 +44,10 @@ type MakeList struct {
 
 // Call the function with the arguments provided.
 func (f *MakeList) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 3)
+	slip.CheckArgCount(s, depth, f, args, 1, 3)
 	size, ok := args[0].(slip.Fixnum)
 	if !ok || size < 0 {
-		slip.PanicType("size", args[0], "fixnum")
+		slip.TypePanic(s, depth, "size", args[0], "fixnum")
 	}
 	ie, _ := slip.GetArgsKeyValue(args[1:], slip.Symbol(":initial-element"))
 	list := make(slip.List, int(size))

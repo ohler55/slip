@@ -46,10 +46,10 @@ type FilePosition struct {
 
 // Call the function with the arguments provided.
 func (f *FilePosition) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 2)
+	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	seeker, ok := args[0].(io.Seeker)
 	if !ok {
-		slip.PanicType("stream", args[0], "file-stream", "broadcast-stream", "synonym-stream")
+		slip.TypePanic(s, depth, "stream", args[0], "file-stream", "broadcast-stream", "synonym-stream")
 	}
 	var offset int64
 	whence := 1
@@ -58,7 +58,7 @@ func (f *FilePosition) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			offset = int64(pos)
 			whence = 0
 		} else {
-			slip.PanicType("position", args[1], "fixnum")
+			slip.TypePanic(s, depth, "position", args[1], "fixnum")
 		}
 	}
 	if pos, err := seeker.Seek(offset, whence); err == nil {

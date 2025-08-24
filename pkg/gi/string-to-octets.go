@@ -50,8 +50,8 @@ type StringToOctets struct {
 
 // Call the function with the arguments provided.
 func (f *StringToOctets) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, 5)
-	start, end := seqStarEndArgs(args)
+	slip.CheckArgCount(s, depth, f, args, 1, 5)
+	start, end := seqStarEndArgs(s, args, depth)
 	a0 := args[0]
 top:
 	switch ta := a0.(type) {
@@ -70,7 +70,7 @@ top:
 			if c, ok := v.(slip.Character); ok {
 				ba = utf8.AppendRune(ba, rune(c))
 			} else {
-				slip.PanicType("string element", v, "character")
+				slip.TypePanic(s, depth, "string element", v, "character")
 			}
 		}
 		result = slip.Octets(ba)
@@ -78,7 +78,7 @@ top:
 		a0 = ta.AsList()
 		goto top
 	default:
-		slip.PanicType("string", args[0], "string", "list of characters")
+		slip.TypePanic(s, depth, "string", args[0], "string", "list of characters")
 	}
 	return
 }

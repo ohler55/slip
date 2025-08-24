@@ -82,7 +82,7 @@ type Iterate struct {
 
 // Call the function with the arguments provided.
 func (f *Iterate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 12)
+	slip.CheckArgCount(s, depth, f, args, 2, 12)
 	d2 := depth + 1
 	var caller slip.Caller
 	channel, ok := args[0].(gi.Channel)
@@ -96,11 +96,11 @@ func (f *Iterate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case io.Reader:
 		ir = ta
 	default:
-		slip.PanicType("input", ta, "string", "input-stream")
+		slip.TypePanic(s, depth, "input", ta, "string", "input-stream")
 	}
 	cr := csv.NewReader(ir)
 	cr.ReuseRecord = false
-	bagIt := csvSetReaderOptions(cr, args[2:], true)
+	bagIt := csvSetReaderOptions(s, cr, args[2:], true, depth)
 	var header []string
 	for {
 		rec, err := cr.Read()

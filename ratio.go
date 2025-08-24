@@ -15,7 +15,7 @@ type Ratio big.Rat
 // NewRatio creates a new Ratio.
 func NewRatio(num, denom int64) *Ratio {
 	if denom == 0 {
-		PanicArithmetic(Symbol("/"), List{Fixnum(num), Fixnum(denom)}, "division by zero")
+		ArithmeticPanic(NewScope(), 0, Symbol("/"), List{Fixnum(num), Fixnum(denom)}, "division by zero")
 	}
 	return (*Ratio)(big.NewRat(num, denom))
 }
@@ -23,7 +23,7 @@ func NewRatio(num, denom int64) *Ratio {
 // NewBigRatio creates a new Ratio.
 func NewBigRatio(num, denom *big.Int) *Ratio {
 	if denom.Sign() == 0 {
-		PanicArithmetic(Symbol("/"), List{(*Bignum)(num), (*Bignum)(denom)}, "division by zero")
+		ArithmeticPanic(NewScope(), 0, Symbol("/"), List{(*Bignum)(num), (*Bignum)(denom)}, "division by zero")
 	}
 	var rat big.Rat
 	return (*Ratio)(rat.SetFrac(num, denom))
@@ -101,4 +101,9 @@ func (obj *Ratio) Eval(s *Scope, depth int) Object {
 func (obj *Ratio) RealValue() float64 {
 	f, _ := (*big.Rat)(obj).Float64()
 	return f
+}
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *Ratio) LoadForm() Object {
+	return obj
 }

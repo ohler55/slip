@@ -50,13 +50,13 @@ type Etypecase struct {
 
 // Call the function with the arguments provided.
 func (f *Etypecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	key := args[0]
 	d2 := depth + 1
 	for _, a := range args[1:] {
 		clause, ok := a.(slip.List)
 		if !ok || len(clause) == 0 {
-			slip.PanicType("clause", a, "list")
+			slip.TypePanic(s, depth, "clause", a, "list")
 		}
 		var sym slip.Symbol
 		if sym, ok = clause[0].(slip.Symbol); ok {
@@ -66,7 +66,7 @@ func (f *Etypecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		} else if clause[0] == slip.True {
 			sym = slip.TrueSymbol
 		} else {
-			slip.PanicType("clause key", clause[0], "symbol", "t", "otherwise")
+			slip.TypePanic(s, depth, "clause key", clause[0], "symbol", "t", "otherwise")
 		}
 		if !typecaseMatch(sym, key) {
 			continue
@@ -84,5 +84,5 @@ func (f *Etypecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		}
 	}
 	wants = append(wants, "t")
-	panic(slip.NewTypeError("test-key", key, wants...))
+	panic(slip.TypeErrorNew(s, depth, "test-key", key, wants...))
 }

@@ -50,14 +50,14 @@ type WithOutputToString struct {
 
 // Call the function with the arguments provided.
 func (f *WithOutputToString) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, -1)
+	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	subArgs, ok := args[0].(slip.List)
 	if !ok || len(subArgs) < 1 {
-		slip.PanicType("args", args[0], "list of (var &optional string-form)")
+		slip.TypePanic(s, depth, "args", args[0], "list of (var &optional string-form)")
 	}
 	var sym slip.Symbol
 	if sym, ok = subArgs[0].(slip.Symbol); !ok {
-		slip.PanicType("var", subArgs[0], "symbol")
+		slip.TypePanic(s, depth, "var", subArgs[0], "symbol")
 	}
 	var out strings.Builder
 	stream := slip.OutputStream{Writer: &out}

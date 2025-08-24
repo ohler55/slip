@@ -61,19 +61,34 @@ type Defmethod struct {
 
 // Call the the function with the arguments provided.
 func (f *Defmethod) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, -1)
+	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		slip.NewPanic("Not yet implemented")
+		var aux *Aux
+		if fi := slip.FindFunc(string(ta)); fi != nil {
+			if aux, _ = fi.Aux.(*Aux); aux == nil {
+				slip.ProgramPanic(s, depth, "%s already names an ordinary function or macro.", ta)
+			}
+		}
+		result = defGenericMethod(s, ta, args[1:], aux, depth)
 	case slip.List:
-		defDirectMethod(s, ta, args[1:])
+		if len(ta) == 2 && slip.Symbol("setf") == ta[0] {
+			fname := ta.String()
+			var aux *Aux
+			if fi := slip.FindFunc(fname); fi != nil {
+				aux, _ = fi.Aux.(*Aux)
+			}
+			result = defGenericMethod(s, slip.Symbol(fname), args[1:], aux, depth)
+		} else {
+			result = defDirectMethod(s, ta, args[1:], depth)
+		}
 	default:
-		slip.PanicType("method designator for defmethod", ta, "symbol", "list")
+		slip.TypePanic(s, depth, "method designator for defmethod", ta, "symbol", "list")
 	}
 	return
 }
 
-func defDirectMethod(s *slip.Scope, ml, args slip.List) {
+func defDirectMethod(s *slip.Scope, ml, args slip.List, depth int) slip.Object {
 	var (
 		class  slip.Class
 		daemon string
@@ -99,20 +114,20 @@ func defDirectMethod(s *slip.Scope, ml, args slip.List) {
 	if sym, ok2 := ml[len(ml)-1].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
 		method = string(sym)
 	} else {
-		slip.PanicType("method for defmethod", ml[len(ml)-1], "keyword")
+		slip.TypePanic(s, depth, "method for defmethod", ml[len(ml)-1], "keyword")
 	}
 	if class == nil {
-		slip.PanicType("class for defmethod", ml[0], "name of class or flavor")
+		slip.TypePanic(s, depth, "class for defmethod", ml[0], "name of class or flavor")
 	}
-	DefClassMethod(class, method, daemon, slip.DefLambda(method, s, args, class.VarNames()...))
+	return DefClassMethod(class, method, daemon, slip.DefLambda(method, s, args, class.VarNames()...))
 }
 
 // DefClassMethod defines a direct method on a class.
-func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) {
+func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) slip.Object {
 	name = strings.ToLower(name)
 	hm, ok := obj.(HasMethods)
 	if !ok {
-		slip.PanicInvalidMethod(obj, slip.Symbol(daemon), slip.Symbol(name),
+		slip.InvalidMethodPanic(slip.NewScope(), 0, obj, slip.Symbol(daemon), slip.Symbol(name),
 			"Can not define a direct method, %s on class %s.", name, obj.Name())
 	}
 	mm := hm.Methods()
@@ -160,7 +175,7 @@ func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) {
 	case ":whopper", ":wrapper":
 		c.Wrap = caller
 	default:
-		slip.PanicInvalidMethod(obj, slip.Symbol(daemon), slip.Symbol(name), "")
+		slip.InvalidMethodPanic(slip.NewScope(), 0, obj, slip.Symbol(daemon), slip.Symbol(name), "")
 	}
 	if addMethod {
 		mm[name] = m
@@ -177,6 +192,7 @@ func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) {
 			}
 		}
 	}
+	return m
 }
 
 func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Combination) {
@@ -207,4 +223,205 @@ func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Comb
 		}
 	}
 	m.Combinations = append(append(m.Combinations[:pos], combo), m.Combinations[pos:]...)
+}
+
+// DefCallerMethod defines a method for a caller.
+func DefCallerMethod(qualifier string, caller slip.Caller, fd *slip.FuncDoc) *slip.Method {
+	var aux *Aux
+	if fi := slip.FindFunc(fd.Name); fi != nil {
+		if aux, _ = fi.Aux.(*Aux); aux == nil {
+			slip.ProgramPanic(slip.NewScope(), 0, "%s already names an ordinary function or macro.", fd.Name)
+		}
+	}
+	if aux == nil {
+		gfd := slip.FuncDoc{
+			Name:   fd.Name,
+			Kind:   slip.GenericFunctionSymbol,
+			Args:   make([]*slip.DocArg, len(fd.Args)),
+			Return: "object",
+		}
+		for i, da := range fd.Args {
+			gfd.Args[i] = &slip.DocArg{Name: da.Name}
+		}
+		aux = NewAux(&gfd)
+		_ = slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := genfun{Function: slip.Function{Name: fd.Name, Args: args}, aux: aux}
+				f.Self = &f
+				return &f
+			},
+			&gfd,
+			aux,
+		)
+	}
+	var key []byte
+	for i, da := range fd.Args {
+		if da.Name[0] == '&' {
+			break
+		}
+		if 0 < i {
+			key = append(key, '|')
+		}
+		key = append(key, da.Type...)
+	}
+	return addMethodCaller(aux, fd.Name, qualifier, string(key), caller, fd)
+}
+
+func defGenericMethod(s *slip.Scope, fname slip.Symbol, args slip.List, aux *Aux, depth int) slip.Object {
+	var qual string
+	if sym, ok := args[0].(slip.Symbol); ok {
+		switch strings.ToLower(string(sym)) {
+		case ":before", ":after", ":around":
+			qual = string(sym)
+		default:
+			slip.InvalidMethodPanic(s, depth, nil, sym, fname, "")
+		}
+		args = args[1:]
+	}
+	ll, ok := args[0].(slip.List)
+	if !ok {
+		slip.TypePanic(s, depth, "specialize-lambda-list", args[0], "list")
+	}
+	if aux == nil {
+		aux = newGfAux(s, fname, ll, depth)
+	}
+	// Set the function docs for the method mostly for a call to describe.
+	fd := slip.FuncDoc{
+		Name:   string(fname),
+		Kind:   slip.MethodSymbol,
+		Args:   make([]*slip.DocArg, len(ll)),
+		Return: "object",
+	}
+	for i, v := range ll {
+		switch tv := v.(type) {
+		case slip.Symbol:
+			fd.Args[i] = &slip.DocArg{Name: string(tv)}
+		case slip.List:
+			if 1 < len(tv) {
+				if sym, _ := tv[0].(slip.Symbol); 0 < len(sym) {
+					if i < aux.reqCnt {
+						if tsym, _ := tv[1].(slip.Symbol); 0 < len(tsym) {
+							fd.Args[i] = &slip.DocArg{Name: string(sym), Type: string(tsym)}
+						} else if tv[1] == slip.True {
+							fd.Args[i] = &slip.DocArg{Name: string(sym), Type: "t"}
+						} else {
+							slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
+						}
+					} else {
+						fd.Args[i] = &slip.DocArg{Name: string(sym), Default: tv[1]}
+					}
+					continue
+				}
+			}
+			slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
+		default:
+			slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
+		}
+	}
+	args = args[1:]
+	if 0 < len(args) {
+		if ss, ok := args[0].(slip.String); ok {
+			fd.Text = string(ss)
+			args = args[1:]
+		}
+	}
+	lam := &slip.Lambda{
+		Doc:   &fd,
+		Forms: args,
+	}
+	lam.Compile(s)
+	key := formMethKey(ll[:aux.reqCnt])
+
+	return addMethodCaller(aux, string(fname), qual, key, lam, &fd)
+}
+
+func addMethodCaller(aux *Aux, fname, qualifier, key string, caller slip.Caller, fd *slip.FuncDoc) *slip.Method {
+	aux.moo.Lock()
+	defer aux.moo.Unlock()
+	meth := aux.methods[key]
+	if meth == nil {
+		meth = &slip.Method{Name: fname, Doc: fd}
+		aux.methods[key] = meth
+	}
+	var c *slip.Combination
+	if 0 < len(meth.Combinations) {
+		c = meth.Combinations[0]
+	} else {
+		c = &slip.Combination{}
+		meth.Combinations = []*slip.Combination{c}
+	}
+	switch qualifier {
+	case "":
+		c.Primary = caller
+	case ":before":
+		c.Before = caller
+	case ":after":
+		c.After = caller
+	case ":around":
+		c.Wrap = caller
+	}
+	if 0 < len(aux.cache) {
+		aux.cache = map[string]*slip.Method{}
+	}
+	aux.updateDefaultCaller()
+
+	return meth
+}
+
+func newGfAux(s *slip.Scope, fname slip.Symbol, ll slip.List, depth int) *Aux {
+	fd := slip.FuncDoc{
+		Name:   string(fname),
+		Kind:   slip.GenericFunctionSymbol,
+		Args:   make([]*slip.DocArg, len(ll)),
+		Return: "object",
+	}
+	for i, v := range ll {
+		switch tv := v.(type) {
+		case slip.Symbol:
+			fd.Args[i] = &slip.DocArg{Name: string(tv)}
+		case slip.List:
+			if 1 < len(tv) {
+				if sym, _ := tv[0].(slip.Symbol); 0 < len(sym) {
+					fd.Args[i] = &slip.DocArg{Name: string(sym)}
+					continue
+				}
+			}
+			slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
+		default:
+			slip.TypePanic(s, depth, "specialize-lambda-list element", tv, "symbol", "list")
+		}
+	}
+	aux := NewAux(&fd)
+	_ = slip.CurrentPackage.Define(
+		func(args slip.List) slip.Object {
+			f := genfun{Function: slip.Function{Name: string(fname), Args: args}, aux: aux}
+			f.Self = &f
+			return &f
+		},
+		&fd,
+		aux,
+	)
+	return aux
+}
+
+func formMethKey(ll slip.List) string {
+	var key []byte
+	for i, v := range ll {
+		if 0 < i {
+			key = append(key, '|')
+		}
+		switch tv := v.(type) {
+		case slip.Symbol:
+			key = append(key, 't')
+		case slip.List:
+			if 1 < len(tv) {
+				if sym, ok := tv[1].(slip.Symbol); ok {
+					key = append(key, sym...)
+				} else {
+					key = append(key, 't')
+				}
+			}
+		}
+	}
+	return string(key)
 }

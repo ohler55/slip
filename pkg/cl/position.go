@@ -87,7 +87,7 @@ func (f *Position) Call(s *slip.Scope, args slip.List, depth int) (index slip.Ob
 	case slip.Octets:
 		index = f.inOctets(s, ta, depth, &sfv)
 	default:
-		slip.PanicType("sequence", ta, "sequence")
+		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
 	return
 }

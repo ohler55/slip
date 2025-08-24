@@ -3,6 +3,8 @@
 package cl
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
 )
 
@@ -72,8 +74,17 @@ Retry:
 		goto Retry
 	case slip.Placer:
 		callPlace(s, tx, value, depth)
+	case slip.Funky:
+		fargs := tx.GetArgs()
+		if fi := slip.FindFunc(fmt.Sprintf("(setf %s)", tx.GetName())); fi != nil && 0 < len(fargs) {
+			args := slip.List{fargs[0], value}
+			f := fi.Create(args)
+			f.Eval(s, depth)
+			return
+		}
+		slip.TypePanic(s, depth, "placer argument to setf", x, "symbol", "placer")
 	default:
-		slip.PanicType("placer argument to setf", x, "symbol", "placer")
+		slip.TypePanic(s, depth, "placer argument to setf", x, "symbol", "placer")
 	}
 }
 

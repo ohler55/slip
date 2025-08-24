@@ -45,7 +45,7 @@ type RegexMatch struct {
 
 // Call the function with the arguments provided.
 func (f *RegexMatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 
 	rx := regexp.MustCompile(slip.MustBeString(args[0], "regex"))
 	str := slip.MustBeString(args[1], "string")

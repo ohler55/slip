@@ -85,7 +85,7 @@ func (obj *EchoStream) IsOpen() bool {
 // Read from the current position in the buf. This is part of the io.Reader interface.
 func (obj *EchoStream) Read(p []byte) (n int, err error) {
 	if obj.input == nil {
-		slip.PanicStream(obj, "closed")
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	if n, err = obj.input.Read(p); err == nil {
 		_, err = obj.output.Write(p[:n])
@@ -97,7 +97,7 @@ func (obj *EchoStream) Read(p []byte) (n int, err error) {
 // is called.
 func (obj *EchoStream) Write(b []byte) (n int, err error) {
 	if obj.output == nil {
-		slip.PanicStream(obj, "closed")
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	return obj.output.Write(b)
 }

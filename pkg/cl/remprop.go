@@ -45,10 +45,10 @@ type Remprop struct {
 
 // Call the function with the arguments provided.
 func (f *Remprop) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol", args[0], "symbol")
+		slip.TypePanic(s, depth, "symbol", args[0], "symbol")
 	}
 	var plist slip.List
 	switch ta := s.Get(sym).(type) {
@@ -57,7 +57,7 @@ func (f *Remprop) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	case slip.List:
 		plist = ta
 	default:
-		slip.PanicType("plist", args[0], "property list")
+		slip.TypePanic(s, depth, "plist", args[0], "property list")
 	}
 	ind := args[1]
 	for i := 0; i < len(plist)-1; i += 2 {

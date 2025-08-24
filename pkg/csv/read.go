@@ -68,7 +68,7 @@ type Read struct {
 
 // Call the function with the arguments provided.
 func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 9)
+	slip.CheckArgCount(s, depth, f, args, 1, 9)
 	var ir io.Reader
 	switch ta := args[0].(type) {
 	case slip.String:
@@ -76,11 +76,11 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	case io.Reader:
 		ir = ta
 	default:
-		slip.PanicType("input", args[0], "string", "input-stream")
+		slip.TypePanic(s, depth, "input", args[0], "string", "input-stream")
 	}
 	cr := csv.NewReader(ir)
 	cr.ReuseRecord = true
-	_ = csvSetReaderOptions(cr, args[1:], false)
+	_ = csvSetReaderOptions(s, cr, args[1:], false, depth)
 	var list slip.List
 	for {
 		rec, err := cr.Read()
@@ -103,11 +103,11 @@ func (f *Read) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return list
 }
 
-func csvSetReaderOptions(cr *csv.Reader, args slip.List, bagOk bool) (bagIt bool) {
+func csvSetReaderOptions(s *slip.Scope, cr *csv.Reader, args slip.List, bagOk bool, depth int) (bagIt bool) {
 	for pos := 0; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(slip.Symbol)
 		if !ok {
-			slip.PanicType("keyword", args[pos], "keyword")
+			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			slip.NewPanic("%s missing an argument", sym)
@@ -117,13 +117,13 @@ func csvSetReaderOptions(cr *csv.Reader, args slip.List, bagOk bool) (bagIt bool
 			if c, ok := args[pos+1].(slip.Character); ok {
 				cr.Comma = rune(c)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "character")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "character")
 			}
 		case ":comment-char":
 			if c, ok := args[pos+1].(slip.Character); ok {
 				cr.Comment = rune(c)
 			} else {
-				slip.PanicType(string(sym), args[pos+1], "character")
+				slip.TypePanic(s, depth, string(sym), args[pos+1], "character")
 			}
 		case ":lazy-quotes":
 			cr.LazyQuotes = args[pos+1] != nil
@@ -133,13 +133,13 @@ func csvSetReaderOptions(cr *csv.Reader, args slip.List, bagOk bool) (bagIt bool
 			if bagOk {
 				bagIt = args[pos+1] != nil
 			} else {
-				slip.PanicType("keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim")
+				slip.TypePanic(s, depth, "keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim")
 			}
 		default:
 			if bagOk {
-				slip.PanicType("keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim", ":as-bag")
+				slip.TypePanic(s, depth, "keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim", ":as-bag")
 			}
-			slip.PanicType("keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim")
+			slip.TypePanic(s, depth, "keyword", sym, ":separator", ":comment-char", ":lazy-quotes", ":trim")
 		}
 	}
 	return

@@ -78,6 +78,11 @@ func (obj UUID) Bytes() []byte {
 	return b
 }
 
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj UUID) LoadForm() slip.Object {
+	return slip.List{slip.Symbol("make-uuid"), slip.String(obj.AppendIETF(nil))}
+}
+
 // UUIDParse parses a UUID formatted string and create a new UUID. The
 // function is tolerant of the format but will return a zero UUID if parsing
 // fails.

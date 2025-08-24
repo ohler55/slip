@@ -7,19 +7,19 @@ import "fmt"
 // ProgramErrorSymbol is the symbol with a value of "program-error".
 const ProgramErrorSymbol = Symbol("program-error")
 
-// NewProgramError creates a ProgramPanic (program-error) describing a program error.
-func NewProgramError(format string, args ...any) Object {
+// ProgramErrorNew creates a ProgramPanic (program-error) describing a program error.
+func ProgramErrorNew(s *Scope, depth int, format string, args ...any) Object {
 	c := FindClass("program-error")
 	obj := c.MakeInstance()
 
-	obj.Init(NewScope(), List{
+	obj.Init(s, List{
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
-	}, 0)
+	}, depth)
 	return obj
 }
 
-// PanicProgram raises a ProgramPanic (program-error) describing a program
+// ProgramPanic raises a ProgramError (program-error) describing a program
 // error.
-func PanicProgram(format string, args ...any) {
-	panic(NewProgramError(format, args...))
+func ProgramPanic(s *Scope, depth int, format string, args ...any) {
+	panic(ProgramErrorNew(s, depth, format, args...))
 }

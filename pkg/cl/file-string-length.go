@@ -47,11 +47,11 @@ type FileStringLength struct {
 
 // Call the function with the arguments provided.
 func (f *FileStringLength) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	switch args[0].(type) {
 	case nil, io.Writer:
 	default:
-		slip.PanicType("stream", args[0], "output-stream")
+		slip.TypePanic(s, depth, "stream", args[0], "output-stream")
 	}
 	var cnt int
 	switch ta := args[1].(type) {

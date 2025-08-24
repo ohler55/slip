@@ -61,10 +61,10 @@ type Walk struct {
 
 // Call the the function with the arguments provided.
 func (f *Walk) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 2, 4)
+	slip.CheckArgCount(s, depth, f, args, 2, 4)
 	obj, ok := args[0].(*flavors.Instance)
 	if !ok || obj.Type != flavor {
-		slip.PanicType("bag", args[0], "bag")
+		slip.TypePanic(s, depth, "bag", args[0], "bag")
 	}
 	walkBag(s, obj, args[1:], depth)
 
@@ -83,7 +83,7 @@ func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {
 		case Path:
 			path = jp.Expr(p)
 		default:
-			slip.PanicType("path", p, "string", "bag-path")
+			slip.TypePanic(s, depth, "path", p, "string", "bag-path")
 		}
 		asBag = 2 < len(args) && args[2] != nil
 	}
@@ -123,6 +123,6 @@ CallFunc:
 		fn = s.Eval(tf, d2)
 		goto CallFunc
 	default:
-		slip.PanicType("function", tf, "function")
+		slip.TypePanic(s, depth, "function", tf, "function")
 	}
 }

@@ -60,3 +60,8 @@ func (obj Values) Eval(s *Scope, depth int) Object {
 func (obj Values) First() Object {
 	return obj[0]
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj Values) LoadForm() Object {
+	return obj
+}

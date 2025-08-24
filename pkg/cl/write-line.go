@@ -54,11 +54,11 @@ type WriteLine struct {
 
 // Call the function with the arguments provided.
 func (f *WriteLine) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.ArgCountCheck(f, args, 1, 6)
-	str, ra, w, ss := parseWriteStringArgs(s, args)
+	slip.CheckArgCount(s, depth, f, args, 1, 6)
+	str, ra, w, ss := parseWriteStringArgs(s, args, depth)
 	ra = append(ra, '\n')
 	if _, err := w.Write([]byte(string(ra))); err != nil {
-		slip.PanicStream(ss, "write-string failed. %s", err)
+		slip.StreamPanic(s, depth, ss, "write-string failed. %s", err)
 	}
 	return str
 }

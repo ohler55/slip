@@ -40,12 +40,10 @@ type Set struct {
 
 // Call the function with the arguments provided.
 func (f *Set) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	if len(args) != 2 {
-		slip.PanicArgCount(f, 2, 2)
-	}
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	sym, ok := args[0].(slip.Symbol)
 	if !ok {
-		slip.PanicType("symbol argument to set", args[0], "symbol")
+		slip.TypePanic(s, depth, "symbol argument to set", args[0], "symbol")
 	}
 	s.Set(sym, args[1])
 

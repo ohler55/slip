@@ -56,7 +56,7 @@ func TestFlavor() *flavors.Flavor {
 type testRunCaller bool
 
 func (caller testRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	_, verbose, trace := getRunKeys(args)
+	_, verbose, trace := getRunKeys(s, args, depth)
 	if trace {
 		slip.Trace(slip.List{slip.True})
 	}

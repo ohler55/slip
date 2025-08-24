@@ -59,7 +59,6 @@ func TestLoadHome(t *testing.T) {
 	if strings.HasPrefix(wd, usr.HomeDir) {
 		wd = string(append([]byte{'~'}, strings.TrimPrefix(wd, usr.HomeDir)...))
 	}
-	fmt.Printf("*** %s %s\n", wd, usr.HomeDir)
 	(&sliptest.Function{
 		Source: fmt.Sprintf(`(let ((load-test-me-too 1))
                                (load "%s/testdata/load-me.lisp")

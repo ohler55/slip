@@ -132,7 +132,7 @@ func TestMakeArrayBadDims(t *testing.T) {
 
 func TestMakeArrayBadElementType(t *testing.T) {
 	(&sliptest.Function{
-		Source:    `(make-array '(1 2) :element-type t)`,
+		Source:    `(make-array '(1 2) :element-type 7)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }

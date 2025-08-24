@@ -42,14 +42,14 @@ type VectorPush struct {
 
 // Call the function with the arguments provided.
 func (f *VectorPush) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	slip.ArgCountCheck(f, args, 2, 2)
+	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	v, ok := args[1].(slip.FillPtrVector)
 	if !ok {
-		slip.PanicType("vector", args[1], "vector with a fill-pointer.")
+		slip.TypePanic(s, depth, "vector", args[1], "vector with a fill-pointer.")
 	}
 	fp := v.FillPointer()
 	if fp < 0 {
-		slip.PanicType("vector", v, "vector with a fill-pointer.")
+		slip.TypePanic(s, depth, "vector", v, "vector with a fill-pointer.")
 	}
 	if v.Length() <= fp {
 		return nil

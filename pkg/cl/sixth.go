@@ -39,10 +39,10 @@ type Sixth struct {
 
 // Call the function with the arguments provided.
 func (f *Sixth) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	return callN(f, args, 5)
+	return callN(s, f, args, 5, depth)
 }
 
 // Place a value in the sixth position of a list or cons.
 func (f *Sixth) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	placeN(f, args, 5, value)
+	placeN(s, f, args, 5, value)
 }

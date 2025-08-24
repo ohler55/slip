@@ -34,6 +34,7 @@ func TestOctets(t *testing.T) {
 	tt.Equal(t, slip.OctetSymbol, abc.ElementType())
 	tt.Equal(t, 1, abc.Rank())
 	tt.Equal(t, []int{3}, abc.Dimensions())
+	tt.Equal(t, "(coerce (list 97 98 99) (quote octets))", abc.LoadForm().String())
 
 	abc.SetElementType(slip.OctetSymbol)
 	tt.Equal(t, slip.OctetSymbol, abc.ElementType())

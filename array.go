@@ -362,3 +362,29 @@ func (obj *Array) SetElementType(ts Object) {
 func (obj *Array) Elements() []Object {
 	return obj.elements
 }
+
+// LoadForm returns a form that can be evaluated to create the object.
+func (obj *Array) LoadForm() Object {
+	dims := make(List, len(obj.dims))
+	for i, d := range obj.dims {
+		dims[i] = Fixnum(d)
+	}
+	var et Object
+	if obj.elementType == TrueSymbol {
+		et = True
+	} else {
+		et = List{quoteSymbol, obj.elementType}
+	}
+	form := List{
+		Symbol("make-array"),
+		List{quoteSymbol, dims},
+		Symbol(":element-type"),
+		et,
+		Symbol(":initial-contents"),
+		List{quoteSymbol, obj.AsList()},
+	}
+	if obj.adjustable {
+		form = append(form, Symbol(":adjustable"), True)
+	}
+	return form
+}

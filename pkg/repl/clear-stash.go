@@ -44,21 +44,21 @@ func (f *ClearStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 }
 
 func cleanStaskCall(f slip.Object, stash *Stash, s *slip.Scope, args slip.List) slip.Object {
-	slip.ArgCountCheck(f, args, 0, 4)
+	slip.CheckArgCount(s, 0, f, args, 0, 4)
 	start := 0
 	end := -1
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":start")); has {
 		if num, ok := v.(slip.Fixnum); ok {
 			start = int(num)
 		} else {
-			slip.PanicType(":start", v, "fixnum")
+			slip.TypePanic(s, 0, ":start", v, "fixnum")
 		}
 	}
 	if v, has := slip.GetArgsKeyValue(args, slip.Symbol(":end")); has {
 		if num, ok := v.(slip.Fixnum); ok {
 			end = int(num)
 		} else {
-			slip.PanicType(":end", v, "fixnum")
+			slip.TypePanic(s, 0, ":end", v, "fixnum")
 		}
 	}
 	stash.Clear(start, end)
