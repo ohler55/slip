@@ -11,15 +11,11 @@
   - PkgUse with clos and generics
 
 - generics branch
- - add scope and depth to all condition creations
-  - replace all in slip, later in plugins
-  + PanicType => TypePanic
-  + ArgCountCheck => CheckArgCount
-  + NewError => ErrorNew
+ - replace all in slip and plugins
+  - ArgCountCheck => CheckArgCount
   - NewPanic => ErrorPanic where there is a scope and depth
-  + CheckMethodArgCount => MethodArgCountCheck
-  + PanicMethodArgCount => MethodArgCountPanic (slip-flow)
-  + PanicStream => StreamPanic (slip-flow)
+  - CheckMethodArgCount => MethodArgCountCheck
+  - PanicMethodArgChoice => MethodArgChoicePanic
 
 ----------
 - for later

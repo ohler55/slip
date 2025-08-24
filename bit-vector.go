@@ -168,7 +168,7 @@ func (obj *BitVector) Set(value Object, indexes ...int) {
 			return
 		}
 	}
-	PanicType("set value", value, "0", "1")
+	TypePanic(NewScope(), 0, "set value", value, "0", "1")
 }
 
 // Grow expands the bit-vector by the length specified.
@@ -187,7 +187,7 @@ func (obj *BitVector) Push(values ...Object) (index int) {
 		case Fixnum(0), Bit(0), Fixnum(1), Bit(1):
 			// okay
 		default:
-			PanicType("array element", v, "0", "1")
+			TypePanic(NewScope(), 0, "array element", v, "0", "1")
 		}
 	}
 	loc := obj.Len
@@ -277,14 +277,14 @@ func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initConte
 		NewPanic("Expected 1 new dimensions for a bit-vector %s, but received %d.", obj, len(dims))
 	}
 	if eType != BitSymbol {
-		PanicType(":element-type", eType, "bit")
+		TypePanic(NewScope(), 0, ":element-type", eType, "bit")
 	}
 	var iv bool
 	if initVal != nil {
 		if num, ok := initVal.(Integer); ok && num.IsInt64() && (num.Int64() == 0 || num.Int64() == 1) {
 			iv = num.Int64() != 0
 		} else {
-			PanicType(":initial-element", initVal, "nil", "0", "1")
+			TypePanic(NewScope(), 0, ":initial-element", initVal, "nil", "0", "1")
 		}
 	}
 	if initContent != nil {
@@ -299,7 +299,7 @@ func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initConte
 					continue
 				}
 			}
-			PanicType(":initial-contents", v, "0", "1")
+			TypePanic(NewScope(), 0, ":initial-contents", v, "0", "1")
 		}
 	}
 	size := obj.Len
@@ -350,7 +350,7 @@ func (obj *BitVector) ElementType() Symbol {
 // SetElementType sets the element-type of the bit-vector.
 func (obj *BitVector) SetElementType(ts Object) {
 	if ts != BitSymbol {
-		PanicType("bit-vector element", ts, "bit")
+		TypePanic(NewScope(), 0, "bit-vector element", ts, "bit")
 	}
 }
 

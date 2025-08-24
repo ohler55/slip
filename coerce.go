@@ -18,30 +18,31 @@ const (
 // when possible as indicated in the table where the vertical axis is the
 // source object type and the horizontal axis the target type:
 //
-//               |list
-//               | |string
-//               | | |vector
-//               | | | |octets (bytes)
-//               | | | | |bit-vector
-//               | | | | | |character
-//               | | | | | | |integer
-//               | | | | | | | |fixnum
-//               | | | | | | | | |octet (byte)
-//               | | | | | | | | | |bignum
-//               | | | | | | | | | | |float
-//               | | | | | | | | | | | |short-float
-//               | | | | | | | | | | | | |single-float
-//               | | | | | | | | | | | | | |double-float
-//               | | | | | | | | | | | | | | |long-float
-//               | | | | | | | | | | | | | | | |rational
-//               | | | | | | | | | | | | | | | | |ratio
-//               | | | | | | | | | | | | | | | | | |complex
-//               | | | | | | | | | | | | | | | | | | |symbol
-//               | | | | | | | | | | | | | | | | | | | |assoc
-//               | | | | | | | | | | | | | | | | | | | | |hash-table
-//               | | | | | | | | | | | | | | | | | | | | | |function
-//               | | | | | | | | | | | | | | | | | | | | | | |signed-byte
-//               | | | | | | | | | | | | | | | | | | | | | | | |unsigned-byte
+//	|list
+//	| |string
+//	| | |vector
+//	| | | |octets (bytes)
+//	| | | | |bit-vector
+//	| | | | | |character
+//	| | | | | | |integer
+//	| | | | | | | |fixnum
+//	| | | | | | | | |octet (byte)
+//	| | | | | | | | | |bignum
+//	| | | | | | | | | | |float
+//	| | | | | | | | | | | |short-float
+//	| | | | | | | | | | | | |single-float
+//	| | | | | | | | | | | | | |double-float
+//	| | | | | | | | | | | | | | |long-float
+//	| | | | | | | | | | | | | | | |rational
+//	| | | | | | | | | | | | | | | | |ratio
+//	| | | | | | | | | | | | | | | | | |complex
+//	| | | | | | | | | | | | | | | | | | |symbol
+//	| | | | | | | | | | | | | | | | | | | |assoc
+//	| | | | | | | | | | | | | | | | | | | | |hash-table
+//	| | | | | | | | | | | | | | | | | | | | | |function
+//	| | | | | | | | | | | | | | | | | | | | | | |signed-byte
+//	| | | | | | | | | | | | | | | | | | | | | | | |unsigned-byte
+//
 // list          |x|x|x|x|x| | | | | | | | | | | | | | | | | | | |
 // string        |x|x|x|x| | | | | | | | | | | | | | |x| | |x| | |
 // vector        |x|x|x|x|x| | | | | | | | | | | | | | | | | | | |
@@ -221,7 +222,7 @@ func CoerceToVector(arg Object, mods ...Object) (result Object) {
 		if 1 < len(mods) && mods[1] != starSym {
 			num, ok := mods[1].(Fixnum)
 			if !ok || num < 0 {
-				PanicType("size", mods[1], "non-negative fixnum")
+				TypePanic(NewScope(), 0, "size", mods[1], "non-negative fixnum")
 			}
 			if int(num) != vl.Length() {
 				NewPanic("The length requested (%d) does not match the type restriction in %s", vl.Length(),
@@ -771,7 +772,7 @@ top:
 	if 0 < len(mods) {
 		num, ok := mods[0].(Fixnum)
 		if !ok || num < 0 {
-			PanicType("size", mods[0], "non-negative fixnum")
+			TypePanic(NewScope(), 0, "size", mods[0], "non-negative fixnum")
 		}
 		bv := result.(*BitVector)
 		if int(num) != int(bv.Len) {
@@ -811,7 +812,7 @@ func coerceToSignedByte(arg Object, mods ...Object) (result Object) {
 		if mods[0] != starSym {
 			num, ok := mods[0].(Fixnum)
 			if !ok || num < 0 {
-				PanicType("size", mods[0], "non-negative fixnum")
+				TypePanic(NewScope(), 0, "size", mods[0], "non-negative fixnum")
 			}
 			sb := result.(*SignedByte)
 			mx := int64(1) << int(num)
@@ -874,7 +875,7 @@ func coerceToUnsignedByte(arg Object, mods ...Object) (result Object) {
 		if mods[0] != starSym {
 			num, ok := mods[0].(Fixnum)
 			if !ok || num < 0 {
-				PanicType("size", mods[0], "non-negative fixnum")
+				TypePanic(NewScope(), 0, "size", mods[0], "non-negative fixnum")
 			}
 			ub := result.(*UnsignedByte)
 			if ub.IsInt64() && (1<<int64(num)) <= ub.Int64() {
@@ -1012,7 +1013,7 @@ func LessThan(v0, v1 Object) bool {
 			return true
 		}
 	default:
-		PanicType("numbers", v0, "real")
+		TypePanic(NewScope(), 0, "numbers", v0, "real")
 	}
 	return false
 }

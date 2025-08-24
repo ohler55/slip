@@ -472,7 +472,7 @@ func (p *Printer) ScopedUpdate(s *Scope) {
 				if base, ok := v.(Fixnum); ok && 2 <= base && base <= 36 {
 					p.Base = uint(base)
 				} else {
-					PanicType("*print-base*", v, "fixnum between 2 and 36 inclusive")
+					TypePanic(s, 0, "*print-base*", v, "fixnum between 2 and 36 inclusive")
 				}
 			},
 			"*print-case*": func(v Object) {
@@ -485,7 +485,7 @@ func (p *Printer) ScopedUpdate(s *Scope) {
 					case downcaseKey, upcaseKey, capitalizeKey:
 						p.Case = key
 					default:
-						PanicType("*print-case*", v, ":downcase", ":upcase", ":capitalize")
+						TypePanic(s, 0, "*print-case*", v, ":downcase", ":upcase", ":capitalize")
 					}
 				}
 			},
@@ -499,7 +499,7 @@ func (p *Printer) ScopedUpdate(s *Scope) {
 				if miserWidth, ok := v.(Fixnum); ok && 0 <= miserWidth {
 					p.MiserWidth = uint(miserWidth)
 				} else {
-					PanicType("*print-miser-width*", v, "non-negative fixnum")
+					TypePanic(s, 0, "*print-miser-width*", v, "non-negative fixnum")
 				}
 			},
 			"*print-pretty*":       func(v Object) { p.Pretty = v != nil },
@@ -520,7 +520,7 @@ func uintVarValue(v Object, varName string) (vv uint) {
 	} else if num, ok := v.(Fixnum); ok && 0 <= num {
 		vv = uint(num)
 	} else {
-		PanicType(varName, v, "non-negative fixnum")
+		TypePanic(NewScope(), 0, varName, v, "non-negative fixnum")
 	}
 	return
 }
@@ -681,7 +681,7 @@ func setPrintBase(value Object) {
 	if base, ok := value.(Fixnum); ok && 2 <= base && base <= 36 {
 		printer.Base = uint(base)
 	} else {
-		PanicType("*print-base*", value, "fixnum between 2 and 36 inclusive")
+		TypePanic(NewScope(), 0, "*print-base*", value, "fixnum between 2 and 36 inclusive")
 	}
 }
 
@@ -701,7 +701,7 @@ func setPrintCase(value Object) {
 		case downcaseKey, upcaseKey, capitalizeKey:
 			printer.Case = key
 		default:
-			PanicType("*print-case*", value, ":downcase", ":upcase", ":capitalize")
+			TypePanic(NewScope(), 0, "*print-case*", value, ":downcase", ":upcase", ":capitalize")
 		}
 	}
 }
@@ -773,7 +773,7 @@ func setPrintLength(value Object) {
 	} else if length, ok := value.(Fixnum); ok && 0 <= length {
 		printer.Length = uint(length)
 	} else {
-		PanicType("*print-length*", value, "non-negative fixnum")
+		TypePanic(NewScope(), 0, "*print-length*", value, "non-negative fixnum")
 	}
 }
 
@@ -792,7 +792,7 @@ func setPrintLevel(value Object) {
 	} else if level, ok := value.(Fixnum); ok && 0 <= level {
 		printer.Level = uint(level)
 	} else {
-		PanicType("*print-level*", value, "non-negative fixnum")
+		TypePanic(NewScope(), 0, "*print-level*", value, "non-negative fixnum")
 	}
 }
 
@@ -811,7 +811,7 @@ func setPrintLines(value Object) {
 	} else if lines, ok := value.(Fixnum); ok && 0 <= lines {
 		printer.Lines = uint(lines)
 	} else {
-		PanicType("*print-lines*", value, "non-negative fixnum")
+		TypePanic(NewScope(), 0, "*print-lines*", value, "non-negative fixnum")
 	}
 }
 
@@ -825,7 +825,7 @@ func setPrintMiserWidth(value Object) {
 	if miserWidth, ok := value.(Fixnum); ok && 0 <= miserWidth {
 		printer.MiserWidth = uint(miserWidth)
 	} else {
-		PanicType("*print-miser-width*", value, "non-negative fixnum")
+		TypePanic(NewScope(), 0, "*print-miser-width*", value, "non-negative fixnum")
 	}
 }
 
@@ -878,7 +878,7 @@ func setPrintPrec(value Object) {
 	if prec, ok := value.(Fixnum); ok {
 		printer.Prec = int(prec)
 	} else {
-		PanicType("*print-prec*", value, "fixnum greater that 0")
+		TypePanic(NewScope(), 0, "*print-prec*", value, "fixnum greater that 0")
 	}
 }
 
@@ -897,7 +897,7 @@ func setPrintRightMargin(value Object) {
 	} else if rightMargin, ok := value.(Fixnum); ok && 0 <= rightMargin {
 		printer.RightMargin = uint(rightMargin)
 	} else {
-		PanicType("*print-right-margin*", value, "non-negative fixnum")
+		TypePanic(NewScope(), 0, "*print-right-margin*", value, "non-negative fixnum")
 	}
 }
 

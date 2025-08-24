@@ -41,7 +41,7 @@ func NewArray(
 	for i := len(dimensions) - 1; 0 <= i; i-- {
 		a.sizes[i] = size
 		if ArrayMaxDimension < dimensions[i] {
-			PanicType("dimension", Fixnum(dimensions[i]),
+			TypePanic(NewScope(), 0, "dimension", Fixnum(dimensions[i]),
 				fmt.Sprintf("positive fixnum less than %d", ArrayMaxDimension))
 		}
 		size *= dimensions[i]
@@ -259,7 +259,7 @@ func (obj *Array) setDim(list List, di, ei int) int {
 		for i := 0; i < d; i++ {
 			sub, ok := list[i].(List)
 			if !ok {
-				PanicType("array initial-content", list[i], "list")
+				TypePanic(NewScope(), 0, "array initial-content", list[i], "list")
 			}
 			ei = obj.setDim(sub, d2, ei)
 		}
@@ -350,7 +350,7 @@ func (obj *Array) ElementType() Symbol {
 func (obj *Array) SetElementType(ts Object) {
 	sym, ok := ts.(Symbol)
 	if !ok {
-		PanicType("type-specification", ts, "symbol")
+		TypePanic(NewScope(), 0, "type-specification", ts, "symbol")
 	}
 	for _, v := range obj.elements {
 		_ = Coerce(v, sym)

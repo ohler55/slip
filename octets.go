@@ -105,7 +105,7 @@ func (obj Octets) ElementType() Symbol {
 // SetElementType sets the element-type of the array.
 func (obj Octets) SetElementType(ts Object) {
 	if ts != OctetSymbol {
-		PanicType("octets element", ts, "octet")
+		TypePanic(NewScope(), 0, "octets element", ts, "octet")
 	}
 }
 
@@ -120,14 +120,14 @@ func (obj Octets) Adjust(dims []int, eType Symbol, initVal Object, initContent L
 		NewPanic("Expected 1 new dimensions for a octets %s, but received %d.", obj, len(dims))
 	}
 	if eType != OctetSymbol {
-		PanicType(":element-type", eType, "octet")
+		TypePanic(NewScope(), 0, ":element-type", eType, "octet")
 	}
 	var iv byte
 	if initVal != nil {
 		if num, ok := initVal.(Integer); ok && num.IsInt64() && 0 <= num.Int64() && num.Int64() < 256 {
 			iv = byte(num.Int64())
 		} else {
-			PanicType(":initial-element", initVal, "nil", "integer between 0 and 256")
+			TypePanic(NewScope(), 0, ":initial-element", initVal, "nil", "integer between 0 and 256")
 		}
 	}
 	if initContent != nil {
@@ -137,7 +137,7 @@ func (obj Octets) Adjust(dims []int, eType Symbol, initVal Object, initContent L
 		}
 		for _, v := range initContent {
 			if vi, ok := v.(Integer); !ok || !vi.IsInt64() || vi.Int64() < 0 || 255 < vi.Int64() {
-				PanicType(":initial-contents", v, "nil", "list of integers between 0 and 256")
+				TypePanic(NewScope(), 0, ":initial-contents", v, "nil", "list of integers between 0 and 256")
 			}
 		}
 	}
@@ -182,7 +182,7 @@ func (obj Octets) Set(value Object, indexes ...int) {
 	if num, ok := value.(Integer); ok && num.IsInt64() && 0 <= num.Int64() && num.Int64() < 256 {
 		obj[pos] = byte(num.Int64())
 	} else {
-		PanicType("set value", value, "integer between 0 and 256")
+		TypePanic(NewScope(), 0, "set value", value, "integer between 0 and 256")
 	}
 }
 

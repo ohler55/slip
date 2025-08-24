@@ -44,16 +44,6 @@ func TypeErrorNew(s *Scope, depth int, use string, value Object, wants ...string
 	return obj
 }
 
-// PanicType raises a TypePanic (type-error) describing an
-// incorrect type being used.
-func PanicType(use string, value Object, wants ...string) {
-	// func PanicType(s *Scope, depth int, use string, value Object, wants ...string) {
-	// TBD temporary
-	s := NewScope()
-	depth := 0
-	panic(TypeErrorNew(s, depth, use, value, wants...))
-}
-
 // TypePanic raises a TypeError (type-error) describing an incorrect type
 // being used.
 func TypePanic(s *Scope, depth int, use string, value Object, wants ...string) {

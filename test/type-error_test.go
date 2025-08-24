@@ -61,5 +61,5 @@ func TestTypeErrorMake(t *testing.T) {
 }
 
 func TestTypeErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.PanicType("testing", slip.Fixnum(3), "symbol") })
+	tt.Panic(t, func() { slip.TypePanic(nil, 0, "testing", slip.Fixnum(3), "symbol") })
 }

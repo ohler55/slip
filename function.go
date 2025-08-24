@@ -415,7 +415,7 @@ func GetArgsKeyValue(args List, key Symbol) (value Object, has bool) {
 	for pos := 0; pos < len(args); pos += 2 {
 		sym, ok := args[pos].(Symbol)
 		if !ok {
-			PanicType("keyword", args[pos], "keyword")
+			TypePanic(NewScope(), 0, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
 			panic(fmt.Sprintf("%s missing an argument", sym))
@@ -443,7 +443,7 @@ func MustBeString(arg Object, name string) (str string) {
 			str = string(ta)
 		}
 	default:
-		PanicType(name, arg, "string", "symbol")
+		TypePanic(NewScope(), 0, name, arg, "string", "symbol")
 	}
 	return
 }
@@ -471,7 +471,7 @@ func PackageFromArg(arg Object) (pkg *Package) {
 	case *Package:
 		pkg = tv
 	default:
-		PanicType("package", tv, "symbol", "string", "package")
+		TypePanic(NewScope(), 0, "package", tv, "symbol", "string", "package")
 	}
 	return
 }

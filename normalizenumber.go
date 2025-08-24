@@ -50,7 +50,7 @@ top:
 				n1 = tt1
 			}
 		default:
-			PanicType("numbers", t1, "number")
+			TypePanic(NewScope(), 0, "numbers", t1, "number")
 		}
 	case Octet:
 		v0 = Fixnum(t0)
@@ -103,7 +103,7 @@ top:
 				n1 = (*LongFloat)(&z)
 			}
 		default:
-			PanicType("numbers", t1, "number")
+			TypePanic(NewScope(), 0, "numbers", t1, "number")
 		}
 	case DoubleFloat:
 		switch t1 := v1.(type) {
@@ -153,7 +153,7 @@ top:
 				n1 = (*LongFloat)(&z)
 			}
 		default:
-			PanicType("numbers", t1, "number")
+			TypePanic(NewScope(), 0, "numbers", t1, "number")
 		}
 	case *LongFloat:
 		n0 = t0
@@ -197,7 +197,7 @@ top:
 				n1 = (*LongFloat)(&z)
 			}
 		default:
-			PanicType("numbers", t1, "number")
+			TypePanic(NewScope(), 0, "numbers", t1, "number")
 		}
 	case *Bignum:
 		switch t1 := v1.(type) {
@@ -253,7 +253,7 @@ top:
 				n1 = tt1
 			}
 		default:
-			PanicType("numbers", t1, "number")
+			TypePanic(NewScope(), 0, "numbers", t1, "number")
 		}
 	case *Ratio:
 		switch t1 := v1.(type) {
@@ -321,7 +321,7 @@ top:
 				n0 = (*LongFloat)(&z0)
 			}
 		default:
-			PanicType("numbers", t1, "number")
+			TypePanic(NewScope(), 0, "numbers", t1, "number")
 		}
 	case Complex:
 		n0 = t0
@@ -363,7 +363,7 @@ top:
 				n1 = Complex(complex(f, 0.0))
 			}
 		default:
-			PanicType("numbers", t1, "number")
+			TypePanic(NewScope(), 0, "numbers", t1, "number")
 		}
 	case *SignedByte:
 		switch tt0 := t0.AsFixOrBig().(type) {
@@ -384,7 +384,7 @@ top:
 			goto top
 		}
 	default:
-		PanicType("numbers", t0, "number")
+		TypePanic(NewScope(), 0, "numbers", t0, "number")
 	}
 	return
 }

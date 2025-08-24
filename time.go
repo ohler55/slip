@@ -170,7 +170,7 @@ func describeTime(s *Scope, obj Time, args List, depth int) Object {
 	if 0 < len(args) {
 		var ok bool
 		if w, ok = args[0].(io.Writer); !ok {
-			PanicType("describe output-stream", args[0], "output-stream")
+			TypePanic(s, depth, "describe output-stream", args[0], "output-stream")
 		}
 	}
 	ansi := s.Get("*print-ansi*") != nil
@@ -187,7 +187,7 @@ func describeTime(s *Scope, obj Time, args List, depth int) Object {
 func addTime(s *Scope, obj Time, args List, depth int) Object {
 	dur, ok := args[0].(Real)
 	if !ok {
-		PanicType("duration", args[0], "real")
+		TypePanic(s, depth, "duration", args[0], "real")
 	}
 	return Time(time.Time(obj).Add(time.Duration(dur.RealValue() * float64(time.Second))))
 }
@@ -195,7 +195,7 @@ func addTime(s *Scope, obj Time, args List, depth int) Object {
 func elapsedTime(s *Scope, obj Time, args List, depth int) Object {
 	end, ok := args[0].(Time)
 	if !ok {
-		PanicType("end", args[0], "time")
+		TypePanic(s, depth, "end", args[0], "time")
 	}
 	return DoubleFloat(float64(time.Time(end).Sub(time.Time(obj))) / float64(time.Second))
 }
@@ -228,7 +228,7 @@ func unixTime(s *Scope, obj Time, args List, depth int) (result Object) {
 		case Symbol(":nanosecond"), Symbol(":nanoseconds"):
 			result = Fixnum(nano)
 		default:
-			PanicType("units", args[0], ":second", ":millisecond", ":micorsecond", ":nanosecond")
+			TypePanic(s, depth, "units", args[0], ":second", ":millisecond", ":micorsecond", ":nanosecond")
 		}
 	} else { // default to seconds
 		result = DoubleFloat(float64(nano) / float64(time.Second))

@@ -113,7 +113,7 @@ Aux:
 					ai++
 					continue
 				}
-				PanicType("keyword to function", a, "symbol")
+				TypePanic(NewScope(), 0, "keyword to function", a, "symbol")
 			}
 		}
 	}
@@ -215,7 +215,7 @@ func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *L
 	case nil:
 		// leave as empty list
 	default:
-		PanicType(fmt.Sprintf("lambda list of %s", defName), tl, "list")
+		TypePanic(s, 0, fmt.Sprintf("lambda list of %s", defName), tl, "list")
 	}
 	var (
 		docStr String
@@ -242,11 +242,11 @@ func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *L
 			lam.Doc.Args = append(lam.Doc.Args, &DocArg{Name: string(ta), Type: "object"})
 		case List: // variable name and default value
 			if len(ta) != 2 {
-				PanicType("lambda list element with default value", ta, "list of two elements")
+				TypePanic(s, 0, "lambda list element with default value", ta, "list of two elements")
 			}
 			var name Symbol
 			if name, ok = ta[0].(Symbol); !ok {
-				PanicType("lambda list element with default value", ta, "list with a symbol as the first element")
+				TypePanic(s, 0, "lambda list element with default value", ta, "list with a symbol as the first element")
 			}
 			if ta[1] == nil {
 				lam.Doc.Args = append(lam.Doc.Args, &DocArg{Name: string(name), Type: "object"})
@@ -255,7 +255,7 @@ func DefLambda(defName string, s *Scope, args List, extraVars ...string) (lam *L
 					&DocArg{Name: string(name), Type: string(ta[1].Hierarchy()[0]), Default: ta[1]})
 			}
 		default:
-			PanicType("lambda list element", ta, "symbol", "list")
+			TypePanic(s, 0, "lambda list element", ta, "symbol", "list")
 		}
 	}
 	lam.Compile(s, extraVars...)

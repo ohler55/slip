@@ -20,11 +20,6 @@ func StreamErrorNew(s *Scope, depth int, stream Stream, format string, args ...a
 	return obj
 }
 
-// PanicStream raises a StreamError (stream-error) describing a stream error.
-func PanicStream(stream Stream, format string, args ...any) {
-	panic(StreamErrorNew(NewScope(), 0, stream, format, args...))
-}
-
 // StreamPanic raises a StreamError (stream-error) describing a stream error.
 func StreamPanic(s *Scope, depth int, stream Stream, format string, args ...any) {
 	panic(StreamErrorNew(s, depth, stream, format, args...))

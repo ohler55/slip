@@ -771,7 +771,7 @@ func setCurrentPackage(value Object) {
 		CurrentPackage = pkg
 		callSetHooks(clPkg, "*package*")
 	} else {
-		PanicType("*package*", value, "package")
+		TypePanic(NewScope(), 0, "*package*", value, "package")
 	}
 }
 
@@ -784,7 +784,7 @@ func setWorkingDir(value Object) {
 		WorkingDir = string(dir)
 		callSetHooks(clPkg, "*default-pathname-defaults*")
 	} else {
-		PanicType("*default-pathname-defaults*", value, "string")
+		TypePanic(NewScope(), 0, "*default-pathname-defaults*", value, "string")
 	}
 }
 
@@ -797,7 +797,7 @@ func setErrorOutput(value Object) {
 		ErrorOutput = value
 		callSetHooks(clPkg, "*error-output*")
 	} else {
-		PanicType("*error-output*", value, "stream")
+		TypePanic(NewScope(), 0, "*error-output*", value, "stream")
 	}
 }
 
@@ -810,7 +810,7 @@ func setGensymCounter(value Object) {
 		gensymCounter = counter
 		callSetHooks(clPkg, "*gensym-counter*")
 	} else {
-		PanicType("*gensym-counter*", value, "fixnum")
+		TypePanic(NewScope(), 0, "*gensym-counter*", value, "fixnum")
 	}
 }
 
@@ -823,7 +823,7 @@ func setStandardOutput(value Object) {
 		StandardOutput = value
 		callSetHooks(clPkg, "*standard-output*")
 	} else {
-		PanicType("*standard-output*", value, "stream")
+		TypePanic(NewScope(), 0, "*standard-output*", value, "stream")
 	}
 }
 
@@ -836,7 +836,7 @@ func setTraceOutput(value Object) {
 		TraceOutput = value
 		callSetHooks(clPkg, "*trace-output*")
 	} else {
-		PanicType("*trace-output*", value, "stream")
+		TypePanic(NewScope(), 0, "*trace-output*", value, "stream")
 	}
 }
 
@@ -849,6 +849,6 @@ func setStandardInput(value Object) {
 		StandardInput = value
 		callSetHooks(clPkg, "*standard-input*")
 	} else {
-		PanicType("*standard-input*", value, "stream")
+		TypePanic(NewScope(), 0, "*standard-input*", value, "stream")
 	}
 }
