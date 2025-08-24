@@ -10,10 +10,8 @@
  - plugins
   - PkgUse with clos and generics
 
-- generics branch
- - replace all in slip and plugins
-  - NewPanic => ErrorPanic where there is a scope and depth (only in slip)
-  - PanicMethodArgChoice => MethodArgChoicePanic (slip and slip-flow)
+- replace in slip
+ - NewPanic => ErrorPanic where there is a scope and depth (only in slip)
 
 ----------
 - for later

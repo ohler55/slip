@@ -143,10 +143,10 @@ func (caller flavorCaller) FuncDocs() *slip.FuncDoc {
 
 type hasOpCaller struct{}
 
-func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller hasOpCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(slip.Instance)
 	if len(args) != 1 {
-		slip.PanicMethodArgChoice(self, ":has", len(args), "1")
+		slip.MethodArgChoicePanic(s, depth, self, ":has", len(args), "1")
 	}
 	if sym, ok := args[0].(slip.Symbol); ok && self.GetMethod(string(sym)) != nil {
 		return slip.True
@@ -267,7 +267,7 @@ type insideCaller struct{}
 func (caller insideCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) != 1 {
 		self := s.Get("self").(slip.Instance)
-		slip.PanicMethodArgChoice(self, ":eval-inside-yourself", len(args), "1")
+		slip.MethodArgChoicePanic(s, depth, self, ":eval-inside-yourself", len(args), "1")
 	}
 	return s.Eval(args[0], depth+1)
 }

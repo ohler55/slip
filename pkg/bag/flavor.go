@@ -92,7 +92,7 @@ func (caller initCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 			}
 		}
 	default:
-		slip.PanicMethodArgChoice(obj, ":init", len(args), "0 or 2")
+		slip.MethodArgChoicePanic(s, depth, obj, ":init", len(args), "0 or 2")
 	}
 	return nil
 }
@@ -132,7 +132,7 @@ func (caller setCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	case 2:
 		setBag(s, obj, args[0], args[1], depth)
 	default:
-		slip.PanicMethodArgChoice(obj, ":set", len(args), "1 or 2")
+		slip.MethodArgChoicePanic(s, depth, obj, ":set", len(args), "1 or 2")
 	}
 	return obj
 }
@@ -170,7 +170,7 @@ func (caller parseCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 	case 2:
 		parseBag(s, obj, args[0], args[1], depth)
 	default:
-		slip.PanicMethodArgChoice(obj, ":parse", len(args), "1 or 2")
+		slip.MethodArgChoicePanic(s, depth, obj, ":parse", len(args), "1 or 2")
 	}
 	return obj
 }
@@ -208,7 +208,7 @@ func (caller readCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	case 2:
 		readBag(s, obj, args[0], args[1], depth)
 	default:
-		slip.PanicMethodArgChoice(obj, ":read", len(args), "1 or 2")
+		slip.MethodArgChoicePanic(s, depth, obj, ":read", len(args), "1 or 2")
 	}
 	return obj
 }
@@ -283,7 +283,7 @@ func (caller hasCaller) Call(s *slip.Scope, args slip.List, depth int) (value sl
 	if len(args) == 1 {
 		value = hasBag(s, obj, args[0], depth)
 	} else {
-		slip.PanicMethodArgChoice(obj, ":has", len(args), "1")
+		slip.MethodArgChoicePanic(s, depth, obj, ":has", len(args), "1")
 	}
 	return
 }
@@ -311,7 +311,7 @@ func (caller removeCaller) Call(s *slip.Scope, args slip.List, depth int) (value
 	if len(args) == 1 {
 		removeBag(s, obj, args[0], depth)
 	} else {
-		slip.PanicMethodArgChoice(obj, ":remove", len(args), "1")
+		slip.MethodArgChoicePanic(s, depth, obj, ":remove", len(args), "1")
 	}
 	return obj
 }
@@ -373,10 +373,10 @@ instance otherwise it will be a lisp construct.`,
 
 type nativeCaller struct{}
 
-func (caller nativeCaller) Call(s *slip.Scope, args slip.List, _ int) (value slip.Object) {
+func (caller nativeCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":native", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":native", len(args), "0")
 	}
 	return slip.SimpleObject(obj.Any)
 }

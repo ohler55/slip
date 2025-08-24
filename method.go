@@ -203,14 +203,6 @@ func MethodArgCountPanic(s *Scope, depth int, inst Instance, method string, cnt,
 		inst.Class().Name(), method, mx, cnt))
 }
 
-// PanicMethodArgChoice raises a panic describing the wrong number of
-// arguments to a method when the expected argument are a choice of a set of
-// values.
-func PanicMethodArgChoice(inst Instance, method string, cnt int, choices string) {
-	ErrorPanic(NewScope(), 0, "Wrong number of arguments to the %s %s method. Either %s expected but got %d.",
-		inst.Class().Name(), method, choices, cnt)
-}
-
 // MethodArgChoicePanic raises a panic describing an invalid choice when the
 // expected argument are a choice of a set of values.
 func MethodArgChoicePanic(s *Scope, depth int, inst Instance, method string, cnt int, choices string) {

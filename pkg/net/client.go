@@ -116,7 +116,7 @@ func (caller clientBodylessCaller) Call(s *slip.Scope, args slip.List, depth int
 	case 1:
 		header = headerFromAssoc(s, args[0], depth)
 	default:
-		slip.PanicMethodArgChoice(obj, ":"+string(caller), len(args), "0 or 1")
+		slip.MethodArgChoicePanic(s, depth, obj, ":"+string(caller), len(args), "0 or 1")
 	}
 	client, u := ensureClient(obj)
 	req := http.Request{
@@ -217,7 +217,7 @@ func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 		}
 		header = headerFromAssoc(s, args[2], depth)
 	default:
-		slip.PanicMethodArgChoice(obj, ":"+string(caller), len(args), "1, 2, or 3")
+		slip.MethodArgChoicePanic(s, depth, obj, ":"+string(caller), len(args), "1, 2, or 3")
 	}
 	client, u := ensureClient(obj)
 	req := http.Request{

@@ -41,10 +41,10 @@ the data associated with the HTTP reply.`),
 
 type respStatusCaller struct{}
 
-func (caller respStatusCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respStatusCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":status", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":status", len(args), "0")
 	}
 	return slip.Fixnum((obj.Any.(*http.Response)).StatusCode)
 }
@@ -59,10 +59,10 @@ func (caller respStatusCaller) FuncDocs() *slip.FuncDoc {
 
 type respProtocolCaller struct{}
 
-func (caller respProtocolCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respProtocolCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":protocol", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":protocol", len(args), "0")
 	}
 	return slip.String((obj.Any.(*http.Response)).Proto)
 }
@@ -77,10 +77,10 @@ func (caller respProtocolCaller) FuncDocs() *slip.FuncDoc {
 
 type respContentCaller struct{}
 
-func (caller respContentCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respContentCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":content", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":content", len(args), "0")
 	}
 	content, err := io.ReadAll(obj.Any.(*http.Response).Body)
 	_ = obj.Any.(*http.Response).Body.Close()
@@ -100,10 +100,10 @@ func (caller respContentCaller) FuncDocs() *slip.FuncDoc {
 
 type respContentLengthCaller struct{}
 
-func (caller respContentLengthCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respContentLengthCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":content-length", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":content-length", len(args), "0")
 	}
 	return slip.Fixnum((obj.Any.(*http.Response)).ContentLength)
 }
@@ -118,10 +118,10 @@ func (caller respContentLengthCaller) FuncDocs() *slip.FuncDoc {
 
 type respHeaderCaller struct{}
 
-func (caller respHeaderCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respHeaderCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":header", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":header", len(args), "0")
 	}
 	var header slip.List
 	for k, v := range (obj.Any.(*http.Response)).Header {
@@ -148,7 +148,7 @@ type respHeaderGetCaller struct{}
 func (caller respHeaderGetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		slip.PanicMethodArgChoice(obj, ":header-get", len(args), "1")
+		slip.MethodArgChoicePanic(s, depth, obj, ":header-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
@@ -181,7 +181,7 @@ type respTrailerCaller struct{}
 func (caller respTrailerCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":trailer", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":trailer", len(args), "0")
 	}
 	var trailer slip.List
 	for k, v := range (obj.Any.(*http.Response)).Trailer {
@@ -208,7 +208,7 @@ type respTrailerGetCaller struct{}
 func (caller respTrailerGetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 1 {
-		slip.PanicMethodArgChoice(obj, ":trailer-get", len(args), "1")
+		slip.MethodArgChoicePanic(s, depth, obj, ":trailer-get", len(args), "1")
 	}
 	key, ok := args[0].(slip.String)
 	if !ok {
@@ -238,10 +238,10 @@ func (caller respTrailerGetCaller) FuncDocs() *slip.FuncDoc {
 
 type respBodyCaller struct{}
 
-func (caller respBodyCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respBodyCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":body", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":body", len(args), "0")
 	}
 	return &slip.InputStream{Reader: (obj.Any.(*http.Response)).Body}
 }
@@ -256,10 +256,10 @@ func (caller respBodyCaller) FuncDocs() *slip.FuncDoc {
 
 type respCloseCaller struct{}
 
-func (caller respCloseCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller respCloseCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 0 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":close", len(args), "0")
+		slip.MethodArgChoicePanic(s, depth, obj, ":close", len(args), "0")
 	}
 	_ = (obj.Any.(*http.Response)).Body.Close()
 	return nil

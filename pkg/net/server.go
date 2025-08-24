@@ -121,7 +121,7 @@ type serverStartCaller struct{}
 func (caller serverStartCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 1 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":start", len(args), "0 or 1")
+		slip.MethodArgChoicePanic(s, depth, obj, ":start", len(args), "0 or 1")
 	}
 	// TBD if server.TLSConfig is not nil then ListenAndServeTLS()
 
@@ -168,10 +168,10 @@ func (caller serverStartCaller) FuncDocs() *slip.FuncDoc {
 
 type serverShutdownCaller struct{}
 
-func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller serverShutdownCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if 1 < len(args) {
-		slip.PanicMethodArgChoice(obj, ":shutdown", len(args), "0 or 1")
+		slip.MethodArgChoicePanic(s, depth, obj, ":shutdown", len(args), "0 or 1")
 	}
 	server := obj.Any.(*http.Server)
 	if 0 < len(args) && args[0] != nil {
@@ -204,7 +204,7 @@ type serverAddHandlerCaller struct{}
 func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
 	if len(args) != 2 {
-		slip.PanicMethodArgChoice(obj, ":add-handler", len(args), "2")
+		slip.MethodArgChoicePanic(s, depth, obj, ":add-handler", len(args), "2")
 	}
 	path, ok := args[0].(slip.String)
 	if !ok {
