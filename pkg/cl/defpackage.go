@@ -58,13 +58,13 @@ func (f *Defpackage) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	a0 := slip.EvalArg(s, args, 0, depth)
 	name := slip.MustBeString(a0, "name")
 	if slip.FindPackage(name) != nil {
-		slip.NewPanic("Package %s already exists.", name)
+		slip.ErrorPanic(s, depth, "Package %s already exists.", name)
 	}
 	rest := args[1:]
 	nicknames := readDefOption(s, ":nicknames", rest, depth)
 	for _, nn := range nicknames {
 		if slip.FindPackage(nn) != nil {
-			slip.NewPanic("Package %s already exists.", nn)
+			slip.ErrorPanic(s, depth, "Package %s already exists.", nn)
 		}
 	}
 	var use []*slip.Package

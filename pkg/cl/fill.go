@@ -72,7 +72,7 @@ func (f *Fill) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	result = args[0]
 	switch seq := args[0].(type) {
 	case slip.List:
-		end = checkStartEnd(start, end, len(seq))
+		end = checkStartEnd(s, start, end, len(seq), depth)
 		for i := start; i < end; i++ {
 			seq[i] = item
 		}
@@ -82,13 +82,13 @@ func (f *Fill) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			slip.TypePanic(s, depth, "item", item, "character")
 		}
 		ra := []rune(seq)
-		end = checkStartEnd(start, end, len(ra))
+		end = checkStartEnd(s, start, end, len(ra), depth)
 		for i := start; i < end; i++ {
 			ra[i] = rune(c)
 		}
 		result = slip.String(ra)
 	case slip.VectorLike:
-		end = checkStartEnd(start, end, seq.Length())
+		end = checkStartEnd(s, start, end, seq.Length(), depth)
 		for i := start; i < end; i++ {
 			seq.Set(item, i)
 		}
@@ -98,17 +98,17 @@ func (f *Fill) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	return
 }
 
-func checkStartEnd(start, end, size int) int {
+func checkStartEnd(s *slip.Scope, start, end, size, depth int) int {
 	if size <= start {
-		slip.NewPanic(":start %d is greater than the size of %d", start, size)
+		slip.ErrorPanic(s, depth, ":start %d is greater than the size of %d", start, size)
 	}
 	if end == math.MaxInt {
 		end = size
 	} else if size <= end {
-		slip.NewPanic(":end %d is greater than the size of %d", end, size)
+		slip.ErrorPanic(s, depth, ":end %d is greater than the size of %d", end, size)
 	}
 	if end < start {
-		slip.NewPanic(":end of %d is less than :start of %d", end, start)
+		slip.ErrorPanic(s, depth, ":end of %d is less than :start of %d", end, start)
 	}
 	return end
 }

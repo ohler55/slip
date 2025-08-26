@@ -97,7 +97,7 @@ func (f *Defclass) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	if c := slip.FindClass(string(name)); c != nil {
 		if sc, ok := c.(*StandardClass); !ok || sc.Final {
-			slip.NewPanic("Can not redefine class %s, a %s.", name, c.Metaclass())
+			slip.ErrorPanic(s, depth, "Can not redefine class %s, a %s.", name, c.Metaclass())
 		}
 	}
 	return DefStandardClass(s, string(name), supers, slotSpecs, args[3:], depth)
@@ -181,7 +181,7 @@ func DefStandardClass(s *slip.Scope, name string, supers, slotSpecs, classOption
 
 func fillMapFromKeyArgs(s *slip.Scope, args slip.List, m map[string]slip.Object, depth int) {
 	if len(args)%2 != 0 {
-		slip.NewPanic("Odd number of &key arguments.")
+		slip.ErrorPanic(s, depth, "Odd number of &key arguments.")
 	}
 	for i := 0; i < len(args); i++ {
 		sym, ok := args[i].(slip.Symbol)
@@ -207,9 +207,9 @@ func (g getter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 type setter string
 
 // Call returns the value of a variable in the instance.
-func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+func (s setter) Call(scope *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) < 1 {
-		slip.NewPanic("no value given for set-%s.", s)
+		slip.ErrorPanic(scope, depth, "no value given for set-%s.", s)
 	}
 	self := scope.Get("self").(slip.Instance)
 	_ = self.SetSlotValue(slip.Symbol(s), args[0])

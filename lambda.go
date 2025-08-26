@@ -113,12 +113,12 @@ Aux:
 					ai++
 					continue
 				}
-				TypePanic(NewScope(), 0, "keyword to function", a, "symbol")
+				TypePanic(s, depth, "keyword to function", a, "symbol")
 			}
 		}
 	}
 	if ai < len(args) {
-		NewPanic("Too many arguments to %s. There are %d extra.", lam, ai+1)
+		ErrorPanic(s, depth, "Too many arguments to %s. There are %d extra.", lam, ai+1)
 	}
 	if 0 < len(rest) {
 		ss.Let(restSym, rest)

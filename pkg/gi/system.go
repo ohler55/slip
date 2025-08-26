@@ -129,13 +129,13 @@ func (caller systemFetchCaller) Call(s *slip.Scope, args slip.List, depth int) s
 			case slip.Symbol(":file"):
 				fetchFiles(s, self, dir, ll[2:], depth)
 			case slip.Symbol(":git"):
-				fetchGit(self, dir, ll[2:])
+				fetchGit(s, self, dir, ll[2:], depth)
 			case slip.Symbol(":require"):
 				fetchRequire(s, self, dir, ll[2:], depth)
 			case slip.Symbol(":call"):
 				fetchCall(s, self, dir, ll[2:], depth)
 			default:
-				slip.NewPanic("%s is not a valid source type.", ll[1])
+				slip.ErrorPanic(s, depth, "%s is not a valid source type.", ll[1])
 			}
 		}
 	}
@@ -174,7 +174,7 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 		case slip.Symbol(":call"):
 			loadCall(s, self, dir, ll[2:], depth)
 		default:
-			slip.NewPanic("%s is not a valid source type.", ll[1])
+			slip.ErrorPanic(s, depth, "%s is not a valid source type.", ll[1])
 		}
 	}
 	gc := self.Get("components")
@@ -193,7 +193,7 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 			if len(matches) == 0 {
 				matches, _ = filepath.Glob(string(path) + ".lisp")
 				if len(matches) == 0 {
-					slip.NewPanic("%s not found.", path)
+					slip.ErrorPanic(s, depth, "%s not found.", path)
 				}
 			}
 			for _, m := range matches {
@@ -298,11 +298,11 @@ func fetchFiles(s *slip.Scope, self *flavors.Instance, dir string, args slip.Lis
 				src = filepath.Join(root, path)
 				dest = filepath.Join(dir, path)
 				if _, err = os.Stat(src); err != nil {
-					slip.NewPanic("%s not found.", src)
+					slip.ErrorPanic(s, depth, "%s not found.", src)
 				}
 			}
 			if err := exec.Command("cp", "-r", src, dest).Run(); err != nil {
-				slip.NewPanic("Failed to copy %s to %s. %s\n", src, dest, err)
+				slip.ErrorPanic(s, depth, "Failed to copy %s to %s. %s\n", src, dest, err)
 			}
 		}
 		return
@@ -310,12 +310,12 @@ func fetchFiles(s *slip.Scope, self *flavors.Instance, dir string, args slip.Lis
 	matches, _ := filepath.Glob(root + "/*")
 	for _, m := range matches {
 		if err := exec.Command("cp", "-r", m, dir).Run(); err != nil {
-			slip.NewPanic("Failed to copy %s to %s. %s\n", m, dir, err)
+			slip.ErrorPanic(s, depth, "Failed to copy %s to %s. %s\n", m, dir, err)
 		}
 	}
 }
 
-func fetchGit(self *flavors.Instance, dir string, args slip.List) {
+func fetchGit(s *slip.Scope, self *flavors.Instance, dir string, args slip.List, depth int) {
 	gu := slip.MustBeString(args[0], "url")
 	rest := args[1:]
 	scratch := ".scratch"
@@ -328,48 +328,48 @@ func fetchGit(self *flavors.Instance, dir string, args slip.List) {
 	}
 	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":tag")); has {
 		tag := slip.MustBeString(val, "tag")
-		fetchGitTag(self, dir, gu, tag, subdir, scratch)
+		fetchGitTag(s, self, dir, gu, tag, subdir, scratch, depth)
 		return
 	}
 	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":branch")); has {
 		branch := slip.MustBeString(val, "branch")
-		fetchGitBranch(self, dir, gu, branch, subdir, scratch)
+		fetchGitBranch(s, self, dir, gu, branch, subdir, scratch, depth)
 		return
 	}
 	if val, has := slip.GetArgsKeyValue(rest, slip.Symbol(":commit")); has {
 		commit := slip.MustBeString(val, "commit")
-		fetchGitCommit(self, dir, gu, commit, subdir, scratch)
+		fetchGitCommit(s, self, dir, gu, commit, subdir, scratch, depth)
 		return
 	}
-	slip.NewPanic("A git source must specify a tag, branch, or commit.")
+	slip.ErrorPanic(s, depth, "A git source must specify a tag, branch, or commit.")
 }
 
-func fetchGitTag(self *flavors.Instance, dir, gitURL, tag, subdir, scratch string) {
+func fetchGitTag(s *slip.Scope, self *flavors.Instance, dir, gitURL, tag, subdir, scratch string, depth int) {
 	_ = os.RemoveAll(scratch)
 	if err := exec.Command("git", "clone", "--depth=1", gitURL, scratch).Run(); err != nil {
-		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
+		slip.ErrorPanic(s, depth, "Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
 	}
 	if err := exec.Command("git", "-C", scratch, "checkout", "tags/"+tag).Run(); err != nil {
-		slip.NewPanic("Failed to git checkout tag %s. %s\n", tag, err)
+		slip.ErrorPanic(s, depth, "Failed to git checkout tag %s. %s\n", tag, err)
 	}
 	mvGitScratchToCache(dir, scratch, subdir)
 }
 
-func fetchGitBranch(self *flavors.Instance, dir, gitURL, branch, subdir, scratch string) {
+func fetchGitBranch(s *slip.Scope, self *flavors.Instance, dir, gitURL, branch, subdir, scratch string, depth int) {
 	_ = os.RemoveAll(scratch)
 	if err := exec.Command("git", "clone", "-b", branch, "--depth=1", gitURL, scratch).Run(); err != nil {
-		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
+		slip.ErrorPanic(s, depth, "Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
 	}
 	mvGitScratchToCache(dir, scratch, subdir)
 }
 
-func fetchGitCommit(self *flavors.Instance, dir, gitURL, commit, subdir, scratch string) {
+func fetchGitCommit(s *slip.Scope, self *flavors.Instance, dir, gitURL, commit, subdir, scratch string, depth int) {
 	_ = os.RemoveAll(scratch)
 	if err := exec.Command("git", "clone", gitURL, scratch).Run(); err != nil {
-		slip.NewPanic("Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
+		slip.ErrorPanic(s, depth, "Failed to git clone %s to %s. %s\n", gitURL, scratch, err)
 	}
 	if err := exec.Command("git", "-C", scratch, "checkout", commit).Run(); err != nil {
-		slip.NewPanic("Failed to git checkout commit %s. %s\n", commit, err)
+		slip.ErrorPanic(s, depth, "Failed to git checkout commit %s. %s\n", commit, err)
 	}
 	mvGitScratchToCache(dir, scratch, subdir)
 }
@@ -378,7 +378,7 @@ func fetchRequire(s *slip.Scope, self *flavors.Instance, dir string, args slip.L
 	slip.CheckArgCount(s, depth, self, args, 2, 2)
 	path := filepath.Join(slip.MustBeString(args[1], "load-path"), slip.MustBeString(args[0], "package-name"))
 	if err := exec.Command("cp", path, dir).Run(); err != nil {
-		slip.NewPanic("Failed to copy %s to %s. %s\n", path, dir, err)
+		slip.ErrorPanic(s, depth, "Failed to copy %s to %s. %s\n", path, dir, err)
 	}
 }
 
@@ -414,7 +414,7 @@ func loadFiles(s *slip.Scope, self *flavors.Instance, dir string, args slip.List
 				path += ".lisp"
 				src = filepath.Join(dir, path)
 				if _, err = os.Stat(src); err != nil {
-					slip.NewPanic("%s not found.", src)
+					slip.ErrorPanic(s, depth, "%s not found.", src)
 				}
 			} else if fi.IsDir() {
 				loadDir(s, self, src)

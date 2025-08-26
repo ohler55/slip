@@ -57,7 +57,7 @@ func (f *RenamePackage) Call(s *slip.Scope, args slip.List, depth int) (result s
 	}
 	name := slip.MustBeString(args[1], "new-name")
 	if slip.FindPackage(name) != nil {
-		slip.NewPanic("Package %s already exists.", name)
+		slip.ErrorPanic(s, depth, "Package %s already exists.", name)
 	}
 	if 2 < len(args) {
 		var nicknames []string
@@ -68,7 +68,7 @@ func (f *RenamePackage) Call(s *slip.Scope, args slip.List, depth int) (result s
 		for _, v := range list {
 			nn := slip.MustBeString(v, "nickname")
 			if slip.FindPackage(nn) != nil {
-				slip.NewPanic("Package %s already exists.", nn)
+				slip.ErrorPanic(s, depth, "Package %s already exists.", nn)
 			}
 			nicknames = append(nicknames, nn)
 		}

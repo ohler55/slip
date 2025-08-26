@@ -52,7 +52,7 @@ func defClient() *flavors.Flavor {
 	return clientFlavor
 }
 
-func ensureClient(obj *flavors.Instance) (client *http.Client, u string) {
+func ensureClient(s *slip.Scope, obj *flavors.Instance, depth int) (client *http.Client, u string) {
 	timeout := defaultClientTimeout
 	if num, ok := obj.Get("timeout").(slip.Fixnum); ok && 0 < num {
 		timeout = time.Duration(num)
@@ -65,7 +65,7 @@ func ensureClient(obj *flavors.Instance) (client *http.Client, u string) {
 		client.Timeout = timeout
 	}
 	if ss, ok := obj.Get(slip.Symbol("url")).(slip.String); !ok || len(ss) == 0 {
-		slip.NewPanic("url is not set or is not a string")
+		slip.ErrorPanic(s, depth, "url is not set or is not a string")
 	} else {
 		u = string(ss)
 	}
@@ -118,7 +118,7 @@ func (caller clientBodylessCaller) Call(s *slip.Scope, args slip.List, depth int
 	default:
 		slip.MethodArgChoicePanic(s, depth, obj, ":"+string(caller), len(args), "0 or 1")
 	}
-	client, u := ensureClient(obj)
+	client, u := ensureClient(s, obj, depth)
 	req := http.Request{
 		Method: string(caller),
 		Header: header,
@@ -131,7 +131,7 @@ func (caller clientBodylessCaller) Call(s *slip.Scope, args slip.List, depth int
 		panic(err)
 	}
 	if resp, err = client.Do(&req); err != nil {
-		slip.NewPanic("%s with URL %s failed. %s", caller, u, err)
+		slip.ErrorPanic(s, depth, "%s with URL %s failed. %s", caller, u, err)
 	}
 	return MakeResponse(resp)
 }
@@ -219,7 +219,7 @@ func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	default:
 		slip.MethodArgChoicePanic(s, depth, obj, ":"+string(caller), len(args), "1, 2, or 3")
 	}
-	client, u := ensureClient(obj)
+	client, u := ensureClient(s, obj, depth)
 	req := http.Request{
 		Method: string(caller),
 		Header: header,
@@ -229,7 +229,7 @@ func (caller clientBodyCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 		panic(err)
 	}
 	if resp, err = client.Do(&req); err != nil {
-		slip.NewPanic("%s with URL %s failed. %s", caller, u, err)
+		slip.ErrorPanic(s, depth, "%s with URL %s failed. %s", caller, u, err)
 	}
 	return MakeResponse(resp)
 }

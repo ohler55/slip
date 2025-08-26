@@ -59,11 +59,11 @@ func (f *BitNot) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 			}
 			dr := ra.Dimensions()
 			if len(d1) != len(dr) {
-				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+				slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, ra)
 			}
 			for i, d := range d1 {
 				if dr[i] != d {
-					slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+					slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, ra)
 				}
 			}
 		} else {
@@ -85,7 +85,7 @@ func (f *BitNot) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 				slip.TypePanic(s, depth, "opt-arg", args[1], "bit-array")
 			}
 			if t1.Len != ra.Len {
-				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+				slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, ra)
 			}
 		} else {
 			ra = &slip.BitVector{

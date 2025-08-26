@@ -33,7 +33,7 @@ func (f *NextMethodP) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 		loc, _ = s.Get("~whopper-location~").(*slip.WhopLoc)
 	}
 	if loc == nil {
-		slip.NewPanic("%s called outside an around method qualifier.", f.Name)
+		slip.ErrorPanic(s, depth, "%s called outside an around method qualifier.", f.Name)
 	}
 	if loc.HasNext() {
 		return slip.True

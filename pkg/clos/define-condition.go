@@ -94,7 +94,7 @@ func (f *DefineCondition) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 	}
 	if c := slip.FindClass(string(name)); c != nil {
 		if cc, ok := c.(*ConditionClass); !ok || cc.Final {
-			slip.NewPanic("Can not redefine class %s.", name)
+			slip.ErrorPanic(s, depth, "Can not redefine class %s.", name)
 		}
 	}
 	return DefConditionClass(s, string(name), supers, slotSpecs, args[3:], depth)

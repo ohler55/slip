@@ -71,7 +71,7 @@ func (f *Case) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 			same = equal(key, k)
 			if !same && (k == slip.True || equal(k, slip.Symbol("otherwise"))) {
 				if i != len(args)-2 {
-					slip.NewPanic("bad case clause, not final %s", clause)
+					slip.ErrorPanic(s, depth, "bad case clause, not final %s", clause)
 				}
 				same = true
 			}

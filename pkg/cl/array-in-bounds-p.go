@@ -51,7 +51,7 @@ func (f *ArrayInBoundsP) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 		slip.TypePanic(s, depth, "array", args[0], "array")
 	}
 	if len(dims) != len(args)-1 {
-		slip.NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(args)-1, len(dims))
+		slip.ErrorPanic(s, depth, "Wrong number of subscripts, %d, for array of rank %d.", len(args)-1, len(dims))
 	}
 	for i, d := range dims {
 		if num, ok := args[i+1].(slip.Fixnum); ok && 0 <= num {

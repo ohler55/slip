@@ -120,7 +120,7 @@ func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
 		}
 		key := strings.ToLower(string(sym))
 		if key == ":self" {
-			slip.NewPanic("initialization keyword 'self' is not initable.")
+			slip.ErrorPanic(scope, depth, "initialization keyword 'self' is not initable.")
 		}
 		i++
 		val := args[i]
@@ -137,12 +137,12 @@ func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
 		} else if _, has := cf.keywords[key]; has {
 			plist = append(plist, sym, val)
 		} else {
-			slip.NewPanic("%s is not an init keyword for flavor %s.", sym, cf.name)
+			slip.ErrorPanic(scope, depth, "%s is not an init keyword for flavor %s.", sym, cf.name)
 		}
 	}
 	for _, k := range cf.requiredKeywords {
 		if !keys[k] {
-			slip.NewPanic("Keyword %s missing from initialization list for flavor %s.", k, cf.name)
+			slip.ErrorPanic(scope, depth, "Keyword %s missing from initialization list for flavor %s.", k, cf.name)
 		}
 	}
 	if scope != nil {

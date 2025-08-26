@@ -61,11 +61,11 @@ func (f *FindSymbol) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		switch ta := args[1].(type) {
 		case slip.Symbol:
 			if p = slip.FindPackage(string(ta)); p == nil {
-				slip.NewPanic("package %s not found", ta)
+				slip.ErrorPanic(s, depth, "package %s not found", ta)
 			}
 		case slip.String:
 			if p = slip.FindPackage(string(ta)); p == nil {
-				slip.NewPanic("package %s not found", ta)
+				slip.ErrorPanic(s, depth, "package %s not found", ta)
 			}
 		case *slip.Package:
 			p = ta

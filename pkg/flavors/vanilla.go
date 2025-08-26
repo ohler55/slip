@@ -423,7 +423,7 @@ This method is an extension of the original flavors.
 
 type updateInstanceForDifferentClassCaller struct{}
 
-func (caller updateInstanceForDifferentClassCaller) Call(s *slip.Scope, args slip.List, _ int) slip.Object {
+func (caller updateInstanceForDifferentClassCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*Instance)
 	// args[0] is previous
 	rest := args[1:]
@@ -433,7 +433,7 @@ func (caller updateInstanceForDifferentClassCaller) Call(s *slip.Scope, args sli
 				continue
 			}
 		}
-		slip.NewPanic("%s is not a valid initialize keyword for %s.", rest[i], self.Type.name)
+		slip.ErrorPanic(s, depth, "%s is not a valid initialize keyword for %s.", rest[i], self.Type.name)
 	}
 	var names slip.List
 	for k := range self.Vars {

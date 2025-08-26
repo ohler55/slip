@@ -179,7 +179,7 @@ func (f *MakeApp) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	app.Generate(scratchDir, key, replace, cleanup)
 	srcApp := filepath.Join(scratchDir, app.Title)
 	if err := os.Rename(srcApp, appPath); err != nil {
-		slip.NewPanic("renaming %s to %s failed. %s", srcApp, appPath, err)
+		slip.ErrorPanic(s, depth, "renaming %s to %s failed. %s", srcApp, appPath, err)
 	}
 	if cleanup {
 		_ = os.RemoveAll(scratchDir)
@@ -220,7 +220,7 @@ func (f *MakeApp) findPluginPath(s *slip.Scope, name string, depth int) (path st
 		}
 	}
 	if len(path) == 0 {
-		slip.NewPanic("could not find plugin %s.", name)
+		slip.ErrorPanic(s, depth, "could not find plugin %s.", name)
 	}
 	return
 }

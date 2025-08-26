@@ -48,7 +48,7 @@ func (f *VectorPop) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.TypePanic(s, depth, "vector", v, "vector with a fill-pointer.")
 	}
 	if fp == 0 || v.Length() <= fp {
-		slip.NewPanic("There is nothing left to pop.")
+		slip.ErrorPanic(s, depth, "There is nothing left to pop.")
 	}
 	return v.Pop()
 }

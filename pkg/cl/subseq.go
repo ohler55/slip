@@ -91,7 +91,7 @@ func (f *Subseq) Place(s *slip.Scope, args slip.List, value slip.Object) {
 			slip.TypePanic(s, 0, "newvalue", value, "list")
 		}
 	case slip.String:
-		slip.NewPanic("setf called on constant value %s", ta)
+		slip.ErrorPanic(s, 0, "setf called on constant value %s", ta)
 	case *slip.Vector:
 		if rep, ok := value.(*slip.Vector); ok {
 			cnt := end - start
@@ -149,7 +149,7 @@ func (f *Subseq) getArgs(s *slip.Scope, args slip.List, depth int) (start, end i
 			end = len(ta)
 		}
 		if start < 0 || len(ta) < start || len(ta) < end {
-			slip.NewPanic("indices %d and %d are out of bounds for list of length %d", start, end, len(ta))
+			slip.ErrorPanic(s, depth, "indices %d and %d are out of bounds for list of length %d", start, end, len(ta))
 		}
 		seq = ta
 	case slip.String:
@@ -158,7 +158,7 @@ func (f *Subseq) getArgs(s *slip.Scope, args slip.List, depth int) (start, end i
 			end = len(ra)
 		}
 		if start < 0 || len(ra) < start || len(ra) < end {
-			slip.NewPanic("indices %d and %d are out of bounds for string of length %d", start, end, len(ra))
+			slip.ErrorPanic(s, depth, "indices %d and %d are out of bounds for string of length %d", start, end, len(ra))
 		}
 		seq = ta
 	case *slip.Vector:
@@ -167,7 +167,7 @@ func (f *Subseq) getArgs(s *slip.Scope, args slip.List, depth int) (start, end i
 			end = size
 		}
 		if start < 0 || size < start || size < end {
-			slip.NewPanic("indices %d and %d are out of bounds for vector of length %d", start, end, size)
+			slip.ErrorPanic(s, depth, "indices %d and %d are out of bounds for vector of length %d", start, end, size)
 		}
 		seq = ta
 	case slip.Octets:
@@ -176,7 +176,7 @@ func (f *Subseq) getArgs(s *slip.Scope, args slip.List, depth int) (start, end i
 			end = len(ba)
 		}
 		if start < 0 || len(ba) < start || len(ba) < end {
-			slip.NewPanic("indices %d and %d are out of bounds for string of length %d", start, end, len(ba))
+			slip.ErrorPanic(s, depth, "indices %d and %d are out of bounds for string of length %d", start, end, len(ba))
 		}
 		seq = ta
 	case *slip.BitVector:
@@ -184,7 +184,7 @@ func (f *Subseq) getArgs(s *slip.Scope, args slip.List, depth int) (start, end i
 			end = int(ta.Len)
 		}
 		if start < 0 || int(ta.Len) < start || int(ta.Len) < end {
-			slip.NewPanic("indices %d and %d are out of bounds for string of length %d", start, end, ta.Len)
+			slip.ErrorPanic(s, depth, "indices %d and %d are out of bounds for string of length %d", start, end, ta.Len)
 		}
 		seq = ta
 	default:

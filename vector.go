@@ -153,9 +153,16 @@ func (obj *Vector) AsList() List {
 }
 
 // Adjust array with new parameters.
-func (obj *Vector) Adjust(dims []int, elementType Symbol, initElement Object, initContent List, fillPtr int) VectorLike {
+func (obj *Vector) Adjust(
+	dims []int,
+	elementType Symbol,
+	initElement Object,
+	initContent List,
+	fillPtr int) VectorLike {
+
 	if len(dims) != len(obj.dims) {
-		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dims))
+		ErrorPanic(NewScope(), 0,
+			"Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dims))
 	}
 	if !obj.adjustable {
 		if initContent == nil {
@@ -184,7 +191,8 @@ func (obj *Vector) FillPointer() int {
 // SetFillPointer sets the fill-pointer.
 func (obj *Vector) SetFillPointer(fp int) {
 	if fp < 0 || len(obj.elements) <= fp {
-		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", fp, obj, len(obj.elements))
+		ErrorPanic(NewScope(), 0,
+			"Invalid major index %d for (array %s). Should be between 0 and %d.", fp, obj, len(obj.elements))
 	}
 	obj.FillPtr = fp
 }

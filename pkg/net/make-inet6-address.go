@@ -46,7 +46,7 @@ func (f *MakeInet6Address) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	}
 	addr := slip.Octets(netip.MustParseAddr(string(str)).AsSlice())
 	if len(addr) != 16 {
-		slip.NewPanic("%s is not a valid IPv6 address", str)
+		slip.ErrorPanic(s, depth, "%s is not a valid IPv6 address", str)
 	}
 	return addr
 }

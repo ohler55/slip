@@ -99,7 +99,7 @@ func modifyBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) 
 					slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 				}
 				if len(args)-1 <= pos {
-					slip.NewPanic("keyword %s is missing a value", sym)
+					slip.ErrorPanic(s, depth, "keyword %s is missing a value", sym)
 				}
 				if strings.EqualFold(string(sym), ":as-bag") {
 					asBag = args[pos+1] != nil

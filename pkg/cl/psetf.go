@@ -47,7 +47,7 @@ type Psetf struct {
 // Call the function with the arguments provided.
 func (f *Psetf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args)%2 != 0 {
-		slip.NewPanic("psetf expected placer/value pairs. Not %d arguments.", len(f.Args))
+		slip.ErrorPanic(s, depth, "psetf expected placer/value pairs. Not %d arguments.", len(f.Args))
 	}
 	d2 := depth + 1
 	results := make(slip.List, len(args)/2)

@@ -110,7 +110,7 @@ func (f *Require) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 		if _, err := os.Stat(filepath); err == nil {
 			slip.CurrentPackageLoadPath = filepath
-			loadLispFile(s, filepath)
+			loadLispFile(s, filepath, depth)
 			return slip.Novalue
 		}
 	}
@@ -125,10 +125,10 @@ func expandPath(path string) string {
 	return path
 }
 
-func loadLispFile(s *slip.Scope, path string) {
+func loadLispFile(s *slip.Scope, path string, depth int) {
 	buf, err := os.ReadFile(path)
 	if err != nil {
-		slip.NewPanic("loading %s: %s", path, err)
+		slip.ErrorPanic(s, depth, "loading %s: %s", path, err)
 	}
 	defer func() {
 		s.Set(slip.Symbol("*load-pathname*"), nil)

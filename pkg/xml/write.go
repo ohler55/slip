@@ -81,7 +81,7 @@ func (f *Write) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			slip.NewPanic("%s missing an argument", sym)
+			slip.ErrorPanic(s, depth, "%s missing an argument", sym)
 		}
 		if string(sym) == ":indent" {
 			var ss slip.String
@@ -117,7 +117,7 @@ func (f *Write) encode(s *slip.Scope, enc *xml.Encoder, data slip.Object, depth 
 	switch td := data.(type) {
 	case slip.List: // all except text
 		if len(td) < 2 {
-			slip.NewPanic("failed to convert to XML due to unexpected list content: %s", td)
+			slip.ErrorPanic(s, depth, "failed to convert to XML due to unexpected list content: %s", td)
 		}
 		switch td[0] {
 		case slip.Symbol(":comment"):
@@ -214,6 +214,6 @@ func (f *Write) encode(s *slip.Scope, enc *xml.Encoder, data slip.Object, depth 
 			panic(err)
 		}
 	default:
-		slip.NewPanic("failed to convert to XML due to unexpected list content: %s", td)
+		slip.ErrorPanic(s, depth, "failed to convert to XML due to unexpected list content: %s", td)
 	}
 }

@@ -91,7 +91,7 @@ func parseWriteStringArgs(
 			if num, ok = value.(slip.Fixnum); ok {
 				start = int(num)
 				if start < 0 || len(ra) <= start {
-					slip.NewPanic(":start (%d) out of range 0 to %d.", start, len(ra)-1)
+					slip.ErrorPanic(s, depth, ":start (%d) out of range 0 to %d.", start, len(ra)-1)
 				}
 			} else {
 				slip.TypePanic(s, depth, "start", value, "fixnum")
@@ -104,7 +104,7 @@ func parseWriteStringArgs(
 			case slip.Fixnum:
 				end = int(tv)
 				if end < start || len(ra) <= end {
-					slip.NewPanic(":end (%d) out of range %d to %d.", end, start, len(ra)-1)
+					slip.ErrorPanic(s, depth, ":end (%d) out of range %d to %d.", end, start, len(ra)-1)
 				}
 			default:
 				slip.TypePanic(s, depth, "end", value, "fixnum")

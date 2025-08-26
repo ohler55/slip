@@ -86,7 +86,7 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			slip.NewPanic("%s missing an argument", sym)
+			slip.ErrorPanic(s, depth, "%s missing an argument", sym)
 		}
 		var n slip.Fixnum
 		switch strings.ToLower(string(sym)) {
@@ -119,10 +119,10 @@ func (f *stringCompare) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 		}
 	}
 	if end1 < start1 || len(str1) < end1 || start1 < 0 {
-		slip.NewPanic("start1 and end1 of %d, %d are not valid for a string of length %d", start1, end1, len(str1))
+		slip.ErrorPanic(s, depth, "start1 and end1 of %d, %d are not valid for a string of length %d", start1, end1, len(str1))
 	}
 	if end2 < start2 || len(str2) < end2 || start2 < 0 {
-		slip.NewPanic("start2 and end2 of %d, %d are not valid for a string of length %d", start2, end2, len(str2))
+		slip.ErrorPanic(s, depth, "start2 and end2 of %d, %d are not valid for a string of length %d", start2, end2, len(str2))
 	}
 	if 0 < start1 || end1 < len(str1) {
 		str1 = str1[start1:end1]

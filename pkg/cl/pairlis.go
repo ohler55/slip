@@ -60,7 +60,7 @@ func (f *Pairlis) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.TypePanic(s, depth, "values", args[1], "list")
 	}
 	if len(keys) != len(values) {
-		slip.NewPanic("Lists of keys and values are of unequal length.")
+		slip.ErrorPanic(s, depth, "Lists of keys and values are of unequal length.")
 	}
 	alist := make(slip.List, len(keys))
 	for i, key := range keys {

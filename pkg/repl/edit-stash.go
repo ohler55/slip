@@ -40,7 +40,7 @@ func (f *EditStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(xed) == 0 {
 		xed = os.Getenv("EDITOR")
 		if len(xed) == 0 {
-			slip.NewPanic("no editor defined")
+			slip.ErrorPanic(s, depth, "no editor defined")
 		}
 		parts := strings.Split(xed, " ")
 		xed = parts[0]
@@ -60,7 +60,7 @@ func (f *EditStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		slip.NewPanic("%s: %s\n", err, stderr.String())
+		slip.ErrorPanic(s, depth, "%s: %s\n", err, stderr.String())
 	}
 	TheStash.LoadExpanded(TheStash.filename)
 

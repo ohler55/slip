@@ -51,7 +51,7 @@ func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	slip.CheckArgCount(s, depth, f, args, 1, 5)
 	name := slip.MustBeString(args[0], "name")
 	if slip.FindPackage(name) != nil {
-		slip.NewPanic("Package %s already exists.", name)
+		slip.ErrorPanic(s, depth, "Package %s already exists.", name)
 	}
 	var nicknames []string
 	rest := args[1:]
@@ -63,7 +63,7 @@ func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 		for _, v := range list {
 			nn := slip.MustBeString(v, "nickname")
 			if slip.FindPackage(nn) != nil {
-				slip.NewPanic("Package %s already exists.", nn)
+				slip.ErrorPanic(s, depth, "Package %s already exists.", nn)
 			}
 			nicknames = append(nicknames, nn)
 		}
@@ -87,7 +87,7 @@ func (f *MakePackage) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 				slip.TypePanic(s, depth, "use", tv, "symbol", "string", "package")
 			}
 			if p == nil {
-				slip.NewPanic("Package %s does not exist.", v)
+				slip.ErrorPanic(s, depth, "Package %s does not exist.", v)
 			}
 			pkgs = append(pkgs, p)
 		}

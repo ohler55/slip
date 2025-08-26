@@ -62,7 +62,7 @@ func (f *SocketMakeStream) Call(s *slip.Scope, args slip.List, depth int) (resul
 	if !ok || !self.IsA("socket") {
 		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
-	return makeStream(self, args[1:])
+	return makeStream(s, self, args[1:], depth)
 }
 
 type socketMakeStreamCaller struct{}
@@ -71,7 +71,7 @@ func (caller socketMakeStreamCaller) Call(s *slip.Scope, args slip.List, depth i
 	self := s.Get("self").(*flavors.Instance)
 	slip.CheckSendArgCount(s, depth, self, ":make-stream", args, 0, 6)
 
-	return makeStream(self, args)
+	return makeStream(s, self, args, depth)
 }
 
 func (caller socketMakeStreamCaller) FuncDocs() *slip.FuncDoc {
@@ -80,7 +80,7 @@ func (caller socketMakeStreamCaller) FuncDocs() *slip.FuncDoc {
 	return md
 }
 
-func makeStream(self *flavors.Instance, args slip.List) (result slip.Object) {
+func makeStream(s *slip.Scope, self *flavors.Instance, args slip.List, depth int) (result slip.Object) {
 	var (
 		in  bool
 		out bool
@@ -108,7 +108,7 @@ func makeStream(self *flavors.Instance, args slip.List) (result slip.Object) {
 	case out:
 		result = &slip.OutputStream{Writer: fdRW(fd)}
 	default:
-		slip.NewPanic(":input or :output must be true")
+		slip.ErrorPanic(s, depth, ":input or :output must be true")
 	}
 	return
 }

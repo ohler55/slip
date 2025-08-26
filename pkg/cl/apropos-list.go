@@ -68,7 +68,7 @@ func (f *AproposList) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 			slip.TypePanic(s, depth, "package", ta, "string", "symbol")
 		}
 		if pkg = slip.FindPackage(name); pkg == nil {
-			slip.NewPanic("Package %s not found.", name)
+			slip.ErrorPanic(s, depth, "Package %s not found.", name)
 		}
 	}
 	var list slip.List

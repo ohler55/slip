@@ -67,7 +67,7 @@ func (f *EnsureDirectoriesExist) Call(s *slip.Scope, args slip.List, depth int) 
 			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			slip.NewPanic("%s missing an argument", sym)
+			slip.ErrorPanic(s, depth, "%s missing an argument", sym)
 		}
 		val := args[pos+1]
 		switch strings.ToLower(string(sym)) {

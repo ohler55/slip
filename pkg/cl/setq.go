@@ -47,7 +47,7 @@ type Setq struct {
 // Call the function with the arguments provided.
 func (f *Setq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	if len(args)%2 != 0 {
-		slip.NewPanic("setq expected symbol value pairs. Not %d arguments.", len(f.Args))
+		slip.ErrorPanic(s, depth, "setq expected symbol value pairs. Not %d arguments.", len(f.Args))
 	}
 	d2 := depth + 1
 	last := len(args) - 1

@@ -62,7 +62,7 @@ func (f *MakeStringInputStream) Call(s *slip.Scope, args slip.List, depth int) s
 		if num, ok := args[1].(slip.Fixnum); ok {
 			start = int(num)
 			if start < 0 || len(ra) <= start {
-				slip.NewPanic("start, %d is outside the bounds of the string of length %d", start, len(ra))
+				slip.ErrorPanic(s, depth, "start, %d is outside the bounds of the string of length %d", start, len(ra))
 			}
 		} else {
 			slip.TypePanic(s, depth, "start", args[1], "fixnum")
@@ -71,10 +71,10 @@ func (f *MakeStringInputStream) Call(s *slip.Scope, args slip.List, depth int) s
 			if num, ok := args[2].(slip.Fixnum); ok {
 				end = int(num)
 				if end < 0 || len(ra) < end {
-					slip.NewPanic("end, %d is outside the bounds of the string of length %d", end, len(ra))
+					slip.ErrorPanic(s, depth, "end, %d is outside the bounds of the string of length %d", end, len(ra))
 				}
 				if end <= start {
-					slip.NewPanic("end, %d is before start %d", end, start)
+					slip.ErrorPanic(s, depth, "end, %d is before start %d", end, start)
 				}
 			} else {
 				slip.TypePanic(s, depth, "end", args[2], "fixnum", "nil")

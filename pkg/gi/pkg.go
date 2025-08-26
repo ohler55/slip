@@ -316,13 +316,13 @@ func seqStarEndArgs(s *slip.Scope, args slip.List, depth int) (start, end int) {
 		end = size
 	}
 	if size < start {
-		slip.NewPanic("start, %d is greater than length of %d", start, size)
+		slip.ErrorPanic(s, depth, "start, %d is greater than length of %d", start, size)
 	}
 	if size < end {
-		slip.NewPanic("end, %d is greater than length of %d", end, size)
+		slip.ErrorPanic(s, depth, "end, %d is greater than length of %d", end, size)
 	}
 	if end < start {
-		slip.NewPanic("end, %d is less start %d", end, start)
+		slip.ErrorPanic(s, depth, "end, %d is less start %d", end, start)
 	}
 	return
 }

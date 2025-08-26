@@ -40,7 +40,7 @@ func NewSlotDef(s *slip.Scope, def slip.Object, depth int) *SlotDef {
 			slip.TypePanic(s, depth, "slot-name", td[0], "symbol")
 		}
 		if len(td)%2 != 1 { // not an even number of pairs plus then slot-name
-			slip.NewPanic("slot-specification for %s must have a slot-name followed by pairs of key and value.",
+			slip.ErrorPanic(s, depth, "slot-specification for %s must have a slot-name followed by pairs of key and value.",
 				sd.name)
 		}
 		for i := 1; i < len(td); i += 2 {
@@ -64,12 +64,12 @@ func NewSlotDef(s *slip.Scope, def slip.Object, depth int) *SlotDef {
 				}
 			case slip.Symbol(":initform"):
 				if sd.initform != slip.Unbound {
-					slip.NewPanic("For slot %s, the :initform option can only be specified once.", sd.name)
+					slip.ErrorPanic(s, depth, "For slot %s, the :initform option can only be specified once.", sd.name)
 				}
 				sd.initform = td[i+1]
 			case slip.Symbol(":type"):
 				if sd.argType != nil {
-					slip.NewPanic("For slot %s, the :type option can only be specified once.", sd.name)
+					slip.ErrorPanic(s, depth, "For slot %s, the :type option can only be specified once.", sd.name)
 				}
 				if sym, ok := td[i+1].(slip.Symbol); ok {
 					sd.argType = sym
@@ -78,7 +78,7 @@ func NewSlotDef(s *slip.Scope, def slip.Object, depth int) *SlotDef {
 				}
 			case slip.Symbol(":documentation"):
 				if 0 < len(sd.docs) {
-					slip.NewPanic("For slot %s, the :documentation option can only be specified once.", sd.name)
+					slip.ErrorPanic(s, depth, "For slot %s, the :documentation option can only be specified once.", sd.name)
 				}
 				if doc, ok := td[i+1].(slip.String); ok {
 					sd.docs = string(doc)

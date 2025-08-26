@@ -158,10 +158,10 @@ func socketReceive(s *slip.Scope, fd int, args slip.List, depth int) slip.Object
 		rset.Set(fd)
 		eset.Set(fd)
 		if err := Select(&rset, nil, &eset, timeout); err != nil || eset.IsSet(fd) {
-			slip.NewPanic("read error")
+			slip.ErrorPanic(s, depth, "read error")
 		}
 		if !rset.IsSet(fd) {
-			slip.NewPanic("read timed out")
+			slip.ErrorPanic(s, depth, "read timed out")
 		}
 	}
 	typ, err := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_TYPE)
@@ -176,7 +176,7 @@ func socketReceive(s *slip.Scope, fd int, args slip.List, depth int) slip.Object
 	} else {
 		cnt, err := syscall.Read(fd, buf)
 		if err != nil || cnt == 0 {
-			slip.NewPanic("read failed. %s", err)
+			slip.ErrorPanic(s, depth, "read failed. %s", err)
 		}
 		result[0] = slip.Octets(buf)
 		result[1] = slip.Fixnum(cnt)

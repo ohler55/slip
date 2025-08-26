@@ -95,7 +95,7 @@ func getAddressArgs(s *slip.Scope, self *flavors.Instance, args slip.List, depth
 	}
 	var ok bool
 	if fd, ok = self.Any.(int); !ok {
-		slip.NewPanic("%s is not initialized", self)
+		slip.ErrorPanic(s, depth, "%s is not initialized", self)
 	}
 	return
 }

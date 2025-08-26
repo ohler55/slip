@@ -91,7 +91,7 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 		parts := strings.SplitN(string(sym), ":", 2)
 		sym = slip.Symbol(parts[1])
 		if pkg = slip.FindPackage(parts[0]); pkg == nil {
-			slip.NewPanic("Package %s does not exist", parts[0])
+			slip.ErrorPanic(slip.NewScope(), 0, "Package %s does not exist", parts[0])
 		}
 	}
 	var pad []byte

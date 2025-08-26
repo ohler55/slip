@@ -70,7 +70,7 @@ func addressToString(s *slip.Scope, arg slip.Object, depth int) (oct slip.Octets
 	case 16:
 		addr = netip.AddrFrom16([16]byte(oct))
 	default:
-		slip.NewPanic("%s is neither an IPv4 nor an IPv6 address", oct)
+		slip.ErrorPanic(s, depth, "%s is neither an IPv4 nor an IPv6 address", oct)
 	}
 	str = addr.String()
 	return

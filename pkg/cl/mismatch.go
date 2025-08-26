@@ -158,7 +158,7 @@ func (f *Mismatch) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	}
 	if pos < len(args) {
-		slip.NewPanic("extra arguments that are not keyword and value pairs")
+		slip.ErrorPanic(s, depth, "extra arguments that are not keyword and value pairs")
 	}
 	seq1 := seqToList(s, args[0], "sequence-1", start1, end1, depth)
 	seq2 := seqToList(s, args[1], "sequence-2", start2, end2, depth)
@@ -235,16 +235,16 @@ func seqToList(s *slip.Scope, seq slip.Object, name string, start, end, depth in
 		return
 	}
 	if len(list) <= start {
-		slip.NewPanic("Start of %d is out of bounds for %s with length %d.", start, name, len(list))
+		slip.ErrorPanic(s, depth, "Start of %d is out of bounds for %s with length %d.", start, name, len(list))
 	}
 	if end == -1 {
 		end = len(list)
 	} else {
 		if len(list) < end {
-			slip.NewPanic("End of %d is out of bounds for %s with length %d.", end, name, len(list))
+			slip.ErrorPanic(s, depth, "End of %d is out of bounds for %s with length %d.", end, name, len(list))
 		}
 		if end < start {
-			slip.NewPanic("End of %d is less than start of %d for %s.", end, start, name)
+			slip.ErrorPanic(s, depth, "End of %d is less than start of %d for %s.", end, start, name)
 		}
 	}
 	return list[start:end]

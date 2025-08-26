@@ -66,14 +66,14 @@ func (f *UseStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	name := slip.MustBeString(args[0], "name")
 	if len(name) == 0 {
-		slip.NewPanic("a stash filename can not be empty")
+		slip.ErrorPanic(s, depth, "a stash filename can not be empty")
 	}
 	home, _ := os.UserHomeDir()
 	if strings.Contains(name, "/") || strings.HasSuffix(strings.ToLower(name), ".lisp") {
 		name = strings.ReplaceAll(name, "~", home)
 		if _, err := os.Stat(name); err != nil && errors.Is(err, os.ErrNotExist) {
 			if err = os.WriteFile(name, []byte{}, 0666); err != nil {
-				slip.NewPanic("failed to open or create a stash file at %s", name)
+				slip.ErrorPanic(s, depth, "failed to open or create a stash file at %s", name)
 			}
 		}
 		TheStash.LoadExpanded(name)
@@ -97,7 +97,7 @@ func (f *UseStash) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if path, ok := loadPaths[0].(slip.String); ok {
 		fp := strings.ReplaceAll(filepath.Join(string(path), name), "~", home)
 		if err := os.WriteFile(fp, []byte{}, 0666); err != nil {
-			slip.NewPanic("failed to open or create a stash file at %s", fp)
+			slip.ErrorPanic(s, depth, "failed to open or create a stash file at %s", fp)
 		}
 		TheStash.LoadExpanded(fp)
 	}

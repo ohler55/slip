@@ -117,14 +117,14 @@ func (f *Replace) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		}
 	}
 	if pos < len(args) {
-		slip.NewPanic("extra arguments that are not keyword and value pairs")
+		slip.ErrorPanic(s, depth, "extra arguments that are not keyword and value pairs")
 	}
 	result = args[0]
 	seq2 := seqToList(s, args[1], "sequence-2", start2, end2, depth)
 	switch seq1 := args[0].(type) {
 	case nil:
 	case slip.List:
-		end1 = f.checkStartEnd(start1, end1, len(seq1))
+		end1 = f.checkStartEnd(s, start1, end1, len(seq1), depth)
 		// TBD check seq1 == seq2
 		for i, v := range seq2 {
 			if end1 <= start1+i {
@@ -134,7 +134,7 @@ func (f *Replace) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		}
 	case slip.String:
 		ra := []rune(seq1)
-		end1 = f.checkStartEnd(start1, end1, len(ra))
+		end1 = f.checkStartEnd(s, start1, end1, len(ra), depth)
 		for i, v := range seq2 {
 			if end1 <= start1+i {
 				break
@@ -147,7 +147,7 @@ func (f *Replace) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		}
 		result = slip.String(ra)
 	case *slip.Vector:
-		end1 = f.checkStartEnd(start1, end1, seq1.Length())
+		end1 = f.checkStartEnd(s, start1, end1, seq1.Length(), depth)
 		for i, v := range seq2 {
 			if end1 <= start1+i {
 				break
@@ -155,7 +155,7 @@ func (f *Replace) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			seq1.Set(v, start1+i)
 		}
 	case slip.Octets:
-		end1 = f.checkStartEnd(start1, end1, len(seq1))
+		end1 = f.checkStartEnd(s, start1, end1, len(seq1), depth)
 		for i, v := range seq2 {
 			if end1 <= start1+i {
 				break
@@ -163,7 +163,7 @@ func (f *Replace) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			seq1[start1+i] = byte(slip.ToOctet(v).(slip.Octet))
 		}
 	case *slip.BitVector:
-		end1 = f.checkStartEnd(start1, end1, int(seq1.Len))
+		end1 = f.checkStartEnd(s, start1, end1, int(seq1.Len), depth)
 		for i, v := range seq2 {
 			if end1 <= start1+i {
 				break
@@ -176,21 +176,21 @@ func (f *Replace) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	return
 }
 
-func (f *Replace) checkStartEnd(start, end, size int) int {
+func (f *Replace) checkStartEnd(s *slip.Scope, start, end, size, depth int) int {
 	if size == 0 && start == 0 && end == -1 {
 		return 0
 	}
 	if size <= start {
-		slip.NewPanic("Start of %d is out of bounds for sequence-1 with length %d.", start, size)
+		slip.ErrorPanic(s, depth, "Start of %d is out of bounds for sequence-1 with length %d.", start, size)
 	}
 	if end == -1 {
 		end = size
 	} else {
 		if size <= end {
-			slip.NewPanic("End of %d is out of bounds for sequence-1 with length %d.", end, size)
+			slip.ErrorPanic(s, depth, "End of %d is out of bounds for sequence-1 with length %d.", end, size)
 		}
 		if end < start {
-			slip.NewPanic("End of %d is less than start of %d for sequence-1.", end, start)
+			slip.ErrorPanic(s, depth, "End of %d is less than start of %d for sequence-1.", end, start)
 		}
 	}
 	return end

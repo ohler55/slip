@@ -70,7 +70,7 @@ func valueIsA(s *slip.Scope, value, valueType slip.Object, depth int) {
 				}
 			}
 			if !match {
-				slip.NewPanic("The value %s is not of type %s.", value, vt)
+				slip.ErrorPanic(s, depth, "The value %s is not of type %s.", value, vt)
 			}
 		} else {
 			slip.TypePanic(s, depth, "value-type", valueType, "symbol", "t")

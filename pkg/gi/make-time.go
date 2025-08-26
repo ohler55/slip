@@ -146,7 +146,7 @@ func getLocArg(s *slip.Scope, arg slip.Object, depth int) (loc *time.Location) {
 	case slip.String:
 		var err error
 		if loc, err = time.LoadLocation(string(ta)); err != nil {
-			slip.NewPanic("failed to load time locations: %s", err)
+			slip.ErrorPanic(s, depth, "failed to load time locations: %s", err)
 		}
 	default:
 		slip.TypePanic(s, depth, "location", ta, "string", "symbol")

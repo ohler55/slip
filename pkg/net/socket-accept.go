@@ -49,7 +49,7 @@ func (f *SocketAccept) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	if !ok || !self.IsA("socket") {
 		slip.TypePanic(s, depth, "socket", args[0], "socket")
 	}
-	return socketAccept(self)
+	return socketAccept(s, self, depth)
 }
 
 type socketAcceptCaller struct{}
@@ -58,7 +58,7 @@ func (caller socketAcceptCaller) Call(s *slip.Scope, args slip.List, depth int) 
 	self := s.Get("self").(*flavors.Instance)
 	slip.CheckSendArgCount(s, depth, self, ":accept", args, 0, 0)
 
-	return socketAccept(self)
+	return socketAccept(s, self, depth)
 }
 
 func (caller socketAcceptCaller) FuncDocs() *slip.FuncDoc {
@@ -67,10 +67,10 @@ func (caller socketAcceptCaller) FuncDocs() *slip.FuncDoc {
 	return md
 }
 
-func socketAccept(self *flavors.Instance) slip.Object {
+func socketAccept(s *slip.Scope, self *flavors.Instance, depth int) slip.Object {
 	fd, ok := self.Any.(int)
 	if !ok {
-		slip.NewPanic("%s is not connected", self)
+		slip.ErrorPanic(s, depth, "%s is not connected", self)
 	}
 	nfd, _, err := syscall.Accept(fd)
 	if err != nil {

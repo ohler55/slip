@@ -46,7 +46,7 @@ func (f *FileWriteDate) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	}
 	fi, err := os.Stat(string(path))
 	if err != nil {
-		slip.NewPanic("file stat on %s failed. %s", path, err)
+		slip.ErrorPanic(s, depth, "file stat on %s failed. %s", path, err)
 	}
 	return slip.Time(fi.ModTime())
 }

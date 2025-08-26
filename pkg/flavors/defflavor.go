@@ -142,7 +142,7 @@ func DefFlavor(
 	s := slip.NewScope()
 	name = strings.ToLower(name)
 	if _, has := allFlavors[name]; has {
-		slip.NewPanic("Flavor %s already defined.", name)
+		slip.ErrorPanic(s, 0, "Flavor %s already defined.", name)
 	}
 	nf := &Flavor{
 		name:        name,
@@ -181,7 +181,7 @@ func DefFlavor(
 	nf.Precedence = append(nf.Precedence, InstanceSymbol, slip.TrueSymbol)
 
 	if !nf.abstract {
-		validateFlavor(nf)
+		validateFlavor(s, nf, 0)
 	}
 	nf.varNames = make([]string, 0, len(nf.defaultVars)+len(nf.requiredVars))
 	for vn := range nf.defaultVars {
@@ -220,35 +220,35 @@ func addIncludes(nf *Flavor) {
 	}
 }
 
-func validateFlavor(nf *Flavor) {
+func validateFlavor(s *slip.Scope, nf *Flavor, depth int) {
 	full := make([]*Flavor, len(nf.inherit)+1)
 	full[0] = nf
 	copy(full[1:], nf.inherit)
 	for _, cf := range full {
 		for _, fn := range cf.required {
 			if !nf.inheritsFlavor(fn) {
-				slip.NewPanic("%s does not inherit from required flavor %s.", nf.name, fn)
+				slip.ErrorPanic(s, depth, "%s does not inherit from required flavor %s.", nf.name, fn)
 			}
 		}
 		for _, mn := range cf.requiredMethods {
 			if _, has := nf.methods[mn]; !has {
-				slip.NewPanic("%s does not include the required method %s.", nf.name, mn)
+				slip.ErrorPanic(s, depth, "%s does not include the required method %s.", nf.name, mn)
 			}
 		}
 		for _, vn := range cf.requiredVars {
 			if _, has := nf.defaultVars[vn]; !has {
-				slip.NewPanic("%s does not include the required variable %s.", nf.name, vn)
+				slip.ErrorPanic(s, depth, "%s does not include the required variable %s.", nf.name, vn)
 			}
 		}
 	}
 }
 
-func valsStringList(vals slip.List) (sa []string) {
+func valsStringList(s *slip.Scope, vals slip.List, depth int) (sa []string) {
 	for _, v := range vals {
 		if sym, ok := v.(slip.Symbol); ok {
 			sa = append(sa, string(sym))
 		} else {
-			slip.NewPanic("%s is not a symbol.", v)
+			slip.ErrorPanic(s, depth, "%s is not a symbol.", v)
 		}
 	}
 	return
@@ -315,10 +315,10 @@ func processFlavorOptions(s *slip.Scope, nf *Flavor, options slip.List, depth in
 							nf.keywords[string(sym)] = plist[1]
 						}
 					} else {
-						slip.NewPanic("In :default-init-plist list car, %s is not a symbol.", plist[0])
+						slip.ErrorPanic(s, depth, "In :default-init-plist list car, %s is not a symbol.", plist[0])
 					}
 				} else {
-					slip.NewPanic("In :default-init-plist, %s is not a list.", v)
+					slip.ErrorPanic(s, depth, "In :default-init-plist, %s is not a list.", v)
 				}
 			}
 		case ":documentation":
@@ -335,7 +335,7 @@ func processFlavorOptions(s *slip.Scope, nf *Flavor, options slip.List, depth in
 					if sym, ok := v.(slip.Symbol); ok {
 						nf.DefMethod(":"+string(sym), "", getter(sym))
 					} else {
-						slip.NewPanic("%s is not a symbol.", v)
+						slip.ErrorPanic(s, depth, "%s is not a symbol.", v)
 					}
 				}
 			} else {
@@ -346,14 +346,14 @@ func processFlavorOptions(s *slip.Scope, nf *Flavor, options slip.List, depth in
 				}
 			}
 		case ":included-flavors":
-			nf.included = valsStringList(vals)
+			nf.included = valsStringList(s, vals, depth)
 		case ":initable-instance-variables", ":inittable-instance-variables":
 			if 0 < len(vals) {
 				for _, v := range vals {
 					if sym, ok := v.(slip.Symbol); ok {
 						nf.initable[":"+string(sym)] = true
 					} else {
-						slip.NewPanic("%s is not a symbol.", v)
+						slip.ErrorPanic(s, depth, "%s is not a symbol.", v)
 					}
 				}
 			} else {
@@ -368,26 +368,26 @@ func processFlavorOptions(s *slip.Scope, nf *Flavor, options slip.List, depth in
 				if sym, ok := v.(slip.Symbol); ok {
 					nf.keywords[string(sym)] = nil
 				} else {
-					slip.NewPanic("%s is not a symbol.", v)
+					slip.ErrorPanic(s, depth, "%s is not a symbol.", v)
 				}
 			}
 		case ":no-vanilla-flavor":
 			nf.noVanilla = true
 		case ":required-flavors":
-			nf.required = valsStringList(vals)
+			nf.required = valsStringList(s, vals, depth)
 		case ":required-init-keywords":
-			nf.requiredKeywords = valsStringList(vals)
+			nf.requiredKeywords = valsStringList(s, vals, depth)
 		case ":required-instance-variables":
-			nf.requiredVars = valsStringList(vals)
+			nf.requiredVars = valsStringList(s, vals, depth)
 		case ":required-methods":
-			nf.requiredMethods = valsStringList(vals)
+			nf.requiredMethods = valsStringList(s, vals, depth)
 		case ":settable-instance-variables", ":writable-instance-variables":
 			if 0 < len(vals) {
 				for _, v := range vals {
 					if sym, ok := v.(slip.Symbol); ok {
 						nf.DefMethod(":set-"+string(sym), "", setter(sym))
 					} else {
-						slip.NewPanic("%s is not a symbol.", v)
+						slip.ErrorPanic(s, depth, "%s is not a symbol.", v)
 					}
 				}
 			} else {
@@ -398,7 +398,7 @@ func processFlavorOptions(s *slip.Scope, nf *Flavor, options slip.List, depth in
 				}
 			}
 		default:
-			slip.NewPanic("%s is not an option to defflavor", key)
+			slip.ErrorPanic(s, depth, "%s is not an option to defflavor", key)
 		}
 	}
 }
@@ -418,9 +418,9 @@ func (g getter) BoundCall(scope *slip.Scope, _ int) slip.Object {
 type setter string
 
 // Call sets the value of a variable in the instance.
-func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
+func (s setter) Call(scope *slip.Scope, args slip.List, depth int) slip.Object {
 	if len(args) < 1 {
-		slip.NewPanic("no value given for set-%s.", s)
+		slip.ErrorPanic(scope, depth, "no value given for set-%s.", s)
 	}
 	scope.Set(slip.Symbol(s), args[0])
 
@@ -428,12 +428,12 @@ func (s setter) Call(scope *slip.Scope, args slip.List, _ int) slip.Object {
 }
 
 // BoundCall the caller member.
-func (s setter) BoundCall(scope *slip.Scope, _ int) (value slip.Object) {
+func (s setter) BoundCall(scope *slip.Scope, depth int) (value slip.Object) {
 	for _, value := range scope.Vars {
 		scope.Set(slip.Symbol(s), value)
 		return value
 	}
-	defer slip.NewPanic("no value given for set-%s.", s)
+	defer slip.ErrorPanic(scope, depth, "no value given for set-%s.", s)
 	return nil
 }
 

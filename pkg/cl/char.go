@@ -48,7 +48,7 @@ func (f *Char) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	ra := []rune(str)
 	if index < 0 || len(ra) <= index {
-		slip.NewPanic("index %d is outside the bound of 0 and %d", index, len(ra))
+		slip.ErrorPanic(s, depth, "index %d is outside the bound of 0 and %d", index, len(ra))
 	}
 	return slip.Character(ra[index])
 }

@@ -75,7 +75,7 @@ func (f *Decrypt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 	strip, block, bsize, trim := extractDencryptArgs(s, args[1:], depth)
 
 	if len(data) < bsize {
-		slip.NewPanic("decrypt data is too short")
+		slip.ErrorPanic(s, depth, "decrypt data is too short")
 	}
 	non = data[:bsize]
 	data = data[bsize:]

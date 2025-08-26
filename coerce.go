@@ -117,11 +117,11 @@ func Coerce(object, typeSpec Object) (result Object) {
 		case BitSymbol:
 			result = coerceToBit(object)
 		default:
-			NewPanic("%s is not a valid coerce result type", object)
+			ErrorPanic(NewScope(), 0, "%s is not a valid coerce result type", object)
 		}
 	case List:
 		if len(t1) < 1 {
-			NewPanic("%s is not a valid coerce result type", t1)
+			ErrorPanic(NewScope(), 0, "%s is not a valid coerce result type", t1)
 		}
 		switch t1[0] {
 		case VectorSymbol:
@@ -151,13 +151,13 @@ func Coerce(object, typeSpec Object) (result Object) {
 		case UnsignedByteSymbol:
 			result = coerceToUnsignedByte(object, t1[1:]...)
 		default:
-			NewPanic("%s is not a valid coerce result type", t1)
+			ErrorPanic(NewScope(), 0, "%s is not a valid coerce result type", t1)
 		}
 	default:
 		if t1 == True {
 			result = object
 		} else {
-			NewPanic("%s is not a valid coerce result type", t1)
+			ErrorPanic(NewScope(), 0, "%s is not a valid coerce result type", t1)
 		}
 	}
 	return
@@ -225,7 +225,8 @@ func CoerceToVector(arg Object, mods ...Object) (result Object) {
 				TypePanic(NewScope(), 0, "size", mods[1], "non-negative fixnum")
 			}
 			if int(num) != vl.Length() {
-				NewPanic("The length requested (%d) does not match the type restriction in %s", vl.Length(),
+				ErrorPanic(NewScope(), 0,
+					"The length requested (%d) does not match the type restriction in %s", vl.Length(),
 					append(List{VectorSymbol}, mods...).String())
 			}
 		}
@@ -776,7 +777,7 @@ top:
 		}
 		bv := result.(*BitVector)
 		if int(num) != int(bv.Len) {
-			NewPanic("The length requested (%d) does not match the type restriction in %s", bv.Len,
+			ErrorPanic(NewScope(), 0, "The length requested (%d) does not match the type restriction in %s", bv.Len,
 				append(List{BitVectorSymbol}, mods...).String())
 		}
 	}
@@ -817,7 +818,7 @@ func coerceToSignedByte(arg Object, mods ...Object) (result Object) {
 			sb := result.(*SignedByte)
 			mx := int64(1) << int(num)
 			if sb.IsInt64() && (mx <= sb.Int64() || sb.Int64() <= -mx) {
-				NewPanic("%s can't be converted to a %s", num,
+				ErrorPanic(NewScope(), 0, "%s can't be converted to a %s", num,
 					append(List{SignedByteSymbol}, mods...).String())
 			}
 		}
@@ -879,7 +880,7 @@ func coerceToUnsignedByte(arg Object, mods ...Object) (result Object) {
 			}
 			ub := result.(*UnsignedByte)
 			if ub.IsInt64() && (1<<int64(num)) <= ub.Int64() {
-				NewPanic("%s can't be converted to a %s", num,
+				ErrorPanic(NewScope(), 0, "%s can't be converted to a %s", num,
 					append(List{UnsignedByteSymbol}, mods...).String())
 			}
 		}
@@ -919,9 +920,9 @@ func coerceListToString(list List) Object {
 
 func coerceNotPossible(arg Object, rtype string) {
 	if arg == nil {
-		NewPanic("Can not coerce a nil into a %s", rtype)
+		ErrorPanic(NewScope(), 0, "Can not coerce a nil into a %s", rtype)
 	}
-	NewPanic("Can not coerce %s a %s into a %s", arg, arg.Hierarchy()[0], rtype)
+	ErrorPanic(NewScope(), 0, "Can not coerce %s a %s into a %s", arg, arg.Hierarchy()[0], rtype)
 }
 
 func checkRange(v Object, mods List) {
@@ -977,9 +978,9 @@ func ToOctet(arg Object) (result Object) {
 	}
 	if result == nil {
 		if arg == nil {
-			NewPanic("Can not coerce a nil into a octet")
+			ErrorPanic(NewScope(), 0, "Can not coerce a nil into a octet")
 		}
-		NewPanic("Can not coerce %s a %s into an octet", arg, arg.Hierarchy()[0])
+		ErrorPanic(NewScope(), 0, "Can not coerce %s a %s into an octet", arg, arg.Hierarchy()[0])
 	}
 	return
 }

@@ -60,7 +60,7 @@ func (f *ChangeClass) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 		slip.TypePanic(s, depth, "new-class", ta, "symbol", "flavor", "class")
 	}
 	if class.Metaclass() != inst.Class().Metaclass() {
-		slip.NewPanic("Can not change the class of an instance of a %s class to a %s class.",
+		slip.ErrorPanic(s, depth, "Can not change the class of an instance of a %s class to a %s class.",
 			inst.Class().Metaclass(), class.Metaclass())
 	}
 	args = args[2:]

@@ -78,7 +78,7 @@ func (f *Nth) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	}
 	n := int(num.Int64())
 	if len(list) <= n || n < 0 {
-		slip.NewPanic("%d is outside the bounds a list of length %d", n, len(list))
+		slip.ErrorPanic(s, 0, "%d is outside the bounds a list of length %d", n, len(list))
 	}
 	list[n] = value
 }

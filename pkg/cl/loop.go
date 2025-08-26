@@ -64,7 +64,7 @@ top:
 					result = tr
 					break top
 				}
-				// slip.NewPanic("return from unknown block: %s", tr.Tag)
+				// slip.ErrorPanic(s, depth, "return from unknown block: %s", tr.Tag)
 			}
 			// Anything other than ReturnResult continues.
 		}

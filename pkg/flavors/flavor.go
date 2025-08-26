@@ -235,7 +235,7 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 // MakeInstance creates a new instance but does not call the :init method.
 func (obj *Flavor) MakeInstance() slip.Instance {
 	if obj.abstract || obj.GoMakeOnly {
-		slip.NewPanic("Can not create an instance of flavor %s.", obj.name)
+		slip.ErrorPanic(slip.NewScope(), 0, "Can not create an instance of flavor %s.", obj.name)
 	}
 	inst := Instance{Type: obj}
 	inst.Vars = map[string]slip.Object{}
@@ -400,7 +400,7 @@ top:
 		result = inst
 	case ":document":
 		if len(args) != 2 {
-			slip.NewPanic(":document expects two arguments.")
+			slip.ErrorPanic(s, depth, ":document expects two arguments.")
 		}
 		name := slip.MustBeString(args[0], "name")
 		desc := slip.MustBeString(args[1], "description")

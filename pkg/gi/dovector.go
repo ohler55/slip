@@ -78,7 +78,7 @@ func (f *Dovector) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		if 2 < len(input) {
 			rform = input[2]
 			if 3 < len(input) {
-				slip.NewPanic("too many elements in %s", input)
+				slip.ErrorPanic(s, depth, "too many elements in %s", input)
 			}
 		}
 	} else {

@@ -165,7 +165,7 @@ func getSockopt(s *slip.Scope, fd int, arg slip.Object, depth int) (result slip.
 		)
 	}
 	if err != nil {
-		slip.NewPanic("option %s failed. %s", arg, err)
+		slip.ErrorPanic(s, depth, "option %s failed. %s", arg, err)
 	}
 	return
 }
@@ -205,7 +205,7 @@ func setSockopt(s *slip.Scope, fd int, opt, val slip.Object, depth int) {
 		)
 	}
 	if err != nil {
-		slip.NewPanic("option %s failed. %s", opt, err)
+		slip.ErrorPanic(s, depth, "option %s failed. %s", opt, err)
 	}
 }
 

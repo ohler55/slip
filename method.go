@@ -166,14 +166,15 @@ func (m *Method) HasMethodFromClass(from string) bool {
 // CompareArgs compares argument types and panics on a mismatch.
 func (m *Method) CompareArgs(fd *FuncDoc) {
 	if len(m.Doc.Args) != len(fd.Args) {
-		NewPanic("Lambda list mismatch. %d versus %d aruments for %s.", len(m.Doc.Args), len(fd.Args), m.Name)
+		ErrorPanic(NewScope(), 0, "Lambda list mismatch. %d versus %d aruments for %s.",
+			len(m.Doc.Args), len(fd.Args), m.Name)
 	}
 	if m.Doc.Return != fd.Return {
-		NewPanic("Return type mismatch. %s versus %s for %s.", m.Doc.Return, fd.Return, m.Name)
+		ErrorPanic(NewScope(), 0, "Return type mismatch. %s versus %s for %s.", m.Doc.Return, fd.Return, m.Name)
 	}
 	for i, da := range fd.Args {
 		if da.Type != m.Doc.Args[i].Type {
-			NewPanic("Lambda list mismatch. %d argument type %s versus %s for %s.",
+			ErrorPanic(NewScope(), 0, "Lambda list mismatch. %d argument type %s versus %s for %s.",
 				i, m.Doc.Args[i].Type, da.Type, m.Name)
 		}
 	}
@@ -183,7 +184,7 @@ func (m *Method) CompareArgs(fd *FuncDoc) {
 // to a method if the argument count is outside the expected bounds.
 func MethodArgCountCheck(s *Scope, depth int, inst Instance, method string, cnt, mn, mx int) {
 	if cnt < mn {
-		NewPanic("Too few arguments to the %s %s method. At least %d expected but got %d.",
+		ErrorPanic(s, 0, "Too few arguments to the %s %s method. At least %d expected but got %d.",
 			inst.Class().Name(), method, mn, cnt)
 	}
 	if mx != -1 && mx < cnt {

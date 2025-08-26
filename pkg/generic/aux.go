@@ -49,7 +49,7 @@ func (aux *Aux) Call(gf slip.Object, s *slip.Scope, args slip.List, depth int) s
 	// All calls must match the gf-lambda-list so check here as much as
 	// reasonable.
 	if len(args) < aux.reqCnt {
-		slip.NewPanic("generic-function %s requires at least %d arguments. Received %d.",
+		slip.ErrorPanic(s, depth, "generic-function %s requires at least %d arguments. Received %d.",
 			aux.docs.Name, aux.reqCnt, len(args))
 	}
 	aux.moo.Lock()

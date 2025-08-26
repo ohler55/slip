@@ -107,7 +107,7 @@ func (f *ParseFloat) Call(s *slip.Scope, args slip.List, depth int) (result slip
 			end = len(ra)
 		}
 		if start < 0 || len(ra) <= start || end < 0 || len(ra) < end || end < start {
-			slip.NewPanic("the bounding indices %d and %d are not valid for string of length %d",
+			slip.ErrorPanic(s, depth, "the bounding indices %d and %d are not valid for string of length %d",
 				start, end, len(ra))
 		}
 		ra = ra[start:end]
@@ -146,7 +146,7 @@ func (f *ParseFloat) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	} else {
 		f64, err := strconv.ParseFloat(string(buf), 64)
 		if err != nil {
-			slip.NewPanic("parsing float failed: %s", err)
+			slip.ErrorPanic(s, depth, "parsing float failed: %s", err)
 		}
 		switch typ {
 		case nil, slip.DoubleFloatSymbol:

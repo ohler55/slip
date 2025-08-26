@@ -81,7 +81,7 @@ func list2TestKeyArgs(
 				slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 			}
 			if len(args)-1 <= pos {
-				slip.NewPanic("%s missing an argument", sym)
+				slip.ErrorPanic(s, depth, "%s missing an argument", sym)
 			}
 			switch strings.ToLower(string(sym)) {
 			case ":key":
@@ -216,11 +216,11 @@ func bitOpArrays(s *slip.Scope, f slip.Object, args slip.List, depth int) (a1, a
 		d1 := t1.Dimensions()
 		d2 := t2.Dimensions()
 		if len(d1) != len(d2) {
-			slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
+			slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, t2)
 		}
 		for i, d := range d1 {
 			if d2[i] != d {
-				slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
+				slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, t2)
 			}
 		}
 		if 2 < len(args) {
@@ -230,11 +230,11 @@ func bitOpArrays(s *slip.Scope, f slip.Object, args slip.List, depth int) (a1, a
 			}
 			dr := ra.Dimensions()
 			if len(d1) != len(dr) {
-				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+				slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, ra)
 			}
 			for i, d := range d1 {
 				if dr[i] != d {
-					slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+					slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, ra)
 				}
 			}
 			r = ra
@@ -249,7 +249,7 @@ func bitOpArrays(s *slip.Scope, f slip.Object, args slip.List, depth int) (a1, a
 			slip.TypePanic(s, depth, "bit-array2", args[1], "bit-array")
 		}
 		if t1.Length() != t2.Length() {
-			slip.NewPanic("%s and %s do not have the same dimensions.", t1, t2)
+			slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, t2)
 		}
 		if 2 < len(args) {
 			ra, ok := args[2].(*slip.BitVector)
@@ -257,7 +257,7 @@ func bitOpArrays(s *slip.Scope, f slip.Object, args slip.List, depth int) (a1, a
 				slip.TypePanic(s, depth, "opt-arg", args[2], "bit-array")
 			}
 			if t1.Len != ra.Len {
-				slip.NewPanic("%s and %s do not have the same dimensions.", t1, ra)
+				slip.ErrorPanic(s, depth, "%s and %s do not have the same dimensions.", t1, ra)
 			}
 			r = ra
 		} else {
@@ -281,7 +281,7 @@ func OpenPlugin(filepath string) {
 	if _, err := plugin.Open(filepath); err != nil {
 		// The error is a error string so just check the contents.
 		if !strings.Contains(err.Error(), "plugin already loaded") {
-			slip.NewPanic("plugin %s open failed. %s", filepath, err)
+			slip.ErrorPanic(slip.NewScope(), 0, "plugin %s open failed. %s", filepath, err)
 		}
 	}
 }

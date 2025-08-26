@@ -64,7 +64,7 @@ func (f *MakeString) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 				slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 			}
 			if len(args)-1 <= pos {
-				slip.NewPanic("%s missing an argument", sym)
+				slip.ErrorPanic(s, depth, "%s missing an argument", sym)
 			}
 			switch strings.ToLower(string(sym)) {
 			case ":initial-element":

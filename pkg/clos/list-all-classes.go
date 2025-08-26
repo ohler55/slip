@@ -52,11 +52,11 @@ func (f *ListAllClasses) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 			p = tv
 		case slip.Symbol:
 			if p = slip.FindPackage(string(tv)); p == nil {
-				slip.NewPanic("%s does not name a package.", tv)
+				slip.ErrorPanic(s, depth, "%s does not name a package.", tv)
 			}
 		case slip.String:
 			if p = slip.FindPackage(string(tv)); p == nil {
-				slip.NewPanic("%s does not name a package.", tv)
+				slip.ErrorPanic(s, depth, "%s does not name a package.", tv)
 			}
 		default:
 			slip.TypePanic(s, depth, ":package", v, "symbol", "string", "package")

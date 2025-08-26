@@ -115,7 +115,7 @@ func compareBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int)
 					case jp.Root, jp.At:
 						// ignore
 					default:
-						slip.NewPanic("ignores path fragment must be child, nth, and wildcard and not %s (%T)",
+						slip.ErrorPanic(s, depth, "ignores path fragment must be child, nth, and wildcard and not %s (%T)",
 							jp.Expr{tf}, tf)
 					}
 				}

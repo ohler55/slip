@@ -58,7 +58,7 @@ func (f *ArrayDimension) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 		slip.TypePanic(s, depth, "axis-number", args[1], "fixnum")
 	}
 	if axis < 0 || len(dims) <= axis {
-		slip.NewPanic("Axis number %d is out of range for array of rank %d.", axis, len(dims))
+		slip.ErrorPanic(s, depth, "Axis number %d is out of range for array of rank %d.", axis, len(dims))
 	}
 	return slip.Fixnum(dims[axis])
 }

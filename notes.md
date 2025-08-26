@@ -4,14 +4,13 @@
 
 - next
 
+- release 1.2.0
+ - clos, generics
+---------------------
+- docs to explain implementation and deviations of clos and others
+
 ---------------------
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
-
- - plugins
-  - PkgUse with clos and generics
-
-- replace in slip
- - NewPanic => ErrorPanic where there is a scope and depth (only in slip)
 
 ----------
 - for later
@@ -35,9 +34,6 @@
 ---------------------
  - flavor allow out of order defflavor like standard-class
  - rename bag-flavor to just bag?
-
----------------------
-- docs to explain implementation and deviations of clos and others
 
 -----------------
   - [ ] inspect [interactive]

@@ -89,10 +89,10 @@ func (defaultSharedInitializeCaller) Call(s *slip.Scope, args slip.List, depth i
 	for k, v := range argMap {
 		sd := obj.Type.initArgDef(k)
 		if sd == nil {
-			slip.NewPanic("%s is not a valid initarg for %s.", k, obj.Type.Name())
+			slip.ErrorPanic(s, depth, "%s is not a valid initarg for %s.", k, obj.Type.Name())
 		}
 		if n, has := nameMap[sd.name]; has {
-			slip.NewPanic("Duplicate initarg (%s) for slot %s. %s already specified.", sd.name, k, n)
+			slip.ErrorPanic(s, depth, "Duplicate initarg (%s) for slot %s. %s already specified.", sd.name, k, n)
 		}
 		obj.setSlot(s, sd, v, depth)
 		nameMap[sd.name] = k

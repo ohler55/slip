@@ -96,7 +96,7 @@ func defDirectMethod(s *slip.Scope, ml, args slip.List, depth int) slip.Object {
 	)
 	switch len(ml) {
 	case 0, 1:
-		slip.NewPanic("Too few elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml))
+		slip.ErrorPanic(s, depth, "Too few elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml))
 	case 2:
 		if sym, ok2 := ml[0].(slip.Symbol); ok2 {
 			class = slip.FindClass(string(sym))
@@ -109,7 +109,7 @@ func defDirectMethod(s *slip.Scope, ml, args slip.List, depth int) slip.Object {
 			daemon = string(sym)
 		}
 	default:
-		slip.NewPanic("Too many elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml))
+		slip.ErrorPanic(s, depth, "Too many elements in the method for defmethod. Expected 2 or 3 but got %d.", len(ml))
 	}
 	if sym, ok2 := ml[len(ml)-1].(slip.Symbol); ok2 && 1 < len(sym) && sym[0] == ':' {
 		method = string(sym)

@@ -140,8 +140,3 @@ func WrapError(s *Scope, obj Instance, name string, args List) *Panic {
 	}
 	return &p
 }
-
-// NewPanic returns a Panic object that can then be used with a call to panic.
-func NewPanic(format string, args ...any) {
-	panic(ErrorNew(NewScope(), 0, format, args...))
-}

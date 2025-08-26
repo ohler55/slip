@@ -46,7 +46,7 @@ func (f *MakeInetAddress) Call(s *slip.Scope, args slip.List, depth int) slip.Ob
 	}
 	addr := slip.Octets(netip.MustParseAddr(string(str)).AsSlice())
 	if len(addr) != 4 {
-		slip.NewPanic("%s is not a valid IPv4 address", str)
+		slip.ErrorPanic(s, depth, "%s is not a valid IPv4 address", str)
 	}
 	return addr
 }

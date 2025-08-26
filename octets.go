@@ -117,7 +117,7 @@ func (obj Octets) Dimensions() []int {
 // Adjust array with new parameters.
 func (obj Octets) Adjust(dims []int, eType Symbol, initVal Object, initContent List, fillPtr int) VectorLike {
 	if len(dims) != 1 {
-		NewPanic("Expected 1 new dimensions for a octets %s, but received %d.", obj, len(dims))
+		ErrorPanic(NewScope(), 0, "Expected 1 new dimensions for a octets %s, but received %d.", obj, len(dims))
 	}
 	if eType != OctetSymbol {
 		TypePanic(NewScope(), 0, ":element-type", eType, "octet")
@@ -132,7 +132,8 @@ func (obj Octets) Adjust(dims []int, eType Symbol, initVal Object, initContent L
 	}
 	if initContent != nil {
 		if len(initContent) != dims[0] {
-			NewPanic("Malformed :initial-contents. Dimensions on axis 0 is %d but initial-content length is %d.",
+			ErrorPanic(NewScope(), 0,
+				"Malformed :initial-contents. Dimensions on axis 0 is %d but initial-content length is %d.",
 				dims[0], len(initContent))
 		}
 		for _, v := range initContent {
@@ -161,11 +162,12 @@ func (obj Octets) Adjust(dims []int, eType Symbol, initVal Object, initContent L
 // Get the value at the location identified by the indexes.
 func (obj Octets) Get(indexes ...int) Object {
 	if len(indexes) != 1 {
-		NewPanic("Wrong number of subscripts, %d, for octets of rank 1.", len(indexes))
+		ErrorPanic(NewScope(), 0, "Wrong number of subscripts, %d, for octets of rank 1.", len(indexes))
 	}
 	pos := indexes[0]
 	if pos < 0 || len(obj) <= pos {
-		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, len(obj))
+		ErrorPanic(NewScope(), 0, "Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.",
+			pos, len(obj))
 	}
 	return Octet(obj[pos])
 }
@@ -173,11 +175,12 @@ func (obj Octets) Get(indexes ...int) Object {
 // Set a value at the location identified by the indexes.
 func (obj Octets) Set(value Object, indexes ...int) {
 	if len(indexes) != 1 {
-		NewPanic("Wrong number of subscripts, %d, for octets of rank 1.", len(indexes))
+		ErrorPanic(NewScope(), 0, "Wrong number of subscripts, %d, for octets of rank 1.", len(indexes))
 	}
 	pos := indexes[0]
 	if pos < 0 || len(obj) <= pos {
-		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, len(obj))
+		ErrorPanic(NewScope(), 0, "Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.",
+			pos, len(obj))
 	}
 	if num, ok := value.(Integer); ok && num.IsInt64() && 0 <= num.Int64() && num.Int64() < 256 {
 		obj[pos] = byte(num.Int64())
@@ -189,11 +192,12 @@ func (obj Octets) Set(value Object, indexes ...int) {
 // MajorIndex for the indexes provided.
 func (obj Octets) MajorIndex(indexes ...int) int {
 	if len(indexes) != 1 {
-		NewPanic("Wrong number of subscripts, %d, for array of rank 1.", len(indexes))
+		ErrorPanic(NewScope(), 0, "Wrong number of subscripts, %d, for array of rank 1.", len(indexes))
 	}
 	pos := indexes[0]
 	if pos < 0 || len(obj) <= pos {
-		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, len(obj))
+		ErrorPanic(NewScope(), 0, "Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.",
+			pos, len(obj))
 	}
 	return pos
 }
@@ -201,7 +205,8 @@ func (obj Octets) MajorIndex(indexes ...int) int {
 // MajorGet for the index provided.
 func (obj Octets) MajorGet(index int) Object {
 	if index < 0 || len(obj) <= index {
-		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj))
+		ErrorPanic(NewScope(), 0, "Invalid major index %d for (array %s). Should be between 0 and %d.",
+			index, obj, len(obj))
 	}
 	return obj.Get(index)
 }
@@ -209,7 +214,8 @@ func (obj Octets) MajorGet(index int) Object {
 // MajorSet for the index provided.
 func (obj Octets) MajorSet(index int, value Object) {
 	if index < 0 || len(obj) <= index {
-		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj))
+		ErrorPanic(NewScope(), 0, "Invalid major index %d for (array %s). Should be between 0 and %d.",
+			index, obj, len(obj))
 	}
 	obj.Set(value, index)
 }

@@ -424,7 +424,7 @@ func (c *client) listen(s *slip.Scope) {
 					case slip.Symbol("result"):
 						c.results <- list[1:]
 					case slip.Symbol("error"):
-						serr := formError(list)
+						serr := formError(s, list)
 						switch tid := list[1].(type) {
 						case nil, slip.Fixnum:
 							c.results <- slip.List{tid, serr}
@@ -444,7 +444,7 @@ func (c *client) listen(s *slip.Scope) {
 	c.active.Store(false)
 }
 
-func formError(list slip.List) (serr slip.Object) {
+func formError(s *slip.Scope, list slip.List) (serr slip.Object) {
 	msg := list[3].(slip.String)
 	class := list[2].(slip.Symbol)
 
@@ -453,7 +453,7 @@ func formError(list slip.List) (serr slip.Object) {
 		obj.Init(slip.NewScope(), slip.List{slip.Symbol(":message"), msg}, 0)
 		serr = obj
 	} else {
-		slip.NewPanic("%s does not designate a condition class.", class)
+		slip.ErrorPanic(s, 0, "%s does not designate a condition class.", class)
 	}
 	return
 }

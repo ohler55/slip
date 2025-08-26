@@ -123,11 +123,12 @@ func (obj *BitVector) At(pos uint) bool {
 // Get the value at the location identified by the indexes.
 func (obj *BitVector) Get(indexes ...int) Object {
 	if len(indexes) != 1 {
-		NewPanic("Wrong number of subscripts, %d, for bit-vector of rank 1.", len(indexes))
+		ErrorPanic(NewScope(), 0, "Wrong number of subscripts, %d, for bit-vector of rank 1.", len(indexes))
 	}
 	pos := indexes[0]
 	if pos < 0 || int(obj.Len) <= pos {
-		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, obj.Len)
+		ErrorPanic(NewScope(), 0,
+			"Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, obj.Len)
 	}
 	if obj.At(uint(pos)) {
 		return Bit(1)
@@ -146,17 +147,19 @@ func (obj *BitVector) Put(pos uint, value bool) {
 		}
 		return
 	}
-	NewPanic("Invalid major index %d for (bit-vector %s). Should be between 0 and %d.", pos, obj, obj.Len)
+	ErrorPanic(NewScope(), 0,
+		"Invalid major index %d for (bit-vector %s). Should be between 0 and %d.", pos, obj, obj.Len)
 }
 
 // Set a value at the location identified by the indexes.
 func (obj *BitVector) Set(value Object, indexes ...int) {
 	if len(indexes) != 1 {
-		NewPanic("Wrong number of subscripts, %d, for bit-vector of rank 1.", len(indexes))
+		ErrorPanic(NewScope(), 0, "Wrong number of subscripts, %d, for bit-vector of rank 1.", len(indexes))
 	}
 	pos := indexes[0]
 	if pos < 0 || int(obj.Len) <= pos {
-		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, obj.Len)
+		ErrorPanic(NewScope(), 0,
+			"Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, obj.Len)
 	}
 	if num, ok := value.(Integer); ok && num.IsInt64() {
 		switch num.Int64() {
@@ -274,7 +277,7 @@ func (obj *BitVector) AsList() List {
 // Adjust array with new parameters.
 func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initContent List, fillPtr int) VectorLike {
 	if len(dims) != 1 {
-		NewPanic("Expected 1 new dimensions for a bit-vector %s, but received %d.", obj, len(dims))
+		ErrorPanic(NewScope(), 0, "Expected 1 new dimensions for a bit-vector %s, but received %d.", obj, len(dims))
 	}
 	if eType != BitSymbol {
 		TypePanic(NewScope(), 0, ":element-type", eType, "bit")
@@ -289,7 +292,8 @@ func (obj *BitVector) Adjust(dims []int, eType Symbol, initVal Object, initConte
 	}
 	if initContent != nil {
 		if len(initContent) != dims[0] {
-			NewPanic("Malformed :initial-contents. Dimensions on axis 0 is %d but initial-content length is %d.",
+			ErrorPanic(NewScope(), 0,
+				"Malformed :initial-contents. Dimensions on axis 0 is %d but initial-content length is %d.",
 				dims[0], len(initContent))
 		}
 		for _, v := range initContent {
@@ -367,11 +371,12 @@ func (obj *BitVector) FillPointer() int {
 // MajorIndex for the indexes provided.
 func (obj *BitVector) MajorIndex(indexes ...int) int {
 	if len(indexes) != 1 {
-		NewPanic("Wrong number of subscripts, %d, for array of rank 1.", len(indexes))
+		ErrorPanic(NewScope(), 0, "Wrong number of subscripts, %d, for array of rank 1.", len(indexes))
 	}
 	pos := indexes[0]
 	if pos < 0 || int(obj.Len) <= pos {
-		NewPanic("Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, obj.Len)
+		ErrorPanic(NewScope(), 0,
+			"Invalid index %d for axis 1 of bit-vector. Should be between 0 and %d.", pos, obj.Len)
 	}
 	return pos
 }
@@ -379,7 +384,8 @@ func (obj *BitVector) MajorIndex(indexes ...int) int {
 // MajorGet for the index provided.
 func (obj *BitVector) MajorGet(index int) Object {
 	if index < 0 || int(obj.Len) <= index {
-		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, obj.Len)
+		ErrorPanic(NewScope(), 0,
+			"Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, obj.Len)
 	}
 	return obj.Get(index)
 }
@@ -387,7 +393,8 @@ func (obj *BitVector) MajorGet(index int) Object {
 // MajorSet for the index provided.
 func (obj *BitVector) MajorSet(index int, value Object) {
 	if index < 0 || int(obj.Len) <= index {
-		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, obj.Len)
+		ErrorPanic(NewScope(), 0,
+			"Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, obj.Len)
 	}
 	obj.Set(value, index)
 }
@@ -395,7 +402,8 @@ func (obj *BitVector) MajorSet(index int, value Object) {
 // SetFillPointer sets the fill-pointer.
 func (obj *BitVector) SetFillPointer(fp int) {
 	if fp < 0 || int(obj.Len) <= fp {
-		NewPanic("Invalid fill-pointer %d for (array %s). Should be between 0 and %d.", fp, obj, obj.Len)
+		ErrorPanic(NewScope(), 0,
+			"Invalid fill-pointer %d for (array %s). Should be between 0 and %d.", fp, obj, obj.Len)
 	}
 	obj.FillPtr = fp
 }

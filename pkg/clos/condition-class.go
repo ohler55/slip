@@ -44,7 +44,7 @@ func (c *ConditionClass) Eval(s *slip.Scope, depth int) slip.Object {
 // MakeInstance creates a new instance but does not call the :init method.
 func (c *ConditionClass) MakeInstance() slip.Instance {
 	if len(c.precedence) == 0 {
-		slip.NewPanic("The class %s has undefined superclasses.", c.name)
+		slip.ErrorPanic(slip.NewScope(), 0, "The class %s has undefined superclasses.", c.name)
 	}
 	obj := StandardObject{
 		HasSlots: HasSlots{

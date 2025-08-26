@@ -52,7 +52,7 @@ func (f *stringModify) Call(s *slip.Scope, args slip.List, depth int) (result sl
 			slip.TypePanic(s, depth, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			slip.NewPanic("%s missing an argument", sym)
+			slip.ErrorPanic(s, depth, "%s missing an argument", sym)
 		}
 		var n slip.Fixnum
 		switch strings.ToLower(string(sym)) {
@@ -73,7 +73,7 @@ func (f *stringModify) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		}
 	}
 	if end < start || len(str) < end || start < 0 {
-		slip.NewPanic("start and end of %d, %d are not valid for a string of length %d", start, end, len(str))
+		slip.ErrorPanic(s, depth, "start and end of %d, %d are not valid for a string of length %d", start, end, len(str))
 	}
 	if 0 < start || end < len(str) {
 		ra := []rune(str)

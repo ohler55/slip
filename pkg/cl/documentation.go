@@ -163,5 +163,5 @@ Top:
 }
 
 func (f *Documentation) unsup(docType, val slip.Object) {
-	slip.NewPanic("Unsupported documentation: doc-type %s for type %T", docType, val)
+	slip.ErrorPanic(slip.NewScope(), 0, "Unsupported documentation: doc-type %s for type %T", docType, val)
 }

@@ -74,7 +74,7 @@ func (obj *Array) calcAndSet(list List) {
 			size *= len(list)
 			if i < len(obj.dims)-1 {
 				if list, ok = list[0].(List); !ok {
-					NewPanic("Invalid data for a %d dimension array. %s", len(obj.dims), list)
+					ErrorPanic(NewScope(), 0, "Invalid data for a %d dimension array. %s", len(obj.dims), list)
 				}
 			}
 		}
@@ -177,7 +177,7 @@ func (obj *Array) Set(value Object, indexes ...int) {
 // MajorIndex for the indexes provided.
 func (obj *Array) MajorIndex(indexes ...int) int {
 	if len(indexes) != len(obj.dims) {
-		NewPanic("Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims))
+		ErrorPanic(NewScope(), 0, "Wrong number of subscripts, %d, for array of rank %d.", len(indexes), len(obj.dims))
 	}
 	pos := 0
 	for i, index := range indexes {
@@ -187,7 +187,7 @@ func (obj *Array) MajorIndex(indexes ...int) int {
 			for j, d2 := range obj.dims {
 				dims[j] = Fixnum(d2)
 			}
-			NewPanic("Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
+			ErrorPanic(NewScope(), 0, "Invalid index %d for axis %d of (array %s). Should be between 0 and %d.",
 				index, i, dims, d)
 		}
 		pos += index * obj.sizes[i]
@@ -198,7 +198,8 @@ func (obj *Array) MajorIndex(indexes ...int) int {
 // MajorGet for the index provided.
 func (obj *Array) MajorGet(index int) Object {
 	if index < 0 || len(obj.elements) <= index {
-		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj.elements))
+		ErrorPanic(NewScope(), 0, "Invalid major index %d for (array %s). Should be between 0 and %d.",
+			index, obj, len(obj.elements))
 	}
 	return obj.elements[index]
 }
@@ -206,7 +207,8 @@ func (obj *Array) MajorGet(index int) Object {
 // MajorSet for the index provided.
 func (obj *Array) MajorSet(index int, value Object) {
 	if index < 0 || len(obj.elements) <= index {
-		NewPanic("Invalid major index %d for (array %s). Should be between 0 and %d.", index, obj, len(obj.elements))
+		ErrorPanic(NewScope(), 0, "Invalid major index %d for (array %s). Should be between 0 and %d.",
+			index, obj, len(obj.elements))
 	}
 	obj.elements[index] = value
 }
@@ -247,7 +249,8 @@ func (obj *Array) SetAll(all List) {
 func (obj *Array) setDim(list List, di, ei int) int {
 	d := obj.dims[di]
 	if d != len(list) {
-		NewPanic("Malformed :initial-contents: Dimension of axis %d is %d but received %d.", di, d, len(list))
+		ErrorPanic(NewScope(), 0,
+			"Malformed :initial-contents: Dimension of axis %d is %d but received %d.", di, d, len(list))
 	}
 	if di == len(obj.dims)-1 {
 		for i := 0; i < d; i++ {
@@ -270,7 +273,8 @@ func (obj *Array) setDim(list List, di, ei int) int {
 // Adjust array with new parameters.
 func (obj *Array) Adjust(dimensions []int, elementType Symbol, initElement Object, initContent List) *Array {
 	if len(dimensions) != len(obj.dims) {
-		NewPanic("Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dimensions))
+		ErrorPanic(NewScope(), 0,
+			"Expected %d new dimensions for array %s, but received %d.", len(obj.dims), obj, len(dimensions))
 	}
 	adjustable := obj.adjustable
 	if !adjustable {

@@ -88,7 +88,7 @@ func (f *Save) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			slip.TypePanic(s, depth, "buffer-size", val, "fixnum")
 		}
 	}
-	b := saveObj(nil, args[0], w, bsize)
+	b := saveObj(s, nil, args[0], w, bsize, depth)
 	if 0 < len(b) {
 		if _, err := w.Write(b); err != nil {
 			panic(err)
@@ -97,7 +97,7 @@ func (f *Save) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return nil
 }
 
-func saveObj(b []byte, obj slip.Object, w io.Writer, bsize int) []byte {
+func saveObj(s *slip.Scope, b []byte, obj slip.Object, w io.Writer, bsize, depth int) []byte {
 Top:
 	switch to := obj.(type) {
 	case nil:
@@ -112,7 +112,7 @@ Top:
 			if 0 < i {
 				b = append(b, ' ')
 			}
-			b = saveObj(b, element, w, bsize)
+			b = saveObj(s, b, element, w, bsize, depth)
 		}
 		b = append(b, ')')
 	case slip.Symbol:
@@ -168,7 +168,7 @@ Top:
 			b = append(b, "#0A"...)
 		default:
 			b = append(b, '#')
-			b = saveObj(b, slip.Fixnum(len(to.Dimensions())), w, bsize)
+			b = saveObj(s, b, slip.Fixnum(len(to.Dimensions())), w, bsize, depth)
 			b = append(b, 'A')
 		}
 		goto Top
@@ -206,7 +206,7 @@ Top:
 		end := len(b)
 		b = to.Append(b)
 		if end+2 < len(b) && b[end] == '#' && b[end+1] == '<' {
-			slip.NewPanic("%s can not be written readably", to)
+			slip.ErrorPanic(s, depth, "%s can not be written readably", to)
 		}
 	}
 	if bsize < len(b) {

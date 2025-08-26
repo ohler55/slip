@@ -87,7 +87,7 @@ func (f *DecryptFile) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 		}
 	}
 	if len(data) < bsize {
-		slip.NewPanic("decrypt-file data is too short")
+		slip.ErrorPanic(s, depth, "decrypt-file data is too short")
 	}
 	non := data[:bsize]
 	data = data[bsize:]

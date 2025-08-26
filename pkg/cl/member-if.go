@@ -79,7 +79,7 @@ func (f *MemberIf) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		}
 	}
 	if pos < len(args) {
-		slip.NewPanic("extra arguments that are not keyword and value pairs")
+		slip.ErrorPanic(s, depth, "extra arguments that are not keyword and value pairs")
 	}
 	d2 := depth + 1
 	for i, a := range list {

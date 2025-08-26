@@ -78,7 +78,7 @@ func listenSocket(s *slip.Scope, self *flavors.Instance, args slip.List, depth i
 	}
 	var fd int
 	if fd, ok = self.Any.(int); !ok {
-		slip.NewPanic("%s is not initialized", self)
+		slip.ErrorPanic(s, depth, "%s is not initialized", self)
 	}
 	if err := syscall.Listen(fd, int(backlog)); err != nil {
 		panic(err)

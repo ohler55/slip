@@ -49,17 +49,17 @@ func (f *Elt) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	index := getFixnumArg(s, args[1], "index", depth)
 	switch seq := args[0].(type) {
 	case slip.List:
-		f.checkIndex(index, len(seq))
+		f.checkIndex(s, index, len(seq), depth)
 		result = seq[index]
 	case slip.Octets:
-		f.checkIndex(index, len(seq))
+		f.checkIndex(s, index, len(seq), depth)
 		result = slip.Octet(seq[index])
 	case slip.String:
 		ra := []rune(seq)
-		f.checkIndex(index, len(ra))
+		f.checkIndex(s, index, len(ra), depth)
 		result = slip.Character(ra[index])
 	case slip.VectorLike:
-		f.checkIndex(index, seq.Length())
+		f.checkIndex(s, index, seq.Length(), depth)
 		result = seq.Get(index)
 	default:
 		slip.TypePanic(s, depth, "sequence", seq, "sequence")
@@ -73,23 +73,23 @@ func (f *Elt) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	index := getFixnumArg(s, args[1], "index", 0)
 	switch seq := args[0].(type) {
 	case slip.List:
-		f.checkIndex(index, len(seq))
+		f.checkIndex(s, index, len(seq), 0)
 		seq[index] = value
 	case slip.Octets:
-		f.checkIndex(index, len(seq))
+		f.checkIndex(s, index, len(seq), 0)
 		seq[index] = byte(slip.ToOctet(value).(slip.Octet))
 	case slip.String:
-		slip.NewPanic("setf on a string character is not possible")
+		slip.ErrorPanic(s, 0, "setf on a string character is not possible")
 	case slip.VectorLike:
-		f.checkIndex(index, seq.Length())
+		f.checkIndex(s, index, seq.Length(), 0)
 		seq.Set(value, index)
 	default:
 		slip.TypePanic(s, 0, "sequence", seq, "sequence")
 	}
 }
 
-func (f *Elt) checkIndex(index, size int) {
+func (f *Elt) checkIndex(s *slip.Scope, index, size, depth int) {
 	if size <= index {
-		slip.NewPanic("index %d is greater than the size of %d", index, size)
+		slip.ErrorPanic(s, depth, "index %d is greater than the size of %d", index, size)
 	}
 }

@@ -153,7 +153,7 @@ func socketSend(s *slip.Scope, fd int, args slip.List, depth int) int {
 			if num, ok := value.(slip.Fixnum); ok && 0 <= num && int(num) < len(buf) {
 				buf = buf[int(num):]
 			} else {
-				slip.NewPanic(":offset must be a positive fixnum less than the length of %d", len(buf))
+				slip.ErrorPanic(s, depth, ":offset must be a positive fixnum less than the length of %d", len(buf))
 			}
 		}
 		if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":timeout")); has && value != nil {
@@ -176,10 +176,10 @@ func socketSend(s *slip.Scope, fd int, args slip.List, depth int) int {
 		wset.Set(fd)
 		eset.Set(fd)
 		if err := Select(nil, &wset, &eset, timeout); err != nil || eset.IsSet(fd) {
-			slip.NewPanic("write error")
+			slip.ErrorPanic(s, depth, "write error")
 		}
 		if !wset.IsSet(fd) {
-			slip.NewPanic("write timed out")
+			slip.ErrorPanic(s, depth, "write timed out")
 		}
 	}
 	typ, err := syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_TYPE)
@@ -217,14 +217,14 @@ func datagramSend(s *slip.Scope, fd int, buf []byte, args slip.List, depth int) 
 		if flag, has := msgFlagMap[slip.Symbol(":nosignal")]; has {
 			flags |= flag
 		} else {
-			slip.NewPanic(":nosignal flag not support on %s", runtime.GOOS)
+			slip.ErrorPanic(s, depth, ":nosignal flag not support on %s", runtime.GOOS)
 		}
 	}
 	if value, has := slip.GetArgsKeyValue(args, slip.Symbol(":confirm")); has && value != nil {
 		if flag, has := msgFlagMap[slip.Symbol(":confirm")]; has {
 			flags |= flag
 		} else {
-			slip.NewPanic(":confirm flag not support on %s", runtime.GOOS)
+			slip.ErrorPanic(s, depth, ":confirm flag not support on %s", runtime.GOOS)
 		}
 	}
 	sa, _ := syscall.Getpeername(fd)
@@ -239,7 +239,7 @@ func datagramSend(s *slip.Scope, fd int, buf []byte, args slip.List, depth int) 
 		}
 	}
 	if sa == nil {
-		slip.NewPanic("no address provided")
+		slip.ErrorPanic(s, depth, "no address provided")
 	}
 	if err := syscall.Sendmsg(fd, buf, nil, sa, flags); err != nil {
 		panic(err)
