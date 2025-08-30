@@ -22,9 +22,6 @@
 
 ---------------------
 
-- docs to explain implementation and deviations of clos and others
-
----------------------
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
 ----------
