@@ -6,7 +6,22 @@
 
 - release 1.2.0
  - clos, generics
+
 ---------------------
+- slip-jet
+ - consumer manager (stream and client)
+  - GetConsumer => Consumer??
+  - PauseConsumer
+  - ResumeConsumer
+  - UnpinConsumer
+  - CreatePushConsumer
+  - UpdatePushConsumer
+  - CreateOrUpdatePushConsumer
+  - PushConsumer or GetPushConsumer?
+ - GetStream to Stream in client?
+
+---------------------
+
 - docs to explain implementation and deviations of clos and others
 
 ---------------------
