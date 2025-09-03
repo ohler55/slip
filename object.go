@@ -121,7 +121,11 @@ func SimpleObject(val any) (obj Object) {
 	case *Panic:
 		obj = tv.Value
 		if obj == nil {
-			obj = String(tv.Message)
+			if tv.Condition != nil {
+				obj = tv.Condition
+			} else {
+				obj = String(tv.Message)
+			}
 		}
 	case Object:
 		obj = tv
