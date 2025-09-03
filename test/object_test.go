@@ -634,7 +634,7 @@ func TestSimpleObject(t *testing.T) {
 	cond = slip.ErrorNew(scope, 0, "sample").(slip.Instance)
 	p = slip.WrapError(scope, cond, "sample", nil)
 	obj = slip.SimpleObject(p)
-	tt.Equal(t, `"sample"`, obj.String())
+	tt.Equal(t, `/#<error [0-9a-f]+>/`, obj.String())
 }
 
 func TestSimple2(t *testing.T) {

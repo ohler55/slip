@@ -9,16 +9,14 @@
 
 ---------------------
 - slip-jet
- - consumer manager (stream and client)
-  - GetConsumer => Consumer??
-  - PauseConsumer
-  - ResumeConsumer
-  - UnpinConsumer
-  - CreatePushConsumer
-  - UpdatePushConsumer
-  - CreateOrUpdatePushConsumer
-  - PushConsumer or GetPushConsumer?
- - GetStream to Stream in client?
+ - consumer-info updated
+ - consumerconfig updated
+ - consumer managers (stream and client)
+
+- gi/recover
+ - don't call SimpleObject
+  - just for conditions?
+  - maybe any
 
 ---------------------
 

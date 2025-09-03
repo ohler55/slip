@@ -19,6 +19,6 @@ func TestErrorPanic(t *testing.T) {
 func TestErrorMessage(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(recover r r (error "failed: ~A" 123))`,
-		Expect: `"failed: 123"`,
+		Expect: `/#<error [0-9a-f]+>/`,
 	}).Test(t)
 }
