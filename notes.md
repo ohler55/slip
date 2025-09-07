@@ -4,21 +4,6 @@
 
 - next
 
-- release 1.2.0
- - clos, generics
-
----------------------
-- slip-jet
- - consumer-info updated
- - consumerconfig updated
- - consumer managers (stream and client)
-
-- gi/recover
- - don't call SimpleObject
-  - just for conditions?
-  - maybe any
-
----------------------
 
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 
