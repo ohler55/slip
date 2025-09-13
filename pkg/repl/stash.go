@@ -73,7 +73,7 @@ func (s *Stash) LoadExpanded(filename string) {
 
 // Add adds a form to the stash.
 func (s *Stash) Add(form Form) {
-	if form.Empty() {
+	if form.Empty() || len(s.filename) == 0 {
 		return
 	}
 	if 0 < len(s.forms) && form.Equal(s.forms[len(s.forms)-1]) {
@@ -162,6 +162,9 @@ func (s *Stash) Size() int {
 // Clear the stash entries in the range specified..
 func (s *Stash) Clear(start, end int) {
 	s.clear(start, end)
+	if len(s.filename) == 0 {
+		return
+	}
 	f, err := os.OpenFile(s.filename, os.O_TRUNC|os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)

@@ -80,6 +80,7 @@ var (
 func init() {
 	scope.SetSynchronized(false)
 	if ev := os.Getenv("XDG_CONFIG_HOME"); 0 < len(ev) {
+		ev += "/slip"
 		stashLoadPath = append(slip.List{slip.String(ev)}, stashLoadPath...)
 	}
 	if scope.Get(slip.Symbol(printANSI)) != nil {
@@ -212,6 +213,7 @@ func ZeroMods() {
 func FindConfigDir() (dir string) {
 	home, _ := os.UserHomeDir()
 	if path := os.Getenv("XDG_CONFIG_HOME"); 0 < len(path) {
+		path += "/slip"
 		dir = strings.Replace(path, "~", home, 1)
 	} else {
 		for _, path := range []string{"~/.config/slip", "~/.slip"} {
@@ -237,8 +239,8 @@ func initStash() {
 		loadPaths = append(loadPaths, slip.String("."))
 	}
 	name := defaultStashName
-	if len(name) == 0 {
-		name = "stash.lisp"
+	if len(name) == 0 { // indicates no stash
+		return
 	}
 	home, _ := os.UserHomeDir()
 	for _, spath := range loadPaths {
