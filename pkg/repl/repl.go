@@ -211,6 +211,9 @@ func ZeroMods() {
 
 // FindConfigDir finds the preferred config directory.
 func FindConfigDir() (dir string) {
+	if 0 < len(configFilename) {
+		return filepath.Dir(configFilename)
+	}
 	home, _ := os.UserHomeDir()
 	if path := os.Getenv("XDG_CONFIG_HOME"); 0 < len(path) {
 		path += "/slip"
@@ -538,5 +541,12 @@ func setDefaultStashName(value slip.Object) {
 		defaultStashName = string(tv)
 	default:
 		panic("*default-stash-name* must be a string or nil")
+	}
+	if 0 < len(defaultStashName) {
+		dir := FindConfigDir()
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			panic(err)
+		}
+		TheStash.filename = filepath.Join(dir, defaultStashName)
 	}
 }

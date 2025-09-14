@@ -5,7 +5,10 @@
 - next
 
 - load path should be ~/.config/slip/config.lisp
- - on setq *default-stash-name* set filename with expand
+ - on setq *default-stash-name*
+  - make sure stash is written to new path
+  - should stash filename change load existing first or over-write
+
 
  - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
 

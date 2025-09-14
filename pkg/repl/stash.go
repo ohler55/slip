@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/ohler55/slip"
 )
@@ -31,6 +32,9 @@ type Stash struct {
 func (s *Stash) LoadExpanded(filename string) {
 	s.filename = filename
 	s.forms = nil
+	if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+		panic(err)
+	}
 	f, err := os.Open(filename)
 	if err != nil {
 		return

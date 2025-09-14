@@ -106,10 +106,18 @@ func run() {
 	} else {
 		scope = repl.Scope()
 		repl.ZeroMods()
-		if 0 < len(cfgDir) && cfgDir != "-" {
-			path = cfgDir // for defer panic handler
-			repl.SetConfigDir(cfgDir)
-			path = ""
+		if cfgDir != "-" {
+			if 0 < len(cfgDir) {
+				path = cfgDir // for defer panic handler
+				repl.SetConfigDir(cfgDir)
+				path = ""
+			} else {
+				// TBD cleanup
+				cfgDir = repl.FindConfigDir()
+				path = cfgDir // for defer panic handler
+				repl.SetConfigDir(cfgDir)
+				path = ""
+			}
 		}
 	}
 	bag.SetCompileScript(scope)
