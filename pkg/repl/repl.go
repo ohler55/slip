@@ -547,6 +547,8 @@ func setDefaultStashName(value slip.Object) {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			panic(err)
 		}
-		TheStash.filename = filepath.Join(dir, defaultStashName)
+		forms := TheStash.forms
+		TheStash.LoadExpanded(filepath.Join(dir, defaultStashName))
+		TheStash.forms = append(TheStash.forms, forms...)
 	}
 }
