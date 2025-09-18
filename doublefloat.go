@@ -3,7 +3,9 @@
 package slip
 
 import (
+	"bytes"
 	"math/big"
+	"strconv"
 )
 
 // DoubleFloatSymbol is the symbol with a value of "doubleFloat".
@@ -19,7 +21,32 @@ func (obj DoubleFloat) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj DoubleFloat) Append(b []byte) []byte {
-	return printer.Append(b, obj, 0)
+	return obj.Readably(b, &printer)
+}
+
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj DoubleFloat) Readably(b []byte, p *Printer) []byte {
+	// Use the LISP exponent nomenclature by forming the buffer and
+	// then replacing the 'e'.
+	var tmp []byte
+	switch {
+	case p.Readably:
+		// float64 precision is 16.
+		if p.Prec < 16 {
+			tmp = strconv.AppendFloat([]byte{}, float64(obj), 'e', p.Prec, 64)
+		} else {
+			tmp = strconv.AppendFloat([]byte{}, float64(obj), 'e', -1, 64)
+		}
+		b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
+	case p.Prec < 16:
+		b = strconv.AppendFloat(b, float64(obj), 'g', p.Prec, 64)
+	default:
+		tmp = strconv.AppendFloat([]byte{}, float64(obj), 'g', -1, 64)
+		b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
+	}
+	return b
 }
 
 // Simplify the Object into a float64.

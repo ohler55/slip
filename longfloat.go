@@ -3,6 +3,7 @@
 package slip
 
 import (
+	"bytes"
 	"math/big"
 )
 
@@ -29,7 +30,29 @@ func (obj *LongFloat) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj *LongFloat) Append(b []byte) []byte {
-	return printer.Append(b, obj, 0)
+	return obj.Readably(b, &printer)
+}
+
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj *LongFloat) Readably(b []byte, p *Printer) []byte {
+	prec := -1
+	if 0 < p.Prec {
+		prec = int(float64((*big.Float)(obj).Prec()) / prec10t2)
+		if p.Prec < prec {
+			prec = p.Prec
+		}
+	}
+	if p.Readably {
+		// Use the LISP exponent nomenclature by forming the buffer and
+		// then replacing the 'e'.
+		tmp := (*big.Float)(obj).Append([]byte{}, 'e', prec)
+		b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)
+	} else {
+		b = (*big.Float)(obj).Append(b, 'g', prec)
+	}
+	return b
 }
 
 // Simplify the Object into a float64.

@@ -4,6 +4,7 @@ package flavors
 
 import (
 	"io"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -232,9 +233,15 @@ func (obj *Flavor) inheritFlavor(cf *Flavor) {
 	}
 }
 
+func (obj *Flavor) calledFromLISP() bool {
+	_, file, _, ok := runtime.Caller(2)
+
+	return ok && strings.HasSuffix(file, "slip/pkg/clos/make-instance.go")
+}
+
 // MakeInstance creates a new instance but does not call the :init method.
 func (obj *Flavor) MakeInstance() slip.Instance {
-	if obj.abstract || obj.GoMakeOnly {
+	if obj.abstract || (obj.GoMakeOnly && obj.calledFromLISP()) {
 		slip.ErrorPanic(slip.NewScope(), 0, "Can not create an instance of flavor %s.", obj.name)
 	}
 	inst := Instance{Type: obj}

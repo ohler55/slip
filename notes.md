@@ -4,8 +4,6 @@
 
 - next
 
- - GoMakeOnly in flavors should be checked in clos.MakeInstance or pass a flag indicating go or lisp
-
 ----------
 - for later
  - [ ] WITH-ACCESSORS
@@ -18,7 +16,10 @@
 
 -------------------
  - readably branch
-  - add Readably or **Readable** interface
+  - add Readably or **Readable** interface (move logic out or Printer if possible)
+   - floats first and test each printer, pp, snapshot
+   - string
+
    - Readably(b []byte, op ...*slip.Printer) []byte
     - always readable but op[0] for base, radix, prec
     - maybe op[0] for pretty and rightMargin

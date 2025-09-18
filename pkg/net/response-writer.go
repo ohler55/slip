@@ -22,6 +22,7 @@ func defResponseWriter() *flavors.Flavor {
 		&Pkg,
 	)
 	responseWriterFlavor.Final = true
+	responseWriterFlavor.GoMakeOnly = true
 	responseWriterFlavor.DefMethod(":write-status", "", respWriterStatusCaller(true))
 	responseWriterFlavor.DefMethod(":write", "", respWriterWriteCaller(true))
 	responseWriterFlavor.DefMethod(":header", "", respWriterHeaderCaller(true))
