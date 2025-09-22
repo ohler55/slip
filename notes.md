@@ -4,7 +4,26 @@
 
 - next
 
-----------
+ - readably branch
+  - add Readable interface (move logic out or Printer if possible)
+   - floats first and test each printer, pp, snapshot
+   - string
+   - vector
+   - array
+   - octets
+   -
+  - printer default update
+  - pp
+  - snapshot
+
+   - Readably(b []byte, op ...*slip.Printer) []byte
+    - always readable but op[0] for base, radix, prec
+    - maybe op[0] for pretty and rightMargin
+    - maybe op[0].Case
+   - use in printer, pp, snapshot, etc can then decide
+
+---------------------
+
 - for later
  - [ ] WITH-ACCESSORS
  - [ ] ENSURE-GENERIC-FUNCTION
@@ -15,18 +34,6 @@
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
 -------------------
- - readably branch
-  - add Readably or **Readable** interface (move logic out or Printer if possible)
-   - floats first and test each printer, pp, snapshot
-   - string
-
-   - Readably(b []byte, op ...*slip.Printer) []byte
-    - always readable but op[0] for base, radix, prec
-    - maybe op[0] for pretty and rightMargin
-    - maybe op[0].Case
-   - use in printer, pp, snapshot, etc can then decide
-
----------------------
  - flavor allow out of order defflavor like standard-class
  - rename bag-flavor to just bag?
 
