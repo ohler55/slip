@@ -3,7 +3,9 @@
 package slip
 
 import (
+	"bytes"
 	"math/big"
+	"strconv"
 )
 
 // SingleFloatSymbol is the symbol with a value of "singleFloat".
@@ -19,7 +21,32 @@ func (obj SingleFloat) String() string {
 
 // Append a buffer with a representation of the Object.
 func (obj SingleFloat) Append(b []byte) []byte {
-	return printer.Append(b, obj, 0)
+	return obj.Readably(b, &printer)
+}
+
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj SingleFloat) Readably(b []byte, p *Printer) []byte {
+	// Use the LISP exponent nomenclature by forming the buffer and
+	// then replacing the 'e'.
+	var tmp []byte
+	switch {
+	case p.Readably:
+		// float32 precision is 7.
+		if p.Prec < 7 {
+			tmp = strconv.AppendFloat([]byte{}, float64(obj), 'e', p.Prec, 32)
+		} else {
+			tmp = strconv.AppendFloat([]byte{}, float64(obj), 'e', -1, 32)
+		}
+		b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
+	case p.Prec < 7:
+		b = strconv.AppendFloat(b, float64(obj), 'g', p.Prec, 32)
+	default:
+		tmp = strconv.AppendFloat([]byte{}, float64(obj), 'g', -1, 32)
+		b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
+	}
+	return b
 }
 
 // Simplify the Object into a float64.

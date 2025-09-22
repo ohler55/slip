@@ -240,60 +240,6 @@ Top:
 		b = (*big.Rat)(to).Num().Append(b, int(p.Base))
 		b = append(b, '/')
 		b = (*big.Rat)(to).Denom().Append(b, int(p.Base))
-	case SingleFloat:
-		// Use the LISP exponent nomenclature by forming the buffer and
-		// then replacing the 'e'.
-		var tmp []byte
-		switch {
-		case p.Readably:
-			// float32 precision is 7.
-			if p.Prec < 7 {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', p.Prec, 32)
-			} else {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 32)
-			}
-			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
-		case p.Prec < 7:
-			b = strconv.AppendFloat(b, float64(to), 'g', p.Prec, 32)
-		default:
-			tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', -1, 32)
-			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'s'})...)
-		}
-	case DoubleFloat:
-		// Use the LISP exponent nomenclature by forming the buffer and
-		// then replacing the 'e'.
-		var tmp []byte
-		switch {
-		case p.Readably:
-			// float64 precision is 16.
-			if p.Prec < 16 {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', p.Prec, 64)
-			} else {
-				tmp = strconv.AppendFloat([]byte{}, float64(to), 'e', -1, 64)
-			}
-			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
-		case p.Prec < 16:
-			b = strconv.AppendFloat(b, float64(to), 'g', p.Prec, 64)
-		default:
-			tmp = strconv.AppendFloat([]byte{}, float64(to), 'g', -1, 64)
-			b = append(b, bytes.ReplaceAll(bytes.ToLower(tmp), []byte{'e'}, []byte{'d'})...)
-		}
-	case *LongFloat:
-		prec := -1
-		if 0 < p.Prec {
-			prec = int(float64((*big.Float)(to).Prec()) / prec10t2)
-			if p.Prec < prec {
-				prec = p.Prec
-			}
-		}
-		if p.Readably {
-			// Use the LISP exponent nomenclature by forming the buffer and
-			// then replacing the 'e'.
-			tmp := (*big.Float)(to).Append([]byte{}, 'e', prec)
-			b = append(b, bytes.ReplaceAll(tmp, []byte{'e'}, []byte{'L'})...)
-		} else {
-			b = (*big.Float)(to).Append(b, 'g', prec)
-		}
 	case Symbol:
 		if len(to) == 0 {
 			b = append(b, "||"...)
@@ -446,8 +392,12 @@ Top:
 		b = append(b, ' ')
 		b = append(b, to.Name...)
 		b = append(b, '>')
+	case Readble:
+		b = to.Readably(b, p)
 	default:
 		buf := to.Append(nil)
+		// TBD add Readably to all that can be read or keep this?
+		// if p.Readably {
 		if p.Readably && p.ReadablyError && bytes.HasPrefix(buf, []byte("#<")) {
 			PrintNotReadablePanic(NewScope(), level, to, "%s can not be written readably", to)
 		}

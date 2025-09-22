@@ -376,3 +376,10 @@ func TestAll(t *testing.T) {
 	}
 	tt.Equal(t, true, found)
 }
+
+func TestFlavorGoMakeOnly(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(make-instance 'http-response-writer-flavor)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}

@@ -80,6 +80,7 @@ var (
 func init() {
 	scope.SetSynchronized(false)
 	if ev := os.Getenv("XDG_CONFIG_HOME"); 0 < len(ev) {
+		ev += "/slip"
 		stashLoadPath = append(slip.List{slip.String(ev)}, stashLoadPath...)
 	}
 	if scope.Get(slip.Symbol(printANSI)) != nil {
@@ -210,8 +211,12 @@ func ZeroMods() {
 
 // FindConfigDir finds the preferred config directory.
 func FindConfigDir() (dir string) {
+	if 0 < len(configFilename) {
+		return filepath.Dir(configFilename)
+	}
 	home, _ := os.UserHomeDir()
 	if path := os.Getenv("XDG_CONFIG_HOME"); 0 < len(path) {
+		path += "/slip"
 		dir = strings.Replace(path, "~", home, 1)
 	} else {
 		for _, path := range []string{"~/.config/slip", "~/.slip"} {
@@ -237,8 +242,8 @@ func initStash() {
 		loadPaths = append(loadPaths, slip.String("."))
 	}
 	name := defaultStashName
-	if len(name) == 0 {
-		name = "stash.lisp"
+	if len(name) == 0 { // indicates no stash
+		return
 	}
 	home, _ := os.UserHomeDir()
 	for _, spath := range loadPaths {
@@ -536,5 +541,14 @@ func setDefaultStashName(value slip.Object) {
 		defaultStashName = string(tv)
 	default:
 		panic("*default-stash-name* must be a string or nil")
+	}
+	if 0 < len(defaultStashName) {
+		dir := FindConfigDir()
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			panic(err)
+		}
+		forms := TheStash.forms
+		TheStash.LoadExpanded(filepath.Join(dir, defaultStashName))
+		TheStash.forms = append(TheStash.forms, forms...)
 	}
 }
