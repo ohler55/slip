@@ -12,8 +12,6 @@ import (
 	"strings"
 	"unicode"
 	"unsafe"
-
-	"github.com/ohler55/ojg"
 )
 
 const (
@@ -258,14 +256,6 @@ Top:
 			}
 		}
 		b = append(b, p.caseName(string(to))...)
-	case String:
-		if p.Readably {
-			b = ojg.AppendJSONString(b, string(to), false)
-		} else {
-			b = append(b, '"')
-			b = append(b, to...)
-			b = append(b, '"')
-		}
 	case List:
 		if len(to) == 0 {
 			return append(b, p.caseName("nil")...)
