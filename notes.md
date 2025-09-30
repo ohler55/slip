@@ -4,18 +4,6 @@
 
 - next
 
- - readably branch
-  - add Readable interface (move logic out or Printer if possible)
-  - printer default update
-  - pp
-  - snapshot
-
-   - Readably(b []byte, op ...*slip.Printer) []byte
-    - always readable but op[0] for base, radix, prec
-    - maybe op[0] for pretty and rightMargin
-    - maybe op[0].Case
-   - use in printer, pp, snapshot, etc can then decide
-
 ---------------------
 
 - for later
