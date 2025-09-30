@@ -12,12 +12,32 @@ type Symbol string
 
 // String representation of the Object.
 func (obj Symbol) String() string {
-	return string(obj.Append([]byte{}))
+	return string(obj.Readably(nil, &printer))
 }
 
 // Append a buffer with a representation of the Object.
 func (obj Symbol) Append(b []byte) []byte {
-	return printer.Append(b, obj, 0)
+	return obj.Readably(b, &printer)
+}
+
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj Symbol) Readably(b []byte, p *Printer) []byte {
+	if len(obj) == 0 {
+		return append(b, '|', '|')
+	}
+	if obj[0] == ':' {
+		return append(b, p.caseName(string(obj))...)
+	}
+	for _, c := range []byte(obj) {
+		if needPipeMap[c] == 'x' {
+			b = append(b, '|')
+			b = append(b, p.caseName(string(obj))...)
+			return append(b, '|')
+		}
+	}
+	return append(b, p.caseName(string(obj))...)
 }
 
 // Simplify the Object into a string.

@@ -94,6 +94,20 @@ func (obj Character) Append(b []byte) []byte {
 	return append(b, encoded[:n]...)
 }
 
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj Character) Readably(b []byte, p *Printer) []byte {
+	if p.Escape {
+		// The Common Lisp docs are a bit vague and leave options open for
+		// when the #\ escape sequences is used.
+		b = obj.Append(b)
+	} else {
+		b = append(b, string([]rune{rune(obj)})...)
+	}
+	return b
+}
+
 // Simplify the Object into a string.
 func (obj Character) Simplify() any {
 	return string([]rune{rune(obj)})

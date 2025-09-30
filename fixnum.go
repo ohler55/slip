@@ -4,6 +4,7 @@ package slip
 
 import (
 	"math/big"
+	"strconv"
 )
 
 // FixnumSymbol is the symbol with a value of "fixnum".
@@ -14,12 +15,42 @@ type Fixnum int64
 
 // String representation of the Object.
 func (obj Fixnum) String() string {
-	return string(obj.Append([]byte{}))
+	return string(obj.Readably(nil, &printer))
 }
 
 // Append a buffer with a representation of the Object.
 func (obj Fixnum) Append(b []byte) []byte {
-	return printer.Append(b, obj, 0)
+	return obj.Readably(b, &printer)
+}
+
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj Fixnum) Readably(b []byte, p *Printer) []byte {
+	if p.Radix {
+		switch p.Base {
+		case 2:
+			b = append(b, "#b"...)
+			b = strconv.AppendInt(b, int64(obj), int(p.Base))
+		case 8:
+			b = append(b, "#o"...)
+			b = strconv.AppendInt(b, int64(obj), int(p.Base))
+		case 16:
+			b = append(b, "#x"...)
+			b = strconv.AppendInt(b, int64(obj), int(p.Base))
+		case 10:
+			b = strconv.AppendInt(b, int64(obj), 10)
+			b = append(b, '.')
+		default:
+			b = append(b, '#')
+			b = strconv.AppendInt(b, int64(p.Base), 10)
+			b = append(b, 'r')
+			b = strconv.AppendInt(b, int64(obj), int(p.Base))
+		}
+	} else {
+		b = strconv.AppendInt(b, int64(obj), int(p.Base))
+	}
+	return b
 }
 
 // Simplify the Object into an int64.

@@ -14,12 +14,19 @@ type Octet byte
 
 // String representation of the Object.
 func (obj Octet) String() string {
-	return string(obj.Append([]byte{}))
+	return string(obj.Readably(nil, &printer))
 }
 
 // Append a buffer with a representation of the Object.
 func (obj Octet) Append(b []byte) []byte {
-	return printer.Append(b, obj, 0)
+	return obj.Readably(b, &printer)
+}
+
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj Octet) Readably(b []byte, p *Printer) []byte {
+	return Fixnum(obj).Readably(b, p)
 }
 
 // Simplify the Object into an int64.

@@ -7,13 +7,10 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"math/big"
 	"strconv"
 	"strings"
 	"unicode"
 	"unsafe"
-
-	"github.com/ohler55/ojg"
 )
 
 const (
@@ -159,113 +156,6 @@ Top:
 	switch to := obj.(type) {
 	case nil:
 		b = append(b, p.caseName("nil")...)
-	case Character:
-		if p.Escape {
-			// The Common Lisp docs are a bit vague and leave options open for
-			// when the #\ escape sequences is used.
-			b = to.Append(b)
-		} else {
-			b = append(b, string([]rune{rune(to)})...)
-		}
-	case Fixnum:
-		if p.Radix {
-			switch p.Base {
-			case 2:
-				b = append(b, "#b"...)
-				b = strconv.AppendInt(b, int64(to), int(p.Base))
-			case 8:
-				b = append(b, "#o"...)
-				b = strconv.AppendInt(b, int64(to), int(p.Base))
-			case 16:
-				b = append(b, "#x"...)
-				b = strconv.AppendInt(b, int64(to), int(p.Base))
-			case 10:
-				b = strconv.AppendInt(b, int64(to), 10)
-				b = append(b, '.')
-			default:
-				b = append(b, '#')
-				b = strconv.AppendInt(b, int64(p.Base), 10)
-				b = append(b, 'r')
-				b = strconv.AppendInt(b, int64(to), int(p.Base))
-			}
-		} else {
-			b = strconv.AppendInt(b, int64(to), int(p.Base))
-		}
-	case *Bignum:
-		if p.Radix {
-			switch p.Base {
-			case 2:
-				b = append(b, "#b"...)
-				b = (*big.Int)(to).Append(b, int(p.Base))
-			case 8:
-				b = append(b, "#o"...)
-				b = (*big.Int)(to).Append(b, int(p.Base))
-			case 16:
-				b = append(b, "#x"...)
-				b = (*big.Int)(to).Append(b, int(p.Base))
-			case 10:
-				b = (*big.Int)(to).Append(b, int(p.Base))
-				b = append(b, '.')
-			default:
-				b = append(b, '#')
-				b = strconv.AppendInt(b, int64(p.Base), 10)
-				b = append(b, 'r')
-				b = (*big.Int)(to).Append(b, int(p.Base))
-			}
-		} else {
-			b = (*big.Int)(to).Append(b, int(p.Base))
-		}
-	case Octet:
-		obj = Fixnum(to)
-		goto Top
-	case *Ratio:
-		if (*big.Rat)(to).IsInt() {
-			obj = (*Bignum)((*big.Rat)(to).Num())
-			goto Top
-		}
-		if p.Radix {
-			switch p.Base {
-			case 2:
-				b = append(b, "#b"...)
-			case 8:
-				b = append(b, "#o"...)
-			case 16:
-				b = append(b, "#x"...)
-			default:
-				b = append(b, '#')
-				b = strconv.AppendInt(b, int64(p.Base), 10)
-				b = append(b, 'r')
-			}
-		}
-		b = (*big.Rat)(to).Num().Append(b, int(p.Base))
-		b = append(b, '/')
-		b = (*big.Rat)(to).Denom().Append(b, int(p.Base))
-	case Symbol:
-		if len(to) == 0 {
-			b = append(b, "||"...)
-			break
-		}
-		if to[0] == ':' {
-			b = append(b, p.caseName(string(to))...)
-			break
-		}
-		for _, c := range []byte(to) {
-			if needPipeMap[c] == 'x' {
-				b = append(b, '|')
-				b = append(b, p.caseName(string(to))...)
-				b = append(b, '|')
-				break Top
-			}
-		}
-		b = append(b, p.caseName(string(to))...)
-	case String:
-		if p.Readably {
-			b = ojg.AppendJSONString(b, string(to), false)
-		} else {
-			b = append(b, '"')
-			b = append(b, to...)
-			b = append(b, '"')
-		}
 	case List:
 		if len(to) == 0 {
 			return append(b, p.caseName("nil")...)
@@ -386,22 +276,13 @@ Top:
 		name := to.GetName()
 		obj = append(List{Symbol(name)}, to.GetArgs()...)
 		goto Top
-	case *Package:
-		b = append(b, "#<"...)
-		b = append(b, p.caseName("package")...)
-		b = append(b, ' ')
-		b = append(b, to.Name...)
-		b = append(b, '>')
 	case Readble:
 		b = to.Readably(b, p)
 	default:
-		buf := to.Append(nil)
-		// TBD add Readably to all that can be read or keep this?
-		// if p.Readably {
-		if p.Readably && p.ReadablyError && bytes.HasPrefix(buf, []byte("#<")) {
-			PrintNotReadablePanic(NewScope(), level, to, "%s can not be written readably", to)
+		if p.Readably && p.ReadablyError {
+			PrintNotReadablePanic(NewScope(), level, to, "%s a %T can not be written readably", to, to)
 		}
-		b = append(b, buf...)
+		return to.Append(b)
 	}
 	/* TBD
 	if bytes.ContainsRune(b, '\n') {
