@@ -394,11 +394,6 @@ func (obj *Package) Has(name string) (has bool) {
 	return
 }
 
-// String representation of the Object.
-func (obj *Package) String() string {
-	return string(obj.Append([]byte{}))
-}
-
 // Define a new golang function.
 func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc, aux ...any) *FuncInfo {
 	name := strings.ToLower(doc.Name)
@@ -525,9 +520,26 @@ func (obj *Package) Undefine(name string) {
 	}
 }
 
+// String representation of the Object.
+func (obj *Package) String() string {
+	return string(obj.Readably(nil, &printer))
+}
+
 // Append a buffer with a representation of the Object.
 func (obj *Package) Append(b []byte) []byte {
-	return printer.Append(b, obj, 0)
+	return obj.Readably(b, &printer)
+}
+
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj *Package) Readably(b []byte, p *Printer) []byte {
+	b = append(b, "#<"...)
+	b = append(b, p.caseName("package")...)
+	b = append(b, ' ')
+	b = append(b, obj.Name...)
+
+	return append(b, '>')
 }
 
 // Simplify the Object into an int64.

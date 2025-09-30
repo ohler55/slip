@@ -4,6 +4,7 @@ package slip
 
 import (
 	"math/big"
+	"strconv"
 )
 
 // RatioSymbol is the symbol with a value of "ratio".
@@ -31,12 +32,40 @@ func NewBigRatio(num, denom *big.Int) *Ratio {
 
 // String representation of the Object.
 func (obj *Ratio) String() string {
-	return string(obj.Append([]byte{}))
+	return string(obj.Readably(nil, &printer))
 }
 
 // Append a buffer with a representation of the Object.
 func (obj *Ratio) Append(b []byte) []byte {
-	return printer.Append(b, obj, 0)
+	return obj.Readably(b, &printer)
+}
+
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj *Ratio) Readably(b []byte, p *Printer) []byte {
+	if (*big.Rat)(obj).IsInt() {
+		return (*Bignum)((*big.Rat)(obj).Num()).Readably(b, p)
+	}
+	if p.Radix {
+		switch p.Base {
+		case 2:
+			b = append(b, "#b"...)
+		case 8:
+			b = append(b, "#o"...)
+		case 16:
+			b = append(b, "#x"...)
+		default:
+			b = append(b, '#')
+			b = strconv.AppendInt(b, int64(p.Base), 10)
+			b = append(b, 'r')
+		}
+	}
+	b = (*big.Rat)(obj).Num().Append(b, int(p.Base))
+	b = append(b, '/')
+	b = (*big.Rat)(obj).Denom().Append(b, int(p.Base))
+
+	return b
 }
 
 // Simplify the Object into an int64.

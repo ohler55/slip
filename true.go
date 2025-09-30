@@ -21,6 +21,13 @@ func (obj boolean) Append(b []byte) []byte {
 	return append(b, 't')
 }
 
+// Readably appends the object to a byte slice. If p.Readbly is true the
+// objects is appended in a readable format otherwise a simple append which
+// may or may not be readable.
+func (obj boolean) Readably(b []byte, p *Printer) []byte {
+	return append(b, 't')
+}
+
 // Simplify the Object into true.
 func (obj boolean) Simplify() any {
 	return true

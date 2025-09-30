@@ -6,12 +6,6 @@
 
  - readably branch
   - add Readable interface (move logic out or Printer if possible)
-   + floats first and test each printer, pp, snapshot
-   + string
-   - vector
-   - array
-   - octets
-   -
   - printer default update
   - pp
   - snapshot
