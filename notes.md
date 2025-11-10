@@ -3,6 +3,18 @@
 - **multipass** or utm for linux
 
 - next
+---------------------
+ - benchmark compare http get
+  - golang vs slip
+
+ - http-request (url method body &key headers)
+  - returns http-response-flavor instance
+  - body is stream or string or bag
+  - headers is list of lists
+ - client option to make requests async with results put on a channel
+  - or maybe with a callback
+   - danger there is no mutex on shared variables
+  - need an id on the request
 
 ---------------------
 
@@ -60,21 +72,7 @@
      - nats ?
 
 
- - clos methods/generics (flavors and clos mix as flos)
-  - flos
-   - defgeneric is only used to check defmethod
-   - inherit flos-flavor to generate functions for all method with a designated prefix
-  - is a standard-class needed instead of vanilla or maybe just expand vanilla?
-
-  - change-class (for flavors instances only for now)
-   - parts of instance interface? same as class-of
-
  - future repl options
-  - color for words
-   - functions - word after (
-   - variables - match word
-   - strings - quotes
-   - comments - ;;
   - select, copy, yank, ring (stack) (is this really needed?)
    - need select
     - mark
