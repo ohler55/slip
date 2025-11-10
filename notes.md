@@ -4,8 +4,6 @@
 
 - next
 ---------------------
- - benchmark compare http get
-  - golang vs slip
 
  - http-request (url method body &key headers)
   - returns http-response-flavor instance

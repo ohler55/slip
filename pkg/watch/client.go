@@ -4,9 +4,9 @@ package watch
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -111,7 +111,7 @@ func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	}
 	self.Any = c
 	var err error
-	if c.con, err = net.Dial("tcp", fmt.Sprintf("%s:%d", c.host, c.port)); err != nil {
+	if c.con, err = net.Dial("tcp", net.JoinHostPort(c.host, strconv.Itoa(c.port))); err != nil {
 		panic(err)
 	}
 	go c.resultLoop()
