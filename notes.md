@@ -5,8 +5,6 @@
 - next
 ---------------------
 
-discover-json (source function &key strict)
-
 update readme
 
 rename bag-flavor to just bag with alias of bag-flavor
