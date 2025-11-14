@@ -5,14 +5,11 @@
 - next
 ---------------------
 
- - http-request (url method body &key headers)
-  - returns http-response-flavor instance
-  - body is stream or string or bag
-  - headers is list of lists
- - client option to make requests async with results put on a channel
-  - or maybe with a callback
-   - danger there is no mutex on shared variables
-  - need an id on the request
+update readme
+
+rename bag-flavor to just bag with alias of bag-flavor
+
+flavor define order
 
 ---------------------
 

@@ -57,12 +57,11 @@ store the compiled go types and no plans for such a feature in the
 future. Any functions that involve compilation to byte codes are not
 support in SLIP.
 
+TBD rework this paragraph
 In the early days of LISP the object system was Flavors. Flavors
-served as most influential model when the Common LISP Object System
-(CLOS) was defined. SLIP supports a full flavors implementation but at
-least initially not CLOS. The reasons for this decision are partly due
-to the auther's preference and familiarity with Flavors but also in
-part because the Flavors model is clearly separate from regular LISP
+served as the most influential model when the Common LISP Object System
+(CLOS) was defined. SLIP includes both a Flavors and a CLOS implementation.
+The Flavors model is clearly separate from regular LISP
 functions calls and hence avoids the restrictions and confusion of the
 more complex CLOS model and it's overlap with normal function calls.
 
@@ -102,3 +101,8 @@ prototyping, testing, and exploring. The SLIP REPL includes Emacs
 style key bindings and make use of ANSI codes to provide help and tab
 completion support. History and global settings are "remembered" from
 one session to the next.
+
+
+TBD
+  mention golang plugins
+  mention json support

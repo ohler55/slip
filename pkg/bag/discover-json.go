@@ -1,12 +1,11 @@
-// Copyright (c) 2023, Peter Ohler, All rights reserved.
+// Copyright (c) 2025, Peter Ohler, All rights reserved.
 
 package bag
 
 import (
 	"io"
 
-	"github.com/ohler55/ojg/oj"
-	"github.com/ohler55/ojg/sen"
+	"github.com/ohler55/ojg/discover"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -16,12 +15,12 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := JSONParse{Function: slip.Function{Name: "json-parse", Args: args}}
+			f := DiscoverJSON{Function: slip.Function{Name: "discover-json", Args: args}}
 			f.Self = &f
 			return &f
 		},
 		&slip.FuncDoc{
-			Name: "json-parse",
+			Name: "discover-json",
 			Args: []*slip.DocArg{
 				{
 					Name: "function",
@@ -42,24 +41,26 @@ func init() {
 				},
 			},
 			Return: "nil",
-			Text: `__json-parse__ parses _input_ and calls _function_ for each parsed JSON wrapped with
-an instance of the _bag-flavor_. If _function_ is a _channel_ then the parsed instance is placed on
-the channel instead.`,
+			Text: `__discover-json__ attempts to discover JSON or SEN in the _input_ and calls
+_function_ for each parsed JSON or SEN wrapped with an instance of the _bag-flavor_. If _function_
+is a _channel_ then the parsed instance is placed on the channel instead.`,
 			Examples: []string{
-				`(defvar data '())`,
-				`(json-parse (lambda (bag) (setq data cons (send bag :native) data)) "{a:1}{b:2}") => nil`,
+				`(defvar data nil)`,
+				`(discover-json`,
+				`  (lambda (bag) (setq data cons (send bag :native) data))`,
+				`  "first {a:1} second {b:2}") => nil`,
 				`data => ((("a" . 1)) (("b" . 2)))`,
 			},
 		}, &Pkg)
 }
 
-// JSONParse represents the JSONParse function.
-type JSONParse struct {
+// DiscoverJSON represents the DiscoverJSON function.
+type DiscoverJSON struct {
 	slip.Function
 }
 
 // Call the the function with the arguments provided.
-func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+func (f *DiscoverJSON) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	d2 := depth + 1
 	var caller slip.Caller
@@ -67,39 +68,41 @@ func (f *JSONParse) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	if !ok {
 		caller = cl.ResolveToCaller(s, args[0], d2)
 	}
-	var cb func(any)
+	var cb func(any) bool
 	if ok {
-		cb = func(j any) {
+		cb = func(j any) bool {
 			inst := flavor.MakeInstance().(*flavors.Instance)
 			inst.Any = j
 			channel <- inst
+			return false
 		}
 	} else {
-		cb = func(j any) {
+		cb = func(j any) bool {
 			inst := flavor.MakeInstance().(*flavors.Instance)
 			inst.Any = j
-			_ = caller.Call(s, slip.List{inst}, d2)
+			return caller.Call(s, slip.List{inst}, d2) != nil
+
 		}
 	}
 	if 2 < len(args) && args[2] != nil {
 		switch ta := args[1].(type) {
 		case slip.String:
-			oj.MustParse([]byte(ta), cb)
+			discover.JSON([]byte(ta), cb)
 		case slip.Octets:
-			oj.MustParse([]byte(ta), cb)
+			discover.JSON([]byte(ta), cb)
 		case io.Reader:
-			oj.MustLoad(ta, cb)
+			discover.ReadJSON(ta, cb)
 		default:
 			slip.TypePanic(s, depth, "input", ta, "string", "input-stream")
 		}
 	} else {
 		switch ta := args[1].(type) {
 		case slip.String:
-			sen.MustParse([]byte(ta), cb)
+			discover.SEN([]byte(ta), cb)
 		case slip.Octets:
-			sen.MustParse([]byte(ta), cb)
+			discover.SEN([]byte(ta), cb)
 		case io.Reader:
-			sen.MustParseReader(ta, cb)
+			discover.ReadSEN(ta, cb)
 		default:
 			slip.TypePanic(s, depth, "input", ta, "string", "input-stream")
 		}
