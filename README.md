@@ -73,12 +73,8 @@ See [CHANGELOG.md](CHANGELOG.md)
 ## Links
 
  - [ANSI Common Lisp](http://www.x3.org/tc_home/tc_sd4/x3j13sd4.html)
-
  - Common LISP reference [LispWorks Common List HyperSpec](tbd)
-
- - flavors spec
-
+ - [Flavors](https://franz.com/support/documentation/10.1/doc/flavors.htm)
  - An introduction to CLOS [LISP Cookbook](https://lispcookbook.github.io/cl-cookbook/clos.html)
  - A CLOS guide: [CLOS Guide](https://www.algo.be/cl/documents/clos-guide.html)
-
  - JSON support provided by [OjG](https://github.com/ohler55/ojg).
