@@ -4,105 +4,81 @@ SLIce Processing is LISP for golang
 
 SLIP is a mostly Common LISP implementation lacking some features and
 including many non standard features. Most notable of the extra
-features is the ability to extend LISP with go code. Also included is
+features is the ability to extend LISP with Go code. Also included is
 a Read Eval Print Loop (REPL) that provides an environment for
-prototyping, testing, and exploring SLIP.
+prototyping, testing, and exploring SLIP. While not a full
+implemenation of Common LISP, SLIP continues to move in that
+direction.
 
-## Almost Common LISP
+A more detailed explanation of some of the features are on the
+[features.md page](features.md).
 
-While not a full implemenation of Common LISP, SLIP continues to move
-in that direction.
+## Using
 
-### Cons versus Slice
+To use first install then start the REPL with the **slip**
+application. A good place to start is to press `ctrl-h` for help. Then
+try out some LISP code. Two of the most help functions are `apropos`
+and `describe`. Press `M-?` or `M-/` after a function name to get
+pop-up documentation.
 
-Most LISP implementations are built on a structure called a __cons__
-which is composed of a __car__ and a __cdr__. Lists are composed of a
-linked list of __cons__ cells. A list of `(1 2 3)` is composed of
-three __cons__ cells.
-
-```
-[car|cdr]
-  ▼   ▼
-  1 [car|cdr]
-      ▼   ▼
-      2 [car|cdr]
-          ▼   ▼
-          3  nil
+```lisp
+▶ (apropos 'json)
+bag:discover-json (built-in)
+bag:json-parse (built-in)
 ```
 
-SLIP is based on go slices instead of __cons__ cells. The same list,
-`(1 2 3)` is:
+```lisp
+▶ (describe 'car)
+common-lisp:car
+  [symbol]
+
+car names a built-in:
+  Lambda-List: (arg)
+  Return: object
+  Documentation:
+    car returns the car if arg is a cons, the first element if arg is a list, and nil if arg is nil or an empty list.
+  Arguments:
+    arg: [list|cons]
+      The value to take the first element of.
+
+  Examples:
+    (car nil) => nil
+    (car '(a . b) => a
+    (car '(a b c)) => a
+```
+
+There is lots more to the REPL with muliple line editing, history, tab
+completion, and more.
+
+## Installation
+
+Install using `go get`:
 
 ```
-[1][2][3]
-```
-
-A __cons__ cell in SLIP is a list of two elements with a special
-_tail_ structure used when a __cons__ `(1 . 2)` is expected such as in
-an association list.
+go get github.com/ohler55/slip/cmd/slip
 
 ```
-[1][tail{value:2}]
+
+Install using **brew**:
+
+```
+brew install slip
+
 ```
 
-The reason for using go slices instead of a cons struct is that using
-slices uses less memory, puts less pressure on the garbage collector,
-and performs better for most operations.
+## Releases
 
-### Missing Features
+See [CHANGELOG.md](CHANGELOG.md)
 
-Common LISP compiles to byte codes this is not part of the SLIP model
-which instead compiles to go types. There is no capacity in SLIP to
-store the compiled go types and no plans for such a feature in the
-future. Any functions that involve compilation to byte codes are not
-support in SLIP.
+## Links
 
-TBD rework this paragraph
-In the early days of LISP the object system was Flavors. Flavors
-served as the most influential model when the Common LISP Object System
-(CLOS) was defined. SLIP includes both a Flavors and a CLOS implementation.
-The Flavors model is clearly separate from regular LISP
-functions calls and hence avoids the restrictions and confusion of the
-more complex CLOS model and it's overlap with normal function calls.
+ - [ANSI Common Lisp](http://www.x3.org/tc_home/tc_sd4/x3j13sd4.html)
 
-The exception or error handling in SLIP differs from Common
-LISP. Similar features exist in SLIP but they are different as they
-integrate better with the underlying go components.
+ - Common LISP reference [LispWorks Common List HyperSpec](tbd)
 
-In go strings are immutable which is reflected in SLIP so the
-_nstring_ functions so not modify the original string but instead are
-the same as the _string_ versions of the functions.
+ - flavors spec
 
-### Added Features
+ - An introduction to CLOS [LISP Cookbook](https://lispcookbook.github.io/cl-cookbook/clos.html)
+ - A CLOS guide: [CLOS Guide](https://www.algo.be/cl/documents/clos-guide.html)
 
-While Common LISP is the modern version of LISP it is lacking in
-support for unicode and threads. SLIP adds that support in the Go
-Integration (GI) package. This package includes channels, routines
-(threads), panic, recover, a simplier time type, a logger, and a few
-other functions optimized for use with slices.
-
-Support for plug-ins written in go is included in SLIP. This make use
-of the go plugin package and the _require_ function to load those
-plug-ins.
-
-## Read and Eval
-
-There are two steps in loading LISP code in SLIP. The code is first
-read which builds a set of go types. During the reading top level
-definition functions such as _defun_, _defvar_, _defmacro_, and
-_defparamter_ are evaluated. The second step evaluate the remaining
-top level code elements.
-
-## REPL
-
-A LISP feature that separates LISP from most other languages is the
-Read Eval Print Loop or REPL. A REPL provides an environment for
-prototyping, testing, and exploring. The SLIP REPL includes Emacs
-style key bindings and make use of ANSI codes to provide help and tab
-completion support. History and global settings are "remembered" from
-one session to the next.
-
-
-TBD
-  mention golang plugins
-  mention json support
+ - JSON support provided by [OjG](https://github.com/ohler55/ojg).

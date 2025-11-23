@@ -6,8 +6,10 @@
 ---------------------
 
 update readme
+ - split up
+  - readme just for summary (with link to features), install, releases, links
+  - features.md
 
-rename bag-flavor to just bag with alias of bag-flavor
 
 flavor define order
 
