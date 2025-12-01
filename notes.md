@@ -5,11 +5,6 @@
 - next
 ---------------------
 
-update readme
- - split up
-  - readme just for summary (with link to features), install, releases, links
-  - features.md
-
 - grahql
  - graphql-query (url query &optional headers &key protocol method)
   - query - field(args){subs}
@@ -40,6 +35,7 @@ update readme
 
 graphql-query (url template &optional headers &key content-type template-args :allow-other-keys)
 
+
 Sends a GraphQL POST request to _url_. Responses are returned as a
 __bag__ instance. The template provided is used as the _control_
 argument to a call to the __format__ function. The &key arguments can
@@ -55,7 +51,7 @@ example:
  (graphql-query
    "http://example.com/graphql"
    "user(id:~S group:\"~=group~=\") {name}"
-   :template-args "id-123"
+   :template-args '("id-123")
    :group "one")
  {data:{user:{name:"Fred"}}}
 
