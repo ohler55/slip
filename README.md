@@ -15,7 +15,7 @@ A more detailed explanation of some of the features are on the
 
 ## Using
 
-To use first install then start the REPL with the **slip**
+To use, first install then start the REPL with the **slip**
 application. A good place to start is to press `ctrl-h` for help. Then
 try out some LISP code. Two of the most help functions are `apropos`
 and `describe`. Press `M-?` or `M-/` after a function name to get
@@ -47,8 +47,8 @@ car names a built-in:
     (car '(a b c)) => a
 ```
 
-There is lots more to the REPL with muliple line editing, history, tab
-completion, and more.
+The REPL includes many additional features such as muliple line
+editing, history, tab completion, and more.
 
 ## Installation
 

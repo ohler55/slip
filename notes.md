@@ -10,6 +10,55 @@ update readme
   - readme just for summary (with link to features), install, releases, links
   - features.md
 
+- grahql
+ - graphql-query (url query &optional headers &key protocol method)
+  - query - field(args){subs}
+   - field
+    "quux"
+    ("quux" args subs)
+   - args
+    (("arg-name" arg-value)...)
+   - arg-value
+    123
+    "string"
+    1.25
+    (enum "string")
+    - input-value
+     (type ("f0" arg-value)...)
+   - subs
+    - field list
+  - query can also be a string
+ - graphql-mutation (url query &optional headers &key protocol)
+ - alternatives (better)
+  - provide a template and fill then provide values
+   - just use format ?? with slip extensions ~=
+   - graphql-query (url template &optional headers &key protocol template-args :allow-other-keys)
+    - use (format nil template template-args)
+     - note all keys are already assigned and ~= can be used
+    - always a POST
+    - returns a bag
+
+graphql-query (url template &optional headers &key content-type template-args :allow-other-keys)
+
+Sends a GraphQL POST request to _url_. Responses are returned as a
+__bag__ instance. The template provided is used as the _control_
+argument to a call to the __format__ function. The &key arguments can
+be used with the ~= directive which is a __slip__ extension to the
+__format__ directives.
+
+The _:content-type_ can be either :graphql, the default, or :json. If
+:graphql then the Content-Type header is set to
+application/graphql. If :json then the Content-Type is set to
+application/json. The content is set accordingly.
+
+example:
+ (graphql-query
+   "http://example.com/graphql"
+   "user(id:~S group:\"~=group~=\") {name}"
+   :template-args "id-123"
+   :group "one")
+ {data:{user:{name:"Fred"}}}
+
 
 flavor define order
 
