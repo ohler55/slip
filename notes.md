@@ -6,34 +6,10 @@
 ---------------------
 
 - grahql
- - graphql-query (url query &optional headers &key protocol method)
-  - query - field(args){subs}
-   - field
-    "quux"
-    ("quux" args subs)
-   - args
-    (("arg-name" arg-value)...)
-   - arg-value
-    123
-    "string"
-    1.25
-    (enum "string")
-    - input-value
-     (type ("f0" arg-value)...)
-   - subs
-    - field list
-  - query can also be a string
- - graphql-mutation (url query &optional headers &key protocol)
- - alternatives (better)
-  - provide a template and fill then provide values
-   - just use format ?? with slip extensions ~=
-   - graphql-query (url template &optional headers &key protocol template-args :allow-other-keys)
-    - use (format nil template template-args)
-     - note all keys are already assigned and ~= can be used
-    - always a POST
-    - returns a bag
+ - graphql-query (url template &optional headers &key content-type template-args :allow-other-keys)
+  - test
+   - fire up agoo initially then switch to custom http server
 
-graphql-query (url template &optional headers &key content-type template-args :allow-other-keys)
 
 
 Sends a GraphQL POST request to _url_. Responses are returned as a

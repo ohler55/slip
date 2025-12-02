@@ -3,13 +3,15 @@
 package net
 
 import (
-	"fmt"
+	"bytes"
 	"net/http"
-	"net/url"
 	"time"
 
+	"github.com/ohler55/ojg/oj"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/cl"
+	"github.com/ohler55/slip/pkg/flavors"
 )
 
 func init() {
@@ -35,15 +37,11 @@ func init() {
 				{Name: "&optional"},
 				{
 					Name: "header",
-					Type: "assoc",
-					Text: "An associate list to be used as the headers in the request.",
+					Type: "list",
+					Text: `A list of lists to be used as the headers in the request.
+(e.g., ((Content-Type" "application/graphql")))`,
 				},
 				{Name: "&key"},
-				{
-					Name: "content-type",
-					Type: "string",
-					Text: "Must be application/json or the default application/graphql.",
-				},
 				{
 					Name: "timeout",
 					Type: "real",
@@ -67,10 +65,11 @@ argument to a call to the __format__ function. The &key arguments can be used wi
 the ~= directive which is a __slip__ extension to the __format__ directives.
 
 
-The _:content-type_ can be either :graphql, the default, or :json. If
-:graphql then the Content-Type header is set to
-application/graphql. If :json then the Content-Type is set to
-application/json. The content is set accordingly.
+The Content-Type header value of anything but application/json will be treated
+as if application/graphql was set and not modification to the templated
+content is made. If the Content-Type is application/json then the content is
+wrapped in a JSON document. If no Content-Type is specified then the
+Content-Type is set to application/graphql.
 `,
 			Examples: []string{
 				`(graphql-query`,
@@ -91,19 +90,17 @@ type GraphqlQuery struct {
 // Call the function with the arguments provided.
 func (f *GraphqlQuery) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 2, -1)
-	u, err := url.Parse(slip.MustBeString(args[0], "url"))
-	if err != nil {
-		panic(err)
-	}
+	u := slip.MustBeString(args[0], "url")
 	template := slip.MustBeString(args[1], "template")
 	args = args[2:]
-	req := http.Request{
-		Method: http.MethodPost,
-		URL:    u,
-	}
-	if list, ok := args[0].(slip.List); ok {
-		req.Header = headerFromAssoc(s, list, depth)
-		args = args[1:]
+	var header http.Header
+	if 0 < len(args) {
+		if list, ok := args[0].(slip.List); ok {
+			header = headerFromAssoc(s, list, depth)
+			args = args[1:]
+		} else if args[0] == nil {
+			args = args[1:]
+		}
 	}
 	targs := slip.List{slip.String(template)}
 	ns := s.NewScope()
@@ -124,21 +121,40 @@ func (f *GraphqlQuery) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 				} else {
 					slip.TypePanic(s, depth, ":timeout", args[i+1], "non-negative real")
 				}
-			case slip.Symbol(":content-type"):
-				// TBD
 			}
 		} else {
 			slip.TypePanic(s, depth, ":key", args[i], "keyword")
 		}
 	}
-	req.Body = bodyWrapString(string(cl.FormatArgs(s, targs, depth)))
-
-	var res *http.Response
-	if res, err = client.Do(&req); err != nil {
+	var ct string
+	if header != nil {
+		ct = header.Get("Content-Type")
+	} else {
+		header = http.Header{}
+	}
+	if len(ct) == 0 {
+		ct = "application/graphql"
+		header.Set("Content-Type", ct)
+	}
+	content := cl.FormatArgs(ns, targs, depth)
+	if ct == "application/json" {
+		content = []byte(oj.JSON(map[string]any{"query": string(content)}))
+	}
+	req, err := http.NewRequest("POST", u, bytes.NewReader(content))
+	if err != nil {
 		panic(err)
 	}
-	// TBD read body and convert to bag
-	fmt.Printf("*** %v\n", res)
+	if header != nil {
+		req.Header = header
+	}
+	var res *http.Response
+	if res, err = client.Do(req); err != nil {
+		panic(err)
+	}
+	defer func() { _ = res.Body.Close() }()
+	bi := bag.Flavor().MakeInstance().(*flavors.Instance)
+	bi.Init(s, slip.List{}, depth)
+	bi.Any = oj.MustLoad(res.Body)
 
-	return nil // TBD reaponse
+	return bi
 }
