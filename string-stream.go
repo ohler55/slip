@@ -137,8 +137,8 @@ func (obj *StringStream) ReadAt(p []byte, off int64) (n int, err error) {
 	return
 }
 
-// ReadRune resd the next run in buf from the current position. This is part of
-// the io.RuneReader interface.
+// ReadRune returns the next rune in buf from the current position. This is
+// part of the io.RuneReader interface.
 func (obj *StringStream) ReadRune() (r rune, size int, err error) {
 	if obj.pos < 0 {
 		return 0, 0, WrapError(NewScope(),

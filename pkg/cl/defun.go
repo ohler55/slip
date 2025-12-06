@@ -31,7 +31,7 @@ func init() {
 					Text: `A list of the function's argument. Arguments can be a symbol, a list of a symbol and a
 default value, or one of &optional, &rest, &key, or &body. Arguments declarations following &optional are optional.
 Argument declarations following &key represent key values. An argument declaration following &rest or &body indicates
-one or more values follow.`,
+one or more values follow. The default and only option if &key is included is for :allow-other-keys to be true.`,
 				},
 				{Name: slip.AmpOptional},
 				{

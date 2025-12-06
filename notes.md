@@ -5,10 +5,24 @@
 - next
 ---------------------
 
-update readme
- - split up
-  - readme just for summary (with link to features), install, releases, links
-  - features.md
+- rune-reader branch
+ - tests for read-line, read-char and peek-char from file and others
+ - add ReadRune to:
+  - RuneReader mixin (embed)
+     Reader io.Reader
+   - func (obj *RuneReader) Read(b []byte) (cnt int, err error) {
+   - func (obj *InputStream) Close() (err error) {
+   - func (obj *RuneReader) ReadRune() (r rune, size int, err error) {
+   - func (obj *RuneReader) UnreadRune() (err error) {
+   - func (obj *RuneReader) PushRune(r rune) {
+   - func (obj *RuneReader) ReadByte() (b byte, err error) {
+ - file-stream
+  - reimplement, separate from input-stream
+ - cl:two-way-stream
+ - cl:echo-stream
+ - cl:concatednated-stream
+ - cl:echo-stream-input-stream
+ - cl:synonym-stream
 
 
 flavor define order
