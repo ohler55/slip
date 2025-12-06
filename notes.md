@@ -5,31 +5,24 @@
 - next
 ---------------------
 
-- grahql
- - graphql-query (url template &optional headers &key content-type template-args :allow-other-keys)
-  - test
-   - fire up agoo initially then switch to custom http server
-
-
-
-Sends a GraphQL POST request to _url_. Responses are returned as a
-__bag__ instance. The template provided is used as the _control_
-argument to a call to the __format__ function. The &key arguments can
-be used with the ~= directive which is a __slip__ extension to the
-__format__ directives.
-
-The _:content-type_ can be either :graphql, the default, or :json. If
-:graphql then the Content-Type header is set to
-application/graphql. If :json then the Content-Type is set to
-application/json. The content is set accordingly.
-
-example:
- (graphql-query
-   "http://example.com/graphql"
-   "user(id:~S group:\"~=group~=\") {name}"
-   :template-args '("id-123")
-   :group "one")
- {data:{user:{name:"Fred"}}}
+- rune-reader branch
+ - tests for read-line, read-char and peek-char from file and others
+ - add ReadRune to:
+  - RuneReader mixin (embed)
+     Reader io.Reader
+   - func (obj *RuneReader) Read(b []byte) (cnt int, err error) {
+   - func (obj *InputStream) Close() (err error) {
+   - func (obj *RuneReader) ReadRune() (r rune, size int, err error) {
+   - func (obj *RuneReader) UnreadRune() (err error) {
+   - func (obj *RuneReader) PushRune(r rune) {
+   - func (obj *RuneReader) ReadByte() (b byte, err error) {
+ - file-stream
+  - reimplement, separate from input-stream
+ - cl:two-way-stream
+ - cl:echo-stream
+ - cl:concatednated-stream
+ - cl:echo-stream-input-stream
+ - cl:synonym-stream
 
 
 flavor define order

@@ -77,7 +77,7 @@ Content-Type is set to application/graphql.
 				`  "user(id:~S group:\"~=group~=\") {name}"`,
 				`  :template-args '("id-123")`,
 				`  :group "one") =>`,
-				`{data:{user:{name:"Fred"}}}`,
+				`{"data":{"user":{"name":"Fred"}}}`,
 			},
 		}, &Pkg)
 }
