@@ -12,8 +12,8 @@ import (
 
 func TestReadCharStdin(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("𝄢bc")}
-	scope.Let(slip.Symbol("*standard-input*"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("𝄢bc"))
+	scope.Let(slip.Symbol("*standard-input*"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-char)`,
@@ -23,8 +23,8 @@ func TestReadCharStdin(t *testing.T) {
 
 func TestReadCharStream(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("abc"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-char in)`,
@@ -34,8 +34,8 @@ func TestReadCharStream(t *testing.T) {
 
 func TestReadCharEOFPanic(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-char in)`,
@@ -45,8 +45,8 @@ func TestReadCharEOFPanic(t *testing.T) {
 
 func TestReadCharEOFNil(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-char in nil)`,
@@ -56,8 +56,8 @@ func TestReadCharEOFNil(t *testing.T) {
 
 func TestReadCharEOFNonNil(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-char in nil 'done)`,

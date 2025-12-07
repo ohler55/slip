@@ -35,28 +35,28 @@ func (r *justReader) Close() error {
 }
 
 func TestInputStreamObject(t *testing.T) {
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
+	stream := slip.NewInputStream(strings.NewReader("abc"))
 	(&sliptest.Object{
-		Target:    &stream,
+		Target:    stream,
 		String:    "#<INPUT-STREAM>",
 		Simple:    "#<INPUT-STREAM>",
 		Hierarchy: "input-stream.stream.t",
 		Equals: []*sliptest.EqTest{
-			{Other: &stream, Expect: true},
+			{Other: stream, Expect: true},
 			{Other: slip.True, Expect: false},
 		},
 		Selfies: []func() slip.Symbol{
 			(&slip.InputStream{}).StreamType,
 		},
-		Eval: &stream,
+		Eval: stream,
 	}).Test(t)
-	data, err := io.ReadAll(&stream)
+	data, err := io.ReadAll(stream)
 	tt.Nil(t, err)
 	tt.Equal(t, "abc", string(data))
 }
 
 func TestInputStreamReadEasy(t *testing.T) {
-	stream := slip.InputStream{Reader: strings.NewReader("a𝄢")}
+	stream := slip.NewInputStream(strings.NewReader("a𝄢"))
 	buf := make([]byte, 10)
 	cnt, err := stream.Read(buf)
 	tt.Nil(t, err)
@@ -73,7 +73,7 @@ func TestInputStreamReadEasy(t *testing.T) {
 }
 
 func TestInputStreamReadHard(t *testing.T) {
-	stream := slip.InputStream{Reader: &justReader{buf: []byte("a𝄢")}}
+	stream := slip.NewInputStream(&justReader{buf: []byte("a𝄢")})
 	buf := make([]byte, 10)
 	cnt, err := stream.Read(buf)
 	tt.Nil(t, err)
@@ -95,7 +95,7 @@ func TestInputStreamReadHard(t *testing.T) {
 	_, err = stream.Read(buf[:3])
 	tt.NotNil(t, err)
 
-	stream = slip.InputStream{Reader: &justReader{buf: []byte("abc")}}
+	stream = slip.NewInputStream(&justReader{buf: []byte("abc")})
 	cnt, err = stream.Read(buf)
 	tt.Nil(t, err)
 	tt.Equal(t, 3, cnt)
@@ -111,7 +111,7 @@ func TestInputStreamReadHard(t *testing.T) {
 }
 
 func TestInputStreamReadRune(t *testing.T) {
-	stream := slip.InputStream{Reader: strings.NewReader("a𝄢c")}
+	stream := slip.NewInputStream(strings.NewReader("a𝄢c"))
 	r, size, err := stream.ReadRune()
 	tt.Equal(t, 'a', r)
 	tt.Equal(t, 1, size)
@@ -140,7 +140,7 @@ func TestInputStreamReadRune(t *testing.T) {
 }
 
 func TestInputStreamReadRuneHardOk(t *testing.T) {
-	stream := slip.InputStream{Reader: &justReader{buf: []byte("a𝄢༒¥")}}
+	stream := slip.NewInputStream(&justReader{buf: []byte("a𝄢༒¥")})
 	r, size, err := stream.ReadRune()
 	tt.Equal(t, 'a', r)
 	tt.Equal(t, 1, size)
@@ -176,13 +176,13 @@ func TestInputStreamReadRuneHardOk(t *testing.T) {
 }
 
 func TestInputStreamReadRuneHardBad(t *testing.T) {
-	stream := slip.InputStream{Reader: &justReader{buf: []byte("\x90")}}
+	stream := slip.NewInputStream(&justReader{buf: []byte("\x90")})
 	_, _, err := stream.ReadRune()
 	tt.NotNil(t, err)
 }
 
 func TestInputStreamUnreadRune(t *testing.T) {
-	stream := slip.InputStream{Reader: &justReader{buf: []byte("𝄢")}}
+	stream := slip.NewInputStream(&justReader{buf: []byte("𝄢")})
 	r, size, err := stream.ReadRune()
 	tt.Equal(t, '𝄢', r)
 	tt.Equal(t, 4, size)
@@ -199,7 +199,7 @@ func TestInputStreamUnreadRune(t *testing.T) {
 	tt.Equal(t, 4, size)
 	tt.Nil(t, err)
 
-	stream = slip.InputStream{Reader: strings.NewReader("𝄢")}
+	stream = slip.NewInputStream(strings.NewReader("𝄢"))
 	r, size, err = stream.ReadRune()
 	tt.Equal(t, '𝄢', r)
 	tt.Equal(t, 4, size)
@@ -215,7 +215,7 @@ func TestInputStreamUnreadRune(t *testing.T) {
 }
 
 func TestInputStreamReadByteEasy(t *testing.T) {
-	stream := slip.InputStream{Reader: strings.NewReader("a𝄢")}
+	stream := slip.NewInputStream(strings.NewReader("a𝄢"))
 	b, err := stream.ReadByte()
 	tt.Nil(t, err)
 	tt.Equal(t, 'a', b)
@@ -237,7 +237,7 @@ func TestInputStreamReadByteEasy(t *testing.T) {
 }
 
 func TestInputStreamReadByteHard(t *testing.T) {
-	stream := slip.InputStream{Reader: &justReader{buf: []byte("a𝄢")}}
+	stream := slip.NewInputStream(&justReader{buf: []byte("a𝄢")})
 	b, err := stream.ReadByte()
 	tt.Nil(t, err)
 	tt.Equal(t, 'a', b)
@@ -251,7 +251,7 @@ func TestInputStreamReadByteHard(t *testing.T) {
 }
 
 func TestInputStreamPushRune(t *testing.T) {
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
+	stream := slip.NewInputStream(strings.NewReader("abc"))
 
 	stream.PushRune('x')
 

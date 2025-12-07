@@ -44,6 +44,10 @@ type UnreadChar struct {
 	slip.Function
 }
 
+type runePusher interface {
+	PushRune(r rune)
+}
+
 // Call the function with the arguments provided.
 func (f *UnreadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, 2)
@@ -55,11 +59,11 @@ func (f *UnreadChar) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	if 1 < len(args) {
 		is = args[1]
 	}
-	var sis *slip.InputStream
-	if sis, ok = is.(*slip.InputStream); !ok {
+	var rp runePusher
+	if rp, ok = is.(runePusher); !ok {
 		slip.TypePanic(s, depth, "stream", args[1], "input-stream")
 	}
-	sis.PushRune(rune(c))
+	rp.PushRune(rune(c))
 
 	return nil
 }

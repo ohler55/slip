@@ -16,12 +16,12 @@ import (
 func TestBagReadWithStringPath(t *testing.T) {
 	r := strings.NewReader("{a:7}")
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 
 	obj := slip.ReadString(
 		`(setq bag (make-instance bag-flavor :read input))`, scope).Eval(scope, nil).(*flavors.Instance)
 	r = strings.NewReader("{b:3}")
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-read bag input "a")`,
@@ -33,12 +33,12 @@ func TestBagReadWithStringPath(t *testing.T) {
 func TestBagReadWithPath(t *testing.T) {
 	r := strings.NewReader("{a:7}")
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 
 	obj := slip.ReadString(
 		`(setq bag (make-instance bag-flavor :read input))`, scope).Eval(scope, nil).(*flavors.Instance)
 	r = strings.NewReader("{b:3}")
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-read bag input (make-bag-path "a"))`,
@@ -50,7 +50,7 @@ func TestBagReadWithPath(t *testing.T) {
 func TestBagReadNoPath(t *testing.T) {
 	r := strings.NewReader("{a:7}")
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 
 	obj := slip.ReadString(
 		`(setq bag (make-instance bag-flavor :parse "{b:3}"))`, scope).Eval(scope, nil).(*flavors.Instance)

@@ -11,7 +11,7 @@ import (
 func init() {
 	slip.CLPkg.Locked = false
 	slip.CLPkg.Set("*terminal-io*", &TwoWayStream{
-		Input:  &slip.InputStream{Reader: os.Stdin},
+		Input:  slip.NewInputStream(os.Stdin),
 		Output: &slip.OutputStream{Writer: os.Stdout},
 	})
 	slip.CLPkg.Locked = true

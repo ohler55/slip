@@ -19,7 +19,7 @@ import (
 func TestLoadStream(t *testing.T) {
 	r := strings.NewReader("(setq load-test-var 7)")
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(load input)`,
@@ -163,7 +163,7 @@ func TestLoadFileNotExist(t *testing.T) {
 func TestLoadReadError(t *testing.T) {
 	r := iotest.ErrReader(errors.New("read failed"))
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(load input)`,

@@ -439,7 +439,7 @@ func TestRequestInit(t *testing.T) {
 
 func TestRequestInit2(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("body"), &slip.InputStream{Reader: strings.NewReader("bidy")})
+	scope.Let(slip.Symbol("body"), slip.NewInputStream(strings.NewReader("bidy")))
 	tf := sliptest.Function{
 		Scope: scope,
 		Source: `(make-instance 'http-request-flavor

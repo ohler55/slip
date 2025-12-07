@@ -243,7 +243,7 @@ func (caller respBodyCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 	if 0 < len(args) {
 		slip.MethodArgChoicePanic(s, depth, obj, ":body", len(args), "0")
 	}
-	return &slip.InputStream{Reader: (obj.Any.(*http.Response)).Body}
+	return slip.NewInputStream((obj.Any.(*http.Response)).Body)
 }
 
 func (caller respBodyCaller) FuncDocs() *slip.FuncDoc {

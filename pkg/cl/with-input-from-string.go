@@ -94,7 +94,7 @@ func (f *WithInputFromString) Call(s *slip.Scope, args slip.List, depth int) (re
 
 	reader := slip.NewStringStream([]byte(string(ra[start:end])))
 	s2 := s.NewScope()
-	s2.Let(sym, &slip.InputStream{Reader: reader})
+	s2.Let(sym, slip.NewInputStream(reader))
 	args = args[1:]
 	for i := range args {
 		result = slip.EvalArg(s2, args, i, d2)

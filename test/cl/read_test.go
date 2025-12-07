@@ -49,7 +49,7 @@ func TestReadStreamMoreSeeker(t *testing.T) {
 
 func TestReadStreamMoreOne(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("in"), &slip.InputStream{Reader: slip.NewStringStream([]byte("123 456"))})
+	scope.Let(slip.Symbol("in"), slip.NewInputStream(slip.NewStringStream([]byte("123 456"))))
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(list (read in) (read in))`,
@@ -94,7 +94,7 @@ func TestReadEmpty(t *testing.T) {
 
 func TestReadNotObject(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("in"), &slip.InputStream{Reader: slip.NewStringStream([]byte("###"))})
+	scope.Let(slip.Symbol("in"), slip.NewInputStream(slip.NewStringStream([]byte("###"))))
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(read in)`,
@@ -104,7 +104,7 @@ func TestReadNotObject(t *testing.T) {
 
 func TestReadError(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("in"), &slip.InputStream{Reader: badReader(0)})
+	scope.Let(slip.Symbol("in"), slip.NewInputStream(badReader(0)))
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(read in)`,

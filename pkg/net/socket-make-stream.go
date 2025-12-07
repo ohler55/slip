@@ -104,7 +104,7 @@ func makeStream(s *slip.Scope, self *flavors.Instance, args slip.List, depth int
 	case in && out:
 		result = &slip.IOStream{RW: fdRW(fd)}
 	case in:
-		result = &slip.InputStream{Reader: fdRW(fd)}
+		result = slip.NewInputStream(fdRW(fd))
 	case out:
 		result = &slip.OutputStream{Writer: fdRW(fd)}
 	default:

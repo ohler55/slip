@@ -79,7 +79,7 @@ func TestConcatenatedStreamNotStream(t *testing.T) {
 }
 
 func TestConcatenatedStreamReadError(t *testing.T) {
-	cs := cl.NewConcatenatedStream(&slip.InputStream{Reader: badReader(0)})
+	cs := cl.NewConcatenatedStream(slip.NewInputStream(badReader(0)))
 	buf := make([]byte, 2)
 	_, err := cs.Read(buf)
 	tt.NotNil(t, err)
