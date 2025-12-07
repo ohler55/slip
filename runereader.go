@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 )
 
-// RuneReader is an *os.Reader wrapped to support .
+// RuneReader is an *os.Reader wrapped to support runes.
 type RuneReader struct {
 	Reader   io.Reader
 	lastRune rune

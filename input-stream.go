@@ -7,7 +7,7 @@ import "io"
 // InputStreamSymbol is the symbol with a value of "input-stream".
 const InputStreamSymbol = Symbol("input-stream")
 
-// InputStream is an *os.Reader wrapped to support .
+// InputStream wraps a io.Reader.
 type InputStream struct {
 	RuneReader
 }

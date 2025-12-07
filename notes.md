@@ -6,6 +6,9 @@
 ---------------------
 
 - rune-reader branch
+ - test string-stream new functions
+ - test echo-stream with unread-char, read-char, peek-char, and read-line
+
  - tests for read-line, read-char and peek-char from file and others
  - add ReadRune to:
   - RuneReader mixin (embed)

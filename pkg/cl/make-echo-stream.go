@@ -49,7 +49,7 @@ func (f *MakeEchoStream) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	es := EchoStream{}
 	var ok bool
-	if es.input, ok = args[0].(io.Reader); !ok {
+	if es.input, ok = args[0].(slip.RuneStream); !ok {
 		slip.TypePanic(s, depth, "input-stream", args[0], "input-stream")
 	}
 	if es.output, ok = args[1].(io.Writer); !ok {

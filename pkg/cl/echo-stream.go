@@ -22,12 +22,12 @@ func init() {
 // EchoStream is a stream that accepts input from an input stream and echos
 // that input to an output stream.
 type EchoStream struct {
-	input  io.Reader
+	input  slip.RuneStream
 	output io.Writer
 }
 
 // NewEchoStream creates a new EchoStream.
-func NewEchoStream(input io.Reader, output io.Writer) *EchoStream {
+func NewEchoStream(input slip.RuneStream, output io.Writer) *EchoStream {
 	return &EchoStream{input: input, output: output}
 }
 
