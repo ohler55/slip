@@ -189,7 +189,7 @@ func (obj *StringStream) UnreadRune() error {
 		if utf8.Valid(obj.buf[obj.pos:end]) {
 			break
 		}
-		if obj.pos-end == utf8.UTFMax {
+		if obj.pos-end == utf8.UTFMax || obj.pos == 0 {
 			obj.pos = end
 			return WrapError(NewScope(),
 				StreamErrorNew(NewScope(), 0, obj, "can not read an invalid UTF8 character").(Instance),
