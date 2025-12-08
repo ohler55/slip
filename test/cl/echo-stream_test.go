@@ -73,4 +73,83 @@ func TestEchoStreamOpenClose(t *testing.T) {
 		buf := make([]byte, 1)
 		_, _ = es.Read(buf)
 	})
+
+	tt.Panic(t, func() { _, _ = es.ReadByte() })
+	tt.Panic(t, func() { _, _, _ = es.ReadRune() })
+	tt.Panic(t, func() { _ = es.UnreadRune() })
+}
+
+func TestEchoStreamReadChar(t *testing.T) {
+	in := slip.NewStringStream([]byte("abc"))
+	out := slip.NewStringStream([]byte{})
+	es := cl.NewEchoStream(in, out)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), es)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-char in)`,
+		Expect: `#\a`,
+	}).Test(t)
+}
+
+func TestEchoStreamReadLine(t *testing.T) {
+	in := slip.NewStringStream([]byte("abc\n"))
+	out := slip.NewStringStream([]byte{})
+	es := cl.NewEchoStream(in, out)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), es)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-line in)`,
+		Expect: `"abc", nil`,
+	}).Test(t)
+}
+
+func TestEchoStreamPeekChar(t *testing.T) {
+	in := slip.NewStringStream([]byte("abc"))
+	out := slip.NewStringStream([]byte{})
+	es := cl.NewEchoStream(in, out)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), es)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(list (peek-char t in) (read-char in))`,
+		Expect: `(#\a #\a)`,
+	}).Test(t)
+}
+
+func TestEchoStreamReadByte(t *testing.T) {
+	in := slip.NewStringStream([]byte("abc"))
+	out := slip.NewStringStream([]byte{})
+	es := cl.NewEchoStream(in, out)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), es)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-byte in)`,
+		Expect: `97`,
+	}).Test(t)
+}
+
+func TestEchoStreamUnreadRune(t *testing.T) {
+	in := slip.NewStringStream([]byte("abc"))
+	out := slip.NewStringStream([]byte{})
+	es := cl.NewEchoStream(in, out)
+
+	r, size, err := es.ReadRune()
+	tt.Nil(t, err)
+	tt.Equal(t, 1, size)
+	tt.Equal(t, rune('a'), r)
+
+	err = es.UnreadRune()
+	tt.Nil(t, err)
+
+	r, size, err = es.ReadRune()
+	tt.Nil(t, err)
+	tt.Equal(t, 1, size)
+	tt.Equal(t, rune('a'), r)
 }

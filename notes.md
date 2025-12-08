@@ -6,22 +6,14 @@
 ---------------------
 
 - rune-reader branch
- - test echo-stream with unread-char, read-char, peek-char, and read-line
+ - test unread-char, read-char, peek-char, and read-line
 
  - tests for read-line, read-char and peek-char from file and others
  - add ReadRune to:
-  - RuneReader mixin (embed)
-     Reader io.Reader
-   - func (obj *RuneReader) Read(b []byte) (cnt int, err error) {
-   - func (obj *InputStream) Close() (err error) {
-   - func (obj *RuneReader) ReadRune() (r rune, size int, err error) {
-   - func (obj *RuneReader) UnreadRune() (err error) {
-   - func (obj *RuneReader) PushRune(r rune) {
-   - func (obj *RuneReader) ReadByte() (b byte, err error) {
  - file-stream
   - reimplement, separate from input-stream
  - cl:two-way-stream
- - cl:echo-stream
+ + cl:echo-stream
  - cl:concatednated-stream
  - cl:echo-stream-input-stream
  - cl:synonym-stream

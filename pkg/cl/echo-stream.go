@@ -4,6 +4,7 @@ package cl
 
 import (
 	"io"
+	"unicode/utf8"
 
 	"github.com/ohler55/slip"
 )
@@ -100,4 +101,37 @@ func (obj *EchoStream) Write(b []byte) (n int, err error) {
 		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	return obj.output.Write(b)
+}
+
+// ReadRune returns the next rune in buf from the current position. This is
+// part of the io.RuneReader interface.
+func (obj *EchoStream) ReadRune() (r rune, size int, err error) {
+	if obj.input == nil {
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
+	}
+	if r, size, err = obj.input.ReadRune(); err == nil {
+		buf := make([]byte, size)
+		utf8.EncodeRune(buf, r)
+		_, err = obj.output.Write(buf)
+	}
+	return
+}
+
+// ReadByte reads a byte.
+func (obj *EchoStream) ReadByte() (b byte, err error) {
+	if obj.input == nil {
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
+	}
+	if b, err = obj.input.ReadByte(); err == nil {
+		_, err = obj.output.Write([]byte{b})
+	}
+	return
+}
+
+// ReadByte reads a byte.
+func (obj *EchoStream) UnreadRune() error {
+	if obj.input == nil {
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
+	}
+	return obj.input.UnreadRune()
 }
