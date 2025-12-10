@@ -84,3 +84,59 @@ func TestConcatenatedStreamReadError(t *testing.T) {
 	_, err := cs.Read(buf)
 	tt.NotNil(t, err)
 }
+
+func TestConcatenatedStreamReadChar(t *testing.T) {
+	ss1 := slip.NewStringStream([]byte("abc"))
+	ss2 := slip.NewStringStream([]byte("def"))
+	cs := cl.NewConcatenatedStream(ss1, ss2)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), cs)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-char in)`,
+		Expect: `#\a`,
+	}).Test(t)
+}
+
+func TestConcatenatedStreamReadLine(t *testing.T) {
+	ss1 := slip.NewStringStream([]byte("abc"))
+	ss2 := slip.NewStringStream([]byte("def"))
+	cs := cl.NewConcatenatedStream(ss1, ss2)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), cs)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-line in)`,
+		Expect: `"abcdef", t`,
+	}).Test(t)
+}
+
+func TestConcatenatedStreamPeekChar(t *testing.T) {
+	ss1 := slip.NewStringStream([]byte("abc"))
+	ss2 := slip.NewStringStream([]byte("def"))
+	cs := cl.NewConcatenatedStream(ss1, ss2)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), cs)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(peek-char t in)`,
+		PanicType: slip.StreamErrorSymbol,
+	}).Test(t)
+}
+
+func TestConcatenatedStreamReadByte(t *testing.T) {
+	ss1 := slip.NewStringStream([]byte("abc"))
+	ss2 := slip.NewStringStream([]byte("def"))
+	cs := cl.NewConcatenatedStream(ss1, ss2)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), cs)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-byte in)`,
+		Expect: `97`,
+	}).Test(t)
+}

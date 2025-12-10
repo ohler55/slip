@@ -128,3 +128,19 @@ func (obj ConcatenatedStream) Close() error {
 func (obj ConcatenatedStream) IsOpen() bool {
 	return obj[0] == nil
 }
+
+// ReadRune returns the next rune in buf from the current position. This is
+// part of the io.RuneReader interface.
+func (obj ConcatenatedStream) ReadRune() (r rune, size int, err error) {
+	return slip.RuneFromReader(obj)
+}
+
+// ReadByte reads a byte.
+func (obj ConcatenatedStream) ReadByte() (b byte, err error) {
+	return slip.ByteFromReader(obj)
+}
+
+// ReadByte reads a byte.
+func (obj ConcatenatedStream) UnreadRune() error {
+	panic(slip.StreamErrorNew(slip.NewScope(), 0, obj, "not supported"))
+}

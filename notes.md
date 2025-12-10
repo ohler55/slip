@@ -14,7 +14,7 @@
   - reimplement, separate from input-stream
  - cl:two-way-stream
  + cl:echo-stream
- - cl:concatednated-stream
+ + cl:concatednated-stream
  - cl:echo-stream-input-stream
  - cl:synonym-stream
 
