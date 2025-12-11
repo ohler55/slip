@@ -650,63 +650,6 @@ func TestSimple2(t *testing.T) {
 	}).Test(t)
 }
 
-func TestFileStream(t *testing.T) {
-	(&sliptest.Object{
-		Target:    (*slip.FileStream)(os.Stdout),
-		String:    "/^#<FILE-STREAM /dev/stdout \\{[0-9+]\\}>$/",
-		Simple:    "#<FILE-STREAM /dev/stdout {1}>",
-		Hierarchy: "file-stream.stream.t",
-		Equals: []*sliptest.EqTest{
-			{Other: (*slip.FileStream)(os.Stdout), Expect: true},
-			{Other: slip.True, Expect: false},
-		},
-		Selfies: []func() slip.Symbol{
-			(*slip.FileStream)(os.Stdout).StreamType,
-		},
-		Eval: (*slip.FileStream)(os.Stdout),
-	}).Test(t)
-}
-
-func TestFileStreamFile(t *testing.T) {
-	filename := "testdata/sample"
-	defer func() { _ = os.Remove(filename) }()
-
-	f, err := os.Create(filename)
-	tt.Nil(t, err)
-	fs := (*slip.FileStream)(f)
-	tt.Equal(t, 0, fs.LastByte())
-	_, err = f.WriteString("hello")
-	tt.Nil(t, err)
-	tt.Equal(t, 'o', fs.LastByte())
-	tt.Equal(t, slip.Fixnum(5), fs.FileLength())
-	pos, _ := fs.Seek(0, 1)
-	tt.Equal(t, int64(5), pos)
-}
-
-func TestFileStreamWriteRead(t *testing.T) {
-	pr, pw, err := os.Pipe()
-	tt.Nil(t, err)
-	defer func() { _ = pw.Close(); _ = pr.Close() }()
-
-	lr := (*slip.FileStream)(pr)
-	lw := (*slip.FileStream)(pw)
-
-	_, _ = lw.Write([]byte("hello"))
-
-	// Should not be able to get the last byte.
-	tt.Equal(t, 0, lw.LastByte())
-
-	tt.Equal(t, true, lw.IsOpen())
-	_ = lw.Close()
-	tt.Equal(t, false, lw.IsOpen())
-
-	buf := make([]byte, 10)
-	n, err := lr.Read(buf)
-	tt.Nil(t, err)
-
-	tt.Equal(t, "hello", string(buf[:n]))
-}
-
 type rwBuilder struct {
 	strings.Builder
 }

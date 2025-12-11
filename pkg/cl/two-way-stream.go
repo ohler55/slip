@@ -22,7 +22,6 @@ func init() {
 // TwoWayStream is a stream that accepts input from an input stream and writes
 // to an output stream.
 type TwoWayStream struct {
-	// Input io.Reader
 	slip.RuneReader
 	Output io.Writer
 }
