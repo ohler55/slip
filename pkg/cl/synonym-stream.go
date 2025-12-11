@@ -131,3 +131,19 @@ func (obj *SynonymStream) Write(b []byte) (n int, err error) {
 	}
 	return w.Write(b)
 }
+
+// ReadRune returns the next rune in buf from the current position. This is
+// part of the io.RuneReader interface.
+func (obj *SynonymStream) ReadRune() (r rune, size int, err error) {
+	return slip.RuneFromReader(obj)
+}
+
+// ReadByte reads a byte.
+func (obj *SynonymStream) ReadByte() (b byte, err error) {
+	return slip.ByteFromReader(obj)
+}
+
+// UnreadRune calls UnreadRune on the input if not closed.
+func (obj *SynonymStream) UnreadRune() error {
+	panic(slip.StreamErrorNew(slip.NewScope(), 0, obj, "not supported"))
+}

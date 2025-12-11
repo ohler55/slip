@@ -49,7 +49,7 @@ func (f *MakeTwoWayStream) Call(s *slip.Scope, args slip.List, depth int) slip.O
 	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	tws := TwoWayStream{}
 	var ok bool
-	if tws.Input, ok = args[0].(io.Reader); !ok {
+	if tws.Reader, ok = args[0].(io.Reader); !ok {
 		slip.TypePanic(s, depth, "input-stream", args[0], "input-stream")
 	}
 	if tws.Output, ok = args[1].(io.Writer); !ok {

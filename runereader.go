@@ -18,6 +18,11 @@ type RuneReader struct {
 
 // Read made visible since os.Read functions are not automatically visible.
 func (obj *RuneReader) Read(b []byte) (cnt int, err error) {
+	if obj.Reader == nil {
+		var is InputStream
+		is.Reader = obj
+		StreamPanic(NewScope(), 0, &is, "closed")
+	}
 	var plus int
 	if obj.useLast && obj.lastRune != 0 {
 		plus = utf8.RuneLen(obj.lastRune)
@@ -61,6 +66,11 @@ func (obj *RuneReader) Close() (err error) {
 
 // ReadRune reads a rune.
 func (obj *RuneReader) ReadRune() (r rune, size int, err error) {
+	if obj.Reader == nil {
+		var is InputStream
+		is.Reader = obj
+		StreamPanic(NewScope(), 0, &is, "closed")
+	}
 	if obj.useLast {
 		r = obj.lastRune
 		size = utf8.RuneLen(r)
@@ -122,6 +132,11 @@ func (obj *RuneReader) PushRune(r rune) {
 
 // ReadByte reads a byte.
 func (obj *RuneReader) ReadByte() (b byte, err error) {
+	if obj.Reader == nil {
+		var is InputStream
+		is.Reader = obj
+		StreamPanic(NewScope(), 0, &is, "closed")
+	}
 	if obj.useLast {
 		if 0x80 <= obj.lastRune {
 			return 0, fmt.Errorf("cannot read a byte from a multiple byte character that was unread, %s",

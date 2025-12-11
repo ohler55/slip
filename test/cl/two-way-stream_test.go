@@ -72,3 +72,79 @@ func TestTwoWayStreamOpenClose(t *testing.T) {
 		_, _ = es.Read(buf)
 	})
 }
+
+func TestTwoWayStreamReadChar(t *testing.T) {
+	var (
+		ss1 slip.StringStream
+		ss2 slip.StringStream
+	)
+	tws := cl.NewTwoWayStream(&ss1, &ss2)
+	_, err := ss1.Write([]byte("abc"))
+	tt.Nil(t, err)
+	_, _ = ss1.Seek(0, 0)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), tws)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-char in)`,
+		Expect: `#\a`,
+	}).Test(t)
+}
+
+func TestTwoWayStreamReadLine(t *testing.T) {
+	var (
+		ss1 slip.StringStream
+		ss2 slip.StringStream
+	)
+	tws := cl.NewTwoWayStream(&ss1, &ss2)
+	_, err := ss1.Write([]byte("abc"))
+	tt.Nil(t, err)
+	_, _ = ss1.Seek(0, 0)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), tws)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-line in)`,
+		Expect: `"abc", t`,
+	}).Test(t)
+}
+
+func TestTwoWayStreamPeekChar(t *testing.T) {
+	var (
+		ss1 slip.StringStream
+		ss2 slip.StringStream
+	)
+	tws := cl.NewTwoWayStream(&ss1, &ss2)
+	_, err := ss1.Write([]byte("abc"))
+	tt.Nil(t, err)
+	_, _ = ss1.Seek(0, 0)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), tws)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(peek-char t in)`,
+		Expect: `#\a`,
+	}).Test(t)
+}
+
+func TestTwoWayStreamReadByte(t *testing.T) {
+	var (
+		ss1 slip.StringStream
+		ss2 slip.StringStream
+	)
+	tws := cl.NewTwoWayStream(&ss1, &ss2)
+	_, err := ss1.Write([]byte("abc"))
+	tt.Nil(t, err)
+	_, _ = ss1.Seek(0, 0)
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), tws)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-byte in)`,
+		Expect: `97`,
+	}).Test(t)
+}

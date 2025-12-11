@@ -6,18 +6,9 @@
 ---------------------
 
 - rune-reader branch
- - test unread-char, read-char, peek-char, and read-line
-
  - tests for read-line, read-char and peek-char from file and others
- - add ReadRune to:
  - file-stream
   - reimplement, separate from input-stream
- - cl:two-way-stream
- + cl:echo-stream
- + cl:concatednated-stream
- - cl:echo-stream-input-stream
- - cl:synonym-stream
-
 
 flavor define order
 
