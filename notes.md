@@ -5,11 +5,6 @@
 - next
 ---------------------
 
-- rune-reader branch
- - tests for read-line, read-char and peek-char from file and others
- - file-stream
-  - reimplement, separate from input-stream
-
 flavor define order
 
 ---------------------
