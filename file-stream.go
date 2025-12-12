@@ -94,5 +94,20 @@ func (obj *FileStream) FileLength() (length Object) {
 // Seek moves the pos in buf. This is part of the io.Seeker interface.
 func (obj *FileStream) Seek(offset int64, whence int) (n int64, err error) {
 	return (*os.File)(obj).Seek(offset, whence)
+}
 
+// ReadRune returns the next rune in buf from the current position. This is
+// part of the io.RuneReader interface.
+func (obj *FileStream) ReadRune() (r rune, size int, err error) {
+	return RuneFromReader(obj)
+}
+
+// ReadByte reads a byte.
+func (obj *FileStream) ReadByte() (b byte, err error) {
+	return ByteFromReader(obj)
+}
+
+// UnreadRune calls UnreadRune on the input if not closed.
+func (obj *FileStream) UnreadRune() error {
+	panic(StreamErrorNew(NewScope(), 0, obj, "not supported"))
 }

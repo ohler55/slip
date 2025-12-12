@@ -16,7 +16,7 @@ import (
 func TestBagJSONParseStream(t *testing.T) {
 	r := strings.NewReader("{a:1}{b:2}{c:3}")
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	scope.Set(slip.Symbol("json-parse-test-out"), slip.List{})
 	(&sliptest.Function{
 		Scope: scope,
@@ -33,7 +33,7 @@ func TestBagJSONParseStream(t *testing.T) {
 func TestBagJSONParseStreamStrict(t *testing.T) {
 	r := strings.NewReader(`{"a":1}{"b":2}{"c":3}`)
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	scope.Set(slip.Symbol("json-parse-test-out"), slip.List{})
 	(&sliptest.Function{
 		Scope: scope,

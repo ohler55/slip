@@ -12,8 +12,8 @@ import (
 
 func TestUnreadCharStream(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("abc"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(progn (read-char in) (unread-char #\x in) (read-char in))`,
@@ -23,8 +23,8 @@ func TestUnreadCharStream(t *testing.T) {
 
 func TestUnreadCharNotChar(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("abc"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(progn (read-char in) (unread-char t in) (read-char in))`,

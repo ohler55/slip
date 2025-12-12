@@ -22,13 +22,13 @@ func init() {
 // TwoWayStream is a stream that accepts input from an input stream and writes
 // to an output stream.
 type TwoWayStream struct {
-	Input  io.Reader
+	slip.RuneReader
 	Output io.Writer
 }
 
 // NewTwoWayStream creates a new TwoWayStream.
 func NewTwoWayStream(input io.Reader, output io.Writer) *TwoWayStream {
-	return &TwoWayStream{Input: input, Output: output}
+	return &TwoWayStream{RuneReader: slip.RuneReader{Reader: input}, Output: output}
 }
 
 // String representation of the Object.
@@ -48,7 +48,7 @@ func (obj *TwoWayStream) Simplify() any {
 
 // Equal returns true if this Object and the other are equal in value.
 func (obj *TwoWayStream) Equal(other slip.Object) (eq bool) {
-	if es, ok := other.(*TwoWayStream); ok && es.Input == obj.Input && es.Output == obj.Output {
+	if es, ok := other.(*TwoWayStream); ok && es.Reader == obj.Reader && es.Output == obj.Output {
 		eq = true
 	}
 	return
@@ -59,7 +59,7 @@ func (obj *TwoWayStream) Hierarchy() []slip.Symbol {
 	return []slip.Symbol{TwoWayStreamSymbol, slip.StreamSymbol, slip.TrueSymbol}
 }
 
-// StreamType returns 'echoStream.
+// StreamType returns 'two-way-stream.
 func (obj *TwoWayStream) StreamType() slip.Symbol {
 	return TwoWayStreamSymbol
 }
@@ -71,7 +71,7 @@ func (obj *TwoWayStream) Eval(s *slip.Scope, depth int) slip.Object {
 
 // Close the stream but not the input or output streams.
 func (obj *TwoWayStream) Close() error {
-	obj.Input = nil
+	obj.Reader = nil
 	obj.Output = nil
 
 	return nil
@@ -79,15 +79,7 @@ func (obj *TwoWayStream) Close() error {
 
 // IsOpen return true if the stream is open or false if not.
 func (obj *TwoWayStream) IsOpen() bool {
-	return obj.Input != nil && obj.Output != nil
-}
-
-// Read from the current position in the buf. This is part of the io.Reader interface.
-func (obj *TwoWayStream) Read(p []byte) (n int, err error) {
-	if obj.Input == nil {
-		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
-	}
-	return obj.Input.Read(p)
+	return obj.Reader != nil && obj.Output != nil
 }
 
 // Write to all the component streams. If any one of the writes fails a panic

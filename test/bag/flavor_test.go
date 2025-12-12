@@ -60,7 +60,7 @@ func TestBagFlavorInitParseTime(t *testing.T) {
 func TestBagFlavorInitReadTime(t *testing.T) {
 	r := strings.NewReader("[\"2022-09-19T01:02:03Z\"]")
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	obj := slip.ReadString(`
 (setq bag (make-instance 'bag-flavor :read input))`, scope).Eval(scope, nil).(*flavors.Instance)
 	tt.Equal(t, "[1663549323.000000000]", pretty.SEN(obj.Any, &ojg.Options{TimeFormat: "second"}))
@@ -111,7 +111,7 @@ func TestBagFlavorRead(t *testing.T) {
 	r := strings.NewReader("{a:3}")
 	scope := slip.NewScope()
 	obj := slip.ReadString("(setq bag (make-instance 'bag-flavor))", scope).Eval(scope, nil).(*flavors.Instance)
-	scope.Let(slip.Symbol("input"), &slip.InputStream{Reader: r})
+	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	_ = slip.ReadString(`(send bag :read input)`, scope).Eval(scope, nil)
 	tt.Equal(t, "{a: 3}", pretty.SEN(obj.Any))
 

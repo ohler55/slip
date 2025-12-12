@@ -15,8 +15,8 @@ import (
 
 func TestIterateStream(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("A, B\n1, 2\n3, 4\n")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("A, B\n1, 2\n3, 4\n"))
+	scope.Let(slip.Symbol("in"), stream)
 	scope.Set(slip.Symbol("csv-test-out"), slip.List{})
 	(&sliptest.Function{
 		Scope:  scope,
@@ -97,8 +97,8 @@ func TestIterateBadKeyword(t *testing.T) {
 
 func TestIterateStreamError(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: badReader(0)}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(badReader(0))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(csv-iterate (lambda (row) nil) in)`,

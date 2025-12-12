@@ -22,12 +22,12 @@ func init() {
 // EchoStream is a stream that accepts input from an input stream and echos
 // that input to an output stream.
 type EchoStream struct {
-	input  io.Reader
+	input  slip.RuneStream
 	output io.Writer
 }
 
 // NewEchoStream creates a new EchoStream.
-func NewEchoStream(input io.Reader, output io.Writer) *EchoStream {
+func NewEchoStream(input slip.RuneStream, output io.Writer) *EchoStream {
 	return &EchoStream{input: input, output: output}
 }
 
@@ -100,4 +100,23 @@ func (obj *EchoStream) Write(b []byte) (n int, err error) {
 		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
 	}
 	return obj.output.Write(b)
+}
+
+// ReadRune returns the next rune in buf from the current position. This is
+// part of the io.RuneReader interface.
+func (obj *EchoStream) ReadRune() (r rune, size int, err error) {
+	return slip.RuneFromReader(obj)
+}
+
+// ReadByte reads a byte.
+func (obj *EchoStream) ReadByte() (b byte, err error) {
+	return slip.ByteFromReader(obj)
+}
+
+// UnreadRune calls UnreadRune on the input if not closed.
+func (obj *EchoStream) UnreadRune() error {
+	if obj.input == nil {
+		slip.StreamPanic(slip.NewScope(), 0, obj, "closed")
+	}
+	return obj.input.UnreadRune()
 }

@@ -74,7 +74,7 @@ func (f *WithZipReader) Call(s *slip.Scope, args slip.List, depth int) (result s
 		panic(err)
 	}
 	s2 := s.NewScope()
-	s2.Let(sym, &slip.InputStream{Reader: z})
+	s2.Let(sym, slip.NewInputStream(z))
 	for i := range forms {
 		result = slip.EvalArg(s2, forms, i, d2)
 	}

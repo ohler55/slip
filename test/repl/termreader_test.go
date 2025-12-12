@@ -29,7 +29,7 @@ func TestTermReader(t *testing.T) {
 	var out strings.Builder
 	in := strings.NewReader("\n(setq x 3)\n")
 	scope.Set(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
-	scope.Set(slip.Symbol("*standard-input*"), &slip.InputStream{Reader: in})
+	scope.Set(slip.Symbol("*standard-input*"), slip.NewInputStream(in))
 	scope.Set(slip.Symbol("*repl-prompt*"), slip.String("> "))
 	scope.Set(slip.Symbol("*repl-editor*"), nil)
 
@@ -55,7 +55,7 @@ func TestTermReaderPanic(t *testing.T) {
 	var out strings.Builder
 	in := strings.NewReader("\nzzz\n")
 	scope.Set(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
-	scope.Set(slip.Symbol("*standard-input*"), &slip.InputStream{Reader: in})
+	scope.Set(slip.Symbol("*standard-input*"), slip.NewInputStream(in))
 	scope.Set(slip.Symbol("*repl-prompt*"), slip.String("> "))
 	scope.Set(slip.Symbol("*repl-editor*"), nil)
 

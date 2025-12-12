@@ -34,8 +34,8 @@ func TestReadStream(t *testing.T) {
 </top>
 `
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader(sample)}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(sample))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(xml-read in)`,
@@ -91,8 +91,8 @@ func TestReadBadKeyword(t *testing.T) {
 
 func TestReadError(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: badReader(0)}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(badReader(0))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(xml-read in)`,

@@ -19,8 +19,8 @@ func (w badReader) Read([]byte) (int, error) {
 
 func TestReadAllStream(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("abc\ndef\n")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("abc\ndef\n"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-all in)`,
@@ -39,7 +39,7 @@ func TestReadAllNotStream(t *testing.T) {
 
 func TestReadAllError(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("in"), &slip.InputStream{Reader: badReader(0)})
+	scope.Let(slip.Symbol("in"), slip.NewInputStream(badReader(0)))
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-all in)`,

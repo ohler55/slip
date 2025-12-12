@@ -13,8 +13,8 @@ import (
 
 func TestPeekCharStdin(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("𝄢bc")}
-	scope.Let(slip.Symbol("*standard-input*"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("𝄢bc"))
+	scope.Let(slip.Symbol("*standard-input*"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char)`,
@@ -24,8 +24,8 @@ func TestPeekCharStdin(t *testing.T) {
 
 func TestPeekCharStream(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("abc"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char nil in)`,
@@ -37,8 +37,8 @@ func TestPeekCharStream(t *testing.T) {
 
 func TestPeekCharSkipWhite(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("\t ab")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("\t ab"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char t in)`,
@@ -62,8 +62,8 @@ func TestPeekCharSkipWhite(t *testing.T) {
 
 func TestPeekCharTarget(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("\t abc")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("\t abc"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char #\b in)`,
@@ -75,8 +75,8 @@ func TestPeekCharTarget(t *testing.T) {
 
 func TestPeekCharEOFPanic(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char nil in)`,
@@ -86,8 +86,8 @@ func TestPeekCharEOFPanic(t *testing.T) {
 
 func TestPeekCharEOFNil(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char nil in nil)`,
@@ -97,8 +97,8 @@ func TestPeekCharEOFNil(t *testing.T) {
 
 func TestPeekCharEOFNonNil(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char nil in nil 'done)`,
@@ -108,8 +108,8 @@ func TestPeekCharEOFNonNil(t *testing.T) {
 
 func TestPeekCharBadPeekType(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("abc"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(peek-char 'x in)`,

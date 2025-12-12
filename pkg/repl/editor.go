@@ -74,9 +74,9 @@ func (ed *editor) initialize() {
 		ed.fd = int(((*os.File)(fs)).Fd())
 		ed.origState = term.MakeRaw(ed.fd)
 	}
-	scope.Set(slip.Symbol("*standard-input*"), &slip.InputStream{Reader: ed})
+	scope.Set(slip.Symbol("*standard-input*"), slip.NewInputStream(ed))
 	if termIO, ok := slip.CLPkg.JustGet("*terminal-io*").(*cl.TwoWayStream); ok {
-		termIO.Input = ed
+		termIO.Reader = ed
 	}
 	ed.completer.Init()
 	go ed.chanRead()

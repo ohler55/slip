@@ -58,7 +58,7 @@ func TestYOrNPBadWrite(t *testing.T) {
 
 func TestYOrNPBadRead(t *testing.T) {
 	scope := slip.NewScope()
-	scope.Let(slip.Symbol("bad"), &slip.InputStream{Reader: badReader(0)})
+	scope.Let(slip.Symbol("bad"), slip.NewInputStream(badReader(0)))
 	(&sliptest.Function{
 		Scope: scope,
 		Source: `(let ((*standard-input* bad)

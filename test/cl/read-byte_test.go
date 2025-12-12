@@ -12,8 +12,8 @@ import (
 
 func TestReadByteStdin(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	scope.Let(slip.Symbol("*standard-input*"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("abc"))
+	scope.Let(slip.Symbol("*standard-input*"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-byte)`,
@@ -23,8 +23,8 @@ func TestReadByteStdin(t *testing.T) {
 
 func TestReadByteStream(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("abc")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader("abc"))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-byte in)`,
@@ -34,8 +34,8 @@ func TestReadByteStream(t *testing.T) {
 
 func TestReadByteEOFPanic(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-byte in)`,
@@ -45,8 +45,8 @@ func TestReadByteEOFPanic(t *testing.T) {
 
 func TestReadByteEOFNil(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-byte in nil)`,
@@ -56,8 +56,8 @@ func TestReadByteEOFNil(t *testing.T) {
 
 func TestReadByteEOFNonNil(t *testing.T) {
 	scope := slip.NewScope()
-	stream := slip.InputStream{Reader: strings.NewReader("")}
-	scope.Let(slip.Symbol("in"), &stream)
+	stream := slip.NewInputStream(strings.NewReader(""))
+	scope.Let(slip.Symbol("in"), stream)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(read-byte in nil 'done)`,

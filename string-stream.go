@@ -155,6 +155,50 @@ func (obj *StringStream) ReadRune() (r rune, size int, err error) {
 	return
 }
 
+// ReadByte reads a byte.
+func (obj *StringStream) ReadByte() (b byte, err error) {
+	if obj.pos < 0 {
+		return 0, WrapError(NewScope(),
+			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
+			"stream closed", nil)
+	}
+	if len(obj.buf) <= obj.pos {
+		return 0, io.EOF
+	}
+	b = obj.buf[obj.pos]
+	obj.pos++
+
+	return
+}
+
+// ReadByte reads a byte.
+func (obj *StringStream) UnreadRune() error {
+	if obj.pos < 0 {
+		return WrapError(NewScope(),
+			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
+			"stream closed", nil)
+	}
+	if obj.pos == 0 {
+		return WrapError(NewScope(),
+			StreamErrorNew(NewScope(), 0, obj, "can not unread from at the start of a stream").(Instance),
+			"stream start", nil)
+	}
+	end := obj.pos
+	for 0 < obj.pos {
+		obj.pos--
+		if utf8.Valid(obj.buf[obj.pos:end]) {
+			break
+		}
+		if obj.pos-end == utf8.UTFMax || obj.pos == 0 {
+			obj.pos = end
+			return WrapError(NewScope(),
+				StreamErrorNew(NewScope(), 0, obj, "can not read an invalid UTF8 character").(Instance),
+				"invalid UTF8", nil)
+		}
+	}
+	return nil
+}
+
 // Seek moves the pos in buf. This is part of the io.Seeker interface.
 func (obj *StringStream) Seek(offset int64, whence int) (n int64, err error) {
 	if obj.pos < 0 {

@@ -3,6 +3,7 @@
 package test
 
 import (
+	"errors"
 	"io"
 	"testing"
 
@@ -189,4 +190,90 @@ func TestStringStreamLastByte(t *testing.T) {
 	tt.Nil(t, err)
 	tt.Equal(t, 5, cnt)
 	tt.Equal(t, 'o', stream.LastByte())
+}
+
+func TestStringStreamReadChar(t *testing.T) {
+	scope := slip.NewScope()
+	stream := slip.NewStringStream([]byte("a𝄢c"))
+	scope.Let(slip.Symbol("in"), stream)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(list (read-char in) (read-char in) (read-char in))`,
+		Expect: `(#\a #\𝄢 #\c)`,
+	}).Test(t)
+}
+
+func TestStringStreamUnreadRuneMisc(t *testing.T) {
+	ss := slip.NewStringStream([]byte("a𝄢c"))
+
+	r, size, err := ss.ReadRune()
+	tt.Nil(t, err)
+	tt.Equal(t, 1, size)
+	tt.Equal(t, rune('a'), r)
+
+	r, size, err = ss.ReadRune()
+	tt.Nil(t, err)
+	tt.Equal(t, 4, size)
+	tt.Equal(t, rune('𝄢'), r)
+
+	// Verify unread a full rune and not just a byte.
+	err = ss.UnreadRune()
+	tt.Nil(t, err)
+	r, size, err = ss.ReadRune()
+	tt.Nil(t, err)
+	tt.Equal(t, 4, size)
+	tt.Equal(t, rune('𝄢'), r)
+
+	// Back up more than one rune.
+	err = ss.UnreadRune()
+	tt.Nil(t, err)
+	err = ss.UnreadRune()
+	tt.Nil(t, err)
+	r, size, err = ss.ReadRune()
+	tt.Nil(t, err)
+	tt.Equal(t, 1, size)
+	tt.Equal(t, rune('a'), r)
+
+	// Hit the limit.
+	err = ss.UnreadRune()
+	tt.Nil(t, err)
+	err = ss.UnreadRune()
+	tt.NotNil(t, err)
+}
+
+func TestStringStreamUnreadRuneClosed(t *testing.T) {
+	ss := slip.NewStringStream([]byte("a𝄢c"))
+	ss.Close()
+	err := ss.UnreadRune()
+	tt.NotNil(t, err)
+}
+
+func TestStringStreamUnreadRuneInvalid(t *testing.T) {
+	ss := slip.NewStringStream([]byte{0xff, 0xfe, 0xfd})
+
+	_, err := ss.ReadByte()
+	tt.Nil(t, err)
+	_, err = ss.ReadByte()
+	tt.Nil(t, err)
+
+	err = ss.UnreadRune()
+	tt.NotNil(t, err)
+}
+
+func TestStringStreamReadByteClosed(t *testing.T) {
+	ss := slip.NewStringStream([]byte("a𝄢c"))
+	ss.Close()
+	_, err := ss.ReadByte()
+	tt.NotNil(t, err)
+}
+
+func TestStringStreamReadByteEOF(t *testing.T) {
+	ss := slip.NewStringStream([]byte("a"))
+
+	_, err := ss.ReadByte()
+	tt.Nil(t, err)
+
+	_, err = ss.ReadByte()
+	tt.NotNil(t, err)
+	tt.Equal(t, true, errors.Is(err, io.EOF))
 }

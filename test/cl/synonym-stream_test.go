@@ -178,3 +178,59 @@ func TestSynonymStreamWriteNotStream(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestSynonymStreamReadChar(t *testing.T) {
+	ss := cl.NewSynonymStream(slip.Symbol("zz"))
+	slip.CurrentPackage.Set("zz", slip.NewStringStream([]byte("abc")))
+	defer func() { _ = slip.CurrentPackage.Remove("zz") }()
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), ss)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-char in)`,
+		Expect: `#\a`,
+	}).Test(t)
+}
+
+func TestSynonymStreamReadLine(t *testing.T) {
+	ss := cl.NewSynonymStream(slip.Symbol("zz"))
+	slip.CurrentPackage.Set("zz", slip.NewStringStream([]byte("abc")))
+	defer func() { _ = slip.CurrentPackage.Remove("zz") }()
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), ss)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-line in)`,
+		Expect: `"abc", t`,
+	}).Test(t)
+}
+
+func TestSynonymStreamPeekChar(t *testing.T) {
+	ss := cl.NewSynonymStream(slip.Symbol("zz"))
+	slip.CurrentPackage.Set("zz", slip.NewStringStream([]byte("abc")))
+	defer func() { _ = slip.CurrentPackage.Remove("zz") }()
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), ss)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(peek-char t in)`,
+		PanicType: slip.StreamErrorSymbol,
+	}).Test(t)
+}
+
+func TestSynonymStreamReadByte(t *testing.T) {
+	ss := cl.NewSynonymStream(slip.Symbol("zz"))
+	slip.CurrentPackage.Set("zz", slip.NewStringStream([]byte("abc")))
+	defer func() { _ = slip.CurrentPackage.Remove("zz") }()
+
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("in"), ss)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(read-byte in)`,
+		Expect: `97`,
+	}).Test(t)
+}

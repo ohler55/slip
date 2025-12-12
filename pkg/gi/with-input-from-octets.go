@@ -66,7 +66,7 @@ func (f *WithInputFromOctets) Call(s *slip.Scope, args slip.List, depth int) (re
 	data := []byte(slip.CoerceToOctets(args[1]).(slip.Octets))
 
 	s2 := s.NewScope()
-	s2.Let(sym, &slip.InputStream{Reader: bytes.NewReader(data)})
+	s2.Let(sym, slip.NewInputStream(bytes.NewReader(data)))
 	for i := range forms {
 		result = slip.EvalArg(s2, forms, i, d2)
 	}
