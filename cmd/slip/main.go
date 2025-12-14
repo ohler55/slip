@@ -44,11 +44,15 @@ func init() {
 
 func main() {
 	flag.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stdout, `
+		_, _ = fmt.Fprintf(os.Stderr, `
+%s%s%s version %s
 
-usage: %s [<options>] [<filepath>]...
+A Common LISP (mostly) evaluator and REPL with support for snapshots, stashing,
+history, tab completion, and multiple help options..
 
-`, filepath.Base(os.Args[0]))
+usage: %[2]s [<options>] [<filepath>]...
+
+`, "\x1b[1m", filepath.Base(os.Args[0]), "\x1b[m", version)
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr)
 	}

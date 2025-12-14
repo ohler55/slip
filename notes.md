@@ -5,7 +5,14 @@
 - next
 ---------------------
 
-flavor define order
+- repl (&key terminal ansi config)
+ - non-standard
+ - panic is already in a repl
+ - exit back to invoking code or exit?
+
+---------------------
+
+- flavor allow out of order defflavor like standard-class
 
 ---------------------
 
@@ -18,12 +25,10 @@ flavor define order
 
   - clos https://lispcookbook.github.io/cl-cookbook/clos.html and https://www.algo.be/cl/documents/clos-guide.html
 
--------------------
- - flavor allow out of order defflavor like standard-class
- - rename bag-flavor to just bag?
-
 -----------------
   - [ ] inspect [interactive]
+   - inspect data, break down at each level
+   - repl but with extra bindings for numbers
 
  - tough-ones
   - [ ] DESTRUCTURING-BIND
@@ -63,23 +68,23 @@ flavor define order
      - nats ?
 
 
- - future repl options
-  - select, copy, yank, ring (stack) (is this really needed?)
-   - need select
-    - mark
-    - highlight from mark to current
-    - ^w to delete
-    - M-w to copy
-   - ^y for yank
-   - M-y for next
-   - need hookup with system copy and paste
+- future repl options
+ - select, copy, yank, ring (stack) (is this really needed?)
+  - need select
+   - mark
+   - highlight from mark to current
+   - ^w to delete
+   - M-w to copy
+  - ^y for yank
+  - M-y for next
+  - need hookup with system copy and paste
 
- - other method combinations?
-  - :method-combination option for defflavor
-  - daemon (default)
-  - progn
-  - or
-  - and
-  - list
+- other method combinations?
+ - :method-combination option for defflavor
+ - daemon (default)
+ - progn
+ - or
+ - and
+ - list
 
 - ui with fyne
