@@ -1382,6 +1382,204 @@ func TestDefstructLoadFormCustomConstructor(t *testing.T) {
 	tt.NotNil(t, form)
 }
 
+// ============================================================================
+// Error path tests for parseStructureOptions
+// ============================================================================
+
+func TestDefstructErrorEmptyNameAndOptions(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct ())`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorNameNotSymbol(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (42))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorNameAndOptionsWrongType(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct 42)`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorUnknownKeywordOption(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt :unknown-option))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorEmptyListOption(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt ()))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorOptionKeywordNotSymbol(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (42 foo)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorConcNameWrongType(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:conc-name 42)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorBOAArglistNotList(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:constructor make-err not-a-list)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorConstructorNameNotSymbol(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:constructor 42)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorCopierWrongType(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:copier 42)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorPredicateWrongType(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:predicate 42)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorIncludeMissingName(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:include)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorIncludeNameNotSymbol(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:include 42)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorIncludeNotDefined(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:include nonexistent-parent)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorIncludeTypedInUntyped(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`
+(defstruct (typedparent (:type vector)) x)
+(defstruct (erropt (:include typedparent)) y)`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorIncludeDifferentType(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`
+(defstruct (vecparent (:type vector)) x)
+(defstruct (erropt (:type list) (:include vecparent)) y)`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorInitialOffsetMissingValue(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:type vector) (:initial-offset)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorInitialOffsetNotFixnum(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:type vector) (:initial-offset "two")))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorTypeMissingValue(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:type)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorTypeInvalidSymbol(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:type invalid)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorTypeListNotVector(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:type (invalid t))))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorTypeWrongType(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:type 42)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorUnknownListOption(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:unknown-option foo)))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorOptionNotSymbolOrList(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt 42))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorPrintFunctionWithType(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct (erropt (:type vector) (:print-function (lambda (o s d) nil))))`, scope).Eval(scope, nil)
+}
+
+// ============================================================================
+// Error path tests for NewStructureSlot
+// ============================================================================
+
+func TestDefstructErrorSlotEmptyList(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct errslot ())`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorSlotNameNotSymbol(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct errslot (42))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorSlotOptionMissingValue(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct errslot (x nil :type))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorSlotTypeTwice(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct errslot (x nil :type fixnum :type string))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorSlotUnknownOption(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct errslot (x nil :unknown t))`, scope).Eval(scope, nil)
+}
+
+func TestDefstructErrorSlotNotSymbolOrList(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() { tt.NotNil(t, recover()) }()
+	slip.ReadString(`(defstruct errslot 42)`, scope).Eval(scope, nil)
+}
+
 // Helper function
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsHelper(s, substr))
