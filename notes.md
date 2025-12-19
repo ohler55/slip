@@ -5,12 +5,7 @@
 - next
 ---------------------
 
-- repl (&key terminal ansi config)
- - non-standard
- - panic is already in a repl
- - exit back to invoking code or exit?
-
----------------------
+- stucts?
 
 - flavor allow out of order defflavor like standard-class
 

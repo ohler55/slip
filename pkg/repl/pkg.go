@@ -3,7 +3,26 @@
 package repl
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/ohler55/slip"
+)
+
+const (
+	printANSI       = "*print-ansi*"
+	stdInput        = "*standard-input*"
+	stdOutput       = "*standard-output*"
+	editorFlagsName = "*repl-editor-flags*"
+
+	form1Key  = "+"
+	form2Key  = "++"
+	form3Key  = "+++"
+	value1Key = "/"
+	value2Key = "//"
+	value3Key = "///"
+
+	configHeader = ";;;; slip REPL configuration file. For help type: (help 'configuration)\n\n"
 )
 
 var (
@@ -184,6 +203,163 @@ The default value is ("." "~/.config/slip" "~/.slip")`,
 		},
 	}, &Ansi{})
 
+	defReplFunction()
+
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
+}
+
+func getPrompt() slip.Object {
+	return slip.String(prompt)
+}
+
+func setPrompt(value slip.Object) {
+	if str, ok := value.(slip.String); ok {
+		prompt = string(str)
+		if ed, ok := replReader.(*editor); ok {
+			ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
+		}
+	} else {
+		panic("*repl-prompt* must be a string")
+	}
+}
+
+func getMatchColor() slip.Object {
+	return slip.String(matchColor)
+}
+
+func setMatchColor(value slip.Object) {
+	if str, ok := value.(slip.String); ok {
+		matchColor = string(str)
+	} else {
+		panic("*repl-match-color* must be a string")
+	}
+}
+
+func getEditorFlags() slip.Object {
+	return editorFlags
+}
+
+func setEditorFlags(value slip.Object) {
+	switch list := value.(type) {
+	case nil:
+		editorFlags = slip.List{}
+	case slip.List:
+		editorFlags = list
+	default:
+		panic("*repl-editor-flags* must be a list of strings")
+	}
+}
+
+func getExternalEditor() slip.Object {
+	return slip.String(externalEditor)
+}
+
+func setExternalEditor(value slip.Object) {
+	if str, ok := value.(slip.String); ok {
+		externalEditor = string(str)
+	} else {
+		panic("*repl-external-editor* must be a string")
+	}
+}
+
+func getWarnPrefix() slip.Object {
+	return slip.String(warnPrefix)
+}
+
+func setWarnPrefix(value slip.Object) {
+	if str, ok := value.(slip.String); ok {
+		warnPrefix = string(str)
+	} else {
+		panic("*repl-warning-prefix* must be a string")
+	}
+}
+
+func getEditor() slip.Object {
+	if _, ok := replReader.(*editor); ok {
+		return slip.True
+	}
+	return nil
+}
+
+func setEditor(value slip.Object) {
+	if value == nil {
+		if _, ok := replReader.(*termReader); !ok {
+			replReader = &termReader{}
+			replReader.initialize()
+		}
+	} else if _, ok := replReader.(*editor); !ok {
+		replReader = &editor{}
+		replReader.initialize()
+	}
+}
+
+func getEvalOnClose() slip.Object {
+	if evalOnClose {
+		return slip.True
+	}
+	return nil
+}
+
+func setEvalOnClose(value slip.Object) {
+	evalOnClose = value != nil
+}
+
+func SetSizer(hs hasSize) {
+	sizer = hs
+}
+
+func getInteractive() slip.Object {
+	if Interactive {
+		return slip.True
+	}
+	return nil
+}
+
+func setInteractive(_ slip.Object) {
+	panic("*repl-interactive* is a read only variable")
+}
+
+func getStashLoadPath() slip.Object {
+	return stashLoadPath
+}
+
+func setStashLoadPath(value slip.Object) {
+	switch list := value.(type) {
+	case nil:
+		stashLoadPath = slip.List{}
+	case slip.List:
+		stashLoadPath = list
+	default:
+		panic("*stash-load-path* must be a list of strings")
+	}
+}
+
+func getDefaultStashName() (name slip.Object) {
+	if 0 < len(defaultStashName) {
+		name = slip.String(defaultStashName)
+	}
+	return
+}
+
+func setDefaultStashName(value slip.Object) {
+	switch tv := value.(type) {
+	case nil:
+		defaultStashName = ""
+	case slip.String:
+		defaultStashName = string(tv)
+	case slip.Symbol:
+		defaultStashName = string(tv)
+	default:
+		panic("*default-stash-name* must be a string or nil")
+	}
+	if 0 < len(defaultStashName) {
+		dir := FindConfigDir()
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			panic(err)
+		}
+		forms := TheStash.forms
+		TheStash.LoadExpanded(filepath.Join(dir, defaultStashName))
+		TheStash.forms = append(TheStash.forms, forms...)
+	}
 }
