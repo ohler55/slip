@@ -116,7 +116,6 @@ func run() {
 				repl.SetConfigDir(cfgDir)
 				path = ""
 			} else {
-				// TBD cleanup
 				cfgDir = repl.FindConfigDir()
 				path = cfgDir // for defer panic handler
 				repl.SetConfigDir(cfgDir)
