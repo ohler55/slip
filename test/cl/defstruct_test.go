@@ -272,3 +272,175 @@ func TestDefstructPrint(t *testing.T) {
 	tt.Equal(t, true, ok)
 	tt.Equal(t, true, len(str) > 0)
 }
+
+// Additional tests for coverage
+
+func TestDefstructTypedVectorPredicate(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (tvec (:type vector) (:named)) x)
+(list (tvec-p (make-tvec :x 1)) (tvec-p #(not-tvec 1)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.TrueSymbol, nil}, result)
+}
+
+func TestDefstructTypedListPredicate(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (tlist (:type list) (:named)) x)
+(list (tlist-p (make-tlist :x 1)) (tlist-p '(not-tlist 1)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.TrueSymbol, nil}, result)
+}
+
+func TestDefstructTypedVectorCopier(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (vcopy (:type vector) (:named)) a b)
+(let* ((v1 (make-vcopy :a 1 :b 2))
+       (v2 (copy-vcopy v1)))
+  (setf (vcopy-a v2) 99)
+  (list (vcopy-a v1) (vcopy-a v2)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(99)}, result)
+}
+
+func TestDefstructTypedListCopier(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (lcopy (:type list) (:named)) a b)
+(let* ((l1 (make-lcopy :a 1 :b 2))
+       (l2 (copy-lcopy l1)))
+  (list (lcopy-a l1) (lcopy-a l2)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(1)}, result)
+}
+
+func TestDefstructTypedVectorSetf(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (vsetf (:type vector) (:named)) x)
+(let ((v (make-vsetf :x 10)))
+  (setf (vsetf-x v) 20)
+  (vsetf-x v))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(20), result)
+}
+
+func TestDefstructTypedBOAConstructor(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (vboa (:type vector) (:named) (:constructor make-vboa (x y))) x y)
+(let ((v (make-vboa 5 6)))
+  (list (vboa-x v) (vboa-y v)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(5), slip.Fixnum(6)}, result)
+}
+
+func TestDefstructTypedBOAOptional(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (vboa2 (:type vector) (:named) (:constructor make-vboa2 (x &optional (y 99)))) x y)
+(list (vboa2-y (make-vboa2 1)) (vboa2-y (make-vboa2 1 2)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(99), slip.Fixnum(2)}, result)
+}
+
+func TestDefstructTypedListBOA(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (lboa (:type list) (:named) (:constructor make-lboa (a b))) a b)
+(let ((l (make-lboa 7 8)))
+  (list (lboa-a l) (lboa-b l)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Fixnum(8)}, result)
+}
+
+func TestDefstructBOAKey(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (kpoint (:constructor make-kpt (&key x y))) x y)
+(let ((p (make-kpt :y 20 :x 10)))
+  (list (kpoint-x p) (kpoint-y p)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(10), slip.Fixnum(20)}, result)
+}
+
+func TestDefstructBOAKeyDefault(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (kdpoint (:constructor make-kdpt (&key (x 1) (y 2)))) x y)
+(list (kpoint-x (make-kdpt)) (kpoint-y (make-kdpt :y 99)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(99)}, result)
+}
+
+func TestDefstructBOAAux(t *testing.T) {
+	scope := slip.NewScope()
+	// &aux with constant initform (referencing other params not yet supported)
+	code := slip.ReadString(`
+(defstruct (auxpt (:constructor make-auxpt (x &aux (y 99)))) x y)
+(let ((p (make-auxpt 5)))
+  (list (auxpt-x p) (auxpt-y p)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(5), slip.Fixnum(99)}, result)
+}
+
+func TestDefstructBOARest(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (restpt (:constructor make-restpt (x &rest y))) x y)
+(let ((p (make-restpt 1 2 3 4)))
+  (list (restpt-x p) (restpt-y p)))`, scope)
+	result := code.Eval(scope, nil)
+	expected := slip.List{slip.Fixnum(1), slip.List{slip.Fixnum(2), slip.Fixnum(3), slip.Fixnum(4)}}
+	tt.Equal(t, expected, result)
+}
+
+func TestDefstructCustomPredicate(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (cpred (:predicate is-cpred)) val)
+(is-cpred (make-cpred :val 1))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.TrueSymbol, result)
+}
+
+func TestDefstructCustomCopier(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (ccopy (:copier dup-ccopy)) val)
+(ccopy-val (dup-ccopy (make-ccopy :val 42)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(42), result)
+}
+
+func TestDefstructNoConstructor(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`(defstruct (noctor (:constructor nil)) val)`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.Symbol("noctor"), result)
+
+	// make-noctor should not exist
+	fn := slip.FindFunc("make-noctor")
+	tt.Equal(t, (*slip.FuncInfo)(nil), fn)
+}
+
+func TestDefstructSlotType(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct typed-slot (count 0 :type fixnum))
+(typed-slot-count (make-typed-slot :count 10))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(10), result)
+}
+
+func TestDefstructTypeVectorElement(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`
+(defstruct (vecelem (:type (vector t))) a b)
+(let ((v (make-vecelem :a 1 :b 2)))
+  (list (vecelem-a v) (vecelem-b v)))`, scope)
+	result := code.Eval(scope, nil)
+	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2)}, result)
+}
