@@ -5,13 +5,7 @@
 - next
 ---------------------
 
-- repl (&key terminal) ;; or is it better to read *repl-editor* ??
- - panic if already in a repl *repl-editor* is non-nil
- - exit back to invoking code or exit?
- - repl.Interactive is flag for repl running
- - if stash file can not be opened then make sure stash is off, print out that fact with the warning
- - same issue with history?
----------------------
+- stucts?
 
 - flavor allow out of order defflavor like standard-class
 

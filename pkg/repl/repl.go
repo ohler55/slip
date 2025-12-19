@@ -421,7 +421,6 @@ func (f *Repl) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	SetConfigDir(dir)
 
-	// TBD
 	Run()
 
 	return nil
