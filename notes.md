@@ -5,7 +5,21 @@
 - next
 ---------------------
 
-- stucts?
+- structs?
+ - defstruct
+ - struct instance is an instance
+ - snapshot
+ - disassemble
+  - on all methods created
+ - type-of
+ - class-of
+ - make-instance
+  - no initializers though... unless??
+ - find-class
+ - describe
+  - both instance and class
+ - typep
+
 
 - flavor allow out of order defflavor like standard-class
 
