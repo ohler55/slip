@@ -78,3 +78,18 @@ See [CHANGELOG.md](CHANGELOG.md)
  - An introduction to CLOS [LISP Cookbook](https://lispcookbook.github.io/cl-cookbook/clos.html)
  - A CLOS guide: [CLOS Guide](https://www.algo.be/cl/documents/clos-guide.html)
  - JSON support provided by [OjG](https://github.com/ohler55/ojg).
+
+## Contributing
+
+Bug fix contributions are welcome. Please create a PR for any
+fixes. New features should be discussed first as the SLIP core
+generally follows the Common LISP specification as much as
+possible. SLIP can be extended with plugins and new features are often
+best offered with a separate plugin project. If you would like me to
+review a plugin just ask and I'll do my best to provide constructive
+comments.
+
+On the subject of using AI, please realize that AI is just a tool and
+the final responsibility is you as a developer. Code that is clearly
+written by AI with developer cleanup or has the hallmarks of sloppy
+code will be rejected early.
