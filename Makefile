@@ -36,6 +36,9 @@ testlint: lint
 
 test:
 	make -C test cover
+	$Q go tool cover -func=test/cov.out | grep "total:"
+	$(eval COVERAGE = $(shell go tool cover -func=test/cov.out | grep "total:" | grep -Eo "[0-9]+\.[0-9]+"))
+	sh ./assets/gen-coverage-badge.sh $(COVERAGE)
 
 test-plugins: plugins
 	go run cmd/slip/main.go -e '(terpri)' plugins/require-test.lisp
