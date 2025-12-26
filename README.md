@@ -1,4 +1,8 @@
-# SLIP
+# [![{}j](assets/slip.svg)](https://github.com/ohler55/slip)
+
+[![Build Status](https://github.com/ohler55/slip/actions/workflows/CI.yml/badge.svg)](https://github.com/ohler55/slip/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ohler55/slip)](https://goreportcard.com/report/github.com/ohler55/slip)
+![](assets/coverage-badge.svg)
 
 SLIce Processing is LISP for golang
 
