@@ -3,13 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - plugin page
-  - what they are
-  - how loaded
-  - go limitation
-   - exact same version
-   - all go require in go.mod must be the same
- - logo
 
 ---------------------
 
