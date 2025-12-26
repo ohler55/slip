@@ -1,4 +1,8 @@
-# SLIP
+# [![{}j](assets/slip.svg)](https://github.com/ohler55/slip)
+
+[![Build Status](https://github.com/ohler55/slip/actions/workflows/CI.yaml/badge.svg)](https://github.com/ohler55/slip/actions/workflows/CI.yaml)
+![](assets/coverage-badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ohler55/slip)](https://goreportcard.com/report/github.com/ohler55/slip)
 
 SLIce Processing is LISP for golang
 
@@ -11,7 +15,7 @@ implemenation of Common LISP, SLIP continues to move in that
 direction.
 
 A more detailed explanation of some of the features are on the
-[features.md page](features.md).
+[features.md page](docs/features.md).
 
 ## Using
 
@@ -36,7 +40,8 @@ car names a built-in:
   Lambda-List: (arg)
   Return: object
   Documentation:
-    car returns the car if arg is a cons, the first element if arg is a list, and nil if arg is nil or an empty list.
+    car returns the car if arg is a cons, the first element if arg is
+    a list, and nil if arg is nil or an empty list.
   Arguments:
     arg: [list|cons]
       The value to take the first element of.
@@ -84,10 +89,11 @@ See [CHANGELOG.md](CHANGELOG.md)
 Bug fix contributions are welcome. Please create a PR for any
 fixes. New features should be discussed first as the SLIP core
 generally follows the Common LISP specification as much as
-possible. SLIP can be extended with plugins and new features are often
-best offered with a separate plugin project. If you would like me to
-review a plugin just ask and I'll do my best to provide constructive
-comments.
+possible. SLIP can be extended with [plugins](docs/plugin.md) and new
+features are often best offered with a separate
+[plugin](docs/plugin.md) project. If you would like me to review a
+[plugin](docs/plugin.md) just ask and I'll do my best to provide
+constructive comments.
 
 On the subject of using AI, please realize that AI is just a tool and
 the final responsibility is you as a developer. Code that is clearly
