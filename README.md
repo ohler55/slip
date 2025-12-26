@@ -40,7 +40,8 @@ car names a built-in:
   Lambda-List: (arg)
   Return: object
   Documentation:
-    car returns the car if arg is a cons, the first element if arg is a list, and nil if arg is nil or an empty list.
+    car returns the car if arg is a cons, the first element if arg is
+    a list, and nil if arg is nil or an empty list.
   Arguments:
     arg: [list|cons]
       The value to take the first element of.
