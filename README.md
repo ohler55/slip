@@ -1,7 +1,6 @@
 # [![{}j](assets/slip.svg)](https://github.com/ohler55/slip)
 
-[![Build Status](https://github.com/ohler55/slip/actions/workflows/CI.yml/badge.svg)](https://github.com/ohler55/slip/actions)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ohler55/slip/CI?label=build)
+[![Build Status](https://github.com/ohler55/slip/actions/workflows/CI.yaml/badge.svg)](https://github.com/ohler55/slip/actions/workflows/CI.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ohler55/slip)](https://goreportcard.com/report/github.com/ohler55/slip)
 ![](assets/coverage-badge.svg)
 
