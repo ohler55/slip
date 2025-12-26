@@ -3,6 +3,11 @@
 - **multipass** or utm for linux
 
 - next
+ - after release
+  - add to brew
+  - verify goreportcard
+  - post notice on forums
+  - mongodb and ggql plugin release
 
 ---------------------
 
