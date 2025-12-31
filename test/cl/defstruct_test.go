@@ -8,441 +8,440 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestDefstructBasic(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`(defstruct point x y)`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Symbol("point"), result)
-
-	// Check that the class was registered
-	class := slip.FindClass("point")
-	tt.NotNil(t, class)
-	tt.Equal(t, "point", class.Name())
+	(&sliptest.Macro{
+		Source: `(defstruct pt-basic x y)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("pt-basic"), result)
+			// Check that the class was registered
+			class := slip.FindClass("pt-basic")
+			tt.NotNil(t, class)
+			tt.Equal(t, "pt-basic", class.Name())
+		},
+	}).Test(t)
 }
 
 func TestDefstructConstructor(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct point x y)
-(make-point :x 10 :y 20)`, scope)
-	result := code.Eval(scope, nil)
+	(&sliptest.Macro{
+		Source: `
+(defstruct pt-ctor x y)
+(make-pt-ctor :x 10 :y 20)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			obj, ok := result.(*cl.StructureObject)
+			tt.Equal(t, true, ok)
+			tt.Equal(t, "pt-ctor", obj.Type.Name())
 
-	obj, ok := result.(*cl.StructureObject)
-	tt.Equal(t, true, ok)
-	tt.Equal(t, "point", obj.Type.Name())
-
-	x, _ := obj.SlotValue(slip.Symbol("x"))
-	y, _ := obj.SlotValue(slip.Symbol("y"))
-	tt.Equal(t, slip.Fixnum(10), x)
-	tt.Equal(t, slip.Fixnum(20), y)
+			x, _ := obj.SlotValue(slip.Symbol("x"))
+			y, _ := obj.SlotValue(slip.Symbol("y"))
+			tt.Equal(t, slip.Fixnum(10), x)
+			tt.Equal(t, slip.Fixnum(20), y)
+		},
+	}).Test(t)
 }
 
 func TestDefstructPredicate(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct point x y)
-(point-p (make-point :x 1 :y 2))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.TrueSymbol, result)
-
-	// Test with non-point
-	code2 := slip.ReadString(`(point-p 42)`, scope)
-	result2 := code2.Eval(scope, nil)
-	tt.Equal(t, nil, result2)
+	(&sliptest.Macro{
+		Source: `
+(defstruct pt-pred x y)
+(list (pt-pred-p (make-pt-pred :x 1 :y 2))
+      (pt-pred-p 42))`,
+		Expect: "(t nil)",
+	}).Test(t)
 }
 
 func TestDefstructAccessors(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct point x y)
-(let ((p (make-point :x 5 :y 10)))
-  (list (point-x p) (point-y p)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(5), slip.Fixnum(10)}, result)
+	(&sliptest.Macro{
+		Source: `
+(defstruct pt-acc x y)
+(let ((p (make-pt-acc :x 5 :y 10)))
+  (list (pt-acc-x p) (pt-acc-y p)))`,
+		Expect: "(5 10)",
+	}).Test(t)
 }
 
 func TestDefstructSetf(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct point x y)
-(let ((p (make-point :x 1 :y 2)))
-  (setf (point-x p) 100)
-  (point-x p))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(100), result)
+	(&sliptest.Macro{
+		Source: `
+(defstruct pt-setf x y)
+(let ((p (make-pt-setf :x 1 :y 2)))
+  (setf (pt-setf-x p) 100)
+  (pt-setf-x p))`,
+		Expect: "100",
+	}).Test(t)
 }
 
 func TestDefstructCopier(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct point x y)
-(let* ((p1 (make-point :x 1 :y 2))
-       (p2 (copy-point p1)))
-  (setf (point-x p2) 999)
-  (list (point-x p1) (point-x p2)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(999)}, result)
+	(&sliptest.Macro{
+		Source: `
+(defstruct pt-copy x y)
+(let* ((p1 (make-pt-copy :x 1 :y 2))
+       (p2 (copy-pt-copy p1)))
+  (setf (pt-copy-x p2) 999)
+  (list (pt-copy-x p1) (pt-copy-x p2)))`,
+		Expect: "(1 999)",
+	}).Test(t)
 }
 
 func TestDefstructInitform(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct counter (value 0))
-(counter-value (make-counter))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(0), result)
+(counter-value (make-counter))`,
+		Expect: "0",
+	}).Test(t)
 }
 
 func TestDefstructConcName(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (person (:conc-name p-)) name age)
 (let ((joe (make-person :name "Joe" :age 30)))
-  (list (p-name joe) (p-age joe)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.String("Joe"), slip.Fixnum(30)}, result)
+  (list (p-name joe) (p-age joe)))`,
+		Expect: `("Joe" 30)`,
+	}).Test(t)
 }
 
 func TestDefstructConcNameNil(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (thing (:conc-name nil)) value)
 (let ((t1 (make-thing :value 42)))
-  (value t1))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(42), result)
+  (value t1))`,
+		Expect: "42",
+	}).Test(t)
 }
 
 func TestDefstructCustomConstructor(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct (point (:constructor create-point)) x y)
-(let ((p (create-point :x 5 :y 6)))
-  (list (point-x p) (point-y p)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(5), slip.Fixnum(6)}, result)
+	(&sliptest.Macro{
+		Source: `
+(defstruct (pt-custom (:constructor create-pt-custom)) x y)
+(let ((p (create-pt-custom :x 5 :y 6)))
+  (list (pt-custom-x p) (pt-custom-y p)))`,
+		Expect: "(5 6)",
+	}).Test(t)
 }
 
 func TestDefstructNoCopier(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`(defstruct (nocopier-point (:copier nil)) x y)`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Symbol("nocopier-point"), result)
-
-	// copy-nocopier-point should not exist
-	fn := slip.FindFunc("copy-nocopier-point")
-	tt.Equal(t, (*slip.FuncInfo)(nil), fn)
+	(&sliptest.Macro{
+		Source: `(defstruct (nocopier-point (:copier nil)) x y)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("nocopier-point"), result)
+			// copy-nocopier-point should not exist
+			fn := slip.FindFunc("copy-nocopier-point")
+			tt.Equal(t, (*slip.FuncInfo)(nil), fn)
+		},
+	}).Test(t)
 }
 
 func TestDefstructNoPredicate(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`(defstruct (blob (:predicate nil)) data)`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Symbol("blob"), result)
-
-	// blob-p should not exist
-	fn := slip.FindFunc("blob-p")
-	tt.Equal(t, (*slip.FuncInfo)(nil), fn)
+	(&sliptest.Macro{
+		Source: `(defstruct (blob (:predicate nil)) data)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("blob"), result)
+			// blob-p should not exist
+			fn := slip.FindFunc("blob-p")
+			tt.Equal(t, (*slip.FuncInfo)(nil), fn)
+		},
+	}).Test(t)
 }
 
 func TestDefstructInclude(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct point2d x y)
 (defstruct (point3d (:include point2d)) z)
 (let ((p (make-point3d :x 1 :y 2 :z 3)))
-  (list (point3d-x p) (point3d-y p) (point3d-z p)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}, result)
+  (list (point3d-x p) (point3d-y p) (point3d-z p)))`,
+		Expect: "(1 2 3)",
+	}).Test(t)
 }
 
 func TestDefstructIncludeTypep(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct base-shape)
 (defstruct (rectangle (:include base-shape)) width height)
 (let ((r (make-rectangle :width 10 :height 20)))
-  (list (rectangle-p r) (base-shape-p r)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.TrueSymbol, slip.TrueSymbol}, result)
+  (list (rectangle-p r) (base-shape-p r)))`,
+		Expect: "(t t)",
+	}).Test(t)
 }
 
 func TestDefstructReadOnly(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r) // Expect panic on setf of read-only slot
-	}()
-
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct immutable (id 0 :read-only t))
 (let ((obj (make-immutable :id 42)))
-  (setf (immutable-id obj) 999))`, scope)
-	code.Eval(scope, nil)
+  (setf (immutable-id obj) 999))`,
+		Panics: true, // Expect panic on setf of read-only slot
+	}).Test(t)
 }
 
 func TestDefstructDocumentation(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct doc-point
   "A 2D point structure"
-  x y)`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Symbol("doc-point"), result)
-
-	class := slip.FindClass("doc-point")
-	tt.Equal(t, "A 2D point structure", class.Documentation())
+  x y)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("doc-point"), result)
+			class := slip.FindClass("doc-point")
+			tt.Equal(t, "A 2D point structure", class.Documentation())
+		},
+	}).Test(t)
 }
 
 func TestDefstructTypeVector(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vec-point (:type vector) (:named)) x y)
 (let ((p (make-vec-point :x 5 :y 10)))
-  (list (vec-point-x p) (vec-point-y p) (vectorp p)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(5), slip.Fixnum(10), slip.True}, result)
+  (list (vec-point-x p) (vec-point-y p) (vectorp p)))`,
+		Expect: "(5 10 t)",
+	}).Test(t)
 }
 
 func TestDefstructTypeVectorNamed(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (named-vec (:type vector) (:named)) a b)
 (let ((v (make-named-vec :a 1 :b 2)))
-  (svref v 0))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Symbol("named-vec"), result)
+  (svref v 0))`,
+		Expect: "named-vec",
+	}).Test(t)
 }
 
 func TestDefstructTypeList(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (list-point (:type list) (:named)) x y)
 (let ((p (make-list-point :x 3 :y 4)))
-  (list (list-point-x p) (list-point-y p) (listp p)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(3), slip.Fixnum(4), slip.True}, result)
+  (list (list-point-x p) (list-point-y p) (listp p)))`,
+		Expect: "(3 4 t)",
+	}).Test(t)
 }
 
 func TestDefstructBOAConstructor(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct (point (:constructor make-pt (x y)))
+	(&sliptest.Macro{
+		Source: `
+(defstruct (pt-boa (:constructor make-ptboa (x y)))
   x y)
-(let ((p (make-pt 7 8)))
-  (list (point-x p) (point-y p)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Fixnum(8)}, result)
+(let ((p (make-ptboa 7 8)))
+  (list (pt-boa-x p) (pt-boa-y p)))`,
+		Expect: "(7 8)",
+	}).Test(t)
 }
 
 func TestDefstructBOAOptional(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct (point (:constructor make-pt (x &optional (y 0))))
+	(&sliptest.Macro{
+		Source: `
+(defstruct (pt-boaopt (:constructor make-ptboaopt (x &optional (y 0))))
   x y)
-(list (point-y (make-pt 5)) (point-y (make-pt 5 10)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(0), slip.Fixnum(10)}, result)
+(list (pt-boaopt-y (make-ptboaopt 5)) (pt-boaopt-y (make-ptboaopt 5 10)))`,
+		Expect: "(0 10)",
+	}).Test(t)
 }
 
 func TestDefstructMultipleConstructors(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct (point
-             (:constructor make-point)
-             (:constructor make-pt (x y)))
+	(&sliptest.Macro{
+		Source: `
+(defstruct (pt-multi
+             (:constructor make-pt-multi)
+             (:constructor make-ptm (x y)))
   x y)
 (list
-  (point-x (make-point :x 1 :y 2))
-  (point-x (make-pt 3 4)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(3)}, result)
+  (pt-multi-x (make-pt-multi :x 1 :y 2))
+  (pt-multi-x (make-ptm 3 4)))`,
+		Expect: "(1 3)",
+	}).Test(t)
 }
 
 func TestDefstructPrint(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct simple-point x y)
-(princ-to-string (make-simple-point :x 1 :y 2))`, scope)
-	result := code.Eval(scope, nil)
-	// Should print in #S(...) format
-	str, ok := result.(slip.String)
-	tt.Equal(t, true, ok)
-	tt.Equal(t, true, len(str) > 0)
+(princ-to-string (make-simple-point :x 1 :y 2))`,
+		Validate: func(t *testing.T, result slip.Object) {
+			// Should print in #S(...) format
+			str, ok := result.(slip.String)
+			tt.Equal(t, true, ok)
+			tt.Equal(t, true, len(str) > 0)
+		},
+	}).Test(t)
 }
 
 // Additional tests for coverage
 
 func TestDefstructTypedVectorPredicate(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (tvec (:type vector) (:named)) x)
-(list (tvec-p (make-tvec :x 1)) (tvec-p #(not-tvec 1)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.TrueSymbol, nil}, result)
+(list (tvec-p (make-tvec :x 1)) (tvec-p #(not-tvec 1)))`,
+		Expect: "(t nil)",
+	}).Test(t)
 }
 
 func TestDefstructTypedListPredicate(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (tlist (:type list) (:named)) x)
-(list (tlist-p (make-tlist :x 1)) (tlist-p '(not-tlist 1)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.TrueSymbol, nil}, result)
+(list (tlist-p (make-tlist :x 1)) (tlist-p '(not-tlist 1)))`,
+		Expect: "(t nil)",
+	}).Test(t)
 }
 
 func TestDefstructTypedVectorCopier(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vcopy (:type vector) (:named)) a b)
 (let* ((v1 (make-vcopy :a 1 :b 2))
        (v2 (copy-vcopy v1)))
   (setf (vcopy-a v2) 99)
-  (list (vcopy-a v1) (vcopy-a v2)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(99)}, result)
+  (list (vcopy-a v1) (vcopy-a v2)))`,
+		Expect: "(1 99)",
+	}).Test(t)
 }
 
 func TestDefstructTypedListCopier(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lcopy (:type list) (:named)) a b)
 (let* ((l1 (make-lcopy :a 1 :b 2))
        (l2 (copy-lcopy l1)))
-  (list (lcopy-a l1) (lcopy-a l2)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(1)}, result)
+  (list (lcopy-a l1) (lcopy-a l2)))`,
+		Expect: "(1 1)",
+	}).Test(t)
 }
 
 func TestDefstructTypedVectorSetf(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vsetf (:type vector) (:named)) x)
 (let ((v (make-vsetf :x 10)))
   (setf (vsetf-x v) 20)
-  (vsetf-x v))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(20), result)
+  (vsetf-x v))`,
+		Expect: "20",
+	}).Test(t)
 }
 
 func TestDefstructTypedBOAConstructor(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vboa (:type vector) (:named) (:constructor make-vboa (x y))) x y)
 (let ((v (make-vboa 5 6)))
-  (list (vboa-x v) (vboa-y v)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(5), slip.Fixnum(6)}, result)
+  (list (vboa-x v) (vboa-y v)))`,
+		Expect: "(5 6)",
+	}).Test(t)
 }
 
 func TestDefstructTypedBOAOptional(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vboa2 (:type vector) (:named) (:constructor make-vboa2 (x &optional (y 99)))) x y)
-(list (vboa2-y (make-vboa2 1)) (vboa2-y (make-vboa2 1 2)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(99), slip.Fixnum(2)}, result)
+(list (vboa2-y (make-vboa2 1)) (vboa2-y (make-vboa2 1 2)))`,
+		Expect: "(99 2)",
+	}).Test(t)
 }
 
 func TestDefstructTypedListBOA(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lboa (:type list) (:named) (:constructor make-lboa (a b))) a b)
 (let ((l (make-lboa 7 8)))
-  (list (lboa-a l) (lboa-b l)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(7), slip.Fixnum(8)}, result)
+  (list (lboa-a l) (lboa-b l)))`,
+		Expect: "(7 8)",
+	}).Test(t)
 }
 
 func TestDefstructBOAKey(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (kpoint (:constructor make-kpt (&key x y))) x y)
 (let ((p (make-kpt :y 20 :x 10)))
-  (list (kpoint-x p) (kpoint-y p)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(10), slip.Fixnum(20)}, result)
+  (list (kpoint-x p) (kpoint-y p)))`,
+		Expect: "(10 20)",
+	}).Test(t)
 }
 
 func TestDefstructBOAKeyDefault(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (kdpoint (:constructor make-kdpt (&key (x 1) (y 2)))) x y)
-(list (kpoint-x (make-kdpt)) (kpoint-y (make-kdpt :y 99)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(99)}, result)
+(list (kdpoint-x (make-kdpt)) (kdpoint-y (make-kdpt :y 99)))`,
+		Expect: "(1 99)",
+	}).Test(t)
 }
 
 func TestDefstructBOAAux(t *testing.T) {
-	scope := slip.NewScope()
-	// &aux with constant initform (referencing other params not yet supported)
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (auxpt (:constructor make-auxpt (x &aux (y 99)))) x y)
 (let ((p (make-auxpt 5)))
-  (list (auxpt-x p) (auxpt-y p)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(5), slip.Fixnum(99)}, result)
+  (list (auxpt-x p) (auxpt-y p)))`,
+		Expect: "(5 99)",
+	}).Test(t)
 }
 
 func TestDefstructBOARest(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (restpt (:constructor make-restpt (x &rest y))) x y)
 (let ((p (make-restpt 1 2 3 4)))
-  (list (restpt-x p) (restpt-y p)))`, scope)
-	result := code.Eval(scope, nil)
-	expected := slip.List{slip.Fixnum(1), slip.List{slip.Fixnum(2), slip.Fixnum(3), slip.Fixnum(4)}}
-	tt.Equal(t, expected, result)
+  (list (restpt-x p) (restpt-y p)))`,
+		Expect: "(1 (2 3 4))",
+	}).Test(t)
 }
 
 func TestDefstructCustomPredicate(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (cpred (:predicate is-cpred)) val)
-(is-cpred (make-cpred :val 1))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.TrueSymbol, result)
+(is-cpred (make-cpred :val 1))`,
+		Expect: "t",
+	}).Test(t)
 }
 
 func TestDefstructCustomCopier(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (ccopy (:copier dup-ccopy)) val)
-(ccopy-val (dup-ccopy (make-ccopy :val 42)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(42), result)
+(ccopy-val (dup-ccopy (make-ccopy :val 42)))`,
+		Expect: "42",
+	}).Test(t)
 }
 
 func TestDefstructNoConstructor(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`(defstruct (noctor (:constructor nil)) val)`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Symbol("noctor"), result)
-
-	// make-noctor should not exist
-	fn := slip.FindFunc("make-noctor")
-	tt.Equal(t, (*slip.FuncInfo)(nil), fn)
+	(&sliptest.Macro{
+		Source: `(defstruct (noctor (:constructor nil)) val)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("noctor"), result)
+			// make-noctor should not exist
+			fn := slip.FindFunc("make-noctor")
+			tt.Equal(t, (*slip.FuncInfo)(nil), fn)
+		},
+	}).Test(t)
 }
 
 func TestDefstructSlotType(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct typed-slot (count 0 :type fixnum))
-(typed-slot-count (make-typed-slot :count 10))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(10), result)
+(typed-slot-count (make-typed-slot :count 10))`,
+		Expect: "10",
+	}).Test(t)
 }
 
 func TestDefstructTypeVectorElement(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vecelem (:type (vector t))) a b)
 (let ((v (make-vecelem :a 1 :b 2)))
-  (list (vecelem-a v) (vecelem-b v)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2)}, result)
+  (list (vecelem-a v) (vecelem-b v)))`,
+		Expect: "(1 2)",
+	}).Test(t)
 }
 
 // ============================================================================
@@ -608,7 +607,6 @@ func TestStructureClassGetters(t *testing.T) {
 	tt.Equal(t, (*cl.StructureClass)(nil), sc.Include())
 	tt.Equal(t, nil, sc.PrintFunction())
 	tt.Equal(t, nil, sc.PrintObject())
-	tt.Equal(t, true, sc.Ready())
 }
 
 func TestStructureClassConstructors(t *testing.T) {
@@ -903,61 +901,57 @@ func TestStructureSlotGetters(t *testing.T) {
 // ============================================================================
 
 func TestDefstructInitialOffset(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (offtest (:type vector) (:initial-offset 2)) x y)
 (let ((v (make-offtest :x 1 :y 2)))
-  (list (svref v 2) (svref v 3)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2)}, result)
+  (list (svref v 2) (svref v 3)))`,
+		Expect: "(1 2)",
+	}).Test(t)
 }
 
 func TestDefstructPrintFunction(t *testing.T) {
-	scope := slip.NewScope()
-	// Just test that it parses without error
-	code := slip.ReadString(`
-(defstruct (pftest (:print-function (lambda (obj stream depth) (write "custom" :stream stream)))) x)`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Symbol("pftest"), result)
-	sc := cl.FindStructureClass("pftest")
-	tt.NotNil(t, sc.PrintFunction())
+	(&sliptest.Macro{
+		Source: `
+(defstruct (pftest (:print-function (lambda (obj stream depth) (write "custom" :stream stream)))) x)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("pftest"), result)
+			sc := cl.FindStructureClass("pftest")
+			tt.NotNil(t, sc.PrintFunction())
+		},
+	}).Test(t)
 }
 
 func TestDefstructPrintObject(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
-(defstruct (potest (:print-object (lambda (obj stream) (write "custom" :stream stream)))) x)`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Symbol("potest"), result)
-	sc := cl.FindStructureClass("potest")
-	tt.NotNil(t, sc.PrintObject())
+	(&sliptest.Macro{
+		Source: `
+(defstruct (potest (:print-object (lambda (obj stream) (write "custom" :stream stream)))) x)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("potest"), result)
+			sc := cl.FindStructureClass("potest")
+			tt.NotNil(t, sc.PrintObject())
+		},
+	}).Test(t)
 }
 
-
 func TestDefstructTypedVectorReadOnly(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vro (:type vector) (:named)) (x 0 :read-only t))
 (let ((v (make-vro :x 42)))
-  (setf (vro-x v) 99))`, scope)
-	code.Eval(scope, nil)
+  (setf (vro-x v) 99))`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructTypedListReadOnly(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lro (:type list) (:named)) (x 0 :read-only t))
 (let ((l (make-lro :x 42)))
-  (setf (lro-x l) 99))`, scope)
-	code.Eval(scope, nil)
+  (setf (lro-x l) 99))`,
+		Panics: true,
+	}).Test(t)
 }
 
 // ============================================================================
@@ -965,61 +959,60 @@ func TestDefstructTypedListReadOnly(t *testing.T) {
 // ============================================================================
 
 func TestDefstructTypedBOAKey(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vboakey (:type vector) (:named) (:constructor make-vboakey (&key x y))) x y)
 (let ((v (make-vboakey :y 2 :x 1)))
-  (list (vboakey-x v) (vboakey-y v)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2)}, result)
+  (list (vboakey-x v) (vboakey-y v)))`,
+		Expect: "(1 2)",
+	}).Test(t)
 }
 
 func TestDefstructTypedBOAAux(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vboaaux (:type vector) (:named) (:constructor make-vboaaux (x &aux (y 50)))) x y)
 (let ((v (make-vboaaux 10)))
-  (list (vboaaux-x v) (vboaaux-y v)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(10), slip.Fixnum(50)}, result)
+  (list (vboaaux-x v) (vboaaux-y v)))`,
+		Expect: "(10 50)",
+	}).Test(t)
 }
 
 func TestDefstructTypedBOARest(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vboarest (:type vector) (:named) (:constructor make-vboarest (x &rest y))) x y)
 (let ((v (make-vboarest 1 2 3)))
-  (list (vboarest-x v) (vboarest-y v)))`, scope)
-	result := code.Eval(scope, nil)
-	expected := slip.List{slip.Fixnum(1), slip.List{slip.Fixnum(2), slip.Fixnum(3)}}
-	tt.Equal(t, expected, result)
+  (list (vboarest-x v) (vboarest-y v)))`,
+		Expect: "(1 (2 3))",
+	}).Test(t)
 }
 
 func TestDefstructBOASimpleOptional(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (simopt (:constructor make-simopt (x &optional y))) x y)
-(list (simopt-y (make-simopt 1)) (simopt-y (make-simopt 1 2)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{nil, slip.Fixnum(2)}, result)
+(list (simopt-y (make-simopt 1)) (simopt-y (make-simopt 1 2)))`,
+		Expect: "(nil 2)",
+	}).Test(t)
 }
 
 func TestDefstructTypedBOASimpleOptional(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vsimopt (:type vector) (:named) (:constructor make-vsimopt (x &optional y))) x y)
-(list (vsimopt-y (make-vsimopt 1)) (vsimopt-y (make-vsimopt 1 2)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{nil, slip.Fixnum(2)}, result)
+(list (vsimopt-y (make-vsimopt 1)) (vsimopt-y (make-vsimopt 1 2)))`,
+		Expect: "(nil 2)",
+	}).Test(t)
 }
 
 func TestDefstructBOAAllowOtherKeys(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (aokey (:constructor make-aokey (&key x &allow-other-keys))) x)
-(aokey-x (make-aokey :x 42 :extra 99))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(42), result)
+(aokey-x (make-aokey :x 42 :extra 99))`,
+		Expect: "42",
+	}).Test(t)
 }
 
 // ============================================================================
@@ -1141,245 +1134,227 @@ func TestStructureObjectEqualDifferentTypes(t *testing.T) {
 }
 
 func TestDefstructTypedVectorNotNamed(t *testing.T) {
-	scope := slip.NewScope()
-	// Without :named, no predicate
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vnoname (:type vector)) x y)
 (let ((v (make-vnoname :x 1 :y 2)))
-  (list (vnoname-x v) (vnoname-y v)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2)}, result)
+  (list (vnoname-x v) (vnoname-y v)))`,
+		Expect: "(1 2)",
+	}).Test(t)
 }
 
 func TestDefstructTypedListNotNamed(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lnoname (:type list)) x y)
 (let ((l (make-lnoname :x 1 :y 2)))
-  (list (lnoname-x l) (lnoname-y l)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2)}, result)
+  (list (lnoname-x l) (lnoname-y l)))`,
+		Expect: "(1 2)",
+	}).Test(t)
 }
 
 func TestDefstructTypedVectorInitOffset(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vioff (:type vector) (:initial-offset 1) (:named)) x)
 (let ((v (make-vioff :x 42)))
-  (vioff-x v))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(42), result)
+  (vioff-x v))`,
+		Expect: "42",
+	}).Test(t)
 }
 
 func TestDefstructTypedListInitOffset(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lioff (:type list) (:initial-offset 1) (:named)) x)
 (let ((l (make-lioff :x 42)))
-  (lioff-x l))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(42), result)
+  (lioff-x l))`,
+		Expect: "42",
+	}).Test(t)
 }
 
 func TestDefstructTypedBOAKeyDefault(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vboakd (:type vector) (:named) (:constructor make-vboakd (&key (x 10) (y 20)))) x y)
 (let ((v (make-vboakd)))
-  (list (vboakd-x v) (vboakd-y v)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(10), slip.Fixnum(20)}, result)
+  (list (vboakd-x v) (vboakd-y v)))`,
+		Expect: "(10 20)",
+	}).Test(t)
 }
 
 func TestDefstructBOANonSlotParam(t *testing.T) {
-	scope := slip.NewScope()
-	// BOA with parameter that's not a slot (should be ignored)
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (boanon (:constructor make-boanon (x extra))) x)
-(boanon-x (make-boanon 42 99))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(42), result)
+(boanon-x (make-boanon 42 99))`,
+		Expect: "42",
+	}).Test(t)
 }
 
 func TestDefstructTypedBOANonSlotParam(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vboanon (:type vector) (:named) (:constructor make-vboanon (x extra))) x)
-(vboanon-x (make-vboanon 42 99))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.Fixnum(42), result)
+(vboanon-x (make-vboanon 42 99))`,
+		Expect: "42",
+	}).Test(t)
 }
 
 func TestDefstructTypedListBOAKey(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lboakey (:type list) (:named) (:constructor make-lboakey (&key x y))) x y)
 (let ((l (make-lboakey :x 5 :y 6)))
-  (list (lboakey-x l) (lboakey-y l)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(5), slip.Fixnum(6)}, result)
+  (list (lboakey-x l) (lboakey-y l)))`,
+		Expect: "(5 6)",
+	}).Test(t)
 }
 
 func TestDefstructTypedListBOAOptional(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lboaopt (:type list) (:named) (:constructor make-lboaopt (x &optional (y 77)))) x y)
-(list (lboaopt-y (make-lboaopt 1)) (lboaopt-y (make-lboaopt 1 2)))`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, slip.List{slip.Fixnum(77), slip.Fixnum(2)}, result)
+(list (lboaopt-y (make-lboaopt 1)) (lboaopt-y (make-lboaopt 1 2)))`,
+		Expect: "(77 2)",
+	}).Test(t)
 }
 
 func TestDefstructSlotSimpleName(t *testing.T) {
-	scope := slip.NewScope()
-	// Simple slot with no options
-	slip.ReadString(`(defstruct simpslot x)`, scope).Eval(scope, nil)
-	sc := cl.FindStructureClass("simpslot")
-	slot := sc.GetSlot("x")
-	tt.NotNil(t, slot)
-	tt.Equal(t, nil, slot.Initform())
-	tt.Equal(t, nil, slot.SlotType())
-	tt.Equal(t, false, slot.IsReadOnly())
+	(&sliptest.Macro{
+		Source: `(defstruct simpslot x)`,
+		Validate: func(t *testing.T, _ slip.Object) {
+			sc := cl.FindStructureClass("simpslot")
+			slot := sc.GetSlot("x")
+			tt.NotNil(t, slot)
+			tt.Equal(t, nil, slot.Initform())
+			tt.Equal(t, nil, slot.SlotType())
+			tt.Equal(t, false, slot.IsReadOnly())
+		},
+	}).Test(t)
 }
 
 func TestDefstructAccessorWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct accwrong x)
-(accwrong-x 42)`, scope) // 42 is not a structure
-	code.Eval(scope, nil)
+(accwrong-x 42)`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructCopierWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct copwrong x)
-(copy-copwrong 42)`, scope)
-	code.Eval(scope, nil)
+(copy-copwrong 42)`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructPredicateNonStructure(t *testing.T) {
-	scope := slip.NewScope()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct prednon x)
-(prednon-p "not a structure")`, scope)
-	result := code.Eval(scope, nil)
-	tt.Equal(t, nil, result)
+(prednon-p "not a structure")`,
+		Expect: "nil",
+	}).Test(t)
 }
 
 func TestDefstructTypedVectorAccessorWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vaccwrong (:type vector) (:named)) x)
-(vaccwrong-x "not a vector")`, scope)
-	code.Eval(scope, nil)
+(vaccwrong-x "not a vector")`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructTypedListAccessorWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (laccwrong (:type list) (:named)) x)
-(laccwrong-x "not a list")`, scope)
-	code.Eval(scope, nil)
+(laccwrong-x "not a list")`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructSetfWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct setfwrong x)
-(setf (setfwrong-x 42) 99)`, scope)
-	code.Eval(scope, nil)
+(setf (setfwrong-x 42) 99)`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructTypedVectorCopierWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vcopywrong (:type vector) (:named)) x)
-(copy-vcopywrong "not a vector")`, scope)
-	code.Eval(scope, nil)
+(copy-vcopywrong "not a vector")`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructTypedListCopierWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lcopywrong (:type list) (:named)) x)
-(copy-lcopywrong "not a list")`, scope)
-	code.Eval(scope, nil)
+(copy-lcopywrong "not a list")`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructTypedVectorSetfWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vsetfwrong (:type vector) (:named)) x)
-(setf (vsetfwrong-x "not a vector") 99)`, scope)
-	code.Eval(scope, nil)
+(setf (vsetfwrong-x "not a vector") 99)`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructTypedListSetfWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	code := slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (lsetfwrong (:type list) (:named)) x)
-(setf (lsetfwrong-x "not a list") 99)`, scope)
-	code.Eval(scope, nil)
+(setf (lsetfwrong-x "not a list") 99)`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructLoadFormWithDocs(t *testing.T) {
-	scope := slip.NewScope()
-	slip.ReadString(`(defstruct lfdocs "documentation" x)`, scope).Eval(scope, nil)
-	sc := cl.FindStructureClass("lfdocs")
-	form := sc.LoadForm()
-	tt.NotNil(t, form)
+	(&sliptest.Macro{
+		Source: `(defstruct lfdocs "documentation" x)`,
+		Validate: func(t *testing.T, _ slip.Object) {
+			sc := cl.FindStructureClass("lfdocs")
+			form := sc.LoadForm()
+			tt.NotNil(t, form)
+		},
+	}).Test(t)
 }
 
 func TestDefstructLoadFormEmptyConcName(t *testing.T) {
-	scope := slip.NewScope()
-	slip.ReadString(`(defstruct (lfemptyconc (:conc-name nil)) x)`, scope).Eval(scope, nil)
-	sc := cl.FindStructureClass("lfemptyconc")
-	form := sc.LoadForm()
-	tt.NotNil(t, form)
+	(&sliptest.Macro{
+		Source: `(defstruct (lfemptyconc (:conc-name nil)) lfemptyconc-val)`,
+		Validate: func(t *testing.T, _ slip.Object) {
+			sc := cl.FindStructureClass("lfemptyconc")
+			form := sc.LoadForm()
+			tt.NotNil(t, form)
+		},
+	}).Test(t)
 }
 
 func TestDefstructLoadFormCustomConstructor(t *testing.T) {
-	scope := slip.NewScope()
-	slip.ReadString(`(defstruct (lfcustctor (:constructor new-lfcustctor)) x)`, scope).Eval(scope, nil)
-	sc := cl.FindStructureClass("lfcustctor")
-	form := sc.LoadForm()
-	tt.NotNil(t, form)
+	(&sliptest.Macro{
+		Source: `(defstruct (lfcustctor (:constructor new-lfcustctor)) x)`,
+		Validate: func(t *testing.T, _ slip.Object) {
+			sc := cl.FindStructureClass("lfcustctor")
+			form := sc.LoadForm()
+			tt.NotNil(t, form)
+		},
+	}).Test(t)
 }
 
 // ============================================================================
@@ -1387,157 +1362,113 @@ func TestDefstructLoadFormCustomConstructor(t *testing.T) {
 // ============================================================================
 
 func TestDefstructErrorEmptyNameAndOptions(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct ())`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct ())`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorNameNotSymbol(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (42))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (42))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorNameAndOptionsWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct 42)`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct 42)`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorUnknownKeywordOption(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt :unknown-option))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt :unknown-option))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorEmptyListOption(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt ()))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt ()))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorOptionKeywordNotSymbol(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (42 foo)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (42 foo)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorConcNameWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:conc-name 42)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:conc-name 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorBOAArglistNotList(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:constructor make-err not-a-list)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:constructor make-err not-a-list)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorConstructorNameNotSymbol(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:constructor 42)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:constructor 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorCopierWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:copier 42)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:copier 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorPredicateWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:predicate 42)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:predicate 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorIncludeMissingName(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:include)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:include)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorIncludeNameNotSymbol(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:include 42)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:include 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorIncludeNotDefined(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:include nonexistent-parent)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:include nonexistent-parent)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorIncludeTypedInUntyped(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (typedparent (:type vector)) x)
-(defstruct (erropt (:include typedparent)) y)`, scope).Eval(scope, nil)
+(defstruct (erropt (:include typedparent)) y)`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructErrorIncludeDifferentType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`
+	(&sliptest.Macro{
+		Source: `
 (defstruct (vecparent (:type vector)) x)
-(defstruct (erropt (:type list) (:include vecparent)) y)`, scope).Eval(scope, nil)
+(defstruct (erropt (:type list) (:include vecparent)) y)`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestDefstructErrorInitialOffsetMissingValue(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:type vector) (:initial-offset)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:type vector) (:initial-offset)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorInitialOffsetNotFixnum(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:type vector) (:initial-offset "two")))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:type vector) (:initial-offset "two")))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorTypeMissingValue(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:type)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:type)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorTypeInvalidSymbol(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:type invalid)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:type invalid)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorTypeListNotVector(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:type (invalid t))))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:type (invalid t))))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorTypeWrongType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:type 42)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:type 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorUnknownListOption(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:unknown-option foo)))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:unknown-option foo)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorOptionNotSymbolOrList(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt 42))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt 42))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorPrintFunctionWithType(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct (erropt (:type vector) (:print-function (lambda (o s d) nil))))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct (erropt (:type vector) (:print-function (lambda (o s d) nil))))`, Panics: true}).Test(t)
 }
 
 // ============================================================================
@@ -1545,39 +1476,27 @@ func TestDefstructErrorPrintFunctionWithType(t *testing.T) {
 // ============================================================================
 
 func TestDefstructErrorSlotEmptyList(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct errslot ())`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct errslot ())`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotNameNotSymbol(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct errslot (42))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct errslot (42))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotOptionMissingValue(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct errslot (x nil :type))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct errslot (x nil :type))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotTypeTwice(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct errslot (x nil :type fixnum :type string))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct errslot (x nil :type fixnum :type string))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotUnknownOption(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct errslot (x nil :unknown t))`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct errslot (x nil :unknown t))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotNotSymbolOrList(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() { tt.NotNil(t, recover()) }()
-	slip.ReadString(`(defstruct errslot 42)`, scope).Eval(scope, nil)
+	(&sliptest.Macro{Source: `(defstruct errslot 42)`, Panics: true}).Test(t)
 }
 
 // Helper function

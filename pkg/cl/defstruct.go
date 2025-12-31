@@ -920,6 +920,10 @@ func (f *boaConstructor) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 		}
 	}
 
+	// Create a child scope for BOA parameter bindings
+	// This allows &aux initforms to reference earlier BOA parameters
+	boaScope := s.NewScope()
+
 	// Parse BOA list and apply arguments
 	argIndex := 0
 	mode := "required" // required, optional, rest, key, aux
@@ -949,17 +953,21 @@ func (f *boaConstructor) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 				case "required":
 					if argIndex < len(args) {
 						obj.slots[slot.index] = args[argIndex]
+						boaScope.Let(p, args[argIndex])
 						argIndex++
 					}
 				case "optional":
 					if argIndex < len(args) {
 						obj.slots[slot.index] = args[argIndex]
+						boaScope.Let(p, args[argIndex])
 						argIndex++
 					}
 				case "rest":
 					// Collect remaining args into a list
 					if argIndex < len(args) {
-						obj.slots[slot.index] = args[argIndex:]
+						restList := args[argIndex:]
+						obj.slots[slot.index] = restList
+						boaScope.Let(p, restList)
 						argIndex = len(args)
 					}
 				case "key":
@@ -972,12 +980,13 @@ func (f *boaConstructor) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 							}
 							if keyName == slotName {
 								obj.slots[slot.index] = args[i+1]
+								boaScope.Let(p, args[i+1])
 								break
 							}
 						}
 					}
 				case "aux":
-					// &aux variables use initforms, already handled
+					// &aux variables use slot's initform (already handled above)
 				}
 			}
 
@@ -995,10 +1004,13 @@ func (f *boaConstructor) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 					case "optional":
 						if argIndex < len(args) {
 							obj.slots[slot.index] = args[argIndex]
+							boaScope.Let(varSym, args[argIndex])
 							argIndex++
 						} else if len(p) >= 2 {
-							// Use default from BOA list
-							obj.slots[slot.index] = s.Eval(p[1], d2)
+							// Use default from BOA list, evaluated in boaScope
+							val := boaScope.Eval(p[1], d2)
+							obj.slots[slot.index] = val
+							boaScope.Let(varSym, val)
 						}
 					case "key":
 						found := false
@@ -1010,17 +1022,24 @@ func (f *boaConstructor) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 								}
 								if keyName == slotName {
 									obj.slots[slot.index] = args[i+1]
+									boaScope.Let(varSym, args[i+1])
 									found = true
 									break
 								}
 							}
 						}
 						if !found && len(p) >= 2 {
-							obj.slots[slot.index] = s.Eval(p[1], d2)
+							// Use default from BOA list, evaluated in boaScope
+							val := boaScope.Eval(p[1], d2)
+							obj.slots[slot.index] = val
+							boaScope.Let(varSym, val)
 						}
 					case "aux":
 						if len(p) >= 2 {
-							obj.slots[slot.index] = s.Eval(p[1], d2)
+							// Evaluate in boaScope so it can reference earlier params
+							val := boaScope.Eval(p[1], d2)
+							obj.slots[slot.index] = val
+							boaScope.Let(varSym, val)
 						}
 					}
 				}
@@ -1114,6 +1133,10 @@ func (f *typedBOAConstructor) Call(s *slip.Scope, args slip.List, depth int) sli
 }
 
 func (f *typedBOAConstructor) applyBOAArgs(s *slip.Scope, args slip.List, setter func(int, slip.Object), depth int) {
+	// Create a child scope for BOA parameter bindings
+	// This allows &aux initforms to reference earlier BOA parameters
+	boaScope := s.NewScope()
+
 	argIndex := 0
 	mode := "required"
 
@@ -1140,11 +1163,14 @@ func (f *typedBOAConstructor) applyBOAArgs(s *slip.Scope, args slip.List, setter
 				case "required", "optional":
 					if argIndex < len(args) {
 						setter(slot.index, args[argIndex])
+						boaScope.Let(p, args[argIndex])
 						argIndex++
 					}
 				case "rest":
 					if argIndex < len(args) {
-						setter(slot.index, args[argIndex:])
+						restList := args[argIndex:]
+						setter(slot.index, restList)
+						boaScope.Let(p, restList)
 						argIndex = len(args)
 					}
 				case "key":
@@ -1156,10 +1182,13 @@ func (f *typedBOAConstructor) applyBOAArgs(s *slip.Scope, args slip.List, setter
 							}
 							if keyName == string(p) {
 								setter(slot.index, args[i+1])
+								boaScope.Let(p, args[i+1])
 								break
 							}
 						}
 					}
+				case "aux":
+					// &aux variables use slot's initform (already handled in Call)
 				}
 			}
 
@@ -1174,9 +1203,13 @@ func (f *typedBOAConstructor) applyBOAArgs(s *slip.Scope, args slip.List, setter
 					case "optional":
 						if argIndex < len(args) {
 							setter(slot.index, args[argIndex])
+							boaScope.Let(varSym, args[argIndex])
 							argIndex++
 						} else if len(p) >= 2 {
-							setter(slot.index, s.Eval(p[1], depth))
+							// Evaluate in boaScope so it can reference earlier params
+							val := boaScope.Eval(p[1], depth)
+							setter(slot.index, val)
+							boaScope.Let(varSym, val)
 						}
 					case "key":
 						found := false
@@ -1188,17 +1221,24 @@ func (f *typedBOAConstructor) applyBOAArgs(s *slip.Scope, args slip.List, setter
 								}
 								if keyName == string(varSym) {
 									setter(slot.index, args[i+1])
+									boaScope.Let(varSym, args[i+1])
 									found = true
 									break
 								}
 							}
 						}
 						if !found && len(p) >= 2 {
-							setter(slot.index, s.Eval(p[1], depth))
+							// Evaluate in boaScope so it can reference earlier params
+							val := boaScope.Eval(p[1], depth)
+							setter(slot.index, val)
+							boaScope.Let(varSym, val)
 						}
 					case "aux":
 						if len(p) >= 2 {
-							setter(slot.index, s.Eval(p[1], depth))
+							// Evaluate in boaScope so it can reference earlier params
+							val := boaScope.Eval(p[1], depth)
+							setter(slot.index, val)
+							boaScope.Let(varSym, val)
 						}
 					}
 				}

@@ -470,11 +470,6 @@ func MustFindStructureClass(s *slip.Scope, depth int, name string) *StructureCla
 	return sc
 }
 
-// Ready returns true (structures are always ready after definition).
-func (sc *StructureClass) Ready() bool {
-	return true
-}
-
 // accessorName returns the accessor name for a slot.
 func (sc *StructureClass) accessorName(slotName string) string {
 	return fmt.Sprintf("%s%s", sc.concName, slotName)
