@@ -28,27 +28,25 @@ type ConstructorSpec struct {
 type StructureClass struct {
 	name          string
 	docs          string
-	slots         []*StructureSlot          // ordered list of slots
-	slotMap       map[string]*StructureSlot // lookup by name
-	concName      string                    // prefix for accessor names (default: name-)
-	constructors  []ConstructorSpec         // constructor specifications
-	copierName    string                    // copier function name (empty = none)
-	predicateName string                    // predicate function name (empty = none)
-	include       *StructureClass           // parent structure (from :include)
-	initialOffset int                       // number of slots to skip at start (:initial-offset)
-	named         bool                      // whether structure is named (:named)
-	repType       slip.Symbol               // representation type: "vector", "list", or "" for standard
-	printFunc     slip.Object               // :print-function
-	printObject   slip.Object               // :print-object
-	pkg           *slip.Package             // package where structure was defined
-	precedence    []slip.Symbol             // type hierarchy for typep
+	slots         []*StructureSlot // ordered list of slots
+	concName      string           // prefix for accessor names (default: name-)
+	constructors  []ConstructorSpec
+	copierName    string          // copier function name (empty = none)
+	predicateName string          // predicate function name (empty = none)
+	include       *StructureClass // parent structure (from :include)
+	initialOffset int             // number of slots to skip at start (:initial-offset)
+	named         bool            // whether structure is named (:named)
+	repType       slip.Symbol     // representation type: "vector", "list", or "" for standard
+	printFunc     slip.Object     // :print-function
+	printObject   slip.Object     // :print-object
+	pkg           *slip.Package   // package where structure was defined
+	precedence    []slip.Symbol   // type hierarchy for typep
 }
 
 // NewStructureClass creates a new structure class with default options.
 func NewStructureClass(name string, pkg *slip.Package) *StructureClass {
 	sc := &StructureClass{
 		name:          name,
-		slotMap:       make(map[string]*StructureSlot),
 		concName:      name + "-",
 		copierName:    "copy-" + name,
 		predicateName: name + "-p",
@@ -254,9 +252,13 @@ func (sc *StructureClass) LoadForm() slip.Object {
 		form = append(form, slip.String(sc.docs))
 	}
 
-	// Slots
-	for _, slot := range sc.slots {
-		if sc.include != nil && sc.include.slotMap[slot.name] != nil {
+	// Slots - skip inherited slots at the beginning
+	inheritedCount := 0
+	if sc.include != nil {
+		inheritedCount = len(sc.include.slots)
+	}
+	for i, slot := range sc.slots {
+		if i < sc.initialOffset+inheritedCount {
 			continue // Skip inherited slots
 		}
 		slotForm := sc.slotLoadForm(slot)
@@ -311,12 +313,16 @@ func (sc *StructureClass) VarNames() []string {
 // AddSlot adds a slot to the structure.
 func (sc *StructureClass) AddSlot(slot *StructureSlot) {
 	sc.slots = append(sc.slots, slot)
-	sc.slotMap[slot.name] = slot
 }
 
 // GetSlot returns a slot by name, or nil if not found.
 func (sc *StructureClass) GetSlot(name string) *StructureSlot {
-	return sc.slotMap[name]
+	for _, slot := range sc.slots {
+		if slot.name == name {
+			return slot
+		}
+	}
+	return nil
 }
 
 // SlotCount returns the total number of slots.
