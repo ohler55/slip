@@ -118,7 +118,7 @@ func (f *Defstruct) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slotIndex := sc.initialOffset
 		for _, parentSlot := range sc.include.slots {
 			newSlot := parentSlot.Copy(slotIndex)
-			sc.AddSlot(newSlot)
+			sc.slots = append(sc.slots, newSlot)
 			slotIndex++
 		}
 	}
@@ -146,12 +146,12 @@ func (f *Defstruct) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			}
 		} else {
 			slot.index = len(sc.slots)
-			sc.AddSlot(slot)
+			sc.slots = append(sc.slots, slot)
 		}
 	}
 
 	// Build precedence list for typep
-	sc.BuildPrecedence()
+	sc.buildPrecedence()
 
 	// Register the structure class
 	slip.RegisterClass(name, sc)
@@ -178,7 +178,7 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 			// Single keyword option (e.g., :named)
 			switch o {
 			case slip.Symbol(":named"):
-				sc.SetNamed(true)
+				sc.named = true
 			default:
 				slip.ErrorPanic(s, depth, "unknown structure option: %s", o)
 			}
@@ -195,31 +195,31 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 			switch key {
 			case slip.Symbol(":conc-name"):
 				if len(o) == 1 || o[1] == nil {
-					sc.SetConcName("")
+					sc.concName = ""
 				} else if sym, ok := o[1].(slip.Symbol); ok {
-					sc.SetConcName(string(sym))
+					sc.concName = string(sym)
 				} else {
 					slip.TypePanic(s, depth, ":conc-name", o[1], "symbol", "nil")
 				}
 
 			case slip.Symbol(":constructor"):
 				if !constructorSeen {
-					sc.ClearConstructors()
+					sc.constructors = nil
 					constructorSeen = true
 				}
 				if len(o) == 1 {
 					// (:constructor) - use default name
-					sc.AddConstructor("make-"+sc.name, nil)
+					sc.constructors = append(sc.constructors, ConstructorSpec{name: "make-" + sc.name})
 				} else if o[1] == nil {
 					// (:constructor nil) - no constructor
 					// Already cleared, nothing to add
 				} else if sym, ok := o[1].(slip.Symbol); ok {
 					if len(o) == 2 {
 						// (:constructor name) - keyword constructor with custom name
-						sc.AddConstructor(string(sym), nil)
+						sc.constructors = append(sc.constructors, ConstructorSpec{name: string(sym)})
 					} else if boaList, ok := o[2].(slip.List); ok {
 						// (:constructor name arglist) - BOA constructor
-						sc.AddConstructor(string(sym), boaList)
+						sc.constructors = append(sc.constructors, ConstructorSpec{name: string(sym), boaList: boaList})
 					} else {
 						slip.TypePanic(s, depth, "BOA constructor arglist", o[2], "list")
 					}
@@ -229,18 +229,18 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 
 			case slip.Symbol(":copier"):
 				if len(o) == 1 || o[1] == nil {
-					sc.SetCopierName("")
+					sc.copierName = ""
 				} else if sym, ok := o[1].(slip.Symbol); ok {
-					sc.SetCopierName(string(sym))
+					sc.copierName = string(sym)
 				} else {
 					slip.TypePanic(s, depth, ":copier", o[1], "symbol", "nil")
 				}
 
 			case slip.Symbol(":predicate"):
 				if len(o) == 1 || o[1] == nil {
-					sc.SetPredicateName("")
+					sc.predicateName = ""
 				} else if sym, ok := o[1].(slip.Symbol); ok {
-					sc.SetPredicateName(string(sym))
+					sc.predicateName = string(sym)
 				} else {
 					slip.TypePanic(s, depth, ":predicate", o[1], "symbol", "nil")
 				}
@@ -264,7 +264,7 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 				if parent.repType != sc.repType && parent.repType != "" {
 					slip.ErrorPanic(s, depth, "included structure %s has different :type", parentName)
 				}
-				sc.SetInclude(parent)
+				sc.include = parent
 
 				// Parse slot modifications in :include
 				// (:include parent-name slot-desc*)
@@ -277,13 +277,13 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 					slip.ErrorPanic(s, depth, ":initial-offset requires a value")
 				}
 				if n, ok := o[1].(slip.Fixnum); ok {
-					sc.SetInitialOffset(int(n))
+					sc.initialOffset = int(n)
 				} else {
 					slip.TypePanic(s, depth, ":initial-offset", o[1], "fixnum")
 				}
 
 			case slip.Symbol(":named"):
-				sc.SetNamed(true)
+				sc.named = true
 
 			case slip.Symbol(":type"):
 				if len(o) < 2 {
@@ -292,7 +292,8 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 				switch t := o[1].(type) {
 				case slip.Symbol:
 					if t == slip.Symbol("vector") || t == slip.Symbol("list") {
-						sc.SetRepType(t)
+						sc.repType = t
+						sc.named = false // When :type is specified, :named defaults to false
 					} else {
 						slip.ErrorPanic(s, depth, ":type must be vector or list, got %s", t)
 					}
@@ -300,7 +301,8 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 					// (vector element-type) form
 					if len(t) >= 1 {
 						if t[0] == slip.Symbol("vector") {
-							sc.SetRepType(slip.Symbol("vector"))
+							sc.repType = slip.Symbol("vector")
+							sc.named = false
 						} else {
 							slip.ErrorPanic(s, depth, ":type must be vector or list")
 						}
@@ -311,12 +313,12 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 
 			case slip.Symbol(":print-function"):
 				if len(o) >= 2 {
-					sc.SetPrintFunction(o[1])
+					sc.printFunc = o[1]
 				}
 
 			case slip.Symbol(":print-object"):
 				if len(o) >= 2 {
-					sc.SetPrintObject(o[1])
+					sc.printObject = o[1]
 				}
 
 			default:
@@ -334,7 +336,7 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 	}
 	if sc.repType != "" && !sc.named && sc.predicateName != "" {
 		// Predicate requires :named for typed structures
-		sc.SetPredicateName("")
+		sc.predicateName = ""
 	}
 }
 

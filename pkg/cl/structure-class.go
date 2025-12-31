@@ -310,11 +310,6 @@ func (sc *StructureClass) VarNames() []string {
 	return names
 }
 
-// AddSlot adds a slot to the structure.
-func (sc *StructureClass) AddSlot(slot *StructureSlot) {
-	sc.slots = append(sc.slots, slot)
-}
-
 // GetSlot returns a slot by name, or nil if not found.
 func (sc *StructureClass) GetSlot(name string) *StructureSlot {
 	for _, slot := range sc.slots {
@@ -335,8 +330,8 @@ func (sc *StructureClass) AllSlots() []*StructureSlot {
 	return sc.slots
 }
 
-// BuildPrecedence builds the type precedence list for typep.
-func (sc *StructureClass) BuildPrecedence() {
+// buildPrecedence builds the type precedence list for typep.
+func (sc *StructureClass) buildPrecedence() {
 	sc.precedence = []slip.Symbol{slip.Symbol(sc.name)}
 	for parent := sc.include; parent != nil; parent = parent.include {
 		sc.precedence = append(sc.precedence, slip.Symbol(parent.name))
@@ -347,65 +342,6 @@ func (sc *StructureClass) BuildPrecedence() {
 // Precedence returns the type precedence list.
 func (sc *StructureClass) Precedence() []slip.Symbol {
 	return sc.precedence
-}
-
-// SetConcName sets the accessor prefix.
-func (sc *StructureClass) SetConcName(prefix string) {
-	sc.concName = prefix
-}
-
-// SetCopierName sets the copier function name.
-func (sc *StructureClass) SetCopierName(name string) {
-	sc.copierName = name
-}
-
-// SetPredicateName sets the predicate function name.
-func (sc *StructureClass) SetPredicateName(name string) {
-	sc.predicateName = name
-}
-
-// SetInclude sets the parent structure.
-func (sc *StructureClass) SetInclude(parent *StructureClass) {
-	sc.include = parent
-}
-
-// SetRepType sets the representation type (vector, list, or "").
-func (sc *StructureClass) SetRepType(t slip.Symbol) {
-	sc.repType = t
-	// When :type is specified, :named defaults to false
-	if t != "" {
-		sc.named = false
-	}
-}
-
-// SetNamed sets whether the structure is named.
-func (sc *StructureClass) SetNamed(named bool) {
-	sc.named = named
-}
-
-// SetInitialOffset sets the initial slot offset.
-func (sc *StructureClass) SetInitialOffset(offset int) {
-	sc.initialOffset = offset
-}
-
-// SetPrintFunction sets the print function.
-func (sc *StructureClass) SetPrintFunction(fn slip.Object) {
-	sc.printFunc = fn
-}
-
-// SetPrintObject sets the print-object function.
-func (sc *StructureClass) SetPrintObject(fn slip.Object) {
-	sc.printObject = fn
-}
-
-// ClearConstructors clears all constructor specifications.
-func (sc *StructureClass) ClearConstructors() {
-	sc.constructors = nil
-}
-
-// AddConstructor adds a constructor specification.
-func (sc *StructureClass) AddConstructor(name string, boaList slip.List) {
-	sc.constructors = append(sc.constructors, ConstructorSpec{name: name, boaList: boaList})
 }
 
 // Constructors returns the list of constructor specifications.
