@@ -26,22 +26,22 @@ type ConstructorSpec struct {
 
 // StructureClass represents a structure type defined by defstruct.
 type StructureClass struct {
-	name           string
-	docs           string
-	slots          []*StructureSlot          // ordered list of slots
-	slotMap        map[string]*StructureSlot // lookup by name
-	concName       string                    // prefix for accessor names (default: name-)
-	constructors   []ConstructorSpec         // constructor specifications
-	copierName     string                    // copier function name (empty = none)
-	predicateName  string                    // predicate function name (empty = none)
-	include        *StructureClass           // parent structure (from :include)
-	initialOffset  int                       // number of slots to skip at start (:initial-offset)
-	named          bool                      // whether structure is named (:named)
-	repType        slip.Symbol               // representation type: "vector", "list", or "" for standard
-	printFunc      slip.Object               // :print-function
-	printObject    slip.Object               // :print-object
-	pkg            *slip.Package             // package where structure was defined
-	precedence     []slip.Symbol             // type hierarchy for typep
+	name          string
+	docs          string
+	slots         []*StructureSlot          // ordered list of slots
+	slotMap       map[string]*StructureSlot // lookup by name
+	concName      string                    // prefix for accessor names (default: name-)
+	constructors  []ConstructorSpec         // constructor specifications
+	copierName    string                    // copier function name (empty = none)
+	predicateName string                    // predicate function name (empty = none)
+	include       *StructureClass           // parent structure (from :include)
+	initialOffset int                       // number of slots to skip at start (:initial-offset)
+	named         bool                      // whether structure is named (:named)
+	repType       slip.Symbol               // representation type: "vector", "list", or "" for standard
+	printFunc     slip.Object               // :print-function
+	printObject   slip.Object               // :print-object
+	pkg           *slip.Package             // package where structure was defined
+	precedence    []slip.Symbol             // type hierarchy for typep
 }
 
 // NewStructureClass creates a new structure class with default options.

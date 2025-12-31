@@ -38,13 +38,8 @@ func (obj *StructureObject) String() string {
 }
 
 // Append a buffer with a representation of the structure object.
+// Note: Custom print-function/print-object requires a scope and is handled by the printer.
 func (obj *StructureObject) Append(b []byte) []byte {
-	// Check for custom print function/object
-	if obj.Type.printFunc != nil || obj.Type.printObject != nil {
-		// Custom printing will be handled elsewhere when a scope is available
-		// For now, use default format
-	}
-
 	b = append(b, "#S("...)
 	b = append(b, obj.Type.name...)
 	for _, slot := range obj.Type.slots {

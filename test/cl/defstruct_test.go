@@ -477,9 +477,12 @@ func TestStructureClassSimplify(t *testing.T) {
 
 func TestStructureClassEqual(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct eqtest x)`, scope).Eval(scope, nil)
+	slip.ReadString(`(defstruct eqtest x) (defstruct eqtest2 x)`, scope).Eval(scope, nil)
 	sc := cl.FindStructureClass("eqtest")
-	tt.Equal(t, true, sc.Equal(sc))
+	sc2 := cl.FindStructureClass("eqtest")  // Same class, different lookup
+	sc3 := cl.FindStructureClass("eqtest2") // Different class
+	tt.Equal(t, true, sc.Equal(sc2))
+	tt.Equal(t, false, sc.Equal(sc3))
 	tt.Equal(t, false, sc.Equal(slip.Fixnum(1)))
 }
 

@@ -121,10 +121,8 @@ func (f *Defstruct) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			sc.AddSlot(newSlot)
 			slotIndex++
 		}
-	} else {
-		// Apply initial offset by adding placeholder slots
-		// (In practice, initial-offset is mainly for :type structures)
 	}
+	// Note: initial-offset for non-:include structures is handled during typed representation creation
 
 	// Parse slot descriptions
 	startIndex := len(sc.slots)
@@ -818,10 +816,10 @@ func generateTypedAccessor(sc *StructureClass, slot *StructureSlot, actualIndex 
 	slip.CurrentPackage.Define(
 		func(args slip.List) slip.Object {
 			f := typedStructAccessor{
-				Function:    slip.Function{Name: name, Args: args},
-				repType:     repType,
-				slotIndex:   actualIndex,
-				readOnly:    readOnly,
+				Function:  slip.Function{Name: name, Args: args},
+				repType:   repType,
+				slotIndex: actualIndex,
+				readOnly:  readOnly,
 			}
 			f.Self = &f
 			return &f
