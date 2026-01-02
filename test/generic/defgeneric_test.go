@@ -15,12 +15,16 @@ func TestDefgenericUsual(t *testing.T) {
 		Source: `(defgeneric quux (a b)
                    (:documentation "quack")
                    (:method-class standard-method)
-                   (:method ((a fixnum) (b fixnum)) (+ a b)))`,
+                   (:method ((a fixnum) (b fixnum)) "quack quack" (+ a b)))`,
 		Expect: "#<generic-function quux>",
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(quux 1 2)`,
 		Expect: "3",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(documentation (find-method 'quux nil '(fixnum fixnum)) 'method)`,
+		Expect: `"quack quack"`,
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(quux 1 2.1)`,
