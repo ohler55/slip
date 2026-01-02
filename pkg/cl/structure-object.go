@@ -4,18 +4,15 @@ package cl
 
 import (
 	"sync"
-	"sync/atomic"
+	"unsafe"
 
 	"github.com/ohler55/slip"
 )
-
-var structureIDCounter uint64
 
 // StructureObject represents an instance of a structure.
 type StructureObject struct {
 	Type   *StructureClass
 	slots  []slip.Object
-	id     uint64
 	locker sync.Locker
 }
 
@@ -24,7 +21,6 @@ func NewStructureObject(sc *StructureClass) *StructureObject {
 	obj := &StructureObject{
 		Type:   sc,
 		slots:  make([]slip.Object, len(sc.slots)),
-		id:     atomic.AddUint64(&structureIDCounter, 1),
 		locker: slip.NoOpLocker{},
 	}
 	// Initialize slots with their initforms (evaluated at creation time by constructor)
@@ -204,7 +200,7 @@ func (obj *StructureObject) MethodNames() slip.List {
 
 // ID returns the unique ID for this instance.
 func (obj *StructureObject) ID() uint64 {
-	return obj.id
+	return uint64(uintptr(unsafe.Pointer(obj)))
 }
 
 // Dup creates a shallow copy of the structure.
@@ -215,7 +211,6 @@ func (obj *StructureObject) Dup() slip.Instance {
 	newObj := &StructureObject{
 		Type:   obj.Type,
 		slots:  make([]slip.Object, len(obj.slots)),
-		id:     atomic.AddUint64(&structureIDCounter, 1),
 		locker: slip.NoOpLocker{},
 	}
 	copy(newObj.slots, obj.slots)

@@ -128,7 +128,7 @@ func (f *Defstruct) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	startIndex := len(sc.slots)
 	for i := argIndex; i < len(args); i++ {
 		slotIndex := startIndex + (i - argIndex)
-		slot := NewStructureSlot(s, args[i], slotIndex, d2)
+		slot := newStructureSlot(s, args[i], slotIndex, d2)
 
 		// Check if this overrides an included slot
 		if existing := sc.GetSlot(slot.name); existing != nil {
@@ -265,12 +265,9 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 					slip.ErrorPanic(s, depth, "included structure %s has different :type", parentName)
 				}
 				sc.include = parent
-
-				// Parse slot modifications in :include
-				// (:include parent-name slot-desc*)
-				for i := 2; i < len(o); i++ {
-					// These are slot modifications - handled when adding slots
-				}
+				// Note: slot modifications in (:include parent-name slot-desc*) are
+				// handled when parsing slot descriptions - they appear as regular slots
+				// that override inherited slot properties
 
 			case slip.Symbol(":initial-offset"):
 				if len(o) < 2 {
@@ -340,13 +337,15 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 		}
 	}
 
-	// Validate options
-	if sc.repType != "" && (sc.printFunc != nil || sc.printObject != nil) {
-		slip.ErrorPanic(s, depth, ":print-function/:print-object cannot be used with :type")
-	}
-	if sc.repType != "" && !sc.named && sc.predicateName != "" {
+	// Validate options for typed representations
+	if sc.repType != "" {
+		if sc.printFunc != nil || sc.printObject != nil {
+			slip.ErrorPanic(s, depth, ":print-function/:print-object cannot be used with :type")
+		}
 		// Predicate requires :named for typed structures
-		sc.predicateName = ""
+		if !sc.named && sc.predicateName != "" {
+			sc.predicateName = ""
+		}
 	}
 }
 
@@ -519,7 +518,7 @@ type structCopier struct {
 func (f *structCopier) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, 1)
 	obj, ok := args[0].(*StructureObject)
-	if !ok {
+	if !ok || obj.Type.name != f.structName {
 		slip.TypePanic(s, depth, "structure", args[0], f.structName)
 	}
 	return obj.Dup()

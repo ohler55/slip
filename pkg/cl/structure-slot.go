@@ -15,13 +15,13 @@ type StructureSlot struct {
 	index    int         // position in the structure's slot array
 }
 
-// NewStructureSlot creates a new StructureSlot from a slot-description in defstruct.
+// newStructureSlot creates a new StructureSlot from a slot-description in defstruct.
 // Slot descriptions can be:
 //   - symbol: just a slot name with no options
 //   - (slot-name default-value slot-option*)
 //
 // Slot options are :type and :read-only.
-func NewStructureSlot(s *slip.Scope, def slip.Object, index, depth int) *StructureSlot {
+func newStructureSlot(s *slip.Scope, def slip.Object, index, depth int) *StructureSlot {
 	ss := &StructureSlot{
 		initform: nil, // nil means uninitialized (behavior undefined if read before set)
 		index:    index,
