@@ -170,3 +170,20 @@ func TestWriteBadFixnum(t *testing.T) {
 		Panics: true,
 	}).Test(t)
 }
+
+func TestWriteBadStreamType(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(write 7 :stream 42)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+// Test getWriteStream error path with custom print function structure
+func TestWriteBadStreamWithPrintFunction(t *testing.T) {
+	(&sliptest.Macro{
+		Source: `
+(defstruct (wbstest (:print-function (lambda (obj str depth) (princ "x" str)))) x)
+(write (make-wbstest :x 1) :stream 42)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}

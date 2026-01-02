@@ -49,9 +49,6 @@ type Print struct {
 // Call the function with the arguments provided.
 func (f *Print) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 1, 2)
-	p := *slip.DefaultPrinter()
-	p.ScopedUpdate(s)
-	p.Escape = true
 	obj := args[0]
 	w := slip.StandardOutput.(io.Writer)
 	ss, _ := slip.StandardOutput.(slip.Stream)
@@ -62,6 +59,34 @@ func (f *Print) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			slip.TypePanic(s, depth, "print output-stream", args[1], "output-stream")
 		}
 	}
+	// Check for StructureObject with custom print function
+	if so, ok := obj.(*StructureObject); ok {
+		if pf := so.Type.printFunc; pf != nil {
+			if _, err := w.Write([]byte{'\n'}); err != nil {
+				slip.StreamPanic(s, depth, ss, "print write failed. %s", err)
+			}
+			// :print-function signature: (object stream depth)
+			pf.Call(s, slip.List{so, ss, slip.Fixnum(0)}, depth+1)
+			if _, err := w.Write([]byte{' '}); err != nil {
+				slip.StreamPanic(s, depth, ss, "print write failed. %s", err)
+			}
+			return obj
+		}
+		if po := so.Type.printObject; po != nil {
+			if _, err := w.Write([]byte{'\n'}); err != nil {
+				slip.StreamPanic(s, depth, ss, "print write failed. %s", err)
+			}
+			// :print-object signature: (object stream)
+			po.Call(s, slip.List{so, ss}, depth+1)
+			if _, err := w.Write([]byte{' '}); err != nil {
+				slip.StreamPanic(s, depth, ss, "print write failed. %s", err)
+			}
+			return obj
+		}
+	}
+	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(s)
+	p.Escape = true
 	b := p.Append([]byte{'\n'}, obj, 0)
 	b = append(b, ' ')
 	if _, err := w.Write(b); err != nil {
