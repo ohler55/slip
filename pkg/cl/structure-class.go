@@ -37,8 +37,8 @@ type StructureClass struct {
 	initialOffset int             // number of slots to skip at start (:initial-offset)
 	named         bool            // whether structure is named (:named)
 	repType       slip.Symbol     // representation type: "vector", "list", or "" for standard
-	printFunc     slip.Object     // :print-function
-	printObject   slip.Object     // :print-object
+	printFunc     slip.Caller     // :print-function
+	printObject   slip.Caller     // :print-object
 	pkg           *slip.Package   // package where structure was defined
 	precedence    []slip.Symbol   // type hierarchy for typep
 }
@@ -320,11 +320,6 @@ func (sc *StructureClass) GetSlot(name string) *StructureSlot {
 	return nil
 }
 
-// SlotCount returns the total number of slots.
-func (sc *StructureClass) SlotCount() int {
-	return len(sc.slots)
-}
-
 // AllSlots returns all slots including inherited ones.
 func (sc *StructureClass) AllSlots() []*StructureSlot {
 	return sc.slots
@@ -384,16 +379,6 @@ func (sc *StructureClass) Include() *StructureClass {
 	return sc.include
 }
 
-// PrintFunction returns the custom print function.
-func (sc *StructureClass) PrintFunction() slip.Object {
-	return sc.printFunc
-}
-
-// PrintObject returns the custom print-object function.
-func (sc *StructureClass) PrintObject() slip.Object {
-	return sc.printObject
-}
-
 // FindStructureClass looks up a structure class by name.
 func FindStructureClass(name string) *StructureClass {
 	c := slip.CurrentPackage.FindClass(name)
@@ -401,15 +386,6 @@ func FindStructureClass(name string) *StructureClass {
 		return sc
 	}
 	return nil
-}
-
-// MustFindStructureClass looks up a structure class and panics if not found.
-func MustFindStructureClass(s *slip.Scope, depth int, name string) *StructureClass {
-	sc := FindStructureClass(name)
-	if sc == nil {
-		slip.ErrorPanic(s, depth, "structure %s is not defined", name)
-	}
-	return sc
 }
 
 // accessorName returns the accessor name for a slot.

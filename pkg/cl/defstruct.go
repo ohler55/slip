@@ -313,12 +313,22 @@ func parseStructureOptions(s *slip.Scope, sc *StructureClass, options slip.List,
 
 			case slip.Symbol(":print-function"):
 				if len(o) >= 2 {
-					sc.printFunc = o[1]
+					val := s.Eval(o[1], depth+1)
+					if caller, ok := val.(slip.Caller); ok {
+						sc.printFunc = caller
+					} else {
+						slip.TypePanic(s, depth, ":print-function", val, "function")
+					}
 				}
 
 			case slip.Symbol(":print-object"):
 				if len(o) >= 2 {
-					sc.printObject = o[1]
+					val := s.Eval(o[1], depth+1)
+					if caller, ok := val.(slip.Caller); ok {
+						sc.printObject = caller
+					} else {
+						slip.TypePanic(s, depth, ":print-object", val, "function")
+					}
 				}
 
 			default:

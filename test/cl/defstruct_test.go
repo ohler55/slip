@@ -3,9 +3,11 @@
 package cl_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
+
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/sliptest"
@@ -571,7 +573,7 @@ func TestStructureClassSlotCount(t *testing.T) {
 	scope := slip.NewScope()
 	slip.ReadString(`(defstruct counttest a b c)`, scope).Eval(scope, nil)
 	sc := cl.FindStructureClass("counttest")
-	tt.Equal(t, 3, sc.SlotCount())
+	tt.Equal(t, 3, len(sc.AllSlots()))
 }
 
 func TestStructureClassAllSlots(t *testing.T) {
@@ -608,8 +610,6 @@ func TestStructureClassGetters(t *testing.T) {
 	tt.Equal(t, slip.Symbol("vector"), sc.RepType())
 	tt.Equal(t, 0, sc.InitialOffset())
 	tt.Equal(t, (*cl.StructureClass)(nil), sc.Include())
-	tt.Equal(t, nil, sc.PrintFunction())
-	tt.Equal(t, nil, sc.PrintObject())
 }
 
 func TestStructureClassConstructors(t *testing.T) {
@@ -632,23 +632,6 @@ func TestStructureClassIncludeGetter(t *testing.T) {
 	parent := sc.Include()
 	tt.NotNil(t, parent)
 	tt.Equal(t, "incbase", parent.Name())
-}
-
-func TestMustFindStructureClass(t *testing.T) {
-	scope := slip.NewScope()
-	slip.ReadString(`(defstruct mustfind x)`, scope).Eval(scope, nil)
-	sc := cl.MustFindStructureClass(scope, 0, "mustfind")
-	tt.NotNil(t, sc)
-	tt.Equal(t, "mustfind", sc.Name())
-}
-
-func TestMustFindStructureClassPanic(t *testing.T) {
-	scope := slip.NewScope()
-	defer func() {
-		r := recover()
-		tt.NotNil(t, r)
-	}()
-	cl.MustFindStructureClass(scope, 0, "nonexistent-struct")
 }
 
 // ============================================================================
@@ -916,11 +899,14 @@ func TestDefstructInitialOffset(t *testing.T) {
 func TestDefstructPrintFunction(t *testing.T) {
 	(&sliptest.Macro{
 		Source: `
-(defstruct (pftest (:print-function (lambda (obj stream depth) (write "custom" :stream stream)))) x)`,
+(defstruct (pftest (:print-function (lambda (obj str depth) (write "custom-pf" :stream str)))) x)`,
 		Validate: func(t *testing.T, result slip.Object) {
 			tt.Equal(t, slip.Symbol("pftest"), result)
-			sc := cl.FindStructureClass("pftest")
-			tt.NotNil(t, sc.PrintFunction())
+			// Verify custom print function is called when writing
+			(&sliptest.Function{
+				Source: `(with-output-to-string (s) (write (make-pftest :x 1) :stream s))`,
+				Expect: `""custom-pf""`,
+			}).Test(t)
 		},
 	}).Test(t)
 }
@@ -928,11 +914,47 @@ func TestDefstructPrintFunction(t *testing.T) {
 func TestDefstructPrintObject(t *testing.T) {
 	(&sliptest.Macro{
 		Source: `
-(defstruct (potest (:print-object (lambda (obj stream) (write "custom" :stream stream)))) x)`,
+(defstruct (potest (:print-object (lambda (obj str) (write "custom-po" :stream str)))) x)`,
 		Validate: func(t *testing.T, result slip.Object) {
 			tt.Equal(t, slip.Symbol("potest"), result)
-			sc := cl.FindStructureClass("potest")
-			tt.NotNil(t, sc.PrintObject())
+			// Verify custom print-object is called when writing
+			(&sliptest.Function{
+				Source: `(with-output-to-string (s) (write (make-potest :x 1) :stream s))`,
+				Expect: `""custom-po""`,
+			}).Test(t)
+		},
+	}).Test(t)
+}
+
+// Test print function with the print command (not write) to cover print.go custom print paths
+func TestDefstructPrintFunctionWithPrint(t *testing.T) {
+	(&sliptest.Macro{
+		Source: `
+(defstruct (pfprint (:print-function (lambda (obj str depth) (princ "pf" str)))) x)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("pfprint"), result)
+			// print prepends newline and appends space around the custom output
+			(&sliptest.Function{
+				Source: `(with-output-to-string (s) (print (make-pfprint :x 1) s))`,
+				Expect: `"
+pf "`,
+			}).Test(t)
+		},
+	}).Test(t)
+}
+
+func TestDefstructPrintObjectWithPrint(t *testing.T) {
+	(&sliptest.Macro{
+		Source: `
+(defstruct (poprint (:print-object (lambda (obj str) (princ "po" str)))) x)`,
+		Validate: func(t *testing.T, result slip.Object) {
+			tt.Equal(t, slip.Symbol("poprint"), result)
+			// print prepends newline and appends space around the custom output
+			(&sliptest.Function{
+				Source: `(with-output-to-string (s) (print (make-poprint :x 1) s))`,
+				Expect: `"
+po "`,
+			}).Test(t)
 		},
 	}).Test(t)
 }
@@ -1110,6 +1132,16 @@ func TestStructureClassDescribeNoPredicate(t *testing.T) {
 	b := sc.Describe(nil, 0, 80, false)
 	str := string(b)
 	tt.Equal(t, true, len(str) > 0)
+}
+
+func TestStructureClassDescribeSlotDetails(t *testing.T) {
+	scope := slip.NewScope()
+	slip.ReadString(`(defstruct descslot (x 42) (y 0 :read-only t))`, scope).Eval(scope, nil)
+	sc := cl.FindStructureClass("descslot")
+	b := sc.Describe(nil, 0, 80, false)
+	str := string(b)
+	tt.Equal(t, true, contains(str, "(read-only)"))
+	tt.Equal(t, true, contains(str, "= 42"))
 }
 
 func TestStructureClassInheritsDeep(t *testing.T) {
@@ -1356,6 +1388,21 @@ func TestDefstructLoadFormCustomConstructor(t *testing.T) {
 			sc := cl.FindStructureClass("lfcustctor")
 			form := sc.LoadForm()
 			tt.NotNil(t, form)
+		},
+	}).Test(t)
+}
+
+func TestDefstructLoadFormCustomCopierPredicate(t *testing.T) {
+	(&sliptest.Macro{
+		Source: `(defstruct (lfcustcp (:copier my-copy) (:predicate my-pred)) x)`,
+		Validate: func(t *testing.T, _ slip.Object) {
+			sc := cl.FindStructureClass("lfcustcp")
+			form := sc.LoadForm()
+			tt.NotNil(t, form)
+			// Verify the form contains the custom names
+			str := fmt.Sprintf("%v", form)
+			tt.Equal(t, true, contains(str, "my-copy"))
+			tt.Equal(t, true, contains(str, "my-pred"))
 		},
 	}).Test(t)
 }
