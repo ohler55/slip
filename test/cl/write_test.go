@@ -180,7 +180,7 @@ func TestWriteBadStreamType(t *testing.T) {
 
 // Test getWriteStream error path with custom print function structure
 func TestWriteBadStreamWithPrintFunction(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (wbstest (:print-function (lambda (obj str depth) (princ "x" str)))) x)
 (write (make-wbstest :x 1) :stream 42)`,

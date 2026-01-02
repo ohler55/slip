@@ -44,7 +44,7 @@ func (f *MakeLoadForm) Call(s *slip.Scope, args slip.List, depth int) (form slip
 	return ObjectLoadForm(args[0], true)
 }
 
-// ObjectLoadForm returns then load form for and object.
+// ObjectLoadForm returns the load form for and object.
 func ObjectLoadForm(obj slip.Object, follow bool) (form slip.Object) {
 Top:
 	switch to := obj.(type) {
