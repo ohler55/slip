@@ -11,21 +11,11 @@
 
 ---------------------
 
-- structs?
- - defstruct
- - struct instance is an instance
- - snapshot
- - disassemble
-  - on all methods created
- - type-of
- - class-of
- - make-instance
-  - no initializers though... unless??
- - find-class
- - describe
-  - both instance and class
- - typep
+- printer branch
 
+- make StructureSlot a caller and placer(minor optimization)
+
+---------------------
 
 - flavor allow out of order defflavor like standard-class
 

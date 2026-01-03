@@ -61,7 +61,7 @@ func TestSliptestObjectPanicType(t *testing.T) {
 
 func TestSliptestMacroBasic(t *testing.T) {
 	// Define a macro and call it in one source string
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: "(defmacro inc1 (x) `(1+ ,x))",
 		Expect: "inc1",
 	}).Test(t)
@@ -70,7 +70,7 @@ func TestSliptestMacroBasic(t *testing.T) {
 func TestSliptestMacroMultipleForms(t *testing.T) {
 	// The key difference from Function: Macro can evaluate multiple forms
 	// where earlier forms define macros used by later forms
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defmacro double (x) ` + "`" + `(* 2 ,x))
 (double 5)`,
@@ -79,7 +79,7 @@ func TestSliptestMacroMultipleForms(t *testing.T) {
 }
 
 func TestSliptestMacroValidate(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: "(defmacro triple (x) `(* 3 ,x)) (triple 7)",
 		Validate: func(t *testing.T, v slip.Object) {
 			tt.Equal(t, slip.Fixnum(21), v)
@@ -88,7 +88,7 @@ func TestSliptestMacroValidate(t *testing.T) {
 }
 
 func TestSliptestMacroReadably(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source:   "(+ 1.5d0 2.5d0)",
 		Expect:   "4d+00",
 		Readably: true,
@@ -96,7 +96,7 @@ func TestSliptestMacroReadably(t *testing.T) {
 }
 
 func TestSliptestMacroArray(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: "#(1 2 3)",
 		Expect: "#(1 2 3)",
 		Array:  true,
@@ -104,21 +104,21 @@ func TestSliptestMacroArray(t *testing.T) {
 }
 
 func TestSliptestMacroPanics(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: "(/ 1 0)",
 		Panics: true,
 	}).Test(t)
 }
 
 func TestSliptestMacroPanicType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source:    "(/ 1 0)",
 		PanicType: slip.DivisionByZeroSymbol,
 	}).Test(t)
 }
 
 func TestSliptestMacroPanicTypeValidate(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source:    "(error \"test error\")",
 		PanicType: slip.Symbol("error"),
 		Validate: func(t *testing.T, v slip.Object) {
@@ -130,7 +130,7 @@ func TestSliptestMacroPanicTypeValidate(t *testing.T) {
 func TestSliptestMacroWithScope(t *testing.T) {
 	scope := slip.NewScope()
 	slip.ReadString("(defmacro add10 (x) `(+ 10 ,x))", scope).Eval(scope, nil)
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(add10 32)",
 		Expect: "42",

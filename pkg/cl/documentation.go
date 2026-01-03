@@ -157,6 +157,10 @@ Top:
 		if docType == slip.Symbol("type") {
 			ta.SetDocumentation(string(doc))
 		}
+	case *slip.Method:
+		if (docType == nil || docType == slip.Symbol("method")) && ta.Doc != nil {
+			ta.Doc.Text = string(doc)
+		}
 	default:
 		f.unsup(docType, ta)
 	}

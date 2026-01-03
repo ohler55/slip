@@ -14,7 +14,7 @@ import (
 )
 
 func TestDefstructBasic(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct pt-basic x y)`,
 		Validate: func(t *testing.T, result slip.Object) {
 			tt.Equal(t, slip.Symbol("pt-basic"), result)
@@ -27,7 +27,7 @@ func TestDefstructBasic(t *testing.T) {
 }
 
 func TestDefstructConstructor(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct pt-ctor x y)
 (make-pt-ctor :x 10 :y 20)`,
@@ -45,7 +45,7 @@ func TestDefstructConstructor(t *testing.T) {
 }
 
 func TestDefstructPredicate(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct pt-pred x y)
 (list (pt-pred-p (make-pt-pred :x 1 :y 2))
@@ -55,7 +55,7 @@ func TestDefstructPredicate(t *testing.T) {
 }
 
 func TestDefstructAccessors(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct pt-acc x y)
 (let ((p (make-pt-acc :x 5 :y 10)))
@@ -65,7 +65,7 @@ func TestDefstructAccessors(t *testing.T) {
 }
 
 func TestDefstructSetf(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct pt-setf x y)
 (let ((p (make-pt-setf :x 1 :y 2)))
@@ -76,7 +76,7 @@ func TestDefstructSetf(t *testing.T) {
 }
 
 func TestDefstructCopier(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct pt-copy x y)
 (let* ((p1 (make-pt-copy :x 1 :y 2))
@@ -88,7 +88,7 @@ func TestDefstructCopier(t *testing.T) {
 }
 
 func TestDefstructInitform(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct counter (value 0))
 (counter-value (make-counter))`,
@@ -97,7 +97,7 @@ func TestDefstructInitform(t *testing.T) {
 }
 
 func TestDefstructConcName(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (person (:conc-name p-)) name age)
 (let ((joe (make-person :name "Joe" :age 30)))
@@ -107,9 +107,9 @@ func TestDefstructConcName(t *testing.T) {
 }
 
 func TestDefstructConcNameNil(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
-(defstruct (thing (:conc-name nil)) value)
+(defstruct (thing (:conc-name nil) :named) value)
 (let ((t1 (make-thing :value 42)))
   (value t1))`,
 		Expect: "42",
@@ -117,7 +117,7 @@ func TestDefstructConcNameNil(t *testing.T) {
 }
 
 func TestDefstructCustomConstructor(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (pt-custom (:constructor create-pt-custom)) x y)
 (let ((p (create-pt-custom :x 5 :y 6)))
@@ -126,8 +126,18 @@ func TestDefstructCustomConstructor(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDefstructDefaultConstructor(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct (pt-default (:constructor)) x y)
+(let ((p (make-pt-default :x 5 :y 6)))
+  (list (pt-custom-x p) (pt-custom-y p)))`,
+		Expect: "(5 6)",
+	}).Test(t)
+}
+
 func TestDefstructNoCopier(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct (nocopier-point (:copier nil)) x y)`,
 		Validate: func(t *testing.T, result slip.Object) {
 			tt.Equal(t, slip.Symbol("nocopier-point"), result)
@@ -139,7 +149,7 @@ func TestDefstructNoCopier(t *testing.T) {
 }
 
 func TestDefstructNoPredicate(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct (blob (:predicate nil)) data)`,
 		Validate: func(t *testing.T, result slip.Object) {
 			tt.Equal(t, slip.Symbol("blob"), result)
@@ -151,7 +161,7 @@ func TestDefstructNoPredicate(t *testing.T) {
 }
 
 func TestDefstructInclude(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct point2d x y)
 (defstruct (point3d (:include point2d)) z)
@@ -161,8 +171,29 @@ func TestDefstructInclude(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDefstructIncludeDupSlot(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct struct-xy x y)
+(defstruct (struct-xyz (:include struct-xy)) (x 4 :type fixnum :read-only t) z )
+(let ((a (make-struct-xyz :x 1 :y 2 :z 3)))
+  (list (struct-xyz-x a) (struct-xyz-y a) (struct-xyz-z a)))`,
+		Expect: "(1 2 3)",
+	}).Test(t)
+}
+
+func TestDefstructIncludeReadOnlyChange(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct no-read (x 0 :read-only t))
+(defstruct (readable (:include no-read)) (x 0 :read-only nil) )
+(a (readable-xyz :x 1))`,
+		Panics: true,
+	}).Test(t)
+}
+
 func TestDefstructIncludeTypep(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct base-shape)
 (defstruct (rectangle (:include base-shape)) width height)
@@ -173,7 +204,7 @@ func TestDefstructIncludeTypep(t *testing.T) {
 }
 
 func TestDefstructReadOnly(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct immutable (id 0 :read-only t))
 (let ((obj (make-immutable :id 42)))
@@ -183,7 +214,7 @@ func TestDefstructReadOnly(t *testing.T) {
 }
 
 func TestDefstructDocumentation(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct doc-point
   "A 2D point structure"
@@ -197,7 +228,7 @@ func TestDefstructDocumentation(t *testing.T) {
 }
 
 func TestDefstructTypeVector(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vec-point (:type vector) (:named)) x y)
 (let ((p (make-vec-point :x 5 :y 10)))
@@ -207,7 +238,7 @@ func TestDefstructTypeVector(t *testing.T) {
 }
 
 func TestDefstructTypeVectorNamed(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (named-vec (:type vector) (:named)) a b)
 (let ((v (make-named-vec :a 1 :b 2)))
@@ -217,17 +248,28 @@ func TestDefstructTypeVectorNamed(t *testing.T) {
 }
 
 func TestDefstructTypeList(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (list-point (:type list) (:named)) x y)
 (let ((p (make-list-point :x 3 :y 4)))
-  (list (list-point-x p) (list-point-y p) (listp p)))`,
-		Expect: "(3 4 t)",
+  (list (list-point-x p) (list-point-y p) (listp p) (list-point-y '(8))))`,
+		Expect: "(3 4 t nil)",
+	}).Test(t)
+}
+
+func TestDefstructTypeListInclude(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct (list-point2 (:type list) (:named)) x y)
+(defstruct (list-point3  (:type list) (:include list-point2) :named) z)
+(let ((p (make-list-point3 :x 3 :y 4 :z 5)))
+  (list (list-point3-x p) (list-point3-y p) (list-point3-z p) (listp p)))`,
+		Expect: "(3 4 5 t)",
 	}).Test(t)
 }
 
 func TestDefstructBOAConstructor(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (pt-boa (:constructor make-ptboa (x y)))
   x y)
@@ -238,7 +280,7 @@ func TestDefstructBOAConstructor(t *testing.T) {
 }
 
 func TestDefstructBOAOptional(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (pt-boaopt (:constructor make-ptboaopt (x &optional (y 0))))
   x y)
@@ -248,7 +290,7 @@ func TestDefstructBOAOptional(t *testing.T) {
 }
 
 func TestDefstructMultipleConstructors(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (pt-multi
              (:constructor make-pt-multi)
@@ -262,7 +304,7 @@ func TestDefstructMultipleConstructors(t *testing.T) {
 }
 
 func TestDefstructPrint(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct simple-point x y)
 (princ-to-string (make-simple-point :x 1 :y 2))`,
@@ -278,7 +320,7 @@ func TestDefstructPrint(t *testing.T) {
 // Additional tests for coverage
 
 func TestDefstructTypedVectorPredicate(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (tvec (:type vector) (:named)) x)
 (list (tvec-p (make-tvec :x 1)) (tvec-p #(not-tvec 1)))`,
@@ -287,7 +329,7 @@ func TestDefstructTypedVectorPredicate(t *testing.T) {
 }
 
 func TestDefstructTypedListPredicate(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (tlist (:type list) (:named)) x)
 (list (tlist-p (make-tlist :x 1)) (tlist-p '(not-tlist 1)))`,
@@ -296,7 +338,7 @@ func TestDefstructTypedListPredicate(t *testing.T) {
 }
 
 func TestDefstructTypedVectorCopier(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vcopy (:type vector) (:named)) a b)
 (let* ((v1 (make-vcopy :a 1 :b 2))
@@ -308,7 +350,7 @@ func TestDefstructTypedVectorCopier(t *testing.T) {
 }
 
 func TestDefstructTypedListCopier(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lcopy (:type list) (:named)) a b)
 (let* ((l1 (make-lcopy :a 1 :b 2))
@@ -319,7 +361,7 @@ func TestDefstructTypedListCopier(t *testing.T) {
 }
 
 func TestDefstructTypedVectorSetf(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vsetf (:type vector) (:named)) x)
 (let ((v (make-vsetf :x 10)))
@@ -330,7 +372,7 @@ func TestDefstructTypedVectorSetf(t *testing.T) {
 }
 
 func TestDefstructTypedBOAConstructor(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vboa (:type vector) (:named) (:constructor make-vboa (x y))) x y)
 (let ((v (make-vboa 5 6)))
@@ -340,7 +382,7 @@ func TestDefstructTypedBOAConstructor(t *testing.T) {
 }
 
 func TestDefstructTypedBOAOptional(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vboa2 (:type vector) (:named) (:constructor make-vboa2 (x &optional (y 99)))) x y)
 (list (vboa2-y (make-vboa2 1)) (vboa2-y (make-vboa2 1 2)))`,
@@ -349,7 +391,7 @@ func TestDefstructTypedBOAOptional(t *testing.T) {
 }
 
 func TestDefstructTypedListBOA(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lboa (:type list) (:named) (:constructor make-lboa (a b))) a b)
 (let ((l (make-lboa 7 8)))
@@ -359,7 +401,7 @@ func TestDefstructTypedListBOA(t *testing.T) {
 }
 
 func TestDefstructBOAKey(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (kpoint (:constructor make-kpt (&key x y))) x y)
 (let ((p (make-kpt :y 20 :x 10)))
@@ -369,7 +411,7 @@ func TestDefstructBOAKey(t *testing.T) {
 }
 
 func TestDefstructBOAKeyDefault(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (kdpoint (:constructor make-kdpt (&key (x 1) (y 2)))) x y)
 (list (kdpoint-x (make-kdpt)) (kdpoint-y (make-kdpt :y 99)))`,
@@ -378,7 +420,7 @@ func TestDefstructBOAKeyDefault(t *testing.T) {
 }
 
 func TestDefstructBOAAux(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (auxpt (:constructor make-auxpt (x &aux (y 99)))) x y)
 (let ((p (make-auxpt 5)))
@@ -388,7 +430,7 @@ func TestDefstructBOAAux(t *testing.T) {
 }
 
 func TestDefstructBOARest(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (restpt (:constructor make-restpt (x &rest y))) x y)
 (let ((p (make-restpt 1 2 3 4)))
@@ -398,7 +440,7 @@ func TestDefstructBOARest(t *testing.T) {
 }
 
 func TestDefstructCustomPredicate(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (cpred (:predicate is-cpred)) val)
 (is-cpred (make-cpred :val 1))`,
@@ -407,7 +449,7 @@ func TestDefstructCustomPredicate(t *testing.T) {
 }
 
 func TestDefstructCustomCopier(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (ccopy (:copier dup-ccopy)) val)
 (ccopy-val (dup-ccopy (make-ccopy :val 42)))`,
@@ -416,7 +458,7 @@ func TestDefstructCustomCopier(t *testing.T) {
 }
 
 func TestDefstructNoConstructor(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct (noctor (:constructor nil)) val)`,
 		Validate: func(t *testing.T, result slip.Object) {
 			tt.Equal(t, slip.Symbol("noctor"), result)
@@ -428,7 +470,7 @@ func TestDefstructNoConstructor(t *testing.T) {
 }
 
 func TestDefstructSlotType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct typed-slot (count 0 :type fixnum))
 (typed-slot-count (make-typed-slot :count 10))`,
@@ -437,7 +479,7 @@ func TestDefstructSlotType(t *testing.T) {
 }
 
 func TestDefstructTypeVectorElement(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vecelem (:type (vector t))) a b)
 (let ((v (make-vecelem :a 1 :b 2)))
@@ -887,7 +929,7 @@ func TestStructureSlotGetters(t *testing.T) {
 // ============================================================================
 
 func TestDefstructInitialOffset(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (offtest (:type vector) (:initial-offset 2)) x y)
 (let ((v (make-offtest :x 1 :y 2)))
@@ -897,7 +939,7 @@ func TestDefstructInitialOffset(t *testing.T) {
 }
 
 func TestDefstructPrintFunction(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (pftest (:print-function (lambda (obj str depth) (write "custom-pf" :stream str)))) x)`,
 		Validate: func(t *testing.T, result slip.Object) {
@@ -911,8 +953,15 @@ func TestDefstructPrintFunction(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDefstructPrintFunctionBad(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(defstruct (pftest (:print-function 7)) x)`,
+		Panics: true,
+	}).Test(t)
+}
+
 func TestDefstructPrintObject(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (potest (:print-object (lambda (obj str) (write "custom-po" :stream str)))) x)`,
 		Validate: func(t *testing.T, result slip.Object) {
@@ -926,9 +975,16 @@ func TestDefstructPrintObject(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDefstructPrintObjectBad(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(defstruct (pftest (:print-object 7)) x)`,
+		Panics: true,
+	}).Test(t)
+}
+
 // Test print function with the print command (not write) to cover print.go custom print paths
 func TestDefstructPrintFunctionWithPrint(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (pfprint (:print-function (lambda (obj str depth) (princ "pf" str)))) x)`,
 		Validate: func(t *testing.T, result slip.Object) {
@@ -944,7 +1000,7 @@ pf "`,
 }
 
 func TestDefstructPrintObjectWithPrint(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (poprint (:print-object (lambda (obj str) (princ "po" str)))) x)`,
 		Validate: func(t *testing.T, result slip.Object) {
@@ -960,7 +1016,7 @@ po "`,
 }
 
 func TestDefstructTypedVectorReadOnly(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vro (:type vector) (:named)) (x 0 :read-only t))
 (let ((v (make-vro :x 42)))
@@ -970,7 +1026,7 @@ func TestDefstructTypedVectorReadOnly(t *testing.T) {
 }
 
 func TestDefstructTypedListReadOnly(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lro (:type list) (:named)) (x 0 :read-only t))
 (let ((l (make-lro :x 42)))
@@ -984,7 +1040,7 @@ func TestDefstructTypedListReadOnly(t *testing.T) {
 // ============================================================================
 
 func TestDefstructTypedBOAKey(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vboakey (:type vector) (:named) (:constructor make-vboakey (&key x y))) x y)
 (let ((v (make-vboakey :y 2 :x 1)))
@@ -994,7 +1050,7 @@ func TestDefstructTypedBOAKey(t *testing.T) {
 }
 
 func TestDefstructTypedBOAAux(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vboaaux (:type vector) (:named) (:constructor make-vboaaux (x &aux (y 50)))) x y)
 (let ((v (make-vboaaux 10)))
@@ -1004,7 +1060,7 @@ func TestDefstructTypedBOAAux(t *testing.T) {
 }
 
 func TestDefstructTypedBOARest(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vboarest (:type vector) (:named) (:constructor make-vboarest (x &rest y))) x y)
 (let ((v (make-vboarest 1 2 3)))
@@ -1014,7 +1070,7 @@ func TestDefstructTypedBOARest(t *testing.T) {
 }
 
 func TestDefstructBOASimpleOptional(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (simopt (:constructor make-simopt (x &optional y))) x y)
 (list (simopt-y (make-simopt 1)) (simopt-y (make-simopt 1 2)))`,
@@ -1023,7 +1079,7 @@ func TestDefstructBOASimpleOptional(t *testing.T) {
 }
 
 func TestDefstructTypedBOASimpleOptional(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vsimopt (:type vector) (:named) (:constructor make-vsimopt (x &optional y))) x y)
 (list (vsimopt-y (make-vsimopt 1)) (vsimopt-y (make-vsimopt 1 2)))`,
@@ -1032,7 +1088,7 @@ func TestDefstructTypedBOASimpleOptional(t *testing.T) {
 }
 
 func TestDefstructBOAAllowOtherKeys(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (aokey (:constructor make-aokey (&key x &allow-other-keys))) x)
 (aokey-x (make-aokey :x 42 :extra 99))`,
@@ -1169,7 +1225,7 @@ func TestStructureObjectEqualDifferentTypes(t *testing.T) {
 }
 
 func TestDefstructTypedVectorNotNamed(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vnoname (:type vector)) x y)
 (let ((v (make-vnoname :x 1 :y 2)))
@@ -1179,7 +1235,7 @@ func TestDefstructTypedVectorNotNamed(t *testing.T) {
 }
 
 func TestDefstructTypedListNotNamed(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lnoname (:type list)) x y)
 (let ((l (make-lnoname :x 1 :y 2)))
@@ -1189,7 +1245,7 @@ func TestDefstructTypedListNotNamed(t *testing.T) {
 }
 
 func TestDefstructTypedVectorInitOffset(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vioff (:type vector) (:initial-offset 1) (:named)) x)
 (let ((v (make-vioff :x 42)))
@@ -1199,7 +1255,7 @@ func TestDefstructTypedVectorInitOffset(t *testing.T) {
 }
 
 func TestDefstructTypedListInitOffset(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lioff (:type list) (:initial-offset 1) (:named)) x)
 (let ((l (make-lioff :x 42)))
@@ -1209,7 +1265,7 @@ func TestDefstructTypedListInitOffset(t *testing.T) {
 }
 
 func TestDefstructTypedBOAKeyDefault(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vboakd (:type vector) (:named) (:constructor make-vboakd (&key (x 10) (y 20)))) x y)
 (let ((v (make-vboakd)))
@@ -1219,7 +1275,7 @@ func TestDefstructTypedBOAKeyDefault(t *testing.T) {
 }
 
 func TestDefstructBOANonSlotParam(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (boanon (:constructor make-boanon (x extra))) x)
 (boanon-x (make-boanon 42 99))`,
@@ -1228,7 +1284,7 @@ func TestDefstructBOANonSlotParam(t *testing.T) {
 }
 
 func TestDefstructTypedBOANonSlotParam(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vboanon (:type vector) (:named) (:constructor make-vboanon (x extra))) x)
 (vboanon-x (make-vboanon 42 99))`,
@@ -1237,7 +1293,7 @@ func TestDefstructTypedBOANonSlotParam(t *testing.T) {
 }
 
 func TestDefstructTypedListBOAKey(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lboakey (:type list) (:named) (:constructor make-lboakey (&key x y))) x y)
 (let ((l (make-lboakey :x 5 :y 6)))
@@ -1247,7 +1303,7 @@ func TestDefstructTypedListBOAKey(t *testing.T) {
 }
 
 func TestDefstructTypedListBOAOptional(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lboaopt (:type list) (:named) (:constructor make-lboaopt (x &optional (y 77)))) x y)
 (list (lboaopt-y (make-lboaopt 1)) (lboaopt-y (make-lboaopt 1 2)))`,
@@ -1256,7 +1312,7 @@ func TestDefstructTypedListBOAOptional(t *testing.T) {
 }
 
 func TestDefstructSlotSimpleName(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct simpslot x)`,
 		Validate: func(t *testing.T, _ slip.Object) {
 			sc := cl.FindStructureClass("simpslot")
@@ -1270,7 +1326,7 @@ func TestDefstructSlotSimpleName(t *testing.T) {
 }
 
 func TestDefstructAccessorWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct accwrong x)
 (accwrong-x 42)`,
@@ -1279,7 +1335,7 @@ func TestDefstructAccessorWrongType(t *testing.T) {
 }
 
 func TestDefstructCopierWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct copwrong x)
 (copy-copwrong 42)`,
@@ -1288,7 +1344,7 @@ func TestDefstructCopierWrongType(t *testing.T) {
 }
 
 func TestDefstructPredicateNonStructure(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct prednon x)
 (prednon-p "not a structure")`,
@@ -1297,7 +1353,7 @@ func TestDefstructPredicateNonStructure(t *testing.T) {
 }
 
 func TestDefstructTypedVectorAccessorWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vaccwrong (:type vector) (:named)) x)
 (vaccwrong-x "not a vector")`,
@@ -1306,7 +1362,7 @@ func TestDefstructTypedVectorAccessorWrongType(t *testing.T) {
 }
 
 func TestDefstructTypedListAccessorWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (laccwrong (:type list) (:named)) x)
 (laccwrong-x "not a list")`,
@@ -1315,7 +1371,7 @@ func TestDefstructTypedListAccessorWrongType(t *testing.T) {
 }
 
 func TestDefstructSetfWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct setfwrong x)
 (setf (setfwrong-x 42) 99)`,
@@ -1324,7 +1380,7 @@ func TestDefstructSetfWrongType(t *testing.T) {
 }
 
 func TestDefstructTypedVectorCopierWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vcopywrong (:type vector) (:named)) x)
 (copy-vcopywrong "not a vector")`,
@@ -1333,7 +1389,7 @@ func TestDefstructTypedVectorCopierWrongType(t *testing.T) {
 }
 
 func TestDefstructTypedListCopierWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lcopywrong (:type list) (:named)) x)
 (copy-lcopywrong "not a list")`,
@@ -1342,7 +1398,7 @@ func TestDefstructTypedListCopierWrongType(t *testing.T) {
 }
 
 func TestDefstructTypedVectorSetfWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vsetfwrong (:type vector) (:named)) x)
 (setf (vsetfwrong-x "not a vector") 99)`,
@@ -1351,7 +1407,7 @@ func TestDefstructTypedVectorSetfWrongType(t *testing.T) {
 }
 
 func TestDefstructTypedListSetfWrongType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (lsetfwrong (:type list) (:named)) x)
 (setf (lsetfwrong-x "not a list") 99)`,
@@ -1360,7 +1416,7 @@ func TestDefstructTypedListSetfWrongType(t *testing.T) {
 }
 
 func TestDefstructLoadFormWithDocs(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct lfdocs "documentation" x)`,
 		Validate: func(t *testing.T, _ slip.Object) {
 			sc := cl.FindStructureClass("lfdocs")
@@ -1371,7 +1427,7 @@ func TestDefstructLoadFormWithDocs(t *testing.T) {
 }
 
 func TestDefstructLoadFormEmptyConcName(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct (lfemptyconc (:conc-name nil)) lfemptyconc-val)`,
 		Validate: func(t *testing.T, _ slip.Object) {
 			sc := cl.FindStructureClass("lfemptyconc")
@@ -1382,7 +1438,7 @@ func TestDefstructLoadFormEmptyConcName(t *testing.T) {
 }
 
 func TestDefstructLoadFormCustomConstructor(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct (lfcustctor (:constructor new-lfcustctor)) x)`,
 		Validate: func(t *testing.T, _ slip.Object) {
 			sc := cl.FindStructureClass("lfcustctor")
@@ -1393,7 +1449,7 @@ func TestDefstructLoadFormCustomConstructor(t *testing.T) {
 }
 
 func TestDefstructLoadFormCustomCopierPredicate(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `(defstruct (lfcustcp (:copier my-copy) (:predicate my-pred)) x)`,
 		Validate: func(t *testing.T, _ slip.Object) {
 			sc := cl.FindStructureClass("lfcustcp")
@@ -1412,63 +1468,63 @@ func TestDefstructLoadFormCustomCopierPredicate(t *testing.T) {
 // ============================================================================
 
 func TestDefstructErrorEmptyNameAndOptions(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct ())`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct ())`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorNameNotSymbol(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (42))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (42))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorNameAndOptionsWrongType(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct 42)`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct 42)`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorUnknownKeywordOption(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt :unknown-option))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt :unknown-option))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorEmptyListOption(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt ()))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt ()))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorOptionKeywordNotSymbol(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (42 foo)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (42 foo)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorConcNameWrongType(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:conc-name 42)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:conc-name 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorBOAArglistNotList(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:constructor make-err not-a-list)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:constructor make-err not-a-list)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorConstructorNameNotSymbol(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:constructor 42)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:constructor 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorCopierWrongType(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:copier 42)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:copier 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorPredicateWrongType(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:predicate 42)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:predicate 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorIncludeMissingName(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:include)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:include)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorIncludeNameNotSymbol(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:include 42)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:include 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorIncludeNotDefined(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:include nonexistent-parent)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:include nonexistent-parent)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorIncludeTypedInUntyped(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (typedparent (:type vector)) x)
 (defstruct (erropt (:include typedparent)) y)`,
@@ -1477,7 +1533,7 @@ func TestDefstructErrorIncludeTypedInUntyped(t *testing.T) {
 }
 
 func TestDefstructErrorIncludeDifferentType(t *testing.T) {
-	(&sliptest.Macro{
+	(&sliptest.Function{
 		Source: `
 (defstruct (vecparent (:type vector)) x)
 (defstruct (erropt (:type list) (:include vecparent)) y)`,
@@ -1486,39 +1542,39 @@ func TestDefstructErrorIncludeDifferentType(t *testing.T) {
 }
 
 func TestDefstructErrorInitialOffsetMissingValue(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:type vector) (:initial-offset)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:type vector) (:initial-offset)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorInitialOffsetNotFixnum(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:type vector) (:initial-offset "two")))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:type vector) (:initial-offset "two")))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorTypeMissingValue(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:type)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:type)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorTypeInvalidSymbol(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:type invalid)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:type invalid)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorTypeListNotVector(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:type (invalid t))))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:type (invalid t))))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorTypeWrongType(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:type 42)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:type 42)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorUnknownListOption(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:unknown-option foo)))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:unknown-option foo)))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorOptionNotSymbolOrList(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt 42))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt 42))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorPrintFunctionWithType(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct (erropt (:type vector) (:print-function (lambda (o s d) nil))))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct (erropt (:type vector) (:print-function (lambda (o s d) nil))))`, Panics: true}).Test(t)
 }
 
 // ============================================================================
@@ -1526,27 +1582,27 @@ func TestDefstructErrorPrintFunctionWithType(t *testing.T) {
 // ============================================================================
 
 func TestDefstructErrorSlotEmptyList(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct errslot ())`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct errslot ())`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotNameNotSymbol(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct errslot (42))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct errslot (42))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotOptionMissingValue(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct errslot (x nil :type))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct errslot (x nil :type))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotTypeTwice(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct errslot (x nil :type fixnum :type string))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct errslot (x nil :type fixnum :type string))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotUnknownOption(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct errslot (x nil :unknown t))`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct errslot (x nil :unknown t))`, Panics: true}).Test(t)
 }
 
 func TestDefstructErrorSlotNotSymbolOrList(t *testing.T) {
-	(&sliptest.Macro{Source: `(defstruct errslot 42)`, Panics: true}).Test(t)
+	(&sliptest.Function{Source: `(defstruct errslot 42)`, Panics: true}).Test(t)
 }
 
 // Helper function

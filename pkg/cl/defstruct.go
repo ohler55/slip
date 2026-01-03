@@ -408,14 +408,12 @@ type structPredicate struct {
 
 func (f *structPredicate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, 1)
-	obj, ok := args[0].(*StructureObject)
-	if !ok {
-		return nil
-	}
-	// Check if obj's type matches or inherits from structName
-	for _, sym := range obj.Type.precedence {
-		if string(sym) == f.structName {
-			return slip.TrueSymbol
+	if obj, ok := args[0].(*StructureObject); ok {
+		// Check if obj's type matches or inherits from structName
+		for _, sym := range obj.Type.precedence {
+			if string(sym) == f.structName {
+				return slip.TrueSymbol
+			}
 		}
 	}
 	return nil

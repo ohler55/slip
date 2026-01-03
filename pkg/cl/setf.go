@@ -70,6 +70,16 @@ Retry:
 	case slip.Symbol:
 		s.Set(tx, value)
 	case slip.List:
+		if 0 < len(tx) {
+			if sym, ok := tx[0].(slip.Symbol); ok && slip.FindFunc(string(sym)) == nil {
+				if fi := slip.FindFunc(fmt.Sprintf("(setf %s)", sym)); fi != nil {
+					args := append(slip.List{value}, tx[1:]...)
+					f := fi.Create(args)
+					f.Eval(s, depth)
+					return
+				}
+			}
+		}
 		x = slip.ListToFunc(s, tx, depth)
 		goto Retry
 	case slip.Placer:

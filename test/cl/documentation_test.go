@@ -75,6 +75,20 @@ func TestDocumentationTypeFlavor(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDocumentationTypeMethod(t *testing.T) {
+	slip.CurrentPackage.Undefine("quux")
+	(&sliptest.Function{
+		Source: `(defgeneric quux (x) (:method ((x fixnum)) "quark" (1+ x)))`,
+		Expect: "#<generic-function quux>",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((method (find-method 'quux '() '(fixnum))))
+                  (setf (documentation method 'method) "quack")
+                  (documentation method 'method))`,
+		Expect: `"quack"`,
+	}).Test(t)
+}
+
 func TestDocumentationSymbolT(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(documentation 'foo t)`,

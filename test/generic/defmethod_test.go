@@ -415,15 +415,21 @@ func TestDefmethodGenericBadOptional(t *testing.T) {
 }
 
 func TestDefmethodGenericSetf(t *testing.T) {
-	slip.CurrentPackage.Undefine("(setf quux)")
+	slip.CurrentPackage.Undefine("(setf buux)")
 	(&sliptest.Function{
-		Source: `(defmethod (setf quux) ((x fixnum)) (list x))`,
-		Expect: `/#<method \(setf quux\) \(\(x fixnum\)\) \{[0-9a-f]+\}>/`,
+		Source: `(defmethod (setf buux) ((v fixnum) (lst list)) (setf (nth 1 lst) v))`,
+		Expect: `/#<method \(setf buux\) \(\(v fixnum\) \(lst list\)\) \{[0-9a-f]+\}>/`,
 	}).Test(t)
 	// repeat
 	(&sliptest.Function{
-		Source: `(defmethod (setf quux) ((x fixnum)) (list x))`,
-		Expect: `/#<method \(setf quux\) \(\(x fixnum\)\) \{[0-9a-f]+\}>/`,
+		Source: `(defmethod (setf buux) ((v fixnum) (lst list)) (setf (nth 1 lst) v))`,
+		Expect: `/#<method \(setf buux\) \(\(v fixnum\) \(lst list\)\) \{[0-9a-f]+\}>/`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(let ((x '(1 2 3)))
+                   (setf (buux x) 5)
+                   x)`,
+		Expect: `(1 5 3)`,
 	}).Test(t)
 }
 
