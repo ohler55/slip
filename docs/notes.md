@@ -11,8 +11,8 @@
 
 ---------------------
 
+- setf coverage for generics
 - bring defstruct tests up closer to 100%
-- documentation tests
 
 - make StructureSlot a caller and placer(minor optimization)
 
