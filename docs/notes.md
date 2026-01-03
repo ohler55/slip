@@ -11,12 +11,9 @@
 
 ---------------------
 
-- setf coverage for generics
-- bring defstruct tests up closer to 100%
+- printer branch
 
 - make StructureSlot a caller and placer(minor optimization)
-
-- printer branch
 
 ---------------------
 

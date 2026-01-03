@@ -109,7 +109,7 @@ func TestDefstructConcName(t *testing.T) {
 func TestDefstructConcNameNil(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
-(defstruct (thing (:conc-name nil)) value)
+(defstruct (thing (:conc-name nil) :named) value)
 (let ((t1 (make-thing :value 42)))
   (value t1))`,
 		Expect: "42",
@@ -121,6 +121,16 @@ func TestDefstructCustomConstructor(t *testing.T) {
 		Source: `
 (defstruct (pt-custom (:constructor create-pt-custom)) x y)
 (let ((p (create-pt-custom :x 5 :y 6)))
+  (list (pt-custom-x p) (pt-custom-y p)))`,
+		Expect: "(5 6)",
+	}).Test(t)
+}
+
+func TestDefstructDefaultConstructor(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct (pt-default (:constructor)) x y)
+(let ((p (make-pt-default :x 5 :y 6)))
   (list (pt-custom-x p) (pt-custom-y p)))`,
 		Expect: "(5 6)",
 	}).Test(t)
@@ -158,6 +168,27 @@ func TestDefstructInclude(t *testing.T) {
 (let ((p (make-point3d :x 1 :y 2 :z 3)))
   (list (point3d-x p) (point3d-y p) (point3d-z p)))`,
 		Expect: "(1 2 3)",
+	}).Test(t)
+}
+
+func TestDefstructIncludeDupSlot(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct struct-xy x y)
+(defstruct (struct-xyz (:include struct-xy)) (x 4 :type fixnum :read-only t) z )
+(let ((a (make-struct-xyz :x 1 :y 2 :z 3)))
+  (list (struct-xyz-x a) (struct-xyz-y a) (struct-xyz-z a)))`,
+		Expect: "(1 2 3)",
+	}).Test(t)
+}
+
+func TestDefstructIncludeReadOnlyChange(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct no-read (x 0 :read-only t))
+(defstruct (readable (:include no-read)) (x 0 :read-only nil) )
+(a (readable-xyz :x 1))`,
+		Panics: true,
 	}).Test(t)
 }
 
@@ -221,8 +252,19 @@ func TestDefstructTypeList(t *testing.T) {
 		Source: `
 (defstruct (list-point (:type list) (:named)) x y)
 (let ((p (make-list-point :x 3 :y 4)))
-  (list (list-point-x p) (list-point-y p) (listp p)))`,
-		Expect: "(3 4 t)",
+  (list (list-point-x p) (list-point-y p) (listp p) (list-point-y '(8))))`,
+		Expect: "(3 4 t nil)",
+	}).Test(t)
+}
+
+func TestDefstructTypeListInclude(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct (list-point2 (:type list) (:named)) x y)
+(defstruct (list-point3  (:type list) (:include list-point2) :named) z)
+(let ((p (make-list-point3 :x 3 :y 4 :z 5)))
+  (list (list-point3-x p) (list-point3-y p) (list-point3-z p) (listp p)))`,
+		Expect: "(3 4 5 t)",
 	}).Test(t)
 }
 
@@ -911,6 +953,13 @@ func TestDefstructPrintFunction(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDefstructPrintFunctionBad(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(defstruct (pftest (:print-function 7)) x)`,
+		Panics: true,
+	}).Test(t)
+}
+
 func TestDefstructPrintObject(t *testing.T) {
 	(&sliptest.Function{
 		Source: `
@@ -923,6 +972,13 @@ func TestDefstructPrintObject(t *testing.T) {
 				Expect: `""custom-po""`,
 			}).Test(t)
 		},
+	}).Test(t)
+}
+
+func TestDefstructPrintObjectBad(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(defstruct (pftest (:print-object 7)) x)`,
+		Panics: true,
 	}).Test(t)
 }
 

@@ -65,6 +65,10 @@ func TestLoadHome(t *testing.T) {
                                load-test-me-too)`, wd),
 		Expect: "5",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(load "~file-should-not-exist")`,
+		Panics: true,
+	}).Test(t)
 }
 
 func TestLoadFileVerbose(t *testing.T) {

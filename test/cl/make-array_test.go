@@ -86,6 +86,17 @@ func TestMakeArrayElementType(t *testing.T) {
 	}).Test(t)
 }
 
+func TestMakeArrayElementTypeTrue(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(make-array '(2 3) :element-type t :initial-element 1 :adjustable nil)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			a := v.(*slip.Array)
+			tt.Equal(t, "((1 1 1) (1 1 1))", slip.ObjectString(a.AsList()))
+			tt.Equal(t, false, a.Adjustable())
+		},
+	}).Test(t)
+}
+
 func TestMakeArrayOctetsSimple(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(make-array 4 :element-type 'octet :initial-element (coerce #\x 'octet))`,
