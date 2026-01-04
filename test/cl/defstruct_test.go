@@ -917,6 +917,7 @@ func TestStructureSlotGetters(t *testing.T) {
 	sc := cl.FindStructureClass("ssget")
 	slot := sc.GetSlot("myslot")
 	tt.NotNil(t, slot)
+	tt.Equal(t, "myslot", slot.Name())
 	tt.Equal(t, 0, slot.Index())
 	tt.Equal(t, true, slot.IsReadOnly())
 	tt.Equal(t, slip.Fixnum(42), slot.Initform())
@@ -1410,6 +1411,28 @@ func TestDefstructTypedListSetfWrongType(t *testing.T) {
 		Source: `
 (defstruct (lsetfwrong (:type list) (:named)) x)
 (setf (lsetfwrong-x "not a list") 99)`,
+		Panics: true,
+	}).Test(t)
+}
+
+func TestDefstructTypedListSetf(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct (lsetfok (:type list) (:named)) x)
+(let ((lst '(1 2 3)))
+  (setf (lsetfok-x lst) 99)
+  lst)`,
+		Expect: "(1 99 3)",
+	}).Test(t)
+}
+
+func TestDefstructTypedListSetfBadIndex(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct (lsetfbi (:type list) (:named)) x)
+(let ((lst '(1)))
+  (setf (lsetfbi-x lst) 99)
+  lst)`,
 		Panics: true,
 	}).Test(t)
 }
