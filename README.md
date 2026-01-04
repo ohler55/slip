@@ -64,7 +64,7 @@ go get github.com/ohler55/slip/cmd/slip
 
 ```
 
-Install using **brew**:
+Install using **brew**: (coming soon)
 
 ```
 brew install slip

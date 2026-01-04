@@ -3,11 +3,14 @@
 package cl
 
 import (
+	"fmt"
+
 	"github.com/ohler55/slip"
 )
 
 // StructureSlot encapsulates the definition of a slot in a structure.
 type StructureSlot struct {
+	slip.Function
 	name     string
 	slotType slip.Object // :type option - type specifier for slot values
 	readOnly bool        // :read-only option - if true, slot cannot be modified after creation
@@ -101,7 +104,7 @@ func (ss *StructureSlot) SlotType() slip.Object {
 	return ss.slotType
 }
 
-// Copy creates a copy of the slot definition, optionally with a new index.
+// Copy creates a copy of the slot definition with a new index.
 func (ss *StructureSlot) Copy(newIndex int) *StructureSlot {
 	return &StructureSlot{
 		name:     ss.name,
@@ -110,4 +113,46 @@ func (ss *StructureSlot) Copy(newIndex int) *StructureSlot {
 		initform: ss.initform,
 		index:    newIndex,
 	}
+}
+
+// generateAccessor creates the accessor function for a slot.
+func (ss *StructureSlot) generateAccessor(sc *StructureClass) {
+	name := sc.accessorName(ss.name)
+
+	slip.CurrentPackage.Define(
+		func(args slip.List) slip.Object {
+			ss.Function = slip.Function{Name: name, Args: args}
+			ss.Self = ss
+			return ss
+		},
+		&slip.FuncDoc{
+			Name: name,
+			Args: []*slip.DocArg{
+				{Name: "structure", Type: ss.name, Text: "Structure to access."},
+			},
+			Return: "t",
+			Text:   fmt.Sprintf("Returns the %s slot of a %s structure.", ss.name, sc.name),
+		},
+	)
+}
+
+func (ss *StructureSlot) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, ss, args, 1, 1)
+	obj, ok := args[0].(*StructureObject)
+	if !ok {
+		slip.TypePanic(s, depth, "structure", args[0], ss.name)
+	}
+	return obj.GetSlotByIndex(ss.index)
+}
+
+// Place implements setf support for the accessor.
+func (ss *StructureSlot) Place(s *slip.Scope, args slip.List, value slip.Object) {
+	if ss.readOnly {
+		slip.ErrorPanic(s, 0, "cannot setf read-only slot")
+	}
+	obj, ok := args[0].(*StructureObject)
+	if !ok {
+		slip.TypePanic(s, 0, "structure", args[0], ss.name)
+	}
+	obj.SetSlotByIndex(ss.index, value)
 }

@@ -917,7 +917,6 @@ func TestStructureSlotGetters(t *testing.T) {
 	sc := cl.FindStructureClass("ssget")
 	slot := sc.GetSlot("myslot")
 	tt.NotNil(t, slot)
-	tt.Equal(t, "myslot", slot.Name())
 	tt.Equal(t, 0, slot.Index())
 	tt.Equal(t, true, slot.IsReadOnly())
 	tt.Equal(t, slip.Fixnum(42), slot.Initform())

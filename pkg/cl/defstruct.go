@@ -372,7 +372,7 @@ func generateStandardFunctions(s *slip.Scope, sc *StructureClass, depth int) {
 
 	// Generate accessors for each slot
 	for _, slot := range sc.slots {
-		generateAccessor(sc, slot)
+		slot.generateAccessor(sc)
 	}
 }
 
@@ -520,63 +520,6 @@ func (f *structCopier) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 		slip.TypePanic(s, depth, "structure", args[0], f.structName)
 	}
 	return obj.Dup()
-}
-
-// generateAccessor creates the accessor function for a slot.
-func generateAccessor(sc *StructureClass, slot *StructureSlot) {
-	name := sc.accessorName(slot.name)
-	structName := sc.name
-	slotIndex := slot.index
-	readOnly := slot.readOnly
-
-	slip.CurrentPackage.Define(
-		func(args slip.List) slip.Object {
-			f := structAccessor{
-				Function:   slip.Function{Name: name, Args: args},
-				structName: structName,
-				slotIndex:  slotIndex,
-				readOnly:   readOnly,
-			}
-			f.Self = &f
-			return &f
-		},
-		&slip.FuncDoc{
-			Name: name,
-			Args: []*slip.DocArg{
-				{Name: "structure", Type: structName, Text: "Structure to access."},
-			},
-			Return: "t",
-			Text:   fmt.Sprintf("Returns the %s slot of a %s structure.", slot.name, structName),
-		},
-	)
-}
-
-type structAccessor struct {
-	slip.Function
-	structName string
-	slotIndex  int
-	readOnly   bool
-}
-
-func (f *structAccessor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.CheckArgCount(s, depth, f, args, 1, 1)
-	obj, ok := args[0].(*StructureObject)
-	if !ok {
-		slip.TypePanic(s, depth, "structure", args[0], f.structName)
-	}
-	return obj.GetSlotByIndex(f.slotIndex)
-}
-
-// Place implements setf support for the accessor.
-func (f *structAccessor) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	if f.readOnly {
-		slip.ErrorPanic(s, 0, "cannot setf read-only slot")
-	}
-	obj, ok := args[0].(*StructureObject)
-	if !ok {
-		slip.TypePanic(s, 0, "structure", args[0], f.structName)
-	}
-	obj.SetSlotByIndex(f.slotIndex, value)
 }
 
 // generateTypedFunctions generates functions for :type vector or :type list.

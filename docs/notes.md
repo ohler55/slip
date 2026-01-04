@@ -11,10 +11,6 @@
 
 ---------------------
 
-- make StructureSlot a caller and placer(minor optimization)
-
----------------------
-
 - flavor allow out of order defflavor like standard-class
 
 ---------------------
