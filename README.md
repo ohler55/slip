@@ -75,6 +75,18 @@ brew install slip
 
 See [CHANGELOG.md](CHANGELOG.md)
 
+## Plugins
+
+Plugins are available in other repositories.
+
+ - [slip-mongo](https://github.com/ohler55/slip-mongo) for mongodb APIs.
+ - [slip-ggql](https://github.com/ohler55/slip-ggql) for a GraphQL server.
+ - **slip-jet** for [JetStream](https://docs.nats.io/nats-concepts/jetstream) messaging APIs (contact me if interested)
+ - **slip-message** for simple [NATS](https://docs.nats.io/nats-concepts/core-nats) APIs (contact me if interested)
+ - **slip-flow** a process flow implementation (contact me if interested)
+ - **flow-editor** a process flow graphical editor (contact me if interested)
+ - **slip-parquet** for parquet APIs (contact me if interested)
+
 ## Links
 
  - [ANSI Common Lisp](http://www.x3.org/tc_home/tc_sd4/x3j13sd4.html)
