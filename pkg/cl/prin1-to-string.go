@@ -46,5 +46,12 @@ func (f *Prin1ToString) Call(s *slip.Scope, args slip.List, depth int) (result s
 	p.Escape = true
 	p.Readably = true
 
-	return slip.String(p.Append([]byte{}, args[0], 0))
+	obj := args[0]
+	var b []byte
+	if sa, ok := obj.(slip.ScopedAppender); ok {
+		b = sa.ScopedAppend(b, s, &p, 0)
+	} else {
+		b = p.Append(b, obj, 0)
+	}
+	return slip.String(b)
 }

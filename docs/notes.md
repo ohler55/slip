@@ -11,8 +11,6 @@
 
 ---------------------
 
-- printer branch
-
 - make StructureSlot a caller and placer(minor optimization)
 
 ---------------------

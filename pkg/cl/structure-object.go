@@ -3,6 +3,7 @@
 package cl
 
 import (
+	"bytes"
 	"sync"
 	"unsafe"
 
@@ -33,8 +34,9 @@ func (obj *StructureObject) String() string {
 	return string(obj.Append([]byte{}))
 }
 
-// Append a buffer with a representation of the structure object.
-// Note: Custom print-function/print-object requires a scope and is handled by the printer.
+// Append a buffer with a representation of the structure object.  Note:
+// Custom print-function/print-object requires a scope and is handled by the
+// ScopedAppend.
 func (obj *StructureObject) Append(b []byte) []byte {
 	b = append(b, "#S("...)
 	b = append(b, obj.Type.name...)
@@ -46,6 +48,26 @@ func (obj *StructureObject) Append(b []byte) []byte {
 		b = slip.Append(b, obj.slots[slot.index])
 	}
 	return append(b, ')')
+}
+
+func (obj *StructureObject) ScopedAppend(b []byte, s *slip.Scope, p *slip.Printer, level int) []byte {
+
+	// TBD
+	if pf := obj.Type.printFunc; pf != nil {
+		var buf bytes.Buffer
+		stream := slip.OutputStream{Writer: &buf}
+		// :print-function signature: (object stream depth)
+		pf.Call(s, slip.List{obj, &stream, slip.Fixnum(level)}, 0)
+		return append(b, buf.Bytes()...)
+	}
+	if po := obj.Type.printObject; po != nil {
+		var buf bytes.Buffer
+		stream := slip.OutputStream{Writer: &buf}
+		// :print-object signature: (object stream)
+		po.Call(s, slip.List{obj, &stream}, 0)
+		return append(b, buf.Bytes()...)
+	}
+	return obj.Append(b)
 }
 
 // Simplify returns a simplified representation for debugging.

@@ -63,10 +63,16 @@ func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		}
 	}
 	var err error
-	if s, _ := obj.(slip.String); 0 < len(s) {
-		_, err = w.Write([]byte(s))
+	if ss, _ := obj.(slip.String); 0 < len(ss) {
+		_, err = w.Write([]byte(ss))
 	} else {
-		_, err = w.Write(p.Append([]byte{}, obj, 0))
+		var b []byte
+		if sa, ok := obj.(slip.ScopedAppender); ok {
+			b = sa.ScopedAppend(b, s, &p, 0)
+		} else {
+			b = p.Append(b, obj, 0)
+		}
+		_, err = w.Write(b)
 	}
 	if err != nil {
 		slip.StreamPanic(s, depth, ss, "princ write failed. %s", err)
