@@ -372,7 +372,7 @@ func generateStandardFunctions(s *slip.Scope, sc *StructureClass, depth int) {
 
 	// Generate accessors for each slot
 	for _, slot := range sc.slots {
-		generateAccessor(sc, slot)
+		slot.generateAccessor(sc)
 	}
 }
 
@@ -522,63 +522,6 @@ func (f *structCopier) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	return obj.Dup()
 }
 
-// generateAccessor creates the accessor function for a slot.
-func generateAccessor(sc *StructureClass, slot *StructureSlot) {
-	name := sc.accessorName(slot.name)
-	structName := sc.name
-	slotIndex := slot.index
-	readOnly := slot.readOnly
-
-	slip.CurrentPackage.Define(
-		func(args slip.List) slip.Object {
-			f := structAccessor{
-				Function:   slip.Function{Name: name, Args: args},
-				structName: structName,
-				slotIndex:  slotIndex,
-				readOnly:   readOnly,
-			}
-			f.Self = &f
-			return &f
-		},
-		&slip.FuncDoc{
-			Name: name,
-			Args: []*slip.DocArg{
-				{Name: "structure", Type: structName, Text: "Structure to access."},
-			},
-			Return: "t",
-			Text:   fmt.Sprintf("Returns the %s slot of a %s structure.", slot.name, structName),
-		},
-	)
-}
-
-type structAccessor struct {
-	slip.Function
-	structName string
-	slotIndex  int
-	readOnly   bool
-}
-
-func (f *structAccessor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.CheckArgCount(s, depth, f, args, 1, 1)
-	obj, ok := args[0].(*StructureObject)
-	if !ok {
-		slip.TypePanic(s, depth, "structure", args[0], f.structName)
-	}
-	return obj.GetSlotByIndex(f.slotIndex)
-}
-
-// Place implements setf support for the accessor.
-func (f *structAccessor) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	if f.readOnly {
-		slip.ErrorPanic(s, 0, "cannot setf read-only slot")
-	}
-	obj, ok := args[0].(*StructureObject)
-	if !ok {
-		slip.TypePanic(s, 0, "structure", args[0], f.structName)
-	}
-	obj.SetSlotByIndex(f.slotIndex, value)
-}
-
 // generateTypedFunctions generates functions for :type vector or :type list.
 func generateTypedFunctions(s *slip.Scope, sc *StructureClass, depth int) {
 	// Calculate offset for :named
@@ -620,52 +563,69 @@ func generateTypedFunctions(s *slip.Scope, sc *StructureClass, depth int) {
 // generateTypedPredicate creates predicate for typed structures.
 func generateTypedPredicate(sc *StructureClass) {
 	name := sc.predicateName
-	structName := sc.name
-	repType := sc.repType
-
-	slip.CurrentPackage.Define(
-		func(args slip.List) slip.Object {
-			f := typedStructPredicate{
-				Function:   slip.Function{Name: name, Args: args},
-				structName: structName,
-				repType:    repType,
-			}
-			f.Self = &f
-			return &f
-		},
-		&slip.FuncDoc{
-			Name:   name,
-			Args:   []*slip.DocArg{{Name: "object", Type: "t"}},
-			Return: "boolean",
-			Text:   fmt.Sprintf("Returns t if object is a %s structure.", structName),
-		},
-	)
+	switch sc.repType {
+	case slip.Symbol("list"):
+		slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := listStructPredicate{
+					Function:   slip.Function{Name: sc.predicateName, Args: args},
+					structName: sc.name,
+				}
+				f.Self = &f
+				return &f
+			},
+			&slip.FuncDoc{
+				Name:   name,
+				Args:   []*slip.DocArg{{Name: "object", Type: "t"}},
+				Return: "boolean",
+				Text:   fmt.Sprintf("Returns t if object is a %s structure.", sc.name),
+			},
+		)
+	case slip.Symbol("vector"):
+		slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := vectorStructPredicate{
+					Function:   slip.Function{Name: sc.predicateName, Args: args},
+					structName: sc.name,
+				}
+				f.Self = &f
+				return &f
+			},
+			&slip.FuncDoc{
+				Name:   name,
+				Args:   []*slip.DocArg{{Name: "object", Type: "t"}},
+				Return: "boolean",
+				Text:   fmt.Sprintf("Returns t if object is a %s structure.", sc.name),
+			},
+		)
+	}
 }
 
-type typedStructPredicate struct {
+type listStructPredicate struct {
 	slip.Function
 	structName string
-	repType    slip.Symbol
 }
 
-func (f *typedStructPredicate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *listStructPredicate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, 1)
-
-	if f.repType == slip.Symbol("vector") {
-		if vec, ok := args[0].(*slip.Vector); ok {
-			if vec.Length() > 0 {
-				if sym, ok := vec.Get(0).(slip.Symbol); ok && string(sym) == f.structName {
-					return slip.TrueSymbol
-				}
-			}
+	if list, ok := args[0].(slip.List); ok && 0 < len(list) {
+		if sym, ok := list[0].(slip.Symbol); ok && string(sym) == f.structName {
+			return slip.TrueSymbol
 		}
-	} else if f.repType == slip.Symbol("list") {
-		if list, ok := args[0].(slip.List); ok {
-			if len(list) > 0 {
-				if sym, ok := list[0].(slip.Symbol); ok && string(sym) == f.structName {
-					return slip.TrueSymbol
-				}
-			}
+	}
+	return nil
+}
+
+type vectorStructPredicate struct {
+	slip.Function
+	structName string
+}
+
+func (f *vectorStructPredicate) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
+	if vec, ok := args[0].(*slip.Vector); ok && 0 < vec.Length() {
+		if sym, ok := vec.Get(0).(slip.Symbol); ok && string(sym) == f.structName {
+			return slip.TrueSymbol
 		}
 	}
 	return nil
@@ -819,70 +779,100 @@ func (f *typedStructCopier) Call(s *slip.Scope, args slip.List, depth int) slip.
 // generateTypedAccessor creates accessor for typed structures.
 func generateTypedAccessor(sc *StructureClass, slot *StructureSlot, actualIndex int) {
 	name := sc.accessorName(slot.name)
-	repType := sc.repType
-	readOnly := slot.readOnly
-
-	slip.CurrentPackage.Define(
-		func(args slip.List) slip.Object {
-			f := typedStructAccessor{
-				Function:  slip.Function{Name: name, Args: args},
-				repType:   repType,
-				slotIndex: actualIndex,
-				readOnly:  readOnly,
-			}
-			f.Self = &f
-			return &f
-		},
-		&slip.FuncDoc{
-			Name:   name,
-			Return: "t",
-			Text:   fmt.Sprintf("Returns the %s slot.", slot.name),
-		},
-	)
+	switch sc.repType {
+	case slip.Symbol("list"):
+		slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := listStructAccessor{
+					Function:  slip.Function{Name: name, Args: args},
+					slotIndex: actualIndex,
+					readOnly:  slot.readOnly,
+				}
+				f.Self = &f
+				return &f
+			},
+			&slip.FuncDoc{
+				Name:   name,
+				Return: "t",
+				Text:   fmt.Sprintf("Returns the %s slot.", slot.name),
+			},
+		)
+	case slip.Symbol("vector"):
+		slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := vectorStructAccessor{
+					Function:  slip.Function{Name: name, Args: args},
+					slotIndex: actualIndex,
+					readOnly:  slot.readOnly,
+				}
+				f.Self = &f
+				return &f
+			},
+			&slip.FuncDoc{
+				Name:   name,
+				Return: "t",
+				Text:   fmt.Sprintf("Returns the %s slot.", slot.name),
+			},
+		)
+	}
 }
 
-type typedStructAccessor struct {
+type vectorStructAccessor struct {
 	slip.Function
-	repType   slip.Symbol
 	slotIndex int
 	readOnly  bool
 }
 
-func (f *typedStructAccessor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *vectorStructAccessor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, 1)
-
-	if f.repType == slip.Symbol("vector") {
-		vec, ok := args[0].(*slip.Vector)
-		if !ok {
-			slip.TypePanic(s, depth, "vector", args[0], "vector")
-		}
-		return vec.Get(f.slotIndex)
-	} else {
-		list, ok := args[0].(slip.List)
-		if !ok {
-			slip.TypePanic(s, depth, "list", args[0], "list")
-		}
-		if f.slotIndex >= len(list) {
-			return nil
-		}
-		return list[f.slotIndex]
+	vec, ok := args[0].(*slip.Vector)
+	if !ok {
+		slip.TypePanic(s, depth, "vector", args[0], "vector")
 	}
+	return vec.Get(f.slotIndex)
 }
 
-func (f *typedStructAccessor) Place(s *slip.Scope, args slip.List, value slip.Object) {
+func (f *vectorStructAccessor) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	if f.readOnly {
 		slip.ErrorPanic(s, 0, "cannot setf read-only slot")
 	}
-
-	if f.repType == slip.Symbol("vector") {
-		vec, ok := args[0].(*slip.Vector)
-		if !ok {
-			slip.TypePanic(s, 0, "vector", args[0], "vector")
-		}
-		vec.Set(value, f.slotIndex)
-	} else {
-		slip.ErrorPanic(s, 0, "cannot setf list structure slot")
+	vec, ok := args[0].(*slip.Vector)
+	if !ok {
+		slip.TypePanic(s, 0, "vector", args[0], "vector")
 	}
+	vec.Set(value, f.slotIndex)
+}
+
+type listStructAccessor struct {
+	slip.Function
+	slotIndex int
+	readOnly  bool
+}
+
+func (f *listStructAccessor) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
+	list, ok := args[0].(slip.List)
+	if !ok {
+		slip.TypePanic(s, depth, "list", args[0], "list")
+	}
+	if f.slotIndex >= len(list) {
+		return nil
+	}
+	return list[f.slotIndex]
+}
+
+func (f *listStructAccessor) Place(s *slip.Scope, args slip.List, value slip.Object) {
+	if f.readOnly {
+		slip.ErrorPanic(s, 0, "cannot setf read-only slot")
+	}
+	list, ok := args[0].(slip.List)
+	if !ok {
+		slip.TypePanic(s, 0, "list", args[0], "list")
+	}
+	if f.slotIndex >= len(list) {
+		slip.ErrorPanic(s, 0, "cannot setf list structure slot %d on list of length %d", f.slotIndex, len(list))
+	}
+	list[f.slotIndex] = value
 }
 
 // generateBOAConstructor creates a BOA (By Order of Arguments) constructor.

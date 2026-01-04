@@ -3,7 +3,6 @@
 package cl_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
@@ -20,9 +19,8 @@ func TestPrin1ToStringBasic(t *testing.T) {
 
 func TestPrin1ToStringStructWithPrintFunction(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct (p1wspf (:print-function (lambda (obj str depth) (princ "x" str)))) x)`,
+	slip.ReadString(`(defstruct (p12spf (:print-function (lambda (obj str depth) (princ "x" str)))) x)`,
 		scope).Eval(scope, nil)
-	out := slip.ReadString("(prin1-to-string (make-p1wspf :x 1))", scope).Eval(scope, nil)
-	fmt.Printf("*** %q\n", out)
+	out := slip.ReadString("(prin1-to-string (make-p12spf :x 1))", scope).Eval(scope, nil)
 	tt.Equal(t, `"x"`, out.String())
 }

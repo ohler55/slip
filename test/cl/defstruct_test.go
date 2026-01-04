@@ -1415,6 +1415,28 @@ func TestDefstructTypedListSetfWrongType(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDefstructTypedListSetf(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct (lsetfok (:type list) (:named)) x)
+(let ((lst '(1 2 3)))
+  (setf (lsetfok-x lst) 99)
+  lst)`,
+		Expect: "(1 99 3)",
+	}).Test(t)
+}
+
+func TestDefstructTypedListSetfBadIndex(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(defstruct (lsetfbi (:type list) (:named)) x)
+(let ((lst '(1)))
+  (setf (lsetfbi-x lst) 99)
+  lst)`,
+		Panics: true,
+	}).Test(t)
+}
+
 func TestDefstructLoadFormWithDocs(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(defstruct lfdocs "documentation" x)`,
