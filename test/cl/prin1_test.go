@@ -3,6 +3,7 @@
 package cl_test
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 
@@ -59,4 +60,14 @@ func TestPrin1WriteFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: badWriter(0)})
 	tt.Panic(t, func() { _ = slip.ReadString("(prin1 123 out)", scope).Eval(scope, nil) })
+}
+
+func TestPrin1WriteStructWithPrintFunction(t *testing.T) {
+	scope := slip.NewScope()
+	slip.ReadString(`(defstruct (p1wspf (:print-function (lambda (obj str depth) (princ "x" str)))) x)`,
+		scope).Eval(scope, nil)
+	var b bytes.Buffer
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &b})
+	_ = slip.ReadString("(prin1 (make-p1wspf :x 1) out)", scope).Eval(scope, nil)
+	tt.Equal(t, "x", b.String())
 }

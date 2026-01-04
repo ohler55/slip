@@ -98,41 +98,11 @@ type Write struct {
 
 // Call the function with the arguments provided.
 func (f *Write) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
-	// Check for StructureObject with custom print function
-	if so, ok := args[0].(*StructureObject); ok {
-		if pf := so.Type.printFunc; pf != nil {
-			stream := getWriteStream(s, args, depth)
-			// :print-function signature: (object stream depth)
-			pf.Call(s, slip.List{so, stream, slip.Fixnum(0)}, depth+1)
-			return args[0]
-		}
-		if po := so.Type.printObject; po != nil {
-			stream := getWriteStream(s, args, depth)
-			// :print-object signature: (object stream)
-			po.Call(s, slip.List{so, stream}, depth+1)
-			return args[0]
-		}
-	}
 	b, w, ss := writeBuf(f, s, args, true, depth)
 	if _, err := w.Write(b); err != nil {
 		slip.StreamPanic(s, depth, ss, "write failed. %s", err)
 	}
 	return args[0]
-}
-
-// getWriteStream extracts the output stream from write args, defaulting to *standard-output*.
-func getWriteStream(s *slip.Scope, args slip.List, depth int) slip.Stream {
-	for i := 1; i < len(args)-1; i += 2 {
-		if sym, ok := args[i].(slip.Symbol); ok {
-			if strings.ToLower(string(sym)) == ":stream" {
-				if stream, ok := args[i+1].(slip.Stream); ok {
-					return stream
-				}
-				slip.TypePanic(s, depth, ":stream", args[i+1], "output-stream")
-			}
-		}
-	}
-	return slip.StandardOutput.(slip.Stream)
 }
 
 func writeBuf(
@@ -219,6 +189,9 @@ func writeBuf(
 				slip.TypePanic(s, depth, "keyword", sym, writeKeywords...)
 			}
 		}
+	}
+	if sa, ok := obj.(slip.ScopedAppender); ok {
+		return sa.ScopedAppend(nil, s, &p, 0), w, ss
 	}
 	return p.Append([]byte{}, obj, 0), w, ss
 }

@@ -62,7 +62,13 @@ func (f *Prin1) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 			slip.TypePanic(s, depth, "prin1 output-stream", args[1], "output-stream")
 		}
 	}
-	if _, err := w.Write(p.Append([]byte{}, obj, 0)); err != nil {
+	var b []byte
+	if sa, ok := obj.(slip.ScopedAppender); ok {
+		b = sa.ScopedAppend(b, s, &p, 0)
+	} else {
+		b = p.Append(b, obj, 0)
+	}
+	if _, err := w.Write(b); err != nil {
 		slip.StreamPanic(s, depth, ss, "prin1 write failed. %s", err)
 	}
 	return obj

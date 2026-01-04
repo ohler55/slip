@@ -50,7 +50,16 @@ func (f *PrintObject) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 	if !ok {
 		slip.TypePanic(s, depth, "stream", args[1], "output-stream")
 	}
-	if _, err := w.Write(slip.Append(nil, args[0])); err != nil {
+	p := *slip.DefaultPrinter()
+	p.ScopedUpdate(s)
+	obj := args[0]
+	var b []byte
+	if sa, ok := obj.(slip.ScopedAppender); ok {
+		b = sa.ScopedAppend(b, s, &p, 0)
+	} else {
+		b = p.Append(b, obj, 0)
+	}
+	if _, err := w.Write(b); err != nil {
 		panic(err)
 	}
 	return nil

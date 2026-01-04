@@ -762,6 +762,8 @@ func (c *control) dirA(colon, at bool, params []any) {
 		}
 		if ss, ok := arg.(slip.String); ok {
 			c.out = append(c.out, ss...)
+		} else if sa, ok := arg.(slip.ScopedAppender); ok {
+			c.out = sa.ScopedAppend(c.out, c.scope, &p, 0)
 		} else {
 			c.out = p.Append(c.out, arg, 0)
 		}
@@ -1301,7 +1303,11 @@ func (c *control) dirAS(colon, at bool, params []any, p *slip.Printer) {
 	case slip.Instance:
 		out = ta.Append(out)
 	default:
-		out = p.Append(out, ta, 0)
+		if sa, ok := ta.(slip.ScopedAppender); ok {
+			out = sa.ScopedAppend(out, slip.NewScope(), p, 0)
+		} else {
+			out = p.Append(out, ta, 0)
+		}
 	}
 	mincol := 0
 	colinc := 1
