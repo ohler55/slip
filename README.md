@@ -4,7 +4,7 @@
 ![](assets/coverage-badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ohler55/slip)](https://goreportcard.com/report/github.com/ohler55/slip)
 
-SLIce Processing is LISP for golang
+SLIce Processing is LISP for golang.
 
 SLIP is a mostly Common LISP implementation lacking some features and
 including many non standard features. Most notable of the extra
@@ -64,10 +64,10 @@ go get github.com/ohler55/slip/cmd/slip
 
 ```
 
-Install using **brew**: (coming soon)
+Install using **brew**: (when the minimum popularity metrics are achieved)
 
 ```
-brew install slip
+# brew install slip
 
 ```
 

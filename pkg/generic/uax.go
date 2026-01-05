@@ -2,6 +2,9 @@
 
 package generic
 
+// The name of the file does not match the type due to a Windows restriction
+// that prohibits "aux" from being a path element.
+
 import (
 	"sort"
 	"strings"
