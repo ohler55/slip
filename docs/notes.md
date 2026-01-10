@@ -3,11 +3,6 @@
 - **multipass** or utm for linux
 
 - next
- - v1.3.1 release with aux.go change
- - update ohler.com
-  - and rss
- - mongodb and ggql plugin release
-  - test to make sure
  - post notice on forums
  - verify goreportcard
 
