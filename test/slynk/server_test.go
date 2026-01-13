@@ -1,6 +1,6 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package slynk
+package slynk_test
 
 import (
 	"net"
@@ -8,12 +8,13 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/slynk"
 	"github.com/ohler55/slip/pkg/swank"
 )
 
 func TestServerStartStop(t *testing.T) {
 	scope := slip.NewScope()
-	server := NewServer(scope)
+	server := slynk.NewServer(scope)
 
 	err := server.Start(":0") // Use any available port
 	if err != nil {
@@ -39,7 +40,7 @@ func TestServerStartStop(t *testing.T) {
 
 func TestConnectionInfo(t *testing.T) {
 	scope := slip.NewScope()
-	server := NewServer(scope)
+	server := slynk.NewServer(scope)
 
 	err := server.Start(":0")
 	if err != nil {
@@ -104,17 +105,17 @@ func TestFlexCompletion(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		score, _ := flexScore(tt.name, tt.pattern)
+		score, _ := slynk.FlexScore(tt.name, tt.pattern)
 		gotHit := score > 0
 		if gotHit != tt.wantHit {
-			t.Errorf("flexScore(%q, %q) hit=%v, want hit=%v", tt.name, tt.pattern, gotHit, tt.wantHit)
+			t.Errorf("FlexScore(%q, %q) hit=%v, want hit=%v", tt.name, tt.pattern, gotHit, tt.wantHit)
 		}
 	}
 }
 
 func TestChannel(t *testing.T) {
 	scope := slip.NewScope()
-	server := NewServer(scope)
+	server := slynk.NewServer(scope)
 
 	err := server.Start(":0")
 	if err != nil {
@@ -138,25 +139,25 @@ func TestChannel(t *testing.T) {
 
 func TestHandlerRegistry(t *testing.T) {
 	// Test handler lookup
-	handler := GetHandler("slynk:connection-info")
+	handler := slynk.GetHandler("slynk:connection-info")
 	if handler == nil {
 		t.Fatal("Expected to find connection-info handler")
 	}
 
 	// Test with swank: prefix (compatibility)
-	handler = GetHandler("swank:connection-info")
+	handler = slynk.GetHandler("swank:connection-info")
 	if handler == nil {
 		t.Fatal("Expected swank: prefix to work for compatibility")
 	}
 
 	// Test without prefix
-	handler = GetHandler("connection-info")
+	handler = slynk.GetHandler("connection-info")
 	if handler == nil {
 		t.Fatal("Expected handler lookup without prefix to work")
 	}
 
 	// Test unknown handler
-	handler = GetHandler("unknown-handler")
+	handler = slynk.GetHandler("unknown-handler")
 	if handler != nil {
 		t.Fatal("Expected nil for unknown handler")
 	}

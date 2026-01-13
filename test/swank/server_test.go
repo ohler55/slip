@@ -1,6 +1,6 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package swank
+package swank_test
 
 import (
 	"net"
@@ -9,18 +9,19 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/swank"
 )
 
 func TestServerStartStop(t *testing.T) {
 	scope := slip.NewScope()
-	server := NewServer(scope)
+	server := swank.NewServer(scope)
 
 	// Start on random port
 	err := server.Start(":0")
 	if err != nil {
 		t.Fatalf("failed to start server: %v", err)
 	}
-	defer server.Stop()
+	defer func() { _ = server.Stop() }()
 
 	if !server.Running() {
 		t.Error("server should be running")
@@ -44,13 +45,13 @@ func TestServerStartStop(t *testing.T) {
 
 func TestServerConnection(t *testing.T) {
 	scope := slip.NewScope()
-	server := NewServer(scope)
+	server := swank.NewServer(scope)
 
 	err := server.Start(":0")
 	if err != nil {
 		t.Fatalf("failed to start server: %v", err)
 	}
-	defer server.Stop()
+	defer func() { _ = server.Stop() }()
 
 	// Connect to server
 	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
@@ -68,14 +69,14 @@ func TestServerConnection(t *testing.T) {
 		slip.Fixnum(1),
 	}
 
-	err = WriteWireMessage(conn, msg)
+	err = swank.WriteWireMessage(conn, msg)
 	if err != nil {
 		t.Fatalf("failed to write: %v", err)
 	}
 
 	// Read response with timeout
-	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-	response, err := ReadWireMessage(conn, scope)
+	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	response, err := swank.ReadWireMessage(conn, scope)
 	if err != nil {
 		t.Fatalf("failed to read response: %v", err)
 	}
@@ -116,13 +117,13 @@ func TestServerConnection(t *testing.T) {
 
 func TestServerEval(t *testing.T) {
 	scope := slip.NewScope()
-	server := NewServer(scope)
+	server := swank.NewServer(scope)
 
 	err := server.Start(":0")
 	if err != nil {
 		t.Fatalf("failed to start server: %v", err)
 	}
-	defer server.Stop()
+	defer func() { _ = server.Stop() }()
 
 	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
 	if err != nil {
@@ -138,13 +139,13 @@ func TestServerEval(t *testing.T) {
 		slip.Symbol("t"),
 		slip.Fixnum(1),
 	}
-	err = WriteWireMessage(conn, createRepl)
+	err = swank.WriteWireMessage(conn, createRepl)
 	if err != nil {
 		t.Fatalf("failed to write create-repl: %v", err)
 	}
 
-	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-	_, err = ReadWireMessage(conn, scope)
+	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, err = swank.ReadWireMessage(conn, scope)
 	if err != nil {
 		t.Fatalf("failed to read create-repl response: %v", err)
 	}
@@ -157,7 +158,7 @@ func TestServerEval(t *testing.T) {
 		slip.Symbol("t"),
 		slip.Fixnum(2),
 	}
-	err = WriteWireMessage(conn, evalMsg)
+	err = swank.WriteWireMessage(conn, evalMsg)
 	if err != nil {
 		t.Fatalf("failed to write eval: %v", err)
 	}
@@ -165,8 +166,8 @@ func TestServerEval(t *testing.T) {
 	// Read all responses (may include :write-string before :return)
 	var foundResult bool
 	for i := 0; i < 5; i++ {
-		conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-		response, err := ReadWireMessage(conn, scope)
+		_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+		response, err := swank.ReadWireMessage(conn, scope)
 		if err != nil {
 			break
 		}

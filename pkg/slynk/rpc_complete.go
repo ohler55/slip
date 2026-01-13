@@ -113,7 +113,7 @@ func collectFlexMatches(matches *[]flexMatch, pkg *slip.Package, pattern string)
 
 	// Check functions
 	pkg.EachFuncName(func(name string) {
-		if score, idxs := flexScore(strings.ToLower(name), pattern); score > 0 {
+		if score, idxs := FlexScore(strings.ToLower(name), pattern); score > 0 {
 			*matches = append(*matches, flexMatch{
 				symbol:      name,
 				score:       score,
@@ -125,7 +125,7 @@ func collectFlexMatches(matches *[]flexMatch, pkg *slip.Package, pattern string)
 
 	// Check variables
 	pkg.EachVarName(func(name string) {
-		if score, idxs := flexScore(strings.ToLower(name), pattern); score > 0 {
+		if score, idxs := FlexScore(strings.ToLower(name), pattern); score > 0 {
 			*matches = append(*matches, flexMatch{
 				symbol:      name,
 				score:       score,
@@ -136,9 +136,9 @@ func collectFlexMatches(matches *[]flexMatch, pkg *slip.Package, pattern string)
 	})
 }
 
-// flexScore computes a flex match score and returns matched indices.
+// FlexScore computes a flex match score and returns matched indices.
 // Higher score = better match. Returns 0 if no match.
-func flexScore(name, pattern string) (float64, []int) {
+func FlexScore(name, pattern string) (float64, []int) {
 	if len(pattern) == 0 {
 		return 0, nil
 	}
