@@ -36,4 +36,10 @@ import (
 
 	// Pull in watch functions.
 	_ "github.com/ohler55/slip/pkg/watch"
+
+	// Pull in swank server for SLIME integration.
+	_ "github.com/ohler55/slip/pkg/swank"
+
+	// Pull in slynk server for SLY integration.
+	_ "github.com/ohler55/slip/pkg/slynk"
 )
