@@ -42,5 +42,4 @@ func init() {
 	defSlynkStop()
 	Pkg.Initialize(nil) // lock
 	slip.AddPackage(&Pkg)
-	slip.UserPkg.Use(&Pkg)
 }

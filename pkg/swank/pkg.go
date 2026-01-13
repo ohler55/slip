@@ -41,5 +41,4 @@ func init() {
 	defSwankStop()
 	Pkg.Initialize(nil) // lock
 	slip.AddPackage(&Pkg)
-	slip.UserPkg.Use(&Pkg)
 }
