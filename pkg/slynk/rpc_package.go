@@ -8,7 +8,7 @@ import (
 
 func init() {
 	// Package listing
-	RegisterHandler("slynk:list-all-packages", handleListAllPackages)
+	RegisterHandler("slynk:list-all-package-names", handleListAllPackageNames)
 
 	// Package switching
 	RegisterHandler("slynk:set-package", handleSetPackage)
@@ -20,8 +20,8 @@ func init() {
 	RegisterHandler("slynk:slynk-require", handleSlynkRequire)
 }
 
-// handleListAllPackages returns a list of all loaded packages.
-func handleListAllPackages(c *Connection, args slip.List) slip.Object {
+// handleListAllPackageNames returns a list of all loaded package names.
+func handleListAllPackageNames(c *Connection, args slip.List) slip.Object {
 	var packages slip.List
 
 	for _, pkg := range slip.AllPackages() {
