@@ -42,4 +42,7 @@ import (
 
 	// Pull in slynk server for SLY integration.
 	_ "github.com/ohler55/slip/pkg/slynk"
+
+	// Pull in alive server for VSCode Alive extension.
+	_ "github.com/ohler55/slip/pkg/alive"
 )
