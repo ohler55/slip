@@ -4,6 +4,7 @@ package alive_test
 
 import (
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -229,5 +230,215 @@ func TestListPackages(t *testing.T) {
 
 	if len(packages) == 0 {
 		t.Error("expected at least one package")
+	}
+}
+
+func TestCompletion(t *testing.T) {
+	scope := slip.NewScope()
+	server := alive.NewServer(scope)
+
+	err := server.Start(":0")
+	if err != nil {
+		t.Fatalf("failed to start: %v", err)
+	}
+	defer server.Stop()
+
+	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
+	if err != nil {
+		t.Fatalf("failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Initialize first
+	initMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  "initialize",
+		Params:  map[string]interface{}{},
+	}
+	_ = alive.WriteMessage(conn, initMsg)
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, _ = alive.ReadMessage(conn)
+
+	// Send completion request with prefix "car"
+	compMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      2,
+		Method:  "textDocument/completion",
+		Params: map[string]interface{}{
+			"word": "car",
+		},
+	}
+	err = alive.WriteMessage(conn, compMsg)
+	if err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+
+	// Read response
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	response, err := alive.ReadMessage(conn)
+	if err != nil {
+		t.Fatalf("failed to read response: %v", err)
+	}
+
+	if response.Error != nil {
+		t.Errorf("unexpected error: %v", response.Error)
+	}
+
+	result, ok := response.Result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map result, got %T", response.Result)
+	}
+
+	items, ok := result["items"].([]interface{})
+	if !ok {
+		t.Fatalf("expected items array, got %T", result["items"])
+	}
+
+	// Should find car function
+	found := false
+	for _, item := range items {
+		if m, ok := item.(map[string]interface{}); ok {
+			if m["label"] == "car" {
+				found = true
+				break
+			}
+		}
+	}
+	if !found {
+		t.Error("expected to find 'car' in completions")
+	}
+}
+
+func TestHover(t *testing.T) {
+	scope := slip.NewScope()
+	server := alive.NewServer(scope)
+
+	err := server.Start(":0")
+	if err != nil {
+		t.Fatalf("failed to start: %v", err)
+	}
+	defer server.Stop()
+
+	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
+	if err != nil {
+		t.Fatalf("failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Initialize first
+	initMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  "initialize",
+		Params:  map[string]interface{}{},
+	}
+	_ = alive.WriteMessage(conn, initMsg)
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, _ = alive.ReadMessage(conn)
+
+	// Send hover request for "car"
+	hoverMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      2,
+		Method:  "textDocument/hover",
+		Params: map[string]interface{}{
+			"word": "car",
+		},
+	}
+	err = alive.WriteMessage(conn, hoverMsg)
+	if err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+
+	// Read response
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	response, err := alive.ReadMessage(conn)
+	if err != nil {
+		t.Fatalf("failed to read response: %v", err)
+	}
+
+	if response.Error != nil {
+		t.Errorf("unexpected error: %v", response.Error)
+	}
+
+	result, ok := response.Result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map result, got %T", response.Result)
+	}
+
+	contents, ok := result["contents"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected contents map, got %T", result["contents"])
+	}
+
+	if contents["kind"] != "markdown" {
+		t.Errorf("expected markdown kind, got %v", contents["kind"])
+	}
+
+	value, ok := contents["value"].(string)
+	if !ok || value == "" {
+		t.Error("expected non-empty hover value")
+	}
+
+	// Should contain CAR in the description
+	if !strings.Contains(value, "CAR") {
+		t.Errorf("expected hover to contain CAR, got: %s", value)
+	}
+}
+
+func TestHoverNoWord(t *testing.T) {
+	scope := slip.NewScope()
+	server := alive.NewServer(scope)
+
+	err := server.Start(":0")
+	if err != nil {
+		t.Fatalf("failed to start: %v", err)
+	}
+	defer server.Stop()
+
+	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
+	if err != nil {
+		t.Fatalf("failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Initialize first
+	initMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  "initialize",
+		Params:  map[string]interface{}{},
+	}
+	_ = alive.WriteMessage(conn, initMsg)
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, _ = alive.ReadMessage(conn)
+
+	// Send hover request without word
+	hoverMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      2,
+		Method:  "textDocument/hover",
+		Params:  map[string]interface{}{},
+	}
+	err = alive.WriteMessage(conn, hoverMsg)
+	if err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+
+	// Read response
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	response, err := alive.ReadMessage(conn)
+	if err != nil {
+		t.Fatalf("failed to read response: %v", err)
+	}
+
+	if response.Error != nil {
+		t.Errorf("unexpected error: %v", response.Error)
+	}
+
+	// Result should be nil when no word provided
+	if response.Result != nil {
+		t.Errorf("expected nil result for missing word, got %v", response.Result)
 	}
 }
