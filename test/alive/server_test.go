@@ -442,3 +442,219 @@ func TestHoverNoWord(t *testing.T) {
 		t.Errorf("expected nil result for missing word, got %v", response.Result)
 	}
 }
+
+func TestMacroexpand1(t *testing.T) {
+	scope := slip.NewScope()
+	server := alive.NewServer(scope)
+
+	err := server.Start(":0")
+	if err != nil {
+		t.Fatalf("failed to start: %v", err)
+	}
+	defer server.Stop()
+
+	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
+	if err != nil {
+		t.Fatalf("failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Initialize first
+	initMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  "initialize",
+		Params:  map[string]interface{}{},
+	}
+	_ = alive.WriteMessage(conn, initMsg)
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, _ = alive.ReadMessage(conn)
+
+	// First, define a simple macro
+	defMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      2,
+		Method:  "$/alive/eval",
+		Params: map[string]interface{}{
+			"text": "(defmacro double (x) `(* ,x 2))",
+		},
+	}
+	_ = alive.WriteMessage(conn, defMsg)
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, _ = alive.ReadMessage(conn)
+
+	// Now test macroexpand-1
+	expandMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      3,
+		Method:  "$/alive/macroexpand1",
+		Params: map[string]interface{}{
+			"text": "(double 5)",
+		},
+	}
+	err = alive.WriteMessage(conn, expandMsg)
+	if err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+
+	// Read response
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	response, err := alive.ReadMessage(conn)
+	if err != nil {
+		t.Fatalf("failed to read response: %v", err)
+	}
+
+	if response.Error != nil {
+		t.Errorf("unexpected error: %v", response.Error)
+	}
+
+	result, ok := response.Result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map result, got %T", response.Result)
+	}
+
+	text, ok := result["text"].(string)
+	if !ok || text == "" {
+		t.Error("expected non-empty text in result")
+	}
+
+	// Should expand to (* 5 2) or similar
+	if !strings.Contains(text, "*") || !strings.Contains(text, "5") || !strings.Contains(text, "2") {
+		t.Errorf("expected expansion to contain '* 5 2', got: %s", text)
+	}
+}
+
+func TestMacroexpand(t *testing.T) {
+	scope := slip.NewScope()
+	server := alive.NewServer(scope)
+
+	err := server.Start(":0")
+	if err != nil {
+		t.Fatalf("failed to start: %v", err)
+	}
+	defer server.Stop()
+
+	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
+	if err != nil {
+		t.Fatalf("failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Initialize first
+	initMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  "initialize",
+		Params:  map[string]interface{}{},
+	}
+	_ = alive.WriteMessage(conn, initMsg)
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, _ = alive.ReadMessage(conn)
+
+	// Test with a standard macro like 'when'
+	expandMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      2,
+		Method:  "$/alive/macroexpand",
+		Params: map[string]interface{}{
+			"text": "(when t (print 'hello))",
+		},
+	}
+	err = alive.WriteMessage(conn, expandMsg)
+	if err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+
+	// Read response
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	response, err := alive.ReadMessage(conn)
+	if err != nil {
+		t.Fatalf("failed to read response: %v", err)
+	}
+
+	if response.Error != nil {
+		t.Errorf("unexpected error: %v", response.Error)
+	}
+
+	result, ok := response.Result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map result, got %T", response.Result)
+	}
+
+	text, ok := result["text"].(string)
+	if !ok || text == "" {
+		t.Error("expected non-empty text in result")
+	}
+
+	// 'when' typically expands to 'if' or 'progn'
+	// Just check we got something back
+	t.Logf("macroexpand result: %s", text)
+}
+
+func TestMacroexpandNonMacro(t *testing.T) {
+	scope := slip.NewScope()
+	server := alive.NewServer(scope)
+
+	err := server.Start(":0")
+	if err != nil {
+		t.Fatalf("failed to start: %v", err)
+	}
+	defer server.Stop()
+
+	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
+	if err != nil {
+		t.Fatalf("failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Initialize first
+	initMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  "initialize",
+		Params:  map[string]interface{}{},
+	}
+	_ = alive.WriteMessage(conn, initMsg)
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, _ = alive.ReadMessage(conn)
+
+	// Test with a regular function (not a macro)
+	expandMsg := &alive.JSONRPCMessage{
+		JSONRPC: "2.0",
+		ID:      2,
+		Method:  "$/alive/macroexpand1",
+		Params: map[string]interface{}{
+			"text": "(+ 1 2)",
+		},
+	}
+	err = alive.WriteMessage(conn, expandMsg)
+	if err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+
+	// Read response
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	response, err := alive.ReadMessage(conn)
+	if err != nil {
+		t.Fatalf("failed to read response: %v", err)
+	}
+
+	if response.Error != nil {
+		t.Errorf("unexpected error: %v", response.Error)
+	}
+
+	result, ok := response.Result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map result, got %T", response.Result)
+	}
+
+	text, ok := result["text"].(string)
+	if !ok {
+		t.Error("expected text in result")
+	}
+
+	// Should return the original form unchanged
+	if !strings.Contains(text, "+") && !strings.Contains(text, "1") && !strings.Contains(text, "2") {
+		t.Errorf("expected original form '(+ 1 2)', got: %s", text)
+	}
+}
