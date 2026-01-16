@@ -1,20 +1,21 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package slynk_test
+package swank_test
 
 import (
 	"net"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/slynk"
+	_ "github.com/ohler55/slip/pkg/cl" // load CL functions
 	"github.com/ohler55/slip/pkg/swank"
 )
 
-func TestListAllPackages(t *testing.T) {
+func TestMacroexpand1(t *testing.T) {
 	scope := slip.NewScope()
-	server := slynk.NewServer(scope)
+	server := swank.NewServer(scope)
 
 	err := server.Start(":0")
 	if err != nil {
@@ -28,14 +29,47 @@ func TestListAllPackages(t *testing.T) {
 	}
 	defer conn.Close()
 
-	msg := slip.List{
+	// First define a macro
+	createRepl := slip.List{
 		slip.Symbol(":emacs-rex"),
-		slip.List{slip.Symbol("slynk:list-all-package-names"), slip.Symbol("t")},
+		slip.List{slip.Symbol("swank:create-repl"), nil},
 		slip.String("cl-user"),
 		slip.Symbol("t"),
 		slip.Fixnum(1),
 	}
-	err = swank.WriteWireMessage(conn, msg)
+	_ = swank.WriteWireMessage(conn, createRepl)
+	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_, _ = swank.ReadWireMessage(conn, scope)
+
+	// Define a simple macro
+	defMacro := slip.List{
+		slip.Symbol(":emacs-rex"),
+		slip.List{slip.Symbol("swank:listener-eval"), slip.String("(defmacro double (x) `(* ,x 2))")},
+		slip.String("cl-user"),
+		slip.Symbol("t"),
+		slip.Fixnum(2),
+	}
+	_ = swank.WriteWireMessage(conn, defMacro)
+	for i := 0; i < 5; i++ {
+		_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+		resp, err := swank.ReadWireMessage(conn, scope)
+		if err != nil {
+			break
+		}
+		if list, ok := resp.(slip.List); ok && len(list) > 0 && list[0] == slip.Symbol(":return") {
+			break
+		}
+	}
+
+	// Test macroexpand-1
+	expandMsg := slip.List{
+		slip.Symbol(":emacs-rex"),
+		slip.List{slip.Symbol("swank:swank-macroexpand-1"), slip.String("(double 5)")},
+		slip.String("cl-user"),
+		slip.Symbol("t"),
+		slip.Fixnum(3),
+	}
+	err = swank.WriteWireMessage(conn, expandMsg)
 	if err != nil {
 		t.Fatalf("failed to write: %v", err)
 	}
@@ -51,16 +85,67 @@ func TestListAllPackages(t *testing.T) {
 		t.Fatalf("expected :return, got %v", response)
 	}
 
-	// Check we got :ok with a list
+	inner, ok := respList[1].(slip.List)
+	if !ok || inner[0] != slip.Symbol(":ok") {
+		t.Errorf("expected :ok response, got %v", respList[1])
+	}
+
+	// The result should contain the expanded form
+	result := slip.ObjectString(inner[1])
+	if !strings.Contains(result, "*") || !strings.Contains(result, "5") || !strings.Contains(result, "2") {
+		t.Errorf("expected expansion to contain '* 5 2', got: %s", result)
+	}
+}
+
+func TestMacroexpand(t *testing.T) {
+	scope := slip.NewScope()
+	server := swank.NewServer(scope)
+
+	err := server.Start(":0")
+	if err != nil {
+		t.Fatalf("failed to start server: %v", err)
+	}
+	defer func() { _ = server.Stop() }()
+
+	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
+	if err != nil {
+		t.Fatalf("failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Test with non-macro form (should return as-is)
+	expandMsg := slip.List{
+		slip.Symbol(":emacs-rex"),
+		slip.List{slip.Symbol("swank:swank-macroexpand"), slip.String("(+ 1 2)")},
+		slip.String("cl-user"),
+		slip.Symbol("t"),
+		slip.Fixnum(1),
+	}
+	err = swank.WriteWireMessage(conn, expandMsg)
+	if err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+
+	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	response, err := swank.ReadWireMessage(conn, scope)
+	if err != nil {
+		t.Fatalf("failed to read: %v", err)
+	}
+
+	respList, ok := response.(slip.List)
+	if !ok || respList[0] != slip.Symbol(":return") {
+		t.Fatalf("expected :return, got %v", response)
+	}
+
 	inner, ok := respList[1].(slip.List)
 	if !ok || inner[0] != slip.Symbol(":ok") {
 		t.Errorf("expected :ok response")
 	}
 }
 
-func TestSetPackage(t *testing.T) {
+func TestMacroexpandAll(t *testing.T) {
 	scope := slip.NewScope()
-	server := slynk.NewServer(scope)
+	server := swank.NewServer(scope)
 
 	err := server.Start(":0")
 	if err != nil {
@@ -74,64 +159,15 @@ func TestSetPackage(t *testing.T) {
 	}
 	defer conn.Close()
 
-	// Set package to common-lisp (full name)
-	msg := slip.List{
+	// Test swank-macroexpand-all
+	expandMsg := slip.List{
 		slip.Symbol(":emacs-rex"),
-		slip.List{slip.Symbol("slynk:set-package"), slip.String("common-lisp")},
+		slip.List{slip.Symbol("swank:swank-macroexpand-all"), slip.String("(+ 1 2)")},
 		slip.String("cl-user"),
 		slip.Symbol("t"),
 		slip.Fixnum(1),
 	}
-	err = swank.WriteWireMessage(conn, msg)
-	if err != nil {
-		t.Fatalf("failed to write: %v", err)
-	}
-
-	// Read responses until :return (may get :new-package first)
-	var gotReturn bool
-	for i := 0; i < 5; i++ {
-		_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-		response, err := swank.ReadWireMessage(conn, scope)
-		if err != nil {
-			break
-		}
-		respList, ok := response.(slip.List)
-		if ok && len(respList) > 0 && respList[0] == slip.Symbol(":return") {
-			gotReturn = true
-			break
-		}
-	}
-
-	if !gotReturn {
-		t.Errorf("expected :return response")
-	}
-}
-
-func TestSetPackageInvalid(t *testing.T) {
-	scope := slip.NewScope()
-	server := slynk.NewServer(scope)
-
-	err := server.Start(":0")
-	if err != nil {
-		t.Fatalf("failed to start server: %v", err)
-	}
-	defer func() { _ = server.Stop() }()
-
-	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
-	if err != nil {
-		t.Fatalf("failed to connect: %v", err)
-	}
-	defer conn.Close()
-
-	// Set package to non-existent
-	msg := slip.List{
-		slip.Symbol(":emacs-rex"),
-		slip.List{slip.Symbol("slynk:set-package"), slip.String("nonexistent-pkg-xyz")},
-		slip.String("cl-user"),
-		slip.Symbol("t"),
-		slip.Fixnum(1),
-	}
-	err = swank.WriteWireMessage(conn, msg)
+	err = swank.WriteWireMessage(conn, expandMsg)
 	if err != nil {
 		t.Fatalf("failed to write: %v", err)
 	}
@@ -144,13 +180,13 @@ func TestSetPackageInvalid(t *testing.T) {
 
 	respList, ok := response.(slip.List)
 	if !ok || respList[0] != slip.Symbol(":return") {
-		t.Errorf("expected :return response")
+		t.Fatalf("expected :return, got %v", response)
 	}
 }
 
-func TestPackageLocalNicknames(t *testing.T) {
+func TestMacroexpandEmptyArgs(t *testing.T) {
 	scope := slip.NewScope()
-	server := slynk.NewServer(scope)
+	server := swank.NewServer(scope)
 
 	err := server.Start(":0")
 	if err != nil {
@@ -164,14 +200,15 @@ func TestPackageLocalNicknames(t *testing.T) {
 	}
 	defer conn.Close()
 
-	msg := slip.List{
+	// Test with empty args
+	expandMsg := slip.List{
 		slip.Symbol(":emacs-rex"),
-		slip.List{slip.Symbol("slynk:package-local-nicknames"), slip.String("common-lisp")},
+		slip.List{slip.Symbol("swank:swank-macroexpand-1")},
 		slip.String("cl-user"),
 		slip.Symbol("t"),
 		slip.Fixnum(1),
 	}
-	err = swank.WriteWireMessage(conn, msg)
+	err = swank.WriteWireMessage(conn, expandMsg)
 	if err != nil {
 		t.Fatalf("failed to write: %v", err)
 	}
@@ -184,87 +221,6 @@ func TestPackageLocalNicknames(t *testing.T) {
 
 	respList, ok := response.(slip.List)
 	if !ok || respList[0] != slip.Symbol(":return") {
-		t.Errorf("expected :return response")
-	}
-}
-
-func TestPackageLocalNicknamesInvalid(t *testing.T) {
-	scope := slip.NewScope()
-	server := slynk.NewServer(scope)
-
-	err := server.Start(":0")
-	if err != nil {
-		t.Fatalf("failed to start server: %v", err)
-	}
-	defer func() { _ = server.Stop() }()
-
-	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
-	if err != nil {
-		t.Fatalf("failed to connect: %v", err)
-	}
-	defer conn.Close()
-
-	// Query nonexistent package
-	msg := slip.List{
-		slip.Symbol(":emacs-rex"),
-		slip.List{slip.Symbol("slynk:package-local-nicknames"), slip.String("nonexistent")},
-		slip.String("cl-user"),
-		slip.Symbol("t"),
-		slip.Fixnum(1),
-	}
-	err = swank.WriteWireMessage(conn, msg)
-	if err != nil {
-		t.Fatalf("failed to write: %v", err)
-	}
-
-	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-	response, err := swank.ReadWireMessage(conn, scope)
-	if err != nil {
-		t.Fatalf("failed to read: %v", err)
-	}
-
-	respList, ok := response.(slip.List)
-	if !ok || respList[0] != slip.Symbol(":return") {
-		t.Errorf("expected :return response")
-	}
-}
-
-func TestSlynkRequire(t *testing.T) {
-	scope := slip.NewScope()
-	server := slynk.NewServer(scope)
-
-	err := server.Start(":0")
-	if err != nil {
-		t.Fatalf("failed to start server: %v", err)
-	}
-	defer func() { _ = server.Stop() }()
-
-	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
-	if err != nil {
-		t.Fatalf("failed to connect: %v", err)
-	}
-	defer conn.Close()
-
-	msg := slip.List{
-		slip.Symbol(":emacs-rex"),
-		slip.List{slip.Symbol("slynk:slynk-require"), slip.Symbol(":slynk-mrepl")},
-		slip.String("cl-user"),
-		slip.Symbol("t"),
-		slip.Fixnum(1),
-	}
-	err = swank.WriteWireMessage(conn, msg)
-	if err != nil {
-		t.Fatalf("failed to write: %v", err)
-	}
-
-	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-	response, err := swank.ReadWireMessage(conn, scope)
-	if err != nil {
-		t.Fatalf("failed to read: %v", err)
-	}
-
-	respList, ok := response.(slip.List)
-	if !ok || respList[0] != slip.Symbol(":return") {
-		t.Errorf("expected :return response")
+		t.Fatalf("expected :return, got %v", response)
 	}
 }
