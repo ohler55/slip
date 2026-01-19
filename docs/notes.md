@@ -2,9 +2,6 @@
 
 - **multipass** or utm for linux
 
-- next
- - post notice on forums
- - verify goreportcard
 
 ---------------------
 
@@ -42,9 +39,6 @@
  - watch.connect.safeEval
   - encode condition and decode
   - frame test broken
-
-
- - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
  - package-export
   - import
