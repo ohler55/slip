@@ -39,7 +39,7 @@ func init() {
 	flag.StringVar(&evalCode, "e", evalCode, "code to evaluate")
 	flag.StringVar(&cfgDir, "c", cfgDir, "configuration directory (an empty string or - indicates none)")
 	flag.BoolVar(&interactive, "i", interactive, "interactive mode")
-	flag.BoolVar(&allAtOnce, "a", allAtOnce, "load all files are once instead of one by one")
+	flag.BoolVar(&allAtOnce, "a", allAtOnce, "load all files at once instead of one by one")
 }
 
 func main() {
