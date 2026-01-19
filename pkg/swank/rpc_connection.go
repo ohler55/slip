@@ -12,7 +12,9 @@ import (
 func init() {
 	RegisterHandler("swank:connection-info", handleConnectionInfo)
 	RegisterHandler("swank:create-repl", handleCreateRepl)
+	RegisterHandler("swank-repl:create-repl", handleCreateRepl) // SLIME uses this variant
 	RegisterHandler("swank:buffer-first-change", handleBufferFirstChange)
+	RegisterHandler("swank:init-presentations", handleInitPresentations)
 }
 
 // handleConnectionInfo returns information about the Lisp implementation.
@@ -103,5 +105,12 @@ func handleCreateRepl(c *Connection, args slip.List) slip.Object {
 // handleBufferFirstChange is called when a buffer is first modified.
 // We just acknowledge it.
 func handleBufferFirstChange(c *Connection, args slip.List) slip.Object {
+	return nil
+}
+
+// handleInitPresentations initializes SLIME's presentation system.
+// Presentations allow clickable/inspectable objects in the REPL.
+// We acknowledge the request but don't implement full presentation tracking.
+func handleInitPresentations(c *Connection, args slip.List) slip.Object {
 	return nil
 }

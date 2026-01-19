@@ -10,6 +10,7 @@ import (
 
 func init() {
 	RegisterHandler("swank:listener-eval", handleListenerEval)
+	RegisterHandler("swank-repl:listener-eval", handleListenerEval) // SLIME uses this variant
 	RegisterHandler("swank:interactive-eval", handleInteractiveEval)
 	RegisterHandler("swank:interactive-eval-region", handleInteractiveEvalRegion)
 	RegisterHandler("swank:eval-and-grab-output", handleEvalAndGrabOutput)

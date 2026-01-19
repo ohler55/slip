@@ -104,8 +104,17 @@ func handleAutodoc(c *Connection, args slip.List) slip.Object {
 		return slip.Symbol(":not-available")
 	}
 
-	// args[0] is the raw form being typed
+	// args[0] is the raw form being typed - may be quoted
 	rawForm, ok := args[0].(slip.List)
+	if !ok {
+		// Try to unwrap a quote form by getting its Args
+		if funky, isFunky := args[0].(slip.Funky); isFunky {
+			qargs := funky.GetArgs()
+			if len(qargs) > 0 {
+				rawForm, ok = qargs[0].(slip.List)
+			}
+		}
+	}
 	if !ok || len(rawForm) == 0 {
 		return slip.Symbol(":not-available")
 	}
@@ -272,14 +281,26 @@ func getArglist(c *Connection, name string) string {
 		}
 	}
 
-	// Check if it's a function
+	// Check if it's a function in current package
 	if fi := pkg.GetFunc(name); fi != nil && fi.Doc != nil {
-		var args []string
-		for _, arg := range fi.Doc.Args {
-			args = append(args, arg.Name)
+		return formatArglist(fi)
+	}
+
+	// Search through used packages
+	for _, usedPkg := range pkg.Uses {
+		if fi := usedPkg.GetFunc(name); fi != nil && fi.Doc != nil {
+			return formatArglist(fi)
 		}
-		return strings.Join(args, " ")
 	}
 
 	return ""
+}
+
+// formatArglist formats a function's argument list as a string.
+func formatArglist(fi *slip.FuncInfo) string {
+	var args []string
+	for _, arg := range fi.Doc.Args {
+		args = append(args, arg.Name)
+	}
+	return strings.Join(args, " ")
 }

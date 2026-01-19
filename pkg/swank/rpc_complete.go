@@ -3,6 +3,7 @@
 package swank
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -65,18 +66,61 @@ func handleFuzzyCompletions(c *Connection, args slip.List) slip.Object {
 	// Build fuzzy completion entries
 	result := make(slip.List, len(completions))
 	for i, comp := range completions {
-		// Each entry: (symbol score chunks doc)
-		// Score is 0-100, chunks highlight matched parts
-		score := slip.Fixnum(100 - i) // Simple scoring by position
+		// Each entry: (symbol score chunks flags)
+		// Score is a string like "71.33", chunks highlight matched parts
+		// Flags: -f--tm-p where f=func, m=macro, t=type, c=class, p=package
+		score := fmt.Sprintf("%.2f", float64(100-i))
+		flags := getSymbolFlags(c, comp)
 		result[i] = slip.List{
 			slip.String(comp),
-			score,
+			slip.String(score),
 			slip.List{slip.List{slip.Fixnum(0), slip.Fixnum(len(prefixStr))}},
-			slip.String(""),
+			slip.String(flags),
 		}
 	}
 
 	return slip.List{result, nil}
+}
+
+// getSymbolFlags returns SLIME-style flags for a symbol.
+// Format: "-f-ctm-p" where each position indicates:
+// 0: b=boundp, 1: f=fboundp, 2: g=generic-function, 3: c=class,
+// 4: t=type, 5: m=macro, 6: s=special-variable, 7: p=package
+func getSymbolFlags(c *Connection, name string) string {
+	flags := []byte("--------")
+	name = strings.ToLower(name)
+
+	// Check if it's a package
+	if strings.HasSuffix(name, ":") {
+		pkgName := strings.TrimSuffix(name, ":")
+		if slip.FindPackage(pkgName) != nil {
+			flags[7] = 'p'
+		}
+		return string(flags)
+	}
+
+	// Check current package and used packages
+	var fi *slip.FuncInfo
+	if fi = c.currentPkg.GetFunc(name); fi == nil {
+		for _, pkg := range c.currentPkg.Uses {
+			if fi = pkg.GetFunc(name); fi != nil {
+				break
+			}
+		}
+	}
+
+	if fi != nil {
+		// Check if it's a macro or function
+		if fi.Kind == slip.MacroSymbol {
+			flags[5] = 'm'
+		}
+		flags[1] = 'f' // fboundp - has function binding
+	}
+
+	// Check if it's a type/class
+	// TODO: Add class/type detection when available
+
+	return string(flags)
 }
 
 // handleApropos searches for symbols matching a pattern.

@@ -14,7 +14,7 @@ const headerSize = 6 // 6 hex digits for message length
 
 // ReadWireMessage reads a length-prefixed S-expression from the reader.
 // The Swank wire format is: 6 ASCII hex characters (length) + UTF-8 payload.
-func ReadWireMessage(r io.Reader, scope *slip.Scope) (slip.Object, error) {
+func ReadWireMessage(r io.Reader, scope *slip.Scope) (obj slip.Object, err error) {
 	// Read 6-byte header containing hex-encoded length
 	header := make([]byte, headerSize)
 	if _, err := io.ReadFull(r, header); err != nil {
@@ -33,7 +33,14 @@ func ReadWireMessage(r io.Reader, scope *slip.Scope) (slip.Object, error) {
 		return nil, err
 	}
 
-	// Parse S-expression using SLIP's reader
+	// Parse S-expression using SLIP's reader, recovering from parse panics
+	defer func() {
+		if rec := recover(); rec != nil {
+			err = fmt.Errorf("parse error: %v", rec)
+			obj = nil
+		}
+	}()
+
 	code := slip.Read(payload, scope)
 	if len(code) == 0 {
 		return nil, nil
