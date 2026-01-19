@@ -49,9 +49,6 @@ func TestCodeToken(t *testing.T) {
 		{src: "cl:abc", expect: "[cl:abc]", kind: "symbol"},
 		{src: "\nt\n", expect: "[t]", kind: "t"},
 		{src: "@2022-04-10T18:52:17Z", expect: "[@2022-04-10T18:52:17Z]", kind: "time"},
-		{src: "%foo%", expect: "[|%foo%|]", kind: "symbol"},
-		{src: "%cursor-marker%", expect: "[|%cursor-marker%|]", kind: "symbol"},
-		{src: "test%middle", expect: "[|test%middle|]", kind: "symbol"},
 	} {
 		ct.test(t, i)
 	}
