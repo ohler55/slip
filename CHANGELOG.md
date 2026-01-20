@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.3.2] - unreleased
+### Changed
+- Allow % and $ in symbols.
+### Added
+- Added `-b` command line option with binding to `$@` and `$<n>` where <n> is the argument position.
+- The `bag-walk` function now supports either one or two arguments to the callback function.
+
 ## [1.3.1] - 2026-01-05
 ### Fixed
 - Renamed pkg/generics/aux.go to pkg/generics/uax.go to satisfy
