@@ -27,6 +27,9 @@ type Connection struct {
 	// History tracking
 	lastValues [3]slip.Object // *, **, ***
 	lastForms  [3]slip.Object // +, ++, +++
+
+	// Inspector state
+	inspector *Inspector
 }
 
 // NewConnection creates a connection for an accepted socket.

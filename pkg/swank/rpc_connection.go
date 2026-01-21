@@ -46,7 +46,7 @@ func handleConnectionInfo(c *Connection, args slip.List) slip.Object {
 			slip.Symbol(":name"), slip.String(c.currentPkg.Name),
 			slip.Symbol(":prompt"), slip.String(c.currentPkg.Name),
 		},
-		slip.Symbol(":version"), slip.String("2.29"), // Swank protocol version
+		slip.Symbol(":version"), nil,
 	}
 }
 

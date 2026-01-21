@@ -8,7 +8,6 @@ import (
 
 func init() {
 	RegisterHandler("swank:swank-require", handleSwankRequire)
-	RegisterHandler("swank:init-inspector", handleInitInspector)
 }
 
 // handleSwankRequire loads optional Swank modules.
@@ -16,10 +15,4 @@ func init() {
 func handleSwankRequire(c *Connection, args slip.List) slip.Object {
 	// Return empty list of loaded modules
 	return slip.List{}
-}
-
-// handleInitInspector initializes the inspector.
-// We don't fully support inspection yet, but acknowledge the request.
-func handleInitInspector(c *Connection, args slip.List) slip.Object {
-	return nil
 }

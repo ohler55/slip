@@ -190,47 +190,34 @@ func describeSymbol(c *Connection, name string) string {
 		}
 	}
 
-	var result strings.Builder
-
-	// Check if it's a function
+	// Check if it's a function/macro
 	if fi := pkg.GetFunc(name); fi != nil {
-		result.WriteString(strings.ToUpper(name))
-		result.WriteString(" is a function.\n\n")
+		return formatFuncDescription(fi)
+	}
 
-		if fi.Doc != nil {
-			result.WriteString("Arguments: ")
-			for i, arg := range fi.Doc.Args {
-				if i > 0 {
-					result.WriteString(" ")
-				}
-				result.WriteString(arg.Name)
-			}
-			result.WriteString("\n\n")
-
-			if fi.Doc.Text != "" {
-				result.WriteString("Documentation:\n")
-				result.WriteString(fi.Doc.Text)
-				result.WriteString("\n")
-			}
+	// Search used packages
+	for _, usedPkg := range pkg.Uses {
+		if fi := usedPkg.GetFunc(name); fi != nil {
+			return formatFuncDescription(fi)
 		}
-		return result.String()
 	}
 
 	// Check if it's a variable
 	if vv := pkg.GetVarVal(name); vv != nil {
+		var result strings.Builder
 		result.WriteString(strings.ToUpper(name))
 		if vv.Const {
-			result.WriteString(" is a constant.\n\n")
+			result.WriteString(" names a constant:\n")
 		} else {
-			result.WriteString(" is a variable.\n\n")
+			result.WriteString(" names a variable:\n")
 		}
 
-		result.WriteString("Value: ")
+		result.WriteString("  Value: ")
 		result.WriteString(slip.ObjectString(vv.Val))
-		result.WriteString("\n\n")
+		result.WriteString("\n")
 
 		if vv.Doc != "" {
-			result.WriteString("Documentation:\n")
+			result.WriteString("  Documentation:\n    ")
 			result.WriteString(vv.Doc)
 			result.WriteString("\n")
 		}
@@ -238,6 +225,32 @@ func describeSymbol(c *Connection, name string) string {
 	}
 
 	return "No description available for " + name
+}
+
+// formatFuncDescription formats a function/macro description.
+func formatFuncDescription(fi *slip.FuncInfo) string {
+	var result []byte
+
+	// Header: "NAME names a function/macro:"
+	result = append(result, strings.ToUpper(fi.Name)...)
+	result = append(result, " names a "...)
+	kind := "function"
+	if fi.Kind == slip.MacroSymbol {
+		kind = "macro"
+	} else if fi.Kind == slip.GenericFunctionSymbol {
+		kind = "generic function"
+	} else if fi.Kind == slip.MethodSymbol {
+		kind = "method"
+	}
+	result = append(result, kind...)
+	result = append(result, ":\n"...)
+
+	// Use FuncDoc.Describe for the rest (with ansi=false to strip markdown)
+	if fi.Doc != nil {
+		result = fi.Doc.Describe(result, 2, 80, false)
+	}
+
+	return string(result)
 }
 
 // getDocumentation returns the documentation for a symbol.
@@ -254,14 +267,21 @@ func getDocumentation(c *Connection, name string) string {
 		}
 	}
 
-	// Check if it's a function
+	// Check if it's a function in current package
 	if fi := pkg.GetFunc(name); fi != nil && fi.Doc != nil {
-		return fi.Doc.Text
+		return string(slip.AppendDoc(nil, fi.Doc.Text, 0, 80, false))
+	}
+
+	// Search used packages
+	for _, usedPkg := range pkg.Uses {
+		if fi := usedPkg.GetFunc(name); fi != nil && fi.Doc != nil {
+			return string(slip.AppendDoc(nil, fi.Doc.Text, 0, 80, false))
+		}
 	}
 
 	// Check if it's a variable
 	if vv := pkg.GetVarVal(name); vv != nil {
-		return vv.Doc
+		return string(slip.AppendDoc(nil, vv.Doc, 0, 80, false))
 	}
 
 	return ""

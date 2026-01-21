@@ -10,8 +10,6 @@ func init() {
 	RegisterHandler("swank:list-all-package-names", handleListAllPackageNames)
 	RegisterHandler("swank:set-package", handleSetPackage)
 	RegisterHandler("swank:find-definitions-for-emacs", handleFindDefinitions)
-	RegisterHandler("swank:xref", handleXref)
-	RegisterHandler("swank:xrefs", handleXrefs)
 }
 
 // handleListAllPackageNames returns a list of all package names.
@@ -65,18 +63,5 @@ func handleSetPackage(c *Connection, args slip.List) slip.Object {
 // We don't have source locations, so return empty for now.
 func handleFindDefinitions(c *Connection, args slip.List) slip.Object {
 	// SLIP doesn't track source locations, so return empty
-	return slip.List{}
-}
-
-// handleXref finds cross-references for a symbol.
-// Response format: ((designator location) ...)
-func handleXref(c *Connection, args slip.List) slip.Object {
-	// SLIP doesn't track cross-references, so return empty
-	return slip.List{}
-}
-
-// handleXrefs finds multiple cross-references.
-func handleXrefs(c *Connection, args slip.List) slip.Object {
-	// SLIP doesn't track cross-references, so return empty
 	return slip.List{}
 }
