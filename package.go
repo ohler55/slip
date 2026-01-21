@@ -17,14 +17,7 @@ const PackageSymbol = Symbol("package")
 // cl:require function.
 var CurrentPackageLoadPath = ""
 
-var packages = []*Package{
-	&CLPkg,
-	&UserPkg,
-}
-
-func init() {
-	CurrentPackage = &UserPkg
-}
+var packages []*Package
 
 // Package represents a LISP package.
 type Package struct {
