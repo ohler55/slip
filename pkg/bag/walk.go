@@ -91,7 +91,6 @@ func walkBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) {
 CallFunc:
 	switch tf := fn.(type) {
 	case *slip.Lambda:
-		// TBD look at len(tf.Doc.Args), make sure it exists
 		if asBag {
 			for _, v := range path.Get(obj.Any) {
 				arg := flavor.MakeInstance().(*flavors.Instance)
@@ -105,7 +104,6 @@ CallFunc:
 			}
 		}
 	case *slip.FuncInfo:
-		// TBD look at len(tf.Doc.Args), make sure it exists
 		if asBag {
 			for _, v := range path.Get(obj.Any) {
 				arg := flavor.MakeInstance().(*flavors.Instance)

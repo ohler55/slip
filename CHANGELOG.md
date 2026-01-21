@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow % and $ in symbols.
 ### Added
 - Added `-b` command line option with binding to `$@` and `$<n>` where <n> is the argument position.
-- The `bag-walk` function now supports either one or two arguments to the callback function.
+- The `bag-scan` function to scan a `bag` and call a function on each node in the data.
 
 ## [1.3.1] - 2026-01-05
 ### Fixed
