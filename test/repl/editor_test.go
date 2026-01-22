@@ -172,8 +172,8 @@ func TestEditorHelp(t *testing.T) {
 func TestEditorDescribeScroll(t *testing.T) {
 	edTest(t, []any{
 		startSteps,
-		provide(strings.Repeat("\n", 20)),
-		until("<set-cursor 22:3>"),
+		provide(strings.Repeat("\n", 19)),
+		until("<set-cursor 21:3>"),
 		provide("(car"),
 		until("("),
 		until("c"),
@@ -181,12 +181,12 @@ func TestEditorDescribeScroll(t *testing.T) {
 		until("r"),
 		provide("\x1b/"),
 		until("<scroll-up 1>"),
-		expect("<set-cursor 23:4>"),
+		expect("<set-cursor 22:4>"),
 		expect("<bold>"),
 		expect("common-lisp:car"),
 		expect("<normal>"),
 		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
-		expect("<set-cursor 21:7>"),
+		until("<set-cursor 20:7>"),
 		provide("\x03"),
 	})
 }
