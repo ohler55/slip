@@ -72,7 +72,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	valueMode = "" +
 		".........ak..a.................." + // 0x00
-		"a.Q#..tq()tt,tttttttttttttt;ttt." + // 0x20
+		"a.Q#.ttq()tt,tttttttttttttt;ttt." + // 0x20
 		"@tttttttttttttttttttttttttt...tt" + // 0x40
 		"Btttttttttttttttttttttttttt.P.t." + // 0x60
 		"................................" + // 0x80
@@ -94,7 +94,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	tokenMode = "" +
 		".........TT..T.................." + // 0x00
-		"T.......TTaa.aaaaaaaaaaaaaa.aaa." + // 0x20
+		"T....a..TTaa.aaaaaaaaaaaaaa.aaa." + // 0x20
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaa...aa" + // 0x40
 		".aaaaaaaaaaaaaaaaaaaaaaaaaa...a." + // 0x60
 		"................................" + // 0x80
