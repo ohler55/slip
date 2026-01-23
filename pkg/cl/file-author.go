@@ -3,10 +3,6 @@
 package cl
 
 import (
-	"os/user"
-	"strconv"
-	"syscall"
-
 	"github.com/ohler55/slip"
 )
 
@@ -46,11 +42,9 @@ func (f *FileAuthor) Call(s *slip.Scope, args slip.List, depth int) (result slip
 	if !ok {
 		slip.TypePanic(s, depth, "filepath", args[0], "string")
 	}
-	var stat syscall.Stat_t
-	if syscall.Stat(string(path), &stat) == nil {
-		if u, err := user.LookupId(strconv.Itoa(int(stat.Uid))); err == nil {
-			result = slip.String(u.Username)
-		}
+
+	if owner := getFileOwner(string(path)); owner != "" {
+		return slip.String(owner)
 	}
-	return
+	return nil
 }
