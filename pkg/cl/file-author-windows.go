@@ -2,7 +2,7 @@
 
 package cl
 
-import "errors"
+import "github.com/ohler55/slip"
 
 func getFileOwner(path string) (string, error) {
 	// On Windows, file-author is not supported and should raise a file-error
