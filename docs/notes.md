@@ -2,6 +2,15 @@
 
 - **multipass** or utm for linux
 
+- next
+ - v1.3.1 release with aux.go change
+ - update ohler.com
+  - and rss
+ - mongodb and ggql plugin release
+  - test to make sure
+ - post notice on forums
+ - verify goreportcard
+
 ---------------------
 
 - flavor allow out of order defflavor like standard-class
@@ -38,6 +47,9 @@
  - watch.connect.safeEval
   - encode condition and decode
   - frame test broken
+
+
+ - structs - seems like a downgrade from class or flavors, just another weaker alternative instances with slots
 
  - package-export
   - import

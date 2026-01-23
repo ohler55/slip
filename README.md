@@ -11,7 +11,7 @@ including many non standard features. Most notable of the extra
 features is the ability to extend LISP with Go code. Also included is
 a Read Eval Print Loop (REPL) that provides an environment for
 prototyping, testing, and exploring SLIP. While not a full
-implementation of Common LISP, SLIP continues to move in that
+implemenation of Common LISP, SLIP continues to move in that
 direction.
 
 A more detailed explanation of some of the features are on the
