@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow % and $ in symbols.
 - `find-class` now considers package prefix such as `'flavors:vanilla-flavor`.
 - The last line of some popup help documentation is no longer cut off.
+- Windows compatibility issues fixed for `file-author` and `send-signal`.
 ### Added
 - Added `-b` command line option with binding to `$@` and `$<n>` where <n> is the argument position.
 - The `bag-scan` function to scan a `bag` and call a function on each node in the data.
