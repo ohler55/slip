@@ -43,7 +43,7 @@ func (f *FileAuthor) Call(s *slip.Scope, args slip.List, depth int) (result slip
 		slip.TypePanic(s, depth, "filepath", args[0], "string")
 	}
 	if owner := getFileOwner(s, string(path)); owner != "" {
-		return slip.String(owner)
+		result = slip.String(owner)
 	}
-	return nil
+	return
 }
