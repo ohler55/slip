@@ -131,6 +131,7 @@ func AppendDescribe(b []byte, obj slip.Object, s *slip.Scope, indent, right int,
 		b = append(b, '\n')
 		b = append(b, pad...)
 		b = c.Describe(b, indent, right, ansi)
+		return b
 	} else {
 		b, _ = describeHead(b, pkg, sym, indent, right, ansi)
 		b = append(b, "  unbound\n"...)
