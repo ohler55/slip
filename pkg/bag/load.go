@@ -35,7 +35,7 @@ creates a __bag__ instance with the content.`,
 		}, &Pkg)
 }
 
-// Load represents the modify function.
+// Load represents the load-bag function.
 type Load struct {
 	slip.Function
 }
