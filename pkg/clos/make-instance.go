@@ -60,7 +60,9 @@ func classFromArg0(f slip.Object, s *slip.Scope, args slip.List, depth int) (cla
 	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	switch ta := args[0].(type) {
 	case slip.Symbol:
-		class = slip.FindClass(string(ta))
+		if class = slip.FindClass(string(ta)); class == nil {
+			slip.ErrorPanic(s, depth, "class %s not found.", ta)
+		}
 	case slip.Class:
 		class = ta
 	default:
