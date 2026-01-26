@@ -82,7 +82,7 @@ func (s *Server) acceptLoop() {
 		conn, err := s.listener.Accept()
 		if err != nil {
 			if s.running.Load() {
-				fmt.Printf("slynk: accept error: %v\n", err)
+				LogError("accept error: %v", err)
 			}
 			continue
 		}

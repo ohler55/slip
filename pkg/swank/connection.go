@@ -65,7 +65,7 @@ func (c *Connection) Run() {
 		msg, err := ReadWireMessage(c.conn, c.scope)
 		if err != nil {
 			if !errors.Is(err, io.EOF) {
-				fmt.Printf("swank: connection %d read error: %v\n", c.id, err)
+				LogError("connection %d read error: %v", c.id, err)
 			}
 			return
 		}
@@ -74,6 +74,7 @@ func (c *Connection) Run() {
 			continue
 		}
 
+		LogWire("<-", msg)
 		c.dispatch(msg)
 	}
 }
@@ -87,6 +88,7 @@ func (c *Connection) Close() {
 func (c *Connection) Send(msg slip.Object) error {
 	c.writeMu.Lock()
 	defer c.writeMu.Unlock()
+	LogWire("->", msg)
 	return WriteWireMessage(c.conn, msg)
 }
 
@@ -108,7 +110,7 @@ func (c *Connection) dispatch(msg slip.Object) {
 	case ":emacs-interrupt":
 		c.handleEmacsInterrupt(list)
 	default:
-		fmt.Printf("swank: unknown message type: %s\n", msgType)
+		LogError("unknown message type: %s", msgType)
 	}
 }
 
@@ -155,9 +157,12 @@ func (c *Connection) handleEmacsRex(msg slip.List) {
 	// Look up and execute handler
 	handler := GetHandler(string(handlerName))
 	if handler == nil {
+		LogError("unknown handler: %s", handlerName)
 		c.sendAbort(cont, fmt.Sprintf("unknown handler: %s", handlerName))
 		return
 	}
+
+	LogDispatch(string(handlerName), formList[1:])
 
 	// Execute handler with panic recovery
 	var result slip.Object

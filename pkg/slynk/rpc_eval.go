@@ -159,6 +159,9 @@ func evalInScope(c *Connection, ch *Channel, source string, updateHistory bool) 
 	// Evaluate
 	result = code.Eval(ch.Scope(), nil)
 
+	// Log evaluation if verbose
+	LogEval(form, result)
+
 	// Update history if requested
 	if updateHistory {
 		ch.UpdateREPLHistory(result, form)

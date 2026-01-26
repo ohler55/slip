@@ -141,6 +141,9 @@ func evalWithCapture(c *Connection, source string, sendOutput bool) (result slip
 	// Evaluate
 	result = code.Eval(c.scope, nil)
 
+	// Log evaluation if verbose
+	LogEval(form, result)
+
 	// Flush any captured output
 	if sendOutput {
 		c.outputStream.FlushToSlime()
