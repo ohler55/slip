@@ -50,6 +50,17 @@ func TestClassPrecedenceCondition(t *testing.T) {
 	}).Test(t)
 }
 
+func TestClassPrecedenceAnyClass(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(progn (defstruct boox x) (defstruct (qoox (:include boox))))`,
+		Expect: "qoox",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(class-precedence 'qoox)`,
+		Expect: "(qoox boox t)",
+	}).Test(t)
+}
+
 func TestClassPrecedenceBuiltIn(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(class-precedence 'fixnum)`,
