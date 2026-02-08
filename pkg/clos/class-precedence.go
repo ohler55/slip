@@ -65,10 +65,12 @@ top:
 		result = pa
 	default:
 		inherits := c.InheritsList()
-		clist := make(slip.List, len(inherits))
+		clist := make(slip.List, len(inherits)+2)
+		clist[0] = slip.Symbol(c.Name())
 		for i, ic := range inherits {
-			clist[i] = slip.Symbol(ic.Name())
+			clist[i+1] = slip.Symbol(ic.Name())
 		}
+		clist[len(inherits)+1] = slip.TrueSymbol
 		result = clist
 	}
 	return
