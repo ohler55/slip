@@ -63,6 +63,13 @@ top:
 			pa[i] = name
 		}
 		result = pa
+	default:
+		inherits := c.InheritsList()
+		clist := make(slip.List, len(inherits))
+		for i, ic := range inherits {
+			clist[i] = slip.Symbol(ic.Name())
+		}
+		result = clist
 	}
 	return
 }
