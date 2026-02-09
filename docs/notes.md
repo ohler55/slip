@@ -4,6 +4,11 @@
 
 ---------------------
 
+- synchronize (xxx &rest forms)
+ - what to use for xxx
+ - xxx has to include or be a mutex
+ - lock on start and defer unlock
+
 - flavor allow out of order defflavor like standard-class
 
 ---------------------
