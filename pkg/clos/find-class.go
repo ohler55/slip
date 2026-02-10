@@ -28,11 +28,10 @@ func defFindClass() {
 					Text: "If true a panic is raised if the flavor is not found.",
 				},
 			},
-			Text: `__find-class__ returns the _class_ or _flavor_ with the _name_ specified
-or _nil_ if not found. If _errorp_ is true then a panic is raised.`,
+			Text: `__find-class__ returns the _flavor_ with the _name_ specified or _nil_ if not found.
+If _errorp_ is true then a panic is raised. This is an alias for __find-flavor__.`,
 			Examples: []string{
 				"(find-class 'vanilla-flavor) => #<flavor vanilla-flavor>",
-				"(find-class 'flavors:vanilla-flavor) => #<flavor vanilla-flavor>",
 			},
 		}, &Pkg)
 }

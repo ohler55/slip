@@ -61,10 +61,6 @@ top:
 		if tc.inherit != nil {
 			result = slip.List{slip.Symbol(tc.inherit.Name())}
 		}
-	default:
-		if ics := tc.InheritsList(); 0 < len(ics) {
-			result = slip.Symbol(ics[0].Name())
-		}
 	}
 	return
 }

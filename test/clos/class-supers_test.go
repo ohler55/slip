@@ -50,17 +50,6 @@ func TestClassSupersCondition(t *testing.T) {
 	}).Test(t)
 }
 
-func TestClassSuperAnyClass(t *testing.T) {
-	(&sliptest.Function{
-		Source: `(progn (defstruct baax x) (defstruct (qaax (:include baax))))`,
-		Expect: "qaax",
-	}).Test(t)
-	(&sliptest.Function{
-		Source: `(class-supers 'qaax)`,
-		Expect: "baax",
-	}).Test(t)
-}
-
 func TestClassSupersBuiltIn(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(class-supers 'fixnum)`,

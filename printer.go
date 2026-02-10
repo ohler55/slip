@@ -27,7 +27,7 @@ const (
 	//   0123456789abcdef0123456789abcdef
 	needPipeMap = "" +
 		"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" + // 0x00
-		"xxxx..xxxx..x..x...........x...." + // 0x20
+		"xxxxxxxxxx..x..x...........x...." + // 0x20
 		"...........................xxx.." + // 0x40
 		"x..........................xxx.x" + // 0x60
 		"................................" + // 0x80

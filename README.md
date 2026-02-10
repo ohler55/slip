@@ -86,7 +86,6 @@ Plugins are available in other repositories.
  - **slip-flow** a process flow implementation (contact me if interested)
  - **flow-editor** a process flow graphical editor (contact me if interested)
  - **slip-parquet** for parquet APIs (contact me if interested)
- - [slap](https://github.com/ohler55/slap) a template for standalone application with embeded LISP code and plugins.
 
 ## Links
 

@@ -4,26 +4,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-## [1.3.2] - unreleased
-### Fixed
-- Allow % and $ in symbols.
-- `find-class` now considers package prefix such as `'flavors:vanilla-flavor`.
-- The last line of some popup help documentation is no longer cut off.
-- Windows compatibility issues fixed for `file-author` and `send-signal`.
-- Stack trace is now printed on error in non-interactive mode.
-- `class-supers` now supports structs and any other class.
-- `class-precedence` now supports structs and any other class.
-- Added `synchronizedp` function for instances.
-- Added `set-synchronized` function for instances.
-- Added `make-mutex` and `with-mutex-lock` functions.
-
-### Added
-- Added `-b` command line option with binding to `$@` and `$<n>` where <n> is the argument position.
-- The `bag-scan` function to scan a `bag` and call a function on each node in the data.
-- The `load-bag` function to load a `bag` from a file.
-- The `each-bag` function to read multiple JSON documents from a stream or file.
-
 ## [1.3.1] - 2026-01-05
 ### Fixed
 - Renamed pkg/generics/aux.go to pkg/generics/uax.go to satisfy

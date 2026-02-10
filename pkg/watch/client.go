@@ -73,7 +73,6 @@ type clientInitCaller struct{}
 
 func (caller clientInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
-	self.SetSynchronized(true)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
@@ -451,7 +450,6 @@ func formError(s *slip.Scope, list slip.List) (serr slip.Object) {
 
 	if c := slip.FindClass(string(class)); c != nil && c.Metaclass() == slip.Symbol("condition-class") {
 		obj := c.MakeInstance()
-		obj.SetSynchronized(true)
 		obj.Init(slip.NewScope(), slip.List{slip.Symbol(":message"), msg}, 0)
 		serr = obj
 	} else {

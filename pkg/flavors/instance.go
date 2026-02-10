@@ -99,6 +99,7 @@ func (obj *Instance) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool)
 		obj.Lock()
 		if _, has = obj.Vars[name]; has {
 			obj.Vars[name] = value
+
 		}
 		obj.Unlock()
 	}
@@ -108,10 +109,6 @@ func (obj *Instance) SetSlotValue(sym slip.Symbol, value slip.Object) (has bool)
 // Init the instance slots from the provided args list. If the scope is not
 // nil then send :init is called.
 func (obj *Instance) Init(scope *slip.Scope, args slip.List, depth int) {
-
-	// The instance is initially not mutex protected for best single thread performance.
-	obj.SetSynchronized(false)
-
 	obj.Keep = true
 	var plist slip.List
 	keys := map[string]bool{}

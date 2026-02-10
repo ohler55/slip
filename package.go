@@ -3,9 +3,6 @@
 package slip
 
 import (
-	"fmt"
-	"io"
-	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -20,7 +17,14 @@ const PackageSymbol = Symbol("package")
 // cl:require function.
 var CurrentPackageLoadPath = ""
 
-var packages []*Package
+var packages = []*Package{
+	&CLPkg,
+	&UserPkg,
+}
+
+func init() {
+	CurrentPackage = &UserPkg
+}
 
 // Package represents a LISP package.
 type Package struct {
@@ -166,16 +170,9 @@ func (obj *Package) Use(pkg *Package) {
 				if xc.Pkg() == c.Pkg() {
 					continue
 				}
-				var w io.Writer = os.Stdout
-				if vv := CurrentPackage.getVarVal("*error-output*"); vv != nil {
-					w = vv.Value().(io.Writer)
-				}
-				_, _ = fmt.Fprintf(w, "WARNING: Package %s:%s shadows %s:%s.\n", obj.Name, name, pkg.Name, name)
-				continue
-				// TBD when exports are ready use those to allow the shadowing
-				// PackagePanic(NewScope(), 0, obj, "Package %s already defines class %s which can not be replaced "+
-				// 	"with a class with the same name in package %s.",
-				// 	obj, name, pkg)
+				PackagePanic(NewScope(), 0, obj, "Package %s already defines class %s which can not be replaced "+
+					"with a class with the same name in package %s.",
+					obj, name, pkg)
 			}
 			obj.classes[name] = c
 		}

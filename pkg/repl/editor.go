@@ -684,9 +684,6 @@ func (ed *editor) displayHelp(doc []byte, w, h int) {
 		pad = 2
 	}
 	cnt := bytes.Count(doc, []byte{'\n'})
-	if doc[len(doc)-1] != '\n' {
-		cnt++
-	}
 	if h <= bottom+cnt+pad {
 		diff := bottom + cnt - h + pad
 		if h <= len(ed.lines)+pad+cnt { // not all will fit in window

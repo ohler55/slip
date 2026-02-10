@@ -57,7 +57,6 @@ type MakeSocket struct {
 func (f *MakeSocket) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 0, 6)
 	self := socketFlavor.MakeInstance().(*flavors.Instance)
-	self.SetSynchronized(true)
 
 	_ = self.Receive(s, ":init", slip.List{args}, 0)
 

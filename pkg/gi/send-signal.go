@@ -3,6 +3,8 @@
 package gi
 
 import (
+	"syscall"
+
 	"github.com/ohler55/slip"
 )
 
@@ -34,10 +36,12 @@ func init() {
 		}, &Pkg)
 }
 
+// SendSignal represents the send-signal function.
 type SendSignal struct {
 	slip.Function
 }
 
+// Call the function with the arguments provided.
 func (f *SendSignal) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 2, 2)
 	pid, ok := args[0].(slip.Fixnum)
@@ -48,9 +52,8 @@ func (f *SendSignal) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	if sig, ok = args[1].(slip.Fixnum); !ok {
 		slip.TypePanic(s, depth, "signal", args[1], "fixnum")
 	}
-
-	// Call the platform-specific implementation
-	sendSignal(int(pid), int(sig))
-
+	if err := syscall.Kill(int(pid), syscall.Signal(sig)); err != nil {
+		panic(err)
+	}
 	return nil
 }

@@ -48,7 +48,6 @@ nil and boolean false.`),
 	generic.DefClassMethod(flavor, ":native", "", nativeCaller{})
 	generic.DefClassMethod(flavor, ":write", "", writeCaller{})
 	generic.DefClassMethod(flavor, ":walk", "", walkCaller{})
-	generic.DefClassMethod(flavor, ":scan", "", scanCaller{})
 
 	return flavor
 }
@@ -488,38 +487,6 @@ func (caller walkCaller) FuncDocs() *slip.FuncDoc {
 				Name: ":as-lisp",
 				Type: "boolean",
 				Text: `If not nil then the value to the _function_ is a LISP value otherwise a new _bag_.`,
-			},
-		},
-		Return: "nil",
-	}
-}
-
-type scanCaller struct{}
-
-func (caller scanCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
-	obj := s.Get("self").(*flavors.Instance)
-	scanBag(s, obj, args, depth)
-	return nil
-}
-
-func (caller scanCaller) FuncDocs() *slip.FuncDoc {
-	return &slip.FuncDoc{
-		Name: ":scan",
-		Text: `Scans nodes in a bag and calls _function_ on each node. If the
-node is a leaf node then the value passed to the _function_ is a built-in LISP value. If the
-node is a branch then then value is a bag.`,
-		Args: []*slip.DocArg{
-			{
-				Name: "function",
-				Type: "symbol|lambda",
-				Text: `The function to apply to each node in the instance's data.`,
-			},
-			{Name: "&key"},
-			{
-				Name:    "leaves-only",
-				Type:    "boolean",
-				Text:    `If true only leaves trigger the calling of _function_.`,
-				Default: slip.String(".."),
 			},
 		},
 		Return: "nil",

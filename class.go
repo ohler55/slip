@@ -2,10 +2,6 @@
 
 package slip
 
-import (
-	"strings"
-)
-
 // Class represents all class types.
 type Class interface {
 	Object
@@ -49,14 +45,7 @@ type Class interface {
 
 // Find finds the named class.
 func FindClass(name string) (c Class) {
-	pkg := CurrentPackage
-	if index := strings.IndexByte(name, ':'); 0 < index {
-		if pkg = FindPackage(name[:index]); pkg == nil {
-			return nil
-		}
-		name = name[index+1:]
-	}
-	return pkg.FindClass(name)
+	return CurrentPackage.FindClass(name)
 }
 
 // RegisterClass a class.

@@ -492,7 +492,6 @@ output is written to that _stream_.`,
 // MakeRequest makes a new request.
 func MakeRequest(req *http.Request) (inst *flavors.Instance) {
 	inst = requestFlavor.MakeInstance().(*flavors.Instance)
-	inst.SetSynchronized(true)
 	inst.Any = req
 	return
 }
