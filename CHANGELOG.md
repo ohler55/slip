@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stack trace is now printed on error in non-interactive mode.
 - `class-supers` now supports structs and any other class.
 - `class-precedence` now supports structs and any other class.
+- Added `synchronizedp` function for instances.
+- Added `set-synchronized` function for instances.
+- Added `make-mutex` and `with-mutex-lock` functions.
 
 ### Added
 - Added `-b` command line option with binding to `$@` and `$<n>` where <n> is the argument position.
