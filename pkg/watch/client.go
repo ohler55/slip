@@ -450,6 +450,7 @@ func formError(s *slip.Scope, list slip.List) (serr slip.Object) {
 
 	if c := slip.FindClass(string(class)); c != nil && c.Metaclass() == slip.Symbol("condition-class") {
 		obj := c.MakeInstance()
+		obj.SetSynchronized(true)
 		obj.Init(slip.NewScope(), slip.List{slip.Symbol(":message"), msg}, 0)
 		serr = obj
 	} else {
