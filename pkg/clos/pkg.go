@@ -54,6 +54,8 @@ func init() {
 	defWithSlots()
 	defSharedInitialize()
 	defInitializeInstance()
+	defSynchronizedp()
+	defSetSynchronized()
 
 	defConditions()
 

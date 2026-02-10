@@ -57,6 +57,7 @@ type serverInitCaller struct{}
 
 func (caller serverInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	self := s.Get("self").(*flavors.Instance)
+	self.SetSynchronized(true)
 	if 0 < len(args) {
 		args = args[0].(slip.List)
 	}
