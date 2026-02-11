@@ -16,8 +16,9 @@ func init() {
 	// Package info
 	RegisterHandler("slynk:package-local-nicknames", handlePackageLocalNicknames)
 
-	// Module loading (stub)
+	// Module loading (stubs)
 	RegisterHandler("slynk:slynk-require", handleSlynkRequire)
+	RegisterHandler("slynk:slynk-add-load-paths", handleSlynkAddLoadPaths)
 }
 
 // handleListAllPackageNames returns a list of all loaded package names.
@@ -100,5 +101,12 @@ func handlePackageLocalNicknames(c *Connection, args slip.List) slip.Object {
 // This is a stub that returns success for requested modules.
 func handleSlynkRequire(c *Connection, args slip.List) slip.Object {
 	// Return nil to indicate success (no additional modules needed to load)
+	return nil
+}
+
+// handleSlynkAddLoadPaths adds directories to the Slynk module search path.
+// This is a stub since SLIP doesn't have a module loading system.
+func handleSlynkAddLoadPaths(c *Connection, args slip.List) slip.Object {
+	// Return nil to indicate success
 	return nil
 }
