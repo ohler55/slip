@@ -230,6 +230,15 @@ func getObjectTitle(obj slip.Object) string {
 	if obj == nil {
 		return "nil"
 	}
+	// For strings, use the raw value to avoid double-quoting when the
+	// title is wrapped in slip.String for the wire response.
+	if str, ok := obj.(slip.String); ok {
+		s := string(str)
+		if len(s) > 50 {
+			s = s[:47] + "..."
+		}
+		return s
+	}
 	// Use short representation
 	s := slip.ObjectString(obj)
 	if len(s) > 50 {
