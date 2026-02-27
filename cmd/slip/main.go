@@ -15,7 +15,6 @@ import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/repl"
-	"github.com/ohler55/slip/pkg/slynk"
 	"github.com/ohler55/slip/pkg/swank"
 	"golang.org/x/term"
 
@@ -50,7 +49,7 @@ func init() {
 			args = append(args, slip.String(s))
 			return nil
 		})
-	flag.StringVar(&emacsMode, "emacs", "", "start Emacs integration server (slime or sly, default: slime)")
+	flag.StringVar(&emacsMode, "emacs", "", "start Emacs SLIME integration server")
 }
 
 func main() {
@@ -112,13 +111,6 @@ func startEmacsServer() {
 	mode := strings.ToLower(emacsMode)
 
 	switch mode {
-	case "sly":
-		server := slynk.NewServer(scope)
-		if err := server.Start(":4005"); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to start slynk server: %v\n", err)
-			os.Exit(1)
-		}
-		fmt.Printf("Slynk server started on %s (for SLY)\n", server.Addr())
 	case "slime", "swank":
 		server := swank.NewServer(scope)
 		if err := server.Start(":4005"); err != nil {
@@ -127,7 +119,7 @@ func startEmacsServer() {
 		}
 		fmt.Printf("Swank server started on %s (for SLIME)\n", server.Addr())
 	default:
-		fmt.Fprintf(os.Stderr, "Unknown emacs mode: %s (use 'slime' or 'sly')\n", emacsMode)
+		fmt.Fprintf(os.Stderr, "Unknown emacs mode: %s (use 'slime')\n", emacsMode)
 		os.Exit(1)
 	}
 }
