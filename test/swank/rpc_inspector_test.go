@@ -122,7 +122,7 @@ func TestInspectNthPart(t *testing.T) {
 	// Get nth part (index 0 should be 'a)
 	result := env.sendRexOK(t, slip.List{slip.Symbol("swank:inspector-nth-part"), slip.Fixnum(0)})
 	if result == nil {
-		t.Log("nth-part returned nil (part might not be indexed)")
+		t.Error("expected part at index 0, got nil — parts not populated after inspect-in-emacs")
 	}
 }
 
@@ -202,19 +202,31 @@ func TestInspectorHistory(t *testing.T) {
 
 	// Pop back to 42
 	result := env.sendRexOK(t, slip.List{slip.Symbol("swank:inspector-pop")})
-	if result != nil {
-		s := slip.ObjectString(result)
-		if !strings.Contains(s, "42") {
-			t.Errorf("expected 42 after pop: %s", s)
+	if result == nil {
+		t.Fatal("expected inspector content after pop")
+	}
+	if plist, ok := result.(slip.List); ok {
+		for i := 0; i+1 < len(plist); i += 2 {
+			if plist[i] == slip.Symbol(":title") {
+				if title, ok := plist[i+1].(slip.String); !ok || string(title) != "42" {
+					t.Errorf("expected title 42, got %v", plist[i+1])
+				}
+			}
 		}
 	}
 
 	// Forward to 99
 	result = env.sendRexOK(t, slip.List{slip.Symbol("swank:inspector-next")})
-	if result != nil {
-		s := slip.ObjectString(result)
-		if !strings.Contains(s, "99") {
-			t.Errorf("expected 99 after next: %s", s)
+	if result == nil {
+		t.Fatal("expected inspector content after next")
+	}
+	if plist, ok := result.(slip.List); ok {
+		for i := 0; i+1 < len(plist); i += 2 {
+			if plist[i] == slip.Symbol(":title") {
+				if title, ok := plist[i+1].(slip.String); !ok || string(title) != "99" {
+					t.Errorf("expected title 99, got %v", plist[i+1])
+				}
+			}
 		}
 	}
 }
@@ -306,6 +318,42 @@ func TestInspectFuncInfo(t *testing.T) {
 		if !strings.Contains(s, ":title") {
 			t.Errorf("expected :title in funcinfo inspection: %s", s)
 		}
+	}
+}
+
+func TestInspectorReinspectAfterQuit(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	env.sendRexOK(t, slip.List{slip.Symbol("swank:inspect-in-emacs"), slip.String("42")})
+	env.sendRex(t, slip.List{slip.Symbol("swank:quit-inspector")})
+
+	// Reinspect after quit — current is nil, should return nil plist
+	result := env.sendRexOK(t, slip.List{slip.Symbol("swank:inspector-reinspect")})
+	if result == nil {
+		t.Fatal("expected nil-object plist from reinspect after quit")
+	}
+	s := slip.ObjectString(result)
+	if !strings.Contains(s, "nil") {
+		t.Errorf("expected nil title after reinspect on empty inspector: %s", s)
+	}
+}
+
+func TestInspectRatio(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{slip.Symbol("swank:inspect-in-emacs"), slip.String("(/ 1 3)")})
+	if result == nil {
+		t.Fatal("expected inspector content for ratio")
+	}
+	s := slip.ObjectString(result)
+	if !strings.Contains(s, "1/3") {
+		t.Errorf("expected 1/3 in ratio inspection: %s", s)
+	}
+	// Ratio must not include Hex representation
+	if strings.Contains(s, "Hex") {
+		t.Errorf("ratio should not have hex: %s", s)
 	}
 }
 
