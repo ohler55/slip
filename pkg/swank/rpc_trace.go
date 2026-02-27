@@ -104,18 +104,14 @@ func parseTraceSpec(spec string) string {
 // isTraced checks if a function is currently being traced.
 // This accesses SLIP's trace state.
 func isTraced(name string) bool {
-	// Get list of traced functions
 	traced := slip.Trace(nil)
 	if traced == nil {
 		return false
 	}
 
-	// If tracing all (returns (t)), check differently
-	if len(traced) == 1 && traced[0] == slip.True {
-		return true
-	}
-
-	// Check if name is in the list
+	// Check if name is in the traced list.
+	// Note: Trace(nil) returns List{True} when traceFuncs is nil (trace-all mode).
+	// We treat that as "not specifically traced" for toggle purposes.
 	name = strings.ToLower(name)
 	for _, t := range traced {
 		if sym, ok := t.(slip.Symbol); ok {

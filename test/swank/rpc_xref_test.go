@@ -133,7 +133,11 @@ func TestXrefBinds(t *testing.T) {
 		slip.Symbol(":binds"),
 		slip.String("*standard-output*"),
 	})
-	_ = result
+	if result != nil {
+		if _, ok := result.(slip.List); !ok {
+			t.Errorf("expected list result for :binds, got %T", result)
+		}
+	}
 }
 
 func TestXrefSets(t *testing.T) {
@@ -145,7 +149,11 @@ func TestXrefSets(t *testing.T) {
 		slip.Symbol(":sets"),
 		slip.String("*print-base*"),
 	})
-	_ = result
+	if result != nil {
+		if _, ok := result.(slip.List); !ok {
+			t.Errorf("expected list result for :sets, got %T", result)
+		}
+	}
 }
 
 func TestXrefMacroexpands(t *testing.T) {
@@ -157,7 +165,11 @@ func TestXrefMacroexpands(t *testing.T) {
 		slip.Symbol(":macroexpands"),
 		slip.String("when"),
 	})
-	_ = result
+	if result != nil {
+		if _, ok := result.(slip.List); !ok {
+			t.Errorf("expected list result for :macroexpands, got %T", result)
+		}
+	}
 }
 
 func TestXrefSpecializes(t *testing.T) {
@@ -235,7 +247,11 @@ func TestXrefStringArgs(t *testing.T) {
 		slip.String(":calls"),
 		slip.String("car"),
 	})
-	_ = result
+	if result != nil {
+		if _, ok := result.(slip.List); !ok {
+			t.Errorf("expected list result for string-args xref, got %T", result)
+		}
+	}
 }
 
 func TestXrefsMultiple(t *testing.T) {
@@ -250,7 +266,11 @@ func TestXrefsMultiple(t *testing.T) {
 			slip.List{slip.Symbol(":callers"), slip.String("car")},
 		},
 	})
-	_ = result
+	if result != nil {
+		if _, ok := result.(slip.List); !ok {
+			t.Errorf("expected list result for xrefs, got %T", result)
+		}
+	}
 }
 
 func TestXrefsNoArgs(t *testing.T) {
@@ -315,7 +335,11 @@ func TestXrefPackageQualified(t *testing.T) {
 		slip.Symbol(":calls"),
 		slip.String("cl:car"),
 	})
-	_ = result
+	if result != nil {
+		if _, ok := result.(slip.List); !ok {
+			t.Errorf("expected list result for package-qualified xref, got %T", result)
+		}
+	}
 }
 
 func TestXrefPackageQualifiedBadPkg(t *testing.T) {

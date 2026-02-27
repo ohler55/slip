@@ -14,18 +14,18 @@ func TestToggleTrace(t *testing.T) {
 	env := newTestEnv(t)
 	defer env.close()
 
-	// Trace a function
+	// Trace a function — first toggle should trace
 	result := env.sendRexOK(t, slip.List{slip.Symbol("swank:swank-toggle-trace"), slip.String("append")})
 	s := slip.ObjectString(result)
-	if !strings.Contains(strings.ToUpper(s), "APPEND") {
-		t.Errorf("expected APPEND in trace response: %s", s)
+	if !strings.Contains(s, "Tracing") || !strings.Contains(strings.ToUpper(s), "APPEND") {
+		t.Errorf("expected 'Tracing APPEND' in first toggle response: %s", s)
 	}
 
-	// Toggle again to untrace
+	// Toggle again to untrace — second toggle should untrace
 	result = env.sendRexOK(t, slip.List{slip.Symbol("swank:swank-toggle-trace"), slip.String("append")})
 	s = slip.ObjectString(result)
-	if !strings.Contains(strings.ToUpper(s), "APPEND") {
-		t.Errorf("expected APPEND in untrace response: %s", s)
+	if !strings.Contains(s, "Untraced") || !strings.Contains(strings.ToUpper(s), "APPEND") {
+		t.Errorf("expected 'Untraced APPEND' in second toggle response: %s", s)
 	}
 
 	// Clean up
@@ -99,6 +99,9 @@ func TestToggleTraceNoArgs(t *testing.T) {
 	defer env.close()
 
 	result := env.sendRexOK(t, slip.List{slip.Symbol("swank:swank-toggle-trace")})
+	if result == nil {
+		t.Fatal("expected non-nil result for no-args toggle")
+	}
 	s := slip.ObjectString(result)
 	if !strings.Contains(s, "No function") {
 		t.Errorf("expected 'No function' message: %s", s)
@@ -110,6 +113,9 @@ func TestToggleTraceInvalidArg(t *testing.T) {
 	defer env.close()
 
 	result := env.sendRexOK(t, slip.List{slip.Symbol("swank:swank-toggle-trace"), slip.Fixnum(42)})
+	if result == nil {
+		t.Fatal("expected non-nil result for invalid arg toggle")
+	}
 	s := slip.ObjectString(result)
 	if !strings.Contains(s, "Invalid") {
 		t.Errorf("expected 'Invalid' message: %s", s)
@@ -134,18 +140,17 @@ func TestToggleTraceRepeated(t *testing.T) {
 	env := newTestEnv(t)
 	defer env.close()
 
-	// Toggle twice — each call returns a message mentioning the function name.
-	// Due to how isTraced works (traceFuncs nil → Trace(nil) returns (t) → true),
-	// both calls may return "Untraced". We verify the response always names the function.
-	for i := 0; i < 2; i++ {
-		result := env.sendRexOK(t, slip.List{slip.Symbol("swank:swank-toggle-trace"), slip.String("last")})
-		s := slip.ObjectString(result)
-		if !strings.Contains(strings.ToUpper(s), "LAST") {
-			t.Errorf("toggle %d: expected LAST in response: %s", i+1, s)
-		}
-		if !strings.Contains(s, "Tracing") && !strings.Contains(s, "Untraced") {
-			t.Errorf("toggle %d: expected Tracing or Untraced: %s", i+1, s)
-		}
+	// First toggle should trace, second should untrace.
+	result := env.sendRexOK(t, slip.List{slip.Symbol("swank:swank-toggle-trace"), slip.String("last")})
+	s := slip.ObjectString(result)
+	if !strings.Contains(s, "Tracing") || !strings.Contains(strings.ToUpper(s), "LAST") {
+		t.Errorf("toggle 1: expected 'Tracing LAST': %s", s)
+	}
+
+	result = env.sendRexOK(t, slip.List{slip.Symbol("swank:swank-toggle-trace"), slip.String("last")})
+	s = slip.ObjectString(result)
+	if !strings.Contains(s, "Untraced") || !strings.Contains(strings.ToUpper(s), "LAST") {
+		t.Errorf("toggle 2: expected 'Untraced LAST': %s", s)
 	}
 
 	env.sendRexOK(t, slip.List{slip.Symbol("swank:untrace-all")})
