@@ -201,3 +201,20 @@ func TestMalformedEmacsRex(t *testing.T) {
 	// Connection should remain functional or gracefully close
 	time.Sleep(50 * time.Millisecond)
 }
+
+func TestEmacsInterrupt(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	// Send :emacs-interrupt -- it's a TODO stub but should not crash
+	msg := slip.List{
+		slip.Symbol(":emacs-interrupt"),
+		slip.Fixnum(1),
+	}
+	err := swank.WriteWireMessage(env.conn, msg)
+	if err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+	// Give server time to handle it
+	time.Sleep(50 * time.Millisecond)
+}
