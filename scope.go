@@ -16,10 +16,11 @@ type Scope struct {
 	Name    Object // can be nil so type can't be Symbol
 	Vars    map[string]Object
 	locker  Locker
-	Block   bool
-	TagBody bool
-	Macro   bool
-	Keep    bool
+	Block          bool
+	TagBody        bool
+	Macro          bool
+	Keep           bool
+	InterruptCheck func() bool
 }
 
 // NewScope create a new top level Scope.
@@ -35,11 +36,12 @@ func (s *Scope) NewScope() *Scope {
 	return &Scope{
 		parents: []*Scope{s},
 		Vars:    map[string]Object{},
-		Block:   false,
-		TagBody: s.TagBody,
-		Macro:   s.Macro,
-		Keep:    s.Keep,
-		locker:  NoOpLocker{},
+		Block:          false,
+		TagBody:        s.TagBody,
+		Macro:          s.Macro,
+		Keep:           s.Keep,
+		InterruptCheck: s.InterruptCheck,
+		locker:         NoOpLocker{},
 	}
 }
 
