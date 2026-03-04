@@ -141,6 +141,44 @@ func TestFunctionCaller(t *testing.T) {
 	tt.Equal(t, f, f.Caller())
 }
 
+func TestFunctionEvalInterruptCheck(t *testing.T) {
+	scope := slip.NewScope()
+
+	// InterruptCheck that always interrupts
+	scope.InterruptCheck = func() bool { return true }
+	tt.Panic(t, func() {
+		slip.ReadString(`(+ 1 2)`, scope).Eval(scope, nil)
+	})
+
+	// InterruptCheck that never interrupts — eval should succeed
+	scope.InterruptCheck = func() bool { return false }
+	result := slip.ReadString(`(+ 1 2)`, scope).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(3), result)
+
+	// Nil InterruptCheck — eval should succeed (default path)
+	scope.InterruptCheck = nil
+	result = slip.ReadString(`(+ 1 2)`, scope).Eval(scope, nil)
+	tt.Equal(t, slip.Fixnum(3), result)
+}
+
+func TestFunctionEvalInterruptMidLoop(t *testing.T) {
+	scope := slip.NewScope()
+	callCount := 0
+	// Interrupt after 5 function calls
+	scope.InterruptCheck = func() bool {
+		callCount++
+		return callCount > 5
+	}
+
+	tt.Panic(t, func() {
+		slip.ReadString(`(dotimes (i 1000) (+ i 1))`, scope).Eval(scope, nil)
+	})
+
+	if callCount <= 5 {
+		t.Fatalf("expected interrupt after 5 calls, got %d", callCount)
+	}
+}
+
 func TestMustBeString(t *testing.T) {
 	str := slip.MustBeString(slip.String("one"), "test")
 	tt.Equal(t, "one", str)
