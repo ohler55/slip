@@ -57,5 +57,5 @@ func TestSimpleWarningMakeBadArgs(t *testing.T) {
 }
 
 func TestPanicSimpleWarning(t *testing.T) {
-	tt.Panic(t, func() { cl.SimpleWarningPanic(nil, 0, "raise", nil) })
+	tt.Panic(t, func() { cl.SimpleWarningPanic(slip.NewScope(), 0, "raise", nil) })
 }

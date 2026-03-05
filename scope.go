@@ -20,7 +20,7 @@ type Scope struct {
 	TagBody        bool
 	Macro          bool
 	Keep           bool
-	InterruptCheck func() bool
+	InterruptCheck func()
 }
 
 // NewScope create a new top level Scope.

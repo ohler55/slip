@@ -96,7 +96,7 @@ func TestScopeAllVars(t *testing.T) {
 
 func TestScopeInterruptCheckPropagation(t *testing.T) {
 	called := false
-	check := func() bool { called = true; return false }
+	check := func() { called = true }
 
 	parent := slip.NewScope()
 	parent.InterruptCheck = check

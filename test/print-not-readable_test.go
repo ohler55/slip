@@ -56,6 +56,6 @@ func TestPrintNotReadableMake(t *testing.T) {
 
 func TestPrintNotReadablePanic(t *testing.T) {
 	tt.Panic(t, func() {
-		slip.PrintNotReadablePanic(nil, 0, slip.Symbol("something"), "raise")
+		slip.PrintNotReadablePanic(slip.NewScope(), 0, slip.Symbol("something"), "raise")
 	})
 }

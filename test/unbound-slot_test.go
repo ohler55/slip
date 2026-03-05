@@ -53,5 +53,5 @@ func TestUnboundSlotNoFormat(t *testing.T) {
 }
 
 func TestUnboundSlotPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.UnboundSlotPanic(nil, 0, slip.Symbol("vanilla"), slip.Symbol(":slop"), "raise") })
+	tt.Panic(t, func() { slip.UnboundSlotPanic(slip.NewScope(), 0, slip.Symbol("vanilla"), slip.Symbol(":slop"), "raise") })
 }

@@ -47,5 +47,5 @@ func TestStreamErrorMake(t *testing.T) {
 }
 
 func TestStreamErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.StreamPanic(nil, 0, &slip.OutputStream{}, "raise") })
+	tt.Panic(t, func() { slip.StreamPanic(slip.NewScope(), 0, &slip.OutputStream{}, "raise") })
 }

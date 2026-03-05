@@ -71,5 +71,5 @@ func TestSimpleTypeErrorMakeBadArgs(t *testing.T) {
 }
 
 func TestPanicSimpleTypeError(t *testing.T) {
-	tt.Panic(t, func() { cl.SimpleTypeErrorPanic(nil, 0, "raise", nil) })
+	tt.Panic(t, func() { cl.SimpleTypeErrorPanic(slip.NewScope(), 0, "raise", nil) })
 }

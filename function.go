@@ -107,8 +107,8 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	beforeEval(s, f.Name, f.Args, depth)
 	defer afterEval(s, f.Name, f.Args, depth, &result)
 
-	if s != nil && s.InterruptCheck != nil && s.InterruptCheck() {
-		panic(&Panic{Message: "Keyboard interrupt"})
+	if s.InterruptCheck != nil {
+		s.InterruptCheck()
 	}
 
 	args := make(List, len(f.Args))

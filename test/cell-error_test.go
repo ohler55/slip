@@ -61,5 +61,5 @@ func TestCellErrorMake(t *testing.T) {
 }
 
 func TestCellErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.CellPanic(nil, 0, slip.Symbol(":sell"), "raise") })
+	tt.Panic(t, func() { slip.CellPanic(slip.NewScope(), 0, slip.Symbol(":sell"), "raise") })
 }

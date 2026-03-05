@@ -144,14 +144,14 @@ func TestFunctionCaller(t *testing.T) {
 func TestFunctionEvalInterruptCheck(t *testing.T) {
 	scope := slip.NewScope()
 
-	// InterruptCheck that always interrupts
-	scope.InterruptCheck = func() bool { return true }
+	// InterruptCheck that always panics
+	scope.InterruptCheck = func() { panic(&slip.Panic{Message: "Keyboard interrupt"}) }
 	tt.Panic(t, func() {
 		slip.ReadString(`(+ 1 2)`, scope).Eval(scope, nil)
 	})
 
-	// InterruptCheck that never interrupts — eval should succeed
-	scope.InterruptCheck = func() bool { return false }
+	// InterruptCheck that does nothing — eval should succeed
+	scope.InterruptCheck = func() {}
 	result := slip.ReadString(`(+ 1 2)`, scope).Eval(scope, nil)
 	tt.Equal(t, slip.Fixnum(3), result)
 
@@ -165,9 +165,11 @@ func TestFunctionEvalInterruptMidLoop(t *testing.T) {
 	scope := slip.NewScope()
 	callCount := 0
 	// Interrupt after 5 function calls
-	scope.InterruptCheck = func() bool {
+	scope.InterruptCheck = func() {
 		callCount++
-		return callCount > 5
+		if callCount > 5 {
+			panic(&slip.Panic{Message: "Keyboard interrupt"})
+		}
 	}
 
 	tt.Panic(t, func() {

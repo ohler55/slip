@@ -59,5 +59,5 @@ func TestNoApplicableMethodErrorMake(t *testing.T) {
 }
 
 func TestNoApplicableMethodErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.NoApplicableMethodPanic(nil, 0, nil, slip.List{}, "raise") })
+	tt.Panic(t, func() { slip.NoApplicableMethodPanic(slip.NewScope(), 0, nil, slip.List{}, "raise") })
 }
