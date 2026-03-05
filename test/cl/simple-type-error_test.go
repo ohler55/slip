@@ -12,7 +12,7 @@ import (
 )
 
 func TestSimpleTypeErrorObj(t *testing.T) {
-	cond := cl.SimpleTypeErrorNew(nil, 0, "condition ~A-~D", slip.Symbol("dummy"), slip.Fixnum(3))
+	cond := cl.SimpleTypeErrorNew(slip.NewScope(), 0, "condition ~A-~D", slip.Symbol("dummy"), slip.Fixnum(3))
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<simple-type-error [0-9a-f]+>$/",

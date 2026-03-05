@@ -12,7 +12,7 @@ import (
 )
 
 func TestSimpleConditionObj(t *testing.T) {
-	cond := cl.SimpleConditionNew(nil, 0, "condition ~A-~D", slip.List{slip.Symbol("dummy"), slip.Fixnum(3)})
+	cond := cl.SimpleConditionNew(slip.NewScope(), 0, "condition ~A-~D", slip.List{slip.Symbol("dummy"), slip.Fixnum(3)})
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<simple-condition [0-9a-f]+>$/",
