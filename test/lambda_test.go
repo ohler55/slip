@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ohler55/ojg/tt"
+
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -48,16 +49,20 @@ func TestDefLambdaArgs(t *testing.T) {
 }
 
 func TestDefLambdaArgsNotList(t *testing.T) {
-	tt.Panic(t, func() { slip.DefLambda("deflambda-test", nil, slip.List{slip.True}) })
+	tt.Panic(t, func() { slip.DefLambda("deflambda-test", slip.NewScope(), slip.List{slip.True}) })
 }
 
 func TestDefLambdaBadArgType(t *testing.T) {
-	tt.Panic(t, func() { slip.DefLambda("deflambda-test", nil, slip.List{slip.List{slip.True}}) })
+	tt.Panic(t, func() { slip.DefLambda("deflambda-test", slip.NewScope(), slip.List{slip.List{slip.True}}) })
 }
 
 func TestDefLambdaBadArgList(t *testing.T) {
-	tt.Panic(t, func() { slip.DefLambda("deflambda-test", nil, slip.List{slip.List{slip.List{slip.Symbol("x")}}}) })
-	tt.Panic(t, func() { slip.DefLambda("deflambda-test", nil, slip.List{slip.List{slip.List{slip.True, slip.True}}}) })
+	tt.Panic(t, func() {
+		slip.DefLambda("deflambda-test", slip.NewScope(), slip.List{slip.List{slip.List{slip.Symbol("x")}}})
+	})
+	tt.Panic(t, func() {
+		slip.DefLambda("deflambda-test", slip.NewScope(), slip.List{slip.List{slip.List{slip.True, slip.True}}})
+	})
 }
 
 func TestLambdaCallWithScope(t *testing.T) {

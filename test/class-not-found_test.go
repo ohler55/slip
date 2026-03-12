@@ -61,5 +61,5 @@ func TestClassNotFoundMake(t *testing.T) {
 }
 
 func TestClassNotFoundPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.ClassNotFoundPanic(nil, 0, slip.Symbol("klas"), "raise") })
+	tt.Panic(t, func() { slip.ClassNotFoundPanic(slip.NewScope(), 0, slip.Symbol("klas"), "raise") })
 }

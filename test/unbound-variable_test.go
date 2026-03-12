@@ -47,5 +47,5 @@ func TestUnboundVariableMake(t *testing.T) {
 }
 
 func TestUnboundVariablePanic(t *testing.T) {
-	tt.Panic(t, func() { slip.UnboundVariablePanic(nil, 0, slip.Symbol("very"), "raise") })
+	tt.Panic(t, func() { slip.UnboundVariablePanic(slip.NewScope(), 0, slip.Symbol("very"), "raise") })
 }

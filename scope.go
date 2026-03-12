@@ -12,14 +12,15 @@ import (
 
 // Scope encapsulates the scope for a function.
 type Scope struct {
-	parents []*Scope
-	Name    Object // can be nil so type can't be Symbol
-	Vars    map[string]Object
-	locker  Locker
-	Block   bool
-	TagBody bool
-	Macro   bool
-	Keep    bool
+	parents        []*Scope
+	Name           Object // can be nil so type can't be Symbol
+	Vars           map[string]Object
+	locker         Locker
+	Block          bool
+	TagBody        bool
+	Macro          bool
+	Keep           bool
+	InterruptCheck func()
 }
 
 // NewScope create a new top level Scope.
@@ -33,13 +34,14 @@ func NewScope() *Scope {
 // NewScope create a new Scope with a parent of the current Scope.
 func (s *Scope) NewScope() *Scope {
 	return &Scope{
-		parents: []*Scope{s},
-		Vars:    map[string]Object{},
-		Block:   false,
-		TagBody: s.TagBody,
-		Macro:   s.Macro,
-		Keep:    s.Keep,
-		locker:  NoOpLocker{},
+		parents:        []*Scope{s},
+		Vars:           map[string]Object{},
+		Block:          false,
+		TagBody:        s.TagBody,
+		Macro:          s.Macro,
+		Keep:           s.Keep,
+		InterruptCheck: s.InterruptCheck,
+		locker:         NoOpLocker{},
 	}
 }
 

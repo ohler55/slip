@@ -48,7 +48,7 @@ func TestCommaAtTail(t *testing.T) {
 
 func TestCommaAtArgCount(t *testing.T) {
 	var commaAt cl.CommaAt
-	tt.Panic(t, func() { _ = commaAt.Call(nil, slip.List{}, 0) })
+	tt.Panic(t, func() { _ = commaAt.Call(slip.NewScope(), slip.List{}, 0) })
 }
 
 func TestCommaAtString(t *testing.T) {

@@ -174,9 +174,9 @@ blueberry
 	}, 0)
 	tt.Equal(t, slip.Fixnum(3), inst.(*flavors.Instance).Get(slip.Symbol("size")))
 
-	tt.Panic(t, func() { inst.Init(nil, slip.List{slip.True, slip.Fixnum(3)}, 0) })
-	tt.Panic(t, func() { inst.Init(nil, slip.List{slip.Symbol(":self"), slip.Fixnum(3)}, 0) })
-	tt.Panic(t, func() { inst.Init(nil, slip.List{slip.Symbol(":nothing"), slip.Fixnum(3)}, 0) })
+	tt.Panic(t, func() { inst.Init(scope, slip.List{slip.True, slip.Fixnum(3)}, 0) })
+	tt.Panic(t, func() { inst.Init(scope, slip.List{slip.Symbol(":self"), slip.Fixnum(3)}, 0) })
+	tt.Panic(t, func() { inst.Init(scope, slip.List{slip.Symbol(":nothing"), slip.Fixnum(3)}, 0) })
 
 	code = slip.ReadString(`
 (defflavor cranberry ((size "medium")) ()
@@ -193,5 +193,5 @@ cranberry
 		slip.Symbol(":nothing"), slip.Fixnum(3),
 		slip.Symbol(":x"), slip.Fixnum(3),
 	}, 0)
-	tt.Panic(t, func() { inst.Init(nil, slip.List{}, 0) })
+	tt.Panic(t, func() { inst.Init(slip.NewScope(), slip.List{}, 0) })
 }

@@ -107,6 +107,10 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 	beforeEval(s, f.Name, f.Args, depth)
 	defer afterEval(s, f.Name, f.Args, depth, &result)
 
+	if s.InterruptCheck != nil {
+		s.InterruptCheck()
+	}
+
 	args := make(List, len(f.Args))
 	d2 := depth + 1
 	si := -1
