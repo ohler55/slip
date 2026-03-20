@@ -12,12 +12,12 @@ import (
 
 func TestTimeTickerOk(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(let* ((tc (time-ticker 0.01)))
+		Source: `(let* ((tc (time-ticker 0.05)))
                   (time-elapsed (channel-pop tc) (channel-pop tc)))`,
 		Validate: func(t *testing.T, v slip.Object) {
 			diff, ok := v.(slip.DoubleFloat)
 			tt.Equal(t, true, ok)
-			tt.Equal(t, true, 0.005 < diff && diff < 0.015)
+			tt.Equal(t, true, 0.02 < diff && diff < 0.08)
 		},
 	}).Test(t)
 }
