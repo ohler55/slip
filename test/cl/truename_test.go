@@ -26,7 +26,7 @@ func validateTruename(t *testing.T, v slip.Object) {
 
 func TestTruenameStringOk(t *testing.T) {
 	(&sliptest.Function{
-		Source: `(truename "truename_test.go")`,
+		Source:   `(truename "truename_test.go")`,
 		Validate: validateTruename,
 	}).Test(t)
 }
