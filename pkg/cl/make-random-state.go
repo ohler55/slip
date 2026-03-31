@@ -50,7 +50,7 @@ func (f *MakeRandomState) Call(s *slip.Scope, args slip.List, depth int) (result
 	if state != slip.True {
 		switch ts := state.(type) {
 		case nil:
-			obj, _ := slip.CLPkg.Get(randomStateStr)
+			obj := s.Get(randomStateStr)
 			rs, _ = obj.(*RandomState)
 		case *RandomState:
 			rs = ts
