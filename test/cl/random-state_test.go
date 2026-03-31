@@ -15,7 +15,7 @@ func TestRandomStateNew(t *testing.T) {
 	rs := cl.NewRandomState(nil)
 	(&sliptest.Object{
 		Target:    rs,
-		String:    `/#<random-state \([0-9]+ [0-9]+ [0-9]+\) \([0-9]+ [0-9]+ [0-9]+\)>/`,
+		String:    `/#<random-state [0-9]+ [0-9]+>/`,
 		Simple:    func(t2 *testing.T, v interface{}) { tt.SameType(t2, "", v) },
 		Hierarchy: "random-state.t",
 		Equals: []*sliptest.EqTest{
@@ -29,5 +29,11 @@ func TestRandomStateNew(t *testing.T) {
 func TestRandomStateCopy(t *testing.T) {
 	current, _ := slip.GetVar("*random-state*")
 	rs := cl.NewRandomState(current.(*cl.RandomState))
-	tt.Equal(t, current.String(), rs.String())
+	tt.Equal(t, true, current.Equal(rs))
+}
+
+func TestRandomStateSeed(t *testing.T) {
+	rs := cl.NewRandomState(nil)
+	rs.Seed(111)
+	tt.Equal(t, "#<random-state 111 0>", rs.String())
 }

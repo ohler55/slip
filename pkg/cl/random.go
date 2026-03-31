@@ -55,7 +55,7 @@ func (f *Random) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		} else {
 			switch state := args[1].(type) {
 			case nil:
-				obj, _ := slip.CLPkg.Get(randomStateStr)
+				obj := s.Get(randomStateStr)
 				rs, _ = obj.(*RandomState)
 			case *RandomState:
 				rs = state
@@ -63,22 +63,22 @@ func (f *Random) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		}
 	}
 	if rs == nil {
-		obj, _ := slip.CLPkg.Get(randomStateStr)
+		obj := s.Get(randomStateStr)
 		rs, _ = obj.(*RandomState)
 	}
 	switch limit := args[0].(type) {
 	case slip.Fixnum:
-		result = slip.Fixnum(rs.Uint64() % uint64(limit))
+		result = slip.Fixnum(rs.Int63() % int64(limit))
 	case *slip.Bignum:
 		var z big.Int
 		result = (*slip.Bignum)(z.Rand(rand.New(rs), (*big.Int)(limit)))
 	case slip.SingleFloat:
-		result = slip.SingleFloat(float64(rs.Uint64()%(1<<53))/float64(1<<53)) * limit
+		result = slip.SingleFloat(float64(rs.Int63()%(1<<53))/float64(1<<53)) * limit
 	case slip.DoubleFloat:
-		result = slip.DoubleFloat(float64(rs.Uint64()%(1<<53))/float64(1<<53)) * limit
+		result = slip.DoubleFloat(float64(rs.Int63()%(1<<53))/float64(1<<53)) * limit
 	case *slip.LongFloat:
 		var z big.Float
-		_ = z.Mul(big.NewFloat(float64(rs.Uint64()%(1<<53))/float64(1<<53)), (*big.Float)(limit))
+		_ = z.Mul(big.NewFloat(float64(rs.Int63()%(1<<53))/float64(1<<53)), (*big.Float)(limit))
 		result = (*slip.LongFloat)(&z)
 	default:
 		slip.TypePanic(s, depth, "limit", limit, "real")
