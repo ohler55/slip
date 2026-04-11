@@ -2,6 +2,8 @@
 
 package slip
 
+import "fmt"
+
 var (
 	setHooks   []*hook
 	unsetHooks []*hook
@@ -76,7 +78,15 @@ func RemoveClassHook(id string) {
 }
 
 func callSetHooks(pkg *Package, name string) {
-	for _, h := range setHooks {
-		h.fun(pkg, name)
+	if pkg == nil {
+		for _, h := range setHooks {
+			h.fun(pkg, name)
+		}
+	} else {
+		pname := fmt.Sprintf("%s:%s", pkg.Name, name)
+		for _, h := range setHooks {
+			h.fun(pkg, name)
+			h.fun(pkg, pname)
+		}
 	}
 }

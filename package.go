@@ -112,6 +112,7 @@ func (obj *Package) Initialize(vars map[string]*VarVal, local ...any) {
 		vv.Pkg = obj
 		vv.name = k
 		obj.vars[k] = vv
+		callSetHooks(obj, vv.name)
 	}
 	if obj.classes == nil {
 		obj.classes = map[string]Class{}
@@ -383,8 +384,10 @@ func (obj *Package) Remove(name string) (removed bool) {
 	}
 	delete(obj.classes, name)
 	obj.mu.Unlock()
+	pname := fmt.Sprintf("%s:%s", obj.Name, name)
 	for _, h := range unsetHooks {
 		h.fun(obj, name)
+		h.fun(obj, pname)
 	}
 	return
 }
@@ -438,6 +441,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc, aux ...
 	obj.mu.Unlock()
 	for _, h := range defunHooks {
 		h.fun(obj, name)
+		h.fun(obj, fmt.Sprintf("%s:%s", obj.Name, name))
 	}
 	return &fi
 }
@@ -518,8 +522,10 @@ func (obj *Package) Undefine(name string) {
 		delete(obj.funcs, name)
 	}
 	obj.mu.Unlock()
+	pname := fmt.Sprintf("%s:%s", obj.Name, name)
 	for _, h := range unsetHooks {
 		h.fun(obj, name)
+		h.fun(obj, pname)
 	}
 }
 
@@ -927,6 +933,11 @@ func (obj *Package) RegisterClass(name string, c Class) {
 	}
 	for _, h := range classHooks {
 		h.fun(obj, name)
+	}
+	if c.Pkg() == obj {
+		for _, h := range classHooks {
+			h.fun(obj, fmt.Sprintf("%s:%s", obj.Name, name))
+		}
 	}
 }
 
