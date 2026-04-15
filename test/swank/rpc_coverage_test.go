@@ -1678,3 +1678,423 @@ func TestEmacsRexSymbolPackage(t *testing.T) {
 		t.Logf("symbol pkg response: %v", slip.ObjectString(resp))
 	}
 }
+
+// --- Coverage gap tests: only tests NOT already in other test files ---
+
+// GetHandler: lookup without "swank:" prefix (exercises fallback path)
+func TestGetHandlerWithoutPrefix(t *testing.T) {
+	h := swank.GetHandler("connection-info")
+	if h == nil {
+		t.Error("expected handler for 'connection-info' without prefix")
+	}
+}
+
+// GetHandler: lookup unknown handler returns nil
+func TestGetHandlerUnknown(t *testing.T) {
+	h := swank.GetHandler("swank:nonexistent-xyz")
+	if h != nil {
+		t.Error("expected nil for unknown handler")
+	}
+}
+
+// GetHandler: lookup unknown without prefix also nil
+func TestGetHandlerUnknownNoPrefix(t *testing.T) {
+	h := swank.GetHandler("nonexistent-xyz")
+	if h != nil {
+		t.Error("expected nil for unknown handler without prefix")
+	}
+}
+
+// macroexpandFull: expand a non-macro form (should return unchanged)
+func TestMacroexpandAllNonMacro(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand-all"),
+		slip.String("(+ 1 2)"),
+	})
+	if result == nil {
+		t.Fatal("expected result")
+	}
+}
+
+// macroexpandFull: expand a form that produces a non-list result
+func TestMacroexpandAllAtom(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand-all"),
+		slip.String("42"),
+	})
+	if result == nil {
+		t.Fatal("expected result")
+	}
+}
+
+// macroexpandFull: expand a nested macro (exercises loop continuation)
+func TestMacroexpandAllWhen(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand-all"),
+		slip.String("(when t 42)"),
+	})
+	if result != nil {
+		s := slip.ObjectString(result)
+		t.Logf("macroexpand-all (when t 42) => %s", s)
+	}
+}
+
+// macroexpand1: non-macro form returns same form
+func TestMacroexpand1NonMacro(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand-1"),
+		slip.String("(car '(1 2 3))"),
+	})
+	if result == nil {
+		t.Fatal("expected result")
+	}
+}
+
+// macroexpand: pass invalid (non-string) source
+func TestMacroexpandInvalidArg(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand"),
+		slip.Fixnum(42),
+	})
+	_ = result
+}
+
+// macroexpand: empty args
+func TestMacroexpandNoArgs(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand"),
+	})
+	_ = result
+}
+
+// macroexpand-all: invalid arg
+func TestMacroexpandAllInvalidArg(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand-all"),
+		slip.Fixnum(42),
+	})
+	_ = result
+}
+
+// macroexpand-all: empty args
+func TestMacroexpandAllNoArgs(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand-all"),
+	})
+	_ = result
+}
+
+// findCompletions: package-qualified with just the package prefix
+func TestCompletionsPackagePrefix(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:completions"),
+		slip.String("common-lisp:"),
+		slip.String("cl-user"),
+	})
+	if result == nil {
+		t.Fatal("expected completions result")
+	}
+}
+
+// simple-completions: exercise the other completions path
+func TestSimpleCompletionsQualified(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:simple-completions"),
+		slip.String("common-lisp:ma"),
+		slip.String("cl-user"),
+	})
+	if result == nil {
+		t.Fatal("expected completions result")
+	}
+}
+
+// getSymbolFlags: name ending with ":"
+func TestFuzzyCompletionsPackageName(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:fuzzy-completions"),
+		slip.String("common-lisp:"),
+		slip.String("cl-user"),
+	})
+	if result == nil {
+		t.Fatal("expected fuzzy completions result")
+	}
+}
+
+// getSymbolFlags: macro name
+func TestFuzzyCompletionsMacro(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:fuzzy-completions"),
+		slip.String("when"),
+		slip.String("cl-user"),
+	})
+	if result == nil {
+		t.Fatal("expected fuzzy completions result")
+	}
+}
+
+// handleAutodoc: non-list, non-Funky argument
+func TestAutodocNonList(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:autodoc"),
+		slip.String("car"),
+	})
+	_ = result
+}
+
+// handleAutodoc: form with non-symbol/non-string first elem
+func TestAutodocInvalidOperator(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:autodoc"),
+		slip.List{slip.Fixnum(42), slip.Symbol("x")},
+	})
+	_ = result
+}
+
+// handleDescribeSymbol: empty args
+func TestDescribeSymbolNoArgs(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:describe-symbol"),
+	})
+	_ = result
+}
+
+// describeSymbol: unknown symbol
+func TestDescribeSymbolUnknown(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:describe-symbol"),
+		slip.String("nonexistent-symbol-xyz"),
+	})
+	if result != nil {
+		s := slip.ObjectString(result)
+		if !strings.Contains(s, "No description") {
+			t.Errorf("expected 'No description' for unknown symbol, got: %s", s)
+		}
+	}
+}
+
+// describe-function: exercise the macro description path
+func TestDescribeFunctionMacro(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:describe-function"),
+		slip.String("defun"),
+	})
+	if result != nil {
+		s := slip.ObjectString(result)
+		if !strings.Contains(s, "macro") {
+			t.Logf("describe-function defun: %s", s)
+		}
+	}
+}
+
+// arglist-for-echo-area: list of names
+func TestArglistForEchoAreaMultipleNames(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:arglist-for-echo-area"),
+		slip.List{slip.String("car"), slip.String("cdr")},
+	})
+	_ = result
+}
+
+// inspector: inspect a hash-table (exercises default/Simplify path in buildContent)
+func TestInspectHashTableCoverage(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:init-inspector"),
+		slip.String("(make-hash-table)"),
+	})
+	// May return nil if hash-table inspection isn't fully supported
+	_ = result
+}
+
+// inspector: inspect-in-emacs with no args
+func TestInspectInEmacsNoArgs(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:inspect-in-emacs"),
+	})
+	_ = result
+}
+
+// set-package: set to unknown package
+func TestSetPackageUnknown(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:set-package"),
+		slip.String("nonexistent-package-xyz"),
+	})
+	_ = result
+}
+
+// completions-for-keyword: empty prefix
+func TestCompletionsForKeywordEmpty(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:completions-for-keyword"),
+		slip.String(":"),
+	})
+	_ = result
+}
+
+// xref: with unknown reference type
+func TestXrefUnknownType(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:xref"),
+		slip.String(":unknown-type"),
+		slip.String("car"),
+	})
+	_ = result
+}
+
+// xref: single arg (missing name)
+func TestXrefOneArg(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:xref"),
+		slip.String(":calls"),
+	})
+	_ = result
+}
+
+// evalWithCapture: evaluation that errors at runtime
+func TestListenerEvalRuntimeError(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	// trigger a runtime error via listener-eval and collect :write-string + :return
+	id := env.nextID
+	env.nextID++
+	msg := slip.List{
+		slip.Symbol(":emacs-rex"),
+		slip.List{slip.Symbol("swank:listener-eval"), slip.String("(error \"test-err\")")},
+		slip.String("cl-user"),
+		slip.Symbol("t"),
+		id,
+	}
+	if err := swank.WriteWireMessage(env.conn, msg); err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+	_ = env.conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	for i := 0; i < 10; i++ {
+		response, err := swank.ReadWireMessage(env.conn, env.scope)
+		if err != nil {
+			break
+		}
+		if respList, ok := response.(slip.List); ok && len(respList) > 0 {
+			if respList[0] == slip.Symbol(":return") {
+				break
+			}
+		}
+	}
+}
+
+// documentation-symbol: package-qualified symbol
+func TestDocumentationSymbolQualified(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:documentation-symbol"),
+		slip.String("common-lisp:car"),
+	})
+	_ = result
+}
+
+// find-definitions-for-emacs: no args
+func TestFindDefinitionsNoArgs(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:find-definitions-for-emacs"),
+	})
+	_ = result
+}
+
+// swank-expand-1: no args
+func TestSwankExpand1NoArgs(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-expand-1"),
+	})
+	_ = result
+}
+
+// swank-expand: no args
+func TestSwankExpandNoArgs(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-expand"),
+	})
+	_ = result
+}

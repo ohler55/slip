@@ -19,14 +19,22 @@ func init() {
 	RegisterHandler("swank:inspector-next", handleInspectorNext)
 	RegisterHandler("swank:inspector-reinspect", handleInspectorReinspect)
 	RegisterHandler("swank:quit-inspector", handleQuitInspector)
+	RegisterHandler("swank:inspector-call-nth-action", handleInspectorCallNthAction)
+}
+
+// inspectorAction is a callable action registered by inspector content builders.
+type inspectorAction struct {
+	fn      func() slip.Object
+	refresh bool
 }
 
 // Inspector holds the state for object inspection.
 type Inspector struct {
-	current slip.Object   // currently inspected object
-	parts   []slip.Object // inspectable parts of current object
-	history []slip.Object // navigation history (back)
-	forward []slip.Object // navigation history (forward)
+	current slip.Object       // currently inspected object
+	parts   []slip.Object     // inspectable parts of current object
+	actions []inspectorAction // callable actions (buttons in SLIME)
+	history []slip.Object     // navigation history (back)
+	forward []slip.Object     // navigation history (forward)
 }
 
 // NewInspector creates a new inspector instance.
@@ -194,6 +202,33 @@ func handleQuitInspector(c *Connection, args slip.List) slip.Object {
 	return nil
 }
 
+// handleInspectorCallNthAction invokes an inspector action by index.
+// Args: (index)
+func handleInspectorCallNthAction(c *Connection, args slip.List) slip.Object {
+	if len(args) == 0 {
+		return nil
+	}
+
+	n, ok := args[0].(slip.Fixnum)
+	if !ok {
+		return nil
+	}
+
+	insp := getInspector(c)
+	idx := int(n)
+	if idx < 0 || idx >= len(insp.actions) {
+		return nil
+	}
+
+	action := insp.actions[idx]
+	action.fn()
+
+	if action.refresh {
+		return buildInspectorContent(c, insp)
+	}
+	return nil
+}
+
 // buildInspectorContent builds the inspector response for the current object.
 // Response format: (:title "..." :id N :content (...) :length N)
 func buildInspectorContent(c *Connection, insp *Inspector) slip.Object {
@@ -206,8 +241,9 @@ func buildInspectorContent(c *Connection, insp *Inspector) slip.Object {
 		}
 	}
 
-	// Clear parts list
+	// Clear parts and actions lists
 	insp.parts = make([]slip.Object, 0)
+	insp.actions = nil
 
 	// Get type information
 	title := getObjectTitle(insp.current)
