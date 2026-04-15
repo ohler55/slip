@@ -4,6 +4,8 @@ package swank
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/ohler55/slip"
 )
@@ -14,6 +16,7 @@ var (
 	VerboseDispatch bool
 	VerboseEval     bool
 	VerboseColor    bool
+	LogOutput       io.Writer = os.Stdout
 )
 
 // ANSI color codes (for black background)
@@ -33,9 +36,9 @@ func LogWire(direction string, msg slip.Object) {
 	}
 	prefix := "[swank:wire]"
 	if VerboseColor {
-		fmt.Printf("%s%s%s %s %s\n", colorCyan, prefix, colorReset, direction, slip.ObjectString(msg))
+		fmt.Fprintf(LogOutput, "%s%s%s %s %s\n", colorCyan, prefix, colorReset, direction, slip.ObjectString(msg))
 	} else {
-		fmt.Printf("%s %s %s\n", prefix, direction, slip.ObjectString(msg))
+		fmt.Fprintf(LogOutput, "%s %s %s\n", prefix, direction, slip.ObjectString(msg))
 	}
 }
 
@@ -46,9 +49,9 @@ func LogDispatch(handler string, args slip.List) {
 	}
 	prefix := "[swank:dispatch]"
 	if VerboseColor {
-		fmt.Printf("%s%s%s %s %s\n", colorYellow, prefix, colorReset, handler, slip.ObjectString(args))
+		fmt.Fprintf(LogOutput, "%s%s%s %s %s\n", colorYellow, prefix, colorReset, handler, slip.ObjectString(args))
 	} else {
-		fmt.Printf("%s %s %s\n", prefix, handler, slip.ObjectString(args))
+		fmt.Fprintf(LogOutput, "%s %s %s\n", prefix, handler, slip.ObjectString(args))
 	}
 }
 
@@ -59,9 +62,9 @@ func LogEval(expr slip.Object, result slip.Object) {
 	}
 	prefix := "[swank:eval]"
 	if VerboseColor {
-		fmt.Printf("%s%s%s %s => %s\n", colorGreen, prefix, colorReset, slip.ObjectString(expr), slip.ObjectString(result))
+		fmt.Fprintf(LogOutput, "%s%s%s %s => %s\n", colorGreen, prefix, colorReset, slip.ObjectString(expr), slip.ObjectString(result))
 	} else {
-		fmt.Printf("%s %s => %s\n", prefix, slip.ObjectString(expr), slip.ObjectString(result))
+		fmt.Fprintf(LogOutput, "%s %s => %s\n", prefix, slip.ObjectString(expr), slip.ObjectString(result))
 	}
 }
 
@@ -70,9 +73,9 @@ func LogError(format string, args ...any) {
 	prefix := "[swank:error]"
 	msg := fmt.Sprintf(format, args...)
 	if VerboseColor {
-		fmt.Printf("%s%s%s %s\n", colorRed, prefix, colorReset, msg)
+		fmt.Fprintf(LogOutput, "%s%s%s %s\n", colorRed, prefix, colorReset, msg)
 	} else {
-		fmt.Printf("%s %s\n", prefix, msg)
+		fmt.Fprintf(LogOutput, "%s %s\n", prefix, msg)
 	}
 }
 

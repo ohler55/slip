@@ -4,6 +4,7 @@ package swank_test
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"net"
 	"testing"
@@ -12,6 +13,13 @@ import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/swank"
 )
+
+func suppressLog(t *testing.T) {
+	t.Helper()
+	saved := swank.LogOutput
+	swank.LogOutput = io.Discard
+	t.Cleanup(func() { swank.LogOutput = saved })
+}
 
 func TestWireReadInvalidHeader(t *testing.T) {
 	// Test reading a message with invalid header (non-hex characters)
@@ -28,7 +36,7 @@ func TestWireReadIncompleteHeader(t *testing.T) {
 	scope := slip.NewScope()
 	reader := bytes.NewReader([]byte("000"))
 	_, err := swank.ReadWireMessage(reader, scope)
-	if err != io.EOF && err != io.ErrUnexpectedEOF {
+	if !errors.Is(err, io.EOF) && !errors.Is(err, io.ErrUnexpectedEOF) {
 		t.Errorf("expected EOF for incomplete header, got %v", err)
 	}
 }
@@ -39,7 +47,7 @@ func TestWireReadIncompleteBody(t *testing.T) {
 	// Header says 10 bytes, but only 5 provided
 	reader := bytes.NewReader([]byte("00000Ahello"))
 	_, err := swank.ReadWireMessage(reader, scope)
-	if err != io.EOF && err != io.ErrUnexpectedEOF {
+	if !errors.Is(err, io.EOF) && !errors.Is(err, io.ErrUnexpectedEOF) {
 		t.Errorf("expected EOF for incomplete body, got %v", err)
 	}
 }
@@ -92,6 +100,7 @@ func TestWireRoundTrip(t *testing.T) {
 }
 
 func TestConnectionClose(t *testing.T) {
+	suppressLog(t)
 	scope := slip.NewScope()
 	server := swank.NewServer(scope)
 	err := server.Start(":0")
@@ -112,6 +121,7 @@ func TestConnectionClose(t *testing.T) {
 }
 
 func TestServerDoubleStop(t *testing.T) {
+	suppressLog(t)
 	scope := slip.NewScope()
 	server := swank.NewServer(scope)
 	err := server.Start(":0")
@@ -133,6 +143,7 @@ func TestServerDoubleStop(t *testing.T) {
 }
 
 func TestUnknownRPCFunction(t *testing.T) {
+	suppressLog(t)
 	scope := slip.NewScope()
 	server := swank.NewServer(scope)
 	err := server.Start(":0")
@@ -174,6 +185,7 @@ func TestUnknownRPCFunction(t *testing.T) {
 }
 
 func TestMalformedEmacsRex(t *testing.T) {
+	suppressLog(t)
 	scope := slip.NewScope()
 	server := swank.NewServer(scope)
 	err := server.Start(":0")
@@ -206,7 +218,51 @@ func TestEmacsInterrupt(t *testing.T) {
 	env := newTestEnv(t)
 	defer env.close()
 
-	// Send :emacs-interrupt -- it's a TODO stub but should not crash
+	id := env.nextID
+	env.nextID++
+
+	// Send long-running eval (don't wait for response)
+	msg := slip.List{
+		slip.Symbol(":emacs-rex"),
+		slip.List{slip.Symbol("swank:listener-eval"), slip.String("(dotimes (i 100000000) (+ i 1))")},
+		slip.String("cl-user"),
+		slip.Symbol("t"),
+		id,
+	}
+	err := swank.WriteWireMessage(env.conn, msg)
+	if err != nil {
+		t.Fatalf("failed to write eval: %v", err)
+	}
+
+	// Let eval goroutine start
+	time.Sleep(50 * time.Millisecond)
+
+	// Send interrupt
+	intMsg := slip.List{
+		slip.Symbol(":emacs-interrupt"),
+		slip.Fixnum(1),
+	}
+	err = swank.WriteWireMessage(env.conn, intMsg)
+	if err != nil {
+		t.Fatalf("failed to write interrupt: %v", err)
+	}
+
+	// Read response — expect :return :abort
+	_, resp := env.readAllResponses(t)
+	if resp[0] != slip.Symbol(":return") {
+		t.Fatalf("expected :return, got %v", resp[0])
+	}
+	inner, ok := resp[1].(slip.List)
+	if !ok || len(inner) < 2 || inner[0] != slip.Symbol(":abort") {
+		t.Fatalf("expected :abort response, got %v", resp[1])
+	}
+}
+
+func TestEmacsInterruptNoActiveEval(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	// Send interrupt with no active eval
 	msg := slip.List{
 		slip.Symbol(":emacs-interrupt"),
 		slip.Fixnum(1),
@@ -215,6 +271,13 @@ func TestEmacsInterrupt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to write: %v", err)
 	}
-	// Give server time to handle it
+
+	// Connection should remain functional
 	time.Sleep(50 * time.Millisecond)
+
+	// Verify with a normal eval
+	resp := env.sendRexOK(t, slip.List{slip.Symbol("swank:connection-info")})
+	if resp == nil {
+		t.Error("expected connection-info response")
+	}
 }

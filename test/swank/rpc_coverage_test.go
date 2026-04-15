@@ -3,6 +3,7 @@
 package swank_test
 
 import (
+	"bytes"
 	"net"
 	"strings"
 	"testing"
@@ -49,7 +50,7 @@ func TestSwankOutputStreamLastByte(t *testing.T) {
 		t.Errorf("expected 0, got %d", b)
 	}
 
-	s.Write([]byte("abc"))
+	_, _ = s.Write([]byte("abc"))
 	if b := s.LastByte(); b != 'c' {
 		t.Errorf("expected 'c', got %c", b)
 	}
@@ -83,7 +84,8 @@ func TestSwankOutputStreamEqual(t *testing.T) {
 	s1 := swank.NewSwankOutputStream(nil)
 	s2 := swank.NewSwankOutputStream(nil)
 
-	if !s1.Equal(s1) {
+	self := s1 // avoid dupArg lint on reflexive equality check
+	if !s1.Equal(self) {
 		t.Error("stream should equal itself")
 	}
 	if s1.Equal(s2) {
@@ -220,7 +222,8 @@ func TestSwankServerInstanceEqual(t *testing.T) {
 		Source: "(let ((s (swank:swank-server :port 0))) (prog1 s (swank:swank-stop)))",
 		Validate: func(t *testing.T, v slip.Object) {
 			// Call Equal directly — CL's equal doesn't dispatch to .Equal() for non-standard types
-			if !v.Equal(v) {
+			self := v // avoid dupArg lint on reflexive equality check
+			if !v.Equal(self) {
 				t.Error("server should equal itself")
 			}
 			// Different type
@@ -791,7 +794,9 @@ func TestFuzzyCompletionsPackageQualified(t *testing.T) {
 // --- verbose.go: exercise logging with flags enabled ---
 
 func TestVerboseLoggingEnabled(t *testing.T) {
-	// Enable verbose flags directly
+	var buf bytes.Buffer
+	saved := swank.LogOutput
+	swank.LogOutput = &buf
 	swank.VerboseWire = true
 	swank.VerboseDispatch = true
 	swank.VerboseEval = true
@@ -801,24 +806,27 @@ func TestVerboseLoggingEnabled(t *testing.T) {
 		swank.VerboseDispatch = false
 		swank.VerboseEval = false
 		swank.VerboseColor = false
+		swank.LogOutput = saved
 	}()
 
-	// LogWire with color
 	swank.LogWire("<-", slip.String("test"))
 	swank.LogWire("->", slip.Fixnum(42))
-
-	// LogDispatch with color
 	swank.LogDispatch("test-handler", slip.List{slip.String("arg1")})
-
-	// LogEval with color
 	swank.LogEval(slip.String("(+ 1 2)"), slip.Fixnum(3))
-
-	// LogError with color
 	swank.LogError("test error %d", 42)
+
+	out := buf.String()
+	for _, want := range []string{"[swank:wire]", "[swank:dispatch]", "[swank:eval]", "[swank:error]", "\x1b["} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected output to contain %q", want)
+		}
+	}
 }
 
 func TestVerboseLoggingNoColor(t *testing.T) {
-	// Enable verbose but not color
+	var buf bytes.Buffer
+	saved := swank.LogOutput
+	swank.LogOutput = &buf
 	swank.VerboseWire = true
 	swank.VerboseDispatch = true
 	swank.VerboseEval = true
@@ -828,23 +836,31 @@ func TestVerboseLoggingNoColor(t *testing.T) {
 		swank.VerboseDispatch = false
 		swank.VerboseEval = false
 		swank.VerboseColor = false
+		swank.LogOutput = saved
 	}()
 
-	// LogWire without color
 	swank.LogWire("<-", slip.String("test"))
-
-	// LogDispatch without color
 	swank.LogDispatch("test-handler", slip.List{slip.String("arg1")})
-
-	// LogEval without color
 	swank.LogEval(slip.String("(+ 1 2)"), slip.Fixnum(3))
-
-	// LogError without color
 	swank.LogError("test error")
+
+	out := buf.String()
+	for _, want := range []string{"[swank:wire]", "[swank:dispatch]", "[swank:eval]", "[swank:error]"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected output to contain %q", want)
+		}
+	}
+	if strings.Contains(out, "\x1b[") {
+		t.Error("expected no ANSI escape codes in no-color mode")
+	}
 }
 
 func TestVerboseLoggingDisabled(t *testing.T) {
-	// All disabled (should be no-ops)
+	var buf bytes.Buffer
+	saved := swank.LogOutput
+	swank.LogOutput = &buf
+	defer func() { swank.LogOutput = saved }()
+
 	swank.VerboseWire = false
 	swank.VerboseDispatch = false
 	swank.VerboseEval = false
@@ -852,6 +868,10 @@ func TestVerboseLoggingDisabled(t *testing.T) {
 	swank.LogWire("<-", slip.String("test"))
 	swank.LogDispatch("handler", nil)
 	swank.LogEval(nil, nil)
+
+	if buf.Len() != 0 {
+		t.Errorf("expected no output when verbose disabled, got: %s", buf.String())
+	}
 }
 
 // --- rpc_inspector.go: exercise appendDescriberContent and appendSimplifiedContent ---

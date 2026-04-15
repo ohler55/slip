@@ -108,6 +108,9 @@ func evalWithCapture(c *Connection, source string, sendOutput bool) (result slip
 	defer func() {
 		if r := recover(); r != nil {
 			if p, ok := r.(*slip.Panic); ok {
+				if p.Message == "Keyboard interrupt" {
+					panic(r) // propagate to handleEmacsRex goroutine recovery
+				}
 				errMsg := fmt.Sprintf("Error: %s\n", p.Message)
 				if sendOutput {
 					c.WriteString(errMsg)
@@ -137,6 +140,13 @@ func evalWithCapture(c *Connection, source string, sendOutput bool) (result slip
 	if len(code) > 0 {
 		form = code[0]
 	}
+
+	// Bind standard output to the capture stream during evaluation so that
+	// functions like princ (which read the Go-level global) write to the
+	// connection stream rather than os.Stdout.
+	prevOut := slip.StandardOutput
+	slip.StandardOutput = c.outputStream
+	defer func() { slip.StandardOutput = prevOut }()
 
 	// Evaluate
 	result = code.Eval(c.scope, nil)

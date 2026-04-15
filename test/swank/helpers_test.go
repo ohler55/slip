@@ -3,6 +3,7 @@
 package swank_test
 
 import (
+	"io"
 	"net"
 	"testing"
 	"time"
@@ -13,32 +14,38 @@ import (
 
 // testEnv holds a running server and connection for a test.
 type testEnv struct {
-	server *swank.Server
-	conn   net.Conn
-	scope  *slip.Scope
-	nextID slip.Fixnum
+	server         *swank.Server
+	conn           net.Conn
+	scope          *slip.Scope
+	nextID         slip.Fixnum
+	savedLogOutput io.Writer
 }
 
 // newTestEnv starts a swank server, connects to it, and returns the env.
 // Caller must defer env.close().
 func newTestEnv(t *testing.T) *testEnv {
 	t.Helper()
+	saved := swank.LogOutput
+	swank.LogOutput = io.Discard
 	scope := slip.NewScope()
 	server := swank.NewServer(scope)
 	if err := server.Start(":0"); err != nil {
+		swank.LogOutput = saved
 		t.Fatalf("failed to start server: %v", err)
 	}
 	conn, err := net.DialTimeout("tcp", server.Addr(), time.Second)
 	if err != nil {
+		swank.LogOutput = saved
 		_ = server.Stop()
 		t.Fatalf("failed to connect: %v", err)
 	}
-	return &testEnv{server: server, conn: conn, scope: scope, nextID: 1}
+	return &testEnv{server: server, conn: conn, scope: scope, nextID: 1, savedLogOutput: saved}
 }
 
 func (e *testEnv) close() {
 	e.conn.Close()
 	_ = e.server.Stop()
+	swank.LogOutput = e.savedLogOutput
 }
 
 // sendRex sends an :emacs-rex message and reads the response.
