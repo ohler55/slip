@@ -128,7 +128,7 @@ func macroexpandFull(c *Connection, form slip.Object) slip.Object {
 		expanded := macroexpand1(c, form)
 
 		// Check if we expanded anything
-		if expanded == form || slip.ObjectString(expanded) == slip.ObjectString(form) {
+		if slip.ObjectString(expanded) == slip.ObjectString(form) {
 			return form
 		}
 
