@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -272,14 +273,19 @@ func TestWireReadNegativeLength(t *testing.T) {
 	}
 }
 
-// TestWireReadOversizedLength guards against unbounded allocation from
-// a header like "FFFFFF" (~16 MiB). We cap at maxMessageSize.
+// TestWireReadOversizedLength guards against unbounded allocation —
+// a header above the 1 MiB sanity cap is rejected before make().
 func TestWireReadOversizedLength(t *testing.T) {
 	scope := slip.NewScope()
-	reader := bytes.NewReader([]byte("FFFFFF"))
+	// 0x200000 = 2 MiB > maxMessageSize (1 MiB); no payload bytes
+	// are needed because the guard fires before io.ReadFull.
+	reader := bytes.NewReader([]byte("200000"))
 	_, err := swank.ReadWireMessage(reader, scope)
 	if err == nil {
 		t.Fatal("expected error for oversized length header, got nil")
+	}
+	if !strings.Contains(err.Error(), "exceeds max") {
+		t.Fatalf("expected max-size error, got: %v", err)
 	}
 }
 

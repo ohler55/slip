@@ -11,8 +11,13 @@ import (
 )
 
 const (
-	headerSize     = 6                // 6 hex digits for message length
-	maxMessageSize = 16 * 1024 * 1024 // 16 MiB upper bound on payload length
+	headerSize = 6 // 6 hex digits for message length
+	// maxMessageSize is a sanity cap on the payload an untrusted peer
+	// can make the server allocate. 1 MiB is well above any real SLIME
+	// form (typical traffic is under a few KiB) and small enough to be
+	// a reachable guard — the protocol header's 6 hex digits can encode
+	// up to 16 MiB - 1.
+	maxMessageSize = 1 * 1024 * 1024
 )
 
 // ReadWireMessage reads a length-prefixed S-expression from the reader.
