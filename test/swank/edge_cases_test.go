@@ -289,6 +289,100 @@ func TestWireReadOversizedLength(t *testing.T) {
 	}
 }
 
+// TestWireReadEmptyPayload exercises the len(code) == 0 branch —
+// a well-formed header with no payload (or whitespace-only payload)
+// must return (nil, nil), not an error.
+func TestWireReadEmptyPayload(t *testing.T) {
+	scope := slip.NewScope()
+	reader := bytes.NewReader([]byte("000000"))
+	obj, err := swank.ReadWireMessage(reader, scope)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if obj != nil {
+		t.Fatalf("expected nil payload, got %v", obj)
+	}
+}
+
+// TestServerStartOnOccupiedPort exercises the net.Listen error path
+// in Server.Start. Pre-bind a port, then try to start a swank server
+// on it — Start must surface the bind error rather than swallow it.
+func TestServerStartOnOccupiedPort(t *testing.T) {
+	suppressLog(t)
+	blocker, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("pre-bind failed: %v", err)
+	}
+	defer blocker.Close()
+
+	scope := slip.NewScope()
+	server := swank.NewServer(scope)
+	if err := server.Start(blocker.Addr().String()); err == nil {
+		_ = server.Stop()
+		t.Fatal("expected bind error on occupied port, got nil")
+	}
+}
+
+// TestSwankServerBadKeyword covers the TypePanic path in
+// SwankServer.Call when a keyword argument is not a slip.Symbol.
+func TestSwankServerBadKeyword(t *testing.T) {
+	suppressLog(t)
+	scope := slip.NewScope()
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("expected panic for non-symbol keyword")
+		}
+	}()
+	// args[0] is a String, not a Symbol — triggers TypePanic at line 158.
+	(&swank.SwankServer{}).Call(scope, slip.List{
+		slip.String(":port"), slip.Fixnum(0),
+	}, 0)
+}
+
+// TestRestartServerNonSymbolKey covers the `continue` branch of
+// parsePortKeyword when a positional arg is a non-Symbol (falls
+// through and uses the default port).
+func TestRestartServerNonSymbolKey(t *testing.T) {
+	suppressLog(t)
+	scope := slip.NewScope()
+	// Pass a non-symbol first arg — parsePortKeyword should skip it
+	// and fall back to default port 4005. Use port 0 via :port to
+	// actually bind ephemerally for cleanup.
+	(&swank.SwankServer{}).Call(scope, slip.List{
+		slip.Symbol(":port"), slip.Fixnum(0),
+	}, 0)
+	t.Cleanup(func() { (&swank.SwankStop{}).Call(scope, nil, 0) })
+
+	// Now invoke restart-server with a non-symbol leading arg.
+	inst := (&swank.RestartServer{}).Call(scope, slip.List{
+		slip.String("bogus"), slip.Symbol(":port"), slip.Fixnum(0),
+	}, 0).(*swank.SwankServerInstance)
+	if inst.Addr() == "" {
+		t.Fatal("restart-server returned no addr")
+	}
+}
+
+// TestEmacsInterruptDoubleSignal covers the `default:` (already
+// signaled) branch of handleEmacsInterrupt by sending two interrupts
+// without giving the drain path time to run.
+func TestEmacsInterruptDoubleSignal(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	intMsg := slip.List{slip.Symbol(":emacs-interrupt"), slip.Fixnum(1)}
+	for i := 0; i < 2; i++ {
+		if err := swank.WriteWireMessage(env.conn, intMsg); err != nil {
+			t.Fatalf("interrupt %d: %v", i, err)
+		}
+	}
+	// Connection stays usable — verify with a normal rex.
+	time.Sleep(50 * time.Millisecond)
+	resp := env.sendRexOK(t, slip.List{slip.Symbol("swank:connection-info")})
+	if resp == nil {
+		t.Fatal("connection unusable after double interrupt")
+	}
+}
+
 // TestRepeatCreateServerClosesPrior guards bug_009: calling a server
 // entry point while another default server is running must stop the
 // prior one before overwriting the defaultServer global. Without the

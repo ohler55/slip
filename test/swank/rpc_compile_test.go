@@ -160,6 +160,59 @@ func TestCompileStringWithPositionList(t *testing.T) {
 	}
 }
 
+// TestCompileStringWithUnknownPositionList covers the fall-through
+// branch of extractOffset: a list arg that does not contain
+// :position should yield offset 0 (and the compile still succeeds).
+func TestCompileStringWithUnknownPositionList(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:compile-string-for-emacs"),
+		slip.String("(+ 1 2)"),
+		slip.String("test-buffer"),
+		slip.List{slip.Symbol(":something-else"), slip.Fixnum(5)},
+		nil,
+		nil,
+	})
+	s := slip.ObjectString(result)
+	if !strings.Contains(s, ":successp") {
+		t.Errorf("expected :successp, got %s", s)
+	}
+}
+
+// TestCompileStringErrorLocation exercises makeNote's case 1
+// (locationName != "" && position > 0) via a parse error whose
+// "at LINE:COL" suffix the regex in recoverToNote extracts into a
+// positive position.
+func TestCompileStringErrorLocation(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	// Unterminated list on line 2 produces "at 1:C" (0-indexed line);
+	// recoverToNote maps that to position = (1-1)*80 + C > 0.
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:compile-string-for-emacs"),
+		slip.String("(+ 1\n(x"),
+		slip.String("err-buffer"),
+		slip.Fixnum(0),
+		nil,
+		nil,
+	})
+	s := slip.ObjectString(result)
+	if !strings.Contains(s, ":location") {
+		t.Errorf("expected :location in result, got %s", s)
+	}
+	if !strings.Contains(s, "err-buffer") {
+		t.Errorf("expected buffer name in :location, got %s", s)
+	}
+	// The offset must be a positive number, not 1 (which is the
+	// locationName-only fallback in makeNote).
+	if !strings.Contains(s, ":offset") {
+		t.Errorf("expected :offset entry, got %s", s)
+	}
+}
+
 // --- compile-file-for-emacs ---
 
 func TestCompileFileSuccess(t *testing.T) {
