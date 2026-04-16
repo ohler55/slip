@@ -412,13 +412,6 @@ func TestConcurrentEvalOutputsIsolated(t *testing.T) {
 // TestListenerEvalEmptySource covers the len(code) == 0 early return
 // in evalWithCapture: an empty source string must not panic and must
 // yield a successful :return to SLIME.
-//
-// TODO(daisy): pick the source string — options and trade-offs:
-//   - "" (empty)                — tightest case; asserts the Read-returns-empty path directly.
-//   - "   "                     — whitespace only; same effective path, tests a realistic idle send.
-//   - ";; just a comment\n"     — exercises the reader's comment stripping.
-//
-// I'd default to "" unless you want to also pin down comment handling.
 func TestListenerEvalEmptySource(t *testing.T) {
 	env := newTestEnv(t)
 	defer env.close()
@@ -449,28 +442,10 @@ func TestListenerEvalEmptySource(t *testing.T) {
 }
 
 // TestListenerEvalErrorPath covers the slip.Panic recovery branch in
-// evalWithCapture with sendOutput=true. When eval panics with a
-// slip.Panic, we expect:
-//   - an "Error: ..." :write-string to arrive before the :return
-//   - the :return to be :abort (set by handleEmacsRex's recover in
-//     connection.go:189-196), OR :ok with nil result (if the recovery
-//     in evalWithCapture swallows the panic). Read the actual code at
-//     rpc_eval.go:107-127 and decide which contract to assert.
-//
-// TODO(daisy): pick (a) the form that triggers the error and
-// (b) whether to assert :abort vs :ok nil vs either.
-//
-//	Form options:
-//	  - "(/ 1 0)"          — arithmetic panic via cl
-//	  - "(foo-undef)"      — undefined function
-//	  - "(car 5)"          — type error (if cl signals one)
-//	  - "(error \"boom\")" — explicit signal — but remember strings
-//	                         in wire forms don't escape, so embedded
-//	                         quotes break. Skip this one.
-//
-// I recommend "(/ 1 0)" — it's the same form used by the existing
-// TestInteractiveEvalError at the bottom of this file, so you know
-// it panics cleanly via slip.Panic.
+// evalWithCapture with sendOutput=true: the panic is swallowed, an
+// "Error: ..." :write-string is sent, and the :return is :ok with nil
+// (handleEmacsRex only produces :abort for panics that escape
+// evalWithCapture's own recover).
 func TestListenerEvalErrorPath(t *testing.T) {
 	env := newTestEnv(t)
 	defer env.close()
@@ -489,12 +464,8 @@ func TestListenerEvalErrorPath(t *testing.T) {
 	}
 	writes, ret := env.readAllResponses(t)
 
-	// Assertions (daisy's choices):
-	//   1. Some :write-string contains "Error:" (substring match — we
-	//      don't couple to the specific CL error text, which may change).
-	//   2. :return is :ok with nil — evalWithCapture's inner recover
-	//      swallows the slip.Panic and yields nil, so handleEmacsRex
-	//      sends :ok not :abort.
+	// Substring match on "Error:" — don't couple to the CL error text
+	// (which may change); require a :write-string with that prefix.
 	sawError := false
 	for _, w := range writes {
 		if strings.Contains(w, "Error:") {
