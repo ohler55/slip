@@ -70,8 +70,8 @@ func TestCompileStringSuccess(t *testing.T) {
 		nil,
 	})
 	s := slip.ObjectString(result)
-	if !strings.Contains(s, ":compilation-result") {
-		t.Errorf("expected compilation-result, got %s", s)
+	if !strings.Contains(s, ":successp") {
+		t.Errorf("expected :successp in result, got %s", s)
 	}
 	if !strings.Contains(s, ":successp") {
 		t.Errorf("expected :successp in result: %s", s)
@@ -122,8 +122,8 @@ func TestCompileStringNoArgs(t *testing.T) {
 		slip.Symbol("swank:compile-string-for-emacs"),
 	})
 	s := slip.ObjectString(result)
-	if !strings.Contains(s, ":compilation-result") {
-		t.Errorf("expected compilation-result, got %s", s)
+	if !strings.Contains(s, ":successp") {
+		t.Errorf("expected :successp in result, got %s", s)
 	}
 }
 
@@ -136,8 +136,8 @@ func TestCompileStringNonStringArg(t *testing.T) {
 		slip.Fixnum(42),
 	})
 	s := slip.ObjectString(result)
-	if !strings.Contains(s, ":compilation-result") {
-		t.Errorf("expected compilation-result, got %s", s)
+	if !strings.Contains(s, ":successp") {
+		t.Errorf("expected :successp in result, got %s", s)
 	}
 }
 
@@ -176,8 +176,8 @@ func TestCompileFileSuccess(t *testing.T) {
 		nil, // don't load
 	})
 	s := slip.ObjectString(result)
-	if !strings.Contains(s, ":compilation-result") {
-		t.Errorf("expected compilation-result, got %s", s)
+	if !strings.Contains(s, ":successp") {
+		t.Errorf("expected :successp in result, got %s", s)
 	}
 	if !strings.Contains(s, ":successp") {
 		t.Errorf("expected :successp, got %s", s)
@@ -228,8 +228,8 @@ func TestCompileFileNoArgs(t *testing.T) {
 		slip.Symbol("swank:compile-file-for-emacs"),
 	})
 	s := slip.ObjectString(result)
-	if !strings.Contains(s, ":compilation-result") {
-		t.Errorf("expected compilation-result, got %s", s)
+	if !strings.Contains(s, ":successp") {
+		t.Errorf("expected :successp in result, got %s", s)
 	}
 }
 
@@ -242,8 +242,8 @@ func TestCompileFileNonStringArg(t *testing.T) {
 		slip.Fixnum(42),
 	})
 	s := slip.ObjectString(result)
-	if !strings.Contains(s, ":compilation-result") {
-		t.Errorf("expected compilation-result, got %s", s)
+	if !strings.Contains(s, ":successp") {
+		t.Errorf("expected :successp in result, got %s", s)
 	}
 }
 

@@ -54,10 +54,14 @@ func getInspector(c *Connection) *Inspector {
 	return c.inspector
 }
 
-// handleInitInspector initializes the inspector.
+// handleInitInspector initializes the inspector with an object.
+// Args: (form) — a string to evaluate and inspect.
 func handleInitInspector(c *Connection, args slip.List) slip.Object {
 	c.inspector = NewInspector()
-	return nil
+	if len(args) == 0 {
+		return nil
+	}
+	return handleInspectInEmacs(c, args)
 }
 
 // handleInspectInEmacs inspects an object.

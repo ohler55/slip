@@ -235,7 +235,6 @@ func compilationResult(notes slip.List, success bool, duration float64) slip.Obj
 	}
 
 	return slip.List{
-		slip.Symbol(":compilation-result"),
 		slip.Symbol(":notes"), notes,
 		slip.Symbol(":successp"), successVal,
 		slip.Symbol(":duration"), slip.DoubleFloat(duration),
