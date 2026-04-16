@@ -252,3 +252,205 @@ func (f *SwankStop) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	}
 	return nil
 }
+
+// startDefaultServer is the shared implementation for create-server, start-server, and setup-server.
+func startDefaultServer(s *slip.Scope, depth int, port slip.Fixnum, host string) slip.Object {
+	address := fmt.Sprintf("%s:%d", host, port)
+	server := NewServer(s)
+	if err := server.Start(address); err != nil {
+		slip.ErrorPanic(s, depth, "failed to start swank server: %v", err)
+	}
+	defaultServer = server
+	return &SwankServerInstance{server: server}
+}
+
+// parsePortKeyword extracts :port from keyword args, defaulting to 4005.
+func parsePortKeyword(s *slip.Scope, depth int, f slip.Object, args slip.List) slip.Fixnum {
+	for i := 0; i < len(args); i += 2 {
+		key, ok := args[i].(slip.Symbol)
+		if !ok || i+1 >= len(args) {
+			continue
+		}
+		if key == ":port" {
+			if p, ok := args[i+1].(slip.Fixnum); ok {
+				return p
+			}
+		}
+	}
+	return 4005
+}
+
+// defCreateServer defines create-server — the standard SLIME way to start a server.
+func defCreateServer() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := CreateServer{Function: slip.Function{Name: "create-server", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "create-server",
+			Args: []*slip.DocArg{
+				{Name: "&key"},
+				{Name: "port", Type: "fixnum", Text: "port to listen on (default 4005)."},
+				{Name: "dont-close", Type: "boolean", Text: "ignored (always persistent)."},
+			},
+			Return: "swank-server",
+			Text: `__create-server__ starts a Swank server for SLIME integration.
+This is the standard SLIME entry point. Equivalent to __swank-server__.`,
+			Examples: []string{
+				`(create-server :port 4005) => #<swank-server :4005>`,
+			},
+		}, &Pkg)
+}
+
+// CreateServer represents the create-server function.
+type CreateServer struct{ slip.Function }
+
+func (f *CreateServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 0, 4)
+	port := parsePortKeyword(s, depth, f, args)
+	return startDefaultServer(s, depth, port, "")
+}
+
+// defStartServer defines start-server — writes port to a file (SLIME convention).
+func defStartServer() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := StartServer{Function: slip.Function{Name: "start-server", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "start-server",
+			Args: []*slip.DocArg{
+				{Name: "port-file", Type: "string", Text: "path to write the port number (ignored)."},
+				{Name: "&key"},
+				{Name: "port", Type: "fixnum", Text: "port to listen on (default 4005)."},
+			},
+			Return: "swank-server",
+			Text: `__start-server__ starts a Swank server. The port-file argument is
+accepted for SLIME compatibility but ignored. Equivalent to __create-server__.`,
+			Examples: []string{
+				`(start-server "/tmp/swank-port" :port 4005) => #<swank-server :4005>`,
+			},
+		}, &Pkg)
+}
+
+// StartServer represents the start-server function.
+type StartServer struct{ slip.Function }
+
+func (f *StartServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 0, 6)
+	// Skip the port-file arg if present (first non-keyword arg).
+	kargs := args
+	if len(args) > 0 {
+		if _, isStr := args[0].(slip.String); isStr {
+			kargs = args[1:]
+		}
+	}
+	port := parsePortKeyword(s, depth, f, kargs)
+	return startDefaultServer(s, depth, port, "")
+}
+
+// defStopServer defines stop-server — stops a server on a given port.
+func defStopServer() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := StopServer{Function: slip.Function{Name: "stop-server", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "stop-server",
+			Args: []*slip.DocArg{
+				{Name: "port", Type: "fixnum", Text: "port of server to stop (default: stop the default server)."},
+			},
+			Return: "nil",
+			Text:   `__stop-server__ stops the Swank server. Equivalent to __swank-stop__.`,
+			Examples: []string{
+				`(stop-server 4005) => nil`,
+			},
+		}, &Pkg)
+}
+
+// StopServer represents the stop-server function.
+type StopServer struct{ slip.Function }
+
+func (f *StopServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 0, 1)
+	if defaultServer != nil {
+		_ = defaultServer.Stop()
+		defaultServer = nil
+	}
+	return nil
+}
+
+// defRestartServer defines restart-server — stops then starts.
+func defRestartServer() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := RestartServer{Function: slip.Function{Name: "restart-server", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "restart-server",
+			Args: []*slip.DocArg{
+				{Name: "&key"},
+				{Name: "port", Type: "fixnum", Text: "port to listen on (default 4005)."},
+			},
+			Return: "swank-server",
+			Text:   `__restart-server__ stops the current server and starts a new one.`,
+			Examples: []string{
+				`(restart-server :port 4005) => #<swank-server :4005>`,
+			},
+		}, &Pkg)
+}
+
+// RestartServer represents the restart-server function.
+type RestartServer struct{ slip.Function }
+
+func (f *RestartServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 0, 4)
+	if defaultServer != nil {
+		_ = defaultServer.Stop()
+		defaultServer = nil
+	}
+	port := parsePortKeyword(s, depth, f, args)
+	return startDefaultServer(s, depth, port, "")
+}
+
+// defSetupServer defines setup-server — lower-level server setup.
+func defSetupServer() {
+	slip.Define(
+		func(args slip.List) slip.Object {
+			f := SetupServer{Function: slip.Function{Name: "setup-server", Args: args}}
+			f.Self = &f
+			return &f
+		},
+		&slip.FuncDoc{
+			Name: "setup-server",
+			Args: []*slip.DocArg{
+				{Name: "port", Type: "fixnum", Text: "port to listen on."},
+			},
+			Return: "swank-server",
+			Text: `__setup-server__ sets up a Swank server on the given port.
+This is the lower-level entry point. Most users should use __create-server__ instead.`,
+			Examples: []string{
+				`(setup-server 4005) => #<swank-server :4005>`,
+			},
+		}, &Pkg)
+}
+
+// SetupServer represents the setup-server function.
+type SetupServer struct{ slip.Function }
+
+func (f *SetupServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, f, args, 1, 1)
+	port := slip.Fixnum(4005)
+	if p, ok := args[0].(slip.Fixnum); ok {
+		port = p
+	}
+	return startDefaultServer(s, depth, port, "")
+}

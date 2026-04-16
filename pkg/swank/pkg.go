@@ -39,6 +39,11 @@ func init() {
 	)
 	defSwankServer()
 	defSwankStop()
+	defCreateServer()
+	defStartServer()
+	defStopServer()
+	defRestartServer()
+	defSetupServer()
 	Pkg.Initialize(nil) // lock
 	slip.AddPackage(&Pkg)
 }

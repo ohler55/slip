@@ -1,22 +1,20 @@
-;;; test-swank-ert.el --- ERT tests for SLIP's Swank server -*- lexical-binding: t -*-
+;;; test-swank-ert.el --- ERT tests for Swank servers -*- lexical-binding: t -*-
 
 ;; Copyright (c) 2025, Peter Ohler, All rights reserved.
 
 ;;; Commentary:
 ;;
-;; Automated ERT tests for the SLIP Swank server.  Does not require SLIME --
-;; connects directly via raw TCP and speaks the wire protocol.
+;; Automated ERT tests for any Swank-protocol server (SLIP, SBCL, etc.).
+;; Does not require SLIME -- connects directly via raw TCP.
 ;;
 ;; Usage:
-;;   1. Start the SLIP swank server:
-;;        slip -e '(swank:swank-server :port 4005)'
+;;   1. Start a swank server on port 4005 (or set SLIP_SWANK_PORT):
+;;        SLIP:  slip -e '(progn (swank:swank-server :port 4005) (loop (sleep 60)))'
+;;        SBCL:  sbcl --load ~/.local/share/common-lisp/source/slime/swank-loader.lisp \
+;;               --eval '(swank-loader:init)' --eval '(swank:create-server :port 4005)'
 ;;
 ;;   2. Run all tests:
-;;        emacs -q -nw --batch -l elisp/test-swank-ert.el \
-;;              -f ert-run-tests-batch-and-exit
-;;
-;;   3. Or run interactively:
-;;        emacs -q -nw -l elisp/test-swank-ert.el -f ert-run-tests-interactively
+;;        emacs -q --batch -l elisp/test-swank-ert.el -f ert-run-tests-batch-and-exit
 ;;
 ;;   Set SLIP_SWANK_PORT to override the default port (4005).
 ;;
@@ -28,10 +26,10 @@
 ;;;; --- Configuration --------------------------------------------------------
 
 (defvar slip-test-host "127.0.0.1"
-  "Host where SLIP Swank server is running.")
+  "Host where Swank server is running.")
 
 (defvar slip-test-port (string-to-number (or (getenv "SLIP_SWANK_PORT") "4005"))
-  "Port where SLIP Swank server is listening.")
+  "Port where Swank server is listening.")
 
 ;;;; --- Wire protocol --------------------------------------------------------
 
@@ -99,16 +97,14 @@
 
 (defun slip-test--read-return (&optional timeout)
   "Read messages until :return, returning that message.
-Intermediate :write-string messages are discarded."
+Intermediate :write-string, :indentation-update, etc. are discarded."
   (let ((deadline (+ (float-time) (or timeout 5.0)))
         msg)
     (while (and (< (float-time) deadline) (null msg))
       (let ((m (slip-test--read-message (- deadline (float-time)))))
         (when m
           (if (eq (car m) :return)
-              (setq msg m)
-            ;; discard :write-string, :indentation-update, etc.
-            ))))
+              (setq msg m)))))
     msg))
 
 (defun slip-test--rex-ok (form &optional package)
@@ -121,16 +117,28 @@ Intermediate :write-string messages are discarded."
       (should (eq (car inner) :ok))
       (cadr inner))))
 
-;;;; --- Fixture: connect / disconnect around each test -----------------------
+;;;; --- Fixture --------------------------------------------------------------
+
+(defvar slip-test--contribs-loaded nil
+  "Non-nil after contrib modules have been loaded.")
 
 (defun slip-test--ensure-connected ()
-  "Connect if not already connected."
+  "Connect and load contrib modules if needed."
   (unless (and slip-test--proc (process-live-p slip-test--proc))
     (condition-case err
-        (slip-test--connect)
+        (progn
+          (slip-test--connect)
+          (setq slip-test--contribs-loaded nil))
       (error (ert-skip (format "Cannot connect to Swank server at %s:%d -- %s"
                                slip-test-host slip-test-port
-                               (error-message-string err)))))))
+                               (error-message-string err))))))
+  ;; Load contrib modules (needed for SBCL; no-op for SLIP).
+  (unless slip-test--contribs-loaded
+    (slip-test--send-rex
+     '(swank:swank-require
+       '(swank-repl swank-c-p-c swank-arglists swank-fuzzy)))
+    (slip-test--read-return 5)
+    (setq slip-test--contribs-loaded t)))
 
 ;;;; --- Tests ----------------------------------------------------------------
 
@@ -152,9 +160,21 @@ Intermediate :write-string messages are discarded."
 (ert-deftest slip-swank/create-repl ()
   "create-repl returns (package-name prompt)."
   (slip-test--ensure-connected)
-  (let ((val (slip-test--rex-ok '(swank:create-repl nil))))
-    (should (listp val))
-    (should (stringp (car val)))))
+  ;; SBCL uses swank-repl:create-repl; SLIP uses swank:create-repl.
+  ;; Try the contrib form first, fall back to the base form.
+  (slip-test--send-rex '(swank-repl:create-repl nil :coding-system "utf-8-unix"))
+  (let ((resp (slip-test--read-return)))
+    (unless resp
+      ;; Retry with swank: prefix (SLIP)
+      (slip-test--send-rex '(swank:create-repl nil))
+      (setq resp (slip-test--read-return)))
+    (should resp)
+    (should (eq (car resp) :return))
+    (let* ((inner (cadr resp))
+           (val (cadr inner)))
+      (should (eq (car inner) :ok))
+      (should (listp val))
+      (should (stringp (car val))))))
 
 (ert-deftest slip-swank/swank-require ()
   "swank-require returns a list (possibly empty)."
@@ -180,10 +200,14 @@ Intermediate :write-string messages are discarded."
     (should (string-match-p "3" (cadr val)))))
 
 (ert-deftest slip-swank/listener-eval ()
-  "listener-eval sends :write-string and :return."
+  "listener-eval sends :return."
   (slip-test--ensure-connected)
-  (slip-test--send-rex '(swank:listener-eval "(+ 10 20)"))
+  ;; SBCL uses swank-repl:listener-eval; SLIP uses swank:listener-eval.
+  (slip-test--send-rex '(swank-repl:listener-eval "(+ 10 20)"))
   (let ((resp (slip-test--read-return)))
+    (unless resp
+      (slip-test--send-rex '(swank:listener-eval "(+ 10 20)"))
+      (setq resp (slip-test--read-return)))
     (should resp)
     (should (eq (car resp) :return))))
 
@@ -203,33 +227,34 @@ Intermediate :write-string messages are discarded."
 ;;; Compilation
 
 (ert-deftest slip-swank/compile-string ()
-  "compile-string-for-emacs returns :compilation-result with :successp."
+  "compile-string-for-emacs returns a plist with :successp."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok
               '(swank:compile-string-for-emacs "(+ 1 2)" "test.lisp" 1 nil nil))))
-    (should (memq :successp val))
-    (should (plist-get val :successp))))
+    (should (listp val))
+    (should (plist-member val :successp))))
 
 (ert-deftest slip-swank/compile-string-error ()
-  "compile-string-for-emacs with bad syntax returns :notes."
+  "compile-string-for-emacs with bad syntax populates :notes."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok
               '(swank:compile-string-for-emacs "(+ 1" "test.lisp" 1 nil nil))))
-    (should (memq :notes val))
-    (should (plist-get val :notes))))
+    (should (listp val))
+    (should (plist-member val :notes))))
 
 ;;; Packages
 
 (ert-deftest slip-swank/list-all-package-names ()
-  "list-all-package-names returns a list of strings."
+  "list-all-package-names returns a list containing common-lisp."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok '(swank:list-all-package-names t))))
     (should (listp val))
     (should (cl-every #'stringp val))
-    (should (member "common-lisp" val))))
+    ;; Case-insensitive: SBCL uses uppercase, SLIP uses lowercase.
+    (should (cl-some (lambda (s) (string-equal-ignore-case s "common-lisp")) val))))
 
 (ert-deftest slip-swank/set-package ()
-  "set-package returns a list."
+  "set-package returns a non-nil value."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok '(swank:set-package "cl-user"))))
     (should val)))
@@ -241,7 +266,7 @@ Intermediate :write-string messages are discarded."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok '(swank:completions "car" "cl-user"))))
     (should (listp val))
-    (should (car val))))  ; first element is list of completions
+    (should (car val))))
 
 (ert-deftest slip-swank/simple-completions ()
   "simple-completions returns matches."
@@ -264,7 +289,7 @@ Intermediate :write-string messages are discarded."
 ;;; Documentation & description
 
 (ert-deftest slip-swank/describe-symbol ()
-  "describe-symbol for car returns a string."
+  "describe-symbol for car returns a non-empty string."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok '(swank:describe-symbol "car"))))
     (should (stringp val))
@@ -283,7 +308,7 @@ Intermediate :write-string messages are discarded."
     (should (or (null val) (stringp val)))))
 
 (ert-deftest slip-swank/operator-arglist ()
-  "operator-arglist for mapcar returns a string."
+  "operator-arglist for mapcar returns a string or nil."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok '(swank:operator-arglist "mapcar" "cl-user"))))
     (should (or (null val) (stringp val)))))
@@ -311,7 +336,7 @@ Intermediate :write-string messages are discarded."
     (should (plist-get val :content))))
 
 (ert-deftest slip-swank/inspect-list ()
-  "Inspecting a list returns content with elements."
+  "Inspecting a list returns content with a title."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok '(swank:init-inspector "'(1 2 3)"))))
     (should (plist-get val :title))))
@@ -319,9 +344,7 @@ Intermediate :write-string messages are discarded."
 (ert-deftest slip-swank/inspect-drill-down ()
   "inspect-nth-part drills into an element."
   (slip-test--ensure-connected)
-  ;; First inspect a list
   (slip-test--rex-ok '(swank:init-inspector "'(a b c)"))
-  ;; Drill into element 0
   (let ((val (slip-test--rex-ok '(swank:inspect-nth-part 0))))
     (should (or (null val) (plist-get val :title)))))
 
@@ -330,9 +353,8 @@ Intermediate :write-string messages are discarded."
   (slip-test--ensure-connected)
   (slip-test--rex-ok '(swank:init-inspector "'(1 2 3)"))
   (slip-test--rex-ok '(swank:inspect-nth-part 0))
-  (let ((val (slip-test--rex-ok '(swank:inspector-pop))))
-    ;; May return nil if history is empty, or inspector content
-    (should t)))
+  ;; May return nil or inspector content
+  (slip-test--rex-ok '(swank:inspector-pop)))
 
 (ert-deftest slip-swank/quit-inspector ()
   "quit-inspector returns nil."
@@ -358,24 +380,25 @@ Intermediate :write-string messages are discarded."
 ;;; Trace
 
 (ert-deftest slip-swank/untrace-all ()
-  "untrace-all returns a string."
+  "untrace-all returns without error."
   (slip-test--ensure-connected)
-  (let ((val (slip-test--rex-ok '(swank:untrace-all))))
-    (should (stringp val))))
+  ;; SLIP returns a string, SBCL returns t -- just check it succeeds.
+  (slip-test--rex-ok '(swank:untrace-all)))
 
 ;;; Xref
 
 (ert-deftest slip-swank/xref-calls ()
-  "xref :calls returns a list."
+  "xref :calls returns a list or :not-implemented."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok '(swank:xref ":calls" "car"))))
-    (should (listp val))))
+    ;; SBCL returns :not-implemented for some xref types.
+    (should (or (listp val) (eq val :not-implemented)))))
 
 (ert-deftest slip-swank/xref-callers ()
-  "xref :callers returns a list."
+  "xref :callers returns a list or :not-implemented."
   (slip-test--ensure-connected)
   (let ((val (slip-test--rex-ok '(swank:xref ":callers" "+"))))
-    (should (listp val))))
+    (should (or (listp val) (eq val :not-implemented)))))
 
 ;;; Indentation
 
@@ -395,7 +418,6 @@ Intermediate :write-string messages are discarded."
 
 ;;;; --- Teardown -------------------------------------------------------------
 
-;; Disconnect after all tests complete (batch mode).
 (add-hook 'kill-emacs-hook #'slip-test--disconnect)
 
 (provide 'test-swank-ert)

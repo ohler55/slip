@@ -9,7 +9,7 @@ import (
 
 	"github.com/ohler55/slip"
 	_ "github.com/ohler55/slip/pkg/cl"
-	_ "github.com/ohler55/slip/pkg/swank"
+	"github.com/ohler55/slip/pkg/swank"
 )
 
 // --- ping ---
@@ -417,6 +417,68 @@ func TestInspectorCallNthActionNegativeIndex(t *testing.T) {
 	if result != nil {
 		t.Errorf("expected nil for negative index, got %v", result)
 	}
+}
+
+// --- server lifecycle convenience functions ---
+// Test directly via Go types since calling via wire would replace the
+// test's own server and kill the connection.
+
+func TestServerLifecycleFunctions(t *testing.T) {
+	suppressLog(t)
+	scope := slip.NewScope()
+
+	// create-server
+	cs := &swank.CreateServer{Function: slip.Function{Name: "create-server"}}
+	cs.Self = cs
+	result := cs.Call(scope, slip.List{slip.Symbol(":port"), slip.Fixnum(0)}, 0)
+	if result == nil {
+		t.Fatal("create-server returned nil")
+	}
+	s := slip.ObjectString(result)
+	if !strings.Contains(s, "swank-server") {
+		t.Errorf("expected swank-server, got %s", s)
+	}
+
+	// stop-server
+	ss := &swank.StopServer{Function: slip.Function{Name: "stop-server"}}
+	ss.Self = ss
+	ss.Call(scope, nil, 0)
+
+	// start-server with port-file arg
+	st := &swank.StartServer{Function: slip.Function{Name: "start-server"}}
+	st.Self = st
+	result = st.Call(scope, slip.List{slip.String("/dev/null"), slip.Symbol(":port"), slip.Fixnum(0)}, 0)
+	if result == nil {
+		t.Fatal("start-server returned nil")
+	}
+
+	// restart-server
+	rs := &swank.RestartServer{Function: slip.Function{Name: "restart-server"}}
+	rs.Self = rs
+	result = rs.Call(scope, slip.List{slip.Symbol(":port"), slip.Fixnum(0)}, 0)
+	if result == nil {
+		t.Fatal("restart-server returned nil")
+	}
+
+	// stop then setup-server
+	ss.Call(scope, nil, 0)
+	su := &swank.SetupServer{Function: slip.Function{Name: "setup-server"}}
+	su.Self = su
+	result = su.Call(scope, slip.List{slip.Fixnum(0)}, 0)
+	if result == nil {
+		t.Fatal("setup-server returned nil")
+	}
+
+	// Final cleanup
+	ss.Call(scope, nil, 0)
+}
+
+func TestStopServerWhenNoneRunning(t *testing.T) {
+	suppressLog(t)
+	ss := &swank.StopServer{Function: slip.Function{Name: "stop-server"}}
+	ss.Self = ss
+	// Should not panic
+	ss.Call(slip.NewScope(), nil, 0)
 }
 
 // --- helpers ---
