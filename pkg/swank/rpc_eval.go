@@ -143,13 +143,12 @@ func evalWithCapture(c *Connection, source string, sendOutput bool) (result slip
 
 	// Bind standard output to the capture stream during evaluation so that
 	// functions like princ (which read the Go-level global) write to the
-	// connection stream rather than os.Stdout.
-	prevOut := slip.StandardOutput
-	slip.StandardOutput = c.outputStream
-	defer func() { slip.StandardOutput = prevOut }()
-
-	// Evaluate
-	result = code.Eval(c.scope, nil)
+	// connection stream rather than os.Stdout. Serialized via stdOutMu —
+	// see output.go — because the global would otherwise race across
+	// concurrent :emacs-rex goroutines.
+	withStandardOutput(c.outputStream, func() {
+		result = code.Eval(c.scope, nil)
+	})
 
 	// Log evaluation if verbose
 	LogEval(form, result)

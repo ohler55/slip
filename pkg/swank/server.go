@@ -175,20 +175,17 @@ func (f *SwankServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 		}
 	}
 
-	address := fmt.Sprintf("%s:%d", host, port)
-
-	server := NewServer(s)
-	if err := server.Start(address); err != nil {
-		slip.ErrorPanic(s, depth, "failed to start swank server: %v", err)
-	}
-
-	defaultServer = server
-	return &SwankServerInstance{server: server}
+	return startDefaultServer(s, depth, port, host)
 }
 
 // SwankServerInstance represents a running Swank server.
 type SwankServerInstance struct {
 	server *Server
+}
+
+// Addr returns the address the underlying server is listening on.
+func (s *SwankServerInstance) Addr() string {
+	return s.server.Addr()
 }
 
 func (s *SwankServerInstance) String() string {
@@ -253,8 +250,15 @@ func (f *SwankStop) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	return nil
 }
 
-// startDefaultServer is the shared implementation for create-server, start-server, and setup-server.
+// startDefaultServer is the shared implementation for create-server,
+// start-server, setup-server, and swank-server. It stops any prior
+// default server before starting the new one so repeat calls on
+// different ports do not leak the previous listener and its goroutines.
 func startDefaultServer(s *slip.Scope, depth int, port slip.Fixnum, host string) slip.Object {
+	if defaultServer != nil {
+		_ = defaultServer.Stop()
+		defaultServer = nil
+	}
 	address := fmt.Sprintf("%s:%d", host, port)
 	server := NewServer(s)
 	if err := server.Start(address); err != nil {
@@ -413,10 +417,6 @@ type RestartServer struct{ slip.Function }
 
 func (f *RestartServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 0, 4)
-	if defaultServer != nil {
-		_ = defaultServer.Stop()
-		defaultServer = nil
-	}
 	port := parsePortKeyword(s, depth, f, args)
 	return startDefaultServer(s, depth, port, "")
 }

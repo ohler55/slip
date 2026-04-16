@@ -10,21 +10,37 @@ import (
 	"github.com/ohler55/slip"
 )
 
-const headerSize = 6 // 6 hex digits for message length
+const (
+	headerSize     = 6                // 6 hex digits for message length
+	maxMessageSize = 16 * 1024 * 1024 // 16 MiB upper bound on payload length
+)
 
 // ReadWireMessage reads a length-prefixed S-expression from the reader.
 // The Swank wire format is: 6 ASCII hex characters (length) + UTF-8 payload.
 func ReadWireMessage(r io.Reader, scope *slip.Scope) (obj slip.Object, err error) {
-	// Read 6-byte header containing hex-encoded length
+	// Recover from any unexpected panic below (parse panics, allocation
+	// panics from a malicious header, etc). Registered before any work so
+	// it covers the full body.
+	defer func() {
+		if rec := recover(); rec != nil {
+			err = fmt.Errorf("parse error: %v", rec)
+			obj = nil
+		}
+	}()
+
+	// Read 6-byte header containing hex-encoded length.
 	header := make([]byte, headerSize)
 	if _, err := io.ReadFull(r, header); err != nil {
 		return nil, err
 	}
 
-	// Decode length from hex
-	length, err := strconv.ParseInt(string(header), 16, 32)
+	// ParseUint rejects a leading sign, so `-0001F` cannot reach make().
+	length, err := strconv.ParseUint(string(header), 16, 32)
 	if err != nil {
 		return nil, fmt.Errorf("invalid message header: %s", header)
+	}
+	if length > maxMessageSize {
+		return nil, fmt.Errorf("message length %d exceeds max %d", length, maxMessageSize)
 	}
 
 	// Read payload
@@ -32,14 +48,6 @@ func ReadWireMessage(r io.Reader, scope *slip.Scope) (obj slip.Object, err error
 	if _, err := io.ReadFull(r, payload); err != nil {
 		return nil, err
 	}
-
-	// Parse S-expression using SLIP's reader, recovering from parse panics
-	defer func() {
-		if rec := recover(); rec != nil {
-			err = fmt.Errorf("parse error: %v", rec)
-			obj = nil
-		}
-	}()
 
 	code := slip.Read(payload, scope)
 	if len(code) == 0 {

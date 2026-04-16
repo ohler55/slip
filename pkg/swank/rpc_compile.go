@@ -162,13 +162,13 @@ func evalSource(c *Connection, source string) (notes slip.List, success bool) {
 			}
 		}()
 
-		prevOut := slip.StandardOutput
-		slip.StandardOutput = c.outputStream
-		defer func() { slip.StandardOutput = prevOut }()
-
-		code := slip.Read([]byte(source), c.scope)
-		code.Compile()
-		code.Eval(c.scope, nil)
+		// See rpc_eval.go: primitives like princ read slip.StandardOutput
+		// as a Go global, so the swap must be serialized.
+		withStandardOutput(c.outputStream, func() {
+			code := slip.Read([]byte(source), c.scope)
+			code.Compile()
+			code.Eval(c.scope, nil)
+		})
 	}()
 	return
 }

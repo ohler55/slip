@@ -107,3 +107,22 @@ func (s *SwankOutputStream) LastByte() byte {
 	}
 	return s.buffer[len(s.buffer)-1]
 }
+
+// stdOutMu serializes mutation of slip.StandardOutput across concurrent
+// swank evals. Required because CL primitives like princ, terpri, write,
+// and printer.Print read slip.StandardOutput as a Go-level global rather
+// than resolving the scope binding *standard-output*. Without this mutex,
+// goroutines spawned by handleEmacsRex cross-route output and can
+// permanently corrupt the global when defer-restores interleave.
+var stdOutMu sync.Mutex
+
+// withStandardOutput runs fn with slip.StandardOutput set to stream,
+// serialized across goroutines.
+func withStandardOutput(stream slip.Object, fn func()) {
+	stdOutMu.Lock()
+	defer stdOutMu.Unlock()
+	prev := slip.StandardOutput
+	slip.StandardOutput = stream
+	defer func() { slip.StandardOutput = prev }()
+	fn()
+}

@@ -258,6 +258,65 @@ func TestEmacsInterrupt(t *testing.T) {
 	}
 }
 
+// TestWireReadNegativeLength guards against the pre-fix DoS where a
+// header like "-0001F" was accepted by strconv.ParseInt and reached
+// make([]byte, -31), panicking the goroutine and tearing down the
+// process. After the fix, ParseUint rejects the sign and we return
+// an error cleanly.
+func TestWireReadNegativeLength(t *testing.T) {
+	scope := slip.NewScope()
+	reader := bytes.NewReader([]byte("-0001F"))
+	_, err := swank.ReadWireMessage(reader, scope)
+	if err == nil {
+		t.Fatal("expected error for negative length header, got nil")
+	}
+}
+
+// TestWireReadOversizedLength guards against unbounded allocation from
+// a header like "FFFFFF" (~16 MiB). We cap at maxMessageSize.
+func TestWireReadOversizedLength(t *testing.T) {
+	scope := slip.NewScope()
+	reader := bytes.NewReader([]byte("FFFFFF"))
+	_, err := swank.ReadWireMessage(reader, scope)
+	if err == nil {
+		t.Fatal("expected error for oversized length header, got nil")
+	}
+}
+
+// TestRepeatCreateServerClosesPrior guards bug_009: calling a server
+// entry point while another default server is running must stop the
+// prior one before overwriting the defaultServer global. Without the
+// fix, the first listener leaks (goroutine + port + fd) and is
+// unreachable from Lisp.
+func TestRepeatCreateServerClosesPrior(t *testing.T) {
+	suppressLog(t)
+	scope := slip.NewScope()
+
+	first := (&swank.SwankServer{}).Call(scope, slip.List{
+		slip.Symbol(":port"), slip.Fixnum(0),
+	}, 0).(*swank.SwankServerInstance)
+	firstAddr := first.Addr()
+
+	second := (&swank.SwankServer{}).Call(scope, slip.List{
+		slip.Symbol(":port"), slip.Fixnum(0),
+	}, 0).(*swank.SwankServerInstance)
+	t.Cleanup(func() { (&swank.SwankStop{}).Call(scope, nil, 0) })
+
+	if first == second {
+		t.Fatal("expected distinct server instances")
+	}
+	if second.Addr() == firstAddr {
+		t.Fatalf("expected second server to bind a different addr, both got %s", firstAddr)
+	}
+
+	// The first listener should now be closed — Dial should fail quickly.
+	conn, err := net.DialTimeout("tcp", firstAddr, 500*time.Millisecond)
+	if err == nil {
+		conn.Close()
+		t.Fatalf("first listener at %s is still accepting; prior server leaked", firstAddr)
+	}
+}
+
 func TestEmacsInterruptNoActiveEval(t *testing.T) {
 	env := newTestEnv(t)
 	defer env.close()

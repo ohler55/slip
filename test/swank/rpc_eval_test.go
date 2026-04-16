@@ -3,8 +3,13 @@
 package swank_test
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"net"
+	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -297,5 +302,109 @@ func TestEvalWithError(t *testing.T) {
 
 	if respList[0] != slip.Symbol(":return") {
 		t.Errorf("expected :return, got %v", respList[0])
+	}
+}
+
+// TestConcurrentEvalOutputsIsolated guards bug_003: concurrent
+// :emacs-rex handlers used to race on the package-global
+// slip.StandardOutput. Each goroutine runs a distinct eval whose
+// result contains its own numeric tag. Under `go test -race`, the
+// underlying data race on slip.StandardOutput is also caught.
+//
+// NOTE: we deliberately avoid string literals inside the eval
+// source because slip's wire format does not escape inner quotes —
+// a round-tripped payload `"(princ \"x\")"` is re-parsed as four
+// tokens, not one string. Integer tags widely spaced (100 apart)
+// avoid substring collisions.
+func TestConcurrentEvalOutputsIsolated(t *testing.T) {
+	saved := swank.LogOutput
+	swank.LogOutput = io.Discard
+	defer func() { swank.LogOutput = saved }()
+
+	const n = 8
+	scope := slip.NewScope()
+	server := swank.NewServer(scope)
+	if err := server.Start(":0"); err != nil {
+		t.Fatalf("failed to start server: %v", err)
+	}
+	defer func() { _ = server.Stop() }()
+
+	// Pre-serialize each goroutine's wire payload so slip's Printer
+	// (which is not concurrency-safe for a single shared instance) is
+	// only exercised from this goroutine. The server-side decode is
+	// the thing we want to race, not the client-side encode.
+	payloads := make([][]byte, n)
+	tags := make([]int, n)
+	for i := 0; i < n; i++ {
+		tag := (i + 1) * 100 // 100, 200, ..., 800
+		tags[i] = tag
+		source := fmt.Sprintf("(princ %d)", tag)
+		msg := slip.List{
+			slip.Symbol(":emacs-rex"),
+			slip.List{slip.Symbol("swank:interactive-eval"), slip.String(source)},
+			slip.String("cl-user"),
+			slip.Symbol("t"),
+			slip.Fixnum(int64(i + 1)),
+		}
+		var buf bytes.Buffer
+		if err := swank.WriteWireMessage(&buf, msg); err != nil {
+			t.Fatalf("pre-encode %d: %v", i, err)
+		}
+		payloads[i] = buf.Bytes()
+	}
+
+	var wg sync.WaitGroup
+	errs := make(chan error, n)
+
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+
+			conn, err := net.DialTimeout("tcp", server.Addr(), 2*time.Second)
+			if err != nil {
+				errs <- fmt.Errorf("dial: %w", err)
+				return
+			}
+			defer conn.Close()
+
+			if _, err := conn.Write(payloads[id]); err != nil {
+				errs <- fmt.Errorf("write: %w", err)
+				return
+			}
+
+			_ = conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+			resp, err := swank.ReadWireMessage(conn, scope)
+			if err != nil {
+				errs <- fmt.Errorf("conn %d: read: %w", id, err)
+				return
+			}
+			list, ok := resp.(slip.List)
+			if !ok || len(list) < 2 || list[0] != slip.Symbol(":return") {
+				errs <- fmt.Errorf("conn %d: bad response: %v", id, resp)
+				return
+			}
+			inner, ok := list[1].(slip.List)
+			if !ok || len(inner) < 2 || inner[0] != slip.Symbol(":ok") {
+				errs <- fmt.Errorf("conn %d: not :ok: %v", id, list[1])
+				return
+			}
+			result, ok := inner[1].(slip.String)
+			if !ok {
+				errs <- fmt.Errorf("conn %d: result not string: %v", id, inner[1])
+				return
+			}
+			want := strconv.Itoa(tags[id])
+			if !strings.Contains(string(result), want) {
+				errs <- fmt.Errorf("conn %d: missing own tag %s in result %q", id, want, result)
+				return
+			}
+		}(i)
+	}
+
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		t.Error(err)
 	}
 }
