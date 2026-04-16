@@ -69,6 +69,48 @@ func TestFormatFuncDescriptionGeneric(t *testing.T) {
 	}
 }
 
+func TestFormatFuncDescriptionMethod(t *testing.T) {
+	fi := &slip.FuncInfo{Name: "my-method", Kind: slip.MethodSymbol}
+	out := formatFuncDescription(fi)
+	if !strings.Contains(out, "names a method") {
+		t.Errorf("expected 'names a method', got %q", out)
+	}
+}
+
+// getObjectTitle's nil guard.
+func TestGetObjectTitleNil(t *testing.T) {
+	if s := getObjectTitle(nil); s != "nil" {
+		t.Errorf("expected 'nil', got %q", s)
+	}
+}
+
+// getObjectType has three paths: nil -> "null", non-empty hierarchy,
+// and the fall-through "object" default. Cover nil and the empty-
+// hierarchy fallback (via a type that returns []Symbol{}).
+func TestGetObjectTypeNil(t *testing.T) {
+	if s := getObjectType(nil); s != "null" {
+		t.Errorf("expected 'null', got %q", s)
+	}
+}
+
+// emptyHierObj implements slip.Object with an empty Hierarchy() slice
+// so we can reach the fall-through in getObjectType. All other methods
+// are stubs; only Hierarchy and the interface tag matter for the call.
+type emptyHierObj struct{}
+
+func (emptyHierObj) String() string                    { return "" }
+func (emptyHierObj) Append(b []byte) []byte            { return b }
+func (emptyHierObj) Simplify() any                     { return nil }
+func (emptyHierObj) Equal(slip.Object) bool            { return false }
+func (emptyHierObj) Hierarchy() []slip.Symbol          { return nil }
+func (emptyHierObj) Eval(*slip.Scope, int) slip.Object { return nil }
+
+func TestGetObjectTypeFallthrough(t *testing.T) {
+	if s := getObjectType(emptyHierObj{}); s != "object" {
+		t.Errorf("expected 'object' fallthrough, got %q", s)
+	}
+}
+
 // referencesSymbol's recursion branches: match inside a nested list,
 // and traversal of Funky args.
 

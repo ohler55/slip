@@ -370,3 +370,45 @@ func TestInspectLambda(t *testing.T) {
 		}
 	}
 }
+
+// TestInspectNonStringArg covers the else branch in
+// handleInspectInEmacs where args[0] is not a string — the handler
+// uses the raw object instead of evaluating it. All other tests pass
+// a string (an expression to eval), leaving this else arm dead.
+func TestInspectNonStringArg(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:inspect-in-emacs"),
+		slip.Fixnum(77),
+	})
+	if result == nil {
+		t.Fatal("expected inspector content for raw fixnum")
+	}
+	s := slip.ObjectString(result)
+	if !strings.Contains(s, "77") {
+		t.Errorf("expected 77 in raw-object inspection: %s", s)
+	}
+}
+
+// TestInspectLambdaMultiArg covers the i > 0 branch in
+// appendLambdaContent's arg-separator loop.
+func TestInspectLambdaMultiArg(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:inspect-in-emacs"),
+		slip.String("(lambda (a b c) (+ a b c))"),
+	})
+	if result == nil {
+		t.Fatal("expected inspector content for multi-arg lambda")
+	}
+	s := slip.ObjectString(result)
+	for _, want := range []string{"a", "b", "c"} {
+		if !strings.Contains(s, want) {
+			t.Errorf("expected arg %q in lambda inspection: %s", want, s)
+		}
+	}
+}

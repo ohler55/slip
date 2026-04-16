@@ -224,3 +224,32 @@ func TestMacroexpandEmptyArgs(t *testing.T) {
 		t.Fatalf("expected :return, got %v", response)
 	}
 }
+
+// TestMacroexpandEmptySource covers expandMacro's len(code)==0 guard.
+func TestMacroexpandEmptySource(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+	env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand-1"),
+		slip.String(""),
+	})
+}
+
+// TestMacroexpandNonSymbolHead covers macroexpand1's early return
+// when the operator position is not a Symbol.
+func TestMacroexpandNonSymbolHead(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.close()
+
+	result := env.sendRexOK(t, slip.List{
+		slip.Symbol("swank:swank-macroexpand-1"),
+		slip.String("((lambda (x) x) 5)"),
+	})
+	s, ok := result.(slip.String)
+	if !ok {
+		t.Fatalf("expected string result, got %T", result)
+	}
+	if !strings.Contains(string(s), "lambda") {
+		t.Errorf("expected original form unchanged, got %q", s)
+	}
+}
