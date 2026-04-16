@@ -30,6 +30,9 @@ type Connection struct {
 
 	// Inspector state
 	inspector *Inspector
+
+	// Interrupt signal channel (buffered 1)
+	interruptCh chan struct{}
 }
 
 // NewConnection creates a connection for an accepted socket.
@@ -38,11 +41,21 @@ func NewConnection(id int64, conn net.Conn, server *Server) *Connection {
 	scope := server.baseScope.NewScope()
 
 	c := &Connection{
-		id:         id,
-		conn:       conn,
-		server:     server,
-		scope:      scope,
-		currentPkg: slip.FindPackage("cl-user"),
+		id:          id,
+		conn:        conn,
+		server:      server,
+		scope:       scope,
+		currentPkg:  slip.FindPackage("cl-user"),
+		interruptCh: make(chan struct{}, 1),
+	}
+
+	// Wire cooperative interrupt into scope
+	c.scope.InterruptCheck = func() {
+		select {
+		case <-c.interruptCh:
+			panic(&slip.Panic{Message: "Keyboard interrupt"})
+		default:
+		}
 	}
 
 	// Create output stream that sends to SLIME
@@ -64,7 +77,7 @@ func (c *Connection) Run() {
 	for {
 		msg, err := ReadWireMessage(c.conn, c.scope)
 		if err != nil {
-			if !errors.Is(err, io.EOF) {
+			if !errors.Is(err, io.EOF) && !errors.Is(err, net.ErrClosed) {
 				LogError("connection %d read error: %v", c.id, err)
 			}
 			return
@@ -164,30 +177,48 @@ func (c *Connection) handleEmacsRex(msg slip.List) {
 
 	LogDispatch(string(handlerName), formList[1:])
 
-	// Execute handler with panic recovery
-	var result slip.Object
-	func() {
-		defer func() {
-			if r := recover(); r != nil {
-				if p, ok := r.(*slip.Panic); ok {
-					c.sendAbort(cont, p.Message)
-				} else {
-					c.sendAbort(cont, fmt.Sprintf("%v", r))
-				}
-				result = nil
-			}
-		}()
-		result = handler(c, formList[1:])
-	}()
+	// Drain stale interrupt before launching eval
+	c.drainInterrupt()
 
-	if result != nil || recover() == nil {
-		c.sendReturn(cont, result)
+	// Execute handler in a goroutine so the dispatch loop stays
+	// free to receive :emacs-interrupt messages during eval.
+	go func() {
+		var result slip.Object
+		recovered := false
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					recovered = true
+					if p, ok := r.(*slip.Panic); ok {
+						c.sendAbort(cont, p.Message)
+					} else {
+						c.sendAbort(cont, fmt.Sprintf("%v", r))
+					}
+				}
+			}()
+			result = handler(c, formList[1:])
+		}()
+		if !recovered {
+			c.sendReturn(cont, result)
+		}
+	}()
+}
+
+// handleEmacsInterrupt signals the interrupt channel to abort an in-flight eval.
+func (c *Connection) handleEmacsInterrupt(msg slip.List) {
+	select {
+	case c.interruptCh <- struct{}{}:
+	default:
+		// Already signaled
 	}
 }
 
-// handleEmacsInterrupt handles interrupt requests.
-func (c *Connection) handleEmacsInterrupt(msg slip.List) {
-	// TODO: implement interrupt handling
+// drainInterrupt clears any stale interrupt signal before a new eval.
+func (c *Connection) drainInterrupt() {
+	select {
+	case <-c.interruptCh:
+	default:
+	}
 }
 
 // sendReturn sends a successful return message.

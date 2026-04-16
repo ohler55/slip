@@ -75,9 +75,7 @@ func handleMacroexpandAll(c *Connection, args slip.List) slip.Object {
 // expandMacro parses and expands a form.
 func expandMacro(c *Connection, source string, once bool) slip.Object {
 	defer func() {
-		if r := recover(); r != nil {
-			// On error, return the original source
-		}
+		_ = recover() // On error, return the original source
 	}()
 
 	// Parse the source

@@ -235,11 +235,12 @@ func formatFuncDescription(fi *slip.FuncInfo) string {
 	result = append(result, strings.ToUpper(fi.Name)...)
 	result = append(result, " names a "...)
 	kind := "function"
-	if fi.Kind == slip.MacroSymbol {
+	switch fi.Kind {
+	case slip.MacroSymbol:
 		kind = "macro"
-	} else if fi.Kind == slip.GenericFunctionSymbol {
+	case slip.GenericFunctionSymbol:
 		kind = "generic function"
-	} else if fi.Kind == slip.MethodSymbol {
+	case slip.MethodSymbol:
 		kind = "method"
 	}
 	result = append(result, kind...)

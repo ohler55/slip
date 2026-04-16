@@ -17,13 +17,13 @@ func init() {
 type xrefType string
 
 const (
-	xrefCalls          xrefType = ":calls"          // what does this function call
-	xrefCallers        xrefType = ":callers"        // who calls this function
-	xrefReferences     xrefType = ":references"     // who references this variable
-	xrefBinds          xrefType = ":binds"          // who binds this variable
-	xrefSets           xrefType = ":sets"           // who sets this variable
-	xrefMacroexpands   xrefType = ":macroexpands"   // who expands this macro
-	xrefSpecializes    xrefType = ":specializes"    // who specializes this class
+	xrefCalls        xrefType = ":calls"        // what does this function call
+	xrefCallers      xrefType = ":callers"      // who calls this function
+	xrefReferences   xrefType = ":references"   // who references this variable
+	xrefBinds        xrefType = ":binds"        // who binds this variable
+	xrefSets         xrefType = ":sets"         // who sets this variable
+	xrefMacroexpands xrefType = ":macroexpands" // who expands this macro
+	xrefSpecializes  xrefType = ":specializes"  // who specializes this class
 )
 
 // handleXref finds cross-references for a symbol.
@@ -234,7 +234,7 @@ func getLambda(fi *slip.FuncInfo) *slip.Lambda {
 	}
 
 	// Create a function instance and get its caller
-	defer func() { recover() }() // Handle any panics from Create
+	defer func() { _ = recover() }() // Handle any panics from Create
 
 	fun := fi.Create(nil)
 	if funky, ok := fun.(slip.Funky); ok {
