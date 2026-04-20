@@ -45,3 +45,10 @@ func TestBagEachBadInput(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestBagEachNotFile(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(each-bag "not-a-file" (lambda (b) nil))`,
+		PanicType: slip.FileErrorSymbol,
+	}).Test(t)
+}

@@ -42,6 +42,7 @@ nil and boolean false.`),
 	generic.DefClassMethod(flavor, ":parse", "", parseCaller{})
 	generic.DefClassMethod(flavor, ":read", "", readCaller{})
 	generic.DefClassMethod(flavor, ":get", "", getCaller{})
+	generic.DefClassMethod(flavor, ":get-all", "", getAllCaller{})
 	generic.DefClassMethod(flavor, ":has", "", hasCaller{})
 	generic.DefClassMethod(flavor, ":remove", "", removeCaller{})
 	generic.DefClassMethod(flavor, ":modify", "", modifyCaller{})
@@ -274,6 +275,48 @@ the JSONPath format.`,
 			},
 		},
 		Return: "object",
+	}
+}
+
+type getAllCaller struct{}
+
+func (caller getAllCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	var retType slip.Object
+	switch len(args) {
+	case 1:
+		// no optional return type
+	case 2:
+		retType = args[1]
+	default:
+		slip.MethodArgCountPanic(s, depth, obj, ":get-all", len(args), 1, 2)
+	}
+	return getAllBag(s, obj, args[0], retType, depth)
+}
+
+func (caller getAllCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":get-all",
+		Text: `Gets all values at the location described by _path_.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `Path to the location in the bag to get the values from. The path must follow
+the JSONPath format.`,
+			},
+			{Name: "&optional"},
+			{
+				Name: "return-type",
+				Type: "keyword",
+				Text: `Dictates the return type:
+  __:native__ returns a list of Lisp objects
+  __:bag__ returns a bag instance
+  __:bag-list__ returns a list of __bag__ instances (the default)
+`,
+			},
+		},
+		Return: "list|bag",
 	}
 }
 

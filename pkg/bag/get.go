@@ -44,7 +44,7 @@ This is the same as the _:get_ method of the _bag-flavor_ except none of the met
 daemons are invoked hence it has a slight performance advantage.`,
 			Examples: []string{
 				`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`,
-				`(bag-get bag "a") => 3`,
+				`(bag-get bag "a") => 7`,
 			},
 		}, &Pkg)
 }
