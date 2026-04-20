@@ -13,31 +13,31 @@ import (
 func TestSwankVerboseNoArgs(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(swank:swank-verbose)",
-		Expect: "(:wire nil :dispatch nil :eval nil :color nil)",
+		Expect: "(:wire nil :dispatch nil :eval nil)",
 	}).Test(t)
 }
 
 func TestSwankVerboseSetWire(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(swank:swank-verbose :wire t)",
-		Expect: "(:wire t :dispatch nil :eval nil :color nil)",
+		Expect: "(:wire t :dispatch nil :eval nil)",
 	}).Test(t)
 	// Reset
 	(&sliptest.Function{
-		Source: "(swank:swank-verbose :wire nil :dispatch nil :eval nil :color nil)",
-		Expect: "(:wire nil :dispatch nil :eval nil :color nil)",
+		Source: "(swank:swank-verbose :wire nil :dispatch nil :eval nil)",
+		Expect: "(:wire nil :dispatch nil :eval nil)",
 	}).Test(t)
 }
 
 func TestSwankVerboseAllFlags(t *testing.T) {
 	(&sliptest.Function{
-		Source: "(swank:swank-verbose :wire t :dispatch t :eval t :color t)",
-		Expect: "(:wire t :dispatch t :eval t :color t)",
+		Source: "(swank:swank-verbose :wire t :dispatch t :eval t)",
+		Expect: "(:wire t :dispatch t :eval t)",
 	}).Test(t)
 	// Reset
 	(&sliptest.Function{
-		Source: "(swank:swank-verbose :wire nil :dispatch nil :eval nil :color nil)",
-		Expect: "(:wire nil :dispatch nil :eval nil :color nil)",
+		Source: "(swank:swank-verbose :wire nil :dispatch nil :eval nil)",
+		Expect: "(:wire nil :dispatch nil :eval nil)",
 	}).Test(t)
 }
 
@@ -52,17 +52,5 @@ func TestSwankVerboseNonKeywordArg(t *testing.T) {
 	(&sliptest.Function{
 		Source:    "(swank:swank-verbose 42 t)",
 		PanicType: slip.Symbol("type-error"),
-	}).Test(t)
-}
-
-func TestSwankVerboseColorOutput(t *testing.T) {
-	(&sliptest.Function{
-		Source: "(swank:swank-verbose :color t :wire t :dispatch t :eval t)",
-		Expect: "(:wire t :dispatch t :eval t :color t)",
-	}).Test(t)
-	// Reset
-	(&sliptest.Function{
-		Source: "(swank:swank-verbose :wire nil :dispatch nil :eval nil :color nil)",
-		Expect: "(:wire nil :dispatch nil :eval nil :color nil)",
 	}).Test(t)
 }

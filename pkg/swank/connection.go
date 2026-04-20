@@ -45,7 +45,7 @@ func NewConnection(id int64, conn net.Conn, server *Server) *Connection {
 		conn:        conn,
 		server:      server,
 		scope:       scope,
-		currentPkg:  slip.FindPackage("cl-user"),
+		currentPkg:  &slip.UserPkg,
 		interruptCh: make(chan struct{}, 1),
 	}
 

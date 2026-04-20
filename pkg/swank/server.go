@@ -309,7 +309,9 @@ This is the standard SLIME entry point. Equivalent to __swank-server__.`,
 }
 
 // CreateServer represents the create-server function.
-type CreateServer struct{ slip.Function }
+type CreateServer struct {
+	slip.Function
+}
 
 func (f *CreateServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 0, 4)
@@ -342,7 +344,9 @@ accepted for SLIME compatibility but ignored. Equivalent to __create-server__.`,
 }
 
 // StartServer represents the start-server function.
-type StartServer struct{ slip.Function }
+type StartServer struct {
+	slip.Function
+}
 
 func (f *StartServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 0, 6)
@@ -379,7 +383,9 @@ func defStopServer() {
 }
 
 // StopServer represents the stop-server function.
-type StopServer struct{ slip.Function }
+type StopServer struct {
+	slip.Function
+}
 
 func (f *StopServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 0, 1)
@@ -413,7 +419,9 @@ func defRestartServer() {
 }
 
 // RestartServer represents the restart-server function.
-type RestartServer struct{ slip.Function }
+type RestartServer struct {
+	slip.Function
+}
 
 func (f *RestartServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 0, 4)
@@ -444,7 +452,9 @@ This is the lower-level entry point. Most users should use __create-server__ ins
 }
 
 // SetupServer represents the setup-server function.
-type SetupServer struct{ slip.Function }
+type SetupServer struct {
+	slip.Function
+}
 
 func (f *SetupServer) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, 1)

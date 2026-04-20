@@ -1,12 +1,13 @@
 // Copyright (c) 2025, Peter Ohler, All rights reserved.
 
-package swank
+package swank_test
 
 import (
 	"bytes"
 	"testing"
 
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/swank"
 )
 
 func TestWriteWireMessage(t *testing.T) {
@@ -35,7 +36,7 @@ func TestWriteWireMessage(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
-			err := WriteWireMessage(&buf, tc.msg)
+			err := swank.WriteWireMessage(&buf, tc.msg)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -73,7 +74,7 @@ func TestReadWireMessage(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			buf := bytes.NewBufferString(tc.input)
-			msg, err := ReadWireMessage(buf, scope)
+			msg, err := swank.ReadWireMessage(buf, scope)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -85,7 +86,7 @@ func TestReadWireMessage(t *testing.T) {
 	}
 }
 
-func TestWireRoundTrip(t *testing.T) {
+func TestWireRoundTripTable(t *testing.T) {
 	tests := []slip.Object{
 		nil,
 		slip.Symbol(":emacs-rex"),
@@ -98,12 +99,12 @@ func TestWireRoundTrip(t *testing.T) {
 	for _, msg := range tests {
 		t.Run(slip.ObjectString(msg), func(t *testing.T) {
 			var buf bytes.Buffer
-			err := WriteWireMessage(&buf, msg)
+			err := swank.WriteWireMessage(&buf, msg)
 			if err != nil {
 				t.Fatalf("write error: %v", err)
 			}
 
-			result, err := ReadWireMessage(&buf, scope)
+			result, err := swank.ReadWireMessage(&buf, scope)
 			if err != nil {
 				t.Fatalf("read error: %v", err)
 			}

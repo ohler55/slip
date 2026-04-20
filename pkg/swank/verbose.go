@@ -15,17 +15,7 @@ var (
 	VerboseWire     bool
 	VerboseDispatch bool
 	VerboseEval     bool
-	VerboseColor    bool
 	LogOutput       io.Writer = os.Stdout
-)
-
-// ANSI color codes (for black background)
-const (
-	colorReset  = "\x1b[0m"
-	colorCyan   = "\x1b[36m" // wire
-	colorYellow = "\x1b[33m" // dispatch
-	colorGreen  = "\x1b[32m" // eval
-	colorRed    = "\x1b[31m" // errors
 )
 
 // LogWire logs wire protocol messages if VerboseWire is enabled.
@@ -34,12 +24,7 @@ func LogWire(direction string, msg slip.Object) {
 	if !VerboseWire {
 		return
 	}
-	prefix := "[swank:wire]"
-	if VerboseColor {
-		fmt.Fprintf(LogOutput, "%s%s%s %s %s\n", colorCyan, prefix, colorReset, direction, slip.ObjectString(msg))
-	} else {
-		fmt.Fprintf(LogOutput, "%s %s %s\n", prefix, direction, slip.ObjectString(msg))
-	}
+	fmt.Fprintf(LogOutput, "[swank:wire] %s %s\n", direction, slip.ObjectString(msg))
 }
 
 // LogDispatch logs handler dispatch if VerboseDispatch is enabled.
@@ -47,12 +32,7 @@ func LogDispatch(handler string, args slip.List) {
 	if !VerboseDispatch {
 		return
 	}
-	prefix := "[swank:dispatch]"
-	if VerboseColor {
-		fmt.Fprintf(LogOutput, "%s%s%s %s %s\n", colorYellow, prefix, colorReset, handler, slip.ObjectString(args))
-	} else {
-		fmt.Fprintf(LogOutput, "%s %s %s\n", prefix, handler, slip.ObjectString(args))
-	}
+	fmt.Fprintf(LogOutput, "[swank:dispatch] %s %s\n", handler, slip.ObjectString(args))
 }
 
 // LogEval logs evaluation if VerboseEval is enabled.
@@ -60,23 +40,12 @@ func LogEval(expr slip.Object, result slip.Object) {
 	if !VerboseEval {
 		return
 	}
-	prefix := "[swank:eval]"
-	if VerboseColor {
-		fmt.Fprintf(LogOutput, "%s%s%s %s => %s\n", colorGreen, prefix, colorReset, slip.ObjectString(expr), slip.ObjectString(result))
-	} else {
-		fmt.Fprintf(LogOutput, "%s %s => %s\n", prefix, slip.ObjectString(expr), slip.ObjectString(result))
-	}
+	fmt.Fprintf(LogOutput, "[swank:eval] %s => %s\n", slip.ObjectString(expr), slip.ObjectString(result))
 }
 
-// LogError logs errors with optional color.
+// LogError logs errors.
 func LogError(format string, args ...any) {
-	prefix := "[swank:error]"
-	msg := fmt.Sprintf(format, args...)
-	if VerboseColor {
-		fmt.Fprintf(LogOutput, "%s%s%s %s\n", colorRed, prefix, colorReset, msg)
-	} else {
-		fmt.Fprintf(LogOutput, "%s %s\n", prefix, msg)
-	}
+	fmt.Fprintf(LogOutput, "[swank:error] %s\n", fmt.Sprintf(format, args...))
 }
 
 func init() {
@@ -98,7 +67,6 @@ func defSwankVerbose() {
 				{Name: "wire", Type: "boolean", Text: "log wire protocol messages."},
 				{Name: "dispatch", Type: "boolean", Text: "log handler dispatch."},
 				{Name: "eval", Type: "boolean", Text: "log evaluation."},
-				{Name: "color", Type: "boolean", Text: "use ANSI colors in output."},
 			},
 			Return: "list",
 			Text: `__swank-verbose__ controls debug logging for the Swank server.
@@ -108,11 +76,10 @@ With keyword arguments, sets the specified flags.
 Categories:
   :wire     - Raw S-expressions sent/received over the socket
   :dispatch - Handler name and arguments for each RPC call
-  :eval     - SLIP expressions being evaluated and results
-  :color    - Enable ANSI colors (cyan=wire, yellow=dispatch, green=eval)`,
+  :eval     - SLIP expressions being evaluated and results`,
 			Examples: []string{
-				`(swank-verbose :wire t :dispatch t :color t)`,
-				`(swank-verbose) => (:wire t :dispatch t :eval nil :color t)`,
+				`(swank-verbose :wire t :dispatch t)`,
+				`(swank-verbose) => (:wire t :dispatch t :eval nil)`,
 			},
 		}, &Pkg)
 }
@@ -124,7 +91,7 @@ type SwankVerbose struct {
 
 // Call implements the swank-verbose function.
 func (f *SwankVerbose) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.CheckArgCount(s, depth, f, args, 0, 8)
+	slip.CheckArgCount(s, depth, f, args, 0, 6)
 
 	// If no args, return current state
 	if len(args) == 0 {
@@ -132,7 +99,6 @@ func (f *SwankVerbose) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 			slip.Symbol(":wire"), boolToLisp(VerboseWire),
 			slip.Symbol(":dispatch"), boolToLisp(VerboseDispatch),
 			slip.Symbol(":eval"), boolToLisp(VerboseEval),
-			slip.Symbol(":color"), boolToLisp(VerboseColor),
 		}
 	}
 
@@ -140,7 +106,7 @@ func (f *SwankVerbose) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	for i := 0; i < len(args); i += 2 {
 		key, ok := args[i].(slip.Symbol)
 		if !ok || i+1 >= len(args) {
-			slip.TypePanic(s, depth, "keyword", args[i], ":wire", ":dispatch", ":eval", ":color")
+			slip.TypePanic(s, depth, "keyword", args[i], ":wire", ":dispatch", ":eval")
 		}
 		val := args[i+1] != nil
 
@@ -151,10 +117,8 @@ func (f *SwankVerbose) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 			VerboseDispatch = val
 		case ":eval":
 			VerboseEval = val
-		case ":color":
-			VerboseColor = val
 		default:
-			slip.TypePanic(s, depth, "keyword", args[i], ":wire", ":dispatch", ":eval", ":color")
+			slip.TypePanic(s, depth, "keyword", args[i], ":wire", ":dispatch", ":eval")
 		}
 	}
 
@@ -162,7 +126,6 @@ func (f *SwankVerbose) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 		slip.Symbol(":wire"), boolToLisp(VerboseWire),
 		slip.Symbol(":dispatch"), boolToLisp(VerboseDispatch),
 		slip.Symbol(":eval"), boolToLisp(VerboseEval),
-		slip.Symbol(":color"), boolToLisp(VerboseColor),
 	}
 }
 

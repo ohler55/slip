@@ -49,7 +49,7 @@ func init() {
 			args = append(args, slip.String(s))
 			return nil
 		})
-	flag.StringVar(&emacsMode, "emacs", "", "start Emacs SLIME integration server")
+	flag.StringVar(&emacsMode, "emacs", "", "start Emacs integration server (slime|swank)")
 }
 
 func main() {

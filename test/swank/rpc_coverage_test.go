@@ -800,12 +800,10 @@ func TestVerboseLoggingEnabled(t *testing.T) {
 	swank.VerboseWire = true
 	swank.VerboseDispatch = true
 	swank.VerboseEval = true
-	swank.VerboseColor = true
 	defer func() {
 		swank.VerboseWire = false
 		swank.VerboseDispatch = false
 		swank.VerboseEval = false
-		swank.VerboseColor = false
 		swank.LogOutput = saved
 	}()
 
@@ -816,42 +814,13 @@ func TestVerboseLoggingEnabled(t *testing.T) {
 	swank.LogError("test error %d", 42)
 
 	out := buf.String()
-	for _, want := range []string{"[swank:wire]", "[swank:dispatch]", "[swank:eval]", "[swank:error]", "\x1b["} {
-		if !strings.Contains(out, want) {
-			t.Errorf("expected output to contain %q", want)
-		}
-	}
-}
-
-func TestVerboseLoggingNoColor(t *testing.T) {
-	var buf bytes.Buffer
-	saved := swank.LogOutput
-	swank.LogOutput = &buf
-	swank.VerboseWire = true
-	swank.VerboseDispatch = true
-	swank.VerboseEval = true
-	swank.VerboseColor = false
-	defer func() {
-		swank.VerboseWire = false
-		swank.VerboseDispatch = false
-		swank.VerboseEval = false
-		swank.VerboseColor = false
-		swank.LogOutput = saved
-	}()
-
-	swank.LogWire("<-", slip.String("test"))
-	swank.LogDispatch("test-handler", slip.List{slip.String("arg1")})
-	swank.LogEval(slip.String("(+ 1 2)"), slip.Fixnum(3))
-	swank.LogError("test error")
-
-	out := buf.String()
 	for _, want := range []string{"[swank:wire]", "[swank:dispatch]", "[swank:eval]", "[swank:error]"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected output to contain %q", want)
 		}
 	}
 	if strings.Contains(out, "\x1b[") {
-		t.Error("expected no ANSI escape codes in no-color mode")
+		t.Error("verbose logging should not emit ANSI escapes")
 	}
 }
 
