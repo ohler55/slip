@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `class-supers` now supports structs and any other class.
 - `class-precedence` now supports structs and any other class.
 - Tab completion now support package name prefixes.
+- Add `bag-get-all` function.
 
 ## [1.3.1] - 2026-01-05
 ### Fixed
