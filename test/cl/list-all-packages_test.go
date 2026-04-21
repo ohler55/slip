@@ -11,7 +11,7 @@ import (
 func TestListAllPackagesOk(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(list-all-packages)`,
-		Expect: `/\(.*#<package common-lisp>/`,
+		Expect: `/\([\s\S]*#<package common-lisp>/`,
 	}).Test(t)
 }
 

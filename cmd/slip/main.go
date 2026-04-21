@@ -10,10 +10,12 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/repl"
+	"github.com/ohler55/slip/pkg/swank"
 	"golang.org/x/term"
 
 	// Pull in all slip functions.
@@ -30,6 +32,7 @@ var (
 	trace       bool
 	allAtOnce   bool
 	args        slip.List
+	emacsMode   string
 )
 
 func init() {
@@ -46,6 +49,7 @@ func init() {
 			args = append(args, slip.String(s))
 			return nil
 		})
+	flag.StringVar(&emacsMode, "emacs", "", "start Emacs integration server (slime|swank)")
 }
 
 func main() {
@@ -61,6 +65,17 @@ usage: %[2]s [<options>] [<filepath>]...
 `, "\x1b[1m", filepath.Base(os.Args[0]), "\x1b[m", version)
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr)
+	}
+	// Handle bare -emacs flag (without value) by setting default
+	for i, arg := range os.Args {
+		if arg == "-emacs" {
+			// Check if next arg exists and is not another flag
+			if i+1 >= len(os.Args) || strings.HasPrefix(os.Args[i+1], "-") {
+				// Insert default value
+				os.Args = append(os.Args[:i+1], append([]string{"slime"}, os.Args[i+1:]...)...)
+				break
+			}
+		}
 	}
 	flag.Parse()
 	// Leave as the default or what ever the user has in their defaults if
@@ -82,7 +97,31 @@ usage: %[2]s [<options>] [<filepath>]...
 	slip.CLPkg.Locked = true
 	slip.CLPkg.Export("*config-directory*")
 
+	// Start Emacs integration server if requested
+	if emacsMode != "" {
+		startEmacsServer()
+	}
+
 	run()
+}
+
+// startEmacsServer starts the appropriate Emacs integration server.
+func startEmacsServer() {
+	scope := slip.NewScope()
+	mode := strings.ToLower(emacsMode)
+
+	switch mode {
+	case "slime", "swank":
+		server := swank.NewServer(scope)
+		if err := server.Start(":4005"); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to start swank server: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Swank server started on %s (for SLIME)\n", server.Addr())
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown emacs mode: %s (use 'slime')\n", emacsMode)
+		os.Exit(1)
+	}
 }
 
 func run() {
