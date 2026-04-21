@@ -141,7 +141,6 @@ quux is a class:
     :send-if-handles
     :shared-initialize
     :which-operations
-  Value = quux
 `,
 		out.String())
 }

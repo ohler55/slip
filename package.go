@@ -3,6 +3,9 @@
 package slip
 
 import (
+	"fmt"
+	"io"
+	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -17,14 +20,7 @@ const PackageSymbol = Symbol("package")
 // cl:require function.
 var CurrentPackageLoadPath = ""
 
-var packages = []*Package{
-	&CLPkg,
-	&UserPkg,
-}
-
-func init() {
-	CurrentPackage = &UserPkg
-}
+var packages []*Package
 
 // Package represents a LISP package.
 type Package struct {
@@ -116,6 +112,7 @@ func (obj *Package) Initialize(vars map[string]*VarVal, local ...any) {
 		vv.Pkg = obj
 		vv.name = k
 		obj.vars[k] = vv
+		callSetHooks(obj, vv.name)
 	}
 	if obj.classes == nil {
 		obj.classes = map[string]Class{}
@@ -170,9 +167,16 @@ func (obj *Package) Use(pkg *Package) {
 				if xc.Pkg() == c.Pkg() {
 					continue
 				}
-				PackagePanic(NewScope(), 0, obj, "Package %s already defines class %s which can not be replaced "+
-					"with a class with the same name in package %s.",
-					obj, name, pkg)
+				var w io.Writer = os.Stdout
+				if vv := CurrentPackage.getVarVal("*error-output*"); vv != nil {
+					w = vv.Value().(io.Writer)
+				}
+				_, _ = fmt.Fprintf(w, "WARNING: Package %s:%s shadows %s:%s.\n", obj.Name, name, pkg.Name, name)
+				continue
+				// TBD when exports are ready use those to allow the shadowing
+				// PackagePanic(NewScope(), 0, obj, "Package %s already defines class %s which can not be replaced "+
+				// 	"with a class with the same name in package %s.",
+				// 	obj, name, pkg)
 			}
 			obj.classes[name] = c
 		}
@@ -380,8 +384,10 @@ func (obj *Package) Remove(name string) (removed bool) {
 	}
 	delete(obj.classes, name)
 	obj.mu.Unlock()
+	pname := fmt.Sprintf("%s:%s", obj.Name, name)
 	for _, h := range unsetHooks {
 		h.fun(obj, name)
+		h.fun(obj, pname)
 	}
 	return
 }
@@ -435,6 +441,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc, aux ...
 	obj.mu.Unlock()
 	for _, h := range defunHooks {
 		h.fun(obj, name)
+		h.fun(obj, fmt.Sprintf("%s:%s", obj.Name, name))
 	}
 	return &fi
 }
@@ -515,8 +522,10 @@ func (obj *Package) Undefine(name string) {
 		delete(obj.funcs, name)
 	}
 	obj.mu.Unlock()
+	pname := fmt.Sprintf("%s:%s", obj.Name, name)
 	for _, h := range unsetHooks {
 		h.fun(obj, name)
+		h.fun(obj, pname)
 	}
 }
 
@@ -924,6 +933,11 @@ func (obj *Package) RegisterClass(name string, c Class) {
 	}
 	for _, h := range classHooks {
 		h.fun(obj, name)
+	}
+	if c.Pkg() == obj {
+		for _, h := range classHooks {
+			h.fun(obj, fmt.Sprintf("%s:%s", obj.Name, name))
+		}
 	}
 }
 

@@ -63,5 +63,5 @@ func TestEndOfFileMake(t *testing.T) {
 }
 
 func TestEndOfFilePanic(t *testing.T) {
-	tt.Panic(t, func() { slip.EndOfFilePanic(nil, 0, &slip.OutputStream{}, "raise") })
+	tt.Panic(t, func() { slip.EndOfFilePanic(slip.NewScope(), 0, &slip.OutputStream{}, "raise") })
 }

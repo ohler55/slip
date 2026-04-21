@@ -19,7 +19,11 @@ func TestSetHook(t *testing.T) {
 	slip.CurrentPackage.Set("set-hook-test", slip.True)
 	slip.CurrentPackage.Remove("set-hook-test")
 
-	tt.Equal(t, "set set-hook-test\nunset set-hook-test\n", string(log))
+	tt.Equal(t, `set set-hook-test
+set common-lisp-user:set-hook-test
+unset set-hook-test
+unset common-lisp-user:set-hook-test
+`, string(log))
 
 	slip.RemoveSetHook("hook-set")
 	slip.RemoveUnsetHook("hook-unset")
@@ -29,7 +33,11 @@ func TestSetHook(t *testing.T) {
 	slip.CurrentPackage.Remove("set-hook-test")
 
 	// Should not have changed.
-	tt.Equal(t, "set set-hook-test\nunset set-hook-test\n", string(log))
+	tt.Equal(t, `set set-hook-test
+set common-lisp-user:set-hook-test
+unset set-hook-test
+unset common-lisp-user:set-hook-test
+`, string(log))
 }
 
 func TestDefunHook(t *testing.T) {

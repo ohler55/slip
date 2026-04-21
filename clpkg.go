@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	CurrentPackage = &UserPkg
+	packages = append(packages, &CLPkg)
 }
 
 // CLPkg is the COMMON-LISP package.

@@ -42,12 +42,14 @@ nil and boolean false.`),
 	generic.DefClassMethod(flavor, ":parse", "", parseCaller{})
 	generic.DefClassMethod(flavor, ":read", "", readCaller{})
 	generic.DefClassMethod(flavor, ":get", "", getCaller{})
+	generic.DefClassMethod(flavor, ":get-all", "", getAllCaller{})
 	generic.DefClassMethod(flavor, ":has", "", hasCaller{})
 	generic.DefClassMethod(flavor, ":remove", "", removeCaller{})
 	generic.DefClassMethod(flavor, ":modify", "", modifyCaller{})
 	generic.DefClassMethod(flavor, ":native", "", nativeCaller{})
 	generic.DefClassMethod(flavor, ":write", "", writeCaller{})
 	generic.DefClassMethod(flavor, ":walk", "", walkCaller{})
+	generic.DefClassMethod(flavor, ":scan", "", scanCaller{})
 
 	return flavor
 }
@@ -276,6 +278,48 @@ the JSONPath format.`,
 	}
 }
 
+type getAllCaller struct{}
+
+func (caller getAllCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	var retType slip.Object
+	switch len(args) {
+	case 1:
+		// no optional return type
+	case 2:
+		retType = args[1]
+	default:
+		slip.MethodArgCountPanic(s, depth, obj, ":get-all", len(args), 1, 2)
+	}
+	return getAllBag(s, obj, args[0], retType, depth)
+}
+
+func (caller getAllCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":get-all",
+		Text: `Gets all values at the location described by _path_.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "path",
+				Type: "string|bag-path",
+				Text: `Path to the location in the bag to get the values from. The path must follow
+the JSONPath format.`,
+			},
+			{Name: "&optional"},
+			{
+				Name: "return-type",
+				Type: "keyword",
+				Text: `Dictates the return type:
+  __:native__ returns a list of Lisp objects
+  __:bag__ returns a bag instance
+  __:bag-list__ returns a list of __bag__ instances (the default)
+`,
+			},
+		},
+		Return: "list|bag",
+	}
+}
+
 type hasCaller struct{}
 
 func (caller hasCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
@@ -487,6 +531,38 @@ func (caller walkCaller) FuncDocs() *slip.FuncDoc {
 				Name: ":as-lisp",
 				Type: "boolean",
 				Text: `If not nil then the value to the _function_ is a LISP value otherwise a new _bag_.`,
+			},
+		},
+		Return: "nil",
+	}
+}
+
+type scanCaller struct{}
+
+func (caller scanCaller) Call(s *slip.Scope, args slip.List, depth int) (value slip.Object) {
+	obj := s.Get("self").(*flavors.Instance)
+	scanBag(s, obj, args, depth)
+	return nil
+}
+
+func (caller scanCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":scan",
+		Text: `Scans nodes in a bag and calls _function_ on each node. If the
+node is a leaf node then the value passed to the _function_ is a built-in LISP value. If the
+node is a branch then then value is a bag.`,
+		Args: []*slip.DocArg{
+			{
+				Name: "function",
+				Type: "symbol|lambda",
+				Text: `The function to apply to each node in the instance's data.`,
+			},
+			{Name: "&key"},
+			{
+				Name:    "leaves-only",
+				Type:    "boolean",
+				Text:    `If true only leaves trigger the calling of _function_.`,
+				Default: slip.String(".."),
 			},
 		},
 		Return: "nil",

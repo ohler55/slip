@@ -47,5 +47,5 @@ func TestUndefinedFunctionMake(t *testing.T) {
 }
 
 func TestUndefinedFunctionPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.UndefinedFunctionPanic(nil, 0, slip.Symbol("nothing"), "raise") })
+	tt.Panic(t, func() { slip.UndefinedFunctionPanic(slip.NewScope(), 0, slip.Symbol("nothing"), "raise") })
 }

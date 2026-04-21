@@ -10,13 +10,15 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/bag"
 	"github.com/ohler55/slip/pkg/repl"
+	"github.com/ohler55/slip/pkg/swank"
 	"golang.org/x/term"
 
-	// Pull in all functions.
+	// Pull in all slip functions.
 	_ "github.com/ohler55/slip/pkg"
 )
 
@@ -29,6 +31,8 @@ var (
 	interactive bool
 	trace       bool
 	allAtOnce   bool
+	args        slip.List
+	emacsMode   string
 )
 
 func init() {
@@ -39,7 +43,13 @@ func init() {
 	flag.StringVar(&evalCode, "e", evalCode, "code to evaluate")
 	flag.StringVar(&cfgDir, "c", cfgDir, "configuration directory (an empty string or - indicates none)")
 	flag.BoolVar(&interactive, "i", interactive, "interactive mode")
-	flag.BoolVar(&allAtOnce, "a", allAtOnce, "load all files are once instead of one by one")
+	flag.BoolVar(&allAtOnce, "a", allAtOnce, "load all files at once instead of one by one")
+	flag.Func("b", "bind the argument $<n> and add to the $@ list",
+		func(s string) error {
+			args = append(args, slip.String(s))
+			return nil
+		})
+	flag.StringVar(&emacsMode, "emacs", "", "start Emacs integration server (slime|swank)")
 }
 
 func main() {
@@ -55,6 +65,17 @@ usage: %[2]s [<options>] [<filepath>]...
 `, "\x1b[1m", filepath.Base(os.Args[0]), "\x1b[m", version)
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr)
+	}
+	// Handle bare -emacs flag (without value) by setting default
+	for i, arg := range os.Args {
+		if arg == "-emacs" {
+			// Check if next arg exists and is not another flag
+			if i+1 >= len(os.Args) || strings.HasPrefix(os.Args[i+1], "-") {
+				// Insert default value
+				os.Args = append(os.Args[:i+1], append([]string{"slime"}, os.Args[i+1:]...)...)
+				break
+			}
+		}
 	}
 	flag.Parse()
 	// Leave as the default or what ever the user has in their defaults if
@@ -76,20 +97,62 @@ usage: %[2]s [<options>] [<filepath>]...
 	slip.CLPkg.Locked = true
 	slip.CLPkg.Export("*config-directory*")
 
+	// Start Emacs integration server if requested
+	if emacsMode != "" {
+		startEmacsServer()
+	}
+
 	run()
 }
 
+// startEmacsServer starts the appropriate Emacs integration server.
+func startEmacsServer() {
+	scope := slip.NewScope()
+	mode := strings.ToLower(emacsMode)
+
+	switch mode {
+	case "slime", "swank":
+		server := swank.NewServer(scope)
+		if err := server.Start(":4005"); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to start swank server: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Swank server started on %s (for SLIME)\n", server.Addr())
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown emacs mode: %s (use 'slime')\n", emacsMode)
+		os.Exit(1)
+	}
+}
+
 func run() {
-	var path string
+	var (
+		path  string
+		scope *slip.Scope
+	)
 	defer func() {
 		switch tr := recover().(type) {
 		case nil:
 			// normal exit
 		case *slip.Panic:
+			var (
+				prefix string
+				suffix string
+			)
 			if slip.CurrentPackage.JustGet("*print-ansi*") == nil {
 				_, _ = fmt.Printf("\n## error: %s\n\n", tr)
 			} else {
 				_, _ = fmt.Printf("\n\x1b[31m## error: %s\x1b[m\n", tr)
+				prefix = "\x1b[31m"
+				suffix = "\x1b[m"
+			}
+			msg := tr.Error()
+			if 0 < len(msg) {
+				var buf []byte
+				buf = append(buf, prefix...)
+				buf = tr.AppendFull(buf)
+				buf = append(buf, suffix...)
+				buf = append(buf, '\n')
+				fmt.Print(string(buf))
 			}
 		default:
 			if 0 < len(path) {
@@ -104,7 +167,6 @@ func run() {
 		repl.Trace = true
 		slip.Trace(slip.List{slip.True})
 	}
-	var scope *slip.Scope
 	if 0 < len(evalCode) && !interactive {
 		scope = slip.NewScope()
 	} else {
@@ -128,6 +190,11 @@ func run() {
 		code slip.Code
 		w    io.Writer
 	)
+	scope.Let(slip.Symbol("$@"), args)
+	scope.Let(slip.Symbol("$0"), slip.String(os.Args[0]))
+	for i, a := range args {
+		scope.Let(slip.Symbol(fmt.Sprintf("$%d", i+1)), a)
+	}
 	verbose := scope.Get(slip.Symbol("*load-verbose*"))
 	print := scope.Get(slip.Symbol("*load-print*"))
 	if verbose != nil || print != nil {

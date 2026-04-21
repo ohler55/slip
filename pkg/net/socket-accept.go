@@ -78,6 +78,7 @@ func socketAccept(s *slip.Scope, self *flavors.Instance, depth int) slip.Object 
 	}
 	syscall.CloseOnExec(nfd)
 	sock := socketFlavor.MakeInstance().(*flavors.Instance)
+	sock.SetSynchronized(true)
 	sock.Any = nfd
 
 	return sock

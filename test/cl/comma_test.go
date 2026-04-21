@@ -33,7 +33,7 @@ func TestCommaList(t *testing.T) {
 
 func TestCommaArgCount(t *testing.T) {
 	var comma cl.Comma
-	tt.Panic(t, func() { _ = comma.Call(nil, slip.List{}, 0) })
+	tt.Panic(t, func() { _ = comma.Call(slip.NewScope(), slip.List{}, 0) })
 }
 
 func TestCommaString(t *testing.T) {

@@ -94,6 +94,33 @@ func TestScopeAllVars(t *testing.T) {
 /`, parent.String())
 }
 
+func TestScopeInterruptCheckPropagation(t *testing.T) {
+	called := false
+	check := func() { called = true }
+
+	parent := slip.NewScope()
+	parent.InterruptCheck = check
+
+	child := parent.NewScope()
+	if child.InterruptCheck == nil {
+		t.Fatal("InterruptCheck not propagated to child scope")
+	}
+	child.InterruptCheck()
+	tt.Equal(t, true, called)
+}
+
+func TestScopeInterruptCheckNilByDefault(t *testing.T) {
+	s := slip.NewScope()
+	if s.InterruptCheck != nil {
+		t.Fatal("InterruptCheck should be nil by default")
+	}
+
+	child := s.NewScope()
+	if child.InterruptCheck != nil {
+		t.Fatal("InterruptCheck should be nil in child when parent has nil")
+	}
+}
+
 func TestScopeString(t *testing.T) {
 	parent := slip.NewScope()
 	child := slip.NewScope()

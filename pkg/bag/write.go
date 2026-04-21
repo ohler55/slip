@@ -120,6 +120,7 @@ func writeBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) (
 		switch ta := args[0].(type) {
 		case nil:
 			// leave as nil for output to string
+			pos++
 		case io.Writer:
 			out = ta
 			pos++
@@ -138,6 +139,7 @@ func writeBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) (
 			switch string(sym) {
 			case ":pretty":
 				prty = args[pos+1] != nil
+				pw.Options.Sort = true
 			case ":depth":
 				num, ok := args[pos+1].(slip.Fixnum)
 				if !ok {

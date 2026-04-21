@@ -3,6 +3,7 @@
 package repl
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -27,13 +28,18 @@ type Completer struct {
 
 func initWords() {
 	completerWords = nil
-	insert := func(word string) {
-		word = strings.ToLower(word)
-		completerWords = append(completerWords, word)
-	}
-	slip.CurrentPackage.EachFuncName(insert)
-	slip.CurrentPackage.EachVarName(insert)
-	slip.CurrentPackage.EachClassName(insert)
+	slip.CurrentPackage.EachFuncInfo(func(fi *slip.FuncInfo) {
+		lo := strings.ToLower(fi.Name)
+		completerWords = append(completerWords, lo, fmt.Sprintf("%s:%s", fi.Pkg.Name, lo))
+	})
+	slip.CurrentPackage.EachVarVal(func(name string, vv *slip.VarVal) {
+		lo := strings.ToLower(name)
+		completerWords = append(completerWords, lo, fmt.Sprintf("%s:%s", vv.Pkg.Name, lo))
+	})
+	slip.CurrentPackage.EachClass(func(c slip.Class) {
+		lo := strings.ToLower(c.Name())
+		completerWords = append(completerWords, lo, fmt.Sprintf("%s:%s", c.Pkg().Name, lo))
+	})
 	sort.Strings(completerWords)
 }
 

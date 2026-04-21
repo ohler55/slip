@@ -73,5 +73,7 @@ func TestInvalidMethodErrorNoFormat(t *testing.T) {
 }
 
 func TestInvalidMethodErrorPanic(t *testing.T) {
-	tt.Panic(t, func() { slip.InvalidMethodPanic(nil, 0, slip.Symbol("vanilla"), slip.Symbol(":meth"), nil, "raise") })
+	tt.Panic(t, func() {
+		slip.InvalidMethodPanic(slip.NewScope(), 0, slip.Symbol("vanilla"), slip.Symbol(":meth"), nil, "raise")
+	})
 }

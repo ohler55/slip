@@ -12,7 +12,7 @@ import (
 )
 
 func TestSimpleErrorObj(t *testing.T) {
-	cond := cl.SimpleErrorNew(nil, 0, "condition ~A-~D", slip.List{slip.Symbol("dummy"), slip.Fixnum(3)})
+	cond := cl.SimpleErrorNew(slip.NewScope(), 0, "condition ~A-~D", slip.List{slip.Symbol("dummy"), slip.Fixnum(3)})
 	(&sliptest.Object{
 		Target: cond,
 		String: "/^#<simple-error [0-9a-f]+>$/",
@@ -57,5 +57,5 @@ func TestSimpleErrorMakeBadArgs(t *testing.T) {
 }
 
 func TestPanicSimpleError(t *testing.T) {
-	tt.Panic(t, func() { cl.SimpleErrorPanic(nil, 0, "raise", nil) })
+	tt.Panic(t, func() { cl.SimpleErrorPanic(slip.NewScope(), 0, "raise", nil) })
 }
