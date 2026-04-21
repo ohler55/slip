@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.3.2] - unreleased
+## [1.4.0] - 2026-04-21
 ### Fixed
 - Allow % and $ in symbols.
 - `find-class` now considers package prefix such as `'flavors:vanilla-flavor`.
@@ -24,7 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `class-supers` now supports structs and any other class.
 - `class-precedence` now supports structs and any other class.
 - Tab completion now support package name prefixes.
-- Add `bag-get-all` function.
+- Added `bag-get-all` function.
+- Added support for emacs swank/slime. Contributed by Joe Duhamel.
 
 ## [1.3.1] - 2026-01-05
 ### Fixed

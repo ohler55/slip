@@ -81,12 +81,13 @@ Plugins are available in other repositories.
 
  - [slip-mongo](https://github.com/ohler55/slip-mongo) for mongodb APIs.
  - [slip-ggql](https://github.com/ohler55/slip-ggql) for a GraphQL server.
+ - [slip-fhir](https://github.com/ohler55/slip-fhir) for a [FHIR](https://fhir.hl7.org/fhir) client and documentation.
  - **slip-jet** for [JetStream](https://docs.nats.io/nats-concepts/jetstream) messaging APIs (contact me if interested)
  - **slip-message** for simple [NATS](https://docs.nats.io/nats-concepts/core-nats) APIs (contact me if interested)
  - **slip-flow** a process flow implementation (contact me if interested)
  - **flow-editor** a process flow graphical editor (contact me if interested)
  - **slip-parquet** for parquet APIs (contact me if interested)
- - [slap](https://github.com/ohler55/slap) a template for standalone application with embeded LISP code and plugins.
+ - [slap](https://github.com/ohler55/slap) a template for standalone applications with embeded LISP code and plugins.
 
 ## Links
 
