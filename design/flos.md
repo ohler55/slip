@@ -7,7 +7,7 @@ As mentioned in [flavors.md](flavors.md), Flavors was developed
 first. With generics function names are always in the global name
 space so care must be taken when importing packages to avoid name
 collisions. That aside, generics are the modern approach to objects in
-Common LISP.
+Common Lisp.
 
 FLOS is a half step toward generics. Methods on Flavors can be wrapped
 with a ordinary function when building an API with go code.

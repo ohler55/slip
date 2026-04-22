@@ -1,6 +1,6 @@
 # Cons versus Slices
 
-Most LISP implementations are built on a structure called a __cons__
+Most Lisp implementations are built on a structure called a __cons__
 which is composed of a __car__ and a __cdr__. Lists are composed of a
 linked list of __cons__ cells. A list of `(1 2 3)` is composed of
 three __cons__ cells.
@@ -15,14 +15,14 @@ three __cons__ cells.
           3  nil
 ```
 
-SLIP is based on go slices instead of __cons__ cells. The same list,
+Slip is based on go slices instead of __cons__ cells. The same list,
 `(1 2 3)` is:
 
 ```
 [1][2][3]
 ```
 
-A __cons__ cell in SLIP is a list of two elements with a special
+A __cons__ cell in Slip is a list of two elements with a special
 _tail_ structure used when a __cons__ `(1 . 2)` is expected such as in
 an association list.
 
@@ -67,11 +67,11 @@ With a `Cons` struct it is possible to forms loops where then tail of
 a list refer back to the head of the list. While not frequently used
 it is possible to create a hoop. Of course using such a hoop with an
 iterator will end up putting the evaluator in an infinite loop. Not
-supporting creating such a data items in SLIP seemed like a very minor
+supporting creating such a data items in Slip seemed like a very minor
 sacrifice.
 
 As noted earlier consing onto the head of a list it not optimum in
-SLIP. It is a common use case in LISP code though so while copying
-LISP code that builds list with `cons` will not be optimum. To
-compensate for this a new function named `add` is included in SLIP and
+Slip. It is a common use case in Lisp code though so while copying
+Lisp code that builds list with `cons` will not be optimum. To
+compensate for this a new function named `add` is included in Slip and
 is much more efficient at beuilding list by appending to a list.

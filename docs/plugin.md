@@ -1,24 +1,24 @@
-# SLIP Plugins
+# Slip Plugins
 
-SLIP can be extended with plugins using the **Go** plugin
+Slip can be extended with plugins using the **Go** plugin
 package. However, there are some guidelines that should be followed
-not only for SLIP plugins but for all **Go** plugins.
+not only for Slip plugins but for all **Go** plugins.
 
-A plugin is a **Go** package that can be loaded at runtime. In SLIP
+A plugin is a **Go** package that can be loaded at runtime. In Slip
 that is accomplished with the `require` function. To define a module
 with functions, variables, and constants a plugin package is defined
 and a `.so` file built. Best practices place the `.so` files in a
 common directory once the `.so` file is built.
 
 It is important to make sure the plugin is built with the **exact**
-version of SLIP that will be used to `require` the module. **Go** is
+version of Slip that will be used to `require` the module. **Go** is
 extremely sensitive to any deviation in versions. Another area to
 watch for is requiring plugins that depend on different version of
 some other package as defined in the go.mod files for each plugin. The
 only indication of a mismatch is a failure with no description of the
 cause.
 
-A trivial example of a plugin for SLIP is:
+A trivial example of a plugin for Slip is:
 
 ```go
 package main
