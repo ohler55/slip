@@ -4,14 +4,14 @@
 ![](assets/coverage-badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ohler55/slip)](https://goreportcard.com/report/github.com/ohler55/slip)
 
-SLIce Processing is LISP for golang.
+SLIce Processing is Lisp for golang.
 
-SLIP is a mostly Common LISP implementation lacking some features and
+Slip is a mostly Common Lisp implementation lacking some features and
 including many non standard features. Most notable of the extra
-features is the ability to extend LISP with Go code. Also included is
+features is the ability to extend Lisp with Go code. Also included is
 a Read Eval Print Loop (REPL) that provides an environment for
-prototyping, testing, and exploring SLIP. While not a full
-implementation of Common LISP, SLIP continues to move in that
+prototyping, testing, and exploring Slip. While not a full
+implementation of Common Lisp, Slip continues to move in that
 direction.
 
 A more detailed explanation of some of the features are on the
@@ -21,7 +21,7 @@ A more detailed explanation of some of the features are on the
 
 To use, first install then start the REPL with the **slip**
 application. A good place to start is to press `ctrl-h` for help. Then
-try out some LISP code. Two of the most help functions are `apropos`
+try out some Lisp code. Two of the most help functions are `apropos`
 and `describe`. Press `M-?` or `M-/` after a function name to get
 pop-up documentation.
 
@@ -87,23 +87,23 @@ Plugins are available in other repositories.
  - **slip-flow** a process flow implementation (contact me if interested)
  - **flow-editor** a process flow graphical editor (contact me if interested)
  - **slip-parquet** for parquet APIs (contact me if interested)
- - [slap](https://github.com/ohler55/slap) a template for standalone applications with embeded LISP code and plugins.
+ - [slap](https://github.com/ohler55/slap) a template for standalone applications with embeded Lisp code and plugins.
 
 ## Links
 
  - [ANSI Common Lisp](http://www.x3.org/tc_home/tc_sd4/x3j13sd4.html)
- - Common LISP reference [LispWorks Common List HyperSpec](tbd)
+ - Common Lisp reference [LispWorks Common List HyperSpec](tbd)
  - [Flavors](https://franz.com/support/documentation/10.1/doc/flavors.htm)
- - An introduction to CLOS [LISP Cookbook](https://lispcookbook.github.io/cl-cookbook/clos.html)
+ - An introduction to CLOS [Lisp Cookbook](https://lispcookbook.github.io/cl-cookbook/clos.html)
  - A CLOS guide: [CLOS Guide](https://www.algo.be/cl/documents/clos-guide.html)
  - JSON support provided by [OjG](https://github.com/ohler55/ojg).
 
 ## Contributing
 
 Bug fix contributions are welcome. Please create a PR for any
-fixes. New features should be discussed first as the SLIP core
-generally follows the Common LISP specification as much as
-possible. SLIP can be extended with [plugins](docs/plugin.md) and new
+fixes. New features should be discussed first as the Slip core
+generally follows the Common Lisp specification as much as
+possible. Slip can be extended with [plugins](docs/plugin.md) and new
 features are often best offered with a separate
 [plugin](docs/plugin.md) project. If you would like me to review a
 [plugin](docs/plugin.md) just ask and I'll do my best to provide

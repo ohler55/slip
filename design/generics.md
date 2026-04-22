@@ -1,6 +1,6 @@
 # Generics
 
-The LISP generics is a multiple dispatch function system. Unlike most
+The Lisp generics is a multiple dispatch function system. Unlike most
 other object oriented system where functions ot methods are associated
 with a specific type or class, generic functions identify a function
 not only by name but also by the types of the arguments provided to
@@ -27,11 +27,11 @@ are evaluated.
 ## Generic Function Structure
 
 Generic functions consist of a component that identifies the arguments
-expected and a set of methods. In SLIP the implementation for function
+expected and a set of methods. In Slip the implementation for function
 lookup uses a map where the keys are the lower case function names and
 the values are `*slip.FuncInfo` instances. The `FuncInfo` includes a
 pointer to a creation function which is used to create an object that
-during LISP code parsing to for an entity composed of the function and
+during Lisp code parsing to for an entity composed of the function and
 arguments such as `(+ 1 2)`. Generic functions use the same approach
 but with some additions.
 
@@ -57,7 +57,7 @@ also a _fixnum_ which has _real_ in it's type hierarchy.
 
 There is another layer to consider. Like Flavors daemons generics has
 qualifiers. There are then same for all practical purposes. Qualifiers
-are used with method combinations. SLIP only implements the default
+are used with method combinations. Slip only implements the default
 standard method combination. Likewise only the generic function class
 and standard method class are supported. When a generic function is
 called then most precisely matching method is called as then primary
@@ -143,7 +143,7 @@ leaving fixnum around
 
 ## `make-load-form`
 
-SLIP features a function named `snapshot` which will take a snapshot
+Slip features a function named `snapshot` which will take a snapshot
 of the current code by writing to a destination. To capture generic
 functions, the `generic.Aux` struct writes then code for then generic
 itself as well as all then methods for the generic function. The code

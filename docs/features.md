@@ -1,21 +1,21 @@
-# SLIP Features
+# Slip Features
 
-SLIce Processing is LISP for golang
+SLIce Processing is Lisp for golang
 
-SLIP is a mostly Common LISP implementation lacking some features and
+Slip is a mostly Common Lisp implementation lacking some features and
 including many non standard features. Most notable of the extra
-features is the ability to extend LISP with Go code. Also included is
+features is the ability to extend Lisp with Go code. Also included is
 a Read Eval Print Loop (REPL) that provides an environment for
-prototyping, testing, and exploring SLIP.
+prototyping, testing, and exploring Slip.
 
-## Almost Common LISP
+## Almost Common Lisp
 
-While not a full implemenation of Common LISP, SLIP continues to move
+While not a full implemenation of Common Lisp, Slip continues to move
 in that direction.
 
 ### Cons versus Slice
 
-Most LISP implementations are built on a structure called a __cons__
+Most Lisp implementations are built on a structure called a __cons__
 which is composed of a __car__ and a __cdr__. Lists are composed of a
 linked list of __cons__ cells. A list of `(1 2 3)` is composed of
 three __cons__ cells.
@@ -30,14 +30,14 @@ three __cons__ cells.
           3  nil
 ```
 
-SLIP is based on Go slices instead of __cons__ cells. The same list,
+Slip is based on Go slices instead of __cons__ cells. The same list,
 `(1 2 3)` is:
 
 ```
 [1][2][3]
 ```
 
-A __cons__ cell in SLIP is a list of two elements with a special
+A __cons__ cell in Slip is a list of two elements with a special
 _tail_ structure used when a __cons__ `(1 . 2)` is expected such as in
 an association list.
 
@@ -51,49 +51,51 @@ and performs better for most operations.
 
 ### Missing Features
 
-Common LISP compiles to byte code. This is not part of the SLIP model
+Common Lisp compiles to byte code. This is not part of the Slip model
 which instead compiles to Go types and functions instead. There is no
-capacity in SLIP to store the compiled Go types and no plans for such
-a feature in the future. SLIP does not support any functions that
+capacity in Slip to store the compiled Go types and no plans for such
+a feature in the future. Slip does not support any functions that
 involve compilation to byte code.
 
-The exception or error handling in SLIP differs from Common
-LISP. Similar features exist in SLIP but those features are different
-than those found in Common LISP. SLIP make use of Go `panic` and
-`recover` as a model for exception and error handling. The Common LISP
+The exception or error handling in Slip differs from Common
+Lisp. Similar features exist in Slip but those features are different
+than those found in Common Lisp. Slip make use of Go `panic` and
+`recover` as a model for exception and error handling. The Common Lisp
 error types are supported and are what is most often recovered when a
 panic is raised.
 
-In Go strings are immutable which is reflected in SLIP so the
+In Go strings are immutable which is reflected in Slip so the
 _nstring_ functions so not modify the original string but instead are
 the same as the _string_ versions of the functions.
 
 ### Added Features
 
-While Common LISP is the modern version of LISP it is lacking in
-support for unicode and threads. SLIP adds that support in the Go
-Integration (GI) package. This package includes channels, routines
-(threads), panic, recover, a simplier time type, a logger, and a other
-functions optimized for use with slices.
+While Common Lisp is the modern version of Lisp it is lacking in
+standardized support for unicode and threads in the defined
+standard. Packages outside the standard do exist that provides support
+for both though. Slip adds that support in the Go Integration (GI)
+package. This package includes channels, routines (threads), panic,
+recover, a simplier time type, a logger, and a other functions
+optimized for use with slices.
 
-Support for plug-ins written in Go is included in SLIP. This makes use
-of the Go plugin package and the LISP _require_ function to load those
+Support for plug-ins written in Go is included in Slip. This makes use
+of the Go plugin package and the Lisp _require_ function to load those
 plug-ins.
 
 ## Read and Eval
 
-There are two steps in loading LISP code in SLIP. The code is first
+There are two steps in loading Lisp code in Slip. The code is first
 read which builds a set of go types. During reading top level
 definition functions such as _defun_, _defvar_, _defmacro_, and
 _defparamter_ are evaluated. The second step evaluate the remaining
-top level code elements to for Go objects which is the SLIP the
+top level code elements to for Go objects which is the Slip the
 compiled code.
 
 ## REPL
 
-A feature that separates LISP from most other languages is the Read
+A feature that separates Lisp from most other languages is the Read
 Eval Print Loop or REPL. A REPL provides an environment for
-prototyping, testing, and exploring. The SLIP REPL includes Emacs
+prototyping, testing, and exploring. The Slip REPL includes Emacs
 style key bindings and makes use of ANSI codes to provide help and tab
 completion support. History and global settings are "remembered" from
 one session to the next.
@@ -104,10 +106,10 @@ prototyping functions since the function can be stashed for later use.
 
 ## Object Systems
 
-In the early days of LISP the object system was Flavors. Flavors was
-the most influential model in the Common LISP Object System (CLOS)
-specification. SLIP includes both a Flavors and a CLOS
-implementation. CLOS and Flavors are separate in SLIP but share some
+In the early days of Lisp the object system was Flavors. Flavors was
+the most influential model in the Common Lisp Object System (CLOS)
+specification. Slip includes both a Flavors and a CLOS
+implementation. CLOS and Flavors are separate in Slip but share some
 functions and functionality.
 
 The principle difference between CLOS and Flavors is the perspective
@@ -128,7 +130,7 @@ since that conflicts with the regular `first` function.
 Flavors is class focussed. Methods are associated with a class. This
 encapsulates a method's behavior in a class inheritance tree so there
 is no bleeding of method names globally. The Flavors implementation is
-SLIP is somewhat more efficient than the CLOS implementation in part
+Slip is somewhat more efficient than the CLOS implementation in part
 dues to the more direct lookup of methods.
 
 ## Watch
@@ -139,13 +141,13 @@ as well.
 
 ## Plugins
 
-LISP code can be imported with the `require` function. The `require`
+Lisp code can be imported with the `require` function. The `require`
 function can also import Go packages with the Go import package. This
-allows Go code to be pulled into a running SLIP application.
+allows Go code to be pulled into a running Slip application.
 
 ## JSON
 
-SLIP includes support for arbitrary that represents JSON data. Support
+Slip includes support for arbitrary that represents JSON data. Support
 for JSON is provided by [OjG](https://github.com/ohler55/ojg). The
 **bag-flavor** represent this JSON data. The data itself is only
 accessible through instances of the **bag-flavor**.

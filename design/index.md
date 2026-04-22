@@ -1,4 +1,4 @@
-# SLIP Design Index
+# Slip Design Index
 
 This set of documents describes then decisions made in designing
 various aspects of the project.
