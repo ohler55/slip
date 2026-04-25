@@ -66,14 +66,15 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 			_ = ci.Receive(s, ":reset", nil, depth+1)
 		}
 	}
+	ss := s.NewScope()
 	if setup := s.Get("setup"); setup != nil {
-		caller := cl.ResolveToCaller(s, setup, depth+1)
-		_ = caller.Call(s, nil, depth+1)
+		caller := cl.ResolveToCaller(ss, setup, depth+1)
+		_ = caller.Call(ss, nil, depth+1)
 	}
 	if teardown := s.Get("teardown"); teardown != nil {
 		defer func() {
-			caller := cl.ResolveToCaller(s, teardown, depth+1)
-			_ = caller.Call(s, nil, depth+1)
+			caller := cl.ResolveToCaller(ss, teardown, depth+1)
+			_ = caller.Call(ss, nil, depth+1)
 		}()
 	}
 	self := s.Get("self").(*flavors.Instance)
@@ -108,7 +109,7 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 					continue
 				}
 			}
-			_ = ci.Receive(s, ":run", cargs, depth+1)
+			_ = ci.Receive(ss, ":run", cargs, depth+1)
 		}
 	}
 	if verbose {
