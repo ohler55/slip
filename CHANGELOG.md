@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed assert-equal ansi check for different length strings.
 ### Added
 - Added the `bind` function for local variable binding in test suite setup functions.
+- Test filters can now included regular expressions by bracketing the
+  string with a '/' character. Some restrictions apply.
 
 ## [1.4.0] - 2026-04-21
 ### Fixed

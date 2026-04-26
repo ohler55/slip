@@ -5,6 +5,7 @@ package test
 import (
 	"fmt"
 	"io"
+	"regexp"
 
 	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
@@ -130,8 +131,8 @@ func (caller suiteRunCaller) FuncDocs() *slip.FuncDoc {
 			{Name: "&key"},
 			{
 				Name: ":filter",
-				Type: "string",
-				Text: `If present identifies the tests to run by a path. e.g., (top child leaf).`,
+				Type: "string|list",
+				Text: `If present identifies the tests to run by a path. e.g., (top child leaf) or "top.child.leaf".`,
 			},
 			{
 				Name: ":verbose",
@@ -342,6 +343,9 @@ func keyMatchName(name string, k slip.Object) bool {
 	var sk string
 	switch tk := k.(type) {
 	case slip.String:
+		if 2 < len(tk) && tk[0] == '/' && tk[len(tk)-1] == '/' {
+			return regexp.MustCompile(string(tk[1 : len(tk)-1])).Match([]byte(name))
+		}
 		sk = string(tk)
 	case slip.Symbol:
 		sk = string(tk)

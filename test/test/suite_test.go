@@ -155,6 +155,21 @@ func TestSuiteRunFilter(t *testing.T) {
 }`, string(result.(slip.String)))
 }
 
+func TestSuiteRunFilterRegexp(t *testing.T) {
+	scope := buildSuiteScope()
+	var out bytes.Buffer
+	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
+	scope.Let("*print-ansi*", nil)
+	_ = slip.ReadString(`(send top :run :filter "/swe*t/./to*t/")`, scope).Eval(scope, nil)
+	result := slip.ReadString(`(send (send top :result) :write nil)`, scope).Eval(scope, nil)
+	tt.Equal(t, `{
+  fail: 0
+  pass: 1
+  skip: 1
+  subs: {sweet: {fail: 0 pass: 1 skip: 1 subs: {boom: null toot: pass}}}
+}`, string(result.(slip.String)))
+}
+
 func TestSuiteReportBadWriter(t *testing.T) {
 	scope := slip.NewScope()
 	_ = slip.ReadString(`(setq sweet (make-instance 'suite-flavor :name "sweet"))`, scope).Eval(scope, nil)
