@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the `bind` function for local variable binding in test suite setup functions.
 - Test filters can now included regular expressions by bracketing the
   string with a '/' character. Some restrictions apply.
+- Added then `parse-time` function.
 
 ## [1.4.0] - 2026-04-21
 ### Fixed
