@@ -173,7 +173,7 @@ const (
 		".........CC..C.................." + // 0x00
 		"C..a....CCaaaaaaaaaaaaaaaaa.aaa." + // 0x20
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaa...aa" + // 0x40
-		".aaaaaaaaaaaaaaaaaaaaaaaaaa.a.a." + // 0x60
+		".aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa." + // 0x60
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0x80
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0xa0
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + // 0xc0

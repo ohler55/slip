@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.1] - unreleased
 ### Fixed
 - Fixed assert-equal ansi check for different length strings.
+- Fixed reading characters '{' and '}'.
 ### Added
 - Added the `bind` function for local variable binding in test suite setup functions.
 - Test filters can now included regular expressions by bracketing the
