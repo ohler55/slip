@@ -64,13 +64,6 @@ go get github.com/ohler55/slip/cmd/slip
 
 ```
 
-Install using **brew**: (when the minimum popularity metrics are achieved)
-
-```
-# brew install slip
-
-```
-
 ## Releases
 
 See [CHANGELOG.md](CHANGELOG.md)
@@ -82,8 +75,8 @@ Plugins are available in other repositories.
  - [slip-mongo](https://github.com/ohler55/slip-mongo) for mongodb APIs.
  - [slip-ggql](https://github.com/ohler55/slip-ggql) for a GraphQL server.
  - [slip-fhir](https://github.com/ohler55/slip-fhir) for a [FHIR](https://fhir.hl7.org/fhir) client and documentation.
- - **slip-jet** for [JetStream](https://docs.nats.io/nats-concepts/jetstream) messaging APIs (contact me if interested)
- - **slip-message** for simple [NATS](https://docs.nats.io/nats-concepts/core-nats) APIs (contact me if interested)
+ - [slip-jet](https://github.com/ohler55/slip-jet) for [JetStream](https://docs.nats.io/nats-concepts/jetstream) messaging APIs
+ - [slip-message](https://github.com/ohler55/slip-message) for simple [NATS](https://docs.nats.io/nats-concepts/core-nats) APIs
  - **slip-flow** a process flow implementation (contact me if interested)
  - **flow-editor** a process flow graphical editor (contact me if interested)
  - **slip-parquet** for parquet APIs (contact me if interested)
