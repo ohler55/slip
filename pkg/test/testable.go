@@ -78,7 +78,14 @@ func getRunKeys(s *slip.Scope, args slip.List, depth int) (filter slip.List, ver
 		}
 		switch strings.ToLower(string(sym)) {
 		case ":filter":
-			filter, _ = args[pos+1].(slip.List)
+			switch ta := args[pos+1].(type) {
+			case slip.String:
+				for _, ss := range strings.Split(string(ta), ".") {
+					filter = append(filter, slip.String(ss))
+				}
+			case slip.List:
+				filter = ta
+			}
 		case ":verbose":
 			verbose = args[pos+1] != nil
 		case ":trace":

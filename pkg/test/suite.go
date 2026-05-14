@@ -5,6 +5,7 @@ package test
 import (
 	"fmt"
 	"io"
+	"regexp"
 
 	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
@@ -66,14 +67,15 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 			_ = ci.Receive(s, ":reset", nil, depth+1)
 		}
 	}
+	ss := s.NewScope()
 	if setup := s.Get("setup"); setup != nil {
-		caller := cl.ResolveToCaller(s, setup, depth+1)
-		_ = caller.Call(s, nil, depth+1)
+		caller := cl.ResolveToCaller(ss, setup, depth+1)
+		_ = caller.Call(ss, nil, depth+1)
 	}
 	if teardown := s.Get("teardown"); teardown != nil {
 		defer func() {
-			caller := cl.ResolveToCaller(s, teardown, depth+1)
-			_ = caller.Call(s, nil, depth+1)
+			caller := cl.ResolveToCaller(ss, teardown, depth+1)
+			_ = caller.Call(ss, nil, depth+1)
 		}()
 	}
 	self := s.Get("self").(*flavors.Instance)
@@ -108,7 +110,7 @@ func (caller suiteRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip
 					continue
 				}
 			}
-			_ = ci.Receive(s, ":run", cargs, depth+1)
+			_ = ci.Receive(ss, ":run", cargs, depth+1)
 		}
 	}
 	if verbose {
@@ -129,8 +131,8 @@ func (caller suiteRunCaller) FuncDocs() *slip.FuncDoc {
 			{Name: "&key"},
 			{
 				Name: ":filter",
-				Type: "string",
-				Text: `If present identifies the tests to run by a path. e.g., (top child leaf).`,
+				Type: "string|list",
+				Text: `If present identifies the tests to run by a path. e.g., (top child leaf) or "top.child.leaf".`,
 			},
 			{
 				Name: ":verbose",
@@ -341,6 +343,9 @@ func keyMatchName(name string, k slip.Object) bool {
 	var sk string
 	switch tk := k.(type) {
 	case slip.String:
+		if 2 < len(tk) && tk[0] == '/' && tk[len(tk)-1] == '/' {
+			return regexp.MustCompile(string(tk[1 : len(tk)-1])).Match([]byte(name))
+		}
 		sk = string(tk)
 	case slip.Symbol:
 		sk = string(tk)

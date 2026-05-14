@@ -71,10 +71,16 @@ func (f *AssertEqual) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 			re := []rune(expect)
 			ra := []rune(actual)
 			for i, r := range re {
+				if len(ra) <= i {
+					break
+				}
 				if r != ra[i] {
 					b = append(b, ansiRed...)
 				}
 				b = utf8.AppendRune(b, ra[i])
+			}
+			if len(re) < len(ra) {
+				b = append(b, string(ra[len(re):])...)
 			}
 			b = append(b, '"')
 		}
