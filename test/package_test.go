@@ -164,7 +164,10 @@ func TestPackageDef(t *testing.T) {
 
 func TestPackageCurrent(t *testing.T) {
 	tt.Equal(t, "common-lisp-user", slip.CurrentPackage.Name)
-	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("a"))
+		slip.CurrentPackage = &slip.UserPkg
+	}()
 
 	pa := slip.DefPackage("a", []string{"aye"}, "Lots of ayes.")
 	slip.CLPkg.Set("*package*", pa)

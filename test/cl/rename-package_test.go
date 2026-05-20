@@ -74,7 +74,7 @@ func TestRenamePackageExists(t *testing.T) {
 		Source: `(progn
                   (make-package 'rename-test-1)
                   (rename-package "rename-test-1" "bag"))`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.PackageErrorSymbol,
 	}).Test(t)
 }
 
@@ -100,6 +100,6 @@ func TestRenamePackageBadNickname(t *testing.T) {
 		Source: `(progn
                   (make-package 'rename-test-1)
                   (rename-package "rename-test-1" "rename-test-2" '(bag)))`,
-		PanicType: slip.ErrorSymbol,
+		PanicType: slip.PackageErrorSymbol,
 	}).Test(t)
 }

@@ -24,7 +24,7 @@ func init() {
 	})
 	UserPkg.Use(&CLPkg)
 
-	packages = append(packages, &UserPkg)
+	AddPackage(&UserPkg)
 
 	CurrentPackage = &UserPkg
 }
