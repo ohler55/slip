@@ -48,6 +48,9 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 Aux:
 	for i, ad := range lam.Doc.Args {
 		if len(args) <= ai {
+			if mode == reqMode && ad.Name[0] != '&' && !s.has("~whopper-location~") {
+				ErrorPanic(s, depth, "Missing %s argument.", ad.Name)
+			}
 			break
 		}
 	Mode:
@@ -107,7 +110,7 @@ Aux:
 				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
 					sym = sym[1:]
 					if len(args) <= ai {
-						panic(fmt.Sprintf("Missing value for key :%s.", sym))
+						ErrorPanic(s, depth, "Missing value for key :%s.", sym)
 					}
 					ss.Let(sym, args[ai])
 					ai++

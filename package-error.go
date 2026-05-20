@@ -2,7 +2,9 @@
 
 package slip
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // PackageErrorSymbol is the symbol with a value of "package-error".
 const PackageErrorSymbol = Symbol("package-error")
@@ -17,6 +19,7 @@ func PackageErrorNew(s *Scope, depth int, pkg *Package, format string, args ...a
 		Symbol(":package"), pkg,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
 	}, depth)
+
 	return obj
 }
 

@@ -222,3 +222,13 @@ func TestCompileList(t *testing.T) {
 	// Should be unbound since it was not defun-ed yet.
 	tt.Panic(t, func() { _ = f.Eval(slip.NewScope(), 0) })
 }
+
+func TestCompileListPackage(t *testing.T) {
+	f := slip.CompileList(slip.List{slip.Symbol("cl:null"), nil})
+	tt.Equal(t, "(null nil)", slip.ObjectString(f))
+
+	tt.Panic(t, func() { _ = slip.CompileList(slip.List{slip.Symbol("cl:quux"), nil}) })
+
+	f = slip.CompileList(slip.List{slip.Symbol("user:quux"), nil})
+	tt.Equal(t, "(quux nil)", slip.ObjectString(f))
+}

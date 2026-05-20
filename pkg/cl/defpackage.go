@@ -52,7 +52,8 @@ type Defpackage struct {
 	slip.Function
 }
 
-// Call the function with the arguments provided.
+// Call the function with the arguments provided. A check for duplicates must
+// be performed before calling this function.
 func (f *Defpackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 1, 7)
 	a0 := slip.EvalArg(s, args, 0, depth)

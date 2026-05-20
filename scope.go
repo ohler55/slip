@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -179,7 +178,7 @@ func UnpackName(str string) (pkg *Package, name string, private bool) {
 	if i := strings.IndexByte(str, ':'); 0 < i {
 		pkg = FindPackage(str[:i])
 		if pkg == nil {
-			panic(fmt.Sprintf("package %s is not defined.", printer.caseName(str[:i])))
+			ErrorPanic(NewScope(), 0, "package %s is not defined.", printer.caseName(str[:i]))
 		}
 		i++
 		if i < len(str) && str[i] == ':' {

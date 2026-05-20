@@ -20,7 +20,10 @@ const PackageSymbol = Symbol("package")
 // cl:require function.
 var CurrentPackageLoadPath = ""
 
-var packages []*Package
+var (
+	packages   []*Package
+	packagesMu sync.Mutex
+)
 
 // Package represents a LISP package.
 type Package struct {
@@ -50,6 +53,9 @@ type Package struct {
 // DefPackage creates a new package. Calling Import() and Use() after creation
 // is expected.
 func DefPackage(name string, nicknames []string, doc string) *Package {
+	for i, nn := range nicknames {
+		nicknames[i] = strings.ToLower(nn)
+	}
 	pkg := Package{
 		Name:      strings.ToLower(name),
 		Nicknames: nicknames,
@@ -61,8 +67,10 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		classes:   map[string]Class{},
 		PreSet:    DefaultPreSet,
 	}
+	packagesMu.Lock()
 	packages = append(packages, &pkg)
 	addFeature(pkg.Name)
+	packagesMu.Unlock()
 
 	return &pkg
 }
@@ -77,19 +85,23 @@ func AddPackage(pkg *Package) {
 	if 0 < len(CurrentPackageLoadPath) {
 		pkg.loadPath = CurrentPackageLoadPath
 	}
+	packagesMu.Lock()
 	packages = append(packages, pkg)
 	addFeature(pkg.Name)
+	packagesMu.Unlock()
 }
 
 // RemovePackage deletes a package.
 func RemovePackage(pkg *Package) {
 	if pkg != nil {
+		packagesMu.Lock()
 		for i, p := range packages {
 			if pkg == p {
 				packages = append(packages[:i], packages[i+1:]...)
 				break
 			}
 		}
+		packagesMu.Unlock()
 		for _, u := range pkg.Uses {
 			pkg.Unuse(u)
 		}
@@ -129,8 +141,8 @@ func (obj *Package) Use(pkg *Package) {
 		PackagePanic(NewScope(), 0, obj, "Package %s is locked and can not be modified.", obj)
 	}
 	if obj != pkg {
-		obj.mu.Lock()
 		pkg.mu.Lock()
+		obj.mu.Lock()
 		defer func() {
 			obj.mu.Unlock()
 			pkg.mu.Unlock()
@@ -275,6 +287,8 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 	if vv = obj.vars[name]; vv != nil {
 		if vv.Export || CurrentPackage == obj || private {
 			if vv.Const {
+				unlock = false
+				obj.mu.Unlock()
 				PackagePanic(NewScope(), 0, obj, "%s is a constant and thus can't be set", name)
 			}
 			if vv.Set != nil {
@@ -300,25 +314,21 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 func (obj *Package) DefConst(name string, value Object, doc string) (vv *VarVal) {
 	name, value = obj.PreSet(obj, name, value)
 	obj.mu.Lock()
-	unlock := true
-	defer func() {
-		if unlock {
-			obj.mu.Unlock()
-		}
-	}()
 	if vv = obj.vars[name]; vv != nil {
 		if vv.Const && ObjectEqual(vv.Val, value) {
+			obj.mu.Unlock()
 			return vv
 		}
+		obj.mu.Unlock()
 		PackagePanic(NewScope(), 0, obj, "%s is a constant and thus can't be changed", name)
 	}
 	if obj.Locked {
+		obj.mu.Unlock()
 		PackagePanic(NewScope(), 0, obj, "Package %s is locked thus no new constants can be set.", obj.Name)
 	}
 	vv = &VarVal{Val: value, Const: true, Pkg: obj, name: name, Doc: doc}
 	obj.vars[name] = vv
 	obj.mu.Unlock()
-	unlock = false
 	callSetHooks(obj, name)
 
 	return
@@ -379,6 +389,15 @@ func (obj *Package) Remove(name string) (removed bool) {
 		for _, u := range obj.Users {
 			if vv := u.vars[name]; vv != nil && vv.Pkg == obj {
 				delete(u.vars, name)
+			}
+		}
+	}
+	if _, has := obj.funcs[name]; has {
+		delete(obj.funcs, name)
+		removed = true
+		for _, u := range obj.Users {
+			if fi := u.funcs[name]; fi != nil && fi.Pkg == obj {
+				delete(u.funcs, name)
 			}
 		}
 	}
@@ -892,20 +911,20 @@ func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Objec
 	} else {
 		obj.lambdas[name] = lam
 	}
-	if fi := obj.funcs[name]; fi != nil {
+	if fi = obj.funcs[name]; fi != nil {
 		fi.Doc = lam.Doc
 		fi.Create = fc
 		fi.Pkg = obj
 		fi.Kind = kind
 	} else {
-		fi := FuncInfo{
+		fi = &FuncInfo{
 			Name:   name,
 			Doc:    lam.Doc,
 			Create: fc,
 			Pkg:    obj,
 			Kind:   kind,
 		}
-		obj.funcs[name] = &fi
+		obj.funcs[name] = fi
 		if vv := obj.vars[name]; vv != nil && Unbound == vv.Val && vv.Export {
 			fi.Export = true
 			delete(obj.vars, name)
@@ -943,11 +962,13 @@ func (obj *Package) RegisterClass(name string, c Class) {
 
 // Find finds the named class.
 func (obj *Package) FindClass(name string) (c Class) {
+	obj.mu.Lock()
 	if obj.classes != nil {
 		if c = obj.classes[name]; c == nil {
 			c = obj.classes[strings.ToLower(name)]
 		}
 	}
+	obj.mu.Unlock()
 	return
 }
 

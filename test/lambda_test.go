@@ -101,6 +101,13 @@ func TestLambdaCallTooManyArgs(t *testing.T) {
 	}).Test(t)
 }
 
+func TestLambdaCallMissingArgs(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `((lambda (a b) nil) 5)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+}
+
 func TestLambdaAuxOnly(t *testing.T) {
 	(&sliptest.Function{
 		Source: `((lambda (&aux a (b 2) (c 3) (d (+ b c))) (list a d)))`,

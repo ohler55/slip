@@ -12,5 +12,5 @@ import (
 func TestLockerTryLock(t *testing.T) {
 	var locker slip.NoOpLocker
 
-	tt.Equal(t, false, locker.TryLock())
+	tt.Equal(t, true, locker.TryLock())
 }

@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -89,10 +88,12 @@ func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 			pkg = pkgs[0]
 		}
 	}
+	pkg.mu.Lock()
 	if fi = pkg.funcs[vname]; fi == nil {
 		vname = strings.ToLower(vname)
 		fi = pkg.funcs[vname]
 	}
+	pkg.mu.Unlock()
 	if fi != nil {
 		if private || fi.Export || CurrentPackage == fi.Pkg {
 			return fi
@@ -338,10 +339,16 @@ func CompileList(list List) (f Object) {
 	if 0 < len(list) {
 		switch ta := list[0].(type) {
 		case Symbol:
-			name := strings.ToLower(string(ta))
-			if fi := CurrentPackage.funcs[name]; fi != nil {
+			if fi := FindFunc(string(ta)); fi != nil {
 				f = fi.Create(list[1:])
 			} else {
+				pkg, name, private := UnpackName(string(ta))
+				if pkg == nil {
+					pkg = CurrentPackage
+				}
+				if pkg.Locked {
+					PackagePanic(NewScope(), 0, pkg, "Package %s is locked and can not be modified.", pkg)
+				}
 				lc := Lambda{
 					Doc: &FuncDoc{
 						Name: name,
@@ -349,16 +356,19 @@ func CompileList(list List) (f Object) {
 					},
 					Forms: List{Undefined(name)},
 				}
-				CurrentPackage.lambdas[name] = &lc
 				fc := func(args List) Object {
 					return &Dynamic{
 						Function: Function{
 							Name: name,
 							Self: &lc,
+							Args: args,
 						},
 					}
 				}
-				CurrentPackage.funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage, Export: true}
+				pkg.mu.Lock()
+				pkg.lambdas[name] = &lc
+				pkg.funcs[name] = &FuncInfo{Create: fc, Pkg: pkg, Export: !private}
+				pkg.mu.Unlock()
 				f = fc(list[1:])
 			}
 			if funk, ok := f.(Funky); ok {
@@ -387,16 +397,19 @@ func CompileList(list List) (f Object) {
 
 // DescribeFunction returns the documentation for the function bound to the
 // sym argument.
-func DescribeFunction(sym Symbol, pkg ...*Package) *FuncDoc {
+func DescribeFunction(sym Symbol, pkg ...*Package) (doc *FuncDoc) {
 	name := strings.ToLower(string(sym))
 	p := CurrentPackage
 	if 0 < len(pkg) {
 		p = pkg[0]
 	}
+	p.mu.Lock()
 	if fi, has := p.funcs[name]; has {
-		return fi.Doc
+		doc = fi.Doc
 	}
-	return nil
+	p.mu.Unlock()
+
+	return
 }
 
 // EvalArg converts lists arguments to functions and replaces the
@@ -422,7 +435,7 @@ func GetArgsKeyValue(args List, key Symbol) (value Object, has bool) {
 			TypePanic(NewScope(), 0, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			panic(fmt.Sprintf("%s missing an argument", sym))
+			ErrorPanic(NewScope(), 0, "%s missing an argument", sym)
 		}
 		if strings.EqualFold(string(key), string(sym)) {
 			value = args[pos+1]

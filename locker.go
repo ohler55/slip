@@ -25,5 +25,5 @@ func (NoOpLocker) Unlock() {
 
 // TryLock does nothing.
 func (NoOpLocker) TryLock() bool {
-	return false
+	return true
 }
