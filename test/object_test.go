@@ -1026,6 +1026,12 @@ func TestFuncInfo(t *testing.T) {
 	fd := fi.FuncDocs()
 	tt.NotNil(t, fd)
 	tt.Equal(t, "car", fd.Name)
+
+	form := fi.LoadForm()
+	tt.Equal(t, `(defun car (arg)
+       "__car__ returns the _car_ if _arg_ is a _cons_, the first element if _arg_ is a _list_, and
+_nil_ if _arg_ is _nil_ or an empty _list_."
+       ...)`, slip.ObjectString(form))
 }
 
 func TestFuncInfoDescribeBasic(t *testing.T) {

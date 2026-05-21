@@ -141,7 +141,7 @@ func RenamePackage(s *Scope, depth int, pkg *Package, name string, optNicknames 
 	for _, nn := range nicknames {
 		if p := packages[nn]; p != nil && p != pkg {
 			packagesMu.Unlock()
-			PackagePanic(s, depth, p, "Package %s already exists.", name)
+			PackagePanic(s, depth, p, "Package %s already exists.", nn)
 		}
 	}
 	delete(packages, pkg.Name)
