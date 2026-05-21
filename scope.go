@@ -309,6 +309,19 @@ func (s *Scope) bound(name string) bool {
 	return false
 }
 
+func (s *Scope) boundLocal(name string) bool {
+	s.locker.Lock()
+	if s.Vars != nil {
+		if v, has := s.Vars[name]; has {
+			s.locker.Unlock()
+			return Unbound != v
+		}
+	}
+	s.locker.Unlock()
+
+	return false
+}
+
 // Remove a variable binding.
 func (s *Scope) Remove(sym Symbol) bool {
 	return s.remove(strings.ToLower(string(sym)))

@@ -101,6 +101,10 @@ func TestInstanceMisc(t *testing.T) {
 	tt.Equal(t, slip.String("large"), value)
 
 	tt.Equal(t, true, bi.HasMethod(":id"))
+
+	form := bi.LoadForm()
+	tt.Equal(t, `(let ((inst (make-instance (quote blueberry)))) (setf (slot-value inst (quote size)) "large") inst)`,
+		slip.ObjectString(form))
 }
 
 func TestInstanceBoundCall(t *testing.T) {

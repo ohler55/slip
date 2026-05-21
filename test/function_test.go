@@ -82,7 +82,10 @@ func TestFunctionEvalArg(t *testing.T) {
 
 func TestFunctionExport(t *testing.T) {
 	scope := slip.NewScope()
-	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("exported-test"))
+		slip.CurrentPackage = &slip.UserPkg
+	}()
 	xpkg := slip.DefPackage("exported-test", []string{}, "testing")
 	slip.CurrentPackage = xpkg
 	slip.CurrentPackage.Use(&slip.CLPkg)
@@ -103,12 +106,14 @@ func TestFunctionExport(t *testing.T) {
 
 func TestFunctionExportNested(t *testing.T) {
 	scope := slip.NewScope()
-	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("xpack-test"))
+		slip.CurrentPackage = &slip.UserPkg
+	}()
 	xpkg := slip.DefPackage("xpack-test", []string{}, "testing")
 	slip.CurrentPackage = xpkg
 	slip.CurrentPackage.Use(&slip.CLPkg)
 	_ = slip.ReadString(`(defun private-child () 3)`, scope).Eval(scope, nil)
-	// _ = slip.ReadString(`(defun private-parent () (private-child))`, scope).Eval(scope, nil)
 	_ = slip.ReadString(`(defun private-parent () (+ (private-child) 4))`, scope).Eval(scope, nil)
 
 	slip.CurrentPackage = &slip.UserPkg

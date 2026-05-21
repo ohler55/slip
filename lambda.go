@@ -154,7 +154,7 @@ Aux:
 			case AmpAllowOtherKeys:
 				// ignore
 			default:
-				if !ss.Bound(Symbol(ad.Name)) {
+				if !ss.boundLocal(ad.Name) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
@@ -167,7 +167,7 @@ Aux:
 			case AmpAllowOtherKeys:
 				// ignore
 			default:
-				if !ss.Bound(Symbol(ad.Name)) {
+				if !ss.boundLocal(ad.Name) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
@@ -175,7 +175,7 @@ Aux:
 			asym := Symbol(ad.Name)
 			if AmpAux == asym {
 				mode = auxMode
-			} else if !ss.Bound(asym) {
+			} else if !ss.boundLocal(string(asym)) {
 				ss.Let(asym, ad.Default)
 			}
 		case auxMode:

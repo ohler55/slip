@@ -21,7 +21,7 @@ const PackageSymbol = Symbol("package")
 var CurrentPackageLoadPath = ""
 
 var (
-	packages   []*Package
+	packages   = map[string]*Package{}
 	packagesMu sync.Mutex
 )
 
@@ -53,11 +53,8 @@ type Package struct {
 // DefPackage creates a new package. Calling Import() and Use() after creation
 // is expected.
 func DefPackage(name string, nicknames []string, doc string) *Package {
-	for i, nn := range nicknames {
-		nicknames[i] = strings.ToLower(nn)
-	}
 	pkg := Package{
-		Name:      strings.ToLower(name),
+		Name:      name,
 		Nicknames: nicknames,
 		Doc:       doc,
 		vars:      map[string]*VarVal{},
@@ -67,10 +64,7 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		classes:   map[string]Class{},
 		PreSet:    DefaultPreSet,
 	}
-	packagesMu.Lock()
-	packages = append(packages, &pkg)
-	addFeature(pkg.Name)
-	packagesMu.Unlock()
+	AddPackage(&pkg)
 
 	return &pkg
 }
@@ -85,8 +79,29 @@ func AddPackage(pkg *Package) {
 	if 0 < len(CurrentPackageLoadPath) {
 		pkg.loadPath = CurrentPackageLoadPath
 	}
+	pkg.Name = strings.ToLower(pkg.Name)
+	for i, nn := range pkg.Nicknames {
+		pkg.Nicknames[i] = strings.ToLower(nn)
+	}
 	packagesMu.Lock()
-	packages = append(packages, pkg)
+	var has string
+	if _, h := packages[pkg.Name]; h {
+		has = pkg.Name
+	} else {
+		for _, nn := range pkg.Nicknames {
+			if _, h = packages[nn]; h {
+				has = nn
+				break
+			}
+		}
+	}
+	if 0 < len(has) {
+		ErrorPanic(NewScope(), 0, "Package %s already exists.", has)
+	}
+	packages[pkg.Name] = pkg
+	for _, nn := range pkg.Nicknames {
+		packages[nn] = pkg
+	}
 	addFeature(pkg.Name)
 	packagesMu.Unlock()
 }
@@ -95,11 +110,9 @@ func AddPackage(pkg *Package) {
 func RemovePackage(pkg *Package) {
 	if pkg != nil {
 		packagesMu.Lock()
-		for i, p := range packages {
-			if pkg == p {
-				packages = append(packages[:i], packages[i+1:]...)
-				break
-			}
+		delete(packages, pkg.Name)
+		for _, nn := range pkg.Nicknames {
+			delete(packages, nn)
 		}
 		packagesMu.Unlock()
 		for _, u := range pkg.Uses {
@@ -107,6 +120,44 @@ func RemovePackage(pkg *Package) {
 		}
 		pkg.Name = ""
 	}
+}
+
+// RenamePackage changes the name of a package as well as the nicknames if
+// provided.
+func RenamePackage(s *Scope, depth int, pkg *Package, name string, optNicknames ...[]string) {
+	name = strings.ToLower(name)
+	var nicknames []string
+	if 0 < len(optNicknames) {
+		nicknames = optNicknames[0]
+		for i, nn := range nicknames {
+			nicknames[i] = strings.ToLower(nn)
+		}
+	}
+	packagesMu.Lock()
+	if p := packages[name]; p != nil && p != pkg {
+		packagesMu.Unlock()
+		PackagePanic(s, depth, p, "Package %s already exists.", name)
+	}
+	for _, nn := range nicknames {
+		if p := packages[nn]; p != nil && p != pkg {
+			packagesMu.Unlock()
+			PackagePanic(s, depth, p, "Package %s already exists.", nn)
+		}
+	}
+	delete(packages, pkg.Name)
+	packages[name] = pkg
+	pkg.Name = name
+
+	if 0 < len(optNicknames) {
+		for _, nn := range pkg.Nicknames {
+			delete(packages, nn)
+		}
+		for _, nn := range nicknames {
+			packages[nn] = pkg
+		}
+		pkg.Nicknames = nicknames
+	}
+	packagesMu.Unlock()
 }
 
 // Initialize the package.
@@ -297,13 +348,6 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 				vv.Set(value)
 			} else {
 				vv.Val = value
-			}
-			for _, u := range obj.Users {
-				u.mu.Lock()
-				if _, has := u.vars[name]; !has {
-					u.vars[name] = vv
-				}
-				u.mu.Unlock()
 			}
 		}
 	}
@@ -642,8 +686,15 @@ func (obj *Package) LoadPath() string {
 
 // PackageNames returns a sorted list of package names.
 func PackageNames() (names List) {
-	for _, pkg := range packages {
-		names = append(names, String(pkg.Name))
+	pm := map[string]String{}
+	packagesMu.Lock()
+	for _, p := range packages {
+		pm[p.Name] = String(p.Name)
+	}
+	packagesMu.Unlock()
+	names = make(List, 0, len(pm))
+	for _, name := range pm {
+		names = append(names, name)
 	}
 	sort.Slice(names,
 		func(i, j int) bool {
@@ -656,26 +707,29 @@ func PackageNames() (names List) {
 
 // AllPackages returns a list of all packages.
 func AllPackages() []*Package {
-	pkgs := make([]*Package, len(packages))
-	copy(pkgs, packages)
+	pm := map[string]*Package{}
+	packagesMu.Lock()
+	for _, p := range packages {
+		pm[p.Name] = p
+	}
+	packagesMu.Unlock()
+	pkgs := make([]*Package, 0, len(pm))
+	for _, p := range pm {
+		pkgs = append(pkgs, p)
+	}
 	return pkgs
 }
 
 // FindPackage returns the package matching the provided name.
-func FindPackage(name string) *Package {
-	for _, pkg := range packages {
-		if strings.EqualFold(name, pkg.Name) {
-			return pkg
-		}
+func FindPackage(name string) (p *Package) {
+	packagesMu.Lock()
+	p = packages[name]
+	if p == nil {
+		p = packages[strings.ToLower(name)]
 	}
-	for _, pkg := range packages {
-		for _, nn := range pkg.Nicknames {
-			if strings.EqualFold(name, nn) {
-				return pkg
-			}
-		}
-	}
-	return nil
+	packagesMu.Unlock()
+
+	return
 }
 
 // Describe the instance in detail.

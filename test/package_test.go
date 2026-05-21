@@ -11,6 +11,8 @@ import (
 	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/bag"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/pp"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -164,7 +166,10 @@ func TestPackageDef(t *testing.T) {
 
 func TestPackageCurrent(t *testing.T) {
 	tt.Equal(t, "common-lisp-user", slip.CurrentPackage.Name)
-	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("a"))
+		slip.CurrentPackage = &slip.UserPkg
+	}()
 
 	pa := slip.DefPackage("a", []string{"aye"}, "Lots of ayes.")
 	slip.CLPkg.Set("*package*", pa)
@@ -329,4 +334,67 @@ func TestPackageLoadForm(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(pps, "(:nicknames cl)"))
 	tt.Equal(t, true, strings.Contains(pps, "(:documentation "))
 	tt.Equal(t, true, strings.Contains(pps, "(:export "))
+}
+
+func TestPackageRenameOk(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+		slip.RemovePackage(slip.FindPackage("rename-test-2"))
+	}()
+	(&sliptest.Function{
+		Source: `(rename-package (make-package 'rename-test-1) 'rename-test-2 '(rt2))`,
+		Validate: func(t *testing.T, v slip.Object) {
+			tt.Equal(t, "#<package rename-test-2>", slip.ObjectString(v))
+			p := v.(*slip.Package)
+			tt.Equal(t, "[rt2]", pretty.SEN(p.Nicknames))
+		},
+	}).Test(t)
+}
+
+func TestPackageRenameExists(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+	}()
+	(&sliptest.Function{
+		Source:    `(rename-package (make-package 'rename-test-1) 'user '(rt2))`,
+		PanicType: slip.PackageErrorSymbol,
+	}).Test(t)
+}
+
+func TestPackageRenameNicknameExists(t *testing.T) {
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("rename-test-1"))
+	}()
+	(&sliptest.Function{
+		Source:    `(rename-package (make-package 'rename-test-1) 'rename-test-2 '(user))`,
+		PanicType: slip.PackageErrorSymbol,
+	}).Test(t)
+}
+
+func TestPackageEachClass(t *testing.T) {
+	var vanilla bool
+	flavors.Pkg.EachClass(func(c slip.Class) {
+		if c.Name() == "vanilla-flavor" {
+			vanilla = true
+		}
+	})
+	tt.Equal(t, true, vanilla)
+}
+
+func TestPackageEachClassName(t *testing.T) {
+	var vanilla bool
+	flavors.Pkg.EachClassName(func(name string) {
+		if name == "vanilla-flavor" {
+			vanilla = true
+		}
+	})
+	tt.Equal(t, true, vanilla)
+}
+
+func TestPackagePkgPath(t *testing.T) {
+	tt.Equal(t, "github.com/ohler55/slip/pkg/bag", bag.Pkg.PkgPath())
+}
+
+func TestPackageLoadPath(t *testing.T) {
+	tt.Equal(t, "", bag.Pkg.LoadPath())
 }
