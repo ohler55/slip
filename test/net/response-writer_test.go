@@ -11,6 +11,7 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	slipnet "github.com/ohler55/slip/pkg/net"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -35,6 +36,13 @@ func (rw *respWriter) Write(b []byte) (int, error) {
 
 func (rw *respWriter) WriteHeader(code int) {
 	rw.code = code
+}
+
+func TestMakeResponseWriter(t *testing.T) {
+	rw := &respWriter{header: http.Header{}}
+	inst := slipnet.MakeResponseWriter(rw)
+	tt.Equal(t, rw, inst.Any)
+	tt.Equal(t, "http-response-writer-flavor", inst.Type.Name())
 }
 
 func TestResponseWriterMethods(t *testing.T) {
