@@ -11,6 +11,7 @@ import (
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
+	slipnet "github.com/ohler55/slip/pkg/net"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -37,6 +38,13 @@ func (rw *respWriter) WriteHeader(code int) {
 	rw.code = code
 }
 
+func TestMakeResponseWriter(t *testing.T) {
+	rw := &respWriter{header: http.Header{}}
+	inst := slipnet.MakeResponseWriter(rw)
+	tt.Equal(t, rw, inst.Any)
+	tt.Equal(t, "http-response-writer-flavor", inst.Type.Name())
+}
+
 func TestResponseWriterMethods(t *testing.T) {
 	rw := respWriter{header: http.Header{"Content-Length": []string{"123"}}}
 	scope := slip.NewScope()
@@ -59,6 +67,28 @@ func TestResponseWriterMethods(t *testing.T) {
 		Source: `(send rw :header-get "Nothing")`,
 		Expect: "nil",
 	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send rw :header-set "Content-Type" "application/json")`,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t, "application/json", rw.header.Get("Content-Type"))
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send rw :header-get "Content-Type")`,
+		Expect: `"application/json"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send rw :header-add "Vary" "Accept-Encoding")`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send rw :header-add "Vary" "Origin")`,
+		Expect: "nil",
+	}).Test(t)
+	tt.Equal(t, []string{"Accept-Encoding", "Origin"}, rw.header["Vary"])
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(send rw :write-status 201)`,
@@ -86,6 +116,16 @@ func TestResponseWriterDocs(t *testing.T) {
 	_ = slip.ReadString(`(describe-method http-response-writer-flavor :header-get out)`, scope).Eval(scope, nil)
 	str = out.String()
 	tt.Equal(t, true, strings.Contains(str, ":header-get"))
+
+	out.Reset()
+	_ = slip.ReadString(`(describe-method http-response-writer-flavor :header-set out)`, scope).Eval(scope, nil)
+	str = out.String()
+	tt.Equal(t, true, strings.Contains(str, ":header-set"))
+
+	out.Reset()
+	_ = slip.ReadString(`(describe-method http-response-writer-flavor :header-add out)`, scope).Eval(scope, nil)
+	str = out.String()
+	tt.Equal(t, true, strings.Contains(str, ":header-add"))
 
 	out.Reset()
 	_ = slip.ReadString(`(describe-method http-response-writer-flavor :write-status out)`, scope).Eval(scope, nil)
@@ -119,6 +159,48 @@ func TestResponseWriterMethodPanics(t *testing.T) {
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send rw :header-get t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send rw :header-set)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send rw :header-set "Content-Type")`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send rw :header-set t "application/json")`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send rw :header-set "Content-Type" t)`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send rw :header-add)`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send rw :header-add "Vary")`,
+		PanicType: slip.Symbol("error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send rw :header-add t "Origin")`,
+		PanicType: slip.Symbol("type-error"),
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send rw :header-add "Vary" t)`,
 		PanicType: slip.Symbol("type-error"),
 	}).Test(t)
 
