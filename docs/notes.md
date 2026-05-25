@@ -4,6 +4,45 @@
 
 ---------------------
 
+- app-support
+ + gi:*app-args*
+ - process-flavor
+ - command-flavor
+
+
+ - find-process (pid) - or find-program better?
+  - maybe return process object (flavor instance or just instance)
+ - :kill process-kill (process) - FLOS
+ - :signal process-signal (process) - FLOS
+ - command (like net:request, use os/exec)
+  - make-instance or make-command
+  - :run (&key :stdout <boolean> :stderr <boolean> :wait <boolean>)
+  - ?? pipes somehow
+  - :wait
+  - :system-time
+  - :user-time
+  - :success
+  - :exit-code
+  - :exited (boolean)
+
+  - vars
+   - stdin input-stream
+   - stdout output-stream
+   - stderr output-stream
+   - env
+   - path
+   - args
+   - dir
+   - process (read only)
+   - exit-state (ProcessState) (maybe just part of process)
+    - system-time
+    - user-time
+    - success
+    - exit-code
+    - exited (boolean)
+
+---------------------
+
 - flavor allow out of order defflavor like standard-class
 
 ---------------------
