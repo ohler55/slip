@@ -29,7 +29,7 @@ type Lambda struct {
 func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	ss := s.NewScope()
 	if lam.Closure != nil {
-		ss.parents = append(ss.parents, lam.Closure)
+		ss.parents = append([]*Scope{lam.Closure}, ss.parents...)
 		ss.Macro = lam.Closure.Macro
 	} else if s.Keep { // flavors instance uses this
 		ss.parents = append(ss.parents, s)

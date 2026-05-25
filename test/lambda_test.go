@@ -87,6 +87,39 @@ func TestLambdaCallInFunc(t *testing.T) {
 	}).Test(t)
 }
 
+func TestLambdaClosureBindingPrecedesCallerScope(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`
+(defun closure-shadow-call-with-fn (fn)
+  (funcall fn 0))
+(defun closure-shadow-target (x)
+  t)
+(defun closure-shadow-wrapper (fn)
+  (closure-shadow-call-with-fn
+    (lambda (x) (eq fn (function closure-shadow-target)))))`, scope).Eval(scope, nil)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(closure-shadow-wrapper (function closure-shadow-target))`,
+		Expect: "t",
+	}).Test(t)
+}
+
+func TestLambdaClosurePreservesCallerParentScope(t *testing.T) {
+	scope := slip.NewScope()
+	_ = slip.ReadString(`
+(defun closure-parent-use-extra (fn extra)
+  (funcall fn 0))
+(defun closure-parent-wrapper (fn)
+  (closure-parent-use-extra
+    (lambda (x) (list (eq fn 'lexical) extra))
+    'caller-parent))`, scope).Eval(scope, nil)
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(closure-parent-wrapper 'lexical)`,
+		Expect: "(t caller-parent)",
+	}).Test(t)
+}
+
 func TestLambdaCallBadKeyword(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `((lambda (&key :test) test) :test)`,
