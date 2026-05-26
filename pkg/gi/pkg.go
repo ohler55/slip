@@ -284,6 +284,9 @@ func init() {
 		vv := Pkg.GetVarVal(f.Name())
 		vv.Const = true
 	}
+	defProcess()
+	defFindProcess()
+
 	Pkg.Initialize(nil, &Env{})
 
 	slip.AddPackage(&Pkg)

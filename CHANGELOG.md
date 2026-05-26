@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.2] - unreleased
 ### Added
 - Added `:header-set` and `:header-add` methods to `http-response-writer-flavor`.
+- Added `gi:*app-args*`.
 
 ### Fixed
 - The CompileList function now correctly handles package prefixes.

@@ -7,6 +7,8 @@
 - app-support
  + gi:*app-args*
  - process-flavor
+  - test with find-process after creating one
+ - find-process (pid)
  - command-flavor
 
 
