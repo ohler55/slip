@@ -14,7 +14,7 @@ import (
 
 func TestFindProcessOk(t *testing.T) {
 	cmd := exec.Command("sleep", "2")
-	cmd.Start()
+	_ = cmd.Start()
 	pid := cmd.Process.Pid
 	(&sliptest.Function{
 		Source: fmt.Sprintf(`(let ((p (find-process %d)))
@@ -68,7 +68,7 @@ func TestFindProcessBadPid(t *testing.T) {
 
 func TestProcessRunning(t *testing.T) {
 	cmd := exec.Command("sleep", "2")
-	cmd.Start()
+	_ = cmd.Start()
 	defer func() {
 		_ = cmd.Process.Kill()
 	}()
@@ -110,7 +110,7 @@ func TestProcessRunning(t *testing.T) {
 
 func TestProcessSuccess(t *testing.T) {
 	cmd := exec.Command("sleep", "0.01")
-	cmd.Start()
+	_ = cmd.Start()
 	pid := cmd.Process.Pid
 	(&sliptest.Function{
 		Source: fmt.Sprintf(`(let ((p (find-process %d)))
@@ -122,7 +122,7 @@ func TestProcessSuccess(t *testing.T) {
 
 func TestProcessWaitWait(t *testing.T) {
 	cmd := exec.Command("sleep", "0.01")
-	cmd.Start()
+	_ = cmd.Start()
 	pid := cmd.Process.Pid
 	(&sliptest.Function{
 		Source: fmt.Sprintf(`(let ((p (find-process %d)))
@@ -134,7 +134,7 @@ func TestProcessWaitWait(t *testing.T) {
 
 func TestProcessWaitSignal(t *testing.T) {
 	cmd := exec.Command("sleep", "0.01")
-	cmd.Start()
+	_ = cmd.Start()
 	pid := cmd.Process.Pid
 	(&sliptest.Function{
 		Source: fmt.Sprintf(`(let ((p (find-process %d)))
@@ -146,7 +146,7 @@ func TestProcessWaitSignal(t *testing.T) {
 
 func TestProcessWaitWaitError(t *testing.T) {
 	cmd := exec.Command("sleep", "0.01")
-	cmd.Start()
+	_ = cmd.Start()
 	pid := cmd.Process.Pid
 	scope := slip.NewScope()
 	p := slip.ReadString(fmt.Sprintf("(find-process %d)", pid), scope).Eval(scope, nil)
