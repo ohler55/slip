@@ -4,10 +4,16 @@
 
 ---------------------
 
+- system
+ - make sure require can load a system
+ - add load-system (system-designator)
+  - :quux or 'quux or "quux"
+
 - app-support
  + gi:*app-args*
  - process-flavor
   - test with find-process after creating one
+  - swap os.Process for os.ProcessState after a call to :wait
  - find-process (pid)
  - command-flavor
 

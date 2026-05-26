@@ -4,6 +4,7 @@ package gi
 
 import (
 	"os"
+	"syscall"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -26,7 +27,8 @@ func defFindProcess() {
 				},
 			},
 			Return: "process",
-			Text:   `__find-process__ find the process with a pid of _pid_.`,
+			Text: `__find-process__ find the process with a pid of _pid_ and return an
+instance of the __process__ flavor or __nil__ if no process is found.`,
 			Examples: []string{
 				`(find-process  12345) => #<process 12345>`,
 			},
@@ -46,6 +48,10 @@ func (f *FindProcess) Call(s *slip.Scope, args slip.List, depth int) slip.Object
 		slip.TypePanic(s, depth, "pid", args[0], "fixnum")
 	}
 	proc, _ := os.FindProcess(int(pid))
+
+	if proc == nil || proc.Signal(syscall.Signal(0)) != nil {
+		return nil
+	}
 	inst := processFlavor.MakeInstance().(*flavors.Instance)
 	inst.Any = proc
 
