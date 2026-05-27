@@ -10,6 +10,10 @@
  + find-process (pid)
  - command flavor
 
+- :required-methods is broken
+ - should not check for required on defflavor as methods are defined later
+  - maybe check on first make-instance?
+
 - system
  - make sure require can load a system
  - add load-system (system-designator)
