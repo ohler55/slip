@@ -4,50 +4,33 @@
 
 ---------------------
 
+- app-support
+ + gi:*app-args*
+ + process flavor
+ + find-process (pid)
+ - command flavor
+
 - system
  - make sure require can load a system
  - add load-system (system-designator)
   - :quux or 'quux or "quux"
+ - system files be .asd
+  - one defsystem in file, read, compile, eval to get system
+  - tell system fetch and load
+ - use load-system to read in file, eval, and then call fetch and load
 
-- app-support
- + gi:*app-args*
- - process-flavor
-  - test with find-process after creating one
-  - swap os.Process for os.ProcessState after a call to :wait
- - find-process (pid)
- - command-flavor
-
-
- - find-process (pid) - or find-program better?
-  - maybe return process object (flavor instance or just instance)
- - :kill process-kill (process) - FLOS
- - :signal process-signal (process) - FLOS
  - command (like net:request, use os/exec)
   - make-instance or make-command
   - :run (&key :stdout <boolean> :stderr <boolean> :wait <boolean>)
-  - ?? pipes somehow
-  - :wait
-  - :system-time
-  - :user-time
-  - :success
-  - :exit-code
-  - :exited (boolean)
-
-  - vars
-   - stdin input-stream
-   - stdout output-stream
-   - stderr output-stream
-   - env
-   - path
-   - args
-   - dir
-   - process (read only)
-   - exit-state (ProcessState) (maybe just part of process)
-    - system-time
-    - user-time
-    - success
-    - exit-code
-    - exited (boolean)
+  - settable before :run and read only after that
+   - :stdin input-stream
+   - :stdout output-stream
+   - :stderr output-stream
+   - :env
+   - :path
+   - :args
+   - :dir
+   - :process (read only)
 
 ---------------------
 
