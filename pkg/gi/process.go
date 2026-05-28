@@ -76,6 +76,7 @@ func (caller processPidCaller) FuncDocs() *slip.FuncDoc {
 		Name:   ":pid",
 		Text:   `returns the process pid.`,
 		Return: "fixnum",
+		Kind:   slip.MethodSymbol,
 	}
 }
 
@@ -100,6 +101,7 @@ func (caller processKillCaller) FuncDocs() *slip.FuncDoc {
 		Name:   ":kill",
 		Text:   `a process and return immediately.`,
 		Return: "nil",
+		Kind:   slip.MethodSymbol,
 	}
 }
 
@@ -135,6 +137,7 @@ func (caller processSignalCaller) FuncDocs() *slip.FuncDoc {
 			},
 		},
 		Return: "nil",
+		Kind:   slip.MethodSymbol,
 	}
 }
 
@@ -163,6 +166,7 @@ func (caller processWaitCaller) FuncDocs() *slip.FuncDoc {
 		Name:   ":wait",
 		Text:   `for a process to complete and return the exit code.`,
 		Return: "symbol",
+		Kind:   slip.MethodSymbol,
 	}
 }
 
@@ -182,6 +186,7 @@ func (caller processExitedCaller) FuncDocs() *slip.FuncDoc {
 		Name:   ":exited",
 		Text:   `returns true if the process has exited. __:wait__ must be called before this.`,
 		Return: "boolean",
+		Kind:   slip.MethodSymbol,
 	}
 }
 
@@ -207,6 +212,7 @@ func (caller processSuccessCaller) FuncDocs() *slip.FuncDoc {
 		Name:   ":success",
 		Text:   `returns true if the process exited successfully.`,
 		Return: "boolean",
+		Kind:   slip.MethodSymbol,
 	}
 }
 
@@ -229,6 +235,7 @@ func (caller processExitCodeCaller) FuncDocs() *slip.FuncDoc {
 		Name:   ":exit-code",
 		Text:   `returns the process exit code if completed and -1 if still running or exited by a signal`,
 		Return: "fixnum",
+		Kind:   slip.MethodSymbol,
 	}
 }
 
@@ -252,6 +259,7 @@ func (caller processSystemTimeCaller) FuncDocs() *slip.FuncDoc {
 		Name:   ":system-time",
 		Text:   `returns the system time if the process has finished. The __:wait__ method must be called first.`,
 		Return: "float",
+		Kind:   slip.MethodSymbol,
 	}
 }
 
@@ -275,5 +283,6 @@ func (caller processUserTimeCaller) FuncDocs() *slip.FuncDoc {
 		Name:   ":user-time",
 		Text:   `returns the user time if the process has finished. The __:wait__ method must be called first.`,
 		Return: "float",
+		Kind:   slip.MethodSymbol,
 	}
 }

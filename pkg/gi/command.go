@@ -4,6 +4,7 @@ package gi
 
 import (
 	"os/exec"
+	"strings"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -17,6 +18,12 @@ func defCommand() {
 		[]string{},
 		slip.List{
 			slip.List{
+				slip.Symbol(":init-keywords"),
+				slip.Symbol(`:path`),
+				slip.Symbol(`:args`),
+				slip.Symbol(`:dir`),
+			},
+			slip.List{
 				slip.Symbol(":documentation"),
 				slip.String(`Represents a command to start a process.`),
 			},
@@ -24,26 +31,325 @@ func defCommand() {
 		&Pkg,
 	)
 
-	// TBD :init
+	commandFlavor.DefMethod(":init", ":after", commandInitCaller{})
+
+	commandFlavor.DefMethod(":path", "", commandPathCaller{})
+	flavors.FlosFun("command-path", ":path", commandPathCaller{}.FuncDocs(), &Pkg)
+	commandFlavor.DefMethod(":set-path", "", commandSetPathCaller{})
+	flavors.FlosFun("command-set-path", ":set-path", commandSetPathCaller{}.FuncDocs(), &Pkg)
+
+	commandFlavor.DefMethod(":args", "", commandArgsCaller{})
+	flavors.FlosFun("command-args", ":args", commandArgsCaller{}.FuncDocs(), &Pkg)
+	commandFlavor.DefMethod(":set-args", "", commandSetArgsCaller{})
+	flavors.FlosFun("command-set-args", ":set-args", commandSetArgsCaller{}.FuncDocs(), &Pkg)
+
+	commandFlavor.DefMethod(":dir", "", commandDirCaller{})
+	flavors.FlosFun("command-dir", ":dir", commandDirCaller{}.FuncDocs(), &Pkg)
+	commandFlavor.DefMethod(":set-dir", "", commandSetDirCaller{})
+	flavors.FlosFun("command-set-dir", ":set-dir", commandSetDirCaller{}.FuncDocs(), &Pkg)
+
+	commandFlavor.DefMethod(":env", "", commandEnvCaller{})
+	flavors.FlosFun("command-env", ":env", commandEnvCaller{}.FuncDocs(), &Pkg)
+	commandFlavor.DefMethod(":set-env", "", commandSetEnvCaller{})
+	flavors.FlosFun("command-set-env", ":set-env", commandSetEnvCaller{}.FuncDocs(), &Pkg)
+
+	// - :stdout => output-stream
+	// :set-stdout (stream)
+	// - :stderr output-stream
+	// - :stdin input-stream
+	// :stdout-pipe
+	// :stderr-pipe
+	// :stdin-pipe
+
+	// - :run
+	// - :start
 
 	commandFlavor.DefMethod(":pid", "", commandPidCaller{})
 	flavors.FlosFun("command-pid", ":pid", commandPidCaller{}.FuncDocs(), &Pkg)
 
 	commandFlavor.DefMethod(":process", "", commandProcessCaller{})
 	flavors.FlosFun("command-process", ":process", commandProcessCaller{}.FuncDocs(), &Pkg)
+}
 
-	// - :run
-	// - :start
+type commandInitCaller struct{}
 
-	// figure out how stdxxx work vs stdxxpipe
-	// - :stdin input-stream
-	// - :stdout output-stream
-	// - :stderr output-stream
-	// - :env
-	// - :path
-	// - :args
-	// - :dir
+func (caller commandInitCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	if 0 < len(args) {
+		args = args[0].(slip.List)
+	}
+	var (
+		path  string
+		dir   string
+		cargs []string
+	)
+	for i := 0; i < len(args)-1; i += 2 {
+		sym := args[i].(slip.Symbol)
+		key := strings.ToLower(string(sym))
+		value := args[i+1]
+		switch key {
+		case ":path":
+			path = slip.MustBeString(value, ":path")
+		case ":args":
+			if list, ok := value.(slip.List); ok {
+				cargs = make([]string, len(list))
+				for j, v := range list {
+					cargs[j] = slip.MustBeString(v, ":args")
+				}
+			} else {
+				slip.TypePanic(s, depth, ":args", value, "list")
+			}
+		case ":dir":
+			dir = slip.MustBeString(value, ":dir")
+		}
+	}
+	c := exec.Command(path, cargs...)
+	if 0 < len(dir) {
+		c.Dir = dir
+	}
+	self.Any = c
 
+	return nil
+}
+
+func (caller commandInitCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":init",
+		Args: []*slip.DocArg{
+			{Name: "&key"},
+			{
+				Name: "path",
+				Type: "string",
+				Text: "The path to the command to run.",
+			},
+			{
+				Name: "args",
+				Type: "list",
+				Text: "The command line argument to command as a list of strings.",
+			},
+			{
+				Name: "dir",
+				Type: "string",
+				Text: "The working directory to execute the command in.",
+			},
+		},
+		Text: "Initializes the path, args, and dir variables of the command.",
+		Kind: slip.MethodSymbol,
+	}
+}
+
+type commandPathCaller struct{}
+
+func (caller commandPathCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":path", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+
+	return slip.String(command.Path)
+}
+
+func (caller commandPathCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":path",
+		Text:   `Returns the command path.`,
+		Kind:   slip.MethodSymbol,
+		Return: "string",
+	}
+}
+
+type commandSetPathCaller struct{}
+
+func (caller commandSetPathCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":set-path", len(args), 1, 1)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Can not set path after :run or :start.")
+	}
+	command.Path = slip.MustBeString(args[0], "path")
+
+	return args[0]
+}
+
+func (caller commandSetPathCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-path",
+		Args: []*slip.DocArg{
+			{
+				Name: "path",
+				Type: "string",
+				Text: "The path to the command to run.",
+			},
+		},
+		Text:   `Sets the command path.`,
+		Kind:   slip.MethodSymbol,
+		Return: "string",
+	}
+}
+
+type commandArgsCaller struct{}
+
+func (caller commandArgsCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":args", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+	list := make(slip.List, len(command.Args))
+	for i, str := range command.Args {
+		list[i] = slip.String(str)
+	}
+	return list
+}
+
+func (caller commandArgsCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":args",
+		Text:   `Returns the command args.`,
+		Kind:   slip.MethodSymbol,
+		Return: "list",
+	}
+}
+
+type commandSetArgsCaller struct{}
+
+func (caller commandSetArgsCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":set-args", len(args), 1, 1)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Can not set args after :run or :start.")
+	}
+	if list, ok := args[0].(slip.List); ok {
+		command.Args = make([]string, len(list))
+		for j, v := range list {
+			command.Args[j] = slip.MustBeString(v, "args")
+		}
+	} else {
+		slip.TypePanic(s, depth, "args", args[0], "list")
+	}
+	return args[0]
+}
+
+func (caller commandSetArgsCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-args",
+		Args: []*slip.DocArg{
+			{
+				Name: "args",
+				Type: "list",
+				Text: "The args to the command to run.",
+			},
+		},
+		Text:   `Sets the command args.`,
+		Kind:   slip.MethodSymbol,
+		Return: "list",
+	}
+}
+
+type commandDirCaller struct{}
+
+func (caller commandDirCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":dir", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+
+	return slip.String(command.Dir)
+}
+
+func (caller commandDirCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":dir",
+		Text:   `Returns the command dir.`,
+		Kind:   slip.MethodSymbol,
+		Return: "string",
+	}
+}
+
+type commandSetDirCaller struct{}
+
+func (caller commandSetDirCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":set-dir", len(args), 1, 1)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Can not set dir after :run or :start.")
+	}
+	command.Dir = slip.MustBeString(args[0], "dir")
+
+	return args[0]
+}
+
+func (caller commandSetDirCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-dir",
+		Args: []*slip.DocArg{
+			{
+				Name: "dir",
+				Type: "string",
+				Text: "The dir to run the command in.",
+			},
+		},
+		Text:   `Sets the command dir.`,
+		Kind:   slip.MethodSymbol,
+		Return: "string",
+	}
+}
+
+type commandEnvCaller struct{}
+
+func (caller commandEnvCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":env", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+	list := make(slip.List, len(command.Env))
+	for i, str := range command.Env {
+		list[i] = slip.String(str)
+	}
+	return list
+}
+
+func (caller commandEnvCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":env",
+		Text:   `Returns the command env.`,
+		Kind:   slip.MethodSymbol,
+		Return: "list",
+	}
+}
+
+type commandSetEnvCaller struct{}
+
+func (caller commandSetEnvCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":set-env", len(args), 1, 1)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Can not set env after :run or :start.")
+	}
+	if list, ok := args[0].(slip.List); ok {
+		command.Env = make([]string, len(list))
+		for j, v := range list {
+			command.Env[j] = slip.MustBeString(v, "env")
+		}
+	} else {
+		slip.TypePanic(s, depth, "env", args[0], "list")
+	}
+	return args[0]
+}
+
+func (caller commandSetEnvCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-env",
+		Args: []*slip.DocArg{
+			{
+				Name: "env",
+				Type: "list",
+				Text: "The env of the command.",
+			},
+		},
+		Text:   `Sets the command env.`,
+		Kind:   slip.MethodSymbol,
+		Return: "list",
+	}
 }
 
 type commandPidCaller struct{}
@@ -62,6 +368,7 @@ func (caller commandPidCaller) FuncDocs() *slip.FuncDoc {
 	return &slip.FuncDoc{
 		Name:   ":pid",
 		Text:   `Returns the command pid.`,
+		Kind:   slip.MethodSymbol,
 		Return: "fixnum",
 	}
 }
@@ -84,6 +391,7 @@ func (caller commandProcessCaller) FuncDocs() *slip.FuncDoc {
 	return &slip.FuncDoc{
 		Name:   ":process",
 		Text:   `Returns the command process.`,
+		Kind:   slip.MethodSymbol,
 		Return: "process",
 	}
 }
