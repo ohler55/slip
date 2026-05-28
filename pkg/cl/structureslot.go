@@ -130,7 +130,7 @@ func (ss *StructureSlot) generateAccessor(sc *StructureClass) {
 			Args: []*slip.DocArg{
 				{Name: "structure", Type: ss.name, Text: "Structure to access."},
 			},
-			Return: "t",
+			Return: "object",
 			Text:   fmt.Sprintf("Returns the %s slot of a %s structure.", ss.name, sc.name),
 		},
 	)

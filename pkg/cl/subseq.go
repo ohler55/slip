@@ -22,7 +22,7 @@ func init() {
 					Text: `A sequence to take the sub-sequence of.`,
 				},
 				{
-					Name: "tree-start",
+					Name: "start",
 					Type: "fixnum",
 					Text: `The start of the sub-sequence.`,
 				},
