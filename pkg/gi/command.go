@@ -57,9 +57,6 @@ func defCommand() {
 	// :set-stdout (stream)
 	// - :stderr output-stream
 	// - :stdin input-stream
-	// :stdout-pipe
-	// :stderr-pipe
-	// :stdin-pipe
 
 	// - :run
 	// - :start

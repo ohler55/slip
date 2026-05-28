@@ -27,14 +27,6 @@
   - make-instance or make-command
   - :run (&key :stdout <boolean> :stderr <boolean> :wait <boolean>)
   - settable before :run and read only after that
-   - :stdin input-stream
-   - :stdout output-stream
-   - :stderr output-stream
-   - :env
-   - :path
-   - :args
-   - :dir
-   - :process (read only)
 
 ---------------------
 
