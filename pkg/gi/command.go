@@ -3,6 +3,7 @@
 package gi
 
 import (
+	"io"
 	"os/exec"
 	"strings"
 
@@ -30,7 +31,6 @@ func defCommand() {
 		},
 		&Pkg,
 	)
-
 	commandFlavor.DefMethod(":init", ":after", commandInitCaller{})
 
 	commandFlavor.DefMethod(":path", "", commandPathCaller{})
@@ -53,13 +53,26 @@ func defCommand() {
 	commandFlavor.DefMethod(":set-env", "", commandSetEnvCaller{})
 	flavors.FlosFun("command-set-env", ":set-env", commandSetEnvCaller{}.FuncDocs(), &Pkg)
 
-	// - :stdout => output-stream
-	// :set-stdout (stream)
-	// - :stderr output-stream
-	// - :stdin input-stream
+	commandFlavor.DefMethod(":stdout", "", commandStdoutCaller{})
+	flavors.FlosFun("command-stdout", ":stdout", commandStdoutCaller{}.FuncDocs(), &Pkg)
+	commandFlavor.DefMethod(":set-stdout", "", commandSetStdoutCaller{})
+	flavors.FlosFun("command-set-stdout", ":set-stdout", commandSetStdoutCaller{}.FuncDocs(), &Pkg)
 
-	// - :run
-	// - :start
+	commandFlavor.DefMethod(":stderr", "", commandStderrCaller{})
+	flavors.FlosFun("command-stderr", ":stderr", commandStderrCaller{}.FuncDocs(), &Pkg)
+	commandFlavor.DefMethod(":set-stderr", "", commandSetStderrCaller{})
+	flavors.FlosFun("command-set-stderr", ":set-stderr", commandSetStderrCaller{}.FuncDocs(), &Pkg)
+
+	commandFlavor.DefMethod(":stdin", "", commandStdinCaller{})
+	flavors.FlosFun("command-stdin", ":stdin", commandStdinCaller{}.FuncDocs(), &Pkg)
+	commandFlavor.DefMethod(":set-stdin", "", commandSetStdinCaller{})
+	flavors.FlosFun("command-set-stdin", ":set-stdin", commandSetStdinCaller{}.FuncDocs(), &Pkg)
+
+	commandFlavor.DefMethod(":run", "", commandRunCaller{})
+	flavors.FlosFun("command-run", ":run", commandRunCaller{}.FuncDocs(), &Pkg)
+
+	commandFlavor.DefMethod(":start", "", commandStartCaller{})
+	flavors.FlosFun("command-start", ":start", commandStartCaller{}.FuncDocs(), &Pkg)
 
 	commandFlavor.DefMethod(":pid", "", commandPidCaller{})
 	flavors.FlosFun("command-pid", ":pid", commandPidCaller{}.FuncDocs(), &Pkg)
@@ -346,6 +359,236 @@ func (caller commandSetEnvCaller) FuncDocs() *slip.FuncDoc {
 		Text:   `Sets the command env.`,
 		Kind:   slip.MethodSymbol,
 		Return: "list",
+	}
+}
+
+type commandStdoutCaller struct{}
+
+func (caller commandStdoutCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":stdout", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+
+	switch tout := command.Stdout.(type) {
+	case *slip.OutputStream:
+		result = tout
+	case nil:
+		// leave result as nil
+	default:
+		result = &slip.OutputStream{Writer: tout}
+	}
+	return
+}
+
+func (caller commandStdoutCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":stdout",
+		Text:   `Returns the command stdout.`,
+		Kind:   slip.MethodSymbol,
+		Return: "output-stream",
+	}
+}
+
+type commandSetStdoutCaller struct{}
+
+func (caller commandSetStdoutCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":set-stdout", len(args), 1, 1)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Can not set stdout after :run or :start.")
+	}
+	if w, ok := args[0].(io.Writer); ok {
+		command.Stdout = w
+	} else {
+		slip.TypePanic(s, depth, "stream", args[0], "output-stream")
+	}
+	return args[0]
+}
+
+func (caller commandSetStdoutCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-stdout",
+		Args: []*slip.DocArg{
+			{
+				Name: "stream",
+				Type: "output-stream",
+				Text: "The stream to set the command stdout.",
+			},
+		},
+		Text:   `Sets the command stdout.`,
+		Kind:   slip.MethodSymbol,
+		Return: "output-stream",
+	}
+}
+
+type commandStderrCaller struct{}
+
+func (caller commandStderrCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":stderr", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+
+	switch terr := command.Stderr.(type) {
+	case *slip.OutputStream:
+		result = terr
+	case nil:
+		// leave result as nil
+	default:
+		result = &slip.OutputStream{Writer: terr}
+	}
+	return
+}
+
+func (caller commandStderrCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":stderr",
+		Text:   `Returns the command stderr.`,
+		Kind:   slip.MethodSymbol,
+		Return: "output-stream",
+	}
+}
+
+type commandSetStderrCaller struct{}
+
+func (caller commandSetStderrCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":set-stderr", len(args), 1, 1)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Can not set stderr after :run or :start.")
+	}
+	if w, ok := args[0].(io.Writer); ok {
+		command.Stderr = w
+	} else {
+		slip.TypePanic(s, depth, "stream", args[0], "output-stream")
+	}
+	return args[0]
+}
+
+func (caller commandSetStderrCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-stderr",
+		Args: []*slip.DocArg{
+			{
+				Name: "stream",
+				Type: "output-stream",
+				Text: "The stream to set the command stderr.",
+			},
+		},
+		Text:   `Sets the command stderr.`,
+		Kind:   slip.MethodSymbol,
+		Return: "output-stream",
+	}
+}
+
+type commandStdinCaller struct{}
+
+func (caller commandStdinCaller) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":stdin", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+
+	switch tin := command.Stdin.(type) {
+	case *slip.InputStream:
+		result = tin
+	case nil:
+		// leave result as nil
+	default:
+		r := slip.InputStream{}
+		r.Reader = tin
+		result = &r
+	}
+	return
+}
+
+func (caller commandStdinCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":stdin",
+		Text:   `Returns the command stdin.`,
+		Kind:   slip.MethodSymbol,
+		Return: "input-stream",
+	}
+}
+
+type commandSetStdinCaller struct{}
+
+func (caller commandSetStdinCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":set-stdin", len(args), 1, 1)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Can not set stdin after :run or :start.")
+	}
+	if r, ok := args[0].(io.Reader); ok {
+		command.Stdin = r
+	} else {
+		slip.TypePanic(s, depth, "stream", args[0], "input-stream")
+	}
+	return args[0]
+}
+
+func (caller commandSetStdinCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name: ":set-stdin",
+		Args: []*slip.DocArg{
+			{
+				Name: "stream",
+				Type: "input-stream",
+				Text: "The stream to set the command stdin.",
+			},
+		},
+		Text:   `Sets the command stdin.`,
+		Kind:   slip.MethodSymbol,
+		Return: "input-stream",
+	}
+}
+
+type commandRunCaller struct{}
+
+func (caller commandRunCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":run", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Already running or already ran.")
+	}
+	if err := command.Run(); err != nil {
+		slip.ErrorPanic(s, depth, ":run error. %s", err)
+	}
+	return nil
+}
+
+func (caller commandRunCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":run",
+		Text:   `Runs the command and wait for completion. Panics on error.`,
+		Kind:   slip.MethodSymbol,
+		Return: "nil",
+	}
+}
+
+type commandStartCaller struct{}
+
+func (caller commandStartCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	self := s.Get("self").(*flavors.Instance)
+	slip.MethodArgCountCheck(s, depth, self, ":start", len(args), 0, 0)
+	command := self.Any.(*exec.Cmd)
+	if command.Process != nil {
+		slip.ErrorPanic(s, depth, "Already running or already ran.")
+	}
+	if err := command.Start(); err != nil {
+		slip.ErrorPanic(s, depth, ":start error. %s", err)
+	}
+	return nil
+}
+
+func (caller commandStartCaller) FuncDocs() *slip.FuncDoc {
+	return &slip.FuncDoc{
+		Name:   ":start",
+		Text:   `Starts the command. Panics on error.`,
+		Kind:   slip.MethodSymbol,
+		Return: "nil",
 	}
 }
 
