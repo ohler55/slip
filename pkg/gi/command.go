@@ -598,6 +598,7 @@ func (caller commandPidCaller) Call(s *slip.Scope, args slip.List, depth int) (r
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":pid", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
+	// TBD check ProcessState also
 	if command.Process != nil {
 		result = slip.Fixnum(command.Process.Pid)
 	}
@@ -619,6 +620,7 @@ func (caller commandProcessCaller) Call(s *slip.Scope, args slip.List, depth int
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":process", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
+	// TBD check ProcessState also
 	if command.Process != nil {
 		inst := commandFlavor.MakeInstance().(*flavors.Instance)
 		inst.Any = command.Process

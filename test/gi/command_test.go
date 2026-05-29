@@ -56,3 +56,71 @@ func TestCommandEnv(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestCommandStdout(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((cmd (make-instance 'command :path "echo" :args '("hello")))
+                       result)
+                   (with-output-to-string (s)
+                     (setq result
+                           (list
+                             (send cmd :stdout)
+                             (send cmd :set-stdout s)
+                             (send cmd :stdout))))
+                   result)`,
+		Expect: `(nil #<OUTPUT-STREAM> #<OUTPUT-STREAM>)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'command :path "echo") :set-stdout t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestCommandStderr(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((cmd (make-instance 'command :path "echo" :args '("hello")))
+                       result)
+                   (with-output-to-string (s)
+                     (setq result
+                           (list
+                             (send cmd :stderr)
+                             (send cmd :set-stderr s)
+                             (send cmd :stderr))))
+                   result)`,
+		Expect: `(nil #<OUTPUT-STREAM> #<OUTPUT-STREAM>)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'command :path "echo") :set-stderr t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestCommandStdin(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((cmd (make-instance 'command :path "echo" :args '("hello")))
+                       result)
+                   (with-input-from-string (s "quux")
+                     (setq result
+                           (list
+                             (send cmd :stdin)
+                             (send cmd :set-stdin s)
+                             (send cmd :stdin))))
+                   result)`,
+		Expect: `(nil #<INPUT-STREAM> #<INPUT-STREAM>)`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source:    `(send (make-instance 'command :path "echo") :set-stdin t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestCommandRun(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((cmd (make-instance 'command :path "sleep" :args '("0.01"))))
+                   ;; process completed so pid and process should exist
+                   (list
+                    (send cmd :pid)
+                    (send cmd :process)))`,
+		Expect: `/xx/`,
+	}).Test(t)
+}

@@ -11,23 +11,21 @@
  - command flavor
  - make-command (path &rest args)
 
-- :required-methods is broken
- - should not check for required on defflavor as methods are defined later
-  - maybe check on first make-instance?
-
 - system
  - make sure require can load a system
  - add load-system (system-designator)
   - :quux or 'quux or "quux"
- - system files be .asd
+ - system files can/should be .asd
   - one defsystem in file, read, compile, eval to get system
   - tell system fetch and load
  - use load-system to read in file, eval, and then call fetch and load
+  - same as require and load but must receive system
+   - must contain only a defsystem or could be more forgiving
 
- - command (like net:request, use os/exec)
-  - make-instance or make-command
-  - :run (&key :stdout <boolean> :stderr <boolean> :wait <boolean>)
-  - settable before :run and read only after that
+- :required-methods is broken
+ - should not check for required on defflavor as methods are defined later
+  - maybe check on first make-instance?
+
 
 ---------------------
 
