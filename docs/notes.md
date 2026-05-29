@@ -4,16 +4,12 @@
 
 ---------------------
 
-- structureslot
- - doesn't need to be a Function
- - generateAccessor should be independent of structureslot
-  - either point to slot or just include the index the the def
-
 - app-support
  + gi:*app-args*
  + process flavor
  + find-process (pid)
  - command flavor
+ - make-command (path &rest args)
 
 - :required-methods is broken
  - should not check for required on defflavor as methods are defined later
