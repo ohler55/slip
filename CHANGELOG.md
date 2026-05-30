@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.2] - unreleased
 ### Added
 - Added `:header-set` and `:header-add` methods to `http-response-writer-flavor`.
+- Added `gi:*app-args*`.
+- Added `gi:process` flavor.
+- Added `gi:find-process` function.
+- Added `gi:command` flavor.
+- Added `gi:make-command` function.
+- Added support for shebang at the start of a file.
 
 ### Fixed
 - The CompileList function now correctly handles package prefixes.
 - More robust concurrency protection on package access.
+- Fixed structure slot accessor issue.
 
 ## [1.4.1] - 2026-05-14
 ### Fixed

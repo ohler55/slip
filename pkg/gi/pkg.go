@@ -3,6 +3,8 @@
 package gi
 
 import (
+	"os"
+
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -268,6 +270,12 @@ func init() {
 				Export: true,
 				Doc:    "The month of December as a fixnum.",
 			},
+			"*app-args*": {
+				Get:    getAppArgs,
+				Set:    nil,
+				Export: true,
+				Doc:    "are the command line arguments.",
+			},
 		})
 	for _, f := range []*flavors.Flavor{
 		defLogger(),
@@ -276,6 +284,11 @@ func init() {
 		vv := Pkg.GetVarVal(f.Name())
 		vv.Const = true
 	}
+	defProcess()
+	defFindProcess()
+	defCommand()
+	defMakeCommand()
+
 	Pkg.Initialize(nil, &Env{})
 
 	slip.AddPackage(&Pkg)
@@ -325,4 +338,12 @@ func seqStarEndArgs(s *slip.Scope, args slip.List, depth int) (start, end int) {
 		slip.ErrorPanic(s, depth, "end, %d is less start %d", end, start)
 	}
 	return
+}
+
+func getAppArgs() slip.Object {
+	args := make(slip.List, len(os.Args))
+	for i, str := range os.Args {
+		args[i] = slip.String(str)
+	}
+	return args
 }

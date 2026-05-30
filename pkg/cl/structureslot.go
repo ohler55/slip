@@ -10,7 +10,6 @@ import (
 
 // StructureSlot encapsulates the definition of a slot in a structure.
 type StructureSlot struct {
-	slip.Function
 	name     string
 	slotType slip.Object // :type option - type specifier for slot values
 	readOnly bool        // :read-only option - if true, slot cannot be modified after creation
@@ -115,44 +114,73 @@ func (ss *StructureSlot) Copy(newIndex int) *StructureSlot {
 	}
 }
 
-// generateAccessor creates the accessor function for a slot.
-func (ss *StructureSlot) generateAccessor(sc *StructureClass) {
-	name := sc.accessorName(ss.name)
-
-	slip.CurrentPackage.Define(
-		func(args slip.List) slip.Object {
-			ss.Function = slip.Function{Name: name, Args: args}
-			ss.Self = ss
-			return ss
-		},
-		&slip.FuncDoc{
-			Name: name,
-			Args: []*slip.DocArg{
-				{Name: "structure", Type: ss.name, Text: "Structure to access."},
-			},
-			Return: "t",
-			Text:   fmt.Sprintf("Returns the %s slot of a %s structure.", ss.name, sc.name),
-		},
-	)
+type getSlot struct {
+	slip.Function
+	name  string
+	index int
 }
 
-func (ss *StructureSlot) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.CheckArgCount(s, depth, ss, args, 1, 1)
+// Call the the function with the arguments provided.
+func (gs *getSlot) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	slip.CheckArgCount(s, depth, gs, args, 1, 1)
 	obj, ok := args[0].(*StructureObject)
 	if !ok {
-		slip.TypePanic(s, depth, "structure", args[0], ss.name)
+		slip.TypePanic(s, depth, "structure", args[0], gs.name)
 	}
-	return obj.GetSlotByIndex(ss.index)
+	return obj.GetSlotByIndex(gs.index)
+}
+
+type accSlot struct {
+	getSlot
 }
 
 // Place implements setf support for the accessor.
-func (ss *StructureSlot) Place(s *slip.Scope, args slip.List, value slip.Object) {
-	if ss.readOnly {
-		slip.ErrorPanic(s, 0, "cannot setf read-only slot")
-	}
+func (as *accSlot) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	obj, ok := args[0].(*StructureObject)
 	if !ok {
-		slip.TypePanic(s, 0, "structure", args[0], ss.name)
+		slip.TypePanic(s, 0, "structure", args[0], as.name)
 	}
-	obj.SetSlotByIndex(ss.index, value)
+	obj.SetSlotByIndex(as.index, value)
+}
+
+// generateAccessor creates the accessor function for a slot.
+func (ss *StructureSlot) generateAccessor(sc *StructureClass) {
+	name := sc.accessorName(ss.name)
+	slotType := "object"
+	if ss.slotType != nil {
+		slotType = slip.ObjectString(ss.slotType)
+	}
+	fd := &slip.FuncDoc{
+		Name: name,
+		Args: []*slip.DocArg{
+			{Name: "structure", Type: slotType, Text: "Structure to access."},
+		},
+		Return: slotType,
+		Text:   fmt.Sprintf("Returns the %s slot of a %s structure.", ss.name, sc.name),
+	}
+	if ss.readOnly {
+		slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := getSlot{Function: slip.Function{Name: name, Args: args}, name: ss.name, index: ss.index}
+				f.Self = &f
+				return &f
+			},
+			fd,
+		)
+	} else {
+		slip.CurrentPackage.Define(
+			func(args slip.List) slip.Object {
+				f := accSlot{
+					getSlot: getSlot{
+						Function: slip.Function{Name: name, Args: args},
+						name:     ss.name,
+						index:    ss.index,
+					},
+				}
+				f.Self = &f
+				return &f
+			},
+			fd,
+		)
+	}
 }

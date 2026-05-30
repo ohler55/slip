@@ -271,7 +271,7 @@ func process() {
 			replReader.setDepth(tr.Depth)
 			return
 		case *slip.Panic:
-			if len(tr.Message) == 0 && tr.Fatal {
+			if len(tr.Message) == 0 && tr.Fatal || tr.Value == slip.Symbol(":help") {
 				panic("")
 			}
 			msg := tr.Error()

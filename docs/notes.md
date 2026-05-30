@@ -4,6 +4,24 @@
 
 ---------------------
 
+- expand-system
+ - make sure require can load a system
+ - add load-system (system-designator)
+  - :quux or 'quux or "quux"
+ - system files can/should be .asd
+  - one defsystem in file, read, compile, eval to get system
+  - tell system fetch and load
+ - use load-system to read in file, eval, and then call fetch and load
+  - same as require and load but must receive system
+   - must contain only a defsystem or could be more forgiving
+
+- :required-methods is broken
+ - should not check for required on defflavor as methods are defined later
+  - maybe check on first make-instance?
+
+
+---------------------
+
 - flavor allow out of order defflavor like standard-class
 
 ---------------------
