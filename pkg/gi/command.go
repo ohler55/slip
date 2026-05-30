@@ -225,7 +225,7 @@ func (caller commandSetArgsCaller) Call(s *slip.Scope, args slip.List, depth int
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":set-args", len(args), 1, 1)
 	command := self.Any.(*exec.Cmd)
-	if command.Process != nil {
+	if command.Process != nil || command.ProcessState != nil {
 		slip.ErrorPanic(s, depth, "Can not set args after :run or :start.")
 	}
 	if list, ok := args[0].(slip.List); ok {
@@ -280,7 +280,7 @@ func (caller commandSetDirCaller) Call(s *slip.Scope, args slip.List, depth int)
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":set-dir", len(args), 1, 1)
 	command := self.Any.(*exec.Cmd)
-	if command.Process != nil {
+	if command.Process != nil || command.ProcessState != nil {
 		slip.ErrorPanic(s, depth, "Can not set dir after :run or :start.")
 	}
 	command.Dir = slip.MustBeString(args[0], "dir")
@@ -332,7 +332,7 @@ func (caller commandSetEnvCaller) Call(s *slip.Scope, args slip.List, depth int)
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":set-env", len(args), 1, 1)
 	command := self.Any.(*exec.Cmd)
-	if command.Process != nil {
+	if command.Process != nil || command.ProcessState != nil {
 		slip.ErrorPanic(s, depth, "Can not set env after :run or :start.")
 	}
 	if list, ok := args[0].(slip.List); ok {
@@ -368,14 +368,10 @@ func (caller commandStdoutCaller) Call(s *slip.Scope, args slip.List, depth int)
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":stdout", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
-
-	switch tout := command.Stdout.(type) {
-	case *slip.OutputStream:
-		result = tout
-	case nil:
-		// leave result as nil
-	default:
-		result = &slip.OutputStream{Writer: tout}
+	if command.Stdout != nil {
+		if obj, ok := command.Stdout.(slip.Object); ok {
+			result = obj
+		}
 	}
 	return
 }
@@ -395,13 +391,16 @@ func (caller commandSetStdoutCaller) Call(s *slip.Scope, args slip.List, depth i
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":set-stdout", len(args), 1, 1)
 	command := self.Any.(*exec.Cmd)
-	if command.Process != nil {
+	if command.Process != nil || command.ProcessState != nil {
 		slip.ErrorPanic(s, depth, "Can not set stdout after :run or :start.")
 	}
-	if w, ok := args[0].(io.Writer); ok {
-		command.Stdout = w
-	} else {
-		slip.TypePanic(s, depth, "stream", args[0], "output-stream")
+	switch ta := args[0].(type) {
+	case io.Writer:
+		command.Stdout = ta
+	case nil:
+		command.Stdout = nil
+	default:
+		slip.TypePanic(s, depth, "stream", ta, "output-stream")
 	}
 	return args[0]
 }
@@ -428,14 +427,10 @@ func (caller commandStderrCaller) Call(s *slip.Scope, args slip.List, depth int)
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":stderr", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
-
-	switch terr := command.Stderr.(type) {
-	case *slip.OutputStream:
-		result = terr
-	case nil:
-		// leave result as nil
-	default:
-		result = &slip.OutputStream{Writer: terr}
+	if command.Stderr != nil {
+		if obj, ok := command.Stderr.(slip.Object); ok {
+			result = obj
+		}
 	}
 	return
 }
@@ -458,10 +453,13 @@ func (caller commandSetStderrCaller) Call(s *slip.Scope, args slip.List, depth i
 	if command.Process != nil {
 		slip.ErrorPanic(s, depth, "Can not set stderr after :run or :start.")
 	}
-	if w, ok := args[0].(io.Writer); ok {
-		command.Stderr = w
-	} else {
-		slip.TypePanic(s, depth, "stream", args[0], "output-stream")
+	switch ta := args[0].(type) {
+	case io.Writer:
+		command.Stderr = ta
+	case nil:
+		command.Stderr = nil
+	default:
+		slip.TypePanic(s, depth, "stream", ta, "output-stream")
 	}
 	return args[0]
 }
@@ -488,16 +486,10 @@ func (caller commandStdinCaller) Call(s *slip.Scope, args slip.List, depth int) 
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":stdin", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
-
-	switch tin := command.Stdin.(type) {
-	case *slip.InputStream:
-		result = tin
-	case nil:
-		// leave result as nil
-	default:
-		r := slip.InputStream{}
-		r.Reader = tin
-		result = &r
+	if command.Stdin != nil {
+		if obj, ok := command.Stdin.(slip.Object); ok {
+			result = obj
+		}
 	}
 	return
 }
@@ -517,13 +509,16 @@ func (caller commandSetStdinCaller) Call(s *slip.Scope, args slip.List, depth in
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":set-stdin", len(args), 1, 1)
 	command := self.Any.(*exec.Cmd)
-	if command.Process != nil {
+	if command.Process != nil || command.ProcessState != nil {
 		slip.ErrorPanic(s, depth, "Can not set stdin after :run or :start.")
 	}
-	if r, ok := args[0].(io.Reader); ok {
-		command.Stdin = r
-	} else {
-		slip.TypePanic(s, depth, "stream", args[0], "input-stream")
+	switch ta := args[0].(type) {
+	case io.Reader:
+		command.Stdin = ta
+	case nil:
+		command.Stdin = nil
+	default:
+		slip.TypePanic(s, depth, "stream", ta, "input-stream")
 	}
 	return args[0]
 }
@@ -550,7 +545,7 @@ func (caller commandRunCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":run", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
-	if command.Process != nil {
+	if command.Process != nil || command.ProcessState != nil {
 		slip.ErrorPanic(s, depth, "Already running or already ran.")
 	}
 	if err := command.Run(); err != nil {
@@ -574,7 +569,7 @@ func (caller commandStartCaller) Call(s *slip.Scope, args slip.List, depth int) 
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":start", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
-	if command.Process != nil {
+	if command.Process != nil || command.ProcessState != nil {
 		slip.ErrorPanic(s, depth, "Already running or already ran.")
 	}
 	if err := command.Start(); err != nil {
@@ -598,8 +593,10 @@ func (caller commandPidCaller) Call(s *slip.Scope, args slip.List, depth int) (r
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":pid", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
-	// TBD check ProcessState also
-	if command.Process != nil {
+	switch {
+	case command.ProcessState != nil:
+		result = slip.Fixnum(command.ProcessState.Pid())
+	case command.Process != nil:
 		result = slip.Fixnum(command.Process.Pid)
 	}
 	return
@@ -620,9 +617,13 @@ func (caller commandProcessCaller) Call(s *slip.Scope, args slip.List, depth int
 	self := s.Get("self").(*flavors.Instance)
 	slip.MethodArgCountCheck(s, depth, self, ":process", len(args), 0, 0)
 	command := self.Any.(*exec.Cmd)
-	// TBD check ProcessState also
-	if command.Process != nil {
-		inst := commandFlavor.MakeInstance().(*flavors.Instance)
+	switch {
+	case command.ProcessState != nil:
+		inst := processFlavor.MakeInstance().(*flavors.Instance)
+		inst.Any = command.ProcessState
+		result = inst
+	case command.Process != nil:
+		inst := processFlavor.MakeInstance().(*flavors.Instance)
 		inst.Any = command.Process
 		result = inst
 	}

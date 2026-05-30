@@ -8,7 +8,7 @@
  + gi:*app-args*
  + process flavor
  + find-process (pid)
- - command flavor
+ + command flavor
  - make-command (path &rest args)
 
 - system
