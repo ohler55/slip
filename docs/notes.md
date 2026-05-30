@@ -4,14 +4,7 @@
 
 ---------------------
 
-- app-support
- + gi:*app-args*
- + process flavor
- + find-process (pid)
- + command flavor
- - make-command (path &rest args)
-
-- system
+- expand-system
  - make sure require can load a system
  - add load-system (system-designator)
   - :quux or 'quux or "quux"

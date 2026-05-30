@@ -287,6 +287,7 @@ func init() {
 	defProcess()
 	defFindProcess()
 	defCommand()
+	defMakeCommand()
 
 	Pkg.Initialize(nil, &Env{})
 

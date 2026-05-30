@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `gi:process` flavor.
 - Added `gi:find-process` function.
 - Added `gi:command` flavor.
+- Added `gi:make-command` function.
 
 ### Fixed
 - The CompileList function now correctly handles package prefixes.
