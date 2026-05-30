@@ -32,6 +32,8 @@ Each list element starts with an operation name such as :test and is followed by
 to invoke to implement that operation. When system :run is called with key values those keys
 are bound to the values and are available to the function being called.
 `
+
+	systemPathnameDoc = "Filepath to the component files."
 )
 
 var system *flavors.Flavor
@@ -54,6 +56,7 @@ func defSystem() *flavors.Flavor {
 			"components":     nil,
 			"in-order-to":    nil,
 			"cache":          nil,
+			"pathname":       nil,
 		},
 		nil, // inherit
 		slip.List{ // options
@@ -64,7 +67,7 @@ func defSystem() *flavors.Flavor {
 				slip.String(`Instances of this Flavor define a system similar to ASDF in common LISP
 (https://asdf.common-lisp.dev) but with some differences. A __system__ instance
 captures the information associated with a code that implements the
-system. This includes providence variables such as author, version, and source
+system. This includes provenance variables such as author, version, and source
 location to name a few.
 
 Some of the differences when compared to ASDF are:
@@ -75,13 +78,13 @@ Some of the differences when compared to ASDF are:
  - The :components variable only allows for files and not modules.
  - The :depends-on variable differs to support git and other system sources.
  - The :in-order-to variable differs although it serves the same purpose.
- - The __system__ is a Flavor that also supports a :fetch method.
+ - The __system__ is a Flavor that also supports :fetch and :load methods.
  - A :cache variable is included.
 
 
 The usual use of a __system__ instance is to first send the instance a :fetch
-method to cache sources and then invoke one of the operations defined in the
-:in-order-to variable.
+method to cache sources, followed by :load, and then invoke one of the
+operations defined in the :in-order-to variable if desired.
 
 `),
 			},
@@ -92,6 +95,7 @@ method to cache sources and then invoke one of the operations defined in the
 	system.DefMethod(":load", "", systemLoadCaller{})
 	system.DefMethod(":run", "", systemRunCaller{})
 
+	system.Document("pathname", systemPathnameDoc)
 	system.Document("components", systemComponentsDoc)
 	system.Document("cache", systemCacheDoc)
 	system.Document("depends-on", systemDependsOnDoc)
@@ -179,6 +183,10 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	}
 	gc := self.Get("components")
 	if gc != nil {
+		dir := "."
+		if pn, _ := self.Get("pathname").(slip.String); 0 < len(pn) {
+			dir = string(pn)
+		}
 		var components slip.List
 		components, ok := gc.(slip.List)
 		if !ok {
@@ -189,11 +197,12 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 			if path, ok = comp.(slip.String); !ok {
 				slip.TypePanic(s, depth, "component", comp, "string")
 			}
-			matches, _ := filepath.Glob(string(path))
+			compPath := filepath.Join(dir, string(path))
+			matches, _ := filepath.Glob(compPath)
 			if len(matches) == 0 {
-				matches, _ = filepath.Glob(string(path) + ".lisp")
+				matches, _ = filepath.Glob(compPath + ".lisp")
 				if len(matches) == 0 {
-					slip.ErrorPanic(s, depth, "%s not found.", path)
+					slip.ErrorPanic(s, depth, "%s.lisp not found.", compPath)
 				}
 			}
 			for _, m := range matches {
