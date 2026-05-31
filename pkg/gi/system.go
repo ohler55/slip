@@ -184,6 +184,9 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 	gc := self.Get("components")
 	if gc != nil {
 		dir := "."
+		if pn, _ := s.Get("*package-load-path*").(slip.String); 0 < len(pn) {
+			dir = string(pn)
+		}
 		if pn, _ := self.Get("pathname").(slip.String); 0 < len(pn) {
 			dir = string(pn)
 		}
@@ -193,16 +196,37 @@ func (caller systemLoadCaller) Call(s *slip.Scope, args slip.List, depth int) sl
 			slip.TypePanic(s, depth, "components", gc, "list")
 		}
 		for _, comp := range components {
-			var path slip.String
-			if path, ok = comp.(slip.String); !ok {
-				slip.TypePanic(s, depth, "component", comp, "string")
+			var path string
+			switch tc := comp.(type) {
+			case slip.String:
+				path = filepath.Join(dir, string(tc))
+			case slip.List:
+				if len(tc)%2 != 0 {
+					slip.TypePanic(s, depth, "component", tc, "property list", "string")
+				}
+				var filename string
+				pathname := "."
+				for i := 0; i < len(tc)-1; i += 2 {
+					switch tc[i] {
+					case slip.Symbol(":file"):
+						filename = slip.MustBeString(tc[i+1], ":file")
+					case slip.Symbol(":pathname"): // relative to system dir
+						pathname = slip.MustBeString(tc[i+1], ":pathname")
+					case slip.Symbol(":description"):
+						// ok but not needed now
+					default:
+						slip.TypePanic(s, depth, "component", tc, "property list", "string")
+					}
+				}
+				path = filepath.Join(dir, pathname, filename)
+			default:
+				slip.TypePanic(s, depth, "component", tc, "property list", "string")
 			}
-			compPath := filepath.Join(dir, string(path))
-			matches, _ := filepath.Glob(compPath)
+			matches, _ := filepath.Glob(path)
 			if len(matches) == 0 {
-				matches, _ = filepath.Glob(compPath + ".lisp")
+				matches, _ = filepath.Glob(path + ".lisp")
 				if len(matches) == 0 {
-					slip.ErrorPanic(s, depth, "%s.lisp not found.", compPath)
+					slip.ErrorPanic(s, depth, "%s.lisp not found.", path)
 				}
 			}
 			for _, m := range matches {

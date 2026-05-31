@@ -8,6 +8,6 @@
     :source-control "https://github.com/ohler55/slip"
     :description "Just a sample."
     :cache "testout"
-    :components '("sister")
+    :components '((:file "sister") (:file "step-sister" :pathname "step"))
     :in-order-to '((:sample (+ (sys-test) six))
                    (:just-eval 3)))

@@ -4,33 +4,7 @@
 
 ---------------------
 
-- expand-system
- - system (not ASDF but similar) https://asdf.common-lisp.dev/asdf.html
-  - add :pathname to system for the default location of component files
-  - components
-   - allow filename of (:file "filename")
-    - other keywords in (:file "quux" :pathname "src-dir" :description "has random stuff in it")
-     - :description string
-     - :pathname pathname-specifier
-    - if (:file quux) is used then file should be the file name only and :pathname indicates the dir
-
- - require and load can not easily be made to do the same as load-system dues to circulat dependency
-  - load alway create some kind of interface but maybe best to leave them as just loading the def and not fetch and load
- - load-system (system)
-  - don't bother with &rest keys &key force force-not verbose version &allow-other-keys
-
-  - :quux or 'quux or "quux" for system
-  - set *load-pathname* and *load-truename* during load and eval
-  - defer package back to before loading
- - system files can/should be .asd
-  - one defsystem in file, read, compile, eval to get system
-   - other code before defsystem will not break
-  - tell system fetch and load
- - use load-system to read in file, eval, and then call fetch and load
-  - same as require and load but must receive system
-   - must contain only a defsystem or could be more forgiving
-
-- :required-methods is broken
+- :flavors required-methods is broken
  - should not check for required on defflavor as methods are defined later
   - maybe check on first make-instance?
 
