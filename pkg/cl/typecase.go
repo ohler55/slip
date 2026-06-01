@@ -80,8 +80,8 @@ func (f *Typecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 }
 
 func typecaseMatch(sym slip.Symbol, key slip.Object) bool {
-	if strings.EqualFold("null", string(sym)) && key == nil {
-		return true
+	if key == nil {
+		return strings.EqualFold("null", string(sym))
 	}
 	for _, h := range key.Hierarchy() {
 		if strings.EqualFold(string(h), string(sym)) {

@@ -24,7 +24,7 @@ func init() {
 				},
 			},
 			Return: "list",
-			Text: `__trace__ turns tracing on for the listed function _name*. If the only name is _t_ then
+			Text: `__trace__ turns tracing on for the listed function _name_. If the only name is _t_ then
 tracing is turned on for all functions. If no functions are named then a list of the functions being
 traced is returned.`,
 			Examples: []string{
