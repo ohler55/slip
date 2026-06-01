@@ -28,8 +28,9 @@ func defLoadSystem() {
 				{Name: "&optional"},
 				{
 					Name: "pathname",
-					Type: "string",
-					Text: "Directory the system .asd file is located in.",
+					Type: "string|list",
+					Text: `Directory the system .asd file is located in or a list of paths
+to search for the .asd file in.`,
 				},
 			},
 			Return: "system",
@@ -53,32 +54,57 @@ func (f *LoadSystem) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	slip.CheckArgCount(s, depth, f, args, 1, 2)
 	cys := slip.MustBeString(args[0], "system")
 	path, _ := s.Get(slip.Symbol("*package-load-path*")).(slip.String)
-	dir := string(path)
-	if 1 < len(args) {
-		dir = slip.MustBeString(args[1], "pathname")
+	var dirs []string
+	if 0 < len(path) {
+		dirs = append(dirs, string(path))
 	}
-	filepath := fmt.Sprintf("%s/%s.asd", dir, cys)
+	if 1 < len(args) {
+		switch ta := args[1].(type) {
+		case slip.String:
+			dirs = []string{string(ta)}
+		case slip.List:
+			dirs = dirs[:0]
+			for _, v := range ta {
+				dirs = append(dirs, slip.MustBeString(v, "pathname"))
+			}
+		default:
+			slip.TypePanic(s, depth, "pathname", ta, "string", "list")
+		}
+	}
 	currentPkg := slip.CurrentPackage
 	defer func() {
 		s.Set(slip.Symbol("*load-pathname*"), nil)
 		s.Set(slip.Symbol("*load-truename*"), nil)
 		slip.CurrentPackage = currentPkg
 	}()
-	s.Set(slip.Symbol("*load-pathname*"), slip.String(filepath))
-	s.Set(slip.Symbol("*load-truename*"), slip.String(filepath))
-	buf, err := os.ReadFile(filepath)
+	var (
+		buf      []byte
+		err      error
+		obj      slip.Object
+		filepath string
+		dirpath  string
+	)
+	for _, dir := range dirs {
+		filepath = fmt.Sprintf("%s/%s.asd", dir, cys)
+		s.Set(slip.Symbol("*load-pathname*"), slip.String(filepath))
+		s.Set(slip.Symbol("*load-truename*"), slip.String(filepath))
+		if buf, err = os.ReadFile(filepath); err != nil {
+			continue
+		}
+		code := slip.Read(buf, s)
+		code.Compile()
+		obj = code.Eval(s, nil)
+		dirpath = dir
+		break
+	}
 	if err != nil {
 		slip.FilePanic(s, depth, slip.String(filepath), "loading system %s at %s: %s", cys, filepath, err)
 	}
-	code := slip.Read(buf, s)
-	code.Compile()
-	obj := code.Eval(s, nil)
-
 	sys, ok := obj.(*flavors.Instance)
 	if !ok || sys.Class() != system {
 		slip.ErrorPanic(s, depth, "The last expression in %s was not a defsystem.", filepath)
 	}
-	sys.Set(slip.Symbol("pathname"), slip.String(dir))
+	sys.Set(slip.Symbol("pathname"), slip.String(dirpath))
 
 	_ = sys.Receive(s, ":fetch", nil, depth+1)
 	_ = sys.Receive(s, ":load", nil, depth+1)

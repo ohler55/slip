@@ -13,13 +13,36 @@ func TestLoadSystemOk(t *testing.T) {
 	scope := slip.NewScope()
 	slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
 	slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
+	slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
+	slip.ReadString("(fmakunbound 'step-sister)", scope).Eval(scope, nil)
 	defer func() {
 		slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
 		slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
+		slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
+		slip.ReadString("(fmakunbound 'step-sister)", scope).Eval(scope, nil)
 	}()
 	(&sliptest.Function{
 		Source: `(let ((*package-load-path* "testdata"))
 		           (load-system :sister "testdata/sister") (sister))`,
+		Expect: "2",
+	}).Test(t)
+}
+
+func TestLoadSystemPathList(t *testing.T) {
+	scope := slip.NewScope()
+	slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
+	slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
+	slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
+	slip.ReadString("(fmakunbound 'step-sister)", scope).Eval(scope, nil)
+	defer func() {
+		slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
+		slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
+		slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
+		slip.ReadString("(fmakunbound 'step-sister)", scope).Eval(scope, nil)
+	}()
+	(&sliptest.Function{
+		Source: `(let ((*package-load-path* "testdata"))
+		           (load-system :sister '("tyestdata" "testdata/sister")) (sister))`,
 		Expect: "2",
 	}).Test(t)
 }
@@ -48,6 +71,13 @@ func TestLoadSystemCompNotPlist(t *testing.T) {
 func TestLoadSystemCompBadKey(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(load-system 'bad-key "testdata/sister")`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestLoadSystemBadPathname(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(load-system 'bad-path t)`,
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
