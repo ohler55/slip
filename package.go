@@ -856,6 +856,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 				b = append(b, indentSpaces[:mx-len(k)+1]...)
 			}
 		}
+		b = append(b, '\n')
 	}
 	if 0 < len(obj.classes) {
 		names = names[:0]

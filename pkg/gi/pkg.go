@@ -284,6 +284,8 @@ func init() {
 		vv := Pkg.GetVarVal(f.Name())
 		vv.Const = true
 	}
+	defChdir()
+	defGetcwd()
 	defProcess()
 	defFindProcess()
 	defCommand()

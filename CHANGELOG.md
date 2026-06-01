@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `gi:load-system` function.
 - Added support for shebang at the start of a file.
 - Added support for ASDF style system component definitions.
+- Added `gi:getcwd` function.
+- Added `gi:chdir` function.
 
 ### Fixed
 - The CompileList function now correctly handles package prefixes.
