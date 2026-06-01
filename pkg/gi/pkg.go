@@ -285,6 +285,7 @@ func init() {
 		vv.Const = true
 	}
 	defChdir()
+	defGetcwd()
 	defProcess()
 	defFindProcess()
 	defCommand()
