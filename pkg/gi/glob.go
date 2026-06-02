@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip/pkg/cl"
 )
 
-func init() {
+func defGlob() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Glob{Function: slip.Function{Name: "glob", Args: args}}

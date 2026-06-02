@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defNow() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Now{Function: slip.Function{Name: "now", Args: args}}

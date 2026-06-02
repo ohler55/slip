@@ -14,7 +14,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defEncrypt() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Encrypt{Function: slip.Function{Name: "encrypt", Args: args}}

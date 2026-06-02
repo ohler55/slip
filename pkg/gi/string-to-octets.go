@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defStringToOctets() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := StringToOctets{Function: slip.Function{Name: "string-to-octets", Args: args}}

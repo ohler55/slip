@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defBase64Decode() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Base64Decode{Function: slip.Function{Name: "base64-decode", Args: args}}

@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defReplaceAll() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ReplaceAll{Function: slip.Function{Name: "replace-all", Args: args}}

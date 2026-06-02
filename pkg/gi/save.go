@@ -27,7 +27,7 @@ const (
 	defaultSaveBufLimit = 65536
 )
 
-func init() {
+func defSave() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Save{Function: slip.Function{Name: "save", Args: args}}

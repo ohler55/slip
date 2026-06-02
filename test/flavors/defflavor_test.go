@@ -12,6 +12,7 @@ import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/pp"
+	"github.com/ohler55/slip/sliptest"
 )
 
 func TestDefflavorBasic(t *testing.T) {
@@ -464,16 +465,33 @@ func TestDefflavorMissing(t *testing.T) {
 (defflavor f3 () () (:required-flavors f1))
 `, scope).Eval(scope, nil)
 	})
-	tt.Panic(t, func() {
-		slip.ReadString(`
+	// Required methods are checked when calling make-instance.
+	slip.ReadString(`
 (defflavor f3 () () (:required-methods :a))
 `, scope).Eval(scope, nil)
-	})
 	tt.Panic(t, func() {
-		slip.ReadString(`
-(defflavor f3 () () (:required-instance-variables b))
-`, scope).Eval(scope, nil)
+		slip.ReadString(`(make-instance 'f3)`, scope).Eval(scope, nil)
 	})
+}
+
+func TestDefflavorRequiredMethods(t *testing.T) {
+	defer undefFlavors("f3")
+	(&sliptest.Function{
+		Source: `
+(defflavor f3 () () (:required-methods :a))
+(defmethod (f3 :a) () nil)
+(make-instance 'f3)
+`,
+		Expect: `/#<f3 [0-9a-f]+>/`,
+	}).Test(t)
+}
+
+func TestDefflavorRequiredVars(t *testing.T) {
+	defer undefFlavors("f3")
+	(&sliptest.Function{
+		Source:    `(defflavor f3 () () (:required-instance-variables b))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
 }
 
 func TestDefflavorDefaultHandlerLambda(t *testing.T) {

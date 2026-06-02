@@ -233,7 +233,7 @@ func validateFlavor(s *slip.Scope, nf *Flavor, depth int) {
 		}
 		for _, mn := range cf.requiredMethods {
 			if _, has := nf.methods[mn]; !has {
-				slip.ErrorPanic(s, depth, "%s does not include the required method %s.", nf.name, mn)
+				nf.missReqMeths = true // check again on MakeInstancew
 			}
 		}
 		for _, vn := range cf.requiredVars {

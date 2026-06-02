@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defLockPackage() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := LockPackage{Function: slip.Function{Name: "lock-package", Args: args}}

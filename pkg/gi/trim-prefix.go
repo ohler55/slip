@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defTrimPrefix() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := TrimPrefix{Function: slip.Function{Name: "trim-prefix", Args: args}}

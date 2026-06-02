@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defTimeUtc() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := TimeUtc{Function: slip.Function{Name: "time-utc", Args: args}}

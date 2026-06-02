@@ -8,7 +8,7 @@ import (
 
 const qualifierSymbol = slip.Symbol("qualifier")
 
-func init() {
+func defMethodErrorQualifier() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MethodErrorQualifier{Function: slip.Function{Name: "method-error-qualifier", Args: args}}

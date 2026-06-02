@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/cl"
 )
 
-func init() {
+func defRange() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Range{Function: slip.Function{Name: "range", Args: args}}

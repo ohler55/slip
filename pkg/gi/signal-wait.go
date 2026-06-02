@@ -10,7 +10,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defSignalWait() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SignalWait{Function: slip.Function{Name: "signal-wait", Args: args}}

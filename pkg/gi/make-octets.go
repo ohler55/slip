@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defMakeOctets() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MakeOctets{Function: slip.Function{Name: "make-octets", Args: args}}

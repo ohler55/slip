@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defReadPush() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ReadPush{Function: slip.Function{Name: "read-push", Args: args}}

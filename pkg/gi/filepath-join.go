@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defFilepathJoin() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := FilepathJoin{Function: slip.Function{Name: "filepath-join", Args: args}}

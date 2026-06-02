@@ -10,7 +10,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defUnzip() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Unzip{Function: slip.Function{Name: "unzip", Args: args}}

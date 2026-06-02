@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defGetenv() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Getenv{Function: slip.Function{Name: "getenv", Args: args}}

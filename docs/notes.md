@@ -4,13 +4,6 @@
 
 ---------------------
 
-- :flavors required-methods is broken
- - should not check for required on defflavor as methods are defined later
-  - maybe check on first make-instance?
-
-
----------------------
-
 - flavor allow out of order defflavor like standard-class
 
 ---------------------

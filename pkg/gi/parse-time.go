@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defParseTime() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ParseTime{Function: slip.Function{Name: "parse-time", Args: args}}

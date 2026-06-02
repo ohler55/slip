@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defContainsp() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Containsp{Function: slip.Function{Name: "containsp", Args: args}}

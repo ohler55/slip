@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defChannelPop() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ChannelPop{Function: slip.Function{Name: "channel-pop", Args: args}}

@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defTimeAdd() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := TimeAdd{Function: slip.Function{Name: "time-add", Args: args}}

@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defCharLength() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := CharLength{Function: slip.Function{Name: "char-length", Args: args}}

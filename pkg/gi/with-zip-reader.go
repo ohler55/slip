@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defWithZipReader() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := WithZipReader{Function: slip.Function{Name: "with-zip-reader", Args: args, SkipEval: []bool{true}}}

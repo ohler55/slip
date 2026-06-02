@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defWithMutexLock() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := WithMutexLock{

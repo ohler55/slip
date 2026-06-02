@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defMemstat() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Memstat{Function: slip.Function{Name: "memstat", Args: args}}

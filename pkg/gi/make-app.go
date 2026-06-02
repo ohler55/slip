@@ -11,7 +11,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defMakeApp() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MakeApp{Function: slip.Function{Name: "make-app", Args: args}}

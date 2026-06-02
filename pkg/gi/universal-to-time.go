@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defUniversalToTime() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := UniversalToTime{Function: slip.Function{Name: "universal-to-time", Args: args}}

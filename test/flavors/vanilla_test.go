@@ -134,6 +134,22 @@ func TestVanillaMethods(t *testing.T) {
 		PanicType: slip.ClassNotFoundSymbol,
 	}).Test(t)
 
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(send berry :change-class (find-class 'blackberry))`,
+		Expect: "/#<blackberry [0-9a-f]+>/",
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send berry :change-class 'quuxberry)`,
+		PanicType: slip.ClassNotFoundSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send berry :change-class t)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+
 	mm := flavors.VanillaMethods()
 	_, hasIt := mm[":inspect"]
 	tt.Equal(t, true, hasIt)

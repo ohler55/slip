@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defSendSignal() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := SendSignal{Function: slip.Function{Name: "send-signal", Args: args}}

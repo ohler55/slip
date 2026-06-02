@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defSelect() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Select{Function: slip.Function{Name: "select", Args: args, SkipEval: []bool{true}}}

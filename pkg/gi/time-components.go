@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defTimeComponents() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := TimeComponents{Function: slip.Function{Name: "time-components", Args: args}}

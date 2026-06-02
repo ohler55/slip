@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defStringRepeat() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := StringRepeat{Function: slip.Function{Name: "string-repeat", Args: args}}

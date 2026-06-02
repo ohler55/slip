@@ -4,7 +4,7 @@ package gi
 
 import "github.com/ohler55/slip"
 
-func init() {
+func defPanic() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Panic{Function: slip.Function{Name: "panic", Args: args}}

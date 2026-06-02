@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defRecover() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Recover{Function: slip.Function{Name: "recover", Args: args, SkipEval: []bool{true}}}

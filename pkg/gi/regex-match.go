@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defRegexMatch() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := RegexMatch{Function: slip.Function{Name: "regex-match", Args: args}}
