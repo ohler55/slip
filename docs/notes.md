@@ -4,6 +4,19 @@
 
 ---------------------
 
+- add provenance
+ - with flag to slip, slap, and slapper
+  - keep file content in memory by path
+  - in code read note file, line, and column for each function id (address)
+ - use that for stack trace
+ - use for coverage
+
+---------------------
+
+- allow package to call in package functions without export
+
+---------------------
+
 - flavor allow out of order defflavor like standard-class
 
 ---------------------

@@ -32,6 +32,12 @@ func TestTerpriStdout(t *testing.T) {
 	tt.Equal(t, "\n", out.String())
 }
 
+func TestTerpriNil(t *testing.T) {
+	scope := slip.NewScope()
+	result := slip.ReadString("(terpri nil)", scope).Eval(scope, nil)
+	tt.Equal(t, slip.String("\n"), result)
+}
+
 func TestTerpriArgCount(t *testing.T) {
 	scope := slip.NewScope()
 	tt.Panic(t, func() { _ = slip.ReadString("(terpri nil nil)", scope).Eval(scope, nil) })
@@ -39,7 +45,7 @@ func TestTerpriArgCount(t *testing.T) {
 
 func TestTerpriBadStream(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { _ = slip.ReadString("(terpri t)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadString("(terpri 3)", scope).Eval(scope, nil) })
 }
 
 func TestTerpriWriteFail(t *testing.T) {
