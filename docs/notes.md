@@ -6,9 +6,16 @@
 
 - add provenance
  - with flag to slip, slap, and slapper
-  - keep file content in memory by path
-  - in code read note file, line, and column for each function id (address)
- - use that for stack trace
+  - keep file content in memory by full path
+  - in code read keep track of file, line, and column for each function id (address)
+   - form map or sorted slice with key of pointer to lists
+   - a second map of func pointer and location info
+    - set in CompileList if provenance flag is true
+ - how to handle multiple files packed into one
+  - maybe place a comment directive in front of file
+   - also works for compiling buffers
+
+ - use for stack trace
  - use for coverage
 
 ---------------------
