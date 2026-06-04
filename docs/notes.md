@@ -14,9 +14,45 @@
  - how to handle multiple files packed into one
   - maybe place a comment directive in front of file
    - also works for compiling buffers
+ - maybe change starts to be location info and stack index
+  - or maybe take address of first element - does that stay the same when list is formed?
+   - doesn't work for nested lists
+  - when list is formed add info to list map
+ - which way, extend functions or separate map
+  - extend function
+   - more directly accessible
+   - always available
+   - simpler, maybe
+  - separate
+   - less memory if not in use
+   - can't turn it on midway through, has to be on start
 
  - use for stack trace
  - use for coverage
+
+ - plan
+  - provenance.go
+   - Prov struct
+    - filepath string
+    - firstLine uint32
+    - lastLine uint32
+    - firstColumn uint16
+    - lastColumn uint16
+   - flag for provenance on/off
+    - SetProvenance(on bool)
+    - just store original file contents (is that even needed?)
+     - if separate prov info then also add to map
+     - if in func then nothing else to do
+   - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
+    - for non-file loaded skip that part (just use a few spaces for indent)
+    - maybe just filepath base without .lisp then firstLine and firstColumn
+
+  - CompileList should lookup list ptr and set new func ptr or populate func prov
+   - pass in list ptr map/sorted-slice
+  - code.closeList add to map in prov info
+  - use (declaim (optimize (filepath foo.lisp)) to switch file in all-at-once loading in app
+
+  - net:available-port ()
 
 ---------------------
 
