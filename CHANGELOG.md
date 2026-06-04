@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for ASDF style system component definitions.
 - Added `gi:getcwd` function.
 - Added `gi:chdir` function.
+- Added `net:available-port` function.
 
 ### Fixed
 - The CompileList function now correctly handles package prefixes.
