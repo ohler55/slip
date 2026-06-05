@@ -206,6 +206,7 @@ func run() {
 	if allAtOnce {
 		var paths slip.List
 		for _, path = range flag.Args() {
+			// TBD add (declaim optimize (filepath <full-path>)) to buf
 			if buf, err := os.ReadFile(path); err == nil {
 				path = filepath.Join(slip.WorkingDir, path)
 				if w != nil {
@@ -239,7 +240,7 @@ func run() {
 				if w != nil {
 					_, _ = fmt.Fprintf(w, ";; Loading contents of %s\n", pathname)
 				}
-				code = slip.Read(buf, scope)
+				code = slip.ReadProv(buf, scope, string(pathname))
 				code.Compile()
 				if print == nil {
 					code.Eval(scope, nil)

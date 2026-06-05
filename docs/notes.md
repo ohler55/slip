@@ -31,13 +31,12 @@
  - use for coverage
 
  - plan
+  - add declaim macro and grab in reader
+   - or maybe just setq on some special variable
+   - or maybe a special comment ;#! or something
   - provenance.go
-   - Prov struct
-    - filepath string
-    - firstLine uint32
-    - lastLine uint32
-    - firstColumn uint16
-    - lastColumn uint16
+   - add to code.reader
+    - just print at first
    - flag for provenance on/off
     - SetProvenance(on bool)
     - just store original file contents (is that even needed?)
@@ -51,8 +50,6 @@
    - pass in list ptr map/sorted-slice
   - code.closeList add to map in prov info
   - use (declaim (optimize (filepath foo.lisp)) to switch file in all-at-once loading in app
-
-  - net:available-port ()
 
 ---------------------
 

@@ -352,17 +352,18 @@ var (
 	}
 )
 
-// Code is a list of S-Expressions read from LISP source code. It is a means
+// Code is a list of S-Expressions read from Lisp source code. It is a means
 // of keeping loaded code together so that it can be evaluated and optimized
 // for subsequent evaluations.
 type Code []Object
 
 type reader struct {
 	tokenStart int
+	filepath   string
 	mode       string
 	nextMode   string
 	stack      []Object
-	starts     []int
+	starts     []Prov
 	carry      []byte // carry over from previous stream read
 	buf        []byte
 	line       int
@@ -400,7 +401,7 @@ func (r *reader) scoped(s *Scope) {
 	}
 }
 
-// ReadString reads LISP source code and return a Code instance.
+// ReadString reads Lisp source code and return a Code instance.
 func ReadString(src string, s *Scope) (code Code) {
 	cr := reader{
 		mode:     valueMode,
@@ -412,7 +413,7 @@ func ReadString(src string, s *Scope) (code Code) {
 	return cr.code
 }
 
-// Read LISP source code and return a Code instance.
+// Read Lisp source code and return a Code instance.
 func Read(src []byte, s *Scope) (code Code) {
 	cr := reader{
 		mode:     valueMode,
@@ -424,7 +425,21 @@ func Read(src []byte, s *Scope) (code Code) {
 	return cr.code
 }
 
-// ReadOne LISP source code and return a Code instance.
+// ReadProv Lisp source code and return a Code instance. The filepath argument
+// is used for provenance information.
+func ReadProv(src []byte, s *Scope, filepath string) (code Code) {
+	cr := reader{
+		mode:     valueMode,
+		nextMode: valueMode,
+		filepath: filepath,
+	}
+	cr.scoped(s)
+	cr.read(src)
+
+	return cr.code
+}
+
+// ReadOne Lisp source code and return a Code instance.
 func ReadOne(src []byte, s *Scope) (code Code, pos int) {
 	cr := reader{
 		mode:     valueMode,
@@ -439,7 +454,7 @@ func ReadOne(src []byte, s *Scope) (code Code, pos int) {
 
 const readBlockSize = 65536
 
-// ReadStream reads LISP source code from a stream and return a Code instance.
+// ReadStream reads Lisp source code from a stream and return a Code instance.
 func ReadStream(r io.Reader, s *Scope, one ...bool) (Code, int) {
 	// Note: Using a separate chan for reading from disk was tried but since a
 	// new buffer had to be created each time the overall performance was
@@ -477,7 +492,7 @@ func ReadStream(r io.Reader, s *Scope, one ...bool) (Code, int) {
 	return cr.code, pos
 }
 
-// ReadStreamPush reads LISP source code from a stream and pushes
+// ReadStreamPush reads Lisp source code from a stream and pushes
 // s-expressions read onto a channel.
 func ReadStreamPush(r io.Reader, s *Scope, channel chan Object) {
 	cr := reader{
@@ -511,7 +526,7 @@ func ReadStreamPush(r io.Reader, s *Scope, channel chan Object) {
 	}
 }
 
-// ReadStreamEach reads LISP source code from a stream and calls the callback
+// ReadStreamEach reads Lisp source code from a stream and calls the callback
 // for each s-expressions read.
 func ReadStreamEach(r io.Reader, s *Scope, caller Caller) {
 	cr := reader{
@@ -545,12 +560,12 @@ func ReadStreamEach(r io.Reader, s *Scope, caller Caller) {
 	}
 }
 
-// CompileString LISP string source code and return an Object.
+// CompileString Lisp string source code and return an Object.
 func CompileString(src string, s *Scope) Object {
 	return Compile([]byte(src), s)
 }
 
-// Compile LISP source code and return an Object.
+// Compile Lisp source code and return an Object.
 func Compile(src []byte, s *Scope) (result Object) {
 	cr := reader{
 		mode:     valueMode,
@@ -607,7 +622,13 @@ func (r *reader) read(src []byte) {
 			r.mode = valueMode
 
 		case openParen:
-			r.starts = append(r.starts, len(r.stack))
+			r.starts = append(r.starts,
+				Prov{
+					Filepath:    r.filepath,
+					FirstLine:   uint32(r.line),
+					FirstColumn: uint32(r.pos - r.lineStart),
+					LastColumn:  uint32(len(r.stack)),
+				})
 			r.stack = append(r.stack, nil)
 		case closeParen:
 			r.closeList()
@@ -697,7 +718,7 @@ func (r *reader) read(src []byte) {
 			goto Retry
 
 		case vectorByte:
-			r.starts = append(r.starts, len(r.stack))
+			r.starts = append(r.starts, Prov{LastColumn: uint32(len(r.stack))})
 			r.stack = append(r.stack, vectorMarker)
 			r.mode = valueMode
 
@@ -729,12 +750,12 @@ func (r *reader) read(src []byte) {
 			r.base = r.sharpNum
 
 		case sharpComplex:
-			r.starts = append(r.starts, len(r.stack))
+			r.starts = append(r.starts, Prov{LastColumn: uint32(len(r.stack))})
 			r.stack = append(r.stack, complexMarker)
 			r.mode = mustArrayMode
 
 		case arrayByte:
-			r.starts = append(r.starts, len(r.stack))
+			r.starts = append(r.starts, Prov{LastColumn: uint32(len(r.stack))})
 			switch r.sharpNum {
 			case 0:
 				r.stack = append(r.stack, &Array{elementType: TrueSymbol})
@@ -866,13 +887,13 @@ func (r *reader) closeList() {
 		r.raise("unmatched close parenthesis")
 	}
 	start := r.starts[len(r.starts)-1]
-	size := len(r.stack) - start - 1
+	last := start.LastColumn
+	size := len(r.stack) - int(start.LastColumn) - 1
 	list := make(List, size)
-	copy(list, r.stack[start+1:])
-	// TBD does the stack need to be cleared (set to nil) before shrinking?
-	r.stack = r.stack[:start+1]
+	copy(list, r.stack[start.LastColumn+1:])
+	r.stack = r.stack[:last+1]
 	var obj Object
-	switch to := r.stack[start].(type) {
+	switch to := r.stack[last].(type) {
 	case *Vector:
 		obj = NewVector(len(list), TrueSymbol, nil, list, true)
 	case *Array:
@@ -892,53 +913,57 @@ func (r *reader) closeList() {
 		} else {
 			obj = list
 		}
-		if 0 < start {
-			switch r.stack[start-1] {
+		start.LastLine = uint32(r.line)
+		start.LastColumn = uint32(r.pos - r.lineStart)
+		// fmt.Printf("*** %s %s\n", list, pretty.SEN(start))
+		// TBD add to list set/map
+		if 0 < last {
+			switch r.stack[last-1] {
 			case quoteMarker:
 				if newQuote == nil {
 					newQuote = CLPkg.GetFunc("quote").Create
 				}
 				obj = newQuote(List{obj})
-				start--
-				r.stack[start] = nil
-				r.stack = r.stack[:start+1]
+				last--
+				r.stack[last] = nil
+				r.stack = r.stack[:last+1]
 			case sharpQuoteMarker:
 				if newSharpQuote == nil {
 					newSharpQuote = CLPkg.GetFunc("function").Create
 				}
 				obj = newSharpQuote(List{obj})
-				start--
-				r.stack[start] = nil
-				r.stack = r.stack[:start+1]
+				last--
+				r.stack[last] = nil
+				r.stack = r.stack[:last+1]
 			case backquoteMarker:
 				if newBackquote == nil {
 					newBackquote = CLPkg.GetFunc("backquote").Create
 				}
 				obj = newBackquote(List{obj})
-				start--
-				r.stack[start] = nil
-				r.stack = r.stack[:start+1]
+				last--
+				r.stack[last] = nil
+				r.stack = r.stack[:last+1]
 			case commaMarker:
 				if newComma == nil {
 					newComma = CLPkg.GetFunc("comma").Create
 				}
 				obj = newComma(List{obj})
-				start--
-				r.stack[start] = nil
-				r.stack = r.stack[:start+1]
+				last--
+				r.stack[last] = nil
+				r.stack = r.stack[:last+1]
 			case commaAtMarker:
 				if newCommaAt == nil {
 					newCommaAt = CLPkg.GetFunc("comma-at").Create
 				}
 				obj = newCommaAt(List{obj})
-				start--
-				r.stack[start] = nil
-				r.stack = r.stack[:start+1]
+				last--
+				r.stack[last] = nil
+				r.stack = r.stack[:last+1]
 			}
 		}
 	}
-	if 0 < start {
-		r.stack[start] = obj
+	if 0 < last {
+		r.stack[last] = obj
 		r.starts = r.starts[:len(r.starts)-1]
 	} else {
 		r.stack = r.stack[:0]
