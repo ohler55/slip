@@ -626,8 +626,8 @@ func (r *reader) read(src []byte) {
 				Prov{
 					Filepath:    r.filepath,
 					FirstLine:   uint32(r.line),
-					FirstColumn: uint32(r.pos - r.lineStart),
-					LastColumn:  uint32(len(r.stack)),
+					FirstColumn: uint16(r.pos - r.lineStart),
+					Count:       uint32(len(r.stack)),
 				})
 			r.stack = append(r.stack, nil)
 		case closeParen:
@@ -718,7 +718,7 @@ func (r *reader) read(src []byte) {
 			goto Retry
 
 		case vectorByte:
-			r.starts = append(r.starts, Prov{LastColumn: uint32(len(r.stack))})
+			r.starts = append(r.starts, Prov{Count: uint32(len(r.stack))})
 			r.stack = append(r.stack, vectorMarker)
 			r.mode = valueMode
 
@@ -750,12 +750,12 @@ func (r *reader) read(src []byte) {
 			r.base = r.sharpNum
 
 		case sharpComplex:
-			r.starts = append(r.starts, Prov{LastColumn: uint32(len(r.stack))})
+			r.starts = append(r.starts, Prov{Count: uint32(len(r.stack))})
 			r.stack = append(r.stack, complexMarker)
 			r.mode = mustArrayMode
 
 		case arrayByte:
-			r.starts = append(r.starts, Prov{LastColumn: uint32(len(r.stack))})
+			r.starts = append(r.starts, Prov{Count: uint32(len(r.stack))})
 			switch r.sharpNum {
 			case 0:
 				r.stack = append(r.stack, &Array{elementType: TrueSymbol})
@@ -887,10 +887,10 @@ func (r *reader) closeList() {
 		r.raise("unmatched close parenthesis")
 	}
 	start := r.starts[len(r.starts)-1]
-	last := start.LastColumn
-	size := len(r.stack) - int(start.LastColumn) - 1
+	last := start.Count
+	size := len(r.stack) - int(start.Count) - 1
 	list := make(List, size)
-	copy(list, r.stack[start.LastColumn+1:])
+	copy(list, r.stack[start.Count+1:])
 	r.stack = r.stack[:last+1]
 	var obj Object
 	switch to := r.stack[last].(type) {
@@ -914,7 +914,7 @@ func (r *reader) closeList() {
 			obj = list
 		}
 		start.LastLine = uint32(r.line)
-		start.LastColumn = uint32(r.pos - r.lineStart)
+		start.LastColumn = uint16(r.pos - r.lineStart)
 		// fmt.Printf("*** %s %s\n", list, pretty.SEN(start))
 		// TBD add to list set/map
 		if 0 < last {

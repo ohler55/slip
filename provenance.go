@@ -8,6 +8,7 @@ type Prov struct {
 	Filepath    string
 	FirstLine   uint32
 	LastLine    uint32
-	FirstColumn uint32
-	LastColumn  uint32 // doubles as the index in the code reader starts slice
+	FirstColumn uint16
+	LastColumn  uint16
+	Count       uint32 // doubles as the index in the code reader starts slice
 }
