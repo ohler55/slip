@@ -31,6 +31,15 @@
  - use for coverage
 
  - plan
+  - build list ptr map in code reader
+   - ProvSet []provEntry
+    - provEntry
+     - key uint64
+     - value *Prov
+    - always append then when read to compile, sort by key
+    -
+
+
   - add declaim macro and grab in reader
    - or maybe just setq on some special variable
    - or maybe a special comment ;#! or something
