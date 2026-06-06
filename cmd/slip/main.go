@@ -206,7 +206,8 @@ func run() {
 	if allAtOnce {
 		var paths slip.List
 		for _, path = range flag.Args() {
-			// TBD add (declaim optimize (filepath <full-path>)) to buf
+			// TBD add #$ path
+			//  calc full path first
 			if buf, err := os.ReadFile(path); err == nil {
 				path = filepath.Join(slip.WorkingDir, path)
 				if w != nil {

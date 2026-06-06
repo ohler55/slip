@@ -366,6 +366,7 @@ type reader struct {
 	starts     []Prov
 	carry      []byte // carry over from previous stream read
 	buf        []byte
+	listProvs  ProvSet
 	line       int
 	lineStart  int
 	pos        int
@@ -915,8 +916,12 @@ func (r *reader) closeList() {
 		}
 		start.LastLine = uint32(r.line)
 		start.LastColumn = uint16(r.pos - r.lineStart)
-		// fmt.Printf("*** %s %s\n", list, pretty.SEN(start))
-		// TBD add to list set/map
+		// fmt.Printf("*** adding prov %s\n", pretty.SEN(&start))
+		if Provenance {
+			p := start
+			r.listProvs = r.listProvs.Add(list, &p)
+		}
+		// fmt.Printf("*** listProvs: %s\n", pretty.SEN(r.listProvs))
 		if 0 < last {
 			switch r.stack[last-1] {
 			case quoteMarker:

@@ -7,7 +7,12 @@ import (
 	"sort"
 )
 
-// Prov repreesnts function provenance which include the filepath and location
+var (
+	Provenance = true
+	Coverage   = false
+)
+
+// Prov represents function provenance which include the filepath and location
 // in the file of a function.
 type Prov struct {
 	Filepath    string

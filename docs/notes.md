@@ -33,6 +33,9 @@
  - plan
   - use ProvSet in code reader
    - print at end to inspect
+   - need to add to Code to get to compile
+   - maybe as first element in code, skip on eval and compile
+
   - pass ProvSet to ListToFunc and CompileList
 
   - special comment ;#! or something to change name in all-at-once
