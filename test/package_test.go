@@ -124,6 +124,10 @@ func TestPackageKeyword(t *testing.T) {
 	tt.NotNil(t, kp)
 	tt.Panic(t, func() { kp.Set("", slip.True) })
 	tt.Panic(t, func() { kp.Set(":yes", slip.True) })
+	vv := kp.Set("quux", slip.Symbol(":quux"))
+	tt.Equal(t, slip.Symbol(":quux"), vv.Val)
+	vv = kp.Set("quux", slip.Symbol(":quux"))
+	tt.Equal(t, slip.Symbol(":quux"), vv.Val)
 }
 
 func TestPackageFind(t *testing.T) {

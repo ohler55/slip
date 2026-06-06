@@ -30,13 +30,16 @@ type provEntry struct {
 // the set and 3 times faster for lookups.
 type ProvSet []provEntry
 
-// Add add a Prov for a list without attempting to sort nor to check for
+// Add a Prov for a list without attempting to sort nor to check for
 // duplicates.
 func (ps ProvSet) Add(list List, value *Prov) ProvSet {
-	if 0 < len(list) {
-		ps = append(ps, provEntry{key: uint64(reflect.ValueOf(list).Pointer()), value: value})
-	}
-	return ps
+	return append(ps, provEntry{key: uint64(reflect.ValueOf(list).Pointer()), value: value})
+}
+
+// AddByKey adds a Prov without attempting to sort nor to check for
+// duplicates.
+func (ps ProvSet) AddByKey(key uint64, value *Prov) ProvSet {
+	return append(ps, provEntry{key: key, value: value})
 }
 
 // Sort the slice. Must be called before Get().
@@ -45,52 +48,12 @@ func (ps ProvSet) Sort() {
 }
 
 // Get a Prov at the provided list address. If none exists nil is returned.
-func (ps ProvSet) Get(list List) *Prov {
-	if 0 < len(list) && 0 < len(ps) {
-		key := uint64(reflect.ValueOf(list).Pointer())
-		lo := 0
-		lok := ps[lo].key
-		if lok == key {
-			return ps[lo].value
-		}
-		if key < lok {
-			return nil
-		}
-		hi := len(ps) - 1
-		hik := ps[hi].key
-		if hik == key {
-			return ps[hi].value
-		}
-		if hik < key {
-			return nil
-		}
-		for lo < hi {
-			i := lo + int((float64(hi-lo)*float64(key-lok))/float64(hik-lok))
-			if i == lo {
-				i++
-				if hi == i {
-					break
-				}
-			}
-			k := ps[i].key
-			if key < k {
-				hi = i
-				hik = k
-				continue
-			}
-			if k < key {
-				lo = i
-				lok = k
-				continue
-			}
-			return ps[i].value
-		}
-	}
-	return nil
+func (ps ProvSet) Get(list List) (p *Prov) {
+	return ps.GetByKey(uint64(reflect.ValueOf(list).Pointer()))
 }
 
-// Get a Prov at the provided index. If none exists nil is returned.
-func (ps ProvSet) Getx(key uint64) *Prov {
+// GetByKey a Prov at the provided key. If none exists nil is returned.
+func (ps ProvSet) GetByKey(key uint64) *Prov {
 	if len(ps) == 0 {
 		return nil
 	}

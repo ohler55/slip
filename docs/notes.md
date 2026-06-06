@@ -31,18 +31,16 @@
  - use for coverage
 
  - plan
-  - build list ptr map in code reader
-   - ProvSet []provEntry
-    - provEntry
-     - key uint64
-     - value *Prov
-    - always append then when read to compile, sort by key
-    -
+  - use ProvSet in code reader
+   - print at end to inspect
+  - pass ProvSet to ListToFunc and CompileList
 
+  - special comment ;#! or something to change name in all-at-once
+    - support \n#+  ??
+     - like #+slip followed by an expression
+     - not easy to do
+     - >>> emacs uses #$ filepath (https://www.gnu.org/software/emacs/manual/html_node/elisp/Docs-and-Compilation.html)
 
-  - add declaim macro and grab in reader
-   - or maybe just setq on some special variable
-   - or maybe a special comment ;#! or something
   - provenance.go
    - add to code.reader
     - just print at first

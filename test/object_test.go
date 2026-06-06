@@ -1034,6 +1034,18 @@ _nil_ if _arg_ is _nil_ or an empty _list_."
        ...)`, slip.ObjectString(form))
 }
 
+func TestFuncInfoOtherForms(t *testing.T) {
+	form := slip.MustFindFunc("setq").LoadForm()
+	tt.Equal(t, `(defmacro setq (symbol value)
+          "__setq__ the value of the _symbol_ to _value_. Note that _symbol_ is not evaluated.
+Repeated pairs of _symbol_ and _value_ are supported."
+          ...)`, slip.ObjectString(form))
+
+	form = slip.MustFindFunc("slot-missing").LoadForm()
+	tt.Equal(t, `(defgeneric slot-missing (class object slot-name operation &optional new-value)
+            (:documentation "__slot-missing__ default method raises a cell-error."))`, slip.ObjectString(form))
+}
+
 func TestFuncInfoDescribeBasic(t *testing.T) {
 	fi := slip.MustFindFunc("car")
 	out := fi.Describe([]byte{}, 0, 80, false)
