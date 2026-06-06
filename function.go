@@ -43,6 +43,9 @@ type Function struct {
 	SkipEval []bool
 
 	Pkg *Package
+
+	// Prov is set if Provenance (in provenance.go) is true. TBD make private?
+	prov *Prov
 }
 
 // Define a new golang function. If the package is provided the function is
@@ -275,6 +278,11 @@ func (f *Function) LoadForm() Object {
 		}
 	}
 	return form
+}
+
+// Provenance return the provenance for the function.
+func (f *Function) Provenance() *Prov {
+	return f.prov
 }
 
 // ListToFunc converts a list to a function.

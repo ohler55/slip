@@ -5,22 +5,22 @@ package slip
 import (
 	"reflect"
 	"sort"
+
+	"github.com/ohler55/ojg/pretty"
 )
 
-var (
-	Provenance = true
-	Coverage   = false
-)
+var Provenance = true
 
 // Prov represents function provenance which include the filepath and location
 // in the file of a function.
 type Prov struct {
 	Filepath    string
 	FirstLine   uint32
-	LastLine    uint32
+	LastLine    uint32 // doubles as the index in the code reader starts slice
 	FirstColumn uint16
 	LastColumn  uint16
-	Count       uint32 // doubles as the index in the code reader starts slice
+	// Use atomic.AddUint32 to change and atomic.LoadUint32 to get value.
+	count uint32
 }
 
 type provEntry struct {
@@ -107,9 +107,26 @@ func (ps ProvSet) Simplify() any {
 	simple := make([]any, len(ps))
 	for i, e := range ps {
 		simple[i] = map[string]any{
-			"key":   e.key,
-			"value": e.value,
+			"key": e.key,
+			"value": map[string]any{
+				"filepath":    e.value.Filepath,
+				"firstLine":   int64(e.value.FirstLine),
+				"lastLine":    int64(e.value.LastLine),
+				"firstColumn": int64(e.value.FirstColumn),
+				"lastColumn":  int64(e.value.LastColumn),
+				"count":       e.value.count,
+			},
 		}
 	}
 	return simple
+}
+
+// String returns a string representation of the instance.
+func (ps ProvSet) String() string {
+	return string(ps.Append(nil))
+}
+
+// Append encodes the instance into a []byte.
+func (ps ProvSet) Append(b []byte) []byte {
+	return append(b, pretty.SEN(ps.Simplify())...)
 }

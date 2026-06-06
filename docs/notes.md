@@ -31,27 +31,15 @@
  - use for coverage
 
  - plan
-  - use ProvSet in code reader
-   - print at end to inspect
-   - need to add to Code to get to compile
-   - maybe as first element in code, skip on eval and compile
+  - add Provenance() to funky
+  - add listProvs to ListToFunc, CompileList, and CompileArg
+  - add global collection (a slice) for funcs if Provenance
+   - used for coverage just to walk
+    - sort by file, firstLine, firstColumn before generating coverage file
 
-  - pass ProvSet to ListToFunc and CompileList
-
-  - special comment ;#! or something to change name in all-at-once
-    - support \n#+  ??
-     - like #+slip followed by an expression
-     - not easy to do
-     - >>> emacs uses #$ filepath (https://www.gnu.org/software/emacs/manual/html_node/elisp/Docs-and-Compilation.html)
+   - trace just used data on function itself
 
   - provenance.go
-   - add to code.reader
-    - just print at first
-   - flag for provenance on/off
-    - SetProvenance(on bool)
-    - just store original file contents (is that even needed?)
-     - if separate prov info then also add to map
-     - if in func then nothing else to do
    - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
     - for non-file loaded skip that part (just use a few spaces for indent)
     - maybe just filepath base without .lisp then firstLine and firstColumn

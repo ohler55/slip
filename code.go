@@ -428,16 +428,17 @@ func Read(src []byte, s *Scope) (code Code) {
 
 // ReadProv Lisp source code and return a Code instance. The filepath argument
 // is used for provenance information.
-func ReadProv(src []byte, s *Scope, filepath string) (code Code) {
+func ReadProv(src []byte, s *Scope, filepath string, listProvs ProvSet) (code Code, ps ProvSet) {
 	cr := reader{
-		mode:     valueMode,
-		nextMode: valueMode,
-		filepath: filepath,
+		mode:      valueMode,
+		nextMode:  valueMode,
+		filepath:  filepath,
+		listProvs: listProvs,
 	}
 	cr.scoped(s)
 	cr.read(src)
 
-	return cr.code
+	return cr.code, cr.listProvs
 }
 
 // ReadOne Lisp source code and return a Code instance.
@@ -628,7 +629,7 @@ func (r *reader) read(src []byte) {
 					Filepath:    r.filepath,
 					FirstLine:   uint32(r.line),
 					FirstColumn: uint16(r.pos - r.lineStart),
-					Count:       uint32(len(r.stack)),
+					LastLine:    uint32(len(r.stack)),
 				})
 			r.stack = append(r.stack, nil)
 		case closeParen:
@@ -719,7 +720,7 @@ func (r *reader) read(src []byte) {
 			goto Retry
 
 		case vectorByte:
-			r.starts = append(r.starts, Prov{Count: uint32(len(r.stack))})
+			r.starts = append(r.starts, Prov{LastLine: uint32(len(r.stack))})
 			r.stack = append(r.stack, vectorMarker)
 			r.mode = valueMode
 
@@ -751,12 +752,12 @@ func (r *reader) read(src []byte) {
 			r.base = r.sharpNum
 
 		case sharpComplex:
-			r.starts = append(r.starts, Prov{Count: uint32(len(r.stack))})
+			r.starts = append(r.starts, Prov{LastLine: uint32(len(r.stack))})
 			r.stack = append(r.stack, complexMarker)
 			r.mode = mustArrayMode
 
 		case arrayByte:
-			r.starts = append(r.starts, Prov{Count: uint32(len(r.stack))})
+			r.starts = append(r.starts, Prov{LastLine: uint32(len(r.stack))})
 			switch r.sharpNum {
 			case 0:
 				r.stack = append(r.stack, &Array{elementType: TrueSymbol})
@@ -888,10 +889,10 @@ func (r *reader) closeList() {
 		r.raise("unmatched close parenthesis")
 	}
 	start := r.starts[len(r.starts)-1]
-	last := start.Count
-	size := len(r.stack) - int(start.Count) - 1
+	last := start.LastLine
+	size := len(r.stack) - int(start.LastLine) - 1
 	list := make(List, size)
-	copy(list, r.stack[start.Count+1:])
+	copy(list, r.stack[start.LastLine+1:])
 	r.stack = r.stack[:last+1]
 	var obj Object
 	switch to := r.stack[last].(type) {
@@ -921,7 +922,6 @@ func (r *reader) closeList() {
 			p := start
 			r.listProvs = r.listProvs.Add(list, &p)
 		}
-		// fmt.Printf("*** listProvs: %s\n", pretty.SEN(r.listProvs))
 		if 0 < last {
 			switch r.stack[last-1] {
 			case quoteMarker:
@@ -1264,6 +1264,15 @@ func (c Code) String() string {
 // Compile all the code elements. This evaluates all the defun, defvar, and
 // defmacro calls and converts unquoted lists to functions.
 func (c Code) Compile() {
+	c.CompileWithProvenance(nil)
+}
+
+// CompileWithProvenance all the code elements. This evaluates all the defun,
+// defvar, and defmacro calls and converts unquoted lists to functions.
+func (c Code) CompileWithProvenance(listProvs ProvSet) {
+
+	// TBD if Provenance and listProvs is not empty then create collection of functions and add to it when compiled
+
 	scope := NewScope()
 	for i, obj := range c {
 		list, ok := obj.(List)

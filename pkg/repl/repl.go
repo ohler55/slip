@@ -126,7 +126,8 @@ func SetConfigDir(dir string) {
 			fmt.Printf("Loading %q.\n", cfgPath)
 		}
 		pathname := slip.String(filepath.Join(slip.WorkingDir, cfgPath))
-		code := slip.ReadProv(buf, &scope, string(pathname))
+		code, listProvs := slip.ReadProv(buf, &scope, string(pathname), nil)
+		fmt.Printf("**** %s\n", listProvs)
 		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
 		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
 		code.Compile()
@@ -147,7 +148,8 @@ func SetConfigDir(dir string) {
 		if Trace {
 			fmt.Printf("Loading %q.\n", pathname)
 		}
-		code := slip.ReadProv(buf, &scope, string(pathname))
+		code, listProvs := slip.ReadProv(buf, &scope, string(pathname), nil)
+		fmt.Printf("**** %s\n", listProvs)
 		code.Compile()
 		code.Eval(&scope, nil) // TBD look at load-verbose and load-print
 	}

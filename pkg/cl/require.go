@@ -136,7 +136,8 @@ func loadLispFile(s *slip.Scope, path string, depth int) {
 	}()
 	s.Set(slip.Symbol("*load-pathname*"), slip.String(path))
 	s.Set(slip.Symbol("*load-truename*"), slip.String(path))
-	code := slip.ReadProv(buf, s, path)
+	code, listProvs := slip.ReadProv(buf, s, path, nil)
+	fmt.Printf("**** %s\n", listProvs)
 	code.Compile()
 	code.Eval(s, nil)
 }

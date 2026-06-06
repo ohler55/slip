@@ -25,4 +25,7 @@ type Funky interface {
 
 	// GetPkg returns the package the function was defined in.
 	GetPkg() *Package
+
+	// Provenance return the provenance for the function.
+	Provenance() *Prov
 }
