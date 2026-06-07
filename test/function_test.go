@@ -220,7 +220,7 @@ func TestGetArgsKeyValue(t *testing.T) {
 }
 
 func TestCompileList(t *testing.T) {
-	f := slip.CompileList(slip.List{slip.Symbol("no-fun")})
+	f := slip.CompileList(slip.List{slip.Symbol("no-fun")}, nil)
 	tt.Equal(t, []slip.Symbol{slip.FunctionSymbol, slip.TrueSymbol}, f.Hierarchy())
 
 	tt.Equal(t, "(no-fun)", slip.ObjectString(f))
@@ -229,11 +229,11 @@ func TestCompileList(t *testing.T) {
 }
 
 func TestCompileListPackage(t *testing.T) {
-	f := slip.CompileList(slip.List{slip.Symbol("cl:null"), nil})
+	f := slip.CompileList(slip.List{slip.Symbol("cl:null"), nil}, nil)
 	tt.Equal(t, "(null nil)", slip.ObjectString(f))
 
-	tt.Panic(t, func() { _ = slip.CompileList(slip.List{slip.Symbol("cl:quux"), nil}) })
+	tt.Panic(t, func() { _ = slip.CompileList(slip.List{slip.Symbol("cl:quux"), nil}, nil) })
 
-	f = slip.CompileList(slip.List{slip.Symbol("user:quux"), nil})
+	f = slip.CompileList(slip.List{slip.Symbol("user:quux"), nil}, nil)
 	tt.Equal(t, "(quux nil)", slip.ObjectString(f))
 }

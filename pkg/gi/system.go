@@ -274,7 +274,7 @@ func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, depth int) (re
 	case nil:
 		// nothing to do
 	case slip.List:
-		result = slip.CompileList(to).Eval(scope, 0)
+		result = slip.CompileList(to, nil).Eval(scope, 0)
 	default:
 		result = to.Eval(scope, 0)
 	}
@@ -422,7 +422,7 @@ func fetchCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List
 	case slip.List:
 		scope := self.NewScope()
 		scope.Set("cache-dir", slip.String(dir))
-		_ = slip.CompileList(ta).Eval(scope, 0)
+		_ = slip.CompileList(ta, nil).Eval(scope, 0)
 	default:
 		slip.TypePanic(s, depth, "fetch-function", args, "list")
 	}
@@ -495,7 +495,7 @@ func loadCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List,
 	case slip.List:
 		scope := self.NewScope()
 		scope.Set("cache-dir", slip.String(dir))
-		_ = slip.CompileList(ta).Eval(scope, 0)
+		_ = slip.CompileList(ta, nil).Eval(scope, 0)
 	default:
 		slip.TypePanic(s, depth, "load-function", args, "list")
 	}

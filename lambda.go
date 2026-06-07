@@ -291,7 +291,7 @@ func (lam *Lambda) Compile(s *Scope, extraVars ...string) {
 			}
 			lam.Forms[i] = vv
 		case List:
-			lam.Forms[i] = CompileList(tf)
+			lam.Forms[i] = CompileList(tf, nil) // TBD can we get listProvs from somewhere?
 		}
 	}
 }

@@ -1270,9 +1270,7 @@ func (c Code) Compile() {
 // CompileWithProvenance all the code elements. This evaluates all the defun,
 // defvar, and defmacro calls and converts unquoted lists to functions.
 func (c Code) CompileWithProvenance(listProvs ProvSet) {
-
-	// TBD if Provenance and listProvs is not empty then create collection of functions and add to it when compiled
-
+	listProvs.Sort()
 	scope := NewScope()
 	for i, obj := range c {
 		list, ok := obj.(List)
@@ -1298,7 +1296,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		var f Object
 		switch strings.ToLower(string(sym)) {
 		case "defun", "defmacro", "defvar", "defparameter", "defconstant":
-			f = ListToFunc(scope, list, 0)
+			f = ListToFuncWithProvenance(scope, list, 0, listProvs)
 			c[i] = f
 		}
 		if f != nil {
@@ -1315,7 +1313,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		if !ok || len(list) == 0 {
 			continue
 		}
-		c[i] = CompileList(list)
+		c[i] = CompileList(list, listProvs) // TBD pass in listProvs
 	}
 }
 

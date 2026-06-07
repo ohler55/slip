@@ -143,8 +143,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		}
 	}
 	code, listProvs := slip.ReadProv(buf, s, path, nil)
-	fmt.Printf("**** %s\n", listProvs)
-	code.Compile()
+	code.CompileWithProvenance(listProvs)
 	if print == nil {
 		code.Eval(s, nil)
 	} else {
