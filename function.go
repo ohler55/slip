@@ -4,6 +4,7 @@ package slip
 
 import (
 	"strings"
+	"sync/atomic"
 )
 
 const (
@@ -150,6 +151,11 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 			v = vs[0]
 		}
 		args[i] = v
+	}
+	if coverage {
+		if p := f.Provenance(); p != nil {
+			_ = atomic.AddUint32(&p.count, 1)
+		}
 	}
 	result = f.Self.Call(s, args, depth)
 

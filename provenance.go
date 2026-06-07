@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/ojg/pretty"
 )
 
-var Provenance = true
+var Provenance = false
 
 // Prov represents function provenance which include the filepath and location
 // in the file of a function.

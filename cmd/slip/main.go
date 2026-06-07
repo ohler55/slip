@@ -33,6 +33,7 @@ var (
 	allAtOnce   bool
 	args        slip.List
 	emacsMode   string
+	coverage    string
 )
 
 func init() {
@@ -50,6 +51,8 @@ func init() {
 			return nil
 		})
 	flag.StringVar(&emacsMode, "emacs", "", "start Emacs integration server (slime|swank)")
+	flag.BoolVar(&slip.Provenance, "p", false, "turn on provenance tracking")
+	flag.StringVar(&coverage, "cover", "", "save coverage to provided file")
 }
 
 func main() {
@@ -101,8 +104,14 @@ usage: %[2]s [<options>] [<filepath>]...
 	if emacsMode != "" {
 		startEmacsServer()
 	}
-
+	if 0 < len(coverage) {
+		slip.StartCoverage()
+	}
 	run()
+	if 0 < len(coverage) {
+		slip.StopCoverage()
+		slip.WriteCoverage(coverage)
+	}
 }
 
 // startEmacsServer starts the appropriate Emacs integration server.
@@ -206,7 +215,6 @@ func run() {
 	var listProvs slip.ProvSet
 	if allAtOnce {
 		var paths slip.List
-
 		for _, path = range flag.Args() {
 			if buf, err := os.ReadFile(path); err == nil {
 				path = filepath.Join(slip.WorkingDir, path)

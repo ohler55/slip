@@ -31,14 +31,24 @@
  - use for coverage
 
  - plan
-  - add Provenance() to funky
   - add listProvs to ListToFunc, CompileList, and CompileArg
   - add global collection (a slice) for funcs if Provenance
    - used for coverage just to walk
     - sort by file, firstLine, firstColumn before generating coverage file
-
    - trace just used data on function itself
-
+  - coverage
+   - lisp app for processing and coverage
+   - add file checksum function to support lisp coverage
+   - functions for terminal support?
+    - add term or termio package using some stuff from the repl
+     - with-raw-terminal (term)
+      - recover and go back to original
+      - can it be run from repl? maybe not
+      - color
+      - move
+      - clear
+      - etc
+   - or coverage viewing as part of repl?
   - provenance.go
    - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
     - for non-file loaded skip that part (just use a few spaces for indent)
