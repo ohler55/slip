@@ -45,7 +45,6 @@ type Function struct {
 
 	Pkg *Package
 
-	// Prov is set if Provenance (in provenance.go) is true. TBD make private?
 	prov *Prov
 }
 
@@ -291,6 +290,11 @@ func (f *Function) Provenance() *Prov {
 	return f.prov
 }
 
+// SetProvenance sets the provenance for the function.
+func (f *Function) SetProvenance(p *Prov) {
+	f.prov = p
+}
+
 // ListToFunc converts a list to a function.
 func ListToFunc(s *Scope, list List, depth int) Object {
 	return ListToFuncWithProvenance(s, list, depth, nil)
@@ -301,9 +305,15 @@ func ListToFuncWithProvenance(s *Scope, list List, depth int, listProvs ProvSet)
 	if len(list) == 0 {
 		return nil
 	}
+	var prov *Prov
+	if Provenance {
+		prov = listProvs.Get(list)
+	}
 	switch ta := list[0].(type) {
 	case Symbol:
-		return NewFunc(string(ta), list[1:]) // TBD lookup and add prov
+		f := NewFunc(string(ta), list[1:])
+		f.SetProvenance(prov)
+		return f
 	case List:
 		if 1 < len(ta) {
 			if sym, ok := ta[0].(Symbol); ok {
@@ -314,7 +324,7 @@ func ListToFuncWithProvenance(s *Scope, list List, depth int, listProvs ProvSet)
 						Function: Function{
 							Self: lc,
 							Args: list[1:],
-							// TBD add prov
+							prov: prov,
 						},
 					}
 				}
@@ -357,10 +367,20 @@ func (f *Function) Caller() Caller {
 // CompileList a list into a function or an undefined function.
 func CompileList(list List, listProvs ProvSet) (f Object) {
 	if 0 < len(list) {
+		var prov *Prov
+		if Provenance {
+			prov = listProvs.Get(list)
+		}
 		switch ta := list[0].(type) {
 		case Symbol:
 			if fi := FindFunc(string(ta)); fi != nil {
-				f = fi.Create(list[1:]) // TBD add prov
+				f = fi.Create(list[1:])
+				if funky, ok := f.(Funky); ok {
+					funky.SetProvenance(prov)
+					if coverage {
+						coverageFuncs = append(coverageFuncs, funky)
+					}
+				}
 			} else {
 				pkg, name, private := UnpackName(string(ta))
 				if pkg == nil {
@@ -382,6 +402,7 @@ func CompileList(list List, listProvs ProvSet) (f Object) {
 							Name: name,
 							Self: &lc,
 							Args: args,
+							prov: prov,
 						},
 					}
 				}
@@ -389,7 +410,12 @@ func CompileList(list List, listProvs ProvSet) (f Object) {
 				pkg.lambdas[name] = &lc
 				pkg.funcs[name] = &FuncInfo{Create: fc, Pkg: pkg, Export: !private}
 				pkg.mu.Unlock()
-				f = fc(list[1:]) // TBD add prov
+				f = fc(list[1:])
+				if coverage {
+					if funky, ok := f.(Funky); ok {
+						coverageFuncs = append(coverageFuncs, funky)
+					}
+				}
 			}
 			if funk, ok := f.(Funky); ok {
 				funk.CompileArgs(listProvs)
@@ -401,12 +427,17 @@ func CompileList(list List, listProvs ProvSet) (f Object) {
 						s := NewScope()
 						lambdaDef := ListToFuncWithProvenance(s, ta, 0, listProvs)
 						lc := s.Eval(lambdaDef, 0).(*Lambda)
-						return &Dynamic{
+						df := &Dynamic{
 							Function: Function{
 								Self: lc,
 								Args: list[1:],
+								prov: prov,
 							},
 						}
+						if coverage {
+							coverageFuncs = append(coverageFuncs, df)
+						}
+						return df
 					}
 				}
 			}

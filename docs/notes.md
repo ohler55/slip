@@ -31,12 +31,12 @@
  - use for coverage
 
  - plan
-  - add listProvs to ListToFunc, CompileList, and CompileArg
-  - add global collection (a slice) for funcs if Provenance
-   - used for coverage just to walk
-    - sort by file, firstLine, firstColumn before generating coverage file
-   - trace just used data on function itself
-  - coverage
+  - tests
+  - provenance.go
+   - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
+    - for non-file loaded skip that part (just use a few spaces for indent)
+    - maybe just filepath base without .lisp then firstLine and firstColumn
+  - coverage app
    - lisp app for processing and coverage
    - add file checksum function to support lisp coverage
    - functions for terminal support?
@@ -49,15 +49,6 @@
       - clear
       - etc
    - or coverage viewing as part of repl?
-  - provenance.go
-   - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
-    - for non-file loaded skip that part (just use a few spaces for indent)
-    - maybe just filepath base without .lisp then firstLine and firstColumn
-
-  - CompileList should lookup list ptr and set new func ptr or populate func prov
-   - pass in list ptr map/sorted-slice
-  - code.closeList add to map in prov info
-  - use (declaim (optimize (filepath foo.lisp)) to switch file in all-at-once loading in app
 
 ---------------------
 

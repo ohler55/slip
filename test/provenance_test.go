@@ -5,7 +5,6 @@ package test
 import (
 	"testing"
 
-	"github.com/ohler55/ojg/pretty"
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 )
@@ -135,5 +134,5 @@ func TestProvSetSimplify(t *testing.T) {
       lastLine: 2
     }
   }
-]`, pretty.SEN(ps))
+]`, ps.String())
 }

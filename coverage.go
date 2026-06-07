@@ -3,10 +3,13 @@
 package slip
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
+	"sort"
+	"sync/atomic"
 )
 
 var (
@@ -30,20 +33,56 @@ func StopCoverage() {
 
 // WriteCoverage writes a coverage file. The file is a Lisp file containing
 // one list. The list starts with a property list of filenames and file
-// checksums. Each file and shecksum pair is identified by number in the
-// provenance lists that follow. Each provenance element in the list contains
-// file-index, first-line, first-column, last-line, last-column, and the
-// number of times the function was called.
-// (("myfile.lisp" "12345") (0 1 1 2 3 4))
+// checksums. Each provenance element in the list contains filepath,
+// first-line, first-column, last-line, last-column, and the number of times
+// the function was called.  (("myfile.lisp" "12345") ("my-file" 1 1 2 3 4))
 func WriteCoverage(filepath string) {
 	var b []byte
 
-	b = append(b, '(', '(')
-	// TBD add files and checksum
-	b = append(b, ')')
-	// TBD add provs
-	b = append(b, ')', '\n')
+	provs := make([]*Prov, 0, len(coverageFuncs))
+	// If a function is on the list it should have a Prov but just to be sure
+	// use append.
+	for _, funky := range coverageFuncs {
+		if p := funky.Provenance(); p != nil {
+			provs = append(provs, p)
+		}
+	}
+	sort.Slice(provs, func(i, j int) bool {
+		pi := provs[i]
+		pj := provs[j]
+		if pi.Filepath < pj.Filepath {
+			return true
+		}
+		if pi.Filepath == pj.Filepath {
+			if pi.FirstLine < pj.FirstLine {
+				return true
+			}
+			if pi.FirstLine == pj.FirstLine {
+				return pi.FirstColumn < pj.FirstColumn
+			}
+		}
+		return false
+	})
 
+	b = append(b, '(', '(')
+	var fp string
+	for _, p := range provs {
+		if fp != p.Filepath {
+			fp = p.Filepath
+			b = fmt.Appendf(b, "%q %q\n  ", fp, FileChecksum(fp))
+		}
+	}
+	if bytes.HasSuffix(b, []byte("\n  ")) {
+		b = b[:len(b)-3]
+	}
+	b = append(b, ')')
+	for _, funky := range coverageFuncs {
+		if p := funky.Provenance(); p != nil {
+			b = fmt.Appendf(b, "\n (%q %d %d %d %d %d)",
+				p.Filepath, p.FirstLine, p.FirstColumn, p.LastLine, p.LastColumn, atomic.LoadUint32(&p.count))
+		}
+	}
+	b = append(b, ')', '\n')
 	if err := os.WriteFile(filepath, b, 0666); err != nil {
 		panic(fmt.Sprintf("Failed to write %s. %s", filepath, err))
 	}
