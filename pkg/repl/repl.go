@@ -127,11 +127,10 @@ func SetConfigDir(dir string) {
 		}
 		pathname := slip.String(filepath.Join(slip.WorkingDir, cfgPath))
 		code, listProvs := slip.ReadProv(buf, &scope, string(pathname), nil)
-		fmt.Printf("**** %s\n", listProvs)
 		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
 		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
-		code.Compile()
-		code.Eval(&scope, nil) // TBD consider at load-verbose and load-print
+		code.CompileWithProvenance(listProvs)
+		code.Eval(&scope, nil) // TBD consider load-verbose and load-print
 	} else {
 		if os.IsNotExist(err) {
 			if err = os.WriteFile(cfgPath, []byte(configHeader), 0666); err != nil {
@@ -149,8 +148,7 @@ func SetConfigDir(dir string) {
 			fmt.Printf("Loading %q.\n", pathname)
 		}
 		code, listProvs := slip.ReadProv(buf, &scope, string(pathname), nil)
-		fmt.Printf("**** %s\n", listProvs)
-		code.Compile()
+		code.CompileWithProvenance(listProvs)
 		code.Eval(&scope, nil) // TBD look at load-verbose and load-print
 	}
 	configFilename = cfgPath

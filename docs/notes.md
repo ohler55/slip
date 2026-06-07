@@ -31,11 +31,16 @@
  - use for coverage
 
  - plan
-  - tests
+  - coverage tests
   - provenance.go
    - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
     - for non-file loaded skip that part (just use a few spaces for indent)
     - maybe just filepath base without .lisp then firstLine and firstColumn
+    - options for tracing as globals?
+     - just provenance
+     - just functions (current)
+     - both
+    - in AppendFull
   - coverage app
    - lisp app for processing and coverage
    - add file checksum function to support lisp coverage
