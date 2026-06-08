@@ -49,6 +49,18 @@ func TestCoverageSimple(t *testing.T) {
 	tt.Equal(t, `/testdata\/cov-test.lisp" 1 1 2 11 1\)/`, string(cov))
 	tt.Equal(t, `/testdata\/cov-test.lisp" 2 4 2 10 1\)/`, string(cov))
 	tt.Equal(t, `/testdata\/cov-test2.lisp" 1 1 1 14 1\)/`, string(cov))
+
+	slip.ResetCoverage(false)
+	slip.WriteCoverage(covfile)
+	cov, err = os.ReadFile(covfile)
+	tt.Nil(t, err)
+	tt.Equal(t, `/testdata\/cov-test.lisp" 1 1 2 11 0\)/`, string(cov))
+
+	slip.ResetCoverage(true)
+	slip.WriteCoverage(covfile)
+	cov, err = os.ReadFile(covfile)
+	tt.Nil(t, err)
+	tt.Equal(t, "(())\n", string(cov))
 }
 
 func TestCoverageError(t *testing.T) {
