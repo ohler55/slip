@@ -125,10 +125,13 @@ func SetConfigDir(dir string) {
 		if Trace {
 			fmt.Printf("Loading %q.\n", cfgPath)
 		}
-		pathname := slip.String(filepath.Join(slip.WorkingDir, cfgPath))
-		code, listProvs := slip.ReadProv(buf, &scope, string(pathname), nil)
-		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
-		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
+		pathname := cfgPath
+		if cfgPath[0] != '/' {
+			pathname = filepath.Join(slip.WorkingDir, cfgPath)
+		}
+		code, listProvs := slip.ReadProv(buf, &scope, pathname, nil)
+		_ = slip.CurrentPackage.Set("*load-pathname*", slip.String(pathname))
+		_ = slip.CurrentPackage.Set("*load-truename*", slip.String(pathname))
 		code.CompileWithProvenance(listProvs)
 		code.Eval(&scope, nil) // TBD consider load-verbose and load-print
 	} else {
@@ -141,7 +144,10 @@ func SetConfigDir(dir string) {
 		}
 	}
 	if buf, err = os.ReadFile(customPath); err == nil {
-		pathname := slip.String(filepath.Join(slip.WorkingDir, customPath))
+		if customPath[0] != '/' {
+			customPath = filepath.Join(slip.WorkingDir, customPath)
+		}
+		pathname := slip.String(customPath)
 		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
 		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
 		if Trace {

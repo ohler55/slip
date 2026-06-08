@@ -276,6 +276,22 @@ func init() {
 				Export: true,
 				Doc:    "are the command line arguments.",
 			},
+			"*provenance*": {
+				Get:    getProvenance,
+				Set:    setProvenance,
+				Export: true,
+				Doc: `If *provenance* is true function provenance information is collected.
+Function provenance is used in stack trace output as we as in coverage reports. If used it
+should be set to true at before loading files.`,
+			},
+			"*coverage*": {
+				Get:    getCoverage,
+				Set:    setCoverage,
+				Export: true,
+				Doc: `If *coverage* is true counts of the number of calls to functions with
+provenance information are collected for use when a call to write-coverage is made. If used
+it should be set to true at before loading files.`,
+			},
 		})
 	for _, f := range []*flavors.Flavor{
 		defLogger(),
@@ -442,4 +458,30 @@ func getAppArgs() slip.Object {
 		args[i] = slip.String(str)
 	}
 	return args
+}
+
+func getProvenance() (state slip.Object) {
+	if slip.Provenance {
+		state = slip.True
+	}
+	return
+}
+
+func setProvenance(value slip.Object) {
+	slip.Provenance = value != nil
+}
+
+func getCoverage() (state slip.Object) {
+	if slip.Coverage() {
+		state = slip.True
+	}
+	return
+}
+
+func setCoverage(value slip.Object) {
+	if value == nil {
+		slip.StopCoverage()
+	} else {
+		slip.StartCoverage()
+	}
 }

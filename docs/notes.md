@@ -5,17 +5,37 @@
 ---------------------
 
 - add provenance
+ - documentation function should replace _ and __ as needed and wrap lines
+ - lisp functions
+  - reset-coverage (hard)
+  - write-coverage (filename &optional destination)
+   - nil should return string mostly for testing or for progress analysis
+ - test with defun
+ - what to do with repl defined functions?
+  - maybe keep counter of editor.evalForm() calls then REPL-<counter> as filename
+
 
  - use for stack trace
   - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
    - for non-file loaded skip that part (just use a few spaces for indent)
    - maybe just filepath base without .lisp then firstLine and firstColumn
-   - options for tracing as globals?
-    - just provenance
-    - just functions (current)
-    - both
+   - options for error stack as globals?
+    - *stack-trace-format*
+     - :provenance (default)
+      - provenance if available and function otherwise
+     - :provenance-long (full file path)
+     - :function
+     - :both
+     - :both-long
    - in AppendFull
+ -
+
  - coverage app
+  - start with writing colorized file(s)
+   - lisp code
+   - where to put the code?
+    - lisp dir in slip?
+  - later could be interactive
   - lisp app for processing and coverage
   - add file checksum function to support lisp coverage
   - functions for terminal support?

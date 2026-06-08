@@ -22,13 +22,30 @@ var (
 func StartCoverage() {
 	Provenance = true
 	coverage = true
-	// Just in case the function is called again the function info is reset.
-	coverageFuncs = coverageFuncs[:0]
 }
 
 // StopCoverage stops collecting coverage data. Existing data is not changed.
 func StopCoverage() {
 	coverage = false
+}
+
+// Coverage returns the current state of coverage.
+func Coverage() bool {
+	return coverage
+}
+
+// ResetCoverage resets all the function use counts to zero. If a hard reset
+// then the coverage function list is also zeroed out.
+func ResetCoverage(hard bool) {
+	if hard {
+		coverageFuncs = coverageFuncs[:0]
+	} else {
+		for _, f := range coverageFuncs {
+			if p := f.Provenance(); p != nil {
+				p.count = 0
+			}
+		}
+	}
 }
 
 // WriteCoverage writes a coverage file. The file is a Lisp file containing
