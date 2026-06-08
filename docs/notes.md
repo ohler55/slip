@@ -5,55 +5,29 @@
 ---------------------
 
 - add provenance
- - with flag to slip, slap, and slapper
-  - keep file content in memory by full path
-  - in code read keep track of file, line, and column for each function id (address)
-   - form map or sorted slice with key of pointer to lists
-   - a second map of func pointer and location info
-    - set in CompileList if provenance flag is true
- - how to handle multiple files packed into one
-  - maybe place a comment directive in front of file
-   - also works for compiling buffers
- - maybe change starts to be location info and stack index
-  - or maybe take address of first element - does that stay the same when list is formed?
-   - doesn't work for nested lists
-  - when list is formed add info to list map
- - which way, extend functions or separate map
-  - extend function
-   - more directly accessible
-   - always available
-   - simpler, maybe
-  - separate
-   - less memory if not in use
-   - can't turn it on midway through, has to be on start
 
  - use for stack trace
- - use for coverage
-
- - plan
-  - coverage tests
-  - provenance.go
-   - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
-    - for non-file loaded skip that part (just use a few spaces for indent)
-    - maybe just filepath base without .lisp then firstLine and firstColumn
-    - options for tracing as globals?
-     - just provenance
-     - just functions (current)
-     - both
-    - in AppendFull
-  - coverage app
-   - lisp app for processing and coverage
-   - add file checksum function to support lisp coverage
-   - functions for terminal support?
-    - add term or termio package using some stuff from the repl
-     - with-raw-terminal (term)
-      - recover and go back to original
-      - can it be run from repl? maybe not
-      - color
-      - move
-      - clear
-      - etc
-   - or coverage viewing as part of repl?
+  - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
+   - for non-file loaded skip that part (just use a few spaces for indent)
+   - maybe just filepath base without .lisp then firstLine and firstColumn
+   - options for tracing as globals?
+    - just provenance
+    - just functions (current)
+    - both
+   - in AppendFull
+ - coverage app
+  - lisp app for processing and coverage
+  - add file checksum function to support lisp coverage
+  - functions for terminal support?
+   - add term or termio package using some stuff from the repl
+    - with-raw-terminal (term)
+     - recover and go back to original
+     - can it be run from repl? maybe not
+     - color
+     - move
+     - clear
+     - etc
+  - or coverage viewing as part of repl?
 
 ---------------------
 
