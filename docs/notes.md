@@ -5,12 +5,12 @@
 ---------------------
 
 - add provenance
- - documentation function should replace _ and __ as needed and wrap lines
  - lisp functions
   - reset-coverage (hard)
-  - write-coverage (filename &optional destination)
-   - nil should return string mostly for testing or for progress analysis
+  - coverage-report (&optional destination)
+
  - test with defun
+ - test with defmethod
  - what to do with repl defined functions?
   - maybe keep counter of editor.evalForm() calls then REPL-<counter> as filename
 

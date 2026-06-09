@@ -48,14 +48,20 @@ func ResetCoverage(hard bool) {
 	}
 }
 
-// WriteCoverage writes a coverage file. The file is a Lisp file containing
-// one list. The list starts with a property list of filenames and file
-// checksums. Each provenance element in the list contains filepath,
+// WriteCoverage writes a coverage file with a coverage report generated from
+// CoverageReport.
+func WriteCoverage(filepath string) {
+	if err := os.WriteFile(filepath, CoverageReport(nil), 0666); err != nil {
+		panic(fmt.Sprintf("Failed to write %s. %s", filepath, err))
+	}
+}
+
+// CoverageReport builds a coverage report. The report is a Lisp file
+// containing one list. The list starts with a property list of filenames and
+// file checksums. Each provenance element in the list contains filepath,
 // first-line, first-column, last-line, last-column, and the number of times
 // the function was called.  (("myfile.lisp" "12345") ("my-file" 1 1 2 3 4))
-func WriteCoverage(filepath string) {
-	var b []byte
-
+func CoverageReport(b []byte) []byte {
 	provs := make([]*Prov, 0, len(coverageFuncs))
 	// If a function is on the list it should have a Prov but just to be sure
 	// use append.
@@ -99,10 +105,7 @@ func WriteCoverage(filepath string) {
 				p.Filepath, p.FirstLine, p.FirstColumn, p.LastLine, p.LastColumn, atomic.LoadUint32(&p.count))
 		}
 	}
-	b = append(b, ')', '\n')
-	if err := os.WriteFile(filepath, b, 0666); err != nil {
-		panic(fmt.Sprintf("Failed to write %s. %s", filepath, err))
-	}
+	return append(b, ')', '\n')
 }
 
 // FileChecksum calculates a checksum of a file and returns the checksum as a
