@@ -5,9 +5,6 @@
 ---------------------
 
 - add provenance
- - lisp functions
-  - reset-coverage (hard)
-  - coverage-report (&optional destination)
 
  - test with defun
  - test with defmethod
