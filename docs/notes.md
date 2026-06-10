@@ -7,8 +7,12 @@
 - add provenance
 
  - stack trace
+  - change trace to pass func in beforeEval and afterEval
+  - change panic stack to list of functions
+
   - *stack-trace-provenance* and *stack-trace-function* and *stack-trace-full-filenames*
    - if none set then default to provenance if *provenance* is true and function otherwise or no provedance found
+   - in cl package or gi or somewhere else, gi since not a cl variable, actual vars in panic.go
 
   - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
    - for non-file loaded skip that part (just use a few spaces for indent)
@@ -23,7 +27,7 @@
      - :both-long
     - or maybe *stack-trace-provenance* and *stack-trace-function* and *stack-trace-full-filenames*
      - if none set then default to provenance if *provenance* is true and function otherwise or no provedance found
-   - in AppendFull
+   - in panic AppendFull
  -
 
  - coverage app

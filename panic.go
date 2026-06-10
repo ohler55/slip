@@ -14,6 +14,26 @@ const (
 
 var errorHierarchy = []Symbol{ErrorSymbol, SeriousConditionSymbol, ConditionSymbol, TrueSymbol}
 
+var (
+	// StackTraceProvenance represents the *stack-trace-provenance* global
+	// variable that controls how stack traces are displayed or output as
+	// strings. If true provedance information of filename, line number, and
+	// column are displayed. If not prvenance information is available then
+	// then function display is used.
+	StackTraceProvenance bool
+
+	// StackTraceFunction represents the *stack-trace-function* global
+	// variable that controls how stack traces are displayed or output as
+	// strings. Displays then function that was called.
+	StackTraceFunction bool = true
+
+	// *stack-trace-full-filenames* StackTraceFullFilenames represents the
+	// *stack-trace-full-filenames* global variable that controls how stack
+	// traces are displayed or output as strings. If *stack-trace-provenance*
+	// is true then the full filename is displayed instead of just the base.
+	StackTraceFullFilenames bool
+)
+
 // Panic is used to gather a stack trace when panic occurs.
 type Panic struct {
 	Message   string
@@ -58,6 +78,19 @@ func (p *Panic) AppendFull(b []byte) []byte {
 			}
 		}
 	}
+	if StackTraceProvenance {
+		return p.appendProvStack(b)
+	}
+	for _, line := range p.stack {
+		b = append(b, "##  "...)
+		b = append(b, line...)
+		b = append(b, '\n')
+	}
+	return b
+}
+
+func (p *Panic) appendProvStack(b []byte) []byte {
+	// TBD use prov info on function in stack
 	for _, line := range p.stack {
 		b = append(b, "##  "...)
 		b = append(b, line...)
