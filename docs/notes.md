@@ -6,10 +6,9 @@
 
 - add provenance
 
- - test with defun
- - test with defmethod
  - what to do with repl defined functions?
   - maybe keep counter of editor.evalForm() calls then REPL-<counter> as filename
+
 
 
  - use for stack trace

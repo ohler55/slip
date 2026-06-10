@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"sort"
+	"strings"
 	"sync/atomic"
 )
 
@@ -92,7 +93,11 @@ func CoverageReport(b []byte) []byte {
 	for _, p := range provs {
 		if fp != p.Filepath {
 			fp = p.Filepath
-			b = fmt.Appendf(b, "%q %q\n  ", fp, FileChecksum(fp))
+			if strings.HasSuffix(fp, ".lisp") {
+				b = fmt.Appendf(b, "%q %q\n  ", fp, FileChecksum(fp))
+			} else {
+				b = fmt.Appendf(b, "%q nil\n  ", fp)
+			}
 		}
 	}
 	if bytes.HasSuffix(b, []byte("\n  ")) {

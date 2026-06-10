@@ -1295,7 +1295,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		}
 		var f Object
 		switch strings.ToLower(string(sym)) {
-		case "defun", "defmacro", "defvar", "defparameter", "defconstant":
+		case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct":
 			f = ListToFuncWithProvenance(scope, list, 0, listProvs)
 			c[i] = f
 		}

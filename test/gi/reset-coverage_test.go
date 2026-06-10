@@ -10,7 +10,7 @@ import (
 	"github.com/ohler55/slip/sliptest"
 )
 
-func TestResetCoverage(t *testing.T) {
+func TestResetCoverageFile(t *testing.T) {
 	defer func() {
 		slip.StopCoverage()
 	}()
