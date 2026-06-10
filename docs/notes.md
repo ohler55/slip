@@ -6,12 +6,10 @@
 
 - add provenance
 
- - what to do with repl defined functions?
-  - maybe keep counter of editor.evalForm() calls then REPL-<counter> as filename
+ - stack trace
+  - *stack-trace-provenance* and *stack-trace-function* and *stack-trace-full-filenames*
+   - if none set then default to provenance if *provenance* is true and function otherwise or no provedance found
 
-
-
- - use for stack trace
   - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
    - for non-file loaded skip that part (just use a few spaces for indent)
    - maybe just filepath base without .lisp then firstLine and firstColumn
@@ -23,6 +21,8 @@
      - :function
      - :both
      - :both-long
+    - or maybe *stack-trace-provenance* and *stack-trace-function* and *stack-trace-full-filenames*
+     - if none set then default to provenance if *provenance* is true and function otherwise or no provedance found
    - in AppendFull
  -
 
