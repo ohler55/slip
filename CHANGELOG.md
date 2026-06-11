@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `gi:getcwd` function.
 - Added `gi:chdir` function.
 - Added `net:available-port` function.
+- Added support for function provenance and coverage. This includes the global variables:
+  - `*provenance*` for turning on function provenance collecting
+  - `*coverage*` for collecting coverage data.
+  - `*stack-trace-provenance*`, `*stack-trace-function*`, and
+    `*stack-trace-full-filenames*` for controlling stack trace displays.
+- Added then slipr application. slipr is used with shebang (#!) to run
+  lisp code by adding `#!/usr/bin/env slipr` as the first line in a
+  .lisp file.
 
 ### Fixed
 - The CompileList function now correctly handles package prefixes.

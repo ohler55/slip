@@ -6,30 +6,13 @@
 
 - add provenance
 
- - stack trace
-  - change panic stack to list of functions
-
-  - *stack-trace-provenance* and *stack-trace-function* and *stack-trace-full-filenames*
-   - if none set then default to provenance if *provenance* is true and function otherwise or no provedance found
-   - in cl package or gi or somewhere else, gi since not a cl variable, actual vars in panic.go
-
-  - for tracing, maybe just add filename:line:col as a prefix and keep current the same otherwise
-   - for non-file loaded skip that part (just use a few spaces for indent)
-   - maybe just filepath base without .lisp then firstLine and firstColumn
-   - options for error stack as globals?
-    - *stack-trace-format*
-     - :provenance (default)
-      - provenance if available and function otherwise
-     - :provenance-long (full file path)
-     - :function
-     - :both
-     - :both-long
-    - or maybe *stack-trace-provenance* and *stack-trace-function* and *stack-trace-full-filenames*
-     - if none set then default to provenance if *provenance* is true and function otherwise or no provedance found
-   - in panic AppendFull
- -
+ - update slap and slapper to use provenance
 
  - coverage app
+  - in slip/lisp dir
+   - cover.lisp
+    - maybe create an slipper or slipr app to run
+    - or try to get it to work without that
   - start with writing colorized file(s)
    - lisp code
    - where to put the code?

@@ -309,7 +309,7 @@ func process() {
 			}
 			reset()
 		case *clos.StandardObject:
-			rec = slip.WrapError(&scope, tr, "", nil)
+			rec = slip.WrapError(&scope, tr, &slip.Function{Args: slip.List{tr}})
 			goto top
 		default:
 			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)

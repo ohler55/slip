@@ -626,13 +626,13 @@ func TestSimpleObject(t *testing.T) {
 		obj.String())
 
 	cond := slip.ErrorNew(scope, 0, "").(slip.Instance)
-	p := slip.WrapError(scope, cond, "sample", nil)
+	p := slip.WrapError(scope, cond, &slip.Function{Name: "sample"})
 	p.Value = slip.Fixnum(7)
 	obj = slip.SimpleObject(p)
 	tt.Equal(t, "7", obj.String())
 
 	cond = slip.ErrorNew(scope, 0, "sample").(slip.Instance)
-	p = slip.WrapError(scope, cond, "sample", nil)
+	p = slip.WrapError(scope, cond, &slip.Function{Name: "sample"})
 	obj = slip.SimpleObject(p)
 	tt.Equal(t, `/#<error [0-9a-f]+>/`, obj.String())
 }

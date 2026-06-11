@@ -292,6 +292,30 @@ should be set to true at before loading files.`,
 provenance information are collected for use when a call to write-coverage is made. If used
 it should be set to true at before loading files.`,
 			},
+			"*stack-trace-provenance*": {
+				Get:    getStackTraceProvenance,
+				Set:    setStackTraceProvenance,
+				Export: true,
+				Doc: `The global *stack-trace-provenance* controls how stack traces are
+displayed or output as strings. If true provenance information of filename, line number,
+and column are displayed. If not provenance information is available then the function
+display is used.`,
+			},
+			"*stack-trace-function*": {
+				Get:    getStackTraceFunction,
+				Set:    setStackTraceFunction,
+				Export: true,
+				Doc: `The global *stack-trace-function* controls how stack traces are
+displayed or output as strings. If true the functions called are displayed.`,
+			},
+			"*stack-trace-full-filenames*": {
+				Get:    getStackTraceFullFilenames,
+				Set:    setStackTraceFullFilenames,
+				Export: true,
+				Doc: `The global *stack-trace-full-filenames* controls how stack traces
+are displayed or output as strings. If *stack-trace-provenance* is true then the full
+filename is displayed instead of just the base.`,
+			},
 		})
 	for _, f := range []*flavors.Flavor{
 		defLogger(),
@@ -486,4 +510,37 @@ func setCoverage(value slip.Object) {
 	} else {
 		slip.StartCoverage()
 	}
+}
+
+func getStackTraceProvenance() (state slip.Object) {
+	if slip.StackTraceProvenance {
+		state = slip.True
+	}
+	return
+}
+
+func setStackTraceProvenance(value slip.Object) {
+	slip.StackTraceProvenance = value != nil
+}
+
+func getStackTraceFunction() (state slip.Object) {
+	if slip.StackTraceFunction {
+		state = slip.True
+	}
+	return
+}
+
+func setStackTraceFunction(value slip.Object) {
+	slip.StackTraceFunction = value != nil
+}
+
+func getStackTraceFullFilenames() (state slip.Object) {
+	if slip.StackTraceFullFilenames {
+		state = slip.True
+	}
+	return
+}
+
+func setStackTraceFullFilenames(value slip.Object) {
+	slip.StackTraceFullFilenames = value != nil
 }

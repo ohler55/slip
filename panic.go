@@ -3,6 +3,8 @@
 package slip
 
 import (
+	"fmt"
+	"path/filepath"
 	"strconv"
 	"unsafe"
 )
@@ -17,14 +19,14 @@ var errorHierarchy = []Symbol{ErrorSymbol, SeriousConditionSymbol, ConditionSymb
 var (
 	// StackTraceProvenance represents the *stack-trace-provenance* global
 	// variable that controls how stack traces are displayed or output as
-	// strings. If true provedance information of filename, line number, and
-	// column are displayed. If not prvenance information is available then
-	// then function display is used.
+	// strings. If true provenance information of filename, line number, and
+	// column are displayed. If not provenance information is available then
+	// the function display is used.
 	StackTraceProvenance bool
 
 	// StackTraceFunction represents the *stack-trace-function* global
 	// variable that controls how stack traces are displayed or output as
-	// strings. Displays then function that was called.
+	// strings. Displays the function that was called.
 	StackTraceFunction bool = true
 
 	// *stack-trace-full-filenames* StackTraceFullFilenames represents the
@@ -38,7 +40,7 @@ var (
 type Panic struct {
 	Message   string
 	Condition Instance
-	stack     []*Function
+	stack     []Funky
 	Value     Object // used when the panic function is called
 	Fatal     bool   // used in repl to indicate an exit should be made
 }
@@ -66,48 +68,48 @@ func (p *Panic) AppendFull(b []byte) []byte {
 	b = append(b, "## "...)
 	b = append(b, p.Message...)
 	b = append(b, '\n')
-	if StackTraceProvenance {
-		return p.appendProvStack(b)
-	}
+
+	stack := p.stack
 	if p.Condition != nil {
-		// TBD after check assume a function
 		if sv, has := p.Condition.SlotValue(stackSymbol); has {
-			if stack, ok := sv.(List); ok {
-				for _, line := range stack {
-					b = append(b, "##  "...)
-					b = append(b, ObjectString(line)...)
-					b = append(b, '\n')
+			stack = []Funky{}
+			list, _ := sv.(List)
+			for _, v := range list {
+				if fn, ok := v.(Funky); ok {
+					stack = append(stack, fn)
 				}
-				return b
 			}
 		}
 	}
-	for _, line := range p.stack {
-		b = append(b, "##  "...)
-		b = append(b, line.String()...)
-		b = append(b, '\n')
-	}
-	return b
+	return AppendStack(b, stack)
 }
 
-func (p *Panic) appendProvStack(b []byte) []byte {
-	// TBD use prov info on function in stack
-	if p.Condition != nil {
-		// TBD after check assume a function
-		if sv, has := p.Condition.SlotValue(stackSymbol); has {
-			if stack, ok := sv.(List); ok {
-				for _, line := range stack {
-					b = append(b, "##  "...)
-					b = append(b, ObjectString(line)...)
-					b = append(b, '\n')
-				}
-				return b
-			}
+// AppendStack appends a stack based on the settings of the stack trace
+// globals.
+func AppendStack(b []byte, stack []Funky) []byte {
+	if !StackTraceProvenance {
+		for _, fn := range stack {
+			b = append(b, "##  "...)
+			b = append(b, fn.String()...)
+			b = append(b, '\n')
 		}
+		return b
 	}
-	for _, line := range p.stack {
-		b = append(b, "##  "...)
-		b = append(b, line.String()...)
+	for _, fn := range stack {
+		b = append(b, "## "...)
+		prov := fn.Provenance()
+		if prov != nil {
+			if StackTraceFullFilenames {
+				b = append(b, prov.Filepath...)
+			} else {
+				b = append(b, filepath.Base(prov.Filepath)...)
+			}
+			b = fmt.Appendf(b, ":%d.%d", prov.FirstLine+1, prov.FirstColumn)
+		}
+		if prov == nil || StackTraceFunction {
+			b = append(b, ' ', ' ')
+			b = append(b, fn.String()...)
+		}
 		b = append(b, '\n')
 	}
 	return b
@@ -148,35 +150,33 @@ func (p *Panic) Error() string {
 
 // AppendToStack appends a function to the stack.
 func (p *Panic) AppendToStack(fn *Function) {
-	line := append(List{Symbol(fn.Name)}, fn.Args...)
 	p.stack = append(p.stack, fn)
 	if p.Condition != nil {
 		if sv, has := p.Condition.SlotValue(stackSymbol); has {
 			stack, _ := sv.(List)
-			p.Condition.SetSlotValue(stackSymbol, append(stack, line))
+			p.Condition.SetSlotValue(stackSymbol, append(stack, fn))
 		}
 	}
 }
 
 // Stack returns the call stack for the error.
-func (p *Panic) Stack() []*Function {
+func (p *Panic) Stack() []Funky {
 	return p.stack
 }
 
 // WrapError creates a Panic that wraps a Instance which is expected to be a
 // clos condition.
-func WrapError(s *Scope, obj Instance, name string, args List) *Panic {
-	fn := Function{Name: name, Args: args}
+func WrapError(s *Scope, obj Instance, fn *Function) *Panic {
 	p := Panic{Condition: obj}
 	var stack List
 	if sv, has := obj.SlotValue(stackSymbol); has {
 		stack, _ = sv.(List)
 	}
-	if 0 < len(name) {
-		p.stack = []*Function{&fn}
-		obj.SetSlotValue(stackSymbol, append(stack, &fn))
+	if 0 < len(fn.Name) {
+		p.stack = []Funky{fn}
+		obj.SetSlotValue(stackSymbol, append(stack, fn))
 	} else if 0 < len(stack) {
-		p.stack = append(p.stack, &fn)
+		p.stack = append(p.stack, fn)
 	}
 	if msg, has := obj.SlotValue(messageSymbol); has {
 		if str, ok2 := msg.(String); ok2 {

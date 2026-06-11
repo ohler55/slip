@@ -75,11 +75,11 @@ func normalAfter(s *Scope, fn *Function, depth int, result *Object) {
 		tr.AppendToStack(fn)
 		panic(tr)
 	case Instance:
-		panic(WrapError(s, tr, fn.Name, fn.Args))
+		panic(WrapError(s, tr, fn))
 	default:
 		cond := ErrorNew(s, depth, "%s", tr).(Instance)
 		_ = cond.SetSlotValue(Symbol("stack"), List{fn})
-		p := WrapError(s, cond, fn.Name, fn.Args)
+		p := WrapError(s, cond, fn)
 		p.Value = SimpleObject(tr)
 		panic(p)
 	}
@@ -127,13 +127,13 @@ func traceAfter(s *Scope, fn *Function, depth int, result *Object) {
 		traceWriterPanic(s, b, tr)
 		panic(tr)
 	case Instance:
-		p := WrapError(s, tr, fn.Name, fn.Args)
+		p := WrapError(s, tr, fn)
 		traceWriterPanic(s, b, p)
-		panic(WrapError(s, tr, fn.Name, fn.Args))
+		panic(WrapError(s, tr, fn))
 	default:
 		cond := ErrorNew(s, depth, "%s", tr).(Instance)
 		_ = cond.SetSlotValue(Symbol("stack"), append(List{Symbol(fn.Name)}, fn.Args...))
-		p := WrapError(s, cond, fn.Name, fn.Args)
+		p := WrapError(s, cond, fn)
 		p.Value = SimpleObject(tr)
 		traceWriterPanic(s, b, p)
 		panic(p)

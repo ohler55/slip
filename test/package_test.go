@@ -137,6 +137,13 @@ func TestPackageFind(t *testing.T) {
 	tt.Equal(t, (*slip.Package)(nil), slip.FindPackage("nothing"))
 }
 
+func TestPackageFromArg(t *testing.T) {
+	tt.Equal(t, &slip.UserPkg, slip.PackageFromArg(slip.Symbol("user")))
+	tt.Equal(t, &slip.UserPkg, slip.PackageFromArg(slip.Symbol(":user")))
+	tt.Equal(t, &slip.UserPkg, slip.PackageFromArg(slip.String("user")))
+	tt.Panic(t, func() { _ = slip.PackageFromArg(slip.True) })
+}
+
 func TestPackageDef(t *testing.T) {
 	pa := slip.DefPackage("a", []string{"aye"}, "Lots of ayes.")
 	pb := slip.DefPackage("b", []string{"bee"}, "Buzzing around.")

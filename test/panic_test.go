@@ -71,6 +71,32 @@ func TestArgCountCheck(t *testing.T) {
 	tt.Panic(t, func() { slip.CheckArgCount(slip.NewScope(), 0, fun, slip.List{}, 1, 2) })
 }
 
+func TestPanicProvenance(t *testing.T) {
+	slip.Provenance = true
+	slip.StackTraceProvenance = true
+	defer func() {
+		slip.Provenance = false
+		slip.StackTraceProvenance = false
+		slip.StackTraceFullFilenames = false
+	}()
+
+	scope := slip.NewScope()
+	f := slip.CompileString(`(load "testdata/panic.lisp")`, scope)
+
+	_, _, stack := recoverPanic(f)
+	tt.Equal(t, `## arg must be a cons or list not t, a t.
+## panic.lisp:4.3  (cdr t)
+## panic.lisp:3.2  (car (cdr t))
+## panic.lisp:2.1  (car (car (cdr t)))
+##   (load "testdata/panic.lisp")
+##   (recover)
+`, stack)
+
+	slip.StackTraceFullFilenames = true
+	_, _, stack = recoverPanic(f)
+	tt.Equal(t, `/## \/.*\/testdata\/panic.lisp:4.3  \(cdr t\)/`, stack)
+}
+
 func recoverPanic(obj slip.Object) (se *slip.Panic, msg, stack string) {
 	defer func() {
 		if se, _ = recover().(*slip.Panic); se != nil {
