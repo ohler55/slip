@@ -7,7 +7,6 @@
 - add provenance
 
  - stack trace
-  - change trace to pass func in beforeEval and afterEval
   - change panic stack to list of functions
 
   - *stack-trace-provenance* and *stack-trace-function* and *stack-trace-full-filenames*

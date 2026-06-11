@@ -65,27 +65,27 @@ func Untrace(args List) {
 	}
 }
 
-func noopBefore(s *Scope, name string, args List, depth int) {
+func noopBefore(s *Scope, fn *Function, depth int) {
 }
 
-func normalAfter(s *Scope, name string, args List, depth int, result *Object) {
+func normalAfter(s *Scope, fn *Function, depth int, result *Object) {
 	switch tr := recover().(type) {
 	case nil:
 	case *Panic:
-		tr.AppendToStack(name, args)
+		tr.AppendToStack(fn)
 		panic(tr)
 	case Instance:
-		panic(WrapError(s, tr, name, args))
+		panic(WrapError(s, tr, fn.Name, fn.Args))
 	default:
 		cond := ErrorNew(s, depth, "%s", tr).(Instance)
-		_ = cond.SetSlotValue(Symbol("stack"), append(List{Symbol(name)}, args...))
-		p := WrapError(s, cond, name, args)
+		_ = cond.SetSlotValue(Symbol("stack"), List{fn})
+		p := WrapError(s, cond, fn.Name, fn.Args)
 		p.Value = SimpleObject(tr)
 		panic(p)
 	}
 }
 
-func traceBefore(s *Scope, name string, args List, depth int) {
+func traceBefore(s *Scope, fn *Function, depth int) {
 	var b []byte
 
 	if len(indentSpaces)/2 <= depth {
@@ -95,14 +95,14 @@ func traceBefore(s *Scope, name string, args List, depth int) {
 	}
 	b = strconv.AppendInt(b, int64(depth), 10)
 	b = append(b, ": "...)
-	b = ObjectAppend(b, append(List{Symbol(name)}, args...))
+	b = ObjectAppend(b, fn)
 	b = append(b, '\n')
 	if w, _ := s.Get(Symbol("*trace-output*")).(io.Writer); w != nil {
 		_, _ = w.Write(b)
 	}
 }
 
-func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
+func traceAfter(s *Scope, fn *Function, depth int, result *Object) {
 	var b []byte
 
 	if len(indentSpaces)/2 <= depth {
@@ -112,7 +112,7 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 	}
 	b = strconv.AppendInt(b, int64(depth), 10)
 	b = append(b, ": "...)
-	b = ObjectAppend(b, append(List{Symbol(name)}, args...))
+	b = ObjectAppend(b, fn)
 	b = append(b, " => "...)
 
 	switch tr := recover().(type) {
@@ -123,32 +123,32 @@ func traceAfter(s *Scope, name string, args List, depth int, result *Object) {
 			_, _ = w.Write(b)
 		}
 	case *Panic:
-		tr.AppendToStack(name, args)
+		tr.AppendToStack(fn)
 		traceWriterPanic(s, b, tr)
 		panic(tr)
 	case Instance:
-		p := WrapError(s, tr, name, args)
+		p := WrapError(s, tr, fn.Name, fn.Args)
 		traceWriterPanic(s, b, p)
-		panic(WrapError(s, tr, name, args))
+		panic(WrapError(s, tr, fn.Name, fn.Args))
 	default:
 		cond := ErrorNew(s, depth, "%s", tr).(Instance)
-		_ = cond.SetSlotValue(Symbol("stack"), append(List{Symbol(name)}, args...))
-		p := WrapError(s, cond, name, args)
+		_ = cond.SetSlotValue(Symbol("stack"), append(List{Symbol(fn.Name)}, fn.Args...))
+		p := WrapError(s, cond, fn.Name, fn.Args)
 		p.Value = SimpleObject(tr)
 		traceWriterPanic(s, b, p)
 		panic(p)
 	}
 }
 
-func traceSelectedBefore(s *Scope, name string, args List, depth int) {
-	if traceFuncs[name] {
-		traceBefore(s, name, args, depth)
+func traceSelectedBefore(s *Scope, fn *Function, depth int) {
+	if traceFuncs[fn.Name] {
+		traceBefore(s, fn, depth)
 	}
 }
 
-func traceSelectedAfter(s *Scope, name string, args List, depth int, result *Object) {
-	if traceFuncs[name] {
-		traceAfter(s, name, args, depth, result)
+func traceSelectedAfter(s *Scope, fn *Function, depth int, result *Object) {
+	if traceFuncs[fn.Name] {
+		traceAfter(s, fn, depth, result)
 	}
 }
 

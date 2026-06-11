@@ -108,8 +108,8 @@ func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 
 // Eval the object.
 func (f *Function) Eval(s *Scope, depth int) (result Object) {
-	beforeEval(s, f.Name, f.Args, depth)
-	defer afterEval(s, f.Name, f.Args, depth, &result)
+	beforeEval(s, f, depth)
+	defer afterEval(s, f, depth, &result)
 
 	if s.InterruptCheck != nil {
 		s.InterruptCheck()
@@ -183,8 +183,9 @@ func (f *Function) SkipArgEval(i int) (skip bool) {
 
 // Apply evaluates with the need to evaluate the args.
 func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
-	beforeEval(s, f.Name, args, depth)
-	defer afterEval(s, f.Name, args, depth, &result)
+	fn := Function{Name: f.Name, Args: args}
+	beforeEval(s, &fn, depth)
+	defer afterEval(s, &fn, depth, &result)
 
 	return f.Self.Call(s, args, depth)
 }

@@ -38,7 +38,7 @@ var (
 type Panic struct {
 	Message   string
 	Condition Instance
-	stack     []string
+	stack     []*Function
 	Value     Object // used when the panic function is called
 	Fatal     bool   // used in repl to indicate an exit should be made
 }
@@ -66,7 +66,11 @@ func (p *Panic) AppendFull(b []byte) []byte {
 	b = append(b, "## "...)
 	b = append(b, p.Message...)
 	b = append(b, '\n')
+	if StackTraceProvenance {
+		return p.appendProvStack(b)
+	}
 	if p.Condition != nil {
+		// TBD after check assume a function
 		if sv, has := p.Condition.SlotValue(stackSymbol); has {
 			if stack, ok := sv.(List); ok {
 				for _, line := range stack {
@@ -78,12 +82,9 @@ func (p *Panic) AppendFull(b []byte) []byte {
 			}
 		}
 	}
-	if StackTraceProvenance {
-		return p.appendProvStack(b)
-	}
 	for _, line := range p.stack {
 		b = append(b, "##  "...)
-		b = append(b, line...)
+		b = append(b, line.String()...)
 		b = append(b, '\n')
 	}
 	return b
@@ -91,9 +92,22 @@ func (p *Panic) AppendFull(b []byte) []byte {
 
 func (p *Panic) appendProvStack(b []byte) []byte {
 	// TBD use prov info on function in stack
+	if p.Condition != nil {
+		// TBD after check assume a function
+		if sv, has := p.Condition.SlotValue(stackSymbol); has {
+			if stack, ok := sv.(List); ok {
+				for _, line := range stack {
+					b = append(b, "##  "...)
+					b = append(b, ObjectString(line)...)
+					b = append(b, '\n')
+				}
+				return b
+			}
+		}
+	}
 	for _, line := range p.stack {
 		b = append(b, "##  "...)
-		b = append(b, line...)
+		b = append(b, line.String()...)
 		b = append(b, '\n')
 	}
 	return b
@@ -132,10 +146,10 @@ func (p *Panic) Error() string {
 	return p.String()
 }
 
-// AppendToStack appends a function name and argument to the stack.
-func (p *Panic) AppendToStack(name string, args List) {
-	line := append(List{Symbol(name)}, args...)
-	p.stack = append(p.stack, ObjectString(line))
+// AppendToStack appends a function to the stack.
+func (p *Panic) AppendToStack(fn *Function) {
+	line := append(List{Symbol(fn.Name)}, fn.Args...)
+	p.stack = append(p.stack, fn)
 	if p.Condition != nil {
 		if sv, has := p.Condition.SlotValue(stackSymbol); has {
 			stack, _ := sv.(List)
@@ -145,27 +159,25 @@ func (p *Panic) AppendToStack(name string, args List) {
 }
 
 // Stack returns the call stack for the error.
-func (p *Panic) Stack() []string {
+func (p *Panic) Stack() []*Function {
 	return p.stack
 }
 
 // WrapError creates a Panic that wraps a Instance which is expected to be a
 // clos condition.
 func WrapError(s *Scope, obj Instance, name string, args List) *Panic {
-	line := append(List{Symbol(name)}, args...)
+	fn := Function{Name: name, Args: args}
 	p := Panic{Condition: obj}
 	var stack List
 	if sv, has := obj.SlotValue(stackSymbol); has {
 		stack, _ = sv.(List)
 	}
 	if 0 < len(name) {
-		p.stack = []string{ObjectString(line)}
-		obj.SetSlotValue(stackSymbol, append(stack, line))
+		p.stack = []*Function{&fn}
+		obj.SetSlotValue(stackSymbol, append(stack, &fn))
 	} else if 0 < len(stack) {
-		p.stack = append(p.stack, ObjectString(line))
+		p.stack = append(p.stack, &fn)
 	}
-
-	// TBD check report slot
 	if msg, has := obj.SlotValue(messageSymbol); has {
 		if str, ok2 := msg.(String); ok2 {
 			p.Message = string(str)

@@ -18,7 +18,11 @@ func TestPanicBytes(t *testing.T) {
 ##  (car (cdr t))
 ##  (recover)
 `, stack)
-	tt.Equal(t, []string{"(cdr t)", "(car (cdr t))", "(recover)"}, p.Stack())
+	var buf []byte
+	for _, fn := range p.Stack() {
+		buf = slip.ObjectAppend(buf, fn)
+	}
+	tt.Equal(t, "(cdr t)(car (cdr t))(recover)", string(buf))
 	tt.Equal(t, p, p.Eval(nil, 0))
 	px := p
 	tt.Equal(t, true, p.Equal(px))
@@ -70,7 +74,7 @@ func TestArgCountCheck(t *testing.T) {
 func recoverPanic(obj slip.Object) (se *slip.Panic, msg, stack string) {
 	defer func() {
 		if se, _ = recover().(*slip.Panic); se != nil {
-			se.AppendToStack("recover", nil)
+			se.AppendToStack(&slip.Function{Name: "recover"})
 			msg = se.Error()
 			stack = string(se.AppendFull(nil))
 		}
