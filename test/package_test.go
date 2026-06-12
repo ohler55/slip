@@ -337,7 +337,7 @@ func TestPackageLoadForm(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(pps, "(:documentation "))
 	tt.Equal(t, true, strings.Contains(pps, "(:nicknames cl-user user)"))
 	tt.Equal(t, true,
-		strings.Contains(pps, "(:use keyword common-lisp generic xml flavors gi bag clos csv test watch net)"))
+		strings.Contains(pps, "(:use keyword common-lisp generic xml flavors gi bag clos csv repl test watch net)"))
 
 	form = (&slip.CLPkg).LoadForm()
 	pps = string(pp.Append(nil, slip.NewScope(), form))

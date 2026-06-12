@@ -24,8 +24,8 @@ usage: ~A <coverage-file> [<filepath>...]
 
     (dolist (fn cov-fun)
       (when (or (null filepath) (suffixp (car fn) filepath))
-        (setq total (1+ total)
-              covered (+ covered (nth 5 fn)))))
+        (incf total)
+        (unless (= 0 (nth 5 fn)) (incf covered))))
 
     (cond ((= total 0) 0)
           (t (/ (* covered 100) total)))))
@@ -49,7 +49,8 @@ usage: ~A <coverage-file> [<filepath>...]
 
 (defun display-cover-file (cover filepath)
   (let ((cov-fun (cdr cover))
-        lines)
+        lines
+        provs)
     ;; The filepath may be a partial path so find the first match and use that
     ;; as the target filepath.
     (setq filepath
@@ -57,13 +58,18 @@ usage: ~A <coverage-file> [<filepath>...]
             (when (suffixp (car fn) filepath)
               (return (car fn)))))
 
+    (dolist (fn cov-fun)
+      (when (equal filepath (car fn))
+        (addf provs fn)))
+
     (with-open-file (f filepath :direction :input)
       (loop
        (let ((line (nth-value 0 (read-line f nil nil))))
          (unless line (return 'eof))
          (addf lines line))))
 
-    ;; TBD read file into memory as lines of string
+    ;; TBD
+    (format t "*** provs:~%~{  ~A~%~}~%" provs)
 
     ;; collect coverage func info, should already be sorted
 
@@ -74,7 +80,7 @@ usage: ~A <coverage-file> [<filepath>...]
     (format t "~A~%" filepath)
     (let ((count 1))
       (dolist (line lines)
-        (format t "~4,'0D| ~A~%" count line)
+        (format t "~A~4,'0D~A| ~A~%" *ansi-gray* count *ansi-reset* line)
         (incf count)))
     (format t "------------------------------------------------------------
 Coverage: ~,1F%~%" (calculate-coverage cov-fun filepath))))

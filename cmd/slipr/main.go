@@ -11,6 +11,7 @@ import (
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/bag"
 
+	// Pull in all slip functions.
 	_ "github.com/ohler55/slip/pkg"
 )
 

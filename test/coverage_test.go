@@ -3,7 +3,6 @@
 package test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -48,7 +47,7 @@ func TestCoverageSimple(t *testing.T) {
 	slip.WriteCoverage(covfile)
 	cov, err := os.ReadFile(covfile)
 	tt.Nil(t, err)
-	fmt.Printf("%s\n", cov)
+
 	tt.Equal(t, `/testdata\/cov-test.lisp" 1 1 2 11 1\)/`, string(cov))
 	tt.Equal(t, `/testdata\/cov-test.lisp" 2 4 2 10 1\)/`, string(cov))
 	tt.Equal(t, `/testdata\/cov-test2.lisp" 1 1 1 14 1\)/`, string(cov))

@@ -208,7 +208,8 @@ func TestAppendPackageVar(t *testing.T) {
 		Expect: `"(defpackage common-lisp-user
   (:nicknames cl-user user)
   (:documentation "The default package for user code and variables.")
-  (:use keyword common-lisp generic xml flavors gi bag clos csv test watch net))
+  (:use keyword common-lisp generic xml flavors gi bag clos csv repl test watch
+   net))
 "`,
 	}).Test(t)
 }
