@@ -49,12 +49,21 @@ type MakeCommand struct {
 func (f *MakeCommand) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	path := slip.MustBeString(args[0], "path")
-	cargs := make([]string, len(args)-1)
-	for i, a := range args[1:] {
-		if ss, ok := a.(slip.String); ok {
-			cargs[i] = string(ss)
-		} else {
-			cargs[i] = slip.ObjectString(a)
+	cargs := make([]string, 0, len(args)-1) // start with size as if args are not in list
+	for _, a := range args[1:] {
+		switch ta := a.(type) {
+		case slip.String:
+			cargs = append(cargs, string(ta))
+		case slip.List:
+			for _, v := range ta {
+				if ss, ok := v.(slip.String); ok {
+					cargs = append(cargs, string(ss))
+				} else {
+					cargs = append(cargs, slip.ObjectString(v))
+				}
+			}
+		default:
+			cargs = append(cargs, slip.ObjectString(ta))
 		}
 	}
 	command := exec.Command(path, cargs...)

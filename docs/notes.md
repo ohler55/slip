@@ -6,20 +6,21 @@
 
 - add provenance
 
- - update slap and slapper to use provenance
-
  - coverage app
-  - in slip/lisp dir
-   - cover.lisp
-    - maybe create an slipper or slipr app to run
-    - or try to get it to work without that
+  - start with one segment for each line that is gray
+  - for each prov divide segments as needed
+  - segment is firstLine, firstCol, lastLine, lastCol, color (nil, :covered, :not-covered)
+   - or maybe drop the line numbers since all on one line
+  - break lines or rather provs into segments
+  - merge segments with same color
+  - use subseq to find text then insert color codes
+
   - start with writing colorized file(s)
    - lisp code
    - where to put the code?
     - lisp dir in slip?
-  - later could be interactive
-  - lisp app for processing and coverage
-  - add file checksum function to support lisp coverage
+
+ - later could be interactive
   - functions for terminal support?
    - add term or termio package using some stuff from the repl
     - with-raw-terminal (term)
