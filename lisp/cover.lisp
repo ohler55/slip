@@ -66,21 +66,20 @@ usage: ~A <coverage-file> [<filepath>...]
   (let (lines)
     ;; Initialize lines with the no provenance indication of nil.
     (dotimes (n count)
-      (addf lines (list (list 0 -1 nil))))
+      (addf lines (list (list -1 -1 nil))))
 
     (dolist (fn provs)
-      (let* ((firstLine (cadr fn))
-             (li (1- firstLine))
-             (line (nth li lines))
+      (let* ((firstLine (cadr fn)) ;; lines are zero based
+             (line (nth firstLine lines))
              (cov (if (< 0 (nth 5 fn)) :covered :not-covered))
              (lastLine (cadddr fn))
-             (c0 (caddr fn))
-             (c1 (nth 4 fn)))
+             (c0 (1- (caddr fn))) ;; columns are 1 based
+             (c1 (nth 4 fn))) ;; one past last character
 
         (cond ((= firstLine lastLine) ;; same line
                (let* ((index (locate-segment line c0 c1))
                       (seg (nth index line)))
-                 (setf (nth li lines)
+                 (setf (nth firstLine lines)
                        (append (subseq line 0 index)
                                  (list (list (car seg) c0 (caddr seg)) (list c0 c1 cov) (list c1 (cadr seg) (caddr seg)))
                                  (subseq line (1+ index))))
@@ -90,22 +89,51 @@ usage: ~A <coverage-file> [<filepath>...]
                (format t "*** different lines~%")
                ))
         ))
-
-    ;; TBD cleanup lines
+    ;; Compact lines. Remove (-1 0 nil) any with a end of zero at start if
+    ;; present. Then merge consecutive segments with the same coverage.
+    (dotimes (n count)
+      (let ((line (nth n lines))
+            comp ;; new compacted segment
+            compact)
+        (dolist (seg line)
+          (cond ((= 0 (cadr seg)) nil) ;; skip segments ending at zero
+                ((null comp) (setq comp seg))
+                ((equal (caddr comp) (caddr seg)) ;; merge
+                 (setf (cadr comp) (cadr seg)))
+                (t ;; different coverage
+                 (addf compact comp)
+                 (setq comp seg))))
+        (addf compact comp)
+        (setf (nth n lines) compact)))
 
     lines))
 
 (defun colorize-lines (lines provs)
+  (format t "*** provs:~%~{  ~A~%~}~%" provs)
+
   (let ((segments (form-segments provs (length lines))))
 
-    (format t "*** provs:~%~{  ~A~%~}~%" provs)
-
     (format t "*** segments:~%~{  ~A~%~}~%" segments)
-    ;; TBD
 
-
-    ;; TBD use segments to insert colors in lines
-    )
+    ;; Use the segments to reform each line with colors.
+    (dotimes (n (length lines))
+      (let ((line (nth n lines))
+            (sline (nth n segments))
+            (colorized ""))
+        (dolist (seg (nth n segments))
+          (setq colorized (string-append colorized (case (caddr seg)
+                                                     (:covered *ansi-green*)
+                                                     (:not-covered *ansi-red*)
+                                                     (t *ansi-gray*))))
+          (cond ((= -1 (cadr seg))
+                 ;; when still more left, append rest
+                 (cond ((< (car seg) 0)
+                        (setq colorized (string-append colorized line)))
+                       ((< (car seg) (length line))
+                        (setq colorized (string-append colorized (subseq line (car seg)))))))
+                (t
+                 (setq colorized (string-append colorized (subseq line (car seg) (cadr seg)))))))
+        (setf (nth n lines) colorized))))
   lines)
 
 (defun display-cover-file (cover filepath)

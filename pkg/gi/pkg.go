@@ -397,6 +397,7 @@ filename is displayed instead of just the base.`,
 	defSnapshot()
 	defSplit()
 	defStrcat()
+	defStringAppend()
 	defStringRepeat()
 	defStringToOctets()
 	defSuffixp()

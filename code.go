@@ -622,6 +622,8 @@ func (r *reader) read(src []byte) {
 			r.mode = commentMode
 		case commentDone:
 			r.mode = valueMode
+			r.line++
+			r.lineStart = r.pos
 
 		case openParen:
 			r.starts = append(r.starts,
@@ -917,7 +919,6 @@ func (r *reader) closeList() {
 		}
 		start.LastLine = uint32(r.line)
 		start.LastColumn = uint16(r.pos - r.lineStart)
-		// fmt.Printf("*** adding prov %s\n", pretty.SEN(&start))
 		if Provenance {
 			p := start
 			r.listProvs = r.listProvs.Add(list, &p)
@@ -1313,7 +1314,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		if !ok || len(list) == 0 {
 			continue
 		}
-		c[i] = CompileList(list, listProvs) // TBD pass in listProvs
+		c[i] = CompileList(list, listProvs)
 	}
 }
 

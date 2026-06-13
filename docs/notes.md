@@ -6,24 +6,15 @@
 
 - add provenance
 
+ - string-append
+  - tests
+  - update changelog
+
  - (add (subseq quux 0 2) 'd)
   - modifies quux - should it?
 
- - cover file seems to skip comment and blank lines
-
  - coverage app
-  - start with one segment for each line that is gray
-  - for each prov divide segments as needed
-  - break lines or rather provs into segments
-  - merge segments with same color
-  - use subseq to find text then insert color codes
-  - (append (subseq quux 0 2) (cons 'd (subseq quux 2)))
-  - or (append (add (copy-list (subseq quux 0 2)) 'd) (subseq quux 2))
-
-  - start with writing colorized file(s)
-   - lisp code
-   - where to put the code?
-    - lisp dir in slip?
+  - handle multiple line provenance info
 
  - later could be interactive
   - functions for terminal support?
