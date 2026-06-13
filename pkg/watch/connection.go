@@ -86,20 +86,20 @@ func (c *connection) listen() {
 }
 
 func (c *connection) shutdown(serverRem bool) {
-	if c.active.Load() {
-		c.active.Store(false)
-		_ = c.con.Close()
-		// close(c.reqs) // closed in method loop
-		close(c.sendQueue)
-		close(c.evalQueue)
-		if serverRem {
-			if c.serv != nil {
-				c.serv.mu.Lock()
-				if c.serv.cons != nil {
-					delete(c.serv.cons, c.id)
-				}
-				c.serv.mu.Unlock()
+	if !c.active.CompareAndSwap(true, false) {
+		return
+	}
+	_ = c.con.Close()
+	// close(c.reqs) // closed in method loop
+	close(c.sendQueue)
+	close(c.evalQueue)
+	if serverRem {
+		if c.serv != nil {
+			c.serv.mu.Lock()
+			if c.serv.cons != nil {
+				delete(c.serv.cons, c.id)
 			}
+			c.serv.mu.Unlock()
 		}
 	}
 }
