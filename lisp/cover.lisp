@@ -78,15 +78,20 @@ usage: ~A <coverage-file> [<filepath>...]
 
         (cond ((= firstLine lastLine) ;; same line
                (let* ((index (locate-segment line c0 c1))
-                      (seg (nth index line)))
+                      (seg (nth index line))
+                      (seg0 (car seg)))
+                 (when (< seg0 0) (setq seg0 0))
                  (setf (nth firstLine lines)
                        (append (subseq line 0 index)
-                                 (list (list (car seg) c0 (caddr seg)) (list c0 c1 cov) (list c1 (cadr seg) (caddr seg)))
-                                 (subseq line (1+ index))))
-                 ))
-
+                               (list (list seg0 c0 (caddr seg))
+                                     (list c0 c1 cov)
+                                     (list c1 (cadr seg) (caddr seg)))
+                               (subseq line (1+ index))))))
               (t
                (format t "*** different lines~%")
+               ;; TBD first and last lines become (x -1 coverage) and (0 y coverage)
+               ;;  locate segment for each
+               ;; inbetween lines become (0 -1 coverage)
                ))
         ))
     ;; Compact lines. Remove (-1 0 nil) any with a end of zero at start if

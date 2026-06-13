@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   lisp code by adding `#!/usr/bin/env slipr` as the first line in a
   .lisp file.
 - Added cover.lisp that displays coverage data from a save coverage file in the lisp directory.
+- Added `gi:string-append` function.
 
 ### Fixed
 - The CompileList function now correctly handles package prefixes.

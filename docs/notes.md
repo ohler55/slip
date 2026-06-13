@@ -6,15 +6,11 @@
 
 - add provenance
 
- - string-append
-  - tests
-  - update changelog
-
- - (add (subseq quux 0 2) 'd)
-  - modifies quux - should it?
-
  - coverage app
   - handle multiple line provenance info
+   - variations on 3 lines
+
+ - remove covx.lisp and testx.lisp after testing
 
  - later could be interactive
   - functions for terminal support?
