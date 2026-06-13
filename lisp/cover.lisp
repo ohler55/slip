@@ -47,6 +47,67 @@ usage: ~A <coverage-file> [<filepath>...]
 
     (format t "Total coverage: ~,1F%~%" (calculate-coverage (cdr cover) nil))))
 
+(defun locate-segment (line c0 c1)
+  (let ((index 0))
+    (dolist (seg line)
+      (when (and (< (car seg) c0)
+                 (or (= (cadr seg) -1)
+                     (< c1 (cadr seg))))
+        (return index))
+      (incf index))
+    index))
+
+(defun form-segments (provs count)
+  "Segments describe a segment of a line associated with a function. Each segment
+   has a start, end, and coverage indicator of nil for no provenance,
+   :covered, and :not-covered. An end of -1 indicates unbounded. Segments are
+   organized by line to match the lines in a file."
+
+  (let (lines)
+    ;; Initialize lines with the no provenance indication of nil.
+    (dotimes (n count)
+      (addf lines (list (list 0 -1 nil))))
+
+    (dolist (fn provs)
+      (let* ((firstLine (cadr fn))
+             (li (1- firstLine))
+             (line (nth li lines))
+             (cov (if (< 0 (nth 5 fn)) :covered :not-covered))
+             (lastLine (cadddr fn))
+             (c0 (caddr fn))
+             (c1 (nth 4 fn)))
+
+        (cond ((= firstLine lastLine) ;; same line
+               (let* ((index (locate-segment line c0 c1))
+                      (seg (nth index line)))
+                 (setf (nth li lines)
+                       (append (subseq line 0 index)
+                                 (list (list (car seg) c0 (caddr seg)) (list c0 c1 cov) (list c1 (cadr seg) (caddr seg)))
+                                 (subseq line (1+ index))))
+                 ))
+
+              (t
+               (format t "*** different lines~%")
+               ))
+        ))
+
+    ;; TBD cleanup lines
+
+    lines))
+
+(defun colorize-lines (lines provs)
+  (let ((segments (form-segments provs (length lines))))
+
+    (format t "*** provs:~%~{  ~A~%~}~%" provs)
+
+    (format t "*** segments:~%~{  ~A~%~}~%" segments)
+    ;; TBD
+
+
+    ;; TBD use segments to insert colors in lines
+    )
+  lines)
+
 (defun display-cover-file (cover filepath)
   (let ((cov-fun (cdr cover))
         lines
@@ -68,14 +129,7 @@ usage: ~A <coverage-file> [<filepath>...]
          (unless line (return 'eof))
          (addf lines line))))
 
-    ;; TBD
-    (format t "*** provs:~%~{  ~A~%~}~%" provs)
-
-    ;; collect coverage func info, should already be sorted
-
-    ;; keep a stack of colors
-    ;; walk lines and cov-fun and insert color changes as needed
-    ;; print lines with line numbers
+    (setq lines (colorize-lines lines provs))
 
     (format t "~A~%" filepath)
     (let ((count 1))
