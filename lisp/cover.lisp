@@ -50,12 +50,28 @@ usage: ~A <coverage-file> [<filepath>...]
 (defun locate-segment (line c0 c1)
   (let ((index 0))
     (dolist (seg line)
-      (when (and (< (car seg) c0)
+      (when (and (<= (car seg) c0)
                  (or (= (cadr seg) -1)
                      (< c1 (cadr seg))))
         (return index))
       (incf index))
     index))
+
+(defun insert-segment (line c0 c1 cov)
+  "Insert a new segment with c0 being the first column and c1 being the last."
+  (let* ((index (locate-segment line c0 c1))
+         (seg (nth index line))
+         (seg0 (car seg))
+         xline)
+    ;; TBD if seg is nil end of line, shouldn't happen but just in case
+    (when (< seg0 0) (setq seg0 0))
+    (when (< 0 index)
+      (setq xline (subseq line 0 index)))
+    (when (< seg0 c0) (addf xline (list seg0 c0 (caddr seg))))
+    (addf xline (list c0 c1 cov))
+    (when (< c0 c1) (addf xline (list c1 (cadr seg) (caddr seg))))
+    (when (< (1+ index) (length line)) (subseq line (1+ index)))
+    xline))
 
 (defun form-segments (provs count)
   "Segments describe a segment of a line associated with a function. Each segment
@@ -77,22 +93,13 @@ usage: ~A <coverage-file> [<filepath>...]
              (c1 (nth 4 fn))) ;; one past last character
 
         (cond ((= firstLine lastLine) ;; same line
-               (let* ((index (locate-segment line c0 c1))
-                      (seg (nth index line))
-                      (seg0 (car seg)))
-                 (when (< seg0 0) (setq seg0 0))
-                 (setf (nth firstLine lines)
-                       (append (subseq line 0 index)
-                               (list (list seg0 c0 (caddr seg))
-                                     (list c0 c1 cov)
-                                     (list c1 (cadr seg) (caddr seg)))
-                               (subseq line (1+ index))))))
+               (setf (nth firstLine lines) (insert-segment line c0 c1 cov)))
               (t
-               (format t "*** different lines~%")
-               ;; TBD first and last lines become (x -1 coverage) and (0 y coverage)
-               ;;  locate segment for each
-               ;; inbetween lines become (0 -1 coverage)
-               ))
+               (setf (nth firstLine lines) (insert-segment line c0 -1 cov))
+               ;; Any lines inbetween first and last are set to one segment.
+               (dotimes (n (- lastLine firstLine 1))
+                 (setf (nth (+ firstLine n) lines) (list (list 0 -1 cov))))
+               (setf (nth lastLine lines) (insert-segment (nth lastLine lines) 0 c1 cov))))
         ))
     ;; Compact lines. Remove (-1 0 nil) any with a end of zero at start if
     ;; present. Then merge consecutive segments with the same coverage.
@@ -114,12 +121,7 @@ usage: ~A <coverage-file> [<filepath>...]
     lines))
 
 (defun colorize-lines (lines provs)
-  (format t "*** provs:~%~{  ~A~%~}~%" provs)
-
   (let ((segments (form-segments provs (length lines))))
-
-    (format t "*** segments:~%~{  ~A~%~}~%" segments)
-
     ;; Use the segments to reform each line with colors.
     (dotimes (n (length lines))
       (let ((line (nth n lines))
@@ -139,6 +141,7 @@ usage: ~A <coverage-file> [<filepath>...]
                 (t
                  (setq colorized (string-append colorized (subseq line (car seg) (cadr seg)))))))
         (setf (nth n lines) colorized))))
+
   lines)
 
 (defun display-cover-file (cover filepath)
@@ -169,8 +172,8 @@ usage: ~A <coverage-file> [<filepath>...]
       (dolist (line lines)
         (format t "~A~4,'0D~A| ~A~%" *ansi-gray* count *ansi-reset* line)
         (incf count)))
-    (format t "------------------------------------------------------------
-Coverage: ~,1F%~%" (calculate-coverage cov-fun filepath))))
+    (format t "~A------------------------------------------------------------
+Coverage: ~,1F%~%" *ansi-reset* (calculate-coverage cov-fun filepath))))
 
 (defun display-coverage (cover filepaths)
   "Display coverage of then listed filepaths."

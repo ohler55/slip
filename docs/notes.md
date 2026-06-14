@@ -7,8 +7,8 @@
 - add provenance
 
  - coverage app
-  - handle multiple line provenance info
-   - variations on 3 lines
+  - more complex tests
+  - should there be tests for cover.lisp somewhere?
 
  - remove covx.lisp and testx.lisp after testing
 
