@@ -13,7 +13,7 @@
     (send cover-suite :result)))
 
 (defun cover-file (test-file cov-file)
-  (send (make-command "go" "run" "../cmd/slip/main.go" "-e" "(terpri)" "-cover" cov-file test-file) :run))
+  (send (make-command "go" "run" "../cmd/slip/main.go" "-i=false" "-c" "-" "-cover" cov-file test-file) :run))
 
 (let ((suite (defsuite "one-line" cover-suite
                :setup (lambda ()

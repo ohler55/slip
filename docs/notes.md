@@ -6,13 +6,15 @@
 
 - add provenance
 
- - change interactive flag handling in slip to detect when explicit set to false
+ - handle -f flag in app-args
 
- - cover-test
-  - make display-cover-file handle other streams
  - coverage app
-  - conditional (if when unless cond ...)
-  - mapcar and similar
+  - conditional (if when unless cond ...) (any with skip eval args)
+   - make sure code not reached is counted
+    - mapcar and similar
+    - maybe alway precompile or special list with prov??
+     -
+
   - more complex tests
   - should there be tests for cover.lisp somewhere?
    - lisp/test

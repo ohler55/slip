@@ -11,6 +11,8 @@ import (
 
 var Provenance = false
 
+var allListProvs ProvSet
+
 // Prov represents function provenance which include the filepath and location
 // in the file of a function.
 type Prov struct {

@@ -298,7 +298,7 @@ func (f *Function) SetProvenance(p *Prov) {
 
 // ListToFunc converts a list to a function.
 func ListToFunc(s *Scope, list List, depth int) Object {
-	return ListToFuncWithProvenance(s, list, depth, nil)
+	return ListToFuncWithProvenance(s, list, depth, allListProvs)
 }
 
 // ListToFuncWithProvenance converts a list to a function.
@@ -314,6 +314,9 @@ func ListToFuncWithProvenance(s *Scope, list List, depth int, listProvs ProvSet)
 	case Symbol:
 		f := NewFunc(string(ta), list[1:])
 		f.SetProvenance(prov)
+		if coverage {
+			coverageFuncs = append(coverageFuncs, f)
+		}
 		return f
 	case List:
 		if 1 < len(ta) {
@@ -321,13 +324,17 @@ func ListToFuncWithProvenance(s *Scope, list List, depth int, listProvs ProvSet)
 				if strings.EqualFold("lambda", string(sym)) {
 					lambdaDef := ListToFuncWithProvenance(s, ta, depth+1, listProvs)
 					lc := s.Eval(lambdaDef, depth).(*Lambda)
-					return &Dynamic{
+					df := Dynamic{
 						Function: Function{
 							Self: lc,
 							Args: list[1:],
 							prov: prov,
 						},
 					}
+					if coverage {
+						coverageFuncs = append(coverageFuncs, &df)
+					}
+					return &df
 				}
 			}
 		}

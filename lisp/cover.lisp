@@ -144,7 +144,7 @@ usage: ~A <coverage-file> [<filepath>...]
 
   lines)
 
-(defun display-cover-file (cover filepath)
+(defun display-cover-file (cover filepath destination)
   (let ((cov-fun (cdr cover))
         lines
         provs)
@@ -167,21 +167,22 @@ usage: ~A <coverage-file> [<filepath>...]
 
     (setq lines (colorize-lines lines provs))
 
-    (format t "~A~%" filepath)
+    (unless destination (setq destination t))
+    (format destination "~A~%" filepath)
     (let ((count 1))
       (dolist (line lines)
-        (format t "~A~4,'0D~A| ~A~%" *ansi-gray* count *ansi-reset* line)
+        (format destination "~A~4,'0D~A| ~A~%" *ansi-gray* count *ansi-reset* line)
         (incf count)))
-    (format t "~A------------------------------------------------------------
+    (format destination "~A------------------------------------------------------------
 Coverage: ~,1F%~%" *ansi-reset* (calculate-coverage cov-fun filepath))))
 
-(defun display-coverage (cover filepaths)
+(defun display-coverage (cover filepaths &optional destination)
   "Display coverage of then listed filepaths."
   (cond ((emptyp filepaths)
          (display-file-list cover))
         (t
          (dolist (filepath filepaths)
-           (display-cover-file cover filepath)))))
+           (display-cover-file cover filepath destination)))))
 
 ;;; Handle the command lines arguments and kick off the processing.
 (cond ((or (member "-h" *app-args*) (member "-help" *app-args*))

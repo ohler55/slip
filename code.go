@@ -1272,6 +1272,9 @@ func (c Code) Compile() {
 // defvar, and defmacro calls and converts unquoted lists to functions.
 func (c Code) CompileWithProvenance(listProvs ProvSet) {
 	listProvs.Sort()
+	allListProvs = append(allListProvs, listProvs...)
+	allListProvs.Sort()
+
 	scope := NewScope()
 	for i, obj := range c {
 		list, ok := obj.(List)

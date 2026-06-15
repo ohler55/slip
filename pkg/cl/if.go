@@ -53,16 +53,19 @@ type If struct {
 // Call the function with the arguments provided.
 func (f *If) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 2, 3)
-	result = nil
 	d2 := depth + 1
-	pos := 0
-	test := slip.EvalArg(s, args, pos, d2) != nil
-	pos++
-	if test {
-		result = slip.EvalArg(s, args, pos, d2)
-	} else if pos < len(args)-1 {
-		pos++
-		result = slip.EvalArg(s, args, pos, d2)
+	if slip.EvalArg(s, args, 0, d2) != nil {
+		result = slip.EvalArg(s, args, 1, d2)
+		if 2 < len(args) {
+			if list, ok := args[2].(slip.List); ok {
+				args[2] = slip.ListToFunc(s, list, d2)
+			}
+		}
+	} else if 2 < len(args) {
+		result = slip.EvalArg(s, args, 2, d2)
+		if list, ok := args[1].(slip.List); ok {
+			args[1] = slip.ListToFunc(s, list, d2)
+		}
 	}
 	return
 }

@@ -21,6 +21,7 @@ func TestResetCoverageFile(t *testing.T) {
                    (addf reports (coverage-report nil))
                    (reset-coverage)
                    (addf reports (coverage-report nil))
+                   (setq *coverage* nil)
                    (reset-coverage t)
                    (addf reports (coverage-report nil))
                    reports)`,
