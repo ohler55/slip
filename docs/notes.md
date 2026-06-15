@@ -6,7 +6,13 @@
 
 - add provenance
 
+ - change interactive flag handling in slip to detect when explicit set to false
+
+ - cover-test
+  - make display-cover-file handle other streams
  - coverage app
+  - conditional (if when unless cond ...)
+  - mapcar and similar
   - more complex tests
   - should there be tests for cover.lisp somewhere?
    - lisp/test
