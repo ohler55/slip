@@ -80,6 +80,11 @@ func (f *Dotimes) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.TypePanic(s, depth, "dotimes input", args[0], "list")
 	}
 	ns.Let(sym, nil) // use the safe way to verify it's a valid symbol to use for a let.
+	for i := 1; i < len(args); i++ {
+		if list, ok := args[i].(slip.List); ok {
+			args[i] = slip.ListToFunc(ns, list, d2)
+		}
+	}
 	for i := int64(0); i < max; i++ {
 		ns.UnsafeLet(sym, slip.Fixnum(i))
 		for i := 1; i < len(args); i++ {

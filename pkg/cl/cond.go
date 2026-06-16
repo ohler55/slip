@@ -49,6 +49,14 @@ func (f *Cond) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		if !ok || len(clause) == 0 {
 			slip.TypePanic(s, depth, "clause", a, "list")
 		}
+		for i := 1; i < len(clause); i++ {
+			if list, ok := clause[i].(slip.List); ok {
+				clause[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+	}
+	for _, a := range args {
+		clause := a.(slip.List)
 		if slip.EvalArg(s, clause, 0, d2) == nil {
 			continue
 		}

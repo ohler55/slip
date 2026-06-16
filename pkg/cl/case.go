@@ -53,11 +53,20 @@ type Case struct {
 func (f *Case) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	d2 := depth + 1
 	key := args[0]
-	for i, a := range args[1:] {
+	// Precompile for provenance.
+	for _, a := range args[1:] {
 		clause, ok := a.(slip.List)
 		if !ok || len(clause) == 0 {
 			slip.TypePanic(s, depth, "clause", a, "list")
 		}
+		for i := 1; i < len(clause); i++ {
+			if list, ok := clause[i].(slip.List); ok {
+				clause[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+	}
+	for i, a := range args[1:] {
+		clause := a.(slip.List) // checked earlier
 		var same bool
 		if keys, ok := clause[0].(slip.List); ok {
 			for _, k := range keys {

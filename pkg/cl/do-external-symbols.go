@@ -96,6 +96,11 @@ func (f *DoExternalSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.
 	ss := s.NewScope()
 	ss.Block = true
 	forms := args[1:]
+	for i, form := range forms {
+		if list, ok := form.(slip.List); ok {
+			forms[i] = slip.ListToFunc(ss, list, d2)
+		}
+	}
 	for _, name := range names {
 		ss.Let(sym, slip.Symbol(name))
 		for i := range forms {

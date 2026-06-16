@@ -54,18 +54,15 @@ type If struct {
 func (f *If) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	d2 := depth + 1
+	for i := 1; i < len(args); i++ {
+		if list, ok := args[i].(slip.List); ok {
+			args[i] = slip.ListToFunc(s, list, d2)
+		}
+	}
 	if slip.EvalArg(s, args, 0, d2) != nil {
 		result = slip.EvalArg(s, args, 1, d2)
-		if 2 < len(args) {
-			if list, ok := args[2].(slip.List); ok {
-				args[2] = slip.ListToFunc(s, list, d2)
-			}
-		}
 	} else if 2 < len(args) {
 		result = slip.EvalArg(s, args, 2, d2)
-		if list, ok := args[1].(slip.List); ok {
-			args[1] = slip.ListToFunc(s, list, d2)
-		}
 	}
 	return
 }

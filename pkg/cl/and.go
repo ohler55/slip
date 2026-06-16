@@ -43,6 +43,11 @@ type And struct {
 func (f *And) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	result = slip.True
 	d2 := depth + 1
+	for i, a := range args {
+		if list, ok := a.(slip.List); ok {
+			args[i] = slip.ListToFunc(s, list, d2)
+		}
+	}
 	for i := range args {
 		if result = slip.EvalArg(s, args, i, d2); result == nil {
 			break

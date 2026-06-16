@@ -58,14 +58,23 @@ func (f *Typecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		if !ok || len(clause) == 0 {
 			slip.TypePanic(s, depth, "clause", a, "list")
 		}
-		var sym slip.Symbol
-		if sym, ok = clause[0].(slip.Symbol); ok {
+		for i := 1; i < len(clause); i++ {
+			if list, ok := clause[i].(slip.List); ok {
+				clause[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+	}
+	for _, a := range args[1:] {
+		clause := a.(slip.List)
+		sym, ok := clause[0].(slip.Symbol)
+		switch {
+		case ok:
 			if strings.EqualFold("otherwise", string(sym)) {
 				sym = slip.TrueSymbol
 			}
-		} else if clause[0] == slip.True {
+		case clause[0] == slip.True:
 			sym = slip.TrueSymbol
-		} else {
+		default:
 			slip.TypePanic(s, depth, "clause key", clause[0], "symbol", "t", "otherwise")
 		}
 		if !typecaseMatch(sym, key) {

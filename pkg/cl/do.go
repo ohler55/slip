@@ -160,5 +160,10 @@ func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, t
 		}
 		rforms = list[1:]
 	}
+	for i := 2; i < len(args); i++ {
+		if list, ok := args[i].(slip.List); ok {
+			args[i] = slip.ListToFunc(ns, list, depth)
+		}
+	}
 	return
 }

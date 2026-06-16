@@ -58,6 +58,11 @@ func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		slip.TypePanic(s, depth, "name", ta, "symbol", "nil")
 	}
 	d2 := depth + 1
+	for i, a := range args {
+		if list, ok := a.(slip.List); ok {
+			args[i] = slip.ListToFunc(s, list, d2)
+		}
+	}
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
 		if rr, _ := result.(*slip.ReturnResult); rr != nil {
