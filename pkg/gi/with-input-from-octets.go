@@ -13,6 +13,7 @@ func defWithInputFromOctets() {
 		func(args slip.List) slip.Object {
 			f := WithInputFromOctets{
 				Function: slip.Function{Name: "with-input-from-octets", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -45,6 +46,7 @@ _octets_ provided.`,
 // WithInputFromOctets represents the with-input-from-octets function.
 type WithInputFromOctets struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -67,6 +69,14 @@ func (f *WithInputFromOctets) Call(s *slip.Scope, args slip.List, depth int) (re
 
 	s2 := s.NewScope()
 	s2.Let(sym, slip.NewInputStream(bytes.NewReader(data)))
+	if f.preProv {
+		for i, a := range forms {
+			if list, ok := a.(slip.List); ok {
+				forms[i] = slip.ListToFunc(s2, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := range forms {
 		result = slip.EvalArg(s2, forms, i, d2)
 	}

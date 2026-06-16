@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Block{Function: slip.Function{Name: "block", Args: args, SkipEval: []bool{true}}}
+			f := Block{
+				Function: slip.Function{Name: "block", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -42,6 +45,7 @@ func init() {
 // Block represents the block function.
 type Block struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -58,10 +62,13 @@ func (f *Block) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		slip.TypePanic(s, depth, "name", ta, "symbol", "nil")
 	}
 	d2 := depth + 1
-	for i, a := range args {
-		if list, ok := a.(slip.List); ok {
-			args[i] = slip.ListToFunc(s, list, d2)
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
 		}
+		f.preProv = false
 	}
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)

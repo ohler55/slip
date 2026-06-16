@@ -11,7 +11,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Etypecase{Function: slip.Function{Name: "etypecase", Args: args, SkipEval: []bool{false, true}}}
+			f := Etypecase{
+				Function: slip.Function{Name: "etypecase", Args: args, SkipEval: []bool{false, true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -46,6 +49,7 @@ If there are no matches an error is raised.`,
 // Etypecase represents the etypecase function.
 type Etypecase struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -53,19 +57,32 @@ func (f *Etypecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	key := args[0]
 	d2 := depth + 1
+	// Precompile for provenance.
 	for _, a := range args[1:] {
 		clause, ok := a.(slip.List)
 		if !ok || len(clause) == 0 {
 			slip.TypePanic(s, depth, "clause", a, "list")
 		}
-		var sym slip.Symbol
-		if sym, ok = clause[0].(slip.Symbol); ok {
+		if f.preProv {
+			for i := 1; i < len(clause); i++ {
+				if list, ok := clause[i].(slip.List); ok {
+					clause[i] = slip.ListToFunc(s, list, d2)
+				}
+			}
+		}
+	}
+	f.preProv = false
+	for _, a := range args[1:] {
+		clause := a.(slip.List)
+		sym, ok := clause[0].(slip.Symbol)
+		switch {
+		case ok:
 			if strings.EqualFold("otherwise", string(sym)) {
 				sym = slip.TrueSymbol
 			}
-		} else if clause[0] == slip.True {
+		case clause[0] == slip.True:
 			sym = slip.TrueSymbol
-		} else {
+		default:
 			slip.TypePanic(s, depth, "clause key", clause[0], "symbol", "t", "otherwise")
 		}
 		if !typecaseMatch(sym, key) {

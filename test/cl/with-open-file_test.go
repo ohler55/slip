@@ -23,6 +23,21 @@ func TestWithOpenFileBasic(t *testing.T) {
 	tt.Equal(t, `"{a: 1 b: 2}"`, slip.ObjectString(result))
 }
 
+func TestWithOpenFilePreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	tf := sliptest.Function{
+		Source: `(with-open-file (file "testdata/map.sen" :direction :input) (make-instance bag-flavor :read file))`,
+		Expect: "/#<bag-flavor .+>/",
+	}
+	tf.Test(t)
+	inst, ok := tf.Result.(*flavors.Instance)
+	tt.Equal(t, true, ok)
+	result := inst.Receive(tf.Scope, ":write", nil, 0)
+	tt.Equal(t, `"{a: 1 b: 2}"`, slip.ObjectString(result))
+}
+
 func TestWithOpenFileBadSymbol(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(with-open-file (t "testdata/map.sen" :direction :input) nil)`,

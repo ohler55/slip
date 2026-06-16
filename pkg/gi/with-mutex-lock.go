@@ -13,6 +13,7 @@ func defWithMutexLock() {
 		func(args slip.List) slip.Object {
 			f := WithMutexLock{
 				Function: slip.Function{Name: "with-mutex-lock", Args: args, SkipEval: []bool{false, true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -56,6 +57,7 @@ choice than using a mutex.`,
 // WithMutexLock represents the with-mutex-lock function.
 type WithMutexLock struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -70,6 +72,14 @@ func (f *WithMutexLock) Call(s *slip.Scope, args slip.List, depth int) (result s
 
 	d2 := depth + 1
 	forms := args[1:]
+	if f.preProv {
+		for i, a := range forms {
+			if list, ok := a.(slip.List); ok {
+				forms[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := range forms {
 		result = slip.EvalArg(s, forms, i, d2)
 	}

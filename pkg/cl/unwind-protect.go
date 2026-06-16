@@ -11,6 +11,7 @@ func init() {
 		func(args slip.List) slip.Object {
 			f := UnwindProtect{
 				Function: slip.Function{Name: "unwind-protect", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -43,12 +44,21 @@ are evaluated before exiting the __unwind-protect__ function.`,
 // UnwindProtect represents the unwind-protect function.
 type UnwindProtect struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
 func (f *UnwindProtect) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	d2 := depth + 1
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	defer func() {
 		for i := 1; i < len(args); i++ {
 			_ = slip.EvalArg(s, args, i, d2)

@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Dox{Function: slip.Function{Name: "do*", Args: args, SkipEval: []bool{true}}}
+			f := Dox{
+				Function: slip.Function{Name: "do*", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -57,6 +60,7 @@ supports __tagbody__ and __go__ in the _statements_ forms.`,
 // Dox represents the do* function.
 type Dox struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -64,7 +68,7 @@ func (f *Dox) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	ns := s.NewScope()
 	d2 := depth + 1
-	steps, test, rforms := setupDo(ns, ns, args, d2)
+	steps, test, rforms := setupDo(ns, ns, args, d2, &f.preProv)
 	for {
 		if ns.Eval(test, d2) != nil {
 			for _, rf := range rforms {

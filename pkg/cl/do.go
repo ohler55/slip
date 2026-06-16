@@ -11,7 +11,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Do{Function: slip.Function{Name: "do", Args: args, SkipEval: []bool{true}}}
+			f := Do{
+				Function: slip.Function{Name: "do", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -59,6 +62,7 @@ supports __tagbody__ and __go__ in the _statements_ forms.`,
 // Do represents the do function.
 type Do struct {
 	slip.Function
+	preProv bool
 }
 
 type stepBind struct {
@@ -72,7 +76,7 @@ func (f *Do) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object)
 	slip.CheckArgCount(s, depth, f, args, 2, -1)
 	ns := s.NewScope()
 	d2 := depth + 1
-	steps, test, rforms := setupDo(s, ns, args, d2)
+	steps, test, rforms := setupDo(s, ns, args, d2, &f.preProv)
 	for {
 		if ns.Eval(test, d2) != nil {
 			for _, rf := range rforms {
@@ -111,7 +115,11 @@ func (f *Do) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object)
 	return
 }
 
-func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, test slip.Object, rforms slip.List) {
+func setupDo(
+	s, ns *slip.Scope,
+	args slip.List,
+	depth int,
+	preProv *bool) (steps []*stepBind, test slip.Object, rforms slip.List) {
 	bindings, ok := args[0].(slip.List)
 	if !ok {
 		slip.TypePanic(s, depth, "do bindings", args[0], "list")
@@ -160,10 +168,13 @@ func setupDo(s, ns *slip.Scope, args slip.List, depth int) (steps []*stepBind, t
 		}
 		rforms = list[1:]
 	}
-	for i := 2; i < len(args); i++ {
-		if list, ok := args[i].(slip.List); ok {
-			args[i] = slip.ListToFunc(ns, list, depth)
+	if *preProv {
+		for i := 2; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(ns, list, depth)
+			}
 		}
+		*preProv = false
 	}
 	return
 }

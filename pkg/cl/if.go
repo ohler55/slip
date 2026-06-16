@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := If{Function: slip.Function{Name: "if", Args: args, SkipEval: []bool{true}}}
+			f := If{
+				Function: slip.Function{Name: "if", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -48,16 +51,20 @@ then _else-form_ is evaluated and the result returned.`,
 // If represents the if function.
 type If struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
 func (f *If) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 2, 3)
 	d2 := depth + 1
-	for i := 1; i < len(args); i++ {
-		if list, ok := args[i].(slip.List); ok {
-			args[i] = slip.ListToFunc(s, list, d2)
+	if f.preProv {
+		for i := 1; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
 		}
+		f.preProv = false
 	}
 	if slip.EvalArg(s, args, 0, d2) != nil {
 		result = slip.EvalArg(s, args, 1, d2)

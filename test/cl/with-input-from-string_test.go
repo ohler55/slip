@@ -16,6 +16,16 @@ func TestWithInputFromStringBasic(t *testing.T) {
 	}).Test(t)
 }
 
+func TestWithInputFromStringPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(with-input-from-string (s "abc def") (read s))`,
+		Expect: "abc",
+	}).Test(t)
+}
+
 func TestWithInputFromStringStartEnd(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(with-input-from-string (s "オーラ \"ピーター\" def" :start 4 :end 10) (read s))`,

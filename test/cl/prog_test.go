@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -16,6 +17,16 @@ func TestProgEmpty(t *testing.T) {
 }
 
 func TestProgSimple(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((y 0)) (list (prog ((x 0)) (setq y (+ 1 x))) y))`,
+		Expect: "(nil 1)",
+	}).Test(t)
+}
+
+func TestProgPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
 	(&sliptest.Function{
 		Source: `(let ((y 0)) (list (prog ((x 0)) (setq y (+ 1 x))) y))`,
 		Expect: "(nil 1)",

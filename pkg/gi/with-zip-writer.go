@@ -12,7 +12,10 @@ import (
 func defWithZipWriter() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := WithZipWriter{Function: slip.Function{Name: "with-zip-writer", Args: args, SkipEval: []bool{true}}}
+			f := WithZipWriter{
+				Function: slip.Function{Name: "with-zip-writer", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -49,6 +52,7 @@ treated the same as the arguments for the __zip__ function.`,
 // WithZipWriter represents the with-zip-writer function.
 type WithZipWriter struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -97,6 +101,14 @@ func (f *WithZipWriter) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	setZipHeader(s, z, args, depth)
 	s2 := s.NewScope()
 	s2.Let(sym, &slip.OutputStream{Writer: z})
+	if f.preProv {
+		for i, a := range forms {
+			if list, ok := a.(slip.List); ok {
+				forms[i] = slip.ListToFunc(s2, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := range forms {
 		_ = slip.EvalArg(s2, forms, i, d2)
 	}

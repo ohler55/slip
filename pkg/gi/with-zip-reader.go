@@ -12,7 +12,10 @@ import (
 func defWithZipReader() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := WithZipReader{Function: slip.Function{Name: "with-zip-reader", Args: args, SkipEval: []bool{true}}}
+			f := WithZipReader{
+				Function: slip.Function{Name: "with-zip-reader", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -47,6 +50,7 @@ be a symbol which is then bound to the new zip _input-stream_.`,
 // WithZipReader represents the with-zip-reader function.
 type WithZipReader struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -75,6 +79,14 @@ func (f *WithZipReader) Call(s *slip.Scope, args slip.List, depth int) (result s
 	}
 	s2 := s.NewScope()
 	s2.Let(sym, slip.NewInputStream(z))
+	if f.preProv {
+		for i, a := range forms {
+			if list, ok := a.(slip.List); ok {
+				forms[i] = slip.ListToFunc(s2, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := range forms {
 		result = slip.EvalArg(s2, forms, i, d2)
 	}

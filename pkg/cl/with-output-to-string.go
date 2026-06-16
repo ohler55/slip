@@ -13,6 +13,7 @@ func init() {
 		func(args slip.List) slip.Object {
 			f := WithOutputToString{
 				Function: slip.Function{Name: "with-output-to-string", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -46,6 +47,7 @@ as the element type is always _character_.`,
 // WithOutputToString represents the with-output-to-string function.
 type WithOutputToString struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -65,6 +67,14 @@ func (f *WithOutputToString) Call(s *slip.Scope, args slip.List, depth int) slip
 	s2 := s.NewScope()
 	s2.Let(sym, &stream)
 	args = args[1:]
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(s2, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := range args {
 		_ = slip.EvalArg(s2, args, i, d2)
 	}

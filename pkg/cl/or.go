@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Or{Function: slip.Function{Name: "or", Args: args, SkipEval: []bool{true}}}
+			f := Or{
+				Function: slip.Function{Name: "or", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -37,16 +40,20 @@ otherwise _nil_ is returned.`,
 // Or represents the or function.
 type Or struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
 func (f *Or) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	result = nil
 	d2 := depth + 1
-	for i, a := range args {
-		if list, ok := a.(slip.List); ok {
-			args[i] = slip.ListToFunc(s, list, d2)
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
 		}
+		f.preProv = false
 	}
 	for i := range args {
 		if result = slip.EvalArg(s, args, i, d2); result != nil {

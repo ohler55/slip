@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Case{Function: slip.Function{Name: "case", Args: args, SkipEval: []bool{false, true}}}
+			f := Case{
+				Function: slip.Function{Name: "case", Args: args, SkipEval: []bool{false, true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -47,6 +50,7 @@ implementations.`,
 // Case represents the case function.
 type Case struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -59,12 +63,15 @@ func (f *Case) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		if !ok || len(clause) == 0 {
 			slip.TypePanic(s, depth, "clause", a, "list")
 		}
-		for i := 1; i < len(clause); i++ {
-			if list, ok := clause[i].(slip.List); ok {
-				clause[i] = slip.ListToFunc(s, list, d2)
+		if f.preProv {
+			for i := 1; i < len(clause); i++ {
+				if list, ok := clause[i].(slip.List); ok {
+					clause[i] = slip.ListToFunc(s, list, d2)
+				}
 			}
 		}
 	}
+	f.preProv = false
 	for i, a := range args[1:] {
 		clause := a.(slip.List) // checked earlier
 		var same bool

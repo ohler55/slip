@@ -23,6 +23,16 @@ func TestProgvBasic(t *testing.T) {
 	}).Test(t)
 }
 
+func TestProgvPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(progv '(x) '(2) (1+ x))`,
+		Expect: "3",
+	}).Test(t)
+}
+
 func TestProgvUnbound(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(progv '(x) '() (boundp 'x))`,

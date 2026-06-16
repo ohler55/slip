@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Ecase{Function: slip.Function{Name: "ecase", Args: args, SkipEval: []bool{false, true}}}
+			f := Ecase{
+				Function: slip.Function{Name: "ecase", Args: args, SkipEval: []bool{false, true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -45,18 +48,31 @@ type error is raised.`,
 // Ecase represents the ecase function.
 type Ecase struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
 func (f *Ecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	d2 := depth + 1
 	key := args[0]
-	var found bool // this approach is needed to achieve 100% coverage
+	// Precompile for provenance.
 	for _, a := range args[1:] {
 		clause, ok := a.(slip.List)
 		if !ok || len(clause) == 0 {
 			slip.TypePanic(s, depth, "clause", a, "list")
 		}
+		if f.preProv {
+			for i := 1; i < len(clause); i++ {
+				if list, ok := clause[i].(slip.List); ok {
+					clause[i] = slip.ListToFunc(s, list, d2)
+				}
+			}
+		}
+	}
+	f.preProv = false
+	var found bool // this approach is needed to achieve 100% coverage
+	for _, a := range args[1:] {
+		clause := a.(slip.List)
 		var same bool
 		if keys, ok := clause[0].(slip.List); ok {
 			for _, k := range keys {

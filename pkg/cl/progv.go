@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Progv{Function: slip.Function{Name: "progv", Args: args, SkipEval: []bool{false, false, true}}}
+			f := Progv{
+				Function: slip.Function{Name: "progv", Args: args, SkipEval: []bool{false, false, true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -48,6 +51,7 @@ bound in the scope of the __progv__ function.`,
 // Progv represents the progv function.
 type Progv struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -86,6 +90,14 @@ func (f *Progv) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		}
 	}
 	d2 := depth + 1
+	if f.preProv {
+		for i := 2; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := 2; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
 	}

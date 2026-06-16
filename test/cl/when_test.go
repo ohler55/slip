@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -38,5 +39,15 @@ func TestWhenArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(when)`,
 		Panics: true,
+	}).Test(t)
+}
+
+func TestWhenPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(when t 1 2 (+ 1 2))`,
+		Expect: "3",
 	}).Test(t)
 }

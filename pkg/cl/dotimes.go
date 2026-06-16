@@ -11,7 +11,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Dotimes{Function: slip.Function{Name: "dotimes", Args: args, SkipEval: []bool{true}}}
+			f := Dotimes{
+				Function: slip.Function{Name: "dotimes", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -46,6 +49,7 @@ __return__ and __go__ forms in the body.`,
 // Dotimes represents the dotimes function.
 type Dotimes struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -80,10 +84,13 @@ func (f *Dotimes) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.TypePanic(s, depth, "dotimes input", args[0], "list")
 	}
 	ns.Let(sym, nil) // use the safe way to verify it's a valid symbol to use for a let.
-	for i := 1; i < len(args); i++ {
-		if list, ok := args[i].(slip.List); ok {
-			args[i] = slip.ListToFunc(ns, list, d2)
+	if f.preProv {
+		for i := 1; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(ns, list, d2)
+			}
 		}
+		f.preProv = false
 	}
 	for i := int64(0); i < max; i++ {
 		ns.UnsafeLet(sym, slip.Fixnum(i))

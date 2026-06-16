@@ -11,6 +11,7 @@ func init() {
 		func(args slip.List) slip.Object {
 			f := WithStandardIoSyntax{
 				Function: slip.Function{Name: "with-standard-io-syntax", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -58,6 +59,7 @@ missing as they are not supported. The variables and values set are:
 // WithStandardIoSyntax represents the with-standard-io-syntax function.
 type WithStandardIoSyntax struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -86,6 +88,14 @@ func (f *WithStandardIoSyntax) Call(s *slip.Scope, args slip.List, depth int) (r
 		ns.UnsafeLet(slip.Symbol(k), v)
 	}
 	d2 := depth + 1
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := 0; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
 		switch result.(type) {

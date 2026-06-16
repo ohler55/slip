@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Prog{Function: slip.Function{Name: "prog", Args: args, SkipEval: []bool{true}}}
+			f := Prog{
+				Function: slip.Function{Name: "prog", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -44,6 +47,7 @@ is encountered.`,
 // Prog represents the prog function.
 type Prog struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -54,6 +58,14 @@ func (f *Prog) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	ns.TagBody = true
 	d2 := depth + 1
 	processBinding(s, ns, args[0], d2)
+	if f.preProv {
+		for i := 1; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(ns, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := 1; i < len(args); i++ {
 		switch tr := slip.EvalArg(ns, args, i, d2).(type) {
 		case *slip.ReturnResult:
