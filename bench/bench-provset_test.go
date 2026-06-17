@@ -1,7 +1,6 @@
 package bench_test
 
 import (
-	"reflect"
 	"testing"
 	"unsafe"
 
@@ -18,7 +17,8 @@ func makeLists(cnt int) (map[uint64]*slip.Prov, []uint64) {
 	for i := 0; i < cnt; i++ {
 		list := slip.List{slip.Fixnum(i)}
 		lists = append(lists, list)
-		key := uint64((*reflect.SliceHeader)(unsafe.Pointer(&list)).Data)
+		key := uint64(uintptr(unsafe.Pointer(unsafe.SliceData(list))))
+
 		keys = append(keys, key)
 		pm[key] = &slip.Prov{
 			Filepath:    "bench.lisp",
@@ -27,6 +27,9 @@ func makeLists(cnt int) (map[uint64]*slip.Prov, []uint64) {
 			FirstColumn: 0,
 			LastColumn:  10,
 		}
+	}
+	if len(lists) == 0 {
+		panic("just keeping the linter quiet")
 	}
 	return pm, keys
 }
@@ -66,15 +69,15 @@ func BenchmarkProvSetCreate(b *testing.B) {
 		for i := 0; i < provSetSize; i++ {
 			list := slip.List{slip.Fixnum(i)}
 			lists[i] = list
-			key := uint64((*reflect.SliceHeader)(unsafe.Pointer(&list)).Data)
+			key := uint64(uintptr(unsafe.Pointer(unsafe.SliceData(list))))
 			keys[i] = key
 		}
 	}
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		// ps := make(slip.ProvSet, 0, n*10) // about the same
 		ps := make(slip.ProvSet, 0, 4096)
+		// var ps slip.ProvSet
 		for i := 0; i < provSetSize; i++ {
 			ps.AddByKey(keys[i], &prov)
 		}
@@ -92,14 +95,14 @@ func BenchmarkProvMapCreate(b *testing.B) {
 		for i := 0; i < provSetSize; i++ {
 			list := slip.List{slip.Fixnum(i)}
 			lists[i] = list
-			key := uint64((*reflect.SliceHeader)(unsafe.Pointer(&list)).Data)
+			key := uint64(uintptr(unsafe.Pointer(unsafe.SliceData(list))))
 			keys[i] = key
 		}
 	}
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		pm := map[uint64]*slip.Prov{}
-		//pm := make(map[uint64]*slip.Prov, n*10) // slower
+		// pm := make(map[uint64]*slip.Prov, n*10) // slower
 		for i := 0; i < provSetSize; i++ {
 			pm[keys[i]] = &prov
 		}

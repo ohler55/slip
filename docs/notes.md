@@ -6,10 +6,6 @@
 
 - add provenance
 
- - handle -f flag in app-args
-
- - preallocate code listProvs
-
  - coverage app
   - more complex tests
   - should there be tests for cover.lisp somewhere?

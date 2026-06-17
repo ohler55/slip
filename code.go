@@ -606,6 +606,9 @@ func (r *reader) read(src []byte) {
 			}
 		}
 	}
+	if Provenance && cap(r.listProvs) == 0 {
+		r.listProvs = make(ProvSet, 0, 4096)
+	}
 	var b byte
 	// If src is empty then the for loop will not set r.pos so initialize to
 	// -1 to keep r.pos where it should be.

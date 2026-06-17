@@ -7,10 +7,29 @@
 
 (defvar cover-suite (defsuite "cover" nil))
 
+(defun display-help (error)
+  (typecase error
+    (null nil) ;; no error
+    (symbol nil) ;; probably :help
+    (condition (format t ">>> ~A~%~%" (slot-value error 'message)))
+    (otherwise (format t ">>> ~A~%~%" error)))
+  (format t "~A~%~%runs the covererage tests.~%~%usage: [<options>]~%" (cadr *app-args*))
+  (format t "  -f <pattern>  filter tests~%")
+  (format t "  -v            verbose test output~%")
+  (format t "  -h            display help~%")
+  (terpri))
+
 (defun run-cover-tests ()
-  (let ((verbose (member "-v" *app-args*)))
-    (send cover-suite :run :verbose verbose)
-    (send cover-suite :result)))
+  (recover r (display-help r)
+           (let (verbose filter filter-next)
+             (dolist (arg (subseq *app-args* 2))
+               (cond (filter-next (setq filter arg filter-next nil))
+                     ((string= arg "-v") (setq verbose t))
+                     ((string= arg "-f") (setq filter-next t))
+                     ((string= arg "-h") (panic :help))
+                     (t (panic (format nil "~A is not a valid command line option." arg)))))
+             (send cover-suite :run :verbose verbose)
+             (send cover-suite :result))))
 
 (defun cover-file (test-file cov-file)
   (send (make-command "go" "run" "../cmd/slip/main.go" "-i=false" "-c" "-" "-cover" cov-file test-file) :run))

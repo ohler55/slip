@@ -3,7 +3,6 @@
 package slip
 
 import (
-	"reflect"
 	"sort"
 	"unsafe"
 
@@ -42,7 +41,7 @@ type ProvSet []provEntry
 // duplicates.
 func (ps ProvSet) Add(list List, value *Prov) ProvSet {
 	return append(ps, provEntry{
-		key:   uint64((*reflect.SliceHeader)(unsafe.Pointer(&list)).Data),
+		key:   uint64(uintptr(unsafe.Pointer(unsafe.SliceData(list)))),
 		value: value})
 }
 
@@ -59,7 +58,7 @@ func (ps ProvSet) Sort() {
 
 // Get a Prov at the provided list address. If none exists nil is returned.
 func (ps ProvSet) Get(list List) (p *Prov) {
-	return ps.GetByKey(uint64((*reflect.SliceHeader)(unsafe.Pointer(&list)).Data))
+	return ps.GetByKey(uint64(uintptr(unsafe.Pointer(unsafe.SliceData(list)))))
 }
 
 // GetByKey a Prov at the provided key. If none exists nil is returned.
