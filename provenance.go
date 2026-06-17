@@ -5,6 +5,7 @@ package slip
 import (
 	"reflect"
 	"sort"
+	"unsafe"
 
 	"github.com/ohler55/ojg/pretty"
 )
@@ -33,14 +34,16 @@ type provEntry struct {
 // ProvEntry is used by the code reader to keep track of Prov data associated
 // with each list read. The ProvSet is then passed to CompileList and
 // ListToFunc to attach the Prov to functions after they are created from the
-// lists. A ProvSet is 6 times faster than a map[uint64]*Prov for adding to
-// the set and 3 times faster for lookups.
+// lists. A ProvSet is 18 times faster than a map[uint64]*Prov for adding to
+// the set and 4 times faster for lookups.
 type ProvSet []provEntry
 
 // Add a Prov for a list without attempting to sort nor to check for
 // duplicates.
 func (ps ProvSet) Add(list List, value *Prov) ProvSet {
-	return append(ps, provEntry{key: uint64(reflect.ValueOf(list).Pointer()), value: value})
+	return append(ps, provEntry{
+		key:   uint64((*reflect.SliceHeader)(unsafe.Pointer(&list)).Data),
+		value: value})
 }
 
 // AddByKey adds a Prov without attempting to sort nor to check for
@@ -56,7 +59,7 @@ func (ps ProvSet) Sort() {
 
 // Get a Prov at the provided list address. If none exists nil is returned.
 func (ps ProvSet) Get(list List) (p *Prov) {
-	return ps.GetByKey(uint64(reflect.ValueOf(list).Pointer()))
+	return ps.GetByKey(uint64((*reflect.SliceHeader)(unsafe.Pointer(&list)).Data))
 }
 
 // GetByKey a Prov at the provided key. If none exists nil is returned.
