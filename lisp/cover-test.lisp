@@ -37,7 +37,7 @@
                      ((string= arg "-f") (setq filter-next t))
                      ((string= arg "-h") (panic :help))
                      (t (panic (format nil "~A is not a valid command line option." arg)))))
-             (send cover-suite :run :verbose verbose)
+             (send cover-suite :run :verbose verbose :filter filter)
              (send cover-suite :result))))
 
 (defun cover-file (test-file cov-file)
@@ -91,7 +91,7 @@
 
 (let ((suite (defsuite "if" cover-suite
                :setup (lambda ()
-                        (bind test-file "testdata/if-test.lisp"
+                        (bind test-file "testdata/if.lisp"
                               cov-file "testdata/cov.lisp")
                         (cover-file test-file cov-file)
                         (bind cov-out
@@ -109,20 +109,24 @@
   ;;        (+ 2 3)
   ;;        (- 3 2)))
 
-  (deftest "function-1" suite
+  (deftest "plus-1" suite
     (let ((line (cadr cov-out)))
       (assert-match test-file line)
       (assert-match "1 1 1 21 1" line)))
-  (deftest "function-2" suite
+  (deftest "if" suite
     (let ((line (caddr cov-out)))
       (assert-match test-file line)
       (assert-match "2 4 4 15 1" line)))
-  (deftest "function-3" suite
+  (deftest "greater-than" suite
     (let ((line (cadddr cov-out)))
       (assert-match test-file line)
-      (assert-match "3 8 3 14 1" line)))
-  (deftest "function-4" suite
+      (assert-match "2 8 2 14 1" line)))
+  (deftest "plus-2" suite
     (let ((line (nth 4 cov-out)))
+      (assert-match test-file line)
+      (assert-match "3 8 3 14 1" line)))
+  (deftest "minus-3" suite
+    (let ((line (nth 5 cov-out)))
       (assert-match test-file line)
       (assert-match "4 8 4 14 0" line)))
   (deftest "colorized" suite
@@ -135,5 +139,44 @@
       (assert-equal "G0005R| C       N(- 3 2)C)" (nth 5 lines))
       (assert-equal "R------------------------------------------------------------" (nth 6 lines))
       (assert-equal "Coverage: 80.0%" (nth 7 lines)))))
+
+(let ((suite (defsuite "lambda" cover-suite
+               :setup (lambda ()
+                        (bind test-file "testdata/lambda.lisp"
+                              cov-file "testdata/cov.lisp")
+                        (cover-file test-file cov-file)
+                        (bind cov-out
+                              (let (out)
+                                (with-open-file (f cov-file :direction :input)
+                                  (loop
+                                   (let ((line (nth-value 0 (read-line f nil nil))))
+                                     (unless line (return 'eof))
+                                     (addf out line))))
+                                out))
+                        (bind colorized (colorized-file test-file cov-file))))))
+  ;; (mapcar (lambda (x)
+  ;;           (1+ x))
+  ;;         '(1 2 3))
+
+  (deftest "mapcar" suite
+    (let ((line (cadr cov-out)))
+      (assert-match test-file line)
+      (assert-match "0 0 2 17 1" line)))
+  (deftest "lambda" suite
+    (let ((line (caddr cov-out)))
+      (assert-match test-file line)
+      (assert-match "0 8 1 17 1" line)))
+  (deftest "one-plus" suite
+    (let ((line (nth 3 cov-out)))
+      (assert-match test-file line)
+      (assert-match "1 11 1 16 3" line)))
+  (deftest "colorized" suite
+    (let ((lines (split (decolorize colorized) "\n")))
+      (assert-match test-file (car lines))
+      (assert-equal "G0001R| C(mapcar (lambda (x)" (cadr lines))
+      (assert-equal "G0002R| C          (1+ x))" (caddr lines))
+      (assert-equal "G0003R| C        '(1 2 3))G" (nth 3 lines))
+      (assert-equal "R------------------------------------------------------------" (nth 4 lines))
+      (assert-equal "Coverage: 100.0%" (nth 5 lines)))))
 
 (run-cover-tests)

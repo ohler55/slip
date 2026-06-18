@@ -8,6 +8,10 @@
 
  - coverage app
   - more complex tests
+   - defun
+   - defvar
+   - dolist
+
 
  - remove covx.lisp and testx.lisp after testing
 

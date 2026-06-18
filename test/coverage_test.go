@@ -108,6 +108,7 @@ func TestCoverageDefun(t *testing.T) {
 		Expect: `"(("TestCoverageDefun" nil)
  ("TestCoverageDefun" 0 0 3 41 0)
  ("TestCoverageDefun" 1 20 1 46 1)
+ ("TestCoverageDefun" 1 39 1 45 1)
  ("TestCoverageDefun" 2 20 2 30 1)
  ("TestCoverageDefun" 3 20 3 40 1))
 "`,

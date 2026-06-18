@@ -87,7 +87,6 @@ func CoverageReport(b []byte) []byte {
 		}
 		return false
 	})
-
 	b = append(b, '(', '(')
 	var fp string
 	for _, p := range provs {
@@ -104,11 +103,9 @@ func CoverageReport(b []byte) []byte {
 		b = b[:len(b)-3]
 	}
 	b = append(b, ')')
-	for _, funky := range coverageFuncs {
-		if p := funky.Provenance(); p != nil {
-			b = fmt.Appendf(b, "\n (%q %d %d %d %d %d)",
-				p.Filepath, p.FirstLine, p.FirstColumn, p.LastLine, p.LastColumn, atomic.LoadUint32(&p.count))
-		}
+	for _, p := range provs {
+		b = fmt.Appendf(b, "\n (%q %d %d %d %d %d)",
+			p.Filepath, p.FirstLine, p.FirstColumn, p.LastLine, p.LastColumn, atomic.LoadUint32(&p.count))
 	}
 	return append(b, ')', '\n')
 }
