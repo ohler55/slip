@@ -8,11 +8,6 @@
 
  - coverage app
   - more complex tests
-  - should there be tests for cover.lisp somewhere?
-   - lisp/test
-    - testdata for files
-    - call go to execute tests with explanation that want to use the latest and for CI
-     - use slipr along with Makefile
 
  - remove covx.lisp and testx.lisp after testing
 
