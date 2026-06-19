@@ -7,13 +7,7 @@
 - add provenance
 
  - coverage app
-  - more complex tests
-   - defun
-   - defvar
-   - dolist
-
-
- - remove covx.lisp and testx.lisp after testing
+  - test on larger set of code
 
  - later could be interactive
   - functions for terminal support?

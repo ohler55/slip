@@ -140,8 +140,13 @@ usage: ~A <coverage-file> [<filepath>...]
                         (setq colorized (string-append colorized (subseq line (car seg)))))))
                 (t
                  (setq colorized (string-append colorized (subseq line (car seg) (cadr seg)))))))
+        (let ((last (cadar (last (nth n segments)))))
+          (when (and (<= 0 last) (< last (length line)))
+            (setq colorized (string-append colorized
+                                           (if (< (1+ last) (length line)) (subseq line last (1+ last)) "")
+                                           *ansi-gray*
+                                           (subseq line (1+ last))))))
         (setf (nth n lines) colorized))))
-
   lines)
 
 (defun display-cover-file (cover filepath destination)
@@ -177,7 +182,7 @@ usage: ~A <coverage-file> [<filepath>...]
 Coverage: ~,1F%~%" *ansi-reset* (calculate-coverage cov-fun filepath))))
 
 (defun display-coverage (cover filepaths &optional destination)
-  "Display coverage of then listed filepaths."
+  "Display coverage of the listed filepaths."
   (cond ((emptyp filepaths)
          (display-file-list cover))
         (t
