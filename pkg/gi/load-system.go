@@ -5,6 +5,8 @@ package gi
 import (
 	"fmt"
 	"os"
+	"os/user"
+	"path/filepath"
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -78,11 +80,12 @@ func (f *LoadSystem) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 		slip.CurrentPackage = currentPkg
 	}()
 	var (
-		buf      []byte
-		err      error
-		obj      slip.Object
-		filepath string
-		dirpath  string
+		buf       []byte
+		err       error
+		obj       slip.Object
+		filepath  string
+		dirpath   string
+		listProvs slip.ProvSet
 	)
 	for _, dir := range dirs {
 		filepath = fmt.Sprintf("%s/%s.asd", dir, cys)
@@ -91,8 +94,9 @@ func (f *LoadSystem) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 		if buf, err = os.ReadFile(filepath); err != nil {
 			continue
 		}
-		code := slip.Read(buf, s)
-		code.Compile()
+		var code slip.Code
+		code, listProvs = slip.ReadProv(buf, s, absPath(filepath), listProvs)
+		code.CompileWithProvenance(listProvs)
 		obj = code.Eval(s, nil)
 		dirpath = dir
 		break
@@ -110,4 +114,21 @@ func (f *LoadSystem) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 	_ = sys.Receive(s, ":load", nil, depth+1)
 
 	return sys
+}
+
+func absPath(path string) string {
+	if 0 < len(path) && path[0] == '~' {
+		if usr, err := user.Current(); err == nil {
+			if 1 < len(path) && path[1] == '/' {
+				path = filepath.Join(usr.HomeDir, path[2:])
+			} else {
+				path = filepath.Join(filepath.Dir(usr.HomeDir), path[1:])
+			}
+		}
+	}
+	var err error
+	if path, err = filepath.Abs(path); err != nil {
+		panic(err)
+	}
+	return path
 }

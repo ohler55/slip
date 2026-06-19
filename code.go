@@ -28,16 +28,17 @@ const (
 	tokenStart = 't'
 	tokenDone  = 'T'
 
-	doubleQuote = 'Q'
-	stringByte  = 's'
-	stringDone  = 'S'
-	escByte     = 'e'
-	escOne      = 'E'
-	escUnicode4 = 'u'
-	escUnicode8 = 'U'
-	runeDigit   = '1'
-	runeHexA    = 'H'
-	runeHexa    = 'h'
+	doubleQuote   = 'Q'
+	stringByte    = 's'
+	stringNewline = 'N'
+	stringDone    = 'S'
+	escByte       = 'e'
+	escOne        = 'E'
+	escUnicode4   = 'u'
+	escUnicode8   = 'U'
+	runeDigit     = '1'
+	runeHexA      = 'H'
+	runeHexa      = 'h'
 
 	pipeByte = 'P'
 	pipeDone = 'p'
@@ -104,7 +105,7 @@ const (
 
 	//   0123456789abcdef0123456789abcdef
 	stringMode = "" +
-		".........ss..s.................." + // 0x00
+		".........sN..s.................." + // 0x00
 		"ssSsssssssssssssssssssssssssssss" + // 0x20
 		"ssssssssssssssssssssssssssssesss" + // 0x40
 		"ssssssssssssssssssssssssssssssss" + // 0x60
@@ -664,6 +665,12 @@ func (r *reader) read(src []byte) {
 			if 0 < len(r.buf) {
 				r.buf = append(r.buf, b)
 			}
+		case stringNewline:
+			if 0 < len(r.buf) {
+				r.buf = append(r.buf, b)
+			}
+			r.line++
+			r.lineStart = r.pos
 		case stringDone:
 			var obj Object
 			if 0 < len(r.buf) {

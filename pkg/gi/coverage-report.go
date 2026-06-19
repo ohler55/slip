@@ -4,6 +4,7 @@ package gi
 
 import (
 	"io"
+	"os"
 
 	"github.com/ohler55/slip"
 )
@@ -21,15 +22,17 @@ func defCoverageReport() {
 				{Name: "&optional"},
 				{
 					Name: "destination",
-					Type: "output-stream|t|nil",
+					Type: "output-stream|t|nil|string",
 					Text: `The destination to write to. If _t_ then write to _*standard-output*_.
-If _nil_ then return a string.`,
+If _nil_ then return a string. If a string then assume it is a filepath and create a file and
+write to that file. Finally, if an output-stream, write to the stream.`,
 				},
 			},
 			Return: "nil|string",
 			Text: `__coverage-report__ generates a coverage report and writes to _destination_.
 If _destination_ is __t__ then write output to _*standard-output*_. If _destination_ is __nil__
-then return the report as a string.`,
+then return the report as a __string__. If a _destination_ is a string then assume it is a filepath
+and create a file and write to that file. Finally, if an __output-stream__, write to the stream.`,
 			Examples: []string{
 				`(coverage-report t) => nil`,
 			},
@@ -59,6 +62,14 @@ func (f *CoverageReport) Call(s *slip.Scope, args slip.List, depth int) slip.Obj
 	case io.Writer:
 		w = ta
 		ss, _ = args[0].(slip.Stream)
+	case slip.String:
+		gf, err := os.Create(string(ta))
+		if err != nil {
+			slip.FilePanic(s, depth, ta, "create file failed: %s", err)
+		}
+		w = gf
+		ss = (*slip.FileStream)(gf)
+		defer func() { _ = gf.Close() }()
 	default:
 		if ta == slip.True {
 			so := s.Get("*standard-output*")

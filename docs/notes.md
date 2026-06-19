@@ -7,7 +7,11 @@
 - add provenance
 
  - coverage app
-  - test on larger set of code
+  - option for cover.lisp to show only selected files or dirs
+   -i --include <regex>
+   -x --exclude <regex>
+   - read in .asd first then pick files for summary report, ignore otherwise
+
 
  - later could be interactive
   - functions for terminal support?

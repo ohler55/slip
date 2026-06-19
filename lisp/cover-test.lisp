@@ -131,7 +131,7 @@
       (assert-equal "G0002R| C(+ 1" (caddr lines))
       (assert-equal "G0003R| C   (if (< 0 1)" (nth 3 lines))
       (assert-equal "G0004R| G       C(+ 2 3)G" (nth 4 lines))
-      (assert-equal "G0005R| C       N(- 3 2)C)G" (nth 5 lines))
+      (assert-equal "G0005R| C       N(- 3 2)C)C" (nth 5 lines))
       (assert-equal "R------------------------------------------------------------" (nth 6 lines))
       (assert-equal "Coverage: 80.0%" (nth 7 lines)))))
 
@@ -207,10 +207,10 @@
       (assert-match test-file (car lines))
       (assert-equal "G0001R| C(defun quux (x)" (cadr lines))
       (assert-equal "G0002R| C  (+ 2 x))" (caddr lines))
-      (assert-equal "G0003R| G" (nth 3 lines))
+      (assert-equal "G0003R| C" (nth 3 lines))
       (assert-equal "G0004R| C(defun not-called ()" (nth 4 lines))
       (assert-equal "G0005R| C  N(list 'a 'b)C)" (nth 5 lines))
-      (assert-equal "G0006R| G" (nth 6 lines))
+      (assert-equal "G0006R| C" (nth 6 lines))
       (assert-equal "G0007R| C(quux 3)G" (nth 7 lines))
       (assert-equal "R------------------------------------------------------------" (nth 8 lines))
       (assert-equal "Coverage: 80.0%" (nth 9 lines)))))
@@ -235,7 +235,7 @@
   (deftest "colorized" suite
     (let ((lines (split (decolorize colorized) "\n")))
       (assert-match test-file (car lines))
-      (assert-equal "G0001R| C(defvar quux (+ 2 3))G ;; comment at end of line" (cadr lines))
+      (assert-equal "G0001R| C(defvar quux (+ 2 3))C ;; comment at end of line" (cadr lines))
       (assert-equal "R------------------------------------------------------------" (caddr lines))
       (assert-equal "Coverage: 100.0%" (cadddr lines)))))
 

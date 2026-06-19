@@ -2,8 +2,11 @@
 
 ;;;; Copyright (c) 2026, Peter Ohler, All rights reserved.
 
-(defun display-help (&optional error-message)
-  (when error-message (format t "~%>>> ~A <<<~%" error-message))
+(defun display-help (&optional err)
+  (typecase err
+    (error (format t "~%>>> ~A <<<~%" (send err :message)))
+    (string (format t "~%>>> ~A <<<~%" err))
+    (t nil))
   (format t "~%~A
 
 Explore the coverage of lisp code. The first argument must be a path to a
@@ -13,31 +16,50 @@ provided then the file is displayed with colors indicating whether a function
 was called. A coverage percentage is display at the end of the file.
 
 usage: ~A <coverage-file> [<filepath>...]
-
-" (cadr *app-args*) (cadr *app-args*)))
+" (cadr *app-args*) (cadr *app-args*))
+  (format t "  -i --include <regex>  include file (default: all files) ~%")
+  (format t "  -x --exclude <regex>  exclude file (default: no exclusions) ~%")
+  (format t "  -h --help             display help~%")
+  (terpri))
 
 (defun calculate-coverage (cov-fun filepath)
-  "Calculates the coverage percentage for a file of if no filepath is provided
-   then overall coverage is calculated."
+  "Calculates the coverage percentage for a file if filepath is a string. If
+   filepath is nil then the overall coverage is calculated. If filepath is a
+   list of files then only files in the list are used for the summary."
   (let ((covered 0)
         (total 0))
 
     (dolist (fn cov-fun)
-      (when (or (null filepath) (suffixp (car fn) filepath))
+      (when (or (null filepath)
+                (and (stringp filepath) (suffixp (car fn) filepath))
+                (and (listp filepath) (member (car fn) filepath)))
         (incf total)
         (unless (= 0 (nth 5 fn)) (incf covered))))
 
     (cond ((= total 0) 0)
           (t (/ (* covered 100) total)))))
 
-(defun display-file-list (cover)
+(defun filter-filepath (filepath includes excludes)
+  "File a pathname with the includes and excludes where both the includes and
+   excludes are lists of regexp strings. A filepath passes if it is in the
+   includes and not in the excludes. An empty or nil includes passes any
+   filepath unless it matches a regexp in the excludes."
+  (let ((pass (emptyp includes)))
+    (dolist (rx includes)
+      (when (regex-match rx filepath) (setq pass t)))
+    (dolist (rx excludes)
+      (when (regex-match rx filepath) (setq pass nil)))
+    pass))
+
+(defun display-file-list (cover includes excludes)
   "Display a list of the files in the coverage information along with the
    coverage of each and the overall coverage."
   (let ((cov-files (car cover))
         filepaths)
     (loop
      (when (emptyp cov-files) (return 'done))
-     (addf filepaths (car cov-files))
+     (when (filter-filepath (car cov-files) includes excludes)
+       (addf filepaths (car cov-files)))
      (setq cov-files (cddr cov-files)))
 
     (sort filepaths)
@@ -45,7 +67,7 @@ usage: ~A <coverage-file> [<filepath>...]
     (dolist (filepath filepaths)
       (format t "~A: ~,1F%~%" filepath (calculate-coverage (cdr cover) filepath)))
 
-    (format t "Total coverage: ~,1F%~%" (calculate-coverage (cdr cover) nil))))
+    (format t "Total coverage: ~,1F%~%" (calculate-coverage (cdr cover) filepaths))))
 
 (defun locate-segment (line c0 c1)
   (let ((index 0))
@@ -63,7 +85,6 @@ usage: ~A <coverage-file> [<filepath>...]
          (seg (nth index line))
          (seg0 (car seg))
          xline)
-    ;; TBD if seg is nil end of line, shouldn't happen but just in case
     (when (< seg0 0) (setq seg0 0))
     (when (< 0 index)
       (setq xline (subseq line 0 index)))
@@ -116,6 +137,10 @@ usage: ~A <coverage-file> [<filepath>...]
                  (addf compact comp)
                  (setq comp seg))))
         (addf compact comp)
+        (when (= 1 (length compact))
+          (let ((seg (car compact)))
+            (when (and (< 0 n) (= -1 (car seg)) (= -1 (cadr seg)) (null (caddr seg)))
+              (setf (caddr seg) (caddar (last (nth (1- n) lines)))))))
         (setf (nth n lines) compact)))
 
     lines))
@@ -126,12 +151,14 @@ usage: ~A <coverage-file> [<filepath>...]
     (dotimes (n (length lines))
       (let ((line (nth n lines))
             (sline (nth n segments))
+            (current-color *ansi-gray*)
             (colorized ""))
         (dolist (seg (nth n segments))
-          (setq colorized (string-append colorized (case (caddr seg)
-                                                     (:covered *ansi-green*)
-                                                     (:not-covered *ansi-red*)
-                                                     (t *ansi-gray*))))
+          (setq current-color (case (caddr seg)
+                                (:covered *ansi-green*)
+                                (:not-covered *ansi-red*)
+                                (t *ansi-gray*)))
+          (setq colorized (string-append colorized current-color))
           (cond ((= -1 (cadr seg))
                  ;; when still more left, append rest
                  (cond ((< (car seg) 0)
@@ -139,17 +166,22 @@ usage: ~A <coverage-file> [<filepath>...]
                        ((< (car seg) (length line))
                         (setq colorized (string-append colorized (subseq line (car seg)))))))
                 (t
-                 (setq colorized (string-append colorized (subseq line (car seg) (cadr seg)))))))
+                 (let ((last (cadr seg)))
+                   (cond ((< (length line) last)
+                          (setq colorized (string-append colorized (subseq line (car seg)))))
+                         (t
+                          (setq colorized (string-append colorized (subseq line (car seg) last)))))))))
         (let ((last (cadar (last (nth n segments)))))
           (when (and (<= 0 last) (< last (length line)))
             (setq colorized (string-append colorized
                                            (if (< (1+ last) (length line)) (subseq line last (1+ last)) "")
-                                           *ansi-gray*
+                                           current-color
                                            (subseq line (1+ last))))))
         (setf (nth n lines) colorized))))
   lines)
 
 (defun display-cover-file (cover filepath destination)
+  "Output a file colorized according to the coverage of each function."
   (let ((cov-fun (cdr cover))
         lines
         provs)
@@ -181,23 +213,34 @@ usage: ~A <coverage-file> [<filepath>...]
     (format destination "~A------------------------------------------------------------
 Coverage: ~,1F%~%" *ansi-reset* (calculate-coverage cov-fun filepath))))
 
-(defun display-coverage (cover filepaths &optional destination)
+(defun display-coverage (cover filepaths &optional destination &key include exclude)
   "Display coverage of the listed filepaths."
   (cond ((emptyp filepaths)
-         (display-file-list cover))
+         (display-file-list cover includes excludes))
         (t
          (dolist (filepath filepaths)
            (display-cover-file cover filepath destination)))))
 
-;;; Handle the command lines arguments and kick off the processing.
-(cond ((or (member "-h" *app-args*) (member "-help" *app-args*))
-       (display-help))
-      ((< (length *app-args*) 3)
-       (display-help "missing coverage-file"))
-      (t
-       (recover r (progn
-                    (when (typep r 'error) (setq r (send r :message)))
-                    (display-help r))
-                (let ((cover (with-open-file (f (caddr *app-args*) :direction :input)
-                               (read f))))
-                  (display-coverage cover (cdddr *app-args*))))))
+(defun run-for-cover ()
+  "Parses the command line arguments and runs the coverage display code."
+  (let (includes
+        include-next
+        excludes
+        exclude-next
+        cover
+        files)
+    (dolist (arg (subseq *app-args* 2))
+      (cond (include-next (addf includes arg) (setq include-next nil))
+            (exclude-next (addf excludes arg) (setq exclude-next nil))
+            ((or (string= arg "-i") (string= arg "--include")) (setq include-next t))
+            ((or (string= arg "-x") (string= arg "--exclude")) (setq exclude-next t))
+            ((string= arg "-h") (panic :help))
+            (cover (addf files arg))
+            (t
+             (with-open-file (f arg :direction :input)
+               (setq cover (read f))))))
+    (unless cover (panic "Missing coverage file."))
+    (display-coverage cover files t :include includes :exclude excludes)))
+
+(recover r (display-help r)
+         (run-for-cover))
