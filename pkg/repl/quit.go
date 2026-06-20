@@ -28,7 +28,7 @@ type Quit struct {
 // Call the the function with the arguments provided.
 func (f *Quit) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	cond := slip.ErrorNew(s, depth, "").(slip.Instance)
-	p := slip.WrapError(s, cond, "quit", nil)
+	p := slip.WrapError(s, cond, &slip.Function{Name: "quit"})
 	p.Fatal = true
 	panic(p)
 }

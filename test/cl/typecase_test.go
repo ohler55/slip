@@ -18,6 +18,18 @@ func TestTypecaseSimple(t *testing.T) {
 	}).Test(t)
 }
 
+func TestTypecasePreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(typecase 3
+                  (float (list 'float))
+                  (fixnum (list 'fixnum)))`,
+		Expect: "(fixnum)",
+	}).Test(t)
+}
+
 func TestTypecaseListKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(typecase '(3 2.5)

@@ -19,6 +19,19 @@ func TestWithZipWriter5(t *testing.T) {
 	}).Test(t)
 }
 
+func TestWithZipWriterPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(base64-encode
+                  (with-output-to-string (s)
+                    (with-zip-writer (z s 5 :comment "test")
+                      (format z "some data"))))`,
+		Expect: `"H4sIEAAAAAAA/3Rlc3QAKs7PTVVISSxJBAAAAP//AQAA//8e6cLZCQAAAA=="`,
+	}).Test(t)
+}
+
 func TestWithZipWriterDefault(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode

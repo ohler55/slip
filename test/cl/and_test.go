@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -30,6 +31,16 @@ func TestAndFalse(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(and t nil)`,
+		Expect: "nil",
+	}).Test(t)
+}
+
+func TestAndPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(and (not t) (null nil))`,
 		Expect: "nil",
 	}).Test(t)
 }

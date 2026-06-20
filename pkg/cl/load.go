@@ -142,8 +142,8 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 			defer func() { _, _ = fmt.Fprintf(w, ";; Finished loading %s\n", path) }()
 		}
 	}
-	code := slip.Read(buf, s)
-	code.Compile()
+	code, listProvs := slip.ReadProv(buf, s, path, nil)
+	code.CompileWithProvenance(listProvs)
 	if print == nil {
 		code.Eval(s, nil)
 	} else {

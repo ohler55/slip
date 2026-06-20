@@ -12,7 +12,10 @@ import (
 func defDovector() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Dovector{Function: slip.Function{Name: "dovector", Args: args, SkipEval: []bool{true}}}
+			f := Dovector{
+				Function: slip.Function{Name: "dovector", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -46,6 +49,7 @@ the __dovector__. The __dovector__ allows for __return__ and __go__ forms in the
 // Dovector represents the dovector function.
 type Dovector struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -85,6 +89,14 @@ func (f *Dovector) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.TypePanic(s, depth, "dovector input", args[0], "list")
 	}
 	ns.Let(sym, nil) // use the safe way to verify it's a valid symbol to use for a let.
+	if f.preProv {
+		for i := 1; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for _, v := range list {
 		ns.UnsafeLet(sym, v)
 		for i := 1; i < len(args); i++ {

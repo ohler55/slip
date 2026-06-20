@@ -5,6 +5,7 @@ package gi_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -33,5 +34,15 @@ func TestRecoverSymbol(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(recover t 7)`,
 		Panics: true,
+	}).Test(t)
+}
+
+func TestRecoverPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(recover rec (list rec) 'abc (panic 'catch-me) 'def)`,
+		Expect: "(catch-me)",
 	}).Test(t)
 }

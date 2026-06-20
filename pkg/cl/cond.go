@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Cond{Function: slip.Function{Name: "cond", Args: args, SkipEval: []bool{true}}}
+			f := Cond{
+				Function: slip.Function{Name: "cond", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -39,6 +42,7 @@ evaluation is returned.`,
 // Cond represents the cond function.
 type Cond struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -49,6 +53,17 @@ func (f *Cond) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		if !ok || len(clause) == 0 {
 			slip.TypePanic(s, depth, "clause", a, "list")
 		}
+		if f.preProv {
+			for i := 1; i < len(clause); i++ {
+				if list, ok := clause[i].(slip.List); ok {
+					clause[i] = slip.ListToFunc(s, list, d2)
+				}
+			}
+		}
+	}
+	f.preProv = false
+	for _, a := range args {
+		clause := a.(slip.List)
 		if slip.EvalArg(s, clause, 0, d2) == nil {
 			continue
 		}

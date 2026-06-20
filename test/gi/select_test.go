@@ -29,6 +29,16 @@ func TestSelectT1(t *testing.T) {
 	}).Test(t)
 }
 
+func TestSelectPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(select ((time-after 0.1) x 1) ((time-after 0.01) x (1+ 2)))`,
+		Expect: "3",
+	}).Test(t)
+}
+
 func TestSelectEmpty(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(select ((time-after 0.1)))`,

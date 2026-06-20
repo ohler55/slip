@@ -22,6 +22,15 @@ func TestLetNoInitialForm(t *testing.T) {
 	tt.Equal(t, "(nil nil)", slip.ObjectString(code.Eval(scope, nil)))
 }
 
+func TestLetPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	scope := slip.NewScope()
+	code := slip.ReadString("(let (x (y)) (list x y))", scope)
+	tt.Equal(t, "(nil nil)", slip.ObjectString(code.Eval(scope, nil)))
+}
+
 func TestLetNested(t *testing.T) {
 	scope := slip.NewScope()
 	code := slip.ReadString("(let ((x 1)) (let ((y 2)) (list x y)))", scope)

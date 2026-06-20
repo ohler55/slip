@@ -36,6 +36,7 @@ testlint: lint
 
 test:
 	make -C test cover
+	make -C lisp cover
 	$Q go tool cover -func=test/cov.out | grep "total:"
 	$(eval COVERAGE = $(shell go tool cover -func=test/cov.out | grep "total:" | grep -Eo "[0-9]+\.[0-9]+"))
 	sh ./assets/gen-coverage-badge.sh $(COVERAGE)

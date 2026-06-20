@@ -5,11 +5,25 @@
 ---------------------
 
 - add provenance
- - with flag to slip, slap, and slapper
-  - keep file content in memory by path
-  - in code read note file, line, and column for each function id (address)
- - use that for stack trace
- - use for coverage
+
+ - coverage app
+  - option for cover.lisp to show only selected files or dirs
+   -i --include <regex>
+   -x --exclude <regex>
+   - read in .asd first then pick files for summary report, ignore otherwise
+
+
+ - later could be interactive
+  - functions for terminal support?
+   - add term or termio package using some stuff from the repl
+    - with-raw-terminal (term)
+     - recover and go back to original
+     - can it be run from repl? maybe not
+     - color
+     - move
+     - clear
+     - etc
+  - or coverage viewing as part of repl?
 
 ---------------------
 

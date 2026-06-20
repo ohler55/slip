@@ -19,6 +19,19 @@ func TestWithZipReaderOk(t *testing.T) {
 	}).Test(t)
 }
 
+func TestWithZipReaderPrerov(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(let ((src (base64-decode "H4sIEAAAAAAA/3Rlc3QAKs7PTVVISSxJBAAAAP//AQAA//8e6cLZCQAAAA==")))
+                   (with-input-from-octets (s src)
+                     (with-zip-reader (z s)
+                       (read-all z))))`,
+		Expect: `"some data"`,
+	}).Test(t)
+}
+
 func TestWithZipReaderArgsNotList(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(with-zip-reader t nil)`,

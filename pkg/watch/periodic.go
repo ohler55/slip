@@ -21,7 +21,7 @@ func (p *periodic) eval(s *slip.Scope) (result slip.Object) {
 		if rec := recover(); rec != nil {
 			if result, _ = rec.(*slip.Panic); result == nil {
 				cond := slip.ErrorNew(s, 0, "%s", rec).(slip.Instance)
-				result = slip.WrapError(s, cond, p.id, nil)
+				result = slip.WrapError(s, cond, &slip.Function{Name: p.id})
 			}
 		}
 	}()

@@ -53,10 +53,9 @@ func (tf *Function) Test(t *testing.T) {
 	switch {
 	case tf.PanicType != nil:
 		r := tt.Panic(t, func() {
-			code := slip.ReadString(tf.Source, scope)
+			code, listProvs := slip.ReadProv([]byte(tf.Source), scope, t.Name(), nil)
+			code.CompileWithProvenance(listProvs)
 			code.Eval(scope, nil)
-			// obj := slip.CompileString(tf.Source, scope)
-			// obj.Eval(scope, 0)
 		}, tf.Source)
 		so, ok := r.(slip.Object)
 		tt.Equal(t, true, ok, "expected a panic of %s not a %T", tf.PanicType, r)
@@ -72,16 +71,14 @@ func (tf *Function) Test(t *testing.T) {
 		}
 	case tf.Panics:
 		tt.Panic(t, func() {
-			code := slip.ReadString(tf.Source, scope)
+			code, listProvs := slip.ReadProv([]byte(tf.Source), scope, t.Name(), nil)
+			code.CompileWithProvenance(listProvs)
 			code.Eval(scope, nil)
-			// obj := slip.CompileString(tf.Source, scope)
-			// obj.Eval(scope, 0)
 		}, tf.Source)
 	default:
-		code := slip.ReadString(tf.Source, scope)
+		code, listProvs := slip.ReadProv([]byte(tf.Source), scope, t.Name(), nil)
+		code.CompileWithProvenance(listProvs)
 		tf.Result = code.Eval(scope, nil)
-		// obj := slip.CompileString(tf.Source, scope)
-		// tf.Result = scope.Eval(obj, 0)
 		if tf.Validate != nil {
 			tf.Validate(t, tf.Result)
 		} else {

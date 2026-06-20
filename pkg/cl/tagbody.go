@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Tagbody{Function: slip.Function{Name: "tagbody", Args: args, SkipEval: []bool{true}}}
+			f := Tagbody{
+				Function: slip.Function{Name: "tagbody", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -42,6 +45,7 @@ func init() {
 // Tagbody represents the tagbody function.
 type Tagbody struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -49,6 +53,14 @@ func (f *Tagbody) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	ns := s.NewScope()
 	ns.TagBody = true
 	d2 := depth + 1
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(ns, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := 0; i < len(args); i++ {
 		if gt, _ := slip.EvalArg(ns, args, i, d2).(*GoTo); gt != nil {
 			for i++; i < len(args); i++ {

@@ -134,3 +134,23 @@ func TestScopeString(t *testing.T) {
   x: 1
 /`, child.String())
 }
+
+func TestScopeSyncLock(t *testing.T) {
+	scope := slip.NewScope()
+	dummy := 0
+	// Just make sure no hangs or crashes. Linter want something between and
+	// lock and unlock.
+	scope.SetSynchronized(true)
+	tt.Equal(t, true, scope.Synchronized())
+	scope.Lock()
+	dummy = 1
+	scope.Unlock()
+	tt.Equal(t, 1, dummy)
+
+	scope.SetSynchronized(false)
+	tt.Equal(t, false, scope.Synchronized())
+	scope.Lock()
+	dummy = 2
+	scope.Unlock()
+	tt.Equal(t, 2, dummy)
+}

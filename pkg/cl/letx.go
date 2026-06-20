@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Letx{Function: slip.Function{Name: "let*", Args: args, SkipEval: []bool{true}}}
+			f := Letx{
+				Function: slip.Function{Name: "let*", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -42,6 +45,7 @@ a closure that includes the bindings. All bindings are performed in sequence unl
 // Letx represents the let* function.
 type Letx struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -75,6 +79,14 @@ func (f *Letx) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		default:
 			slip.TypePanic(s, depth, "let* binding", f, "list", "symbol")
 		}
+	}
+	if f.preProv {
+		for i := 1; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
 	}
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)

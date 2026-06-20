@@ -16,6 +16,16 @@ func TestWithInputFromOctetsBasic(t *testing.T) {
 	}).Test(t)
 }
 
+func TestWithInputFromOctetsPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(with-input-from-octets (s "abc def") (read-all s))`,
+		Expect: `"abc def"`,
+	}).Test(t)
+}
+
 func TestWithInputFromOctetsBadArgs(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(with-input-from-octets t (read s))`,

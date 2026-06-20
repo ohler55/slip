@@ -27,6 +27,7 @@ func TestSystemFile(t *testing.T) {
 	defer func() {
 		slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
 		slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
+		slip.ReadString("(fmakunbound 'sub)", scope).Eval(scope, nil)
 	}()
 	(&sliptest.Function{
 		Source: `

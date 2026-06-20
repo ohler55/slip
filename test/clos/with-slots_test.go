@@ -81,6 +81,26 @@ func TestWithSlotsSetq(t *testing.T) {
 	}).Test(t)
 }
 
+func TestWithSlotsPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+
+	slip.CurrentPackage.Remove("quux")
+
+	(&sliptest.Function{
+		Source: `(defclass quux () ((x :initarg :x)))`,
+		Expect: "#<standard-class quux>",
+	}).Test(t)
+
+	(&sliptest.Function{
+		Source: `(let ((q (make-instance 'quux :x 3)))
+                   (with-slots (x) q
+                     (1+ x)))`,
+		Expect: "4",
+	}).Test(t)
+}
+
 func TestWithSlotsNotInstance(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(with-slots ((z x)) 7)`,

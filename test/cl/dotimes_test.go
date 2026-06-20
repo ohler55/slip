@@ -5,10 +5,21 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
 func TestDotimesBasic(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((sum 0)) (dotimes (x 3 (* sum x)) (setq sum (+ sum x))))`,
+		Expect: "9",
+	}).Test(t)
+}
+
+func TestDotimesPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
 	(&sliptest.Function{
 		Source: `(let ((sum 0)) (dotimes (x 3 (* sum x)) (setq sum (+ sum x))))`,
 		Expect: "9",

@@ -16,6 +16,16 @@ func TestWithOpenStreamBasic(t *testing.T) {
 	}).Test(t)
 }
 
+func TestWithOpenStreamPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(with-open-stream (s (make-string-input-stream "abc def")) (read s))`,
+		Expect: "abc",
+	}).Test(t)
+}
+
 func TestWithOpenStreamBadArgs(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(with-open-stream t (read s))`,

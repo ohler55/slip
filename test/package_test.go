@@ -124,6 +124,10 @@ func TestPackageKeyword(t *testing.T) {
 	tt.NotNil(t, kp)
 	tt.Panic(t, func() { kp.Set("", slip.True) })
 	tt.Panic(t, func() { kp.Set(":yes", slip.True) })
+	vv := kp.Set("quux", slip.Symbol(":quux"))
+	tt.Equal(t, slip.Symbol(":quux"), vv.Val)
+	vv = kp.Set("quux", slip.Symbol(":quux"))
+	tt.Equal(t, slip.Symbol(":quux"), vv.Val)
 }
 
 func TestPackageFind(t *testing.T) {
@@ -131,6 +135,13 @@ func TestPackageFind(t *testing.T) {
 	tt.Equal(t, &slip.UserPkg, slip.FindPackage("common-lisp-user"))
 	tt.Equal(t, &slip.UserPkg, slip.FindPackage("user"))
 	tt.Equal(t, (*slip.Package)(nil), slip.FindPackage("nothing"))
+}
+
+func TestPackageFromArg(t *testing.T) {
+	tt.Equal(t, &slip.UserPkg, slip.PackageFromArg(slip.Symbol("user")))
+	tt.Equal(t, &slip.UserPkg, slip.PackageFromArg(slip.Symbol(":user")))
+	tt.Equal(t, &slip.UserPkg, slip.PackageFromArg(slip.String("user")))
+	tt.Panic(t, func() { _ = slip.PackageFromArg(slip.True) })
 }
 
 func TestPackageDef(t *testing.T) {
@@ -326,7 +337,7 @@ func TestPackageLoadForm(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(pps, "(:documentation "))
 	tt.Equal(t, true, strings.Contains(pps, "(:nicknames cl-user user)"))
 	tt.Equal(t, true,
-		strings.Contains(pps, "(:use keyword common-lisp generic xml flavors gi bag clos csv test watch net)"))
+		strings.Contains(pps, "(:use keyword common-lisp generic xml flavors gi bag clos csv repl test watch net)"))
 
 	form = (&slip.CLPkg).LoadForm()
 	pps = string(pp.Append(nil, slip.NewScope(), form))

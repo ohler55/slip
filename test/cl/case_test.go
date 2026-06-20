@@ -27,6 +27,20 @@ func TestCaseBasic(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCasePreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(let ((value 3))
+                  (case value
+                   ((1 2) (list 'low))
+                   (3 (list 'mid))
+                   (t (list 'high))))`,
+		Expect: "(mid)",
+	}).Test(t)
+}
+
 func TestCaseOtherwise(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(case 5 (1 2) (otherwise 1))`,

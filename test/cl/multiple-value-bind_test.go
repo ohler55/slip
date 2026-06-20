@@ -16,6 +16,16 @@ func TestMultipleValueBindBasic(t *testing.T) {
 	}).Test(t)
 }
 
+func TestMultipleValueBindPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(multiple-value-bind (x y) (floor 130 11) (list x y))`,
+		Expect: "(11 9)",
+	}).Test(t)
+}
+
 func TestMultipleValueBindTooFew(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(multiple-value-bind (x) (floor 130 11) x)`,

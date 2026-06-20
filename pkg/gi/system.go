@@ -274,7 +274,7 @@ func (caller systemRunCaller) Call(s *slip.Scope, args slip.List, depth int) (re
 	case nil:
 		// nothing to do
 	case slip.List:
-		result = slip.CompileList(to).Eval(scope, 0)
+		result = slip.CompileList(to, nil).Eval(scope, 0)
 	default:
 		result = to.Eval(scope, 0)
 	}
@@ -422,7 +422,7 @@ func fetchCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List
 	case slip.List:
 		scope := self.NewScope()
 		scope.Set("cache-dir", slip.String(dir))
-		_ = slip.CompileList(ta).Eval(scope, 0)
+		_ = slip.CompileList(ta, nil).Eval(scope, 0)
 	default:
 		slip.TypePanic(s, depth, "fetch-function", args, "list")
 	}
@@ -495,7 +495,7 @@ func loadCall(s *slip.Scope, self *flavors.Instance, dir string, args slip.List,
 	case slip.List:
 		scope := self.NewScope()
 		scope.Set("cache-dir", slip.String(dir))
-		_ = slip.CompileList(ta).Eval(scope, 0)
+		_ = slip.CompileList(ta, nil).Eval(scope, 0)
 	default:
 		slip.TypePanic(s, depth, "load-function", args, "list")
 	}
@@ -509,8 +509,11 @@ func loadFile(s *slip.Scope, self *flavors.Instance, path string) (result slip.O
 	self.Set(slip.Symbol("*load-pathname*"), slip.String(path))
 	self.Set(slip.Symbol("*load-truename*"), slip.String(path))
 	if buf, err := os.ReadFile(path); err == nil {
-		code := slip.Read(buf, s)
-		code.Compile()
+		code, listProvs := slip.ReadProv(buf, s, absPath(path), nil)
+		code.CompileWithProvenance(listProvs)
+
+		// code := slip.Read(buf, s)
+		// code.Compile()
 		result = code.Eval(&self.Scope, nil)
 	} else {
 		panic(err)

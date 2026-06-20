@@ -125,12 +125,15 @@ func SetConfigDir(dir string) {
 		if Trace {
 			fmt.Printf("Loading %q.\n", cfgPath)
 		}
-		code := slip.Read(buf, &scope)
-		pathname := slip.String(filepath.Join(slip.WorkingDir, cfgPath))
-		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
-		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
-		code.Compile()
-		code.Eval(&scope, nil) // TBD consider at load-verbose and load-print
+		pathname := cfgPath
+		if cfgPath[0] != '/' {
+			pathname = filepath.Join(slip.WorkingDir, cfgPath)
+		}
+		code, listProvs := slip.ReadProv(buf, &scope, pathname, nil)
+		_ = slip.CurrentPackage.Set("*load-pathname*", slip.String(pathname))
+		_ = slip.CurrentPackage.Set("*load-truename*", slip.String(pathname))
+		code.CompileWithProvenance(listProvs)
+		code.Eval(&scope, nil) // TBD consider load-verbose and load-print
 	} else {
 		if os.IsNotExist(err) {
 			if err = os.WriteFile(cfgPath, []byte(configHeader), 0666); err != nil {
@@ -141,14 +144,17 @@ func SetConfigDir(dir string) {
 		}
 	}
 	if buf, err = os.ReadFile(customPath); err == nil {
-		pathname := slip.String(filepath.Join(slip.WorkingDir, customPath))
+		if customPath[0] != '/' {
+			customPath = filepath.Join(slip.WorkingDir, customPath)
+		}
+		pathname := slip.String(customPath)
 		_ = slip.CurrentPackage.Set("*load-pathname*", pathname)
 		_ = slip.CurrentPackage.Set("*load-truename*", pathname)
 		if Trace {
 			fmt.Printf("Loading %q.\n", pathname)
 		}
-		code := slip.Read(buf, &scope)
-		code.Compile()
+		code, listProvs := slip.ReadProv(buf, &scope, string(pathname), nil)
+		code.CompileWithProvenance(listProvs)
 		code.Eval(&scope, nil) // TBD look at load-verbose and load-print
 	}
 	configFilename = cfgPath
@@ -303,7 +309,7 @@ func process() {
 			}
 			reset()
 		case *clos.StandardObject:
-			rec = slip.WrapError(&scope, tr, "", nil)
+			rec = slip.WrapError(&scope, tr, &slip.Function{Args: slip.List{tr}})
 			goto top
 		default:
 			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)

@@ -16,3 +16,12 @@ func TestMakeCommandOk(t *testing.T) {
 		Expect: `/\(".*echo" \("echo" "one" "2" "three"\)\)/`,
 	}).Test(t)
 }
+
+func TestMakeCommandListArgs(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((cmd (make-command "echo" '("one" 2 three))))
+                   (list (send cmd :path)
+                         (send cmd :args)))`,
+		Expect: `/\(".*echo" \("echo" "one" "2" "three"\)\)/`,
+	}).Test(t)
+}

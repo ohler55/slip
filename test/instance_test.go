@@ -23,3 +23,13 @@ func TestInstance(t *testing.T) {
 	tt.Equal(t, `(let ((inst (make-instance (quote loaded)))) (setf (slot-value inst (quote none)) nil)
      (setf (slot-value inst (quote size)) 3) inst)`, slip.ObjectString(form))
 }
+
+func TestInstanceCondition(t *testing.T) {
+	scope := slip.NewScope()
+	code := slip.ReadString(`(setq quux (make-condition 'error))`, scope)
+	obj := code.Eval(scope, nil).(slip.Instance)
+
+	form := slip.InstanceLoadForm(obj)
+
+	tt.Equal(t, `(let ((inst (make-condition (quote error)))) inst)`, slip.ObjectString(form))
+}

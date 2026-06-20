@@ -11,7 +11,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Typecase{Function: slip.Function{Name: "typecase", Args: args, SkipEval: []bool{false, true}}}
+			f := Typecase{
+				Function: slip.Function{Name: "typecase", Args: args, SkipEval: []bool{false, true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -46,6 +49,7 @@ If there are no matches an error is raised.`,
 // Typecase represents the typecase function.
 type Typecase struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -58,14 +62,26 @@ func (f *Typecase) Call(s *slip.Scope, args slip.List, depth int) (result slip.O
 		if !ok || len(clause) == 0 {
 			slip.TypePanic(s, depth, "clause", a, "list")
 		}
-		var sym slip.Symbol
-		if sym, ok = clause[0].(slip.Symbol); ok {
+		if f.preProv {
+			for i := 1; i < len(clause); i++ {
+				if list, ok := clause[i].(slip.List); ok {
+					clause[i] = slip.ListToFunc(s, list, d2)
+				}
+			}
+		}
+	}
+	f.preProv = false
+	for _, a := range args[1:] {
+		clause := a.(slip.List)
+		sym, ok := clause[0].(slip.Symbol)
+		switch {
+		case ok:
 			if strings.EqualFold("otherwise", string(sym)) {
 				sym = slip.TrueSymbol
 			}
-		} else if clause[0] == slip.True {
+		case clause[0] == slip.True:
 			sym = slip.TrueSymbol
-		} else {
+		default:
 			slip.TypePanic(s, depth, "clause key", clause[0], "symbol", "t", "otherwise")
 		}
 		if !typecaseMatch(sym, key) {

@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := IgnoreErrors{Function: slip.Function{Name: "ignore-errors", Args: args, SkipEval: []bool{true}}}
+			f := IgnoreErrors{
+				Function: slip.Function{Name: "ignore-errors", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -38,6 +41,7 @@ condition is raised then the result of the forms is returned.`,
 // IgnoreErrors represents the ignore-errors function.
 type IgnoreErrors struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -53,6 +57,14 @@ func (f *IgnoreErrors) Call(s *slip.Scope, args slip.List, depth int) (result sl
 		}
 	}()
 	d2 := depth + 1
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := range args {
 		result = slip.EvalArg(s, args, i, d2)
 	}

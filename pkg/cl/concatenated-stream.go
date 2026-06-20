@@ -90,7 +90,7 @@ func (obj ConcatenatedStream) Read(b []byte) (n int, err error) {
 	if obj[0] != nil {
 		return 0, slip.WrapError(slip.NewScope(),
 			slip.StreamErrorNew(slip.NewScope(), 0, obj, "closed").(slip.Instance),
-			"closed", nil)
+			&slip.Function{Name: "closed"})
 	}
 	var read bool
 	for i, s := range obj {

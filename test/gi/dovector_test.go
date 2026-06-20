@@ -5,6 +5,7 @@ package gi_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -25,6 +26,16 @@ func TestDovectorVector(t *testing.T) {
 func TestDovectorOctets(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(let ((sum 0)) (dovector (x (coerce #(1 2 3) 'octets) sum) (setq sum (+ sum x))))`,
+		Expect: "6",
+	}).Test(t)
+}
+
+func TestDovectorPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(let ((sum 0)) (dovector (x #(1 2 3) sum) (setq sum (+ sum x))))`,
 		Expect: "6",
 	}).Test(t)
 }

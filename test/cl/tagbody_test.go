@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -16,6 +17,16 @@ func TestTagbodyEmpty(t *testing.T) {
 }
 
 func TestTagbodyNoTag(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(let ((x 0)) (tagbody (setq x (1+ x)) (setq x (1+ x))) x)`,
+		Expect: "2",
+	}).Test(t)
+}
+
+func TestTagbodyPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
 	(&sliptest.Function{
 		Source: `(let ((x 0)) (tagbody (setq x (1+ x)) (setq x (1+ x))) x)`,
 		Expect: "2",
