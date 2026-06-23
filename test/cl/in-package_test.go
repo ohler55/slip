@@ -69,12 +69,10 @@ func TestInPackageCallInternal(t *testing.T) {
 (defun inner () (setq inner-called t))
 (defun quuxly () (inner))
 (quuxly)
-;;(export 'quuxly)
 (in-package 'user)
 (use-package 'quux)
 (setq inner-called nil)
 (quuxly)
-;;(inner)
 inner-called
 `,
 		Expect: `t`,

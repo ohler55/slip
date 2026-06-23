@@ -145,6 +145,15 @@ func (p *Panic) Error() string {
 	if 0 < len(p.Message) {
 		return p.Message
 	}
+	if p.Condition != nil {
+		if msg, _ := p.Condition.SlotValue(Symbol("message")); msg != nil {
+			str := msg.String()
+			if ss, ok := msg.(String); ok {
+				str = string(ss)
+			}
+			return str
+		}
+	}
 	return p.String()
 }
 

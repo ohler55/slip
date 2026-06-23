@@ -63,7 +63,7 @@ func TestPanicAppend(t *testing.T) {
 	tt.Equal(t, "/#<warning [0-9a-f]+>/", p.String())
 	tt.Equal(t, "/#<warning [0-9a-f]+>/", p.Simplify())
 	p.Message = ""
-	tt.Equal(t, "/#<warning [0-9a-f]+>/", p.Error())
+	tt.Equal(t, "warn", p.Error())
 }
 
 func TestArgCountCheck(t *testing.T) {

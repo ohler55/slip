@@ -4,6 +4,11 @@
 
 ---------------------
 
+- load and load system still have package inner issues
+ - test for load-system with package
+
+---------------------
+
 - make coverage interactive
   - functions for terminal support?
    - add term or termio package using some stuff from the repl
@@ -24,6 +29,12 @@
 
 - rethink read/compile/eval cycle
  - try and remove special case for defxxx functions and in-package
+ - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
+ - how about first pass, just lists
+  - second pass convert to functions (maybe combine with first)
+  - third call each including defuns
+   - calls need to resolve functions in this step
+
 
 ---------------------
 
