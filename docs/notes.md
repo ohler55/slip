@@ -4,16 +4,7 @@
 
 ---------------------
 
-- add provenance
-
- - coverage app
-  - option for cover.lisp to show only selected files or dirs
-   -i --include <regex>
-   -x --exclude <regex>
-   - read in .asd first then pick files for summary report, ignore otherwise
-
-
- - later could be interactive
+- make coverage interactive
   - functions for terminal support?
    - add term or termio package using some stuff from the repl
     - with-raw-terminal (term)
@@ -27,11 +18,12 @@
 
 ---------------------
 
-- allow package to call in package functions without export
+- flavor allow out of order defflavor like standard-class
 
 ---------------------
 
-- flavor allow out of order defflavor like standard-class
+- rethink read/compile/eval cycle
+ - try and remove special case for defxxx functions and in-package
 
 ---------------------
 

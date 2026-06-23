@@ -1309,7 +1309,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		}
 		var f Object
 		switch strings.ToLower(string(sym)) {
-		case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct":
+		case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct", "defpackage", "in-package":
 			f = ListToFuncWithProvenance(scope, list, 0, listProvs)
 			c[i] = f
 		}
@@ -1318,7 +1318,9 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 			if newQuote == nil {
 				newQuote = CLPkg.GetFunc("quote").Create
 			}
-			c[i] = newQuote(List{name})
+			if string(sym) != "in-package" {
+				c[i] = newQuote(List{name})
+			}
 		}
 	}
 	// Now convert lists to functions.
@@ -1335,6 +1337,20 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 func (c Code) Eval(scope *Scope, w io.Writer) (result Object) {
 	for _, obj := range c {
 		if obj != nil {
+			if df, ok := obj.(*Dynamic); ok {
+				if lam, ok2 := df.Self.(*Lambda); ok2 && 0 < len(lam.Forms) {
+					if ud, ok3 := lam.Forms[0].(Undefined); ok3 {
+						if fi := FindFunc(string(ud)); fi != nil {
+							f := fi.Create(df.Args)
+							result = f.Eval(scope, 0)
+							if w != nil {
+								_, _ = fmt.Fprintf(w, ";;  %s\n", ObjectString(result))
+							}
+							continue
+						}
+					}
+				}
+			}
 			result = obj.Eval(scope, 0)
 			if w != nil {
 				_, _ = fmt.Fprintf(w, ";;  %s\n", ObjectString(result))

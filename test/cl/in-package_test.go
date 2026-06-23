@@ -51,3 +51,84 @@ func TestInPackageBadName(t *testing.T) {
 		PanicType: slip.PackageErrorSymbol,
 	}).Test(t)
 }
+
+func TestInPackageCallInternal(t *testing.T) {
+	scope := slip.NewScope()
+	orig := scope.Get("*package*")
+	slip.CurrentPackage.Remove("quuxly")
+	defer func() {
+		scope.Set("*package*", orig)
+		slip.RemovePackage(slip.FindPackage("quux"))
+		slip.CurrentPackage.Remove("quuxly")
+	}()
+	(&sliptest.Function{
+		Source: `
+(setq inner-called nil)
+(defpackage :quux (:use :common-lisp) (:export 'quuxly))
+(in-package :quux)
+(defun inner () (setq inner-called t))
+(defun quuxly () (inner))
+(quuxly)
+;;(export 'quuxly)
+(in-package 'user)
+(use-package 'quux)
+(setq inner-called nil)
+(quuxly)
+;;(inner)
+inner-called
+`,
+		Expect: `t`,
+	}).Test(t)
+}
+
+func TestInPackageCallInternalExportLater(t *testing.T) {
+	scope := slip.NewScope()
+	orig := scope.Get("*package*")
+	slip.CurrentPackage.Remove("quuxly")
+	defer func() {
+		scope.Set("*package*", orig)
+		slip.RemovePackage(slip.FindPackage("quux"))
+		slip.CurrentPackage.Remove("quuxly")
+	}()
+	(&sliptest.Function{
+		Source: `
+(setq inner-called nil)
+(defpackage :quux (:use :common-lisp))
+(in-package :quux)
+(defun inner () (setq inner-called t))
+(defun quuxly () (inner))
+(quuxly)
+(export 'quuxly)
+(in-package 'user)
+(use-package 'quux)
+(setq inner-called nil)
+(quuxly)
+inner-called
+`,
+		Expect: `t`,
+	}).Test(t)
+}
+
+func TestInPackageCallInternalNoExport(t *testing.T) {
+	scope := slip.NewScope()
+	orig := scope.Get("*package*")
+	slip.CurrentPackage.Remove("quuxly")
+	defer func() {
+		scope.Set("*package*", orig)
+		slip.RemovePackage(slip.FindPackage("quux"))
+		slip.CurrentPackage.Remove("quuxly")
+	}()
+	(&sliptest.Function{
+		Source: `
+(setq inner-called nil)
+(defpackage :quux (:use :common-lisp))
+(in-package :quux)
+(defun inner () (setq inner-called t))
+(defun quuxly () (inner))
+(in-package 'user)
+(use-package 'quux)
+(quuxly)
+`,
+		PanicType: slip.UndefinedFunctionSymbol,
+	}).Test(t)
+}

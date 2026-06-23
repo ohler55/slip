@@ -88,7 +88,6 @@ func init() {
 		},
 		"*repl-interactive*": {
 			Get:    getInteractive,
-			Set:    setInteractive,
 			Doc:    "True if the repl is interactive.",
 			Const:  true,
 			Export: true,
@@ -245,7 +244,7 @@ func setPrompt(value slip.Object) {
 			ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 		}
 	} else {
-		panic("*repl-prompt* must be a string")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-prompt*", value, "string")
 	}
 }
 
@@ -257,7 +256,7 @@ func setMatchColor(value slip.Object) {
 	if str, ok := value.(slip.String); ok {
 		matchColor = string(str)
 	} else {
-		panic("*repl-match-color* must be a string")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-match-color*", value, "string")
 	}
 }
 
@@ -272,7 +271,7 @@ func setEditorFlags(value slip.Object) {
 	case slip.List:
 		editorFlags = list
 	default:
-		panic("*repl-editor-flags* must be a list of strings")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-editor-flags*", value, "list of strings", "nil")
 	}
 }
 
@@ -284,7 +283,7 @@ func setExternalEditor(value slip.Object) {
 	if str, ok := value.(slip.String); ok {
 		externalEditor = string(str)
 	} else {
-		panic("*repl-external-editor* must be a string")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-external-editor*", value, "string")
 	}
 }
 
@@ -296,7 +295,7 @@ func setWarnPrefix(value slip.Object) {
 	if str, ok := value.(slip.String); ok {
 		warnPrefix = string(str)
 	} else {
-		panic("*repl-warning-prefix* must be a string")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-warning-prefix*", value, "string")
 	}
 }
 
@@ -341,10 +340,6 @@ func getInteractive() slip.Object {
 	return nil
 }
 
-func setInteractive(_ slip.Object) {
-	panic("*repl-interactive* is a read only variable")
-}
-
 func getStashLoadPath() slip.Object {
 	return stashLoadPath
 }
@@ -356,7 +351,7 @@ func setStashLoadPath(value slip.Object) {
 	case slip.List:
 		stashLoadPath = list
 	default:
-		panic("*stash-load-path* must be a list of strings")
+		slip.TypePanic(slip.NewScope(), 0, "*stash-load-path*", value, "list of strings", "nil")
 	}
 }
 
@@ -376,7 +371,7 @@ func setDefaultStashName(value slip.Object) {
 	case slip.Symbol:
 		defaultStashName = string(tv)
 	default:
-		panic("*default-stash-name* must be a string or nil")
+		slip.TypePanic(slip.NewScope(), 0, "*default-stash-name*", value, "string", "nil")
 	}
 	if 0 < len(defaultStashName) {
 		dir := FindConfigDir()

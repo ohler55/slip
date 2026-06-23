@@ -11,6 +11,9 @@ const UndefinedFunctionSymbol = Symbol("undefined-function")
 // describing a undefined-function error.
 func UndefinedFunctionNew(s *Scope, depth int, name Object, format string, args ...any) Object {
 	c := FindClass("undefined-function")
+	if c == nil {
+		c = UserPkg.FindClass("error")
+	}
 	obj := c.MakeInstance()
 
 	obj.Init(s, List{
