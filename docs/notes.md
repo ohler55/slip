@@ -4,8 +4,13 @@
 
 ---------------------
 
-- load and load system still have package inner issues
- - test for load-system with package
+- rethink read/compile/eval cycle
+ - try and remove special case for defxxx functions and in-package
+ - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
+ - how about first pass, just lists
+  - second pass convert to functions (maybe combine with first)
+  - third call each including defuns
+   - calls need to resolve functions in this step
 
 ---------------------
 
@@ -24,17 +29,6 @@
 ---------------------
 
 - flavor allow out of order defflavor like standard-class
-
----------------------
-
-- rethink read/compile/eval cycle
- - try and remove special case for defxxx functions and in-package
- - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
- - how about first pass, just lists
-  - second pass convert to functions (maybe combine with first)
-  - third call each including defuns
-   - calls need to resolve functions in this step
-
 
 ---------------------
 
