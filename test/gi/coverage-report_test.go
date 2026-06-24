@@ -3,8 +3,10 @@
 package gi_test
 
 import (
+	"os"
 	"testing"
 
+	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
@@ -39,6 +41,17 @@ func TestCoverageReportStream(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCoverageReportFile(t *testing.T) {
+	defer func() { _ = os.RemoveAll("testdata/cov.lisp") }()
+	(&sliptest.Function{
+		Source: `(coverage-report "testdata/cov.lisp")`,
+		Expect: "nil",
+	}).Test(t)
+	content, err := os.ReadFile("testdata/cov.lisp")
+	tt.Nil(t, err)
+	tt.Equal(t, "(())\n", string(content))
+}
+
 func TestCoverageReportBadDestination(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(coverage-report 7)`,
@@ -53,5 +66,12 @@ func TestCoverageReportWriteFail(t *testing.T) {
 		Scope:     scope,
 		Source:    `(coverage-report out)`,
 		PanicType: slip.StreamErrorSymbol,
+	}).Test(t)
+}
+
+func TestCoverageReportBadFile(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(coverage-report "testdata/comp.lisp/quux.lisp")`,
+		PanicType: slip.FileErrorSymbol,
 	}).Test(t)
 }

@@ -61,9 +61,12 @@ func (obj *StandardObject) IsA(class string) bool {
 // Init the instance slots from the provided args list. If the scope is not
 // nil then send :init is called.
 func (obj *StandardObject) Init(scope *slip.Scope, args slip.List, depth int) {
-	if fi := slip.FindFunc("initialize-instance"); fi != nil {
-		_ = fi.Apply(scope, append(slip.List{obj}, args), depth+1)
+	fi := slip.FindFunc("initialize-instance")
+	if fi == nil {
+		fi = initInstFi
 	}
+	_ = fi.Apply(scope, append(slip.List{obj}, args), depth+1)
+
 	if scope != nil {
 		_ = obj.Receive(scope, ":init", slip.List{args}, depth+1)
 	}

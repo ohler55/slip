@@ -4,16 +4,17 @@
 
 ---------------------
 
-- add provenance
+- rethink read/compile/eval cycle
+ - try and remove special case for defxxx functions and in-package
+ - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
+ - how about first pass, just lists
+  - second pass convert to functions (maybe combine with first)
+  - third call each including defuns
+   - calls need to resolve functions in this step
 
- - coverage app
-  - option for cover.lisp to show only selected files or dirs
-   -i --include <regex>
-   -x --exclude <regex>
-   - read in .asd first then pick files for summary report, ignore otherwise
+---------------------
 
-
- - later could be interactive
+- make coverage interactive
   - functions for terminal support?
    - add term or termio package using some stuff from the repl
     - with-raw-terminal (term)
@@ -24,10 +25,6 @@
      - clear
      - etc
   - or coverage viewing as part of repl?
-
----------------------
-
-- allow package to call in package functions without export
 
 ---------------------
 

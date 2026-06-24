@@ -333,6 +333,7 @@ func TestComplex(t *testing.T) {
 		},
 		Eval: slip.Complex(1 + 2i),
 	}).Test(t)
+	tt.Equal(t, "#C(1 2)", slip.Complex(1+2i).LoadForm().String())
 }
 
 func TestString(t *testing.T) {
@@ -594,6 +595,7 @@ func TestValues(t *testing.T) {
 		Eval: nil,
 	}).Test(t)
 	tt.Nil(t, slip.Values{nil, slip.Fixnum(2)}.First())
+	tt.Equal(t, "nil, 2", slip.Values{nil, slip.Fixnum(2)}.LoadForm().String())
 }
 
 func TestSimpleObject(t *testing.T) {

@@ -181,3 +181,31 @@ func TestLoadEmptyPath(t *testing.T) {
 		PanicType: slip.FileErrorSymbol,
 	}).Test(t)
 }
+
+func TestLoadInPackage(t *testing.T) {
+	scope := slip.NewScope()
+	orig := scope.Get("*package*")
+	slip.CurrentPackage.Remove("quuxly")
+	defer func() {
+		scope.Set("*package*", orig)
+		slip.RemovePackage(slip.FindPackage("quux"))
+		slip.CurrentPackage.Remove("quuxly")
+	}()
+	(&sliptest.Function{
+		Source: `
+(let ((inner-called 0))
+  (with-input-from-string (s "
+    (defpackage :quux (:use :common-lisp) (:export 'quuxly))
+    (in-package :quux)
+    (defun inner () (incf inner-called))
+    (defun quuxly () (inner))
+    (quuxly)
+")
+  (load s))
+  (use-package 'quux)
+  (quuxly)
+  inner-called)
+`,
+		Expect: `2`,
+	}).Test(t)
+}

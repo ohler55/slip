@@ -511,9 +511,6 @@ func loadFile(s *slip.Scope, self *flavors.Instance, path string) (result slip.O
 	if buf, err := os.ReadFile(path); err == nil {
 		code, listProvs := slip.ReadProv(buf, s, absPath(path), nil)
 		code.CompileWithProvenance(listProvs)
-
-		// code := slip.Read(buf, s)
-		// code.Compile()
 		result = code.Eval(&self.Scope, nil)
 	} else {
 		panic(err)

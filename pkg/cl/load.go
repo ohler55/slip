@@ -70,6 +70,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 
 	verbose := s.Get(slip.Symbol("*load-verbose*"))
 	print := s.Get(slip.Symbol("*load-print*"))
+	currentPkg := slip.CurrentPackage
 	var (
 		ifNotExist slip.Object = slip.True
 		buf        []byte
@@ -98,6 +99,7 @@ func (f *Load) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	defer func() {
 		s.Set(slip.Symbol("*load-pathname*"), nil)
 		s.Set(slip.Symbol("*load-truename*"), nil)
+		slip.CurrentPackage = currentPkg
 	}()
 	switch ta := args[0].(type) {
 	case slip.String:

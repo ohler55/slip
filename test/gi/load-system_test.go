@@ -81,3 +81,22 @@ func TestLoadSystemBadPathname(t *testing.T) {
 		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
+
+func TestLoadSystemInPackage(t *testing.T) {
+	scope := slip.NewScope()
+	orig := scope.Get("*package*")
+	slip.CurrentPackage.Remove("packer")
+	defer func() {
+		scope.Set("*package*", orig)
+		slip.RemovePackage(slip.FindPackage("packer"))
+		slip.CurrentPackage.Remove("outer")
+	}()
+	(&sliptest.Function{
+		Source: `
+(load-system :packer "testdata/packer")
+(use-package :packer)
+(outer)
+`,
+		Expect: `inside`,
+	}).Test(t)
+}

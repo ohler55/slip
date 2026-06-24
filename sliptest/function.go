@@ -3,6 +3,7 @@
 package sliptest
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/ohler55/slip"
@@ -46,6 +47,14 @@ type Function struct {
 
 // Test the object test specification.
 func (tf *Function) Test(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			if p, ok := r.(*slip.Panic); ok {
+				fmt.Printf("%s\n", p.AppendFull(nil))
+			}
+			panic(r)
+		}
+	}()
 	scope := tf.Scope
 	if scope == nil {
 		scope = slip.NewScope()

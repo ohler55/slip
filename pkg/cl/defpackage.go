@@ -42,7 +42,7 @@ func init() {
 			Examples: []string{
 				`(defpackage 'quux`,
 				`  (:use "bag" "cl")`,
-				`  (:nicknames "qux"")) => #<package quux>`,
+				`  (:nicknames "quux"")) => #<package quux>`,
 			},
 		}, &slip.CLPkg)
 }
@@ -103,6 +103,9 @@ func readDefOption(s *slip.Scope, name string, args slip.List, depth int) (value
 		}
 		if option[0] == key {
 			for _, v := range option[1:] {
+				if q, ok := v.(*Quote); ok {
+					v = q.Args[0]
+				}
 				values = append(values, slip.MustBeString(v, "option"))
 			}
 			break

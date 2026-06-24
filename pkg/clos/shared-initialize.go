@@ -7,6 +7,8 @@ import (
 	"github.com/ohler55/slip/pkg/generic"
 )
 
+var sharedInitFi *slip.FuncInfo
+
 func defSharedInitialize() {
 	fd := slip.FuncDoc{
 		Name: "shared-initialize",
@@ -47,7 +49,7 @@ when an instance is created by the __initialize-instance__ function.`,
 		Doc:          &md,
 		Combinations: []*slip.Combination{{Primary: defaultSharedInitializeCaller{}}},
 	})
-	Pkg.Define(
+	sharedInitFi = Pkg.Define(
 		func(args slip.List) slip.Object {
 			f := SharedInitialize{
 				Function: slip.Function{Name: "shared-initialize", Args: args, SkipEval: []bool{true}},

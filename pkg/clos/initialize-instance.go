@@ -7,6 +7,8 @@ import (
 	"github.com/ohler55/slip/pkg/generic"
 )
 
+var initInstFi *slip.FuncInfo
+
 func defInitializeInstance() {
 	fd := slip.FuncDoc{
 		Name: "initialize-instance",
@@ -42,7 +44,7 @@ when an instance is created.`,
 		Doc:          &md,
 		Combinations: []*slip.Combination{{Primary: defaultInitializeInstanceCaller{}}},
 	})
-	Pkg.Define(
+	initInstFi = Pkg.Define(
 		func(args slip.List) slip.Object {
 			f := InitializeInstance{
 				Function: slip.Function{Name: "initialize-instance", Args: args, SkipEval: []bool{true}},
@@ -70,9 +72,12 @@ func (f *InitializeInstance) Call(s *slip.Scope, args slip.List, depth int) slip
 type defaultInitializeInstanceCaller struct{}
 
 func (defaultInitializeInstanceCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	if fi := slip.FindFunc("shared-initialize"); fi != nil {
-		args = append(slip.List{args[0], slip.True}, args[1:]...)
-		_ = fi.Apply(s, args, depth+1)
+	fi := slip.FindFunc("shared-initialize")
+	if fi == nil {
+		fi = sharedInitFi
 	}
+	args = append(slip.List{args[0], slip.True}, args[1:]...)
+	_ = fi.Apply(s, args, depth+1)
+
 	return args[0]
 }
