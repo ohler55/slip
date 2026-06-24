@@ -32,9 +32,9 @@ func main() {
 				break
 			}
 			if slip.CurrentPackage.JustGet("*print-ansi*") == nil {
-				_, _ = fmt.Printf("\n## error: %s\n\n", tr)
+				_, _ = fmt.Printf("\n## error: %s\n\n", tr.Error())
 			} else {
-				_, _ = fmt.Printf("\n\x1b[31m## error: %s\x1b[m\n", tr)
+				_, _ = fmt.Printf("\n\x1b[31m## error: %s\x1b[m\n", tr.Error())
 				prefix = "\x1b[31m"
 				suffix = "\x1b[m"
 			}
