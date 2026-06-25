@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   .lisp file.
 - Added cover.lisp that displays coverage data from a save coverage file in the lisp directory.
 - Added `gi:string-append` function.
+- Added the `net:url-flavor` and `net:parse-url` for parsing URLs.
 
 ### Fixed
 - The CompileList function now correctly handles package prefixes.
