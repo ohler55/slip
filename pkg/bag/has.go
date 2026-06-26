@@ -30,7 +30,7 @@ func init() {
 The path must follow the JSONPath format.`,
 				},
 			},
-			Return: "bag",
+			Return: "boolean",
 			Text: `__bag-has__ returns true if a _value_ at the location described by _path_ exists.
 
 This is the same as the _:has_ method of the _bag-flavor_ except none of the method's
