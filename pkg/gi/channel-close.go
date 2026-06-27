@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defChannelClose() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ChannelClose{Function: slip.Function{Name: "channel-close", Args: args}}

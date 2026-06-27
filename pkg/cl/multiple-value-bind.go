@@ -11,6 +11,7 @@ func init() {
 		func(args slip.List) slip.Object {
 			f := MultipleValueBind{
 				Function: slip.Function{Name: "multiple-value-bind", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -48,6 +49,7 @@ and then evaluates the _forms_ in order.`,
 // MultipleValueBind represents the multiple-value-bind function.
 type MultipleValueBind struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -76,6 +78,14 @@ func (f *MultipleValueBind) Call(s *slip.Scope, args slip.List, depth int) (resu
 		}
 	}
 	d2 := depth + 1
+	if f.preProv {
+		for i := 2; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := 2; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
 		switch result.(type) {

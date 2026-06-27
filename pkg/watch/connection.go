@@ -86,8 +86,7 @@ func (c *connection) listen() {
 }
 
 func (c *connection) shutdown(serverRem bool) {
-	if c.active.Load() {
-		c.active.Store(false)
+	if c.active.CompareAndSwap(true, false) {
 		_ = c.con.Close()
 		// close(c.reqs) // closed in method loop
 		close(c.sendQueue)

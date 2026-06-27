@@ -57,10 +57,10 @@ editing, history, tab completion, and more.
 
 ## Installation
 
-Install using `go get`:
+Install using `go install`:
 
 ```
-go get github.com/ohler55/slip/cmd/slip
+go install github.com/ohler55/slip/cmd/slip@latest
 
 ```
 

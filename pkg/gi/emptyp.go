@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defEmptyp() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Emptyp{Function: slip.Function{Name: "emptyp", Args: args}}

@@ -39,4 +39,7 @@ import (
 
 	// Pull in swank server for SLIME integration.
 	_ "github.com/ohler55/slip/pkg/swank"
+
+	// Pull in REPL functions.
+	_ "github.com/ohler55/slip/pkg/repl"
 )

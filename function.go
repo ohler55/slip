@@ -3,8 +3,8 @@
 package slip
 
 import (
-	"fmt"
 	"strings"
+	"sync/atomic"
 )
 
 const (
@@ -44,6 +44,8 @@ type Function struct {
 	SkipEval []bool
 
 	Pkg *Package
+
+	prov *Prov
 }
 
 // Define a new golang function. If the package is provided the function is
@@ -89,10 +91,12 @@ func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 			pkg = pkgs[0]
 		}
 	}
+	pkg.mu.Lock()
 	if fi = pkg.funcs[vname]; fi == nil {
 		vname = strings.ToLower(vname)
 		fi = pkg.funcs[vname]
 	}
+	pkg.mu.Unlock()
 	if fi != nil {
 		if private || fi.Export || CurrentPackage == fi.Pkg {
 			return fi
@@ -104,8 +108,8 @@ func FindFunc(name string, pkgs ...*Package) (fi *FuncInfo) {
 
 // Eval the object.
 func (f *Function) Eval(s *Scope, depth int) (result Object) {
-	beforeEval(s, f.Name, f.Args, depth)
-	defer afterEval(s, f.Name, f.Args, depth, &result)
+	beforeEval(s, f, depth)
+	defer afterEval(s, f, depth, &result)
 
 	if s.InterruptCheck != nil {
 		s.InterruptCheck()
@@ -147,6 +151,11 @@ func (f *Function) Eval(s *Scope, depth int) (result Object) {
 		}
 		args[i] = v
 	}
+	if coverage {
+		if p := f.Provenance(); p != nil {
+			_ = atomic.AddUint32(&p.count, 1)
+		}
+	}
 	result = f.Self.Call(s, args, depth)
 
 	// If there are any .Args that need updating to the function version do
@@ -174,8 +183,9 @@ func (f *Function) SkipArgEval(i int) (skip bool) {
 
 // Apply evaluates with the need to evaluate the args.
 func (f *Function) Apply(s *Scope, args List, depth int) (result Object) {
-	beforeEval(s, f.Name, args, depth)
-	defer afterEval(s, f.Name, args, depth, &result)
+	fn := Function{Name: f.Name, Args: args}
+	beforeEval(s, &fn, depth)
+	defer afterEval(s, &fn, depth, &result)
 
 	return f.Self.Call(s, args, depth)
 }
@@ -276,26 +286,55 @@ func (f *Function) LoadForm() Object {
 	return form
 }
 
+// Provenance return the provenance for the function.
+func (f *Function) Provenance() *Prov {
+	return f.prov
+}
+
+// SetProvenance sets the provenance for the function.
+func (f *Function) SetProvenance(p *Prov) {
+	f.prov = p
+}
+
 // ListToFunc converts a list to a function.
 func ListToFunc(s *Scope, list List, depth int) Object {
+	return ListToFuncWithProvenance(s, list, depth, allListProvs)
+}
+
+// ListToFuncWithProvenance converts a list to a function.
+func ListToFuncWithProvenance(s *Scope, list List, depth int, listProvs ProvSet) Object {
 	if len(list) == 0 {
 		return nil
 	}
+	var prov *Prov
+	if Provenance {
+		prov = listProvs.Get(list)
+	}
 	switch ta := list[0].(type) {
 	case Symbol:
-		return NewFunc(string(ta), list[1:])
+		f := NewFunc(string(ta), list[1:])
+		f.SetProvenance(prov)
+		if coverage {
+			coverageFuncs = append(coverageFuncs, f)
+		}
+		return f
 	case List:
 		if 1 < len(ta) {
 			if sym, ok := ta[0].(Symbol); ok {
 				if strings.EqualFold("lambda", string(sym)) {
-					lambdaDef := ListToFunc(s, ta, depth+1)
+					lambdaDef := ListToFuncWithProvenance(s, ta, depth+1, listProvs)
 					lc := s.Eval(lambdaDef, depth).(*Lambda)
-					return &Dynamic{
+					df := Dynamic{
 						Function: Function{
 							Self: lc,
 							Args: list[1:],
+							prov: prov,
 						},
 					}
+					if coverage {
+						coverageFuncs = append(coverageFuncs, &df)
+					}
+					return &df
 				}
 			}
 		}
@@ -305,7 +344,7 @@ func ListToFunc(s *Scope, list List, depth int) Object {
 }
 
 // CompileArgs for the function.
-func (f *Function) CompileArgs() {
+func (f *Function) CompileArgs(listProvs ProvSet) {
 	si := -1
 	for i := 0; i < len(f.Args); i++ {
 		si++
@@ -314,16 +353,16 @@ func (f *Function) CompileArgs() {
 			if len(f.SkipEval) <= si {
 				if !f.SkipEval[len(f.SkipEval)-1] {
 					if alist, ok := arg.(List); ok {
-						f.Args[i] = CompileList(alist)
+						f.Args[i] = CompileList(alist, listProvs)
 					}
 				}
 			} else if !f.SkipEval[si] {
 				if alist, ok := arg.(List); ok {
-					f.Args[i] = CompileList(alist)
+					f.Args[i] = CompileList(alist, listProvs)
 				}
 			}
 		} else if alist, ok := arg.(List); ok {
-			f.Args[i] = CompileList(alist)
+			f.Args[i] = CompileList(alist, listProvs)
 		}
 	}
 }
@@ -334,14 +373,30 @@ func (f *Function) Caller() Caller {
 }
 
 // CompileList a list into a function or an undefined function.
-func CompileList(list List) (f Object) {
+func CompileList(list List, listProvs ProvSet) (f Object) {
 	if 0 < len(list) {
+		var prov *Prov
+		if Provenance {
+			prov = listProvs.Get(list)
+		}
 		switch ta := list[0].(type) {
 		case Symbol:
-			name := strings.ToLower(string(ta))
-			if fi := CurrentPackage.funcs[name]; fi != nil {
+			if fi := FindFunc(string(ta)); fi != nil {
 				f = fi.Create(list[1:])
+				if funky, ok := f.(Funky); ok {
+					funky.SetProvenance(prov)
+					if coverage {
+						coverageFuncs = append(coverageFuncs, funky)
+					}
+				}
 			} else {
+				pkg, name, private := UnpackName(string(ta))
+				if pkg == nil {
+					pkg = CurrentPackage
+				}
+				if pkg.Locked {
+					PackagePanic(NewScope(), 0, pkg, "Package %s is locked and can not be modified.", pkg)
+				}
 				lc := Lambda{
 					Doc: &FuncDoc{
 						Name: name,
@@ -349,34 +404,48 @@ func CompileList(list List) (f Object) {
 					},
 					Forms: List{Undefined(name)},
 				}
-				CurrentPackage.lambdas[name] = &lc
 				fc := func(args List) Object {
 					return &Dynamic{
 						Function: Function{
 							Name: name,
 							Self: &lc,
+							Args: args,
+							prov: prov,
 						},
 					}
 				}
-				CurrentPackage.funcs[name] = &FuncInfo{Create: fc, Pkg: CurrentPackage, Export: true}
+				pkg.mu.Lock()
+				pkg.lambdas[name] = &lc
+				pkg.funcs[name] = &FuncInfo{Create: fc, Pkg: pkg, Export: !private}
+				pkg.mu.Unlock()
 				f = fc(list[1:])
+				if coverage {
+					if funky, ok := f.(Funky); ok {
+						coverageFuncs = append(coverageFuncs, funky)
+					}
+				}
 			}
 			if funk, ok := f.(Funky); ok {
-				funk.CompileArgs()
+				funk.CompileArgs(listProvs)
 			}
 		case List:
 			if 1 < len(ta) {
 				if sym, ok := ta[0].(Symbol); ok {
 					if strings.EqualFold("lambda", string(sym)) {
 						s := NewScope()
-						lambdaDef := ListToFunc(s, ta, 0)
+						lambdaDef := ListToFuncWithProvenance(s, ta, 0, listProvs)
 						lc := s.Eval(lambdaDef, 0).(*Lambda)
-						return &Dynamic{
+						df := &Dynamic{
 							Function: Function{
 								Self: lc,
 								Args: list[1:],
+								prov: prov,
 							},
 						}
+						if coverage {
+							coverageFuncs = append(coverageFuncs, df)
+						}
+						return df
 					}
 				}
 			}
@@ -387,16 +456,19 @@ func CompileList(list List) (f Object) {
 
 // DescribeFunction returns the documentation for the function bound to the
 // sym argument.
-func DescribeFunction(sym Symbol, pkg ...*Package) *FuncDoc {
+func DescribeFunction(sym Symbol, pkg ...*Package) (doc *FuncDoc) {
 	name := strings.ToLower(string(sym))
 	p := CurrentPackage
 	if 0 < len(pkg) {
 		p = pkg[0]
 	}
+	p.mu.Lock()
 	if fi, has := p.funcs[name]; has {
-		return fi.Doc
+		doc = fi.Doc
 	}
-	return nil
+	p.mu.Unlock()
+
+	return
 }
 
 // EvalArg converts lists arguments to functions and replaces the
@@ -422,7 +494,7 @@ func GetArgsKeyValue(args List, key Symbol) (value Object, has bool) {
 			TypePanic(NewScope(), 0, "keyword", args[pos], "keyword")
 		}
 		if len(args)-1 <= pos {
-			panic(fmt.Sprintf("%s missing an argument", sym))
+			ErrorPanic(NewScope(), 0, "%s missing an argument", sym)
 		}
 		if strings.EqualFold(string(key), string(sym)) {
 			value = args[pos+1]

@@ -42,7 +42,9 @@ func init() {
 			},
 		},
 	)
+	defAvailablePort()
 	defNameServiceError()
+	defParseURL()
 	defSocketAccept()
 	defSocketAddress()
 	defSocketBind()
@@ -73,6 +75,7 @@ func init() {
 		defServer(),
 		defSocket(),
 		defHostent(),
+		defURL(),
 	} {
 		vv := Pkg.GetVarVal(f.Name())
 		vv.Const = true

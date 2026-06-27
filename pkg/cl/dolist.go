@@ -11,7 +11,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Dolist{Function: slip.Function{Name: "dolist", Args: args, SkipEval: []bool{true}}}
+			f := Dolist{
+				Function: slip.Function{Name: "dolist", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -45,6 +48,7 @@ the __dolist__. The __dolist__ allows for __return__ and __go__ forms in the bod
 // Dolist represents the dolist function.
 type Dolist struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -82,6 +86,14 @@ func (f *Dolist) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 		slip.TypePanic(s, depth, "dolist input", args[0], "list")
 	}
 	ns.Let(sym, nil) // use the safe way to verify it's a valid symbol to use for a let.
+	if f.preProv {
+		for i := 1; i < len(args); i++ {
+			if lst, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(ns, lst, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for _, v := range list {
 		ns.UnsafeLet(sym, v)
 		for i := 1; i < len(args); i++ {

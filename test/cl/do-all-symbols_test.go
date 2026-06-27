@@ -74,6 +74,30 @@ func TestDoAllSymbolsJustSymbol(t *testing.T) {
 	}).Test(t)
 }
 
+func TestDoAllSymbolsPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(let ((lst ())) (do-all-symbols (s) (setq lst (add lst s))) lst)`,
+		Validate: func(t *testing.T, v slip.Object) {
+			str := slip.ObjectString(v)
+			// Check a var and function from multiple packages.
+			for _, name := range []string{
+				"*bag*",
+				"bag-compare",
+				"*clos*",
+				"make-instance",
+				"*flavors*",
+				"vanilla-flavor",
+				"*print-pretty*",
+			} {
+				tt.Equal(t, true, strings.Contains(str, name))
+			}
+		},
+	}).Test(t)
+}
+
 func TestDoAllSymbolsReturn(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(do-all-symbols (s 3) (when (equal 'bag-get s) (return 7)))`,

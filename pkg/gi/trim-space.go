@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defTrimSpace() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := TrimSpace{Function: slip.Function{Name: "trim-space", Args: args}}

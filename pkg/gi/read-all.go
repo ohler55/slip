@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defReadAll() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ReadAll{Function: slip.Function{Name: "read-all", Args: args}}

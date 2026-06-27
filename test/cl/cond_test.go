@@ -43,6 +43,21 @@ func TestCondBasic(t *testing.T) {
 	}).Test(t)
 }
 
+func TestCondPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(let ((value 3))
+                   (cond
+                     ((not (integerp value)) (list 'unknown))
+                     ((zerop value) (list 'zero))
+                     ((evenp value) (list 'even))
+                     (t (list 'odd))))`,
+		Expect: "(odd)",
+	}).Test(t)
+}
+
 func TestCondNoMatch(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(cond (nil 1))`,

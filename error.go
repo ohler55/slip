@@ -12,6 +12,9 @@ const ErrorSymbol = Symbol("error")
 // ErrorNew returns an Error object that can then be used with a call to panic.
 func ErrorNew(s *Scope, depth int, format string, args ...any) Object {
 	c := FindClass("error")
+	if c == nil {
+		c = UserPkg.FindClass("error")
+	}
 	obj := c.MakeInstance()
 	obj.Init(s, List{
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),

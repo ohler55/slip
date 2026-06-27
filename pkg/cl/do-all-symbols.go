@@ -11,7 +11,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := DoAllSymbols{Function: slip.Function{Name: "do-all-symbols", Args: args, SkipEval: []bool{true}}}
+			f := DoAllSymbols{
+				Function: slip.Function{Name: "do-all-symbols", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -45,6 +48,7 @@ each symbol in all the packages the _forms_ are called.`,
 // DoAllSymbols represents the do-all-symbols function.
 type DoAllSymbols struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -82,6 +86,14 @@ func (f *DoAllSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.Objec
 	ss := s.NewScope()
 	ss.Block = true
 	forms := args[1:]
+	if f.preProv {
+		for i, form := range forms {
+			if list, ok := form.(slip.List); ok {
+				forms[i] = slip.ListToFunc(ss, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for _, name := range names {
 		ss.Let(sym, slip.Symbol(name))
 		for i := range forms {

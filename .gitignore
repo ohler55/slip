@@ -26,3 +26,5 @@ test/gi/testdata/snapshot.lisp
 
 # Plans
 docs/plans/
+
+cov.lisp

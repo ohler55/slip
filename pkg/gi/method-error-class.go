@@ -8,7 +8,7 @@ import (
 
 const classSymbol = slip.Symbol("class")
 
-func init() {
+func defMethodErrorClass() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MethodErrorClass{Function: slip.Function{Name: "method-error-class", Args: args}}

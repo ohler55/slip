@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -19,6 +20,16 @@ func TestWithStandardIoSyntaxOk(t *testing.T) {
 }
 
 func TestWithStandardIoSyntaxReturn(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(block nil (with-standard-io-syntax (+ 1 2) (return 7) 8))`,
+		Expect: "7",
+	}).Test(t)
+}
+
+func TestWithStandardIoSyntaxPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
 	(&sliptest.Function{
 		Source: `(block nil (with-standard-io-syntax (+ 1 2) (return 7) 8))`,
 		Expect: "7",

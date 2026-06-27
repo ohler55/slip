@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-06-26
+### Added
+- Added `:header-set` and `:header-add` methods to `http-response-writer-flavor`.
+- Added `gi:*app-args*`.
+- Added `gi:process` flavor.
+- Added `gi:find-process` function.
+- Added `gi:command` flavor.
+- Added `gi:make-command` function.
+- Added `gi:load-system` function.
+- Added support for shebang at the start of a file.
+- Added support for ASDF style system component definitions.
+- Added `gi:getcwd` function.
+- Added `gi:chdir` function.
+- Added `net:available-port` function.
+- Added support for function provenance and coverage. This includes the global variables:
+  - `*provenance*` for turning on function provenance collecting
+  - `*coverage*` for collecting coverage data.
+  - `*stack-trace-provenance*`, `*stack-trace-function*`, and
+    `*stack-trace-full-filenames*` for controlling stack trace displays.
+- Added then slipr application. slipr is used with shebang (#!) to run
+  lisp code by adding `#!/usr/bin/env slipr` as the first line in a
+  .lisp file.
+- Added cover.lisp that displays coverage data from a save coverage file in the lisp directory.
+- Added `gi:string-append` function.
+- Added the `net:url-flavor` and `net:parse-url` for parsing URLs.
+
+### Fixed
+- The CompileList function now correctly handles package prefixes.
+- More robust concurrency protection on package access.
+- Fixed structure slot accessor issue.
+- Flavors required-methods now waits until make-instance to detect missing methods.
+- The `terpri` function now allows shadowed `*standard-output*` to be used.
+- Package private functions no longer need to be exported (in most cases).
+
 ## [1.4.1] - 2026-05-14
 ### Fixed
 - Fixed assert-equal ansi check for different length strings.

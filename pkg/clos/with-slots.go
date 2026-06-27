@@ -9,7 +9,10 @@ import (
 func defWithSlots() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := WithSlots{Function: slip.Function{Name: "with-slots", Args: args, SkipEval: []bool{true, false, true}}}
+			f := WithSlots{
+				Function: slip.Function{Name: "with-slots", Args: args, SkipEval: []bool{true, false, true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -44,6 +47,7 @@ of _instance_.`,
 // WithSlots represents the with-slots function.
 type WithSlots struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the the function with the arguments provided.
@@ -89,6 +93,14 @@ func (f *WithSlots) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 		default:
 			slip.TypePanic(s, depth, "slot-entry", entry, "symbol", "list")
 		}
+	}
+	if f.preProv {
+		for i := 2; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(ns, list, d2)
+			}
+		}
+		f.preProv = false
 	}
 	for i := 2; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)

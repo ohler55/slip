@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defAdd() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Add{Function: slip.Function{Name: "add", Args: args}}

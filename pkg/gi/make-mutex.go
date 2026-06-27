@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defMakeMutex() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MakeMutex{Function: slip.Function{Name: "make-mutex", Args: args}}

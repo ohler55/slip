@@ -88,7 +88,6 @@ func init() {
 		},
 		"*repl-interactive*": {
 			Get:    getInteractive,
-			Set:    setInteractive,
 			Doc:    "True if the repl is interactive.",
 			Const:  true,
 			Export: true,
@@ -107,99 +106,124 @@ The default value is ("." "~/.config/slip" "~/.slip")`,
 			Export: true,
 		},
 		"*bold*": {
-			Val:   slip.String("\x1b[1m"),
-			Const: true,
-			Doc:   "bold ANSI sequence",
+			Val:    slip.String("\x1b[1m"),
+			Const:  true,
+			Export: true,
+			Doc:    "bold ANSI sequence",
 		},
 		"*underline*": {
-			Val:   slip.String("\x1b[4m"),
-			Const: true,
-			Doc:   "underline ANSI sequence",
+			Val:    slip.String("\x1b[4m"),
+			Const:  true,
+			Export: true,
+			Doc:    "underline ANSI sequence",
 		},
 		"*ansi-reset*": {
-			Val:   slip.String("\x1b[m"),
-			Const: true,
-			Doc:   "reset ANSI sequence",
+			Val:    slip.String("\x1b[m"),
+			Const:  true,
+			Export: true,
+			Doc:    "reset ANSI sequence",
 		},
 		"*ansi-black*": {
-			Val:   slip.String("\x1b[30m"),
-			Const: true,
-			Doc:   "black ANSI sequence",
+			Val:    slip.String("\x1b[30m"),
+			Const:  true,
+			Export: true,
+			Doc:    "black ANSI sequence",
 		},
 		"*ansi-red*": {
-			Val:   slip.String("\x1b[31m"),
-			Const: true,
-			Doc:   "red ANSI sequence",
+			Val:    slip.String("\x1b[31m"),
+			Const:  true,
+			Export: true,
+			Doc:    "red ANSI sequence",
 		},
 		"*ansi-green*": {
-			Val:   slip.String("\x1b[32m"),
-			Const: true,
-			Doc:   "green ANSI sequence",
+			Val:    slip.String("\x1b[32m"),
+			Const:  true,
+			Export: true,
+			Doc:    "green ANSI sequence",
 		},
 		"*ansi-yellow*": {
-			Val:   slip.String("\x1b[33m"),
-			Const: true,
-			Doc:   "yellow ANSI sequence",
+			Val:    slip.String("\x1b[33m"),
+			Const:  true,
+			Export: true,
+			Doc:    "yellow ANSI sequence",
 		},
 		"*ansi-blue*": {
-			Val:   slip.String("\x1b[34m"),
-			Const: true,
-			Doc:   "blue ANSI sequence",
+			Val:    slip.String("\x1b[34m"),
+			Const:  true,
+			Export: true,
+			Doc:    "blue ANSI sequence",
 		},
 		"*ansi-magenta*": {
-			Val:   slip.String("\x1b[35m"),
-			Const: true,
-			Doc:   "magenta ANSI sequence",
+			Val:    slip.String("\x1b[35m"),
+			Const:  true,
+			Export: true,
+			Doc:    "magenta ANSI sequence",
 		},
 		"*ansi-cyan*": {
-			Val:   slip.String("\x1b[36m"),
-			Const: true,
-			Doc:   "cyan ANSI sequence",
+			Val:    slip.String("\x1b[36m"),
+			Const:  true,
+			Export: true,
+			Doc:    "cyan ANSI sequence",
 		},
 		"*ansi-white*": {
-			Val:   slip.String("\x1b[37m"),
-			Const: true,
-			Doc:   "white ANSI sequence",
+			Val:    slip.String("\x1b[37m"),
+			Const:  true,
+			Export: true,
+			Doc:    "white ANSI sequence",
 		},
 		"*ansi-light-black*": {
-			Val:   slip.String("\x1b[90m"),
-			Const: true,
-			Doc:   "gray ANSI sequence",
+			Val:    slip.String("\x1b[90m"),
+			Const:  true,
+			Export: true,
+			Doc:    "gray ANSI sequence",
+		},
+		"*ansi-gray*": {
+			Val:    slip.String("\x1b[90m"),
+			Const:  true,
+			Export: true,
+			Doc:    "gray ANSI sequence",
 		},
 		"*ansi-light-red*": {
-			Val:   slip.String("\x1b[91m"),
-			Const: true,
-			Doc:   "light-red ANSI sequence",
+			Val:    slip.String("\x1b[91m"),
+			Const:  true,
+			Export: true,
+			Doc:    "light-red ANSI sequence",
 		},
 		"*ansi-light-green*": {
-			Val:   slip.String("\x1b[92m"),
-			Const: true,
-			Doc:   "light-green ANSI sequence",
+			Val:    slip.String("\x1b[92m"),
+			Const:  true,
+			Export: true,
+			Doc:    "light-green ANSI sequence",
 		},
 		"*ansi-light-yellow*": {
-			Val:   slip.String("\x1b[93m"),
-			Const: true,
-			Doc:   "light-yellow ANSI sequence",
+			Val:    slip.String("\x1b[93m"),
+			Const:  true,
+			Export: true,
+			Doc:    "light-yellow ANSI sequence",
 		},
 		"*ansi-light-blue*": {
-			Val:   slip.String("\x1b[94m"),
-			Const: true,
-			Doc:   "light-blue ANSI sequence",
+			Val:    slip.String("\x1b[94m"),
+			Const:  true,
+			Export: true,
+			Doc:    "light-blue ANSI sequence",
 		},
 		"*ansi-light-magenta*": {
-			Val:   slip.String("\x1b[95m"),
-			Const: true,
-			Doc:   "light-magenta ANSI sequence",
+			Val:    slip.String("\x1b[95m"),
+			Const:  true,
+			Export: true,
+			Doc:    "light-magenta ANSI sequence",
 		},
 		"*ansi-light-cyan*": {
-			Val:   slip.String("\x1b[96m"),
-			Const: true,
-			Doc:   "light-cyan ANSI sequence",
+			Val:    slip.String("\x1b[96m"),
+			Const:  true,
+			Export: true,
+			Doc:    "light-cyan ANSI sequence",
 		},
 		"*ansi-light-white*": {
-			Val:   slip.String("\x1b[97m"),
-			Const: true,
-			Doc:   "bright-white ANSI sequence",
+			Val:    slip.String("\x1b[97m"),
+			Const:  true,
+			Export: true,
+			Doc:    "bright-white ANSI sequence",
 		},
 	}, &Ansi{})
 
@@ -220,7 +244,7 @@ func setPrompt(value slip.Object) {
 			ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 		}
 	} else {
-		panic("*repl-prompt* must be a string")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-prompt*", value, "string")
 	}
 }
 
@@ -232,7 +256,7 @@ func setMatchColor(value slip.Object) {
 	if str, ok := value.(slip.String); ok {
 		matchColor = string(str)
 	} else {
-		panic("*repl-match-color* must be a string")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-match-color*", value, "string")
 	}
 }
 
@@ -247,7 +271,7 @@ func setEditorFlags(value slip.Object) {
 	case slip.List:
 		editorFlags = list
 	default:
-		panic("*repl-editor-flags* must be a list of strings")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-editor-flags*", value, "list of strings", "nil")
 	}
 }
 
@@ -259,7 +283,7 @@ func setExternalEditor(value slip.Object) {
 	if str, ok := value.(slip.String); ok {
 		externalEditor = string(str)
 	} else {
-		panic("*repl-external-editor* must be a string")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-external-editor*", value, "string")
 	}
 }
 
@@ -271,7 +295,7 @@ func setWarnPrefix(value slip.Object) {
 	if str, ok := value.(slip.String); ok {
 		warnPrefix = string(str)
 	} else {
-		panic("*repl-warning-prefix* must be a string")
+		slip.TypePanic(slip.NewScope(), 0, "*repl-warning-prefix*", value, "string")
 	}
 }
 
@@ -316,10 +340,6 @@ func getInteractive() slip.Object {
 	return nil
 }
 
-func setInteractive(_ slip.Object) {
-	panic("*repl-interactive* is a read only variable")
-}
-
 func getStashLoadPath() slip.Object {
 	return stashLoadPath
 }
@@ -331,7 +351,7 @@ func setStashLoadPath(value slip.Object) {
 	case slip.List:
 		stashLoadPath = list
 	default:
-		panic("*stash-load-path* must be a list of strings")
+		slip.TypePanic(slip.NewScope(), 0, "*stash-load-path*", value, "list of strings", "nil")
 	}
 }
 
@@ -351,7 +371,7 @@ func setDefaultStashName(value slip.Object) {
 	case slip.Symbol:
 		defaultStashName = string(tv)
 	default:
-		panic("*default-stash-name* must be a string or nil")
+		slip.TypePanic(slip.NewScope(), 0, "*default-stash-name*", value, "string", "nil")
 	}
 	if 0 < len(defaultStashName) {
 		dir := FindConfigDir()

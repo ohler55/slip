@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defMakeTime() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MakeTime{Function: slip.Function{Name: "make-time", Args: args}}

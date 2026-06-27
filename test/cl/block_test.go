@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -16,6 +17,16 @@ func TestBlockNil(t *testing.T) {
 }
 
 func TestBlockPlain(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(block nil (+ 1 2) (+ 2 3))`,
+		Expect: "5",
+	}).Test(t)
+}
+
+func TestBlockPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
 	(&sliptest.Function{
 		Source: `(block nil (+ 1 2) (+ 2 3))`,
 		Expect: "5",

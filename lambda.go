@@ -29,7 +29,7 @@ type Lambda struct {
 func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 	ss := s.NewScope()
 	if lam.Closure != nil {
-		ss.parents = append(ss.parents, lam.Closure)
+		ss.parents = append([]*Scope{lam.Closure}, ss.parents...)
 		ss.Macro = lam.Closure.Macro
 	} else if s.Keep { // flavors instance uses this
 		ss.parents = append(ss.parents, s)
@@ -48,6 +48,9 @@ func (lam *Lambda) Call(s *Scope, args List, depth int) (result Object) {
 Aux:
 	for i, ad := range lam.Doc.Args {
 		if len(args) <= ai {
+			if mode == reqMode && ad.Name[0] != '&' && !s.has("~whopper-location~") {
+				ErrorPanic(s, depth, "Missing %s argument.", ad.Name)
+			}
 			break
 		}
 	Mode:
@@ -107,7 +110,7 @@ Aux:
 				if sym, ok := a.(Symbol); ok && 0 < len(sym) && sym[0] == ':' {
 					sym = sym[1:]
 					if len(args) <= ai {
-						panic(fmt.Sprintf("Missing value for key :%s.", sym))
+						ErrorPanic(s, depth, "Missing value for key :%s.", sym)
 					}
 					ss.Let(sym, args[ai])
 					ai++
@@ -151,7 +154,7 @@ Aux:
 			case AmpAllowOtherKeys:
 				// ignore
 			default:
-				if !ss.Bound(Symbol(ad.Name)) {
+				if !ss.boundLocal(ad.Name) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
@@ -164,7 +167,7 @@ Aux:
 			case AmpAllowOtherKeys:
 				// ignore
 			default:
-				if !ss.Bound(Symbol(ad.Name)) {
+				if !ss.boundLocal(ad.Name) {
 					ss.Let(Symbol(ad.Name), ad.Default)
 				}
 			}
@@ -172,7 +175,7 @@ Aux:
 			asym := Symbol(ad.Name)
 			if AmpAux == asym {
 				mode = auxMode
-			} else if !ss.Bound(asym) {
+			} else if !ss.boundLocal(string(asym)) {
 				ss.Let(asym, ad.Default)
 			}
 		case auxMode:
@@ -288,7 +291,7 @@ func (lam *Lambda) Compile(s *Scope, extraVars ...string) {
 			}
 			lam.Forms[i] = vv
 		case List:
-			lam.Forms[i] = CompileList(tf)
+			lam.Forms[i] = CompileList(tf, allListProvs)
 		}
 	}
 }

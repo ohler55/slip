@@ -333,6 +333,7 @@ func TestComplex(t *testing.T) {
 		},
 		Eval: slip.Complex(1 + 2i),
 	}).Test(t)
+	tt.Equal(t, "#C(1 2)", slip.Complex(1+2i).LoadForm().String())
 }
 
 func TestString(t *testing.T) {
@@ -594,6 +595,7 @@ func TestValues(t *testing.T) {
 		Eval: nil,
 	}).Test(t)
 	tt.Nil(t, slip.Values{nil, slip.Fixnum(2)}.First())
+	tt.Equal(t, "nil, 2", slip.Values{nil, slip.Fixnum(2)}.LoadForm().String())
 }
 
 func TestSimpleObject(t *testing.T) {
@@ -626,13 +628,13 @@ func TestSimpleObject(t *testing.T) {
 		obj.String())
 
 	cond := slip.ErrorNew(scope, 0, "").(slip.Instance)
-	p := slip.WrapError(scope, cond, "sample", nil)
+	p := slip.WrapError(scope, cond, &slip.Function{Name: "sample"})
 	p.Value = slip.Fixnum(7)
 	obj = slip.SimpleObject(p)
 	tt.Equal(t, "7", obj.String())
 
 	cond = slip.ErrorNew(scope, 0, "sample").(slip.Instance)
-	p = slip.WrapError(scope, cond, "sample", nil)
+	p = slip.WrapError(scope, cond, &slip.Function{Name: "sample"})
 	obj = slip.SimpleObject(p)
 	tt.Equal(t, `/#<error [0-9a-f]+>/`, obj.String())
 }
@@ -1026,6 +1028,24 @@ func TestFuncInfo(t *testing.T) {
 	fd := fi.FuncDocs()
 	tt.NotNil(t, fd)
 	tt.Equal(t, "car", fd.Name)
+
+	form := fi.LoadForm()
+	tt.Equal(t, `(defun car (arg)
+       "__car__ returns the _car_ if _arg_ is a _cons_, the first element if _arg_ is a _list_, and
+_nil_ if _arg_ is _nil_ or an empty _list_."
+       ...)`, slip.ObjectString(form))
+}
+
+func TestFuncInfoOtherForms(t *testing.T) {
+	form := slip.MustFindFunc("setq").LoadForm()
+	tt.Equal(t, `(defmacro setq (symbol value)
+          "__setq__ the value of the _symbol_ to _value_. Note that _symbol_ is not evaluated.
+Repeated pairs of _symbol_ and _value_ are supported."
+          ...)`, slip.ObjectString(form))
+
+	form = slip.MustFindFunc("slot-missing").LoadForm()
+	tt.Equal(t, `(defgeneric slot-missing (class object slot-name operation &optional new-value)
+            (:documentation "__slot-missing__ default method raises a cell-error."))`, slip.ObjectString(form))
 }
 
 func TestFuncInfoDescribeBasic(t *testing.T) {

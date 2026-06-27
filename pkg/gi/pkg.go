@@ -3,6 +3,8 @@
 package gi
 
 import (
+	"os"
+
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
 )
@@ -268,6 +270,52 @@ func init() {
 				Export: true,
 				Doc:    "The month of December as a fixnum.",
 			},
+			"*app-args*": {
+				Get:    getAppArgs,
+				Set:    nil,
+				Export: true,
+				Doc:    "are the command line arguments.",
+			},
+			"*provenance*": {
+				Get:    getProvenance,
+				Set:    setProvenance,
+				Export: true,
+				Doc: `If *provenance* is true function provenance information is collected.
+Function provenance is used in stack trace output as we as in coverage reports. If used it
+should be set to true at before loading files.`,
+			},
+			"*coverage*": {
+				Get:    getCoverage,
+				Set:    setCoverage,
+				Export: true,
+				Doc: `If *coverage* is true counts of the number of calls to functions with
+provenance information are collected for use when a call to write-coverage is made. If used
+it should be set to true at before loading files.`,
+			},
+			"*stack-trace-provenance*": {
+				Get:    getStackTraceProvenance,
+				Set:    setStackTraceProvenance,
+				Export: true,
+				Doc: `The global *stack-trace-provenance* controls how stack traces are
+displayed or output as strings. If true provenance information of filename, line number,
+and column are displayed. If not provenance information is available then the function
+display is used.`,
+			},
+			"*stack-trace-function*": {
+				Get:    getStackTraceFunction,
+				Set:    setStackTraceFunction,
+				Export: true,
+				Doc: `The global *stack-trace-function* controls how stack traces are
+displayed or output as strings. If true the functions called are displayed.`,
+			},
+			"*stack-trace-full-filenames*": {
+				Get:    getStackTraceFullFilenames,
+				Set:    setStackTraceFullFilenames,
+				Export: true,
+				Doc: `The global *stack-trace-full-filenames* controls how stack traces
+are displayed or output as strings. If *stack-trace-provenance* is true then the full
+filename is displayed instead of just the base.`,
+			},
 		})
 	for _, f := range []*flavors.Flavor{
 		defLogger(),
@@ -276,6 +324,110 @@ func init() {
 		vv := Pkg.GetVarVal(f.Name())
 		vv.Const = true
 	}
+	defAdd()
+	defAddf()
+	defAddnew()
+	defBase64Decode()
+	defBase64Encode()
+	defChannelClose()
+	defChannelPop()
+	defChannelPush()
+	defCharLength()
+	defChdir()
+	defClearenv()
+	defCommand()
+	defContainsp()
+	defCoverageReport()
+	defCryptoHash()
+	defDecrypt()
+	defDecryptFile()
+	defDefSystem()
+	defDovector()
+	defEmptyp()
+	defEncrypt()
+	defEncryptFile()
+	defEnv()
+	defFileInfo()
+	defFilepathJoin()
+	defFindProcess()
+	defGc()
+	defGetcwd()
+	defGetenv()
+	defGlob()
+	defLoadSystem()
+	defLockPackage()
+	defMakeApp()
+	defMakeChannel()
+	defMakeCommand()
+	defMakeMutex()
+	defMakeOctets()
+	defMakeTime()
+	defMakeUUID()
+	defMapv()
+	defMemstat()
+	defMethodErrorClass()
+	defMethodErrorQualifier()
+	defNow()
+	defOctetLength()
+	defOctetsToString()
+	defPackageLockedp()
+	defPanic()
+	defParseTime()
+	defPrefixp()
+	defPrettyPrint()
+	defProcess()
+	defProcessID()
+	defRange()
+	defReadAll()
+	defReadEach()
+	defReadPush()
+	defRecover()
+	defRegexFind()
+	defRegexFindAll()
+	defRegexMatch()
+	defReplaceAll()
+	defReplaceFirst()
+	defResetCoverage()
+	defRun()
+	defSave()
+	defSelect()
+	defSendSignal()
+	defSetenv()
+	defSignalWait()
+	defSnapshot()
+	defSplit()
+	defStrcat()
+	defStringAppend()
+	defStringRepeat()
+	defStringToOctets()
+	defSuffixp()
+	defTimeAdd()
+	defTimeAfter()
+	defTimeComponents()
+	defTimeElapsed()
+	defTimeFormat()
+	defTimeIn()
+	defTimeTicker()
+	defTimeToUniversal()
+	defTimeUnix()
+	defTimeUtc()
+	defTimep()
+	defTrimPrefix()
+	defTrimSpace()
+	defTrimSuffix()
+	defUUIDString()
+	defUUIDValues()
+	defUniversalToTime()
+	defUnixTime()
+	defUnlockPackage()
+	defUnsetenv()
+	defUnzip()
+	defWithInputFromOctets()
+	defWithMutexLock()
+	defWithZipReader()
+	defWithZipWriter()
+	defZip()
+
 	Pkg.Initialize(nil, &Env{})
 
 	slip.AddPackage(&Pkg)
@@ -325,4 +477,71 @@ func seqStarEndArgs(s *slip.Scope, args slip.List, depth int) (start, end int) {
 		slip.ErrorPanic(s, depth, "end, %d is less start %d", end, start)
 	}
 	return
+}
+
+func getAppArgs() slip.Object {
+	args := make(slip.List, len(os.Args))
+	for i, str := range os.Args {
+		args[i] = slip.String(str)
+	}
+	return args
+}
+
+func getProvenance() (state slip.Object) {
+	if slip.Provenance {
+		state = slip.True
+	}
+	return
+}
+
+func setProvenance(value slip.Object) {
+	slip.Provenance = value != nil
+}
+
+func getCoverage() (state slip.Object) {
+	if slip.Coverage() {
+		state = slip.True
+	}
+	return
+}
+
+func setCoverage(value slip.Object) {
+	if value == nil {
+		slip.StopCoverage()
+	} else {
+		slip.StartCoverage()
+	}
+}
+
+func getStackTraceProvenance() (state slip.Object) {
+	if slip.StackTraceProvenance {
+		state = slip.True
+	}
+	return
+}
+
+func setStackTraceProvenance(value slip.Object) {
+	slip.StackTraceProvenance = value != nil
+}
+
+func getStackTraceFunction() (state slip.Object) {
+	if slip.StackTraceFunction {
+		state = slip.True
+	}
+	return
+}
+
+func setStackTraceFunction(value slip.Object) {
+	slip.StackTraceFunction = value != nil
+}
+
+func getStackTraceFullFilenames() (state slip.Object) {
+	if slip.StackTraceFullFilenames {
+		state = slip.True
+	}
+	return
+}
+
+func setStackTraceFullFilenames(value slip.Object) {
+	slip.StackTraceFullFilenames = value != nil
 }

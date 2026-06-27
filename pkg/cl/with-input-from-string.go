@@ -14,6 +14,7 @@ func init() {
 		func(args slip.List) slip.Object {
 			f := WithInputFromString{
 				Function: slip.Function{Name: "with-input-from-string", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -47,6 +48,7 @@ which is set when the function returns.`,
 // WithInputFromString represents the with-input-from-string function.
 type WithInputFromString struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -96,6 +98,14 @@ func (f *WithInputFromString) Call(s *slip.Scope, args slip.List, depth int) (re
 	s2 := s.NewScope()
 	s2.Let(sym, slip.NewInputStream(reader))
 	args = args[1:]
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := range args {
 		result = slip.EvalArg(s2, args, i, d2)
 	}

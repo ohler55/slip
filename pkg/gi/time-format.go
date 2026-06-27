@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defTimeFormat() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := TimeFormat{Function: slip.Function{Name: "time-format", Args: args}}

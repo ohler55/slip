@@ -10,7 +10,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defFileInfo() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := FileInfo{Function: slip.Function{Name: "file-info", Args: args}}

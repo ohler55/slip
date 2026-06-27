@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defGc() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Gc{Function: slip.Function{Name: "gc", Args: args}}

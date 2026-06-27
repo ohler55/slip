@@ -11,6 +11,7 @@ func init() {
 		func(args slip.List) slip.Object {
 			f := WithOpenStream{
 				Function: slip.Function{Name: "with-open-stream", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -42,6 +43,7 @@ func init() {
 // WithOpenStream represents the with-open-stream function.
 type WithOpenStream struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -61,6 +63,14 @@ func (f *WithOpenStream) Call(s *slip.Scope, args slip.List, depth int) (result 
 		s2 := s.NewScope()
 		s2.Let(sym, stream)
 		args = args[1:]
+		if f.preProv {
+			for i, a := range args {
+				if list, ok := a.(slip.List); ok {
+					args[i] = slip.ListToFunc(s, list, d2)
+				}
+			}
+			f.preProv = false
+		}
 		for i := range args {
 			result = slip.EvalArg(s2, args, i, d2)
 		}

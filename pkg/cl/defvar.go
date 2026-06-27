@@ -62,6 +62,11 @@ func (f *Defvar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	if pkg == nil {
 		pkg = slip.CurrentPackage
 	}
+	if 1 < len(args) {
+		if list, ok := args[1].(slip.List); ok {
+			args[1] = slip.ListToFunc(s, list, depth+1)
+		}
+	}
 	if v, has := pkg.Get(vname); has && v != slip.Unbound {
 		return slip.Symbol(vname)
 	}

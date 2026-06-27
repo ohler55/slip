@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defPrefixp() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Prefixp{Function: slip.Function{Name: "prefixp", Args: args}}

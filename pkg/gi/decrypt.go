@@ -12,7 +12,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defDecrypt() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Decrypt{Function: slip.Function{Name: "decrypt", Args: args}}

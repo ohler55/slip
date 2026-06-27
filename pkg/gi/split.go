@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defSplit() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Split{Function: slip.Function{Name: "split", Args: args}}

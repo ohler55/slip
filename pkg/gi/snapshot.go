@@ -16,7 +16,7 @@ import (
 	"github.com/ohler55/slip/pp"
 )
 
-func init() {
+func defSnapshot() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Snapshot{Function: slip.Function{Name: "snapshot", Args: args}}

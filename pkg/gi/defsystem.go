@@ -7,7 +7,7 @@ import (
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
-func init() {
+func defDefSystem() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := DefSystem{Function: slip.Function{Name: "defsystem", Args: args}}

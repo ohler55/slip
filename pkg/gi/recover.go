@@ -6,10 +6,13 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defRecover() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Recover{Function: slip.Function{Name: "recover", Args: args, SkipEval: []bool{true}}}
+			f := Recover{
+				Function: slip.Function{Name: "recover", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -47,6 +50,7 @@ otherwise the rest of the forms are evaluated in order.`,
 // Recover represents the recover function.
 type Recover struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -68,6 +72,14 @@ func (f *Recover) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 			}
 		}
 	}()
+	if f.preProv {
+		for i := 1; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := 2; i < len(args); i++ {
 		result = slip.EvalArg(s, args, i, d2)
 	}

@@ -42,7 +42,7 @@ func init() {
 			Examples: []string{
 				`(defpackage 'quux`,
 				`  (:use "bag" "cl")`,
-				`  (:nicknames "qux"")) => #<package quux>`,
+				`  (:nicknames "quux"")) => #<package quux>`,
 			},
 		}, &slip.CLPkg)
 }
@@ -52,7 +52,8 @@ type Defpackage struct {
 	slip.Function
 }
 
-// Call the function with the arguments provided.
+// Call the function with the arguments provided. A check for duplicates must
+// be performed before calling this function.
 func (f *Defpackage) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 1, 7)
 	a0 := slip.EvalArg(s, args, 0, depth)
@@ -102,6 +103,9 @@ func readDefOption(s *slip.Scope, name string, args slip.List, depth int) (value
 		}
 		if option[0] == key {
 			for _, v := range option[1:] {
+				if q, ok := v.(*Quote); ok {
+					v = q.Args[0]
+				}
 				values = append(values, slip.MustBeString(v, "option"))
 			}
 			break

@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defReplaceFirst() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ReplaceFirst{Function: slip.Function{Name: "replace-first", Args: args}}

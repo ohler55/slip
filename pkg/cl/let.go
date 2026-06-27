@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Let{Function: slip.Function{Name: "let", Args: args, SkipEval: []bool{true}}}
+			f := Let{
+				Function: slip.Function{Name: "let", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -42,6 +45,7 @@ a closure that includes the bindings. All bindings are performed in parallel unl
 // Let represents the let function.
 type Let struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -50,6 +54,14 @@ func (f *Let) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	ns := s.NewScope()
 	d2 := depth + 1
 	processBinding(s, ns, args[0], d2)
+	if f.preProv {
+		for i := 1; i < len(args); i++ {
+			if list, ok := args[i].(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for i := 1; i < len(args); i++ {
 		result = slip.EvalArg(ns, args, i, d2)
 		switch result.(type) {

@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defUUIDValues() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := UUIDValues{Function: slip.Function{Name: "uuid-values", Args: args}}

@@ -20,3 +20,17 @@ func TestUnwindProtect(t *testing.T) {
 	}).Test(t)
 	tt.Equal(t, slip.Fixnum(3), scope.Get("x"))
 }
+
+func TestUnwindProtectPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	scope := slip.NewScope()
+	scope.Let("x", slip.Fixnum(1))
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(unwind-protect (setq x (/ 1 0)) (setq x 3))`,
+		PanicType: slip.DivisionByZeroSymbol,
+	}).Test(t)
+	tt.Equal(t, slip.Fixnum(3), scope.Get("x"))
+}

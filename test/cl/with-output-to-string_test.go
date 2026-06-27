@@ -16,6 +16,16 @@ func TestWithOutputToString(t *testing.T) {
 	}).Test(t)
 }
 
+func TestWithOutputToStringPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(with-output-to-string (s) (princ 'abc s))`,
+		Expect: `"abc"`,
+	}).Test(t)
+}
+
 func TestWithOutputToStringBadArgs(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(with-output-to-string t (princ 'x))`,

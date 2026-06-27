@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defUnsetenv() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Unsetenv{Function: slip.Function{Name: "unsetenv", Args: args}}

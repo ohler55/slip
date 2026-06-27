@@ -61,7 +61,7 @@ func (obj *StringStream) Write(b []byte) (int, error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
-			"stream closed", nil)
+			&Function{Name: "stream closed"})
 	}
 	if obj.pos < len(obj.buf) {
 		copy(obj.buf[obj.pos:], b)
@@ -82,7 +82,7 @@ func (obj *StringStream) WriteAt(b []byte, off int64) (int, error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
-			"stream closed", nil)
+			&Function{Name: "stream closed"})
 	}
 	if off < int64(len(obj.buf)) {
 		copy(obj.buf[off:], b)
@@ -101,7 +101,7 @@ func (obj *StringStream) Read(p []byte) (n int, err error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
-			"stream closed", nil)
+			&Function{Name: "stream closed"})
 	}
 	if len(obj.buf) <= obj.pos {
 		if 0 < len(p) {
@@ -121,7 +121,7 @@ func (obj *StringStream) ReadAt(p []byte, off int64) (n int, err error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
-			"stream closed", nil)
+			&Function{Name: "stream closed"})
 	}
 	if off <= 0 {
 		off = 0 // maybe non-standard
@@ -143,7 +143,7 @@ func (obj *StringStream) ReadRune() (r rune, size int, err error) {
 	if obj.pos < 0 {
 		return 0, 0, WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
-			"stream closed", nil)
+			&Function{Name: "stream closed"})
 	}
 	if len(obj.buf) <= obj.pos {
 		err = io.EOF
@@ -160,7 +160,7 @@ func (obj *StringStream) ReadByte() (b byte, err error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
-			"stream closed", nil)
+			&Function{Name: "stream closed"})
 	}
 	if len(obj.buf) <= obj.pos {
 		return 0, io.EOF
@@ -176,12 +176,12 @@ func (obj *StringStream) UnreadRune() error {
 	if obj.pos < 0 {
 		return WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
-			"stream closed", nil)
+			&Function{Name: "stream closed"})
 	}
 	if obj.pos == 0 {
 		return WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "can not unread from at the start of a stream").(Instance),
-			"stream start", nil)
+			&Function{Name: "stream closed"})
 	}
 	end := obj.pos
 	for 0 < obj.pos {
@@ -193,7 +193,7 @@ func (obj *StringStream) UnreadRune() error {
 			obj.pos = end
 			return WrapError(NewScope(),
 				StreamErrorNew(NewScope(), 0, obj, "can not read an invalid UTF8 character").(Instance),
-				"invalid UTF8", nil)
+				&Function{Name: "invalid UTF8"})
 		}
 	}
 	return nil
@@ -204,7 +204,7 @@ func (obj *StringStream) Seek(offset int64, whence int) (n int64, err error) {
 	if obj.pos < 0 {
 		return 0, WrapError(NewScope(),
 			StreamErrorNew(NewScope(), 0, obj, "stream closed").(Instance),
-			"stream closed", nil)
+			&Function{Name: "stream closed"})
 	}
 	switch whence {
 	case 0:

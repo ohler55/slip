@@ -9,7 +9,10 @@ import (
 func init() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := When{Function: slip.Function{Name: "when", Args: args, SkipEval: []bool{true}}}
+			f := When{
+				Function: slip.Function{Name: "when", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -42,6 +45,7 @@ the result of the last form evaluated.`,
 // When represents the when function.
 type When struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -49,6 +53,14 @@ func (f *When) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	slip.CheckArgCount(s, depth, f, args, 1, -1)
 	result = nil
 	d2 := depth + 1
+	if f.preProv {
+		for i, a := range args {
+			if list, ok := a.(slip.List); ok {
+				args[i] = slip.ListToFunc(s, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	pos := 0
 	if slip.EvalArg(s, args, pos, d2) != nil {
 		for pos++; pos < len(args); pos++ {

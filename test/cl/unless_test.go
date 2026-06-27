@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -34,5 +35,15 @@ func TestUnlessArgCount(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(unless)`,
 		Panics: true,
+	}).Test(t)
+}
+
+func TestUnlessPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(unless nil 1 2 (+ 1 2))`,
+		Expect: "3",
 	}).Test(t)
 }

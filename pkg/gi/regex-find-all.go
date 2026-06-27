@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defRegexFindAll() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := RegexFindAll{Function: slip.Function{Name: "regex-find-all", Args: args}}

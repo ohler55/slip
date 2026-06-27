@@ -52,3 +52,13 @@ func TestOrBound(t *testing.T) {
 		Expect: "3",
 	}).Test(t)
 }
+
+func TestOrPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(or (+ 1 2) t)`,
+		Expect: "3",
+	}).Test(t)
+}

@@ -20,7 +20,10 @@ const PackageSymbol = Symbol("package")
 // cl:require function.
 var CurrentPackageLoadPath = ""
 
-var packages []*Package
+var (
+	packages   = map[string]*Package{}
+	packagesMu sync.Mutex
+)
 
 // Package represents a LISP package.
 type Package struct {
@@ -51,7 +54,7 @@ type Package struct {
 // is expected.
 func DefPackage(name string, nicknames []string, doc string) *Package {
 	pkg := Package{
-		Name:      strings.ToLower(name),
+		Name:      name,
 		Nicknames: nicknames,
 		Doc:       doc,
 		vars:      map[string]*VarVal{},
@@ -61,8 +64,7 @@ func DefPackage(name string, nicknames []string, doc string) *Package {
 		classes:   map[string]Class{},
 		PreSet:    DefaultPreSet,
 	}
-	packages = append(packages, &pkg)
-	addFeature(pkg.Name)
+	AddPackage(&pkg)
 
 	return &pkg
 }
@@ -77,24 +79,85 @@ func AddPackage(pkg *Package) {
 	if 0 < len(CurrentPackageLoadPath) {
 		pkg.loadPath = CurrentPackageLoadPath
 	}
-	packages = append(packages, pkg)
+	pkg.Name = strings.ToLower(pkg.Name)
+	for i, nn := range pkg.Nicknames {
+		pkg.Nicknames[i] = strings.ToLower(nn)
+	}
+	packagesMu.Lock()
+	var has string
+	if _, h := packages[pkg.Name]; h {
+		has = pkg.Name
+	} else {
+		for _, nn := range pkg.Nicknames {
+			if _, h = packages[nn]; h {
+				has = nn
+				break
+			}
+		}
+	}
+	if 0 < len(has) {
+		ErrorPanic(NewScope(), 0, "Package %s already exists.", has)
+	}
+	packages[pkg.Name] = pkg
+	for _, nn := range pkg.Nicknames {
+		packages[nn] = pkg
+	}
 	addFeature(pkg.Name)
+	packagesMu.Unlock()
 }
 
 // RemovePackage deletes a package.
 func RemovePackage(pkg *Package) {
 	if pkg != nil {
-		for i, p := range packages {
-			if pkg == p {
-				packages = append(packages[:i], packages[i+1:]...)
-				break
-			}
+		packagesMu.Lock()
+		delete(packages, pkg.Name)
+		for _, nn := range pkg.Nicknames {
+			delete(packages, nn)
 		}
+		packagesMu.Unlock()
 		for _, u := range pkg.Uses {
 			pkg.Unuse(u)
 		}
 		pkg.Name = ""
 	}
+}
+
+// RenamePackage changes the name of a package as well as the nicknames if
+// provided.
+func RenamePackage(s *Scope, depth int, pkg *Package, name string, optNicknames ...[]string) {
+	name = strings.ToLower(name)
+	var nicknames []string
+	if 0 < len(optNicknames) {
+		nicknames = optNicknames[0]
+		for i, nn := range nicknames {
+			nicknames[i] = strings.ToLower(nn)
+		}
+	}
+	packagesMu.Lock()
+	if p := packages[name]; p != nil && p != pkg {
+		packagesMu.Unlock()
+		PackagePanic(s, depth, p, "Package %s already exists.", name)
+	}
+	for _, nn := range nicknames {
+		if p := packages[nn]; p != nil && p != pkg {
+			packagesMu.Unlock()
+			PackagePanic(s, depth, p, "Package %s already exists.", nn)
+		}
+	}
+	delete(packages, pkg.Name)
+	packages[name] = pkg
+	pkg.Name = name
+
+	if 0 < len(optNicknames) {
+		for _, nn := range pkg.Nicknames {
+			delete(packages, nn)
+		}
+		for _, nn := range nicknames {
+			packages[nn] = pkg
+		}
+		pkg.Nicknames = nicknames
+	}
+	packagesMu.Unlock()
 }
 
 // Initialize the package.
@@ -129,8 +192,8 @@ func (obj *Package) Use(pkg *Package) {
 		PackagePanic(NewScope(), 0, obj, "Package %s is locked and can not be modified.", obj)
 	}
 	if obj != pkg {
-		obj.mu.Lock()
 		pkg.mu.Lock()
+		obj.mu.Lock()
 		defer func() {
 			obj.mu.Unlock()
 			pkg.mu.Unlock()
@@ -275,6 +338,8 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 	if vv = obj.vars[name]; vv != nil {
 		if vv.Export || CurrentPackage == obj || private {
 			if vv.Const {
+				unlock = false
+				obj.mu.Unlock()
 				PackagePanic(NewScope(), 0, obj, "%s is a constant and thus can't be set", name)
 			}
 			if vv.Set != nil {
@@ -283,13 +348,6 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 				vv.Set(value)
 			} else {
 				vv.Val = value
-			}
-			for _, u := range obj.Users {
-				u.mu.Lock()
-				if _, has := u.vars[name]; !has {
-					u.vars[name] = vv
-				}
-				u.mu.Unlock()
 			}
 		}
 	}
@@ -300,25 +358,21 @@ func (obj *Package) SetIfHas(name string, value Object, private bool) (vv *VarVa
 func (obj *Package) DefConst(name string, value Object, doc string) (vv *VarVal) {
 	name, value = obj.PreSet(obj, name, value)
 	obj.mu.Lock()
-	unlock := true
-	defer func() {
-		if unlock {
-			obj.mu.Unlock()
-		}
-	}()
 	if vv = obj.vars[name]; vv != nil {
 		if vv.Const && ObjectEqual(vv.Val, value) {
+			obj.mu.Unlock()
 			return vv
 		}
+		obj.mu.Unlock()
 		PackagePanic(NewScope(), 0, obj, "%s is a constant and thus can't be changed", name)
 	}
 	if obj.Locked {
+		obj.mu.Unlock()
 		PackagePanic(NewScope(), 0, obj, "Package %s is locked thus no new constants can be set.", obj.Name)
 	}
 	vv = &VarVal{Val: value, Const: true, Pkg: obj, name: name, Doc: doc}
 	obj.vars[name] = vv
 	obj.mu.Unlock()
-	unlock = false
 	callSetHooks(obj, name)
 
 	return
@@ -379,6 +433,15 @@ func (obj *Package) Remove(name string) (removed bool) {
 		for _, u := range obj.Users {
 			if vv := u.vars[name]; vv != nil && vv.Pkg == obj {
 				delete(u.vars, name)
+			}
+		}
+	}
+	if _, has := obj.funcs[name]; has {
+		delete(obj.funcs, name)
+		removed = true
+		for _, u := range obj.Users {
+			if fi := u.funcs[name]; fi != nil && fi.Pkg == obj {
+				delete(u.funcs, name)
 			}
 		}
 	}
@@ -623,8 +686,15 @@ func (obj *Package) LoadPath() string {
 
 // PackageNames returns a sorted list of package names.
 func PackageNames() (names List) {
-	for _, pkg := range packages {
-		names = append(names, String(pkg.Name))
+	pm := map[string]String{}
+	packagesMu.Lock()
+	for _, p := range packages {
+		pm[p.Name] = String(p.Name)
+	}
+	packagesMu.Unlock()
+	names = make(List, 0, len(pm))
+	for _, name := range pm {
+		names = append(names, name)
 	}
 	sort.Slice(names,
 		func(i, j int) bool {
@@ -637,26 +707,29 @@ func PackageNames() (names List) {
 
 // AllPackages returns a list of all packages.
 func AllPackages() []*Package {
-	pkgs := make([]*Package, len(packages))
-	copy(pkgs, packages)
+	pm := map[string]*Package{}
+	packagesMu.Lock()
+	for _, p := range packages {
+		pm[p.Name] = p
+	}
+	packagesMu.Unlock()
+	pkgs := make([]*Package, 0, len(pm))
+	for _, p := range pm {
+		pkgs = append(pkgs, p)
+	}
 	return pkgs
 }
 
 // FindPackage returns the package matching the provided name.
-func FindPackage(name string) *Package {
-	for _, pkg := range packages {
-		if strings.EqualFold(name, pkg.Name) {
-			return pkg
-		}
+func FindPackage(name string) (p *Package) {
+	packagesMu.Lock()
+	p = packages[name]
+	if p == nil {
+		p = packages[strings.ToLower(name)]
 	}
-	for _, pkg := range packages {
-		for _, nn := range pkg.Nicknames {
-			if strings.EqualFold(name, nn) {
-				return pkg
-			}
-		}
-	}
-	return nil
+	packagesMu.Unlock()
+
+	return
 }
 
 // Describe the instance in detail.
@@ -783,6 +856,7 @@ func (obj *Package) Describe(b []byte, indent, right int, ansi bool) []byte {
 				b = append(b, indentSpaces[:mx-len(k)+1]...)
 			}
 		}
+		b = append(b, '\n')
 	}
 	if 0 < len(obj.classes) {
 		names = names[:0]
@@ -892,20 +966,20 @@ func (obj *Package) DefLambda(name string, lam *Lambda, fc func(args List) Objec
 	} else {
 		obj.lambdas[name] = lam
 	}
-	if fi := obj.funcs[name]; fi != nil {
+	if fi = obj.funcs[name]; fi != nil {
 		fi.Doc = lam.Doc
 		fi.Create = fc
 		fi.Pkg = obj
 		fi.Kind = kind
 	} else {
-		fi := FuncInfo{
+		fi = &FuncInfo{
 			Name:   name,
 			Doc:    lam.Doc,
 			Create: fc,
 			Pkg:    obj,
 			Kind:   kind,
 		}
-		obj.funcs[name] = &fi
+		obj.funcs[name] = fi
 		if vv := obj.vars[name]; vv != nil && Unbound == vv.Val && vv.Export {
 			fi.Export = true
 			delete(obj.vars, name)
@@ -943,11 +1017,13 @@ func (obj *Package) RegisterClass(name string, c Class) {
 
 // Find finds the named class.
 func (obj *Package) FindClass(name string) (c Class) {
+	obj.mu.Lock()
 	if obj.classes != nil {
 		if c = obj.classes[name]; c == nil {
 			c = obj.classes[strings.ToLower(name)]
 		}
 	}
+	obj.mu.Unlock()
 	return
 }
 

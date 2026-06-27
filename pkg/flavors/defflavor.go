@@ -45,6 +45,7 @@ and a default value.`,
  :settable-instance-variables creates a setter method for each variable.
  :initable-instance-variables allows the listed variables to be given initial values. If none are listed then all
 variables can be provided an initial value. (also spelled :inittable-instance-variables)
+ :init-keywords specifies the keywords allowed for initialization.
  :required-instance-variables lists the variables that must be present in any flavor inheriting this flavor.
  :required-methods lists the methods that must be included in any flavor inheriting this flavor.
  :required-flavors lists the flavor names that must be included in any flavor inheriting this flavor.
@@ -232,7 +233,7 @@ func validateFlavor(s *slip.Scope, nf *Flavor, depth int) {
 		}
 		for _, mn := range cf.requiredMethods {
 			if _, has := nf.methods[mn]; !has {
-				slip.ErrorPanic(s, depth, "%s does not include the required method %s.", nf.name, mn)
+				nf.missReqMeths = true // check again on MakeInstancew
 			}
 		}
 		for _, vn := range cf.requiredVars {

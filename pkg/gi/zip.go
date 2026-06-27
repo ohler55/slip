@@ -10,7 +10,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defZip() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Zip{Function: slip.Function{Name: "zip", Args: args}}

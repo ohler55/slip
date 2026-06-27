@@ -295,7 +295,10 @@ func TestFormatCall(t *testing.T) {
 	scope := slip.NewScope()
 	code := slip.ReadString(`(defun test-call-dir (s arg colon at) (format s "~A ~A ~A" arg colon at))`, scope)
 	code.Eval(scope, nil)
-	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("call-test"))
+		slip.CurrentPackage = &slip.UserPkg
+	}()
 	slip.CurrentPackage.Export("test-call-dir")
 
 	slip.CurrentPackage = slip.DefPackage("call-test", []string{}, "testing")

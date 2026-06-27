@@ -41,6 +41,7 @@ type Flavor struct {
 	Precedence       []slip.Symbol
 	Final            bool
 	GoMakeOnly       bool
+	missReqMeths     bool
 }
 
 // Find the named flavor.
@@ -243,6 +244,19 @@ func (obj *Flavor) calledFromLISP() bool {
 func (obj *Flavor) MakeInstance() slip.Instance {
 	if obj.abstract || (obj.GoMakeOnly && obj.calledFromLISP()) {
 		slip.ErrorPanic(slip.NewScope(), 0, "Can not create an instance of flavor %s.", obj.name)
+	}
+	if obj.missReqMeths {
+		full := make([]*Flavor, len(obj.inherit)+1)
+		full[0] = obj
+		copy(full[1:], obj.inherit)
+		for _, cf := range full {
+			for _, mn := range cf.requiredMethods {
+				if _, has := obj.methods[mn]; !has {
+					slip.ErrorPanic(slip.NewScope(), 0, "%s does not include the required method %s.", obj.name, mn)
+				}
+			}
+		}
+		obj.missReqMeths = false
 	}
 	inst := Instance{Type: obj}
 	inst.Vars = map[string]slip.Object{}

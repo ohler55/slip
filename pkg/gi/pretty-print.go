@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip/pp"
 )
 
-func init() {
+func defPrettyPrint() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := PrettyPrint{Function: slip.Function{Name: "pretty-print", Args: args, SkipEval: []bool{true, false}}}

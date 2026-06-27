@@ -28,6 +28,20 @@ func TestEcaseBasic(t *testing.T) {
 	}).Test(t)
 }
 
+func TestEcasePreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(let ((value 3))
+                  (ecase value
+                   ((1 2) (list 'low))
+                   (3 (list 'mid))
+                   (4 (list 'high))))`,
+		Expect: "(mid)",
+	}).Test(t)
+}
+
 func TestEcaseNoMatch(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(ecase 5 (1 'one) ((2 3) 'several))`,

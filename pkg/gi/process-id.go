@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defProcessID() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := ProcessID{Function: slip.Function{Name: "process-id", Args: args}}

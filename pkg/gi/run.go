@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defRun() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Run{Function: slip.Function{Name: "run", Args: args, SkipEval: []bool{true}}}

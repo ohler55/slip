@@ -16,7 +16,7 @@ type Funky interface {
 	Apply(s *Scope, args List, depth int) Object
 
 	// CompileArgs for the function.
-	CompileArgs()
+	CompileArgs(listProvs ProvSet)
 
 	// Caller returns the function's Caller (Self).
 	Caller() Caller
@@ -25,4 +25,10 @@ type Funky interface {
 
 	// GetPkg returns the package the function was defined in.
 	GetPkg() *Package
+
+	// SetProvenance sets the provenance for the function.
+	SetProvenance(p *Prov)
+
+	// Provenance return the provenance for the function.
+	Provenance() *Prov
 }

@@ -9,10 +9,13 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defSelect() {
 	slip.Define(
 		func(args slip.List) slip.Object {
-			f := Select{Function: slip.Function{Name: "select", Args: args, SkipEval: []bool{true}}}
+			f := Select{
+				Function: slip.Function{Name: "select", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
+			}
 			f.Self = &f
 			return &f
 		},
@@ -41,6 +44,7 @@ evaluates each form in the _clause_ for that channel.`,
 // Select represents the select function.
 type Select struct {
 	slip.Function
+	preProv bool
 }
 
 const (
@@ -79,8 +83,16 @@ func (f *Select) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 			if _, ok := clause[1].(slip.Symbol); !ok {
 				slip.TypePanic(s, depth, "clause[1]", clause[1], "symbol")
 			}
+			if f.preProv {
+				for i := 2; i < len(clause); i++ {
+					if list, ok := clause[i].(slip.List); ok {
+						clause[i] = slip.ListToFunc(s, list, d2)
+					}
+				}
+			}
 		}
 	}
+	f.preProv = false
 	// Note if the maxSlipChan or maxTimeChan values are changed the select
 	// case must also be changed.
 	select {

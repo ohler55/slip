@@ -5,6 +5,7 @@ package cl_test
 import (
 	"testing"
 
+	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/sliptest"
 )
 
@@ -13,6 +14,19 @@ func TestDoSimple(t *testing.T) {
 		Source: `(do ((x 0 (1+ x))
                       (y 0 (1- y)))
                      ((> (- x y) 5) x))`,
+		Expect: "3",
+	}).Test(t)
+}
+
+func TestDoPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	(&sliptest.Function{
+		Source: `(do ((x 0 (1+ x))
+                      (y 0 (1- y)))
+                     ((> (- x y) 5) x)
+                     (when (< 10 x) (return nil 7)))`,
 		Expect: "3",
 	}).Test(t)
 }

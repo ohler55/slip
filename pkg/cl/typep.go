@@ -50,23 +50,27 @@ func (f *Typep) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	if !ok {
 		slip.TypePanic(s, depth, "type", args[1], "symbol")
 	}
+	typ := string(sym)
+	if 1 < len(typ) && typ[0] == ':' {
+		typ = typ[1:]
+	}
 	switch ta := args[0].(type) {
 	case nil:
-		if strings.EqualFold("null", string(sym)) {
+		if strings.EqualFold("null", typ) {
 			return slip.True
 		}
 	case slip.List:
-		if len(ta) == 0 && strings.EqualFold("null", string(sym)) {
+		if len(ta) == 0 && strings.EqualFold("null", typ) {
 			return slip.True
 		}
 		for _, h := range ta.Hierarchy() {
-			if strings.EqualFold(string(h), string(sym)) {
+			if strings.EqualFold(string(h), typ) {
 				return slip.True
 			}
 		}
 	default:
 		for _, h := range ta.Hierarchy() {
-			if strings.EqualFold(string(h), string(sym)) {
+			if strings.EqualFold(string(h), typ) {
 				return slip.True
 			}
 		}

@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defClearenv() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Clearenv{Function: slip.Function{Name: "clearenv", Args: args}}

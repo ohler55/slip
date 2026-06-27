@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defMakeChannel() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MakeChannel{Function: slip.Function{Name: "make-channel", Args: args}}

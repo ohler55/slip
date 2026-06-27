@@ -27,6 +27,8 @@ func defResponseWriter() *flavors.Flavor {
 	responseWriterFlavor.DefMethod(":write", "", respWriterWriteCaller(true))
 	responseWriterFlavor.DefMethod(":header", "", respWriterHeaderCaller(true))
 	responseWriterFlavor.DefMethod(":header-get", "", respWriterHeaderGetCaller(true))
+	responseWriterFlavor.DefMethod(":header-set", "", respWriterHeaderSetCaller(true))
+	responseWriterFlavor.DefMethod(":header-add", "", respWriterHeaderAddCaller(true))
 
 	return responseWriterFlavor
 }
@@ -128,6 +130,62 @@ func (caller respWriterHeaderGetCaller) Docs() string {
    _key_ for the header value to get
 
 Returns the header of the responseWriter as an association list.
+`
+}
+
+type respWriterHeaderSetCaller bool
+
+func (caller respWriterHeaderSetCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	if len(args) != 2 {
+		slip.MethodArgChoicePanic(s, depth, obj, ":header-set", len(args), "2")
+	}
+	key, ok := args[0].(slip.String)
+	if !ok {
+		slip.TypePanic(s, depth, "responseWriter :header-set key", args[0], "string")
+	}
+	value, ok := args[1].(slip.String)
+	if !ok {
+		slip.TypePanic(s, depth, "responseWriter :header-set value", args[1], "string")
+	}
+	(obj.Any.(http.ResponseWriter)).Header().Set(string(key), string(value))
+	return nil
+}
+
+func (caller respWriterHeaderSetCaller) Docs() string {
+	return `__:header-set__ _key_ _value_ => _nil_
+   _key_ for the header value to set
+   _value_ to set for the header
+
+Sets the responseWriter header value for _key_ to _value_.
+`
+}
+
+type respWriterHeaderAddCaller bool
+
+func (caller respWriterHeaderAddCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+	obj := s.Get("self").(*flavors.Instance)
+	if len(args) != 2 {
+		slip.MethodArgChoicePanic(s, depth, obj, ":header-add", len(args), "2")
+	}
+	key, ok := args[0].(slip.String)
+	if !ok {
+		slip.TypePanic(s, depth, "responseWriter :header-add key", args[0], "string")
+	}
+	value, ok := args[1].(slip.String)
+	if !ok {
+		slip.TypePanic(s, depth, "responseWriter :header-add value", args[1], "string")
+	}
+	(obj.Any.(http.ResponseWriter)).Header().Add(string(key), string(value))
+	return nil
+}
+
+func (caller respWriterHeaderAddCaller) Docs() string {
+	return `__:header-add__ _key_ _value_ => _nil_
+   _key_ for the header value to add
+   _value_ to add to the header
+
+Adds _value_ to the responseWriter header values for _key_.
 `
 }
 

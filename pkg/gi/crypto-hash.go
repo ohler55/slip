@@ -8,7 +8,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defCryptoHash() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := CryptoHash{Function: slip.Function{Name: "crypto-hash", Args: args}}

@@ -90,7 +90,7 @@ func (obj BroadcastStream) Write(b []byte) (n int, err error) {
 	if obj[0] != nil {
 		return 0, slip.WrapError(slip.NewScope(),
 			slip.StreamErrorNew(slip.NewScope(), 0, obj, "closed").(slip.Instance),
-			"closed", nil)
+			&slip.Function{Name: "closed"})
 	}
 	for _, s := range obj {
 		if s != nil {
@@ -108,7 +108,7 @@ func (obj BroadcastStream) Seek(offset int64, whence int) (n int64, err error) {
 	if obj[0] != nil {
 		return 0, slip.WrapError(slip.NewScope(),
 			slip.StreamErrorNew(slip.NewScope(), 0, obj, "closed").(slip.Instance),
-			"closed", nil)
+			&slip.Function{Name: "closed"})
 	}
 	if 1 < len(obj) {
 		if seeker, ok := obj[len(obj)-1].(io.Seeker); ok {

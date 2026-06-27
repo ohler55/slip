@@ -82,7 +82,10 @@ func TestFunctionEvalArg(t *testing.T) {
 
 func TestFunctionExport(t *testing.T) {
 	scope := slip.NewScope()
-	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("exported-test"))
+		slip.CurrentPackage = &slip.UserPkg
+	}()
 	xpkg := slip.DefPackage("exported-test", []string{}, "testing")
 	slip.CurrentPackage = xpkg
 	slip.CurrentPackage.Use(&slip.CLPkg)
@@ -103,12 +106,14 @@ func TestFunctionExport(t *testing.T) {
 
 func TestFunctionExportNested(t *testing.T) {
 	scope := slip.NewScope()
-	defer func() { slip.CurrentPackage = &slip.UserPkg }()
+	defer func() {
+		slip.RemovePackage(slip.FindPackage("xpack-test"))
+		slip.CurrentPackage = &slip.UserPkg
+	}()
 	xpkg := slip.DefPackage("xpack-test", []string{}, "testing")
 	slip.CurrentPackage = xpkg
 	slip.CurrentPackage.Use(&slip.CLPkg)
 	_ = slip.ReadString(`(defun private-child () 3)`, scope).Eval(scope, nil)
-	// _ = slip.ReadString(`(defun private-parent () (private-child))`, scope).Eval(scope, nil)
 	_ = slip.ReadString(`(defun private-parent () (+ (private-child) 4))`, scope).Eval(scope, nil)
 
 	slip.CurrentPackage = &slip.UserPkg
@@ -215,10 +220,20 @@ func TestGetArgsKeyValue(t *testing.T) {
 }
 
 func TestCompileList(t *testing.T) {
-	f := slip.CompileList(slip.List{slip.Symbol("no-fun")})
+	f := slip.CompileList(slip.List{slip.Symbol("no-fun")}, nil)
 	tt.Equal(t, []slip.Symbol{slip.FunctionSymbol, slip.TrueSymbol}, f.Hierarchy())
 
 	tt.Equal(t, "(no-fun)", slip.ObjectString(f))
 	// Should be unbound since it was not defun-ed yet.
 	tt.Panic(t, func() { _ = f.Eval(slip.NewScope(), 0) })
+}
+
+func TestCompileListPackage(t *testing.T) {
+	f := slip.CompileList(slip.List{slip.Symbol("cl:null"), nil}, nil)
+	tt.Equal(t, "(null nil)", slip.ObjectString(f))
+
+	tt.Panic(t, func() { _ = slip.CompileList(slip.List{slip.Symbol("cl:quux"), nil}, nil) })
+
+	f = slip.CompileList(slip.List{slip.Symbol("user:quux"), nil}, nil)
+	tt.Equal(t, "(quux nil)", slip.ObjectString(f))
 }

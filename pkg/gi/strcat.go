@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defStrcat() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Strcat{Function: slip.Function{Name: "strcat", Args: args}}

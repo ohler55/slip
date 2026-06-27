@@ -34,6 +34,9 @@ func TestServerBasic(t *testing.T) {
                                          "/test"
                                          (lambda (w r) (send w :write "Thank you.")))`, scope).Eval(scope, nil)
 	_ = slip.ReadString(`(send server :add-handler
+                                         "/test3"
+                                         '(lambda (w r c) (send w :write c))  "Bye")`, scope).Eval(scope, nil)
+	_ = slip.ReadString(`(send server :add-handler
                                          "/sample/"
                                          "testdata")`, scope).Eval(scope, nil)
 	sinst := server.(*flavors.Instance)
@@ -61,6 +64,16 @@ func TestServerBasic(t *testing.T) {
 	tt.Equal(t, "Thank you.", string(body))
 	_ = res.Body.Close()
 
+	req, err = http.NewRequestWithContext(cx, "GET", fmt.Sprintf("http://localhost:%d/test3", port), nil)
+	tt.Nil(t, err)
+	res, err = (&http.Client{}).Do(req)
+	tt.Nil(t, err)
+	defer func() { _ = res.Body.Close() }()
+	body, _ = io.ReadAll(res.Body)
+	tt.Equal(t, 200, res.StatusCode)
+	tt.Equal(t, "Bye", string(body))
+	_ = res.Body.Close()
+
 	req, err = http.NewRequestWithContext(cx, "GET", fmt.Sprintf("http://localhost:%d/sample/sample.txt", port), nil)
 	tt.Nil(t, err)
 	res, err = (&http.Client{}).Do(req)
@@ -74,11 +87,11 @@ func TestServerBasic(t *testing.T) {
 func TestServerInitFail(t *testing.T) {
 	(&sliptest.Function{
 		Source:    `(make-instance 'http-server-flavor :idle-timeout t)`,
-		PanicType: slip.Symbol("type-error"),
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
 		Source:    `(make-instance 'http-server-flavor :maximum-header-length t)`,
-		PanicType: slip.Symbol("type-error"),
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 }
 
@@ -115,33 +128,47 @@ func TestServerMethodArgFail(t *testing.T) {
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send server :start t t)`,
-		PanicType: slip.Symbol("error"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send server :start t)`,
-		PanicType: slip.Symbol("type-error"),
+		PanicType: slip.TypeErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send server :start 0.1)`,
-		PanicType: slip.Symbol("error"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send server :shutdown t t)`,
-		PanicType: slip.Symbol("error"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send server :add-handler "/test")`,
-		PanicType: slip.Symbol("error"),
+		PanicType: slip.ErrorSymbol,
 	}).Test(t)
 	(&sliptest.Function{
 		Scope:     scope,
 		Source:    `(send server :add-handler t nil)`,
-		PanicType: slip.Symbol("type-error"),
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+	(&sliptest.Function{
+		Scope:     scope,
+		Source:    `(send server :add-handler "quux" 7)`,
+		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestServerAddHandlerFunction(t *testing.T) {
+	port := availablePort()
+	(&sliptest.Function{
+		Source: fmt.Sprintf(`(let ((server (make-instance :http-server-flavor :address ":%d")))
+                               (send server :add-handler "/bogus" 'nth))`, port),
+		Expect: "nil",
 	}).Test(t)
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defEnv() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := Env{Function: slip.Function{Name: "env", Args: args}}

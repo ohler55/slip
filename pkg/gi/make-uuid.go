@@ -6,7 +6,7 @@ import (
 	"github.com/ohler55/slip"
 )
 
-func init() {
+func defMakeUUID() {
 	slip.Define(
 		func(args slip.List) slip.Object {
 			f := MakeUUID{Function: slip.Function{Name: "make-uuid", Args: args}}

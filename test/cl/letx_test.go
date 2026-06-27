@@ -22,6 +22,15 @@ func TestLetxNoInitialForm(t *testing.T) {
 	tt.Equal(t, "(nil nil)", slip.ObjectString(code.Eval(scope, nil)))
 }
 
+func TestLetxPreProv(t *testing.T) {
+	orig := slip.Provenance
+	slip.Provenance = true
+	defer func() { slip.Provenance = orig }()
+	scope := slip.NewScope()
+	code := slip.ReadString("(let* (x (y)) (list x y))", scope)
+	tt.Equal(t, "(nil nil)", slip.ObjectString(code.Eval(scope, nil)))
+}
+
 func TestLetxParallel(t *testing.T) {
 	scope := slip.NewScope()
 	code := slip.ReadString("(setq x 3) (let* ((x 4) (y x)) (list x y))", scope)

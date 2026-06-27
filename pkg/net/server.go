@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/ohler55/slip"
-	"github.com/ohler55/slip/pkg/cl"
 	"github.com/ohler55/slip/pkg/flavors"
 )
 
@@ -203,8 +202,8 @@ type serverAddHandlerCaller struct{}
 
 func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	obj := s.Get("self").(*flavors.Instance)
-	if len(args) != 2 {
-		slip.MethodArgChoicePanic(s, depth, obj, ":add-handler", len(args), "2")
+	if len(args) < 2 || 3 < len(args) {
+		slip.MethodArgChoicePanic(s, depth, obj, ":add-handler", len(args), "2 or 3")
 	}
 	path, ok := args[0].(slip.String)
 	if !ok {
@@ -221,13 +220,41 @@ func (caller serverAddHandlerCaller) Call(s *slip.Scope, args slip.List, depth i
 		)
 		return nil
 	}
-	reqCaller := cl.ResolveToCaller(s, args[1], depth)
+	fn := args[1]
+	var (
+		take3     bool
+		reqCaller slip.Caller
+		a3        slip.Object
+	)
+	if 2 < len(args) {
+		a3 = args[2]
+	}
+callFunc:
+	switch tf := fn.(type) {
+	case *slip.Lambda:
+		reqCaller = tf
+		take3 = (tf.Doc != nil && len(tf.Doc.Args) == 3)
+	case *slip.FuncInfo:
+		reqCaller = tf.Create(nil).(slip.Funky).Caller()
+		take3 = (tf.Doc != nil && len(tf.Doc.Args) == 3)
+	case slip.Symbol:
+		fn = slip.MustFindFunc(string(tf))
+		goto callFunc
+	case slip.List:
+		fn = s.Eval(tf, depth+1)
+		goto callFunc
+	default:
+		slip.TypePanic(s, depth, "function", tf, "function")
+	}
 	server.Handler.(*http.ServeMux).HandleFunc(
 		string(path),
 		func(w http.ResponseWriter, r *http.Request) {
 			cargs := slip.List{
 				MakeResponseWriter(w),
 				MakeRequest(r),
+			}
+			if take3 {
+				cargs = append(cargs, a3)
 			}
 			reqCaller.Call(s, cargs, depth+1)
 		},
@@ -248,7 +275,15 @@ func (caller serverAddHandlerCaller) FuncDocs() *slip.FuncDoc {
 			{
 				Name: "handler",
 				Type: "symbol|function|string",
-				Text: `Function to handle requests on _path_ or a _string_ that is the path to a directory.`,
+				Text: `Function to handle requests on _path_ or a _string_ that is the
+path to a directory. If a function that function should take 2 or 3 arguments. The
+arguments will be an instance of the __http-response-writer__ and an instance of the
+__http-request__. If 3 argument can be accepted the _context_ will be the third argument.`,
+			},
+			{
+				Name: "context",
+				Type: "object",
+				Text: `A context to be passed as the third argument to the handler function..`,
 			},
 		},
 	}

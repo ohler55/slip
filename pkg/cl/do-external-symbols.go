@@ -13,6 +13,7 @@ func init() {
 		func(args slip.List) slip.Object {
 			f := DoExternalSymbols{
 				Function: slip.Function{Name: "do-external-symbols", Args: args, SkipEval: []bool{true}},
+				preProv:  slip.Provenance,
 			}
 			f.Self = &f
 			return &f
@@ -47,6 +48,7 @@ is evaluated and the result returned. For each exported symbol in the package th
 // DoExternalSymbols represents the do-external-symbols function.
 type DoExternalSymbols struct {
 	slip.Function
+	preProv bool
 }
 
 // Call the function with the arguments provided.
@@ -96,6 +98,14 @@ func (f *DoExternalSymbols) Call(s *slip.Scope, args slip.List, depth int) slip.
 	ss := s.NewScope()
 	ss.Block = true
 	forms := args[1:]
+	if f.preProv {
+		for i, form := range forms {
+			if list, ok := form.(slip.List); ok {
+				forms[i] = slip.ListToFunc(ss, list, d2)
+			}
+		}
+		f.preProv = false
+	}
 	for _, name := range names {
 		ss.Let(sym, slip.Symbol(name))
 		for i := range forms {

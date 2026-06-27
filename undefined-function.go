@@ -2,7 +2,9 @@
 
 package slip
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // UndefinedFunctionSymbol is the symbol with a value of "undefined-function".
 const UndefinedFunctionSymbol = Symbol("undefined-function")
@@ -11,12 +13,18 @@ const UndefinedFunctionSymbol = Symbol("undefined-function")
 // describing a undefined-function error.
 func UndefinedFunctionNew(s *Scope, depth int, name Object, format string, args ...any) Object {
 	c := FindClass("undefined-function")
+	if c == nil {
+		c = UserPkg.FindClass("error")
+		name = nil
+	}
 	obj := c.MakeInstance()
 
 	obj.Init(s, List{
-		Symbol(":name"), name,
 		Symbol(":message"), String(fmt.Sprintf(format, args...)),
 	}, depth)
+	if name != nil {
+		_ = obj.SetSlotValue(Symbol("name"), name)
+	}
 	return obj
 }
 

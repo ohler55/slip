@@ -10,6 +10,7 @@ import (
 // unbound.
 func GetVar(sym Symbol) (Object, bool) {
 	name := strings.ToLower(string(sym))
+
 	return CurrentPackage.Get(name)
 }
 
@@ -21,24 +22,30 @@ func SetVar(sym Symbol, value Object) {
 // HasVar returns true if the sym argument is bound to a value.
 func HasVar(sym Symbol) bool {
 	name := strings.ToLower(string(sym))
-	if _, has := CurrentPackage.vars[name]; has {
-		return true
-	}
-	return false
+	CurrentPackage.mu.Lock()
+	_, has := CurrentPackage.vars[name]
+	CurrentPackage.mu.Unlock()
+
+	return has
 }
 
 // RemoveVar removes the binding to the sym argument.
 func RemoveVar(sym Symbol) {
 	name := strings.ToLower(string(sym))
+	CurrentPackage.mu.Lock()
 	delete(CurrentPackage.vars, name)
+	CurrentPackage.mu.Unlock()
 }
 
 // DescribeVar returns the documentation for the variable bound to the sym
 // argument.
-func DescribeVar(sym Symbol) string {
+func DescribeVar(sym Symbol) (doc string) {
 	name := strings.ToLower(string(sym))
+	CurrentPackage.mu.Lock()
 	if vv, has := CurrentPackage.vars[name]; has {
-		return vv.Doc
+		doc = vv.Doc
 	}
-	return ""
+	CurrentPackage.mu.Unlock()
+
+	return
 }
