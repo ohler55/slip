@@ -4,6 +4,25 @@
 
 ---------------------
 
+- sequence-io
+ - read-sequence
+  - read into octets (maybe limit to octets)
+ - write-sequence
+ - copy-stream-to-stream (input output &key buffer-size)
+  - also element-type but has to be octets or (unsigned-byte 8)
+
+---------------------
+
+- clipboard-extras
+  - add C-Y with pbpaste
+  - C-k should add to clipboard
+  - M-d should copy to clipboard
+  - M-DEL should copy to clipboard
+
+  - test osc52 with iterm2
+
+---------------------
+
 - rethink read/compile/eval cycle
  - try and remove special case for defxxx functions and in-package
  - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
@@ -11,6 +30,11 @@
   - second pass convert to functions (maybe combine with first)
   - third call each including defuns
    - calls need to resolve functions in this step
+ - plan
+  - try not having compile for some test code
+  - once that works, make compile do nothing
+  - finally no special case for defxxx
+
 
 ---------------------
 
@@ -25,6 +49,12 @@
      - clear
      - etc
   - or coverage viewing as part of repl?
+
+---------------------
+
+- support mouse in repl
+ - for what purpose?
+ - https://iterm2.com/feature-reporting/
 
 ---------------------
 

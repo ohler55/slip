@@ -224,19 +224,28 @@ func printSize(s string) (cnt int) {
 }
 
 func (ed *editor) chanRead() {
-	var err error
+	buf := make([]byte, 32)
 	for {
 		if ed.pause.Load() {
 			time.Sleep(time.Millisecond * 50)
 			continue
 		}
-		s := seq{cnt: 0, buf: make([]byte, 32)}
-		if s.cnt, err = ed.in.Read(s.buf); err != nil {
+		cnt, err := ed.in.Read(buf)
+		if err != nil {
 			// shutting down
 			return
 		}
-		if 0 < s.cnt {
-			ed.seqChan <- &s
+		content := buf[:cnt]
+		for 0 < len(content) {
+			pos := bytes.IndexByte(content, '\r')
+			if pos < 0 || len(content)-1 == pos {
+				ed.seqChan <- &seq{cnt: cnt, buf: content}
+				time.Sleep(time.Millisecond * 50)
+				break
+			}
+			ed.seqChan <- &seq{cnt: pos, buf: content[:pos]}
+			ed.seqChan <- &seq{cnt: 1, buf: []byte{'\r'}}
+			content = content[pos+1:]
 		}
 	}
 }

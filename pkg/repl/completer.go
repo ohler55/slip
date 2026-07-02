@@ -57,6 +57,7 @@ func setHook(p *slip.Package, key string) {
 		strings.HasPrefix(key, "*print-") ||
 		key == "*bag-time-format*" ||
 		key == "*bag-time-wrap*" {
+		key = strings.TrimPrefix(key, "repl:")
 		modifiedVars[key] = true
 		updateConfigFile()
 	}
