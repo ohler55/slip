@@ -14,6 +14,7 @@ import (
 
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/bag"
+	"github.com/ohler55/slip/pkg/flavors"
 	"github.com/ohler55/slip/pkg/repl"
 	"github.com/ohler55/slip/pkg/swank"
 	"golang.org/x/term"
@@ -229,7 +230,9 @@ func run() {
 		var paths slip.List
 		for _, path = range flag.Args() {
 			if buf, err := os.ReadFile(path); err == nil {
-				path = filepath.Join(slip.WorkingDir, path)
+				if !filepath.IsAbs(path) {
+					path = filepath.Join(slip.WorkingDir, path)
+				}
 				if w != nil {
 					_, _ = fmt.Fprintf(w, ";; Loading contents of %s\n", path)
 				}
@@ -257,7 +260,10 @@ func run() {
 	} else {
 		for _, path = range flag.Args() {
 			if buf, err := os.ReadFile(path); err == nil {
-				pathname := slip.String(filepath.Join(slip.WorkingDir, path))
+				pathname := slip.String(path)
+				if !filepath.IsAbs(path) {
+					pathname = slip.String(filepath.Join(slip.WorkingDir, path))
+				}
 				scope.UnsafeLet(slip.Symbol("*load-pathname*"), pathname)
 				scope.UnsafeLet(slip.Symbol("*load-truename*"), pathname)
 				if w != nil {
@@ -265,10 +271,16 @@ func run() {
 				}
 				code, listProvs = slip.ReadProv(buf, scope, string(pathname), listProvs)
 				code.CompileWithProvenance(listProvs)
+				var loaded slip.Object
 				if print == nil {
-					code.Eval(scope, nil)
+					loaded = code.Eval(scope, nil)
 				} else {
-					code.Eval(scope, w)
+					loaded = code.Eval(scope, w)
+				}
+				if sys, ok := loaded.(*flavors.Instance); ok && sys.Class().Name() == "system" {
+					sys.Set(slip.Symbol("pathname"), slip.String(filepath.Dir(path)))
+					_ = sys.Receive(scope, ":fetch", nil, 0)
+					_ = sys.Receive(scope, ":load", nil, 0)
 				}
 				if w != nil {
 					_, _ = fmt.Fprintf(w, ";; Finished loading %s\n", pathname)

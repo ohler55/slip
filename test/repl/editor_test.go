@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ohler55/ojg/tt"
 	"github.com/ohler55/slip"
@@ -89,6 +90,12 @@ func runScript(t *testing.T, tm *repl.Termock, script []any) {
 				fmt.Printf("<<< %q\n", tx)
 			}
 			tm.Input(string(tx))
+			// This is for testing interactions. Since the test scripts
+			// expected to see prompts after returns this gives the REPL a
+			// chance to do so.
+			if strings.Contains(string(tx), "\r") {
+				time.Sleep(time.Millisecond * 10)
+			}
 		case comment:
 			if testing.Verbose() {
 				fmt.Printf("### %s\n", tx)
