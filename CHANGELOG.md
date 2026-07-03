@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.5.1] - unreleased
 ### Added
 - Added `gi:copy-stream-to-stream` function.
+- Added `cl:read-sequence` function.
 
 ### Fixed
 - Paste-ing multiple line text into the REPL no longer trims lines.

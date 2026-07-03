@@ -65,6 +65,9 @@ func Coerce(object, typeSpec Object) (result Object) {
 	case nil:
 		result = object
 	case Symbol:
+		if 1 < len(t1) && t1[0] == ':' {
+			t1 = t1[1:]
+		}
 		switch t1 {
 		case TrueSymbol:
 			result = object

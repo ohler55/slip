@@ -30,7 +30,7 @@ func TestCoerceToList(t *testing.T) {
 		Expect: "nil",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(coerce '(a b c) 'list)`,
+		Source: `(coerce '(a b c) :list)`,
 		Expect: "(a b c)",
 	}).Test(t)
 	(&sliptest.Function{

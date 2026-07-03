@@ -1,4 +1,3 @@
- * [ ] READ-SEQUENCE
  * [ ] COMPLEMENT
  * [ ] CONJUGATE
  * [ ] ENOUGH-NAMESTRING
@@ -611,6 +610,7 @@
  * [x] READ-CHAR
  * [x] READ-FROM-STRING
  * [x] READ-LINE
+ * [x] READ-SEQUENCE
  * [x] READER-ERROR
  * [x] REAL
  * [x] REALP

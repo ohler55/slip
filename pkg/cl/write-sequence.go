@@ -56,7 +56,7 @@ type WriteSequence struct {
 
 // Call the function with the arguments provided.
 func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.CheckArgCount(s, depth, f, args, 1, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	var ss slip.Stream
 	w, ok := args[1].(io.Writer)
 	if ok {

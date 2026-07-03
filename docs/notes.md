@@ -7,8 +7,7 @@
 - sequence-io
  + copy-stream-to-stream (input output &key buffer-size)
  + write-sequence
- - read-sequence (sequence stream &key start end)
-  - read into octets (maybe limit to octets)
+ + read-sequence (sequence stream &key start end)
 
 ---------------------
 
