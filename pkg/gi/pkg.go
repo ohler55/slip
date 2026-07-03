@@ -337,6 +337,7 @@ filename is displayed instead of just the base.`,
 	defClearenv()
 	defCommand()
 	defContainsp()
+	defCopyStreamToStream()
 	defCoverageReport()
 	defCryptoHash()
 	defDecrypt()

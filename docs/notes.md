@@ -5,11 +5,11 @@
 ---------------------
 
 - sequence-io
- - read-sequence
+ + copy-stream-to-stream (input output &key buffer-size)
+ - read-sequence (sequence stream &key start end)
   - read into octets (maybe limit to octets)
  - write-sequence
- - copy-stream-to-stream (input output &key buffer-size)
-  - also element-type but has to be octets or (unsigned-byte 8)
+  - update to also support octets
 
 ---------------------
 
