@@ -49,7 +49,7 @@ func (caller respWriterStatusCaller) Call(s *slip.Scope, args slip.List, depth i
 }
 
 func (caller respWriterStatusCaller) Docs() string {
-	return `__:write-status__ _code_=> _nil_
+	return `__:write-status__ _code_ => _nil_
    _code_ the status code for the HTTP response.
 
 Writes the status code as part of the response.
@@ -74,7 +74,7 @@ func (caller respWriterWriteCaller) Call(s *slip.Scope, args slip.List, depth in
 }
 
 func (caller respWriterWriteCaller) Docs() string {
-	return `__:write__ _content => _nil_
+	return `__:write__ _content_ => _nil_
    _content_ to write as the response.
 
 Write _content_ as the response.

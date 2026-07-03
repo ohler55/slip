@@ -56,7 +56,7 @@ type WriteSequence struct {
 
 // Call the function with the arguments provided.
 func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
-	slip.CheckArgCount(s, depth, f, args, 1, 6)
+	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	var ss slip.Stream
 	w, ok := args[1].(io.Writer)
 	if ok {
@@ -64,10 +64,17 @@ func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	} else {
 		slip.TypePanic(s, depth, "stream", args[1], "output-stream")
 	}
-	var ra []rune
+	var (
+		ra      []rune
+		ba      []byte
+		isBytes bool
+	)
 	switch ta := args[0].(type) {
 	case slip.String:
 		ra = []rune(ta)
+	case slip.Octets:
+		isBytes = true
+		ba = []byte(ta)
 	case slip.List:
 		ra = make([]rune, len(ta))
 		for i, v := range ta {
@@ -83,41 +90,54 @@ func (f *WriteSequence) Call(s *slip.Scope, args slip.List, depth int) slip.Obje
 	default:
 		slip.TypePanic(s, depth, "sequence", ta, "sequence")
 	}
+	start := 0
+	end := -1
 	if 2 < len(args) {
 		rest := args[2:]
-		start := 0
-		end := len(ra)
-		if w, ok = args[1].(io.Writer); ok {
-			ss, _ = args[1].(slip.Stream)
-			rest = args[2:]
-		}
 		if value, has := slip.GetArgsKeyValue(rest, slip.Symbol(":start")); has {
-			var num slip.Fixnum
-			if num, ok = value.(slip.Fixnum); ok {
-				start = int(num)
-				if start < 0 || len(ra) <= start {
-					slip.ErrorPanic(s, depth, ":start (%d) out of range 0 to %d.", start, len(ra)-1)
-				}
-			} else {
-				slip.TypePanic(s, depth, "start", value, "fixnum")
+			switch tv := value.(type) {
+			case nil:
+				start = 0
+			case slip.Fixnum:
+				start = int(tv)
+			default:
+				slip.TypePanic(s, depth, ":start", value, "non-negative fixnum")
 			}
 		}
 		if value, has := slip.GetArgsKeyValue(rest, slip.Symbol(":end")); has {
 			switch tv := value.(type) {
 			case nil:
-				end = len(ra)
+				end = -1
 			case slip.Fixnum:
 				end = int(tv)
-				if end < start || len(ra) <= end {
-					slip.ErrorPanic(s, depth, ":end (%d) out of range %d to %d.", end, start, len(ra)-1)
-				}
 			default:
-				slip.TypePanic(s, depth, "end", value, "fixnum")
+				slip.TypePanic(s, depth, ":end", value, "non-negative fixnum")
 			}
 		}
+	}
+	size := len(ra)
+	if isBytes {
+		size = len(ba)
+	}
+	if end < 0 {
+		end = size
+	}
+	if size <= start {
+		slip.ErrorPanic(s, depth, ":start (%d) out of range 0 to %d.", start, size-1)
+	}
+	if size < end {
+		slip.ErrorPanic(s, depth, ":end (%d) out of range 0 to %d.", end, size)
+	}
+	if 0 < start || end < size {
 		ra = ra[start:end]
 	}
-	if _, err := w.Write([]byte(string(ra))); err != nil {
+	var err error
+	if isBytes {
+		_, err = w.Write(ba)
+	} else {
+		_, err = w.Write([]byte(string(ra)))
+	}
+	if err != nil {
 		slip.StreamPanic(s, depth, ss, "write-sequence failed. %s", err)
 	}
 	return args[0]

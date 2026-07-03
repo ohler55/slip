@@ -94,3 +94,16 @@ func TestWriteSequenceWriteFail(t *testing.T) {
 		PanicType: slip.StreamErrorSymbol,
 	}).Test(t)
 }
+
+func TestWriteSequenceOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(with-output-to-string (out)
+                      (write-sequence (coerce "abc" 'octets) out :start nil :end nil))`,
+		Expect: `"abc"`,
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(with-output-to-string (out)
+                      (write-sequence (coerce "abc" 'octets) out :start nil :end 4))`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}

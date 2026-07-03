@@ -22,7 +22,7 @@ func TestTypepTrue(t *testing.T) {
 		Expect: "t",
 	}).Test(t)
 	(&sliptest.Function{
-		Source: `(typep '(1 2) 'list)`,
+		Source: `(typep '(1 2) :list)`,
 		Expect: "t",
 	}).Test(t)
 }

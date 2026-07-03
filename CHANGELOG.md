@@ -5,10 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.5.1] - unreleased
+### Added
+- Added `gi:copy-stream-to-stream` function.
+- Added `cl:read-sequence` function.
+
 ### Fixed
 - Paste-ing multiple line text into the REPL no longer trims lines.
 - An ASDF file listed when starting slip correctly fetches and loads the system in the file.
 - Setting `*repl-editor*` no longer adds two entries to the slip config.lisp file.
+- `cl:write-sequence` now supports `octets`.
+
 
 ## [1.5.0] - 2026-06-26
 ### Added
