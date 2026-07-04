@@ -249,7 +249,7 @@ func (ed *editor) queueText(content []byte) {
 			break
 		}
 		ed.seqChan <- &seq{cnt: pos, buf: content[:pos]}
-		ed.seqChan <- &seq{cnt: 1, buf: []byte{'\r'}}
+		ed.seqChan <- &seq{cnt: 1, buf: []byte{'\n'}}
 		content = content[pos+1:]
 	}
 }
@@ -941,7 +941,6 @@ lineLoop:
 }
 
 func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
-	// TBD fromPos to toPos if same line else gather from bott lines
 	cmd := exec.Command("pbcopy")
 	if fromLine == toLine {
 		line := ed.lines[toLine]
@@ -952,20 +951,23 @@ func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
 		ed.lines[toLine] = append(line[:fromPos], line[toPos:]...)
 		return
 	}
-	// var buf []byte
-	// buf = append(buf, []byte(string(ed.lines[fromLine][fromPos:]))...)
+	var buf []byte
+	buf = append(buf, []byte(string(ed.lines[fromLine][fromPos:]))...)
+	for line := fromLine + 1; line < toLine; line++ {
+		buf = append(buf, []byte(string(ed.lines[line]))...)
+		buf = append(buf, '\n')
+	}
+	buf = append(buf, '\n')
+	buf = append(buf, []byte(string(ed.lines[toLine][:toPos]))...)
+	cmd.Stdin = bytes.NewReader(buf)
+	// Ignore errors as pbcopy may not exist.
+	_ = cmd.Run()
 	ed.lines[fromLine] = append(ed.lines[fromLine][:fromPos], ed.lines[toLine][toPos:]...)
 	if toLine < len(ed.lines) {
-		// TBD add in between lines
-		// buf = append(buf, '\r')
-		// buf = append(buf, []byte(string(ed.lines[toLine][:toPos]))...)
 		ed.lines = append(ed.lines[:fromLine+1], ed.lines[toLine+1:]...)
 	} else {
 		ed.lines = ed.lines[:fromLine+1]
 	}
-	// cmd.Stdin = bytes.NewReader(buf)
-	// Ignore errors as pbcopy may not exist.
-	// _ = cmd.Run()
 }
 
 func (ed *editor) addToHistory() {

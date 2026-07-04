@@ -496,6 +496,7 @@ func delBack(ed *editor, b byte) bool {
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
+
 	return false
 }
 
@@ -504,11 +505,12 @@ func delForwardWord(ed *editor, b byte) bool {
 	cnt := len(ed.lines)
 	toLine, toPos := ed.findWordEnd()
 	ed.deleteRange(ed.line, ed.pos, toLine, toPos)
-	for i := toLine; i < cnt; i++ {
+	for i := ed.line; i < cnt; i++ {
 		ed.drawLine(i)
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
+
 	return false
 }
 
@@ -517,13 +519,14 @@ func delBackWord(ed *editor, b byte) bool {
 	cnt := len(ed.lines)
 	toLine, toPos := ed.findWordStart()
 	ed.deleteRange(toLine, toPos, ed.line, ed.pos)
-	for i := toLine; i < cnt; i++ {
+	for i := ed.line; i < cnt; i++ {
 		ed.drawLine(i)
 	}
 	ed.line = toLine
 	ed.pos = toPos
 	ed.setCursorCurrent()
 	ed.mode = topMode
+
 	return false
 }
 
@@ -549,6 +552,7 @@ func delLineEnd(ed *editor, b byte) bool {
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
+
 	return false
 }
 
@@ -564,6 +568,7 @@ func swapChar(ed *editor, b byte) bool {
 		ed.setCursorCurrent()
 	}
 	ed.mode = topMode
+
 	return false
 }
 
