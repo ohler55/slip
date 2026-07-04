@@ -4,18 +4,12 @@
 
 ---------------------
 
-- sequence-io
- + copy-stream-to-stream (input output &key buffer-size)
- + write-sequence
- + read-sequence (sequence stream &key start end)
-
----------------------
-
 - clipboard-extras
-  - add C-Y with pbpaste
-  - C-k should add to clipboard
+  + add C-Y with pbpaste
+  + C-k should add to clipboard
   - M-d should copy to clipboard
   - M-DEL should copy to clipboard
+   - delete forward across lines deletes too much
 
   - test osc52 with iterm2
 

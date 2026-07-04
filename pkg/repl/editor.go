@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"os/signal"
 	"sync/atomic"
 	"syscall"
@@ -235,18 +236,21 @@ func (ed *editor) chanRead() {
 			// shutting down
 			return
 		}
-		content := buf[:cnt]
-		for 0 < len(content) {
-			pos := bytes.IndexByte(content, '\r')
-			if pos < 0 || len(content)-1 == pos {
-				ed.seqChan <- &seq{cnt: cnt, buf: content}
-				time.Sleep(time.Millisecond * 50)
-				break
-			}
-			ed.seqChan <- &seq{cnt: pos, buf: content[:pos]}
-			ed.seqChan <- &seq{cnt: 1, buf: []byte{'\r'}}
-			content = content[pos+1:]
+		ed.queueText(buf[:cnt])
+	}
+}
+
+func (ed *editor) queueText(content []byte) {
+	for 0 < len(content) {
+		pos := bytes.IndexByte(content, '\r')
+		if pos < 0 || len(content)-1 == pos {
+			ed.seqChan <- &seq{cnt: len(content), buf: content}
+			time.Sleep(time.Millisecond * 50)
+			break
 		}
+		ed.seqChan <- &seq{cnt: pos, buf: content[:pos]}
+		ed.seqChan <- &seq{cnt: 1, buf: []byte{'\r'}}
+		content = content[pos+1:]
 	}
 }
 
@@ -937,17 +941,31 @@ lineLoop:
 }
 
 func (ed *editor) deleteRange(fromLine, fromPos, toLine, toPos int) {
+	// TBD fromPos to toPos if same line else gather from bott lines
+	cmd := exec.Command("pbcopy")
 	if fromLine == toLine {
 		line := ed.lines[toLine]
+		cut := line[fromPos:toPos]
+		cmd.Stdin = bytes.NewReader([]byte(string(cut)))
+		// Ignore errors as pbcopy may not exist.
+		_ = cmd.Run()
 		ed.lines[toLine] = append(line[:fromPos], line[toPos:]...)
 		return
 	}
+	// var buf []byte
+	// buf = append(buf, []byte(string(ed.lines[fromLine][fromPos:]))...)
 	ed.lines[fromLine] = append(ed.lines[fromLine][:fromPos], ed.lines[toLine][toPos:]...)
 	if toLine < len(ed.lines) {
+		// TBD add in between lines
+		// buf = append(buf, '\r')
+		// buf = append(buf, []byte(string(ed.lines[toLine][:toPos]))...)
 		ed.lines = append(ed.lines[:fromLine+1], ed.lines[toLine+1:]...)
 	} else {
 		ed.lines = ed.lines[:fromLine+1]
 	}
+	// cmd.Stdin = bytes.NewReader(buf)
+	// Ignore errors as pbcopy may not exist.
+	// _ = cmd.Run()
 }
 
 func (ed *editor) addToHistory() {
