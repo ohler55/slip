@@ -33,7 +33,7 @@ var (
 		bad, lineBegin, back, done, delForward, lineEnd, forward, bad, // 0x00
 		help, tab, nl, delLineEnd, bad, enter, down, nlAfter, // 0x08
 		up, bad, searchBack, searchForward, swapChar, clearForm, historyForward, ccut, // 0x10
-		bad, bad, bad, esc, bad, bad, bad, describe, // 0x18
+		bad, cpaste, bad, esc, bad, bad, bad, describe, // 0x18
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x20
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x28
 		addByte, addByte, addByte, addByte, addByte, addByte, addByte, addByte, // 0x30
@@ -496,6 +496,7 @@ func delBack(ed *editor, b byte) bool {
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
+
 	return false
 }
 
@@ -504,11 +505,12 @@ func delForwardWord(ed *editor, b byte) bool {
 	cnt := len(ed.lines)
 	toLine, toPos := ed.findWordEnd()
 	ed.deleteRange(ed.line, ed.pos, toLine, toPos)
-	for i := toLine; i < cnt; i++ {
+	for i := ed.line; i < cnt; i++ {
 		ed.drawLine(i)
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
+
 	return false
 }
 
@@ -517,13 +519,14 @@ func delBackWord(ed *editor, b byte) bool {
 	cnt := len(ed.lines)
 	toLine, toPos := ed.findWordStart()
 	ed.deleteRange(toLine, toPos, ed.line, ed.pos)
-	for i := toLine; i < cnt; i++ {
+	for i := ed.line; i < cnt; i++ {
 		ed.drawLine(i)
 	}
 	ed.line = toLine
 	ed.pos = toPos
 	ed.setCursorCurrent()
 	ed.mode = topMode
+
 	return false
 }
 
@@ -531,6 +534,11 @@ func delLineEnd(ed *editor, b byte) bool {
 	ed.logf("=> %02x delLineEnd\n", b)
 	line := ed.lines[ed.line]
 	if ed.pos < len(line) {
+		cut := line[ed.pos:]
+		cmd := exec.Command("pbcopy")
+		cmd.Stdin = bytes.NewReader([]byte(string(cut)))
+		// Ignore errors as pbcopy may not exist.
+		_ = cmd.Run()
 		line = line[:ed.pos]
 		ed.lines[ed.line] = line
 		ed.adjustShift(true)
@@ -544,6 +552,7 @@ func delLineEnd(ed *editor, b byte) bool {
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
+
 	return false
 }
 
@@ -559,6 +568,7 @@ func swapChar(ed *editor, b byte) bool {
 		ed.setCursorCurrent()
 	}
 	ed.mode = topMode
+
 	return false
 }
 
@@ -771,6 +781,7 @@ bindings are:
 		"\x1b[1mC-u\x1b[m   clear current form",
 		"\x1b[1mC-v\x1b[m   next in history",
 		"\x1b[1mC-w\x1b[m   cut to clipboard (macOS only)",
+		"\x1b[1mC-y\x1b[m   paste from clipboard (macOS only)",
 		"\x1b[1mM-C-b\x1b[m move back to matching paren",
 		"\x1b[1mM-C-e\x1b[m edit current form in $EDITOR",
 		"\x1b[1mM-C-f\x1b[m move forward to matching paren",
@@ -1183,6 +1194,20 @@ func ccut(ed *editor, b byte) bool {
 	ed.reset()
 
 	return true
+}
+
+// paste to clipboard on macOS or if pbpaste is defined or aliased.
+func cpaste(ed *editor, b byte) bool {
+	ed.logf("=> %02x cpaste\n", b)
+	cmd := exec.Command("pbpaste")
+	var buf bytes.Buffer
+	cmd.Stdout = &buf
+	if err := cmd.Run(); err != nil {
+		panic(err)
+	}
+	ed.queueText(buf.Bytes())
+
+	return false
 }
 
 func stashAdd(ed *editor, b byte) bool {
