@@ -128,7 +128,7 @@ func writeBag(s *slip.Scope, obj *flavors.Instance, args slip.List, depth int) (
 			// probably a key or an error
 		default:
 			if ta == slip.True {
-				out = slip.StandardOutput.(io.Writer)
+				out = s.Get("*standard-output*").(io.Writer)
 			} else {
 				slip.TypePanic(s, depth, "stream", ta, "nil", "t", "output-stream")
 			}

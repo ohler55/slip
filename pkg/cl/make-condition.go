@@ -49,7 +49,11 @@ func (f *MakeCondition) Call(s *slip.Scope, args slip.List, depth int) (cond sli
 	if !ok {
 		slip.TypePanic(s, depth, "type", args[0], "symbol")
 	}
-	if c := slip.FindClass(string(sym)); c != nil && c.Metaclass() == slip.Symbol("condition-class") {
+	name := string(sym)
+	if 1 < len(name) && name[0] == ':' {
+		name = name[1:]
+	}
+	if c := slip.FindClass(name); c != nil && c.Metaclass() == slip.Symbol("condition-class") {
 		obj := c.MakeInstance()
 		obj.Init(s, args[1:], depth+1)
 		return obj

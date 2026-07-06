@@ -5,6 +5,7 @@ package bag
 import (
 	"strings"
 
+	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/slip"
 	"github.com/ohler55/slip/pkg/flavors"
@@ -149,7 +150,7 @@ func ObjectToBag(s *slip.Scope, obj slip.Object, depth int) (v any) {
 			slip.TypePanic(s, depth, "value", val, "nil", "t", ":false", "integer", "float", "string", "symbol", "gi::time",
 				"list", "hash-table", "bag-instance")
 		}
-		v = val.Any
+		v = alt.Dup(val.Any)
 	default:
 		v = val.Simplify()
 	}

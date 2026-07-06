@@ -10,11 +10,14 @@ import (
 )
 
 func TestMakeConditionBasic(t *testing.T) {
-	tf := sliptest.Function{
+	(&sliptest.Function{
 		Source: "(make-condition 'unbound-slot :name 'slop :instance 'cymbol)",
 		Expect: "/^#<unbound-slot [0-9a-f]+>$/",
-	}
-	tf.Test(t)
+	}).Test(t)
+	(&sliptest.Function{
+		Source: "(make-condition :unbound-slot :name 'slop :instance 'cymbol)",
+		Expect: "/^#<unbound-slot [0-9a-f]+>$/",
+	}).Test(t)
 }
 
 func TestMakeConditionNotCondition(t *testing.T) {

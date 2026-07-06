@@ -27,7 +27,7 @@ func init() {
 			Return: "bag",
 			Text: `__make-bag__ makes a new _bag_ by either parsing a _string_ as a
 JSON or SEN document or converting an assoc to a map, a list to an array, and number
-to an int64 or float64 in go terms.`,
+to an int64 or float64 in go terms. If _value_ is a bag then a deep copy is returned.`,
 			Examples: []string{
 				`(make-bag "{a:7}") => #<bag-flavor 12345> ;; content is now {a:7}`,
 			},

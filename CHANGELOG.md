@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Setting `*repl-editor*` no longer adds two entries to the slip config.lisp file.
 - `cl:write-sequence` now supports `octets`.
 - Delete word and to end of line now copy to the clipboard.
+- The `bag:make-bag` function now does a deep copy if a bag is provided as an argument.
+- The `bag:bag-write` function uses the locally scoped `*standard-output*` if `t` is provided as the destination.
 
 ## [1.5.0] - 2026-06-26
 ### Added
