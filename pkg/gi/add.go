@@ -30,7 +30,7 @@ func defAdd() {
 				},
 			},
 			Return: "list",
-			Text: `__add__ appends to the _list_ potentiallt modifying the _list_.
+			Text: `__add__ appends to the _list_ potentially modifying the _list_.
 __add__ is an addition to common LISP.`,
 			Examples: []string{
 				"(add '(a b) 'c 'd) => (a b c d)",

@@ -85,13 +85,16 @@ usage: ~A <coverage-file> [<filepath>...]
          (seg (nth index line))
          (seg0 (car seg))
          xline)
-    (when (< seg0 0) (setq seg0 0))
-    (when (< 0 index)
-      (setq xline (subseq line 0 index)))
-    (when (< seg0 c0) (addf xline (list seg0 c0 (caddr seg))))
-    (addf xline (list c0 c1 cov))
-    (when (< c0 c1) (addf xline (list c1 (cadr seg) (caddr seg))))
-    (when (< (1+ index) (length line)) (subseq line (1+ index)))
+    (cond ((numberp seg)
+           (when (< seg0 0) (setq seg0 0))
+           (when (< 0 index)
+             (setq xline (subseq line 0 index)))
+           (when (< seg0 c0) (addf xline (list seg0 c0 (caddr seg))))
+           (addf xline (list c0 c1 cov))
+           (when (< c0 c1) (addf xline (list c1 (cadr seg) (caddr seg))))
+           (when (< (1+ index) (length line)) (subseq line (1+ index))))
+          (t ;; append to end of line
+           (setq xline (add (copy-list line) (list c0 c1 cov)))))
     xline))
 
 (defun form-segments (provs count)
@@ -100,7 +103,7 @@ usage: ~A <coverage-file> [<filepath>...]
    :covered, and :not-covered. An end of -1 indicates unbounded. Segments are
    organized by line to match the lines in a file."
 
-  (let (lines)
+  (let (lines current-cover)
     ;; Initialize lines with the no provenance indication of nil.
     (dotimes (n count)
       (addf lines (list (list -1 -1 nil))))
@@ -122,25 +125,56 @@ usage: ~A <coverage-file> [<filepath>...]
                  (setf (nth (+ firstLine n) lines) (list (list 0 -1 cov))))
                (setf (nth lastLine lines) (insert-segment (nth lastLine lines) 0 c1 cov))))
         ))
-    ;; Compact lines. Remove (-1 0 nil) any with a end of zero at start if
+
+    ;; Compact lines. Remove (-1 0 nil) or any with an end of zero at start if
     ;; present. Then merge consecutive segments with the same coverage.
     (dotimes (n count)
       (let ((line (nth n lines))
             comp ;; new compacted segment
             compact)
+        (sort line (lambda (s0 s1)
+                     (or (< (car s0) (car s1)) (and (= (car s0) (car s1)) (< (cadr s0) (cadr s1))))))
         (dolist (seg line)
           (cond ((= 0 (cadr seg)) nil) ;; skip segments ending at zero
+                ((= -1 (car seg)) nil)
                 ((null comp) (setq comp seg))
                 ((equal (caddr comp) (caddr seg)) ;; merge
-                 (setf (cadr comp) (cadr seg)))
+                 (when (< (cadr comp) (cadr seg)) (setf (cadr comp) (cadr seg))))
                 (t ;; different coverage
                  (addf compact comp)
-                 (setq comp seg))))
+                 (setq comp seg current-cover (caddr seg)))))
+        (unless (or comp (not (emptyp compact))) (setq comp (list 0 -1 current-cover)))
         (addf compact comp)
+        (setq current-cover (caddr comp))
         (when (= 1 (length compact))
           (let ((seg (car compact)))
             (when (and (< 0 n) (= -1 (car seg)) (= -1 (cadr seg)) (null (caddr seg)))
               (setf (caddr seg) (caddar (last (nth (1- n) lines)))))))
+
+        ;; Adjust segments to remove overlaps.
+        (let (prev enclosed)
+          (dolist (seg compact)
+            (cond ((null prev))
+                  ((= -1 (cadr prev)) (setf (cadr prev) (car seg)))
+                  ((< (car seg) (cadr prev))
+                   (if (<= (cadr prev) (cadr seg)) ;; not enclosed by
+                       (setf (car seg) (cadr prev))
+                       (setq enclosed t))))
+            (setq prev seg))
+          (when enclosed
+            ;; At least one segment fell completely inside another. Break
+            ;; those into 3 segments.
+            (let (expanded)
+              (setq prev nil)
+              (dolist (seg compact)
+                (cond ((null prev) (addf expanded seg))
+                      ((and (< (car seg) (cadr prev)) (< (cadr seg) (cadr prev)))
+                       ;; TBD modify prev
+                       (addf expanded seg (list (cadr seg) (cadr prev) (caddr prev)))
+                       (setf (cadr prev) (car seg)))
+                      (t (addf expanded seg)))
+                (setq prev seg))
+              (setq compact expanded))))
         (setf (nth n lines) compact)))
 
     lines))

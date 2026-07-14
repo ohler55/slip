@@ -42,7 +42,7 @@ in the _sequence_ to return a key for comparison.`,
 			},
 			Return: "sequence",
 			Text: `__sort__ returns modified and sorted _sequence_. Deviating from
-the Common LISP standard the _predicate_ is option. A default comparitor is used if
+the Common LISP standard the _predicate_ is optional. A default comparitor is used if
 the _predicate_ is _nil_.`,
 			Examples: []string{
 				`(sort "cba") => "abc"`,
