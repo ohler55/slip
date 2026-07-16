@@ -614,6 +614,7 @@ func (r *reader) read(src []byte) {
 	// If src is empty then the for loop will not set r.pos so initialize to
 	// -1 to keep r.pos where it should be.
 	r.pos = -1
+	r.lineStart = -1 // needed to make the first line offset correct for provenance
 	for r.pos, b = range src {
 	Retry:
 		switch r.mode[b] {

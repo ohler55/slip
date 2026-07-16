@@ -84,7 +84,7 @@ func TestCoverageInTest(t *testing.T) {
                    (+ 1 2)
                    (coverage-report nil))`,
 		Expect: `"(("TestCoverageInTest" nil)
- ("TestCoverageInTest" 0 0 2 41 0)
+ ("TestCoverageInTest" 0 1 2 41 0)
  ("TestCoverageInTest" 1 20 1 26 1)
  ("TestCoverageInTest" 2 20 2 40 1))
 "`,
@@ -106,7 +106,7 @@ func TestCoverageDefun(t *testing.T) {
                    (cov-fun 3)
                    (coverage-report nil))`,
 		Expect: `"(("TestCoverageDefun" nil)
- ("TestCoverageDefun" 0 0 3 41 0)
+ ("TestCoverageDefun" 0 1 3 41 0)
  ("TestCoverageDefun" 1 20 1 46 1)
  ("TestCoverageDefun" 1 39 1 45 1)
  ("TestCoverageDefun" 2 20 2 30 1)
@@ -131,7 +131,7 @@ func TestCoverageMethod(t *testing.T) {
                    (send (make-instance 'cov-flavor) :ok)
                    (coverage-report nil))`,
 		Expect: `"(("TestCoverageMethod" nil)
- ("TestCoverageMethod" 0 0 4 41 0)
+ ("TestCoverageMethod" 0 1 4 41 0)
  ("TestCoverageMethod" 1 20 1 47 1)
  ("TestCoverageMethod" 2 20 2 52 1)
  ("TestCoverageMethod" 3 20 3 57 1)

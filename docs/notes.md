@@ -4,6 +4,13 @@
 
 ---------------------
 
+cover.lisp
+ - form-segments
+  - start with actual length
+  - insert each and no more after that
+
+-------
+
 - rethink read/compile/eval cycle
  - try and remove special case for defxxx functions and in-package
  - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve

@@ -130,8 +130,8 @@
       (assert-equal "G0001R| G;;;; a conditional test" (cadr lines))
       (assert-equal "G0002R| C(+ 1" (caddr lines))
       (assert-equal "G0003R| C   (if (< 0 1)" (nth 3 lines))
-      (assert-equal "G0004R| G       C(+ 2 3)G" (nth 4 lines))
-      (assert-equal "G0005R| C       N(- 3 2)C)C" (nth 5 lines))
+      (assert-equal "G0004R| C       (+ 2 3)" (nth 4 lines))
+      (assert-equal "G0005R| C       N(- 3 2)C))" (nth 5 lines))
       (assert-equal "R------------------------------------------------------------" (nth 6 lines))
       (assert-equal "Coverage: 80.0%" (nth 7 lines)))))
 
@@ -149,11 +149,11 @@
   (deftest "mapcar" suite
     (let ((line (cadr cov-out)))
       (assert-match test-file line)
-      (assert-match "0 0 2 17 1" line)))
+      (assert-match "0 1 2 17 1" line)))
   (deftest "lambda" suite
     (let ((line (caddr cov-out)))
       (assert-match test-file line)
-      (assert-match "0 8 1 17 1" line)))
+      (assert-match "0 9 1 17 1" line)))
   (deftest "one-plus" suite
     (let ((line (nth 3 cov-out)))
       (assert-match test-file line)
@@ -163,7 +163,7 @@
       (assert-match test-file (car lines))
       (assert-equal "G0001R| C(mapcar (lambda (x)" (cadr lines))
       (assert-equal "G0002R| C          (1+ x))" (caddr lines))
-      (assert-equal "G0003R| C        '(1 2 3))G" (nth 3 lines))
+      (assert-equal "G0003R| C        '(1 2 3))" (nth 3 lines))
       (assert-equal "R------------------------------------------------------------" (nth 4 lines))
       (assert-equal "Coverage: 100.0%" (nth 5 lines)))))
 
@@ -185,7 +185,7 @@
   (deftest "defun-quux" suite
     (let ((line (cadr cov-out)))
       (assert-match test-file line)
-      (assert-match "0 0 1 10 1" line)))
+      (assert-match "0 1 1 10 1" line)))
   (deftest "plus" suite
     (let ((line (caddr cov-out)))
       (assert-match test-file line)
@@ -207,11 +207,11 @@
       (assert-match test-file (car lines))
       (assert-equal "G0001R| C(defun quux (x)" (cadr lines))
       (assert-equal "G0002R| C  (+ 2 x))" (caddr lines))
-      (assert-equal "G0003R| C" (nth 3 lines))
+      (assert-equal "G0003R| G" (nth 3 lines))
       (assert-equal "G0004R| C(defun not-called ()" (nth 4 lines))
       (assert-equal "G0005R| C  N(list 'a 'b)C)" (nth 5 lines))
-      (assert-equal "G0006R| C" (nth 6 lines))
-      (assert-equal "G0007R| C(quux 3)G" (nth 7 lines))
+      (assert-equal "G0006R| G" (nth 6 lines))
+      (assert-equal "G0007R| C(quux 3)" (nth 7 lines))
       (assert-equal "R------------------------------------------------------------" (nth 8 lines))
       (assert-equal "Coverage: 80.0%" (nth 9 lines)))))
 
@@ -227,15 +227,15 @@
   (deftest "defvar" suite
     (let ((line (cadr cov-out)))
       (assert-match test-file line)
-      (assert-match "0 0 0 20 1" line)))
+      (assert-match "0 1 0 21 1" line)))
   (deftest "plus" suite
     (let ((line (caddr cov-out)))
       (assert-match test-file line)
-      (assert-match "0 13 0 19 1" line)))
+      (assert-match "0 14 0 20 1" line)))
   (deftest "colorized" suite
     (let ((lines (split (decolorize colorized) "\n")))
       (assert-match test-file (car lines))
-      (assert-equal "G0001R| C(defvar quux (+ 2 3))C ;; comment at end of line" (cadr lines))
+      (assert-equal "G0001R| C(defvar quux (+ 2 3))G ;; comment at end of line" (cadr lines))
       (assert-equal "R------------------------------------------------------------" (caddr lines))
       (assert-equal "Coverage: 100.0%" (cadddr lines)))))
 
@@ -252,7 +252,7 @@
   (deftest "dolist" suite
     (let ((line (cadr cov-out)))
       (assert-match test-file line)
-      (assert-match "0 0 1 12 1" line)))
+      (assert-match "0 1 1 12 1" line)))
   (deftest "print" suite
     (let ((line (caddr cov-out)))
       (assert-match test-file line)
