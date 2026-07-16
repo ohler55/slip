@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Delete word and to end of line now copy to the clipboard.
 - The `bag:make-bag` function now does a deep copy if a bag is provided as an argument.
 - The `bag:bag-write` function uses the locally scoped `*standard-output*` if `t` is provided as the destination.
+- Fixed some spelling errors in the descriptions.
+- Fixed provenance column offset calculations for the first line of a file.
+- Fixed cover.lisp coverage displays and simplified the colorization code.
 
 ## [1.5.0] - 2026-06-26
 ### Added

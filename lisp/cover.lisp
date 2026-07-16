@@ -69,84 +69,88 @@ usage: ~A <coverage-file> [<filepath>...]
 
     (format t "Total coverage: ~,1F%~%" (calculate-coverage (cdr cover) filepaths))))
 
-(defun locate-segment (line c0 c1)
-  (let ((index 0))
-    (dolist (seg line)
-      (when (and (<= (car seg) c0)
-                 (or (= (cadr seg) -1)
-                     (< c1 (cadr seg))))
-        (return index))
-      (incf index))
-    index))
+(defun insert (seq pos item)
+  "A general list insertion function."
+  (cond ((= pos 0) (cons item seq))
+        ((<= (length seq) pos) (add seq item))
+        (t (append (add (subseq seq 0 pos) item) (subseq seq pos)))))
 
-(defun insert-segment (line c0 c1 cov)
-  "Insert a new segment with c0 being the first column and c1 being the last."
-  (let* ((index (locate-segment line c0 c1))
-         (seg (nth index line))
-         (seg0 (car seg))
-         xline)
-    (when (< seg0 0) (setq seg0 0))
-    (when (< 0 index)
-      (setq xline (subseq line 0 index)))
-    (when (< seg0 c0) (addf xline (list seg0 c0 (caddr seg))))
-    (addf xline (list c0 c1 cov))
-    (when (< c0 c1) (addf xline (list c1 (cadr seg) (caddr seg))))
-    (when (< (1+ index) (length line)) (subseq line (1+ index)))
-    xline))
+(defun add-prov (segments c0 c1 cov)
+  "Add a provenance segment for a function as described by c0, the first column,
+and c1, the last column along with the coverage. Segments are a list of
+function provenance triplets. Consideration is given to the relationship of
+the new segment and it's coverage."
+  (dotimes (n (length segments))
+    (let ((seg (nth n segments)))
+      (cond ((and (= (car seg) c0) (= (cadr seg) c1))
+             ;; Function is the same as seg. This happens when replaing an initial segment for a full line.
+             (setf (caddr seg) cov))
 
-(defun form-segments (provs count)
-  "Segments describe a segment of a line associated with a function. Each segment
-   has a start, end, and coverage indicator of nil for no provenance,
-   :covered, and :not-covered. An end of -1 indicates unbounded. Segments are
-   organized by line to match the lines in a file."
+            ((and (= (car seg) c0) (<= c1 (cadr seg)))
+             ;; Function is inside the seg with the same left edge.
+             (unless (equal (caddr seg) cov)
+               (setf (car seg) c1)
+               (setq segments (insert segments n (list c0 c1 cov)))))
+            ((and (<= (car seg) c0) (= c1 (cadr seg)))
+             ;; Function is inside the seg with the same right edge.
+             (unless (equal (caddr seg) cov)
+               (setf (cadr seg) c0)
+               (setq segments (insert segments (1+ n) (list c0 c1 cov)))))
+            ((and (<= (car seg) c0) (<= c1 (cadr seg)))
+             ;; Function is inside the seg with the same right edge.
+             (unless (equal (caddr seg) cov)
+               (setq segments (insert segments (1+ n) (list c1 (cadr seg) (caddr seg))))
+               (setq segments (insert segments (1+ n) (list c0 c1 cov)))
+               (setf (cadr seg) c0)))
 
-  (let (lines)
-    ;; Initialize lines with the no provenance indication of nil.
-    (dotimes (n count)
-      (addf lines (list (list -1 -1 nil))))
+            ((and (= c0 (car seg)) (<= (cadr seg) c1))
+             ;; Function wraps the seg with the same left edge.
+             (if (equal (caddr seg) cov)
+                 (setf (cadr seg) c1)
+                 (setq segments (insert segments (1+ n) (list (cadr seg) c1 cov)))))
+            ((and (<= c0 (car seg)) (= (cadr seg) c1))
+             ;; Function wraps the seg with the same right edge.
+             (if (equal (caddr seg) cov)
+                 (setf (car seg) c0)
+                 (setq segments (insert segments n (list c0 (car seg) cov)))))
+            ((and (<= c0 (car seg)) (<= (cadr seg) c1))
+             ;; Function wraps the seg.
+             (cond ((equal (caddr seg) cov)
+                    (setf (car seg) c0)
+                    (setf (cadr seg) c1))
+                   (t
+                    (setq segments (insert segments (1+ n) (list (cadr seg) c1 cov)))
+                    (setq segments (insert segments n (list c0 (car seg) cov))))))
+
+            (t nil))))
+  segments)
+
+(defun form-segments (provs lines)
+  "Form a set of segments where each segment is a list of coverage markers that
+can be used to write a colorized version of a text line."
+  (let ((seg-sets (mapcar (lambda (line) (list (list 0 (length line) nil))) lines)))
 
     (dolist (fn provs)
-      (let* ((firstLine (cadr fn)) ;; lines are zero based
-             (line (nth firstLine lines))
+      (let* ((first-line (cadr fn)) ;; lines are zero based
              (cov (if (< 0 (nth 5 fn)) :covered :not-covered))
-             (lastLine (cadddr fn))
+             (last-line (cadddr fn))
              (c0 (1- (caddr fn))) ;; columns are 1 based
              (c1 (nth 4 fn))) ;; one past last character
 
-        (cond ((= firstLine lastLine) ;; same line
-               (setf (nth firstLine lines) (insert-segment line c0 c1 cov)))
-              (t
-               (setf (nth firstLine lines) (insert-segment line c0 -1 cov))
-               ;; Any lines inbetween first and last are set to one segment.
-               (dotimes (n (- lastLine firstLine 1))
-                 (setf (nth (+ firstLine n) lines) (list (list 0 -1 cov))))
-               (setf (nth lastLine lines) (insert-segment (nth lastLine lines) 0 c1 cov))))
-        ))
-    ;; Compact lines. Remove (-1 0 nil) any with a end of zero at start if
-    ;; present. Then merge consecutive segments with the same coverage.
-    (dotimes (n count)
-      (let ((line (nth n lines))
-            comp ;; new compacted segment
-            compact)
-        (dolist (seg line)
-          (cond ((= 0 (cadr seg)) nil) ;; skip segments ending at zero
-                ((null comp) (setq comp seg))
-                ((equal (caddr comp) (caddr seg)) ;; merge
-                 (setf (cadr comp) (cadr seg)))
-                (t ;; different coverage
-                 (addf compact comp)
-                 (setq comp seg))))
-        (addf compact comp)
-        (when (= 1 (length compact))
-          (let ((seg (car compact)))
-            (when (and (< 0 n) (= -1 (car seg)) (= -1 (cadr seg)) (null (caddr seg)))
-              (setf (caddr seg) (caddar (last (nth (1- n) lines)))))))
-        (setf (nth n lines) compact)))
-
-    lines))
+        (when (< c0 0) (setq c0 0))
+        ;; First determine if the function spans multiple lines.
+        (cond ((= first-line last-line) ;; one line
+               (setf (nth first-line seg-sets) (add-prov (nth first-line seg-sets) c0 c1 cov)))
+              (t ;; multiple lines
+               (setf (nth first-line seg-sets) (add-prov (nth first-line seg-sets) c0 (length (nth first-line lines)) cov))
+               (dotimes (n (- last-line first-line 1))
+                       (let ((mid (+ first-line n 1)))
+                         (setf (nth mid seg-sets) (add-prov (nth mid seg-sets) 0 (length (nth mid lines)) cov))))
+               (setf (nth last-line seg-sets) (add-prov (nth last-line seg-sets) 0 c1 cov))))))
+    seg-sets))
 
 (defun colorize-lines (lines provs)
-  (let ((segments (form-segments provs (length lines))))
+  (let ((segments (form-segments provs lines)))
     ;; Use the segments to reform each line with colors.
     (dotimes (n (length lines))
       (let ((line (nth n lines))
@@ -159,18 +163,11 @@ usage: ~A <coverage-file> [<filepath>...]
                                 (:not-covered *ansi-red*)
                                 (t *ansi-gray*)))
           (setq colorized (string-append colorized current-color))
-          (cond ((= -1 (cadr seg))
-                 ;; when still more left, append rest
-                 (cond ((< (car seg) 0)
-                        (setq colorized (string-append colorized line)))
-                       ((< (car seg) (length line))
-                        (setq colorized (string-append colorized (subseq line (car seg)))))))
-                (t
-                 (let ((last (cadr seg)))
-                   (cond ((< (length line) last)
-                          (setq colorized (string-append colorized (subseq line (car seg)))))
-                         (t
-                          (setq colorized (string-append colorized (subseq line (car seg) last)))))))))
+          (let ((last (cadr seg)))
+            (cond ((< (length line) last)
+                   (setq colorized (string-append colorized (subseq line (car seg)))))
+                  (t
+                   (setq colorized (string-append colorized (subseq line (car seg) last)))))))
         (let ((last (cadar (last (nth n segments)))))
           (when (and (<= 0 last) (< last (length line)))
             (setq colorized (string-append colorized

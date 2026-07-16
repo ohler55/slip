@@ -24,7 +24,7 @@ func init() {
 			Args: []*slip.DocArg{
 				{
 					Name: "keyform*",
-					Type: "for",
+					Type: "form",
 					Text: `Form that evaluates to a key form.`,
 				},
 				{Name: "&rest"},

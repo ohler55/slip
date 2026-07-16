@@ -195,5 +195,5 @@ func TestServerProtocolOk(t *testing.T) {
 
 	cnt, err = con.Read(reply)
 	tt.Nil(t, err)
-	tt.Equal(t, `(error nil parse-error "unmatched close parenthesis at 0:3")`, string(reply[:cnt]))
+	tt.Equal(t, `(error nil parse-error "unmatched close parenthesis at 0:4")`, string(reply[:cnt]))
 }

@@ -51,7 +51,9 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	start, end, seq := f.getArgs(s, args, depth)
 	switch ta := seq.(type) {
 	case slip.List:
-		result = ta[start:end]
+		dup := make(slip.List, end-start)
+		copy(dup, ta[start:end])
+		result = dup
 	case slip.String:
 		ra := []rune(ta)
 		result = slip.String(ra[start:end])
@@ -59,8 +61,9 @@ func (f *Subseq) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		elements := ta.AsList()[start:end]
 		result = slip.NewVector(len(elements), ta.ElementType(), nil, elements, ta.Adjustable())
 	case slip.Octets:
-		ba := []byte(ta)
-		result = slip.Octets(ba[start:end])
+		dup := make([]byte, end-start)
+		copy(dup, []byte(ta)[start:end])
+		result = slip.Octets(dup)
 	case *slip.BitVector:
 		cnt := end - start
 		bv := slip.BitVector{
