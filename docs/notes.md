@@ -4,13 +4,6 @@
 
 ---------------------
 
-cover.lisp
- - form-segments
-  - start with actual length
-  - insert each and no more after that
-
--------
-
 - rethink read/compile/eval cycle
  - try and remove special case for defxxx functions and in-package
  - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
@@ -27,7 +20,16 @@ cover.lisp
 ---------------------
 
 - make coverage interactive
-  - functions for terminal support?
+ - functions for terminal support?
+  - with-raw-terminal (term)
+   - term is an instance
+    - methods
+     - :draw-frame
+     - :write (string &key left top right bottom)
+     - :write-at (string left top)
+     - :clear
+  - need input channel as well
+
    - add term or termio package using some stuff from the repl
     - with-raw-terminal (term)
      - recover and go back to original
