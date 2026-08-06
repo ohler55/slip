@@ -195,9 +195,18 @@ func DefClassMethod(obj slip.Class, name, daemon string, caller slip.Caller) sli
 	return m
 }
 
+func getMethodComb(combs []*slip.Combination, class slip.Class) *slip.Combination {
+	for _, c := range combs {
+		if c.From == class {
+			return c
+		}
+	}
+	return nil
+}
+
 func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Combination) {
 	var mm map[string]*slip.Method
-	if hm, ok := class.(HasMethods); ok {
+	if hm, ok := class.(HasMethods); ok { // always true
 		mm = hm.Methods()
 	}
 	m := mm[method.Name]
@@ -210,19 +219,18 @@ func insertMethod(class, super slip.Class, method *slip.Method, combo *slip.Comb
 		mm[method.Name] = m
 		return
 	}
-	var pos int
-	if pos < len(m.Combinations) && m.Combinations[pos].From == class {
-		pos++
+	ca := make([]*slip.Combination, 0, len(m.Combinations)+1)
+	if c := getMethodComb(m.Combinations, class); c != nil {
+		ca = append(ca, c)
 	}
 	for _, f := range class.InheritsList() {
-		if len(m.Combinations) <= pos || m.Combinations[pos].From == super {
-			break
-		}
-		if m.Combinations[pos].From == f {
-			pos++
+		if f == super {
+			ca = append(ca, combo)
+		} else if c := getMethodComb(m.Combinations, f); c != nil {
+			ca = append(ca, c)
 		}
 	}
-	m.Combinations = append(append(m.Combinations[:pos], combo), m.Combinations[pos:]...)
+	m.Combinations = ca
 }
 
 // DefCallerMethod defines a method for a caller.

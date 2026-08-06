@@ -242,6 +242,6 @@ func TestInstanceMixinOrder(t *testing.T) {
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(progn (send (make-instance 'blueberry :size 3) :quux) quux)`,
-		Expect: "(sizeable has-color berry blueberry)",
+		Expect: "(has-color sizeable berry blueberry)",
 	}).Test(t)
 }
