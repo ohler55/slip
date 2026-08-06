@@ -199,3 +199,49 @@ cranberry
 	}, 0)
 	tt.Panic(t, func() { inst.Init(slip.NewScope(), slip.List{}, 0) })
 }
+
+func TestInstanceMixinInit(t *testing.T) {
+	defer undefFlavors("blueberry", "berry", "has-color", "sizeable")
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("quux"), slip.List{})
+	_ = slip.ReadString(`
+(defflavor sizeable (size) () :inittable-instance-variables)
+(defflavor has-color () ())
+(defflavor berry () (sizeable))
+(defflavor blueberry () (berry has-color))
+
+(defmethod (berry :after :init) (args) (addf quux 'berry))
+(defmethod (has-color :after :init) (args) (addf quux 'has-color))
+(defmethod (sizeable :after :init) (args) (addf quux 'sizeable))
+(defmethod (blueberry :after :init) (args) (addf quux 'blueberry))
+`, scope).Eval(scope, nil)
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(progn (make-instance 'blueberry :size 3) quux)`,
+		Expect: "(has-color sizeable berry blueberry)",
+	}).Test(t)
+}
+
+func TestInstanceMixinOrder(t *testing.T) {
+	defer undefFlavors("blueberry", "berry", "has-color", "sizeable")
+	scope := slip.NewScope()
+	scope.Let(slip.Symbol("quux"), slip.List{})
+	_ = slip.ReadString(`
+(defflavor sizeable (size) () :inittable-instance-variables)
+(defflavor has-color () ())
+(defflavor berry () (sizeable))
+(defflavor blueberry () (berry has-color))
+
+(defmethod (berry :after :quux) () (addf quux 'berry))
+(defmethod (has-color :after :quux) () (addf quux 'has-color))
+(defmethod (sizeable :after :quux) () (addf quux 'sizeable))
+(defmethod (blueberry :after :quux) () (addf quux 'blueberry))
+`, scope).Eval(scope, nil)
+
+	(&sliptest.Function{
+		Scope:  scope,
+		Source: `(progn (send (make-instance 'blueberry :size 3) :quux) quux)`,
+		Expect: "(has-color sizeable berry blueberry)",
+	}).Test(t)
+}
