@@ -61,12 +61,14 @@ func (f *Recover) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		slip.TypePanic(s, depth, "symbol", args[0], "symbol")
 	}
 	d2 := depth + 1
+	s2 := s.NewScope()
 	defer func() {
 		if rec := recover(); rec != nil {
-			s2 := s.NewScope()
+			// s2 := s.NewScope()
 			s2.Let(sym, slip.SimpleObject(rec))
 			form := args[1]
 			result = nil
+
 			if form != nil {
 				result = form.Eval(s2, d2)
 			}
@@ -81,7 +83,7 @@ func (f *Recover) Call(s *slip.Scope, args slip.List, depth int) (result slip.Ob
 		f.preProv = false
 	}
 	for i := 2; i < len(args); i++ {
-		result = slip.EvalArg(s, args, i, d2)
+		result = slip.EvalArg(s2, args, i, d2)
 	}
 	return
 }

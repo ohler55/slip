@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed some spelling errors in the descriptions.
 - Fixed provenance column offset calculations for the first line of a file.
 - Fixed cover.lisp coverage displays and simplified the colorization code.
+- Fixed Instance `self` masking on recover from panic in a method.
 
 ## [1.5.0] - 2026-06-26
 ### Added
