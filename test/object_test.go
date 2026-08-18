@@ -766,6 +766,19 @@ func TestIOStream(t *testing.T) {
 	tt.Equal(t, false, stream.IsOpen())
 }
 
+func TestIsNil(t *testing.T) {
+	tt.Equal(t, true, slip.IsNil(nil))
+	tt.Equal(t, false, slip.IsNil(slip.Fixnum(3)))
+}
+
+func TestNilValue(t *testing.T) {
+	tt.Equal(t, true, slip.NilValue(nil))
+	tt.Equal(t, true, slip.NilValue(slip.Values{nil, nil}))
+	tt.Equal(t, true, slip.NilValue(slip.List{}))
+	tt.Equal(t, false, slip.NilValue(slip.Fixnum(3)))
+	tt.Equal(t, false, slip.NilValue(slip.Values{slip.True, nil}))
+}
+
 func TestIOStream2(t *testing.T) {
 	var out rwBuilder
 	stream := slip.IOStream{RW: &out}

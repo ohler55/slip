@@ -44,7 +44,7 @@ func objInList(obj slip.Object, list slip.List) bool {
 
 func objInListTest(s *slip.Scope, obj slip.Object, list slip.List, testFunc slip.Caller, depth int) bool {
 	for _, x := range list {
-		if testFunc.Call(s, slip.List{x, obj}, depth) != nil {
+		if !slip.NilValue(testFunc.Call(s, slip.List{x, obj}, depth)) {
 			return true
 		}
 	}

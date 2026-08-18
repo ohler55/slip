@@ -37,15 +37,11 @@ type Null struct {
 }
 
 // Call the function with the arguments provided.
-func (f *Null) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
+func (f *Null) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 1, 1)
-	switch ta := args[0].(type) {
-	case slip.List:
-		if len(ta) == 0 {
-			return slip.True
-		}
-	case nil:
-		return slip.True
+
+	if slip.NilValue(args[0]) {
+		result = slip.True
 	}
-	return nil
+	return
 }

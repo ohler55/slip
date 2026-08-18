@@ -66,10 +66,13 @@ func (f *If) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object)
 		}
 		f.preProv = false
 	}
-	if slip.EvalArg(s, args, 0, d2) != nil {
+	cv := slip.EvalArg(s, args, 0, d2)
+	if cv == nil || slip.NilValue(cv) {
+		if 2 < len(args) {
+			result = slip.EvalArg(s, args, 2, d2)
+		}
+	} else {
 		result = slip.EvalArg(s, args, 1, d2)
-	} else if 2 < len(args) {
-		result = slip.EvalArg(s, args, 2, d2)
 	}
 	return
 }

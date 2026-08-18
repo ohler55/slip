@@ -64,7 +64,8 @@ func (f *Cond) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	f.preProv = false
 	for _, a := range args {
 		clause := a.(slip.List)
-		if slip.EvalArg(s, clause, 0, d2) == nil {
+		cv := slip.EvalArg(s, clause, 0, d2)
+		if cv == nil || slip.NilValue(cv) {
 			continue
 		}
 		for i := 1; i < len(clause); i++ {
