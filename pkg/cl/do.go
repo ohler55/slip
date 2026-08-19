@@ -78,7 +78,7 @@ func (f *Do) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object)
 	d2 := depth + 1
 	steps, test, rforms := setupDo(s, ns, args, d2, &f.preProv)
 	for {
-		if ns.Eval(test, d2) != nil {
+		if !slip.NilValue(ns.Eval(test, d2)) {
 			for _, rf := range rforms {
 				result = ns.Eval(rf, d2)
 			}

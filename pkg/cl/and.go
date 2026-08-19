@@ -56,7 +56,8 @@ func (f *And) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 		f.preProv = false
 	}
 	for i := range args {
-		if result = slip.EvalArg(s, args, i, d2); result == nil {
+		result = slip.EvalArg(s, args, i, d2)
+		if slip.NilValue(result) {
 			break
 		}
 	}

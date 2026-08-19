@@ -22,6 +22,10 @@ func TestWhenTrue(t *testing.T) {
 		Source: `(when t)`,
 		Expect: "nil",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(when (values t nil) 7)`,
+		Expect: "7",
+	}).Test(t)
 }
 
 func TestWhenFalse(t *testing.T) {
@@ -31,6 +35,10 @@ func TestWhenFalse(t *testing.T) {
 	}).Test(t)
 	(&sliptest.Function{
 		Source: `(when nil 3)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(when (values nil t) 7)`,
 		Expect: "nil",
 	}).Test(t)
 }

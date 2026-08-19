@@ -63,6 +63,20 @@ func IsNil(v any) bool {
 	return (*[2]uintptr)(unsafe.Pointer(&v))[1] == 0
 }
 
+// NilValue returns true if the value is nil or a Values with the first
+// element set to nil.
+func NilValue(v any) bool {
+	switch tv := v.(type) {
+	case Values:
+		if 0 < len(tv) {
+			v = tv[0]
+		}
+	case List:
+		return len(tv) == 0
+	}
+	return (*[2]uintptr)(unsafe.Pointer(&v))[1] == 0
+}
+
 // SimpleObject creates an Object from simple data.
 func SimpleObject(val any) (obj Object) {
 	switch tv := val.(type) {

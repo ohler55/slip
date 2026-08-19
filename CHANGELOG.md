@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `gi:copy-stream-to-stream` function.
 - Added `cl:read-sequence` function.
 - Added C-y to the REPL to be the same as the system paste. Mac only.
+### Fixed
+- values with a `nil` first element is now treated as nil in conditions such as `if` and `cond`.
 
 ### Fixed
 - Paste-ing multiple line text into the REPL no longer trims lines.

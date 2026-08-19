@@ -22,11 +22,19 @@ func TestUnlessTrue(t *testing.T) {
 		Source: `(unless nil)`,
 		Expect: "nil",
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(unless (values t nil) 1)`,
+		Expect: "nil",
+	}).Test(t)
 }
 
 func TestUnlessFalse(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(unless t 3)`,
+		Expect: "nil",
+	}).Test(t)
+	(&sliptest.Function{
+		Source: `(unless (values t nil) 1)`,
 		Expect: "nil",
 	}).Test(t)
 }

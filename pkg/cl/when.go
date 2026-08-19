@@ -62,7 +62,11 @@ func (f *When) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 		f.preProv = false
 	}
 	pos := 0
-	if slip.EvalArg(s, args, pos, d2) != nil {
+	cv := slip.EvalArg(s, args, pos, d2)
+	if values, ok := cv.(slip.Values); ok && 0 < len(values) {
+		cv = values[0]
+	}
+	if cv != nil {
 		for pos++; pos < len(args); pos++ {
 			result = slip.EvalArg(s, args, pos, d2)
 		}
