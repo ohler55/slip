@@ -2,10 +2,6 @@
 
 - **multipass** or utm for linux
 
--------------
-- cond-values
-
-
 ---------------------
 
 - rethink read/compile/eval cycle
