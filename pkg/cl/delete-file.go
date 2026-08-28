@@ -33,7 +33,7 @@ func init() {
 		}, &slip.CLPkg)
 }
 
-// Delete-File represents the delete-file function.
+// DeleteFile represents the delete-file function.
 type DeleteFile struct {
 	slip.Function
 }

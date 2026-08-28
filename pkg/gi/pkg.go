@@ -386,6 +386,7 @@ filename is displayed instead of just the base.`,
 	defRegexFind()
 	defRegexFindAll()
 	defRegexMatch()
+	defRemoveAll()
 	defReplaceAll()
 	defReplaceFirst()
 	defResetCoverage()
