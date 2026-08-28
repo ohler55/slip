@@ -15,7 +15,9 @@ func TestWithZipWriter5(t *testing.T) {
                   (with-output-to-string (s)
                     (with-zip-writer (z s 5 :comment "test")
                       (format z "some data"))))`,
-		Expect: `"H4sIEAAAAAAA/3Rlc3QAKs7PTVVISSxJBAAAAP//AQAA//8e6cLZCQAAAA=="`,
+		Validate: func(t *testing.T, v slip.Object) {
+			checkZipB64(t, v, "test", "some data")
+		},
 	}).Test(t)
 }
 
@@ -28,7 +30,9 @@ func TestWithZipWriterPreProv(t *testing.T) {
                   (with-output-to-string (s)
                     (with-zip-writer (z s 5 :comment "test")
                       (format z "some data"))))`,
-		Expect: `"H4sIEAAAAAAA/3Rlc3QAKs7PTVVISSxJBAAAAP//AQAA//8e6cLZCQAAAA=="`,
+		Validate: func(t *testing.T, v slip.Object) {
+			checkZipB64(t, v, "test", "some data")
+		},
 	}).Test(t)
 }
 
@@ -38,7 +42,9 @@ func TestWithZipWriterDefault(t *testing.T) {
                   (with-output-to-string (s)
                     (with-zip-writer (z s)
                       (format z "some data"))))`,
-		Expect: `"H4sIAAAAAAAA/yrOz01VSEksSQQAAAD//wEAAP//HunC2QkAAAA="`,
+		Validate: func(t *testing.T, v slip.Object) {
+			checkZipB64(t, v, "", "some data")
+		},
 	}).Test(t)
 }
 
@@ -48,7 +54,9 @@ func TestWithZipWriterNilLevel(t *testing.T) {
                   (with-output-to-string (s)
                     (with-zip-writer (z s nil)
                       (format z "some data"))))`,
-		Expect: `"H4sIAAAAAAAA/yrOz01VSEksSQQAAAD//wEAAP//HunC2QkAAAA="`,
+		Validate: func(t *testing.T, v slip.Object) {
+			checkZipB64(t, v, "", "some data")
+		},
 	}).Test(t)
 }
 

@@ -90,7 +90,6 @@ func TestAppRunGenerate(t *testing.T) {
 	// go.mod and the application go.mod.
 	scratchPath := filepath.Join(os.TempDir(), "scratch")
 	if td := os.Getenv("RUNNER_TEMP"); 0 < len(td) {
-		scratchPath = filepath.Join(td, "scratch")
 		t.Skip("CI has issues when 'go mod tidy' is called.")
 	}
 	_ = os.RemoveAll(scratchPath)
@@ -140,7 +139,6 @@ func TestAppRunGenerateCleanup(t *testing.T) {
 	// go.mod and the application go.mod.
 	scratchPath := filepath.Join(os.TempDir(), "scratch")
 	if td := os.Getenv("RUNNER_TEMP"); 0 < len(td) {
-		scratchPath = filepath.Join(td, "scratch")
 		t.Skip("CI has issues when 'go mod tidy' is called.")
 	}
 	_ = os.RemoveAll(scratchPath)
