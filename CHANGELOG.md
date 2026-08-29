@@ -4,13 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.1] - unreleased
+## [1.5.1] - 2026-08-29
 ### Added
 - Added `gi:copy-stream-to-stream` function.
 - Added `cl:read-sequence` function.
 - Added C-y to the REPL to be the same as the system paste. Mac only.
-### Fixed
-- values with a `nil` first element is now treated as nil in conditions such as `if` and `cond`.
+- Added `gi:remove-all` function.
+
+### Changed
+- Updated the go version to v1.27 and fixed the zip test that failed as a result.
 
 ### Fixed
 - Paste-ing multiple line text into the REPL no longer trims lines.
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed cover.lisp coverage displays and simplified the colorization code.
 - Fixed Instance `self` masking on recover from panic in a method.
 - Fixed `:init` inheritance order bug.
+- values with a `nil` first element is now treated as nil in conditions such as `if` and `cond`.
 
 ## [1.5.0] - 2026-06-26
 ### Added
