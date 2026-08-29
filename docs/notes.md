@@ -11,11 +11,6 @@
   - second pass convert to functions (maybe combine with first)
   - third call each including defuns
    - calls need to resolve functions in this step
- - plan
-  - try not having compile for some test code
-  - once that works, make compile do nothing
-  - finally no special case for defxxx
-
 
 ---------------------
 
@@ -29,7 +24,7 @@
      - :write-at (string left top)
      - :clear
   - need input channel as well
-
+  - functions for terminal support?
    - add term or termio package using some stuff from the repl
     - with-raw-terminal (term)
      - recover and go back to original
@@ -39,12 +34,6 @@
      - clear
      - etc
   - or coverage viewing as part of repl?
-
----------------------
-
-- support mouse in repl
- - for what purpose?
- - https://iterm2.com/feature-reporting/
 
 ---------------------
 
