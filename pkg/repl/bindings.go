@@ -688,7 +688,7 @@ func completeOverride(ed *editor) bool {
 			lastRow := (ed.completer.hi - ed.completer.lo + 1) / ed.completer.colCnt * ed.completer.colCnt
 			ed.completer.index = lastRow + ed.completer.index%ed.completer.colCnt
 			if ed.completer.hi-ed.completer.lo < ed.completer.index {
-				ed.completer.index = ed.completer.hi
+				ed.completer.index = ed.completer.hi - ed.completer.lo
 			}
 		}
 	case "\n", "\r":
