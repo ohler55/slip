@@ -75,6 +75,30 @@ history. History is not by line but by form.
 
 
 Tab completion is supported for function names and package level variables.
+
+
+Keys can be bound to editor actions with _repl-bind-key_ and restored to the
+default with _repl-unbind-key_. Keys follow the Emacs conventions such as "C-l"
+or "M-f". The available actions are listed by _(repl-key-actions)_ and the
+current binding for a key is returned by _repl-key-binding_. Binding a key to
+_nil_ disables the key. For example _(repl-bind-key "C-l" 'clear-form)_ makes
+control-l clear the current form. User bindings are kept in the
+_*repl-key-bindings*_ variable and saved in the configuration file.
+
+
+Terminal keys are named in angle brackets: <up>, <down>, <right>, <left>,
+<home>, <end>, <insert>, <delete>, <prior> (or <pageup>), <next> (or
+<pagedown>), <f1> to <f12>, and S-<tab> (or <backtab>). Names may be preceded
+by the C- (control), M- (alt), and S- (shift) modifiers. A name binds every
+sequence terminals commonly send for the key. Only the arrows, <home>, <end>,
+and <f1> to <f4> with C- or M-, and C-<delete> can be bound with modifiers.
+Other than the arrows and S-<tab> these keys have no default binding. For
+example _(repl-bind-key "C-<right>" 'forward-word)_ makes control right arrow
+move forward one word and _(repl-bind-key "<delete>" 'delete-forward)_ makes
+Delete delete one forward without exiting. The _form-begin_ and _form-end_
+actions suit C-<up> and C-<down>. Raw sequences such as "M-[1;5C" can also be
+bound. Some terminals send different sequences so check what a key sends if a
+binding does not work.
 `
 	helpHistory = `__SLIP REPL History__
 

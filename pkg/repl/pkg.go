@@ -78,6 +78,14 @@ func init() {
 			Doc:    "The form history limit.",
 			Export: true,
 		},
+		keyBindingsName: {
+			Get: getKeyBindings,
+			Set: setKeyBindingsVar,
+			Doc: `The user REPL editor key bindings as a list of (key . action) conses where key is
+a key name such as "C-a" or "M-[1;5C" and action is an action symbol from _repl-key-actions_
+or _nil_ to disable the key. Only changes from the default bindings are included.`,
+			Export: true,
+		},
 		"*repl-help-box*": {Val: slip.True, Doc: "If true display help in a box.", Export: true},
 		"*repl-debug*":    {Val: nil, Doc: "If true the go stack is printed on error.", Export: true},
 		"*repl-eval-on-close*": {

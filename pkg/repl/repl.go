@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -117,11 +118,13 @@ func SetConfigDir(dir string) {
 	_ = os.MkdirAll(dir, 0755)
 	var buf []byte
 	defer func() {
+		loadingConfig = false
 		_ = slip.CurrentPackage.Set("*load-pathname*", nil)
 		_ = slip.CurrentPackage.Set("*load-truename*", nil)
 	}()
 	if buf, err = os.ReadFile(cfgPath); err == nil {
 		configFilename = "" // Turn off writing while evaluating config file.
+		loadingConfig = true
 		if Trace {
 			fmt.Printf("Loading %q.\n", cfgPath)
 		}
@@ -134,6 +137,7 @@ func SetConfigDir(dir string) {
 		_ = slip.CurrentPackage.Set("*load-truename*", slip.String(pathname))
 		code.CompileWithProvenance(listProvs)
 		code.Eval(&scope, nil) // TBD consider load-verbose and load-print
+		loadingConfig = false
 	} else {
 		if os.IsNotExist(err) {
 			if err = os.WriteFile(cfgPath, []byte(configHeader), 0666); err != nil {
@@ -158,6 +162,15 @@ func SetConfigDir(dir string) {
 		code.Eval(&scope, nil) // TBD look at load-verbose and load-print
 	}
 	configFilename = cfgPath
+}
+
+// warnSuffix returns the ANSI reset sequence if the warning prefix includes
+// an ANSI sequence.
+func warnSuffix() string {
+	if strings.Contains(warnPrefix, "\u001b") {
+		return "\x1b[m"
+	}
+	return ""
 }
 
 // Scope returns the REPL scope.
@@ -266,11 +279,7 @@ func process() {
 			reset()
 			return
 		}
-		var suffix string
-
-		if strings.Contains(warnPrefix, "\u001b") {
-			suffix = "\x1b[m"
-		}
+		suffix := warnSuffix()
 	top:
 		switch tr := rec.(type) {
 		case *slip.PartialPanic:
@@ -373,6 +382,10 @@ func updateConfigFile() {
 		value := slip.UserPkg.JustGet(key)
 		p := *slip.DefaultPrinter()
 		p.Readably = true
+		p.Escape = true
+		p.Length = math.MaxInt
+		p.Level = math.MaxInt
+		p.Lines = math.MaxInt
 		b = fmt.Appendf(b, "(setq %s ", key)
 		if list, ok := value.(slip.List); ok && 0 < len(list) {
 			b = append(b, '\'')

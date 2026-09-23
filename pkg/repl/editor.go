@@ -32,7 +32,6 @@ type editor struct {
 	key        seq
 	uni        []byte
 	ri         uint32
-	msg        string
 	mode       []bindFunc
 	line       int
 	pos        int
@@ -55,6 +54,9 @@ type editor struct {
 	log        *os.File
 	pause      atomic.Bool
 	partSeq    *seq
+	userKey    *userKeymap // current user key binding node, nil at the root
+	keyBytes   []byte      // bytes of the key being read
+	keyNext    int         // index of the next byte in key.buf to dispatch
 }
 
 func (ed *editor) initialize() {
@@ -181,6 +183,8 @@ func (ed *editor) reset() {
 	ed.pos = 0
 	ed.shift = 0
 	ed.mode = topMode
+	ed.userKey = nil
+	ed.keyBytes = ed.keyBytes[:0]
 }
 
 func (ed *editor) display() {
@@ -306,8 +310,7 @@ top:
 			}
 		}
 		// dirty and not tab and not shift-tab
-		if 0 < ed.dirty.cnt &&
-			ed.key.buf[0] != 0x09 && !(ed.key.buf[0] == 0x1b && ed.key.buf[1] == 0x5b && ed.key.buf[2] == 0x5a) {
+		if 0 < ed.dirty.cnt && !ed.helpScrollKey() {
 			ed.setCursor(ed.v0+len(ed.lines), 1)
 			ed.clearDown()
 			ed.setCursorCurrent()
@@ -322,8 +325,8 @@ top:
 			continue
 		}
 		for i := 0; i < ed.key.cnt; i++ {
-			b := ed.key.buf[i]
-			if ed.mode[b](ed, b) {
+			ed.keyNext = i + 1
+			if ed.dispatch(ed.key.buf[i]) {
 				if 0 <= ed.match.line {
 					n := ed.match.line
 					ed.match.line = -1

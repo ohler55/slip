@@ -62,7 +62,6 @@ var (
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xe8
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf0
 		topUni, topUni, topUni, topUni, topUni, topUni, topUni, topUni, // 0xf8
-		func(ed *editor, b byte) bool { ed.msg = ""; return false },
 	}
 	escMode = []bindFunc{
 		bad, bad, matchClose, bad, bad, editForm, matchOpen, bad, // 0x00
@@ -71,7 +70,7 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, // 0x20
 		bad, bad, bad, bad, searchStashBack, bad, searchStashForward, describe, // 0x28
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, describe, // 0x30
-		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x40
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, termKey, // 0x40
 		bad, bad, bad, nthStash, bad, enterUnicode, bad, bad, // 0x50
 		bad, bad, bad, esc5b, collapse, bad, bad, bad, // 0x58
 		bad, bad, backWord, bad, delForwardWord, eval, forwardWord, bad, // 0x60
@@ -86,13 +85,12 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
-		func(ed *editor, b byte) bool { ed.msg = "M-"; return false },
 	}
 	esc5bMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x10
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x20
-		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x30
+		bad, csi1, csi2, csi3, termKey, termKey, termKey, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x30
 		bad, up, down, forward, back, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x40
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, shiftTab, bad, bad, bad, bad, bad, // 0x50
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x60
@@ -105,7 +103,6 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xd0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xe0
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0xf0
-		func(ed *editor, b byte) bool { ed.msg = "esc [ "; return false },
 	}
 	unicodeMode = []bindFunc{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, // 0x00
@@ -132,8 +129,82 @@ var (
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xe8
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf0
 		addUni, addUni, addUni, addUni, addUni, addUni, addUni, addUni, // 0xf8
-		func(ed *editor, b byte) bool { ed.msg = "unicode "; return false },
 	}
+	// Modified keys in the xterm form of esc [ 1 ; <modifier> <key> along
+	// with esc [ 1 ~ for home.
+	csi1Mode   []bindFunc
+	csiModMode []bindFunc
+	// Delete key as esc [ 3 ~ and esc [ 3 ; <modifier> ~.
+	csi3Mode    []bindFunc
+	csi3ModMode []bindFunc
+	// Insert as esc [ 2 ~ and F9 to F12 as esc [ 2 <digit> ~.
+	csi2Mode []bindFunc
+	// Terminal keys such as the modified arrows, end, page up, the function
+	// keys, and the esc O application keys have no default bindings but can
+	// be bound by the user. This mode follows the prefix for those keys.
+	termKeyMode []bindFunc
+	// helpRows are the key bindings displayed on the help page. The key is the
+	// canonical key name. The label defaults to the key and the description
+	// defaults to the doc of the action bound to the key.
+	helpRows = []struct {
+		key   string
+		label string
+		desc  string
+	}{
+		{key: "C-a"},
+		{key: "C-b"},
+		{key: "C-c"},
+		{key: "C-d"},
+		{key: "C-e"},
+		{key: "C-f"},
+		{key: "C-h"},
+		{key: "C-j"},
+		{key: "C-k"},
+		{key: "C-n"},
+		{key: "C-o"},
+		{key: "C-p"},
+		{key: "C-r"},
+		{key: "C-s"},
+		{key: "C-t"},
+		{key: "C-u"},
+		{key: "C-v"},
+		{key: "C-w"},
+		{key: "C-y"},
+		{key: "M-C-b"},
+		{key: "M-C-e"},
+		{key: "M-C-f"},
+		{key: "C-_", label: "C-/"},
+		{key: "M-/"},
+		{key: "M-?"},
+		{key: "M-\\"},
+		{key: "M-b"},
+		{key: "M-d"},
+		{key: "M-e"},
+		{key: "M-f"},
+		{key: "M-h"},
+		{key: "M-r"},
+		{key: "M-s"},
+		{key: "M-S"},
+		{key: "M-u", desc: "enter 4 byte unicode"},
+		{key: "M-U", desc: "enter 8 byte unicode"},
+		{key: "M-v"},
+		{key: "M-w"},
+		{key: "M-,"},
+		{key: "M-."},
+		{key: "TAB"},
+		{key: "S-<tab>"},
+		{key: "DEL"},
+		{key: "M-DEL"},
+		{key: "<up>"},
+		{key: "<down>"},
+		{key: "<right>"},
+		{key: "<left>"},
+		{key: "RET", label: "ENTER"},
+	}
+	// Functions used by the history and stash overrides for user bound
+	// actions.
+	historyAliases map[string]bindFunc
+	stashAliases   map[string]bindFunc
 	// Update this if the key bindings for history are changed.
 	historyBindings map[string]bindFunc
 	stashBindings   map[string]bindFunc
@@ -141,6 +212,16 @@ var (
 
 func init() {
 	topMode = rootMode
+	// The modified arrow, home, end, delete, and function keys have no
+	// default bindings but the prefixes are defined so the keys can be
+	// bound by the user. F5 to F8 are esc [ 1 <digit> ~.
+	csi1Mode = sparseMode(map[byte]bindFunc{';': csiMod, '5': termKey, '7': termKey, '8': termKey, '9': termKey})
+	// Alt (3) and ctrl (5) modifiers.
+	csiModMode = sparseMode(map[byte]bindFunc{'3': termKey, '5': termKey})
+	csi3Mode = sparseMode(map[byte]bindFunc{';': csi3Mod})
+	csi3ModMode = sparseMode(map[byte]bindFunc{'5': termKey})
+	csi2Mode = sparseMode(map[byte]bindFunc{'0': termKey, '1': termKey, '3': termKey, '4': termKey})
+	termKeyMode = sparseMode(nil)
 	// Update this if the key bindings for history are changed.
 	historyBindings = map[string]bindFunc{
 		"\x16":      historyForward,
@@ -160,12 +241,34 @@ func init() {
 		"\x1b,": searchStashBack,
 		"\x1b.": searchStashForward,
 	}
+	historyAliases = map[string]bindFunc{
+		"history-back":           historyBack,
+		"previous-line":          historyBack,
+		"history-forward":        historyForward,
+		"next-line":              historyForward,
+		"search-history-back":    searchBack,
+		"search-history-forward": searchForward,
+	}
+	stashAliases = map[string]bindFunc{
+		"stash-back":           stashBack,
+		"stash-forward":        stashForward,
+		"search-stash-back":    searchStashBack,
+		"search-stash-forward": searchStashForward,
+	}
+	initActions()
 }
 
-func (ed *editor) modeName() string {
-	e := editor{}
-	ed.mode[256](&e, 0)
-	return e.msg
+// sparseMode returns a mode with only the provided bindings, all other keys
+// are bad.
+func sparseMode(binds map[byte]bindFunc) []bindFunc {
+	mode := make([]bindFunc, 256)
+	for i := range mode {
+		mode[i] = bad
+	}
+	for b, f := range binds {
+		mode[b] = f
+	}
+	return mode
 }
 
 const hexMap = "0123456789abcdef"
@@ -173,27 +276,13 @@ const hexMap = "0123456789abcdef"
 func bad(ed *editor, b byte) bool {
 	ed.logf("=> %02x bad\n", b)
 	ed.write([]byte{0x07})
-	mod := ed.modeName()
-	var charName []byte
-	for i := 0; i < ed.key.cnt; i++ {
-		c := ed.key.buf[i]
-		switch {
-		case c == 0x1b:
-			if mod != "M-" {
-				charName = append(charName, 'M', '-')
-			}
-		case c < 0x20:
-			charName = append(charName, 'C', '-', 'a'+c-1)
-		case c == 0x7f:
-			charName = append(charName, 'D', 'E', 'L')
-		case 0x80 <= c:
-			charName = append(charName, '\\', 'u', '0', '0', hexMap[c>>4], hexMap[c&0x0f])
-		default:
-			charName = append(charName, c)
-		}
+	// The rest of the bytes read are part of the undefined key and are
+	// discarded.
+	sq := ed.keyBytes
+	if ed.keyNext < ed.key.cnt {
+		sq = append(sq[:len(sq):len(sq)], ed.key.buf[ed.keyNext:ed.key.cnt]...)
 	}
-	sq := ed.key.buf[:ed.key.cnt]
-	msg := fmt.Appendf(nil, "key %s%s is undefined. sequence: %#v", mod, charName, sq)
+	msg := fmt.Appendf(nil, "key %s is undefined. sequence: %#v", formatKey(sq), sq)
 	ed.key.cnt = 0
 	ed.displayMessage(msg)
 	ed.mode = topMode
@@ -309,6 +398,42 @@ func esc5b(ed *editor, b byte) bool {
 	return false
 }
 
+func csi1(ed *editor, b byte) bool {
+	ed.logf("=> %02x csi1\n", b)
+	ed.mode = csi1Mode
+	return false
+}
+
+func csiMod(ed *editor, b byte) bool {
+	ed.logf("=> %02x csiMod\n", b)
+	ed.mode = csiModMode
+	return false
+}
+
+func csi3(ed *editor, b byte) bool {
+	ed.logf("=> %02x csi3\n", b)
+	ed.mode = csi3Mode
+	return false
+}
+
+func csi3Mod(ed *editor, b byte) bool {
+	ed.logf("=> %02x csi3Mod\n", b)
+	ed.mode = csi3ModMode
+	return false
+}
+
+func csi2(ed *editor, b byte) bool {
+	ed.logf("=> %02x csi2\n", b)
+	ed.mode = csi2Mode
+	return false
+}
+
+func termKey(ed *editor, b byte) bool {
+	ed.logf("=> %02x termKey\n", b)
+	ed.mode = termKeyMode
+	return false
+}
+
 func back(ed *editor, b byte) bool {
 	ed.logf("=> %02x back\n", b)
 	ed.pos--
@@ -409,6 +534,36 @@ func forwardWord(ed *editor, b byte) bool {
 	return false
 }
 
+func formBegin(ed *editor, b byte) bool {
+	ed.logf("=> %02x formBegin\n", b)
+	n := ed.line
+	ed.line = 0
+	ed.pos = 0
+	ed.shift = 0
+	if n != ed.line {
+		ed.drawLine(n)
+	}
+	ed.adjustShift(true)
+	ed.setCursorCurrent()
+	ed.mode = topMode
+	return false
+}
+
+func formEnd(ed *editor, b byte) bool {
+	ed.logf("=> %02x formEnd\n", b)
+	n := ed.line
+	ed.line = len(ed.lines) - 1
+	ed.pos = len(ed.lines[ed.line])
+	ed.shift = 0
+	if n != ed.line {
+		ed.drawLine(n)
+	}
+	ed.adjustShift(true)
+	ed.setCursorCurrent()
+	ed.mode = topMode
+	return false
+}
+
 func lineBegin(ed *editor, b byte) bool {
 	ed.logf("=> %02x lineBegin\n", b)
 	ed.pos = 0
@@ -417,6 +572,7 @@ func lineBegin(ed *editor, b byte) bool {
 		ed.drawLine(ed.line)
 	}
 	ed.setCursorCurrent()
+	ed.mode = topMode
 	return false
 }
 
@@ -425,6 +581,7 @@ func lineEnd(ed *editor, b byte) bool {
 	ed.pos = len(ed.lines[ed.line])
 	ed.adjustShift(true)
 	ed.setCursorCurrent()
+	ed.mode = topMode
 	return false
 }
 
@@ -452,8 +609,18 @@ func matchOpen(ed *editor, b byte) bool {
 	return false
 }
 
+// delForward deletes one forward or exits if there is nothing to delete and
+// the form is empty.
 func delForward(ed *editor, b byte) bool {
 	ed.logf("=> %02x delForward\n", b)
+	if len(ed.lines[ed.line]) <= ed.pos && len(ed.lines)-1 <= ed.line && ed.lines.Empty() {
+		return done(ed, b)
+	}
+	return delChar(ed, b)
+}
+
+func delChar(ed *editor, b byte) bool {
+	ed.logf("=> %02x delChar\n", b)
 	line := ed.lines[ed.line]
 	switch {
 	case ed.pos < len(line):
@@ -468,8 +635,6 @@ func delForward(ed *editor, b byte) bool {
 		ed.setCursor(ed.v0+len(ed.lines), 0)
 		ed.clearLine()
 		ed.display()
-	case ed.lines.Empty():
-		return done(ed, b)
 	}
 	ed.setCursorCurrent()
 	ed.mode = topMode
@@ -658,19 +823,22 @@ func tab(ed *editor, b byte) bool {
 }
 
 func completeOverride(ed *editor) bool {
-	k := string(ed.key.buf[:ed.key.cnt])
-	switch k {
-	case "\t", "\x06", "\x1b[C": // next
+	var name string
+	if a := keyAction(string(ed.key.buf[:ed.key.cnt])); a != nil {
+		name = a.name
+	}
+	switch name {
+	case "tab", "forward-char": // next
 		ed.completer.index++
 		if ed.completer.hi-ed.completer.lo < ed.completer.index {
 			ed.completer.index = 0
 		}
-	case "\x02", "\x1b[D": // back
+	case "back-char":
 		ed.completer.index--
 		if ed.completer.index < 0 {
 			ed.completer.index = ed.completer.hi - ed.completer.lo
 		}
-	case "\x0e", "\x1b[B": // down
+	case "next-line":
 		if ed.completer.index < 0 {
 			ed.completer.index = 0
 		} else {
@@ -679,7 +847,7 @@ func completeOverride(ed *editor) bool {
 		if ed.completer.hi-ed.completer.lo < ed.completer.index {
 			ed.completer.index %= ed.completer.colCnt
 		}
-	case "\x10", "\x1b[A": // up
+	case "previous-line":
 		if ed.completer.index < 0 {
 			ed.completer.index = 0
 		}
@@ -691,7 +859,7 @@ func completeOverride(ed *editor) bool {
 				ed.completer.index = ed.completer.hi - ed.completer.lo
 			}
 		}
-	case "\n", "\r":
+	case "newline", "enter":
 		if 0 <= ed.completer.index {
 			word := completerWords[ed.completer.lo+ed.completer.index]
 			added := []rune(word)[len(ed.completer.target):]
@@ -707,10 +875,6 @@ func completeOverride(ed *editor) bool {
 			}
 			ed.drawLine(ed.line)
 		}
-		ed.key.cnt = 0
-		ed.override = nil
-		return false
-	case "\x1b": // esc
 		ed.key.cnt = 0
 		ed.override = nil
 		return false
@@ -762,56 +926,26 @@ current form is blank. The alternate behavior is included in parenthesis. Key
 bindings are:
 
 `
-	keys := []string{
-		"\x1b[1mC-a\x1b[m   move to line start",
-		"\x1b[1mC-b\x1b[m   move left one",
-		"\x1b[1mC-c\x1b[m   exit",
-		"\x1b[1mC-d\x1b[m   delete one forward (exit)",
-		"\x1b[1mC-e\x1b[m   move to line end",
-		"\x1b[1mC-f\x1b[m   move right one",
-		"\x1b[1mC-h\x1b[m   show this help page",
-		"\x1b[1mC-j\x1b[m   insert newline",
-		"\x1b[1mC-k\x1b[m   delete to line end",
-		"\x1b[1mC-n\x1b[m   move down one (next in history)",
-		"\x1b[1mC-o\x1b[m   insert newline after",
-		"\x1b[1mC-p\x1b[m   move up one (previous in history)",
-		"\x1b[1mC-r\x1b[m   search history backward",
-		"\x1b[1mC-s\x1b[m   search history forward",
-		"\x1b[1mC-t\x1b[m   swap characters",
-		"\x1b[1mC-u\x1b[m   clear current form",
-		"\x1b[1mC-v\x1b[m   next in history",
-		"\x1b[1mC-w\x1b[m   cut to clipboard (macOS only)",
-		"\x1b[1mC-y\x1b[m   paste from clipboard (macOS only)",
-		"\x1b[1mM-C-b\x1b[m move back to matching paren",
-		"\x1b[1mM-C-e\x1b[m edit current form in $EDITOR",
-		"\x1b[1mM-C-f\x1b[m move forward to matching paren",
-		"\x1b[1mC-/\x1b[m   describe word",
-		"\x1b[1mM-/\x1b[m   describe word",
-		"\x1b[1mM-?\x1b[m   describe word",
-		"\x1b[1mM-\\\x1b[m   collapse space",
-		"\x1b[1mM-b\x1b[m   move back one word",
-		"\x1b[1mM-d\x1b[m   delete one word",
-		"\x1b[1mM-e\x1b[m   evaluate current form",
-		"\x1b[1mM-f\x1b[m   move forward one word",
-		"\x1b[1mM-h\x1b[m   nth in history",
-		"\x1b[1mM-r\x1b[m   reset terminal",
-		"\x1b[1mM-s\x1b[m   add to stash",
-		"\x1b[1mM-S\x1b[m   nth in stash",
-		"\x1b[1mM-u\x1b[m   enter 4 byte unicode",
-		"\x1b[1mM-U\x1b[m   enter 8 byte unicode",
-		"\x1b[1mM-v\x1b[m   previous in history",
-		"\x1b[1mM-w\x1b[m   copy to clipboard (macOS only)",
-		"\x1b[1mM-,\x1b[m   search stash backward",
-		"\x1b[1mM-.\x1b[m   search stash forward",
-		"\x1b[1mTAB\x1b[m   word completion or help scroll",
-		"\x1b[1mS-TAB\x1b[m help scroll back",
-		"\x1b[1mDEL\x1b[m   delete one back",
-		"\x1b[1mM-DEL\x1b[m delete previous word",
-		"\x1b[1m🔼\x1b[m    move up one",
-		"\x1b[1m🔽\x1b[m    move down one",
-		"\x1b[1m▶️\x1b[m     move right one",
-		"\x1b[1m◀️\x1b[m     move left one",
-		"\x1b[1mENTER\x1b[m evaluate form",
+	ub := userBinds.Load()
+	kbs := ub.list
+	var keys [][]byte
+	for _, row := range helpRows {
+		label := row.label
+		if len(label) == 0 {
+			label = row.key
+		}
+		_, seqs, _ := parseKey(row.key)
+		desc := row.desc
+		if len(desc) == 0 {
+			desc = defaultKeys[seqs[0]].doc
+		}
+		for _, seq := range seqs {
+			if ub.acts[seq] != nil {
+				desc += " *"
+				break
+			}
+		}
+		keys = append(keys, helpEntry(label, desc, 6))
 	}
 	w := int(atomic.LoadInt32(&ed.width))
 	indent := 3
@@ -819,7 +953,24 @@ bindings are:
 	buf := slip.AppendDoc(nil, header, indent, w-6, true)
 	buf = bytes.TrimSpace(buf)
 	buf = append(buf, '\n', '\n')
-
+	if 0 < len(kbs) {
+		buf = append(buf, leftPad...)
+		buf = append(buf, "Your bindings (defaults they replace are marked with *):\n"...)
+		width := 0
+		for _, kb := range kbs {
+			width = max(width, printWidth([]byte(kb.key)))
+		}
+		for _, kb := range kbs {
+			name := "undefined"
+			if kb.act != nil {
+				name = kb.act.name
+			}
+			buf = append(buf, leftPad...)
+			buf = append(buf, helpEntry(kb.key, name, width+2)...)
+			buf = append(buf, '\n')
+		}
+		buf = append(buf, '\n')
+	}
 	colCnt := w / 41 // enough for the longest key binding description plus 2 for spacing
 	klines := len(keys)/colCnt + 1
 	for i := 0; i < klines; i++ {
@@ -830,14 +981,37 @@ bindings are:
 			}
 			k := keys[i+j*klines]
 			buf = append(buf, k...)
-			// 48 is the max map description length plus the 7 bytes used for
-			// making the key sequence bold.
-			buf = append(buf, bytes.Repeat([]byte{' '}, 48-len(k))...)
+			buf = append(buf, bytes.Repeat([]byte{' '}, max(0, 41-printWidth(k)))...)
 		}
 		buf = append(buf, '\n')
 	}
 	ed.displayHelp(buf, w, int(atomic.LoadInt32(&ed.height)))
+	ed.mode = topMode
 	return false
+}
+
+// helpEntry returns a help page entry with a bold label and a description
+// that starts in the seventh column unless the label is too long.
+func helpEntry(label, desc string, width int) []byte {
+	entry := fmt.Appendf(nil, "\x1b[1m%s\x1b[m", label)
+	entry = append(entry, bytes.Repeat([]byte{' '}, max(1, width-printWidth([]byte(label))))...)
+	return append(entry, desc...)
+}
+
+// printWidth returns the display width of text, ignoring ANSI sequences.
+func printWidth(text []byte) (w int) {
+	var esc bool
+	for _, r := range string(text) {
+		switch {
+		case r == 0x1b:
+			esc = true
+		case esc:
+			esc = r != 'm'
+		default:
+			w += RuneWidth(r)
+		}
+	}
+	return
 }
 
 func describe(ed *editor, b byte) bool {
@@ -873,17 +1047,19 @@ func describe(ed *editor, b byte) bool {
 	buf = bytes.TrimSpace(buf)
 
 	ed.displayHelp(buf, w, h)
+	ed.mode = topMode
 	return false
 }
 
 func clearForm(ed *editor, b byte) bool {
 	ed.logf("=> %02x clearForm\n", b)
 	ed.clearForm()
+	ed.mode = topMode
 	return false
 }
 
 func historyOverride(ed *editor) bool {
-	f := historyBindings[string(ed.key.buf[:ed.key.cnt])]
+	f := ed.overrideBinding(historyBindings, historyAliases)
 	if f == nil {
 		ed.keepForm()
 		ed.override = nil
@@ -935,7 +1111,7 @@ func historyForward(ed *editor, b byte) bool {
 }
 
 func historySearchOverride(ed *editor) bool {
-	f := historyBindings[string(ed.key.buf[:ed.key.cnt])]
+	f := ed.overrideBinding(historyBindings, historyAliases)
 	var b byte = 'x'
 	if f == nil {
 		if ed.key.buf[0] < 0x20 {
@@ -1112,6 +1288,7 @@ func editForm(ed *editor, b byte) bool {
 	if len(xed) == 0 {
 		xed = os.Getenv("EDITOR")
 		if len(xed) == 0 {
+			ed.mode = topMode
 			return false
 		}
 		parts := strings.Split(xed, " ")
@@ -1261,7 +1438,7 @@ func nthStash(ed *editor, b byte) bool {
 }
 
 func stashOverride(ed *editor) bool {
-	f := stashBindings[string(ed.key.buf[:ed.key.cnt])]
+	f := ed.overrideBinding(stashBindings, stashAliases)
 	if f == nil {
 		ed.keepForm()
 		ed.override = nil
@@ -1313,7 +1490,7 @@ func stashForward(ed *editor, b byte) bool {
 }
 
 func stashSearchOverride(ed *editor) bool {
-	f := stashBindings[string(ed.key.buf[:ed.key.cnt])]
+	f := ed.overrideBinding(stashBindings, stashAliases)
 	var b byte = 'x'
 	if f == nil {
 		if ed.key.buf[0] < 0x20 {
