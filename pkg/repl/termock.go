@@ -5,6 +5,7 @@ package repl
 import (
 	"fmt"
 	"runtime/debug"
+	"sync"
 
 	"github.com/ohler55/slip"
 )
@@ -14,6 +15,8 @@ type Termock struct {
 	// input keys
 	input  chan []byte
 	output chan string
+	done   chan struct{}
+	closed sync.Once
 	width  int
 	height int
 	// cursor position
@@ -30,6 +33,7 @@ func NewTermock(high, wide int) *Termock {
 	return &Termock{
 		input:  make(chan []byte, 10),
 		output: make(chan string, 100),
+		done:   make(chan struct{}),
 		width:  wide,
 		height: high,
 		cv:     1,
@@ -197,9 +201,22 @@ func (tm *Termock) Input(keys ...string) {
 	}
 }
 
+// Output returns the next output or an empty string once the Termock is
+// closed.
 func (tm *Termock) Output() string {
-	// TBD add timeout
-	return <-tm.output
+	select {
+	case out := <-tm.output:
+		return out
+	case <-tm.done:
+		return ""
+	}
+}
+
+// Close the Termock so Output returns an empty string. The output channel is
+// left open since the editor may still write to it. Close can be called more
+// than once.
+func (tm *Termock) Close() {
+	tm.closed.Do(func() { close(tm.done) })
 }
 
 // Assume a good code so no error checking.

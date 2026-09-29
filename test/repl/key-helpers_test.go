@@ -90,6 +90,7 @@ func keyEdTestSize(t *testing.T, high, wide int, script []any) {
 	err = os.RemoveAll("config/config.lisp")
 	tt.Nil(t, err)
 	tm := repl.NewTermock(high, wide)
+	closed := make(chan bool)
 	defer repl.SetSizer(nil)
 	repl.SetSizer(tm)
 	scope := repl.GetScope()
@@ -100,14 +101,25 @@ func keyEdTestSize(t *testing.T, high, wide int, script []any) {
 	scope.Set(slip.Symbol("*repl-editor*"), slip.True)
 
 	out := make(chan string, 4096)
+	// The pump and the C-c goroutine close these when they return so the
+	// cleanup can check neither is left running.
+	pumpDone := make(chan bool)
+	ctlDone := make(chan bool)
 	go func() {
+		defer close(pumpDone)
 		for {
-			out <- tm.Output()
+			s := tm.Output()
+			select {
+			case <-closed:
+				return
+			case out <- s:
+			}
 		}
 	}()
 	done := make(chan string, 1)
 	exited := make(chan bool)
 	go func() {
+		defer close(ctlDone)
 		done <- runKeySteps(tm, out, script)
 		// Keep sending C-c until the REPL exits. A single C-c is not enough
 		// if a failing binding left the editor in a prefix mode.
@@ -138,8 +150,23 @@ func keyEdTestSize(t *testing.T, high, wide int, script []any) {
 			bye = true
 		}
 	}
+	close(closed)
+	tm.Close()
 	if 0 < len(failure) {
 		t.Fatal(failure)
+	}
+	keyJoin(t, "output pump", pumpDone)
+	keyJoin(t, "C-c", ctlDone)
+}
+
+// keyJoin waits for a goroutine that closes c when it returns and fails the
+// test if it is still running after a step timeout.
+func keyJoin(t *testing.T, name string, c chan bool) {
+	t.Helper()
+	select {
+	case <-c:
+	case <-time.After(keyStepTimeout):
+		t.Fatalf("%s goroutine did not exit", name)
 	}
 }
 
