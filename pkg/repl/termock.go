@@ -25,6 +25,16 @@ type Termock struct {
 	// save cursor position
 	csv int
 	csh int
+	// cursor position report controls, see SendBeforeCursorReport and
+	// HoldCursorReports
+	mu       sync.Mutex
+	before   []byte
+	sameRead bool
+	hold     int
+	held     []byte
+	split    int
+	// pending is input not yet returned by Read
+	pending []byte
 }
 
 // NewTermock creates a new Termock with an initial size described by high and
@@ -41,10 +51,14 @@ func NewTermock(high, wide int) *Termock {
 	}
 }
 
+// Read the next input. Input longer than p is returned over several reads
+// as a terminal would.
 func (tm *Termock) Read(p []byte) (n int, err error) {
-	key := <-tm.input
-	copy(p, key)
-	n = len(key)
+	if len(tm.pending) == 0 {
+		tm.pending = <-tm.input
+	}
+	n = copy(p, tm.pending)
+	tm.pending = tm.pending[n:]
 	return
 }
 
@@ -125,7 +139,7 @@ func (tm *Termock) Write(p []byte) (n int, err error) {
 				}
 			case 'n': // cursor location
 				if n0 == 6 {
-					tm.input <- fmt.Appendf(nil, "\x1b[%d;%dR", tm.cv, tm.ch)
+					tm.cursorReport(fmt.Appendf(nil, "\x1b[%d;%dR", tm.cv, tm.ch))
 				}
 			case 'H': // set cursor location
 				tm.output <- fmt.Sprintf("<set-cursor %d:%d>", n0, n1)
@@ -198,6 +212,72 @@ func (tm *Termock) Write(p []byte) (n int, err error) {
 func (tm *Termock) Input(keys ...string) {
 	for _, k := range keys {
 		tm.input <- []byte(k)
+	}
+}
+
+// SendBeforeCursorReport sends text as input just before the next cursor
+// position report, as when a user types while a slow terminal answers a
+// query. If sameRead is true the text and the report arrive in one read.
+func (tm *Termock) SendBeforeCursorReport(text string, sameRead bool) {
+	tm.mu.Lock()
+	tm.before = []byte(text)
+	tm.sameRead = sameRead
+	tm.mu.Unlock()
+}
+
+// HoldCursorReports holds back the next n cursor position reports, as when a
+// terminal is slow to answer, until ReleaseCursorReports is called.
+func (tm *Termock) HoldCursorReports(n int) {
+	tm.mu.Lock()
+	tm.hold = n
+	tm.mu.Unlock()
+}
+
+// SplitCursorReport sends the next cursor position report as two reads,
+// the first with at bytes, as when a report arrives across two reads.
+func (tm *Termock) SplitCursorReport(at int) {
+	tm.mu.Lock()
+	tm.split = at
+	tm.mu.Unlock()
+}
+
+// ReleaseCursorReports sends all held cursor position reports in one read.
+func (tm *Termock) ReleaseCursorReports() {
+	tm.mu.Lock()
+	held := tm.held
+	tm.held = nil
+	tm.mu.Unlock()
+	tm.input <- held
+}
+
+// cursorReport sends a cursor position report as input. It is sent from
+// its own goroutine since a terminal never makes the program writing a
+// query wait for the answer to be read.
+func (tm *Termock) cursorReport(report []byte) {
+	tm.mu.Lock()
+	var chunks [][]byte
+	switch {
+	case 0 < tm.hold:
+		tm.hold--
+		tm.held = append(tm.held, report...)
+	case tm.before != nil && tm.sameRead:
+		chunks = [][]byte{append(tm.before, report...)}
+	case tm.before != nil:
+		chunks = [][]byte{tm.before, report}
+	case 0 < tm.split:
+		chunks = [][]byte{report[:tm.split], report[tm.split:]}
+		tm.split = 0
+	default:
+		chunks = [][]byte{report}
+	}
+	tm.before = nil
+	tm.mu.Unlock()
+	if 0 < len(chunks) {
+		go func() {
+			for _, c := range chunks {
+				tm.input <- c
+			}
+		}()
 	}
 }
 

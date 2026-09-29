@@ -20,11 +20,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   makes Delete delete one forward without exiting.
 
 ### Changed
+- The REPL editor no longer pauses 50ms after each read of terminal input.
 - In the REPL editor M-O (alt-O) is now a prefix for the terminal keys so M-O
   followed by another key is reported as that undefined pair instead of M-O
   alone being undefined.
 
 ### Fixed
+- REPL editor keys typed while the terminal is answering a cursor position
+  query are no longer lost, and a late answer, or one split across reads,
+  is no longer read as keys. The editor also no longer waits forever if the
+  terminal does not answer.
+- REPL editor input read quickly after other input is no longer overwritten
+  while waiting to be processed.
+- A C-y paste longer than 32 bytes no longer fails with an index out of
+  range error.
+- Exiting the REPL editor no longer hangs when keys typed ahead fill the
+  key queue.
 - REPL completion list navigation with up in a single column list now wraps to
   the last word.
 
