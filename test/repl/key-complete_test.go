@@ -3,6 +3,7 @@
 package repl
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -299,5 +300,158 @@ func TestKeyCompleteLoneEscBeforePick(t *testing.T) {
 		until("/<clear-down/"),
 		provide("f"),
 		untilWithout{target: "f", forbid: "/undefined|<inverse>/"},
+	})
+}
+
+// Multi-column wrap (addendum E2). The list is laid out row-major, so with
+// two columns the entries a b / c d / e f sit in three rows and moving up
+// from the top row wraps to the bottom of the same column.
+
+// keyTwoColWide gives a two column list for six character words: each column
+// is 8 wide and (24-6)/8 is 2.
+const keyTwoColWide = 24
+
+// withKeyWords defines a variable for each word so the completion list for
+// their shared prefix holds exactly those words, and removes them again when
+// the test ends.
+func withKeyWords(t *testing.T, words ...string) {
+	t.Helper()
+	t.Cleanup(func() {
+		for _, w := range words {
+			_ = keyEval(t, fmt.Sprintf("(makunbound '%s)", w))
+		}
+	})
+	for _, w := range words {
+		_ = keyEval(t, fmt.Sprintf("(defvar %s 1)", w))
+	}
+}
+
+// keyTwoColChoices types prefix and opens the completion list without a
+// pick. The narrow box is shorter than keyBoxEnd so only its corner is
+// matched.
+func keyTwoColChoices(prefix string) []any {
+	return []any{
+		startSteps,
+		provide(prefix),
+		until(prefix[len(prefix)-1:]),
+		provide("\t"),
+		until("-"),
+		provide("\t"),
+		until("/┛/"),
+	}
+}
+
+func keyTwoColPick(key, want string) []any {
+	return []any{provide(key), until("<inverse>"), expect(want), until("/┛/")}
+}
+
+func withSixKeyWords(t *testing.T) {
+	withKeyWords(t, "zqkw-a", "zqkw-b", "zqkw-c", "zqkw-d", "zqkw-e", "zqkw-f")
+}
+
+func withFiveKeyWords(t *testing.T) {
+	withKeyWords(t, "zqkv-a", "zqkv-b", "zqkv-c", "zqkv-d", "zqkv-e")
+}
+
+func TestKeyCompleteTwoColumnsUpWrapsFirstColumn(t *testing.T) {
+	withKeyBindings(t, "")
+	withSixKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkw"),
+		keyTwoColPick("\t", "zqkw-a"),
+		keyTwoColPick("\x10", "zqkw-e"),
+	})
+}
+
+func TestKeyCompleteTwoColumnsUpWrapsSecondColumn(t *testing.T) {
+	withKeyBindings(t, "")
+	withSixKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkw"),
+		keyTwoColPick("\t", "zqkw-a"),
+		keyTwoColPick("\t", "zqkw-b"),
+		keyTwoColPick("\x10", "zqkw-f"),
+	})
+}
+
+func TestKeyCompleteTwoColumnsUpBeforePick(t *testing.T) {
+	// With nothing highlighted up starts from the first entry and wraps to
+	// the bottom of the first column.
+	withKeyBindings(t, "")
+	withSixKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkw"),
+		keyTwoColPick("\x10", "zqkw-e"),
+	})
+}
+
+func TestKeyCompleteTwoColumnsUpWithinList(t *testing.T) {
+	withKeyBindings(t, "")
+	withSixKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkw"),
+		keyTwoColPick("\x10", "zqkw-e"),
+		keyTwoColPick("\x10", "zqkw-c"),
+		keyTwoColPick("\x10", "zqkw-a"),
+	})
+}
+
+func TestKeyCompleteTwoColumnsDownWrapsFirstColumn(t *testing.T) {
+	withKeyBindings(t, "")
+	withSixKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkw"),
+		keyTwoColPick("\x10", "zqkw-e"),
+		keyTwoColPick("\x0e", "zqkw-a"),
+	})
+}
+
+func TestKeyCompleteTwoColumnsDownWrapsSecondColumn(t *testing.T) {
+	withKeyBindings(t, "")
+	withSixKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkw"),
+		keyTwoColPick("\t", "zqkw-a"),
+		keyTwoColPick("\t", "zqkw-b"),
+		keyTwoColPick("\x0e", "zqkw-d"),
+		keyTwoColPick("\x0e", "zqkw-f"),
+		keyTwoColPick("\x0e", "zqkw-b"),
+	})
+}
+
+func TestKeyCompleteTwoColumnsShortRowUpFirstColumn(t *testing.T) {
+	// Five entries: the last row holds only zqkv-e, in the first column.
+	withKeyBindings(t, "")
+	withFiveKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkv"),
+		keyTwoColPick("\t", "zqkv-a"),
+		keyTwoColPick("\x10", "zqkv-e"),
+	})
+}
+
+func TestKeyCompleteTwoColumnsShortRowUpSecondColumn(t *testing.T) {
+	// The second column has no entry in the short last row so up from the
+	// top lands on the last entry of that column.
+	withKeyBindings(t, "")
+	withFiveKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkv"),
+		keyTwoColPick("\t", "zqkv-a"),
+		keyTwoColPick("\t", "zqkv-b"),
+		keyTwoColPick("\x10", "zqkv-d"),
+	})
+}
+
+func TestKeyCompleteTwoColumnsShortRowDownWraps(t *testing.T) {
+	// Down from zqkv-d passes the end and wraps to the top of its column.
+	withKeyBindings(t, "")
+	withFiveKeyWords(t)
+	keyEdTestSize(t, 40, keyTwoColWide, []any{
+		keyTwoColChoices("zqkv"),
+		keyTwoColPick("\t", "zqkv-a"),
+		keyTwoColPick("\t", "zqkv-b"),
+		keyTwoColPick("\x0e", "zqkv-d"),
+		keyTwoColPick("\x0e", "zqkv-b"),
 	})
 }

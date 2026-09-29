@@ -851,12 +851,15 @@ func completeOverride(ed *editor) bool {
 		if ed.completer.index < 0 {
 			ed.completer.index = 0
 		}
+		// The list is row-major so wrap to the same column in the last row
+		// or the row above it if the last row is short.
+		n := ed.completer.hi - ed.completer.lo + 1
+		col := ed.completer.index % ed.completer.colCnt
 		ed.completer.index -= ed.completer.colCnt
 		if ed.completer.index < 0 {
-			lastRow := (ed.completer.hi - ed.completer.lo + 1) / ed.completer.colCnt * ed.completer.colCnt
-			ed.completer.index = lastRow + ed.completer.index%ed.completer.colCnt
-			if ed.completer.hi-ed.completer.lo < ed.completer.index {
-				ed.completer.index = ed.completer.hi - ed.completer.lo
+			ed.completer.index = (n-1)/ed.completer.colCnt*ed.completer.colCnt + col
+			if n <= ed.completer.index {
+				ed.completer.index -= ed.completer.colCnt
 			}
 		}
 	case "newline", "enter":
