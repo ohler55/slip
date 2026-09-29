@@ -157,7 +157,7 @@ func TestKeyNameInvalid(t *testing.T) {
 func TestKeyNameUpperCaseControlSynonym(t *testing.T) {
 	withKeyBindings(t, `(progn (repl-bind-key "C-l" 'line-end) (repl-bind-key "C-L" 'line-begin))`)
 	tt.Equal(t, `(("C-l" . line-begin))`, keyEval(t, `*repl-key-bindings*`))
-	tt.Equal(t, "line-begin", keyEval(t, `(repl-key-binding "C-A")`))
+	tt.Equal(t, "line-begin", keyEval(t, `(repl-key-binding "C-L")`))
 }
 
 func TestKeyNameCtrlMetaSynonym(t *testing.T) {
