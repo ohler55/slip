@@ -171,7 +171,12 @@ func (ed *editor) stop() {
 		ed.resizeChan <- nil
 		ed.resizeChan = nil
 	}
-	ed.seqChan <- nil
+	// Don't block if the key queue is full, as after a large paste. Each
+	// initialize makes a new queue so nothing waits on this one.
+	select {
+	case ed.seqChan <- nil:
+	default:
+	}
 	ed.reset()
 	ed.out = nil
 	if ed.log != nil {
@@ -262,7 +267,6 @@ func (ed *editor) queueText(content []byte) {
 		pos := bytes.IndexByte(content, '\r')
 		if pos < 0 || len(content)-1 == pos {
 			ed.seqChan <- &seq{cnt: len(content), buf: content}
-			time.Sleep(time.Millisecond * 50)
 			break
 		}
 		ed.seqChan <- &seq{cnt: pos, buf: content[:pos]}
@@ -324,8 +328,14 @@ top:
 	for {
 		select {
 		case key := <-ed.seqChan:
+			// A paste can be longer than the key buffer so grow it. The
+			// buffer is never shrunk as the bindings look past the key
+			// count for escape sequences.
+			if len(ed.key.buf) < key.cnt {
+				ed.key.buf = make([]byte, key.cnt)
+			}
 			ed.key.cnt = key.cnt
-			copy(ed.key.buf, key.buf)
+			copy(ed.key.buf, key.buf[:key.cnt])
 		case sig := <-ed.resizeChan:
 			if sig == nil {
 				return nil

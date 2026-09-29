@@ -30,6 +30,8 @@ type Termock struct {
 	sameRead bool
 	hold     int
 	held     []byte
+	// pending is input not yet returned by Read
+	pending []byte
 }
 
 // NewTermock creates a new Termock with an initial size described by high and
@@ -45,10 +47,14 @@ func NewTermock(high, wide int) *Termock {
 	}
 }
 
+// Read the next input. Input longer than p is returned over several reads
+// as a terminal would.
 func (tm *Termock) Read(p []byte) (n int, err error) {
-	key := <-tm.input
-	copy(p, key)
-	n = len(key)
+	if len(tm.pending) == 0 {
+		tm.pending = <-tm.input
+	}
+	n = copy(p, tm.pending)
+	tm.pending = tm.pending[n:]
 	return
 }
 
@@ -232,22 +238,31 @@ func (tm *Termock) ReleaseCursorReports() {
 	tm.input <- held
 }
 
+// cursorReport sends a cursor position report as input. It is sent from
+// its own goroutine since a terminal never makes the program writing a
+// query wait for the answer to be read.
 func (tm *Termock) cursorReport(report []byte) {
 	tm.mu.Lock()
-	defer tm.mu.Unlock()
+	var chunks [][]byte
 	switch {
 	case 0 < tm.hold:
 		tm.hold--
 		tm.held = append(tm.held, report...)
 	case tm.before != nil && tm.sameRead:
-		tm.input <- append(tm.before, report...)
-		tm.before = nil
+		chunks = [][]byte{append(tm.before, report...)}
 	case tm.before != nil:
-		tm.input <- tm.before
-		tm.input <- report
-		tm.before = nil
+		chunks = [][]byte{tm.before, report}
 	default:
-		tm.input <- report
+		chunks = [][]byte{report}
+	}
+	tm.before = nil
+	tm.mu.Unlock()
+	if 0 < len(chunks) {
+		go func() {
+			for _, c := range chunks {
+				tm.input <- c
+			}
+		}()
 	}
 }
 

@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   does not answer.
 - REPL editor input read quickly after other input is no longer overwritten
   while waiting to be processed.
+- A C-y paste longer than 32 bytes no longer fails with an index out of
+  range error.
+- Exiting the REPL editor no longer hangs when keys typed ahead fill the
+  key queue.
+
+### Changed
+- The REPL editor no longer pauses 50ms after each read of terminal input.
 
 ## [1.5.1] - 2026-08-29
 ### Added

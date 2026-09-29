@@ -4,6 +4,7 @@ package repl
 
 import (
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -13,11 +14,16 @@ import (
 	"github.com/ohler55/slip/pkg/repl"
 )
 
+// termockTag matches the tags Termock writes for ANSI sequences.
+var termockTag = regexp.MustCompile(`<[^>]*>`)
+
 // cursorTest runs the editor with a Termock. The setup function is called
 // before the editor starts and the keys function is called with a step
 // function that provides input and waits for a pattern in the output. If the
 // pattern is not seen before the step times out, C-c is sent so the test
-// fails instead of hanging. All output is returned.
+// fails instead of hanging. The pattern is matched against the output with
+// and without the Termock tags since the editor moves the cursor between
+// echoed characters. All output is returned.
 func cursorTest(t *testing.T, setup func(tm *repl.Termock), keys func(step func(input, want string) bool)) string {
 	err := os.RemoveAll("config/history")
 	tt.Nil(t, err)
@@ -58,7 +64,8 @@ func cursorTest(t *testing.T, setup func(tm *repl.Termock), keys func(step func(
 			select {
 			case s := <-outChan:
 				all.WriteString(s)
-				if strings.Contains(all.String(), want) {
+				if strings.Contains(all.String(), want) ||
+					strings.Contains(termockTag.ReplaceAllString(all.String(), ""), want) {
 					return true
 				}
 			case <-deadline:
@@ -69,17 +76,26 @@ func cursorTest(t *testing.T, setup func(tm *repl.Termock), keys func(step func(
 	}
 	step("", "Entering the SLIP REPL editor")
 	keys(step)
+	// Send C-c at most once a second. Sending one for every output would
+	// fill the key queue once the editor stops reading it.
 	for {
-		tm.Input("\x03")
-		select {
-		case <-exited:
-			for 0 < len(outChan) {
-				all.WriteString(<-outChan)
+		// Input can block once the editor stops reading so send from a
+		// goroutine and stop as soon as the editor has exited.
+		go tm.Input("\x03")
+		retry := time.After(time.Second)
+	wait:
+		for {
+			select {
+			case <-exited:
+				for 0 < len(outChan) {
+					all.WriteString(<-outChan)
+				}
+				return all.String()
+			case s := <-outChan:
+				all.WriteString(s)
+			case <-retry:
+				break wait
 			}
-			return all.String()
-		case s := <-outChan:
-			all.WriteString(s)
-		case <-time.After(time.Second):
 		}
 	}
 }
