@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - REPL editor keys typed while the terminal is answering a cursor position
-  query are no longer lost, and a late answer is no longer read as an
-  undefined key. The editor also no longer waits forever if the terminal
-  does not answer.
+  query are no longer lost, and a late answer, or one split across reads,
+  is no longer read as keys. The editor also no longer waits forever if the
+  terminal does not answer.
 - REPL editor input read quickly after other input is no longer overwritten
   while waiting to be processed.
 - A C-y paste longer than 32 bytes no longer fails with an index out of

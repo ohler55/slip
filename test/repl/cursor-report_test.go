@@ -3,6 +3,7 @@
 package repl
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -170,5 +171,31 @@ func TestEditorCursorReportPatternWithoutQuery(t *testing.T) {
 		func(tm *repl.Termock) {},
 		func(step func(string, string) bool) {
 			step("\x1b[1;2R", "undefined")
+		})
+}
+
+func TestEditorSplitCursorReport(t *testing.T) {
+	// A cursor position report split across two reads at each point must
+	// still be recognized rather than read as keys.
+	for at := 1; at <= 5; at++ {
+		t.Run(fmt.Sprintf("at %d", at), func(t *testing.T) {
+			out := cursorTest(t,
+				func(tm *repl.Termock) { tm.SplitCursorReport(at) },
+				func(step func(string, string) bool) {
+					step("(+ 1000 234)\r", "1234")
+				})
+			tt.Equal(t, false, strings.Contains(out, "undefined"))
+			tt.Equal(t, false, strings.Contains(out, "1R"))
+		})
+	}
+}
+
+func TestEditorHeldReportStartIsKeys(t *testing.T) {
+	// Bytes held as a possible report start that turn out to be keys, here
+	// the start of a left arrow, reach the editor in order.
+	cursorTest(t,
+		func(tm *repl.Termock) { tm.SendBeforeCursorReport("(list 12)\x1b[", false) },
+		func(step func(string, string) bool) {
+			step("D3\r", "(123)")
 		})
 }

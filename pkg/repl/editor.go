@@ -29,8 +29,13 @@ const (
 	cursorTimeout = 250 * time.Millisecond
 )
 
-// cursorReport matches a cursor position report, ESC [ row ; col R.
-var cursorReport = regexp.MustCompile(`\x1b\[(\d+);(\d+)R`)
+var (
+	// cursorReport matches a cursor position report, ESC [ row ; col R.
+	cursorReport = regexp.MustCompile(`\x1b\[(\d+);(\d+)R`)
+	// cursorReportStart matches the start of a cursor position report at
+	// the end of a read.
+	cursorReportStart = regexp.MustCompile(`\x1b(?:\[(?:\d+(?:;\d*)?)?)?$`)
+)
 
 type seq struct {
 	cnt int
@@ -67,6 +72,7 @@ type editor struct {
 	pause      atomic.Bool
 	cursorWait atomic.Int32 // cursor position queries not yet answered
 	cursorChan chan [2]int  // cursor position reports from the input
+	reportHead []byte       // start of a cursor position report split across reads
 	partSeq    *seq
 }
 
@@ -257,12 +263,11 @@ func (ed *editor) chanRead() {
 		}
 		// Copy since buf is reused by the next read while this text may
 		// still be waiting in the queue.
-		ed.queueText(append([]byte(nil), buf[:cnt]...))
+		ed.queueText(ed.takeCursorReports(append([]byte(nil), buf[:cnt]...)))
 	}
 }
 
 func (ed *editor) queueText(content []byte) {
-	content = ed.takeCursorReports(content)
 	for 0 < len(content) {
 		pos := bytes.IndexByte(content, '\r')
 		if pos < 0 || len(content)-1 == pos {
@@ -275,15 +280,25 @@ func (ed *editor) queueText(content []byte) {
 	}
 }
 
-// takeCursorReports removes cursor position reports from content while
-// cursor position queries are outstanding and passes them to getCursor. The
-// other bytes, such as keys typed before a report arrives, are returned in
-// order. A report is only recognized while a query is outstanding since
-// ESC [ 1 ; 2 R is also shift-F3 on some terminals.
+// takeCursorReports removes cursor position reports from terminal input
+// while cursor position queries are outstanding and passes them to
+// getCursor. The other bytes, such as keys typed before a report arrives,
+// are returned in order. A report is only recognized while a query is
+// outstanding since ESC [ 1 ; 2 R is also shift-F3 on some terminals. A read
+// can end part way through a report so the start of one at the end of a
+// read is held and put in front of the next read. Only chanRead calls this.
 func (ed *editor) takeCursorReports(content []byte) []byte {
+	if 0 < len(ed.reportHead) {
+		content = append(ed.reportHead, content...)
+		ed.reportHead = nil
+	}
 	for 0 < ed.cursorWait.Load() {
 		m := cursorReport.FindSubmatchIndex(content)
 		if m == nil {
+			if loc := cursorReportStart.FindIndex(content); loc != nil {
+				ed.reportHead = append([]byte(nil), content[loc[0]:]...)
+				content = content[:loc[0]]
+			}
 			break
 		}
 		ed.cursorWait.Add(-1)

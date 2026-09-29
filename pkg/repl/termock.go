@@ -30,6 +30,7 @@ type Termock struct {
 	sameRead bool
 	hold     int
 	held     []byte
+	split    int
 	// pending is input not yet returned by Read
 	pending []byte
 }
@@ -229,6 +230,14 @@ func (tm *Termock) HoldCursorReports(n int) {
 	tm.mu.Unlock()
 }
 
+// SplitCursorReport sends the next cursor position report as two reads,
+// the first with at bytes, as when a report arrives across two reads.
+func (tm *Termock) SplitCursorReport(at int) {
+	tm.mu.Lock()
+	tm.split = at
+	tm.mu.Unlock()
+}
+
 // ReleaseCursorReports sends all held cursor position reports in one read.
 func (tm *Termock) ReleaseCursorReports() {
 	tm.mu.Lock()
@@ -252,6 +261,9 @@ func (tm *Termock) cursorReport(report []byte) {
 		chunks = [][]byte{append(tm.before, report...)}
 	case tm.before != nil:
 		chunks = [][]byte{tm.before, report}
+	case 0 < tm.split:
+		chunks = [][]byte{report[:tm.split], report[tm.split:]}
+		tm.split = 0
 	default:
 		chunks = [][]byte{report}
 	}
