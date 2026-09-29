@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"regexp"
+	"strconv"
 	"sync/atomic"
 	"syscall"
 	"time"
@@ -19,7 +21,21 @@ import (
 	"github.com/ohler55/slip/pkg/repl/term"
 )
 
-const MAX_DIM = 9999
+const (
+	MAX_DIM = 9999
+
+	// cursorTimeout is how long getCursor waits for a cursor position
+	// report.
+	cursorTimeout = 250 * time.Millisecond
+)
+
+var (
+	// cursorReport matches a cursor position report, ESC [ row ; col R.
+	cursorReport = regexp.MustCompile(`\x1b\[(\d+);(\d+)R`)
+	// cursorReportStart matches the start of a cursor position report at
+	// the end of a read.
+	cursorReportStart = regexp.MustCompile(`\x1b(?:\[(?:\d+(?:;\d*)?)?)?$`)
+)
 
 type seq struct {
 	cnt int
@@ -54,6 +70,9 @@ type editor struct {
 	seqChan    chan *seq
 	log        *os.File
 	pause      atomic.Bool
+	cursorWait atomic.Int32 // cursor position queries not yet answered
+	cursorChan chan [2]int  // cursor position reports from the input
+	reportHead []byte       // start of a cursor position report split across reads
 	partSeq    *seq
 }
 
@@ -70,6 +89,7 @@ func (ed *editor) initialize() {
 	ed.match.line = -1
 	ed.foff = printSize(prompt) + 1 // terminal positions are one based and not zero based so add one
 	ed.seqChan = make(chan *seq, 100)
+	ed.cursorChan = make(chan [2]int, 1)
 	ed.in = scope.Get(slip.Symbol(stdInput)).(io.Reader)
 	if fs, ok := ed.in.(*slip.FileStream); ok {
 		ed.fd = int(((*os.File)(fs)).Fd())
@@ -157,7 +177,12 @@ func (ed *editor) stop() {
 		ed.resizeChan <- nil
 		ed.resizeChan = nil
 	}
-	ed.seqChan <- nil
+	// Don't block if the key queue is full, as after a large paste. Each
+	// initialize makes a new queue so nothing waits on this one.
+	select {
+	case ed.seqChan <- nil:
+	default:
+	}
 	ed.reset()
 	ed.out = nil
 	if ed.log != nil {
@@ -236,7 +261,9 @@ func (ed *editor) chanRead() {
 			// shutting down
 			return
 		}
-		ed.queueText(buf[:cnt])
+		// Copy since buf is reused by the next read while this text may
+		// still be waiting in the queue.
+		ed.queueText(ed.takeCursorReports(append([]byte(nil), buf[:cnt]...)))
 	}
 }
 
@@ -245,13 +272,45 @@ func (ed *editor) queueText(content []byte) {
 		pos := bytes.IndexByte(content, '\r')
 		if pos < 0 || len(content)-1 == pos {
 			ed.seqChan <- &seq{cnt: len(content), buf: content}
-			time.Sleep(time.Millisecond * 50)
 			break
 		}
 		ed.seqChan <- &seq{cnt: pos, buf: content[:pos]}
 		ed.seqChan <- &seq{cnt: 1, buf: []byte{'\n'}}
 		content = content[pos+1:]
 	}
+}
+
+// takeCursorReports removes cursor position reports from terminal input
+// while cursor position queries are outstanding and passes them to
+// getCursor. The other bytes, such as keys typed before a report arrives,
+// are returned in order. A report is only recognized while a query is
+// outstanding since ESC [ 1 ; 2 R is also shift-F3 on some terminals. A read
+// can end part way through a report so the start of one at the end of a
+// read is held and put in front of the next read. Only chanRead calls this.
+func (ed *editor) takeCursorReports(content []byte) []byte {
+	if 0 < len(ed.reportHead) {
+		content = append(ed.reportHead, content...)
+		ed.reportHead = nil
+	}
+	for 0 < ed.cursorWait.Load() {
+		m := cursorReport.FindSubmatchIndex(content)
+		if m == nil {
+			if loc := cursorReportStart.FindIndex(content); loc != nil {
+				ed.reportHead = append([]byte(nil), content[loc[0]:]...)
+				content = content[:loc[0]]
+			}
+			break
+		}
+		ed.cursorWait.Add(-1)
+		v, _ := strconv.Atoi(string(content[m[2]:m[3]]))
+		h, _ := strconv.Atoi(string(content[m[4]:m[5]]))
+		select {
+		case ed.cursorChan <- [2]int{v, h}:
+		default: // a late report is already waiting so drop this one
+		}
+		content = append(append([]byte{}, content[:m[0]]...), content[m[1]:]...)
+	}
+	return content
 }
 
 func (ed *editor) afterEval() {
@@ -284,8 +343,14 @@ top:
 	for {
 		select {
 		case key := <-ed.seqChan:
+			// A paste can be longer than the key buffer so grow it. The
+			// buffer is never shrunk as the bindings look past the key
+			// count for escape sequences.
+			if len(ed.key.buf) < key.cnt {
+				ed.key.buf = make([]byte, key.cnt)
+			}
 			ed.key.cnt = key.cnt
-			copy(ed.key.buf, key.buf)
+			copy(ed.key.buf, key.buf[:key.cnt])
 		case sig := <-ed.resizeChan:
 			if sig == nil {
 				return nil
@@ -524,44 +589,28 @@ func (ed *editor) getSize() (w, h int) {
 }
 
 // ANSI sequences
+
+// getCursor asks the terminal for the cursor position. The report arrives
+// through takeCursorReports so keys typed while waiting are not lost. If
+// there is no report in time the current position is returned.
 func (ed *editor) getCursor() (v, h int) {
+	// Drop a late report left by an earlier query that timed out.
+	select {
+	case <-ed.cursorChan:
+	default:
+	}
+	ed.cursorWait.Add(1)
 	if _, err := ed.out.Write([]byte("\x1b[6n")); err != nil {
 		return ed.v0, ed.foff
 	}
-	key := <-ed.seqChan
-	var mode int
-done:
-	for i, b := range key.buf {
-		if key.cnt <= i {
-			break
-		}
-		switch b {
-		case '\n', '\r':
-			// ignore
-		case '\x1b':
-			mode++
-		case '[':
-			if mode == 1 {
-				mode++
-			}
-		case ';':
-			if mode == 2 {
-				mode++
-			}
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			if mode == 2 {
-				v = v*10 + int(b-'0')
-			} else {
-				h = h*10 + int(b-'0')
-			}
-		case 'R':
-			break done
-		default:
-			v, h = ed.v0, ed.foff
-			break done
-		}
+	select {
+	case pos := <-ed.cursorChan:
+		return pos[0], pos[1]
+	case <-time.After(cursorTimeout):
+		// A late report is still removed from the input since cursorWait
+		// stays above zero until it arrives.
+		return ed.v0, ed.foff
 	}
-	return
 }
 
 func (ed *editor) setCursor(v, h int) {

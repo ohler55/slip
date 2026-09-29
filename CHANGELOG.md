@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- REPL editor keys typed while the terminal is answering a cursor position
+  query are no longer lost, and a late answer, or one split across reads,
+  is no longer read as keys. The editor also no longer waits forever if the
+  terminal does not answer.
+- REPL editor input read quickly after other input is no longer overwritten
+  while waiting to be processed.
+- A C-y paste longer than 32 bytes no longer fails with an index out of
+  range error.
+- Exiting the REPL editor no longer hangs when keys typed ahead fill the
+  key queue.
+
+### Changed
+- The REPL editor no longer pauses 50ms after each read of terminal input.
+
 ## [1.5.1] - 2026-08-29
 ### Added
 - Added `gi:copy-stream-to-stream` function.
