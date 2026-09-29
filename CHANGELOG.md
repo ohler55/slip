@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- REPL editor keys typed while the terminal is answering a cursor position
+  query are no longer lost, and a late answer is no longer read as an
+  undefined key. The editor also no longer waits forever if the terminal
+  does not answer.
+- REPL editor input read quickly after other input is no longer overwritten
+  while waiting to be processed.
+
 ## [1.5.1] - 2026-08-29
 ### Added
 - Added `gi:copy-stream-to-stream` function.
