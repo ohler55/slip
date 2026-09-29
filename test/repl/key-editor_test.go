@@ -965,3 +965,84 @@ func TestKeyEdTabsInOneReadScrollHelp(t *testing.T) {
 		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
 	})
 }
+
+// Addendum E4: the help scroll check looks at the first complete user key in
+// a read, so two user tab keys arriving together still scroll the help page
+// rather than dismissing it.
+func TestKeyEdUserTabsInOneReadScrollHelp(t *testing.T) {
+	withKeyBindings(t, `(repl-bind-key "C-l" 'tab)`)
+	keyEdTestSize(t, 20, 80, []any{
+		startSteps,
+		provide("\x08"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+		provide("\x0c\x0c"),
+		untilWithout{target: "<clear-to-end 3:4>", forbid: "/<clear-down/"},
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+	})
+}
+
+func TestKeyEdUserShiftTabsInOneReadScrollHelp(t *testing.T) {
+	withKeyBindings(t, `(repl-bind-key "C-l" 'shift-tab)`)
+	keyEdTestSize(t, 20, 80, []any{
+		startSteps,
+		provide("\x08"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+		provide("\t"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+		provide("\x0c\x0c"),
+		untilWithout{target: "<clear-to-end 3:4>", forbid: "/<clear-down/"},
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+	})
+}
+
+func TestKeyEdUserMultiByteTabsInOneReadScrollHelp(t *testing.T) {
+	// The first user key spans several bytes.
+	withKeyBindings(t, `(repl-bind-key "M-[1;5C" 'tab)`)
+	keyEdTestSize(t, 20, 80, []any{
+		startSteps,
+		provide("\x08"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+		provide("\x1b[1;5C\x1b[1;5C"),
+		untilWithout{target: "<clear-to-end 3:4>", forbid: "/<clear-down/"},
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+	})
+}
+
+func TestKeyEdUserNonTabFirstInReadDismissesHelp(t *testing.T) {
+	// The first user key in the read is not a tab so the help is dismissed
+	// even though a user tab key follows it.
+	withKeyBindings(t, `(progn (repl-bind-key "C-l" 'tab) (repl-bind-key "C-o" 'line-begin))`)
+	keyEdTestSize(t, 20, 80, []any{
+		startSteps,
+		provide("\x08"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+		provide("\x0f\x0c"),
+		untilWithout{target: "/<clear-down/", forbid: "<clear-to-end 3:4>"},
+	})
+}
+
+func TestKeyEdDefaultKeyFirstInReadDismissesHelp(t *testing.T) {
+	// The first byte is not a user key and not TAB so the help is dismissed
+	// even though a user tab key follows it.
+	withKeyBindings(t, `(repl-bind-key "C-l" 'tab)`)
+	keyEdTestSize(t, 20, 80, []any{
+		startSteps,
+		provide("\x08"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+		provide("\x01\x0c"),
+		untilWithout{target: "/<clear-down/", forbid: "<clear-to-end 3:4>"},
+	})
+}
+
+func TestKeyEdDefaultTabFirstInReadScrollsHelp(t *testing.T) {
+	// The first byte is TAB with no user binding so the fallback check keeps
+	// the help even though a user key follows it.
+	withKeyBindings(t, `(repl-bind-key "C-l" 'line-begin)`)
+	keyEdTestSize(t, 20, 80, []any{
+		startSteps,
+		provide("\x08"),
+		until("/┕━━━━━━━━━━━━━━*━━━━━━━━━━━━┛/"),
+		provide("\t\x0c"),
+		untilWithout{target: "<clear-to-end 3:4>", forbid: "/<clear-down/"},
+	})
+}

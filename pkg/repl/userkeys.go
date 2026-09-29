@@ -291,12 +291,18 @@ func (ed *editor) atTop() bool {
 	return &ed.mode[0] == &topMode[0]
 }
 
-// helpScrollKey returns true if the key read scrolls the help display. A
-// user binding for the key is used if there is one otherwise the key is
-// checked for tab or shift-tab.
+// helpScrollKey returns true if the key read scrolls the help display. The
+// first complete user key in the read is used if there is one otherwise the
+// first key is checked for tab or shift-tab.
 func (ed *editor) helpScrollKey() bool {
-	if a := userBinds.Load().acts[string(ed.key.buf[:ed.key.cnt])]; a != nil {
-		return a == tabAction || a == shiftTabAction
+	km := userBinds.Load().root
+	for _, b := range ed.key.buf[:ed.key.cnt] {
+		if a := km.binds[b]; a != nil {
+			return a == tabAction || a == shiftTabAction
+		}
+		if km = km.next[b]; km == nil {
+			break
+		}
 	}
 	return ed.key.buf[0] == 0x09 || (ed.key.buf[0] == 0x1b && ed.key.buf[1] == 0x5b && ed.key.buf[2] == 0x5a)
 }
