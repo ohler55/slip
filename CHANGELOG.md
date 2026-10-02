@@ -5,6 +5,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- REPL editor keys can be rebound with the `repl-bind-key`, `repl-unbind-key`,
+  `repl-key-binding`, and `repl-key-actions` functions. User bindings are kept in
+  `*repl-key-bindings*` and saved in the config file.
+- Terminal keys can be bound by name: `<up>`, `<down>`, `<right>`, `<left>`,
+  `<home>`, `<end>`, `<insert>`, `<delete>`, `<prior>` (`<pageup>`), `<next>`
+  (`<pagedown>`), `<f1>`-`<f12>`, and `S-<tab>` (`<backtab>`), with `C-` and
+  `M-` modifiers such as `C-<right>` and `C-<delete>`. A name binds every
+  sequence commonly sent for the key and raw sequences such as `"M-[1;5C"`
+  still work. Other than the arrows and `S-<tab>` these keys have no default
+  bindings. The new `form-begin`, `form-end`, and `delete-forward` actions are
+  available for them, for example `(repl-bind-key "<delete>" 'delete-forward)`
+  makes Delete delete one forward without exiting.
+
+### Changed
+- The REPL editor no longer pauses 50ms after each read of terminal input.
+- In the REPL editor M-O (alt-O) is now a prefix for the terminal keys so M-O
+  followed by another key is reported as that undefined pair instead of M-O
+  alone being undefined.
+
 ### Fixed
 - REPL editor keys typed while the terminal is answering a cursor position
   query are no longer lost, and a late answer, or one split across reads,
@@ -16,9 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   range error.
 - Exiting the REPL editor no longer hangs when keys typed ahead fill the
   key queue.
-
-### Changed
-- The REPL editor no longer pauses 50ms after each read of terminal input.
+- REPL completion list navigation with up in a single column list now wraps to
+  the last word.
 
 ## [1.5.1] - 2026-08-29
 ### Added

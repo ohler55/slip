@@ -251,7 +251,9 @@ func testEditorUnknownKey(t *testing.T, key string) {
 		provide(key),
 		until("<inverse>"),
 		expect("  "),
-		expect("/key .+ is undefined. sequence: \\[\\]byte{.+} +/"),
+		// Zero or more trailing spaces since a long message fills all 80
+		// columns and is not padded.
+		expect("/key .+ is undefined. sequence: \\[\\]byte{.+} */"),
 		expect("<normal>"),
 		provide("\x03"),
 	})
@@ -465,6 +467,32 @@ func TestEditorForwardBackWord(t *testing.T) {
 		"<set-cursor 2:7>", "<set-cursor 2:3>",
 		"<set-cursor 2:6>", "<set-cursor 2:10>",
 	)
+}
+
+func TestEditorCtrlArrowWord(t *testing.T) {
+	withKeyBindings(t, `(progn (repl-bind-key "M-[1;5C" 'forward-word) (repl-bind-key "M-[1;5D" 'back-word))`)
+	testEditorSeq(t, "abc def\x1b[1;5D\x1b[1;5D\x1b[1;5C\x1b[1;5C",
+		"a", "b", "c", " ", "d", "e", "f",
+		"<set-cursor 2:7>", "<set-cursor 2:3>",
+		"<set-cursor 2:6>", "<set-cursor 2:10>",
+	)
+}
+
+func TestEditorAltArrowWord(t *testing.T) {
+	withKeyBindings(t, `(progn (repl-bind-key "M-[1;3C" 'forward-word) (repl-bind-key "M-[1;3D" 'back-word))`)
+	testEditorSeq(t, "abc def\x1b[1;3D\x1b[1;3D\x1b[1;3C\x1b[1;3C",
+		"a", "b", "c", " ", "d", "e", "f",
+		"<set-cursor 2:7>", "<set-cursor 2:3>",
+		"<set-cursor 2:6>", "<set-cursor 2:10>",
+	)
+}
+
+func TestEditorUnknownModifiedKey(t *testing.T) {
+	testEditorUnknownKey(t, "\x1b[1;2C")
+}
+
+func TestEditorUnknownModifiedArrow(t *testing.T) {
+	testEditorUnknownKey(t, "\x1b[1;5E")
 }
 
 func TestEditorLineStartEnd(t *testing.T) {
