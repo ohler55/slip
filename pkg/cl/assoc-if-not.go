@@ -57,8 +57,13 @@ func (f *AssocIfNot) Call(s *slip.Scope, args slip.List, depth int) (found slip.
 	pos := 0
 	predicate := ResolveToCaller(s, args[pos], depth)
 	pos++
-	alist, ok := args[pos].(slip.List)
-	if !ok {
+	var alist slip.List
+	switch ta := args[pos].(type) {
+	case nil:
+		return nil
+	case slip.List:
+		alist = ta
+	default:
 		slip.TypePanic(s, depth, "alist", args[pos], "list")
 	}
 	pos++

@@ -22,6 +22,13 @@ func TestRassocIfWithNil(t *testing.T) {
 	}).Test(t)
 }
 
+func TestRassocIfNilList(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(rassoc-if 'zerop nil)",
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestRassocIfKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(rassoc-if 'zerop '((x . 1) (y . 2) (z . 3)) :key '1-)",

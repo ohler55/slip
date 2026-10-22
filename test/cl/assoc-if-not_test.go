@@ -22,6 +22,13 @@ func TestAssocIfNotWithNil(t *testing.T) {
 	}).Test(t)
 }
 
+func TestAssocIfNotNilList(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(assoc-if-not 'zerop nil)",
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestAssocIfNotKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(assoc-if-not 'zerop '((1 . x) (2 . y) (3 . z)) :key '1-)",
