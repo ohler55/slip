@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   key queue.
 - REPL completion list navigation with up in a single column list now wraps to
   the last word.
+- Updated multiple functions such as `assoc` to accept `nil` as a valid argument.
 
 ## [1.5.1] - 2026-08-29
 ### Added

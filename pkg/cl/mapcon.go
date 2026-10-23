@@ -51,17 +51,11 @@ func (f *Mapcon) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	caller := ResolveToCaller(s, fn, d2)
 
 	pos++
-	list, ok := args[pos].(slip.List)
-	if !ok {
-		slip.TypePanic(s, depth, "lists", args[pos], "list")
-	}
+	list := slip.MustBeList(args[pos], "lists")
 	var rlist slip.List
 	min := len(list)
-	var l2 slip.List
 	for i := 1; i < len(args); i++ {
-		if l2, ok = args[i].(slip.List); !ok {
-			slip.TypePanic(s, depth, "lists", args[i], "list")
-		}
+		l2 := slip.MustBeList(args[i], "lists")
 		if len(l2) < min {
 			min = len(l2)
 		}

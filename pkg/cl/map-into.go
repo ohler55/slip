@@ -52,21 +52,14 @@ type MapInto struct {
 // Call the function with the arguments provided.
 func (f *MapInto) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 2, -1)
-	rlist, ok := args[0].(slip.List)
-	if !ok {
-		slip.TypePanic(s, depth, "result-sequence", args[0], "list")
-	}
+	rlist := slip.MustBeList(args[0], "result-sequence")
 	fn := args[1]
 	d2 := depth + 1
 	caller := ResolveToCaller(s, fn, d2)
 	args = args[2:]
 	lists := make([]slip.List, len(args))
 	for i, arg := range args {
-		var list slip.List
-		if list, ok = arg.(slip.List); !ok {
-			slip.TypePanic(s, depth, "lists", arg, "list")
-		}
-		lists[i] = list
+		lists[i] = slip.MustBeList(arg, "lists")
 	}
 	ca := make(slip.List, len(args))
 	for i := 0; i < len(rlist); i++ {

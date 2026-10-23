@@ -68,12 +68,9 @@ func (f *Nth) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 // Place a value in the first position of a list or cons.
 func (f *Nth) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	slip.CheckArgCount(s, 0, f, args, 2, 2)
-	list, ok := args[1].(slip.List)
+	list := slip.MustBeList(args[1], "list")
+	num, ok := args[0].(slip.Integer)
 	if !ok {
-		slip.TypePanic(s, 0, "list", args[1], "list")
-	}
-	var num slip.Integer
-	if num, ok = args[0].(slip.Integer); !ok {
 		slip.TypePanic(s, 0, "n", args[1], "integer")
 	}
 	n := int(num.Int64())

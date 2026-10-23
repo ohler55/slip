@@ -57,15 +57,7 @@ func (f *AssocIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Obj
 	pos := 0
 	predicate := ResolveToCaller(s, args[pos], depth)
 	pos++
-	var alist slip.List
-	switch ta := args[pos].(type) {
-	case nil:
-		return nil
-	case slip.List:
-		alist = ta
-	default:
-		slip.TypePanic(s, depth, "alist", args[pos], "list")
-	}
+	alist := slip.MustBeList(args[pos], "alist")
 	pos++
 	var keyFunc slip.Caller
 	for ; pos < len(args)-1; pos += 2 {
