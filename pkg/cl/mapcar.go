@@ -51,18 +51,12 @@ func (f *Mapcar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 	caller := ResolveToCaller(s, fn, d2)
 
 	pos++
-	list, ok := args[pos].(slip.List)
-	if !ok {
-		slip.TypePanic(s, depth, "lists", args[pos], "list")
-	}
+	list := slip.MustBeList(args[pos], "lists")
 	var rlist slip.List
 	if pos < len(args)-1 {
 		min := len(list)
-		var l2 slip.List
 		for i := 1; i < len(args); i++ {
-			if l2, ok = args[i].(slip.List); !ok {
-				slip.TypePanic(s, depth, "lists", args[i], "list")
-			}
+			l2 := slip.MustBeList(args[i], "lists")
 			if len(l2) < min {
 				min = len(l2)
 			}
@@ -71,7 +65,7 @@ func (f *Mapcar) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obj
 		ca := make(slip.List, len(args)-1)
 		for n := 0; n < min; n++ {
 			for i := 1; i < len(args); i++ {
-				l2 := args[i].(slip.List)
+				l2 := args[i].(slip.List) // since min is greater than 0 this must be a list
 				ca[i-1] = l2[n]
 			}
 			rlist[n] = caller.Call(s, ca, d2)

@@ -169,7 +169,9 @@ func Coerce(object, typeSpec Object) (result Object) {
 // CoerceToList coerce to a list or panic.
 func CoerceToList(arg Object) (result Object) {
 	switch ta := arg.(type) {
-	case nil, List:
+	case nil:
+		result = List{}
+	case List:
 		result = ta
 	case String:
 		ra := []rune(ta)

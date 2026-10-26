@@ -57,10 +57,7 @@ func (f *RassocIf) Call(s *slip.Scope, args slip.List, depth int) (found slip.Ob
 	pos := 0
 	predicate := ResolveToCaller(s, args[pos], depth)
 	pos++
-	alist, ok := args[pos].(slip.List)
-	if !ok {
-		slip.TypePanic(s, depth, "alist", args[pos], "list")
-	}
+	alist := slip.MustBeList(args[pos], "alist")
 	pos++
 	var keyFunc slip.Caller
 	for ; pos < len(args)-1; pos += 2 {

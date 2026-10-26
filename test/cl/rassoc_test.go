@@ -22,6 +22,13 @@ func TestRassocWithNil(t *testing.T) {
 	}).Test(t)
 }
 
+func TestRassocNilList(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(rassoc 'z nil)",
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestRassocKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(rassoc 3 '((x . 1) (y . 2) (z . 3)) :key '1+)",

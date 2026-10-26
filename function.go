@@ -524,6 +524,21 @@ func MustBeString(arg Object, name string) (str string) {
 	return
 }
 
+// MustBeList returns a list if the arg is a a list or nil. If neither then a
+// type error is raised with the name argument as the expected field in the
+// error.
+func MustBeList(arg Object, name string) (list List) {
+	switch ta := arg.(type) {
+	case nil:
+		// leave as is
+	case List:
+		list = ta
+	default:
+		TypePanic(NewScope(), 0, name, arg, "list", "nil")
+	}
+	return
+}
+
 func (f *Function) setPkg(p *Package) {
 	f.Pkg = p
 }

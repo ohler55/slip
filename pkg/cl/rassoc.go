@@ -61,10 +61,7 @@ func (f *Rassoc) Call(s *slip.Scope, args slip.List, depth int) (found slip.Obje
 	pos := 0
 	item := args[pos]
 	pos++
-	alist, ok := args[pos].(slip.List)
-	if !ok {
-		slip.TypePanic(s, depth, "alist", args[pos], "list")
-	}
+	alist := slip.MustBeList(args[pos], "alist")
 	pos++
 	var (
 		keyFunc  slip.Caller

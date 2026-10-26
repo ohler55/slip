@@ -50,18 +50,11 @@ func (f *Mapc) Call(s *slip.Scope, args slip.List, depth int) (result slip.Objec
 	fn := args[0]
 	d2 := depth + 1
 	caller := ResolveToCaller(s, fn, d2)
-
-	list, ok := args[1].(slip.List)
-	if !ok {
-		slip.TypePanic(s, depth, "lists", args[1], "list")
-	}
+	list := slip.MustBeList(args[1], "lists")
 	if 1 < len(args)-1 {
 		min := len(list)
-		var l2 slip.List
 		for i := 1; i < len(args); i++ {
-			if l2, ok = args[i].(slip.List); !ok {
-				slip.TypePanic(s, depth, "lists", args[i], "list")
-			}
+			l2 := slip.MustBeList(args[i], "lists")
 			if len(l2) < min {
 				min = len(l2)
 			}

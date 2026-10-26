@@ -22,6 +22,13 @@ func TestAssocWithNil(t *testing.T) {
 	}).Test(t)
 }
 
+func TestAssocNilList(t *testing.T) {
+	(&sliptest.Function{
+		Source: "(assoc 'z nil)",
+		Expect: "nil",
+	}).Test(t)
+}
+
 func TestAssocKey(t *testing.T) {
 	(&sliptest.Function{
 		Source: "(assoc 3 '((1 . x) (2 . y) (3 . z)) :key '1+)",

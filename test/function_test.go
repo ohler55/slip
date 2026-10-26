@@ -199,6 +199,16 @@ func TestMustBeString(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.MustBeString(slip.True, "test") })
 }
 
+func TestMustBeList(t *testing.T) {
+	list := slip.MustBeList(slip.List{nil}, "test")
+	tt.SameType(t, slip.List{}, list)
+
+	list = slip.MustBeList(nil, "test")
+	tt.SameType(t, slip.List{}, list)
+
+	tt.Panic(t, func() { _ = slip.MustBeList(slip.True, "test") })
+}
+
 func TestGetArgsKeyValue(t *testing.T) {
 	scope := slip.NewScope()
 	args := slip.ReadString("(list :one 1 :two 2)", scope).Eval(scope, nil).(slip.List)

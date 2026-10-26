@@ -59,15 +59,7 @@ type Member struct {
 func (f *Member) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	item := args[0]
-	var list slip.List
-	switch ta := args[1].(type) {
-	case nil:
-		return nil
-	case slip.List:
-		list = ta
-	default:
-		slip.TypePanic(s, depth, "list", args[1], "list")
-	}
+	list := slip.MustBeList(args[1], "list")
 	var (
 		keyFunc  slip.Caller
 		testFunc slip.Caller

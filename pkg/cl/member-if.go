@@ -54,15 +54,7 @@ type MemberIf struct {
 func (f *MemberIf) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object) {
 	slip.CheckArgCount(s, depth, f, args, 2, 6)
 	predicate := ResolveToCaller(s, args[0], depth)
-	var list slip.List
-	switch ta := args[1].(type) {
-	case nil:
-		return nil
-	case slip.List:
-		list = ta
-	default:
-		slip.TypePanic(s, depth, "list", args[1], "list")
-	}
+	list := slip.MustBeList(args[1], "list")
 	var keyFunc slip.Caller
 	pos := 2
 	for ; pos < len(args)-1; pos += 2 {
