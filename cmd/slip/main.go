@@ -156,6 +156,7 @@ func run() {
 		case nil:
 			// normal exit
 		case *slip.Panic:
+			debug.PrintStack()
 			var (
 				prefix string
 				suffix string

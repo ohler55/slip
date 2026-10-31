@@ -3,7 +3,6 @@
 - **multipass** or utm for linux
 
 - bugs
- - (princ "") -> """" should be ""?
  - package private
  - make sure defparameter can be exported
  - bugs dir

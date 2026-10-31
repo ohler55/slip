@@ -299,7 +299,7 @@ func process() {
 				_, _ = scope.Get(slip.Symbol(stdOutput)).(io.Writer).Write(buf)
 			}
 			reset()
-			if scope.Get("*repl-debug*") != nil {
+			if scope.Has(slip.Symbol("*repl-debug*")) && scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
 			}
 			if tr.Fatal {
@@ -313,7 +313,7 @@ func process() {
 				panic(nil) // exits the REPL loop
 			}
 			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
-			if scope.Get("*repl-debug*") != nil {
+			if scope.Has(slip.Symbol("*repl-debug*")) && scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
 			}
 			reset()
@@ -322,7 +322,7 @@ func process() {
 			goto top
 		default:
 			_, _ = fmt.Fprintf(scope.Get(slip.Symbol(stdOutput)).(io.Writer), "%s%v%s\n", warnPrefix, tr, suffix)
-			if scope.Get("*repl-debug*") != nil {
+			if scope.Has(slip.Symbol("*repl-debug*")) && scope.Get("*repl-debug*") != nil {
 				debug.PrintStack()
 			}
 			reset()
