@@ -102,5 +102,7 @@ func (f *CryptoHash) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 			":sha512-256",
 		)
 	}
-	return slip.Octets(h.New().Sum(data))
+	hasher := h.New()
+	_, _ = hasher.Write(data)
+	return slip.Octets(hasher.Sum(nil))
 }
