@@ -12,84 +12,99 @@ import (
 func TestCryptoHashMD5(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :md5))`,
-		Expect: `"c29tZSBkYXRh1B2M2Y8AsgTpgAmY7PhCfg=="`,
+		Expect: `"HlAhCgICSX+3m8OLat5sNA=="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA1(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha1))`,
-		Expect: `"c29tZSBkYXRh2jmj7l5rSw0yVb/vlWAYkK/YBwk="`,
+		Expect: `"uvNFUf7LSKzD2oaOuF4bbayd41Y="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA224(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha224))`,
-		Expect: `"c29tZSBkYXRh0UoCjCo6K8lHYQK7KII0xBWisB+CjqYqxbPkLw=="`,
+		Expect: `"mzpf7INPIMYQQDeCAkrBnrLH/shTfOjoiMGSCw=="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA256(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha256))`,
-		Expect: `"c29tZSBkYXRh47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU="`,
+		Expect: `"EweZDmulyhRes16ZGCqb7EZTG8VN32VqYCx4D6AkDe4="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA384(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha384))`,
-		Expect: `"c29tZSBkYXRhOLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb"`,
+		Expect: `"qcYaFi9LVypj5rDitFrvRztzAn1ZBVWWakwJGFg3/3KhAZHBNuw/RhTXkU0dqCPw"`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA512(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha512))`,
-		Expect: `"c29tZSBkYXRhz4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="`,
+		Expect: `"4WRedJLwMvtixnTbdVAL57Jgv8DaqWWCHds/ikm10zeI7j8EZ0TiuVr7XD2PJQDFScqJ15/GiQiF0o4FUAdCTw=="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA3_224(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha3-224))`,
-		Expect: `"c29tZSBkYXRha04DQjZn27c7bhVFTw6xq9RZf5obB44/W1prxw=="`,
+		Expect: `"X9nfFY/X63N4kzMsXhmQbY0TUqaTLb8QwCALUw=="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA3_256(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha3-256))`,
-		Expect: `"c29tZSBkYXRhp//G+L8e12ZRwUdWoGHWYvWA/03kO0n6gtgKS4D4Q0o="`,
+		Expect: `"WTPpJzFmk0puuq9YFxB0R5MJp96EYHxFCwHCZbMIFxI="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA3_384(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha3-384))`,
-		Expect: `"c29tZSBkYXRhDGOnW4ReT30BEH2FLkwkhcUaUKqqlPxhmV5xu+6YOirDcTgxJkrbR/tr0eBY1fAE"`,
+		Expect: `"cg14BHysvF+5LmXT/OewHyFmsjqahDxRbdDO6EWIL3AubKVfgdtCINOgM/dmYur+"`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA3_512(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha3-512))`,
-		Expect: `"c29tZSBkYXRhpp9zzKI6msXItWfcGFp1bpfJghZP4lhZ4NHcwUdcgKYVshI68fX5TBHj6UAsOsVY9QAZnZW20+MBdYWGKB3NJg=="`,
+		Expect: `"I8jd37PveuXWQRqmY2PBaKP6PXYqqqPU0zomNJLRl+7CpBIpdNyVDXPmPyFi/iJnRD5FP2H4t/A39UJQCbvIKw=="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA512_224(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha512-224))`,
-		Expect: `"c29tZSBkYXRhbtDdAoBvqJ4l3gYMGdOshsq7h9ag3dBcMzuE9A=="`,
+		Expect: `"01QCWwgp/ozW7lT0Qdd4fk6kPjvomgVEvs+kgg=="`,
 	}).Test(t)
 }
 
 func TestCryptoHashSHA512_256(t *testing.T) {
 	(&sliptest.Function{
 		Source: `(base64-encode (crypto-hash "some data" :sha512-256))`,
-		Expect: `"c29tZSBkYXRhxnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno="`,
+		Expect: `"dgukJ16Engd3UH21jw10/AWzDhDMwnqZ1QRl9bZjkCY="`,
+	}).Test(t)
+}
+
+// FIPS 180-2 test vector: SHA-256("abc") = ba7816bf...f20015ad.
+func TestCryptoHashSHA256Vector(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(base64-encode (crypto-hash "abc" :sha256))`,
+		Expect: `"ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="`,
+	}).Test(t)
+}
+
+func TestCryptoHashOctets(t *testing.T) {
+	(&sliptest.Function{
+		Source: `(base64-encode (crypto-hash (coerce '(97 98 99) 'octets) :sha256))`,
+		Expect: `"ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="`,
 	}).Test(t)
 }
 
