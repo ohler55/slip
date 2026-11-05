@@ -599,6 +599,10 @@ func TestFormatE(t *testing.T) {
 		Source: `(format nil "~,4,2,-3@E" 12.345)`,
 		Expect: `"+0.0001e+05"`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(format nil "~,3E" 0.001)`,
+		Expect: `"1.000e-3"`,
+	}).Test(t)
 
 	(&sliptest.Function{
 		Source: `(format nil "~v3E" -4 12.345)`,
@@ -651,6 +655,11 @@ func TestFormatF(t *testing.T) {
 	}).Test(t)
 
 	(&sliptest.Function{
+		Source: `(format nil "~,3F" 0.001)`,
+		Expect: `"0.001"`,
+	}).Test(t)
+
+	(&sliptest.Function{
 		Source: `(format nil "~F" 'abc)`,
 		Expect: `"abc"`,
 	}).Test(t)
@@ -673,6 +682,11 @@ func TestFormatG(t *testing.T) {
 		Source: `(format nil "~10G" 1234e-8)`,
 		Expect: `"0.00001234"`,
 	}).Test(t)
+	(&sliptest.Function{
+		Source: `(format nil "~,3G" 0.001)`,
+		Expect: `"0.001"`,
+	}).Test(t)
+
 	(&sliptest.Function{
 		Source: `(format nil "~10G" 1234e-9)`,
 		Expect: `"  1.234e-6"`,

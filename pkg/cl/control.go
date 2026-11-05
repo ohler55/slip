@@ -903,9 +903,11 @@ func (c *control) getEFGarg(ff *floatFormatter) {
 		ff.exp = int(math.Floor(math.Log10(num)))
 		ff.digits = strconv.AppendFloat(nil, num, 'e', -1, 64)
 		ff.digits = ff.digits[:bytes.IndexByte(ff.digits, 'e')]
-		copy(ff.digits[1:], ff.digits[2:])
-		ff.digits = ff.digits[:len(ff.digits)-1]
-		ff.exp -= len(ff.digits) - 1
+		if 2 < len(ff.digits) {
+			copy(ff.digits[1:], ff.digits[2:])
+			ff.digits = ff.digits[:len(ff.digits)-1]
+			ff.exp -= len(ff.digits) - 1
+		}
 	default:
 		p := *slip.DefaultPrinter()
 		p.ScopedUpdate(c.scope)
