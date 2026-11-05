@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `crypto-hash` now returns the digest of the data. It was returning the data
   followed by the digest of empty input.
+- `format` now handles whole number with exponent without a panic.
 
 ## [1.6.1] - 2026-10-25
 ### Fixed
