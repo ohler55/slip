@@ -390,7 +390,7 @@ func CompileList(list List, listProvs ProvSet) (f Object) {
 					}
 				}
 			} else {
-				pkg, name, private := UnpackName(string(ta))
+				pkg, name, _ := UnpackName(string(ta))
 				if pkg == nil {
 					pkg = CurrentPackage
 				}
@@ -416,7 +416,7 @@ func CompileList(list List, listProvs ProvSet) (f Object) {
 				}
 				pkg.mu.Lock()
 				pkg.lambdas[name] = &lc
-				pkg.funcs[name] = &FuncInfo{Create: fc, Pkg: pkg, Export: !private}
+				pkg.funcs[name] = &FuncInfo{Create: fc, Pkg: pkg}
 				pkg.mu.Unlock()
 				f = fc(list[1:])
 				if coverage {
