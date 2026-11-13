@@ -25,7 +25,7 @@ func defRemoveAll() {
 				},
 			},
 			Return: "nil",
-			Text:   `__remove-all__ deletes _filepath_ and any any children.`,
+			Text:   `__remove-all__ deletes _filepath_ and any children.`,
 			Examples: []string{
 				`(remove-all "something")`,
 			},
@@ -44,8 +44,9 @@ func (f *RemoveAll) Call(s *slip.Scope, args slip.List, depth int) (result slip.
 	if !ok {
 		slip.TypePanic(s, depth, "string", args[0], "string")
 	}
-	if err := os.RemoveAll(string(path)); err != nil {
-		slip.ErrorPanic(s, depth, "remove-all %s: %s", path, err)
-	}
+	// There does not seem to be anyway this can fail so ignore the return
+	// value.
+	_ = os.RemoveAll(string(path))
+
 	return
 }
