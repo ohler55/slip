@@ -54,9 +54,6 @@ func TestLambdaFuncEval(t *testing.T) {
 	tt.SameType(t, slip.List{}, code[0])
 
 	tt.Equal(t, slip.Fixnum(1), code.Eval(scope, nil))
-
-	//tt.Equal(t, `/^\(#<function \(lambda \(x\)\) \{[0-9a-h]+\}> '\(1 2 3\)\)$/`, slip.ObjectString(code[0]))
-	//tt.SameType(t, &slip.Dynamic{}, code[0])
 }
 
 func TestLambdaClosure(t *testing.T) {

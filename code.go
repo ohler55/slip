@@ -10,7 +10,6 @@ import (
 	"math/big"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -1290,54 +1289,53 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 	listProvs.Sort()
 	allListProvs = append(allListProvs, listProvs...)
 	allListProvs.Sort()
-	return
 
-	scope := NewScope()
-	for _, obj := range c {
-		list, ok := obj.(List)
-		if !ok || len(list) == 0 {
-			continue
-		}
-		// var sym Symbol
-		switch tv := list[0].(type) {
-		case Symbol:
-			// sym = tv
-		case List:
-			if 0 < len(tv) {
-				if s2, ok2 := tv[0].(Symbol); ok2 {
-					if strings.EqualFold("lambda", string(s2)) {
-						break
-					}
-				}
-			}
-			ParsePanic(scope, 0, "%s is not a function", tv)
-		default:
-			ParsePanic(scope, 0, "%s is not a function", tv)
-		}
-		// var f Object
-		// switch strings.ToLower(string(sym)) {
-		// case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct", "defpackage", "in-package":
-		// 	f = ListToFuncWithProvenance(scope, list, 0, listProvs)
-		// 	c[i] = f
-		// }
-		// if f != nil {
-		// 	name := f.Eval(scope, 0)
-		// 	if newQuote == nil {
-		// 		newQuote = CLPkg.GetFunc("quote").Create
-		// 	}
-		// 	if string(sym) != "in-package" {
-		// 		c[i] = newQuote(List{name})
-		// 	}
-		// }
-	}
-	// Now convert lists to functions.
-	for i, obj := range c {
-		list, ok := obj.(List)
-		if !ok || len(list) == 0 {
-			continue
-		}
-		c[i] = CompileList(list, listProvs)
-	}
+	// scope := NewScope()
+	// for _, obj := range c {
+	// 	list, ok := obj.(List)
+	// 	if !ok || len(list) == 0 {
+	// 		continue
+	// 	}
+	// 	// var sym Symbol
+	// 	switch tv := list[0].(type) {
+	// 	case Symbol:
+	// 		// sym = tv
+	// 	case List:
+	// 		if 0 < len(tv) {
+	// 			if s2, ok2 := tv[0].(Symbol); ok2 {
+	// 				if strings.EqualFold("lambda", string(s2)) {
+	// 					break
+	// 				}
+	// 			}
+	// 		}
+	// 		ParsePanic(scope, 0, "%s is not a function", tv)
+	// 	default:
+	// 		ParsePanic(scope, 0, "%s is not a function", tv)
+	// 	}
+	// 	// var f Object
+	// 	// switch strings.ToLower(string(sym)) {
+	// 	// case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct", "defpackage", "in-package":
+	// 	// 	f = ListToFuncWithProvenance(scope, list, 0, listProvs)
+	// 	// 	c[i] = f
+	// 	// }
+	// 	// if f != nil {
+	// 	// 	name := f.Eval(scope, 0)
+	// 	// 	if newQuote == nil {
+	// 	// 		newQuote = CLPkg.GetFunc("quote").Create
+	// 	// 	}
+	// 	// 	if string(sym) != "in-package" {
+	// 	// 		c[i] = newQuote(List{name})
+	// 	// 	}
+	// 	// }
+	// }
+	// // Now convert lists to functions.
+	// for i, obj := range c {
+	// 	list, ok := obj.(List)
+	// 	if !ok || len(list) == 0 {
+	// 		continue
+	// 	}
+	// 	c[i] = CompileList(list, listProvs)
+	// }
 	// c.Eval(scope, nil)
 }
 
