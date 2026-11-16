@@ -20,13 +20,17 @@ func SetCompileScript(s *slip.Scope) {
 	if s == nil {
 		s = slip.NewScope()
 	}
-	jp.CompileScript = func(code []byte) jp.Procedure {
-		obj := slip.Compile(code, s).(any)
+	jp.CompileScript = func(code []byte) (proc jp.Procedure) {
+		c := slip.Read(code, s)
 		var (
+			obj    any
 			doc    *slip.FuncDoc
 			caller slip.Caller
 			rest   bool
 		)
+		if 0 < len(c) {
+			obj = slip.CompileList(c[0].(slip.List), nil)
+		}
 	top:
 		switch to := obj.(type) {
 		case *slip.Dynamic:
@@ -39,17 +43,20 @@ func SetCompileScript(s *slip.Scope) {
 			caller = to.Caller()
 			doc = slip.CurrentPackage.GetFunc(to.GetName()).Doc
 		}
-		for _, fa := range doc.Args {
-			if fa.Name == "&rest" {
-				rest = true
-				break
+		if doc != nil {
+			for _, fa := range doc.Args {
+				if fa.Name == "&rest" {
+					rest = true
+					break
+				}
+			}
+			proc = &Procedure{
+				scope:  s,
+				caller: caller,
+				rest:   rest,
 			}
 		}
-		return &Procedure{
-			scope:  s,
-			caller: caller,
-			rest:   rest,
-		}
+		return
 	}
 }
 

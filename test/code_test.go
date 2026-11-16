@@ -406,6 +406,10 @@ func TestCodeCompile(t *testing.T) {
 
 	code = slip.ReadString("(defvar code-compile-test 5)", scope)
 	code.Compile()
+
+	quux := code.Eval(scope, nil)
+	fmt.Printf("*** %s\n", quux)
+
 	val, has := slip.CurrentPackage.Get("code-compile-test")
 	tt.Equal(t, slip.Fixnum(5), val)
 	tt.Equal(t, true, has)

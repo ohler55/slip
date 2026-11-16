@@ -24,8 +24,8 @@ func TestFunctionLambda(t *testing.T) {
 func TestFunctionSharpQuote(t *testing.T) {
 	scope := slip.NewScope()
 	code := slip.ReadString("#'car", scope)
-	tt.Equal(t, "#<built-in car>", slip.ObjectString(code.Eval(scope, nil)))
 	tt.Equal(t, "#'car", slip.ObjectString(code[0]))
+	tt.Equal(t, "#<built-in car>", slip.ObjectString(code.Eval(scope, nil)))
 }
 
 func TestFunctionArgCount(t *testing.T) {

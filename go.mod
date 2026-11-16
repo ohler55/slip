@@ -8,3 +8,5 @@ require (
 	golang.org/x/term v0.47.0
 	golang.org/x/text v0.43.0
 )
+
+replace github.com/ohler55/ojg => ../ojg

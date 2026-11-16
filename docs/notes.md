@@ -2,7 +2,31 @@
 
 - **multipass** or utm for linux
 
+- code - read compile
+ - read as symbols, lists, etc
+ - convert list to functions
+  - how to deal with macros that evaluate later?
+ - evaluate
+  - could or should this be done in compile stage? - no, need to look forward to future defuns in file
+ - build test for tracing various bits of code
+  - verify each phase
+ - for dummy func, have to figure out what package it was in
+  - without a package in the func name maybe a any package place holder
+ - for all functions create a place holder with no package
+  - resolve to package dummy on eval
+   - what about functions that change packages?
+ - two phases
+  - read to lists of symbols and primitives
+  - eval
+   - for defun leave body as list of symbols until called
+    - for symbols, if func, add dummy to current package
+  -  sbcl can not call func before defined in a file
+  - with compile a no op, what about provenance?
+
 - bugs
+ - read with in-package has order problem
+  - read without any eval to create code
+  -
  - package private
  - make sure defparameter can be exported
  - bugs dir

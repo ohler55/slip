@@ -2,7 +2,7 @@
 
 package slip
 
-// Tail is used to indicate the []Object is sons and not a list. The
+// Tail is used to indicate the []Object is cons and not a list. The
 // difference between a list and a cons in LISP is that the cdr of the last
 // cons cell in a list is nil while if the last cdr in a list is a value then
 // the list is actually a cons.

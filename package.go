@@ -217,6 +217,9 @@ func (obj *Package) Use(pkg *Package) {
 			obj.funcs = map[string]*FuncInfo{}
 		}
 		for name, fi := range pkg.funcs {
+			if _, has := obj.funcs[name]; has {
+				continue
+			}
 			if fi.Export {
 				obj.funcs[name] = fi
 			}
@@ -492,7 +495,7 @@ func (obj *Package) Define(creator func(args List) Object, doc *FuncDoc, aux ...
 	if obj.funcs == nil {
 		obj.funcs = map[string]*FuncInfo{}
 	}
-	if _, has := obj.funcs[name]; has {
+	if xfi, has := obj.funcs[name]; has && !xfi.unbound {
 		Warn("redefining %s", printer.caseName(name))
 	}
 	obj.funcs[name] = &fi

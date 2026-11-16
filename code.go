@@ -578,8 +578,13 @@ func Compile(src []byte, s *Scope) (result Object) {
 	cr.read(src)
 
 	cr.code.Compile()
+	cr.code.Eval(s, nil)
+	// TBD Eval
 	if 0 < len(cr.code) {
 		result = cr.code[len(cr.code)-1]
+		if ev, ok := result.(evalue); ok {
+			result = ev.value
+		}
 	}
 	return
 }
@@ -1285,17 +1290,18 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 	listProvs.Sort()
 	allListProvs = append(allListProvs, listProvs...)
 	allListProvs.Sort()
+	return
 
 	scope := NewScope()
-	for i, obj := range c {
+	for _, obj := range c {
 		list, ok := obj.(List)
 		if !ok || len(list) == 0 {
 			continue
 		}
-		var sym Symbol
+		// var sym Symbol
 		switch tv := list[0].(type) {
 		case Symbol:
-			sym = tv
+			// sym = tv
 		case List:
 			if 0 < len(tv) {
 				if s2, ok2 := tv[0].(Symbol); ok2 {
@@ -1308,21 +1314,21 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		default:
 			ParsePanic(scope, 0, "%s is not a function", tv)
 		}
-		var f Object
-		switch strings.ToLower(string(sym)) {
-		case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct", "defpackage", "in-package":
-			f = ListToFuncWithProvenance(scope, list, 0, listProvs)
-			c[i] = f
-		}
-		if f != nil {
-			name := f.Eval(scope, 0)
-			if newQuote == nil {
-				newQuote = CLPkg.GetFunc("quote").Create
-			}
-			if string(sym) != "in-package" {
-				c[i] = newQuote(List{name})
-			}
-		}
+		// var f Object
+		// switch strings.ToLower(string(sym)) {
+		// case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct", "defpackage", "in-package":
+		// 	f = ListToFuncWithProvenance(scope, list, 0, listProvs)
+		// 	c[i] = f
+		// }
+		// if f != nil {
+		// 	name := f.Eval(scope, 0)
+		// 	if newQuote == nil {
+		// 		newQuote = CLPkg.GetFunc("quote").Create
+		// 	}
+		// 	if string(sym) != "in-package" {
+		// 		c[i] = newQuote(List{name})
+		// 	}
+		// }
 	}
 	// Now convert lists to functions.
 	for i, obj := range c {
@@ -1332,6 +1338,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		}
 		c[i] = CompileList(list, listProvs)
 	}
+	// c.Eval(scope, nil)
 }
 
 // Eval all code elements and return the value of the last evaluation.
@@ -1358,6 +1365,11 @@ func (c Code) Eval(scope *Scope, w io.Writer) (result Object) {
 			}
 		}
 	}
+	for i := range c {
+		c[i] = nil
+	}
+	c[len(c)-1] = evalue{value: result}
+
 	return
 }
 
@@ -1368,4 +1380,24 @@ func (r *reader) makeToken(src []byte) []byte {
 	r.carry = r.carry[:0]
 
 	return token
+}
+
+func inspectObj(obj Object) {
+	if lst, ok := obj.(List); ok {
+		fmt.Print("(")
+		for _, o2 := range lst {
+			inspectObj(o2)
+		}
+		fmt.Print(")")
+	} else {
+		fmt.Printf("%s <%T> ", obj, obj)
+	}
+}
+
+func (c Code) Inspect(label string) {
+	fmt.Printf("*** %s\n", label)
+	for _, obj := range c {
+		inspectObj(obj)
+		fmt.Println()
+	}
 }

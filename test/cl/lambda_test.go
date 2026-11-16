@@ -47,10 +47,16 @@ func TestLambdaFuncEval(t *testing.T) {
 	tt.Equal(t, slip.Fixnum(1), result)
 
 	code := slip.ReadString("((lambda (x) (car x)) '(1 2 3))", scope)
-	code.Compile()
+	code.Compile() // TBD Does nothing, remove
+
 	tt.Equal(t, 1, len(code))
-	tt.Equal(t, `/^\(#<function \(lambda \(x\)\) \{[0-9a-h]+\}> '\(1 2 3\)\)$/`, slip.ObjectString(code[0]))
-	tt.SameType(t, &slip.Dynamic{}, code[0])
+	tt.Equal(t, "((lambda (x) (car x)) '(1 2 3))", slip.ObjectString(code[0]))
+	tt.SameType(t, slip.List{}, code[0])
+
+	tt.Equal(t, slip.Fixnum(1), code.Eval(scope, nil))
+
+	//tt.Equal(t, `/^\(#<function \(lambda \(x\)\) \{[0-9a-h]+\}> '\(1 2 3\)\)$/`, slip.ObjectString(code[0]))
+	//tt.SameType(t, &slip.Dynamic{}, code[0])
 }
 
 func TestLambdaClosure(t *testing.T) {
