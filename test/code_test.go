@@ -395,10 +395,10 @@ func TestCodeBackquote(t *testing.T) {
 func TestCodeCompile(t *testing.T) {
 	scope := slip.NewScope()
 	code := slip.ReadString("(5)", scope)
-	tt.Panic(t, func() { code.Compile() })
+	tt.Panic(t, func() { code.Eval(scope, nil) })
 
 	code = slip.ReadString("((x))", scope)
-	tt.Panic(t, func() { code.Compile() })
+	tt.Panic(t, func() { code.Eval(scope, nil) })
 
 	code = slip.ReadString("((lambda () nil))", scope)
 	code.Compile()
