@@ -392,7 +392,7 @@ func TestCodeBackquote(t *testing.T) {
 	}
 }
 
-func TestCodeCompile(t *testing.T) {
+func TestCodeEval(t *testing.T) {
 	scope := slip.NewScope()
 	code := slip.ReadString("(5)", scope)
 	tt.Panic(t, func() { code.Eval(scope, nil) })
@@ -401,14 +401,11 @@ func TestCodeCompile(t *testing.T) {
 	tt.Panic(t, func() { code.Eval(scope, nil) })
 
 	code = slip.ReadString("((lambda () nil))", scope)
-	code.Compile()
-	tt.SameType(t, &slip.Dynamic{}, code[0])
+	tt.Equal(t, nil, code.Eval(scope, nil))
 
 	code = slip.ReadString("(defvar code-compile-test 5)", scope)
-	code.Compile()
-
 	quux := code.Eval(scope, nil)
-	fmt.Printf("*** %s\n", quux)
+	tt.Equal(t, slip.Symbol("code-compile-test"), quux)
 
 	val, has := slip.CurrentPackage.Get("code-compile-test")
 	tt.Equal(t, slip.Fixnum(5), val)

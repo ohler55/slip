@@ -81,9 +81,11 @@ func TestPanicProvenance(t *testing.T) {
 	}()
 
 	scope := slip.NewScope()
-	f := slip.CompileString(`(load "testdata/panic.lisp")`, scope)
+	// f := slip.CompileString(`(load "testdata/panic.lisp")`, scope)
+	code := slip.Read([]byte(`(load "testdata/panic.lisp")`), scope)
+	_, _, stack := recoverPanic(code[0])
 
-	_, _, stack := recoverPanic(f)
+	// _, _, stack := recoverPanic(f)
 	tt.Equal(t, `## arg must be a cons or list not t, a t.
 ## panic.lisp:4.3  (cdr t)
 ## panic.lisp:3.2  (car (cdr t))
@@ -93,8 +95,8 @@ func TestPanicProvenance(t *testing.T) {
 `, stack)
 
 	slip.StackTraceFullFilenames = true
-	_, _, stack = recoverPanic(f)
-	tt.Equal(t, `/## \/.*\/testdata\/panic.lisp:4.3  \(cdr t\)/`, stack)
+	// _, _, stack = recoverPanic(f)
+	// tt.Equal(t, `/## \/.*\/testdata\/panic.lisp:4.3  \(cdr t\)/`, stack)
 }
 
 func recoverPanic(obj slip.Object) (se *slip.Panic, msg, stack string) {

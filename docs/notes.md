@@ -3,6 +3,16 @@
 - **multipass** or utm for linux
 
 - code - read compile
+ - maybe change code.Compile, slip.CompileString to force convertions like CompileList, old way
+  - caviat about not evaluated so funcs like in-package will not fire
+ - leave compile alone and comment with caveat
+  - suggest read then eval, no compile
+  - verify provenance is working with just read-eval [it works]
+
+ - new branch
+  - set Kind in defstruct and others
+  - no need for code eval to be able to be called twice
+
  - read as symbols, lists, etc
  - convert list to functions
   - how to deal with macros that evaluate later?

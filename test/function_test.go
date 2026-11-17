@@ -22,8 +22,8 @@ func TestFunctionNew(t *testing.T) {
 	sliptest.LoadForm(t, f)
 
 	code := slip.ReadString(`(car '(1 2))`, slip.NewScope())
-	code.Compile()
-	f = code[0].(slip.Funky)
+	f = slip.CompileList(code[0].(slip.List), nil).(slip.Funky)
+
 	sliptest.LoadForm(t, f)
 }
 
