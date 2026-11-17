@@ -76,9 +76,10 @@ func (f *Defstruct) Call(s *slip.Scope, args slip.List, depth int) slip.Object {
 	d2 := depth + 1
 
 	// Parse name-and-options
-	var name string
-	var options slip.List
-
+	var (
+		name    string
+		options slip.List
+	)
 	switch na := args[0].(type) {
 	case slip.Symbol:
 		name = string(na)
@@ -396,6 +397,7 @@ func generatePredicate(sc *StructureClass) {
 				{Name: "object", Type: "t", Text: "Object to test."},
 			},
 			Return: "boolean",
+			Kind:   slip.FunctionSymbol,
 			Text:   fmt.Sprintf("Returns t if object is a %s structure.", structName),
 		},
 	)
@@ -433,7 +435,7 @@ func generateKeywordConstructor(sc *StructureClass, name string) {
 		})
 	}
 
-	slip.CurrentPackage.Define(
+	_ = slip.CurrentPackage.Define(
 		func(args slip.List) slip.Object {
 			f := structConstructor{
 				Function:    slip.Function{Name: name, Args: args},
@@ -446,6 +448,7 @@ func generateKeywordConstructor(sc *StructureClass, name string) {
 			Name:   name,
 			Args:   docArgs,
 			Return: sc.name,
+			Kind:   slip.FunctionSymbol,
 			Text:   fmt.Sprintf("Creates a new %s structure.", sc.name),
 		},
 	)
@@ -503,6 +506,7 @@ func generateCopier(sc *StructureClass) {
 				{Name: "structure", Type: structName, Text: "Structure to copy."},
 			},
 			Return: structName,
+			Kind:   slip.FunctionSymbol,
 			Text:   fmt.Sprintf("Creates a shallow copy of a %s structure.", structName),
 		},
 	)
@@ -578,6 +582,7 @@ func generateTypedPredicate(sc *StructureClass) {
 				Name:   name,
 				Args:   []*slip.DocArg{{Name: "object", Type: "t"}},
 				Return: "boolean",
+				Kind:   slip.FunctionSymbol,
 				Text:   fmt.Sprintf("Returns t if object is a %s structure.", sc.name),
 			},
 		)
@@ -595,6 +600,7 @@ func generateTypedPredicate(sc *StructureClass) {
 				Name:   name,
 				Args:   []*slip.DocArg{{Name: "object", Type: "t"}},
 				Return: "boolean",
+				Kind:   slip.FunctionSymbol,
 				Text:   fmt.Sprintf("Returns t if object is a %s structure.", sc.name),
 			},
 		)
@@ -656,6 +662,7 @@ func generateTypedKeywordConstructor(sc *StructureClass, name string, offset int
 		&slip.FuncDoc{
 			Name:   name,
 			Return: string(repType),
+			Kind:   slip.FunctionSymbol,
 			Text:   fmt.Sprintf("Creates a new %s structure as a %s.", structName, repType),
 		},
 	)
@@ -743,6 +750,7 @@ func generateTypedCopier(sc *StructureClass) {
 		&slip.FuncDoc{
 			Name:   name,
 			Return: string(repType),
+			Kind:   slip.FunctionSymbol,
 			Text:   "Creates a shallow copy of the structure.",
 		},
 	)
@@ -794,6 +802,7 @@ func generateTypedAccessor(sc *StructureClass, slot *StructureSlot, actualIndex 
 			&slip.FuncDoc{
 				Name:   name,
 				Return: "t",
+				Kind:   slip.FunctionSymbol,
 				Text:   fmt.Sprintf("Returns the %s slot.", slot.name),
 			},
 		)
@@ -811,6 +820,7 @@ func generateTypedAccessor(sc *StructureClass, slot *StructureSlot, actualIndex 
 			&slip.FuncDoc{
 				Name:   name,
 				Return: "t",
+				Kind:   slip.FunctionSymbol,
 				Text:   fmt.Sprintf("Returns the %s slot.", slot.name),
 			},
 		)
@@ -895,6 +905,7 @@ func generateBOAConstructor(s *slip.Scope, sc *StructureClass, name string, boaL
 		&slip.FuncDoc{
 			Name:   name,
 			Return: sc.name,
+			Kind:   slip.FunctionSymbol,
 			Text:   fmt.Sprintf("Creates a new %s structure using positional arguments.", sc.name),
 		},
 	)
@@ -1073,6 +1084,7 @@ func generateTypedBOAConstructor(s *slip.Scope, sc *StructureClass, name string,
 		&slip.FuncDoc{
 			Name:   name,
 			Return: string(repType),
+			Kind:   slip.FunctionSymbol,
 			Text:   fmt.Sprintf("Creates a new %s structure using positional arguments.", structName),
 		},
 	)
