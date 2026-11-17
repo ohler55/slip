@@ -416,7 +416,7 @@ func CompileList(list List, listProvs ProvSet) (f Object) {
 				}
 				pkg.mu.Lock()
 				pkg.lambdas[name] = &lc
-				pkg.funcs[name] = &FuncInfo{Create: fc, Pkg: pkg}
+				pkg.funcs[name] = &FuncInfo{Create: fc, Pkg: pkg, unbound: true}
 				pkg.mu.Unlock()
 				f = fc(list[1:])
 				if coverage {

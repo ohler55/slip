@@ -8,13 +8,14 @@ import (
 
 // FuncInfo stores information about a function.
 type FuncInfo struct {
-	Name   string
-	Create func(args List) Object
-	Doc    *FuncDoc
-	Pkg    *Package // package interned in
-	Kind   Symbol
-	Aux    any
-	Export bool
+	Name    string
+	Create  func(args List) Object
+	Doc     *FuncDoc
+	Pkg     *Package // package interned in
+	Kind    Symbol
+	Aux     any
+	Export  bool
+	unbound bool
 }
 
 // String representation of the Object.
