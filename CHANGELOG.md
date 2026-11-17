@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- The `princ` function no longer quotes an empty string.
+- Panics when in a package that does not include *repl-debug* no longer exits.
 - `crypto-hash` now returns the digest of the data. It was returning the data
   followed by the digest of empty input.
 - `format` now handles whole number with exponent without a panic.

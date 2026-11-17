@@ -63,7 +63,7 @@ func (f *Princ) Call(s *slip.Scope, args slip.List, depth int) (result slip.Obje
 		}
 	}
 	var err error
-	if ss, _ := obj.(slip.String); 0 < len(ss) {
+	if ss, ok := obj.(slip.String); ok {
 		_, err = w.Write([]byte(ss))
 	} else {
 		var b []byte
