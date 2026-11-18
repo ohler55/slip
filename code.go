@@ -584,6 +584,18 @@ func Compile(src []byte, s *Scope) (result Object) {
 	return
 }
 
+// ReadEval a Lisp source code and return the result of the evaluation.
+func ReadEval(src []byte, s *Scope) Object {
+	cr := reader{
+		mode:     valueMode,
+		nextMode: valueMode,
+	}
+	cr.scoped(s)
+	cr.read(src)
+
+	return cr.code.Eval(s, nil)
+}
+
 func (r *reader) runeAppendByte(b byte) {
 	r.rn = r.rn<<4 | rune(b)
 	r.rcnt--

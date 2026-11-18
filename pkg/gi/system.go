@@ -3,6 +3,7 @@
 package gi
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -510,7 +511,9 @@ func loadFile(s *slip.Scope, self *flavors.Instance, path string) (result slip.O
 	self.Set(slip.Symbol("*load-truename*"), slip.String(path))
 	if buf, err := os.ReadFile(path); err == nil {
 		code, listProvs := slip.ReadProv(buf, s, absPath(path), nil)
-		code.CompileWithProvenance(listProvs)
+		// code.CompileWithProvenance(listProvs)
+		// TBD use listProvs or are they already in the globals?
+		fmt.Printf("*** %d\n", len(listProvs))
 		result = code.Eval(&self.Scope, nil)
 	} else {
 		panic(err)
