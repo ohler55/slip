@@ -585,14 +585,19 @@ func Compile(src []byte, s *Scope) (result Object) {
 }
 
 // ReadEval a Lisp source code and return the result of the evaluation.
-func ReadEval(src []byte, s *Scope) Object {
+func ReadEval(src []byte, s *Scope, filepath string) Object {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
+		filepath: filepath,
 	}
 	cr.scoped(s)
 	cr.read(src)
-
+	if Provenance && 0 < len(cr.listProvs) {
+		cr.listProvs.Sort()
+		allListProvs = append(allListProvs, cr.listProvs...)
+		allListProvs.Sort()
+	}
 	return cr.code.Eval(s, nil)
 }
 

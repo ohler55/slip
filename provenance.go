@@ -9,6 +9,8 @@ import (
 	"github.com/ohler55/ojg/pretty"
 )
 
+// Provenance when true will collect provenance information on list and
+// functions.
 var Provenance = false
 
 var allListProvs ProvSet
