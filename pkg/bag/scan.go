@@ -26,7 +26,7 @@ func init() {
 				{
 					Name: "function",
 					Type: "function",
-					Text: "The function to call for each node with then path and value at that node.",
+					Text: "The function to call for each node with the path and value at that node.",
 				},
 				{Name: "&key"},
 				{
