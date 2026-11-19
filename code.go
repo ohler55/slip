@@ -585,11 +585,13 @@ func Compile(src []byte, s *Scope) (result Object) {
 }
 
 // ReadEval a Lisp source code and return the result of the evaluation.
-func ReadEval(src []byte, s *Scope, filepath string) Object {
+func ReadEval(src []byte, s *Scope, filepath ...string) Object {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
-		filepath: filepath,
+	}
+	if 0 < len(filepath) {
+		cr.filepath = filepath[0]
 	}
 	cr.scoped(s)
 	cr.read(src)
@@ -599,6 +601,11 @@ func ReadEval(src []byte, s *Scope, filepath string) Object {
 		allListProvs.Sort()
 	}
 	return cr.code.Eval(s, nil)
+}
+
+// ReadEvalString a Lisp source code and return the result of the evaluation.
+func ReadEvalString(src string, s *Scope, filepath ...string) Object {
+	return ReadEval([]byte(src), s, filepath...)
 }
 
 func (r *reader) runeAppendByte(b byte) {

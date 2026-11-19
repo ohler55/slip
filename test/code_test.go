@@ -409,8 +409,17 @@ func TestCodeCompile(t *testing.T) {
 	val, has := slip.CurrentPackage.Get("code-compile-test")
 	tt.Equal(t, slip.Fixnum(5), val)
 	tt.Equal(t, true, has)
+}
 
-	// TBD defparameter
+func TestCodeReadEval(t *testing.T) {
+	scope := slip.NewScope()
+	tt.Panic(t, func() { slip.ReadEvalString("(5)", scope) })
+	tt.Panic(t, func() { slip.ReadEvalString("((x))", scope) })
+
+	_ = slip.ReadEvalString("(defvar code-compile-test 5)", scope)
+	val, has := slip.CurrentPackage.Get("code-compile-test")
+	tt.Equal(t, slip.Fixnum(5), val)
+	tt.Equal(t, true, has)
 }
 
 func TestCodeStringer(t *testing.T) {

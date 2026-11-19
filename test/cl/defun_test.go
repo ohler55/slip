@@ -22,64 +22,63 @@ func TestDefunBasic(t *testing.T) {
 
 func TestDefunJustString(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defun funny-hello () "hello")
 (funny-hello)`, scope)
-	tt.Equal(t, slip.String("hello"), code.Eval(scope, nil))
+	tt.Equal(t, slip.String("hello"), result)
 }
 
 func TestDefunDefaultArgValue(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defun funny2 (&optional (x 3)) x)
 (funny2 7)`, scope)
-	tt.Equal(t, slip.Fixnum(7), code.Eval(scope, nil))
-	tt.Equal(t, slip.Fixnum(3), slip.ReadString("(funny2)", scope).Eval(scope, nil))
+	tt.Equal(t, slip.Fixnum(7), result)
+	tt.Equal(t, slip.Fixnum(3), slip.ReadEvalString("(funny2)", scope))
 }
 
 func TestDefunDefaultArgNilValue(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defun funny3 (&optional (x nil)) x)
 (funny3 7)`, scope)
-	tt.Equal(t, slip.Fixnum(7), code.Eval(scope, nil))
-	tt.Equal(t, nil, slip.ReadString("(funny3)", scope).Eval(scope, nil))
+	tt.Equal(t, slip.Fixnum(7), result)
+	tt.Equal(t, nil, slip.ReadEvalString("(funny3)", scope))
 }
 
 func TestDefunRest(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defun the-rest (&rest args) args)
 (the-rest 1 2 3)`, scope)
-	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}, code.Eval(scope, nil))
+	tt.Equal(t, slip.List{slip.Fixnum(1), slip.Fixnum(2), slip.Fixnum(3)}, result)
 }
 
 func TestDefunKey(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defun key-rest (&key kee) kee)
 (key-rest :kee 1)`, scope)
-	tt.Equal(t, slip.Fixnum(1), code.Eval(scope, nil))
+	tt.Equal(t, slip.Fixnum(1), result)
 }
 
 func TestDefunPre(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defun aaa () (bbb))
 (defun bbb () 7)
 (aaa)`, scope)
-	code.Compile()
-	tt.Equal(t, slip.Fixnum(7), code.Eval(scope, nil))
+	tt.Equal(t, slip.Fixnum(7), result)
 }
 
 func TestDefunClosure(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (let ((x 7))
  (defun clo () x))
 (clo)
 `, scope)
-	tt.Equal(t, slip.Fixnum(7), code.Eval(scope, nil))
+	tt.Equal(t, slip.Fixnum(7), result)
 }
 
 func TestDefunBadName(t *testing.T) {
