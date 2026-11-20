@@ -12,12 +12,12 @@ import (
 
 func TestDefunBasic(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defun funny (x)
   "Documentation here"
   x)
 (funny 7)`, scope)
-	tt.Equal(t, slip.Fixnum(7), code.Eval(scope, nil))
+	tt.Equal(t, slip.Fixnum(7), result)
 }
 
 func TestDefunJustString(t *testing.T) {
@@ -83,53 +83,54 @@ func TestDefunClosure(t *testing.T) {
 
 func TestDefunBadName(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { _ = slip.ReadString("(defun t () nil)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defun t () nil)", scope) })
 }
 
 func TestDefunBadLambdaList(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { _ = slip.ReadString("(defun bad t nil)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defun bad t nil)", scope) })
 }
 
 func TestDefunBadLambdaListArg(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { _ = slip.ReadString("(defun bad ((x)) nil)", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defun bad ((t 0)) nil)", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defun bad (t) nil)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defun bad ((x)) nil)", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defun bad ((t 0)) nil)", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defun bad (t) nil)", scope) })
 }
 
 func TestDefunAgain(t *testing.T) {
 	var out bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let("*error-output*", &slip.OutputStream{Writer: &out})
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defun again () 3)
 (defun again () 7)
 (again)`, scope)
-	tt.Equal(t, slip.Fixnum(7), code.Eval(scope, nil))
+	tt.Equal(t, slip.Fixnum(7), result)
 	tt.Equal(t, "WARNING: redefining common-lisp-user:again in defun\n", out.String())
 }
 
 func TestDefunTooManyArgs(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	tt.Panic(t, func() {
+		_ = slip.ReadEvalString(`
 (defun too-many () 3)
 (too-many 7)`, scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	})
 }
 
 func TestDefunTooFewArgs(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	tt.Panic(t, func() {
+		_ = slip.ReadEvalString(`
 (defun too-few (x) x)
 (too-few)`, scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	})
 }
 
 func TestDefunLocked(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(defun setq () nil)", scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defun setq () nil)", scope) })
 }
 
 func TestDefunInternal(t *testing.T) {
@@ -139,16 +140,16 @@ func TestDefunInternal(t *testing.T) {
 		slip.RemovePackage(slip.FindPackage("internal-test"))
 		scope.Set("*package*", orig)
 	}()
-	_ = slip.ReadString(`(defpackage 'internal-test (:use "cl"))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(in-package 'internal-test)`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(defun child-fun () 7)`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(defun parent-fun () (1+ (child-fun)))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(export 'parent-fun)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(defpackage 'internal-test (:use "cl"))`, scope)
+	_ = slip.ReadEvalString(`(in-package 'internal-test)`, scope)
+	_ = slip.ReadEvalString(`(defun child-fun () 7)`, scope)
+	_ = slip.ReadEvalString(`(defun parent-fun () (1+ (child-fun)))`, scope)
+	_ = slip.ReadEvalString(`(export 'parent-fun)`, scope)
 
-	result := slip.ReadString(`(parent-fun)`, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(`(parent-fun)`, scope)
 	tt.Equal(t, slip.Fixnum(8), result)
 
-	_ = slip.ReadString(`(in-package 'cl)`, scope).Eval(scope, nil)
-	result = slip.ReadString(`(internal-test:parent-fun)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(in-package 'cl)`, scope)
+	result = slip.ReadEvalString(`(internal-test:parent-fun)`, scope)
 	tt.Equal(t, slip.Fixnum(8), result)
 }

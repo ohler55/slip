@@ -12,8 +12,8 @@ import (
 
 func TestBagHasStringPath(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -30,8 +30,8 @@ func TestBagHasStringPath(t *testing.T) {
 
 func TestBagHasBagPath(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-has bag (make-bag-path "a"))`,
@@ -41,8 +41,8 @@ func TestBagHasBagPath(t *testing.T) {
 
 func TestBagHasArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-has bag)`,
@@ -52,8 +52,8 @@ func TestBagHasArgCount(t *testing.T) {
 
 func TestBagHasBadPath(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-has bag t)`,

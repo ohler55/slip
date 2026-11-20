@@ -14,8 +14,8 @@ import (
 
 func TestBagRemoveStringPath(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7 b:8}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7 b:8}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-remove bag "a")`,
@@ -26,8 +26,8 @@ func TestBagRemoveStringPath(t *testing.T) {
 
 func TestBagRemovePath(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7 b:8}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7 b:8}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-remove bag (make-bag-path "$.a"))`,
@@ -38,8 +38,8 @@ func TestBagRemovePath(t *testing.T) {
 
 func TestBagRemoveNoPath(t *testing.T) {
 	scope := slip.NewScope()
-	obj := slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7 b:8}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7 b:8}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-remove bag)`,
@@ -50,8 +50,8 @@ func TestBagRemoveNoPath(t *testing.T) {
 
 func TestBagRemoveBadPath(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7 b:8}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7 b:8}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-remove bag t)`,
