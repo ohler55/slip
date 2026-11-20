@@ -74,12 +74,12 @@ func TestDefpackageExport(t *testing.T) {
 			fi := slip.FindFunc("fun1", p)
 			tt.Nil(t, fi)
 
-			_ = slip.ReadString("(defvar defpack-test-6::v2 3)", scope).Eval(scope, nil)
+			_ = slip.ReadEvalString("(defvar defpack-test-6::v2 3)", scope)
 			vv = p.GetVarVal("v2")
 			tt.NotNil(t, vv)
 			tt.Equal(t, slip.Fixnum(3), vv.Val)
 
-			_ = slip.ReadString("(defun defpack-test-6::fun1 () 7)", scope).Eval(scope, nil)
+			_ = slip.ReadEvalString("(defun defpack-test-6::fun1 () 7)", scope)
 			vv = p.GetVarVal("fun1")
 			tt.Nil(t, vv)
 			fi = slip.FindFunc("fun1", p)

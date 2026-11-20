@@ -494,7 +494,7 @@ func TestDefstructTypeVectorElement(t *testing.T) {
 
 func TestStructureClassString(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct strtest x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct strtest x)`, scope)
 	sc := cl.FindStructureClass("strtest")
 	tt.NotNil(t, sc)
 	str := sc.String()
@@ -503,7 +503,7 @@ func TestStructureClassString(t *testing.T) {
 
 func TestStructureClassAppend(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct apptest x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct apptest x)`, scope)
 	sc := cl.FindStructureClass("apptest")
 	b := sc.Append([]byte("prefix:"))
 	tt.Equal(t, "prefix:#<structure-class apptest>", string(b))
@@ -511,7 +511,7 @@ func TestStructureClassAppend(t *testing.T) {
 
 func TestStructureClassSimplify(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct simptest a b)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct simptest a b)`, scope)
 	sc := cl.FindStructureClass("simptest")
 	simp := sc.Simplify()
 	m, ok := simp.(map[string]any)
@@ -521,7 +521,7 @@ func TestStructureClassSimplify(t *testing.T) {
 
 func TestStructureClassEqual(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct eqtest x) (defstruct eqtest2 x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct eqtest x) (defstruct eqtest2 x)`, scope)
 	sc := cl.FindStructureClass("eqtest")
 	sc2 := cl.FindStructureClass("eqtest")  // Same class, different lookup
 	sc3 := cl.FindStructureClass("eqtest2") // Different class
@@ -532,7 +532,7 @@ func TestStructureClassEqual(t *testing.T) {
 
 func TestStructureClassHierarchy(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct hiertest x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct hiertest x)`, scope)
 	sc := cl.FindStructureClass("hiertest")
 	hier := sc.Hierarchy()
 	tt.Equal(t, 3, len(hier))
@@ -541,7 +541,7 @@ func TestStructureClassHierarchy(t *testing.T) {
 
 func TestStructureClassEval(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct evaltest x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct evaltest x)`, scope)
 	sc := cl.FindStructureClass("evaltest")
 	result := sc.Eval(scope, 0)
 	tt.Equal(t, sc, result)
@@ -549,7 +549,7 @@ func TestStructureClassEval(t *testing.T) {
 
 func TestStructureClassDescribe(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct desctest "test docs" x y)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct desctest "test docs" x y)`, scope)
 	sc := cl.FindStructureClass("desctest")
 	b := sc.Describe(nil, 0, 80, false)
 	str := string(b)
@@ -561,7 +561,7 @@ func TestStructureClassDescribe(t *testing.T) {
 
 func TestStructureClassMakeInstance(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct mktest x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct mktest x)`, scope)
 	sc := cl.FindStructureClass("mktest")
 	inst := sc.MakeInstance()
 	tt.NotNil(t, inst)
@@ -572,9 +572,9 @@ func TestStructureClassMakeInstance(t *testing.T) {
 
 func TestStructureClassInheritsList(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defstruct inhbase x)
-(defstruct (inhchild (:include inhbase)) y)`, scope).Eval(scope, nil)
+(defstruct (inhchild (:include inhbase)) y)`, scope)
 	sc := cl.FindStructureClass("inhchild")
 	list := sc.InheritsList()
 	tt.Equal(t, 1, len(list))
@@ -583,7 +583,7 @@ func TestStructureClassInheritsList(t *testing.T) {
 
 func TestStructureClassLoadForm(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct loadtest (x 0) (y 1 :read-only t))`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct loadtest (x 0) (y 1 :read-only t))`, scope)
 	sc := cl.FindStructureClass("loadtest")
 	form := sc.LoadForm()
 	tt.NotNil(t, form)
@@ -594,14 +594,14 @@ func TestStructureClassLoadForm(t *testing.T) {
 
 func TestStructureClassMetaclass(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct metatest x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct metatest x)`, scope)
 	sc := cl.FindStructureClass("metatest")
 	tt.Equal(t, slip.Symbol("structure-class"), sc.Metaclass())
 }
 
 func TestStructureClassVarNames(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct vartest b a c)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct vartest b a c)`, scope)
 	sc := cl.FindStructureClass("vartest")
 	names := sc.VarNames()
 	tt.Equal(t, 3, len(names))
@@ -613,14 +613,14 @@ func TestStructureClassVarNames(t *testing.T) {
 
 func TestStructureClassSlotCount(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct counttest a b c)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct counttest a b c)`, scope)
 	sc := cl.FindStructureClass("counttest")
 	tt.Equal(t, 3, len(sc.AllSlots()))
 }
 
 func TestStructureClassAllSlots(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct alltest a b)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct alltest a b)`, scope)
 	sc := cl.FindStructureClass("alltest")
 	slots := sc.AllSlots()
 	tt.Equal(t, 2, len(slots))
@@ -628,7 +628,7 @@ func TestStructureClassAllSlots(t *testing.T) {
 
 func TestStructureClassPrecedence(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct prectest x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct prectest x)`, scope)
 	sc := cl.FindStructureClass("prectest")
 	prec := sc.Precedence()
 	tt.Equal(t, true, len(prec) >= 3)
@@ -637,13 +637,13 @@ func TestStructureClassPrecedence(t *testing.T) {
 
 func TestStructureClassGetters(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defstruct (gettest
   (:conc-name gt-)
   (:copier copy-gt)
   (:predicate gt-p)
   (:type vector)
-  (:named)) x)`, scope).Eval(scope, nil)
+  (:named)) x)`, scope)
 	sc := cl.FindStructureClass("gettest")
 	tt.Equal(t, "gt-", sc.ConcName())
 	tt.Equal(t, "copy-gt", sc.CopierName())
@@ -656,10 +656,10 @@ func TestStructureClassGetters(t *testing.T) {
 
 func TestStructureClassConstructors(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defstruct (ctortest
   (:constructor make-ct)
-  (:constructor new-ct (x))) x)`, scope).Eval(scope, nil)
+  (:constructor new-ct (x))) x)`, scope)
 	sc := cl.FindStructureClass("ctortest")
 	ctors := sc.Constructors()
 	tt.Equal(t, 2, len(ctors))
@@ -667,9 +667,9 @@ func TestStructureClassConstructors(t *testing.T) {
 
 func TestStructureClassIncludeGetter(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defstruct incbase x)
-(defstruct (incchild (:include incbase)) y)`, scope).Eval(scope, nil)
+(defstruct (incchild (:include incbase)) y)`, scope)
 	sc := cl.FindStructureClass("incchild")
 	parent := sc.Include()
 	tt.NotNil(t, parent)
@@ -682,10 +682,9 @@ func TestStructureClassIncludeGetter(t *testing.T) {
 
 func TestStructureObjectString(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct sostr x y)
 (make-sostr :x 1 :y 2)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	str := obj.String()
 	tt.Equal(t, true, contains(str, "#S("))
@@ -694,10 +693,9 @@ func TestStructureObjectString(t *testing.T) {
 
 func TestStructureObjectSimplify(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct sosimp a)
 (make-sosimp :a 42)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	simp := obj.Simplify()
 	m, ok := simp.(map[string]any)
@@ -707,10 +705,9 @@ func TestStructureObjectSimplify(t *testing.T) {
 
 func TestStructureObjectEqual(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct soeq x)
 (list (make-soeq :x 1) (make-soeq :x 1) (make-soeq :x 2))`, scope)
-	result := code.Eval(scope, nil)
 	list := result.(slip.List)
 	obj1 := list[0].(*cl.StructureObject)
 	obj2 := list[1].(*cl.StructureObject)
@@ -722,10 +719,9 @@ func TestStructureObjectEqual(t *testing.T) {
 
 func TestStructureObjectHierarchy(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct sohier x)
 (make-sohier :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	hier := obj.Hierarchy()
 	tt.Equal(t, true, len(hier) >= 3)
@@ -734,10 +730,9 @@ func TestStructureObjectHierarchy(t *testing.T) {
 
 func TestStructureObjectEval(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct soeval x)
 (make-soeval :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	evaled := obj.Eval(scope, 0)
 	tt.Equal(t, obj, evaled)
@@ -745,10 +740,9 @@ func TestStructureObjectEval(t *testing.T) {
 
 func TestStructureObjectClass(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct soclass x)
 (make-soclass :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	class := obj.Class()
 	tt.Equal(t, "soclass", class.Name())
@@ -756,11 +750,10 @@ func TestStructureObjectClass(t *testing.T) {
 
 func TestStructureObjectIsA(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct isabase x)
 (defstruct (isachild (:include isabase)) y)
 (make-isachild :x 1 :y 2)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	tt.Equal(t, true, obj.IsA("isachild"))
 	tt.Equal(t, true, obj.IsA("isabase"))
@@ -769,7 +762,7 @@ func TestStructureObjectIsA(t *testing.T) {
 
 func TestStructureObjectInit(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct soinit x y)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct soinit x y)`, scope)
 	sc := cl.FindStructureClass("soinit")
 	obj := cl.NewStructureObject(sc)
 	obj.Init(scope, slip.List{slip.Symbol(":x"), slip.Fixnum(10), slip.Symbol(":y"), slip.Fixnum(20)}, 0)
@@ -781,10 +774,9 @@ func TestStructureObjectInit(t *testing.T) {
 
 func TestStructureObjectSynchronized(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct sosync x)
 (make-sosync :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	tt.Equal(t, false, obj.Synchronized())
 	obj.SetSynchronized(true)
@@ -795,10 +787,9 @@ func TestStructureObjectSynchronized(t *testing.T) {
 
 func TestStructureObjectSlotNames(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct sonames a b c)
 (make-sonames :a 1 :b 2 :c 3)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	names := obj.SlotNames()
 	tt.Equal(t, 3, len(names))
@@ -806,10 +797,9 @@ func TestStructureObjectSlotNames(t *testing.T) {
 
 func TestStructureObjectSetSlotValue(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct soset x)
 (make-soset :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	ok := obj.SetSlotValue(slip.Symbol("x"), slip.Fixnum(99))
 	tt.Equal(t, true, ok)
@@ -823,10 +813,9 @@ func TestStructureObjectSetSlotValue(t *testing.T) {
 
 func TestStructureObjectSetSlotValueReadOnly(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct soro (x 0 :read-only t))
 (make-soro :x 42)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	ok := obj.SetSlotValue(slip.Symbol("x"), slip.Fixnum(99))
 	tt.Equal(t, false, ok) // Should fail for read-only
@@ -834,10 +823,9 @@ func TestStructureObjectSetSlotValueReadOnly(t *testing.T) {
 
 func TestStructureObjectGetSlotByIndex(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct soindex a b)
 (make-soindex :a 10 :b 20)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	tt.Equal(t, slip.Fixnum(10), obj.GetSlotByIndex(0))
 	tt.Equal(t, slip.Fixnum(20), obj.GetSlotByIndex(1))
@@ -847,30 +835,27 @@ func TestStructureObjectGetSlotByIndex(t *testing.T) {
 
 func TestStructureObjectGetMethod(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct someth x)
 (make-someth :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	tt.Equal(t, (*slip.Method)(nil), obj.GetMethod("anything"))
 }
 
 func TestStructureObjectMethodNames(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct somnames x)
 (make-somnames :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	tt.Equal(t, slip.List(nil), obj.MethodNames())
 }
 
 func TestStructureObjectID(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct soid x)
 (list (make-soid :x 1) (make-soid :x 2))`, scope)
-	result := code.Eval(scope, nil)
 	list := result.(slip.List)
 	obj1 := list[0].(*cl.StructureObject)
 	obj2 := list[1].(*cl.StructureObject)
@@ -880,10 +865,9 @@ func TestStructureObjectID(t *testing.T) {
 
 func TestStructureObjectReceive(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct sorcv x)
 (make-sorcv :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	defer func() {
 		r := recover()
@@ -894,10 +878,9 @@ func TestStructureObjectReceive(t *testing.T) {
 
 func TestStructureObjectDup(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct sodup x)
 (make-sodup :x 42)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	dup := obj.Dup()
 	dupObj := dup.(*cl.StructureObject)
@@ -913,7 +896,7 @@ func TestStructureObjectDup(t *testing.T) {
 
 func TestStructureSlotGetters(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct ssget (myslot 42 :type fixnum :read-only t))`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct ssget (myslot 42 :type fixnum :read-only t))`, scope)
 	sc := cl.FindStructureClass("ssget")
 	slot := sc.GetSlot("myslot")
 	tt.NotNil(t, slot)
@@ -1102,10 +1085,9 @@ func TestDefstructBOAAllowOtherKeys(t *testing.T) {
 
 func TestDefstructSlotNotFound(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct snftest x)
 (make-snftest :x 1)`, scope)
-	result := code.Eval(scope, nil)
 	obj := result.(*cl.StructureObject)
 	_, found := obj.SlotValue(slip.Symbol("nonexistent"))
 	tt.Equal(t, false, found)
@@ -1123,12 +1105,12 @@ func TestDefstructFindNonexistent(t *testing.T) {
 func TestStructureClassLoadFormWithOptions(t *testing.T) {
 	scope := slip.NewScope()
 	// Test LoadForm with non-default options
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defstruct (lfopt
   (:conc-name lfo-)
   (:copier nil)
   (:predicate nil)
-  (:type vector)) x)`, scope).Eval(scope, nil)
+  (:type vector)) x)`, scope)
 	sc := cl.FindStructureClass("lfopt")
 	form := sc.LoadForm()
 	tt.NotNil(t, form)
@@ -1136,9 +1118,9 @@ func TestStructureClassLoadFormWithOptions(t *testing.T) {
 
 func TestStructureClassLoadFormWithInclude(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defstruct lfbase x)
-(defstruct (lfinc (:include lfbase)) y)`, scope).Eval(scope, nil)
+(defstruct (lfinc (:include lfbase)) y)`, scope)
 	sc := cl.FindStructureClass("lfinc")
 	form := sc.LoadForm()
 	tt.NotNil(t, form)
@@ -1146,7 +1128,7 @@ func TestStructureClassLoadFormWithInclude(t *testing.T) {
 
 func TestStructureClassLoadFormSlotWithType(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct lfslot (x nil :type list))`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct lfslot (x nil :type list))`, scope)
 	sc := cl.FindStructureClass("lfslot")
 	form := sc.LoadForm()
 	tt.NotNil(t, form)
@@ -1154,9 +1136,9 @@ func TestStructureClassLoadFormSlotWithType(t *testing.T) {
 
 func TestStructureClassDescribeWithInclude(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defstruct descbase x)
-(defstruct (descinc (:include descbase)) y)`, scope).Eval(scope, nil)
+(defstruct (descinc (:include descbase)) y)`, scope)
 	sc := cl.FindStructureClass("descinc")
 	b := sc.Describe(nil, 0, 80, false)
 	str := string(b)
@@ -1165,7 +1147,7 @@ func TestStructureClassDescribeWithInclude(t *testing.T) {
 
 func TestStructureClassDescribeWithType(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct (desctype (:type vector) (:named)) x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct (desctype (:type vector) (:named)) x)`, scope)
 	sc := cl.FindStructureClass("desctype")
 	b := sc.Describe(nil, 0, 80, false)
 	str := string(b)
@@ -1174,7 +1156,7 @@ func TestStructureClassDescribeWithType(t *testing.T) {
 
 func TestStructureClassDescribeNoCopier(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct (descnc (:copier nil)) x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct (descnc (:copier nil)) x)`, scope)
 	sc := cl.FindStructureClass("descnc")
 	b := sc.Describe(nil, 0, 80, false)
 	str := string(b)
@@ -1183,7 +1165,7 @@ func TestStructureClassDescribeNoCopier(t *testing.T) {
 
 func TestStructureClassDescribeNoPredicate(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct (descnp (:predicate nil)) x)`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct (descnp (:predicate nil)) x)`, scope)
 	sc := cl.FindStructureClass("descnp")
 	b := sc.Describe(nil, 0, 80, false)
 	str := string(b)
@@ -1192,7 +1174,7 @@ func TestStructureClassDescribeNoPredicate(t *testing.T) {
 
 func TestStructureClassDescribeSlotDetails(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct descslot (x 42) (y 0 :read-only t))`, scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct descslot (x 42) (y 0 :read-only t))`, scope)
 	sc := cl.FindStructureClass("descslot")
 	b := sc.Describe(nil, 0, 80, false)
 	str := string(b)
@@ -1202,10 +1184,10 @@ func TestStructureClassDescribeSlotDetails(t *testing.T) {
 
 func TestStructureClassInheritsDeep(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defstruct inhroot x)
 (defstruct (inhmid (:include inhroot)) y)
-(defstruct (inhleaf (:include inhmid)) z)`, scope).Eval(scope, nil)
+(defstruct (inhleaf (:include inhmid)) z)`, scope)
 	sc := cl.FindStructureClass("inhleaf")
 	root := cl.FindStructureClass("inhroot")
 	tt.Equal(t, true, sc.Inherits(root))
@@ -1213,11 +1195,10 @@ func TestStructureClassInheritsDeep(t *testing.T) {
 
 func TestStructureObjectEqualDifferentTypes(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	result := slip.ReadEvalString(`
 (defstruct eqtype1 x)
 (defstruct eqtype2 x)
 (list (make-eqtype1 :x 1) (make-eqtype2 :x 1))`, scope)
-	result := code.Eval(scope, nil)
 	list := result.(slip.List)
 	obj1 := list[0].(*cl.StructureObject)
 	obj2 := list[1].(*cl.StructureObject)

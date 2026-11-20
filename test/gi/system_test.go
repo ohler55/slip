@@ -22,12 +22,12 @@ func checkConnected(t *testing.T) {
 
 func TestSystemFile(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
-	slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(fmakunbound 'sys-test)", scope)
+	slip.ReadEvalString("(fmakunbound 'sys-test-comp)", scope)
 	defer func() {
-		slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'sub)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'sys-test)", scope)
+		slip.ReadEvalString("(fmakunbound 'sys-test-comp)", scope)
+		slip.ReadEvalString("(fmakunbound 'sub)", scope)
 	}()
 	(&sliptest.Function{
 		Source: `
@@ -43,13 +43,13 @@ func TestSystemFile(t *testing.T) {
 	}).Test(t)
 	_, err := os.Stat("testout/quux/sys-test.lisp")
 	tt.Nil(t, err)
-	result := slip.ReadString("(sys-test-comp)", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("(sys-test-comp)", scope)
 	tt.Equal(t, slip.Fixnum(3), result)
 
-	result = slip.ReadString("(sys-test)", scope).Eval(scope, nil)
+	result = slip.ReadEvalString("(sys-test)", scope)
 	tt.Equal(t, slip.Fixnum(7), result)
 
-	result = slip.ReadString("(sub)", scope).Eval(scope, nil)
+	result = slip.ReadEvalString("(sub)", scope)
 	tt.Equal(t, slip.Fixnum(9), result)
 
 	(&sliptest.Function{
@@ -152,9 +152,9 @@ func TestSystemLoadBadComp(t *testing.T) {
 func TestSystemGitTag(t *testing.T) {
 	checkConnected(t)
 	scope := slip.NewScope()
-	slip.ReadString("(fmakunbound 'sample)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(fmakunbound 'sample)", scope)
 	defer func() {
-		slip.ReadString("(fmakunbound 'sample)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'sample)", scope)
 	}()
 
 	(&sliptest.Function{
@@ -182,7 +182,7 @@ func TestSystemGitTag(t *testing.T) {
   (+ x 5))
 `, string(content))
 
-	result := slip.ReadString("(sample 3)", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("(sample 3)", scope)
 	tt.Equal(t, slip.Fixnum(8), result)
 
 	(&sliptest.Function{
@@ -217,11 +217,11 @@ func TestSystemGitTag(t *testing.T) {
 func TestSystemGitBranch(t *testing.T) {
 	checkConnected(t)
 	scope := slip.NewScope()
-	slip.ReadString("(fmakunbound 'sample)", scope).Eval(scope, nil)
-	slip.ReadString("(fmakunbound 'quux)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(fmakunbound 'sample)", scope)
+	slip.ReadEvalString("(fmakunbound 'quux)", scope)
 	defer func() {
-		slip.ReadString("(fmakunbound 'sample)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'quux)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'sample)", scope)
+		slip.ReadEvalString("(fmakunbound 'quux)", scope)
 	}()
 	(&sliptest.Function{
 		Source: `
@@ -252,7 +252,7 @@ func TestSystemGitBranch(t *testing.T) {
   'foobar)
 `, string(content))
 
-	result := slip.ReadString("(sample 3)", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("(sample 3)", scope)
 	tt.Equal(t, slip.Fixnum(11), result)
 
 	(&sliptest.Function{
@@ -402,7 +402,7 @@ func TestSystemCall(t *testing.T) {
 `, string(content))
 
 	scope := slip.NewScope()
-	result := slip.ReadString("aaa", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("aaa", scope)
 	tt.Equal(t, slip.String("peter@ohler.com"), result)
 
 	(&sliptest.Function{
@@ -439,7 +439,7 @@ func TestSystemDescribe(t *testing.T) {
 		":run",
 	} {
 		out.Reset()
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method 'system %s out)`, method), scope).Eval(scope, nil)
+		_ = slip.ReadEvalString(fmt.Sprintf(`(describe-method 'system %s out)`, method), scope)
 		str := out.String()
 		tt.Equal(t, true, strings.Contains(str, "system"))
 		tt.Equal(t, true, strings.Contains(str, method))
@@ -566,9 +566,9 @@ func TestSystemUnknown(t *testing.T) {
 
 func TestSystemRunOk(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(fmakunbound 'sys-test)", scope)
 	defer func() {
-		slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'sys-test)", scope)
 	}()
 	(&sliptest.Function{
 		Source: `
@@ -620,7 +620,7 @@ func TestSystemRequire(t *testing.T) {
 	_, err := os.Stat("testout/quux/testplugin.so")
 	tt.Nil(t, err)
 
-	result := slip.ReadString("(plug)", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("(plug)", scope)
 	tt.Equal(t, slip.String("Plugged it"), result)
 }
 
@@ -654,9 +654,9 @@ func TestSystemRequireBadLoad(t *testing.T) {
 
 func TestSystemSystem(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(fmakunbound 'sister)", scope)
 	defer func() {
-		slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'sister)", scope)
 	}()
 
 	(&sliptest.Function{
@@ -671,7 +671,7 @@ func TestSystemSystem(t *testing.T) {
 `,
 		Expect: `nil`,
 	}).Test(t)
-	result := slip.ReadString("(sister)", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("(sister)", scope)
 	tt.Equal(t, slip.Fixnum(2), result)
 }
 

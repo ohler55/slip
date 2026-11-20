@@ -26,7 +26,7 @@ func TestCadaarCons(t *testing.T) {
 
 func TestCadaarSetf(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString("(setq target '(((a . (b . c)) . d) . e))", scope).Eval(slip.NewScope(), nil)
+	_ = slip.ReadEvalString("(setq target '(((a . (b . c)) . d) . e))", slip.NewScope())
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(setf (cadaar target) 'x)",

@@ -130,8 +130,8 @@ func TestSnapshotVar(t *testing.T) {
 func TestSnapshotFlavors(t *testing.T) {
 	defer func() {
 		scope := slip.NewScope()
-		_ = slip.ReadString(`(undefflavor 'snapper)`, scope).Eval(scope, nil)
-		_ = slip.ReadString(`(undefflavor 'snappy)`, scope).Eval(scope, nil)
+		_ = slip.ReadEvalString(`(undefflavor 'snapper)`, scope)
+		_ = slip.ReadEvalString(`(undefflavor 'snappy)`, scope)
 	}()
 	(&sliptest.Function{
 		Source: `(progn

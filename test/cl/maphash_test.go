@@ -12,11 +12,11 @@ import (
 
 func TestMaphashLambda(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (setq table (make-hash-table))
 (setf (gethash 'a table) 1)
 (setq entries '())
-`, scope).Eval(scope, nil)
+`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(maphash (lambda (k v) (setq entries (cons (list k v) entries))) table)`,
@@ -27,11 +27,11 @@ func TestMaphashLambda(t *testing.T) {
 
 func TestMaphashLambdaList(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (setq table (make-hash-table))
 (setf (gethash 'a table) 1)
 (setq entries '())
-`, scope).Eval(scope, nil)
+`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(maphash '(lambda (k v) (setq entries (cons (list k v) entries))) table)`,
@@ -42,12 +42,12 @@ func TestMaphashLambdaList(t *testing.T) {
 
 func TestMaphashSymbol(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (setq table (make-hash-table))
 (setf (gethash 'a table) 1)
 (setq entries '())
 (defun entry-push (k v) (setq entries (cons (list k v) entries)))
-`, scope).Eval(scope, nil)
+`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(maphash 'entry-push table)`,

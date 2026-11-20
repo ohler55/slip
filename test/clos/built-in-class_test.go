@@ -12,7 +12,7 @@ import (
 
 func TestBuiltInClassBasic(t *testing.T) {
 	scope := slip.NewScope()
-	c := slip.ReadString(`(find-class 'fixnum)`, scope).Eval(scope, nil)
+	c := slip.ReadEvalString(`(find-class 'fixnum)`, scope)
 	c2 := c
 	tt.Equal(t, c, c.Eval(nil, 0))
 	tt.Equal(t, true, c.Equal(c2))
@@ -32,7 +32,7 @@ func TestBuiltInClassBasic(t *testing.T) {
   package: common-lisp
   prototype: 42
 }`, pretty.SEN(c.Simplify()))
-	tt.Panic(t, func() { _ = slip.ReadString(`(make-instance 'fixnum)`, scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(make-instance 'fixnum)`, scope) })
 
 	tt.Equal(t, 0, len(c.(slip.Class).VarNames()))
 	tt.Equal(t, []slip.Class{
@@ -45,7 +45,7 @@ func TestBuiltInClassBasic(t *testing.T) {
 
 func TestBuiltInClassDescribeBasic(t *testing.T) {
 	scope := slip.NewScope()
-	c := slip.ReadString(`(find-class 'fixnum)`, scope).Eval(scope, nil).(slip.Class)
+	c := slip.ReadEvalString(`(find-class 'fixnum)`, scope).(slip.Class)
 	out := c.Describe([]byte{}, 0, 80, false)
 	tt.Equal(t, `fixnum is a built-in class:
   Documentation:

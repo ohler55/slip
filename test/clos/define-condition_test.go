@@ -11,7 +11,7 @@ import (
 
 func TestDefineConditionMinimal(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(makunbound 'base-condition)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(makunbound 'base-condition)`, scope)
 	(&sliptest.Function{
 		Source: `(let ((bc (define-condition base-condition () () (:report (lambda (c s) nil)))))
                    (pretty-print bc nil))`,

@@ -12,11 +12,11 @@ import (
 func TestSlotMakunboundOk(t *testing.T) {
 	defer undefFlavors("blueberry")
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor blueberry ((size "medium")) ()
            :initable-instance-variables
            :gettable-instance-variables)
-`, scope).Eval(scope, nil)
+`, scope)
 
 	(&sliptest.Function{
 		Source: `(let ((berry (make-instance 'blueberry)))

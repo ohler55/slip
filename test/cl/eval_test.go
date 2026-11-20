@@ -25,7 +25,7 @@ func TestEvalListQuoted(t *testing.T) {
 
 func TestEvalSymbol(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq x '(+ 1 2))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq x '(+ 1 2))`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(eval x)`,
@@ -35,7 +35,7 @@ func TestEvalSymbol(t *testing.T) {
 
 func TestEvalQuoted(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq x '(+ 1 2))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq x '(+ 1 2))`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(eval 'x)`,

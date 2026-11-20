@@ -39,10 +39,10 @@ func TestPrintObjectNotStream(t *testing.T) {
 
 func TestPrintObjectStructWithPrintFunction(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct (pospf (:print-function (lambda (obj str depth) (princ "x" str)))) x)`,
-		scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct (pospf (:print-function (lambda (obj str depth) (princ "x" str)))) x)`,
+		scope)
 	var b bytes.Buffer
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &b})
-	_ = slip.ReadString("(print-object (make-pospf :x 1) out)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(print-object (make-pospf :x 1) out)", scope)
 	tt.Equal(t, "x", b.String())
 }

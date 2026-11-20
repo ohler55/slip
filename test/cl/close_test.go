@@ -16,13 +16,13 @@ import (
 func TestClose(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("file"), nil)
-	_ = slip.ReadString(`(setq file (open "testdata/load-me.lisp"))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq file (open "testdata/load-me.lisp"))`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(close file)`,
 		Expect: "t",
 	}).Test(t)
-	result := slip.ReadString(`(close file)`, scope).Eval(scope, nil) // second close
+	result := slip.ReadEvalString(`(close file)`, scope) // second close
 	tt.Nil(t, result)
 	f, _ := scope.Get(slip.Symbol("file")).(io.Closer)
 	tt.NotNil(t, f)

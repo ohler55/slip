@@ -11,15 +11,15 @@ import (
 
 func TestLoadSystemOk(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
-	slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
-	slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
-	slip.ReadString("(fmakunbound 'step-sister)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(fmakunbound 'sys-test)", scope)
+	slip.ReadEvalString("(fmakunbound 'sys-test-comp)", scope)
+	slip.ReadEvalString("(fmakunbound 'sister)", scope)
+	slip.ReadEvalString("(fmakunbound 'step-sister)", scope)
 	defer func() {
-		slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'step-sister)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'sys-test)", scope)
+		slip.ReadEvalString("(fmakunbound 'sys-test-comp)", scope)
+		slip.ReadEvalString("(fmakunbound 'sister)", scope)
+		slip.ReadEvalString("(fmakunbound 'step-sister)", scope)
 	}()
 	(&sliptest.Function{
 		Source: `(let ((*package-load-path* "testdata"))
@@ -30,15 +30,15 @@ func TestLoadSystemOk(t *testing.T) {
 
 func TestLoadSystemPathList(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
-	slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
-	slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
-	slip.ReadString("(fmakunbound 'step-sister)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(fmakunbound 'sys-test)", scope)
+	slip.ReadEvalString("(fmakunbound 'sys-test-comp)", scope)
+	slip.ReadEvalString("(fmakunbound 'sister)", scope)
+	slip.ReadEvalString("(fmakunbound 'step-sister)", scope)
 	defer func() {
-		slip.ReadString("(fmakunbound 'sys-test)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'sys-test-comp)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'sister)", scope).Eval(scope, nil)
-		slip.ReadString("(fmakunbound 'step-sister)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'sys-test)", scope)
+		slip.ReadEvalString("(fmakunbound 'sys-test-comp)", scope)
+		slip.ReadEvalString("(fmakunbound 'sister)", scope)
+		slip.ReadEvalString("(fmakunbound 'step-sister)", scope)
 	}()
 	(&sliptest.Function{
 		Source: `(let ((*package-load-path* "testdata"))

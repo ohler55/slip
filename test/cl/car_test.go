@@ -115,12 +115,10 @@ func TestCarSetfNotList(t *testing.T) {
 
 func TestCarValues(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`(car (values '(a b) 'c))`, scope)
-	tt.Equal(t, slip.Symbol("a"), code.Eval(scope, nil))
+	tt.Equal(t, slip.Symbol("a"), slip.ReadEvalString(`(car (values '(a b) 'c))`, scope))
 }
 
 func TestCarPlaceValues(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`(setq target '(a b)) (setf (car target) (values 'c 'd))`, scope)
-	tt.Equal(t, slip.Symbol("c"), code.Eval(scope, nil))
+	tt.Equal(t, slip.Symbol("c"), slip.ReadEvalString(`(setq target '(a b)) (setf (car target) (values 'c 'd))`, scope))
 }
