@@ -19,16 +19,15 @@ func TestDefflavorBasic(t *testing.T) {
 	defer undefFlavor("strawberry")
 
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	tt.Equal(t, slip.Symbol("strawberry"), slip.ReadEvalString(`
 (defflavor strawberry ((size "medium")) ()
  :gettable-instance-variables
  :settable-instance-variables
  :initable-instance-variables
  (:documentation "Strawberry icecream"))
-`, scope)
-	tt.Equal(t, slip.Symbol("strawberry"), code.Eval(scope, nil))
+`, scope))
 
-	f := slip.ReadString("strawberry", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("strawberry", scope)
 	sf := f.Simplify()
 	tt.Equal(t, "strawberry", jp.C("name").First(sf))
 	tt.Equal(t, "Strawberry icecream", jp.C("docs").First(sf))
@@ -53,15 +52,14 @@ func TestDefflavorInittable(t *testing.T) {
 	defer undefFlavor("strawberry")
 
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	tt.Equal(t, slip.Symbol("strawberry"), slip.ReadEvalString(`
 (defflavor strawberry (size color) ()
  :gettable-instance-variables
  :settable-instance-variables
  (:initable-instance-variables size))
-`, scope)
-	tt.Equal(t, slip.Symbol("strawberry"), code.Eval(scope, nil))
+`, scope))
 
-	f := slip.ReadString("strawberry", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("strawberry", scope)
 	tt.Equal(t, `
 (defflavor strawberry (color size)
                       ()
@@ -75,14 +73,13 @@ func TestDefflavorGettableSettable(t *testing.T) {
 	defer undefFlavor("strawberry")
 
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	tt.Equal(t, slip.Symbol("strawberry"), slip.ReadEvalString(`
 (defflavor strawberry ((size "medium") color) ()
  (:gettable-instance-variables size)
  (:settable-instance-variables size))
-`, scope)
-	tt.Equal(t, slip.Symbol("strawberry"), code.Eval(scope, nil))
+`, scope))
 
-	f := slip.ReadString("strawberry", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("strawberry", scope)
 	sf := f.Simplify()
 
 	daemons := jp.MustParseString("methods[?(@.name == ':size')]").Get(sf)
@@ -108,30 +105,30 @@ func TestDefflavorGettableSettable(t *testing.T) {
 func TestDefflavorInherit(t *testing.T) {
 	defer undefFlavors("f1", "f2", "f3")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 ((a 1)) ())
 (defflavor f2 ((b 2)) (f1))
 (defflavor f3 () (f2))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	names := slip.ReadString("*all-flavor-names*", scope).Eval(scope, nil)
+	names := slip.ReadEvalString("*all-flavor-names*", scope)
 	tt.Equal(t, "/f1 f2 f3/",
 		names.String())
 
-	sf := slip.ReadString("f3", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("f3", scope).Simplify()
 	tt.Equal(t, "[f2 f1 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
 	tt.Equal(t, "{a: 1 b: 2 self: null}", pretty.SEN(jp.C("defaultVars").First(sf)))
 
-	f := slip.ReadString("f3", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f3", scope)
 	tt.Equal(t, `
 (defflavor f3 ()
               (f2 f1))
 `, string(pp.Append([]byte{'\n'}, scope, f)))
 
-	slip.ReadString("(undefflavor 'f1)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(undefflavor 'f1)", scope)
 
 	// undefflavor should remove all flavors that inherit from f1 as well as f1.
-	names = slip.ReadString("*all-flavor-names*", scope).Eval(scope, nil)
+	names = slip.ReadEvalString("*all-flavor-names*", scope)
 	tt.Equal(t, false, strings.Contains(names.String(), "f1"))
 	tt.Equal(t, false, strings.Contains(names.String(), "f2"))
 	tt.Equal(t, false, strings.Contains(names.String(), "f3"))
@@ -143,16 +140,16 @@ func TestDefflavorInherit(t *testing.T) {
 func TestDefflavorInheritSame(t *testing.T) {
 	defer undefFlavors("f1", "f2", "f3")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 ((a 1)) ())
 (defflavor f2 ((b 2)) (f1))
 (defflavor f3 () (f1 f2))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	sf := slip.ReadString("f3", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("f3", scope).Simplify()
 	tt.Equal(t, "[f1 f2 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
 
-	f := slip.ReadString("f3", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f3", scope)
 	tt.Equal(t, `
 (defflavor f3 ()
               (f1 f2))
@@ -162,14 +159,14 @@ func TestDefflavorInheritSame(t *testing.T) {
 func TestDefflavorNoVanilla(t *testing.T) {
 	defer undefFlavors("chocolate")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor chocolate ((a 1)) () :no-vanilla-flavor)
-`, scope).Eval(scope, nil)
+`, scope)
 
-	sf := slip.ReadString("chocolate", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("chocolate", scope).Simplify()
 	tt.Equal(t, "[]", pretty.SEN(jp.C("inherit").First(sf)))
 
-	f := slip.ReadString("chocolate", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("chocolate", scope)
 	tt.Equal(t, `
 (defflavor chocolate ((a 1))
                      ()
@@ -180,15 +177,15 @@ func TestDefflavorNoVanilla(t *testing.T) {
 func TestDefflavorKeywords(t *testing.T) {
 	defer undefFlavors("f1")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 ((b 2)) () (:init-keywords :x :y) (:required-init-keywords :x))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	sf := slip.ReadString("f1", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("f1", scope).Simplify()
 	tt.Equal(t, `[":x"]`, pretty.SEN(jp.C("requiredKeywords").First(sf)))
 	tt.Equal(t, `{":x": null ":y": null}`, pretty.SEN(jp.C("keywords").First(sf)))
 
-	f := slip.ReadString("f1", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f1", scope)
 	tt.Equal(t, `
 (defflavor f1 ((b 2))
               ()
@@ -200,14 +197,14 @@ func TestDefflavorKeywords(t *testing.T) {
 func TestDefflavorInitPlist(t *testing.T) {
 	defer undefFlavors("f1")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 ((b 2)) () (:default-init-plist (:allow-other-keys t) (:x 1) (:y 2)))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	sf := slip.ReadString("f1", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("f1", scope).Simplify()
 	tt.Equal(t, `{":x": 1 ":y": 2}`, pretty.SEN(jp.C("keywords").First(sf)))
 
-	f := slip.ReadString("f1", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f1", scope)
 	tt.Equal(t, `
 (defflavor f1 ((b 2))
               ()
@@ -218,15 +215,15 @@ func TestDefflavorInitPlist(t *testing.T) {
 func TestDefflavorInitPlistInherit(t *testing.T) {
 	defer undefFlavors("f1")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 ((a 1)) () (:default-init-plist (:allow-other-keys t) (:x 1) (:y 2)))
 (defflavor f2 ((b 2)) (f1))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	sf := slip.ReadString("f2", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("f2", scope).Simplify()
 	tt.Equal(t, `{":x": 1 ":y": 2}`, pretty.SEN(jp.C("keywords").First(sf)))
 
-	f := slip.ReadString("f2", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f2", scope)
 	tt.Equal(t, `
 (defflavor f2 ((b 2))
               (f1)
@@ -238,14 +235,14 @@ func TestDefflavorInitBadPlist(t *testing.T) {
 	defer undefFlavors("f1")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		slip.ReadString(`
+		slip.ReadEvalString(`
 (defflavor f1 ((b 2)) () (:default-init-plist (t 2)))
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 	tt.Panic(t, func() {
-		slip.ReadString(`
+		slip.ReadEvalString(`
 (defflavor f1 ((b 2)) () (:default-init-plist :x))
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
@@ -253,9 +250,9 @@ func TestDefflavorBadKeywords(t *testing.T) {
 	defer undefFlavors("f1")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		slip.ReadString(`
+		slip.ReadEvalString(`
 (defflavor f1 ((b 2)) () (:init-keywords t))
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
@@ -263,9 +260,9 @@ func TestDefflavorBadGettable(t *testing.T) {
 	defer undefFlavors("f1")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		slip.ReadString(`
+		slip.ReadEvalString(`
 (defflavor f1 ((b 2)) () (:gettable-instance-variables t))
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
@@ -273,29 +270,29 @@ func TestDefflavorBadSettable(t *testing.T) {
 	defer undefFlavors("f1")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		slip.ReadString(`
+		slip.ReadEvalString(`
 (defflavor f1 ((b 2)) () (:settable-instance-variables t))
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
 func TestDefflavorInclude(t *testing.T) {
 	defer undefFlavors("f1", "f2", "f3")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 ((a 1)) ())
 (defflavor f2 ((b 2)) (f1))
 (defflavor f3 () () (:included-flavors f2 f1))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	names := slip.ReadString("*all-flavor-names*", scope).Eval(scope, nil)
+	names := slip.ReadEvalString("*all-flavor-names*", scope)
 	tt.Equal(t, "/f1 f2 f3/", names.String())
 
-	sf := slip.ReadString("f3", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("f3", scope).Simplify()
 	tt.Equal(t, "[f2 f1 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
 	tt.Equal(t, "{a: 1 b: 2 self: null}", pretty.SEN(jp.C("defaultVars").First(sf)))
 
-	f := slip.ReadString("f3", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f3", scope)
 	tt.Equal(t, `
 (defflavor f3 ()
               (f2 f1)
@@ -306,20 +303,20 @@ func TestDefflavorInclude(t *testing.T) {
 func TestDefflavorIncludeAbstract(t *testing.T) {
 	defer undefFlavors("f1", "f2", "f3")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 ((a 1)) ())
 (defflavor f2 ((b 2)) () :abstract-flavor (:included-flavors f1))
 (defflavor f3 () () (:included-flavors f2))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	names := slip.ReadString("*all-flavor-names*", scope).Eval(scope, nil)
+	names := slip.ReadEvalString("*all-flavor-names*", scope)
 	tt.Equal(t, "/f1 f2 f3/", names.String())
 
-	sf := slip.ReadString("f3", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("f3", scope).Simplify()
 	tt.Equal(t, "[f2 f1 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
 	tt.Equal(t, "{a: 1 b: 2 self: null}", pretty.SEN(jp.C("defaultVars").First(sf)))
 
-	f := slip.ReadString("f2", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f2", scope)
 	tt.Equal(t, `
 (defflavor f2 ((b 2))
               ()
@@ -327,7 +324,7 @@ func TestDefflavorIncludeAbstract(t *testing.T) {
   (:included-flavors f1))
 `, string(pp.Append([]byte{'\n'}, scope, f)))
 
-	f = slip.ReadString("f3", scope).Eval(scope, nil)
+	f = slip.ReadEvalString("f3", scope)
 	tt.Equal(t, `
 (defflavor f3 ()
               (f2 f1)
@@ -339,115 +336,115 @@ func TestDefflavorIncludeBadAbstract(t *testing.T) {
 	defer undefFlavors("f2", "f3")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		slip.ReadString(`
+		slip.ReadEvalString(`
 (defflavor f2 ((b 2)) () :abstract-flavor (:included-flavors f4))
 (defflavor f3 () () (:included-flavors f2))
-`, scope).Eval(scope, nil)
+`, scope)
 	})
-	slip.ReadString("(undefflavor 'f2)", scope).Eval(scope, nil)
+	slip.ReadEvalString("(undefflavor 'f2)", scope)
 }
 
 func TestDefflavorBadArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 ())", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 ())", scope) })
 }
 
 func TestDefflavorBadName(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor t () ())", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor t () ())", scope) })
 }
 
 func TestDefflavorBadDefaultHandler(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () (:default-handler t))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () (:default-handler t))", scope) })
 }
 
 func TestDefflavorShortOption(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () (:default-handler))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () (:default-handler))", scope) })
 }
 
 func TestDefflavorTooManyOption(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () (:default-handler bad bad))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () (:default-handler bad bad))", scope) })
 }
 
 func TestDefflavorBadOptionKey(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () (t t))", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () :not-an-option)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () (t t))", scope) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () :not-an-option)", scope) })
 }
 
 func TestDefflavorBadOption(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () t)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () t)", scope) })
 }
 
 func TestDefflavorBadVars(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 t ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 (t) ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 (x (y)) ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 ((1 2)) ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 ((x nil) 1) ())", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 t ())", scope) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 (t) ())", scope) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 (x (y)) ())", scope) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 ((1 2)) ())", scope) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 ((x nil) 1) ())", scope) })
 }
 
 func TestDefflavorBadInheritedFlavor(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () (t))", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () t)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () (t))", scope) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () t)", scope) })
 }
 
 func TestDefflavorDuplicate(t *testing.T) {
 	scope := slip.NewScope()
 	defer undefFlavor("f1")
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () ()) (defflavor f1 () ())", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () ()) (defflavor f1 () ())", scope) })
 }
 
 func TestDefflavorInheritNotDefined(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () (bad))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () (bad))", scope) })
 }
 
 func TestDefflavorIncludedNotDefined(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () (:included-flavors bad))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () (:included-flavors bad))", scope) })
 }
 
 func TestDefflavorRequiredNotSymbol(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () (:required-flavors t))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () (:required-flavors t))", scope) })
 }
 
 func TestDefflavorBadDocs(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { slip.ReadString("(defflavor f1 () () (:documentation t))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { slip.ReadEvalString("(defflavor f1 () () (:documentation t))", scope) })
 }
 
 func TestDefflavorBadInitable(t *testing.T) {
 	scope := slip.NewScope()
 	tt.Panic(t,
 		func() {
-			slip.ReadString("(defflavor f1 () () (:initable-instance-variables t))", scope).Eval(scope, nil)
+			slip.ReadEvalString("(defflavor f1 () () (:initable-instance-variables t))", scope)
 		})
 }
 
 func TestDefflavorRequired(t *testing.T) {
 	defer undefFlavors("f1", "f2", "f3")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 ((a 1)) () :gettable-instance-variables)
 (defflavor f2 ((b 2)) (f1))
 (defflavor f3 () (f2) (:required-flavors f1) (:required-methods :a) (:required-instance-variables b))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	names := slip.ReadString("*all-flavor-names*", scope).Eval(scope, nil)
+	names := slip.ReadEvalString("*all-flavor-names*", scope)
 	tt.Equal(t, "/f1 f2 f3/", names.String())
 
-	sf := slip.ReadString("f3", scope).Eval(scope, nil).Simplify()
+	sf := slip.ReadEvalString("f3", scope).Simplify()
 	tt.Equal(t, "[f2 f1 vanilla-flavor]", pretty.SEN(jp.C("inherit").First(sf)))
 
-	f := slip.ReadString("f3", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f3", scope)
 	tt.Equal(t, `
 (defflavor f3 ()
               (f2 f1)
@@ -461,16 +458,16 @@ func TestDefflavorMissing(t *testing.T) {
 	defer undefFlavors("f3")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		slip.ReadString(`
+		slip.ReadEvalString(`
 (defflavor f3 () () (:required-flavors f1))
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 	// Required methods are checked when calling make-instance.
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f3 () () (:required-methods :a))
-`, scope).Eval(scope, nil)
+`, scope)
 	tt.Panic(t, func() {
-		slip.ReadString(`(make-instance 'f3)`, scope).Eval(scope, nil)
+		slip.ReadEvalString(`(make-instance 'f3)`, scope)
 	})
 }
 
@@ -497,11 +494,11 @@ func TestDefflavorRequiredVars(t *testing.T) {
 func TestDefflavorDefaultHandlerLambda(t *testing.T) {
 	defer undefFlavors("f3")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f3 () () (:default-handler (lambda (&rest args) args)))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	f := slip.ReadString("f3", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f3", scope)
 	tt.Equal(t, `
 (defflavor f3 ()
               ()
@@ -513,13 +510,13 @@ func TestDefflavorDefaultHandlerLambda(t *testing.T) {
 func TestDefflavorDefaultHandlerFunc(t *testing.T) {
 	scope := slip.NewScope()
 	defer undefFlavors("f3")
-	defer slip.ReadString("(fmakunbound 'anything)", scope).Eval(scope, nil)
-	slip.ReadString(`
+	defer slip.ReadEvalString("(fmakunbound 'anything)", scope)
+	slip.ReadEvalString(`
 (defun anything (&rest args) args)
 (defflavor f3 () () (:default-handler anything))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	f := slip.ReadString("f3", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("f3", scope)
 	tt.Equal(t, `
 (defflavor f3 ()
               ()

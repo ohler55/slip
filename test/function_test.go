@@ -89,19 +89,19 @@ func TestFunctionExport(t *testing.T) {
 	xpkg := slip.DefPackage("exported-test", []string{}, "testing")
 	slip.CurrentPackage = xpkg
 	slip.CurrentPackage.Use(&slip.CLPkg)
-	_ = slip.ReadString(`(defun private-func () 'private)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(defun private-func () 'private)`, scope)
 	slip.CurrentPackage = &slip.UserPkg
-	result := slip.ReadString(`(exported-test::private-func)`, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(`(exported-test::private-func)`, scope)
 	tt.Equal(t, "private", slip.ObjectString(result))
 
-	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`, scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(exported-test:private-func)`, scope) })
 
 	xpkg.Export("private-func")
-	result = slip.ReadString(`(exported-test:private-func)`, scope).Eval(scope, nil)
+	result = slip.ReadEvalString(`(exported-test:private-func)`, scope)
 	tt.Equal(t, "private", slip.ObjectString(result))
 
 	xpkg.Unexport("private-func")
-	tt.Panic(t, func() { _ = slip.ReadString(`(exported-test:private-func)`, scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(exported-test:private-func)`, scope) })
 }
 
 func TestFunctionExportNested(t *testing.T) {
@@ -113,15 +113,15 @@ func TestFunctionExportNested(t *testing.T) {
 	xpkg := slip.DefPackage("xpack-test", []string{}, "testing")
 	slip.CurrentPackage = xpkg
 	slip.CurrentPackage.Use(&slip.CLPkg)
-	_ = slip.ReadString(`(defun private-child () 3)`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(defun private-parent () (+ (private-child) 4))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(defun private-child () 3)`, scope)
+	_ = slip.ReadEvalString(`(defun private-parent () (+ (private-child) 4))`, scope)
 
 	slip.CurrentPackage = &slip.UserPkg
-	result := slip.ReadString(`(xpack-test::private-parent)`, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(`(xpack-test::private-parent)`, scope)
 	tt.Equal(t, slip.Fixnum(7), result)
 
 	xpkg.Export("private-parent")
-	result = slip.ReadString(`(xpack-test:private-parent)`, scope).Eval(scope, nil)
+	result = slip.ReadEvalString(`(xpack-test:private-parent)`, scope)
 	tt.Equal(t, slip.Fixnum(7), result)
 }
 
@@ -152,17 +152,17 @@ func TestFunctionEvalInterruptCheck(t *testing.T) {
 	// InterruptCheck that always panics
 	scope.InterruptCheck = func() { panic(&slip.Panic{Message: "Keyboard interrupt"}) }
 	tt.Panic(t, func() {
-		slip.ReadString(`(+ 1 2)`, scope).Eval(scope, nil)
+		slip.ReadEvalString(`(+ 1 2)`, scope)
 	})
 
 	// InterruptCheck that does nothing — eval should succeed
 	scope.InterruptCheck = func() {}
-	result := slip.ReadString(`(+ 1 2)`, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(`(+ 1 2)`, scope)
 	tt.Equal(t, slip.Fixnum(3), result)
 
 	// Nil InterruptCheck — eval should succeed (default path)
 	scope.InterruptCheck = nil
-	result = slip.ReadString(`(+ 1 2)`, scope).Eval(scope, nil)
+	result = slip.ReadEvalString(`(+ 1 2)`, scope)
 	tt.Equal(t, slip.Fixnum(3), result)
 }
 
@@ -178,7 +178,7 @@ func TestFunctionEvalInterruptMidLoop(t *testing.T) {
 	}
 
 	tt.Panic(t, func() {
-		slip.ReadString(`(dotimes (i 1000) (+ i 1))`, scope).Eval(scope, nil)
+		slip.ReadEvalString(`(dotimes (i 1000) (+ i 1))`, scope)
 	})
 
 	if callCount <= 5 {
@@ -211,7 +211,7 @@ func TestMustBeList(t *testing.T) {
 
 func TestGetArgsKeyValue(t *testing.T) {
 	scope := slip.NewScope()
-	args := slip.ReadString("(list :one 1 :two 2)", scope).Eval(scope, nil).(slip.List)
+	args := slip.ReadEvalString("(list :one 1 :two 2)", scope).(slip.List)
 
 	val, has := slip.GetArgsKeyValue(args, slip.Symbol(":one"))
 	tt.Equal(t, true, has)
@@ -221,11 +221,11 @@ func TestGetArgsKeyValue(t *testing.T) {
 	tt.Equal(t, false, has)
 
 	tt.Panic(t, func() {
-		slip.GetArgsKeyValue(slip.ReadString("(list t 1)", scope).Eval(scope, nil).(slip.List), slip.Symbol(":x"))
+		slip.GetArgsKeyValue(slip.ReadEvalString("(list t 1)", scope).(slip.List), slip.Symbol(":x"))
 	})
 
 	tt.Panic(t, func() {
-		slip.GetArgsKeyValue(slip.ReadString("(list :x 1 :y)", scope).Eval(scope, nil).(slip.List), slip.Symbol(":y"))
+		slip.GetArgsKeyValue(slip.ReadEvalString("(list :x 1 :y)", scope).(slip.List), slip.Symbol(":y"))
 	})
 }
 

@@ -15,11 +15,11 @@ func TestAssertMatchFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-match "^[0-9a-f]+$" "abcx123" "sample"))
-                                     ))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                     ))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   expect: /^[0-9a-f]+$/
   actual: "abcx123"
@@ -34,11 +34,11 @@ func TestAssertMatchPass(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-match "^[0-9a-f]+$" 'abc123 "sample"))
-                                     ))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                     ))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: PASS
 `, out.String())
 }
@@ -48,11 +48,11 @@ func TestAssertMatchNumberPass(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-match "^[0-9a-f]+$" 123 'sample))
-                                     ))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                     ))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: PASS
 `, out.String())
 }
@@ -62,11 +62,11 @@ func TestAssertMatchNumberFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-match "^[0-9a-f]+$" 12.3 'sample))
-                                     ))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                     ))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   expect: /^[0-9a-f]+$/
   actual: 12.3
@@ -80,10 +80,10 @@ func TestAssertMatchAnsi(t *testing.T) {
 	var out bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((assert-match "ab.." "abc"))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                                   :forms '((assert-match "ab.." "abc"))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 
 	expect := "toot: \x1b[1mFAIL\x1b[m\n" +
 		"  \x1b[0;31m\x1b[mexpect: /ab../\n" +
@@ -99,10 +99,10 @@ func TestAssertNotReqexp(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((assert-match 3 3))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run)`, scope).Eval(scope, nil)
+                                                   :forms '((assert-match 3 3))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run)`, scope)
 	tt.Equal(t, `toot: FAIL
   regexp must be a string not 3, a fixnum.
 `, out.String())

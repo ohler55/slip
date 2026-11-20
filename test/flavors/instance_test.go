@@ -20,11 +20,10 @@ import (
 func TestInstanceMisc(t *testing.T) {
 	defer undefFlavors("blueberry")
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	berry := slip.ReadEvalString(`
 (defflavor blueberry ((size "medium")) ())
 (setq berry (make-instance 'blueberry))
 `, scope)
-	berry := code.Eval(scope, nil)
 
 	tt.Equal(t, `/{"flavor":"blueberry","id":"[0-9a-f]+","vars":{"size":"medium"}}/`,
 		oj.JSON(berry, &ojg.Options{Sort: true, Indent: 0}))
@@ -56,14 +55,14 @@ func TestInstanceMisc(t *testing.T) {
 	tt.Equal(t, "/\x1b\\[1m#<blueberry [0-9a-f]+>\x1b\\[m, an instance of flavor \x1b\\[1mblueberry\x1b\\[m,\n"+
 		"  has instance variable values:\n    size: \"medium\".*/", string(out))
 
-	b2 := slip.ReadString("(make-instance blueberry)", scope).Eval(scope, nil).(*flavors.Instance)
+	b2 := slip.ReadEvalString("(make-instance blueberry)", scope).(*flavors.Instance)
 	tt.Equal(t, true, b2.Equal(berry))
-	tt.Equal(t, slip.ReadString(`blueberry`, scope).Eval(scope, nil), b2.Class())
+	tt.Equal(t, slip.ReadEvalString(`blueberry`, scope), b2.Class())
 
 	tt.Equal(t, true, b2.IsA("blueberry"))
 	tt.Equal(t, true, b2.IsA("vanilla-flavor"))
-	_ = slip.ReadString(`(defflavor blackberry () ())`, scope).Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'blackberry)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(defflavor blackberry () ())`, scope)
+	defer slip.ReadEvalString("(undefflavor 'blackberry)", scope)
 	tt.Equal(t, false, b2.IsA("blackberry"))
 
 	b2.Set(slip.Symbol("size"), slip.Symbol("large"))
@@ -81,11 +80,11 @@ func TestInstanceMisc(t *testing.T) {
 	bi.Any = "abc"
 	tt.Equal(t, 3, bi.Length())
 
-	_ = slip.ReadString(`(defmethod (blueberry :length) () 5)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(defmethod (blueberry :length) () 5)`, scope)
 	tt.Equal(t, 5, bi.Length())
 
-	_ = slip.ReadString(`(defmethod (blueberry :get-size) () size)`, scope).Eval(scope, nil)
-	result := slip.ReadString(`(send berry :get-size)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(defmethod (blueberry :get-size) () size)`, scope)
+	result := slip.ReadEvalString(`(send berry :get-size)`, scope)
 	tt.Equal(t, slip.String("medium"), result)
 
 	slots := bi.SlotNames()
@@ -110,13 +109,12 @@ func TestInstanceMisc(t *testing.T) {
 func TestInstanceBoundCall(t *testing.T) {
 	defer undefFlavors("blueberry")
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	berry := slip.ReadEvalString(`
 (defflavor blueberry ((size "medium")) () :gettable-instance-variables :settable-instance-variables)
 (defmethod (blueberry :length) () 5)
 (defmethod (blueberry :double) (x) (* 2 x))
 (setq berry (make-instance 'blueberry))
-`, scope)
-	berry := code.Eval(scope, nil).(*flavors.Instance)
+`, scope).(*flavors.Instance)
 
 	result := berry.BoundReceive(scope, ":length", nil, 0)
 	tt.Equal(t, "5", slip.ObjectString(result))
@@ -138,13 +136,12 @@ func TestInstanceBoundCall(t *testing.T) {
 func TestInstanceSimplify(t *testing.T) {
 	defer undefFlavors("blueberry")
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	berry := slip.ReadEvalString(`
 (defflavor blueberry (me) () :settable-instance-variables)
 (setq berry (make-instance 'blueberry))
 (send berry :set-me berry)
 berry
 `, scope)
-	berry := code.Eval(scope, nil)
 
 	(&sliptest.Object{
 		Target: berry,
@@ -162,14 +159,13 @@ berry
 func TestInstanceInit(t *testing.T) {
 	defer undefFlavors("blueberry", "cranberry")
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	blueberry := slip.ReadEvalString(`
 (defflavor blueberry ((size "medium")) ()
            :gettable-instance-variables
            :inittable-instance-variables
            (:init-keywords :x))
 blueberry
-`, scope)
-	blueberry := code.Eval(scope, nil).(*flavors.Flavor)
+`, scope).(*flavors.Flavor)
 
 	inst := blueberry.MakeInstance()
 	inst.Init(scope, slip.List{
@@ -182,7 +178,7 @@ blueberry
 	tt.Panic(t, func() { inst.Init(scope, slip.List{slip.Symbol(":self"), slip.Fixnum(3)}, 0) })
 	tt.Panic(t, func() { inst.Init(scope, slip.List{slip.Symbol(":nothing"), slip.Fixnum(3)}, 0) })
 
-	code = slip.ReadString(`
+	cranberry := slip.ReadEvalString(`
 (defflavor cranberry ((size "medium")) ()
            :gettable-instance-variables
            :inittable-instance-variables
@@ -190,8 +186,7 @@ blueberry
            (:required-init-keywords :x)
            (:default-init-plist (:allow-other-keys t)))
 cranberry
-`, scope)
-	cranberry := code.Eval(scope, nil).(*flavors.Flavor)
+`, scope).(*flavors.Flavor)
 	inst = cranberry.MakeInstance()
 	inst.Init(nil, slip.List{
 		slip.Symbol(":nothing"), slip.Fixnum(3),
@@ -204,7 +199,7 @@ func TestInstanceMixinInit(t *testing.T) {
 	defer undefFlavors("blueberry", "berry", "has-color", "sizeable")
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("quux"), slip.List{})
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor sizeable (size) () :inittable-instance-variables)
 (defflavor has-color () ())
 (defflavor berry () (sizeable))
@@ -214,7 +209,7 @@ func TestInstanceMixinInit(t *testing.T) {
 (defmethod (has-color :after :init) (args) (addf quux 'has-color))
 (defmethod (sizeable :after :init) (args) (addf quux 'sizeable))
 (defmethod (blueberry :after :init) (args) (addf quux 'blueberry))
-`, scope).Eval(scope, nil)
+`, scope)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -227,7 +222,7 @@ func TestInstanceMixinOrder(t *testing.T) {
 	defer undefFlavors("blueberry", "berry", "has-color", "sizeable")
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("quux"), slip.List{})
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor sizeable (size) () :inittable-instance-variables)
 (defflavor has-color () ())
 (defflavor berry () (sizeable))
@@ -237,7 +232,7 @@ func TestInstanceMixinOrder(t *testing.T) {
 (defmethod (has-color :after :quux) () (addf quux 'has-color))
 (defmethod (sizeable :after :quux) () (addf quux 'sizeable))
 (defmethod (blueberry :after :quux) () (addf quux 'blueberry))
-`, scope).Eval(scope, nil)
+`, scope)
 
 	(&sliptest.Function{
 		Scope:  scope,

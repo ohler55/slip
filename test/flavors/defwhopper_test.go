@@ -19,7 +19,7 @@ func TestDefwhopperBasic(t *testing.T) {
 	var b strings.Builder
 	scope := slip.NewScope()
 	scope.Set(slip.Symbol("out"), &slip.OutputStream{Writer: &b})
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defmethod (berry :after :rot) () (princ "berry after rot" out) (terpri out))
 (defwhopper (berry :rot) ()
@@ -27,8 +27,8 @@ func TestDefwhopperBasic(t *testing.T) {
  (princ "berry whopper rot start" out) (terpri out)
  (continue-whopper)
  (princ "berry whopper rot done" out) (terpri out))
-`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`
+`, scope)
+	_ = slip.ReadEvalString(`
 (defflavor blueberry () (berry))
 (defmethod (blueberry :before :rot) () (princ "blueberry before rot" out) (terpri out))
 (defmethod (blueberry :after :rot) () (princ "blueberry after rot" out) (terpri out))
@@ -38,11 +38,11 @@ func TestDefwhopperBasic(t *testing.T) {
  (continue-whopper)
  (princ "blueberry whopper rot done" out) (terpri out)
 )
-`, scope).Eval(scope, nil)
+`, scope)
 
-	_ = slip.ReadString("(setq blue (make-instance blueberry))", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(setq blue (make-instance blueberry))", scope)
 
-	_ = slip.ReadString("(send blue :rot)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(send blue :rot)", scope)
 	tt.Equal(t, `blueberry whopper rot start
 berry whopper rot start
 blueberry before rot
@@ -53,7 +53,7 @@ berry whopper rot done
 blueberry whopper rot done
 `, b.String())
 
-	f := slip.ReadString("blueberry", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("blueberry", scope)
 	sf := f.Simplify()
 	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].whopper").First(sf))
 
@@ -83,12 +83,12 @@ func TestDefwhopperOneWrap(t *testing.T) {
 	var b strings.Builder
 	scope := slip.NewScope()
 	scope.Set(slip.Symbol("out"), &slip.OutputStream{Writer: &b})
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defmethod (berry :rot) () (princ "berry rot" out) (terpri out))
 (defmethod (berry :after :rot) () (princ "berry after rot" out) (terpri out))
-`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`
+`, scope)
+	_ = slip.ReadEvalString(`
 (defflavor blueberry () (berry))
 (defmethod (blueberry :before :rot) () (princ "blueberry before rot" out) (terpri out))
 (defmethod (blueberry :after :rot) () (princ "blueberry after rot" out) (terpri out))
@@ -97,11 +97,11 @@ func TestDefwhopperOneWrap(t *testing.T) {
  (continue-whopper)
  (princ "blueberry whopper rot done" out) (terpri out)
 )
-`, scope).Eval(scope, nil)
+`, scope)
 
-	blue := slip.ReadString("(setq blue (make-instance blueberry))", scope).Eval(scope, nil).(*flavors.Instance)
+	blue := slip.ReadEvalString("(setq blue (make-instance blueberry))", scope).(*flavors.Instance)
 
-	_ = slip.ReadString("(send blue :rot)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(send blue :rot)", scope)
 	tt.Equal(t, `blueberry whopper rot start
 blueberry before rot
 berry rot
@@ -124,26 +124,26 @@ blueberry whopper rot done
 func TestDefwhopperPanics(t *testing.T) {
 	defer undefFlavors("berry")
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
-`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper t ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry) ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry :before :rot) ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (not-defined :rot) ())", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(defwhopper (berry t) ())", scope).Eval(scope, nil) })
+`, scope)
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defwhopper ())", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defwhopper t ())", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defwhopper (berry) ())", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defwhopper (berry :before :rot) ())", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defwhopper (not-defined :rot) ())", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(defwhopper (berry t) ())", scope) })
 }
 
 func TestContinueWhopperLocation(t *testing.T) {
 	defer undefFlavors("berry")
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defwhopper (berry :rot) () (setq loc ~whopper-location~))
-`, scope).Eval(scope, nil)
-	_ = slip.ReadString("(setq bb (make-instance berry))", scope).Eval(scope, nil).(*flavors.Instance)
-	_ = slip.ReadString("(send bb :rot)", scope).Eval(scope, nil)
+`, scope)
+	_ = slip.ReadEvalString("(setq bb (make-instance berry))", scope).(*flavors.Instance)
+	_ = slip.ReadEvalString("(send bb :rot)", scope)
 	loc := scope.Get(slip.Symbol("loc"))
 	tt.Equal(t, "#<whopper-location 0>", slip.ObjectString(loc))
 	tt.Equal(t, "#<whopper-location 0>", slip.Simplify(loc))

@@ -14,13 +14,13 @@ func TestDefflavorBasic(t *testing.T) {
 	defer undefFlavor("strawberry")
 
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor strawberry ((size "medium")) ()
  :gettable-instance-variables
  :settable-instance-variables
  :initable-instance-variables
  (:documentation "Strawberry icecream"))
-`, scope).Eval(scope, nil)
+`, scope)
 
 	(&sliptest.Function{
 		Source: `(let ((*print-right-margin* 60)
@@ -81,5 +81,5 @@ func TestDefflavorLongerLines(t *testing.T) {
 func undefFlavor(fn string) {
 	defer func() { _ = recover() }()
 	scope := slip.NewScope()
-	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn), scope).Eval(scope, nil)
+	slip.ReadEvalString(fmt.Sprintf("(undefflavor '%s)", fn), scope)
 }

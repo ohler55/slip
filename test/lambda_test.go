@@ -67,7 +67,7 @@ func TestDefLambdaBadArgList(t *testing.T) {
 
 func TestLambdaCallWithScope(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(let ((y 3)) (setq call-it (lambda (x) (+ x y))))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(let ((y 3)) (setq call-it (lambda (x) (+ x y))))`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(apply call-it '(2))`,
@@ -77,9 +77,9 @@ func TestLambdaCallWithScope(t *testing.T) {
 
 func TestLambdaCallInFunc(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defun quux (x)
-  (apply (lambda (y) (+ x y)) '(5)))`, scope).Eval(scope, nil)
+  (apply (lambda (y) (+ x y)) '(5)))`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(quux 7)`,
@@ -89,14 +89,14 @@ func TestLambdaCallInFunc(t *testing.T) {
 
 func TestLambdaClosureBindingPrecedesCallerScope(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defun closure-shadow-call-with-fn (fn)
   (funcall fn 0))
 (defun closure-shadow-target (x)
   t)
 (defun closure-shadow-wrapper (fn)
   (closure-shadow-call-with-fn
-    (lambda (x) (eq fn (function closure-shadow-target)))))`, scope).Eval(scope, nil)
+    (lambda (x) (eq fn (function closure-shadow-target)))))`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(closure-shadow-wrapper (function closure-shadow-target))`,
@@ -106,13 +106,13 @@ func TestLambdaClosureBindingPrecedesCallerScope(t *testing.T) {
 
 func TestLambdaClosurePreservesCallerParentScope(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defun closure-parent-use-extra (fn extra)
   (funcall fn 0))
 (defun closure-parent-wrapper (fn)
   (closure-parent-use-extra
     (lambda (x) (list (eq fn 'lexical) extra))
-    'caller-parent))`, scope).Eval(scope, nil)
+    'caller-parent))`, scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(closure-parent-wrapper 'lexical)`,

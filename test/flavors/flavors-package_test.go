@@ -13,8 +13,7 @@ import (
 
 func TestFlavorsPackageAll(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("*all-flavor-names*", scope)
-	for _, name := range code.Eval(scope, nil).(slip.List) {
+	for _, name := range slip.ReadEvalString("*all-flavor-names*", scope).(slip.List) {
 		if strings.EqualFold("vanilla-flavor", string(name.(slip.Symbol))) {
 			return
 		}
@@ -24,14 +23,11 @@ func TestFlavorsPackageAll(t *testing.T) {
 
 func TestFlavorsPackageSetAll(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(setq *all-flavor-names* nil)", scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(setq *all-flavor-names* nil)", scope) })
 }
 
 func TestFlavorsVanilla(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("vanilla-flavor", scope)
-
-	vanilla := code.Eval(scope, nil)
+	vanilla := slip.ReadEvalString("vanilla-flavor", scope)
 	tt.Equal(t, "#<flavor vanilla-flavor>", slip.ObjectString(vanilla))
 }

@@ -16,7 +16,7 @@ func TestTestPass(t *testing.T) {
 	var out bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(setq sweet (make-instance 'suite-flavor :name "sweet"))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq sweet (make-instance 'suite-flavor :name "sweet"))`, scope)
 	sf := sliptest.Function{
 		Scope: scope,
 		Source: `(make-instance 'test-flavor
@@ -27,10 +27,10 @@ func TestTestPass(t *testing.T) {
 	}
 	sf.Test(t)
 	scope.Let(slip.Symbol("toot"), sf.Result)
-	_ = slip.ReadString(`(send toot :run)`, scope).Eval(scope, nil)
-	result := slip.ReadString(`(send toot :result)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send toot :run)`, scope)
+	result := slip.ReadEvalString(`(send toot :result)`, scope)
 	tt.Equal(t, slip.Symbol(":pass"), result)
-	_ = slip.ReadString(`(send toot :report out)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send toot :report out)`, scope)
 	tt.Equal(t, "/^  toot: .*PASS.*/", out.String())
 }
 
@@ -40,13 +40,13 @@ func TestTestFail(t *testing.T) {
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*trace-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((+ 1 (/ 2 0)))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :trace t)`, scope).Eval(scope, nil)
-	result := slip.ReadString(`(send toot :result)`, scope).Eval(scope, nil)
+                                                   :forms '((+ 1 (/ 2 0)))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :trace t)`, scope)
+	result := slip.ReadEvalString(`(send toot :result)`, scope)
 	tt.Equal(t, slip.Symbol(":fail"), result)
-	_ = slip.ReadString(`(send toot :report)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send toot :report)`, scope)
 
 	for _, seq := range []string{
 		"0: (+ 1 (/ 2 0))\n",
@@ -63,8 +63,8 @@ toot: FAIL
 		tt.Equal(t, true, strings.Contains(out.String(), seq), seq)
 	}
 	out.Reset()
-	_ = slip.ReadString(`(send toot :reset)`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :report)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send toot :reset)`, scope)
+	_ = slip.ReadEvalString(`(send toot :report)`, scope)
 	tt.Equal(t, `toot: SKIP
 `, out.String())
 }
@@ -75,23 +75,23 @@ func TestTestDocs(t *testing.T) {
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
 
-	_ = slip.ReadString(`(describe-method 'test-flavor :run)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'test-flavor :run)`, scope)
 	tt.Equal(t, "/:run is a method of test-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'test-flavor :result)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'test-flavor :result)`, scope)
 	tt.Equal(t, "/:result is a method of test-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'test-flavor :report)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'test-flavor :report)`, scope)
 	tt.Equal(t, "/:report is a method of test-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'test-flavor :reset)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'test-flavor :reset)`, scope)
 	tt.Equal(t, "/:reset is a method of test-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'test-flavor :init)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'test-flavor :init)`, scope)
 	tt.Equal(t, "/:init is a method of test-flavor/", out.String())
 }
 
@@ -100,10 +100,10 @@ func TestTestVerbose(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((+ 1 (/ 2 0)))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                                   :forms '((+ 1 (/ 2 0)))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   divide by zero
   (/ 2 0)
@@ -111,37 +111,37 @@ func TestTestVerbose(t *testing.T) {
 `, out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((+ 1 (/ 3 2)))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                                   :forms '((+ 1 (/ 3 2)))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, "toot: PASS\n", out.String())
 }
 
 func TestTestReportBadWriter(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((/ 1 0))))`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = slip.ReadString(`(send toot :report t)`, scope).Eval(scope, nil) })
+                                                   :forms '((/ 1 0))))`, scope)
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(send toot :report t)`, scope) })
 }
 
 func TestTestRunPanics(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((/ 3 2))))`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = slip.ReadString(`(send toot :run t)`, scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString(`(send toot :run :verbose)`, scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString(`(send toot :run :bad t)`, scope).Eval(scope, nil) })
+                                                   :forms '((/ 3 2))))`, scope)
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(send toot :run t)`, scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(send toot :run :verbose)`, scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(send toot :run :bad t)`, scope) })
 }
 
 func TestTestInitPanic(t *testing.T) {
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		_ = slip.ReadString(`(make-instance 'test-flavor
+		_ = slip.ReadEvalString(`(make-instance 'test-flavor
                                             :name "toot"
                                             :parent (make-instance 'vanilla-flavor)
-                                            :forms '(nil))`, scope).Eval(scope, nil)
+                                            :forms '(nil))`, scope)
 	})
 }

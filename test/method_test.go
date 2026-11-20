@@ -62,9 +62,9 @@ func TestMethodInnerCall(t *testing.T) {
 		Combinations: []*slip.Combination{
 			{
 				From:    slip.FindClass("fixnum"),
-				Before:  slip.ReadString(`(lambda (out) (princ 'before out))`, scope).Eval(scope, nil).(slip.Caller),
-				Primary: slip.ReadString(`(lambda (out) (princ " primary " out))`, scope).Eval(scope, nil).(slip.Caller),
-				After:   slip.ReadString(`(lambda (out) (princ 'after out))`, scope).Eval(scope, nil).(slip.Caller),
+				Before:  slip.ReadEvalString(`(lambda (out) (princ 'before out))`, scope).(slip.Caller),
+				Primary: slip.ReadEvalString(`(lambda (out) (princ " primary " out))`, scope).(slip.Caller),
+				After:   slip.ReadEvalString(`(lambda (out) (princ 'after out))`, scope).(slip.Caller),
 			},
 		},
 	}
@@ -82,8 +82,8 @@ func TestMethodCallWrap(t *testing.T) {
 		Combinations: []*slip.Combination{
 			{
 				From:    slip.FindClass("fixnum"),
-				Wrap:    slip.ReadString(`(lambda (out) (princ 'whopper out))`, scope).Eval(scope, nil).(slip.Caller),
-				Primary: slip.ReadString(`(lambda (out) (princ 'primary out))`, scope).Eval(scope, nil).(slip.Caller),
+				Wrap:    slip.ReadEvalString(`(lambda (out) (princ 'whopper out))`, scope).(slip.Caller),
+				Primary: slip.ReadEvalString(`(lambda (out) (princ 'primary out))`, scope).(slip.Caller),
 			},
 		},
 	}
@@ -93,7 +93,7 @@ func TestMethodCallWrap(t *testing.T) {
 
 func TestMethodArgCountCheck(t *testing.T) {
 	scope := slip.NewScope()
-	inst := slip.ReadString(`(make-instance 'vanilla-flavor)`, scope).Eval(scope, nil).(slip.Instance)
+	inst := slip.ReadEvalString(`(make-instance 'vanilla-flavor)`, scope).(slip.Instance)
 
 	tt.Panic(t, func() { slip.MethodArgCountCheck(scope, 0, inst, "method-1", 1, 2, 3) })
 	tt.Panic(t, func() { slip.MethodArgCountCheck(scope, 0, inst, "method-1", 4, 2, 3) })
@@ -101,7 +101,7 @@ func TestMethodArgCountCheck(t *testing.T) {
 
 func TestMethodArgCountPanic(t *testing.T) {
 	scope := slip.NewScope()
-	inst := slip.ReadString(`(make-instance 'vanilla-flavor)`, scope).Eval(scope, nil).(slip.Instance)
+	inst := slip.ReadEvalString(`(make-instance 'vanilla-flavor)`, scope).(slip.Instance)
 
 	tt.Panic(t, func() { slip.MethodArgCountPanic(scope, 0, inst, "method-1", 1, 2, 3) })
 	tt.Panic(t, func() { slip.MethodArgCountPanic(scope, 0, inst, "method-1", 4, 2, 3) })
@@ -109,14 +109,14 @@ func TestMethodArgCountPanic(t *testing.T) {
 
 func TestMethodArgChoicePanic(t *testing.T) {
 	scope := slip.NewScope()
-	inst := slip.ReadString(`(make-instance 'vanilla-flavor)`, scope).Eval(scope, nil).(slip.Instance)
+	inst := slip.ReadEvalString(`(make-instance 'vanilla-flavor)`, scope).(slip.Instance)
 
 	tt.Panic(t, func() { slip.MethodArgChoicePanic(scope, 0, inst, "method-1", 1, "2 or 3") })
 }
 
 func TestCheckSendArgCount(t *testing.T) {
 	scope := slip.NewScope()
-	inst := slip.ReadString(`(make-instance 'vanilla-flavor)`, scope).Eval(scope, nil).(slip.Instance)
+	inst := slip.ReadEvalString(`(make-instance 'vanilla-flavor)`, scope).(slip.Instance)
 
 	tt.Panic(t, func() { slip.CheckSendArgCount(scope, 0, inst, "method-1", slip.List{nil}, 2, 3) })
 }
@@ -182,7 +182,7 @@ func TestMethodBoundCall(t *testing.T) {
 	var buf strings.Builder
 	out := slip.OutputStream{Writer: &buf}
 	scope.Let(slip.Symbol("out"), &out)
-	code := slip.ReadString(`
+	berry := slip.ReadEvalString(`
 (defflavor berry () ())
 ;;(defwhopper (berry :double) (x) (continue-whopper (1+ x)))
 (defflavor blueberry ((size "medium")) (berry) :gettable-instance-variables :settable-instance-variables)
@@ -193,8 +193,7 @@ func TestMethodBoundCall(t *testing.T) {
 (defwhopper (blueberry :double) (x) (continue-whopper (* 2 x)))
 (defwhopper (berry :double) (x) (continue-whopper (1+ x)))
 (setq berry (make-instance 'blueberry))
-`, scope)
-	berry := code.Eval(scope, nil).(*flavors.Instance)
+`, scope).(*flavors.Instance)
 
 	result := berry.BoundReceive(scope, ":length", nil, 0)
 	tt.Equal(t, "5", slip.ObjectString(result))
@@ -212,5 +211,5 @@ func TestMethodBoundCall(t *testing.T) {
 func undefFlavor(fn string) {
 	defer func() { _ = recover() }()
 	scope := slip.NewScope()
-	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn), scope).Eval(scope, nil)
+	slip.ReadEvalString(fmt.Sprintf("(undefflavor '%s)", fn), scope)
 }

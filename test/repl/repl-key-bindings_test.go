@@ -439,7 +439,7 @@ func BenchmarkReplKeyBindingsSetq(b *testing.B) {
   ("M-a" . line-end) ("M-c" . line-end) ("M-g" . line-end) ("M-i" . line-end)
   ("M-j" . line-end) ("M-k" . line-end) ("M-l" . line-end) ("M-m" . line-end)
   ("M-o" . line-end) ("M-q" . line-end) ("M-x" . line-end) ("M-[1;5E" . line-end)))`, scope)
-	defer slip.ReadString(`(setq *repl-key-bindings* nil)`, scope).Eval(scope, nil)
+	defer slip.ReadEvalString(`(setq *repl-key-bindings* nil)`, scope)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		code.Eval(scope, nil)

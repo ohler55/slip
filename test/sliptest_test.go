@@ -129,7 +129,7 @@ func TestSliptestMacroPanicTypeValidate(t *testing.T) {
 
 func TestSliptestMacroWithScope(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString("(defmacro add10 (x) `(+ 10 ,x))", scope).Eval(scope, nil)
+	slip.ReadEvalString("(defmacro add10 (x) `(+ 10 ,x))", scope)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: "(add10 32)",

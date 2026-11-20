@@ -13,11 +13,10 @@ import (
 func TestRef(t *testing.T) {
 	defer undefFlavor("reef")
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	rr := slip.ReadEvalString(`
 (defflavor reef ((size 3) (none nil)) ())
 (setq rr (make-instance 'reef))
-`, scope)
-	rr := code.Eval(scope, nil).(slip.Instance)
+`, scope).(slip.Instance)
 	ref := slip.Ref{Instance: rr, Key: slip.Symbol("size")}
 	(&sliptest.Object{
 		Target:    &ref,
