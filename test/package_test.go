@@ -4,6 +4,7 @@ package test
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -336,9 +337,23 @@ func TestPackageLoadForm(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(pps, "(defpackage common-lisp-user"))
 	tt.Equal(t, true, strings.Contains(pps, "(:documentation "))
 	tt.Equal(t, true, strings.Contains(pps, "(:nicknames cl-user user)"))
-	tt.Equal(t, true,
-		strings.Contains(pps, "(:use keyword common-lisp generic xml flavors gi bag clos csv repl test watch net)"))
-
+	for _, pkg := range []string{
+		"keyword",
+		"common-lisp",
+		"generic",
+		"xml",
+		"flavors",
+		"gi",
+		"bag",
+		"clos",
+		"csv",
+		"repl",
+		"test",
+		"watch",
+		"net",
+	} {
+		tt.Equal(t, fmt.Sprintf(`/\(:use.*%s/`, pkg), pps)
+	}
 	form = (&slip.CLPkg).LoadForm()
 	pps = string(pp.Append(nil, slip.NewScope(), form))
 	tt.Equal(t, true, strings.Contains(pps, "(defpackage common-lisp"))

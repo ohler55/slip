@@ -4,6 +4,9 @@
 
 ---------------------
 
+- unuse-package does something wrong, code_test TestCodeReadEvalOrder fails
+- TestProvSetBasic in provenance_test.go fails sometimes
+
 - rethink read/compile/eval cycle
  - try and remove special case for defxxx functions and in-package
  - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
