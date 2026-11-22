@@ -3,6 +3,7 @@
 package test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -37,8 +38,8 @@ func TestCoverageSimple(t *testing.T) {
 	slip.StartCoverage()
 	scope := slip.NewScope()
 
-	_ = slip.CompileString(`(load "testdata/cov-test2.lisp")`, scope).Eval(scope, 0)
-	_ = slip.CompileString(`(load "testdata/cov-test.lisp")`, scope).Eval(scope, 0)
+	_ = slip.ReadEvalString(`(load "testdata/cov-test2.lisp")`, scope)
+	_ = slip.ReadEvalString(`(load "testdata/cov-test.lisp")`, scope)
 
 	slip.StopCoverage()
 
@@ -73,10 +74,13 @@ func TestCoverageError(t *testing.T) {
 }
 
 func TestCoverageInTest(t *testing.T) {
+	fmt.Printf("*** Provenance: %t\n", slip.Provenance)
 	defer func() {
 		slip.ResetCoverage(true)
 		slip.StopCoverage()
+		slip.Provenance = false
 	}()
+	slip.Provenance = true
 	slip.ResetCoverage(true)
 	slip.StartCoverage()
 	(&sliptest.Function{

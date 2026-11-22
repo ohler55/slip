@@ -595,10 +595,13 @@ func ReadEval(src []byte, s *Scope, filepath ...string) Object {
 	}
 	cr.scoped(s)
 	cr.read(src)
-	if Provenance && 0 < len(cr.listProvs) {
-		cr.listProvs.Sort()
-		allListProvs = append(allListProvs, cr.listProvs...)
-		allListProvs.Sort()
+	if Provenance && cr.listProvs != nil {
+		if allListProvs == nil {
+			allListProvs = ProvSet{}
+		}
+		for k, p := range cr.listProvs {
+			allListProvs[k] = p
+		}
 	}
 	return cr.code.Eval(s, nil)
 }
@@ -631,8 +634,8 @@ func (r *reader) read(src []byte) {
 			}
 		}
 	}
-	if Provenance && cap(r.listProvs) == 0 {
-		r.listProvs = make(ProvSet, 0, 4096)
+	if Provenance && r.listProvs == nil {
+		r.listProvs = ProvSet{}
 	}
 	var b byte
 	// If src is empty then the for loop will not set r.pos so initialize to
@@ -956,7 +959,7 @@ func (r *reader) closeList() {
 		start.LastColumn = uint16(r.pos - r.lineStart)
 		if Provenance {
 			p := start
-			r.listProvs = r.listProvs.Add(list, &p)
+			r.listProvs.Add(list, &p)
 		}
 		if 0 < last {
 			switch r.stack[last-1] {
@@ -1306,10 +1309,14 @@ func (c Code) Compile() {
 // CompileWithProvenance all the code elements. This evaluates all the defun,
 // defvar, and defmacro calls and converts unquoted lists to functions.
 func (c Code) CompileWithProvenance(listProvs ProvSet) {
-	listProvs.Sort()
-	allListProvs = append(allListProvs, listProvs...)
-	allListProvs.Sort()
-
+	if listProvs != nil {
+		if allListProvs == nil {
+			allListProvs = ProvSet{}
+		}
+		for k, p := range listProvs {
+			allListProvs[k] = p
+		}
+	}
 	scope := NewScope()
 	for i, obj := range c {
 		list, ok := obj.(List)
