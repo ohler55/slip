@@ -3,7 +3,6 @@
 package test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -74,13 +73,10 @@ func TestCoverageError(t *testing.T) {
 }
 
 func TestCoverageInTest(t *testing.T) {
-	fmt.Printf("*** Provenance: %t\n", slip.Provenance)
 	defer func() {
 		slip.ResetCoverage(true)
 		slip.StopCoverage()
-		slip.Provenance = false
 	}()
-	slip.Provenance = true
 	slip.ResetCoverage(true)
 	slip.StartCoverage()
 	(&sliptest.Function{

@@ -80,12 +80,11 @@ func (f *LoadSystem) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 		slip.CurrentPackage = currentPkg
 	}()
 	var (
-		buf       []byte
-		err       error
-		obj       slip.Object
-		filepath  string
-		dirpath   string
-		listProvs slip.ProvSet
+		buf      []byte
+		err      error
+		obj      slip.Object
+		filepath string
+		dirpath  string
 	)
 	for _, dir := range dirs {
 		filepath = fmt.Sprintf("%s/%s.asd", dir, cys)
@@ -94,10 +93,7 @@ func (f *LoadSystem) Call(s *slip.Scope, args slip.List, depth int) slip.Object 
 		if buf, err = os.ReadFile(filepath); err != nil {
 			continue
 		}
-		var code slip.Code
-		code, listProvs = slip.ReadProv(buf, s, absPath(filepath), listProvs)
-		code.CompileWithProvenance(listProvs)
-		obj = code.Eval(s, nil)
+		obj = slip.ReadEval(buf, s, absPath(filepath))
 		dirpath = dir
 		break
 	}

@@ -47,7 +47,7 @@ func ResetProvenance() {
 	provsMutex.Unlock()
 }
 
-// ResetProvenanceUsage sets all provenance useage counts to zero.
+// ResetProvenanceUsage sets all provenance usage counts to zero.
 func ResetProvenanceUsage() {
 	provsMutex.Lock()
 	for _, p := range allListProvs {

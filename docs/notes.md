@@ -6,9 +6,9 @@
 
 - unuse-package does something wrong, code_test TestCodeReadEvalOrder fails
  - are function package un use being preserved or checked on unuse?
-- TestProvSetBasic in provenance_test.go fails sometimes
- - add mutex
- - remove compile with prov in favor of more control of global provset
+
+- remove ReadProv in slip and slap
+- remove CompileWithProvenance in slip and slap
 
 - rethink read/compile/eval cycle
  - try and remove special case for defxxx functions and in-package

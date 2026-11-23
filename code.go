@@ -416,10 +416,13 @@ func ReadString(src string, s *Scope) (code Code) {
 }
 
 // Read Lisp source code and return a Code instance.
-func Read(src []byte, s *Scope) (code Code) {
+func Read(src []byte, s *Scope, filepath ...string) (code Code) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
+	}
+	if 0 < len(filepath) {
+		cr.filepath = filepath[0]
 	}
 	cr.scoped(s)
 	cr.read(src)
@@ -595,14 +598,7 @@ func ReadEval(src []byte, s *Scope, filepath ...string) Object {
 	}
 	cr.scoped(s)
 	cr.read(src)
-	if Provenance && cr.listProvs != nil {
-		if allListProvs == nil {
-			allListProvs = ProvSet{}
-		}
-		for k, p := range cr.listProvs {
-			allListProvs[k] = p
-		}
-	}
+
 	return cr.code.Eval(s, nil)
 }
 
@@ -960,6 +956,7 @@ func (r *reader) closeList() {
 		if Provenance {
 			p := start
 			r.listProvs.Add(list, &p)
+			AddProvenance(list, &p)
 		}
 		if 0 < last {
 			switch r.stack[last-1] {
