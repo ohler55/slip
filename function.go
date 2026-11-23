@@ -298,17 +298,12 @@ func (f *Function) SetProvenance(p *Prov) {
 
 // ListToFunc converts a list to a function.
 func ListToFunc(s *Scope, list List, depth int) Object {
-	return ListToFuncWithProvenance(s, list, depth, allListProvs)
-}
-
-// ListToFuncWithProvenance converts a list to a function.
-func ListToFuncWithProvenance(s *Scope, list List, depth int, listProvs ProvSet) Object {
 	if len(list) == 0 {
 		return nil
 	}
 	var prov *Prov
 	if Provenance {
-		prov = listProvs.Get(list)
+		prov = GetProvenance(list)
 	}
 	switch ta := list[0].(type) {
 	case Symbol:
@@ -322,7 +317,7 @@ func ListToFuncWithProvenance(s *Scope, list List, depth int, listProvs ProvSet)
 		if 1 < len(ta) {
 			if sym, ok := ta[0].(Symbol); ok {
 				if strings.EqualFold("lambda", string(sym)) {
-					lambdaDef := ListToFuncWithProvenance(s, ta, depth+1, listProvs)
+					lambdaDef := ListToFunc(s, ta, depth+1)
 					lc := s.Eval(lambdaDef, depth).(*Lambda)
 					df := Dynamic{
 						Function: Function{
@@ -344,7 +339,7 @@ func ListToFuncWithProvenance(s *Scope, list List, depth int, listProvs ProvSet)
 }
 
 // CompileArgs for the function.
-func (f *Function) CompileArgs(listProvs ProvSet) {
+func (f *Function) CompileArgs() {
 	si := -1
 	for i := 0; i < len(f.Args); i++ {
 		si++
@@ -353,16 +348,16 @@ func (f *Function) CompileArgs(listProvs ProvSet) {
 			if len(f.SkipEval) <= si {
 				if !f.SkipEval[len(f.SkipEval)-1] {
 					if alist, ok := arg.(List); ok {
-						f.Args[i] = CompileList(alist, listProvs)
+						f.Args[i] = CompileList(alist)
 					}
 				}
 			} else if !f.SkipEval[si] {
 				if alist, ok := arg.(List); ok {
-					f.Args[i] = CompileList(alist, listProvs)
+					f.Args[i] = CompileList(alist)
 				}
 			}
 		} else if alist, ok := arg.(List); ok {
-			f.Args[i] = CompileList(alist, listProvs)
+			f.Args[i] = CompileList(alist)
 		}
 	}
 }
@@ -373,11 +368,11 @@ func (f *Function) Caller() Caller {
 }
 
 // CompileList a list into a function or an undefined function.
-func CompileList(list List, listProvs ProvSet) (f Object) {
+func CompileList(list List) (f Object) {
 	if 0 < len(list) {
 		var prov *Prov
 		if Provenance {
-			prov = listProvs.Get(list)
+			prov = GetProvenance(list)
 		}
 		switch ta := list[0].(type) {
 		case Symbol:
@@ -426,14 +421,14 @@ func CompileList(list List, listProvs ProvSet) (f Object) {
 				}
 			}
 			if funk, ok := f.(Funky); ok {
-				funk.CompileArgs(listProvs)
+				funk.CompileArgs()
 			}
 		case List:
 			if 1 < len(ta) {
 				if sym, ok := ta[0].(Symbol); ok {
 					if strings.EqualFold("lambda", string(sym)) {
 						s := NewScope()
-						lambdaDef := ListToFuncWithProvenance(s, ta, 0, listProvs)
+						lambdaDef := ListToFunc(s, ta, 0)
 						lc := s.Eval(lambdaDef, 0).(*Lambda)
 						df := &Dynamic{
 							Function: Function{

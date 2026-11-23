@@ -367,7 +367,6 @@ type reader struct {
 	starts     []Prov
 	carry      []byte // carry over from previous stream read
 	buf        []byte
-	listProvs  ProvSet
 	line       int
 	lineStart  int
 	pos        int
@@ -428,21 +427,6 @@ func Read(src []byte, s *Scope, filepath ...string) (code Code) {
 	cr.read(src)
 
 	return cr.code
-}
-
-// ReadProv Lisp source code and return a Code instance. The filepath argument
-// is used for provenance information.
-func ReadProv(src []byte, s *Scope, filepath string, listProvs ProvSet) (code Code, ps ProvSet) {
-	cr := reader{
-		mode:      valueMode,
-		nextMode:  valueMode,
-		filepath:  filepath,
-		listProvs: listProvs,
-	}
-	cr.scoped(s)
-	cr.read(src)
-
-	return cr.code, cr.listProvs
 }
 
 // ReadOne Lisp source code and return a Code instance.
@@ -629,9 +613,6 @@ func (r *reader) read(src []byte) {
 				break
 			}
 		}
-	}
-	if Provenance && r.listProvs == nil {
-		r.listProvs = ProvSet{}
 	}
 	var b byte
 	// If src is empty then the for loop will not set r.pos so initialize to
@@ -955,7 +936,6 @@ func (r *reader) closeList() {
 		start.LastColumn = uint16(r.pos - r.lineStart)
 		if Provenance {
 			p := start
-			r.listProvs.Add(list, &p)
 			AddProvenance(list, &p)
 		}
 		if 0 < last {
@@ -1300,20 +1280,6 @@ func (c Code) String() string {
 // Compile all the code elements. This evaluates all the defun, defvar, and
 // defmacro calls and converts unquoted lists to functions.
 func (c Code) Compile() {
-	c.CompileWithProvenance(nil)
-}
-
-// CompileWithProvenance all the code elements. This evaluates all the defun,
-// defvar, and defmacro calls and converts unquoted lists to functions.
-func (c Code) CompileWithProvenance(listProvs ProvSet) {
-	if listProvs != nil {
-		if allListProvs == nil {
-			allListProvs = ProvSet{}
-		}
-		for k, p := range listProvs {
-			allListProvs[k] = p
-		}
-	}
 	scope := NewScope()
 	for i, obj := range c {
 		list, ok := obj.(List)
@@ -1339,7 +1305,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		var f Object
 		switch strings.ToLower(string(sym)) {
 		case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct", "defpackage", "in-package":
-			f = ListToFuncWithProvenance(scope, list, 0, listProvs)
+			f = ListToFunc(scope, list, 0)
 			c[i] = f
 		}
 		if f != nil {
@@ -1358,7 +1324,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		if !ok || len(list) == 0 {
 			continue
 		}
-		c[i] = CompileList(list, listProvs)
+		c[i] = CompileList(list)
 	}
 }
 

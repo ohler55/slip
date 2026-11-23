@@ -6,17 +6,24 @@
 
 - unuse-package does something wrong, code_test TestCodeReadEvalOrder fails
  - are function package un use being preserved or checked on unuse?
+- update unit tests
+- remove ReadProv in slap
+- remove CompileWithProvenance in slap
 
-- remove ReadProv in slip and slap
-- remove CompileWithProvenance in slip and slap
-
-- rethink read/compile/eval cycle
- - try and remove special case for defxxx functions and in-package
- - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
- - how about first pass, just lists
-  - second pass convert to functions (maybe combine with first)
-  - third call each including defuns
-   - calls need to resolve functions in this step
+---------------------
+- add a fixnum sorted collection
+ - fast adds
+ - fast lookups
+ - burn code or old provenance
+ - ops
+  - clear or clr
+  - get
+  - has
+  - set or just use setf?
+  - make
+  - type check xxx-p
+  - size or count
+  - remove or rem
 
 ---------------------
 
