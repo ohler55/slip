@@ -536,4 +536,18 @@ func TestCodeReadEvalOrder(t *testing.T) {
 	// Not exported.
 	tt.Panic(t, func() { _ = slip.ReadEvalString("(quux2:inner 3)", scope) })
 	tt.Panic(t, func() { _ = slip.ReadEvalString("(inner 3)", scope) })
+
+	// _ = slip.ReadEvalString(`
+	// (let ((q (find-package 'quux2)))
+	//   (unuse-package q)
+	//   (delete-package q)
+	// )
+	// `, scope)
 }
+
+// func TestCodeReadEvalOrder2(t *testing.T) {
+// 	(&sliptest.Function{
+// 		Source: `(coerce 1.5 'signed-byte)`,
+// 		//PanicType: slip.ErrorSymbol,
+// 	}).Test(t)
+// }

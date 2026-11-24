@@ -249,6 +249,18 @@ func (obj *Package) Use(pkg *Package) {
 	}
 }
 
+func (obj *Package) PrintClasses(label string) {
+	// fmt.Printf("****** %s %s\n", obj, label)
+	// var ca []Class
+	// for _, c := range obj.classes {
+	// 	ca = append(ca, c)
+	// }
+	// sort.Slice(ca, func(i, j int) bool { return ca[i].Name() < ca[j].Name() })
+	// for _, c := range ca {
+	// 	fmt.Printf("  %s:%s\n", c.Pkg().Name, c.Name())
+	// }
+}
+
 // Unuse a package
 func (obj *Package) Unuse(pkg *Package) {
 	if obj.Locked {
@@ -261,6 +273,7 @@ func (obj *Package) Unuse(pkg *Package) {
 			obj.mu.Unlock()
 			pkg.mu.Unlock()
 		}()
+		obj.PrintClasses("before")
 		for i, p := range obj.Uses {
 			if pkg.Name == p.Name {
 				obj.Uses = append(obj.Uses[:i], obj.Uses[i+1:]...)
@@ -277,6 +290,9 @@ func (obj *Package) Unuse(pkg *Package) {
 		obj.vars = map[string]*VarVal{}
 		obj.funcs = map[string]*FuncInfo{}
 		obj.classes = map[string]Class{}
+
+		// TBD make use of same code as obj.Use()
+
 		for _, p := range obj.Uses {
 			for name, vv := range p.vars {
 				obj.vars[name] = vv
@@ -288,6 +304,7 @@ func (obj *Package) Unuse(pkg *Package) {
 				obj.classes[name] = c
 			}
 		}
+		obj.PrintClasses("after")
 	}
 }
 
