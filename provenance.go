@@ -7,8 +7,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"unsafe"
-
-	"github.com/ohler55/ojg/pretty"
 )
 
 // Provenance when true will collect provenance information on list and
@@ -94,51 +92,4 @@ func DebugProvenance() any {
 		return simple[i].(map[string]any)["key"].(int64) < simple[j].(map[string]any)["key"].(int64)
 	})
 	return simple
-}
-
-// Add a Prov for a list without attempting to sort nor to check for
-// duplicates.
-func (ps ProvSet) Add(list List, value *Prov) {
-	ps[unsafe.Pointer(unsafe.SliceData(list))] = value
-}
-
-// Get a Prov at the provided list address. If none exists nil is returned.
-func (ps ProvSet) Get(list List) (p *Prov) {
-	provsMutex.Lock()
-	p = ps[unsafe.Pointer(unsafe.SliceData(list))]
-	provsMutex.Unlock()
-
-	return
-}
-
-// Simplify into the simple format defined in OjG.
-func (ps ProvSet) Simplify() any {
-	simple := make([]any, 0, len(ps))
-	for k, p := range ps {
-		simple = append(simple, map[string]any{
-			"key": int64(uintptr(k)),
-			"value": map[string]any{
-				"filepath":    p.Filepath,
-				"firstLine":   int64(p.FirstLine),
-				"lastLine":    int64(p.LastLine),
-				"firstColumn": int64(p.FirstColumn),
-				"lastColumn":  int64(p.LastColumn),
-				"count":       p.count,
-			},
-		})
-	}
-	sort.Slice(simple, func(i, j int) bool {
-		return simple[i].(map[string]any)["key"].(int64) < simple[j].(map[string]any)["key"].(int64)
-	})
-	return simple
-}
-
-// String returns a string representation of the instance.
-func (ps ProvSet) String() string {
-	return string(ps.Append(nil))
-}
-
-// Append encodes the instance into a []byte.
-func (ps ProvSet) Append(b []byte) []byte {
-	return append(b, pretty.SEN(ps.Simplify())...)
 }

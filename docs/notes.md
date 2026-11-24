@@ -6,7 +6,7 @@
 
 - unuse-package does something wrong, code_test TestCodeReadEvalOrder fails
  - are function package un use being preserved or checked on unuse?
-- update unit tests
+
 - remove ReadProv in slap
 - remove CompileWithProvenance in slap
 
