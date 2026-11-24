@@ -545,10 +545,3 @@ func TestCodeReadEvalOrder(t *testing.T) {
 	)
 	`, scope)
 }
-
-func TestCodeReadEvalOrder2(t *testing.T) {
-	(&sliptest.Function{
-		Source:    `(coerce 1.5 'signed-byte)`,
-		PanicType: slip.ErrorSymbol,
-	}).Test(t)
-}

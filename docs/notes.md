@@ -4,13 +4,13 @@
 
 ---------------------
 
-- test unuse-package shadow recover
-
-- remove ReadProv in slap
-- remove CompileWithProvenance in slap
+- replace ReadProv in slap
+- replace CompileWithProvenance in slap
 
 ---------------------
-- add a fixnum sorted collection
+- add with-package-iterator (name package-list-form &rest symbol-types)
+
+- add a fixnum sorted collection - fixnum-table fixnum-set fixnum-dict
  - fast adds
  - fast lookups
  - burn code or old provenance
