@@ -249,16 +249,31 @@ func (obj *Package) Use(pkg *Package) {
 	}
 }
 
-func (obj *Package) PrintClasses(label string) {
-	// fmt.Printf("****** %s %s\n", obj, label)
-	// var ca []Class
-	// for _, c := range obj.classes {
-	// 	ca = append(ca, c)
-	// }
-	// sort.Slice(ca, func(i, j int) bool { return ca[i].Name() < ca[j].Name() })
-	// for _, c := range ca {
-	// 	fmt.Printf("  %s:%s\n", c.Pkg().Name, c.Name())
-	// }
+func (obj *Package) findImportedVar(name string) *VarVal {
+	for _, p := range obj.Uses {
+		if vv := p.vars[name]; vv != nil {
+			return vv
+		}
+	}
+	return nil
+}
+
+func (obj *Package) findImportedFunc(name string) *FuncInfo {
+	for _, p := range obj.Uses {
+		if fi := p.funcs[name]; fi != nil {
+			return fi
+		}
+	}
+	return nil
+}
+
+func (obj *Package) findImportedClass(name string) Class {
+	for _, p := range obj.Uses {
+		if c := p.classes[name]; c != nil {
+			return c
+		}
+	}
+	return nil
 }
 
 // Unuse a package
@@ -273,7 +288,6 @@ func (obj *Package) Unuse(pkg *Package) {
 			obj.mu.Unlock()
 			pkg.mu.Unlock()
 		}()
-		obj.PrintClasses("before")
 		for i, p := range obj.Uses {
 			if pkg.Name == p.Name {
 				obj.Uses = append(obj.Uses[:i], obj.Uses[i+1:]...)
@@ -286,25 +300,44 @@ func (obj *Package) Unuse(pkg *Package) {
 				break
 			}
 		}
-		// Rebuild to make sure use tree branches are removed as well.
-		obj.vars = map[string]*VarVal{}
-		obj.funcs = map[string]*FuncInfo{}
-		obj.classes = map[string]Class{}
-
-		// TBD make use of same code as obj.Use()
-
-		for _, p := range obj.Uses {
-			for name, vv := range p.vars {
+		var remove []string
+		for name, vv := range obj.vars {
+			if vv.Pkg == pkg {
+				remove = append(remove, name)
+			}
+		}
+		for _, name := range remove {
+			delete(obj.vars, name)
+			if vv := obj.findImportedVar(name); vv != nil {
 				obj.vars[name] = vv
 			}
-			for name, fi := range p.funcs {
+		}
+
+		remove = remove[:0]
+		for name, fi := range obj.funcs {
+			if fi.Pkg == pkg {
+				remove = append(remove, name)
+			}
+		}
+		for _, name := range remove {
+			delete(obj.funcs, name)
+			if fi := obj.findImportedFunc(name); fi != nil {
 				obj.funcs[name] = fi
 			}
-			for name, c := range p.classes {
+		}
+
+		remove = remove[:0]
+		for name, c := range obj.classes {
+			if c.Pkg() == pkg {
+				remove = append(remove, name)
+			}
+		}
+		for _, name := range remove {
+			delete(obj.classes, name)
+			if c := obj.findImportedClass(name); c != nil {
 				obj.classes[name] = c
 			}
 		}
-		obj.PrintClasses("after")
 	}
 }
 

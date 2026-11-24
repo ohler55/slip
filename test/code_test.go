@@ -506,11 +506,12 @@ func TestCodeReadStreamPushOk(t *testing.T) {
 // Verify functions are called in order unlike a read/compile/eval sycle.
 func TestCodeReadEvalOrder(t *testing.T) {
 	scope := slip.NewScope()
-	// defer func() {
-	// 	_ = slip.ReadEvalString(`(let ((q (find-package 'quux2)))
-	//                                (unuse-package q)
-	//                                (delete-package q))`, scope)
-	// }()
+	defer func() {
+		_ = slip.ReadEvalString(`(let ((q (find-package 'quux2)))
+                                   (when q
+                                     (unuse-package q)
+                                     (delete-package q)))`, scope)
+	}()
 	src := []byte(`
 (defpackage :quux2
   (:use :cl))
@@ -537,17 +538,17 @@ func TestCodeReadEvalOrder(t *testing.T) {
 	tt.Panic(t, func() { _ = slip.ReadEvalString("(quux2:inner 3)", scope) })
 	tt.Panic(t, func() { _ = slip.ReadEvalString("(inner 3)", scope) })
 
-	// _ = slip.ReadEvalString(`
-	// (let ((q (find-package 'quux2)))
-	//   (unuse-package q)
-	//   (delete-package q)
-	// )
-	// `, scope)
+	_ = slip.ReadEvalString(`
+	(let ((q (find-package 'quux2)))
+	  (unuse-package q)
+	  (delete-package q)
+	)
+	`, scope)
 }
 
-// func TestCodeReadEvalOrder2(t *testing.T) {
-// 	(&sliptest.Function{
-// 		Source: `(coerce 1.5 'signed-byte)`,
-// 		//PanicType: slip.ErrorSymbol,
-// 	}).Test(t)
-// }
+func TestCodeReadEvalOrder2(t *testing.T) {
+	(&sliptest.Function{
+		Source:    `(coerce 1.5 'signed-byte)`,
+		PanicType: slip.ErrorSymbol,
+	}).Test(t)
+}

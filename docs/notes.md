@@ -4,9 +4,7 @@
 
 ---------------------
 
-- unuse-package does something wrong, code_test TestCodeReadEvalOrder fails
- - are function package un use being preserved or checked on unuse?
- - save own classes, vars, and funcs to put back after unuse
+- test unuse-package shadow recover
 
 - remove ReadProv in slap
 - remove CompileWithProvenance in slap
