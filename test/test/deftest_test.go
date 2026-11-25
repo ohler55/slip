@@ -15,8 +15,8 @@ func TestDeftestBasic(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (deftest "toot" nil (assert-nil (car '()))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :describe out)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq toot (deftest "toot" nil (assert-nil (car '()))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :describe out)`, scope)
 	tt.Equal(t, `/#<test-flavor [0-9a-f]+>, an instance of flavor test-flavor,
   has instance variable values:
     forms: \(\(assert-nil \(car '\(\)\)\)\)
@@ -27,7 +27,7 @@ func TestDeftestBasic(t *testing.T) {
 
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	out.Reset()
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, "toot: PASS\n", out.String())
 }
 
@@ -36,9 +36,9 @@ func TestDeftestInSuite(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq top (defsuite "top" nil))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(setq toot (deftest "toot" top (assert-nil (car '()))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :describe out)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq top (defsuite "top" nil))`, scope)
+	_ = slip.ReadEvalString(`(setq toot (deftest "toot" top (assert-nil (car '()))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :describe out)`, scope)
 	tt.Equal(t, `/#<test-flavor [0-9a-f]+>, an instance of flavor test-flavor,
   has instance variable values:
     forms: \(\(assert-nil \(car '\(\)\)\)\)
@@ -49,7 +49,7 @@ func TestDeftestInSuite(t *testing.T) {
 
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	out.Reset()
-	_ = slip.ReadString(`(send top :run :verbose t)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send top :run :verbose t)`, scope)
 	tt.Equal(t, `top:
   toot: PASS
 -------------- top:
@@ -61,10 +61,10 @@ func TestDeftestInSuite(t *testing.T) {
 
 func TestDeftestBadName(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { _ = slip.ReadString(`(deftest t nil)`, scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(deftest t nil)`, scope) })
 }
 
 func TestDeftestBadParent(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { _ = slip.ReadString(`(deftest "bad" t)`, scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(deftest "bad" t)`, scope) })
 }

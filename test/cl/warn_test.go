@@ -19,7 +19,7 @@ func TestWarnSimple(t *testing.T) {
 	defer func() { slip.ErrorOutput = orig }()
 	slip.ErrorOutput = &slip.OutputStream{Writer: &out}
 
-	result := slip.ReadString(`(warn "numbers ~D and ~D" 2 3)`, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(`(warn "numbers ~D and ~D" 2 3)`, scope)
 	tt.Nil(t, result)
 	tt.Equal(t, "Warning: numbers 2 and 3\n", out.String())
 }
@@ -32,7 +32,7 @@ func TestWarnClass(t *testing.T) {
 	defer func() { slip.ErrorOutput = orig }()
 	slip.ErrorOutput = &slip.OutputStream{Writer: &out}
 
-	result := slip.ReadString(`(warn 'warning :message "danger")`, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(`(warn 'warning :message "danger")`, scope)
 	tt.Nil(t, result)
 	tt.Equal(t, "Warning: danger\n", out.String())
 }
@@ -43,7 +43,7 @@ func TestWarnWriteFail(t *testing.T) {
 	defer func() { slip.ErrorOutput = orig }()
 	slip.ErrorOutput = &slip.OutputStream{Writer: badWriter(0)}
 
-	tt.Panic(t, func() { _ = slip.ReadString(`(warn "fail")`, scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(warn "fail")`, scope) })
 }
 
 func TestWarnBadDatum(t *testing.T) {

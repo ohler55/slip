@@ -4,8 +4,6 @@ package slip
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -39,15 +37,17 @@ type Package struct {
 	// implicitly by referencing a function not yet defined. In that case the
 	// caller in the map will have Forms list of length 1 and the single form
 	// will have an Object that evaluates to an undefined function panic.
-	lambdas  map[string]*Lambda
-	funcs    map[string]*FuncInfo
-	vars     map[string]*VarVal
-	classes  map[string]Class
-	PreSet   func(p *Package, name string, value Object) (string, Object)
-	mu       sync.Mutex
-	path     string
-	loadPath string // load path is set by require
-	Locked   bool
+	lambdas     map[string]*Lambda
+	funcs       map[string]*FuncInfo
+	vars        map[string]*VarVal
+	classes     map[string]Class
+	shadowVars  map[string]*VarVal
+	shadowFuncs map[string]*FuncInfo
+	PreSet      func(p *Package, name string, value Object) (string, Object)
+	mu          sync.Mutex
+	path        string
+	loadPath    string // load path is set by require
+	Locked      bool
 }
 
 // DefPackage creates a new package. Calling Import() and Use() after creation
@@ -210,6 +210,12 @@ func (obj *Package) Use(pkg *Package) {
 		}
 		for name, vv := range pkg.vars {
 			if vv.Export {
+				if ovv, has := obj.vars[name]; has && ovv.Pkg == obj {
+					if obj.shadowVars == nil {
+						obj.shadowVars = map[string]*VarVal{}
+					}
+					obj.shadowVars[name] = ovv
+				}
 				obj.vars[name] = vv
 			}
 		}
@@ -217,10 +223,13 @@ func (obj *Package) Use(pkg *Package) {
 			obj.funcs = map[string]*FuncInfo{}
 		}
 		for name, fi := range pkg.funcs {
-			if xfi, has := obj.funcs[name]; has && !xfi.unbound {
-				continue
-			}
 			if fi.Export {
+				if ofi, has := obj.funcs[name]; has && ofi.Pkg == obj {
+					if obj.shadowFuncs == nil {
+						obj.shadowFuncs = map[string]*FuncInfo{}
+					}
+					obj.shadowFuncs[name] = ofi
+				}
 				obj.funcs[name] = fi
 			}
 		}
@@ -228,23 +237,51 @@ func (obj *Package) Use(pkg *Package) {
 			obj.classes = map[string]Class{}
 		}
 		for name, c := range pkg.classes {
-			// TBD check if exported
+			// TBD make sure all packages with flavors or classes export
 			if xc, has := obj.classes[name]; has {
 				if xc.Pkg() == c.Pkg() {
 					continue
 				}
-				var w io.Writer = os.Stdout
-				if vv := CurrentPackage.getVarVal("*error-output*"); vv != nil {
-					w = vv.Value().(io.Writer)
-				}
-				_, _ = fmt.Fprintf(w, "WARNING: Package %s:%s shadows %s:%s.\n", obj.Name, name, pkg.Name, name)
-				continue
-				// TBD when exports are ready use those to allow the shadowing
-				// PackagePanic(NewScope(), 0, obj, "Package %s already defines class %s which can not be replaced "+
-				// 	"with a class with the same name in package %s.",
-				// 	obj, name, pkg)
+				PackagePanic(NewScope(), 0, obj, "Package %s already defines class %s which can not be replaced "+
+					"with a class with the same name in package %s.", obj, name, pkg)
 			}
 			obj.classes[name] = c
+		}
+	}
+}
+
+// replaceShadowVar looks for a var that has been shadowed. It can either be
+// on the shadow map or imported from a used package.
+func (obj *Package) replaceShadowVar(name string) {
+	if obj.shadowVars != nil {
+		if vv := obj.shadowVars[name]; vv != nil {
+			obj.vars[name] = vv
+			delete(obj.shadowVars, name)
+			return
+		}
+	}
+	for _, p := range obj.Uses {
+		if vv := p.vars[name]; vv != nil && vv.Export {
+			obj.vars[name] = vv
+			return
+		}
+	}
+}
+
+// replaceShadowFunc looks for a func that has been shadowed. It can either be
+// on the shadow map or imported from a used package.
+func (obj *Package) replaceShadowFunc(name string) {
+	if obj.shadowFuncs != nil {
+		if vv := obj.shadowFuncs[name]; vv != nil {
+			obj.funcs[name] = vv
+			delete(obj.shadowFuncs, name)
+			return
+		}
+	}
+	for _, p := range obj.Uses {
+		if vv := p.funcs[name]; vv != nil && vv.Export {
+			obj.funcs[name] = vv
+			return
 		}
 	}
 }
@@ -273,20 +310,36 @@ func (obj *Package) Unuse(pkg *Package) {
 				break
 			}
 		}
-		// Rebuild to make sure use tree branches are removed as well.
-		obj.vars = map[string]*VarVal{}
-		obj.funcs = map[string]*FuncInfo{}
-		obj.classes = map[string]Class{}
-		for _, p := range obj.Uses {
-			for name, vv := range p.vars {
-				obj.vars[name] = vv
+		var remove []string
+		for name, vv := range obj.vars {
+			if vv.Pkg == pkg {
+				remove = append(remove, name)
 			}
-			for name, fi := range p.funcs {
-				obj.funcs[name] = fi
+		}
+		for _, name := range remove {
+			delete(obj.vars, name)
+			obj.replaceShadowVar(name)
+		}
+
+		remove = remove[:0]
+		for name, fi := range obj.funcs {
+			if fi.Pkg == pkg {
+				remove = append(remove, name)
 			}
-			for name, c := range p.classes {
-				obj.classes[name] = c
+		}
+		for _, name := range remove {
+			delete(obj.funcs, name)
+			obj.replaceShadowFunc(name)
+		}
+
+		remove = remove[:0]
+		for name, c := range obj.classes {
+			if c.Pkg() == pkg {
+				remove = append(remove, name)
 			}
+		}
+		for _, name := range remove {
+			delete(obj.classes, name)
 		}
 	}
 }

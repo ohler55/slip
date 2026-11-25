@@ -12,11 +12,10 @@ import (
 func TestInstance(t *testing.T) {
 	defer undefFlavor("loaded")
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	obj := slip.ReadEvalString(`
 (defflavor loaded ((size 3) (none nil)) ())
 (setq load (make-instance 'loaded))
-`, scope)
-	obj := code.Eval(scope, nil).(slip.Instance)
+`, scope).(slip.Instance)
 
 	form := slip.InstanceLoadForm(obj)
 
@@ -26,8 +25,7 @@ func TestInstance(t *testing.T) {
 
 func TestInstanceCondition(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`(setq quux (make-condition 'error))`, scope)
-	obj := code.Eval(scope, nil).(slip.Instance)
+	obj := slip.ReadEvalString(`(setq quux (make-condition 'error))`, scope).(slip.Instance)
 
 	form := slip.InstanceLoadForm(obj)
 

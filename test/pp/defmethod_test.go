@@ -14,7 +14,7 @@ func TestDefmethodBasic(t *testing.T) {
 	defer undefFlavor("berry")
 
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor berry (color) ()
  :gettable-instance-variables
  :settable-instance-variables
@@ -26,7 +26,7 @@ func TestDefmethodBasic(t *testing.T) {
 (defflavor blueberry () (berry))
 (defmethod (blueberry :before :rot) () "Berries that are blue." (princ "blueberry before rot") (terpri))
 (defmethod (blueberry :after :rot) () (princ "blueberry after rot") (terpri))
-`, scope).Eval(scope, nil)
+`, scope)
 
 	(&sliptest.Function{
 		Source: `(let ((*print-right-margin* 60)) (pretty-print berry:primary:rot nil))`,

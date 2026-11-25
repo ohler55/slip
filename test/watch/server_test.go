@@ -158,7 +158,7 @@ func TestServerDocs(t *testing.T) {
 		":connections",
 		":activep",
 	} {
-		_ = slip.ReadString(fmt.Sprintf(`(describe-method watch-server %s out)`, method), scope).Eval(scope, nil)
+		_ = slip.ReadEvalString(fmt.Sprintf(`(describe-method watch-server %s out)`, method), scope)
 		tt.Equal(t, true, strings.Contains(out.String(), method))
 		out.Reset()
 	}
@@ -167,8 +167,8 @@ func TestServerDocs(t *testing.T) {
 func TestServerProtocolOk(t *testing.T) {
 	scope := slip.NewScope()
 	port := availablePort()
-	ws := slip.ReadString(
-		fmt.Sprintf(`(make-instance 'watch-server :port %d)`, port), scope).Eval(scope, nil).(*flavors.Instance)
+	ws := slip.ReadEvalString(
+		fmt.Sprintf(`(make-instance 'watch-server :port %d)`, port), scope).(*flavors.Instance)
 	defer func() { _ = ws.Receive(scope, ":shutdown", slip.List{}, 0) }()
 
 	con, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))

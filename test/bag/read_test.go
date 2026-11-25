@@ -18,8 +18,8 @@ func TestBagReadWithStringPath(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 
-	obj := slip.ReadString(
-		`(setq bag (make-instance bag-flavor :read input))`, scope).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadEvalString(
+		`(setq bag (make-instance bag-flavor :read input))`, scope).(*flavors.Instance)
 	r = strings.NewReader("{b:3}")
 	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	(&sliptest.Function{
@@ -35,8 +35,8 @@ func TestBagReadWithPath(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 
-	obj := slip.ReadString(
-		`(setq bag (make-instance bag-flavor :read input))`, scope).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadEvalString(
+		`(setq bag (make-instance bag-flavor :read input))`, scope).(*flavors.Instance)
 	r = strings.NewReader("{b:3}")
 	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 	(&sliptest.Function{
@@ -52,8 +52,8 @@ func TestBagReadNoPath(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("input"), slip.NewInputStream(r))
 
-	obj := slip.ReadString(
-		`(setq bag (make-instance bag-flavor :parse "{b:3}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	obj := slip.ReadEvalString(
+		`(setq bag (make-instance bag-flavor :parse "{b:3}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-read bag input)`,
@@ -64,8 +64,8 @@ func TestBagReadNoPath(t *testing.T) {
 
 func TestBagReadNotStream(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(
-		`(setq bag (make-instance bag-flavor :parse "{b:3}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance bag-flavor :parse "{b:3}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-read bag t)`,
@@ -75,8 +75,8 @@ func TestBagReadNotStream(t *testing.T) {
 
 func TestBagReadNotBag(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(
-		`(setq bag (make-instance bag-flavor :parse "{b:3}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance bag-flavor :parse "{b:3}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-read (make-instance vanilla-flavor) t)`,

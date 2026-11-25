@@ -225,7 +225,6 @@ func run() {
 	if interactive || len(evalCode) == 0 {
 		repl.Interactive = true
 	}
-	var listProvs slip.ProvSet
 	if allAtOnce {
 		var paths slip.List
 		for _, path = range flag.Args() {
@@ -236,9 +235,7 @@ func run() {
 				if w != nil {
 					_, _ = fmt.Fprintf(w, ";; Loading contents of %s\n", path)
 				}
-				var c slip.Code
-				c, listProvs = slip.ReadProv(buf, scope, path, listProvs)
-				code = append(code, c...)
+				code = append(code, slip.Read(buf, scope, path)...)
 				paths = append(paths, slip.String(path))
 			} else {
 				panic(err)
@@ -246,7 +243,6 @@ func run() {
 		}
 		scope.UnsafeLet(slip.Symbol("*load-pathname*"), paths)
 		scope.UnsafeLet(slip.Symbol("*load-truename*"), paths)
-		code.CompileWithProvenance(listProvs)
 		if print == nil {
 			code.Eval(scope, nil)
 		} else {
@@ -269,8 +265,7 @@ func run() {
 				if w != nil {
 					_, _ = fmt.Fprintf(w, ";; Loading contents of %s\n", pathname)
 				}
-				code, listProvs = slip.ReadProv(buf, scope, string(pathname), listProvs)
-				code.CompileWithProvenance(listProvs)
+				code = slip.Read(buf, scope, string(pathname))
 				var loaded slip.Object
 				if print == nil {
 					loaded = code.Eval(scope, nil)

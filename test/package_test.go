@@ -4,6 +4,7 @@ package test
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -336,9 +337,23 @@ func TestPackageLoadForm(t *testing.T) {
 	tt.Equal(t, true, strings.Contains(pps, "(defpackage common-lisp-user"))
 	tt.Equal(t, true, strings.Contains(pps, "(:documentation "))
 	tt.Equal(t, true, strings.Contains(pps, "(:nicknames cl-user user)"))
-	tt.Equal(t, true,
-		strings.Contains(pps, "(:use keyword common-lisp generic xml flavors gi bag clos csv repl test watch net)"))
-
+	for _, pkg := range []string{
+		"keyword",
+		"common-lisp",
+		"generic",
+		"xml",
+		"flavors",
+		"gi",
+		"bag",
+		"clos",
+		"csv",
+		"repl",
+		"test",
+		"watch",
+		"net",
+	} {
+		tt.Equal(t, fmt.Sprintf(`/\(:use.*%s/`, pkg), pps)
+	}
 	form = (&slip.CLPkg).LoadForm()
 	pps = string(pp.Append(nil, slip.NewScope(), form))
 	tt.Equal(t, true, strings.Contains(pps, "(defpackage common-lisp"))
@@ -408,4 +423,62 @@ func TestPackagePkgPath(t *testing.T) {
 
 func TestPackageLoadPath(t *testing.T) {
 	tt.Equal(t, "", bag.Pkg.LoadPath())
+}
+
+func TestPackageUnuse(t *testing.T) {
+	scope := slip.NewScope()
+	defer func() {
+		_ = slip.ReadEvalString(`(let ((q (find-package 'quux3)))
+                                   (makunbound 'shadow-var)
+                                   (makunbound 'shadow-fun)
+                                   (when q
+                                     (unuse-package q)
+                                     (delete-package q)))`, scope)
+	}()
+	src := []byte(`
+(defvar shadow-var 3)
+(defun shadow-fun () 4)
+
+(defpackage :quux3
+  (:use :cl))
+
+(in-package :quux3)
+
+(defun outer (x)
+  (inner x))
+
+(defun inner (x)
+  (* 2 x))
+
+(defvar shadow-var 5)
+(defun shadow-fun () 6)
+
+(export 'outer)
+(export 'shadow-var)
+(export 'shadow-fun)
+
+(in-package 'cl-user)
+(use-package 'quux3)
+`)
+	_ = slip.ReadEval(src, scope)
+
+	tt.Equal(t, slip.Fixnum(6), slip.ReadEvalString("(outer 3)", scope))
+	tt.Equal(t, slip.Fixnum(6), slip.ReadEvalString("(quux3::inner 3)", scope))
+
+	// Not exported.
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(quux3:inner 3)", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(inner 3)", scope) })
+
+	tt.Equal(t, slip.Fixnum(5), slip.ReadEvalString("shadow-var", scope))
+	tt.Equal(t, slip.Fixnum(6), slip.ReadEvalString("(shadow-fun)", scope))
+
+	_ = slip.ReadEvalString(`
+(let ((q (find-package 'quux3)))
+  (unuse-package q)
+  (delete-package q))
+`, scope)
+
+	tt.Equal(t, slip.Fixnum(3), slip.ReadEvalString("shadow-var", scope))
+	tt.Equal(t, slip.Fixnum(4), slip.ReadEvalString("(shadow-fun)", scope))
+
 }

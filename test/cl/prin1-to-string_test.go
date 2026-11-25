@@ -19,8 +19,8 @@ func TestPrin1ToStringBasic(t *testing.T) {
 
 func TestPrin1ToStringStructWithPrintFunction(t *testing.T) {
 	scope := slip.NewScope()
-	slip.ReadString(`(defstruct (p12spf (:print-function (lambda (obj str depth) (princ "x" str)))) x)`,
-		scope).Eval(scope, nil)
-	out := slip.ReadString("(prin1-to-string (make-p12spf :x 1))", scope).Eval(scope, nil)
+	slip.ReadEvalString(`(defstruct (p12spf (:print-function (lambda (obj str depth) (princ "x" str)))) x)`,
+		scope)
+	out := slip.ReadEvalString("(prin1-to-string (make-p12spf :x 1))", scope)
 	tt.Equal(t, `"x"`, out.String())
 }

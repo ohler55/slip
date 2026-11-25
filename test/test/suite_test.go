@@ -17,27 +17,27 @@ func TestSuiteDocs(t *testing.T) {
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
 
-	_ = slip.ReadString(`(describe-method 'suite-flavor :run)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'suite-flavor :run)`, scope)
 	tt.Equal(t, "/:run is a method of suite-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'suite-flavor :result)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'suite-flavor :result)`, scope)
 	tt.Equal(t, "/:result is a method of suite-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'suite-flavor :report)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'suite-flavor :report)`, scope)
 	tt.Equal(t, "/:report is a method of suite-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'suite-flavor :reset)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'suite-flavor :reset)`, scope)
 	tt.Equal(t, "/:reset is a method of suite-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'suite-flavor :init)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'suite-flavor :init)`, scope)
 	tt.Equal(t, "/:init is a method of suite-flavor/", out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(describe-method 'suite-flavor :find)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(describe-method 'suite-flavor :find)`, scope)
 	tt.Equal(t, "/:find is a method of suite-flavor/", out.String())
 }
 
@@ -48,8 +48,8 @@ func TestSuiteRunBasic(t *testing.T) {
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &stdout})
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(send sweet :run)`, scope).Eval(scope, nil)
-	result := slip.ReadString(`(send (send top :result) :write nil)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send sweet :run)`, scope)
+	result := slip.ReadEvalString(`(send (send top :result) :write nil)`, scope)
 	tt.Equal(t, `{
   fail: 1
   pass: 1
@@ -57,7 +57,7 @@ func TestSuiteRunBasic(t *testing.T) {
   subs: {sweet: {fail: 1 pass: 1 skip: 0 subs: {boom: fail toot: pass}}}
 }`, string(result.(slip.String)))
 
-	_ = slip.ReadString(`(send top :report out)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send top :report out)`, scope)
 	tt.Equal(t, `top:
   sweet:
     toot: PASS
@@ -82,7 +82,7 @@ func TestSuiteRunVerbose(t *testing.T) {
 	var out bytes.Buffer
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(send top :run :verbose t)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send top :run :verbose t)`, scope)
 	tt.Equal(t, `top:
   sweet:
     toot: PASS
@@ -100,7 +100,7 @@ func TestSuiteRunVerbose(t *testing.T) {
 `, out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(send top :report)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send top :report)`, scope)
 	tt.Equal(t, `top:
   sweet:
     toot: PASS
@@ -118,25 +118,25 @@ func TestSuiteRunVerbose(t *testing.T) {
 
 func TestSuiteFind(t *testing.T) {
 	scope := buildSuiteScope()
-	found := slip.ReadString(`(send top :find 'sweet 'boom)`, scope).Eval(scope, nil)
+	found := slip.ReadEvalString(`(send top :find 'sweet 'boom)`, scope)
 	tt.SameType(t, &flavors.Instance{}, found)
 	scope.Let(slip.Symbol("found"), found)
-	name := slip.ReadString(`(send found :name)`, scope).Eval(scope, nil)
+	name := slip.ReadEvalString(`(send found :name)`, scope)
 	tt.Equal(t, "boom", string(name.(slip.String)))
 
-	found = slip.ReadString(`(send top :find 'sweet "nothing")`, scope).Eval(scope, nil)
+	found = slip.ReadEvalString(`(send top :find 'sweet "nothing")`, scope)
 	tt.Nil(t, found)
 
-	found = slip.ReadString(`(send top :find)`, scope).Eval(scope, nil)
+	found = slip.ReadEvalString(`(send top :find)`, scope)
 	tt.Nil(t, found)
 
-	found = slip.ReadString(`(send top :find t)`, scope).Eval(scope, nil)
+	found = slip.ReadEvalString(`(send top :find t)`, scope)
 	tt.Nil(t, found)
 
-	found = slip.ReadString(`(send top :find '())`, scope).Eval(scope, nil)
+	found = slip.ReadEvalString(`(send top :find '())`, scope)
 	tt.SameType(t, &flavors.Instance{}, found)
 	scope.Let(slip.Symbol("found"), found)
-	name = slip.ReadString(`(send found :name)`, scope).Eval(scope, nil)
+	name = slip.ReadEvalString(`(send found :name)`, scope)
 	tt.Equal(t, "top", string(name.(slip.String)))
 }
 
@@ -145,8 +145,8 @@ func TestSuiteRunFilter(t *testing.T) {
 	var out bytes.Buffer
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(send top :run :filter '(sweet toot))`, scope).Eval(scope, nil)
-	result := slip.ReadString(`(send (send top :result) :write nil)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send top :run :filter '(sweet toot))`, scope)
+	result := slip.ReadEvalString(`(send (send top :result) :write nil)`, scope)
 	tt.Equal(t, `{
   fail: 0
   pass: 1
@@ -160,8 +160,8 @@ func TestSuiteRunFilterRegexp(t *testing.T) {
 	var out bytes.Buffer
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(send top :run :filter "/swe*t/./to*t/")`, scope).Eval(scope, nil)
-	result := slip.ReadString(`(send (send top :result) :write nil)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send top :run :filter "/swe*t/./to*t/")`, scope)
+	result := slip.ReadEvalString(`(send (send top :result) :write nil)`, scope)
 	tt.Equal(t, `{
   fail: 0
   pass: 1
@@ -172,18 +172,18 @@ func TestSuiteRunFilterRegexp(t *testing.T) {
 
 func TestSuiteReportBadWriter(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq sweet (make-instance 'suite-flavor :name "sweet"))`, scope).Eval(scope, nil)
-	tt.Panic(t, func() { _ = slip.ReadString(`(send sweet :report t)`, scope).Eval(scope, nil) })
+	_ = slip.ReadEvalString(`(setq sweet (make-instance 'suite-flavor :name "sweet"))`, scope)
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(send sweet :report t)`, scope) })
 }
 
 func buildSuiteScope() *slip.Scope {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (setq top (make-instance 'suite-flavor :name "top")
       sweet (make-instance 'suite-flavor :name "sweet" :parent top)
       toot (make-instance 'test-flavor :name "toot" :parent sweet :forms '((+ 1 (/ 2 3))))
       boom (make-instance 'test-flavor :name "boom" :parent sweet :forms '((/ 1 0))))
-`, scope).Eval(scope, nil)
+`, scope)
 	return scope
 }
 
@@ -192,9 +192,9 @@ func TestSuiteRunSetup(t *testing.T) {
 	var out bytes.Buffer
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(send sweet :set-setup (lambda () (setq suite-setup t)))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send sweet :set-teardown (lambda () (setq suite-teardown t)))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send top :run)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send sweet :set-setup (lambda () (setq suite-setup t)))`, scope)
+	_ = slip.ReadEvalString(`(send sweet :set-teardown (lambda () (setq suite-teardown t)))`, scope)
+	_ = slip.ReadEvalString(`(send top :run)`, scope)
 
 	tt.NotNil(t, scope.Get("suite-setup"))
 	tt.NotNil(t, scope.Get("suite-teardown"))

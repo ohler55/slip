@@ -15,10 +15,10 @@ func TestRefuteNilFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-nil nil "sample"))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                                   :forms '((refute-nil nil "sample"))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   expect: not nil
   actual: nil
@@ -33,10 +33,10 @@ func TestRefuteNilMessageFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-nil nil 'sample))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                                   :forms '((refute-nil nil 'sample))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   expect: not nil
   actual: nil
@@ -51,11 +51,11 @@ func TestRefuteNilPass(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((refute-nil (car '(1)) 'sample))))`,
-		scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+		scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: PASS
 `, out.String())
 }
@@ -64,10 +64,10 @@ func TestRefuteNilAnsi(t *testing.T) {
 	var out bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((refute-nil nil))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                                   :forms '((refute-nil nil))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 
 	expect := "toot: \x1b[1mFAIL\x1b[m\n" +
 		"  \x1b[0;31m\x1b[mexpect: not nil\n" +

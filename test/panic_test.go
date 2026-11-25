@@ -88,7 +88,7 @@ func TestPanicProvenance(t *testing.T) {
 ## panic.lisp:4.3  (cdr t)
 ## panic.lisp:3.2  (car (cdr t))
 ## panic.lisp:2.1  (car (car (cdr t)))
-##   (load "testdata/panic.lisp")
+## .:1.1  (load "testdata/panic.lisp")
 ##   (recover)
 `, stack)
 

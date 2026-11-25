@@ -51,18 +51,18 @@ func TestRecoverPreProv(t *testing.T) {
 func undefFlavor(fn string) {
 	defer func() { _ = recover() }()
 	scope := slip.NewScope()
-	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn), scope).Eval(scope, nil)
+	slip.ReadEvalString(fmt.Sprintf("(undefflavor '%s)", fn), scope)
 }
 
 func TestRecoverMethod(t *testing.T) {
 	defer undefFlavor("blueberry")
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor blueberry ((size "medium")) ())
 (defmethod (blueberry :quux) ()
   (let ((s self))
     (recover r nil (panic "fake error"))
-    (equal s self)))`, scope).Eval(scope, nil)
+    (equal s self)))`, scope)
 
 	(&sliptest.Function{
 		Scope: scope,

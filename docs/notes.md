@@ -4,13 +4,25 @@
 
 ---------------------
 
-- rethink read/compile/eval cycle
- - try and remove special case for defxxx functions and in-package
- - maybe postpone as much as possible, keep psuedo functions (undefined) around but have them be able to resolve
- - how about first pass, just lists
-  - second pass convert to functions (maybe combine with first)
-  - third call each including defuns
-   - calls need to resolve functions in this step
+- replace ReadProv in slap
+- replace CompileWithProvenance in slap
+
+---------------------
+- add with-package-iterator (name package-list-form &rest symbol-types)
+
+- add a fixnum sorted collection - fixnum-table fixnum-set fixnum-dict
+ - fast adds
+ - fast lookups
+ - burn code or old provenance
+ - ops
+  - clear or clr
+  - get
+  - has
+  - set or just use setf?
+  - make
+  - type check xxx-p
+  - size or count
+  - remove or rem
 
 ---------------------
 

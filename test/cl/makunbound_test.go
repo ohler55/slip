@@ -18,7 +18,7 @@ func TestMakunboundOk(t *testing.T) {
 		Source: `(makunbound 'makunbound-test)`,
 		Expect: "makunbound-test",
 	}).Test(t)
-	result := slip.ReadString("(boundp 'makunbound-test)", scope).Eval(slip.NewScope(), nil)
+	result := slip.ReadEvalString("(boundp 'makunbound-test)", slip.NewScope())
 	tt.Equal(t, nil, result)
 }
 

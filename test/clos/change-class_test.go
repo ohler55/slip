@@ -11,7 +11,7 @@ import (
 
 func TestChangeClassSymbol(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor strawberry ((size "medium")) ()
  :gettable-instance-variables
  :settable-instance-variables
@@ -22,9 +22,8 @@ func TestChangeClassSymbol(t *testing.T) {
  (:initable-instance-variables size fresh))
 (setq berry (make-instance 'strawberry :size "medium"))
 `, scope)
-	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'strawberry)", scope).Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'blackberry)", scope).Eval(scope, nil)
+	defer slip.ReadEvalString("(undefflavor 'strawberry)", scope)
+	defer slip.ReadEvalString("(undefflavor 'blackberry)", scope)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -40,7 +39,7 @@ func TestChangeClassSymbol(t *testing.T) {
 
 func TestChangeClassFlavor(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor strawberry ((size "medium")) ()
  :gettable-instance-variables
  :settable-instance-variables
@@ -51,9 +50,8 @@ func TestChangeClassFlavor(t *testing.T) {
  (:initable-instance-variables size fresh))
 (setq berry (make-instance 'strawberry :size "medium"))
 `, scope)
-	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'strawberry)", scope).Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'blackberry)", scope).Eval(scope, nil)
+	defer slip.ReadEvalString("(undefflavor 'strawberry)", scope)
+	defer slip.ReadEvalString("(undefflavor 'blackberry)", scope)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -80,7 +78,7 @@ func TestChangeClassStandard(t *testing.T) {
 	slip.CurrentPackage.Remove("quux")
 	slip.CurrentPackage.Remove("buux")
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defclass buux ()
   ((x :initarg :x)
    (a :initform 1)))
@@ -89,7 +87,6 @@ func TestChangeClassStandard(t *testing.T) {
    (y :initarg :y)
    (z :initform 3)))
 `, scope)
-	_ = code.Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope: scope,
@@ -108,11 +105,10 @@ func TestChangeClassMetaclass(t *testing.T) {
 	slip.CurrentPackage.Remove("quux")
 	slip.CurrentPackage.Remove("cuux")
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (define-condition cuux () ())
 (defclass quux () ())
 `, scope)
-	_ = code.Eval(scope, nil)
 
 	(&sliptest.Function{
 		Scope: scope,

@@ -61,8 +61,8 @@ func TestBagScanSend(t *testing.T) {
 
 func TestBagScanFunc(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(setq result '())`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(defun scan-test (p v) (setq result (add result (list p v))))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq result '())`, scope)
+	_ = slip.ReadEvalString(`(defun scan-test (p v) (setq result (add result (list p v))))`, scope)
 	(&sliptest.Function{
 		Source: `(bag-scan (make-bag "{a:7}") 'scan-test :leaves-only t)`,
 		Expect: "nil",

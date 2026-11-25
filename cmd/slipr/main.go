@@ -63,9 +63,7 @@ func main() {
 		pathname := slip.String(filepath.Join(slip.WorkingDir, path))
 		scope.UnsafeLet(slip.Symbol("*load-pathname*"), pathname)
 		scope.UnsafeLet(slip.Symbol("*load-truename*"), pathname)
-		code, listProvs := slip.ReadProv(buf, scope, string(pathname), nil)
-		code.CompileWithProvenance(listProvs)
-		code.Eval(scope, nil)
+		_ = slip.ReadEval(buf, scope, string(pathname))
 	} else {
 		panic(err)
 	}

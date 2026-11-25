@@ -25,7 +25,7 @@ func undefFlavors(fns ...string) {
 func undefFlavor(fn string) {
 	defer func() { _ = recover() }()
 	scope := slip.NewScope()
-	slip.ReadString(fmt.Sprintf("(undefflavor '%s)", fn), scope).Eval(scope, nil)
+	slip.ReadEvalString(fmt.Sprintf("(undefflavor '%s)", fn), scope)
 }
 
 func TestDefmethodFlavors(t *testing.T) {
@@ -54,7 +54,7 @@ func TestDefClassMethodBadClass(t *testing.T) {
 
 func defineBerry(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor berry (color) ()
  :gettable-instance-variables
  :settable-instance-variables
@@ -62,16 +62,16 @@ func defineBerry(t *testing.T) {
 (defmethod (berry :rot) () "When berries rot they turn brown." (setq color 'brown))
 (defmethod (berry :before :color) () (princ "berry before color") (terpri))
 (defmethod (berry :after :rot) () (princ "berry after rot") (terpri))
-`, scope).Eval(scope, nil)
+`, scope)
 }
 
 func defineBlueberry(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor blueberry () (berry))
 (defmethod (blueberry :before :rot) () "When blueberries rot they turn mushy." (princ "blueberry before rot") (terpri))
 (defmethod (blueberry :after :rot) () (princ "blueberry after rot") (terpri))
-`, scope).Eval(scope, nil)
+`, scope)
 }
 
 func TestDefmethodBasic(t *testing.T) {
@@ -79,7 +79,7 @@ func TestDefmethodBasic(t *testing.T) {
 	defineBerry(t)
 
 	scope := slip.NewScope()
-	f := slip.ReadString("berry", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("berry", scope)
 	sf := f.Simplify()
 	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].primary").First(sf))
 	tt.Equal(t, true, jp.MustParseString("methods[?(@.name == ':rot')].combinations[*].after").First(sf))
@@ -89,7 +89,7 @@ func TestDefmethodBasic(t *testing.T) {
 func TestDefmethodInsert(t *testing.T) {
 	defer undefFlavors("f1", "f2", "f3")
 	scope := slip.NewScope()
-	slip.ReadString(`
+	slip.ReadEvalString(`
 (defflavor f1 () ())
 (defflavor f2 () (f1))
 (defflavor f3 () (f2))
@@ -97,9 +97,9 @@ func TestDefmethodInsert(t *testing.T) {
 (defmethod (f3 :before :quux) () 'q3)
 (defmethod (f1 :before :quux) () 'q1)
 (defwhopper (f1 :quux) nil)
-`, scope).Eval(scope, nil)
+`, scope)
 
-	f := slip.ReadString("f3", scope).Eval(scope, nil).(*flavors.Flavor)
+	f := slip.ReadEvalString("f3", scope).(*flavors.Flavor)
 	m := f.GetMethod(":quux")
 	tt.Equal(t, `{
   combinations: [
@@ -117,7 +117,7 @@ func TestDefmethodInherit(t *testing.T) {
 	defineBlueberry(t)
 
 	scope := slip.NewScope()
-	f := slip.ReadString("blueberry", scope).Eval(scope, nil)
+	f := slip.ReadEvalString("blueberry", scope)
 	sf := f.Simplify()
 	rot := jp.MustParseString("methods[?(@.name == ':rot')].combinations[*]").Get(sf)
 	tt.Equal(t, 2, len(rot))
@@ -130,8 +130,8 @@ func TestDefmethodInherit(t *testing.T) {
 	orig := scope.Get(slip.Symbol("*standard-output*"))
 	scope.Set(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	defer scope.Set(slip.Symbol("*standard-output*"), orig)
-	bb := slip.ReadString("(setq obj (make-instance 'blueberry))", scope).Eval(scope, nil).(*flavors.Instance)
-	result := slip.ReadString("(send obj :rot)", scope).Eval(scope, nil)
+	bb := slip.ReadEvalString("(setq obj (make-instance 'blueberry))", scope).(*flavors.Instance)
+	result := slip.ReadEvalString("(send obj :rot)", scope)
 	tt.Equal(t, "brown", slip.ObjectString(result))
 
 	result = bb.BoundReceive(nil, ":rot", nil, 0)
@@ -177,10 +177,10 @@ func TestDefmethodArgCount(t *testing.T) {
 	defer undefFlavor("berry")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		_ = slip.ReadString(`
+		_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defmethod (berry :rot))
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
@@ -188,10 +188,10 @@ func TestDefmethodNotList(t *testing.T) {
 	defer undefFlavor("berry")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		_ = slip.ReadString(`
+		_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defmethod t ())
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
@@ -199,10 +199,10 @@ func TestDefmethodLowDesignatorCount(t *testing.T) {
 	defer undefFlavor("berry")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		_ = slip.ReadString(`
+		_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defmethod (berry) ())
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
@@ -210,10 +210,10 @@ func TestDefmethodHighDesignatorCount(t *testing.T) {
 	defer undefFlavor("berry")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		_ = slip.ReadString(`
+		_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defmethod (berry :before :rot nil) ())
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
@@ -221,10 +221,10 @@ func TestDefmethodBadDesignator(t *testing.T) {
 	defer undefFlavor("berry")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		_ = slip.ReadString(`
+		_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defmethod (berry rot) ())
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
@@ -232,17 +232,17 @@ func TestDefmethodBadDaemon(t *testing.T) {
 	defer undefFlavor("berry")
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		_ = slip.ReadString(`
+		_ = slip.ReadEvalString(`
 (defflavor berry (color) ())
 (defmethod (berry :nothing :rot) ())
-`, scope).Eval(scope, nil)
+`, scope)
 	})
 }
 
 func TestDefmethodNotFlavor(t *testing.T) {
 	scope := slip.NewScope()
 	tt.Panic(t, func() {
-		_ = slip.ReadString(`(defmethod (nothing :rot) ())`, scope).Eval(scope, nil)
+		_ = slip.ReadEvalString(`(defmethod (nothing :rot) ())`, scope)
 	})
 }
 
@@ -267,7 +267,7 @@ func TestDefmethodArgsMismatch(t *testing.T) {
 	defineBerry(t)
 
 	scope := slip.NewScope()
-	f := slip.ReadString("berry", scope).Eval(scope, nil).(*flavors.Flavor)
+	f := slip.ReadEvalString("berry", scope).(*flavors.Flavor)
 	tt.Panic(t, func() { f.DefMethod(":rot", ":after", rottenCaller{}) })
 }
 

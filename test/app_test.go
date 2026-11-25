@@ -21,8 +21,8 @@ import (
 func TestAppRunSimple(t *testing.T) {
 	_ = os.RemoveAll("testdata/app/run-simple.out")
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(fmakunbound 'app-quux)`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(fmakunbound 'app-no-op)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(fmakunbound 'app-quux)`, scope)
+	_ = slip.ReadEvalString(`(fmakunbound 'app-no-op)`, scope)
 
 	app := slip.App{
 		Title: "quux",
@@ -54,8 +54,8 @@ func TestAppRunSimple(t *testing.T) {
 
 func TestAppRunKeyFile(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(fmakunbound 'app-quux)`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(fmakunbound 'app-no-op)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(fmakunbound 'app-quux)`, scope)
+	_ = slip.ReadEvalString(`(fmakunbound 'app-no-op)`, scope)
 
 	app := slip.App{
 		Title:         "quux",

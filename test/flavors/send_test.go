@@ -14,51 +14,49 @@ import (
 
 func TestSendGetSet(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor strawberry ((size "medium")) ()
  :gettable-instance-variables
  :settable-instance-variables
  (:initable-instance-variables size))
 (setq berry (make-instance 'strawberry :size "medium"))
 `, scope)
-	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'strawberry)", scope).Eval(scope, nil)
 
-	size := slip.ReadString("(send berry :size)", scope).Eval(scope, nil)
+	defer func() { _ = slip.ReadEvalString("(undefflavor 'strawberry)", scope) }()
+
+	size := slip.ReadEvalString("(send berry :size)", scope)
 	tt.Equal(t, slip.String("medium"), size)
 
-	_ = slip.ReadString(`(send berry :set-size "large")`, scope).Eval(scope, nil)
-	size = slip.ReadString("(send berry :size)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send berry :set-size "large")`, scope)
+	size = slip.ReadEvalString("(send berry :size)", scope)
 	tt.Equal(t, slip.String("large"), size)
 
-	_ = slip.ReadString(`(setf (send berry :size) "small")`, scope).Eval(scope, nil)
-	size = slip.ReadString("(send berry :size)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setf (send berry :size) "small")`, scope)
+	size = slip.ReadEvalString("(send berry :size)", scope)
 	tt.Equal(t, slip.String("small"), size)
 
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :bad)", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(send berry :set-size)", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(setf (send t :bad) 7)", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(setf (send berry t) 7)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(send berry :bad)", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(send berry :set-size)", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(setf (send t :bad) 7)", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(setf (send berry t) 7)", scope) })
 }
 
 func TestSendDefHand(t *testing.T) {
 	scope := slip.NewScope()
-	defer slip.ReadString("(fmakunbound 'anything)", scope).Eval(scope, nil)
+	defer func() { _ = slip.ReadEvalString("(fmakunbound 'anything)", scope) }()
 
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defun anything (&rest args) args)
 (defflavor handy () ()
  (:default-handler 'anything)) ;; unquoted anything also works
 (setq hand (make-instance 'handy))
 `, scope)
-	code.Compile()
-	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'handy)", scope).Eval(scope, nil)
+	defer func() { _ = slip.ReadEvalString("(undefflavor 'handy)", scope) }()
 
-	result := slip.ReadString("(send hand :nothing 7)", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("(send hand :nothing 7)", scope)
 	tt.Equal(t, slip.List{slip.Symbol(":nothing"), slip.Fixnum(7)}, result)
 
-	hand := slip.ReadString("hand", scope).Eval(scope, nil).(*flavors.Instance)
+	hand := slip.ReadEvalString("hand", scope).(*flavors.Instance)
 	bindings := slip.NewScope()
 	bindings.Let(slip.Symbol("x"), slip.Fixnum(7))
 	result = hand.BoundReceive(scope, ":nothing", bindings, 0)
@@ -67,43 +65,37 @@ func TestSendDefHand(t *testing.T) {
 
 func TestSendDefHandLambda(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor handy () ()
  (:default-handler (lambda (&rest args) args)))
 (setq hand (make-instance 'handy))
 `, scope)
-	code.Compile()
-	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'handy)", scope).Eval(scope, nil)
+	defer func() { _ = slip.ReadEvalString("(undefflavor 'handy)", scope) }()
 
-	result := slip.ReadString("(send hand :nothing 7)", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("(send hand :nothing 7)", scope)
 	tt.Equal(t, slip.List{slip.Symbol(":nothing"), slip.Fixnum(7)}, result)
 }
 
 func TestSendMissingArg(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor missy (x) () :gettable-instance-variables)
 (setq miss (make-instance 'missy))
 `, scope)
-	code.Compile()
-	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'missy)", scope).Eval(scope, nil)
+	defer slip.ReadEvalString("(undefflavor 'missy)", scope)
 
-	tt.Panic(t, func() { _ = slip.ReadString("(send miss)", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(send miss :describe nil nil)", scope).Eval(scope, nil) })
-	tt.Panic(t, func() { _ = slip.ReadString("(send miss :send-if-handles)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(send miss)", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(send miss :describe nil nil)", scope) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(send miss :send-if-handles)", scope) })
 }
 
 func TestSendNoMethod(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor missy (x) () :gettable-instance-variables)
 (setq miss (make-instance 'missy))
 `, scope)
-	code.Compile()
-	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'missy)", scope).Eval(scope, nil)
+	defer slip.ReadEvalString("(undefflavor 'missy)", scope)
 
 	miss := scope.Get(slip.Symbol("miss")).(*flavors.Instance)
 	tt.Panic(t, func() { _ = miss.BoundReceive(scope, ":nothing", nil, 0) })
@@ -118,15 +110,13 @@ func TestSendNotInstance(t *testing.T) {
 
 func TestSendNotKeyword(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor nokey () ())
 (setq nock (make-instance 'nokey))
 `, scope)
-	code.Compile()
-	_ = code.Eval(scope, nil)
-	defer slip.ReadString("(undefflavor 'nokey)", scope).Eval(scope, nil)
+	defer slip.ReadEvalString("(undefflavor 'nokey)", scope)
 
-	tt.Panic(t, func() { _ = slip.ReadString("(send nock t)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(send nock t)", scope) })
 }
 
 func TestSendDaemons(t *testing.T) {
@@ -134,23 +124,23 @@ func TestSendDaemons(t *testing.T) {
 	var b strings.Builder
 	scope := slip.NewScope()
 	scope.Set(slip.Symbol("out"), &slip.OutputStream{Writer: &b})
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defflavor berry (color) ()
  :gettable-instance-variables
  :settable-instance-variables
  :initable-instance-variables)
 (defmethod (berry :rot) () (princ "berry rot" out) (terpri out))
 (defmethod (berry :after :rot) () (princ "berry after rot" out) (terpri out))
-`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`
+`, scope)
+	_ = slip.ReadEvalString(`
 (defflavor blueberry () (berry))
 (defmethod (blueberry :before :rot) () (princ "blueberry before rot" out) (terpri out))
 (defmethod (blueberry :after :rot) () (princ "blueberry after rot" out) (terpri out))
-`, scope).Eval(scope, nil)
+`, scope)
 
-	_ = slip.ReadString("(setq blue (make-instance blueberry))", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(setq blue (make-instance blueberry))", scope)
 
-	_ = slip.ReadString("(send blue :rot)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(send blue :rot)", scope)
 	tt.Equal(t, `blueberry before rot
 berry rot
 berry after rot

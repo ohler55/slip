@@ -15,11 +15,11 @@ func TestAssertEqualFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-equal 3 (+ 2 2) "sample"))))`,
-		scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+		scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   expect: 3
   actual: 4
@@ -34,21 +34,21 @@ func TestAssertEqualFailStringLen(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", slip.True)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-equal "abc" "ab" "sample"))))`,
-		scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+		scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `/FAIL/`, out.String())
 	tt.Equal(t, `/"abc"/`, out.String())
 	tt.Equal(t, `/"ab"/`, out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-equal "ab" "abc" "sample"))))`,
-		scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+		scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `/FAIL/`, out.String())
 	tt.Equal(t, `/"abc"/`, out.String())
 	tt.Equal(t, `/"ab"/`, out.String())
@@ -59,11 +59,11 @@ func TestAssertEqualMessageFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-equal 3 (+ 2 2) 'sample))))`,
-		scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+		scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   expect: 3
   actual: 4
@@ -78,11 +78,11 @@ func TestAssertEqualPass(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-equal 3 (+ 1 2) 'sample))))`,
-		scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+		scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: PASS
 `, out.String())
 }
@@ -91,12 +91,12 @@ func TestAssertEqualStringFail(t *testing.T) {
 	var out bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-equal "abcdefg" "abcdxfg"))))`,
-		scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :report)`, scope).Eval(scope, nil)
+		scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
+	_ = slip.ReadEvalString(`(send toot :report)`, scope)
 
 	expect := "toot: \x1b[1mFAIL\x1b[m\n" +
 		"  \x1b[0;31m\x1b[mexpect: \"abcdefg\"\n" +
@@ -112,10 +112,10 @@ func TestAssertEqualAnsi(t *testing.T) {
 	var out bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((assert-equal 3 (+ 1 1)))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                                   :forms '((assert-equal 3 (+ 1 1)))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 
 	expect := "toot: \x1b[1mFAIL\x1b[m\n" +
 		"  \x1b[0;31m\x1b[mexpect: 3\n" +

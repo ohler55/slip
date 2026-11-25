@@ -367,7 +367,6 @@ type reader struct {
 	starts     []Prov
 	carry      []byte // carry over from previous stream read
 	buf        []byte
-	listProvs  ProvSet
 	line       int
 	lineStart  int
 	pos        int
@@ -416,30 +415,18 @@ func ReadString(src string, s *Scope) (code Code) {
 }
 
 // Read Lisp source code and return a Code instance.
-func Read(src []byte, s *Scope) (code Code) {
+func Read(src []byte, s *Scope, filepath ...string) (code Code) {
 	cr := reader{
 		mode:     valueMode,
 		nextMode: valueMode,
+	}
+	if 0 < len(filepath) {
+		cr.filepath = filepath[0]
 	}
 	cr.scoped(s)
 	cr.read(src)
 
 	return cr.code
-}
-
-// ReadProv Lisp source code and return a Code instance. The filepath argument
-// is used for provenance information.
-func ReadProv(src []byte, s *Scope, filepath string, listProvs ProvSet) (code Code, ps ProvSet) {
-	cr := reader{
-		mode:      valueMode,
-		nextMode:  valueMode,
-		filepath:  filepath,
-		listProvs: listProvs,
-	}
-	cr.scoped(s)
-	cr.read(src)
-
-	return cr.code, cr.listProvs
 }
 
 // ReadOne Lisp source code and return a Code instance.
@@ -584,6 +571,26 @@ func Compile(src []byte, s *Scope) (result Object) {
 	return
 }
 
+// ReadEval a Lisp source code and return the result of the evaluation.
+func ReadEval(src []byte, s *Scope, filepath ...string) Object {
+	cr := reader{
+		mode:     valueMode,
+		nextMode: valueMode,
+	}
+	if 0 < len(filepath) {
+		cr.filepath = filepath[0]
+	}
+	cr.scoped(s)
+	cr.read(src)
+
+	return cr.code.Eval(s, nil)
+}
+
+// ReadEvalString a Lisp source code and return the result of the evaluation.
+func ReadEvalString(src string, s *Scope, filepath ...string) Object {
+	return ReadEval([]byte(src), s, filepath...)
+}
+
 func (r *reader) runeAppendByte(b byte) {
 	r.rn = r.rn<<4 | rune(b)
 	r.rcnt--
@@ -606,9 +613,6 @@ func (r *reader) read(src []byte) {
 				break
 			}
 		}
-	}
-	if Provenance && cap(r.listProvs) == 0 {
-		r.listProvs = make(ProvSet, 0, 4096)
 	}
 	var b byte
 	// If src is empty then the for loop will not set r.pos so initialize to
@@ -932,7 +936,7 @@ func (r *reader) closeList() {
 		start.LastColumn = uint16(r.pos - r.lineStart)
 		if Provenance {
 			p := start
-			r.listProvs = r.listProvs.Add(list, &p)
+			AddProvenance(list, &p)
 		}
 		if 0 < last {
 			switch r.stack[last-1] {
@@ -1276,16 +1280,6 @@ func (c Code) String() string {
 // Compile all the code elements. This evaluates all the defun, defvar, and
 // defmacro calls and converts unquoted lists to functions.
 func (c Code) Compile() {
-	c.CompileWithProvenance(nil)
-}
-
-// CompileWithProvenance all the code elements. This evaluates all the defun,
-// defvar, and defmacro calls and converts unquoted lists to functions.
-func (c Code) CompileWithProvenance(listProvs ProvSet) {
-	listProvs.Sort()
-	allListProvs = append(allListProvs, listProvs...)
-	allListProvs.Sort()
-
 	scope := NewScope()
 	for i, obj := range c {
 		list, ok := obj.(List)
@@ -1311,7 +1305,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		var f Object
 		switch strings.ToLower(string(sym)) {
 		case "defun", "defmacro", "defvar", "defparameter", "defconstant", "defstruct", "defpackage", "in-package":
-			f = ListToFuncWithProvenance(scope, list, 0, listProvs)
+			f = ListToFunc(scope, list, 0)
 			c[i] = f
 		}
 		if f != nil {
@@ -1330,7 +1324,7 @@ func (c Code) CompileWithProvenance(listProvs ProvSet) {
 		if !ok || len(list) == 0 {
 			continue
 		}
-		c[i] = CompileList(list, listProvs)
+		c[i] = CompileList(list)
 	}
 }
 

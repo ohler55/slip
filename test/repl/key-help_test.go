@@ -70,7 +70,7 @@ func TestKeyHelpRowsAreBound(t *testing.T) {
 		func() {
 			defer func() { _ = recover() }()
 			src := fmt.Sprintf(`(repl-key-binding %q)`, key)
-			action = slip.ObjectString(slip.ReadString(src, scope).Eval(scope, nil))
+			action = slip.ObjectString(slip.ReadEvalString(src, scope))
 			parsed = true
 		}()
 		if !parsed {

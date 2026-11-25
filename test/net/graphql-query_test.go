@@ -15,20 +15,20 @@ import (
 func TestGraphQLQueryOk(t *testing.T) {
 	port := availablePort()
 	scope := slip.NewScope()
-	server := slip.ReadString(
+	server := slip.ReadEvalString(
 		fmt.Sprintf(`(make-instance 'http-server-flavor
                                      :maximum-header-length 1024
                                      :read-timeout 3.0
                                      :write-timeout 4.0
                                      :idle-timeout 5.0
                                      :address ":%d")`, port),
-		scope).Eval(scope, nil)
+		scope)
 	scope.Let("server", server)
 
 	var recvLog bytes.Buffer
 	scope.Let("recv-log", &slip.OutputStream{Writer: &recvLog})
-	defer func() { _ = slip.ReadString(`(send server :shutdown)`, scope).Eval(scope, nil) }()
-	_ = slip.ReadString(
+	defer func() { _ = slip.ReadEvalString(`(send server :shutdown)`, scope) }()
+	_ = slip.ReadEvalString(
 		`(send server :add-handler "/graphql"
                                    (lambda (w r)
                                      (format recv-log "~A: ~A~%~A~%"
@@ -36,9 +36,9 @@ func TestGraphQLQueryOk(t *testing.T) {
                                              (send r :header)
                                              (read-all (send r :body)))
                                      (send w :write "{\"data\":{\"user\":{\"name\":\"Fred\"}}}")))`,
-		scope).Eval(scope, nil)
+		scope)
 
-	_ = slip.ReadString(`(send server :start 1.0)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(send server :start 1.0)`, scope)
 
 	(&sliptest.Function{
 		Scope: scope,

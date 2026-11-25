@@ -19,11 +19,11 @@ import (
 
 func TestStandardObjectBasic(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defclass buux () ((z :initarg :z)))
 (defclass quux (buux)
   (x (y :initarg :y :initform 1))
-  (:default-initargs :y 3 :z 4))`, scope).Eval(scope, nil)
+  (:default-initargs :y 3 :z 4))`, scope)
 	scope.Let("qube", nil)
 	scope.Let("bub", nil)
 	scope.Let("q2", nil)
@@ -112,11 +112,11 @@ func TestStandardObjectBasic(t *testing.T) {
 
 func TestStandardObjectInitform(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defvar counter 3)
 (defclass buux () ((z :initarg :z :initform (1+ counter))))
 (defclass quux (buux)
-  (x (y :initarg :y :initform 1)))`, scope).Eval(scope, nil)
+  (x (y :initarg :y :initform 1)))`, scope)
 	scope.Let("qube", nil)
 	(&sliptest.Function{
 		Scope:  scope,
@@ -133,10 +133,10 @@ func TestStandardObjectInitform(t *testing.T) {
 
 func TestStandardObjectClassAlloc(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defclass buux () ((b :initarg :b :allocation :class)))
 (defclass quux (buux)
-  ((q :initarg :q :initform 7 :allocation :class)))`, scope).Eval(scope, nil)
+  ((q :initarg :q :initform 7 :allocation :class)))`, scope)
 	scope.Let("qube", nil)
 	(&sliptest.Function{
 		Scope:  scope,
@@ -163,9 +163,9 @@ func TestStandardObjectClassAlloc(t *testing.T) {
 
 func TestStandardObjectSlotType(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(defclass quux ()
+	_ = slip.ReadEvalString(`(defclass quux ()
                            ((x :initarg :x :type real)
-                            (y :initarg :y :allocation :class :type :real)))`, scope).Eval(scope, nil)
+                            (y :initarg :y :allocation :class :type :real)))`, scope)
 	(&sliptest.Function{
 		Source: `(slot-value (make-instance 'quux :x 7) 'x)`,
 		Expect: `7`,
@@ -182,10 +182,10 @@ func TestStandardObjectSlotType(t *testing.T) {
 
 func TestStandardObjectDefaultInits(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(defclass quux ()
+	_ = slip.ReadEvalString(`(defclass quux ()
                            ((x :initarg :x :initarg :xx)
                             (y :initarg :y))
-                           (:default-initargs :x nil :y 3))`, scope).Eval(scope, nil)
+                           (:default-initargs :x nil :y 3))`, scope)
 	(&sliptest.Function{
 		Source: `(slot-value (make-instance 'quux) 'x)`,
 		Expect: `nil`,

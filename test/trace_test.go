@@ -18,7 +18,7 @@ func TestTraceAll(t *testing.T) {
 
 	defer slip.Untrace(nil)
 	slip.Trace(slip.List{slip.True})
-	_ = slip.ReadString("(car (car (car '(((a))))))", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(car (car (car '(((a))))))", scope)
 
 	tt.Equal(t, `0: (car (car (car '(((a))))))
   1: (car (car '(((a)))))
@@ -30,7 +30,7 @@ func TestTraceAll(t *testing.T) {
 0: (car (car (car '(((a)))))) => a
 `, out.String())
 
-	tt.Equal(t, "(t)", slip.ObjectString(slip.ReadString("(trace)", scope).Eval(scope, nil)))
+	tt.Equal(t, "(t)", slip.ObjectString(slip.ReadEvalString("(trace)", scope)))
 }
 
 func TestTraceNames(t *testing.T) {
@@ -41,7 +41,7 @@ func TestTraceNames(t *testing.T) {
 	defer slip.Untrace(nil)
 	slip.Trace(slip.List{slip.Symbol("car"), slip.Symbol("cdr")})
 
-	_ = slip.ReadString("(car (car (car '(((a))))))", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(car (car (car '(((a))))))", scope)
 	tt.Equal(t, `0: (car (car (car '(((a))))))
   1: (car (car '(((a)))))
     2: (car '(((a))))
@@ -50,9 +50,9 @@ func TestTraceNames(t *testing.T) {
 0: (car (car (car '(((a)))))) => a
 `, out.String())
 
-	tt.Equal(t, "(car cdr)", slip.ObjectString(slip.ReadString("(trace)", scope).Eval(scope, nil)))
-	_ = slip.ObjectString(slip.ReadString("(untrace car)", scope).Eval(scope, nil))
-	tt.Equal(t, "(cdr)", slip.ObjectString(slip.ReadString("(trace)", scope).Eval(scope, nil)))
+	tt.Equal(t, "(car cdr)", slip.ObjectString(slip.ReadEvalString("(trace)", scope)))
+	_ = slip.ObjectString(slip.ReadEvalString("(untrace car)", scope))
+	tt.Equal(t, "(cdr)", slip.ObjectString(slip.ReadEvalString("(trace)", scope)))
 }
 
 func TestTracePanicANSI(t *testing.T) {
@@ -63,7 +63,7 @@ func TestTracePanicANSI(t *testing.T) {
 	slip.CurrentPackage.Set("*repl-warning-ansi*", slip.String("\x1b[31m"))
 
 	slip.Trace(slip.List{slip.True})
-	tt.Panic(t, func() { _ = slip.ReadString("(car (car (car 7)))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(car (car (car 7)))", scope) })
 	slip.Untrace(nil)
 
 	checkHasLines(t, out.String(), []string{
@@ -84,7 +84,7 @@ func TestTracePanicNotANSI(t *testing.T) {
 	scope.Let(slip.Symbol("*trace-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
 	slip.Trace(slip.List{slip.True})
-	tt.Panic(t, func() { _ = slip.ReadString("(car (car (car 7)))", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(car (car (car 7)))", scope) })
 	slip.Untrace(nil)
 
 	checkHasLines(t, out.String(), []string{
@@ -137,7 +137,7 @@ func TestTracePanicString(t *testing.T) {
 	scope.Let(slip.Symbol("*trace-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
 	slip.Trace(slip.List{slip.True})
-	tt.Panic(t, func() { _ = slip.ReadString("(panic-test)", scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(panic-test)", scope) })
 	slip.Untrace(nil)
 
 	checkHasLines(t, out.String(), []string{

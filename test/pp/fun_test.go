@@ -12,12 +12,12 @@ import (
 func TestFunBasic(t *testing.T) {
 	scope := slip.NewScope()
 	defer func() {
-		slip.ReadString("(fmakunbound 'quux)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'quux)", scope)
 	}()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defun quux (a b)
   (* (+ a b) (- a b)))
-`, scope).Eval(scope, nil)
+`, scope)
 
 	(&sliptest.Function{
 		Source: `(let ((*print-right-margin* 60)) (pretty-print quux nil))`,
@@ -38,14 +38,14 @@ func TestFunBasic(t *testing.T) {
 func TestFunDotimes(t *testing.T) {
 	scope := slip.NewScope()
 	defer func() {
-		slip.ReadString("(fmakunbound 'quux)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(fmakunbound 'quux)", scope)
 	}()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defun quux (a b)
   "quack quack"
   (dotimes (x 3)
     (* (+ a b x) (- a b x))))
-`, scope).Eval(scope, nil)
+`, scope)
 	(&sliptest.Function{
 		Source: `(let ((*print-right-margin* 20)) (pretty-print quux nil))`,
 		Expect: `"(defun quux (a b)
@@ -77,12 +77,12 @@ func TestFunBuiltin(t *testing.T) {
 func TestFunMacro(t *testing.T) {
 	scope := slip.NewScope()
 	defer func() {
-		slip.ReadString("(makunbound 'quux)", scope).Eval(scope, nil)
+		slip.ReadEvalString("(makunbound 'quux)", scope)
 	}()
-	_ = slip.ReadString(`
+	_ = slip.ReadEvalString(`
 (defmacro quux (a b)
   (* (+ a b) (- a b)))
-`, scope).Eval(scope, nil)
+`, scope)
 	(&sliptest.Function{
 		Source: `(let ((*print-right-margin* 60)) (pretty-print quux nil))`,
 		Expect: `"(defmacro quux (a b)

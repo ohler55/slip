@@ -94,7 +94,7 @@ func TestProcessWaitWaitError(t *testing.T) {
 	_ = cmd.Start()
 	pid := cmd.Process.Pid
 	scope := slip.NewScope()
-	p := slip.ReadString(fmt.Sprintf("(find-process %d)", pid), scope).Eval(scope, nil)
+	p := slip.ReadEvalString(fmt.Sprintf("(find-process %d)", pid), scope)
 	scope.Let("p", p)
 	_ = cmd.Wait()
 	(&sliptest.Function{

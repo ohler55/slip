@@ -14,14 +14,14 @@ import (
 
 func TestConditionClassBasic(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(progn (makunbound 'quux) (makunbound 'buux))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(progn (makunbound 'quux) (makunbound 'buux))`, scope)
 
-	quux := slip.ReadString(`
+	quux := slip.ReadEvalString(`
 (define-condition quux (buux)
   (x
    (y :initarg :y))
   (:documentation "quack quack")
-  (:default-initargs :y 3))`, scope).Eval(scope, nil).(*clos.ConditionClass)
+  (:default-initargs :y 3))`, scope).(*clos.ConditionClass)
 
 	tt.Equal(t, `(define-condition quux (buux)
   (x (y :initarg :y))
@@ -32,7 +32,7 @@ func TestConditionClassBasic(t *testing.T) {
 	tt.Equal(t, false, quux.Ready())
 	tt.Panic(t, func() { _ = quux.MakeInstance() })
 
-	buux := slip.ReadString(`
+	buux := slip.ReadEvalString(`
 (define-condition buux ()
   ((z
     :initarg :z
@@ -41,7 +41,7 @@ func TestConditionClassBasic(t *testing.T) {
     :reader get-z
     :writer set-z
     :accessor z-access
-    :type fixnum)))`, scope).Eval(scope, nil).(*clos.ConditionClass)
+    :type fixnum)))`, scope).(*clos.ConditionClass)
 	tt.Equal(t, true, buux.Ready())
 	tt.Equal(t, true, quux.Ready())
 
@@ -65,10 +65,10 @@ func TestConditionClassBasic(t *testing.T) {
 
 func TestConditionClassAllocClass(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(makunbound 'quux)`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`
+	_ = slip.ReadEvalString(`(makunbound 'quux)`, scope)
+	quux := slip.ReadEvalString(`
 (define-condition quux ()
-  ((x :initarg :x :initform 3 :allocation :class)))`, scope).Eval(scope, nil).(*clos.ConditionClass)
+  ((x :initarg :x :initform 3 :allocation :class)))`, scope).(*clos.ConditionClass)
 
 	desc := quux.Describe(nil, 0, 80, false)
 	tt.Equal(t, `quux is a class:
@@ -99,8 +99,8 @@ func TestConditionClassAllocClass(t *testing.T) {
 
 func TestConditionClassMinimal(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(makunbound 'quux)`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`(define-condition quux () ())`, scope).Eval(scope, nil).(*clos.ConditionClass)
+	_ = slip.ReadEvalString(`(makunbound 'quux)`, scope)
+	quux := slip.ReadEvalString(`(define-condition quux () ())`, scope).(*clos.ConditionClass)
 	desc := quux.Describe(nil, 0, 80, false)
 
 	tt.Equal(t, `quux is a class:
@@ -125,10 +125,10 @@ func TestConditionClassMinimal(t *testing.T) {
 
 func TestConditionClassMergeSupers(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(progn (makunbound 'quux) (makunbound 'buux) (makunbound 'duux))`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`(define-condition quux (buux duux) ())`, scope).Eval(scope, nil).(*clos.ConditionClass)
-	_ = slip.ReadString(`(define-condition buux (duux) ())`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(define-condition duux () ())`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(progn (makunbound 'quux) (makunbound 'buux) (makunbound 'duux))`, scope)
+	quux := slip.ReadEvalString(`(define-condition quux (buux duux) ())`, scope).(*clos.ConditionClass)
+	_ = slip.ReadEvalString(`(define-condition buux (duux) ())`, scope)
+	_ = slip.ReadEvalString(`(define-condition duux () ())`, scope)
 
 	tt.Equal(t, `(define-condition quux (buux duux)
   ())

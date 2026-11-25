@@ -37,7 +37,7 @@ func keyEval(t *testing.T, src string) string {
 		}
 	}()
 	scope := slip.NewScope()
-	result := slip.ReadString(src, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(src, scope)
 	return slip.ObjectString(result)
 }
 
@@ -54,7 +54,7 @@ func keyError(t *testing.T, src string) (p *slip.Panic) {
 			}
 		}()
 		scope := slip.NewScope()
-		slip.ReadString(src, scope).Eval(scope, nil)
+		slip.ReadEvalString(src, scope)
 	}()
 	return
 }

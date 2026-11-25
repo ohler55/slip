@@ -16,7 +16,7 @@ func TestWriteLineOkay(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString(`(write-line "abcdef" out :start 1 :end 3)`, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(`(write-line "abcdef" out :start 1 :end 3)`, scope)
 
 	tt.Equal(t, slip.String("abcdef"), result)
 	tt.Equal(t, "bc\n", out.String())
@@ -27,7 +27,7 @@ func TestWriteLineNilEnd(t *testing.T) {
 	scope := slip.NewScope()
 
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
-	result := slip.ReadString(`(write-line "abcdef" out :end nil)`, scope).Eval(scope, nil)
+	result := slip.ReadEvalString(`(write-line "abcdef" out :end nil)`, scope)
 
 	tt.Equal(t, slip.String("abcdef"), result)
 	tt.Equal(t, "abcdef\n", out.String())

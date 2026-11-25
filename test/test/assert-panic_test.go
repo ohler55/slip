@@ -15,11 +15,11 @@ func TestAssertPanicFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-panic (lambda () nil) "sample"))
-                                    ))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                    ))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   expect: panic
   actual: did not panic
@@ -34,11 +34,11 @@ func TestAssertPanicMessageFail(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-panic (lambda () nil) 'sample))
-                                    ))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                    ))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: FAIL
   expect: panic
   actual: did not panic
@@ -53,11 +53,11 @@ func TestAssertPanicPass(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
                                                    :forms '((assert-panic '(car 7) 'sample))
-                                    ))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                    ))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 	tt.Equal(t, `toot: PASS
 `, out.String())
 }
@@ -66,10 +66,10 @@ func TestAssertPanicAnsi(t *testing.T) {
 	var out bytes.Buffer
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &out})
-	_ = slip.ReadString(`(setq toot (make-instance 'test-flavor
+	_ = slip.ReadEvalString(`(setq toot (make-instance 'test-flavor
                                                    :name "toot"
-                                                   :forms '((assert-panic t))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send toot :run :verbose t)`, scope).Eval(scope, nil)
+                                                   :forms '((assert-panic t))))`, scope)
+	_ = slip.ReadEvalString(`(send toot :run :verbose t)`, scope)
 
 	expect := "toot: \x1b[1mFAIL\x1b[m\n" +
 		"  \x1b[0;31m\x1b[mexpect: panic\n" +

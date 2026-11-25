@@ -37,8 +37,8 @@ func TestCoverageSimple(t *testing.T) {
 	slip.StartCoverage()
 	scope := slip.NewScope()
 
-	_ = slip.CompileString(`(load "testdata/cov-test2.lisp")`, scope).Eval(scope, 0)
-	_ = slip.CompileString(`(load "testdata/cov-test.lisp")`, scope).Eval(scope, 0)
+	_ = slip.ReadEvalString(`(load "testdata/cov-test2.lisp")`, scope)
+	_ = slip.ReadEvalString(`(load "testdata/cov-test.lisp")`, scope)
 
 	slip.StopCoverage()
 

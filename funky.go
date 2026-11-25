@@ -16,7 +16,7 @@ type Funky interface {
 	Apply(s *Scope, args List, depth int) Object
 
 	// CompileArgs for the function.
-	CompileArgs(listProvs ProvSet)
+	CompileArgs()
 
 	// Caller returns the function's Caller (Self).
 	Caller() Caller

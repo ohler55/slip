@@ -17,13 +17,13 @@ import (
 
 func TestStandardClassBasic(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(progn (makunbound 'quux) (makunbound 'buux))`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`
+	_ = slip.ReadEvalString(`(progn (makunbound 'quux) (makunbound 'buux))`, scope)
+	quux := slip.ReadEvalString(`
 (defclass quux (buux)
   (x
    (y :initarg :y))
   (:documentation "quack quack")
-  (:default-initargs :y 3))`, scope).Eval(scope, nil).(*clos.StandardClass)
+  (:default-initargs :y 3))`, scope).(*clos.StandardClass)
 
 	tt.Equal(t, `(defclass quux (buux)
   (x (y :initarg :y))
@@ -34,7 +34,7 @@ func TestStandardClassBasic(t *testing.T) {
 	tt.Equal(t, false, quux.Ready())
 	tt.Panic(t, func() { _ = quux.MakeInstance() })
 
-	buux := slip.ReadString(`
+	buux := slip.ReadEvalString(`
 (defclass buux ()
   ((z
     :initarg :z
@@ -43,7 +43,7 @@ func TestStandardClassBasic(t *testing.T) {
     :reader get-z
     :writer set-z
     :accessor z-access
-    :type fixnum)))`, scope).Eval(scope, nil).(*clos.StandardClass)
+    :type fixnum)))`, scope).(*clos.StandardClass)
 	tt.Equal(t, true, buux.Ready())
 	tt.Equal(t, true, quux.Ready())
 
@@ -112,10 +112,10 @@ func TestStandardClassBasic(t *testing.T) {
 
 func TestStandardClassAllocClass(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(makunbound 'quux)`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`
+	_ = slip.ReadEvalString(`(makunbound 'quux)`, scope)
+	quux := slip.ReadEvalString(`
 (defclass quux ()
-  ((x :initarg :x :initform 3 :allocation :class)))`, scope).Eval(scope, nil).(*clos.StandardClass)
+  ((x :initarg :x :initform 3 :allocation :class)))`, scope).(*clos.StandardClass)
 
 	desc := quux.Describe(nil, 0, 80, false)
 	tt.Equal(t, `quux is a class:
@@ -146,8 +146,8 @@ func TestStandardClassAllocClass(t *testing.T) {
 
 func TestStandardClassMinimal(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(makunbound 'quux)`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`(defclass quux () ())`, scope).Eval(scope, nil).(*clos.StandardClass)
+	_ = slip.ReadEvalString(`(makunbound 'quux)`, scope)
+	quux := slip.ReadEvalString(`(defclass quux () ())`, scope).(*clos.StandardClass)
 	desc := quux.Describe(nil, 0, 80, false)
 
 	tt.Equal(t, `quux is a class:
@@ -172,10 +172,10 @@ func TestStandardClassMinimal(t *testing.T) {
 
 func TestStandardClassMergeSupers(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(progn (makunbound 'quux) (makunbound 'buux) (makunbound 'duux))`, scope).Eval(scope, nil)
-	quux := slip.ReadString(`(defclass quux (buux duux) ())`, scope).Eval(scope, nil).(*clos.StandardClass)
-	_ = slip.ReadString(`(defclass buux (duux) ())`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(defclass duux () ())`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(progn (makunbound 'quux) (makunbound 'buux) (makunbound 'duux))`, scope)
+	quux := slip.ReadEvalString(`(defclass quux (buux duux) ())`, scope).(*clos.StandardClass)
+	_ = slip.ReadEvalString(`(defclass buux (duux) ())`, scope)
+	_ = slip.ReadEvalString(`(defclass duux () ())`, scope)
 
 	tt.Equal(t, `(defclass quux (buux duux)
   ())

@@ -12,14 +12,12 @@ import (
 
 func TestLetxEmpty(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(let* ())", scope)
-	tt.Equal(t, nil, code.Eval(scope, nil))
+	tt.Equal(t, nil, slip.ReadEvalString("(let* ())", scope))
 }
 
 func TestLetxNoInitialForm(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(let* (x (y)) (list x y))", scope)
-	tt.Equal(t, "(nil nil)", slip.ObjectString(code.Eval(scope, nil)))
+	tt.Equal(t, "(nil nil)", slip.ObjectString(slip.ReadEvalString("(let* (x (y)) (list x y))", scope)))
 }
 
 func TestLetxPreProv(t *testing.T) {
@@ -27,44 +25,37 @@ func TestLetxPreProv(t *testing.T) {
 	slip.Provenance = true
 	defer func() { slip.Provenance = orig }()
 	scope := slip.NewScope()
-	code := slip.ReadString("(let* (x (y)) (list x y))", scope)
-	tt.Equal(t, "(nil nil)", slip.ObjectString(code.Eval(scope, nil)))
+	tt.Equal(t, "(nil nil)", slip.ObjectString(slip.ReadEvalString("(let* (x (y)) (list x y))", scope)))
 }
 
 func TestLetxParallel(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(setq x 3) (let* ((x 4) (y x)) (list x y))", scope)
-	tt.Equal(t, "(4 4)", slip.ObjectString(code.Eval(scope, nil)))
+	tt.Equal(t, "(4 4)", slip.ObjectString(slip.ReadEvalString("(setq x 3) (let* ((x 4) (y x)) (list x y))", scope)))
 }
 
 func TestLetxNoBindings(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(let*)", scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(let*)", scope) })
 }
 
 func TestLetxBadBindings(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(let* t)", scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(let* t)", scope) })
 }
 
 func TestLetxEmptyBinding(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(let* (()))", scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(let* (()))", scope) })
 }
 
 func TestLetxBadBindingVar(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(let* ((t 3)))", scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(let* ((t 3)))", scope) })
 }
 
 func TestLetxBadVar(t *testing.T) {
 	scope := slip.NewScope()
-	code := slip.ReadString("(let* (t))", scope)
-	tt.Panic(t, func() { _ = code.Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString("(let* (t))", scope) })
 }
 
 func TestLetxReturn(t *testing.T) {

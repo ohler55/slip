@@ -16,8 +16,8 @@ import (
 func TestBagWriteOk(t *testing.T) {
 	scope := slip.NewScope()
 	slip.SetVar(slip.Symbol("*print-pretty*"), slip.True)
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-write bag)`,
@@ -28,8 +28,8 @@ func TestBagWriteOk(t *testing.T) {
 func TestBagWriteStreamNil(t *testing.T) {
 	scope := slip.NewScope()
 	slip.SetVar(slip.Symbol("*print-pretty*"), slip.True)
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-write bag nil)`,
@@ -42,8 +42,8 @@ func TestBagWriteStream(t *testing.T) {
 	slip.SetVar(slip.Symbol("*print-pretty*"), slip.True)
 	var b bytes.Buffer
 	slip.SetVar(slip.Symbol("buf"), &slip.OutputStream{Writer: &b})
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-write bag buf)`,
@@ -59,8 +59,8 @@ func TestBagWriteStreamT(t *testing.T) {
 	orig, _ := slip.GetVar(slip.Symbol("*standard-output*"))
 	slip.SetVar(slip.Symbol("*standard-output*"), &slip.OutputStream{Writer: &b})
 	defer slip.SetVar(slip.Symbol("*standard-output*"), orig)
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-write bag t)`,
@@ -72,8 +72,8 @@ func TestBagWriteStreamT(t *testing.T) {
 func TestBagWritePretty(t *testing.T) {
 	scope := slip.NewScope()
 	slip.SetVar(slip.Symbol("*print-pretty*"), nil)
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-write bag :pretty t)`,
@@ -89,8 +89,8 @@ func TestBagWritePretty(t *testing.T) {
 func TestBagWriteDepth(t *testing.T) {
 	scope := slip.NewScope()
 	slip.SetVar(slip.Symbol("*print-pretty*"), nil)
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "[1 [2 [3 4] 5] 6]"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "[1 [2 [3 4] 5] 6]"))`, scope).(*flavors.Instance)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -135,8 +135,8 @@ func TestBagWriteDepth(t *testing.T) {
 func TestBagWriteRightMargin(t *testing.T) {
 	scope := slip.NewScope()
 	slip.SetVar(slip.Symbol("*print-pretty*"), nil)
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "[1 [2 [3 4] 5] 6]"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "[1 [2 [3 4] 5] 6]"))`, scope).(*flavors.Instance)
 
 	(&sliptest.Function{
 		Scope:  scope,
@@ -152,8 +152,8 @@ func TestBagWriteRightMargin(t *testing.T) {
 func TestBagWriteColor(t *testing.T) {
 	scope := slip.NewScope()
 	slip.SetVar(slip.Symbol("*print-pretty*"), nil)
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "[1 2 3]"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-write bag :pretty t :color t)`,
@@ -164,9 +164,9 @@ func TestBagWriteColor(t *testing.T) {
 func TestBagWriteTime(t *testing.T) {
 	scope := slip.NewScope()
 	slip.SetVar(slip.Symbol("*print-pretty*"), slip.True)
-	_ = slip.ReadString(
+	_ = slip.ReadEvalString(
 		`(setq bag (make-instance 'bag-flavor :set '(@2022-09-24T13:49:55Z)))`,
-		scope).Eval(scope, nil).(*flavors.Instance)
+		scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-write bag :time-format "2006-01-02" :time-wrap "time")`,
@@ -245,8 +245,8 @@ func (w badWriter) Write([]byte) (int, error) {
 func TestBagWriteBadWriter(t *testing.T) {
 	scope := slip.NewScope()
 	slip.SetVar(slip.Symbol("buf"), &slip.OutputStream{Writer: badWriter(0)})
-	_ = slip.ReadString(
-		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).Eval(scope, nil).(*flavors.Instance)
+	_ = slip.ReadEvalString(
+		`(setq bag (make-instance 'bag-flavor :parse "{a:7}"))`, scope).(*flavors.Instance)
 	(&sliptest.Function{
 		Scope:  scope,
 		Source: `(bag-write bag buf)`,

@@ -49,7 +49,7 @@ func BenchmarkHTTPSlip(b *testing.B) {
 	}
 	scope := slip.NewScope()
 	scope.Let("url", slip.String(su))
-	_ = slip.ReadString(`(setq client (make-instance 'http-client-flavor :url url))`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq client (make-instance 'http-client-flavor :url url))`, scope)
 	send := slip.ReadString(`(send (send client :get) :close)`, scope)
 
 	b.ResetTimer()

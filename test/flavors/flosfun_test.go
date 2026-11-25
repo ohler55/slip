@@ -14,15 +14,15 @@ import (
 
 func TestFlosfunDocFlavor(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(flosfun 'foo-foo :flavor vanilla-flavor)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(flosfun 'foo-foo :flavor vanilla-flavor)`, scope)
 
-	result := slip.ReadString("(foo-foo (make-instance 'vanilla-flavor))", scope).Eval(scope, nil)
+	result := slip.ReadEvalString("(foo-foo (make-instance 'vanilla-flavor))", scope)
 	tt.Equal(t, "#<flavor vanilla-flavor>", slip.ObjectString(result))
 
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString("(describe 'foo-foo out)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(describe 'foo-foo out)", scope)
 
 	tt.Equal(t, "/foo-foo names/", out.String())
 	tt.Equal(t, "/Return: flavor/", out.String()) // pulled in from vanilla-flavor
@@ -30,12 +30,12 @@ func TestFlosfunDocFlavor(t *testing.T) {
 
 func TestFlosfunDocString(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(flosfun "foo-zoo" :flavor ":flavor.")`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(flosfun "foo-zoo" :flavor ":flavor.")`, scope)
 
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString("(describe 'foo-zoo out)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(describe 'foo-zoo out)", scope)
 
 	tt.Equal(t, "/foo-zoo sends/", out.String())
 }
@@ -43,7 +43,7 @@ func TestFlosfunDocString(t *testing.T) {
 func TestFlosfunDocsNil(t *testing.T) {
 	scope := slip.NewScope()
 	defer func() {
-		_ = slip.ReadString(`(fmakunbound 'floss-package:flossy)`, scope).Eval(scope, nil)
+		_ = slip.ReadEvalString(`(fmakunbound 'floss-package:flossy)`, scope)
 		slip.RemovePackage(slip.FindPackage("floss-package"))
 	}()
 	pkg := slip.DefPackage("floss-package", nil, "")
@@ -53,7 +53,7 @@ func TestFlosfunDocsNil(t *testing.T) {
 	var out strings.Builder
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let(slip.Symbol("*print-ansi*"), nil)
-	_ = slip.ReadString("(describe 'floss-package:flossy out)", scope).Eval(scope, nil)
+	_ = slip.ReadEvalString("(describe 'floss-package:flossy out)", scope)
 
 	tt.Equal(t, "/flossy names a flos-function/", out.String())
 	tt.Equal(t, "/The instance to send the :floss method to/", out.String())
@@ -61,7 +61,7 @@ func TestFlosfunDocsNil(t *testing.T) {
 
 func TestFlosfunNotInstance(t *testing.T) {
 	scope := slip.NewScope()
-	_ = slip.ReadString(`(flosfun "foo-boo" :flavor ":flavor.")`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(flosfun "foo-boo" :flavor ":flavor.")`, scope)
 
 	(&sliptest.Function{
 		Source:    `(foo-boo t)`,

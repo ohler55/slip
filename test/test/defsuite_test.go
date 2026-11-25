@@ -15,11 +15,11 @@ func TestDefsuiteBasic(t *testing.T) {
 	scope := slip.NewScope()
 	scope.Let(slip.Symbol("out"), &slip.OutputStream{Writer: &out})
 	scope.Let("*print-ansi*", nil)
-	_ = slip.ReadString(`(setq top
+	_ = slip.ReadEvalString(`(setq top
                                (defsuite "top" nil
                                          :setup (lambda () (setq foo 3))
-                                         :teardown (lambda () (setq foo 4))))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send top :describe out)`, scope).Eval(scope, nil)
+                                         :teardown (lambda () (setq foo 4))))`, scope)
+	_ = slip.ReadEvalString(`(send top :describe out)`, scope)
 	tt.Equal(t, `/#<suite-flavor [0-9a-f]+>, an instance of flavor suite-flavor,
   has instance variable values:
     children: nil
@@ -30,8 +30,8 @@ func TestDefsuiteBasic(t *testing.T) {
 /`, out.String())
 
 	out.Reset()
-	_ = slip.ReadString(`(setq sweet (defsuite "sweet" top))`, scope).Eval(scope, nil)
-	_ = slip.ReadString(`(send top :describe out)`, scope).Eval(scope, nil)
+	_ = slip.ReadEvalString(`(setq sweet (defsuite "sweet" top))`, scope)
+	_ = slip.ReadEvalString(`(send top :describe out)`, scope)
 	tt.Equal(t, `/#<suite-flavor [0-9a-f]+>, an instance of flavor suite-flavor,
   has instance variable values:
     children: \(#<suite-flavor [0-9a-f]+>\)
@@ -44,10 +44,10 @@ func TestDefsuiteBasic(t *testing.T) {
 
 func TestDefsuiteBadName(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { _ = slip.ReadString(`(defsuite t nil)`, scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(defsuite t nil)`, scope) })
 }
 
 func TestDefsuiteBadParent(t *testing.T) {
 	scope := slip.NewScope()
-	tt.Panic(t, func() { _ = slip.ReadString(`(defsuite "bad" t)`, scope).Eval(scope, nil) })
+	tt.Panic(t, func() { _ = slip.ReadEvalString(`(defsuite "bad" t)`, scope) })
 }
