@@ -8,8 +8,6 @@
 - replace CompileWithProvenance in slap
 
 ---------------------
-- add with-package-iterator (name package-list-form &rest symbol-types)
-
 - add a fixnum sorted collection - fixnum-table fixnum-set fixnum-dict
  - fast adds
  - fast lookups
