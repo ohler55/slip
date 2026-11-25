@@ -8,19 +8,27 @@
 - replace CompileWithProvenance in slap
 
 ---------------------
-- add a fixnum sorted collection - fixnum-table fixnum-set fixnum-dict
+- add a fixnum sorted collection - fixnum-table fixnum-set fixnum-dict Positive Indexed Sorted Set (PISS)
  - fast adds
  - fast lookups
  - burn code or old provenance
- - ops
-  - clear or clr
-  - get
-  - has
-  - set or just use setf?
-  - make
-  - type check xxx-p
-  - size or count
-  - remove or rem
+ - both function and flavor-like?
+ - functions
+  - piss-clear (pis)
+  - piss-get (pis index)
+   - also a placer for setf
+  - piss-has (pis index)
+  - piss-set (pis index value)
+  - piss-rem (pis index)
+  - make-piss ()
+  - pissp (obj)
+  - piss-count (pis)
+  - mappiss (function piss) - function take 2 args, index and value
+  - with-piss-iterator (next piss) *forms
+   - next is a function that return a values of 3; has-next, index, value
+  - piss-add (pis &rest index-values)
+   - index-values can be assoc or property list, detect by first value or allow a mix?
+   - more efficient way to bulk add data
 
 ---------------------
 
