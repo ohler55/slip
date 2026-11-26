@@ -209,7 +209,7 @@ func TestAppendPackageVar(t *testing.T) {
   (:nicknames cl-user user)
   (:documentation "The default package for user code and variables.")
   (:use keyword common-lisp generic xml flavors gi bag clos csv repl test watch
-   net))
+   wos net))
 "`,
 	}).Test(t)
 }
