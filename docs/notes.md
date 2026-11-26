@@ -9,24 +9,26 @@
 
 ---------------------
 - add a fixnum sorted collection - fixnum-table fixnum-set fixnum-dict Positive Indexed Sorted Set (PISS)
+ - Well Ordered Set or Whole number Ordered Set (wos)
+
  - fast adds
  - fast lookups
  - burn code or old provenance
  - both function and flavor-like?
  - functions
-  - piss-clear (pis)
-  - piss-get (pis index)
+  - wos-clear (pis)
+  - wos-get (pis index)
    - also a placer for setf
-  - piss-has (pis index)
-  - piss-set (pis index value)
-  - piss-rem (pis index)
-  - make-piss ()
-  - pissp (obj)
-  - piss-count (pis)
-  - mappiss (function piss) - function take 2 args, index and value
-  - with-piss-iterator (next piss) *forms
+  - wos-has (pis index)
+  - wos-set (pis index value)
+  - wos-rem (pis index)
+  - make-wos ()
+  - wosp (obj)
+  - wos-count (pis)
+  - mapwos (function wos) - function take 2 args, index and value
+  - with-wos-iterator (next wos) *forms
    - next is a function that return a values of 3; has-next, index, value
-  - piss-add (pis &rest index-values)
+  - wos-add (pis &rest index-values)
    - index-values can be assoc or property list, detect by first value or allow a mix?
    - more efficient way to bulk add data
 

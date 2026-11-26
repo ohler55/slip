@@ -42,4 +42,7 @@ import (
 
 	// Pull in REPL functions.
 	_ "github.com/ohler55/slip/pkg/repl"
+
+	// Pull in wos functions.
+	_ "github.com/ohler55/slip/pkg/wos"
 )
