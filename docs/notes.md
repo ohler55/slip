@@ -8,29 +8,11 @@
 - replace CompileWithProvenance in slap
 
 ---------------------
-- add a fixnum sorted collection - fixnum-table fixnum-set fixnum-dict Positive Indexed Sorted Set (PISS)
- - Well Ordered Set or Whole number Ordered Set (wos)
-
- - fast adds
- - fast lookups
- - burn code or old provenance
- - both function and flavor-like?
- - functions
-  - wos-clear (pis)
-  - wos-get (pis index)
-   - also a placer for setf
-  - wos-has (pis index)
-  - wos-set (pis index value)
-  - wos-rem (pis index)
-  - make-wos ()
-  - wosp (obj)
-  - wos-count (pis)
-  - mapwos (function wos) - function take 2 args, index and value
-  - with-wos-iterator (next wos) *forms
-   - next is a function that return a values of 3; has-next, index, value
-  - wos-add (pis &rest index-values)
-   - index-values can be assoc or property list, detect by first value or allow a mix?
-   - more efficient way to bulk add data
+- WOS
+ - benchmark wos vs hash-table
+  - adds - populate with trusted data, i.e., no duplicates
+  - get
+  - set
 
 ---------------------
 

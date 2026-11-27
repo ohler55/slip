@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Peter Ohler, All rights reserved.
+// Copyright (c) 2026, Peter Ohler, All rights reserved.
 
 package wos
 
@@ -31,7 +31,11 @@ func init() {
 	vv := Pkg.GetVarVal(f.Name())
 	vv.Const = true
 
-	// Pkg.Initialize(nil, &Get{}) // lock it down
+	defMake()
+	defGet()
+	defWosp()
+
+	Pkg.Initialize(nil, &get{}) // lock it down
 	slip.AddPackage(&Pkg)
 	slip.UserPkg.Use(&Pkg)
 }

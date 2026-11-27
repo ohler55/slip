@@ -24,6 +24,7 @@ github.com/ohler55/slip/sliptest\
 	make -C watch
 	make -C pp
 	make -C swank
+	make -C wos
 	$Q grep github cl/cov.out >> cov.out
 	$Q grep github flavors/cov.out >> cov.out
 	$Q grep github gi/cov.out >> cov.out
@@ -38,6 +39,7 @@ github.com/ohler55/slip/sliptest\
 	$Q grep github watch/cov.out >> cov.out
 	$Q grep github pp/cov.out >> cov.out
 	$Q grep github swank/cov.out >> cov.out
+	$Q grep github wos/cov.out >> cov.out
 	$Q go tool cover -func=cov.out | grep "total:"
 
 local: plugin
