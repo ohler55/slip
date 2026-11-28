@@ -16,7 +16,7 @@ func (caller getCaller) Call(s *slip.Scope, args slip.List, depth int) (value sl
 	if !ok || key < 0 {
 		slip.TypePanic(s, depth, "key", args[0], "non-negative fixnum")
 	}
-	if e := self.Any.(ordered).getEntry(uint64(key)); e != nil {
+	if e, _ := self.Any.(ordered).getEntry(uint64(key)); e != nil {
 		value = e.value
 	}
 	return
@@ -30,7 +30,7 @@ func (caller getCaller) FuncDocs() *slip.FuncDoc {
 			{
 				Name: "key",
 				Type: "non-negative fixnum",
-				Text: `A key to a value in the well ordered set.`,
+				Text: `A key to a value in the wos ordered set.`,
 			},
 		},
 		Return: "object",
@@ -50,7 +50,7 @@ func defGet() {
 				{
 					Name: "key",
 					Type: "non-negative fixnum",
-					Text: `A key to a value in the well ordered set.`,
+					Text: `A key to a value in the wos ordered set.`,
 				},
 			},
 			Return: "object",
@@ -81,7 +81,7 @@ func (f *get) Call(s *slip.Scope, args slip.List, depth int) (result slip.Object
 	if !ok || key < 0 {
 		slip.TypePanic(s, depth, "key", args[1], "non-negative fixnum")
 	}
-	if e := self.Any.(ordered).getEntry(uint64(key)); e != nil {
+	if e, _ := self.Any.(ordered).getEntry(uint64(key)); e != nil {
 		result = e.value
 	}
 	return
@@ -98,7 +98,7 @@ func (f *get) Place(s *slip.Scope, args slip.List, value slip.Object) {
 	if !ok || key < 0 {
 		slip.TypePanic(s, 0, "key", args[1], "non-negative fixnum")
 	}
-	if e := self.Any.(ordered).getEntry(uint64(key)); e != nil {
+	if e, _ := self.Any.(ordered).getEntry(uint64(key)); e != nil {
 		e.value = value
 	} else {
 		self.Any = append(self.Any.(ordered), entry{key: uint64(key), value: value})

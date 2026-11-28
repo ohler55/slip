@@ -34,6 +34,10 @@ func init() {
 	defMake()
 	defGet()
 	defWosp()
+	defClear()
+	defHas()
+	defSet()
+	defRemove()
 
 	Pkg.Initialize(nil, &get{}) // lock it down
 	slip.AddPackage(&Pkg)

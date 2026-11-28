@@ -49,8 +49,8 @@ func TestGetMethod(t *testing.T) {
                    (setf (wos-get wos 2) 'one)
                    (setf (wos-get wos 2) 'two)
                    (setf (wos-get wos 5) 'five)
-                   (list (send wos :get 2) (send wos :get 3) (send wos :get 4) (send wos :get 5)))`,
-		Expect: "(two three nil five)",
+                   (list (send wos :get 2) (send wos :get 3) (send wos :get 4) (send wos :get 5) (length wos)))`,
+		Expect: "(two three nil five 3)",
 	}).Test(t)
 }
 
@@ -58,5 +58,16 @@ func TestGetMethodBadKey(t *testing.T) {
 	(&sliptest.Function{
 		Source:    "(send (make-wos) :get 1.5)",
 		PanicType: slip.TypeErrorSymbol,
+	}).Test(t)
+}
+
+func TestGetMix(t *testing.T) {
+	(&sliptest.Function{
+		Source: `
+(let ((wos (make-wos)))
+  (dolist (x '(11 1 7 3 17 2 13))
+    (wos-set wos x x))
+  (length wos))`,
+		Expect: "7",
 	}).Test(t)
 }

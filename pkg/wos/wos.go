@@ -19,33 +19,34 @@ type entry struct {
 
 type ordered []entry
 
+// Length returns the length of the set.
+func (or ordered) Length() int {
+	return len(or)
+}
+
 func (or ordered) sort() {
 	sort.Slice(or, func(i, j int) bool { return or[i].key < or[j].key })
 }
 
-// func (or ordered) add(key uint64, value slip.Object) ordered {
-// 	return append(or, entry{key: key, value: value})
-// }
-
-func (or ordered) getEntry(key uint64) *entry {
+func (or ordered) getEntry(key uint64) (*entry, int) {
 	if len(or) == 0 {
-		return nil
+		return nil, -1
 	}
 	lo := 0
 	lok := or[lo].key
 	if lok == key {
-		return &or[lo]
+		return &or[lo], lo
 	}
 	if key < lok {
-		return nil
+		return nil, -1
 	}
 	hi := len(or) - 1
 	hik := or[hi].key
 	if hik == key {
-		return &or[hi]
+		return &or[hi], hi
 	}
 	if hik < key {
-		return nil
+		return nil, -1
 	}
 	for lo < hi {
 		i := lo + int((float64(hi-lo)*float64(key-lok))/float64(hik-lok))
@@ -66,9 +67,9 @@ func (or ordered) getEntry(key uint64) *entry {
 			lok = k
 			continue
 		}
-		return &or[i]
+		return &or[i], i
 	}
-	return nil
+	return nil, -1
 }
 
 func defWos() *flavors.Flavor {
@@ -84,14 +85,12 @@ func defWos() *flavors.Flavor {
 	)
 	generic.DefClassMethod(flavor, ":init", "", initCaller{})
 	generic.DefClassMethod(flavor, ":get", "", getCaller{})
+	generic.DefClassMethod(flavor, ":set", "", setCaller{})
+	generic.DefClassMethod(flavor, ":has", "", hasCaller{})
+	generic.DefClassMethod(flavor, ":clear", "", clearCaller{})
+	generic.DefClassMethod(flavor, ":remove", "", removeCaller{})
 
 	// TBD other methods
-	// - wos-clear (wos)
-	//  - also a placer for setf
-	// - wos-has (wos key)
-	// - wos-set (wos key value)
-	// - wos-rem (wos key)
-	// - wos-count (wos)
 	// - mapwos (function wos) - function take 2 args, index and value
 	// - with-wos-iterator (next wos) *forms
 	//  - next is a function that return a values of 3; has-next, index, value

@@ -10,6 +10,7 @@ import (
 
 	"github.com/ohler55/ojg/alt"
 	"github.com/ohler55/slip"
+	"github.com/ohler55/slip/pkg/cl"
 )
 
 // InstanceSymbol is the symbol with a value of "instance".
@@ -309,6 +310,8 @@ func (obj *Instance) Length() (size int) {
 			size = len(tv)
 		case map[string]any:
 			size = len(tv)
+		case cl.HasLength:
+			size = tv.Length()
 		}
 	}
 	return
